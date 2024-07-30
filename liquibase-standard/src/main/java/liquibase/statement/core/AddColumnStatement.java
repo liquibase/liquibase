@@ -1,31 +1,37 @@
 package liquibase.statement.core;
 
 import liquibase.statement.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.*;
 
+@Getter
 public class AddColumnStatement extends AbstractSqlStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
     private String columnName;
     private String columnType;
     private Object defaultValue;
+    @Setter
     private String defaultValueConstraintName;
     private String remarks;
+    @Setter
     private String addAfterColumn;
+    @Setter
     private String addBeforeColumn;
+    @Setter
     private Integer addAtPosition;
+    @Setter
     private Boolean computed;
     private final Set<ColumnConstraint> constraints = new HashSet<>();
 
     private final List<AddColumnStatement> columns = new ArrayList<>();
+    private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
 
     public AddColumnStatement(String catalogName, String schemaName, String tableName, String columnName, String columnType, Object defaultValue, ColumnConstraint... constraints) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
+        this.databaseTableIdentifier.setCatalogName(catalogName);
+        this.databaseTableIdentifier.setSchemaName(schemaName);
+        this.databaseTableIdentifier.setTableName(tableName);
         this.columnName = columnName;
         this.columnType = columnType;
         this.defaultValue = defaultValue;
@@ -50,38 +56,6 @@ public class AddColumnStatement extends AbstractSqlStatement {
 
     public boolean isMultiple() {
         return !columns.isEmpty();
-    }
-
-    public List<AddColumnStatement> getColumns() {
-        return columns;
-    }
-
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public String getColumnName() {
-        return columnName;
-    }
-
-    public String getColumnType() {
-        return columnType;
-    }
-
-    public String getRemarks() {
-        return remarks;
-    }
-
-    public Set<ColumnConstraint> getConstraints() {
-        return constraints;
     }
 
     public boolean isAutoIncrement() {
@@ -181,47 +155,17 @@ public class AddColumnStatement extends AbstractSqlStatement {
         return null;
     }
 
-    public Object getDefaultValue() {
-        return defaultValue;
+    public String getCatalogName(){
+        return databaseTableIdentifier.getCatalogName();
     }
 
-    public String getAddAfterColumn() {
-        return addAfterColumn;
+    public String getSchemaName(){
+        return databaseTableIdentifier.getSchemaName();
     }
 
-    public void setAddAfterColumn(String addAfterColumn) {
-        this.addAfterColumn = addAfterColumn;
+    public String getTableName(){
+        return databaseTableIdentifier.getTableName();
     }
+    
 
-    public String getAddBeforeColumn() {
-        return addBeforeColumn;
-    }
-
-    public void setAddBeforeColumn(String addBeforeColumn) {
-        this.addBeforeColumn = addBeforeColumn;
-    }
-
-    public Integer getAddAtPosition() {
-        return addAtPosition;
-    }
-
-    public void setAddAtPosition(Integer addAtPosition) {
-        this.addAtPosition = addAtPosition;
-    }
-
-    public String getDefaultValueConstraintName() {
-        return defaultValueConstraintName;
-    }
-
-    public void setDefaultValueConstraintName(String defaultValueConstraintName) {
-        this.defaultValueConstraintName = defaultValueConstraintName;
-    }
-
-    public Boolean getComputed() {
-        return computed;
-    }
-
-    public void setComputed(Boolean computed) {
-        this.computed = computed;
-    }
 }

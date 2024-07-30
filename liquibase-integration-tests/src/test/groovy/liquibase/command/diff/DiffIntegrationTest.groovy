@@ -4,7 +4,7 @@ import liquibase.CatalogAndSchema
 import liquibase.Scope
 import liquibase.command.CommandScope
 import liquibase.command.core.DiffCommandStep
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.command.core.helpers.DiffOutputControlCommandStep
 import liquibase.command.core.helpers.PreCompareCommandStep
 import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep
@@ -25,18 +25,18 @@ import spock.lang.Specification
 class DiffIntegrationTest extends Specification {
 
     @Shared
-    private DatabaseTestSystem postgres =
-            (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("postgresql")
+    private DatabaseTestSystem h2 =
+            (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("h2")
 
     def "Diff with excludes that reference objects on target should work" () {
         when:
-        CommandUtil.runDropAll(postgres)
-        CommandUtil.runSnapshot(postgres, "target/test-classes/snapshot.json")
-        CommandUtil.runTag(postgres, "1.0.0")
+        CommandUtil.runDropAll(h2)
+        CommandUtil.runSnapshot(h2, "target/test-classes/snapshot.json")
+        CommandUtil.runTag(h2, "1.0.0")
         def diffFile = "target/test-classes/diff.json"
         def url = "offline:postgresql?snapshot=target/test-classes/snapshot.json"
         Database targetDatabase =
-                DatabaseFactory.getInstance().openDatabase(postgres.getConnectionUrl(), postgres.getUsername(), postgres.getPassword(), null, new SearchPathResourceAccessor("."))
+                DatabaseFactory.getInstance().openDatabase(h2.getConnectionUrl(), h2.getUsername(), h2.getPassword(), null, new SearchPathResourceAccessor("."))
 
         def refUrl = "offline:postgresql?snapshot=target/test-classes/snapshot.json"
         Database refDatabase =
@@ -51,7 +51,7 @@ class DiffIntegrationTest extends Specification {
         CommandScope commandScope = new CommandScope(DiffCommandStep.COMMAND_NAME)
         commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
         commandScope.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, CompareControl.STANDARD)
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, targetDatabase)
         commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
         commandScope.addArgumentValue(PreCompareCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
         commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_LIQUIBASE_SCHEMA_NAME_ARG, refDatabase.getLiquibaseSchemaName())
@@ -72,8 +72,8 @@ class DiffIntegrationTest extends Specification {
         } catch (Exception ignored) {
 
         }
-        CommandUtil.runDropAll(postgres)
-        postgres.getConnection().close()
+        CommandUtil.runDropAll(h2)
+        h2.getConnection().close()
         refDatabase.close()
         targetDatabase.close()
     }

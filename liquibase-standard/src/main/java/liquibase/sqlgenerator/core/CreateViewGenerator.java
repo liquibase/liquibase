@@ -16,6 +16,7 @@ import liquibase.statement.core.CreateViewStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.View;
 import liquibase.util.StringClauses;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,12 +94,13 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
                     //from http://stackoverflow.com/questions/163246/sql-server-equivalent-to-oracles-create-or-replace-view
                     CatalogAndSchema schema = new CatalogAndSchema(
                             statement.getCatalogName(), statement.getSchemaName()).customize(database);
+                    String schemaSpec = determineSchemaSpec(schema.getSchemaName());
                     sql.add(new UnparsedSql(
-                            "IF NOT EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'["
-                                    + schema.getSchemaName()
-                                    + "].[" + statement.getViewName()
+                            "IF NOT EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'"
+                                    + schemaSpec
+                                    + "[" + statement.getViewName()
                                     + "]'))\n"
-                                    + "    EXEC sp_executesql N'CREATE VIEW [" + schema.getSchemaName() + "].["
+                                    + "    EXEC sp_executesql N'CREATE VIEW " + schemaSpec + "["
                                     + statement.getViewName()
                                     + "] AS SELECT " +
                                     "''This is a code stub which will be replaced by an Alter Statement'' as [code_stub]'"));
@@ -123,6 +125,13 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         return sql.toArray(EMPTY_SQL);
     }
 
+    private String determineSchemaSpec(String schemaName) {
+        if (StringUtil.isEmpty(schemaName)) {
+            return "";
+        }
+        return "[" + schemaName + "].";
+    }
+
     //
     // Check to see if the collection of clauses are in the view definition
     //
@@ -137,7 +146,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
     private boolean shouldPrependDropViewStatement(Database database) {
         // allow overriding the value of the dropIfCannotReplace attribute
         // from liquibase.properties or command line
-        boolean dropIfCannotReplace = false;
+        boolean dropIfCannotReplace = GlobalConfiguration.ALWAYS_DROP_INSTEAD_OF_REPLACE.getDefaultValue();
         if (GlobalConfiguration.ALWAYS_DROP_INSTEAD_OF_REPLACE.getCurrentValue() != null) {
             dropIfCannotReplace = GlobalConfiguration.ALWAYS_DROP_INSTEAD_OF_REPLACE.getCurrentValue();
         } 

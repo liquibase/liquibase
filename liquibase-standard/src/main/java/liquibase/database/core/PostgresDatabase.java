@@ -9,6 +9,8 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
 import liquibase.logging.Logger;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
@@ -400,8 +402,13 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     public void rollback() throws DatabaseException {
         super.rollback();
 
-        //Rollback in postgresql resets the search path. Need to put it back to the defaults
-        DatabaseUtils.initializeDatabase(getDefaultCatalogName(), getDefaultSchemaName(), this);
+        // Rollback in postgresql resets the search path. Need to put it back to the defaults
+        // Prevent resetting the search path if we are running in a mode that does not update the database to avoid spurious 
+        // SET SEARCH_PATH SQL statements
+        final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this);
+        if(executor.updatesDatabase()) {
+            DatabaseUtils.initializeDatabase(getDefaultCatalogName(), getDefaultSchemaName(), this);
+        }
     }
 
     @Override
@@ -410,5 +417,15 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             Scope.getCurrentScope().getUI().sendMessage("WARNING: Postgres does not support catalogs, so the values set in 'defaultCatalogName' and 'referenceDefaultCatalogName' will be ignored.");
         }
         super.setDefaultCatalogName(defaultCatalogName);
+    }
+
+    @Override
+    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return type.isAssignableFrom(Table.class);
+    }
+
+    @Override
+    public boolean supportsDatabaseChangeLogHistory() {
+        return true;
     }
 }

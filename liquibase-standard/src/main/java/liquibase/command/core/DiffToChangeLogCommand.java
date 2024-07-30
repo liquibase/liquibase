@@ -2,7 +2,7 @@ package liquibase.command.core;
 
 import liquibase.command.CommandResult;
 import liquibase.command.CommandScope;
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.command.core.helpers.DiffOutputControlCommandStep;
 import liquibase.command.core.helpers.PreCompareCommandStep;
 import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep;
@@ -59,7 +59,7 @@ public class DiffToChangeLogCommand extends DiffCommand {
 
         final CommandScope commandScope = new CommandScope("diffChangelog");
         commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, getReferenceDatabase());
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getTargetDatabase());
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getTargetDatabase());
         commandScope.addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, getSnapshotTypes());
         commandScope.addArgumentValue(DiffCommandStep.SNAPSHOT_LISTENER_ARG, getSnapshotListener());
         commandScope.addArgumentValue(DiffCommandStep.REFERENCE_SNAPSHOT_CONTROL_ARG, getReferenceSnapshotControl());

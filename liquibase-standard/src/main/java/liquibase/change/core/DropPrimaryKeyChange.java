@@ -10,6 +10,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropPrimaryKeyStatement;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
+import lombok.Setter;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ import java.util.List;
  */
 @DatabaseChange(name = "dropPrimaryKey", description = "Drops an existing primary key", priority = ChangeMetaData.PRIORITY_DEFAULT,
     appliesTo = "primaryKey")
+@Setter
 public class DropPrimaryKeyChange extends AbstractChange {
     private String catalogName;
     private String schemaName;
@@ -35,17 +37,9 @@ public class DropPrimaryKeyChange extends AbstractChange {
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting ="primaryKey.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @DatabaseChangeProperty(mustEqualExisting = "primaryKey.table", description = "Name of the table to drop the primary key from")
@@ -53,26 +47,14 @@ public class DropPrimaryKeyChange extends AbstractChange {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "primaryKey", description = "Name of the primary key to drop")
     public String getConstraintName() {
         return constraintName;
     }
 
-    public void setConstraintName(String constraintName) {
-        this.constraintName = constraintName;
-    }
-
     @DatabaseChangeProperty(description = "Whether to drop the index associated with the primary key")
     public Boolean getDropIndex() {
         return dropIndex;
-    }
-
-    public void setDropIndex(Boolean dropIndex) {
-        this.dropIndex = dropIndex;
     }
 
     @Override

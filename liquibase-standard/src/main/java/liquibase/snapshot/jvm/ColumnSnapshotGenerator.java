@@ -12,7 +12,7 @@ import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.BooleanUtil;
@@ -39,6 +39,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     private static final Pattern POSTGRES_NUMBER_VALUE_PATTERN = Pattern.compile(POSTGRES_NUMBER_VALUE_REGEX);
 
     private static final String MYSQL_DEFAULT_GENERATED = "DEFAULT_GENERATED";
+    private static final String GENERATED_ALWAYS_AS = "GENERATED ALWAYS AS ";
+    private static final String YES_VALUE = "YES";
+    private static final String IS_GENERATED_COLUMN = "IS_GENERATEDCOLUMN";
 
     private final ColumnAutoIncrementService columnAutoIncrementService = new ColumnAutoIncrementService();
 
@@ -145,7 +148,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException {
-        if (!snapshot.getSnapshotControl().shouldInclude(Column.class)) {
+        if (!snapshot.getSnapshotControl().shouldInclude(Column.class) || !snapshot.getDatabase().supports(Column.class)) {
             return;
         }
         if (foundObject instanceof Relation) {
@@ -395,12 +398,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 (columnTypeName))) {
             try {
 
+                StringBuilder sql = new StringBuilder("SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS\n")
+                        .append("WHERE TABLE_SCHEMA = ?\n")
+                        .append("AND TABLE_NAME = ?\n")
+                        .append("AND COLUMN_NAME = ?");
                 String enumValue = Scope.getCurrentScope().getSingleton(ExecutorService.class)
                         .getExecutor("jdbc", database)
-                        .queryForObject(new RawSqlStatement("SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS\n" +
-                                "WHERE TABLE_SCHEMA = '" + column.getSchema().getName() + "'\n" +
-                                "AND TABLE_NAME = '" + column.getRelation().getName() + "'\n" +
-                                "AND COLUMN_NAME = '" + column.getName() + "'"), String.class);
+                        .queryForObject(new RawParameterizedSqlStatement(sql.toString(), column.getSchema().getName(), column.getRelation().getName(), column.getName()), String.class);
 
                 enumValue = enumValue.replace("enum(", "ENUM(");
                 enumValue = enumValue.replace("set(", "SET(");
@@ -522,7 +526,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         if ((database instanceof OracleDatabase) && (columnMetadataResultSet.get(COLUMN_DEF_COL) == null)) {
             columnMetadataResultSet.set(COLUMN_DEF_COL, columnMetadataResultSet.get("DATA_DEFAULT"));
 
-            if ((columnMetadataResultSet.get(COLUMN_DEF_COL) != null) && "NULL".equalsIgnoreCase((String)
+            if ((columnMetadataResultSet.get(COLUMN_DEF_COL) != null) && StringUtil.equalsWordNull((String)
                     columnMetadataResultSet.get(COLUMN_DEF_COL))) {
                 columnMetadataResultSet.set(COLUMN_DEF_COL, null);
             }
@@ -533,10 +537,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 return new DatabaseFunction((String) columnDef);
             }
 
-            if ("YES".equals(columnMetadataResultSet.get("VIRTUAL_COLUMN"))) {
+            if (YES_VALUE.equals(columnMetadataResultSet.get("VIRTUAL_COLUMN"))) {
                 Object virtColumnDef = columnMetadataResultSet.get(COLUMN_DEF_COL);
-                if ((virtColumnDef != null) && !"null".equals(virtColumnDef)) {
-                    columnMetadataResultSet.set(COLUMN_DEF_COL, "GENERATED ALWAYS AS (" + virtColumnDef + ")");
+                if ((virtColumnDef != null) && !StringUtil.equalsWordNull(virtColumnDef.toString())) {
+                    columnMetadataResultSet.set(COLUMN_DEF_COL, GENERATED_ALWAYS_AS + "(" + virtColumnDef.toString().replace("\"", "") + ")");
                 }
             }
 
@@ -560,7 +564,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         if ((database instanceof AbstractDb2Database)
                 && ((columnMetadataResultSet.get(COLUMN_DEF_COL) != null)
-                && "NULL".equalsIgnoreCase((String) columnMetadataResultSet.get(COLUMN_DEF_COL)))) {
+                && StringUtil.equalsWordNull((String) columnMetadataResultSet.get(COLUMN_DEF_COL)))) {
             columnMetadataResultSet.set(COLUMN_DEF_COL, null);
         }
 
@@ -581,9 +585,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
            columnMetadataResultSet.set(COLUMN_DEF_COL, defaultValue);
 
-           if ("YES".equals(columnMetadataResultSet.get("IS_GENERATEDCOLUMN"))) {
+           if (YES_VALUE.equals(columnMetadataResultSet.get(IS_GENERATED_COLUMN))) {
                Object virtColumnDef = columnMetadataResultSet.get(COLUMN_DEF_COL);
-               if ((virtColumnDef != null) && !"null".equals(virtColumnDef)) {
+               if ((virtColumnDef != null) && !StringUtil.equalsWordNull(virtColumnDef.toString())) {
                    columnMetadataResultSet.set(COLUMN_DEF_COL, "COMPUTE (" + virtColumnDef + ")");
                }
            }
@@ -594,12 +598,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     private void readDefaultValueForMysqlDatabase(CachedRow columnMetadataResultSet, Column column, Database database) {
         try {
+            StringBuilder selectQuery = new StringBuilder("SELECT EXTRA FROM INFORMATION_SCHEMA.COLUMNS\n")
+                    .append("WHERE TABLE_SCHEMA = ?\n")
+                    .append("AND TABLE_NAME = ?\n")
+                    .append( "AND COLUMN_NAME = ?");
             String extraValue = Scope.getCurrentScope().getSingleton(ExecutorService.class)
                     .getExecutor("jdbc", database)
-                    .queryForObject(new RawSqlStatement("SELECT EXTRA FROM INFORMATION_SCHEMA.COLUMNS\n" +
-                            "WHERE TABLE_SCHEMA = '" + column.getSchema().getName() + "'\n" +
-                            "AND TABLE_NAME = '" + column.getRelation().getName() + "'\n" +
-                            "AND COLUMN_NAME = '" + column.getName() + "'"), String.class);
+                    .queryForObject(new RawParameterizedSqlStatement(selectQuery.toString(), column.getSchema().getName(), column.getRelation().getName(), column.getName()), String.class);
             if (extraValue != null && !extraValue.isEmpty() &&
                 (extraValue.startsWith(MYSQL_DEFAULT_GENERATED + " ") || extraValue.toLowerCase(Locale.ENGLISH).contains("on update"))
             ) {
@@ -630,19 +635,21 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             columnMetadataResultSet.set(COLUMN_DEF_COL, defaultValue);
         }
 
-        if ("YES".equals(columnMetadataResultSet.get("IS_GENERATEDCOLUMN"))) {
+        if (YES_VALUE.equals(columnMetadataResultSet.get(IS_GENERATED_COLUMN))) {
             Object virtColumnDef = columnMetadataResultSet.get(COLUMN_DEF_COL);
-            if ((virtColumnDef != null) && !"null".equals(virtColumnDef)) {
+            if (virtColumnDef != null && !StringUtil.equalsWordNull(virtColumnDef.toString()) &&
+                !String.valueOf(virtColumnDef).startsWith(GENERATED_ALWAYS_AS) // to avoid duplication
+            ) {
                 // Column type added on PG 12 and until PG 15 only STORED mode is supported and jdbc metadata just say "YES" or "NO"
                 // VIRTUAL support is yet to be implemented, so we need to come back here if that happens and see what needs to be changed
-                columnMetadataResultSet.set(COLUMN_DEF_COL, "GENERATED ALWAYS AS " + virtColumnDef + " STORED");
+                columnMetadataResultSet.set(COLUMN_DEF_COL, GENERATED_ALWAYS_AS + virtColumnDef + " STORED");
             }
         }
     }
 
     /**
      * {@link IndexSnapshotGenerator} fails to differentiate computed and non-computed column's for {@link PostgresDatabase}
-     * assume that if COLUMN_NAME contains parentesised expression -- its function reference.
+     * assume that if COLUMN_NAME contains parenthesized expression -- its function reference.
      * should handle cases like:
      * - ((name)::text)
      * - lower/upper((name)::text)

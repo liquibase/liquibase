@@ -7,7 +7,7 @@ import liquibase.serializer.LiquibaseSerializable;
 import java.lang.annotation.*;
 
 /**
- * Annotation used by {@link AbstractChange } to declare {@link ChangeParameterMetaData} information.
+ * Annotation used by {@link AbstractChange} to declare {@link ChangeParameterMetaData} information.
  * The annotation should be placed on the read method.
  * This annotation should not be checked for outside AbstractChange, if any code is trying to determine the
  * metadata provided by this annotation, it should get it from
@@ -74,4 +74,6 @@ public @interface DatabaseChangeProperty {
      * is requested, the second annotation is used.
      */
     ChecksumVersion[] version() default {};
+
+    String[] alternatePropertyNames() default {};
 }

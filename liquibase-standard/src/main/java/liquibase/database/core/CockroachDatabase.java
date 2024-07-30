@@ -5,7 +5,9 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtil;
 
 import java.sql.ResultSet;
@@ -108,7 +110,7 @@ public class CockroachDatabase extends PostgresDatabase {
         if (conn instanceof JdbcConnection) {
             try {
                 String version = Scope.getCurrentScope().getSingleton(ExecutorService.class).
-                        getExecutor("jdbc", this).queryForObject(new RawSqlStatement("SELECT version()"), String.class);
+                        getExecutor("jdbc", this).queryForObject(new RawParameterizedSqlStatement("SELECT version()"), String.class);
 
                 final Matcher versionMatcher = VERSION_NUMBER_PATTERN.matcher(version);
                 if (versionMatcher.find()) {
@@ -116,7 +118,7 @@ public class CockroachDatabase extends PostgresDatabase {
                     this.databaseMinorVersion = Integer.parseInt(versionMatcher.group(2));
                 }
             } catch (Throwable e) {
-                Scope.getCurrentScope().getLog(getClass()).fine("Cannot determine cockroachdb version: "+e.getMessage(), e);
+                Scope.getCurrentScope().getLog(getClass()).fine("Cannot determine cockroachdb version: " + e.getMessage(), e);
             }
         } else {
             Scope.getCurrentScope().getLog(getClass()).fine("Cannot determine cockroachdb version: cannot query database");
@@ -130,5 +132,10 @@ public class CockroachDatabase extends PostgresDatabase {
         } catch (DatabaseException e) {
             return true;
         }
+    }
+
+    @Override
+    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return type.isAssignableFrom(Table.class);
     }
 }

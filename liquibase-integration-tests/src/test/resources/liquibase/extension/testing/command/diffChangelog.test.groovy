@@ -5,6 +5,7 @@ import liquibase.change.ColumnConfig
 import liquibase.change.ConstraintsConfig
 import liquibase.change.core.AddPrimaryKeyChange
 import liquibase.change.core.CreateTableChange
+import liquibase.exception.CommandExecutionException
 import liquibase.exception.CommandValidationException
 import liquibase.extension.testing.setup.SetupCleanResources
 
@@ -72,13 +73,21 @@ Optional Args:
     Default: null
   referenceUsername (String) The reference database username
     Default: null
+  replaceIfExistsTypes (String) Sets replaceIfExists="true" for changes of these types (supported types: createProcedure, createView)
+    Default: none
+  runOnChangeTypes (String) Sets runOnChange="true" for changesets containing solely changes of these types (e. g. createView, createProcedure, ...).
+    Default: none
   schemas (String) Schemas to include in diff
     Default: null
+  skipObjectSorting (Boolean) When true will skip object sorting. This can be useful on databases that have a lot of packages/procedures that are linked to each other
+    Default: false
+  useOrReplaceOption (Boolean) If true, will add 'OR REPLACE' option to the create view change object
+    Default: false
   username (String) Username to use to connect to the database
     Default: null
 """
 
-    run "Running diffChangelog against itself finds no differences", {
+    run "Running diffChangelog against itself finds no differences and don't generate an output file", {
         arguments = [
                 url              : { it.url },
                 username         : { it.username },
@@ -110,16 +119,41 @@ Optional Args:
 
         }
 
-        expectedFileContent = [
-                //
-                // Empty changelog contains no changeSet tags and an empty databaseChangeLog tag
-                //
-                "target/test-classes/diffChangelog-test.xml" :
-                        [
-                            CommandTests.assertNotContains("<changeSet"),
-                            Pattern.compile("^.*<?xml.*databaseChangeLog.*xsd./>", Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSITIVE)
-                        ]
+        expectFileToNotExist = new File("target/test-classes/diffChangelog-test.xml")
+    }
+
+    run "illegal file path should throw exception", {
+        arguments = [
+                url              : { it.url },
+                username         : { it.username },
+                password         : { it.password },
+                referenceUrl     : { it.url },
+                referenceUsername: { it.username },
+                referencePassword: { it.password },
+                changelogFile: "nonexistant://thisfileshouldnotbecreated.xml",
         ]
+
+        setup {
+            database = [
+                    new CreateTableChange(
+                            tableName: "FirstTable",
+                            columns: [
+                                    ColumnConfig.fromName("FirstColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "SecondTable",
+                            columns: [
+                                    ColumnConfig.fromName("SecondColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+            ]
+        }
+
+        expectedException = CommandExecutionException.class
+        expectedExceptionMessage = "java.io.IOException: Cannot parse resource location: 'nonexistant://thisfileshouldnotbecreated.xml'"
     }
 
     run "Running diffChangelog should add changesets with specified author", {

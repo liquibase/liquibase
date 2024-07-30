@@ -7,6 +7,7 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Sequence;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtil;
 
@@ -118,8 +119,20 @@ public class Ingres9Database extends AbstractJdbcDatabase {
     }
 
     @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Sequence.class.isAssignableFrom(object)) {
+            return false;
+        }
+        return super.supports(object);
+    }
+
+    @Override
     public boolean supportsSequences() {
         return false;
     }
 
+    @Override
+    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return type.isAssignableFrom(Table.class);
+    }
 }

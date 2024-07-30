@@ -15,9 +15,11 @@ import liquibase.diff.output.report.DiffToReport;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcValue;
+import liquibase.logging.mdc.customobjects.DiffResultsSummary;
 import liquibase.snapshot.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.DatabaseObjectFactory;
+import liquibase.structure.core.Schema;
 import liquibase.util.StringUtil;
 
 import java.io.PrintStream;
@@ -113,8 +115,9 @@ public class DiffCommandStep extends AbstractCommandStep {
         DatabaseSnapshot referenceSnapshot = createReferenceSnapshot(resultsBuilder);
         DatabaseSnapshot targetSnapshot = getTargetSnapshot(resultsBuilder);
         final CompareControl compareControl = (CompareControl) resultsBuilder.getResult(PreCompareCommandStep.COMPARE_CONTROL_RESULT.getName());
-
-        return DiffGeneratorFactory.getInstance().compare(referenceSnapshot, targetSnapshot, compareControl);
+        DiffResult result = DiffGeneratorFactory.getInstance().compare(referenceSnapshot, targetSnapshot, compareControl);
+        Scope.getCurrentScope().getMdcManager().put(MdcKey.DIFF_RESULTS_SUMMARY, new DiffResultsSummary(result));
+        return result;
     }
 
     protected DatabaseSnapshot getTargetSnapshot(CommandResultsBuilder resultsBuilder) throws DatabaseException, InvalidExampleException {
@@ -134,7 +137,7 @@ public class DiffCommandStep extends AbstractCommandStep {
             int i = 0;
             for (CompareControl.SchemaComparison comparison : compareControl.getSchemaComparisons()) {
                 CatalogAndSchema schema;
-                if (targetDatabase.supportsSchemas()) {
+                if (targetDatabase.supports(Schema.class)) {
                     schema = new CatalogAndSchema(targetDatabase.getDefaultCatalogName(), comparison.getComparisonSchema().getSchemaName());
                 } else {
                     schema = new CatalogAndSchema(comparison.getComparisonSchema().getSchemaName(), comparison.getComparisonSchema().getSchemaName());
@@ -175,7 +178,7 @@ public class DiffCommandStep extends AbstractCommandStep {
             int i = 0;
             for (CompareControl.SchemaComparison comparison : compareControl.getSchemaComparisons()) {
                 CatalogAndSchema schema;
-                if (referenceDatabase.supportsSchemas()) {
+                if (referenceDatabase.supports(Schema.class)) {
                     schema = new CatalogAndSchema(referenceDatabase.getDefaultCatalogName(), comparison.getReferenceSchema().getSchemaName());
                 } else {
                     schema = new CatalogAndSchema(comparison.getReferenceSchema().getSchemaName(), comparison.getReferenceSchema().getSchemaName());

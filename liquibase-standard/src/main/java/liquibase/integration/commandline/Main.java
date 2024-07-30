@@ -15,7 +15,6 @@ import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.*;
 import liquibase.integration.IntegrationDetails;
-import liquibase.io.WriterOutputStream;
 import liquibase.license.LicenseInstallResult;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
@@ -36,6 +35,7 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.SystemUtil;
+import org.apache.commons.io.output.WriterOutputStream;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -234,7 +234,7 @@ public class Main {
                     try {
                         if ((args.length == 0) || ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0]))) {
                             main.printHelp(outputStream);
-                            return Integer.valueOf(0);
+                            return 0;
                         } else if (("--" + OPTIONS.VERSION).equals(args[0])) {
                             main.command = "";
                             main.parseDefaultPropertyFiles();
@@ -260,7 +260,7 @@ public class Main {
                                     System.getProperties().getProperty("java.home"),
                                     SystemUtil.getJavaVersion()
                             ));
-                            return Integer.valueOf(0);
+                            return 0;
                         }
 
                         //
@@ -283,7 +283,7 @@ public class Main {
                             main.parseOptions(args);
                             if (main.command == null) {
                                 main.printHelp(outputStream);
-                                return Integer.valueOf(0);
+                                return 0;
                             }
                             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, main.command);
                         } catch (CommandLineParsingException e) {
@@ -373,14 +373,14 @@ public class Main {
                             Scope.getCurrentScope().getUI().sendErrorMessage((
                                     String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
                                             LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentConfiguredValue().getProvidedValue().getActualKey())));
-                            return Integer.valueOf(0);
+                            return 0;
                         }
 
                         if (setupNeeded(main)) {
                             List<String> setupMessages = main.checkSetup();
                             if (!setupMessages.isEmpty()) {
                                 main.printHelp(setupMessages, isStandardOutputRequired(main.command) ? System.err : outputStream);
-                                return Integer.valueOf(1);
+                                return 1;
                             }
                         }
 
@@ -447,7 +447,7 @@ public class Main {
                         }
                     }
 
-                    return Integer.valueOf(0);
+                    return 0;
                 }
             });
     }
@@ -1116,11 +1116,12 @@ public class Main {
     protected static CodePointCheck checkArg(String arg) {
         char[] chars = arg.toCharArray();
         for (int i = 0; i < chars.length; i++) {
-            for (int j = 0; j < suspiciousCodePoints.length; j++) {
-                if (suspiciousCodePoints[j] == chars[i]) {
+            char ch = chars[i];
+            for (int suspiciousCodePoint : suspiciousCodePoints) {
+                if (suspiciousCodePoint == ch) {
                     CodePointCheck codePointCheck = new CodePointCheck();
                     codePointCheck.position = i;
-                    codePointCheck.ch = chars[i];
+                    codePointCheck.ch = ch;
                     return codePointCheck;
                 }
             }
@@ -1470,7 +1471,7 @@ public class Main {
             } else if (COMMANDS.DROP_ALL.equalsIgnoreCase(command)) {
                 CommandScope dropAllCommand = new CommandScope("dropAll");
                 dropAllCommand
-                        .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, liquibase.getDatabase())
+                        .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, liquibase.getDatabase())
                         .addArgumentValue(DropAllCommandStep.CATALOG_AND_SCHEMAS_ARG, InternalSnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
                         .addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
 
@@ -1504,7 +1505,7 @@ public class Main {
                 CommandScope calculateChecksumCommand = new CommandScope("calculateChecksum");
 
                 calculateChecksumCommand
-                        .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, database)
+                        .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database)
                         .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_PATH_ARG, getCommandParam(OPTIONS.CHANGE_SET_PATH, null))
                         .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_ID_ARG, getCommandParam(OPTIONS.CHANGE_SET_ID, null))
                         .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_AUTHOR_ARG, getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null))
@@ -1652,9 +1653,9 @@ public class Main {
                         handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
                     }
                 } else if (COMMANDS.HISTORY.equalsIgnoreCase(command)) {
-                    CommandScope historyCommand = new CommandScope("internalHistory");
-                    historyCommand.addArgumentValue(InternalHistoryCommandStep.DATABASE_ARG, database);
-                    historyCommand.addArgumentValue(InternalHistoryCommandStep.FORMAT_ARG, HistoryFormat.valueOf(format));
+                    CommandScope historyCommand = new CommandScope(HistoryCommandStep.COMMAND_NAME);
+                    historyCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
+                    historyCommand.addArgumentValue(HistoryCommandStep.FORMAT_ARG, HistoryFormat.valueOf(format));
                     historyCommand.setOutput(getOutputStream());
 
                     historyCommand.execute();
@@ -1863,13 +1864,13 @@ public class Main {
      * Set database arguments values received by Main class to the provided command scope.
      */
     private void setDatabaseArgumentsToCommand(CommandScope command) {
-        command.addArgumentValue(DbUrlConnectionCommandStep.DEFAULT_SCHEMA_NAME_ARG, defaultSchemaName)
-                .addArgumentValue(DbUrlConnectionCommandStep.DEFAULT_CATALOG_NAME_ARG, defaultCatalogName)
-                .addArgumentValue(DbUrlConnectionCommandStep.DRIVER_ARG, driver)
-                .addArgumentValue(DbUrlConnectionCommandStep.DRIVER_PROPERTIES_FILE_ARG, driverPropertiesFile)
-                .addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, username)
-                .addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, password)
-                .addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, url);
+        command.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DEFAULT_SCHEMA_NAME_ARG, defaultSchemaName)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DEFAULT_CATALOG_NAME_ARG, defaultCatalogName)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DRIVER_ARG, driver)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DRIVER_PROPERTIES_FILE_ARG, driverPropertiesFile)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, username)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, password)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, url);
     }
 
     /**

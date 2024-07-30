@@ -1,23 +1,19 @@
 package liquibase.integration.servlet;
 
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.sql.Connection;
-import java.util.Arrays;
-import java.util.Collections;
-
-import javax.naming.Context;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
-
-import org.apache.derby.jdbc.BasicEmbeddedDataSource40;
-
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.h2.jdbcx.JdbcDataSource;
+
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.util.Arrays;
+import java.util.Collections;
+
+import static org.mockito.Mockito.*;
 
 public class LiquibaseServletListenerTest extends TestCase {
 
@@ -34,9 +30,10 @@ public class LiquibaseServletListenerTest extends TestCase {
         return new TestSetup(new TestSuite(LiquibaseServletListenerTest.class)) {
             @Override protected void setUp() {
                 TestInitialContextFactory.install();
-                BasicEmbeddedDataSource40 ds = new BasicEmbeddedDataSource40();
-                ds.setDatabaseName("memory:foo");
-                ds.setCreateDatabase("create");
+                JdbcDataSource ds = new JdbcDataSource();
+                ds.setURL("jdbc:h2:mem:lbcat");
+                ds.setUser("sa");
+                ds.setPassword("sa");
                 dataSource = ds;
             }
             @Override protected void tearDown() {
@@ -66,7 +63,7 @@ public class LiquibaseServletListenerTest extends TestCase {
         TestInitialContextFactory.setInitialContext(namingContext);
     }
 
-    public void testShouldNotShutEmbeddedDerbyDown() throws Exception {
+    public void testShouldNotShutEmbeddedDatabaseDown() throws Exception {
         if (dataSource == null) {
             return;
         }

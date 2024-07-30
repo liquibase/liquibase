@@ -7,11 +7,7 @@ import liquibase.Scope
 import liquibase.change.Change
 import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory
-import liquibase.command.CommandArgumentDefinition
-import liquibase.command.CommandFactory
-import liquibase.command.CommandFailedException
-import liquibase.command.CommandResults
-import liquibase.command.CommandScope
+import liquibase.command.*
 import liquibase.command.core.InternalSnapshotCommandStep
 import liquibase.configuration.AbstractMapConfigurationValueProvider
 import liquibase.configuration.ConfigurationValueProvider
@@ -27,11 +23,7 @@ import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.integration.commandline.Main
 import liquibase.logging.core.BufferedLogService
-import liquibase.resource.ClassLoaderResourceAccessor
-import liquibase.resource.PathHandlerFactory
-import liquibase.resource.Resource
-import liquibase.resource.ResourceAccessor
-import liquibase.resource.SearchPathResourceAccessor
+import liquibase.resource.*
 import liquibase.ui.ConsoleUIService
 import liquibase.ui.InputHandler
 import liquibase.ui.UIService
@@ -40,8 +32,8 @@ import liquibase.util.StreamUtil
 import liquibase.util.StringUtil
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.junit.Assert
-import org.junit.Assume
 import org.junit.ComparisonFailure
+import org.junit.jupiter.api.Assumptions
 import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.OperatingSystem
@@ -164,6 +156,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             }
             foundRequired = true
             signature.println "  ${argDef.name} (${argDef.dataType.simpleName}) ${argDef.description ?: "MISSING DESCRIPTION"}"
+            if (!argDef.forcePrintedAliases.isEmpty()) {
+                signature.println "    Force-printed aliases: ${argDef.forcePrintedAliases}"
+            }
             if (argDef.valueObfuscator != null) {
                 signature.println("    OBFUSCATED")
             }
@@ -182,6 +177,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             foundOptional = true
             signature.println "  ${argDef.name} (${argDef.dataType.simpleName}) ${argDef.description ?:  "MISSING DESCRIPTION"}"
             signature.println "    Default: ${argDef.defaultValueDescription}"
+            if (!argDef.forcePrintedAliases.isEmpty()) {
+                signature.println "    Force-printed aliases: ${argDef.forcePrintedAliases}"
+            }
             if (argDef.valueObfuscator != null) {
                 signature.println("    OBFUSCATED")
             }
@@ -208,7 +206,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     def "run"() {
         setup:
         Main.runningFromNewCli = true
-        Assume.assumeTrue("Skipping test: " + permutation.testSetupEnvironment.errorMessage, permutation.testSetupEnvironment.connection != null)
+        Assumptions.assumeTrue(permutation.testSetupEnvironment.connection != null, "Skipping test: " + permutation.testSetupEnvironment.errorMessage)
 
         def testDef = permutation.definition
 
@@ -230,10 +228,12 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             altDatabase.dropDatabaseObjects(altCatalogAndSchemas[0])
         }
 
+        Scope.getCurrentScope().getMdcManager().clear()
+
         when:
         if (testDef.supportedOs != null) {
             def currentOs = OperatingSystem.getCurrent()
-            Assume.assumeTrue("The current operating system (" + currentOs.name + ") does not support this test.", testDef.supportedOs.contains(currentOs))
+            Assumptions.assumeTrue(testDef.supportedOs.contains(currentOs), "The current operating system (" + currentOs.name + ") does not support this test.")
         }
         def commandScope
         try {
@@ -572,7 +572,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         }
     }
 
-    private static File takeDatabaseSnapshot(Database database, String format) {
+    static File takeDatabaseSnapshot(Database database, String format) {
         final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database)
         changeLogService.init()
         changeLogService.reset()
@@ -586,7 +586,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         snapshotCommand
                 .addArgumentValue(InternalSnapshotCommandStep.DATABASE_ARG, database)
                 .addArgumentValue(InternalSnapshotCommandStep.SCHEMAS_ARG, schemas)
-                .addArgumentValue(InternalSnapshotCommandStep.SERIALIZER_FORMAT_ARG, "txt")
+                .addArgumentValue(InternalSnapshotCommandStep.SERIALIZER_FORMAT_ARG, format)
 
         Writer outputWriter = new FileWriter(tempFile)
         String result = InternalSnapshotCommandStep.printSnapshot(snapshotCommand, snapshotCommand.execute())
@@ -610,6 +610,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     contents = StreamUtil.readStreamAsString(resource.openInputStream())
                 } else {
                     contents = null
+                    throw new FileNotFoundException("File ${path} not found")
                 }
             }
 
@@ -725,6 +726,12 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     }
                 }
             }
+        }
+
+        if (returnList.isEmpty()) {
+            throw new RuntimeException("Required test systems not found! " +
+                    "Make sure your test systems are specified in your liquibase.sdk.yaml " +
+                    "and that you are not accidentally filtering out all tests.")
         }
 
         def descriptions =
@@ -1226,7 +1233,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     }
 
     public static String createRandomFilePath(String suffix) {
-        String rand = "target/test-classes/" + StringUtil.randomIdentifer(10) + "." + suffix
+        String rand = "target/test-classes/" + StringUtil.randomIdentifier(10) + "." + suffix
         rand
     }
 

@@ -1,7 +1,6 @@
 package liquibase.diffchangelog
 
 import liquibase.Scope
-import liquibase.UpdateSummaryEnum
 import liquibase.change.core.AddForeignKeyConstraintChange
 import liquibase.change.core.DropForeignKeyConstraintChange
 import liquibase.changelog.ChangeLogParameters
@@ -9,12 +8,15 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.command.CommandScope
 import liquibase.command.core.DiffChangelogCommandStep
-import liquibase.command.core.UpdateCommandStep
-import liquibase.command.core.helpers.*
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
+import liquibase.command.core.helpers.DiffOutputControlCommandStep
+import liquibase.command.core.helpers.PreCompareCommandStep
+import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep
 import liquibase.command.util.CommandUtil
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
 import liquibase.diff.compare.CompareControl
+import liquibase.exception.CommandExecutionException
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
@@ -36,9 +38,9 @@ class DiffChangelogIntegrationTest extends Specification {
 
     def "auto increment on varchar column" () {
         when:
-        def changelogfile = StringUtil.randomIdentifer(10) + ".sql"
+        def changelogfile = StringUtil.randomIdentifier(10) + ".sql"
         def sequenceName = "customer_customer_id_seq"
-        def tableName = StringUtil.randomIdentifer(10)
+        def tableName = StringUtil.randomIdentifier(10)
         def sql = """
 CREATE SEQUENCE $sequenceName INCREMENT 5 START 100;
 CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'));
@@ -58,7 +60,7 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
         commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changelogfile)
         commandScope.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, CompareControl.STANDARD)
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, targetDatabase)
         commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
         commandScope.addArgumentValue(DiffChangelogCommandStep.LABEL_FILTER_ARG, "newLabels")
         commandScope.addArgumentValue(DiffChangelogCommandStep.CONTEXTS_ARG, "newContexts")
@@ -99,7 +101,7 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
         commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, diffChangelogFile)
         commandScope.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, CompareControl.STANDARD)
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, targetDatabase)
         commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
         commandScope.execute()
         def generatedChangelog = new File(diffChangelogFile)
@@ -125,9 +127,9 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
 
     def "should include view comments"() {
         when:
-        def changelogfile = StringUtil.randomIdentifer(10) + ".sql"
-        def viewName = StringUtil.randomIdentifer(10)
-        def columnName = StringUtil.randomIdentifer(10)
+        def changelogfile = StringUtil.randomIdentifier(10) + ".sql"
+        def viewName = StringUtil.randomIdentifier(10)
+        def columnName = StringUtil.randomIdentifier(10)
         def viewComment = "some insightful comment"
         def columnComment = "some comment relating to this column"
         def sql = """
@@ -149,7 +151,7 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
         commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changelogfile)
         commandScope.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, CompareControl.STANDARD)
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, targetDatabase)
         commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
 
         then:
@@ -169,5 +171,107 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         refDatabase.close()
         targetDatabase.close()
         CommandUtil.runDropAll(postgres)
+    }
+
+    def "Ensure diff-changelog set runOnChange and replaceIfExists properties correctly for a created view changeset"() {
+        given:
+        CommandUtil.runUpdate(postgres, "changelogs/mysql/complete/createtable.and.view.changelog.xml", null, null, null)
+        def outputChangelogFile = String.format("diffChangelogFile-%s-output.xml", StringUtil.randomIdentifier(10))
+        Database refDatabase = DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl(), postgres.getUsername(), postgres.getPassword(), null, null)
+
+        Database targetDatabase =
+                DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl().replace("lbcat", "lbcat2"), postgres.getUsername(), postgres.getPassword(), null, null)
+
+        when:
+        CommandScope commandScope = new CommandScope(DiffChangelogCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, targetDatabase)
+        commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, outputChangelogFile)
+        commandScope.addArgumentValue(DiffChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG, "createView")
+        commandScope.addArgumentValue(DiffChangelogCommandStep.RUN_ON_CHANGE_TYPES_ARG, "createView")
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
+        commandScope.execute()
+
+        then:
+
+        def outputFile = new File(outputChangelogFile)
+        def outputContent = FileUtil.getContents(outputFile)
+        outputContent.contains(" runOnChange=\"true\">")
+        outputContent.contains(" replaceIfExists=\"true\"")
+
+        cleanup:
+        outputFile.delete()
+        refDatabase.close()
+        targetDatabase.close()
+        CommandUtil.runDropAll(postgres)
+        postgres.getConnection().close()
+    }
+
+    def "Ensure diff-changelog with SQL output format contains 'OR REPLACE' instruction for a view when USE_OR_REPLACE_OPTION is set as true"() {
+        given:
+        def outputChangelogFile = String.format("diffChangelogFile-%s-output.postgresql.sql", StringUtil.randomIdentifier(10))
+        Database refDatabase =
+                DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl(), postgres.getUsername(), postgres.getPassword(), null, null)
+        Database targetDatabase =
+                DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl().replace("lbcat", "lbcat2"), postgres.getUsername(), postgres.getPassword(), null, null)
+
+        postgres.executeSql("""create table foo(               
+                id numeric not null primary key, 
+                some_json json null)""")
+        postgres.executeSql("CREATE VIEW fooview AS Select * from foo;")
+
+        when:
+        runDiffToChangelogWithUseOrReplaceCommandArgument(targetDatabase, refDatabase, outputChangelogFile, true)
+        def outputFile = new File(outputChangelogFile)
+        def contents = FileUtil.getContents(outputFile)
+
+        then:
+        contents.contains("CREATE OR REPLACE VIEW \"fooview\"")
+
+        cleanup:
+        outputFile.delete()
+        refDatabase.close()
+        targetDatabase.close()
+        CommandUtil.runDropAll(postgres)
+        postgres.getConnection().close()
+    }
+
+    def "Ensure diff-changelog with SQL output format does NOT contain 'OR REPLACE' instruction for a view when USE_OR_REPLACE_OPTION is set as false"() {
+        given:
+        def outputChangelogFile = String.format("diffChangelogFile-%s-output.postgresql.sql", StringUtil.randomIdentifier(10))
+        Database refDatabase =
+                DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl(), postgres.getUsername(), postgres.getPassword(), null, null)
+        Database targetDatabase =
+                DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl().replace("lbcat", "lbcat2"), postgres.getUsername(), postgres.getPassword(), null, null)
+
+        postgres.executeSql("""create table foo(               
+                id numeric not null primary key, 
+                some_json json null)""")
+        postgres.executeSql("CREATE VIEW fooview AS Select * from foo;")
+
+        when:
+        runDiffToChangelogWithUseOrReplaceCommandArgument(targetDatabase, refDatabase, outputChangelogFile, false)
+        def outputFile = new File(outputChangelogFile)
+        def contents = FileUtil.getContents(outputFile)
+
+        then:
+        !contents.contains("CREATE OR REPLACE VIEW \"fooview\"")
+        contents.contains("CREATE VIEW \"fooview\"")
+
+        cleanup:
+        outputFile.delete()
+        refDatabase.close()
+        targetDatabase.close()
+        CommandUtil.runDropAll(postgres)
+        postgres.getConnection().close()
+    }
+
+    static void runDiffToChangelogWithUseOrReplaceCommandArgument(Database targetDatabase, Database referenceDatabase,
+                                                                  String outputFile, boolean useOrReplaceOption) throws CommandExecutionException {
+        CommandScope commandScope = new CommandScope(DiffChangelogCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, targetDatabase)
+        commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, outputFile)
+        commandScope.addArgumentValue(DiffChangelogCommandStep.USE_OR_REPLACE_OPTION, useOrReplaceOption)
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
+        commandScope.execute()
     }
 }

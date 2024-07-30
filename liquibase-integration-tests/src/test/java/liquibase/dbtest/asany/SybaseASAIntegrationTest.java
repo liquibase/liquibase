@@ -3,19 +3,18 @@ package liquibase.dbtest.asany;
 import liquibase.Scope;
 import liquibase.command.CommandScope;
 import liquibase.command.core.GenerateChangelogCommandStep;
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.executor.ExecutorService;
-import liquibase.statement.core.RawSqlStatement;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeNotNull;
+import liquibase.statement.core.RawParameterizedSqlStatement;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeNotNull;
 
 @Ignore("No test database implementation")
 public class SybaseASAIntegrationTest extends AbstractIntegrationTest {
@@ -36,12 +35,12 @@ public class SybaseASAIntegrationTest extends AbstractIntegrationTest {
         clearDatabase();
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                 .execute(
-                        new RawSqlStatement("CREATE TABLE generated_test (height_cm numeric, height_stored numeric COMPUTE (height_cm / 2.54))"));
+                        new RawParameterizedSqlStatement("CREATE TABLE generated_test (height_cm numeric, height_stored numeric COMPUTE (height_cm / 2.54))"));
 
         // when
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, getDatabase())
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase())
                 .setOutput(baos)
                 .execute();
 

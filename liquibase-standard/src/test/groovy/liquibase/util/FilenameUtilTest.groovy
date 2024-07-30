@@ -1,6 +1,7 @@
 package liquibase.util
 
-import org.junit.Assume
+
+import spock.lang.Requires
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -29,11 +30,9 @@ class FilenameUtilTest extends Specification {
         ""                    | ""
     }
 
+    @Requires({ System.getProperty("os.name").toLowerCase().contains("win") })
     @Unroll
     def "normalize (windows)"() {
-        setup:
-        Assume.assumeTrue(SystemUtil.isWindows())
-
         expect:
         FilenameUtil.normalize(filename) == expected
 
@@ -69,6 +68,7 @@ class FilenameUtilTest extends Specification {
         filename                         | expected
         "normalString"                   | "normalString"
         "<B>o\\b|I/s|*?Yo\"u\\r?Uncle:/" | "_B_o_b_I_s___Yo_u_r_Uncle__"
+        "this@that.com"                  | "this_that.com"
         null                             | null
     }
 
@@ -85,11 +85,9 @@ class FilenameUtilTest extends Specification {
         null     | null
     }
 
+    @Requires({ System.getProperty("os.name").toLowerCase().contains("win") })
     @Unroll
     def "getFullPath (windows)"() {
-        setup:
-        Assume.assumeTrue(SystemUtil.isWindows())
-
         expect:
         FilenameUtil.getDirectory(filename) == expected
 

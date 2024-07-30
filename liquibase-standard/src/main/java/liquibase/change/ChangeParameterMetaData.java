@@ -13,6 +13,7 @@ import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
@@ -37,8 +38,11 @@ public class ChangeParameterMetaData {
     private final Map<String, Object> exampleValues;
     private final String displayName;
     private String dataType;
+    @Getter
     private Class dataTypeClass;
+    @Getter
     private Type[] dataTypeClassParameters = new Type[0];
+    @Getter
     private final String since;
     private Set<String> requiredForDatabase;
     private Set<String> supportedDatabases;
@@ -48,11 +52,21 @@ public class ChangeParameterMetaData {
     private final String[] supportedDatabasesArg;
     private Optional<Method> readMethodRef = Optional.empty();
     private Optional<Method> writeMethodRef = Optional.empty();
+    @Getter
+    private final String[] alternateParameterNames;
 
     public ChangeParameterMetaData(Change change, String parameterName, String displayName, String description,
                                    Map<String, Object> exampleValues, String since, Type dataType,
                                    String[] requiredForDatabase, String[] supportedDatabases, String mustEqualExisting,
                                    LiquibaseSerializable.SerializationType serializationType) {
+        this(change, parameterName, displayName, description, exampleValues, since, dataType, requiredForDatabase,
+                supportedDatabases, mustEqualExisting, serializationType, null);
+    }
+
+    public ChangeParameterMetaData(Change change, String parameterName, String displayName, String description,
+                                   Map<String, Object> exampleValues, String since, Type dataType,
+                                   String[] requiredForDatabase, String[] supportedDatabases, String mustEqualExisting,
+                                   LiquibaseSerializable.SerializationType serializationType, String[] alternateParameterNames) {
         if (parameterName == null) {
             throw new UnexpectedLiquibaseException("Unexpected null parameterName");
         }
@@ -92,6 +106,7 @@ public class ChangeParameterMetaData {
 
         this.supportedDatabasesArg = supportedDatabases;
         this.requiredForDatabaseArg = requiredForDatabase;
+        this.alternateParameterNames = alternateParameterNames;
     }
 
     public ChangeParameterMetaData withAccessors(Method readMethod, Method writeMethod) {
@@ -217,24 +232,12 @@ public class ChangeParameterMetaData {
         return displayName;
     }
 
-    public String getSince() {
-        return since;
-    }
-
     /**
      * Return the data type of value stored in this parameter. Used for documentation and integration purposes as well
      * as validation.
      */
     public String getDataType() {
         return dataType;
-    }
-
-    public Class getDataTypeClass() {
-        return dataTypeClass;
-    }
-
-    public Type[] getDataTypeClassParameters() {
-        return dataTypeClassParameters;
     }
 
     /**
@@ -336,15 +339,18 @@ public class ChangeParameterMetaData {
         try {
             Method writeMethod = getWriteMethod(change);
             Class<?> expectedWriteType = writeMethod.getParameterTypes()[0];
-            if ((value != null) && !expectedWriteType.isAssignableFrom(value.getClass())) {
-                if (expectedWriteType.equals(String.class)) {
-                    value = value.toString();
-                } else {
-                    throw new UnexpectedLiquibaseException(
-                            "Could not convert " + value.getClass().getName() +
-                                    " to " +
-                                    expectedWriteType.getName()
-                    );
+            if ((value != null)) {
+                Class<?> actualType = value.getClass();
+                if (!expectedWriteType.isAssignableFrom(actualType)) {
+                    if (expectedWriteType.equals(String.class)) {
+                        value = value.toString();
+                    } else if (!allowUnboxing(actualType, expectedWriteType)) {
+                        throw new UnexpectedLiquibaseException(
+                                "Could not convert " + actualType.getName() +
+                                        " to " +
+                                        expectedWriteType.getName()
+                        );
+                    }
                 }
             }
             writeMethod.invoke(change, value);
@@ -353,6 +359,21 @@ public class ChangeParameterMetaData {
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException("Error setting " + this.parameterName + " to " + value, e);
         }
+    }
+
+    private static boolean allowUnboxing(Class<?> actual, Class<?> expected) {
+        if (!expected.isPrimitive()) {
+            return false;
+        }
+        return
+                actual.equals(Boolean.class) && expected.equals(boolean.class) ||
+                actual.equals(Byte.class) && expected.equals(byte.class) ||
+                actual.equals(Character.class) && expected.equals(char.class) ||
+                actual.equals(Double.class) && expected.equals(double.class) ||
+                actual.equals(Float.class) && expected.equals(float.class) ||
+                actual.equals(Integer.class) && expected.equals(int.class) ||
+                actual.equals(Long.class) && expected.equals(long.class) ||
+                actual.equals(Short.class) && expected.equals(short.class);
     }
 
     private Method getWriteMethod(Change change) {

@@ -15,7 +15,7 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.RawCallStatement;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
@@ -282,6 +282,14 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         return true;
     }
 
+    @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Schema.class.isAssignableFrom(object)) {
+            return false;
+        }
+        return super.supports(object);
+    }
+
     /**
      * Oracle supports catalogs in liquibase terms
      *
@@ -527,10 +535,10 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 try {
                     try {
                         //noinspection HardCodedStringLiteral
-                        userDefinedTypes.addAll(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForList(new RawSqlStatement("SELECT DISTINCT TYPE_NAME FROM ALL_TYPES"), String.class));
+                        userDefinedTypes.addAll(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForList(new RawParameterizedSqlStatement("SELECT DISTINCT TYPE_NAME FROM ALL_TYPES"), String.class));
                     } catch (DatabaseException e) { //fall back to USER_TYPES if the user cannot see ALL_TYPES
                         //noinspection HardCodedStringLiteral
-                        userDefinedTypes.addAll(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForList(new RawSqlStatement("SELECT TYPE_NAME FROM USER_TYPES"), String.class));
+                        userDefinedTypes.addAll(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForList(new RawParameterizedSqlStatement("SELECT TYPE_NAME FROM USER_TYPES"), String.class));
                     }
                 } catch (DatabaseException e) {
                     //ignore error
@@ -669,6 +677,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             throw new UnexpectedLiquibaseException("Cannot determine the Oracle database version number", ex);
         }
 
+    }
+
+    @Override
+    public boolean supportsDatabaseChangeLogHistory() {
+        return true;
     }
 
 }

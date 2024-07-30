@@ -29,8 +29,8 @@ public interface ChangeSetVisitor {
 
     default void logMdcData(ChangeSet changeSet) {
         Scope scope = Scope.getCurrentScope();
-        scope.addMdcValue(MdcKey.CHANGESET_ID, changeSet.getId());
-        scope.addMdcValue(MdcKey.CHANGESET_AUTHOR, changeSet.getAuthor());
+        scope.addMdcValue(MdcKey.CHANGESET_ID, changeSet.getId(), false);
+        scope.addMdcValue(MdcKey.CHANGESET_AUTHOR, changeSet.getAuthor(), false);
         scope.addMdcValue(MdcKey.CHANGESET_FILEPATH, changeSet.getFilePath());
     }
 }

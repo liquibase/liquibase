@@ -28,7 +28,7 @@ public class MockLockService implements LockService {
     }
 
     @Override
-    public void setChangeLogLockRecheckTime(long changeLogLocRecheckTime) {
+    public void setChangeLogLockRecheckTime(long changeLogLockRecheckTime) {
     }
 
     @Override

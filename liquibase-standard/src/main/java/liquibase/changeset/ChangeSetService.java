@@ -1,6 +1,5 @@
 package liquibase.changeset;
 
-import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ModifyChangeSets;
@@ -91,6 +90,19 @@ public interface ChangeSetService extends Plugin {
 
     /**
      *
+     * Create the ModifyChangeSets instance which will do the modifications
+     *
+     * @param  runWith                    The runWith value
+     * @param  runWithSpool               The runWithSpool value
+     * @return ModifyChangeSets           The object which will perform the modifications
+     *
+     */
+    default ModifyChangeSets createModifyChangeSets(String runWith, String runWithSpool) {
+        return new ModifyChangeSets(runWith, runWithSpool);
+    }
+
+    /**
+     *
      * Given a change set and a ModifyChangeSets instance, perform the modifications
      *
      * @param changeSet                  The change set to modify
@@ -122,4 +134,5 @@ public interface ChangeSetService extends Plugin {
     default String getEndDelimiter(ChangeSet changeSet) {
         return null;
     }
+
 }

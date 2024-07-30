@@ -1,6 +1,5 @@
 package liquibase.changeset;
 
-import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ModifyChangeSets;
@@ -37,7 +36,7 @@ public class StandardChangeSetService implements ChangeSetService {
         return new ChangeSet(id, author, alwaysRun, runOnChange,
                 DatabaseChangeLog.normalizePath(filePath),
                 contextFilter, dbmsList, runWith, runWithSpoolFile, runInTransaction,
-                databaseChangeLog.getObjectQuotingStrategy(), databaseChangeLog);
+                quotingStrategy, databaseChangeLog);
     }
     @Override
     public ModifyChangeSets createModifyChangeSets(ParsedNode node) throws ParsedNodeException {

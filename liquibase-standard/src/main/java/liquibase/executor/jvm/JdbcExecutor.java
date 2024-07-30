@@ -39,6 +39,9 @@ import java.util.logging.Level;
  */
 public class JdbcExecutor extends AbstractExecutor {
 
+    public static final String SHOULD_UPDATE_ROWS_AFFECTED_SCOPE_KEY = "shouldUpdateRowsAffected";
+    public static final String ROWS_AFFECTED_SCOPE_KEY = "rowsAffected";
+
     /**
      * Return the name of the Executor
      *
@@ -72,6 +75,9 @@ public class JdbcExecutor extends AbstractExecutor {
                 throw new DatabaseException("Cannot execute commands against an offline database");
             }
             stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement();
+            if (Boolean.TRUE.equals(SqlConfiguration.ALWAYS_SET_FETCH_SIZE.getCurrentValue())) {
+                stmt.setFetchSize(database.getFetchSize());
+            }
             Statement stmtToUse = stmt;
 
             Object object = action.doInStatement(stmtToUse);
@@ -496,8 +502,9 @@ public class JdbcExecutor extends AbstractExecutor {
 
     private void addUpdateCountToScope(int updateCount) {
         if (updateCount > -1) {
-            AtomicInteger scopeRowsAffected = Scope.getCurrentScope().get("rowsAffected", AtomicInteger.class);
-            if (scopeRowsAffected != null) {
+            AtomicInteger scopeRowsAffected = Scope.getCurrentScope().get(ROWS_AFFECTED_SCOPE_KEY, AtomicInteger.class);
+            Boolean shouldUpdateRowsAffected = Scope.getCurrentScope().get(SHOULD_UPDATE_ROWS_AFFECTED_SCOPE_KEY, true);
+            if (scopeRowsAffected != null && Boolean.TRUE.equals(shouldUpdateRowsAffected)) {
                 scopeRowsAffected.addAndGet(updateCount);
             }
         }

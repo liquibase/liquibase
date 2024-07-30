@@ -4,7 +4,9 @@ import liquibase.ChecksumVersion;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.Change;
-import liquibase.changelog.*;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
@@ -26,7 +28,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     private String errorPreconditionsMessage = null;
     private final List<FailedPrecondition> failedPreconditions = new ArrayList<>();
     private final List<ErrorPrecondition> errorPreconditions = new ArrayList<>();
-    private final Set<ChangeSet> duplicateChangeSets = new HashSet<>();
+    private final Set<ChangeSet> duplicateChangeSets = new LinkedHashSet<>();
     private final List<SetupException> setupExceptions = new ArrayList<>();
     private final List<Throwable> changeValidationExceptions = new ArrayList<>();
     private final ValidationErrors validationErrors = new ValidationErrors();
@@ -45,7 +47,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
     public ValidatingVisitor(List<RanChangeSet> ranChangeSets) {
         ranIndex = new HashMap<>();
-        for(RanChangeSet changeSet:ranChangeSets) {
+        for(RanChangeSet changeSet: ranChangeSets) {
             ranIndex.put(changeSet.toString(), changeSet);
         }
     }
@@ -114,38 +116,10 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         }
 
         for (Change change : changeSet.getChanges()) {
-            try {
-                change.finishInitialization();
-            } catch (SetupException se) {
-                setupExceptions.add(se);
-            }
-            
-            
-            if(shouldValidate){
-                warnings.addAll(change.warn(database));
-
-                try {
-                    ValidationErrors foundErrors = change.validate(database);
-                    if ((foundErrors != null)) {
-                        if (foundErrors.hasErrors() && (changeSet.getOnValidationFail().equals
-                                (ChangeSet.ValidationFailOption.MARK_RAN))) {
-                            Scope.getCurrentScope().getLog(getClass()).info(
-                                    "Skipping changeset " + changeSet + " due to validation error(s): " +
-                                            StringUtil.join(foundErrors.getErrorMessages(), ", "));
-                            changeSet.setValidationFailed(true);
-                        } else {
-                            if (!foundErrors.getWarningMessages().isEmpty())
-                                Scope.getCurrentScope().getLog(getClass()).warning(
-                                        "Changeset " + changeSet + ": " +
-                                                StringUtil.join(foundErrors.getWarningMessages(), ", "));
-                            validationErrors.addAll(foundErrors, changeSet);
-                        }
-                    }
-                } catch (Exception e) {
-                    changeValidationExceptions.add(e);
-                }
-            }
+            validateChange(changeSet, database, change, shouldValidate);
         }
+
+        additionalValidations(changeSet, database, shouldValidate, ran);
 
         if(ranChangeSet != null) {
             if (!changeSet.isCheckSumValid(ranChangeSet.getLastCheckSum()) &&
@@ -164,7 +138,48 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         } else {
             seenChangeSets.add(changeSetString);
         }
-    } // public void visit(...)
+    }
+
+    /**
+     * Other implementations of this class might optionally provide additional validations to do in this method.
+     */
+    protected void additionalValidations(ChangeSet changeSet, Database database, boolean shouldValidate, boolean ran) {
+        // purposefully empty
+    }
+
+    protected void validateChange(ChangeSet changeSet, Database database, Change change, boolean shouldValidate) {
+        try {
+            change.finishInitialization();
+        } catch (SetupException se) {
+            setupExceptions.add(se);
+        }
+
+
+        if(shouldValidate){
+            warnings.addAll(change.warn(database));
+
+            try {
+                ValidationErrors foundErrors = change.validate(database);
+                if ((foundErrors != null)) {
+                    if (foundErrors.hasErrors() && (changeSet.getOnValidationFail().equals
+                            (ChangeSet.ValidationFailOption.MARK_RAN))) {
+                        Scope.getCurrentScope().getLog(getClass()).info(
+                                "Skipping changeset " + changeSet + " due to validation error(s): " +
+                                        StringUtil.join(foundErrors.getErrorMessages(), ", "));
+                        changeSet.setValidationFailed(true);
+                    } else {
+                        if (!foundErrors.getWarningMessages().isEmpty())
+                            Scope.getCurrentScope().getLog(getClass()).warning(
+                                    "Changeset " + changeSet + ": " +
+                                            StringUtil.join(foundErrors.getWarningMessages(), ", "));
+                        validationErrors.addAll(foundErrors, changeSet);
+                    }
+                }
+            } catch (Exception e) {
+                changeValidationExceptions.add(e);
+            }
+        }
+    }
 
     private boolean areChangeSetAttributesValid(ChangeSet changeSet) {
         boolean authorEmpty = StringUtil.isEmpty(changeSet.getAuthor());
@@ -189,5 +204,4 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             duplicateChangeSets.isEmpty() && changeValidationExceptions.isEmpty() && setupExceptions.isEmpty() &&
             !validationErrors.hasErrors();
     }
-
 }

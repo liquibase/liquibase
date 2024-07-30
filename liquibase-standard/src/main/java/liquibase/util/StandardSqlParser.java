@@ -1,5 +1,6 @@
 package liquibase.util;
 
+import liquibase.changelog.ChangeSet;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.LiquibaseSqlParser;
 import liquibase.util.grammar.*;
@@ -7,6 +8,7 @@ import liquibase.util.grammar.*;
 import java.io.StringReader;
 
 public class StandardSqlParser implements LiquibaseSqlParser {
+
     @Override
     public StringClauses parse(String sqlBlock) {
         return parse(sqlBlock, false, false);
@@ -14,6 +16,11 @@ public class StandardSqlParser implements LiquibaseSqlParser {
 
     @Override
     public StringClauses parse(String sqlBlock, boolean preserveWhitespace, boolean preserveComments) {
+        return parse(sqlBlock, preserveWhitespace, preserveComments, null);
+    }
+
+    @Override
+    public StringClauses parse(String sqlBlock, boolean preserveWhitespace, boolean preserveComments, ChangeSet changeSet) {
         StringClauses clauses = new StringClauses(preserveWhitespace?"":" ");
 
         SimpleSqlGrammarTokenManager tokenManager = new SimpleSqlGrammarTokenManager(new SimpleCharStream(new StringReader(sqlBlock)));
@@ -42,8 +49,12 @@ public class StandardSqlParser implements LiquibaseSqlParser {
                 token = t.getNextToken();
             }
 
-        } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
+        } catch (Throwable e) {
+            if (changeSet != null) {
+                throw new UnexpectedLiquibaseException(changeSet.toString(), e);
+            } else {
+                throw new UnexpectedLiquibaseException(e);
+            }
         }
         return clauses;
     }

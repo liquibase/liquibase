@@ -28,6 +28,7 @@ public class InternalSnapshotCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<CatalogAndSchema[]> SCHEMAS_ARG;
     public static final CommandArgumentDefinition<String> SERIALIZER_FORMAT_ARG;
     public static final CommandArgumentDefinition<SnapshotListener> SNAPSHOT_LISTENER_ARG;
+    public static final CommandArgumentDefinition<SnapshotControl> SNAPSHOT_CONTROL_ARG;
 
     private Map<String, Object> snapshotMetadata;
 
@@ -38,6 +39,7 @@ public class InternalSnapshotCommandStep extends AbstractCommandStep {
         SCHEMAS_ARG = builder.argument("schemas", CatalogAndSchema[].class).build();
         SERIALIZER_FORMAT_ARG = builder.argument("serializerFormat", String.class).build();
         SNAPSHOT_LISTENER_ARG = builder.argument("snapshotListener", SnapshotListener.class).build();
+        SNAPSHOT_CONTROL_ARG = builder.argument("snapshotControl", SnapshotControl.class).hidden().build();
     }
 
     @Override
@@ -82,7 +84,10 @@ public class InternalSnapshotCommandStep extends AbstractCommandStep {
         CatalogAndSchema[] schemas = commandScope.getArgumentValue(SCHEMAS_ARG);
 
         InternalSnapshotCommandStep.logUnsupportedDatabase(database, this.getClass());
-        SnapshotControl snapshotControl = new SnapshotControl(database);
+        SnapshotControl snapshotControl = commandScope.getArgumentValue(SNAPSHOT_CONTROL_ARG);
+        if (snapshotControl == null) {
+            snapshotControl = new SnapshotControl(database);
+        }
         snapshotControl.setSnapshotListener(snapshotListener);
 
         if (schemas == null) {
@@ -120,6 +125,7 @@ public class InternalSnapshotCommandStep extends AbstractCommandStep {
                     || database instanceof MySQLDatabase
                     || database instanceof DB2Database
                     || database instanceof PostgresDatabase
+                    || database.getShortName().equalsIgnoreCase("bigquery")
                     || database.getShortName().equalsIgnoreCase("snowflake"))) { //TODO: Update to use SnowflakeDatabase once the liquibase-snowflake module is fully integrated into liquibase-core
                 Scope.getCurrentScope().getUI().sendMessage("INFO This command might not yet capture Liquibase Pro additional object types on " + database.getShortName());
             }

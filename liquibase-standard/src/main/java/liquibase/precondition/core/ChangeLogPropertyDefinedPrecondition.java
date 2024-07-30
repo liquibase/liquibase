@@ -10,7 +10,9 @@ import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.precondition.AbstractPrecondition;
+import lombok.Getter;
 
+@Getter
 public class ChangeLogPropertyDefinedPrecondition extends AbstractPrecondition {
 
     private String property;
@@ -26,16 +28,8 @@ public class ChangeLogPropertyDefinedPrecondition extends AbstractPrecondition {
         return "changeLogPropertyDefined";
     }
 
-    public String getProperty() {
-        return property;
-    }
-
     public void setProperty(String property) {
         this.property = property;
-    }
-
-    public String getValue() {
-        return value;
     }
 
     public void setValue(String value) {
