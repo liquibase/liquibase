@@ -184,7 +184,7 @@ jobs:
           for I in "${EXT[@]}"; do
             cp ~/.m2/repository/org/liquibase/ext/$I/${{ needs.setup.outputs.version }}/$I-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$I-${{ needs.setup.outputs.version }}.jar || echo "Failed to move $I artifact"
           done
-          (cd re-version/out/liquibase-${{ needs.setup.outputs.version }} && tar -czvf ../liquibase-${{ needs.setup.outputs.version }}.tar.gz -C . . && cd .. && rm -rf liquibase-${{ needs.setup.outputs.version }})
+          (cd re-version/out/liquibase-${{ needs.setup.outputs.version }} && tar -czvf ../liquibase-${{ needs.setup.outputs.version }}.tar.gz -C . && cd .. && rm -rf liquibase-${{ needs.setup.outputs.version }})
 
           $PWD/.github/util/sign-artifacts.sh re-version/out
    
