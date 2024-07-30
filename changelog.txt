@@ -5,7 +5,9 @@ Changes in version 4.29.1 (2024.07.31)
 
 ### Liquibase 4.29.1 is a patch release
 
-Liquibase 4.29.1 patches a pom mismatch in the Liquibase Big Query commercial extension.
+* Liquibase 4.29.1 patches a pom mismatch in the Liquibase BigQuery Commercial Extension.
+
+* Liquibase 4.29.1 resolves an issue with the zip distribution where all files were incorrectly placed inside liquibase-4.29.1 directory. This update ensures proper file organization and installation.
 
 
 ### [PRO] Changelog
