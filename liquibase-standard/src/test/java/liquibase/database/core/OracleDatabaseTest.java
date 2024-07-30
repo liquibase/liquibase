@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 import liquibase.Scope;
+import org.mockito.Mockito;
 
 import static java.util.ResourceBundle.getBundle;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -150,6 +151,90 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
     @Test
     public void getDateLiteral_unsupported() {
         assertEquals("UNSUPPORTED:123", database.getDateLiteral("123"));
+    }
+
+    @Test
+    public void shouldTruncatePrimaryKeyNameTo30Characters_withOracleMajor12Minor1() throws Exception {
+        final Database database = getDatabase();
+        final String tableName = "SOME_TABLE_WITH_MORE_THAN_30_CHARACTERS";
+        final Database spyDatabase = Mockito.spy(database);
+        Mockito.when(spyDatabase.getDatabaseMajorVersion()).thenReturn(OracleDatabase.ORACLE_12C_MAJOR_VERSION);
+        Mockito.when(spyDatabase.getDatabaseMinorVersion()).thenReturn(1);
+        String primaryKeyName = spyDatabase.generatePrimaryKeyName(tableName);
+        assertEquals("PK_SOME_TABLE_WITH_MORE_THAN_3", primaryKeyName, "Should truncate primary key to 30 characters");
+    }
+
+    @Test
+    public void shouldTruncatePrimaryKeyNameTo30Characters_withOracleMajor11() throws Exception {
+        final Database database = getDatabase();
+        final String tableName = "SOME_TABLE_WITH_MORE_THAN_30_CHARACTERS";
+        final Database spyDatabase = Mockito.spy(database);
+        Mockito.when(spyDatabase.getDatabaseMajorVersion()).thenReturn(OracleDatabase.ORACLE_12C_MAJOR_VERSION-1);
+        String primaryKeyName = spyDatabase.generatePrimaryKeyName(tableName);
+        assertEquals("PK_SOME_TABLE_WITH_MORE_THAN_3", primaryKeyName, "Should truncate primary key to 30 characters");
+    }
+
+    @Test
+    public void shouldHavePrimaryKeyShorterThan30Characters_withOracleMajor12Minor1() throws Exception {
+        final Database database = getDatabase();
+        final String tableName = "TABLE_LESS_30_CHARS";
+        final Database spyDatabase = Mockito.spy(database);
+        Mockito.when(spyDatabase.getDatabaseMajorVersion()).thenReturn(OracleDatabase.ORACLE_12C_MAJOR_VERSION);
+        Mockito.when(spyDatabase.getDatabaseMinorVersion()).thenReturn(1);
+        String primaryKeyName = spyDatabase.generatePrimaryKeyName(tableName);
+        assertEquals("PK_TABLE_LESS_30_CHARS", primaryKeyName, "Should have primary key with less than 30 characters");
+    }
+
+    @Test
+    public void shouldHavePrimaryKeyShorterThan30Characters_withOracleMajor11() throws Exception {
+        final Database database = getDatabase();
+        final String tableName = "TABLE_LESS_30_CHARS";
+        final Database spyDatabase = Mockito.spy(database);
+        Mockito.when(spyDatabase.getDatabaseMajorVersion()).thenReturn(OracleDatabase.ORACLE_12C_MAJOR_VERSION-1);
+        String primaryKeyName = spyDatabase.generatePrimaryKeyName(tableName);
+        assertEquals("PK_TABLE_LESS_30_CHARS", primaryKeyName, "Should have primary key with less than 30 characters");
+    }
+
+    @Test
+    public void shouldTruncatePrimaryKeyNameTo128Characters_withOracleMajor13() throws Exception {
+        final Database database = getDatabase();
+        final String tableName = "SOME_TABLE_WITH_MORE_THAN_128_CHARACTERS_SOME_TABLE_WITH_MORE_THAN_128_CHARACTERS_SOME_TABLE_WITH_MORE_THAN_128_CHARACTERS_SOME_TABLE_WITH_MORE_THAN_128_CHARACTERS";
+        final Database spyDatabase = Mockito.spy(database);
+        Mockito.when(spyDatabase.getDatabaseMajorVersion()).thenReturn(OracleDatabase.ORACLE_12C_MAJOR_VERSION+1);
+        String primaryKeyName = spyDatabase.generatePrimaryKeyName(tableName);
+        assertEquals("PK_SOME_TABLE_WITH_MORE_THAN_128_CHARACTERS_SOME_TABLE_WITH_MORE_THAN_128_CHARACTERS_SOME_TABLE_WITH_MORE_THAN_128_CHARACTERS_SO", primaryKeyName, "Should truncate primary key to 128 characters");
+    }
+
+    @Test
+    public void shouldTruncatePrimaryKeyNameTo128Characters_withOracleMajor12Minor2() throws Exception {
+        final Database database = getDatabase();
+        final String tableName = "SOME_TABLE_WITH_MORE_THAN_128_CHARACTERS_SOME_TABLE_WITH_MORE_THAN_128_CHARACTERS_SOME_TABLE_WITH_MORE_THAN_128_CHARACTERS_SOME_TABLE_WITH_MORE_THAN_128_CHARACTERS";
+        final Database spyDatabase = Mockito.spy(database);
+        Mockito.when(spyDatabase.getDatabaseMajorVersion()).thenReturn(OracleDatabase.ORACLE_12C_MAJOR_VERSION);
+        Mockito.when(spyDatabase.getDatabaseMinorVersion()).thenReturn(2);
+        String primaryKeyName = spyDatabase.generatePrimaryKeyName(tableName);
+        assertEquals("PK_SOME_TABLE_WITH_MORE_THAN_128_CHARACTERS_SOME_TABLE_WITH_MORE_THAN_128_CHARACTERS_SOME_TABLE_WITH_MORE_THAN_128_CHARACTERS_SO", primaryKeyName, "Should truncate primary key to 128 characters");
+    }
+
+    @Test
+    public void shouldHavePrimaryKeyShorterThan128Characters_withOracleMajor13() throws Exception {
+        final Database database = getDatabase();
+        final String tableName = "SOME_TABLE_WITH_MORE_THAN_128_CHARACTERS";
+        final Database spyDatabase = Mockito.spy(database);
+        Mockito.when(spyDatabase.getDatabaseMajorVersion()).thenReturn(OracleDatabase.ORACLE_12C_MAJOR_VERSION+1);
+        String primaryKeyName = spyDatabase.generatePrimaryKeyName(tableName);
+        assertEquals("PK_SOME_TABLE_WITH_MORE_THAN_128_CHARACTERS", primaryKeyName, "Should have primary key with less than 128 characters");
+    }
+
+    @Test
+    public void shouldHavePrimaryKeyShorterThan128Characters_withOracle12Minor2() throws Exception {
+        final Database database = getDatabase();
+        final String tableName = "SOME_TABLE_WITH_MORE_THAN_128_CHARACTERS";
+        final Database spyDatabase = Mockito.spy(database);
+        Mockito.when(spyDatabase.getDatabaseMajorVersion()).thenReturn(OracleDatabase.ORACLE_12C_MAJOR_VERSION);
+        Mockito.when(spyDatabase.getDatabaseMinorVersion()).thenReturn(2);
+        String primaryKeyName = spyDatabase.generatePrimaryKeyName(tableName);
+        assertEquals("PK_SOME_TABLE_WITH_MORE_THAN_128_CHARACTERS", primaryKeyName, "Should have primary key with less than 128 characters");
     }
 }
 
