@@ -411,6 +411,11 @@ public class H2Database extends AbstractJdbcDatabase {
     }
 
     @Override
+    public CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase() {
+        return CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE;
+    }
+
+    @Override
     public String escapeObjectName(String objectName, final Class<? extends DatabaseObject> objectType) {
         if (objectName == null) {
             return null;
