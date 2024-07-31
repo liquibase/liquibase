@@ -1,8 +1,8 @@
 package liquibase.database.core
 
-import liquibase.GlobalConfiguration
 import liquibase.Scope
 import liquibase.database.OfflineConnection
+import liquibase.structure.core.Catalog
 import liquibase.structure.core.Column
 import liquibase.structure.core.Schema
 import liquibase.structure.core.Table
@@ -14,6 +14,30 @@ import static liquibase.database.ObjectQuotingStrategy.QUOTE_ALL_OBJECTS
 import static liquibase.database.ObjectQuotingStrategy.QUOTE_ONLY_RESERVED_WORDS
 
 class H2DatabaseSpec extends Specification {
+
+    @Unroll("#featureName [#h2Version], [#objectName, #objectType], [#expected]")
+    def "correctObjectName schema and catalog are returned in original case"() {
+        given:
+        def database = new H2Database()
+
+        expect:
+        database.correctObjectName(objectName, objectType) == expected
+
+        where:
+        h2Version || objectName   | objectType || expected
+        null      || 'UPPER_CASE' | Schema     || 'UPPER_CASE'
+        null      || 'lower_case' | Schema     || 'lower_case'
+        null      || 'mixed_CASE' | Schema     || 'mixed_CASE'
+        "1.4.200" || 'UPPER_CASE' | Schema     || 'UPPER_CASE'
+        "1.4.200" || 'lower_case' | Schema     || 'lower_case'
+        "1.4.200" || 'mixed_CASE' | Schema     || 'mixed_CASE'
+        null      || 'UPPER_CASE' | Catalog    || 'UPPER_CASE'
+        null      || 'lower_case' | Catalog    || 'lower_case'
+        null      || 'mixed_CASE' | Catalog    || 'mixed_CASE'
+        "1.4.200" || 'UPPER_CASE' | Catalog    || 'UPPER_CASE'
+        "1.4.200" || 'lower_case' | Catalog    || 'lower_case'
+        "1.4.200" || 'mixed_CASE' | Catalog    || 'mixed_CASE'
+    }
 
     @Unroll("#featureName [#quotingStrategy], [#objectName, #objectType], [#expectedCorrect, #expectedEscape]")
     def "correctObjectName, escapeObjectName"() {
@@ -93,7 +117,7 @@ class H2DatabaseSpec extends Specification {
         "1.4.200" | QUOTE_ALL_OBJECTS         || 'Value'          || '"Value"'
     }
 
-    @Unroll("#featureName [#quotingStrategy, #preserveSchemaCase], [#objectName, #objectType], [#expected]")
+    @Unroll("#featureName [#quotingStrategy], [#objectName, #objectType], [#expected]")
     def escapeObjectName() {
         given:
         def database = new H2Database().tap {
@@ -102,11 +126,7 @@ class H2DatabaseSpec extends Specification {
                 it.objectQuotingStrategy = quotingStrategy
             }
         }
-        def scopeValues = [:].tap {
-            if (preserveSchemaCase != null) {
-                it[GlobalConfiguration.PRESERVE_SCHEMA_CASE.getKey()] = preserveSchemaCase
-            }
-        }
+        def scopeValues = [:]
 
         expect:
         Scope.child(scopeValues, {
@@ -114,31 +134,19 @@ class H2DatabaseSpec extends Specification {
         } as Scope.ScopedRunnerWithReturn<String>) == expected
 
         where:
-        quotingStrategy           | preserveSchemaCase || objectName | objectType || expected
-        null                      | null               || 'tbl_1'    | Table      || 'tbl_1'
-        null                      | null               || 'sch_1'    | Schema     || 'sch_1'
-        null                      | null               || 'groups'   | Table      || '"GROUPS"'
-        null                      | null               || 'groups'   | Schema     || '"GROUPS"'
-        null                      | true               || 'tbl_1'    | Table      || 'tbl_1'
-        null                      | true               || 'sch_1'    | Schema     || '"sch_1"'
-        null                      | true               || 'groups'   | Table      || '"GROUPS"'
-        null                      | true               || 'groups'   | Schema     || '"groups"'
-        QUOTE_ONLY_RESERVED_WORDS | null               || 'tbl_1'    | Table      || 'tbl_1'
-        QUOTE_ONLY_RESERVED_WORDS | null               || 'sch_1'    | Schema     || 'sch_1'
-        QUOTE_ONLY_RESERVED_WORDS | null               || 'groups'   | Table      || '"GROUPS"'
-        QUOTE_ONLY_RESERVED_WORDS | null               || 'groups'   | Schema     || '"GROUPS"'
-        QUOTE_ONLY_RESERVED_WORDS | true               || 'tbl_1'    | Table      || 'tbl_1'
-        QUOTE_ONLY_RESERVED_WORDS | true               || 'sch_1'    | Schema     || '"sch_1"'
-        QUOTE_ONLY_RESERVED_WORDS | true               || 'groups'   | Table      || '"GROUPS"'
-        QUOTE_ONLY_RESERVED_WORDS | true               || 'groups'   | Schema     || '"groups"'
-        QUOTE_ALL_OBJECTS         | null               || 'tbl_1'    | Table      || '"tbl_1"'
-        QUOTE_ALL_OBJECTS         | null               || 'sch_1'    | Schema     || '"SCH_1"'
-        QUOTE_ALL_OBJECTS         | null               || 'groups'   | Table      || '"groups"'
-        QUOTE_ALL_OBJECTS         | null               || 'groups'   | Schema     || '"GROUPS"'
-        QUOTE_ALL_OBJECTS         | true               || 'tbl_1'    | Table      || '"tbl_1"'
-        QUOTE_ALL_OBJECTS         | true               || 'sch_1'    | Schema     || '"sch_1"'
-        QUOTE_ALL_OBJECTS         | true               || 'groups'   | Table      || '"groups"'
-        QUOTE_ALL_OBJECTS         | true               || 'groups'   | Schema     || '"groups"'
+        quotingStrategy           || objectName | objectType || expected
+        null                      || 'tbl_1'    | Table      || 'tbl_1'
+        null                      || 'sch_1'    | Schema     || '"sch_1"'
+        null                      || 'groups'   | Table      || '"GROUPS"'
+        null                      || 'groups'   | Schema     || '"groups"'
+        QUOTE_ONLY_RESERVED_WORDS || 'tbl_1'    | Table      || 'tbl_1'
+        QUOTE_ONLY_RESERVED_WORDS || 'sch_1'    | Schema     || '"sch_1"'
+        QUOTE_ONLY_RESERVED_WORDS || 'groups'   | Table      || '"GROUPS"'
+        QUOTE_ONLY_RESERVED_WORDS || 'groups'   | Schema     || '"groups"'
+        QUOTE_ALL_OBJECTS         || 'tbl_1'    | Table      || '"tbl_1"'
+        QUOTE_ALL_OBJECTS         || 'sch_1'    | Schema     || '"sch_1"'
+        QUOTE_ALL_OBJECTS         || 'groups'   | Table      || '"groups"'
+        QUOTE_ALL_OBJECTS         || 'groups'   | Schema     || '"groups"'
     }
 
     @Unroll("#featureName [#h2Version, #quotingStrategy], [#tableName], [#expected]")
