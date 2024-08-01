@@ -180,6 +180,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public final void addReservedWords(Collection<String> words) {
         reservedWords.addAll(words);
+        addMySQLReservedWordIfApplicable("MANUAL");
     }
 
     /**
@@ -946,14 +947,13 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (isCatalogOrSchemaType(objectType) && preserveCaseIfRequested() == CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE) {
             return true;
         }
-        addMySQLReservedWordIfApplicable("MANUAL");
         return objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName) || NON_WORD_PATTERN.matcher(objectName).matches();
     }
 
     private void addMySQLReservedWordIfApplicable(String... reservedWord) {
         try {
             if(this instanceof MySQLDatabase && (getDatabaseMajorVersion() == 8 && getDatabaseMinorVersion() >= 4)) {
-                addReservedWords(Arrays.asList(reservedWord));
+                reservedWords.addAll(Arrays.asList(reservedWord));
             }
         } catch (DatabaseException e) {
             throw new RuntimeException(e);
