@@ -54,8 +54,6 @@ public class H2DatabaseTest extends AbstractJdbcDatabaseTest {
         assertEquals("schemaName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
     }
 
-
-
 //    @Test
 //    public void versionBeforeMinMaxSequenceIntroductionShouldReturnFalse() throws DatabaseException {
 //
