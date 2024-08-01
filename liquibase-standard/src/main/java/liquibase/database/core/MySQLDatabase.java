@@ -353,19 +353,6 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         return 0;
     }
 
-    public void addReservedWord(String rword) throws DatabaseException {
-        MySQLDatabase db = new MySQLDatabase();
-        db.setConnection(getConnection());
-        if(db.getDatabaseMinorVersion() == 4) {
-            if(!isReservedWord(rword)) {
-                RESERVED_WORDS.add(rword);
-            }
-            else {
-                System.out.println("sadasd");
-            }
-        }
-    }
-
     /*
      * list from http://dev.mysql.com/doc/refman/5.6/en/reserved-words.html
      */
