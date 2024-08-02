@@ -19,7 +19,7 @@ jobs:
       with:
         version: "${{ github.event.ref }}-SNAPSHOT"
     
-    - uses: actions/delete-package-versions@v5
+    - uses: actions/delete-package-versions@v3
       if: ${{ steps.version.outputs.ids != '' }}
       with:
         package-type: maven
