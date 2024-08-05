@@ -12,6 +12,11 @@ jobs:
   delete-package:
     name: Delete Github Package for Branch
     runs-on: ubuntu-22.04
+
+    strategy:
+      matrix:
+        packages_to_delete: [org.liquibase.liquibase-core, org.liquibase.liquibase-extension-testing, org.liquibase.liquibase-integration-tests, org.liquibase.liquibase-maven-plugin, org.liquibase.liquibase-cdi-jakarta, org.liquibase.liquibase-cdi, org.liquibase.liquibase]
+
     steps:
 
     - name: Checkout code
@@ -62,12 +67,18 @@ jobs:
         echo "Package versions to query: $PACKAGE_VERSIONS"
 
     - name: Get package version IDs
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         PACKAGE_IDS=""
+        ORG="liquibase"
+        PACKAGE_TYPE="maven"  # Adjust as needed, e.g., 'npm', 'docker'
+
         for VERSION in $(echo "${{ env.PACKAGE_VERSIONS }}" | tr ',' '\n'); do
           echo "Processing version: $VERSION"
-          ID=$(curl -s -H "Authorization: bearer ${{ secrets.GITHUB_TOKEN }}" -X POST -d "{\"query\": \"query { repository(owner: \\\"liquibase\\\", name: \\\"liquibase\\\") { packages(first: 100) { nodes { name versions(first: 100, where: {version: \\\"$VERSION\\\"}) { nodes { id } } } } } } }\"}" https://api.github.com/graphql | jq -r '.data.repository.packages.nodes[].versions.nodes[].id')
-    
+
+          ID=$(gh api "orgs/$ORG/packages/$PACKAGE_TYPE/${{ matrix.packages_to_delete }}/versions" | jq -r --arg VERSION "$VERSION" '.[] | select(.metadata.container.tags[] == $VERSION) | .id')
+
           if [ -n "$ID" ]; then
             echo "Found ID: $ID for version $VERSION"
             PACKAGE_IDS="${PACKAGE_IDS}${ID},"
@@ -75,11 +86,6 @@ jobs:
             echo "No ID found for version $VERSION"
           fi
         done
-    
-        # Remove trailing comma and update the PACKAGE_IDS in the environment
-        PACKAGE_IDS="${PACKAGE_IDS%,}"
-        echo "Final package IDs: $PACKAGE_IDS"
-        echo "PACKAGE_IDS=$PACKAGE_IDS" >> $GITHUB_ENV
 
       # Get version id(s) based on version name
     - uses: castlabs/get-package-version-id-action@v2.2
