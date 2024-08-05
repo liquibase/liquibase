@@ -77,7 +77,7 @@ jobs:
         for VERSION in $(echo "${{ env.PACKAGE_VERSIONS }}" | tr ',' '\n'); do
           echo "Processing version: $VERSION"
 
-          ID=$(gh api "orgs/$ORG/packages/$PACKAGE_TYPE/${{ matrix.packages_to_delete }}/versions" | jq -r --arg VERSION "$VERSION" '.[] | select(.metadata.container.tags[] == $VERSION) | .id')
+          ID=$(gh api "orgs/$ORG/packages/$PACKAGE_TYPE/${{ matrix.packages_to_delete }}/versions" | jq -r --arg VERSION "$VERSION" '.[] | select(.name == $VERSION) | .id')
 
           if [ -n "$ID" ]; then
             echo "Found ID: $ID for version $VERSION"
