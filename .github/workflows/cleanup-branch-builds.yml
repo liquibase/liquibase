@@ -18,6 +18,10 @@ jobs:
       id: version
       with:
         version: "${{ github.event.ref }}-SNAPSHOT"
+
+      # show versions to delete
+    - run: |
+        echo "Version to delete ${{ steps.version.outputs.ids }} for ${{ github.event.ref }}-SNAPSHOT"
     
     - uses: actions/delete-package-versions@v3
       if: ${{ steps.version.outputs.ids != '' }}
