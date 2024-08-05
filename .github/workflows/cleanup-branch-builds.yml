@@ -13,15 +13,23 @@ jobs:
     name: Delete Github Package for Branch
     runs-on: ubuntu-22.04
     steps:
+
+    - name: Extract branch name
+      shell: bash
+      run: |
+        BRANCH_NAME=${GITHUB_REF#refs/heads/}
+        echo "Branch name is $BRANCH_NAME"
+        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
       # Get version id(s) based on version name
     - uses: castlabs/get-package-version-id-action@v2.2
       id: version
       with:
-        version: "${{ github.event.ref_name }}-SNAPSHOT"
+        version: "${{ env.BRANCH_NAME }}-SNAPSHOT"
 
       # show versions to delete
     - run: |
-        echo "Version to delete ${{ steps.version.outputs.ids }} for ${{ github.event.ref_name }}-SNAPSHOT"
+        echo "Version to delete ${{ steps.version.outputs.ids }} for ${{ env.BRANCH_NAME }}-SNAPSHOT"
     
     - uses: actions/delete-package-versions@v3
       if: ${{ steps.version.outputs.ids != '' }}
