@@ -204,6 +204,7 @@ jobs:
             $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ github.ref }}" ${dep}
             $PWD/.github/util/sign-artifacts.sh ./target "${{ inputs.liquibase-version }}" "${{ github.ref }}"
             mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+            sed -i -e "s/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/<liquibase.version>${{ inputs.liquibase-version }}<\/liquibase.version>/g" pom.xml
             mvn deploy:deploy-file \
             -Dfile=./re-version/out/${dep}-${{ inputs.liquibase-version }}.jar \
             -Dsources=./re-version/out/${dep}-${{ inputs.liquibase-version }}-sources.jar \
@@ -248,6 +249,7 @@ jobs:
             $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ github.ref }}" ${ext}
             $PWD/.github/util/sign-artifacts.sh ./target "${{ inputs.liquibase-version }}" "${{ github.ref }}"
             mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+            sed -i -e "s/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/<liquibase.version>${{ inputs.liquibase-version }}<\/liquibase.version>/g" pom.xml
             mvn deploy:deploy-file \
             -Dfile=./re-version/out/${ext}-${{ inputs.liquibase-version }}.jar \
             -Dsources=./re-version/out/${ext}-${{ inputs.liquibase-version }}-sources.jar \
