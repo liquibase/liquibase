@@ -68,7 +68,7 @@ jobs:
         for VERSION in $(echo "${{ env.PACKAGE_VERSIONS }}" | tr ',' '\n'); do
           echo "Processing version: $VERSION"
           ID=$(gh api graphql -F version="$VERSION" -f query='query($version: String!) {
-            repository(owner: "OWNER", name: "REPO") {
+            repository(owner: "liquibase", name: "liquibase") {
               package(name: "PACKAGE_NAME") {
                 versions(first: 1, where: { version: $version }) {
                   nodes {
