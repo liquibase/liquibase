@@ -14,12 +14,32 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
 
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 
+        ref: ${{ github.event.ref }}
+
     - name: Extract branch name
       shell: bash
       run: |
         BRANCH_NAME=${GITHUB_REF#refs/heads/}
         echo "Branch name is $BRANCH_NAME"
         echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+    - name: Get commits between ${{ env.BRANCH_NAME }} and master
+      run: |
+        git fetch origin master
+        COMMITS=$(git rev-list --reverse ${GITHUB_SHA}..origin/master)
+        echo "COMMITS=$COMMITS" >> $GITHUB_ENV
+        echo "Commits between $BRANCH_NAME and master: $COMMITS"
+
+    - name: Get commits between ${{ env.BRANCH_NAME }} and release
+      run: |
+        git fetch origin release
+        COMMITS=$(git rev-list --reverse ${GITHUB_SHA}..origin/release)
+        echo "COMMITS_RELEASE=$COMMITS" >> $GITHUB_ENV
+        echo "Commits between $BRANCH_NAME and release: $COMMITS"
 
       # Get version id(s) based on version name
     - uses: castlabs/get-package-version-id-action@v2.2
