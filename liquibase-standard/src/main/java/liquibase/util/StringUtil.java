@@ -110,8 +110,13 @@ public class StringUtil {
             }
 
             if (isInClause == 0 && splitStatements && (piece instanceof String) && isDelimiter((String) piece, previousPiece, endDelimiter)) {
-                String sentenceWithoutDelimiter = removeEndDelimiterIfItsASlash(endDelimiter, currentString);
-                String trimmedString = sentenceWithoutDelimiter.isEmpty() ? StringUtil.trimToNull(currentString.toString()):StringUtil.trimToNull(sentenceWithoutDelimiter);
+                String trimmedString;
+                if (Boolean.TRUE.equals(GlobalConfiguration.STRICT.getCurrentValue())) {
+                    String sentenceWithoutDelimiter = removeEndDelimiterIfItsASlash(endDelimiter, currentString);
+                    trimmedString = sentenceWithoutDelimiter.isEmpty() ? StringUtil.trimToNull(currentString.toString()) : StringUtil.trimToNull(sentenceWithoutDelimiter);
+                } else {
+                    trimmedString = StringUtil.trimToNull(currentString.toString());
+                }
                 if (trimmedString != null) {
                     returnArray.add(trimmedString);
                 }
@@ -225,8 +230,13 @@ public class StringUtil {
         } else {
             if (endDelimiter.length() == 1) {
                 if ("/".equals(endDelimiter)) {
-                    if (previousPiece != null) {
-                        return previousPiece.contentEquals(endDelimiter) && piece.startsWith("\n");
+                    if (Boolean.TRUE.equals(GlobalConfiguration.STRICT.getCurrentValue())) {
+                        if (previousPiece != null) {
+                            return previousPiece.contentEquals(endDelimiter) && piece.startsWith("\n");
+                        }
+                    } else if (previousPiece != null && !previousPiece.endsWith("\n")) {
+                        //don't count /'s the are there for comments for division signs or any other use besides a / at the beginning of a line
+                        return false;
                     }
                 }
                 return StringUtils.equalsIgnoreCase(piece, endDelimiter);
