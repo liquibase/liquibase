@@ -31,15 +31,17 @@ jobs:
       run: |
         git fetch origin master
         COMMITS=$(git rev-list --reverse ${GITHUB_SHA}..origin/master)
-        echo "COMMITS=$COMMITS" >> $GITHUB_ENV
-        echo "Commits between $BRANCH_NAME and master: $COMMITS"
+        COMMITS_LIST=$(echo "$COMMITS" | tr '\n' ',' | sed 's/,$//')
+        echo "COMMITS_LIST=$COMMITS_LIST" >> $GITHUB_ENV
+        echo "Commits between $BRANCH_NAME and master: $COMMITS_LIST"
 
     - name: Get commits between ${{ env.BRANCH_NAME }} and release
       run: |
         git fetch origin release
         COMMITS=$(git rev-list --reverse ${GITHUB_SHA}..origin/release)
-        echo "COMMITS_RELEASE=$COMMITS" >> $GITHUB_ENV
-        echo "Commits between $BRANCH_NAME and release: $COMMITS"
+        COMMITS_LIST=$(echo "$COMMITS" | tr '\n' ',' | sed 's/,$//')
+        echo "COMMITS_LIST_RELEASE=$COMMITS_LIST" >> $GITHUB_ENV
+        echo "Commits between $BRANCH_NAME and release: $COMMITS_LIST"
 
       # Get version id(s) based on version name
     - uses: castlabs/get-package-version-id-action@v2.2
