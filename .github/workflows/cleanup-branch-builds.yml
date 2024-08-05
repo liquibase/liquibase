@@ -17,11 +17,11 @@ jobs:
     - uses: castlabs/get-package-version-id-action@v2.2
       id: version
       with:
-        version: "${GITHUB_REF#refs/heads/}-SNAPSHOT"
+        version: "${{ github.event.ref_name }}-SNAPSHOT"
 
       # show versions to delete
     - run: |
-        echo "Version to delete ${{ steps.version.outputs.ids }} for ${GITHUB_REF#refs/heads/}-SNAPSHOT"
+        echo "Version to delete ${{ steps.version.outputs.ids }} for ${{ github.event.ref_name }}-SNAPSHOT"
     
     - uses: actions/delete-package-versions@v3
       if: ${{ steps.version.outputs.ids != '' }}
