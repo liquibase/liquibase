@@ -9,8 +9,46 @@ on:
       - 'dependabot-**'
       - 'feat/**'
 jobs:
+
+  delete-dat-package:
+    name: Delete DAT-SNAPSHOT Github Package for Branch
+    runs-on: ubuntu-22.04
+
+    steps:
+
+    - name: Extract branch name
+      shell: bash
+      run: |
+        BRANCH_NAME=${GITHUB_REF#refs/heads/}
+        echo "Branch name is $BRANCH_NAME"
+        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+      # Get version id(s) based on version name
+    - uses: castlabs/get-package-version-id-action@v2.2
+      id: version
+      with:
+        version: "${{ env.BRANCH_NAME }}-SNAPSHOT"
+
+      # show versions to delete
+    - run: |
+        echo "Version to delete ${{ steps.version.outputs.ids }} for ${{ env.BRANCH_NAME }}-SNAPSHOT"
+    
+    - uses: actions/delete-package-versions@v3
+      if: ${{ steps.version.outputs.ids != '' }}
+      with:
+        package-type: maven
+        # The number of latest versions to keep.
+        # This cannot be specified with `num-old-versions-to-delete`. By default, `num-old-versions-to-delete` takes precedence over `min-versions-to-keep`.
+        # When set to 0, all deletable versions will be deleted.
+        # When set greater than 0, all deletable package versions except the specified number will be deleted.
+        min-versions-to-keep: 0
+        
+        # on branch id's deletion we only want to delete that particular branch version
+        package-version-ids: "${{ steps.version.outputs.ids }}"
+
   delete-sha-package:
     name: Delete SHA-SNAPSHOT Github Package for Branch
+    needs: delete-dat-package
     runs-on: ubuntu-22.04
 
     strategy:
@@ -90,7 +128,7 @@ jobs:
         echo "Package ID versions to delete: $PACKAGE_IDS"
     
     - name: Delete package versions
-      if: steps.get-ids.outputs.PACKAGE_IDS != ''
+      if: env.PACKAGE_VERSIONS != ''
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
@@ -98,39 +136,3 @@ jobs:
           echo "Deleting package version with ID: $ID"
           gh api -X DELETE "orgs/liquibase/packages/maven/${{ matrix.packages_to_delete }}/versions/$ID"
         done
-
-  delete-dat-package:
-    name: Delete DAT-SNAPSHOT Github Package for Branch
-    runs-on: ubuntu-22.04
-
-    steps:
-
-    - name: Extract branch name
-      shell: bash
-      run: |
-        BRANCH_NAME=${GITHUB_REF#refs/heads/}
-        echo "Branch name is $BRANCH_NAME"
-        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
-
-      # Get version id(s) based on version name
-    - uses: castlabs/get-package-version-id-action@v2.2
-      id: version
-      with:
-        version: "${{ env.BRANCH_NAME }}-SNAPSHOT"
-
-      # show versions to delete
-    - run: |
-        echo "Version to delete ${{ steps.version.outputs.ids }} for ${{ env.BRANCH_NAME }}-SNAPSHOT"
-    
-    - uses: actions/delete-package-versions@v3
-      if: ${{ steps.version.outputs.ids != '' }}
-      with:
-        package-type: maven
-        # The number of latest versions to keep.
-        # This cannot be specified with `num-old-versions-to-delete`. By default, `num-old-versions-to-delete` takes precedence over `min-versions-to-keep`.
-        # When set to 0, all deletable versions will be deleted.
-        # When set greater than 0, all deletable package versions except the specified number will be deleted.
-        min-versions-to-keep: 0
-        
-        # on branch id's deletion we only want to delete that particular branch version
-        package-version-ids: "${{ steps.version.outputs.ids }}"
