@@ -8,3 +8,4 @@ public abstract class ScopeManager {
 
     protected abstract Scope init(Scope scope) throws Exception;
 }
+
