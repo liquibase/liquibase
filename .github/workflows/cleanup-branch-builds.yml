@@ -110,7 +110,7 @@ jobs:
       run: |
         PACKAGE_IDS=""
         ORG="liquibase"
-        PACKAGE_TYPE="maven"  # Adjust as needed, e.g., 'npm', 'docker'
+        PACKAGE_TYPE="maven"
 
         for VERSION in $(echo "${{ env.PACKAGE_VERSIONS }}" | tr ',' '\n'); do
           echo "Processing version: $VERSION"
