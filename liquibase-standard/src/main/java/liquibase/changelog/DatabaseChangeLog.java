@@ -90,6 +90,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private List<ChangeVisitor> changeVisitors = new ArrayList<>();
     private final List<ChangeSet> changeSets = new ArrayList<>();
     private final List<ChangeSet> skippedChangeSets = new ArrayList<>();
+    private final List<ChangeSet> skippedBecauseOfLicenseChangeSets = new ArrayList<>();
     private ChangeLogParameters changeLogParameters;
 
     private RuntimeEnvironment runtimeEnvironment;
@@ -297,6 +298,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     public List<ChangeSet> getChangeSets() {
         return changeSets;
+    }
+
+    public List<ChangeSet> getSkippedBecauseOfLicenseChangeSets() {
+        return skippedBecauseOfLicenseChangeSets;
     }
 
     public List<ChangeSet> getSkippedChangeSets() {
