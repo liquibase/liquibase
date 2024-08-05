@@ -62,6 +62,8 @@ jobs:
         echo "Package versions to query: $PACKAGE_VERSIONS"
 
     - name: Get package version IDs
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         for VERSION in $(echo "${{ env.PACKAGE_VERSIONS }}" | tr ',' '\n'); do
           echo "Processing version: $VERSION"
