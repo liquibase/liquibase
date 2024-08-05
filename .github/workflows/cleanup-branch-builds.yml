@@ -62,30 +62,24 @@ jobs:
         echo "Package versions to query: $PACKAGE_VERSIONS"
 
     - name: Get package version IDs
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        PACKAGE_IDS=""
         for VERSION in $(echo "${{ env.PACKAGE_VERSIONS }}" | tr ',' '\n'); do
           echo "Processing version: $VERSION"
-          ID=$(gh api graphql -F version="$VERSION" -f query='query($version: String!) {
-            repository(owner: "liquibase", name: "liquibase") {
-              package(name: "PACKAGE_NAME") {
-                versions(first: 1, where: { version: $version }) {
-                  nodes {
-                    id
-                  }
-                }
-              }
-            }
-          }' --jq '.data.repository.package.versions.nodes[0].id')
-
+          ID=$(curl -s -H "Authorization: bearer ${{ secrets.GITHUB_TOKEN }}" -X POST -d "{\"query\": \"query { repository(owner: \\\"liquibase\\\", name: \\\"liquibase\\\") { packages(first: 100) { nodes { name versions(first: 100, where: {version: \\\"$VERSION\\\"}) { nodes { id } } } } } } }\"}" https://api.github.com/graphql | jq -r '.data.repository.packages.nodes[].versions.nodes[].id')
+    
           if [ -n "$ID" ]; then
             echo "Found ID: $ID for version $VERSION"
-            echo "PACKAGE_IDS=${PACKAGE_IDS}${ID}," >> $GITHUB_ENV
+            PACKAGE_IDS="${PACKAGE_IDS}${ID},"
           else
             echo "No ID found for version $VERSION"
           fi
         done
+    
+        # Remove trailing comma and update the PACKAGE_IDS in the environment
+        PACKAGE_IDS="${PACKAGE_IDS%,}"
+        echo "Final package IDs: $PACKAGE_IDS"
+        echo "PACKAGE_IDS=$PACKAGE_IDS" >> $GITHUB_ENV
 
       # Get version id(s) based on version name
     - uses: castlabs/get-package-version-id-action@v2.2
