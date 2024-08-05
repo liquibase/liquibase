@@ -9,8 +9,8 @@ on:
       - 'dependabot-**'
       - 'feat/**'
 jobs:
-  delete-package:
-    name: Delete Github Package for Branch
+  delete-sha-package:
+    name: Delete SHA-SNAPSHOT Github Package for Branch
     runs-on: ubuntu-22.04
 
     strategy:
@@ -86,6 +86,44 @@ jobs:
             echo "No ID found for version $VERSION"
           fi
         done
+        echo "PACKAGE_IDS=$PACKAGE_IDS" >> $GITHUB_ENV
+        echo "Package ID versions to delete: $PACKAGE_IDS"
+    
+    - uses: actions/delete-package-versions@v3
+      if: ${{ steps.version.outputs.ids != '' }}
+      with:
+        package-type: maven
+        # The number of latest versions to keep.
+        # This cannot be specified with `num-old-versions-to-delete`. By default, `num-old-versions-to-delete` takes precedence over `min-versions-to-keep`.
+        # When set to 0, all deletable versions will be deleted.
+        # When set greater than 0, all deletable package versions except the specified number will be deleted.
+        min-versions-to-keep: 0
+        
+        # on branch id's deletion we only want to delete that particular branch version
+        package-version-ids: "${{ env.PACKAGE_IDS }}"
+
+  delete-dat-package:
+    name: Delete DAT-SNAPSHOT Github Package for Branch
+    runs-on: ubuntu-22.04
+
+    strategy:
+      matrix:
+        packages_to_delete: [org.liquibase.liquibase-core, org.liquibase.liquibase-extension-testing, org.liquibase.liquibase-integration-tests, org.liquibase.liquibase-maven-plugin, org.liquibase.liquibase-cdi-jakarta, org.liquibase.liquibase-cdi, org.liquibase.liquibase]
+
+    steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 
+        ref: ${{ github.event.ref }}
+
+    - name: Extract branch name
+      shell: bash
+      run: |
+        BRANCH_NAME=${GITHUB_REF#refs/heads/}
+        echo "Branch name is $BRANCH_NAME"
+        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
       # Get version id(s) based on version name
     - uses: castlabs/get-package-version-id-action@v2.2
