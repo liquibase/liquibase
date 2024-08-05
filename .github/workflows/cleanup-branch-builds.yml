@@ -61,6 +61,30 @@ jobs:
         echo "PACKAGE_VERSIONS=$PACKAGE_VERSIONS" >> $GITHUB_ENV
         echo "Package versions to query: $PACKAGE_VERSIONS"
 
+    - name: Get package version IDs
+      run: |
+        for VERSION in $(echo "${{ env.PACKAGE_VERSIONS }}" | tr ',' '\n'); do
+          echo "Processing version: $VERSION"
+          ID=$(gh api graphql -F version="$VERSION" -f query='query($version: String!) {
+            repository(owner: "OWNER", name: "REPO") {
+              package(name: "PACKAGE_NAME") {
+                versions(first: 1, where: { version: $version }) {
+                  nodes {
+                    id
+                  }
+                }
+              }
+            }
+          }' --jq '.data.repository.package.versions.nodes[0].id')
+
+          if [ -n "$ID" ]; then
+            echo "Found ID: $ID for version $VERSION"
+            echo "PACKAGE_IDS=${PACKAGE_IDS}${ID}," >> $GITHUB_ENV
+          else
+            echo "No ID found for version $VERSION"
+          fi
+        done
+
       # Get version id(s) based on version name
     - uses: castlabs/get-package-version-id-action@v2.2
       id: version
