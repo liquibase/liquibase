@@ -90,7 +90,7 @@ jobs:
         echo "Package ID versions to delete: $PACKAGE_IDS"
     
     - uses: actions/delete-package-versions@v3
-      if: ${{ steps.version.outputs.ids != '' }}
+      if: ${{ env.PACKAGE_IDS != '' }}
       with:
         package-type: maven
         # The number of latest versions to keep.
