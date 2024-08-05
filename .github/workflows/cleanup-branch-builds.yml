@@ -43,6 +43,24 @@ jobs:
         echo "COMMITS_LIST_RELEASE=$COMMITS_LIST" >> $GITHUB_ENV
         echo "Commits between $BRANCH_NAME and release: $COMMITS_LIST"
 
+    - name: Prepare list of package versions to delete
+      id: prepare-packages
+      run: |
+        MASTER_COMMITS="${{ env.COMMITS_LIST }}"
+        RELEASE_COMMITS="${{ env.COMMITS_LIST_RELEASE }}"
+        PACKAGE_VERSIONS=""
+
+        for COMMIT in $(echo "$MASTER_COMMITS,$RELEASE_COMMITS" | tr ',' '\n'); do
+          if [ -n "$COMMIT" ]; then
+            PACKAGE_VERSIONS="${PACKAGE_VERSIONS}${COMMIT}-SNAPSHOT,"
+          fi
+        done
+
+        # Remove trailing comma
+        PACKAGE_VERSIONS="${PACKAGE_VERSIONS%,}"
+        echo "PACKAGE_VERSIONS=$PACKAGE_VERSIONS" >> $GITHUB_ENV
+        echo "Package versions to query: $PACKAGE_VERSIONS"
+
       # Get version id(s) based on version name
     - uses: castlabs/get-package-version-id-action@v2.2
       id: version
