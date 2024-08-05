@@ -89,18 +89,15 @@ jobs:
         echo "PACKAGE_IDS=$PACKAGE_IDS" >> $GITHUB_ENV
         echo "Package ID versions to delete: $PACKAGE_IDS"
     
-    - uses: actions/delete-package-versions@v3
-      if: ${{ env.PACKAGE_IDS != '' }}
-      with:
-        package-type: maven
-        # The number of latest versions to keep.
-        # This cannot be specified with `num-old-versions-to-delete`. By default, `num-old-versions-to-delete` takes precedence over `min-versions-to-keep`.
-        # When set to 0, all deletable versions will be deleted.
-        # When set greater than 0, all deletable package versions except the specified number will be deleted.
-        min-versions-to-keep: 0
-        
-        # on branch id's deletion we only want to delete that particular branch version
-        package-version-ids: "${{ env.PACKAGE_IDS }}"
+    - name: Delete package versions
+      if: steps.get-ids.outputs.PACKAGE_IDS != ''
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        for ID in $(echo "${{ env.PACKAGE_IDS }}" | tr ',' '\n'); do
+          echo "Deleting package version with ID: $ID"
+          gh api -X DELETE "orgs/liquibase/packages/maven/${{ matrix.packages_to_delete }}/versions/$ID"
+        done
 
   delete-dat-package:
     name: Delete DAT-SNAPSHOT Github Package for Branch
