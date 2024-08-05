@@ -106,17 +106,7 @@ jobs:
     name: Delete DAT-SNAPSHOT Github Package for Branch
     runs-on: ubuntu-22.04
 
-    strategy:
-      matrix:
-        packages_to_delete: [org.liquibase.liquibase-core, org.liquibase.liquibase-extension-testing, org.liquibase.liquibase-integration-tests, org.liquibase.liquibase-maven-plugin, org.liquibase.liquibase-cdi-jakarta, org.liquibase.liquibase-cdi, org.liquibase.liquibase]
-
     steps:
-
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0 
-        ref: ${{ github.event.ref }}
 
     - name: Extract branch name
       shell: bash
