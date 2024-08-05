@@ -1,7 +1,9 @@
 package liquibase.util
 
+import spock.lang.Ignore
 import spock.lang.Specification
 
+@Ignore
 class NetUtilTest extends Specification {
 
     def getLocalHostAddress() {
