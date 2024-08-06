@@ -13,7 +13,7 @@ public class RawParameterizedSqlStatement extends AbstractSqlStatement {
     private final String sql;
     private final List<Object> parameters = new ArrayList<>();
     @Setter
-    private String endDelimiter  = ";";
+    private String endDelimiter  = ";"; // end delimiter was added here
 
     public RawParameterizedSqlStatement(String sql) {
         this.sql = sql;
