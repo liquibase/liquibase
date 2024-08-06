@@ -1,7 +1,9 @@
 package liquibase.changelog;
 
+import liquibase.GlobalConfiguration;
 import liquibase.RuntimeEnvironment;
 import liquibase.Scope;
+import liquibase.change.Change;
 import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
@@ -9,6 +11,7 @@ import liquibase.changelog.filter.CountChangeSetFilter;
 import liquibase.changelog.filter.UpToTagChangeSetFilter;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.changelog.visitor.SkippedChangeSetVisitor;
+import liquibase.exception.ChangeNotFoundException;
 import liquibase.exception.LiquibaseException;
 
 import java.util.*;
@@ -38,6 +41,8 @@ public class StatusChangeLogIterator extends ChangeLogIterator {
         try {
             Scope.child(Scope.Attr.databaseChangeLog, databaseChangeLog, () -> {
                 List<ChangeSet> changeSetList = new ArrayList<>(databaseChangeLog.getChangeSets());
+                TagDatabaseChange tagDatabaseChange = getTagDatabaseChange(changeSetList);
+                boolean thereIsTagDatabaseChange =  tagDatabaseChange != null;
                 if (visitor.getDirection().equals(ChangeSetVisitor.Direction.REVERSE)) {
                     Collections.reverse(changeSetList);
                 }
@@ -58,12 +63,38 @@ public class StatusChangeLogIterator extends ChangeLogIterator {
                         }
                     }
                 }
+                if(GlobalConfiguration.STRICT.getCurrentValue()) {
+                    if(!thereIsTagDatabaseChange) {
+                        throw new ChangeNotFoundException("TagDatabaseChange", databaseChangeLog.getRuntimeEnvironment().getTargetDatabase());
+                    }
+                    else {
+                        if(!isThereTagDatabaseChangeMatching(tagDatabaseChange)) {
+                            throw new LiquibaseException(String.format("Command execution tag %s does not match with changeSet tag %s", this.tag, tagDatabaseChange.getTag()));
+                        }
+                    }
+                }
             });
         } catch (Exception e) {
             throw new LiquibaseException(e);
         } finally {
             databaseChangeLog.setRuntimeEnvironment(null);
         }
+    }
+
+    private TagDatabaseChange getTagDatabaseChange(List<ChangeSet> changeSetList) {
+        TagDatabaseChange tagDatabaseChange = null;
+        for(ChangeSet changeSet : changeSetList){
+            for(Change change : changeSet.getChanges()) {
+                if(change instanceof TagDatabaseChange) {
+                    tagDatabaseChange = (TagDatabaseChange) change;
+                }
+            }
+        }
+        return tagDatabaseChange;
+    }
+
+    private boolean isThereTagDatabaseChangeMatching(TagDatabaseChange tagDatabaseChange) {
+        return (tagDatabaseChange != null && tagDatabaseChange.getTag().equals(this.tag));
     }
 
     //
