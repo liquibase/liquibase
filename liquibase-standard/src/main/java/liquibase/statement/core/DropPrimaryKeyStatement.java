@@ -2,11 +2,13 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
 import lombok.Getter;
+import lombok.Setter;
 
 public class DropPrimaryKeyStatement extends AbstractSqlStatement {
 
     @Getter
     private final String constraintName;
+    @Setter
     @Getter
     private Boolean dropIndex;
     private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
@@ -30,7 +32,4 @@ public class DropPrimaryKeyStatement extends AbstractSqlStatement {
         return databaseTableIdentifier.getTableName();
     }
 
-    public void setDropIndex(Boolean dropIndex) {
-        this.dropIndex = dropIndex;
-    }
 }

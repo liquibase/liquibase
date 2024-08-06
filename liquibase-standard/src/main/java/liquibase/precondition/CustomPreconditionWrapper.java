@@ -11,6 +11,7 @@ import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.ObjectUtil;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -22,15 +23,12 @@ import java.util.TreeSet;
 
 public class CustomPreconditionWrapper extends AbstractPrecondition {
 
+    @Setter
     @Getter
     private String className;
 
     private final SortedSet<String> params = new TreeSet<>();
     private final Map<String, String> paramValues = new LinkedHashMap<>();
-
-    public void setClassName(String className) {
-        this.className = className;
-    }
 
     public void setClass(String className) {
         this.className = className;

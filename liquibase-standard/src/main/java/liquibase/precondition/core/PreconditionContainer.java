@@ -18,6 +18,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,10 +80,14 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
         }
     }
 
+    @Setter
     private FailOption onFail = FailOption.HALT;
+    @Setter
     private ErrorOption onError = ErrorOption.HALT;
     private OnSqlOutputOption onSqlOutput = OnSqlOutputOption.IGNORE;
+    @Setter
     private String onFailMessage;
+    @Setter
     private String onErrorMessage;
 
     public void setOnFail(String onFail) {
@@ -103,10 +108,6 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
         }
     }
 
-    public void setOnFail(FailOption onFail) {
-        this.onFail = onFail;
-    }
-
     public void setOnError(String onError) {
         if (onError == null) {
             this.onError = ErrorOption.HALT;
@@ -123,10 +124,6 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
             }
             throw new RuntimeException("Unknown onError attribute value '"+onError+"'.  Possible values: " + StringUtil.join(possibleOptions, ", "));
         }
-    }
-
-    public void setOnError(ErrorOption onError) {
-        this.onError = onError;
     }
 
     public void setOnSqlOutput(String onSqlOutput) {
@@ -154,14 +151,6 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
         } else {
             this.onSqlOutput = onSqlOutput;
         }
-    }
-
-    public void setOnFailMessage(String onFailMessage) {
-        this.onFailMessage = onFailMessage;
-    }
-
-    public void setOnErrorMessage(String onErrorMessage) {
-        this.onErrorMessage = onErrorMessage;
     }
 
     @Override

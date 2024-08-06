@@ -7,6 +7,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.DatabaseObjectFactory;
 import liquibase.util.StringUtil;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.*;
 
@@ -194,6 +195,7 @@ public class CompareControl {
     public static class SchemaComparison {
         private final CatalogAndSchema comparisonSchema;
         private final CatalogAndSchema referenceSchema;
+        @Setter
         private String outputSchemaAs;
 
         public SchemaComparison(CatalogAndSchema reference, CatalogAndSchema comparison) {
@@ -227,9 +229,6 @@ public class CompareControl {
             }
         }
 
-        public void setOutputSchemaAs(String outputSchemaAs) {
-            this.outputSchemaAs = outputSchemaAs;
-        }
     }
 
     public static class ComputedSchemas {

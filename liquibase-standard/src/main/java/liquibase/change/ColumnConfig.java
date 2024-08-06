@@ -13,6 +13,7 @@ import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.core.*;
 import liquibase.util.*;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigInteger;
 import java.text.NumberFormat;
@@ -148,6 +149,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     private DatabaseFunction defaultValueComputed;
     @Getter
     private SequenceNextValueFunction defaultValueSequenceNext;
+    @Setter
     @Getter
     private String defaultValueConstraintName;
 
@@ -703,10 +705,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         this.defaultValueSequenceNext = defaultValueSequenceNext;
 
         return this;
-    }
-
-    public void setDefaultValueConstraintName(String defaultValueConstraintName) {
-        this.defaultValueConstraintName = defaultValueConstraintName;
     }
 
     @Override

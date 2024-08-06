@@ -12,6 +12,7 @@ import liquibase.statement.core.CreateIndexStatement;
 import liquibase.structure.core.Index;
 import liquibase.util.StringUtil;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -23,6 +24,7 @@ import java.util.List;
 public class CreateIndexGeneratorFirebird extends CreateIndexGenerator {
 
     // Just a little value object for passing a complex result of the column analysis
+    @Setter
     @Getter
     private final class ColumnAnalysisResult {
         private String columnExpression;
@@ -31,25 +33,6 @@ public class CreateIndexGeneratorFirebird extends CreateIndexGenerator {
         private int numComputedCols;
         private int numRegularCols;
 
-        public void setColumnExpression(String columnExpression) {
-            this.columnExpression = columnExpression;
-        }
-
-        public void setFoundAscColumns(boolean foundAscColumns) {
-            this.foundAscColumns = foundAscColumns;
-        }
-
-        public void setFoundDescColumns(boolean foundDescColumns) {
-            this.foundDescColumns = foundDescColumns;
-        }
-
-        public void setNumComputedCols(int numComputedCols) {
-            this.numComputedCols = numComputedCols;
-        }
-
-        public void setNumRegularCols(int numRegularCols) {
-            this.numRegularCols = numRegularCols;
-        }
     }
 
     /**

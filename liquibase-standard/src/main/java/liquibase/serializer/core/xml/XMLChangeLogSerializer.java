@@ -18,6 +18,7 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.XMLUtil;
 import liquibase.util.xml.DefaultXmlWriter;
+import lombok.Setter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -46,6 +47,7 @@ import java.util.TreeMap;
 public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
     public static final String INVALID_STRING_ENCODING_MESSAGE = "Invalid string encoding";
+    @Setter
     private Document currentChangeLogFileDOM;
 
     private static final String XML_VERSION = "1.1";
@@ -61,10 +63,6 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     }
 
     protected XMLChangeLogSerializer(Document currentChangeLogFileDOM) {
-        this.currentChangeLogFileDOM = currentChangeLogFileDOM;
-    }
-
-    public void setCurrentChangeLogFileDOM(Document currentChangeLogFileDOM) {
         this.currentChangeLogFileDOM = currentChangeLogFileDOM;
     }
 

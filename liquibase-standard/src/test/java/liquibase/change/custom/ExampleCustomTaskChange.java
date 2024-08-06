@@ -8,19 +8,17 @@ import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
 import lombok.Getter;
+import lombok.Setter;
 
 public class ExampleCustomTaskChange implements CustomTaskChange, CustomTaskRollback {
 
+    @Setter
     @Getter
     private String helloTo;
 
     @SuppressWarnings({"UnusedDeclaration", "FieldCanBeLocal"})
     private ResourceAccessor resourceAccessor;
 
-
-    public void setHelloTo(String helloTo) {
-        this.helloTo = helloTo;
-    }
 
     @Override
     public void execute(Database database) throws CustomChangeException {

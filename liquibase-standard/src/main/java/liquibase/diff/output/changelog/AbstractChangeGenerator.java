@@ -3,9 +3,11 @@ package liquibase.diff.output.changelog;
 import liquibase.change.Change;
 import liquibase.diff.compare.CompareControl;
 import liquibase.util.ObjectUtil;
+import lombok.Setter;
 
 import java.util.Arrays;
 
+@Setter
 public abstract class AbstractChangeGenerator implements ChangeGenerator {
     private boolean respectSchemaAndCatalogCase = false;
 
@@ -166,7 +168,4 @@ public abstract class AbstractChangeGenerator implements ChangeGenerator {
         }
     }
 
-    public void setRespectSchemaAndCatalogCase(boolean respectSchemaAndCatalogCase) {
-        this.respectSchemaAndCatalogCase = respectSchemaAndCatalogCase;
-    }
 }

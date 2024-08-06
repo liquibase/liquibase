@@ -6,9 +6,11 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import lombok.Setter;
 
 import java.util.Arrays;
 
+@Setter
 @DataTypeInfo(name="number", aliases = {"numeric", "java.sql.Types.NUMERIC"}, minParameters = 0, maxParameters = 2, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class NumberType extends LiquibaseDataType {
 
@@ -17,10 +19,6 @@ public class NumberType extends LiquibaseDataType {
     @Override
     public boolean isAutoIncrement() {
         return autoIncrement;
-    }
-
-    public void setAutoIncrement(boolean autoIncrement) {
-        this.autoIncrement = autoIncrement;
     }
 
     @Override

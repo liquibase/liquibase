@@ -7,6 +7,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.statement.DatabaseFunction;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
      *
      * @return the additional information. Might be null.
      */
+    @Setter
     @Getter
     private String additionalInformation;
     /**
@@ -106,10 +108,6 @@ public abstract class LiquibaseDataType implements PrioritizedService {
      */
     public void addParameter(Object value) {
         this.parameters.add(value);
-    }
-
-    public void setAdditionalInformation(String additionalInformation) {
-        this.additionalInformation = additionalInformation;
     }
 
     /**

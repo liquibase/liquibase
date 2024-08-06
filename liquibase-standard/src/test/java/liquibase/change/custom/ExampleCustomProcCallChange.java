@@ -8,19 +8,17 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.StoredProcedureStatement;
 import lombok.Getter;
+import lombok.Setter;
 
 public class ExampleCustomProcCallChange implements CustomSqlChange {
 
+    @Setter
     @Getter
     private String procedureName;
 
     @SuppressWarnings({"UnusedDeclaration", "FieldCanBeLocal"})
     private ResourceAccessor resourceAccessor;
 
-
-    public void setProcedureName(String procedureName) {
-        this.procedureName = procedureName;
-    }
 
     @Override
     public SqlStatement[] generateStatements(Database database) throws CustomChangeException {

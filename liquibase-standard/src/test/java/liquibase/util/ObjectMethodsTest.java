@@ -3,6 +3,7 @@ package liquibase.util;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.junit.jupiter.api.Test;
 
 class ObjectMethodsTest {
@@ -27,15 +28,12 @@ class ObjectMethodsTest {
   @Getter
   static class User {
     private final String name;
+    @Setter
     private int age;
 
     User(String name) {this.name = name;}
 
-      public void setAge(int age) {
-      this.age = age;
-    }
-
-    public boolean isHuman() {
+      public boolean isHuman() {
       return true;
     }
   }

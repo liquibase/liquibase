@@ -1,6 +1,7 @@
 package liquibase.statement;
 
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 public class DatabaseFunction {
@@ -11,6 +12,7 @@ public class DatabaseFunction {
      */
     public static final String CURRENT_DATE_TIME_PLACE_HOLDER = "current_datetime";
 
+    @Setter
     private String schemaName;
 
     private final String value;
@@ -27,10 +29,6 @@ public class DatabaseFunction {
     @Override
     public String toString() {
         return (getSchemaName() == null ? "" : getSchemaName() + ".") + getValue();
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @Override

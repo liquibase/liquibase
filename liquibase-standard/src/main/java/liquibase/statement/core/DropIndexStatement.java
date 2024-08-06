@@ -2,6 +2,7 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 public class DropIndexStatement extends AbstractSqlStatement {
@@ -10,6 +11,7 @@ public class DropIndexStatement extends AbstractSqlStatement {
     private final String tableCatalogName;
     private final String tableSchemaName;
     private final String tableName;
+    @Setter
     private String associatedWith;
 
     public DropIndexStatement(String indexName, String tableCatalogName, String tableSchemaName, String tableName, String associatedWith) {
@@ -20,7 +22,4 @@ public class DropIndexStatement extends AbstractSqlStatement {
         this.associatedWith = associatedWith;
     }
 
-    public void setAssociatedWith(String associatedWith) {
-        this.associatedWith = associatedWith;
-    }
 }

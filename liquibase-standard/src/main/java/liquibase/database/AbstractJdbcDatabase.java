@@ -27,6 +27,7 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.NowAndTodayUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
+import lombok.Setter;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -96,12 +97,20 @@ public abstract class AbstractJdbcDatabase implements Database {
     protected Boolean unquotedObjectsAreUppercased;
     // whether object names should be quoted
     protected ObjectQuotingStrategy quotingStrategy = ObjectQuotingStrategy.LEGACY;
+    @Setter
     protected Boolean caseSensitive;
     private String databaseChangeLogTableName;
     private String databaseChangeLogLockTableName;
     private String liquibaseTablespaceName;
     private String liquibaseSchemaName;
     private String liquibaseCatalogName;
+    /**
+     * -- SETTER --
+     *  Used for TEST only
+     *
+     * @param previousAutoCommit
+     */
+    @Setter
     private Boolean previousAutoCommit;
     private boolean canCacheLiquibaseTableInfo = false;
     private DatabaseConnection connection;
@@ -165,16 +174,6 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public boolean getAutoCommitMode() {
         return !supportsDDLInTransaction();
-    }
-
-    /**
-     * Used for TEST only
-     *
-     * @param previousAutoCommit
-     *
-     */
-    public void setPreviousAutoCommit(Boolean previousAutoCommit) {
-        this.previousAutoCommit = previousAutoCommit;
     }
 
     @Override
@@ -742,10 +741,6 @@ public abstract class AbstractJdbcDatabase implements Database {
         } else {
             return caseSensitive;
         }
-    }
-
-    public void setCaseSensitive(Boolean caseSensitive) {
-        this.caseSensitive = caseSensitive;
     }
 
     @Override

@@ -4,6 +4,7 @@ import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.serializer.LiquibaseSerializable;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +20,12 @@ public class JavaLogService extends AbstractLogService {
 
     private final Map<Class, JavaLogger> loggers = new HashMap<>();
 
+    /**
+     * -- SETTER --
+     *  Explicitly control the parent logger for all
+     *  instances created.
+     */
+    @Setter
     @Getter
     private java.util.logging.Logger parent;
 
@@ -83,13 +90,6 @@ public class JavaLogService extends AbstractLogService {
         }
 
         return "liquibase";
-    }
-
-    /**
-     * Explicitly control the parent logger for all {@link java.util.logging.Logger} instances created.
-     */
-    public void setParent(java.util.logging.Logger parent) {
-        this.parent = parent;
     }
 
     public Formatter getCustomFormatter() {

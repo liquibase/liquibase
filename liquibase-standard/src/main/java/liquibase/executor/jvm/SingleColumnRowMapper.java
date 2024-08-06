@@ -3,6 +3,7 @@ package liquibase.executor.jvm;
 import liquibase.util.JdbcUtil;
 import liquibase.util.NumberUtil;
 import liquibase.util.ObjectUtil;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -18,8 +19,15 @@ import java.sql.*;
  *
  * @author Spring Framework
  */
+@Setter
 class SingleColumnRowMapper implements RowMapper {
 
+    /**
+     * -- SETTER --
+     *  Set the type that each result object is expected to match.
+     *  <p>If not specified, the column value will be exposed as
+     *  returned by the JDBC driver.
+     */
     private Class requiredType;
 
 
@@ -37,15 +45,6 @@ class SingleColumnRowMapper implements RowMapper {
      * @param requiredType the type that each result object is expected to match
      */
     public SingleColumnRowMapper(Class requiredType) {
-        this.requiredType = requiredType;
-    }
-
-    /**
-     * Set the type that each result object is expected to match.
-     * <p>If not specified, the column value will be exposed as
-     * returned by the JDBC driver.
-     */
-    public void setRequiredType(Class requiredType) {
         this.requiredType = requiredType;
     }
 

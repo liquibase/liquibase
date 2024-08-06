@@ -20,6 +20,7 @@ import liquibase.structure.core.Schema;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -40,13 +41,19 @@ public class OfflineConnection implements DatabaseConnection {
     private DatabaseSnapshot snapshot;
     private OutputLiquibaseSql outputLiquibaseSql = OutputLiquibaseSql.NONE;
     private String changeLogFile = "databasechangelog.csv";
+    @Setter
     @Getter
     private boolean caseSensitive;
+    @Setter
     private String productName;
+    @Setter
     private String productVersion;
+    @Setter
     private int databaseMajorVersion = 999;
+    @Setter
     private int databaseMinorVersion = 999;
     private String catalog;
+    @Setter
     private boolean sendsStringParametersAsUnicode = true;
     private String connectionUserName;
 
@@ -264,25 +271,9 @@ public class OfflineConnection implements DatabaseConnection {
         return databaseMajorVersion;
     }
 
-    public void setDatabaseMajorVersion(int databaseMajorVersion) {
-        this.databaseMajorVersion = databaseMajorVersion;
-    }
-
-    public void setProductVersion(String productVersion) {
-        this.productVersion = productVersion;
-    }
-
-    public void setProductName(String productName) {
-        this.productName = productName;
-    }
-
     @Override
     public int getDatabaseMinorVersion() throws DatabaseException {
         return databaseMinorVersion;
-    }
-
-    public void setDatabaseMinorVersion(int databaseMinorVersion) {
-        this.databaseMinorVersion = databaseMinorVersion;
     }
 
     @Override
@@ -306,14 +297,6 @@ public class OfflineConnection implements DatabaseConnection {
 
     public boolean getSendsStringParametersAsUnicode() {
         return sendsStringParametersAsUnicode;
-    }
-
-    public void setSendsStringParametersAsUnicode(boolean sendsStringParametersAsUnicode) {
-        this.sendsStringParametersAsUnicode = sendsStringParametersAsUnicode;
-    }
-
-    public void setCaseSensitive(boolean caseSensitive) {
-        this.caseSensitive = caseSensitive;
     }
 
     /**

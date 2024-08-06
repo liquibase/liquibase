@@ -2,6 +2,7 @@ package liquibase.command;
 
 import liquibase.util.StringUtil;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.*;
 
@@ -29,15 +30,19 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
      * -- GETTER --
      *  The long description of the command. Used in help docs.
      */
+    @Setter
     @Getter
     private String longDescription = null;
     /**
      * -- GETTER --
      *  The short description of the command. Used in help docs.
      */
+    @Setter
     @Getter
     private String shortDescription = null;
+    @Setter
     private boolean internal;
+    @Setter
     private boolean hidden;
     private String footer;
     private String groupFooter;
@@ -136,10 +141,6 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
     }
 
 
-    public void setShortDescription(String shortDescription) {
-        this.shortDescription = shortDescription;
-    }
-
     /**
      * The short description of the given command group. Used in help docs.
      */
@@ -168,10 +169,6 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
         this.groupLongDescription.put(StringUtil.join(group, " "), longDescription);
     }
 
-
-    public void setLongDescription(String longDescription) {
-        this.longDescription = longDescription;
-    }
 
     public String getHelpFooter() {
         return footer;
@@ -202,20 +199,12 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
         return internal;
     }
 
-    public void setInternal(boolean internal) {
-        this.internal = internal;
-    }
-
     /**
      * Hidden commands are ones that can be called via integrations, but should not be normally shown in help to users.
      * "Alias" or legacy commands are often marked as hidden commands.
      */
     public boolean getHidden() {
         return hidden;
-    }
-
-    public void setHidden(boolean hidden) {
-        this.hidden = hidden;
     }
 
     /**

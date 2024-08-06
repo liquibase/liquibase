@@ -15,12 +15,14 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.snapshot.SnapshotListener;
 import liquibase.util.StringUtil;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+@Setter
 @Getter
 public class InternalSnapshotCommandStep extends AbstractCommandStep {
 
@@ -67,10 +69,6 @@ public class InternalSnapshotCommandStep extends AbstractCommandStep {
         }
 
         return finalList.toArray(new CatalogAndSchema[0]);
-    }
-
-    public void setSnapshotMetadata(Map<String, Object> snapshotMetadata) {
-        this.snapshotMetadata = snapshotMetadata;
     }
 
     @Override

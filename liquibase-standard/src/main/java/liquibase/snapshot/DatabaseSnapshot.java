@@ -23,6 +23,7 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -47,9 +48,11 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
     private final Map<String, Object> snapshotScratchPad = new ConcurrentHashMap<>();
 
     private final Map<String, ResultSetCache> resultSetCaches = new ConcurrentHashMap<>();
+    @Setter
     @Getter
     private CompareControl.SchemaComparison[] schemaComparisons;
 
+    @Setter
     @Getter
     private Map<String, Object> metadata = new ConcurrentHashMap<>();
 
@@ -691,11 +694,4 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         return snapshotScratchPad.put(key, data);
     }
 
-    public void setSchemaComparisons(CompareControl.SchemaComparison[] schemaComparisons) {
-        this.schemaComparisons = schemaComparisons;
-    }
-
-    public void setMetadata(Map<String, Object> metadata) {
-        this.metadata = metadata;
-    }
 }

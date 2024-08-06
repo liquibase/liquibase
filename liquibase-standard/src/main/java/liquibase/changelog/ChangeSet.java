@@ -57,9 +57,15 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * -- GETTER --
      *  Gets storedCheckSum
      *
-     * @return storedCheckSum if it was executed otherwise null
+     *
+     * -- SETTER --
+     *  Sets the stored checksum in the ValidatingVisitor in case the changeset was executed.
+     *
+     @return storedCheckSum if it was executed otherwise null
+      * @param storedCheckSum the checksum to set
 
      */
+    @Setter
     @Getter
     private CheckSum storedCheckSum;
 
@@ -109,6 +115,12 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     protected String key;
 
+    /**
+     * -- SETTER --
+     *  Called by the changelog parsing process to pass the
+     * .
+     */
+    @Setter
     @Getter
     private ChangeLogParameters changeLogParameters;
 
@@ -133,9 +145,13 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * File changeSet is defined in.  May be a logical/non-physical string.  It is included in the unique identifier to allow duplicate id+author combinations in different files
      * -- GETTER --
      *
-     * @return either this object's logicalFilePath or the changelog's filepath (logical or physical) if not.
+     *
+     * -- SETTER --
+     *  Called to update file path from database entry when rolling back and ignoreClasspathPrefix is true.
+     @return either this object's logicalFilePath or the changelog's filepath (logical or physical) if not.
 
      */
+    @Setter
     @Getter
     private String filePath = "UNKNOWN CHANGE LOG";
 
@@ -149,12 +165,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * @return the logical file path defined on this node, or {@code null} if not set
 
      */
+    @Setter
     @Getter
     private String logicalFilePath;
 
     /**
      * File path stored in the databasechangelog table. It should be the same as filePath, but not always.
      */
+    @Setter
     private String storedFilePath;
 
     /**
@@ -178,12 +196,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     /**
      * "Labels" associated with this changeSet.  If null or empty, will execute regardless of labels set
      */
+    @Setter
     @Getter
     private Labels labels;
 
     /**
      * If set to true, the changeSet will be ignored (skipped)
      */
+    @Setter
     @Getter
     private boolean ignore;
 
@@ -202,6 +222,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     /**
      * If false, do not stop liquibase update execution if an error is thrown executing the changeSet.  Defaults to true
      */
+    @Setter
     @Getter
     private Boolean failOnError;
 
@@ -219,12 +240,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     /**
      * Behavior if the validation of any of the changeSet changes fails.  Does not include checksum validation
      */
+    @Setter
     @Getter
     private ValidationFailOption onValidationFail = ValidationFailOption.HALT;
 
     /**
      * Stores if validation failed on this ChangeSet
      */
+    @Setter
     private boolean validationFailed;
 
     /**
@@ -237,6 +260,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     /**
      * ChangeSet comments defined in changeLog file
      */
+    @Setter
     @Getter
     private String comments;
 
@@ -248,11 +272,13 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     /**
      * ChangeSet level attribute to specify an Executor
      */
+    @Setter
     private String runWith;
 
     /**
      * ChangeSet level attribute to specify a spool file name
      */
+    @Setter
     @Getter
     private String runWithSpoolFile;
 
@@ -285,9 +311,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * Deployment ID stored in the databasechangelog table.
      * -- GETTER --
      *
-     * @return Deployment ID stored in the databasechangelog table.
+     *
+     * -- SETTER --
+     *
+     @return Deployment ID stored in the databasechangelog table.
+      * @param deploymentId Deployment ID stored in the databasechangelog table.
 
      */
+    @Setter
     @Getter
     private String deploymentId;
 
@@ -366,10 +397,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.dbmsOriginalString = dbmsList;
     }
 
-    public void setLogicalFilePath(String logicalFilePath) {
-        this.logicalFilePath = logicalFilePath;
-    }
-
     public String getStoredFilePath() {
         if (storedFilePath == null) {
             return getFilePath();
@@ -377,23 +404,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return storedFilePath;
     }
 
-    public void setStoredFilePath(String storedFilePath) {
-        this.storedFilePath = storedFilePath;
-    }
-
     /**
      * @return the runWith value. If the runWith value is empty or not set this method will return null.
      */
     public String getRunWith() {
         return runWith == null || runWith.isEmpty() ? null : runWith;
-    }
-
-    public void setRunWith(String runWith) {
-        this.runWith = runWith;
-    }
-
-    public void setRunWithSpoolFile(String runWithSpoolFile) {
-        this.runWithSpoolFile = runWithSpoolFile;
     }
 
     public void clearCheckSum() {
@@ -1075,14 +1090,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return this;
     }
 
-    public void setLabels(Labels labels) {
-        this.labels = labels;
-    }
-
-    public void setIgnore(boolean ignore) {
-        this.ignore = ignore;
-    }
-
     public boolean isInheritableIgnore() {
         DatabaseChangeLog changeLog = getChangeLog();
         if (changeLog == null) {
@@ -1196,10 +1203,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return toString(false);
     }
 
-    public void setComments(String comments) {
-        this.comments = comments;
-    }
-
     public void addRollBackSQL(String sql) {
         if (StringUtil.trimToNull(sql) == null) {
             if (rollback.getChanges().isEmpty()) {
@@ -1247,18 +1250,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
 
         return StringUtil.limitSize(StringUtil.join(messages, "; "), 255);
-    }
-
-    public void setFailOnError(Boolean failOnError) {
-        this.failOnError = failOnError;
-    }
-
-    public void setOnValidationFail(ValidationFailOption onValidationFail) {
-        this.onValidationFail = onValidationFail;
-    }
-
-    public void setValidationFailed(boolean validationFailed) {
-        this.validationFailed = validationFailed;
     }
 
     public void addValidCheckSum(String text) {
@@ -1309,20 +1300,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     public void addSqlVisitor(SqlVisitor sqlVisitor) {
         sqlVisitors.add(sqlVisitor);
-    }
-
-    /**
-     * Called by the changelog parsing process to pass the {@link ChangeLogParameters}.
-     */
-    public void setChangeLogParameters(ChangeLogParameters changeLogParameters) {
-        this.changeLogParameters = changeLogParameters;
-    }
-
-    /**
-     * Called to update file path from database entry when rolling back and ignoreClasspathPrefix is true.
-     */
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
     }
 
     public void setRunOrder(String runOrder) {
@@ -1508,22 +1485,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.attributes.put(attribute, value);
 
         return this;
-    }
-
-    /**
-     * Sets the stored checksum in the ValidatingVisitor in case the changeset was executed.
-     *
-     * @param storedCheckSum the checksum to set
-     */
-    public void setStoredCheckSum(CheckSum storedCheckSum) {
-        this.storedCheckSum = storedCheckSum;
-    }
-
-    /**
-     * @param deploymentId Deployment ID stored in the databasechangelog table.
-     */
-    public void setDeploymentId(String deploymentId) {
-        this.deploymentId = deploymentId;
     }
 
     public void addChangeSetMdcProperties() {

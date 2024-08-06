@@ -5,9 +5,11 @@ import liquibase.command.CommandResult;
 import liquibase.command.CommandValidationErrors;
 import liquibase.command.LiquibaseCommand;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.SortedSet;
 
+@Setter
 @Getter
 public class MockLiquibaseCommand implements LiquibaseCommand {
 
@@ -22,10 +24,6 @@ public class MockLiquibaseCommand implements LiquibaseCommand {
     @Override
     public int getPriority(String commandName) {
         return PRIORITY_DEFAULT;
-    }
-
-    public void setValue1(String value1) {
-        this.value1 = value1;
     }
 
     @Override

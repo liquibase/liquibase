@@ -1,6 +1,7 @@
 package liquibase.exception;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.logging.Level;
 
@@ -11,7 +12,9 @@ import java.util.logging.Level;
 public class LiquibaseException extends Exception {
 
     private static final long serialVersionUID = 1L;
+    @Setter
     private String timestamp;
+    @Setter
     private String details;
     private Level logLevel = null;
 
@@ -35,11 +38,4 @@ public class LiquibaseException extends Exception {
         super(cause);
     }
 
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public void setDetails(String details) {
-        this.details = details;
-    }
 }

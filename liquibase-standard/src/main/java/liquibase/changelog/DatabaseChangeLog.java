@@ -34,6 +34,7 @@ import liquibase.servicelocator.LiquibaseService;
 import liquibase.util.FileUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
@@ -83,9 +84,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     public static final String GLOBAL = "global";
 
     private final PreconditionContainer preconditionContainer = new GlobalPreconditionContainer();
+    @Setter
     @Getter
     private String physicalFilePath;
+    @Setter
     private String logicalFilePath;
+    @Setter
     @Getter
     private ObjectQuotingStrategy objectQuotingStrategy;
 
@@ -97,25 +101,33 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private final List<ChangeSet> skippedChangeSets = new ArrayList<>();
     @Getter
     private final List<ChangeSet> skippedBecauseOfLicenseChangeSets = new ArrayList<>();
+    @Setter
     @Getter
     private ChangeLogParameters changeLogParameters;
 
+    @Setter
     @Getter
     private RuntimeEnvironment runtimeEnvironment;
 
+    @Setter
     private DatabaseChangeLog rootChangeLog = ROOT_CHANGE_LOG.get();
 
+    @Setter
     @Getter
     private DatabaseChangeLog parentChangeLog = PARENT_CHANGE_LOG.get();
 
+    @Setter
     @Getter
     private ContextExpression contextFilter;
 
+    @Setter
     @Getter
     private ContextExpression includeContextFilter;
 
+    @Setter
     @Getter
     private Labels includeLabels;
+    @Setter
     @Getter
     private boolean includeIgnore;
 
@@ -129,20 +141,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         this.physicalFilePath = physicalFilePath;
     }
 
-    public void setRootChangeLog(DatabaseChangeLog rootChangeLog) {
-        this.rootChangeLog = rootChangeLog;
-    }
-
     public DatabaseChangeLog getRootChangeLog() {
         return (rootChangeLog != null) ? rootChangeLog : this;
-    }
-
-    public void setParentChangeLog(DatabaseChangeLog parentChangeLog) {
-        this.parentChangeLog = parentChangeLog;
-    }
-
-    public void setRuntimeEnvironment(RuntimeEnvironment runtimeEnvironment) {
-        this.runtimeEnvironment = runtimeEnvironment;
     }
 
     @Override
@@ -156,14 +156,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
 
-    public void setChangeLogParameters(ChangeLogParameters changeLogParameters) {
-        this.changeLogParameters = changeLogParameters;
-    }
-
-    public void setPhysicalFilePath(String physicalFilePath) {
-        this.physicalFilePath = physicalFilePath;
-    }
-
     public String getLogicalFilePath() {
         String returnPath = logicalFilePath;
         if (logicalFilePath == null) {
@@ -176,20 +168,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return SLASH_PATTERN.matcher(path).replaceFirst("");
     }
 
-    public void setLogicalFilePath(String logicalFilePath) {
-        this.logicalFilePath = logicalFilePath;
-    }
-
     public String getFilePath() {
         if (logicalFilePath == null) {
             return physicalFilePath;
         } else {
             return getLogicalFilePath();
         }
-    }
-
-    public void setObjectQuotingStrategy(ObjectQuotingStrategy objectQuotingStrategy) {
-        this.objectQuotingStrategy = objectQuotingStrategy;
     }
 
     /**
@@ -206,10 +190,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         setContextFilter(contexts);
     }
 
-    public void setContextFilter(ContextExpression contextFilter) {
-        this.contextFilter = contextFilter;
-    }
-
     /**
      * @deprecated Correct version is {@link #setIncludeLabels(Labels)}. Kept for backwards compatibility.
      */
@@ -217,23 +197,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         this.includeLabels = new Labels(labels.toString());
     }
 
-    public void setIncludeLabels(Labels labels) {
-        this.includeLabels = labels;
-    }
-
-    public void setIncludeIgnore(boolean ignore) {
-        this.includeIgnore = ignore;
-    }
-
     /**
      * @deprecated use {@link #setIncludeContextFilter(ContextExpression)}
      */
     public void setIncludeContexts(ContextExpression includeContexts) {
         setIncludeContextFilter(includeContexts);
-    }
-
-    public void setIncludeContextFilter(ContextExpression includeContextFilter) {
-        this.includeContextFilter = includeContextFilter;
     }
 
     @Override

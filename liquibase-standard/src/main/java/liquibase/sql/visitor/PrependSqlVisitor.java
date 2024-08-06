@@ -2,7 +2,9 @@ package liquibase.sql.visitor;
 
 import liquibase.database.Database;
 import lombok.Getter;
+import lombok.Setter;
 
+@Setter
 @Getter
 public class PrependSqlVisitor extends AbstractSqlVisitor {
     private String value;
@@ -11,10 +13,6 @@ public class PrependSqlVisitor extends AbstractSqlVisitor {
     @Override
     public String getName() {
         return "prepend";
-    }
-
-    public void setValue(String value) {
-        this.value = value;
     }
 
     @Override

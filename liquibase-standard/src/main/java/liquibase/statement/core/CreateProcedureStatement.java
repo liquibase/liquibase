@@ -2,6 +2,7 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 public class CreateProcedureStatement extends AbstractSqlStatement {
@@ -11,6 +12,7 @@ public class CreateProcedureStatement extends AbstractSqlStatement {
     private final String procedureName;
     private final String procedureText;
     private final String endDelimiter;
+    @Setter
     private Boolean replaceIfExists;
 
     public CreateProcedureStatement(String catalogName, String schemaName, String procedureName, String procedureText, String endDelimiter) {
@@ -21,7 +23,4 @@ public class CreateProcedureStatement extends AbstractSqlStatement {
         this.endDelimiter = endDelimiter;
     }
 
-    public void setReplaceIfExists(Boolean replaceIfExists) {
-        this.replaceIfExists = replaceIfExists;
-    }
 }

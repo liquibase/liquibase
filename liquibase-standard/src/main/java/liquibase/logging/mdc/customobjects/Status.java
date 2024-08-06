@@ -3,10 +3,12 @@ package liquibase.logging.mdc.customobjects;
 import liquibase.changelog.ChangeSet;
 import liquibase.logging.mdc.CustomMdcObject;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Setter
 @Getter
 public class Status extends SimpleStatus implements CustomMdcObject {
 
@@ -20,10 +22,7 @@ public class Status extends SimpleStatus implements CustomMdcObject {
         this.undeployedChangesets = unrunChangeSets.stream().map(urcs -> new Changeset(urcs.getFilePath(), urcs.getAuthor(), urcs.getId())).collect(Collectors.toList());
     }
 
-    public void setUndeployedChangesets(List<Changeset> undeployedChangesets) {
-        this.undeployedChangesets = undeployedChangesets;
-    }
-
+    @Setter
     @Getter
     public static class Changeset {
         private String changelogPath;
@@ -39,16 +38,5 @@ public class Status extends SimpleStatus implements CustomMdcObject {
             this.changesetId = changesetId;
         }
 
-        public void setChangelogPath(String changelogPath) {
-            this.changelogPath = changelogPath;
-        }
-
-        public void setChangesetAuthor(String changesetAuthor) {
-            this.changesetAuthor = changesetAuthor;
-        }
-
-        public void setChangesetId(String changesetId) {
-            this.changesetId = changesetId;
-        }
     }
 }

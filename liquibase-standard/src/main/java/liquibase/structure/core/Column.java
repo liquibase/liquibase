@@ -14,6 +14,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.util.BooleanUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -27,6 +28,7 @@ public class Column extends AbstractDatabaseObject {
     private Boolean computed;
     @Getter
     private Boolean descending;
+    @Setter
     @Getter
     private boolean forIndex;
 
@@ -66,10 +68,6 @@ public class Column extends AbstractDatabaseObject {
         }
 
         setRemarks(columnConfig.getRemarks());
-    }
-
-    public void setForIndex(boolean forIndex) {
-        this.forIndex = forIndex;
     }
 
     public Relation getRelation() {
@@ -402,7 +400,9 @@ public class Column extends AbstractDatabaseObject {
     public static class AutoIncrementInformation extends AbstractLiquibaseSerializable {
         private BigInteger startWith;
         private BigInteger incrementBy;
+        @Setter
         private Boolean defaultOnNull;
+        @Setter
         private String generationType;
 
         public AutoIncrementInformation() {
@@ -412,14 +412,6 @@ public class Column extends AbstractDatabaseObject {
         public AutoIncrementInformation(Number startWith, Number incrementBy) {
             this.startWith = (startWith == null) ? null : BigInteger.valueOf(startWith.longValue());
             this.incrementBy = (incrementBy == null) ? null : BigInteger.valueOf(incrementBy.longValue());
-        }
-
-        public void setDefaultOnNull(Boolean defaultOnNull) {
-            this.defaultOnNull = defaultOnNull;
-        }
-
-        public void setGenerationType(String generationType) {
-            this.generationType = generationType;
         }
 
         @Override

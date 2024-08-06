@@ -9,6 +9,7 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotListener;
 import liquibase.util.StringUtil;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,11 +20,13 @@ import java.util.Locale;
  */
 public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCommandResult> {
 
+    @Setter
     @Getter
     private Database database;
     private CatalogAndSchema[] schemas;
     @Getter
     private String serializerFormat;
+    @Setter
     @Getter
     private SnapshotListener snapshotListener;
 
@@ -32,10 +35,6 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
         return "snapshot";
     }
 
-
-    public void setDatabase(Database database) {
-        this.database = database;
-    }
 
     public SnapshotCommand setSchemas(CatalogAndSchema... catalogAndSchema) {
         schemas = catalogAndSchema;
@@ -64,10 +63,6 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
     public SnapshotCommand setSerializerFormat(String serializerFormat) {
         this.serializerFormat = serializerFormat;
         return this;
-    }
-
-    public void setSnapshotListener(SnapshotListener snapshotListener) {
-        this.snapshotListener = snapshotListener;
     }
 
     @Override

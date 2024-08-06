@@ -12,6 +12,7 @@ import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Sequence;
+import lombok.Setter;
 
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -24,6 +25,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
 
     protected int driverVersionMajor;
     protected int driverVersionMinor;
+    @Setter
     private boolean shutdownEmbeddedDerby = true;
 
     public DerbyDatabase() {
@@ -122,10 +124,6 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
 
     public boolean getShutdownEmbeddedDerby() {
         return shutdownEmbeddedDerby;
-    }
-
-    public void setShutdownEmbeddedDerby(boolean shutdown) {
-        this.shutdownEmbeddedDerby = shutdown;
     }
 
     @Override

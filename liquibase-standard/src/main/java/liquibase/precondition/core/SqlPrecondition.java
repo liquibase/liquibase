@@ -10,21 +10,15 @@ import liquibase.executor.ExecutorService;
 import liquibase.precondition.AbstractPrecondition;
 import liquibase.statement.core.RawParameterizedSqlStatement;
 import lombok.Getter;
+import lombok.Setter;
 
+@Setter
 @Getter
 public class SqlPrecondition extends AbstractPrecondition {
 
     private String expectedResult;
     private String sql;
 
-
-    public void setExpectedResult(String expectedResult) {
-        this.expectedResult = expectedResult;
-    }
-
-    public void setSql(String sql) {
-        this.sql = sql;
-    }
 
     @Override
     public Warnings warn(Database database) {

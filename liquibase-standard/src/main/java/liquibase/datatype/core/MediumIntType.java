@@ -7,9 +7,11 @@ import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
+import lombok.Setter;
 
 import java.util.Locale;
 
+@Setter
 @DataTypeInfo(name="mediumint", minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class MediumIntType extends LiquibaseDataType {
 
@@ -18,10 +20,6 @@ public class MediumIntType extends LiquibaseDataType {
     @Override
     public boolean isAutoIncrement() {
         return autoIncrement;
-    }
-
-    public void setAutoIncrement(boolean autoIncrement) {
-        this.autoIncrement = autoIncrement;
     }
 
     @Override

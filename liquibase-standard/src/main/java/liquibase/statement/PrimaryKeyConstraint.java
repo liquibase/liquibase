@@ -1,6 +1,7 @@
 package liquibase.statement;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +20,7 @@ public class PrimaryKeyConstraint implements ColumnConstraint {
     /**
      * Default value is true
      */
+    @Setter
     private boolean validatePrimaryKey = true;
 
     // used for PK's index configuration
@@ -57,10 +59,6 @@ public class PrimaryKeyConstraint implements ColumnConstraint {
 
     public boolean shouldValidatePrimaryKey() {
         return validatePrimaryKey;
-    }
-
-    public void setValidatePrimaryKey(boolean validatePrimaryKey) {
-        this.validatePrimaryKey = validatePrimaryKey;
     }
 
     public PrimaryKeyConstraint setInitiallyDeferred(boolean initiallyDeferred) {

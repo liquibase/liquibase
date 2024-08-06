@@ -19,7 +19,9 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtil;
 import lombok.Getter;
+import lombok.Setter;
 
+@Setter
 @Getter
 public class UniqueConstraintExistsPrecondition extends AbstractPrecondition {
 
@@ -29,27 +31,7 @@ public class UniqueConstraintExistsPrecondition extends AbstractPrecondition {
 	private String columnNames;
 	private String constraintName;
 
-    public void setConstraintName(String constraintName) {
-		this.constraintName = constraintName;
-	}
-
-    public void setCatalogName(String catalogName) {
-		this.catalogName = catalogName;
-	}
-
-    public void setSchemaName(String schemaName) {
-		this.schemaName = schemaName;
-	}
-
-    public void setTableName(String tableName) {
-		this.tableName = tableName;
-	}
-
-    public void setColumnNames(String columnNames) {
-		this.columnNames = columnNames;
-	}
-
-	@Override
+    @Override
 	public String getSerializedObjectNamespace() {
 		return STANDARD_CHANGELOG_NAMESPACE;
 	}

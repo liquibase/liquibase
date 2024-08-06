@@ -12,6 +12,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.DatabaseObjectFactory;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -24,6 +25,7 @@ public class SnapshotControl implements LiquibaseSerializable {
 
     private Set<Class<? extends DatabaseObject>> types;
     private ObjectChangeFilter objectChangeFilter;
+    @Setter
     @Getter
     private SnapshotListener snapshotListener;
     /**
@@ -81,10 +83,6 @@ public class SnapshotControl implements LiquibaseSerializable {
         this(database, true, types);
 
         this.objectChangeFilter = objectChangeFilter;
-    }
-
-    public void setSnapshotListener(SnapshotListener snapshotListener) {
-        this.snapshotListener = snapshotListener;
     }
 
     @Override

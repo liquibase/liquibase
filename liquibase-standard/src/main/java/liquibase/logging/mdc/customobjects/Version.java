@@ -3,9 +3,11 @@ package liquibase.logging.mdc.customobjects;
 import liquibase.integration.commandline.Banner;
 import liquibase.logging.mdc.CustomMdcObject;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
+@Setter
 @Getter
 public class Version implements CustomMdcObject {
 
@@ -22,18 +24,7 @@ public class Version implements CustomMdcObject {
         this.liquibaseLibraries = liquibaseLibraries;
     }
 
-    public void setLiquibaseVersion(Banner liquibaseVersion) {
-        this.liquibaseVersion = liquibaseVersion;
-    }
-
-    public void setJavaHome(JavaHome javaHome) {
-        this.javaHome = javaHome;
-    }
-
-    public void setLiquibaseLibraries(LiquibaseLibraries liquibaseLibraries) {
-        this.liquibaseLibraries = liquibaseLibraries;
-    }
-
+    @Setter
     @Getter
     public static class JavaHome {
         private String path;
@@ -47,15 +38,9 @@ public class Version implements CustomMdcObject {
             this.version = version;
         }
 
-        public void setPath(String path) {
-            this.path = path;
-        }
-
-        public void setVersion(String version) {
-            this.version = version;
-        }
     }
 
+    @Setter
     @Getter
     public static class LiquibaseLibraries {
         private int libraryCount;
@@ -69,15 +54,9 @@ public class Version implements CustomMdcObject {
             this.libraries = libraries;
         }
 
-        public void setLibraryCount(int libraryCount) {
-            this.libraryCount = libraryCount;
-        }
-
-        public void setLibraries(List<Library> libraries) {
-            this.libraries = libraries;
-        }
     }
 
+    @Setter
     @Getter
     public static class Library {
         private String name;
@@ -91,13 +70,6 @@ public class Version implements CustomMdcObject {
             this.path = path;
         }
 
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public void setPath(String path) {
-            this.path = path;
-        }
     }
 
 }

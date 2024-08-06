@@ -1,5 +1,8 @@
 package liquibase.statement;
 
+import lombok.Setter;
+
+@Setter
 public abstract class AbstractSqlStatement implements SqlStatement {
 
     private boolean continueOnError;
@@ -13,10 +16,6 @@ public abstract class AbstractSqlStatement implements SqlStatement {
     @Override
     public boolean continueOnError() {
         return continueOnError;
-    }
-
-    public void setContinueOnError(boolean continueOnError) {
-        this.continueOnError = continueOnError;
     }
 
 }

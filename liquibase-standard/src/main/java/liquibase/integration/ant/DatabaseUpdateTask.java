@@ -4,6 +4,7 @@ import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.resources.FileResource;
 import org.apache.tools.ant.util.FileUtils;
@@ -15,6 +16,7 @@ import java.io.Writer;
 /**
  * Ant task for migrating a database forward.
  */
+@Setter
 @Getter
 public class DatabaseUpdateTask extends AbstractChangeLogBasedTask {
     private boolean dropFirst;
@@ -46,11 +48,4 @@ public class DatabaseUpdateTask extends AbstractChangeLogBasedTask {
         }
     }
 
-    public void setDropFirst(boolean dropFirst) {
-        this.dropFirst = dropFirst;
-    }
-
-    public void setToTag(String toTag) {
-        this.toTag = toTag;
-    }
 }

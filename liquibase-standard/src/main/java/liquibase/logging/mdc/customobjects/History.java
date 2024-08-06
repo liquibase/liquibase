@@ -3,9 +3,11 @@ package liquibase.logging.mdc.customobjects;
 import liquibase.changelog.RanChangeSet;
 import liquibase.logging.mdc.CustomMdcObject;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
+@Setter
 @Getter
 public class History implements CustomMdcObject {
 
@@ -22,18 +24,7 @@ public class History implements CustomMdcObject {
         this.changesets = changesets;
     }
 
-    public void setLiquibaseTargetUrl(String liquibaseTargetUrl) {
-        this.liquibaseTargetUrl = liquibaseTargetUrl;
-    }
-
-    public void setChangesetCount(int changesetCount) {
-        this.changesetCount = changesetCount;
-    }
-
-    public void setChangesets(List<Changeset> changesets) {
-        this.changesets = changesets;
-    }
-
+    @Setter
     @Getter
     public static class Changeset {
         private String deploymentId;
@@ -53,25 +44,6 @@ public class History implements CustomMdcObject {
             this.changesetId = ranChangeSet.getId();
         }
 
-        public void setDeploymentId(String deploymentId) {
-            this.deploymentId = deploymentId;
-        }
-
-        public void setUpdateDate(String updateDate) {
-            this.updateDate = updateDate;
-        }
-
-        public void setChangelogPath(String changelogPath) {
-            this.changelogPath = changelogPath;
-        }
-
-        public void setChangesetAuthor(String changesetAuthor) {
-            this.changesetAuthor = changesetAuthor;
-        }
-
-        public void setChangesetId(String changesetId) {
-            this.changesetId = changesetId;
-        }
     }
 
 }

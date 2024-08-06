@@ -16,6 +16,7 @@ import liquibase.util.FileUtil;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
+import lombok.Setter;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -25,11 +26,18 @@ import java.nio.charset.Charset;
 /**
  * Represents a Change for custom SQL stored in a File.
  */
+@Setter
 @DatabaseChange(name = "sqlFile",
         description = "Allows you to specify any SQL statement and have it stored external in a file.",
         priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class SQLFileChange extends AbstractSQLChange {
 
+    /**
+     * -- SETTER --
+     *  Sets the file name but setUp must be called for the change to have impact.
+     *
+     * @param fileName The file to use
+     */
     private String path;
     private Boolean relativeToChangelogFile;
     private Boolean doExpandExpressionsInGenerateChecksum = false;
@@ -48,15 +56,6 @@ public class SQLFileChange extends AbstractSQLChange {
             exampleValue = "my/path/file.sql", requiredForDatabase = "all")
     public String getPath() {
         return path;
-    }
-
-    /**
-     * Sets the file name but setUp must be called for the change to have impact.
-     *
-     * @param fileName The file to use
-     */
-    public void setPath(String fileName) {
-        path = fileName;
     }
 
     /**
@@ -80,14 +79,6 @@ public class SQLFileChange extends AbstractSQLChange {
         "rather than looked up in the search path. Default: false.")
     public Boolean isRelativeToChangelogFile() {
         return relativeToChangelogFile;
-    }
-
-    public void setRelativeToChangelogFile(Boolean relativeToChangelogFile) {
-        this.relativeToChangelogFile = relativeToChangelogFile;
-    }
-
-    public void setDoExpandExpressionsInGenerateChecksum(Boolean doExpandExpressionsInGenerateChecksum) {
-        this.doExpandExpressionsInGenerateChecksum = doExpandExpressionsInGenerateChecksum;
     }
 
     @Override

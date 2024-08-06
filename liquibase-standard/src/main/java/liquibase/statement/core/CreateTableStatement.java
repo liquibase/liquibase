@@ -3,16 +3,19 @@ package liquibase.statement.core;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.*;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.*;
 
 public class CreateTableStatement extends AbstractSqlStatement implements CompoundStatement {
     /** Table type used by some RDBMS (Snowflake, SAP HANA) supporting different ... types ... of tables (e.g. column- vs. row-based) */
+    @Setter
     @Getter
     private String tableType;
 
     @Getter
     private String tablespace;
+    @Setter
     @Getter
     private String remarks;
     @Getter
@@ -44,8 +47,10 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     private final Set<UniqueConstraint> uniqueConstraints = new LinkedHashSet<>();
     private final Set<String> computedColumns = new HashSet<>();
 
+    @Setter
     @Getter
     private boolean ifNotExists;
+    @Setter
     @Getter
     private boolean rowDependencies;
     private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
@@ -101,10 +106,6 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     public CreateTableStatement setTablespace(String tablespace) {
         this.tablespace = tablespace;
         return this;
-    }
-
-    public void setRemarks(String remarks) {
-        this.remarks = remarks;
     }
 
     @java.lang.SuppressWarnings("squid:S4275")
@@ -270,18 +271,6 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
 
     public boolean isComputed(String columnName) {
         return this.computedColumns.contains(columnName);
-    }
-
-    public void setTableType(String tableType) {
-        this.tableType = tableType;
-    }
-
-    public void setIfNotExists(boolean ifNotExists) {
-        this.ifNotExists = ifNotExists;
-    }
-
-    public void setRowDependencies(boolean rowDependencies) {
-        this.rowDependencies = rowDependencies;
     }
 
 }

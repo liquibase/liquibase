@@ -4,6 +4,7 @@ import liquibase.change.AddColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
 import liquibase.statement.CompoundStatement;
 import lombok.Getter;
+import lombok.Setter;
 
 public class CreateIndexStatement extends AbstractSqlStatement implements CompoundStatement {
 
@@ -22,6 +23,7 @@ public class CreateIndexStatement extends AbstractSqlStatement implements Compou
     private final Boolean unique;
     // Contain associations of index
     // for example: foreignKey, primaryKey or uniqueConstraint
+    @Setter
     @Getter
     private String associatedWith;
     private Boolean clustered;
@@ -44,10 +46,6 @@ public class CreateIndexStatement extends AbstractSqlStatement implements Compou
 
     public Boolean isUnique() {
         return unique;
-    }
-
-    public void setAssociatedWith(String associatedWith) {
-        this.associatedWith = associatedWith;
     }
 
     public Boolean isClustered() {

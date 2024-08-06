@@ -3,10 +3,12 @@ package liquibase.logging.mdc.customobjects;
 import liquibase.change.core.SQLFileChange;
 import liquibase.logging.mdc.CustomMdcObject;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * This class is used to represent MDC data related to a sqlFile type change inside a rollback.
  */
+@Setter
 @Getter
 public class RollbackSqlFile implements CustomMdcObject {
     private String dbms;
@@ -30,31 +32,4 @@ public class RollbackSqlFile implements CustomMdcObject {
         this.relativeToChangelogFile = change.isRelativeToChangelogFile();
     }
 
-    public void setDbms(String dbms) {
-        this.dbms = dbms;
-    }
-
-    public void setEncoding(String encoding) {
-        this.encoding = encoding;
-    }
-
-    public void setEndDelimiter(String endDelimiter) {
-        this.endDelimiter = endDelimiter;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public void setRelativeToChangelogFile(Boolean relativeToChangelogFile) {
-        this.relativeToChangelogFile = relativeToChangelogFile;
-    }
-
-    public void setSplitStatements(Boolean splitStatements) {
-        this.splitStatements = splitStatements;
-    }
-
-    public void setStripComments(Boolean stripComments) {
-        this.stripComments = stripComments;
-    }
 }

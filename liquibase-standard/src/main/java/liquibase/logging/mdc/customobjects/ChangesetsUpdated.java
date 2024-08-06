@@ -3,6 +3,7 @@ package liquibase.logging.mdc.customobjects;
 import liquibase.changelog.ChangeSet;
 import liquibase.logging.mdc.CustomMdcObject;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
 /**
  * Custom MDC object to represent the changesets that were deployed during an update event.
  */
+@Setter
 @Getter
 public class ChangesetsUpdated implements CustomMdcObject {
 
@@ -28,14 +30,6 @@ public class ChangesetsUpdated implements CustomMdcObject {
         for (ChangeSet deployedChangeSet : deployedChangeSets) {
             this.changeset.add(MdcChangesetExtended.fromChangeset(deployedChangeSet));
         }
-    }
-
-    public void setChangesetCount(int changesetCount) {
-        this.changesetCount = changesetCount;
-    }
-
-    public void setChangeset(List<MdcChangesetExtended> changeset) {
-        this.changeset = changeset;
     }
 
 }

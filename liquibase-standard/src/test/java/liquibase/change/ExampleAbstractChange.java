@@ -3,7 +3,9 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import lombok.Getter;
+import lombok.Setter;
 
+@Setter
 @DatabaseChange(name = "exampleAbstractChange", description = "Used for the AbstractChangeTest unit test", priority = 1)
 class ExampleAbstractChange extends AbstractChange {
 
@@ -28,30 +30,14 @@ class ExampleAbstractChange extends AbstractChange {
         return paramOne;
     }
 
-    public void setParamOne(String paramOne) {
-        this.paramOne = paramOne;
-    }
-
     @DatabaseChangeProperty(requiredForDatabase = {"mysql", "mssql"}, mustEqualExisting = "table", serializationType = SerializationType.NESTED_OBJECT)
     public Integer getParamTwo() {
         return paramTwo;
     }
 
-    public void setParamTwo(Integer paramTwo) {
-        this.paramTwo = paramTwo;
-    }
-
-    public void setParamNoMetadata(String paramNoMetadata) {
-        this.paramNoMetadata = paramNoMetadata;
-    }
-
     @DatabaseChangeProperty(isChangeProperty = false)
     public String getParamNotIncluded() {
         return paramNotIncluded;
-    }
-
-    public void setParamNotIncluded(String paramNotIncluded) {
-        this.paramNotIncluded = paramNotIncluded;
     }
 
     public String getNotWriteMethod() {

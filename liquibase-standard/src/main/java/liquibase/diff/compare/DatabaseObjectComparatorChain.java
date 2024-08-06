@@ -4,11 +4,13 @@ import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.structure.DatabaseObject;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.Set;
 
 public class DatabaseObjectComparatorChain {
+    @Setter
     @Getter
     private CompareControl.SchemaComparison[] schemaComparisons;
     private final List<DatabaseObjectComparator> comparators;
@@ -97,7 +99,4 @@ public class DatabaseObjectComparatorChain {
         return next.findDifferences(object1, object2, accordingTo, compareControl, this, exclude);
     }
 
-    public void setSchemaComparisons(CompareControl.SchemaComparison[] schemaComparisons) {
-        this.schemaComparisons = schemaComparisons;
-    }
 }

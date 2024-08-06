@@ -20,6 +20,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Sequence;
+import lombok.Setter;
 
 import java.io.Writer;
 import java.math.BigInteger;
@@ -42,11 +43,15 @@ public class MockDatabase implements Database, InternalDatabase {
 
     private boolean outputDefaultSchema;
     private boolean outputDefaultCatalog;
+    @Setter
     private boolean supportsCatalogs = true;
+    @Setter
     private boolean supportsSchemas = true;
+    @Setter
     private boolean supportsSequences = true;
     private String defaultCatalogName;
     private String defaultSchemaName;
+    @Setter
     private boolean caseSensitive;
     private DatabaseConnection connection = new MockDatabaseConnection();
     private String currentDateTimeFunction = "DATETIME()";
@@ -148,10 +153,6 @@ public class MockDatabase implements Database, InternalDatabase {
         return caseSensitive;
     }
 
-    public void setCaseSensitive(boolean caseSensitive) {
-        this.caseSensitive = caseSensitive;
-    }
-
     @Override
     public boolean supportsDDLInTransaction() {
         return false;
@@ -223,10 +224,6 @@ public class MockDatabase implements Database, InternalDatabase {
     @Override
     public boolean supportsSequences() {
         return supportsSequences;
-    }
-
-    public void setSupportsSequences(boolean supportsSequences) {
-        this.supportsSequences = supportsSequences;
     }
 
     @Override
@@ -451,10 +448,6 @@ public class MockDatabase implements Database, InternalDatabase {
         return supportsSchemas;
     }
 
-    public void setSupportsSchemas(boolean supportsSchemas) {
-        this.supportsSchemas = supportsSchemas;
-    }
-
     @Override
     public boolean supportsCatalogs() {
         return supportsCatalogs;
@@ -463,10 +456,6 @@ public class MockDatabase implements Database, InternalDatabase {
     @Override
     public CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase() {
         return CatalogAndSchema.CatalogAndSchemaCase.UPPER_CASE;
-    }
-
-    public void setSupportsCatalogs(boolean supportsCatalogs) {
-        this.supportsCatalogs = supportsCatalogs;
     }
 
     public boolean supportsCatalogInObjectName() {

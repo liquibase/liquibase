@@ -2,6 +2,7 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
 import lombok.Getter;
+import lombok.Setter;
 
 public class SetNullableStatement extends AbstractSqlStatement {
     @Getter
@@ -12,6 +13,7 @@ public class SetNullableStatement extends AbstractSqlStatement {
     private final boolean nullable;
     @Getter
     private String constraintName;
+    @Setter
     @Getter
     private boolean validate = true;
     private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
@@ -51,7 +53,4 @@ public class SetNullableStatement extends AbstractSqlStatement {
         return databaseTableIdentifier.getTableName();
     }
 
-    public void setValidate(boolean validate) {
-        this.validate = validate;
-    }
 }

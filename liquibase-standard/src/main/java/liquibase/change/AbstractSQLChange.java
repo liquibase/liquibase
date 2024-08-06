@@ -18,6 +18,7 @@ import liquibase.statement.core.RawCompoundStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.BooleanUtil;
 import liquibase.util.StringUtil;
+import lombok.Setter;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -53,6 +54,14 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     @Deprecated
     private boolean splitStatementsSet;
 
+    /**
+     * -- SETTER --
+     *  Sets the end delimiter for splitting SQL statements. Set to
+     *  to use the default delimiter.
+     *
+     * @param endDelimiter the end delimiter to set
+     */
+    @Setter
     private String endDelimiter;
     private String sql;
     private String dbms;
@@ -229,15 +238,6 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             return service.getOverrideDelimiter(endDelimiter);
         }
         return service.getEndDelimiter(getChangeSet());
-    }
-
-    /**
-     * Sets the end delimiter for splitting SQL statements. Set to {@code null} to use the default delimiter.
-     *
-     * @param endDelimiter the end delimiter to set
-     */
-    public void setEndDelimiter(String endDelimiter) {
-        this.endDelimiter = endDelimiter;
     }
 
     /**

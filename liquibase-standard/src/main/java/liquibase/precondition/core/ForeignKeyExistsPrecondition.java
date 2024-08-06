@@ -15,7 +15,9 @@ import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 import lombok.Getter;
+import lombok.Setter;
 
+@Setter
 @Getter
 public class ForeignKeyExistsPrecondition extends AbstractPrecondition {
     private String catalogName;
@@ -26,22 +28,6 @@ public class ForeignKeyExistsPrecondition extends AbstractPrecondition {
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
-    public void setForeignKeyTableName(String foreignKeyTableName) {
-        this.foreignKeyTableName = foreignKeyTableName;
-    }
-
-    public void setForeignKeyName(String foreignKeyName) {
-        this.foreignKeyName = foreignKeyName;
     }
 
     @Override

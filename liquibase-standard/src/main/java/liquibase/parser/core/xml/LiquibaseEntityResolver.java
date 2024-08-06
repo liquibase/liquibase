@@ -9,6 +9,7 @@ import liquibase.resource.InputStreamList;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.LiquibaseUtil;
+import lombok.Setter;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.EntityResolver2;
@@ -26,10 +27,16 @@ import java.util.regex.Pattern;
  * Finds the Liquibase schema from the classpath rather than fetching it over the Internet.
  * Also resolve external entities using a resourceAccessor if it's provided
  */
+@Setter
 public class LiquibaseEntityResolver implements EntityResolver2 {
 
     private static final String XSD_VERSION_REGEX = "(?:-pro-|-)(?<version>[\\d.]*)\\.xsd";
     private static final Pattern XSD_VERSION_PATTERN = Pattern.compile(XSD_VERSION_REGEX);
+    /**
+     * -- SETTER --
+     *  When set to true, a warning will be printed to the console if the XSD version used does not match the version
+     *  of Liquibase. If "latest" is used as the XSD version, no warning is printed.
+     */
     private boolean shouldWarnOnMismatchedXsdVersion = false;
     /**
      * The warning message should only be printed once.
@@ -128,14 +135,6 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
     public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
         Scope.getCurrentScope().getLog(getClass()).warning("The current XML parser does not seems to not support EntityResolver2. External entities may not be correctly loaded");
         return resolveEntity(null, publicId, null, systemId);
-    }
-
-    /**
-     * When set to true, a warning will be printed to the console if the XSD version used does not match the version
-     * of Liquibase. If "latest" is used as the XSD version, no warning is printed.
-     */
-    public void setShouldWarnOnMismatchedXsdVersion(boolean shouldWarnOnMismatchedXsdVersion) {
-        this.shouldWarnOnMismatchedXsdVersion = shouldWarnOnMismatchedXsdVersion;
     }
 
     /**

@@ -2,6 +2,7 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 public class FindForeignKeyConstraintsStatement extends AbstractSqlStatement {
@@ -13,7 +14,9 @@ public class FindForeignKeyConstraintsStatement extends AbstractSqlStatement {
     public static final String RESULT_COLUMN_CONSTRAINT_NAME        = "CONSTRAINT_NAME";
 
     private final String baseTableCatalogName;
+    @Setter
     private String baseTableSchemaName;
+    @Setter
     private String baseTableName;
 
     public FindForeignKeyConstraintsStatement(String baseTableCatalogName, String baseTableSchemaName,
@@ -23,11 +26,4 @@ public class FindForeignKeyConstraintsStatement extends AbstractSqlStatement {
         this.baseTableName = baseTableName;
     }
 
-    public void setBaseTableSchemaName(String baseTableSchemaName) {
-        this.baseTableSchemaName = baseTableSchemaName;
-    }
-
-    public void setBaseTableName(String baseTableName) {
-        this.baseTableName = baseTableName;
-    }
 }

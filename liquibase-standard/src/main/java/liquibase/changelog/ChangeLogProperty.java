@@ -2,6 +2,7 @@ package liquibase.changelog;
 
 import liquibase.serializer.AbstractLiquibaseSerializable;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -9,14 +10,22 @@ import java.util.Set;
 
 @Getter
 public class ChangeLogProperty extends AbstractLiquibaseSerializable implements ChangeLogChild {
+    @Setter
     private String file;
+    @Setter
     private Boolean relativeToChangelogFile;
+    @Setter
     private Boolean errorIfMissing;
+    @Setter
     private String name;
+    @Setter
     private String value;
     private String contextFilter;
+    @Setter
     private String labels;
+    @Setter
     private String dbms;
+    @Setter
     private Boolean global;
 
     @Override
@@ -32,26 +41,6 @@ public class ChangeLogProperty extends AbstractLiquibaseSerializable implements 
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
-    }
-
-    public void setFile(String file) {
-        this.file = file;
-    }
-
-    public void setRelativeToChangelogFile(Boolean getRelativeToChangelogFile) {
-        this.relativeToChangelogFile = getRelativeToChangelogFile;
-    }
-
-    public void setErrorIfMissing(Boolean errorIfMissing) {
-        this.errorIfMissing = errorIfMissing;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
     }
 
     /**
@@ -75,15 +64,4 @@ public class ChangeLogProperty extends AbstractLiquibaseSerializable implements 
         return this;
     }
 
-    public void setLabels(String labels) {
-        this.labels = labels;
-    }
-
-    public void setDbms(String dbms) {
-        this.dbms = dbms;
-    }
-
-    public void setGlobal(Boolean global) {
-        this.global = global;
-    }
 }

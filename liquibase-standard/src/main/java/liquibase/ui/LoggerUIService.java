@@ -3,12 +3,14 @@ package liquibase.ui;
 import liquibase.AbstractExtensibleObject;
 import liquibase.Scope;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.logging.Level;
 
 /**
  * Sends all UI requests to the configured Logger. The level they are logged at defaults to {@link Level#INFO} for standard messages and {@link Level#SEVERE} for error messages.
  */
+@Setter
 @Getter
 public class LoggerUIService extends AbstractExtensibleObject implements UIService {
 
@@ -57,11 +59,4 @@ public class LoggerUIService extends AbstractExtensibleObject implements UIServi
         return valueIfNoEntry;
     }
 
-    public void setStandardLogLevel(Level standardLogLevel) {
-        this.standardLogLevel = standardLogLevel;
-    }
-
-    public void setErrorLogLevel(Level errorLogLevel) {
-        this.errorLogLevel = errorLogLevel;
-    }
 }

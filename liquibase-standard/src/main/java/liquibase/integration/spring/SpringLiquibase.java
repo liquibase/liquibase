@@ -78,13 +78,22 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     /**
      * -- GETTER --
      *  The DataSource that liquibase will use to perform the migration.
+     * -- SETTER --
+     *  The DataSource that liquibase will use to perform the migration.
+
      */
+    @Setter
     @Getter
     protected DataSource dataSource;
     /**
      * -- GETTER --
      *  Returns a Resource that is able to resolve to a file or classpath resource.
+     * -- SETTER --
+     *  Sets a Spring Resource that is able to resolve to a file or classpath resource.
+     *  An example might be <code>classpath:db-changelog.xml</code>.
+
      */
+    @Setter
     @Getter
     protected String changeLog;
 
@@ -142,7 +151,14 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     /**
      * -- GETTER --
      *  Returns whether a rollback should be tested at update time or not.
+     * -- SETTER --
+     *  If testRollbackOnUpdate is set to true a rollback will be tested at update time.
+     *  For doing so when the update is performed
+     *
+     * @param testRollbackOnUpdate
+
      */
+    @Setter
     @Getter
     protected boolean testRollbackOnUpdate = false;
 
@@ -188,22 +204,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     }
 
     /**
-     * The DataSource that liquibase will use to perform the migration.
-     */
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
-    /**
-     * Sets a Spring Resource that is able to resolve to a file or classpath resource.
-     * An example might be <code>classpath:db-changelog.xml</code>.
-     */
-    public void setChangeLog(String dataModel) {
-
-        this.changeLog = dataModel;
-    }
-
-    /**
      * @deprecated use {@link #getLabelFilter()}
      */
     @Deprecated
@@ -217,16 +217,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     @Deprecated
     public void setLabels(String labels) {
         setLabelFilter(labels);
-    }
-
-    /**
-     * If testRollbackOnUpdate is set to true a rollback will be tested at update time.
-     * For doing so when the update is performed
-     *
-     * @param testRollbackOnUpdate
-     */
-    public void setTestRollbackOnUpdate(boolean testRollbackOnUpdate) {
-        this.testRollbackOnUpdate = testRollbackOnUpdate;
     }
 
     /**

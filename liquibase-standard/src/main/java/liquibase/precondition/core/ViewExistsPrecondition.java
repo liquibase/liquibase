@@ -13,24 +13,14 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.View;
 import lombok.Getter;
+import lombok.Setter;
 
+@Setter
 @Getter
 public class ViewExistsPrecondition extends AbstractPrecondition {
     private String catalogName;
     private String schemaName;
     private String viewName;
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
-    public void setViewName(String viewName) {
-        this.viewName = viewName;
-    }
 
     @Override
     public Warnings warn(Database database) {

@@ -11,7 +11,9 @@ import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.precondition.AbstractPrecondition;
 import lombok.Getter;
+import lombok.Setter;
 
+@Setter
 @Getter
 public class ChangeLogPropertyDefinedPrecondition extends AbstractPrecondition {
 
@@ -28,14 +30,6 @@ public class ChangeLogPropertyDefinedPrecondition extends AbstractPrecondition {
         return "changeLogPropertyDefined";
     }
 
-    public void setProperty(String property) {
-        this.property = property;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-    
     @Override
     public Warnings warn(Database database) {
         return new Warnings();

@@ -11,6 +11,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.util.BooleanUtil;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.io.IOException;
 import java.util.*;
@@ -25,8 +26,10 @@ public class DiffResult {
     @Getter
     private final CompareControl compareControl;
 
+    @Setter
     @Getter
     private StringDiff productNameDiff;
+    @Setter
     @Getter
     private StringDiff productVersionDiff;
 
@@ -42,14 +45,6 @@ public class DiffResult {
         this.compareControl = compareControl;
     }
 
-    public void setProductNameDiff(StringDiff productNameDiff) {
-        this.productNameDiff = productNameDiff;
-    }
-
-
-    public void setProductVersionDiff(StringDiff productVersionDiff) {
-        this.productVersionDiff = productVersionDiff;
-    }
 
     public Set<? extends DatabaseObject> getMissingObjects() {
         return missingObjects;

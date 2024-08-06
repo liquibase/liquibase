@@ -2,12 +2,14 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigInteger;
 
 @Getter
 public class CreateSequenceStatement extends AbstractSqlStatement {
 
+    @Setter
     private String catalogName;
     private final String schemaName;
     private final String sequenceName;
@@ -29,10 +31,6 @@ public class CreateSequenceStatement extends AbstractSqlStatement {
     @Override
     public boolean skipOnUnsupported() {
         return true;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
     }
 
     public CreateSequenceStatement setStartValue(BigInteger startValue) {

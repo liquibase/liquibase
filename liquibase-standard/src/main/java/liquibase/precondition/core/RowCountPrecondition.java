@@ -14,29 +14,21 @@ import liquibase.precondition.AbstractPrecondition;
 import liquibase.statement.core.TableRowCountStatement;
 import liquibase.util.StringUtil;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 public class RowCountPrecondition extends AbstractPrecondition {
 
+    @Setter
     private String catalogName;
     private String schemaName;
+    @Setter
     private String tableName;
+    @Setter
     private Long expectedRows;
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
 
     public void setSchemaName(String schemaName) {
         this.schemaName = StringUtil.trimToNull(schemaName);
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
-    public void setExpectedRows(Long expectedRows) {
-        this.expectedRows = expectedRows;
     }
 
     @Override

@@ -38,6 +38,7 @@ import liquibase.util.DependencyUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayOutputStream;
@@ -63,13 +64,20 @@ public class DiffToChangeLog {
 
     private int changeNumber = 1;
 
+    @Setter
     private String changeSetContext;
+    @Setter
     private String changeSetLabels;
+    @Setter
     private String changeSetAuthor;
+    @Setter
     @Getter
     private String changeSetPath;
+    @Setter
     private String[] changeSetRunOnChangeTypes;
+    @Setter
     private String[] changeReplaceIfExistsTypes;
+    @Setter
     private DiffResult diffResult;
     private final DiffOutputControl diffOutputControl;
     private boolean tryDbaDependencies = true;
@@ -103,18 +111,6 @@ public class DiffToChangeLog {
         if (this.diffResult.getComparisonSnapshot().getDatabase() instanceof AbstractDb2Database) {
             diffOutputControl.setRespectSchemaAndCatalogCase(true);
         }
-    }
-
-    public void setDiffResult(DiffResult diffResult) {
-        this.diffResult = diffResult;
-    }
-
-    public void setChangeSetContext(String changeSetContext) {
-        this.changeSetContext = changeSetContext;
-    }
-
-    public void setChangeSetLabels(String changeSetLabels) {
-        this.changeSetLabels = changeSetLabels;
     }
 
     public void print(String changeLogFile) throws ParserConfigurationException, IOException, DatabaseException {
@@ -926,28 +922,12 @@ public class DiffToChangeLog {
         }
     }
 
-    public void setChangeSetAuthor(String changeSetAuthor) {
-        this.changeSetAuthor = changeSetAuthor;
-    }
-
-    public void setChangeSetPath(String changeSetPath) {
-        this.changeSetPath = changeSetPath;
-    }
-
-    public void setChangeSetRunOnChangeTypes(final String[] runOnChangeTypes) {
-        changeSetRunOnChangeTypes = runOnChangeTypes;
-    }
-
     protected String[] getChangeSetRunOnChangeTypes() {
         return changeSetRunOnChangeTypes;
     }
 
     private boolean isContainedInRunOnChangeTypes(final Change change) {
         return getChangeSetRunOnChangeTypes() != null && Arrays.asList(getChangeSetRunOnChangeTypes()).contains(change.getSerializedObjectName());
-    }
-
-    public void setChangeReplaceIfExistsTypes(final String[] replaceIfExistsTypes) {
-        changeReplaceIfExistsTypes = replaceIfExistsTypes;
     }
 
     protected String[] getChangeReplaceIfExistsTypes() {

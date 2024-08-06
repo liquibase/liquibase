@@ -2,7 +2,9 @@ package liquibase.sql.visitor;
 
 import liquibase.database.Database;
 import lombok.Getter;
+import lombok.Setter;
 
+@Setter
 @Getter
 public class ReplaceSqlVisitor extends AbstractSqlVisitor {
 
@@ -12,14 +14,6 @@ public class ReplaceSqlVisitor extends AbstractSqlVisitor {
     @Override
     public String getName() {
         return "replace";
-    }
-
-    public void setReplace(String replace) {
-        this.replace = replace;
-    }
-
-    public void setWith(String with) {
-        this.with = with;
     }
 
     @Override

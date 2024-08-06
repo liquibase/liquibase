@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.resource.ResourceAccessor;
+import lombok.Setter;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.DataType;
@@ -18,21 +19,36 @@ public class DatabaseType extends DataType {
     @SuppressWarnings("squid:S2068")
     private static final String PASSWORD_PROPERTY_NAME = "password";
 
+    @Setter
     private String driver;
+    @Setter
     private String url;
+    @Setter
     private String user;
+    @Setter
     private String password;
     private ConnectionProperties connectionProperties;
+    @Setter
     private String defaultSchemaName;
+    @Setter
     private String defaultCatalogName;
+    @Setter
     private String currentDateTimeFunction;
+    @Setter
     private boolean outputDefaultSchema = true;
+    @Setter
     private boolean outputDefaultCatalog = true;
+    @Setter
     private String liquibaseSchemaName;
+    @Setter
     private String liquibaseCatalogName;
+    @Setter
     private String databaseClass;
+    @Setter
     private String databaseChangeLogTableName;
+    @Setter
     private String databaseChangeLogLockTableName;
+    @Setter
     private String liquibaseTablespaceName;
 
     public DatabaseType(Project project) {
@@ -153,32 +169,16 @@ public class DatabaseType extends DataType {
         return isReference() ? ((DatabaseType) getCheckedRef()).getDriver() : driver;
     }
 
-    public void setDriver(String driver) {
-        this.driver = driver;
-    }
-
     public String getUrl() {
         return isReference() ? ((DatabaseType) getCheckedRef()).getUrl() : url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
     }
 
     public String getUser() {
         return isReference() ? ((DatabaseType) getCheckedRef()).getUser() : user;
     }
 
-    public void setUser(String user) {
-        this.user = user;
-    }
-
     public String getPassword() {
         return isReference() ? ((DatabaseType) getCheckedRef()).getPassword() : password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public ConnectionProperties getConnectionProperties() {
@@ -196,87 +196,44 @@ public class DatabaseType extends DataType {
         return isReference() ? ((DatabaseType) getCheckedRef()).getDefaultSchemaName() : defaultSchemaName;
     }
 
-    public void setDefaultSchemaName(String defaultSchemaName) {
-        this.defaultSchemaName = defaultSchemaName;
-    }
-
     public String getDefaultCatalogName() {
         return isReference() ? ((DatabaseType) getCheckedRef()).getDefaultCatalogName() : defaultCatalogName;
-    }
-
-    public void setDefaultCatalogName(String defaultCatalogName) {
-        this.defaultCatalogName = defaultCatalogName;
     }
 
     public String getCurrentDateTimeFunction() {
         return isReference() ? ((DatabaseType) getCheckedRef()).getCurrentDateTimeFunction() : currentDateTimeFunction;
     }
 
-    public void setCurrentDateTimeFunction(String currentDateTimeFunction) {
-        this.currentDateTimeFunction = currentDateTimeFunction;
-    }
-
     public boolean isOutputDefaultSchema() {
         return isReference() ? ((DatabaseType) getCheckedRef()).isOutputDefaultSchema() : outputDefaultSchema;
-    }
-
-    public void setOutputDefaultSchema(boolean outputDefaultSchema) {
-        this.outputDefaultSchema = outputDefaultSchema;
     }
 
     public boolean isOutputDefaultCatalog() {
         return isReference() ? ((DatabaseType) getCheckedRef()).isOutputDefaultCatalog() : outputDefaultCatalog;
     }
 
-    public void setOutputDefaultCatalog(boolean outputDefaultCatalog) {
-        this.outputDefaultCatalog = outputDefaultCatalog;
-    }
-
     public String getDatabaseClass() {
         return isReference() ? ((DatabaseType) getCheckedRef()).getDatabaseClass() : databaseClass;
-    }
-
-    public void setDatabaseClass(String databaseClass) {
-        this.databaseClass = databaseClass;
     }
 
     public String getLiquibaseSchemaName() {
         return isReference() ? ((DatabaseType) getCheckedRef()).getLiquibaseSchemaName() : liquibaseSchemaName;
     }
 
-    public void setLiquibaseSchemaName(String liquibaseSchemaName) {
-        this.liquibaseSchemaName = liquibaseSchemaName;
-    }
-
     public String getLiquibaseCatalogName() {
         return isReference() ? ((DatabaseType) getCheckedRef()).getLiquibaseCatalogName() : liquibaseCatalogName;
-    }
-
-    public void setLiquibaseCatalogName(String liquibaseCatalogName) {
-        this.liquibaseCatalogName = liquibaseCatalogName;
     }
 
     public String getDatabaseChangeLogTableName() {
         return isReference() ? ((DatabaseType) getCheckedRef()).getDatabaseChangeLogTableName() : databaseChangeLogTableName;
     }
 
-    public void setDatabaseChangeLogTableName(String databaseChangeLogTableName) {
-        this.databaseChangeLogTableName = databaseChangeLogTableName;
-    }
-
     public String getDatabaseChangeLogLockTableName() {
         return isReference() ? ((DatabaseType) getCheckedRef()).getDatabaseChangeLogLockTableName() : databaseChangeLogLockTableName;
-    }
-
-    public void setDatabaseChangeLogLockTableName(String databaseChangeLogLockTableName) {
-        this.databaseChangeLogLockTableName = databaseChangeLogLockTableName;
     }
 
     public String getLiquibaseTablespaceName() {
         return isReference() ? ((DatabaseType) getCheckedRef()).getLiquibaseTablespaceName() : liquibaseTablespaceName;
     }
 
-    public void setLiquibaseTablespaceName(String liquibaseTablespaceName) {
-        this.liquibaseTablespaceName = liquibaseTablespaceName;
-    }
 }

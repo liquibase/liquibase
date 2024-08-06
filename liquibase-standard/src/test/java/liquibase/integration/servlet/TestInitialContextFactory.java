@@ -1,5 +1,7 @@
 package liquibase.integration.servlet;
 
+import lombok.Setter;
+
 import static javax.naming.Context.INITIAL_CONTEXT_FACTORY;
 
 import java.util.Hashtable;
@@ -11,6 +13,7 @@ public class TestInitialContextFactory implements InitialContextFactory {
 
     private static String originalFactory;
 
+    @Setter
     private static Context initialContext;
 
     public static void install() {
@@ -25,10 +28,6 @@ public class TestInitialContextFactory implements InitialContextFactory {
         } else {
             System.setProperty(INITIAL_CONTEXT_FACTORY, originalFactory);
         }
-    }
-
-    public static void setInitialContext(Context context) {
-        initialContext = context;
     }
 
     @Override

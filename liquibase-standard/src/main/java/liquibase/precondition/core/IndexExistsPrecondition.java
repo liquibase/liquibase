@@ -16,7 +16,9 @@ import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 import lombok.Getter;
+import lombok.Setter;
 
+@Setter
 @Getter
 public class IndexExistsPrecondition extends AbstractPrecondition {
     private String catalogName;
@@ -28,26 +30,6 @@ public class IndexExistsPrecondition extends AbstractPrecondition {
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
-    public void setIndexName(String indexName) {
-        this.indexName = indexName;
-    }
-
-    public void setColumnNames(String columnNames) {
-        this.columnNames = columnNames;
     }
 
     @Override

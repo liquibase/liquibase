@@ -8,12 +8,14 @@ import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
+import lombok.Setter;
 
 import java.util.Locale;
 
 /**
  * Represents a signed integer number using 32 bits of storage.
  */
+@Setter
 @DataTypeInfo(name = "int", aliases = {"integer", "java.sql.Types.INTEGER", "java.lang.Integer", "serial", "int4", "serial4"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class IntType extends LiquibaseDataType {
 
@@ -22,10 +24,6 @@ public class IntType extends LiquibaseDataType {
     @Override
     public boolean isAutoIncrement() {
         return autoIncrement;
-    }
-
-    public void setAutoIncrement(boolean autoIncrement) {
-        this.autoIncrement = autoIncrement;
     }
 
 

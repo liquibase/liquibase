@@ -1,6 +1,7 @@
 package liquibase.statement;
 
 import lombok.Getter;
+import lombok.Setter;
 
 public class ForeignKeyConstraint implements ColumnConstraint {
     @Getter
@@ -9,8 +10,10 @@ public class ForeignKeyConstraint implements ColumnConstraint {
     private String column;
     @Getter
     private final String references;
+    @Setter
     @Getter
     private String referencedTableCatalogName;
+    @Setter
     @Getter
     private String referencedTableSchemaName;
     @Getter
@@ -26,6 +29,7 @@ public class ForeignKeyConstraint implements ColumnConstraint {
     /**
      * Default value is true
      */
+    @Setter
     private boolean validateForeignKey = true;
 
     public ForeignKeyConstraint(String foreignKeyName,String references) {
@@ -62,14 +66,6 @@ public class ForeignKeyConstraint implements ColumnConstraint {
     }
 
 
-    public void setReferencedTableCatalogName(String referencedTableCatalogName) {
-        this.referencedTableCatalogName = referencedTableCatalogName;
-    }
-
-    public void setReferencedTableSchemaName(String referencedTableSchemaName) {
-        this.referencedTableSchemaName = referencedTableSchemaName;
-    }
-
     public ForeignKeyConstraint setDeleteCascade(boolean deleteCascade) {
         this.deleteCascade = deleteCascade;
         return this;
@@ -89,7 +85,4 @@ public class ForeignKeyConstraint implements ColumnConstraint {
         return validateForeignKey;
     }
 
-    public void setValidateForeignKey(boolean validateForeignKey) {
-        this.validateForeignKey = validateForeignKey;
-    }
 }

@@ -2,7 +2,9 @@ package liquibase.structure.core;
 
 import liquibase.serializer.AbstractLiquibaseSerializable;
 import lombok.Getter;
+import lombok.Setter;
 
+@Setter
 @Getter
 public class DataType extends AbstractLiquibaseSerializable {
 
@@ -21,26 +23,6 @@ public class DataType extends AbstractLiquibaseSerializable {
 
     public DataType(String typeName) {
         this.typeName = typeName;
-    }
-
-    public void setTypeName(String typeName) {
-        this.typeName = typeName;
-    }
-
-    public void setDataTypeId(Integer dataTypeId) {
-        this.dataTypeId = dataTypeId;
-    }
-
-    public void setColumnSize(Integer columnSize) {
-        this.columnSize = columnSize;
-    }
-
-    public void setColumnSizeUnit(ColumnSizeUnit columnSizeUnit) {
-        this.columnSizeUnit = columnSizeUnit;
-    }
-
-    public void setDecimalDigits(Integer decimalDigits) {
-        this.decimalDigits = decimalDigits;
     }
 
     @Override
@@ -103,14 +85,6 @@ public class DataType extends AbstractLiquibaseSerializable {
         }
 
         return value;
-    }
-
-    public void setRadix(Integer radix) {
-        this.radix = radix;
-    }
-
-    public void setCharacterOctetLength(Integer characterOctetLength) {
-        this.characterOctetLength = characterOctetLength;
     }
 
     @Override

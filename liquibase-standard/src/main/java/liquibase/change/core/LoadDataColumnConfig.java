@@ -19,20 +19,14 @@ public class LoadDataColumnConfig extends ColumnConfig {
      * -- GETTER --
      *  Returns true if this Column should be updated. Returns null if update hasn't been explicitly assigned.
      */
+    @Setter
     @Getter
     @Setter
     private Boolean allowUpdate;
     private LoadDataChange.LOAD_DATA_TYPE loadType;
+    @Setter
     @Getter
     private String nullPlaceholder;
-
-    public void setAllowUpdate(Boolean getAllowUpdate) {
-        this.allowUpdate = getAllowUpdate;
-    }
-
-    public void setNullPlaceholder(String nullPlaceholder) {
-        this.nullPlaceholder = nullPlaceholder;
-    }
 
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {

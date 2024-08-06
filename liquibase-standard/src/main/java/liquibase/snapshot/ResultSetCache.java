@@ -12,6 +12,7 @@ import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
+import lombok.Setter;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,6 +23,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ResultSetCache {
     private final Map<String, Integer> timesSingleQueried = new HashMap<>();
     private final Map<String, Boolean> didBulkQuery = new HashMap<>();
+    /**
+     * -- SETTER --
+     *  Method to control bulk fetching. By default it is true. Mostly this
+     *  flag is used when the database supports multi catalog/schema
+     *
+     * @param bulkTracking - boolean flag to control bulk operation
+     */
+    @Setter
     private boolean bulkTracking = true;
 
     private final Map<String, Map<String, List<CachedRow>>> cacheBySchema = new ConcurrentHashMap<>();
@@ -350,12 +359,4 @@ public class ResultSetCache {
         }
     }
 
-    /**
-     * Method to control bulk fetching. By default it is true. Mostly this
-     * flag is used when the database supports multi catalog/schema
-     * @param bulkTracking - boolean flag to control bulk operation
-     */
-    public void setBulkTracking(boolean bulkTracking) {
-        this.bulkTracking = bulkTracking;
-    }
 }

@@ -7,6 +7,7 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
+import lombok.Setter;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -15,6 +16,7 @@ import java.util.Locale;
  * Container for a data type that is not covered by any implementation in {@link liquibase.datatype.core}. Most often,
  * this class is used when a DBMS-specific data type is given of which Liquibase does not know anything about yet.
  */
+@Setter
 public class UnknownType extends LiquibaseDataType {
 
     private boolean autoIncrement;
@@ -34,10 +36,6 @@ public class UnknownType extends LiquibaseDataType {
     @Override
     public boolean isAutoIncrement() {
         return autoIncrement;
-    }
-
-    public void setAutoIncrement(boolean autoIncrement) {
-        this.autoIncrement = autoIncrement;
     }
 
     @Override

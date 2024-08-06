@@ -2,6 +2,7 @@ package liquibase.datatype;
 
 import liquibase.util.StringUtil;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Locale;
 
@@ -10,6 +11,7 @@ import java.util.Locale;
  * {@link LiquibaseDataType}, which represents data types used in changeSets (which will later be translated into
  * the RDBMS-specific data type if required).
  */
+@Setter
 @Getter
 public class DatabaseDataType {
 
@@ -60,10 +62,6 @@ public class DatabaseDataType {
     @Override
     public String toString() {
         return type;
-    }
-
-    public void setType(final String type) {
-        this.type = type;
     }
 
 }
