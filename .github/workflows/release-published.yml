@@ -470,3 +470,11 @@ jobs:
           repository: liquibase/liquibase-docs
           event-type: oss-released-version       
           client-payload: '{"latest_version": "${{ steps.get_latest_oss_version.outputs.latest_version }}", "previous_version": "${{ steps.get_latest_oss_version.outputs.previous_version }}"}'
+
+      # dispatch an event to `liquibase-aws-license-service` repository to update pom.xml with latest OSS Release
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          repository: liquibase/liquibase-aws-license-service
+          event-type: oss-released-version  

@@ -7,6 +7,7 @@ import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.resource.SearchPathResourceAccessor
+import liquibase.util.FileUtil
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -33,6 +34,20 @@ class JdbcDatabaseSnapshotMSSQLIntegrationTest extends Specification {
 
         then:
         noExceptionThrown()
+
+        cleanup:
+        CommandUtil.runDropAll(mssql)
+    }
+
+    def "snapshot int column must by int and not int size 10"() {
+        when:
+        mssql.executeSql('CREATE TABLE address(id1 int)')
+        def outputFile = 'diff-output.mssql.sql'
+        CommandUtil.runDiffChangelog('offline:oracle', mssql.getDatabaseFromFactory(), outputFile)
+        def contents = FileUtil.getContents(new File(outputFile))
+
+        then:
+        contents.toString().contains("(id1 int)")
 
         cleanup:
         CommandUtil.runDropAll(mssql)

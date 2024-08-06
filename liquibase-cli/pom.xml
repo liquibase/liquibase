@@ -9,6 +9,8 @@
         <version>0-SNAPSHOT</version>
     </parent>
 
+    <name>liquibase-cli</name>
+
     <description>Liquibase CLI interface</description>
 
     <artifactId>liquibase-cli</artifactId>

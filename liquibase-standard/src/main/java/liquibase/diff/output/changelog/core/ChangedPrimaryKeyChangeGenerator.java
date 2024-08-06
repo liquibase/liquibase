@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static liquibase.structure.core.PrimaryKey.CLUSTERED_ATTRIBUTE;
+import static liquibase.structure.core.PrimaryKey.VALIDATE_ATRIBUTE;
+
 public class ChangedPrimaryKeyChangeGenerator extends AbstractChangeGenerator implements ChangedObjectChangeGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
@@ -42,13 +45,8 @@ public class ChangedPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
     @Override
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
 
-        //don't try to recreate PKs that differ in just clustered
-        Difference clusteredDiff = differences.getDifference("clustered");
-        if (clusteredDiff != null) {
-            if ((clusteredDiff.getReferenceValue() == null) || (clusteredDiff.getComparedValue() == null)) {
-                differences.removeDifference("clustered");
-            }
-        }
+        removeInvalidDifferences(differences, referenceDatabase, comparisonDatabase);
+
         if (!differences.hasDifferences()) {
             return EMPTY_CHANGE;
         }
@@ -122,5 +120,19 @@ public class ChangedPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
         }
 
         return returnList.toArray(EMPTY_CHANGE);
+    }
+
+    private void removeInvalidDifferences(ObjectDifferences differences, Database referenceDatabase, Database comparisonDatabase) {
+        //don't try to recreate PKs that differ in just clustered
+        Difference clusteredDiff = differences.getDifference(CLUSTERED_ATTRIBUTE);
+        if (clusteredDiff != null && ((clusteredDiff.getReferenceValue() == null) || (clusteredDiff.getComparedValue() == null))) {
+            differences.removeDifference(CLUSTERED_ATTRIBUTE);
+        }
+
+        // as only oracle supports PK validate, we will use it only for Oracle vs Oracle comparisons
+        if (differences.getDifference(VALIDATE_ATRIBUTE) != null &&
+            (!(comparisonDatabase instanceof OracleDatabase) || (!(referenceDatabase instanceof OracleDatabase)))) {
+            differences.removeDifference(VALIDATE_ATRIBUTE);
+        }
     }
 }

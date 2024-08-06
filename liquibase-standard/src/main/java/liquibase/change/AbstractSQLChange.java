@@ -15,7 +15,6 @@ import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCompoundStatement;
-import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.BooleanUtil;
 import liquibase.util.StringUtil;
@@ -59,6 +58,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     private String dbms;
 
     protected String encoding;
+    private boolean stripCommentsUsedDefaultValue;
 
 
     protected AbstractSQLChange() {
@@ -135,7 +135,20 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      */
     @DatabaseChangeProperty(description = "Set to true to remove any comments in the SQL before executing, otherwise false. Defaults to false if not set")
     public Boolean isStripComments() {
-        return stripComments;
+        ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
+        // If default value is not used, then a value was provided in the changelog, and it should be prioritized.
+        if (!stripCommentsUsedDefaultValue) {
+            return service.getOverrideStripComments(stripComments);
+        }
+        // If the default value is used, first check to see if a value was set globally.
+        Boolean global = service.getStripComments(getChangeSet());
+        if (global != null) {
+            // Use that value if it exists.
+            return global;
+        } else {
+            // Otherwise, use the default value.
+            return stripComments;
+        }
     }
 
 
@@ -144,11 +157,16 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      * Passing null sets stripComments to the default value (false).
      */
     public void setStripComments(Boolean stripComments) {
+        setStripComments(stripComments, stripComments == null);
+    }
+
+    public void setStripComments(Boolean stripComments, boolean usedDefaultValue) {
         if (stripComments == null) {
             this.stripComments = false;
         } else {
             this.stripComments = stripComments;
         }
+        this.stripCommentsUsedDefaultValue = usedDefaultValue;
     }
 
     /**
