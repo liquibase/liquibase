@@ -1,7 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
+@Getter
 public class RenameSequenceStatement  extends AbstractSqlStatement {
   
   private final String catalogName;
@@ -16,19 +18,4 @@ public class RenameSequenceStatement  extends AbstractSqlStatement {
       this.newSequenceName = newSequenceName;
   }
 
-  public String getCatalogName() {
-      return catalogName;
-  }
-
-  public String getSchemaName() {
-      return schemaName;
-  }
-
-  public String getOldSequenceName() {
-      return oldSequenceName;
-  }
-
-  public String getNewSequenceName() {
-      return newSequenceName;
-  }
 }

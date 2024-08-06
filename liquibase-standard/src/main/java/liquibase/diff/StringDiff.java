@@ -1,7 +1,10 @@
 package liquibase.diff;
 
+import lombok.Getter;
+
 public class StringDiff {
     private final String baseVersion;
+    @Getter
     private final String targetVersion;
 
 
@@ -13,10 +16,6 @@ public class StringDiff {
 
     public String getReferenceVersion() {
         return baseVersion;
-    }
-
-    public String getTargetVersion() {
-        return targetVersion;
     }
 
     public boolean areEqual() {

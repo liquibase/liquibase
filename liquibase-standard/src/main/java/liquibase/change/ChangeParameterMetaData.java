@@ -33,10 +33,27 @@ public class ChangeParameterMetaData {
     public static final String NONE = "none";
 
     private final Change change;
+    /**
+     * -- GETTER --
+     *  Programmatic Name of the parameter. Will not contain spaces so it can be used for XMl tag names etc.
+     *  By convention, Change names should start be camel case starting with a lower case letter.
+     */
+    @Getter
     private final String parameterName;
     private final String description;
     private final Map<String, Object> exampleValues;
+    /**
+     * -- GETTER --
+     *  A more friendly name of the parameter.
+     */
+    @Getter
     private final String displayName;
+    /**
+     * -- GETTER --
+     *  Return the data type of value stored in this parameter. Used for documentation and integration purposes as well
+     *  as validation.
+     */
+    @Getter
     private String dataType;
     @Getter
     private Class dataTypeClass;
@@ -46,7 +63,31 @@ public class ChangeParameterMetaData {
     private final String since;
     private Set<String> requiredForDatabase;
     private Set<String> supportedDatabases;
+    /**
+     * -- GETTER --
+     *  Returns a dot-delimited chain of
+     *  fields describing what existing
+     *  value this parameter would need to be set if applying the Change to a particular DatabaseObject.
+     *  <p></p>
+     *  For example, in an addColumn Change, the "name" parameter would return "column.name" because if you know of an
+     *  existing Column object, the "name" parameter needs to be set to the column's name.
+     *  In the addColumn's "tableName" parameter, this method would return "column.table.name".
+     *  <p></p>
+     *  The values of the chain correspond to the
+     *  and
+     *
+     *  <p></p>
+     *  This method is used by integrations that want to generate Change instances or configurations pre-filled with
+     *  data required to apply to an existing database object.
+     */
+    @Getter
     private final String mustEqualExisting;
+    /**
+     * -- GETTER --
+     *  Return the
+     *  to use when serializing this object.
+     */
+    @Getter
     private final LiquibaseSerializable.SerializationType serializationType;
     private final String[] requiredForDatabaseArg;
     private final String[] supportedDatabasesArg;
@@ -218,29 +259,6 @@ public class ChangeParameterMetaData {
     }
 
     /**
-     * Programmatic Name of the parameter. Will not contain spaces so it can be used for XMl tag names etc.
-     * By convention, Change names should start be camel case starting with a lower case letter.
-     */
-    public String getParameterName() {
-        return parameterName;
-    }
-
-    /**
-     * A more friendly name of the parameter.
-     */
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    /**
-     * Return the data type of value stored in this parameter. Used for documentation and integration purposes as well
-     * as validation.
-     */
-    public String getDataType() {
-        return dataType;
-    }
-
-    /**
      * Return the database types for which this parameter is required. The strings returned correspond to the values
      * returned by {@link liquibase.database.Database#getShortName()}.
      * If the parameter is required for all databases, this will return the string "all" as an element.
@@ -397,32 +415,6 @@ public class ChangeParameterMetaData {
             throw new UnexpectedLiquibaseException(e);
         }
         throw new UnexpectedLiquibaseException("Could not find writeMethod for " + this.parameterName);
-    }
-
-    /**
-     * Returns a dot-delimited chain of {@link liquibase.structure.DatabaseObject} fields describing what existing
-     * value this parameter would need to be set if applying the Change to a particular DatabaseObject.
-     * <p></p>
-     * For example, in an addColumn Change, the "name" parameter would return "column.name" because if you know of an
-     * existing Column object, the "name" parameter needs to be set to the column's name.
-     * In the addColumn's "tableName" parameter, this method would return "column.table.name".
-     * <p></p>
-     * The values of the chain correspond to the {@link liquibase.structure.DatabaseObject#getObjectTypeName()} and
-     * {@link liquibase.structure.DatabaseObject#getAttributes()}
-     * <p></p>
-     * This method is used by integrations that want to generate Change instances or configurations pre-filled with
-     * data required to apply to an existing database object.
-     */
-    public String getMustEqualExisting() {
-        return mustEqualExisting;
-    }
-
-    /**
-     * Return the {@link liquibase.serializer.LiquibaseSerializable.SerializationType}
-     * to use when serializing this object.
-     */
-    public liquibase.serializer.LiquibaseSerializable.SerializationType getSerializationType() {
-        return serializationType;
     }
 
     public Object getExampleValue(Database database) {

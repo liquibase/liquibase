@@ -2,24 +2,35 @@ package liquibase.statement.core;
 
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.*;
+import lombok.Getter;
 
 import java.util.*;
 
 public class CreateTableStatement extends AbstractSqlStatement implements CompoundStatement {
     /** Table type used by some RDBMS (Snowflake, SAP HANA) supporting different ... types ... of tables (e.g. column- vs. row-based) */
+    @Getter
     private String tableType;
 
+    @Getter
     private String tablespace;
+    @Getter
     private String remarks;
+    @Getter
     private final List<String> columns = new ArrayList<>();
+    @Getter
     private final Set<AutoIncrementConstraint> autoIncrementConstraints = new HashSet<>();
+    @Getter
     private final Map<String, LiquibaseDataType> columnTypes = new HashMap<>();
+    @Getter
     private final Map<String, Object> defaultValues = new HashMap<>();
+    @Getter
     private final Map<String, String> defaultValueConstraintNames = new HashMap<>();
     private final Map<String, String> columnRemarks = new HashMap<>();
 
+    @Getter
     private PrimaryKeyConstraint primaryKeyConstraint;
     private final Map<String, NotNullConstraint> notNullConstraints = new HashMap<>();
+    @Getter
     private final Set<ForeignKeyConstraint> foreignKeyConstraints = new HashSet<>();
 
     /* NOT NULL constraints in RDBMSs are curious beasts. In some RDBMS, they do not exist as constraints at all, i.e.
@@ -29,10 +40,13 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
        in line with the column (this implies that a NN constraint can always affect exactly one column). */
     private final HashMap<String, NotNullConstraint> notNullColumns = new HashMap<>();
 
+    @Getter
     private final Set<UniqueConstraint> uniqueConstraints = new LinkedHashSet<>();
     private final Set<String> computedColumns = new HashSet<>();
 
+    @Getter
     private boolean ifNotExists;
+    @Getter
     private boolean rowDependencies;
     private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
 
@@ -84,37 +98,13 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         return databaseTableIdentifier.getTableName();
     }
 
-    public List<String> getColumns() {
-        return columns;
-    }
-
-    public String getTablespace() {
-        return tablespace;
-    }
-
     public CreateTableStatement setTablespace(String tablespace) {
         this.tablespace = tablespace;
         return this;
     }
 
-    public String getRemarks() {
-        return remarks;
-    }
-
     public void setRemarks(String remarks) {
         this.remarks = remarks;
-    }
-
-    public PrimaryKeyConstraint getPrimaryKeyConstraint() {
-        return primaryKeyConstraint;
-    }
-
-    public Set<ForeignKeyConstraint> getForeignKeyConstraints() {
-        return foreignKeyConstraints;
-    }
-
-    public Set<UniqueConstraint> getUniqueConstraints() {
-        return uniqueConstraints;
     }
 
     @java.lang.SuppressWarnings("squid:S4275")
@@ -270,22 +260,6 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         return this;
     }
 
-    public Set<AutoIncrementConstraint> getAutoIncrementConstraints() {
-        return autoIncrementConstraints;
-    }
-
-    public Map<String, LiquibaseDataType> getColumnTypes() {
-        return columnTypes;
-    }
-
-    public Map<String, Object> getDefaultValues() {
-        return defaultValues;
-    }
-
-    public Map<String, String> getDefaultValueConstraintNames() {
-        return defaultValueConstraintNames;
-    }
-
     public void setSchemaName(String schemaName) {
         this.databaseTableIdentifier.setSchemaName(schemaName);
     }
@@ -298,24 +272,12 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         return this.computedColumns.contains(columnName);
     }
 
-    public String getTableType() {
-        return tableType;
-    }
-
     public void setTableType(String tableType) {
         this.tableType = tableType;
     }
 
-    public boolean isIfNotExists() {
-        return ifNotExists;
-    }
-
     public void setIfNotExists(boolean ifNotExists) {
         this.ifNotExists = ifNotExists;
-    }
-
-    public boolean isRowDependencies() {
-        return rowDependencies;
     }
 
     public void setRowDependencies(boolean rowDependencies) {

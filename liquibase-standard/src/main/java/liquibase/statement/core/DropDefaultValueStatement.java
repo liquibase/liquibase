@@ -1,10 +1,13 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
 public class DropDefaultValueStatement extends AbstractSqlStatement {
 
+    @Getter
     private final String columnName;
+    @Getter
     private final String columnDataType;
     private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
 
@@ -27,13 +30,5 @@ public class DropDefaultValueStatement extends AbstractSqlStatement {
     public String getTableName() {
         return databaseTableIdentifier.getTableName();
     }
-
-    public String getColumnName() {
-        return columnName;
-    }
-    
-    public String getColumnDataType() {
-		return columnDataType;
-	}
 
 }

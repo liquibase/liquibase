@@ -1,9 +1,11 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
 public class DropTableStatement extends AbstractSqlStatement {
 
+    @Getter
     private final boolean cascadeConstraints;
     private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
 
@@ -26,7 +28,4 @@ public class DropTableStatement extends AbstractSqlStatement {
         return databaseTableIdentifier.getTableName();
     }
 
-    public boolean isCascadeConstraints() {
-        return cascadeConstraints;
-    }
 }

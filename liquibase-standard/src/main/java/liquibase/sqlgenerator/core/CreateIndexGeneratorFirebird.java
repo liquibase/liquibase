@@ -11,6 +11,7 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateIndexStatement;
 import liquibase.structure.core.Index;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -22,6 +23,7 @@ import java.util.List;
 public class CreateIndexGeneratorFirebird extends CreateIndexGenerator {
 
     // Just a little value object for passing a complex result of the column analysis
+    @Getter
     private final class ColumnAnalysisResult {
         private String columnExpression;
         private boolean foundAscColumns;
@@ -29,40 +31,20 @@ public class CreateIndexGeneratorFirebird extends CreateIndexGenerator {
         private int numComputedCols;
         private int numRegularCols;
 
-        public String getColumnExpression() {
-            return columnExpression;
-        }
-
         public void setColumnExpression(String columnExpression) {
             this.columnExpression = columnExpression;
-        }
-
-        public boolean isFoundAscColumns() {
-            return foundAscColumns;
         }
 
         public void setFoundAscColumns(boolean foundAscColumns) {
             this.foundAscColumns = foundAscColumns;
         }
 
-        public boolean isFoundDescColumns() {
-            return foundDescColumns;
-        }
-
         public void setFoundDescColumns(boolean foundDescColumns) {
             this.foundDescColumns = foundDescColumns;
         }
 
-        public int getNumComputedCols() {
-            return numComputedCols;
-        }
-
         public void setNumComputedCols(int numComputedCols) {
             this.numComputedCols = numComputedCols;
-        }
-
-        public int getNumRegularCols() {
-            return numRegularCols;
         }
 
         public void setNumRegularCols(int numRegularCols) {

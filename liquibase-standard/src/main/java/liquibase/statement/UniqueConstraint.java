@@ -1,15 +1,19 @@
 package liquibase.statement;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class UniqueConstraint implements ColumnConstraint {
+    @Getter
     private String constraintName;
     /**
      * Default value is true
      */
     private boolean validateUnique = true;
+    @Getter
     private final List<String> columns = new ArrayList<>();
 
     public UniqueConstraint() {
@@ -32,16 +36,8 @@ public class UniqueConstraint implements ColumnConstraint {
         return this;
     }
 
-    public String getConstraintName() {
-        return constraintName;
-    }
-
     public void setConstraintName(String constraintName) {
         this.constraintName = constraintName;
-    }
-
-    public List<String> getColumns() {
-        return columns;
     }
 
     public boolean shouldValidateUnique() {

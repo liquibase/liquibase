@@ -1,8 +1,10 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
 public class CommentStatement extends AbstractSqlStatement {
+    @Getter
     private final String text;
     private final int MAX_LENGTH = 80;
 
@@ -32,7 +34,4 @@ public class CommentStatement extends AbstractSqlStatement {
         return getText();
     }
 
-    public String getText() {
-        return text;
-    }
 }

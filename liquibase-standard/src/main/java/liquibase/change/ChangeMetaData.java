@@ -3,6 +3,7 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.structure.DatabaseObject;
+import lombok.Getter;
 
 import java.util.*;
 
@@ -17,11 +18,29 @@ import java.util.*;
 public class ChangeMetaData implements PrioritizedService {
     public static final int PRIORITY_DEFAULT = 1;
 
+    /**
+     * -- GETTER --
+     *  Return the name of the change used to identify it. The name must not contain spaces since it will be used as tag names in XML etc.
+     */
+    @Getter
     private final String name;
+    /**
+     * -- GETTER --
+     *  A description of the Change for documentation purposes.
+     */
+    @Getter
     private final String description;
     private final int priority;
 
     private Map<String, ChangeParameterMetaData> parameters;
+    /**
+     * -- GETTER --
+     *  Returns the types of DatabaseObjects this change would apply to.
+     *  Useful for documentation or integrations that present a user with what change commands are available for a given database type.
+     *  If no information is known, returns null. Will never return an empty set, only null or a populated set.
+     *  The string value will correspond to the values returned by
+     */
+    @Getter
     private Set<String> appliesTo;
     private final HashMap<String, String> databaseNotes = new HashMap<>();
 
@@ -50,20 +69,6 @@ public class ChangeMetaData implements PrioritizedService {
         if (databaseNotes != null) {
             this.databaseNotes.putAll(databaseNotes);
         }
-    }
-
-    /**
-     * Return the name of the change used to identify it. The name must not contain spaces since it will be used as tag names in XML etc.
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * A description of the Change for documentation purposes.
-     */
-    public String getDescription() {
-        return description;
     }
 
     /**
@@ -124,16 +129,6 @@ public class ChangeMetaData implements PrioritizedService {
             }
         }
         return returnMap;
-    }
-
-    /**
-     * Returns the types of DatabaseObjects this change would apply to.
-     * Useful for documentation or integrations that present a user with what change commands are available for a given database type.
-     * If no information is known, returns null. Will never return an empty set, only null or a populated set.
-     * The string value will correspond to the values returned by {@link liquibase.structure.DatabaseObject#getObjectTypeName()}
-     */
-    public Set<String> getAppliesTo() {
-        return appliesTo;
     }
 
     public boolean appliesTo(DatabaseObject databaseObject) {

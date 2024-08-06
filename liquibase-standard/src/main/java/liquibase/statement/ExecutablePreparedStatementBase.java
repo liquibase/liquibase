@@ -25,6 +25,7 @@ import liquibase.structure.core.Table;
 import liquibase.util.FilenameUtil;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StreamUtil;
+import lombok.Getter;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -42,14 +43,20 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     protected static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     protected Database database;
+    @Getter
     private final String catalogName;
+    @Getter
     private final String schemaName;
+    @Getter
     private final String tableName;
+    @Getter
     private final List<? extends ColumnConfig> columns;
+    @Getter
     private final ChangeSet changeSet;
 
     private final Set<Closeable> closeables;
 
+    @Getter
     private final ResourceAccessor resourceAccessor;
 
     //Some databases do extra work on creating prepared statements, so constantly creating new prepared statements is expensive
@@ -492,30 +499,6 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         return false;
     }
 
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public List<? extends ColumnConfig> getColumns() {
-        return columns;
-    }
-
-    public ChangeSet getChangeSet() {
-        return changeSet;
-    }
-
-    public ResourceAccessor getResourceAccessor() {
-        return resourceAccessor;
-    }
-
     private Object getScratchData(String key) {
         return snapshotScratchPad.get(key);
     }
@@ -546,6 +529,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         return length;
     }
 
+    @Getter
     protected static class LOBContent<T> {
         private final T content;
         private final long length;
@@ -555,13 +539,6 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             this.length = length;
         }
 
-        public T getContent() {
-            return content;
-        }
-
-        public long getLength() {
-            return length;
-        }
     }
 
 }

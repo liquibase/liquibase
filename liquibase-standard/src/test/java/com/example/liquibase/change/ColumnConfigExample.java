@@ -1,7 +1,9 @@
 package com.example.liquibase.change;
 
 import liquibase.serializer.AbstractLiquibaseSerializable;
+import lombok.Getter;
 
+@Getter
 public class ColumnConfigExample extends AbstractLiquibaseSerializable {
     private String name;
     private String type;
@@ -20,17 +22,9 @@ public class ColumnConfigExample extends AbstractLiquibaseSerializable {
         return "column";
     }
 
-    public String getName() {
-        return name;
-    }
-
     public ColumnConfigExample setName(String name) {
         this.name = name;
         return this;
-    }
-
-    public String getType() {
-        return type;
     }
 
     public ColumnConfigExample setType(String type) {
@@ -38,17 +32,9 @@ public class ColumnConfigExample extends AbstractLiquibaseSerializable {
         return this;
     }
 
-    public Boolean getNullable() {
-        return nullable;
-    }
-
     public ColumnConfigExample setNullable(Boolean nullable) {
         this.nullable = nullable;
         return this;
-    }
-
-    public IdentityConfig getIdentity() {
-        return identity;
     }
 
     public ColumnConfigExample setIdentity(IdentityConfig identity) {
@@ -56,17 +42,9 @@ public class ColumnConfigExample extends AbstractLiquibaseSerializable {
         return this;
     }
 
-    public DefaultConstraintConfig getDefaultConstraint() {
-        return defaultConstraint;
-    }
-
     public ColumnConfigExample setDefaultConstraint(DefaultConstraintConfig defaultConstraint) {
         this.defaultConstraint = defaultConstraint;
         return this;
-    }
-
-    public ComputedConfig getComputed() {
-        return computed;
     }
 
     public ColumnConfigExample setComputed(ComputedConfig computed) {

@@ -20,6 +20,7 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.csv.CSVReader;
 import liquibase.util.csv.CSVWriter;
+import lombok.Getter;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -32,10 +33,12 @@ import java.util.List;
 public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryService {
 
     private final File changeLogFile;
+    @Getter
     private boolean executeDmlAgainstDatabase = true;
     /**
      * Output CREATE TABLE LIQUIBASECHANGELOG or not
      */
+    @Getter
     private boolean executeDdlAgainstDatabase = true;
 
     private Integer lastChangeSetSequenceValue;
@@ -75,16 +78,8 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
         return (database.getConnection() != null) && (database.getConnection() instanceof OfflineConnection);
     }
 
-    public boolean isExecuteDmlAgainstDatabase() {
-        return executeDmlAgainstDatabase;
-    }
-
     public void setExecuteDmlAgainstDatabase(boolean executeDmlAgainstDatabase) {
         this.executeDmlAgainstDatabase = executeDmlAgainstDatabase;
-    }
-
-    public boolean isExecuteDdlAgainstDatabase() {
-        return executeDdlAgainstDatabase;
     }
 
     public void setExecuteDdlAgainstDatabase(boolean executeDdlAgainstDatabase) {

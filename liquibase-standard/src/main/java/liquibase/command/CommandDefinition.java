@@ -10,6 +10,11 @@ import java.util.*;
  */
 public class CommandDefinition implements Comparable<CommandDefinition> {
 
+    /**
+     * -- GETTER --
+     *  The fully qualified name of this command.
+     */
+    @Getter
     private final String[] name;
     private final String concatName;
 
@@ -20,7 +25,17 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
 
     private final SortedMap<String, CommandArgumentDefinition<?>> arguments = new TreeMap<>();
 
+    /**
+     * -- GETTER --
+     *  The long description of the command. Used in help docs.
+     */
+    @Getter
     private String longDescription = null;
+    /**
+     * -- GETTER --
+     *  The short description of the command. Used in help docs.
+     */
+    @Getter
     private String shortDescription = null;
     private boolean internal;
     private boolean hidden;
@@ -48,13 +63,6 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
             }
             return order;
         });
-    }
-
-    /**
-     * The fully qualified name of this command.
-     */
-    public String[] getName() {
-        return name;
     }
 
     @Override
@@ -128,13 +136,6 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
     }
 
 
-    /**
-     * The short description of the command. Used in help docs.
-     */
-    public String getShortDescription() {
-        return shortDescription;
-    }
-
     public void setShortDescription(String shortDescription) {
         this.shortDescription = shortDescription;
     }
@@ -167,13 +168,6 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
         this.groupLongDescription.put(StringUtil.join(group, " "), longDescription);
     }
 
-
-    /**
-     * The long description of the command. Used in help docs.
-     */
-    public String getLongDescription() {
-        return longDescription;
-    }
 
     public void setLongDescription(String longDescription) {
         this.longDescription = longDescription;

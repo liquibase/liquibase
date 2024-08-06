@@ -1,7 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
+@Getter
 public class RenameTableStatement extends AbstractSqlStatement {
     private final String catalogName;
     private final String schemaName;
@@ -15,19 +17,4 @@ public class RenameTableStatement extends AbstractSqlStatement {
         this.newTableName = newTableName;
     }
 
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getOldTableName() {
-        return oldTableName;
-    }
-
-    public String getNewTableName() {
-        return newTableName;
-    }
 }

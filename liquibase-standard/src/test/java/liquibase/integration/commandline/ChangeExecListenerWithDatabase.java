@@ -2,7 +2,9 @@ package liquibase.integration.commandline;
 
 import liquibase.changelog.visitor.AbstractChangeExecListener;
 import liquibase.database.Database;
+import lombok.Getter;
 
+@Getter
 public class ChangeExecListenerWithDatabase extends AbstractChangeExecListener {
     private final Database database;
 
@@ -10,7 +12,4 @@ public class ChangeExecListenerWithDatabase extends AbstractChangeExecListener {
         this.database = database;
     }
 
-    public Database getDatabase() {
-        return database;
-    }
 }

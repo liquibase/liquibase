@@ -32,16 +32,21 @@ public class DiffOutputControl {
     @Setter
     private boolean isReplaceIfExistsSet = false;
 
+    @Getter
     private CompareControl.SchemaComparison[] schemaComparisons;
 
     private final DatabaseObjectCollection alreadyHandledMissing= new DatabaseObjectCollection(new DatabaseForHash());
     private final DatabaseObjectCollection alreadyHandledUnexpected = new DatabaseObjectCollection(new DatabaseForHash());
     private final DatabaseObjectCollection alreadyHandledChanged = new DatabaseObjectCollection(new DatabaseForHash());
+    @Getter
     private ObjectQuotingStrategy objectQuotingStrategy;
 
+    @Getter
     private ContextExpression context;
+    @Getter
     private Labels labels;
 
+    @Getter
     private ObjectChangeFilter objectChangeFilter;
     private boolean respectSchemaAndCatalogCase = false;
     // Some JDBC drivers call 'Catalogs' 'Schemas'
@@ -58,10 +63,6 @@ public class DiffOutputControl {
         this.includeCatalog = includeCatalog;
         this.includeTablespace = includeTablespace;
         this.schemaComparisons = schemaComparisons;
-    }
-
-    public CompareControl.SchemaComparison[] getSchemaComparisons() {
-        return schemaComparisons;
     }
 
     public boolean getIncludeSchema() {
@@ -152,17 +153,9 @@ public class DiffOutputControl {
         }
     }
 
-    public ObjectChangeFilter getObjectChangeFilter() {
-        return objectChangeFilter;
-    }
-
     public DiffOutputControl setObjectChangeFilter(ObjectChangeFilter objectChangeFilter) {
         this.objectChangeFilter = objectChangeFilter;
         return this;
-    }
-
-    public ContextExpression getContext() {
-        return context;
     }
 
     public DiffOutputControl setContext(ContextExpression contextExpression) {
@@ -170,17 +163,9 @@ public class DiffOutputControl {
         return this;
     }
 
-    public Labels getLabels() {
-        return labels;
-    }
-
     public DiffOutputControl setLabels(Labels labels) {
         this.labels = labels;
         return this;
-    }
-
-    public ObjectQuotingStrategy getObjectQuotingStrategy() {
-        return objectQuotingStrategy;
     }
 
     public DiffOutputControl setObjectQuotingStrategy(ObjectQuotingStrategy objectQuotingStrategy) {

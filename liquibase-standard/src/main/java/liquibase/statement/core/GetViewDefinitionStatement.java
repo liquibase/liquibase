@@ -1,7 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
+@Getter
 public class GetViewDefinitionStatement extends AbstractSqlStatement {
     private final String catalogName;
     private final String schemaName;
@@ -13,15 +15,4 @@ public class GetViewDefinitionStatement extends AbstractSqlStatement {
         this.viewName = viewName;
     }
 
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getViewName() {
-        return viewName;
-    }
 }

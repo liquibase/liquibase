@@ -7,6 +7,7 @@ import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.io.PrintStream;
 import java.util.List;
@@ -20,6 +21,7 @@ public class ValidationFailedException extends MigrationFailedException {
     private static final long serialVersionUID = -6824856974397660436L;
     public static final String INDENT_SPACES = "     ";
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    @Getter
     private final List<String> invalidMD5Sums;
     private final String failedPreconditionsMessage;
     private final List<FailedPrecondition> failedPreconditions;
@@ -128,10 +130,6 @@ public class ValidationFailedException extends MigrationFailedException {
         }
 
         return message.toString();
-    }
-
-    public List<String> getInvalidMD5Sums() {
-        return invalidMD5Sums;
     }
 
     public void printDescriptiveError(PrintStream out) {

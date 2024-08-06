@@ -10,11 +10,13 @@ import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.precondition.AbstractPrecondition;
+import lombok.Getter;
 
 /**
  * Precondition for specifying the type of database (oracle, mysql, etc.).
  */
 
+@Getter
 public class DBMSPrecondition extends AbstractPrecondition {
     private String type;
 
@@ -25,10 +27,6 @@ public class DBMSPrecondition extends AbstractPrecondition {
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
-    }
-
-    public String getType() {
-        return type;
     }
 
     public void setType(String atype) {

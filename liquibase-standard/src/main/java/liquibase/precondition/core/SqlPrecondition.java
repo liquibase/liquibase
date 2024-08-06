@@ -9,23 +9,17 @@ import liquibase.exception.*;
 import liquibase.executor.ExecutorService;
 import liquibase.precondition.AbstractPrecondition;
 import liquibase.statement.core.RawParameterizedSqlStatement;
+import lombok.Getter;
 
+@Getter
 public class SqlPrecondition extends AbstractPrecondition {
 
     private String expectedResult;
     private String sql;
 
 
-    public String getExpectedResult() {
-        return expectedResult;
-    }
-
     public void setExpectedResult(String expectedResult) {
         this.expectedResult = expectedResult;
-    }
-
-    public String getSql() {
-        return sql;
     }
 
     public void setSql(String sql) {

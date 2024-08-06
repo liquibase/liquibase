@@ -1,7 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
+@Getter
 public class FindForeignKeyConstraintsStatement extends AbstractSqlStatement {
 
     public static final String RESULT_COLUMN_BASE_TABLE_NAME        = "TABLE_NAME";
@@ -21,20 +23,8 @@ public class FindForeignKeyConstraintsStatement extends AbstractSqlStatement {
         this.baseTableName = baseTableName;
     }
 
-    public String getBaseTableCatalogName() {
-        return baseTableCatalogName;
-    }
-
-    public String getBaseTableSchemaName() {
-        return baseTableSchemaName;
-    }
-
     public void setBaseTableSchemaName(String baseTableSchemaName) {
         this.baseTableSchemaName = baseTableSchemaName;
-    }
-
-    public String getBaseTableName() {
-        return baseTableName;
     }
 
     public void setBaseTableName(String baseTableName) {

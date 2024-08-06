@@ -1,8 +1,11 @@
 package liquibase.command;
 
+import lombok.Getter;
+
 /**
  * A common place to store commonly used command argument names.
  */
+@Getter
 public enum CommonArgumentNames {
     USERNAME("username"),
     PASSWORD("password"),
@@ -16,7 +19,4 @@ public enum CommonArgumentNames {
         this.argumentName = argumentName;
     }
 
-    public String getArgumentName() {
-        return argumentName;
-    }
 }

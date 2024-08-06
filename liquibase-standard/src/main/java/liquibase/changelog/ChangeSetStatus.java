@@ -6,6 +6,7 @@ import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.exception.LiquibaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
+import lombok.Getter;
 
 import java.util.Date;
 import java.util.Set;
@@ -16,18 +17,46 @@ import java.util.Set;
  */
 public class ChangeSetStatus {
 
+    @Getter
     private final ChangeSet changeSet;
+    @Getter
     private final CheckSum currentCheckSum;
+    /**
+     * -- GETTER --
+     *  ChangeSet description
+     */
+    @Getter
     private String description;
+    /**
+     * -- GETTER --
+     *  ChangeSet comments
+     */
+    @Getter
     private String comments;
 
     private boolean willRun;
+    /**
+     * -- GETTER --
+     *  Reasons the changeset will or will not run next time. Returns empty set if no reasons were given
+     */
+    @Getter
     private Set<ChangeSetFilterResult> filterResults;
 
+    /**
+     * -- GETTER --
+     *  Return the checksum stored from the last execution of the changeset. Returns null if it has not run before
+     */
+    @Getter
     private CheckSum storedCheckSum;
+    /**
+     * -- GETTER --
+     *  Return the date the changeset was last executed. Returns null if it has not run before
+     */
+    @Getter
     private Date dateLastExecuted;
     private boolean previouslyRan;
 
+    @Getter
     private RanChangeSet ranChangeSet;
 
     public ChangeSetStatus(ChangeSet changeSet) {
@@ -52,30 +81,8 @@ public class ChangeSetStatus {
         }
     }
 
-    public ChangeSet getChangeSet() {
-        return changeSet;
-    }
-
-    public CheckSum getCurrentCheckSum() {
-        return currentCheckSum;
-    }
-
-    /**
-     * ChangeSet description
-     */
-    public String getDescription() {
-        return description;
-    }
-
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    /**
-     * ChangeSet comments
-     */
-    public String getComments() {
-        return comments;
     }
 
     public void setComments(String comments) {
@@ -91,13 +98,6 @@ public class ChangeSetStatus {
 
     public void setWillRun(boolean willRun) {
         this.willRun = willRun;
-    }
-
-    /**
-     * Reasons the changeset will or will not run next time. Returns empty set if no reasons were given
-     */
-    public Set<ChangeSetFilterResult> getFilterResults() {
-        return filterResults;
     }
 
     public void setFilterResults(Set<ChangeSetFilterResult> filterResults) {
@@ -124,22 +124,8 @@ public class ChangeSetStatus {
         return false;
     }
 
-    /**
-     * Return the checksum stored from the last execution of the changeset. Returns null if it has not run before
-     */
-    public CheckSum getStoredCheckSum() {
-        return storedCheckSum;
-    }
-
     public void setStoredCheckSum(CheckSum storedCheckSum) {
         this.storedCheckSum = storedCheckSum;
-    }
-
-    /**
-     * Return the date the changeset was last executed. Returns null if it has not run before
-     */
-    public Date getDateLastExecuted() {
-        return dateLastExecuted;
     }
 
     public void setDateLastExecuted(Date dateLastExecuted) {
@@ -155,10 +141,6 @@ public class ChangeSetStatus {
 
     public void setPreviouslyRan(boolean previouslyRan) {
         this.previouslyRan = previouslyRan;
-    }
-
-    public RanChangeSet getRanChangeSet() {
-        return ranChangeSet;
     }
 
     public void setRanChangeSet(RanChangeSet ranChangeSet) {

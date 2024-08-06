@@ -86,6 +86,7 @@ public class ChangeStatus {
         return out;
     }
 
+    @Getter
     public enum Status {
         complete("Complete"),
         incorrect("Incorrect"),
@@ -98,8 +99,5 @@ public class ChangeStatus {
             this.name = name;
         }
 
-        public String getName() {
-            return name;
-        }
     }
 }

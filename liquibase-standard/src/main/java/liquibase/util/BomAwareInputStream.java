@@ -14,6 +14,7 @@ import java.nio.charset.Charset;
  * detectedCharsetName is null.
  * @deprecated use {@link BOMInputStream} instead
  */
+@Getter
 @Deprecated
 public class BomAwareInputStream extends BOMInputStream {
 
@@ -21,7 +22,6 @@ public class BomAwareInputStream extends BOMInputStream {
      * Returns detected charset name. Null if no BOM header was found.
      * @return charset name - one of UTF-8, UTF-16BE, UTF-32LE, UTF-16LE, UTF-32BE or null if no BOM detected
      */
-    @Getter
     private Charset detectedCharset;
 
     public BomAwareInputStream(InputStream in) throws IOException {

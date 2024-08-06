@@ -2,7 +2,9 @@ package liquibase.diff;
 
 import liquibase.serializer.AbstractLiquibaseSerializable;
 import liquibase.serializer.LiquibaseSerializable;
+import lombok.Getter;
 
+@Getter
 public class Difference extends AbstractLiquibaseSerializable implements Comparable, LiquibaseSerializable {
     private final String message;
     private final String field;
@@ -31,22 +33,6 @@ public class Difference extends AbstractLiquibaseSerializable implements Compara
     @Override
     public String getSerializedObjectNamespace() {
         return null;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public String getField() {
-        return field;
-    }
-
-    public Object getReferenceValue() {
-        return referenceValue;
-    }
-
-    public Object getComparedValue() {
-        return comparedValue;
     }
 
     @Override

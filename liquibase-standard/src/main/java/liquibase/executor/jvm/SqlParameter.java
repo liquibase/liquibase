@@ -1,5 +1,7 @@
 package liquibase.executor.jvm;
 
+import lombok.Getter;
+
 /**
  * Object to represent a SQL parameter definition.
  * <p/>
@@ -9,26 +11,39 @@ package liquibase.executor.jvm;
  * @author Spring Framework
  * @see java.sql.Types
  */
+@Getter
 class SqlParameter {
 
     /**
      * The name of the parameter, if any
+     * -- GETTER --
+     *  Return the name of the parameter.
+
      */
     private String name;
 
     /**
      * SQL type constant from <code>java.sql.Types</code>
+     * -- GETTER --
+     *  Return the SQL type of the parameter.
+
      */
     private final int sqlType;
 
     /**
      * Used for types that are user-named like: STRUCT, DISTINCT, JAVA_OBJECT, named array types
+     * -- GETTER --
+     *  Return the type name of the parameter, if any.
+
      */
     private String typeName;
 
 
     /**
      * The scale to apply in case of a NUMERIC or DECIMAL type, if any
+     * -- GETTER --
+     *  Return the scale of the parameter, if any.
+
      */
     private Integer scale;
 
@@ -113,35 +128,6 @@ class SqlParameter {
         this.sqlType = otherParam.sqlType;
         this.typeName = otherParam.typeName;
         this.scale = otherParam.scale;
-    }
-
-
-    /**
-     * Return the name of the parameter.
-     */
-    public String getName() {
-        return this.name;
-    }
-
-    /**
-     * Return the SQL type of the parameter.
-     */
-    public int getSqlType() {
-        return this.sqlType;
-    }
-
-    /**
-     * Return the type name of the parameter, if any.
-     */
-    public String getTypeName() {
-        return this.typeName;
-    }
-
-    /**
-     * Return the scale of the parameter, if any.
-     */
-    public Integer getScale() {
-        return this.scale;
     }
 
 

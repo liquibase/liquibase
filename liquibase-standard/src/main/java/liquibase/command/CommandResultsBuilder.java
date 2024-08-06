@@ -2,6 +2,7 @@ package liquibase.command;
 
 import liquibase.Scope;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.io.OutputStream;
 import java.util.SortedMap;
@@ -12,30 +13,27 @@ import java.util.TreeMap;
  */
 public class CommandResultsBuilder {
 
+    /**
+     * -- GETTER --
+     *  Returns the
+     *  for output for the command.
+     *
+     */
+    @Getter
     private final OutputStream outputStream;
     private final SortedMap<String, Object> resultValues = new TreeMap<>();
+    /**
+     * -- GETTER --
+     *  Return the
+     *  the results are being built for.
+     */
+    @Getter
     private final CommandScope commandScope;
 
 
     CommandResultsBuilder(CommandScope commandScope, OutputStream outputStream) {
         this.outputStream = outputStream;
         this.commandScope = commandScope;
-    }
-
-    /**
-     * Return the {@link CommandScope} the results are being built for.
-     */
-    public CommandScope getCommandScope() {
-        return commandScope;
-    }
-
-    /**
-     * Returns the {@link OutputStream} for output for the command.
-     *
-     * @see CommandScope#setOutput(OutputStream)
-     */
-    public OutputStream getOutputStream() {
-        return outputStream;
     }
 
     /**

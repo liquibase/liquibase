@@ -15,6 +15,7 @@ import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.resource.*;
 import liquibase.util.NetUtil;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -48,23 +49,19 @@ abstract class GenericServletListener {
     private static final String LIQUIBASE_PARAMETER = "liquibase.parameter";
     private static final String LIQUIBASE_SCHEMA_DEFAULT = "liquibase.schema.default";
 
+    @Getter
     private String changeLogFile;
     private String dataSourceName;
+    @Getter
     private String contexts;
+    @Getter
     private String labelFilter;
+    @Getter
     private String defaultSchema;
     private String hostName;
 
-    public String getChangeLogFile() {
-        return changeLogFile;
-    }
-
     public void setChangeLogFile(String changeLogFile) {
         this.changeLogFile = changeLogFile;
-    }
-
-    public String getContexts() {
-        return contexts;
     }
 
     public void setContexts(String ctxt) {
@@ -87,10 +84,6 @@ abstract class GenericServletListener {
         setLabelFilter(labels);
     }
 
-    public String getLabelFilter() {
-        return labelFilter;
-    }
-
     public void setLabelFilter(String labelFilter) {
         this.labelFilter = labelFilter;
     }
@@ -104,10 +97,6 @@ abstract class GenericServletListener {
      */
     public void setDataSource(String dataSource) {
         this.dataSourceName = dataSource;
-    }
-
-    public String getDefaultSchema() {
-        return defaultSchema;
     }
 
     public void contextInitialized(GenericServletWrapper.ServletContext servletContext) {

@@ -3,11 +3,13 @@ package liquibase.diff.compare;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.structure.DatabaseObject;
+import lombok.Getter;
 
 import java.util.List;
 import java.util.Set;
 
 public class DatabaseObjectComparatorChain {
+    @Getter
     private CompareControl.SchemaComparison[] schemaComparisons;
     private final List<DatabaseObjectComparator> comparators;
     private int nextIndex; //this class is used often enough that the overhead of an iterator adds up to a significant percentage of the execution time
@@ -19,10 +21,6 @@ public class DatabaseObjectComparatorChain {
 
     protected DatabaseObjectComparatorChain copy() {
         return new DatabaseObjectComparatorChain(comparators, schemaComparisons);
-    }
-
-    public CompareControl.SchemaComparison[] getSchemaComparisons() {
-        return schemaComparisons;
     }
 
     public boolean isSameObject(DatabaseObject object1, DatabaseObject object2, Database accordingTo) {

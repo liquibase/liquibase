@@ -2,9 +2,11 @@ package liquibase.logging.mdc.customobjects;
 
 import liquibase.integration.commandline.Banner;
 import liquibase.logging.mdc.CustomMdcObject;
+import lombok.Getter;
 
 import java.util.List;
 
+@Getter
 public class Version implements CustomMdcObject {
 
     private Banner liquibaseVersion;
@@ -20,30 +22,19 @@ public class Version implements CustomMdcObject {
         this.liquibaseLibraries = liquibaseLibraries;
     }
 
-    public Banner getLiquibaseVersion() {
-        return liquibaseVersion;
-    }
-
     public void setLiquibaseVersion(Banner liquibaseVersion) {
         this.liquibaseVersion = liquibaseVersion;
-    }
-
-    public JavaHome getJavaHome() {
-        return javaHome;
     }
 
     public void setJavaHome(JavaHome javaHome) {
         this.javaHome = javaHome;
     }
 
-    public LiquibaseLibraries getLiquibaseLibraries() {
-        return liquibaseLibraries;
-    }
-
     public void setLiquibaseLibraries(LiquibaseLibraries liquibaseLibraries) {
         this.liquibaseLibraries = liquibaseLibraries;
     }
 
+    @Getter
     public static class JavaHome {
         private String path;
         private String version;
@@ -56,16 +47,8 @@ public class Version implements CustomMdcObject {
             this.version = version;
         }
 
-        public String getPath() {
-            return path;
-        }
-
         public void setPath(String path) {
             this.path = path;
-        }
-
-        public String getVersion() {
-            return version;
         }
 
         public void setVersion(String version) {
@@ -73,6 +56,7 @@ public class Version implements CustomMdcObject {
         }
     }
 
+    @Getter
     public static class LiquibaseLibraries {
         private int libraryCount;
         private List<Library> libraries;
@@ -85,16 +69,8 @@ public class Version implements CustomMdcObject {
             this.libraries = libraries;
         }
 
-        public int getLibraryCount() {
-            return libraryCount;
-        }
-
         public void setLibraryCount(int libraryCount) {
             this.libraryCount = libraryCount;
-        }
-
-        public List<Library> getLibraries() {
-            return libraries;
         }
 
         public void setLibraries(List<Library> libraries) {
@@ -102,6 +78,7 @@ public class Version implements CustomMdcObject {
         }
     }
 
+    @Getter
     public static class Library {
         private String name;
         private String path;
@@ -114,16 +91,8 @@ public class Version implements CustomMdcObject {
             this.path = path;
         }
 
-        public String getName() {
-            return name;
-        }
-
         public void setName(String name) {
             this.name = name;
-        }
-
-        public String getPath() {
-            return path;
         }
 
         public void setPath(String path) {

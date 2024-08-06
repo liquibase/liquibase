@@ -1,6 +1,7 @@
 package liquibase.serializer;
 
 import liquibase.exception.UnexpectedLiquibaseException;
+import lombok.Getter;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -10,11 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ReflectionSerializer {
 
+    @Getter
     private static final ReflectionSerializer instance = new ReflectionSerializer();
-
-    public static ReflectionSerializer getInstance() {
-        return instance;
-    }
 
     private final Map<Class, Map<String, Field>> reflectionCache = new ConcurrentHashMap<>();
 

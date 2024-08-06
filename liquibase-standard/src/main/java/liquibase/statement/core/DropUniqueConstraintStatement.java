@@ -2,13 +2,16 @@ package liquibase.statement.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
 public class DropUniqueConstraintStatement extends AbstractSqlStatement {
 
+    @Getter
     private final String constraintName;
     /**
      * Sybase ASA does drop unique constraint not by name, but using list of the columns in unique clause.
      */
+    @Getter
     private ColumnConfig[] uniqueColumns;
     private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
 
@@ -39,15 +42,7 @@ public class DropUniqueConstraintStatement extends AbstractSqlStatement {
         return databaseTableIdentifier.getTableName();
     }
 
-    public String getConstraintName() {
-        return constraintName;
-    }
-
-	public ColumnConfig[] getUniqueColumns() {
-		return uniqueColumns;
-	}
-
-	public void setUniqueColumns(ColumnConfig[] uniqueColumns) {
+    public void setUniqueColumns(ColumnConfig[] uniqueColumns) {
 		this.uniqueColumns = uniqueColumns;
 	}
 

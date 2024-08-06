@@ -2,7 +2,9 @@ package liquibase.statement.core;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
+@Getter
 public class UpdateChangeSetChecksumStatement extends AbstractSqlStatement {
 
     private final ChangeSet changeSet;
@@ -11,7 +13,4 @@ public class UpdateChangeSetChecksumStatement extends AbstractSqlStatement {
         this.changeSet = changeSet;
     }
 
-    public ChangeSet getChangeSet() {
-        return changeSet;
-    }
 }

@@ -1,7 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
+@Getter
 public class DropSequenceStatement extends AbstractSqlStatement {
 
     private final String catalogName;
@@ -17,18 +19,6 @@ public class DropSequenceStatement extends AbstractSqlStatement {
     @Override
     public boolean skipOnUnsupported() {
         return true;
-    }
-
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getSequenceName() {
-        return sequenceName;
     }
 
 }

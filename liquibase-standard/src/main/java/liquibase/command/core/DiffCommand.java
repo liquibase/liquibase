@@ -15,6 +15,7 @@ import liquibase.snapshot.SnapshotListener;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.DatabaseObjectFactory;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.io.PrintStream;
 import java.util.Set;
@@ -22,6 +23,7 @@ import java.util.Set;
 /**
  * @deprecated Implement commands with {@link liquibase.command.CommandStep} and call them with {@link liquibase.command.CommandFactory#getCommandDefinition(String...)}.
  */
+@Getter
 public class DiffCommand extends AbstractCommand<CommandResult> {
 
     private Database referenceDatabase;
@@ -44,26 +46,14 @@ public class DiffCommand extends AbstractCommand<CommandResult> {
         return new CommandValidationErrors(this);
     }
 
-    public Database getReferenceDatabase() {
-        return referenceDatabase;
-    }
-
     public DiffCommand setReferenceDatabase(Database referenceDatabase) {
         this.referenceDatabase = referenceDatabase;
         return this;
     }
 
-    public Database getTargetDatabase() {
-        return targetDatabase;
-    }
-
     public DiffCommand setTargetDatabase(Database targetDatabase) {
         this.targetDatabase = targetDatabase;
         return this;
-    }
-
-    public Class<? extends DatabaseObject>[] getSnapshotTypes() {
-        return snapshotTypes;
     }
 
     public DiffCommand setSnapshotTypes(String... snapshotTypes) {
@@ -86,17 +76,9 @@ public class DiffCommand extends AbstractCommand<CommandResult> {
         return this;
     }
 
-    public PrintStream getOutputStream() {
-        return outputStream;
-    }
-
     public DiffCommand setOutputStream(PrintStream outputStream) {
         this.outputStream = outputStream;
         return this;
-    }
-
-    public SnapshotControl getReferenceSnapshotControl() {
-        return referenceSnapshotControl;
     }
 
     public DiffCommand setReferenceSnapshotControl(SnapshotControl referenceSnapshotControl) {
@@ -104,17 +86,9 @@ public class DiffCommand extends AbstractCommand<CommandResult> {
         return this;
     }
 
-    public SnapshotControl getTargetSnapshotControl() {
-        return targetSnapshotControl;
-    }
-
     public DiffCommand setTargetSnapshotControl(SnapshotControl targetSnapshotControl) {
         this.targetSnapshotControl = targetSnapshotControl;
         return this;
-    }
-
-    public SnapshotListener getSnapshotListener() {
-        return snapshotListener;
     }
 
     public DiffCommand setSnapshotListener(SnapshotListener snapshotListener) {
@@ -122,17 +96,9 @@ public class DiffCommand extends AbstractCommand<CommandResult> {
         return this;
     }
 
-    public CompareControl getCompareControl() {
-        return compareControl;
-    }
-
     public DiffCommand setCompareControl(CompareControl compareControl) {
         this.compareControl = compareControl;
         return this;
-    }
-
-    public ObjectChangeFilter getObjectChangeFilter() {
-        return objectChangeFilter;
     }
 
     public DiffCommand setObjectChangeFilter(ObjectChangeFilter objectChangeFilter) {

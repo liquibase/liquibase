@@ -18,6 +18,7 @@ import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.sql.*;
 import java.util.*;
@@ -55,16 +56,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
     public class CachingDatabaseMetaData {
         private static final String SQL_FILTER_MATCH_ALL = "%";
+        @Getter
         private final DatabaseMetaData databaseMetaData;
         private final Database database;
 
         public CachingDatabaseMetaData(Database database, DatabaseMetaData metaData) {
             this.databaseMetaData = metaData;
             this.database = database;
-        }
-
-        public java.sql.DatabaseMetaData getDatabaseMetaData() {
-            return databaseMetaData;
         }
 
         public List<CachedRow> getForeignKeys(final String catalogName, final String schemaName, final String tableName,

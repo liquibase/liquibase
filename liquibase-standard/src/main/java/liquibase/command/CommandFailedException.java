@@ -1,6 +1,7 @@
 package liquibase.command;
 
 import liquibase.exception.ExitCodeException;
+import lombok.Getter;
 
 /**
  * CommandFailedException is thrown any time a command did not succeed. If it did not succeed due to normal and expected
@@ -10,8 +11,16 @@ import liquibase.exception.ExitCodeException;
 public class CommandFailedException extends Exception implements ExitCodeException {
 
     private static final long serialVersionUID = -394350095952659571L;
+    @Getter
     private final CommandResults results;
     private final int exitCode;
+    /**
+     * -- GETTER --
+     *  In certain circumstances, this exception is thrown solely to set the exit code of a command's execution, in which
+     *  case, the exception is expected. In these cases, Liquibase does not print the stacktrace of the exception to the
+     *  logs, and isExpected returns true.
+     */
+    @Getter
     private final boolean expected;
 
     public CommandFailedException(CommandResults results, int exitCode, String message, boolean expected) {
@@ -21,20 +30,8 @@ public class CommandFailedException extends Exception implements ExitCodeExcepti
         this.expected = expected;
     }
 
-    public CommandResults getResults() {
-        return results;
-    }
-
     public Integer getExitCode() {
         return exitCode;
     }
 
-    /**
-     * In certain circumstances, this exception is thrown solely to set the exit code of a command's execution, in which
-     * case, the exception is expected. In these cases, Liquibase does not print the stacktrace of the exception to the
-     * logs, and isExpected returns true.
-     */
-    public boolean isExpected() {
-        return expected;
-    }
 }

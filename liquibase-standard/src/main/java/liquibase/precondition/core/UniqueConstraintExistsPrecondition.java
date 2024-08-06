@@ -18,7 +18,9 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
+@Getter
 public class UniqueConstraintExistsPrecondition extends AbstractPrecondition {
 
 	private String catalogName;
@@ -27,43 +29,23 @@ public class UniqueConstraintExistsPrecondition extends AbstractPrecondition {
 	private String columnNames;
 	private String constraintName;
 
-	public String getConstraintName() {
-		return constraintName;
-	}
-
-	public void setConstraintName(String constraintName) {
+    public void setConstraintName(String constraintName) {
 		this.constraintName = constraintName;
 	}
 
-	public String getCatalogName() {
-		return catalogName;
-	}
-
-	public void setCatalogName(String catalogName) {
+    public void setCatalogName(String catalogName) {
 		this.catalogName = catalogName;
 	}
 
-	public String getSchemaName() {
-		return schemaName;
-	}
-
-	public void setSchemaName(String schemaName) {
+    public void setSchemaName(String schemaName) {
 		this.schemaName = schemaName;
 	}
 
-	public String getTableName() {
-		return tableName;
-	}
-
-	public void setTableName(String tableName) {
+    public void setTableName(String tableName) {
 		this.tableName = tableName;
 	}
 
-	public String getColumnNames() {
-		return columnNames;
-	}
-
-	public void setColumnNames(String columnNames) {
+    public void setColumnNames(String columnNames) {
 		this.columnNames = columnNames;
 	}
 

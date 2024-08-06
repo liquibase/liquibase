@@ -83,27 +83,40 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     public static final String GLOBAL = "global";
 
     private final PreconditionContainer preconditionContainer = new GlobalPreconditionContainer();
+    @Getter
     private String physicalFilePath;
     private String logicalFilePath;
+    @Getter
     private ObjectQuotingStrategy objectQuotingStrategy;
 
+    @Getter
     private List<ChangeVisitor> changeVisitors = new ArrayList<>();
+    @Getter
     private final List<ChangeSet> changeSets = new ArrayList<>();
+    @Getter
     private final List<ChangeSet> skippedChangeSets = new ArrayList<>();
+    @Getter
     private final List<ChangeSet> skippedBecauseOfLicenseChangeSets = new ArrayList<>();
+    @Getter
     private ChangeLogParameters changeLogParameters;
 
+    @Getter
     private RuntimeEnvironment runtimeEnvironment;
 
     private DatabaseChangeLog rootChangeLog = ROOT_CHANGE_LOG.get();
 
+    @Getter
     private DatabaseChangeLog parentChangeLog = PARENT_CHANGE_LOG.get();
 
+    @Getter
     private ContextExpression contextFilter;
 
+    @Getter
     private ContextExpression includeContextFilter;
 
+    @Getter
     private Labels includeLabels;
+    @Getter
     private boolean includeIgnore;
 
     @Getter
@@ -128,14 +141,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         this.parentChangeLog = parentChangeLog;
     }
 
-    public DatabaseChangeLog getParentChangeLog() {
-        return parentChangeLog;
-    }
-
-    public RuntimeEnvironment getRuntimeEnvironment() {
-        return runtimeEnvironment;
-    }
-
     public void setRuntimeEnvironment(RuntimeEnvironment runtimeEnvironment) {
         this.runtimeEnvironment = runtimeEnvironment;
     }
@@ -151,16 +156,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
 
-    public ChangeLogParameters getChangeLogParameters() {
-        return changeLogParameters;
-    }
-
     public void setChangeLogParameters(ChangeLogParameters changeLogParameters) {
         this.changeLogParameters = changeLogParameters;
-    }
-
-    public String getPhysicalFilePath() {
-        return physicalFilePath;
     }
 
     public void setPhysicalFilePath(String physicalFilePath) {
@@ -191,10 +188,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
     }
 
-    public ObjectQuotingStrategy getObjectQuotingStrategy() {
-        return objectQuotingStrategy;
-    }
-
     public void setObjectQuotingStrategy(ObjectQuotingStrategy objectQuotingStrategy) {
         this.objectQuotingStrategy = objectQuotingStrategy;
     }
@@ -213,16 +206,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         setContextFilter(contexts);
     }
 
-    public ContextExpression getContextFilter() {
-        return contextFilter;
-    }
-
     public void setContextFilter(ContextExpression contextFilter) {
         this.contextFilter = contextFilter;
-    }
-
-    public ContextExpression getIncludeContextFilter() {
-        return includeContextFilter;
     }
 
     /**
@@ -236,16 +221,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         this.includeLabels = labels;
     }
 
-    public Labels getIncludeLabels() {
-        return includeLabels;
-    }
-
     public void setIncludeIgnore(boolean ignore) {
         this.includeIgnore = ignore;
-    }
-
-    public boolean isIncludeIgnore() {
-        return this.includeIgnore;
     }
 
     /**
@@ -269,9 +246,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return getFilePath().compareTo(o.getFilePath());
     }
 
-    public List<ChangeVisitor> getChangeVisitors(){
-        return changeVisitors;
-    }
     public ChangeSet getChangeSet(String path, String author, String id) {
         final List<ChangeSet> possibleChangeSets = getChangeSets(path, author, id);
         if (possibleChangeSets.isEmpty()) {
@@ -294,18 +268,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
         }
         return changeSetsToReturn;
-    }
-
-    public List<ChangeSet> getChangeSets() {
-        return changeSets;
-    }
-
-    public List<ChangeSet> getSkippedBecauseOfLicenseChangeSets() {
-        return skippedBecauseOfLicenseChangeSets;
-    }
-
-    public List<ChangeSet> getSkippedChangeSets() {
-        return skippedChangeSets;
     }
 
     public void addChangeSet(ChangeSet changeSet) {

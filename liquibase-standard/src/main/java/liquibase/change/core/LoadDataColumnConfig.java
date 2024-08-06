@@ -15,24 +15,19 @@ public class LoadDataColumnConfig extends ColumnConfig {
     @Setter
     @Getter
     private String header;
+    /**
+     * -- GETTER --
+     *  Returns true if this Column should be updated. Returns null if update hasn't been explicitly assigned.
+     */
+    @Getter
     @Setter
     private Boolean allowUpdate;
     private LoadDataChange.LOAD_DATA_TYPE loadType;
+    @Getter
     private String nullPlaceholder;
-
-    /**
-     * Returns true if this Column should be updated. Returns null if update hasn't been explicitly assigned.
-     */  
-    public Boolean getAllowUpdate() {
-        return allowUpdate;
-    }
 
     public void setAllowUpdate(Boolean getAllowUpdate) {
         this.allowUpdate = getAllowUpdate;
-    }
-
-    public String getNullPlaceholder() {
-        return nullPlaceholder;
     }
 
     public void setNullPlaceholder(String nullPlaceholder) {

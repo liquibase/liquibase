@@ -15,10 +15,35 @@ import lombok.Setter;
 public class ConstraintsConfig extends AbstractLiquibaseSerializable {
 
     private Boolean nullable;
+    /**
+     * -- GETTER --
+     *  If
+     *  is 'false' and database supports named not null constraints
+     *
+     * @return not null constraint name
+     *
+     */
+    @Getter
     private String notNullConstraintName;
     private Boolean primaryKey;
+    /**
+     * -- GETTER --
+     *  Returns the name to use for the primary key constraint. Returns null if not specified
+     */
+    @Getter
     private String primaryKeyName;
+    /**
+     * -- GETTER --
+     *  Returns the tablespace to use for the defined primary key. Returns null if not specified.
+     */
+    @Getter
     private String primaryKeyTablespace;
+    /**
+     * -- GETTER --
+     *  Returns the "references" clause to use for the foreign key. Normally a string of the format TABLE(COLUMN_NAME).
+     *  Returns null if not specified
+     */
+    @Getter
     private String references;
     @Setter
     @Getter
@@ -33,15 +58,54 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     @Getter
     private String referencedColumnNames;
     private Boolean unique;
+    /**
+     * -- GETTER --
+     *  Returns the name to use for the unique constraint. Returns null if not specified
+     */
+    @Getter
     private String uniqueConstraintName;
+    /**
+     * -- GETTER --
+     *  Returns the check constraint to use on this column. Returns null if not specified
+     */
+    @Getter
     private String checkConstraint;
     private Boolean deleteCascade;
+    /**
+     * -- GETTER --
+     *  Returns the name to use for the columns foreign key constraint. Returns null if not specified.
+     */
+    @Getter
     private String foreignKeyName;
     private Boolean initiallyDeferred;
     private Boolean deferrable;
+    /**
+     * -- GETTER --
+     *  Returns whether a NotNullConst defined for this column should validate.
+     *  Returns null if not setValidateNullable has not been called.
+     */
+    @Getter
     private Boolean validateNullable;
+    /**
+     * -- GETTER --
+     *  Returns whether a UniqueConst defined for this column should validate.
+     *  Returns null if not setValidateUnique has not been called.
+     */
+    @Getter
     private Boolean validateUnique;
+    /**
+     * -- GETTER --
+     *  Returns whether a PrimaryKeyConst defined for this column should validate.
+     *  Returns null if not setValidatePrimaryKey has not been called.
+     */
+    @Getter
     private Boolean validatePrimaryKey;
+    /**
+     * -- GETTER --
+     *  Returns whether a ForeignKeyConst defined for this column should validate.
+     *  Returns null if not setValidateForeignKey has not been called.
+     */
+    @Getter
     private Boolean validateForeignKey ;
 
     /**
@@ -67,15 +131,6 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
         this.nullable = parseBoolean(nullable);
 
         return this;
-    }
-
-    /**
-     * If {@link #isNullable()} is 'false' and database supports named not null constraints
-     * @return not null constraint name
-     * @see #getUniqueConstraintName()
-     */
-    public String getNotNullConstraintName() {
-        return notNullConstraintName;
     }
 
     public ConstraintsConfig setNotNullConstraintName(String notNullConstraintName) {
@@ -109,24 +164,9 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     }
 
 
-    /**
-     * Returns the name to use for the primary key constraint. Returns null if not specified
-     */
-    public String getPrimaryKeyName() {
-        return primaryKeyName;
-    }
-
     public ConstraintsConfig setPrimaryKeyName(String primaryKeyName) {
         this.primaryKeyName = primaryKeyName;
         return this;
-    }
-
-    /**
-     * Returns the "references" clause to use for the foreign key. Normally a string of the format TABLE(COLUMN_NAME).
-     * Returns null if not specified
-     */
-    public String getReferences() {
-        return references;
     }
 
     public ConstraintsConfig setReferences(String references) {
@@ -160,23 +200,9 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     }
 
 
-    /**
-     * Returns the name to use for the unique constraint. Returns null if not specified
-     */
-    public String getUniqueConstraintName() {
-        return uniqueConstraintName;
-    }
-
     public ConstraintsConfig setUniqueConstraintName(String uniqueConstraintName) {
         this.uniqueConstraintName = uniqueConstraintName;
         return this;
-    }
-
-    /**
-     * Returns the check constraint to use on this column. Returns null if not specified
-     */
-    public String getCheckConstraint() {
-        return checkConstraint;
     }
 
     public ConstraintsConfig setCheckConstraint(String checkConstraint) {
@@ -208,13 +234,6 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
         this.deleteCascade = parseBoolean(deleteCascade);
 
         return this;
-    }
-
-    /**
-     * Returns the name to use for the columns foreign key constraint. Returns null if not specified.
-     */
-    public String getForeignKeyName() {
-        return foreignKeyName;
     }
 
     public ConstraintsConfig setForeignKeyName(String foreignKeyName) {
@@ -271,14 +290,6 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-    /**
-     * Returns whether a NotNullConst defined for this column should validate.
-     * Returns null if not setValidateNullable has not been called.
-     */
-    public Boolean getValidateNullable() {
-        return validateNullable;
-    }
-
     public ConstraintsConfig setValidateNullable(Boolean validateNullable) {
         this.validateNullable = validateNullable;
         return this;
@@ -294,14 +305,6 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     public ConstraintsConfig setValidateUnique(String validateUnique) {
         this.validateUnique = parseBoolean(validateUnique);
         return this;
-    }
-
-    /**
-     * Returns whether a UniqueConst defined for this column should validate.
-     * Returns null if not setValidateUnique has not been called.
-     */
-    public Boolean getValidateUnique() {
-        return validateUnique;
     }
 
     public ConstraintsConfig setValidateUnique(Boolean validateUnique) {
@@ -321,14 +324,6 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-    /**
-     * Returns whether a PrimaryKeyConst defined for this column should validate.
-     * Returns null if not setValidatePrimaryKey has not been called.
-     */
-    public Boolean getValidatePrimaryKey() {
-        return validatePrimaryKey;
-    }
-
     public ConstraintsConfig setValidatePrimaryKey(Boolean validatePrimaryKey) {
         this.validatePrimaryKey = validatePrimaryKey;
         return this;
@@ -344,14 +339,6 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     public ConstraintsConfig setValidateForeignKey(String validateForeignKey) {
         this.validateForeignKey= parseBoolean(validateForeignKey);
         return this;
-    }
-
-    /**
-     * Returns whether a ForeignKeyConst defined for this column should validate.
-     * Returns null if not setValidateForeignKey has not been called.
-     */
-    public Boolean getValidateForeignKey() {
-        return validateForeignKey;
     }
 
     public ConstraintsConfig setValidateForeignKey(Boolean validateForeignKey) {
@@ -370,13 +357,6 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
         this.deferrable = parseBoolean(deferrable);
 
         return this;
-    }
-
-    /**
-     * Returns the tablespace to use for the defined primary key. Returns null if not specified.
-     */
-    public String getPrimaryKeyTablespace() {
-        return primaryKeyTablespace;
     }
 
     public ConstraintsConfig setPrimaryKeyTablespace(String primaryKeyTablespace) {

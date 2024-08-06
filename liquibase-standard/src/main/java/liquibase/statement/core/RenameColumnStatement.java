@@ -1,12 +1,17 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
 public class RenameColumnStatement extends AbstractSqlStatement {
 
+    @Getter
     private String oldColumnName;
+    @Getter
     private String newColumnName;
+    @Getter
     private String columnDataType;
+    @Getter
     private String remarks;
     private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
 
@@ -45,32 +50,16 @@ public class RenameColumnStatement extends AbstractSqlStatement {
         this.databaseTableIdentifier.setTableName(tableName);
     }
 
-    public String getOldColumnName() {
-        return oldColumnName;
-    }
-
     public void setOldColumnName(String oldColumnName) {
         this.oldColumnName = oldColumnName;
-    }
-
-    public String getNewColumnName() {
-        return newColumnName;
     }
 
     public void setNewColumnName(String newColumnName) {
         this.newColumnName = newColumnName;
     }
 
-    public String getColumnDataType() {
-        return columnDataType;
-    }
-
     public void setColumnDataType(String columnDataType) {
         this.columnDataType = columnDataType;
-    }
-
-    public String getRemarks() {
-        return remarks;
     }
 
     public void setRemarks(String remarks) {

@@ -4,6 +4,7 @@ import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.resource.ResourceAccessor;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.List;
 
 import static liquibase.util.SqlUtil.replacePredicatePlaceholders;
 
+@Getter
 public class UpdateExecutablePreparedStatement extends ExecutablePreparedStatementBase {
 
     private String whereClause;
@@ -54,10 +56,6 @@ public class UpdateExecutablePreparedStatement extends ExecutablePreparedStateme
     }
 
 
-    public String getWhereClause() {
-        return whereClause;
-    }
-
     public UpdateExecutablePreparedStatement setWhereClause(String whereClause) {
         this.whereClause = whereClause;
 
@@ -82,11 +80,4 @@ public class UpdateExecutablePreparedStatement extends ExecutablePreparedStateme
         return this;
     }
 
-    public List<Object> getWhereParameters() {
-        return whereParameters;
-    }
-
-    public List<String> getWhereColumnNames() {
-        return whereColumnNames;
-    }
 }

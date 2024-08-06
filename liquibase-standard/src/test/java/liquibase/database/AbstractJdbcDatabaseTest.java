@@ -12,6 +12,7 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.structure.core.Table;
+import lombok.Getter;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -24,16 +25,13 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Base test class for database-specific tests
  */
+@Getter
 public abstract class AbstractJdbcDatabaseTest {
 
     protected AbstractJdbcDatabase database;
 
     protected AbstractJdbcDatabaseTest(AbstractJdbcDatabase database) throws Exception {
         this.database = database;
-    }
-
-    public AbstractJdbcDatabase getDatabase() {
-        return database;
     }
 
     protected abstract String getProductNameString();

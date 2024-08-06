@@ -6,6 +6,7 @@ import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -26,28 +27,29 @@ import java.util.*;
  * </ul>
  */
 public class ParsedNode {
+    /**
+     * -- GETTER --
+     *  Each node key contains both a namespace and a name which together identifies the node.
+     */
+    @Getter
     private final String namespace;
+    /**
+     * -- GETTER --
+     *  Each node key contains both a namespace and a name which together identifies the node.
+     */
+    @Getter
     private final String name;
     private final List<ParsedNode> children = new ArrayList<>();
+    /**
+     * -- GETTER --
+     *  Return the value associated with this node.
+     */
+    @Getter
     private Object value;
 
     public ParsedNode(String namespace, String name) {
         this.namespace = namespace;
         this.name = name;
-    }
-
-    /**
-     * Each node key contains both a namespace and a name which together identifies the node.
-     */
-    public String getNamespace() {
-        return namespace;
-    }
-
-    /**
-     * Each node key contains both a namespace and a name which together identifies the node.
-     */
-    public String getName() {
-        return name;
     }
 
     /**
@@ -70,13 +72,6 @@ public class ParsedNode {
             }
         }
         return Collections.unmodifiableList(returnList);
-    }
-
-    /**
-     * Return the value associated with this node.
-     */
-    public Object getValue() {
-        return value;
     }
 
     /**

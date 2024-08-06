@@ -1,7 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
+@Getter
 public class CreateProcedureStatement extends AbstractSqlStatement {
 
     private final String catalogName;
@@ -17,30 +19,6 @@ public class CreateProcedureStatement extends AbstractSqlStatement {
         this.procedureName = procedureName;
         this.procedureText = procedureText;
         this.endDelimiter = endDelimiter;
-    }
-
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getProcedureName() {
-        return procedureName;
-    }
-
-    public String getProcedureText() {
-        return procedureText;
-    }
-
-    public String getEndDelimiter() {
-        return endDelimiter;
-    }
-
-    public Boolean getReplaceIfExists() {
-        return replaceIfExists;
     }
 
     public void setReplaceIfExists(Boolean replaceIfExists) {

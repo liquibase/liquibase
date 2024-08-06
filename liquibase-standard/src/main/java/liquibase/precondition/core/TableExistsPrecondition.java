@@ -12,30 +12,20 @@ import liquibase.precondition.AbstractPrecondition;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
+import lombok.Getter;
 
+@Getter
 public class TableExistsPrecondition extends AbstractPrecondition {
     private String catalogName;
     private String schemaName;
     private String tableName;
 
-    public String getCatalogName() {
-        return catalogName;
-    }
-
     public void setCatalogName(String catalogName) {
         this.catalogName = catalogName;
     }
 
-    public String getSchemaName() {
-        return schemaName;
-    }
-
     public void setSchemaName(String schemaName) {
         this.schemaName = schemaName;
-    }
-
-    public String getTableName() {
-        return tableName;
     }
 
     public void setTableName(String tableName) {

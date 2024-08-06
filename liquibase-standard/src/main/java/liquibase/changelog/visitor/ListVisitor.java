@@ -5,18 +5,16 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+@Getter
 public class ListVisitor implements ChangeSetVisitor {
 
     private final List<ChangeSet> seenChangeSets = new ArrayList<>();
-
-    public List<ChangeSet> getSeenChangeSets() {
-        return seenChangeSets;
-    }
 
     @Override
     public Direction getDirection() {

@@ -1,12 +1,11 @@
 package liquibase.osgi;
 
+import lombok.Getter;
+
 public class ContainerChecker {
 
+    @Getter
     private static volatile boolean osgiPlatform = false;
-
-    public static boolean isOsgiPlatform() {
-        return osgiPlatform;
-    }
 
     static void osgiPlatform() {
         osgiPlatform = true;

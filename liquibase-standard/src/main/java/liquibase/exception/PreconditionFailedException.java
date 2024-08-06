@@ -3,6 +3,7 @@ package liquibase.exception;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.Precondition;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
  * Thrown when a precondition failed. This is NOT the same as a PreconditionErrorException: A failure just means that
  * the specified condition evaluated to "does not apply".
  */
+@Getter
 public class PreconditionFailedException extends Exception {
 
     private static final long serialVersionUID = 1L;
@@ -29,10 +31,6 @@ public class PreconditionFailedException extends Exception {
     public PreconditionFailedException(List<FailedPrecondition> failedPreconditions) {
         super("Preconditions Failed");
         this.failedPreconditions = failedPreconditions;
-    }
-
-    public List<FailedPrecondition> getFailedPreconditions() {
-        return failedPreconditions;
     }
 
 }

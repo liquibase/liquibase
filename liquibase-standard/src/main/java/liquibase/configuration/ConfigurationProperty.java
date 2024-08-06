@@ -3,6 +3,7 @@ package liquibase.configuration;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -14,6 +15,12 @@ public class ConfigurationProperty {
 
     private final ConfigurationDefinition.Building definitionBuilder;
     private ConfigurationDefinition definition;
+    /**
+     * -- GETTER --
+     *  Returns the namespace used by this property's
+     *
+     */
+    @Getter
     private final String namespace;
 
     public ConfigurationProperty(String namespace, ConfigurationDefinition.Building definitionBuilder) {
@@ -29,14 +36,6 @@ public class ConfigurationProperty {
      */
     public String getName() {
         return definition.getKey().replace(namespace+".", "");
-    }
-
-    /**
-     * Returns the namespace used by this property's {@link ConfigurationContainer}
-     * @deprecated
-     */
-    public String getNamespace() {
-        return namespace;
     }
 
     /**

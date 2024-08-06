@@ -15,6 +15,7 @@ import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -23,6 +24,7 @@ import java.sql.Statement;
 
 import static java.lang.String.format;
 
+@Getter
 public class ColumnExistsPrecondition extends AbstractPrecondition {
     private String catalogName;
     private String schemaName;
@@ -34,32 +36,16 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
-    public String getCatalogName() {
-        return catalogName;
-    }
-
     public void setCatalogName(String catalogName) {
         this.catalogName = catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
         this.schemaName = schemaName;
     }
 
-    public String getTableName() {
-        return tableName;
-    }
-
     public void setTableName(String tableName) {
         this.tableName = tableName;
-    }
-
-    public String getColumnName() {
-        return columnName;
     }
 
     public void setColumnName(String columnName) {

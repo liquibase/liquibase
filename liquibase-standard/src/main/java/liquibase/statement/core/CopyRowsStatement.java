@@ -2,9 +2,11 @@ package liquibase.statement.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
 import java.util.List;
 
+@Getter
 public class CopyRowsStatement extends AbstractSqlStatement {
 
     private final String sourceTable;
@@ -19,15 +21,4 @@ public class CopyRowsStatement extends AbstractSqlStatement {
         this.copyColumns = copyColumns;
     }
 
-    public String getSourceTable() {
-        return this.sourceTable;
-    }
-
-    public String getTargetTable() {
-        return this.targetTable;
-    }
-
-    public List<ColumnConfig> getCopyColumns() {
-        return this.copyColumns;
-    }
 }

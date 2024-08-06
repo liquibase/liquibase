@@ -38,6 +38,7 @@ import liquibase.util.ObjectUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.csv.CSVReader;
+import lombok.Getter;
 import lombok.Setter;
 
 import java.io.IOException;
@@ -907,6 +908,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     protected static class LoadDataRowConfig {
 
         private final boolean needsPreparedStatement;
+        @Getter
         private final List<LoadDataColumnConfig> columns;
 
         public LoadDataRowConfig(boolean needsPreparedStatement, List<LoadDataColumnConfig> columns) {
@@ -918,8 +920,5 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
             return needsPreparedStatement;
         }
 
-        public List<LoadDataColumnConfig> getColumns() {
-            return columns;
-        }
     }
 }

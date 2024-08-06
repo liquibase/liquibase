@@ -7,6 +7,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.precondition.Precondition;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,7 +16,9 @@ import java.util.List;
 
 public class ValidationErrors {
 
+    @Getter
     protected List<String> errorMessages = new ArrayList<>();
+    @Getter
     protected List<String> warningMessages = new ArrayList<>();
     protected String change = null;
 
@@ -134,17 +137,9 @@ public class ValidationErrors {
         return this;
     }
 
-    public List<String> getErrorMessages() {
-        return errorMessages;
-    }
-
     public ValidationErrors addWarning(String message) {
         warningMessages.add(message);
         return this;
-    }
-
-    public List<String> getWarningMessages() {
-        return warningMessages;
     }
 
     public ValidationErrors addAll(ValidationErrors validationErrors) {

@@ -1,9 +1,12 @@
 package liquibase.precondition;
 
 import liquibase.changelog.DatabaseChangeLog;
+import lombok.Getter;
 
 public class FailedPrecondition {
+    @Getter
     private final String message;
+    @Getter
     private final Precondition precondition;
     private final DatabaseChangeLog changeLog;
 
@@ -12,15 +15,6 @@ public class FailedPrecondition {
         this.message = message;
         this.changeLog = changeLog;
         this.precondition = precondition;
-    }
-
-
-    public String getMessage() {
-        return message;
-    }
-
-    public Precondition getPrecondition() {
-        return precondition;
     }
 
 

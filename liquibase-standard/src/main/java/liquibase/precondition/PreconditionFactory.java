@@ -2,10 +2,12 @@ package liquibase.precondition;
 
 import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
+import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Getter
 public class PreconditionFactory {
     @SuppressWarnings("unchecked")
     private final Map<String, Class<? extends Precondition>> preconditions;
@@ -33,10 +35,6 @@ public class PreconditionFactory {
 
     public static synchronized void reset() {
         instance = new PreconditionFactory();
-    }
-
-    public Map<String, Class<? extends Precondition>> getPreconditions() {
-        return preconditions;
     }
 
     public void register(Precondition precondition) {

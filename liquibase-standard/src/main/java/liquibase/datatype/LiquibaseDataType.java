@@ -6,6 +6,7 @@ import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.statement.DatabaseFunction;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -19,14 +20,31 @@ import java.util.Locale;
  */
 public abstract class LiquibaseDataType implements PrioritizedService {
 
+    @Getter
     private final String name;
+    @Getter
     private final String[] aliases;
     private final int priority;
     private final int minParameters;
     private final int maxParameters;
 
     private final List<Object> parameters = new ArrayList<>();
+    /**
+     * -- GETTER --
+     *  Returns additional information that was stored during
+     *  or other parsers.
+     *
+     * @return the additional information. Might be null.
+     */
+    @Getter
     private String additionalInformation;
+    /**
+     * -- GETTER --
+     *  Obtains the "raw" data type definition if one was used to create this object as a result of parsing
+     *
+     * @return the raw definition, or null.
+     */
+    @Getter
     private String rawDefinition;
 
     protected LiquibaseDataType(LiquibaseDataType originalType) {
@@ -52,14 +70,6 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         this.maxParameters = maxParameters;
         this.aliases = new String[0];
         this.priority = 0;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String[] getAliases() {
-        return aliases;
     }
 
     @Override
@@ -98,25 +108,8 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         this.parameters.add(value);
     }
 
-    /**
-     * Returns additional information that was stored during {@link DataTypeFactory#fromDescription(String, Database)}
-     * or other parsers.
-     * @return the additional information. Might be null.
-     */
-    public String getAdditionalInformation() {
-        return additionalInformation;
-    }
-
     public void setAdditionalInformation(String additionalInformation) {
         this.additionalInformation = additionalInformation;
-    }
-
-    /**
-     * Obtains the "raw" data type definition if one was used to create this object as a result of parsing
-     * @return the raw definition, or null.
-     */
-    public String getRawDefinition() {
-        return rawDefinition;
     }
 
     /**

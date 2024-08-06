@@ -1,7 +1,9 @@
 package com.example.liquibase.change;
 
 import liquibase.serializer.AbstractLiquibaseSerializable;
+import lombok.Getter;
 
+@Getter
 public class KeyColumnConfig extends AbstractLiquibaseSerializable {
     private String name;
     private Boolean descending;
@@ -16,17 +18,9 @@ public class KeyColumnConfig extends AbstractLiquibaseSerializable {
         return "keyColumn";
     }
 
-    public String getName() {
-        return name;
-    }
-
     public KeyColumnConfig setName(String name) {
         this.name = name;
         return this;
-    }
-
-    public Boolean getDescending() {
-        return descending;
     }
 
     public KeyColumnConfig setDescending(Boolean descending) {

@@ -42,7 +42,13 @@ public class CommandScope {
 
     /**
      * Config key including the command name. Example `liquibase.command.update`
+     * -- GETTER --
+     *  Returns the complete configuration prefix (without a trailing period) for the command in this scope.
+     *
+     * @return the complete configuration prefix for the command in this scope
+
      */
+    @Getter
     private final String completeConfigPrefix;
 
     /**
@@ -75,15 +81,6 @@ public class CommandScope {
      */
     public CommandDefinition getCommand() {
         return commandDefinition;
-    }
-
-    /**
-     * Returns the complete configuration prefix (without a trailing period) for the command in this scope.
-     *
-     * @return the complete configuration prefix for the command in this scope
-     */
-    public String getCompleteConfigPrefix() {
-        return completeConfigPrefix;
     }
 
     /**

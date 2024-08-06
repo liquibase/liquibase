@@ -2,9 +2,11 @@ package liquibase.logging.mdc.customobjects;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.logging.mdc.CustomMdcObject;
+import lombok.Getter;
 
 import java.util.List;
 
+@Getter
 public class SimpleStatus implements CustomMdcObject {
 
     private String message;
@@ -20,24 +22,12 @@ public class SimpleStatus implements CustomMdcObject {
         this.changesetCount = unrunChangeSets.size();
     }
 
-    public String getMessage() {
-        return message;
-    }
-
     public void setMessage(String message) {
         this.message = message;
     }
 
-    public String getLiquibaseTargetUrl() {
-        return liquibaseTargetUrl;
-    }
-
     public void setLiquibaseTargetUrl(String liquibaseTargetUrl) {
         this.liquibaseTargetUrl = liquibaseTargetUrl;
-    }
-
-    public int getChangesetCount() {
-        return changesetCount;
     }
 
     public void setChangesetCount(int changesetCount) {

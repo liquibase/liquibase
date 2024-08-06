@@ -1,9 +1,12 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
 public class ModifyDataTypeStatement extends AbstractSqlStatement {
+    @Getter
     private String columnName;
+    @Getter
     private String newDataType;
     private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
 
@@ -35,16 +38,8 @@ public class ModifyDataTypeStatement extends AbstractSqlStatement {
         this.databaseTableIdentifier.setTableName(tableName);
     }
 
-    public String getColumnName() {
-        return columnName;
-    }
-
     public void setColumnName(String columnName) {
         this.columnName = columnName;
-    }
-
-    public String getNewDataType() {
-        return newDataType;
     }
 
     public void setNewDataType(String newDataType) {

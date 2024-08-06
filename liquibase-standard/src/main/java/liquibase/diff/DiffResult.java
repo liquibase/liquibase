@@ -10,22 +10,29 @@ import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.util.BooleanUtil;
+import lombok.Getter;
 
 import java.io.IOException;
 import java.util.*;
 
 public class DiffResult {
 
+    @Getter
     private final DatabaseSnapshot referenceSnapshot;
+    @Getter
     private final DatabaseSnapshot comparisonSnapshot;
 
+    @Getter
     private final CompareControl compareControl;
 
+    @Getter
     private StringDiff productNameDiff;
+    @Getter
     private StringDiff productVersionDiff;
 
     private final Set<DatabaseObject> missingObjects = new HashSet<>();
     private final Set<DatabaseObject> unexpectedObjects = new HashSet<>();
+    @Getter
     private final Map<DatabaseObject, ObjectDifferences> changedObjects = new HashMap<>();
 
 
@@ -35,33 +42,13 @@ public class DiffResult {
         this.compareControl = compareControl;
     }
 
-    public DatabaseSnapshot getReferenceSnapshot() {
-        return referenceSnapshot;
-    }
-
-    public DatabaseSnapshot getComparisonSnapshot() {
-        return comparisonSnapshot;
-    }
-
-    public StringDiff getProductNameDiff() {
-        return productNameDiff;
-    }
-
     public void setProductNameDiff(StringDiff productNameDiff) {
         this.productNameDiff = productNameDiff;
-    }
-
-    public StringDiff getProductVersionDiff() {
-        return productVersionDiff;
     }
 
 
     public void setProductVersionDiff(StringDiff productVersionDiff) {
         this.productVersionDiff = productVersionDiff;
-    }
-
-    public CompareControl getCompareControl() {
-        return compareControl;
     }
 
     public Set<? extends DatabaseObject> getMissingObjects() {
@@ -135,10 +122,6 @@ public class DiffResult {
 
     public void addUnexpectedObject(DatabaseObject obj) {
         unexpectedObjects.add(obj);
-    }
-
-    public Map<DatabaseObject, ObjectDifferences> getChangedObjects() {
-        return changedObjects;
     }
 
     public <T extends DatabaseObject> Map<T, ObjectDifferences> getChangedObjects(Class<T> type) {

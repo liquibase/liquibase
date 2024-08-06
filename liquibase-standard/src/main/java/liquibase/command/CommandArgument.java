@@ -1,32 +1,19 @@
 package liquibase.command;
 
+import lombok.Getter;
+
 import java.util.Objects;
 
 /**
  * @deprecated Used by the old {@link LiquibaseCommand} style of command setup.
  */
+@Getter
 public class CommandArgument implements Comparable {
 
     private String name;
     private String description;
     private Class dataType;
     private boolean required;
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public Class getDataType() {
-        return dataType;
-    }
-
-    public boolean isRequired() {
-        return required;
-    }
 
     @Override
     public int compareTo(Object o) {

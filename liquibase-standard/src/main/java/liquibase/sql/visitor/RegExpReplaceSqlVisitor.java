@@ -1,7 +1,9 @@
 package liquibase.sql.visitor;
 
 import liquibase.database.Database;
+import lombok.Getter;
 
+@Getter
 public class RegExpReplaceSqlVisitor extends AbstractSqlVisitor {
 
     private String replace;
@@ -12,16 +14,8 @@ public class RegExpReplaceSqlVisitor extends AbstractSqlVisitor {
         return "regExpReplace";
     }
 
-    public String getReplace() {
-        return replace;
-    }
-
     public void setReplace(String replace) {
         this.replace = replace;
-    }
-
-    public String getWith() {
-        return with;
     }
 
     public void setWith(String with) {

@@ -1,10 +1,13 @@
 package liquibase.exception;
 
+import lombok.Getter;
+
 import java.util.logging.Level;
 
 /**
  * Base class for all Liquibase exceptions.
  */
+@Getter
 public class LiquibaseException extends Exception {
 
     private static final long serialVersionUID = 1L;
@@ -32,20 +35,8 @@ public class LiquibaseException extends Exception {
         super(cause);
     }
 
-    public Level getLogLevel() {
-        return logLevel;
-    }
-
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
-    }
-
-    public String getTimestamp() {
-        return timestamp;
-    }
-
-    public String getDetails() {
-        return details;
     }
 
     public void setDetails(String details) {

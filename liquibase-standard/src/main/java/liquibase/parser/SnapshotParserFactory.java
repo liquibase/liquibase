@@ -5,6 +5,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.UnknownFormatException;
 import liquibase.resource.ResourceAccessor;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,6 +16,7 @@ public class SnapshotParserFactory {
 
     private static SnapshotParserFactory instance;
 
+    @Getter
     private final List<SnapshotParser> parsers;
     private final Comparator<SnapshotParser> snapshotParserComparator;
 
@@ -49,10 +51,6 @@ public class SnapshotParserFactory {
             throw new UnexpectedLiquibaseException(e);
         }
 
-    }
-
-    public List<SnapshotParser> getParsers() {
-        return parsers;
     }
 
     public SnapshotParser getParser(String fileNameOrExtension, ResourceAccessor resourceAccessor) throws LiquibaseException {

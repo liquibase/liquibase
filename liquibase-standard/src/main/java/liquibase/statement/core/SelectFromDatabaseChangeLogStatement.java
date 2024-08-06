@@ -6,6 +6,7 @@ import liquibase.statement.AbstractSqlStatement;
 import lombok.Data;
 import lombok.Getter;
 
+@Getter
 public class SelectFromDatabaseChangeLogStatement extends AbstractSqlStatement {
 
     private ColumnConfig[] columnsToSelect;
@@ -31,26 +32,10 @@ public class SelectFromDatabaseChangeLogStatement extends AbstractSqlStatement {
         this.whereClause = whereClause;
     }
 
-    public ColumnConfig[] getColumnsToSelect() {
-        return columnsToSelect;
-    }
-
-    public WhereClause getWhereClause() {
-        return whereClause;
-    }
-
-    public String[] getOrderByColumns() {
-        return orderByColumns;
-    }
-
     public SelectFromDatabaseChangeLogStatement setOrderBy(String... columns) {
         this.orderByColumns = columns;
 
         return this;
-    }
-
-    public Integer getLimit() {
-        return limit;
     }
 
     public SelectFromDatabaseChangeLogStatement setLimit(Integer limit) {

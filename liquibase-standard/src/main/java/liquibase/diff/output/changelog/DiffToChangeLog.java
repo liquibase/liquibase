@@ -37,6 +37,7 @@ import liquibase.structure.core.Table;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayOutputStream;
@@ -65,6 +66,7 @@ public class DiffToChangeLog {
     private String changeSetContext;
     private String changeSetLabels;
     private String changeSetAuthor;
+    @Getter
     private String changeSetPath;
     private String[] changeSetRunOnChangeTypes;
     private String[] changeReplaceIfExistsTypes;
@@ -926,10 +928,6 @@ public class DiffToChangeLog {
 
     public void setChangeSetAuthor(String changeSetAuthor) {
         this.changeSetAuthor = changeSetAuthor;
-    }
-
-    public String getChangeSetPath() {
-        return changeSetPath;
     }
 
     public void setChangeSetPath(String changeSetPath) {

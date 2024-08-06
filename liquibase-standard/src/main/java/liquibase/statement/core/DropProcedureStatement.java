@@ -1,7 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
+@Getter
 public class DropProcedureStatement extends AbstractSqlStatement {
 
     private final String catalogName;
@@ -14,15 +16,4 @@ public class DropProcedureStatement extends AbstractSqlStatement {
         this.procedureName = procedureName;
     }
 
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getProcedureName() {
-        return procedureName;
-    }
 }

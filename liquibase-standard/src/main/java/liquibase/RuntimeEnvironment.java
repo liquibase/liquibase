@@ -1,7 +1,9 @@
 package liquibase;
 
 import liquibase.database.Database;
+import lombok.Getter;
 
+@Getter
 public class RuntimeEnvironment {
     private final Database targetDatabase;
     private final Contexts contexts;
@@ -13,15 +15,4 @@ public class RuntimeEnvironment {
         this.labels = labelExpression;
     }
 
-    public Database getTargetDatabase() {
-        return targetDatabase;
-    }
-
-    public Contexts getContexts() {
-        return contexts;
-    }
-
-    public LabelExpression getLabels() {
-        return labels;
-    }
 }

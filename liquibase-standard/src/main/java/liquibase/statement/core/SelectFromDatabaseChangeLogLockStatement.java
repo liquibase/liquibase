@@ -2,7 +2,9 @@ package liquibase.statement.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
+@Getter
 public class SelectFromDatabaseChangeLogLockStatement extends AbstractSqlStatement {
 
     private final ColumnConfig[] columnsToSelect;
@@ -22,7 +24,4 @@ public class SelectFromDatabaseChangeLogLockStatement extends AbstractSqlStateme
         this.columnsToSelect = columnsToSelect;
     }
 
-    public ColumnConfig[] getColumnsToSelect() {
-        return columnsToSelect;
-    }
 }

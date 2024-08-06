@@ -6,6 +6,7 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.database.core.MockDatabase;
+import lombok.Getter;
 
 import java.io.File;
 import java.net.*;
@@ -21,14 +22,11 @@ import java.util.Set;
  * url.
  */
 public class TestContext {
+    @Getter
     private static TestContext instance = new TestContext();
 
     private Set<Database> allDatabases;
     private ResourceAccessor resourceAccessor;
-
-    public static TestContext getInstance() {
-        return instance;
-    }
 
     public Set<Database> getAllDatabases() {
         if (allDatabases == null) {

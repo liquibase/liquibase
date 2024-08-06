@@ -1,14 +1,18 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class DeleteStatement extends AbstractSqlStatement {
+    @Getter
     private String where;
+    @Getter
     private final List<Object> whereParameters = new ArrayList<>();
+    @Getter
     private final List<String> whereColumnNames = new ArrayList<>();
     private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
 
@@ -28,10 +32,6 @@ public class DeleteStatement extends AbstractSqlStatement {
 
     public String getTableName() {
         return databaseTableIdentifier.getTableName();
-    }
-
-    public String getWhere() {
-        return where;
     }
 
     public DeleteStatement setWhere(String where) {
@@ -68,11 +68,4 @@ public class DeleteStatement extends AbstractSqlStatement {
         return this;
     }
 
-    public List<Object> getWhereParameters() {
-        return whereParameters;
-    }
-
-    public List<String> getWhereColumnNames() {
-        return whereColumnNames;
-    }
 }

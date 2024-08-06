@@ -1,11 +1,15 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
 public class DropViewStatement extends AbstractSqlStatement {
 
+    @Getter
     private final String catalogName;
+    @Getter
     private final String schemaName;
+    @Getter
     private final String viewName;
     private final Boolean ifExists;
 
@@ -18,18 +22,6 @@ public class DropViewStatement extends AbstractSqlStatement {
         this.schemaName = schemaName;
         this.viewName = viewName;
         this.ifExists = ifExists;
-    }
-
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getViewName() {
-        return viewName;
     }
 
     public Boolean isIfExists() {

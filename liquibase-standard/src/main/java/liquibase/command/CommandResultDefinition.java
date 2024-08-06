@@ -1,5 +1,7 @@
 package liquibase.command;
 
+import lombok.Getter;
+
 import java.util.Objects;
 
 /**
@@ -9,44 +11,33 @@ import java.util.Objects;
  *
  * @see CommandBuilder#result(String, Class) for constructing new instances.
  */
+@Getter
 public class CommandResultDefinition<DataType> implements Comparable<CommandResultDefinition<?>> {
 
+    /**
+     * -- GETTER --
+     *  The name of the result. Must be camelCase and alphanumeric.
+     */
     private final String name;
+    /**
+     * -- GETTER --
+     *  The description of the result. Used in generated help documentation.
+     */
     private String description;
+    /**
+     * -- GETTER --
+     *  The datatype of the result.
+     */
     private final Class<DataType> dataType;
+    /**
+     * -- GETTER --
+     *  The default value to use if no value was provided.
+     */
     private DataType defaultValue;
 
     protected CommandResultDefinition(String name, Class<DataType> type) {
         this.name = name;
         this.dataType = type;
-    }
-
-    /**
-     * The name of the result. Must be camelCase and alphanumeric.
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * The description of the result. Used in generated help documentation.
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * The datatype of the result.
-     */
-    public Class<DataType> getDataType() {
-        return dataType;
-    }
-
-    /**
-     * The default value to use if no value was provided.
-     */
-    public DataType getDefaultValue() {
-        return defaultValue;
     }
 
     @Override

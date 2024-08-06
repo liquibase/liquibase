@@ -1,11 +1,13 @@
 package liquibase.statement.core;
 
 import liquibase.change.DatabaseChangeProperty;
+import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class InsertOrUpdateStatement extends InsertStatement {
+    @Getter
     private final String primaryKey;
     private Boolean onlyUpdate = Boolean.FALSE;
     private final Map<String, Boolean> allowUpdates = new HashMap<>();
@@ -18,10 +20,6 @@ public class InsertOrUpdateStatement extends InsertStatement {
     public InsertOrUpdateStatement(String catalogName, String schemaName, String tableName, String primaryKey, boolean onlyUpdate) {
         this(catalogName, schemaName, tableName,primaryKey);
         this.onlyUpdate = onlyUpdate;
-    }
-    
-    public String getPrimaryKey() {
-        return primaryKey;
     }
 
     @DatabaseChangeProperty(description = "Whether records with no matching database record should be ignored")

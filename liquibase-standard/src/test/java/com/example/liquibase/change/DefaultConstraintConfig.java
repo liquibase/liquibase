@@ -1,7 +1,9 @@
 package com.example.liquibase.change;
 
 import liquibase.serializer.AbstractLiquibaseSerializable;
+import lombok.Getter;
 
+@Getter
 public class DefaultConstraintConfig extends AbstractLiquibaseSerializable {
     private String name;
     private String expression;
@@ -24,17 +26,9 @@ public class DefaultConstraintConfig extends AbstractLiquibaseSerializable {
         return SerializationType.NAMED_FIELD;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public DefaultConstraintConfig setName(String name) {
         this.name = name;
         return this;
-    }
-
-    public String getExpression() {
-        return expression;
     }
 
     public DefaultConstraintConfig setExpression(String expression) {

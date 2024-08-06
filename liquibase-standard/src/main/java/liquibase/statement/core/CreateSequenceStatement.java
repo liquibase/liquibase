@@ -1,9 +1,11 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
 import java.math.BigInteger;
 
+@Getter
 public class CreateSequenceStatement extends AbstractSqlStatement {
 
     private String catalogName;
@@ -29,24 +31,8 @@ public class CreateSequenceStatement extends AbstractSqlStatement {
         return true;
     }
 
-    public String getCatalogName() {
-        return catalogName;
-    }
-
     public void setCatalogName(String catalogName) {
         this.catalogName = catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getSequenceName() {
-        return sequenceName;
-    }
-
-    public BigInteger getStartValue() {
-        return startValue;
     }
 
     public CreateSequenceStatement setStartValue(BigInteger startValue) {
@@ -54,17 +40,9 @@ public class CreateSequenceStatement extends AbstractSqlStatement {
         return this;
     }
 
-    public BigInteger getIncrementBy() {
-        return incrementBy;
-    }
-
     public CreateSequenceStatement setIncrementBy(BigInteger incrementBy) {
         this.incrementBy = incrementBy;
         return this;
-    }
-
-    public BigInteger getMaxValue() {
-        return maxValue;
     }
 
     public CreateSequenceStatement setMaxValue(BigInteger maxValue) {
@@ -72,17 +50,9 @@ public class CreateSequenceStatement extends AbstractSqlStatement {
         return this;
     }
 
-    public BigInteger getMinValue() {
-        return minValue;
-    }
-
     public CreateSequenceStatement setMinValue(BigInteger minValue) {
         this.minValue = minValue;
         return this;
-    }
-
-    public Boolean getOrdered() {
-        return ordered;
     }
 
     public CreateSequenceStatement setOrdered(Boolean ordered) {
@@ -90,25 +60,14 @@ public class CreateSequenceStatement extends AbstractSqlStatement {
         return this;
     }
 
-    public Boolean getCycle() {
-        return cycle;
-    }
-
     public CreateSequenceStatement setCycle(Boolean cycle) {
         this.cycle = cycle;
         return this;
     }
 
-    public BigInteger getCacheSize() {
-        return cacheSize;
-    }
-
     public CreateSequenceStatement setCacheSize(BigInteger cacheSize) {
         this.cacheSize = cacheSize;
         return this;
-    }
-    public String getDataType() {
-        return dataType;
     }
 
     public CreateSequenceStatement setDataType(String dataType) {

@@ -1,14 +1,18 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
 import java.util.*;
 
 public class UpdateStatement extends AbstractSqlStatement {
     private final SortedMap<String, Object> newColumnValues = new TreeMap<>();
+    @Getter
     private String whereClause;
 
+    @Getter
     private final List<String> whereColumnNames = new ArrayList<>();
+    @Getter
     private final List<Object> whereParameters = new ArrayList<>();
     private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
 
@@ -35,10 +39,6 @@ public class UpdateStatement extends AbstractSqlStatement {
             newColumnValues.put(columnName, newValue);
 
         return this;
-    }
-
-    public String getWhereClause() {
-        return whereClause;
     }
 
     public UpdateStatement setWhereClause(String whereClause) {
@@ -70,11 +70,4 @@ public class UpdateStatement extends AbstractSqlStatement {
         return newColumnValues;
     }
 
-    public List<Object> getWhereParameters() {
-        return whereParameters;
-    }
-
-    public List<String> getWhereColumnNames() {
-        return whereColumnNames;
-    }
 }

@@ -11,11 +11,13 @@ import liquibase.precondition.AbstractPrecondition;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Sequence;
+import lombok.Getter;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+@Getter
 public class SequenceExistsPrecondition extends AbstractPrecondition {
     private String catalogName;
     private String schemaName;
@@ -23,24 +25,12 @@ public class SequenceExistsPrecondition extends AbstractPrecondition {
 
     private static final String SQL_CHECK_POSTGRES_SEQUENCE_EXISTS = "SELECT c.relname FROM pg_class c JOIN pg_namespace ns on c.relnamespace = ns.oid WHERE c.relkind = 'S' AND ns.nspname = ? and c.relname ILIKE ?";
 
-    public String getCatalogName() {
-        return catalogName;
-    }
-
     public void setCatalogName(String catalogName) {
         this.catalogName = catalogName;
     }
 
-    public String getSchemaName() {
-        return schemaName;
-    }
-
     public void setSchemaName(String schemaName) {
         this.schemaName = schemaName;
-    }
-
-    public String getSequenceName() {
-        return sequenceName;
     }
 
     public void setSequenceName(String sequenceName) {

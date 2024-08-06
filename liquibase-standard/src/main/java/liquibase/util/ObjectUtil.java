@@ -5,6 +5,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
+import lombok.Getter;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.beans.IntrospectionException;
@@ -490,6 +491,7 @@ public class ObjectUtil {
     }
 
     private static class IntrospectionContext {
+        @Getter
         private final Class<?> targetClass;
         private final Map<String, PropertyDescriptor> descriptors = new ConcurrentHashMap<>();
 
@@ -518,9 +520,6 @@ public class ObjectUtil {
             return descriptors.values().toArray(new PropertyDescriptor[0]);
         }
 
-        public Class<?> getTargetClass() {
-            return targetClass;
-        }
     }
 
 }

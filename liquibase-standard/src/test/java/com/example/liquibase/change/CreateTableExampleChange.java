@@ -5,11 +5,13 @@ import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 @DatabaseChange(
     name = "createTableExample",
     description = "Used in unit tests",
@@ -38,17 +40,9 @@ public class CreateTableExampleChange extends AbstractChange {
         return "Test Confirmation Message";
     }
 
-    public String getSchemaName() {
-        return schemaName;
-    }
-
     public CreateTableExampleChange setSchemaName(String schemaName) {
         this.schemaName = schemaName;
         return this;
-    }
-
-    public String getTableName() {
-        return tableName;
     }
 
     public CreateTableExampleChange setTableName(String tableName) {
@@ -56,17 +50,9 @@ public class CreateTableExampleChange extends AbstractChange {
         return this;
     }
 
-    public List<ColumnConfigExample> getColumns() {
-        return columns;
-    }
-
     public CreateTableExampleChange setColumns(List<ColumnConfigExample> columns) {
         this.columns = columns;
         return this;
-    }
-
-    public PrimaryKeyConfig getPrimaryKey() {
-        return primaryKey;
     }
 
     public CreateTableExampleChange setPrimaryKey(PrimaryKeyConfig primaryKey) {
@@ -74,17 +60,9 @@ public class CreateTableExampleChange extends AbstractChange {
         return this;
     }
 
-    public List<UniqueConstraintConfig> getUniqueConstraints() {
-        return uniqueConstraints;
-    }
-
     public CreateTableExampleChange setUniqueConstraints(List<UniqueConstraintConfig> uniqueConstraints) {
         this.uniqueConstraints = uniqueConstraints;
         return this;
-    }
-
-    public BigDecimal getDecimalValue() {
-        return decimalValue;
     }
 
     public CreateTableExampleChange setDecimalValue(BigDecimal decimalValue) {

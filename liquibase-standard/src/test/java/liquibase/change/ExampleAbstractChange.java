@@ -2,12 +2,14 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
+import lombok.Getter;
 
 @DatabaseChange(name = "exampleAbstractChange", description = "Used for the AbstractChangeTest unit test", priority = 1)
 class ExampleAbstractChange extends AbstractChange {
 
     private String paramOne;
     private Integer paramTwo;
+    @Getter
     private String paramNoMetadata;
     private String paramNotIncluded;
 
@@ -37,10 +39,6 @@ class ExampleAbstractChange extends AbstractChange {
 
     public void setParamTwo(Integer paramTwo) {
         this.paramTwo = paramTwo;
-    }
-
-    public String getParamNoMetadata() {
-        return paramNoMetadata;
     }
 
     public void setParamNoMetadata(String paramNoMetadata) {

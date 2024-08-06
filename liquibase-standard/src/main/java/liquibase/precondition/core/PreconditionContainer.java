@@ -17,10 +17,12 @@ import liquibase.precondition.FailedPrecondition;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class PreconditionContainer extends AndPrecondition implements ChangeLogChild {
 
     public enum FailOption {
@@ -83,10 +85,6 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
     private String onFailMessage;
     private String onErrorMessage;
 
-    public FailOption getOnFail() {
-        return onFail;
-    }
-
     public void setOnFail(String onFail) {
         if (onFail == null) {
             this.onFail = FailOption.HALT;
@@ -109,10 +107,6 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
         this.onFail = onFail;
     }
 
-    public ErrorOption getOnError() {
-        return onError;
-    }
-
     public void setOnError(String onError) {
         if (onError == null) {
             this.onError = ErrorOption.HALT;
@@ -133,10 +127,6 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
 
     public void setOnError(ErrorOption onError) {
         this.onError = onError;
-    }
-
-    public OnSqlOutputOption getOnSqlOutput() {
-        return onSqlOutput;
     }
 
     public void setOnSqlOutput(String onSqlOutput) {
@@ -166,16 +156,8 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
         }
     }
 
-    public String getOnFailMessage() {
-        return onFailMessage;
-    }
-
     public void setOnFailMessage(String onFailMessage) {
         this.onFailMessage = onFailMessage;
-    }
-
-    public String getOnErrorMessage() {
-        return onErrorMessage;
     }
 
     public void setOnErrorMessage(String onErrorMessage) {

@@ -6,10 +6,12 @@ import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.command.core.helpers.DiffOutputControlCommandStep;
 import liquibase.command.core.helpers.PreCompareCommandStep;
 import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep;
+import lombok.Getter;
 
 /**
  * @deprecated Implement commands with {@link liquibase.command.CommandStep} and call them with {@link liquibase.command.CommandFactory#getCommandDefinition(String...)}.
  */
+@Getter
 public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
 
     private String author;
@@ -20,17 +22,9 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
         return "generateChangeLog";
     }
 
-    public String getAuthor() {
-        return author;
-    }
-
     public GenerateChangeLogCommand setAuthor(String author) {
         this.author = author;
         return this;
-    }
-
-    public String getContext() {
-        return context;
     }
 
     public GenerateChangeLogCommand setContext(String context) {

@@ -1,5 +1,8 @@
 package liquibase.statement;
 
+import lombok.Getter;
+
+@Getter
 public class DatabaseFunction {
 
     /**
@@ -21,17 +24,9 @@ public class DatabaseFunction {
         this.value = value;
     }
 
-    public String getValue() {
-        return value;
-    }
-
     @Override
     public String toString() {
         return (getSchemaName() == null ? "" : getSchemaName() + ".") + getValue();
-    }
-
-    public String getSchemaName() {
-        return schemaName;
     }
 
     public void setSchemaName(String schemaName) {

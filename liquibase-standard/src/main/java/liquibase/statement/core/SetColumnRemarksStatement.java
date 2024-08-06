@@ -2,11 +2,15 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
 import liquibase.util.ColumnParentType;
+import lombok.Getter;
 
 public class SetColumnRemarksStatement extends AbstractSqlStatement {
 
+    @Getter
     private final String columnName;
+    @Getter
     private final String remarks;
+    @Getter
     private final String columnDataType;
     private String columnParentType;
     private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
@@ -45,10 +49,6 @@ public class SetColumnRemarksStatement extends AbstractSqlStatement {
         this.columnParentType = columnParentType;
     }
 
-    public String getColumnDataType() {
-        return columnDataType;
-    }
-
     public String getCatalogName() {
         return databaseTableIdentifier.getCatalogName();
     }
@@ -59,14 +59,6 @@ public class SetColumnRemarksStatement extends AbstractSqlStatement {
 
     public String getTableName() {
         return databaseTableIdentifier.getTableName();
-    }
-
-    public String getColumnName() {
-        return columnName;
-    }
-
-    public String getRemarks() {
-        return remarks;
     }
 
     public ColumnParentType getColumnParentType() {

@@ -1,10 +1,22 @@
 package liquibase.resource;
 
+import lombok.Getter;
+
 /**
  * Defines the options for opening {@link Resource}s in Liquibase.
  */
+@Getter
 public class OpenOptions {
+    /**
+     * -- GETTER --
+     *  Should an existing file be truncated when opened. Both this and
+     *  are automatically kept in sync with each other.
+     */
     private boolean truncate;
+    /**
+     * -- GETTER --
+     *  If true, create the resource if it does not exist. If false, do not create the resource.
+     */
     private boolean createIfNeeded;
 
     /**
@@ -13,14 +25,6 @@ public class OpenOptions {
     public OpenOptions() {
         this.truncate = true;
         this.createIfNeeded = true;
-    }
-
-    /**
-     * Should an existing file be truncated when opened. Both this and {@link #isAppend()}
-     * are automatically kept in sync with each other.
-     */
-    public boolean isTruncate() {
-        return truncate;
     }
 
     public OpenOptions setTruncate(boolean truncate) {
@@ -39,13 +43,6 @@ public class OpenOptions {
     public OpenOptions setAppend(boolean append) {
         this.truncate = !append;
         return this;
-    }
-
-    /**
-     * If true, create the resource if it does not exist. If false, do not create the resource.
-     */
-    public boolean isCreateIfNeeded() {
-        return createIfNeeded;
     }
 
     public OpenOptions setCreateIfNeeded(boolean createIfNeeded) {

@@ -2,6 +2,7 @@ package liquibase;
 
 import liquibase.util.ExpressionMatcher;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.util.*;
 
@@ -19,6 +20,7 @@ import java.util.*;
 public class LabelExpression {
 
     private final HashSet<String> labels = new LinkedHashSet<>();
+    @Getter
     private String originalString;
 
     public LabelExpression() {
@@ -133,7 +135,4 @@ public class LabelExpression {
         return this.labels.isEmpty();
     }
 
-    public String getOriginalString() {
-        return originalString;
-    }
 }

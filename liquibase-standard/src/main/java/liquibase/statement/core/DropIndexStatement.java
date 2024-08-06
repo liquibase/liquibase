@@ -1,7 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
+@Getter
 public class DropIndexStatement extends AbstractSqlStatement {
 
     private final String indexName;
@@ -16,26 +18,6 @@ public class DropIndexStatement extends AbstractSqlStatement {
         this.indexName = indexName;
         this.tableName = tableName;
         this.associatedWith = associatedWith;
-    }
-
-    public String getTableCatalogName() {
-        return tableCatalogName;
-    }
-
-    public String getTableSchemaName() {
-        return tableSchemaName;
-    }
-
-    public String getIndexName() {
-        return indexName;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public String getAssociatedWith() {
-        return associatedWith;
     }
 
     public void setAssociatedWith(String associatedWith) {

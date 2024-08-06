@@ -1,7 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
+@Getter
 public class RenameViewStatement extends AbstractSqlStatement {
 
     private final String catalogName;
@@ -17,19 +19,4 @@ public class RenameViewStatement extends AbstractSqlStatement {
     }
 
 
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getOldViewName() {
-        return oldViewName;
-    }
-
-    public String getNewViewName() {
-        return newViewName;
-    }
 }

@@ -1,6 +1,7 @@
 package liquibase.util;
 
 import liquibase.Scope;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -175,7 +176,9 @@ public class DependencyUtil {
 
     private static class GraphNode<T> {
         public T value;
+        @Getter
         private List<GraphNode<T>> comingInNodes;
+        @Getter
         private List<GraphNode<T>> goingOutNodes;
 
         public void addComingInNode(GraphNode<T> node) {
@@ -190,13 +193,6 @@ public class DependencyUtil {
             goingOutNodes.add(node);
         }
 
-        public List<GraphNode<T>> getComingInNodes() {
-            return comingInNodes;
-        }
-
-        public List<GraphNode<T>> getGoingOutNodes() {
-            return goingOutNodes;
-        }
     }
 
 

@@ -11,6 +11,7 @@ import liquibase.serializer.LiquibaseSerializable;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.DatabaseObjectFactory;
+import lombok.Getter;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -23,7 +24,15 @@ public class SnapshotControl implements LiquibaseSerializable {
 
     private Set<Class<? extends DatabaseObject>> types;
     private ObjectChangeFilter objectChangeFilter;
+    @Getter
     private SnapshotListener snapshotListener;
+    /**
+     * -- GETTER --
+     *  Returns if the code should log a LogLevel.WARNING message if the object to be snapshotted could not be found.
+     *
+     * @return true if WARNINGs should be emitted (default), false if not.
+     */
+    @Getter
     private boolean warnIfObjectNotFound = true;
     
     
@@ -72,10 +81,6 @@ public class SnapshotControl implements LiquibaseSerializable {
         this(database, true, types);
 
         this.objectChangeFilter = objectChangeFilter;
-    }
-
-    public SnapshotListener getSnapshotListener() {
-        return snapshotListener;
     }
 
     public void setSnapshotListener(SnapshotListener snapshotListener) {
@@ -177,15 +182,7 @@ public class SnapshotControl implements LiquibaseSerializable {
     public ParsedNode serialize() {
         throw new RuntimeException("TODO");
     }
-    
-    /**
-     * Returns if the code should log a LogLevel.WARNING message if the object to be snapshotted could not be found.
-     * @return true if WARNINGs should be emitted (default), false if not.
-     */
-    public boolean isWarnIfObjectNotFound() {
-        return warnIfObjectNotFound;
-    }
-    
+
     /**
      * Configures the code to log a LogLevel.WARNING message if the object to be snapshotted could not be found.
      * @param warnIfObjectNotFound true if a warning should emitted (default value), false if not.

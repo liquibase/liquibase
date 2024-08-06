@@ -1,9 +1,12 @@
 package liquibase.precondition;
 
 import liquibase.changelog.DatabaseChangeLog;
+import lombok.Getter;
 
 public class ErrorPrecondition {
+    @Getter
     private final Throwable cause;
+    @Getter
     private final Precondition precondition;
     private final DatabaseChangeLog changeLog;
 
@@ -12,15 +15,6 @@ public class ErrorPrecondition {
         this.cause = exception;
         this.changeLog = changeLog;
         this.precondition = precondition;
-    }
-
-
-    public Throwable getCause() {
-        return cause;
-    }
-
-    public Precondition getPrecondition() {
-        return precondition;
     }
 
 

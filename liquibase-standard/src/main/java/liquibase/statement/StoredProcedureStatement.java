@@ -1,11 +1,14 @@
 package liquibase.statement;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class StoredProcedureStatement extends AbstractSqlStatement implements CallableSqlStatement {
 
+    @Getter
     private final String procedureName;
     private final List<String> parameters = new ArrayList<>();
     private final List<Integer> types = new ArrayList<>();
@@ -13,10 +16,6 @@ public class StoredProcedureStatement extends AbstractSqlStatement implements Ca
 
     public StoredProcedureStatement(String procedureName) {
         this.procedureName = procedureName;
-    }
-
-    public String getProcedureName() {
-        return procedureName;
     }
 
 

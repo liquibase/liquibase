@@ -3,10 +3,12 @@ package liquibase.serializer;
 import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
+import lombok.Getter;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Getter
 public class SnapshotSerializerFactory {
     private static SnapshotSerializerFactory instance;
 
@@ -32,10 +34,6 @@ public class SnapshotSerializerFactory {
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
-    }
-
-    public Map<String, List<SnapshotSerializer>> getSerializers() {
-        return serializers;
     }
 
     public List<SnapshotSerializer> getSerializers(String fileNameOrExtension) {

@@ -1,9 +1,11 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
 public class SetTableRemarksStatement extends AbstractSqlStatement {
 
+    @Getter
     private final String remarks;
     private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
 
@@ -24,10 +26,6 @@ public class SetTableRemarksStatement extends AbstractSqlStatement {
 
     public String getTableName() {
         return databaseTableIdentifier.getTableName();
-    }
-
-    public String getRemarks() {
-        return remarks;
     }
 
 }

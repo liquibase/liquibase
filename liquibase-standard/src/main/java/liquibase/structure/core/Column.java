@@ -13,6 +13,7 @@ import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.BooleanUtil;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -22,8 +23,11 @@ import java.util.Set;
 public class Column extends AbstractDatabaseObject {
 
     private String name;
+    @Getter
     private Boolean computed;
+    @Getter
     private Boolean descending;
+    @Getter
     private boolean forIndex;
 
     public Column() {
@@ -62,10 +66,6 @@ public class Column extends AbstractDatabaseObject {
         }
 
         setRemarks(columnConfig.getRemarks());
-    }
-
-    public boolean isForIndex() {
-        return forIndex;
     }
 
     public void setForIndex(boolean forIndex) {
@@ -119,11 +119,6 @@ public class Column extends AbstractDatabaseObject {
         return this;
     }
 
-
-
-    public Boolean getComputed() {
-        return computed;
-    }
 
     public Column setComputed(Boolean computed) {
         this.computed = computed;
@@ -185,10 +180,6 @@ public class Column extends AbstractDatabaseObject {
 
     public void setAutoIncrementInformation(AutoIncrementInformation autoIncrementInformation) {
         setAttribute("autoIncrementInformation", autoIncrementInformation);
-    }
-
-    public Boolean getDescending() {
-        return descending;
     }
 
     public Column setDescending(Boolean descending) {
@@ -407,6 +398,7 @@ public class Column extends AbstractDatabaseObject {
         }
     }
 
+    @Getter
     public static class AutoIncrementInformation extends AbstractLiquibaseSerializable {
         private BigInteger startWith;
         private BigInteger incrementBy;
@@ -422,28 +414,12 @@ public class Column extends AbstractDatabaseObject {
             this.incrementBy = (incrementBy == null) ? null : BigInteger.valueOf(incrementBy.longValue());
         }
 
-        public BigInteger getStartWith() {
-            return startWith;
-        }
-
-        public BigInteger getIncrementBy() {
-            return incrementBy;
-        }
-
         public void setDefaultOnNull(Boolean defaultOnNull) {
             this.defaultOnNull = defaultOnNull;
         }
 
-        public Boolean getDefaultOnNull() {
-            return defaultOnNull;
-        }
-
         public void setGenerationType(String generationType) {
             this.generationType = generationType;
-        }
-
-        public String getGenerationType() {
-            return generationType;
         }
 
         @Override

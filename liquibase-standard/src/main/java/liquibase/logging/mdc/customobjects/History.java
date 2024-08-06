@@ -2,9 +2,11 @@ package liquibase.logging.mdc.customobjects;
 
 import liquibase.changelog.RanChangeSet;
 import liquibase.logging.mdc.CustomMdcObject;
+import lombok.Getter;
 
 import java.util.List;
 
+@Getter
 public class History implements CustomMdcObject {
 
     private String liquibaseTargetUrl;
@@ -20,30 +22,19 @@ public class History implements CustomMdcObject {
         this.changesets = changesets;
     }
 
-    public String getLiquibaseTargetUrl() {
-        return liquibaseTargetUrl;
-    }
-
     public void setLiquibaseTargetUrl(String liquibaseTargetUrl) {
         this.liquibaseTargetUrl = liquibaseTargetUrl;
-    }
-
-    public int getChangesetCount() {
-        return changesetCount;
     }
 
     public void setChangesetCount(int changesetCount) {
         this.changesetCount = changesetCount;
     }
 
-    public List<Changeset> getChangesets() {
-        return changesets;
-    }
-
     public void setChangesets(List<Changeset> changesets) {
         this.changesets = changesets;
     }
 
+    @Getter
     public static class Changeset {
         private String deploymentId;
         private String updateDate;
@@ -62,40 +53,20 @@ public class History implements CustomMdcObject {
             this.changesetId = ranChangeSet.getId();
         }
 
-        public String getDeploymentId() {
-            return deploymentId;
-        }
-
         public void setDeploymentId(String deploymentId) {
             this.deploymentId = deploymentId;
-        }
-
-        public String getUpdateDate() {
-            return updateDate;
         }
 
         public void setUpdateDate(String updateDate) {
             this.updateDate = updateDate;
         }
 
-        public String getChangelogPath() {
-            return changelogPath;
-        }
-
         public void setChangelogPath(String changelogPath) {
             this.changelogPath = changelogPath;
         }
 
-        public String getChangesetAuthor() {
-            return changesetAuthor;
-        }
-
         public void setChangesetAuthor(String changesetAuthor) {
             this.changesetAuthor = changesetAuthor;
-        }
-
-        public String getChangesetId() {
-            return changesetId;
         }
 
         public void setChangesetId(String changesetId) {

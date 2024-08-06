@@ -3,11 +3,13 @@ package liquibase.changelog;
 import liquibase.Scope;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
+import lombok.Getter;
 
 /**
  * Container class to handle the modifyChangeSets tag.
  * Other attributes may be added later
  */
+@Getter
 public class ModifyChangeSets {
     private final String runWith;
     private final String runWithSpool;
@@ -33,11 +35,4 @@ public class ModifyChangeSets {
         this.runWithSpool = runWithSpool;
     }
 
-    public String getRunWith() {
-        return runWith;
-    }
-
-    public String getRunWithSpool() {
-        return runWithSpool;
-    }
 }

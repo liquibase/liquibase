@@ -6,6 +6,7 @@ import liquibase.database.PreparedStatementFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import lombok.Getter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -515,12 +516,9 @@ public class ExecutablePreparedStatementBaseTest {
         assertEquals(java.sql.Types.NULL, stmt.getParamTypes().get(1).intValue());
     }
 
+    @Getter
     private static class DummyPreparedStatement implements PreparedStatement {
         private Map<Integer, Integer> paramTypes = new HashMap<>();
-
-        public Map<Integer, Integer> getParamTypes() {
-            return paramTypes;
-        }
 
         @Override
         public ResultSet executeQuery(String sql) throws SQLException {

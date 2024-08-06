@@ -1,5 +1,7 @@
 package liquibase.statement;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -7,8 +9,11 @@ import java.util.List;
 
 public class PrimaryKeyConstraint implements ColumnConstraint {
 
+    @Getter
     private String constraintName;
+    @Getter
     private boolean initiallyDeferred;
+    @Getter
     private boolean deferrable;
 
     /**
@@ -17,6 +22,7 @@ public class PrimaryKeyConstraint implements ColumnConstraint {
     private boolean validatePrimaryKey = true;
 
     // used for PK's index configuration
+    @Getter
     private String tablespace;
 
     private final List<String> columns = new ArrayList<>();
@@ -33,14 +39,6 @@ public class PrimaryKeyConstraint implements ColumnConstraint {
         setValidatePrimaryKey(validatePrimaryKey);
     }
 
-
-    public String getConstraintName() {
-        return constraintName;
-    }
-
-    public String getTablespace() {
-        return tablespace;
-    }
 
     public PrimaryKeyConstraint setTablespace(String tablespace) {
         this.tablespace = tablespace;
@@ -65,17 +63,9 @@ public class PrimaryKeyConstraint implements ColumnConstraint {
         this.validatePrimaryKey = validatePrimaryKey;
     }
 
-    public boolean isInitiallyDeferred() {
-        return initiallyDeferred;
-    }
-
     public PrimaryKeyConstraint setInitiallyDeferred(boolean initiallyDeferred) {
         this.initiallyDeferred = initiallyDeferred;
         return this;
-    }
-
-    public boolean isDeferrable() {
-        return deferrable;
     }
 
     public PrimaryKeyConstraint setDeferrable(boolean deferrable) {

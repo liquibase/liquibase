@@ -6,6 +6,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.Logger;
 import liquibase.util.CollectionUtil;
 import liquibase.util.FileUtil;
+import lombok.Getter;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -318,6 +319,7 @@ public interface ResourceAccessor extends AutoCloseable {
         }
     }
 
+    @Getter
     class SearchOptions {
         private int minDepth;
         private int maxDepth;
@@ -344,19 +346,11 @@ public interface ResourceAccessor extends AutoCloseable {
             }
         }
 
-        public int getMinDepth() {
-            return minDepth;
-        }
-
         public void setMinDepth(int minDepth) {
             if(minDepth < 0) {
                 throw new IllegalArgumentException("minDepth must be non-negative");
             }
             this.minDepth = minDepth;
-        }
-
-        public int getMaxDepth() {
-            return maxDepth;
         }
 
         public void setMaxDepth(int maxDepth) {
@@ -365,8 +359,6 @@ public interface ResourceAccessor extends AutoCloseable {
             }
             this.maxDepth = maxDepth;
         }
-
-        public String getEndsWithFilter() { return endsWithFilter; }
 
         public void setTrimmedEndsWithFilter(String endsWithFilter) { this.endsWithFilter = endsWithFilter.trim(); }
 

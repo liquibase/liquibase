@@ -62,13 +62,30 @@ import java.util.Map;
 public class SpringLiquibase implements InitializingBean, BeanNameAware, ResourceLoaderAware {
 
     protected final Logger log = Scope.getCurrentScope().getLog(SpringLiquibase.class);
+    /**
+     * -- GETTER --
+     *  Gets the Spring-name of this instance.
+     *
+     * @return
+     */
+    @Getter
     protected String beanName;
 
     @Getter
     @Setter
     protected ResourceLoader resourceLoader;
 
+    /**
+     * -- GETTER --
+     *  The DataSource that liquibase will use to perform the migration.
+     */
+    @Getter
     protected DataSource dataSource;
+    /**
+     * -- GETTER --
+     *  Returns a Resource that is able to resolve to a file or classpath resource.
+     */
+    @Getter
     protected String changeLog;
 
     @Getter
@@ -122,6 +139,11 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     protected UpdateSummaryEnum showSummary;
     protected UpdateSummaryOutputEnum showSummaryOutput = UpdateSummaryOutputEnum.LOG;
 
+    /**
+     * -- GETTER --
+     *  Returns whether a rollback should be tested at update time or not.
+     */
+    @Getter
     protected boolean testRollbackOnUpdate = false;
 
     @Getter
@@ -168,22 +190,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     /**
      * The DataSource that liquibase will use to perform the migration.
      */
-    public DataSource getDataSource() {
-        return dataSource;
-    }
-
-    /**
-     * The DataSource that liquibase will use to perform the migration.
-     */
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
-    }
-
-    /**
-     * Returns a Resource that is able to resolve to a file or classpath resource.
-     */
-    public String getChangeLog() {
-        return changeLog;
     }
 
     /**
@@ -209,13 +217,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     @Deprecated
     public void setLabels(String labels) {
         setLabelFilter(labels);
-    }
-
-    /**
-     * Returns whether a rollback should be tested at update time or not.
-     */
-    public boolean isTestRollbackOnUpdate() {
-        return testRollbackOnUpdate;
     }
 
     /**
@@ -389,15 +390,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
      */
     protected SpringResourceAccessor createResourceOpener() {
         return new SpringResourceAccessor(resourceLoader);
-    }
-
-    /**
-     * Gets the Spring-name of this instance.
-     *
-     * @return
-     */
-    public String getBeanName() {
-        return beanName;
     }
 
     /**

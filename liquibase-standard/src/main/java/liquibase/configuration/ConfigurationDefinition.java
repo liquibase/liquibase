@@ -5,6 +5,7 @@ import liquibase.command.CommandArgumentDefinition;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.ValueHandlerUtil;
+import lombok.Getter;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -25,14 +26,63 @@ import java.util.regex.Pattern;
  */
 public class ConfigurationDefinition<DataType> implements Comparable<ConfigurationDefinition<DataType>> {
 
+    /**
+     * -- GETTER --
+     *  The standard configuration key for this definition. See the
+     *  class-level docs on key format.
+     */
+    @Getter
     private final String key;
+    /**
+     * -- GETTER --
+     *
+     * @return alternate configuration keys to check for values. Used for backwards compatibility.
+     */
+    @Getter
     private final Set<String> aliasKeys = new TreeSet<>();
+    /**
+     * -- GETTER --
+     *
+     * @return the type of data this definition returns.
+     */
+    @Getter
     private final Class<DataType> dataType;
+    /**
+     * -- GETTER --
+     *  A user-friendly description of this definition.
+     *  This will be exposed to end-users in generated help.
+     */
+    @Getter
     private String description;
+    /**
+     * -- GETTER --
+     *  The default value used by this definition if no value is currently configured.
+     *  <p>
+     *  NOTE: this is only used if none of the
+     * s have a configuration for the property.
+     *  Even if some return "null", that is still considered a provided value to use rather than this default.
+     */
+    @Getter
     private DataType defaultValue;
+    /**
+     * -- GETTER --
+     *  A description of the default value. Defaults to
+     *  of
+     *  but
+     *  can be explicitly with
+     * .
+     */
+    @Getter
     private String defaultValueDescription;
     private boolean commonlyUsed;
+    /**
+     * -- GETTER --
+     *  Return true if this configuration is for internal and/or programmatic use only.
+     *  End-user facing integrations should not expose internal configurations directly.
+     */
+    @Getter
     private boolean internal;
+    @Getter
     private ConfigurationValueConverter<DataType> valueConverter;
     private ConfigurationValueObfuscator<DataType> valueObfuscator;
 
@@ -40,6 +90,11 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     private static final Pattern ALLOWED_KEY_PATTERN = Pattern.compile(ALLOWED_KEY_REGEX);
 
     private boolean loggedUsingDefault = false;
+    /**
+     * -- GETTER --
+     *  Return true if this configuration should not be printed to the console for any help command.
+     */
+    @Getter
     private boolean hidden = false;
 
     /**
@@ -67,10 +122,6 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         } catch (ClassCastException e) {
             throw new IllegalArgumentException("The current value of " + key + " not the expected type: " + e.getMessage(), e);
         }
-    }
-
-    public ConfigurationValueConverter<DataType> getValueConverter() {
-        return valueConverter;
     }
 
     /**
@@ -137,73 +188,11 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     }
 
     /**
-     * The standard configuration key for this definition. See the {@link ConfigurationDefinition} class-level docs on key format.
-     */
-    public String getKey() {
-        return key;
-    }
-
-    /**
-     * @return alternate configuration keys to check for values. Used for backwards compatibility.
-     */
-    public Set<String> getAliasKeys() {
-        return aliasKeys;
-    }
-
-    /**
-     * @return the type of data this definition returns.
-     */
-    public Class<DataType> getDataType() {
-        return dataType;
-    }
-
-    /**
-     * A user-friendly description of this definition.
-     * This will be exposed to end-users in generated help.
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * The default value used by this definition if no value is currently configured.
-     * <p>
-     * NOTE: this is only used if none of the {@link ConfigurationValueProvider}s have a configuration for the property.
-     * Even if some return "null", that is still considered a provided value to use rather than this default.
-     */
-    public DataType getDefaultValue() {
-        return defaultValue;
-    }
-
-    /**
-     * A description of the default value. Defaults to {@link String#valueOf(Object)} of {@link #getDefaultValue()} but
-     * can be explicitly with {@link CommandArgumentDefinition.Building#defaultValue(Object, String)}.
-     */
-    public String getDefaultValueDescription() {
-        return defaultValueDescription;
-    }
-
-    /**
      * Returns true if this is configuration users are often interested in setting.
      * Used to simplify generated help by hiding less commonly used settings.
      */
     public boolean getCommonlyUsed() {
         return commonlyUsed;
-    }
-
-    /**
-     * Return true if this configuration is for internal and/or programmatic use only.
-     * End-user facing integrations should not expose internal configurations directly.
-     */
-    public boolean isInternal() {
-        return internal;
-    }
-
-    /**
-     * Return true if this configuration should not be printed to the console for any help command.
-     */
-    public boolean isHidden() {
-        return hidden;
     }
 
     @Override

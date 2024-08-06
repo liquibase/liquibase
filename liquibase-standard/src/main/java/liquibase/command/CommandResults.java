@@ -1,5 +1,7 @@
 package liquibase.command;
 
+import lombok.Getter;
+
 import java.util.Collections;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -10,18 +12,17 @@ import java.util.TreeMap;
 public class CommandResults {
 
     private final SortedMap<String, Object> resultValues = new TreeMap<>();
+    /**
+     * -- GETTER --
+     *  The
+     *  that was executed to produce this result.
+     */
+    @Getter
     private final CommandScope commandScope;
 
     protected CommandResults(SortedMap<String, Object> resultValues, CommandScope commandScope) {
         this.resultValues.putAll(resultValues);
         this.commandScope = commandScope;
-    }
-
-    /**
-     * The {@link CommandScope} that was executed to produce this result.
-     */
-    public CommandScope getCommandScope() {
-        return commandScope;
     }
 
     /**

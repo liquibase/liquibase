@@ -28,35 +28,159 @@ import java.util.Locale;
  * in all cases.
  */
 public class ColumnConfig extends AbstractLiquibaseSerializable {
+    /**
+     * -- GETTER --
+     *  The name of the column.
+     */
+    @Getter
     private String name;
+    @Getter
     private Boolean computed;
+    /**
+     * -- GETTER --
+     *  The data type fof the column.
+     *  This value will pass through
+     *  before being included in SQL.
+     */
+    @Getter
     private String type;
+    /**
+     * -- GETTER --
+     *  The String value to set this column to. If you do not want the value set by
+     *  use a more specific function like
+     *  or the more generic
+     *  <p></p>
+     *  If performing an data manipulation operation, the setValue* functions should be used to set what the columns
+     *  should be set to. If performing a data definition operation, this setValue* functions should be used to set
+     *  what existing rows should be set to (may be different than the default value for new rows)
+     */
+    @Getter
     private String value;
+    /**
+     * -- GETTER --
+     *  Return the numeric value this column should be set to.
+     *
+     */
+    @Getter
     private Number valueNumeric;
+    /**
+     * -- GETTER --
+     *  Return the date value this column should be set to.
+     *
+     */
+    @Getter
     private Date valueDate;
+    /**
+     * -- GETTER --
+     *  Return the boolean value this column should be set to.
+     *
+     */
+    @Getter
     private Boolean valueBoolean;
+    /**
+     * -- GETTER --
+     *  Return the file containing the data to load into a BLOB.
+     *
+     */
+    @Getter
     private String valueBlobFile;
+    /**
+     * -- GETTER --
+     *  Return the file containing the data to load into a CLOB.
+     *
+     */
+    @Getter
     private String valueClobFile;
+    /**
+     * -- GETTER --
+     *  Return encoding of a file, referenced via
+     * .
+     */
+    @Getter
     private String encoding;
+    /**
+     * -- GETTER --
+     *  Return the function this column should be set from.
+     *
+     */
+    @Getter
     private DatabaseFunction valueComputed;
+    @Getter
     private SequenceNextValueFunction valueSequenceNext;
+    @Getter
     private SequenceCurrentValueFunction valueSequenceCurrent;
 
+    /**
+     * -- GETTER --
+     *  The String default value to assign to this column. If you do not want the default set by
+     *  use a more specific function like
+     *  or the more generic
+     */
+    @Getter
     private String defaultValue;
+    /**
+     * -- GETTER --
+     *  Return the numeric value this column should default to.
+     *
+     */
+    @Getter
     private Number defaultValueNumeric;
+    /**
+     * -- GETTER --
+     *  Return the date value this column should default to.
+     *
+     */
+    @Getter
     private Date defaultValueDate;
+    /**
+     * -- GETTER --
+     *  Return the boolean value this column should default to.
+     *
+     */
+    @Getter
     private Boolean defaultValueBoolean;
+    /**
+     * -- GETTER --
+     *  Return the function whose value should generate this column's default.
+     *
+     */
+    @Getter
     private DatabaseFunction defaultValueComputed;
+    @Getter
     private SequenceNextValueFunction defaultValueSequenceNext;
+    @Getter
     private String defaultValueConstraintName;
 
+    /**
+     * -- GETTER --
+     *  Returns the ConstraintsConfig this ColumnConfig is using. Returns null if nho constraints have been assigned yet.
+     */
+    @Getter
     private ConstraintsConfig constraints;
     private Boolean autoIncrement;
+    @Getter
     private String generationType;
+    @Getter
     private Boolean defaultOnNull;
+    /**
+     * -- GETTER --
+     *  Return the number to start auto incrementing with.
+     */
+    @Getter
     private BigInteger startWith;
+    /**
+     * -- GETTER --
+     *  Return the amount to auto increment by.
+     */
+    @Getter
     private BigInteger incrementBy;
+    /**
+     * -- GETTER --
+     *  Return the remarks to apply to this column.
+     */
+    @Getter
     private String remarks;
+    @Getter
     private Boolean descending;
 
     /**
@@ -197,13 +321,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return returnArray;
     }
 
-    /**
-     * The name of the column.
-     */
-    public String getName() {
-        return name;
-    }
-
     public ColumnConfig setName(String name) {
         this.name = name;
         return this;
@@ -214,38 +331,14 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return setName(name);
     }
 
-    public Boolean getComputed() {
-        return computed;
-    }
-
     public ColumnConfig setComputed(Boolean computed) {
         this.computed = computed;
         return this;
     }
 
-    /**
-     * The data type fof the column.
-     * This value will pass through {@link liquibase.datatype.DataTypeFactory#fromDescription(String, liquibase.database.Database)} before being included in SQL.
-     */
-    public String getType() {
-        return type;
-    }
-
     public ColumnConfig setType(String type) {
         this.type = type;
         return this;
-    }
-
-    /**
-     * The String value to set this column to. If you do not want the value set by {@link #setValue(String)}
-     * use a more specific function like {@link #getValueNumeric()} or the more generic {@link #getValueObject()}
-     * <p></p>
-     * If performing an data manipulation operation, the setValue* functions should be used to set what the columns
-     * should be set to. If performing a data definition operation, this setValue* functions should be used to set
-     * what existing rows should be set to (may be different than the default value for new rows)
-     */
-    public String getValue() {
-        return value;
     }
 
     /**
@@ -258,14 +351,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         this.value = value;
 
         return this;
-    }
-
-    /**
-     * Return the numeric value this column should be set to.
-     * @see #setValue(String)
-     */
-    public Number getValueNumeric() {
-        return valueNumeric;
     }
 
     public ColumnConfig setValueNumeric(Number valueNumeric) {
@@ -300,14 +385,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     }
 
     /**
-     * Return the boolean value this column should be set to.
-     * @see #setValue(String)
-     */
-    public Boolean getValueBoolean() {
-        return valueBoolean;
-    }
-
-    /**
      * Set the valueBoolean based on a given string.
      * If the passed value cannot be parsed as a boolean, it is assumed to be a function that returns a boolean.
      * If the string "null" or an empty string is passed, it will set a null value.
@@ -337,22 +414,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-    /**
-     * Return the function this column should be set from.
-     * @see #setValue(String)
-     */
-    public DatabaseFunction getValueComputed() {
-        return valueComputed;
-    }
-
     public ColumnConfig setValueComputed(DatabaseFunction valueComputed) {
         this.valueComputed = valueComputed;
 
         return this;
-    }
-
-    public SequenceNextValueFunction getValueSequenceNext() {
-        return valueSequenceNext;
     }
 
     public ColumnConfig setValueSequenceNext(SequenceNextValueFunction valueSequenceNext) {
@@ -361,22 +426,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-    public SequenceCurrentValueFunction getValueSequenceCurrent() {
-        return valueSequenceCurrent;
-    }
-
     public ColumnConfig setValueSequenceCurrent(SequenceCurrentValueFunction valueSequenceCurrent) {
         this.valueSequenceCurrent = valueSequenceCurrent;
 
         return this;
-    }
-
-    /**
-     * Return the date value this column should be set to.
-     * @see #setValue(String)
-     */
-    public Date getValueDate() {
-        return valueDate;
     }
 
     /**
@@ -409,37 +462,14 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-    /**
-     * Return the file containing the data to load into a BLOB.
-     * @see #setValue(String)
-     */
-    public String getValueBlobFile() {
-        return valueBlobFile;
-    }
-
     public ColumnConfig setValueBlobFile(String valueBlobFile) {
         this.valueBlobFile = valueBlobFile;
         return this;
     }
 
-    /**
-     * Return the file containing the data to load into a CLOB.
-     * @see #setValue(String)
-     */
-    public String getValueClobFile() {
-        return valueClobFile;
-    }
-
     public ColumnConfig setValueClobFile(String valueClobFile) {
         this.valueClobFile = valueClobFile;
         return this;
-    }
-
-    /**
-     * Return encoding of a file, referenced via {@link #valueClobFile}.
-     */
-    public String getEncoding() {
-        return encoding;
     }
 
     public ColumnConfig setEncoding(String encoding) {
@@ -474,14 +504,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     }
 
     /**
-     * The String default value to assign to this column. If you do not want the default set by {@link #setDefaultValue(String)}
-     * use a more specific function like {@link #getDefaultValueNumeric()} or the more generic {@link #getDefaultValueObject()}
-     */
-    public String getDefaultValue() {
-        return defaultValue;
-    }
-
-    /**
      * Sets the string default value to assign to this column. If you are trying to set a default value type other than a string, use the more specific functions
      * like {@link #setDefaultValueNumeric(Number)}.
      * This method does no processing of the string. Any trimming is expected to be done beforehand. It does not convert the string "null" to null
@@ -491,14 +513,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         this.defaultValue = defaultValue;
 
         return this;
-    }
-
-    /**
-     * Return the numeric value this column should default to.
-     * @see #setDefaultValue(String)
-     */
-    public Number getDefaultValueNumeric() {
-        return defaultValueNumeric;
     }
 
     /**
@@ -536,14 +550,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-    /**
-     * Return the date value this column should default to.
-     * @see #setDefaultValue(String)
-     */
-    public Date getDefaultValueDate() {
-        return defaultValueDate;
-    }
-
     public ColumnConfig setDefaultValueDate(Date defaultValueDate) {
         this.defaultValueDate = defaultValueDate;
 
@@ -569,14 +575,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         }
 
         return this;
-    }
-
-    /**
-     * Return the boolean value this column should default to.
-     * @see #setDefaultValue(String)
-     */
-    public Boolean getDefaultValueBoolean() {
-        return defaultValueBoolean;
     }
 
     /**
@@ -609,14 +607,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-    /**
-     * Return the function whose value should generate this column's default.
-     * @see #setDefaultValue(String)
-     */
-    public DatabaseFunction getDefaultValueComputed() {
-        return defaultValueComputed;
-    }
-
     public ColumnConfig setDefaultValueComputed(DatabaseFunction defaultValueComputed) {
         this.defaultValueComputed = defaultValueComputed;
 
@@ -644,13 +634,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return null;
     }
 
-    /**
-     * Returns the ConstraintsConfig this ColumnConfig is using. Returns null if nho constraints have been assigned yet.
-     */
-    public ConstraintsConfig getConstraints() {
-        return constraints;
-    }
-
     public ColumnConfig setConstraints(ConstraintsConfig constraints) {
         this.constraints = constraints;
 
@@ -670,24 +653,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-    /**
-     * Return the number to start auto incrementing with.
-     */
-    public BigInteger getStartWith() {
-        return startWith;
-    }
-
     public ColumnConfig setStartWith(BigInteger startWith) {
         this.startWith = startWith;
 
         return this;
-    }
-
-    /**
-     * Return the amount to auto increment by.
-     */
-    public BigInteger getIncrementBy() {
-        return incrementBy;
     }
 
     public ColumnConfig setIncrementBy(BigInteger incrementBy) {
@@ -705,20 +674,9 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             .getDefaultValueComputed() != null) || (this.getDefaultValueSequenceNext() != null);
     }
 
-    /**
-     * Return the remarks to apply to this column.
-     */
-    public String getRemarks() {
-        return remarks;
-    }
-
     public ColumnConfig setRemarks(String remarks) {
         this.remarks = remarks;
         return this;
-    }
-
-    public Boolean getDescending() {
-        return descending;
     }
 
     public ColumnConfig setDescending(Boolean descending) {
@@ -726,17 +684,9 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-    public Boolean getDefaultOnNull() {
-        return defaultOnNull;
-    }
-
     public ColumnConfig setDefaultOnNull(Boolean defaultOnNull) {
         this.defaultOnNull = defaultOnNull;
         return this;
-    }
-
-    public String getGenerationType() {
-        return generationType;
     }
 
     public ColumnConfig setGenerationType(String generationType) {
@@ -749,18 +699,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return "column";
     }
 
-    public SequenceNextValueFunction getDefaultValueSequenceNext() {
-        return defaultValueSequenceNext;
-    }
-
     public ColumnConfig setDefaultValueSequenceNext(SequenceNextValueFunction defaultValueSequenceNext) {
         this.defaultValueSequenceNext = defaultValueSequenceNext;
 
         return this;
-    }
-
-    public String getDefaultValueConstraintName() {
-        return defaultValueConstraintName;
     }
 
     public void setDefaultValueConstraintName(String defaultValueConstraintName) {

@@ -3,6 +3,7 @@ package liquibase.logging.core;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.serializer.LiquibaseSerializable;
+import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +19,7 @@ public class JavaLogService extends AbstractLogService {
 
     private final Map<Class, JavaLogger> loggers = new HashMap<>();
 
+    @Getter
     private java.util.logging.Logger parent;
 
     @Override
@@ -81,10 +83,6 @@ public class JavaLogService extends AbstractLogService {
         }
 
         return "liquibase";
-    }
-
-    public java.util.logging.Logger getParent() {
-        return parent;
     }
 
     /**

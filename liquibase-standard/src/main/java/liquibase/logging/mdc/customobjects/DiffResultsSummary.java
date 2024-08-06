@@ -3,7 +3,9 @@ package liquibase.logging.mdc.customobjects;
 import liquibase.diff.DiffResult;
 import liquibase.logging.mdc.CustomMdcObject;
 import liquibase.structure.DatabaseObject;
+import lombok.Getter;
 
+@Getter
 public class DiffResultsSummary implements CustomMdcObject {
     private int missing;
     private int unexpected;
@@ -35,24 +37,12 @@ public class DiffResultsSummary implements CustomMdcObject {
                 .reduce(0, (subtotal, element) -> subtotal + element.getValue().getDifferences().size(), Integer::sum);
     }
 
-    public int getMissing() {
-        return missing;
-    }
-
     public void setMissing(int missing) {
         this.missing = missing;
     }
 
-    public int getUnexpected() {
-        return unexpected;
-    }
-
     public void setUnexpected(int unexpected) {
         this.unexpected = unexpected;
-    }
-
-    public int getChanged() {
-        return changed;
     }
 
     public void setChanged(int changed) {

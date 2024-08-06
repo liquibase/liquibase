@@ -1,15 +1,27 @@
 package liquibase.statement;
 
+import lombok.Getter;
+
 public class ForeignKeyConstraint implements ColumnConstraint {
+    @Getter
     private final String foreignKeyName;
+    @Getter
     private String column;
+    @Getter
     private final String references;
+    @Getter
     private String referencedTableCatalogName;
+    @Getter
     private String referencedTableSchemaName;
+    @Getter
     private String referencedTableName;
+    @Getter
     private String referencedColumnNames;
+    @Getter
     private boolean deleteCascade;
+    @Getter
     private boolean initiallyDeferred;
+    @Getter
     private boolean deferrable;
     /**
      * Default value is true
@@ -44,50 +56,18 @@ public class ForeignKeyConstraint implements ColumnConstraint {
         setValidateForeignKey(validateForeignKey);
     }
 
-    public String getForeignKeyName() {
-        return foreignKeyName;
-    }
-
-    public String getColumn() {
-        return column;
-    }
-
     public ForeignKeyConstraint setColumn(String column) {
         this.column = column;
         return this;
     }
 
 
-    public String getReferences() {
-        return references;
-    }
-
-    public boolean isDeleteCascade() {
-        return deleteCascade;
-    }
-
-    public String getReferencedTableName() {
-        return referencedTableName;
-    }
-
-    public String getReferencedTableCatalogName() {
-        return referencedTableCatalogName;
-    }
-
     public void setReferencedTableCatalogName(String referencedTableCatalogName) {
         this.referencedTableCatalogName = referencedTableCatalogName;
     }
 
-    public String getReferencedTableSchemaName() {
-        return referencedTableSchemaName;
-    }
-
     public void setReferencedTableSchemaName(String referencedTableSchemaName) {
         this.referencedTableSchemaName = referencedTableSchemaName;
-    }
-
-    public String getReferencedColumnNames() {
-        return referencedColumnNames;
     }
 
     public ForeignKeyConstraint setDeleteCascade(boolean deleteCascade) {
@@ -95,17 +75,9 @@ public class ForeignKeyConstraint implements ColumnConstraint {
         return this;
     }
 
-    public boolean isInitiallyDeferred() {
-        return initiallyDeferred;
-    }
-
     public ForeignKeyConstraint setInitiallyDeferred(boolean initiallyDeferred) {
         this.initiallyDeferred = initiallyDeferred;
         return this;
-    }
-
-    public boolean isDeferrable() {
-        return deferrable;
     }
 
     public ForeignKeyConstraint setDeferrable(boolean deferrable) {

@@ -2,10 +2,12 @@ package liquibase.logging.mdc.customobjects;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.logging.mdc.CustomMdcObject;
+import lombok.Getter;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Getter
 public class Status extends SimpleStatus implements CustomMdcObject {
 
     private List<Changeset> undeployedChangesets;
@@ -18,14 +20,11 @@ public class Status extends SimpleStatus implements CustomMdcObject {
         this.undeployedChangesets = unrunChangeSets.stream().map(urcs -> new Changeset(urcs.getFilePath(), urcs.getAuthor(), urcs.getId())).collect(Collectors.toList());
     }
 
-    public List<Changeset> getUndeployedChangesets() {
-        return undeployedChangesets;
-    }
-
     public void setUndeployedChangesets(List<Changeset> undeployedChangesets) {
         this.undeployedChangesets = undeployedChangesets;
     }
 
+    @Getter
     public static class Changeset {
         private String changelogPath;
         private String changesetAuthor;
@@ -40,24 +39,12 @@ public class Status extends SimpleStatus implements CustomMdcObject {
             this.changesetId = changesetId;
         }
 
-        public String getChangelogPath() {
-            return changelogPath;
-        }
-
         public void setChangelogPath(String changelogPath) {
             this.changelogPath = changelogPath;
         }
 
-        public String getChangesetAuthor() {
-            return changesetAuthor;
-        }
-
         public void setChangesetAuthor(String changesetAuthor) {
             this.changesetAuthor = changesetAuthor;
-        }
-
-        public String getChangesetId() {
-            return changesetId;
         }
 
         public void setChangesetId(String changesetId) {

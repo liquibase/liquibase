@@ -1,6 +1,7 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
 /**
  * @deprecated use {@link RawParameterizedSqlStatement}
@@ -8,6 +9,7 @@ import liquibase.statement.AbstractSqlStatement;
 @Deprecated
 public class RawSqlStatement extends AbstractSqlStatement {
 
+    @Getter
     private final String sql;
     private String endDelimiter  = ";";
 
@@ -21,10 +23,6 @@ public class RawSqlStatement extends AbstractSqlStatement {
         if (endDelimiter != null) {
             this.endDelimiter = endDelimiter;
         }
-    }
-
-    public String getSql() {
-        return sql;
     }
 
     public String getEndDelimiter() {

@@ -1,14 +1,17 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class DropColumnStatement extends AbstractSqlStatement {
 
+    @Getter
     private String columnName;
 
+    @Getter
     private final List<DropColumnStatement> columns = new ArrayList<>();
     private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
 
@@ -27,10 +30,6 @@ public class DropColumnStatement extends AbstractSqlStatement {
         return !columns.isEmpty();
     }
 
-    public List<DropColumnStatement> getColumns() {
-        return columns;
-    }
-
     public String getCatalogName() {
         return databaseTableIdentifier.getCatalogName();
     }
@@ -41,10 +40,6 @@ public class DropColumnStatement extends AbstractSqlStatement {
 
     public String getTableName() {
         return databaseTableIdentifier.getTableName();
-    }
-
-    public String getColumnName() {
-        return columnName;
     }
 
 }

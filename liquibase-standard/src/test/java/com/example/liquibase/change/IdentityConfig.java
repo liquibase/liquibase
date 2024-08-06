@@ -1,9 +1,11 @@
 package com.example.liquibase.change;
 
 import liquibase.serializer.AbstractLiquibaseSerializable;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 
+@Getter
 public class IdentityConfig extends AbstractLiquibaseSerializable {
     private BigDecimal seed;
     private BigDecimal increment;
@@ -18,17 +20,9 @@ public class IdentityConfig extends AbstractLiquibaseSerializable {
         return "identity";
     }
 
-    public BigDecimal getSeed() {
-        return seed;
-    }
-
     public IdentityConfig setSeed(BigDecimal seed) {
         this.seed = seed;
         return this;
-    }
-
-    public BigDecimal getIncrement() {
-        return increment;
     }
 
     public IdentityConfig setIncrement(BigDecimal increment) {

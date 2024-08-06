@@ -4,9 +4,11 @@ import liquibase.command.CommandArgument;
 import liquibase.command.CommandResult;
 import liquibase.command.CommandValidationErrors;
 import liquibase.command.LiquibaseCommand;
+import lombok.Getter;
 
 import java.util.SortedSet;
 
+@Getter
 public class MockLiquibaseCommand implements LiquibaseCommand {
 
     private String value1;
@@ -24,10 +26,6 @@ public class MockLiquibaseCommand implements LiquibaseCommand {
 
     public void setValue1(String value1) {
         this.value1 = value1;
-    }
-
-    public String getValue1() {
-        return value1;
     }
 
     @Override

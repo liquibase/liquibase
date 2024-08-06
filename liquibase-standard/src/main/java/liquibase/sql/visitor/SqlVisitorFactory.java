@@ -1,5 +1,7 @@
 package liquibase.sql.visitor;
 
+import lombok.Getter;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,6 +10,7 @@ public class SqlVisitorFactory {
     @SuppressWarnings("unchecked")
 	private final Map<String, Class> tagToClassMap;
 
+    @Getter
     private static final SqlVisitorFactory instance = new SqlVisitorFactory();
 
     @SuppressWarnings("unchecked")
@@ -28,10 +31,6 @@ public class SqlVisitorFactory {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static SqlVisitorFactory getInstance() {
-        return instance;
     }
 
     /**

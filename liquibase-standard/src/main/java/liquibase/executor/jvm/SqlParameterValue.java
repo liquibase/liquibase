@@ -1,5 +1,7 @@
 package liquibase.executor.jvm;
 
+import lombok.Getter;
+
 /**
  * Object to represent a SQL parameter value, including parameter metadata
  * such as the SQL type and the scale for numeric values.
@@ -13,8 +15,13 @@ package liquibase.executor.jvm;
  * @author Spring Framework
  * @see java.sql.Types
  */
+@Getter
 class SqlParameterValue extends SqlParameter {
 
+    /**
+     * -- GETTER --
+     *  Return the value object that this parameter value holds.
+     */
     private final Object value;
 
 
@@ -65,12 +72,5 @@ class SqlParameterValue extends SqlParameter {
         this.value = value;
     }
 
-
-    /**
-     * Return the value object that this parameter value holds.
-	 */
-	public Object getValue() {
-		return this.value;
-	}
 
 }

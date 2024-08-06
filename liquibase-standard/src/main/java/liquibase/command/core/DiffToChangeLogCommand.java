@@ -7,6 +7,7 @@ import liquibase.command.core.helpers.DiffOutputControlCommandStep;
 import liquibase.command.core.helpers.PreCompareCommandStep;
 import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep;
 import liquibase.diff.output.DiffOutputControl;
+import lombok.Getter;
 
 import java.io.PrintStream;
 
@@ -15,17 +16,15 @@ import java.io.PrintStream;
  */
 public class DiffToChangeLogCommand extends DiffCommand {
 
+    @Getter
     private String changeLogFile;
     private PrintStream outputStream;
+    @Getter
     private DiffOutputControl diffOutputControl;
 
     @Override
     public String getName() {
         return "diffChangeLog";
-    }
-
-    public String getChangeLogFile() {
-        return changeLogFile;
     }
 
     public DiffToChangeLogCommand setChangeLogFile(String changeLogFile) {
@@ -42,10 +41,6 @@ public class DiffToChangeLogCommand extends DiffCommand {
     public DiffToChangeLogCommand setOutputStream(PrintStream outputStream) {
         this.outputStream = outputStream;
         return this;
-    }
-
-    public DiffOutputControl getDiffOutputControl() {
-        return diffOutputControl;
     }
 
     public DiffToChangeLogCommand setDiffOutputControl(DiffOutputControl diffOutputControl) {

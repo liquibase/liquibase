@@ -6,12 +6,14 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.DatabaseObjectFactory;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.util.*;
 
 public class CompareControl {
 
     public static CompareControl STANDARD = new CompareControl();
+    @Getter
     private final CompareControl.SchemaComparison[] schemaComparisons;
     private Set<Class<? extends DatabaseObject>> compareTypes = new HashSet<>();
     private final Map<Class<? extends DatabaseObject>, Set<String>> suppressedFields = new HashMap<>();
@@ -169,10 +171,6 @@ public class CompareControl {
         return suppressedFields.get(type).contains(field);
     }
 
-    public SchemaComparison[] getSchemaComparisons() {
-        return schemaComparisons;
-    }
-
     public CatalogAndSchema[] getSchemas(DatabaseRole databaseRole) {
         CatalogAndSchema[] schemas = new CatalogAndSchema[schemaComparisons.length];
         for (int i=0; i<schemaComparisons.length; i++) {
@@ -192,6 +190,7 @@ public class CompareControl {
         COMPARISON
     }
 
+    @Getter
     public static class SchemaComparison {
         private final CatalogAndSchema comparisonSchema;
         private final CatalogAndSchema referenceSchema;
@@ -226,18 +225,6 @@ public class CompareControl {
             } else {
                 return convertedSchemaName;
             }
-        }
-
-        public CatalogAndSchema getComparisonSchema() {
-            return comparisonSchema;
-        }
-
-        public CatalogAndSchema getReferenceSchema() {
-            return referenceSchema;
-        }
-
-        public String getOutputSchemaAs() {
-            return outputSchemaAs;
         }
 
         public void setOutputSchemaAs(String outputSchemaAs) {

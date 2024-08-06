@@ -2,6 +2,7 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -10,7 +11,9 @@ import java.util.List;
 
 public class RawParameterizedSqlStatement extends AbstractSqlStatement {
 
+    @Getter
     private final String sql;
+    @Getter
     private final List<Object> parameters = new ArrayList<>();
     @Setter
     private String endDelimiter  = ";";
@@ -24,14 +27,6 @@ public class RawParameterizedSqlStatement extends AbstractSqlStatement {
         if (parameters != null) {
             this.parameters.addAll(Arrays.asList(parameters));
         }
-    }
-
-    public String getSql() {
-        return sql;
-    }
-
-    public List<Object> getParameters() {
-        return parameters;
     }
 
     public RawParameterizedSqlStatement addParameter(Object parameter) {

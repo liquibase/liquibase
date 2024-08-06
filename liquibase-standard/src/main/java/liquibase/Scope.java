@@ -77,6 +77,11 @@ public class Scope {
 
     private static final ThreadLocal<ScopeManager> scopeManager = new ThreadLocal<>();
 
+    /**
+     * -- GETTER --
+     *  Returns the parent scope to this scope. Returns null if this is a root scope.
+     */
+    @Getter
     private final Scope parent;
     private final SmartMap values = new SmartMap();
     @Getter
@@ -153,13 +158,6 @@ public class Scope {
 
     private String generateScopeId() {
         return StringUtil.randomIdentifier(10).toLowerCase();
-    }
-
-    /**
-     * Returns the parent scope to this scope. Returns null if this is a root scope.
-     */
-    public Scope getParent() {
-        return parent;
     }
 
     /**

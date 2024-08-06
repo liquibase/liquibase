@@ -9,44 +9,33 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
+import lombok.Getter;
 
 public class ExampleCustomSqlChange implements CustomSqlChange, CustomSqlRollback {
 
+    @Getter
     private String schemaName;
+    @Getter
     private String tableName;
+    @Getter
     private String columnName;
+    @Getter
     private String newValue;
 
     @SuppressWarnings("unused")
     private ResourceAccessor resourceAccessor;
 
 
-    public String getSchemaName() {
-        return schemaName;
-    }
-
     public void setSchemaName(String schemaName) {
         this.schemaName = schemaName;
-    }
-
-    public String getTableName() {
-        return tableName;
     }
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
     }
 
-    public String getColumnName() {
-        return columnName;
-    }
-
     public void setColumnName(String columnName) {
         this.columnName = columnName;
-    }
-
-    public String getNewValue() {
-        return newValue;
     }
 
     public void setNewValue(String newValue) {

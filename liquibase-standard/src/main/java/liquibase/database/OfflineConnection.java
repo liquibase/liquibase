@@ -19,6 +19,7 @@ import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -39,6 +40,7 @@ public class OfflineConnection implements DatabaseConnection {
     private DatabaseSnapshot snapshot;
     private OutputLiquibaseSql outputLiquibaseSql = OutputLiquibaseSql.NONE;
     private String changeLogFile = "databasechangelog.csv";
+    @Getter
     private boolean caseSensitive;
     private String productName;
     private String productVersion;
@@ -308,10 +310,6 @@ public class OfflineConnection implements DatabaseConnection {
 
     public void setSendsStringParametersAsUnicode(boolean sendsStringParametersAsUnicode) {
         this.sendsStringParametersAsUnicode = sendsStringParametersAsUnicode;
-    }
-
-    public boolean isCaseSensitive() {
-        return caseSensitive;
     }
 
     public void setCaseSensitive(boolean caseSensitive) {

@@ -12,6 +12,7 @@ import liquibase.precondition.PreconditionFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.sql.visitor.SqlVisitorFactory;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -27,11 +28,13 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
     protected Logger log;
 
-	private final DatabaseChangeLog databaseChangeLog;
+	@Getter
+    private final DatabaseChangeLog databaseChangeLog;
 	private final ResourceAccessor resourceAccessor;
 	private final ChangeLogParameters changeLogParameters;
     private final Stack<ParsedNode> nodeStack = new Stack<>();
     private final Stack<StringBuilder> textStack = new Stack<>();
+    @Getter
     private ParsedNode databaseChangeLogTree;
 
 
@@ -53,14 +56,6 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
         preconditionFactory = PreconditionFactory.getInstance();
         sqlVisitorFactory = SqlVisitorFactory.getInstance();
         changeLogParserFactory = ChangeLogParserFactory.getInstance();
-    }
-
-	public DatabaseChangeLog getDatabaseChangeLog() {
-		return databaseChangeLog;
-	}
-
-    public ParsedNode getDatabaseChangeLogTree() {
-        return databaseChangeLogTree;
     }
 
     @Override

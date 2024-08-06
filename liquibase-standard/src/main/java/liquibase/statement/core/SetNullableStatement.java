@@ -1,12 +1,18 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
 public class SetNullableStatement extends AbstractSqlStatement {
+    @Getter
     private final String columnName;
+    @Getter
     private final String columnDataType;
+    @Getter
     private final boolean nullable;
+    @Getter
     private String constraintName;
+    @Getter
     private boolean validate = true;
     private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
 
@@ -43,26 +49,6 @@ public class SetNullableStatement extends AbstractSqlStatement {
 
     public String getTableName() {
         return databaseTableIdentifier.getTableName();
-    }
-
-    public String getColumnName() {
-        return columnName;
-    }
-
-    public String getColumnDataType() {
-        return columnDataType;
-    }
-
-    public boolean isNullable() {
-        return nullable;
-    }
-
-    public String getConstraintName() {
-        return constraintName;
-    }
-
-    public boolean isValidate() {
-        return validate;
     }
 
     public void setValidate(boolean validate) {

@@ -6,6 +6,7 @@ import liquibase.command.CommandScope;
 import liquibase.command.CommandValidationErrors;
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.database.Database;
+import lombok.Getter;
 
 import java.io.PrintStream;
 import java.text.DateFormat;
@@ -18,9 +19,11 @@ import static liquibase.command.core.HistoryCommandStep.FORMAT_ARG;
  */
 public class HistoryCommand extends AbstractCommand {
 
+    @Getter
     private Database database;
     private final DateFormat dateFormat;
     private HistoryFormat format;
+    @Getter
     private PrintStream outputStream = System.out;
 
     public HistoryCommand() {
@@ -37,16 +40,8 @@ public class HistoryCommand extends AbstractCommand {
         return new CommandValidationErrors(this);
     }
 
-    public Database getDatabase() {
-        return database;
-    }
-
     public void setDatabase(Database database) {
         this.database = database;
-    }
-
-    public PrintStream getOutputStream() {
-        return outputStream;
     }
 
     public void setOutputStream(PrintStream outputStream) {

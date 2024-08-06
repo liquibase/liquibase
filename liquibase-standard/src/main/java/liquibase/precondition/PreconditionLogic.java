@@ -6,6 +6,7 @@ import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,12 +14,9 @@ import java.util.List;
 /**
  * Marker interface for precondition logic tags (and,or, not)
  */
+@Getter
 public abstract class PreconditionLogic extends AbstractPrecondition {
     private final List<Precondition> nestedPreconditions = new ArrayList<>();
-
-    public List<Precondition> getNestedPreconditions() {
-        return this.nestedPreconditions;
-    }
 
     public void addNestedPrecondition(Precondition precondition) {
         if (precondition != null) {

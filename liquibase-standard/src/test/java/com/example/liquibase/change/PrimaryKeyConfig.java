@@ -1,10 +1,12 @@
 package com.example.liquibase.change;
 
 import liquibase.serializer.AbstractLiquibaseSerializable;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class PrimaryKeyConfig extends AbstractLiquibaseSerializable {
     private String name;
     private List<KeyColumnConfig> keyColumns = new ArrayList<KeyColumnConfig>();
@@ -19,17 +21,9 @@ public class PrimaryKeyConfig extends AbstractLiquibaseSerializable {
         return "primaryKey";
     }
 
-    public String getName() {
-        return name;
-    }
-
     public PrimaryKeyConfig setName(String name) {
         this.name = name;
         return this;
-    }
-
-    public List<KeyColumnConfig> getKeyColumns() {
-        return keyColumns;
     }
 
     public PrimaryKeyConfig setKeyColumns(List<KeyColumnConfig> keyColumns) {

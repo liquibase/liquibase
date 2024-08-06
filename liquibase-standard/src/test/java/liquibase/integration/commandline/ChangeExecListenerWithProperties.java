@@ -1,9 +1,11 @@
 package liquibase.integration.commandline;
 
 import liquibase.changelog.visitor.AbstractChangeExecListener;
+import lombok.Getter;
 
 import java.util.Properties;
 
+@Getter
 public class ChangeExecListenerWithProperties extends AbstractChangeExecListener {
     private final Properties properties;
 
@@ -11,7 +13,4 @@ public class ChangeExecListenerWithProperties extends AbstractChangeExecListener
         this.properties = properties;
     }
 
-    public Properties getProperties() {
-        return properties;
-    }
 }

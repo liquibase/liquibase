@@ -5,7 +5,9 @@ import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
+import lombok.Getter;
 
+@Getter
 @DatabaseChange(
         name = "primitiveChange",
         description = "Used in unit tests",
@@ -32,64 +34,32 @@ public class ChangeWithPrimitiveFields extends AbstractChange {
         return SqlStatement.EMPTY_SQL_STATEMENT;
     }
 
-    public boolean isaBoolean() {
-        return aBoolean;
-    }
-
     public void setaBoolean(boolean aBoolean) {
         this.aBoolean = aBoolean;
-    }
-
-    public byte getaByte() {
-        return aByte;
     }
 
     public void setaByte(byte aByte) {
         this.aByte = aByte;
     }
 
-    public char getaChar() {
-        return aChar;
-    }
-
     public void setaChar(char aChar) {
         this.aChar = aChar;
-    }
-
-    public double getaDouble() {
-        return aDouble;
     }
 
     public void setaDouble(double aDouble) {
         this.aDouble = aDouble;
     }
 
-    public float getaFloat() {
-        return aFloat;
-    }
-
     public void setaFloat(float aFloat) {
         this.aFloat = aFloat;
-    }
-
-    public int getAnInt() {
-        return anInt;
     }
 
     public void setAnInt(int anInt) {
         this.anInt = anInt;
     }
 
-    public long getaLong() {
-        return aLong;
-    }
-
     public void setaLong(long aLong) {
         this.aLong = aLong;
-    }
-
-    public short getaShort() {
-        return aShort;
     }
 
     public void setaShort(short aShort) {

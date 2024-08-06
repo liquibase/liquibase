@@ -2,11 +2,13 @@ package liquibase.statement.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class InsertStatement extends AbstractSqlStatement {
+    @Getter
     private final Map<String, Object> columnValues = new LinkedHashMap<>();
     private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
 
@@ -38,10 +40,6 @@ public class InsertStatement extends AbstractSqlStatement {
         return columnValues.get(columnName);
     }
 
-    public Map<String, Object> getColumnValues() {
-        return columnValues;
-    }
-    
     public InsertStatement addColumn(ColumnConfig columnConfig) {
     	return addColumnValue(columnConfig.getName(), columnConfig.getValueObject());
     }

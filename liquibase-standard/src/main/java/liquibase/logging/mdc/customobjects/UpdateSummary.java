@@ -1,12 +1,14 @@
 package liquibase.logging.mdc.customobjects;
 
 import liquibase.logging.mdc.CustomMdcObject;
+import lombok.Getter;
 
 import java.util.SortedMap;
 
 /**
  * This class is the representation of the summary available in the update command.
  */
+@Getter
 public class UpdateSummary implements CustomMdcObject {
     private String value;
     private int run;
@@ -28,40 +30,20 @@ public class UpdateSummary implements CustomMdcObject {
         this.totalChangesets = totalChangesets;
     }
 
-    public String getValue() {
-        return value;
-    }
-
     public void setValue(String value) {
         this.value = value;
-    }
-
-    public int getRun() {
-        return run;
     }
 
     public void setRun(int run) {
         this.run = run;
     }
 
-    public int getRunPreviously() {
-        return runPreviously;
-    }
-
     public void setRunPreviously(int runPreviously) {
         this.runPreviously = runPreviously;
     }
 
-    public SortedMap<String, Integer> getSkipped() {
-        return skipped;
-    }
-
     public void setSkipped(SortedMap<String, Integer> skipped) {
         this.skipped = skipped;
-    }
-
-    public int getTotalChangesets() {
-        return totalChangesets;
     }
 
     public void setTotalChangesets(int totalChangesets) {

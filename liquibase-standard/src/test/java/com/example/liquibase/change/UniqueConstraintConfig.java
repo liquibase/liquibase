@@ -1,10 +1,12 @@
 package com.example.liquibase.change;
 
 import liquibase.serializer.AbstractLiquibaseSerializable;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class UniqueConstraintConfig extends AbstractLiquibaseSerializable {
     private String name;
     private List<KeyColumnConfig> keyColumns = new ArrayList<KeyColumnConfig>();
@@ -19,17 +21,9 @@ public class UniqueConstraintConfig extends AbstractLiquibaseSerializable {
         return "uniqueConstraint";
     }
 
-     public String getName() {
-        return name;
-    }
-
     public UniqueConstraintConfig setName(String name) {
         this.name = name;
         return this;
-    }
-
-    public List<KeyColumnConfig> getKeyColumns() {
-        return keyColumns;
     }
 
     public UniqueConstraintConfig setKeyColumns(List<KeyColumnConfig> keyColumns) {

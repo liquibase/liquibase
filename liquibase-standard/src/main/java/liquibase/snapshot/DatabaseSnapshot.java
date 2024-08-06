@@ -22,6 +22,7 @@ import liquibase.util.BooleanUtil;
 import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -35,7 +36,9 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
     private final DatabaseObject[] originalExamples;
     private final HashSet<String> serializableFields;
+    @Getter
     private final SnapshotControl snapshotControl;
+    @Getter
     private final Database database;
     private final DatabaseObjectCollection allFound;
     private final DatabaseObjectCollection referencedObjects;
@@ -44,8 +47,10 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
     private final Map<String, Object> snapshotScratchPad = new ConcurrentHashMap<>();
 
     private final Map<String, ResultSetCache> resultSetCaches = new ConcurrentHashMap<>();
+    @Getter
     private CompareControl.SchemaComparison[] schemaComparisons;
 
+    @Getter
     private Map<String, Object> metadata = new ConcurrentHashMap<>();
 
     DatabaseSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
@@ -190,10 +195,6 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         return returnSnapshot;
     }
 
-    public SnapshotControl getSnapshotControl() {
-        return snapshotControl;
-    }
-
     @Override
     public String getSerializedObjectName() {
         return "snapshot";
@@ -257,10 +258,6 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             default:
                 throw new UnexpectedLiquibaseException("Unknown field: " + field);
         }
-    }
-
-    public Database getDatabase() {
-        return database;
     }
 
     public ResultSetCache getResultSetCache(String key) {
@@ -694,16 +691,8 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         return snapshotScratchPad.put(key, data);
     }
 
-    public CompareControl.SchemaComparison[] getSchemaComparisons() {
-        return schemaComparisons;
-    }
-
     public void setSchemaComparisons(CompareControl.SchemaComparison[] schemaComparisons) {
         this.schemaComparisons = schemaComparisons;
-    }
-
-    public Map<String, Object> getMetadata() {
-        return metadata;
     }
 
     public void setMetadata(Map<String, Object> metadata) {

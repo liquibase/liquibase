@@ -5,6 +5,7 @@ import liquibase.database.Database;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.servicelocator.LiquibaseService;
+import lombok.Getter;
 
 /**
  * A wrapper class for data types.
@@ -13,6 +14,7 @@ import liquibase.servicelocator.LiquibaseService;
  * 
  * @author islavov
  */
+@Getter
 @LiquibaseService(skip = true)
 public class DataTypeWrapper extends LiquibaseDataType {
 	
@@ -29,12 +31,8 @@ public class DataTypeWrapper extends LiquibaseDataType {
 	}
 	
 	private final LiquibaseDataType underlyingDataType;
-	
-	public LiquibaseDataType getUnderlyingDataType() {
-		return underlyingDataType;
-	}
-	
-	public DataTypeWrapper(LiquibaseDataType originalType) {
+
+    public DataTypeWrapper(LiquibaseDataType originalType) {
 		super(stripWrappedDataType(originalType));
 		this.underlyingDataType = stripWrappedDataType(originalType);
 	}
