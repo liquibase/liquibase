@@ -19,7 +19,6 @@ public class LoadDataColumnConfig extends ColumnConfig {
      * -- GETTER --
      *  Returns true if this Column should be updated. Returns null if update hasn't been explicitly assigned.
      */
-    @Setter
     @Getter
     @Setter
     private Boolean allowUpdate;
