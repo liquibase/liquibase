@@ -14,15 +14,15 @@ jobs:
       name: Extract Branch Info
       runs-on: ubuntu-22.04
       outputs:
-        branch_name: ${{ steps.get_branch_name.outputs.branch_name }}
+        branch_name: ${{ steps.get-branch-name.outputs.branch_name }}
       steps:
     
       - name: Extract branch name
-        id: get_branch_name
+        id: get-branch-name
         run: |
             branch_name=${GITHUB_REF#refs/heads/}
             echo "Branch name is $branch_name"
-            echo "branch_name=$branch_name" >> $branch_name
+            echo "branch_name=$branch_name" >> $GITHUB_OUTPUT
 
   delete-dat-package:
     name: Delete DAT-SNAPSHOT Github Package for Branch
