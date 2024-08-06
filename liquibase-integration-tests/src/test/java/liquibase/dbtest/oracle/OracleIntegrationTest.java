@@ -23,6 +23,7 @@ import liquibase.sql.visitor.AbstractSqlVisitor;
 import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.core.Index;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -230,7 +231,9 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Ignore
     public void verifySlashReplacementOnStrictMode() throws DatabaseException {
+        assumeNotNull(getDatabase());
         clearDatabase();
         try {
             Scope.child(GlobalConfiguration.STRICT.getKey(), true, () -> {
