@@ -372,6 +372,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     || "time".equalsIgnoreCase(columnTypeName)) {
                 columnMetadataResultSet.set("COLUMN_SIZE", columnMetadataResultSet.getInt("DECIMAL_DIGITS"));
                 columnMetadataResultSet.set("DECIMAL_DIGITS", null);
+            } else if ("int".equalsIgnoreCase(columnTypeName) || "integer".equalsIgnoreCase(columnTypeName)) {
+                columnMetadataResultSet.set("COLUMN_SIZE", null); // mssql int type does not have a size
             }
         } else if (database instanceof PostgresDatabase) {
             columnTypeName = database.unescapeDataTypeName(columnTypeName);
