@@ -80,9 +80,7 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
         }
     }
 
-    @Setter
     private FailOption onFail = FailOption.HALT;
-    @Setter
     private ErrorOption onError = ErrorOption.HALT;
     private OnSqlOutputOption onSqlOutput = OnSqlOutputOption.IGNORE;
     @Setter
@@ -108,6 +106,10 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
         }
     }
 
+    public void setOnFail(FailOption onFail) {
+        this.onFail = onFail;
+    }
+
     public void setOnError(String onError) {
         if (onError == null) {
             this.onError = ErrorOption.HALT;
@@ -124,6 +126,10 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
             }
             throw new RuntimeException("Unknown onError attribute value '"+onError+"'.  Possible values: " + StringUtil.join(possibleOptions, ", "));
         }
+    }
+
+    public void setOnError(ErrorOption onError) {
+        this.onError = onError;
     }
 
     public void setOnSqlOutput(String onSqlOutput) {

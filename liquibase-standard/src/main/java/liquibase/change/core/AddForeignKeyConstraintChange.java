@@ -52,9 +52,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     private Boolean initiallyDeferred;
     private Boolean shouldValidate;
 
-    @Setter
     private String onUpdate;
-    @Setter
     private String onDelete;
 
 
@@ -186,6 +184,10 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         }
     }
 
+    public void setOnUpdate(String rule) {
+        this.onUpdate = rule;
+    }
+
     @DatabaseChangeProperty(
         description = "ON UPDATE functionality. Possible values: 'CASCADE', 'SET NULL', 'SET DEFAULT', " +
             "'RESTRICT', 'NO ACTION'",
@@ -199,6 +201,10 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         exampleValue = "CASCADE")
     public String getOnDelete() {
         return this.onDelete;
+    }
+
+    public void setOnDelete(String onDelete) {
+        this.onDelete = onDelete;
     }
 
     public void setOnDelete(ForeignKeyConstraintType rule) {

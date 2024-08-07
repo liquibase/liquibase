@@ -124,7 +124,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     @Getter
     private ContextExpression includeContextFilter;
 
-    @Setter
     @Getter
     private Labels includeLabels;
     @Setter
@@ -195,6 +194,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
      */
     public void setIncludeLabels(LabelExpression labels) {
         this.includeLabels = new Labels(labels.toString());
+    }
+
+    public void setIncludeLabels(Labels labels) {
+        this.includeLabels = labels;
     }
 
     /**
