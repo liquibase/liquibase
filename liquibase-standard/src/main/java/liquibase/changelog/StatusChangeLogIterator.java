@@ -41,8 +41,6 @@ public class StatusChangeLogIterator extends ChangeLogIterator {
         try {
             Scope.child(Scope.Attr.databaseChangeLog, databaseChangeLog, () -> {
                 List<ChangeSet> changeSetList = new ArrayList<>(databaseChangeLog.getChangeSets());
-                TagDatabaseChange tagDatabaseChange = getTagDatabaseChange(changeSetList);
-                boolean thereIsTagDatabaseChange =  tagDatabaseChange != null;
                 if (visitor.getDirection().equals(ChangeSetVisitor.Direction.REVERSE)) {
                     Collections.reverse(changeSetList);
                 }
@@ -64,6 +62,8 @@ public class StatusChangeLogIterator extends ChangeLogIterator {
                     }
                 }
                 if(GlobalConfiguration.STRICT.getCurrentValue()) {
+                    TagDatabaseChange tagDatabaseChange = getTagDatabaseChange(changeSetList);
+                    boolean thereIsTagDatabaseChange =  tagDatabaseChange != null;
                     if(!thereIsTagDatabaseChange) {
                         throw new ChangeNotFoundException("TagDatabaseChange", databaseChangeLog.getRuntimeEnvironment().getTargetDatabase());
                     }
