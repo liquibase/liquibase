@@ -11,6 +11,7 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.util.BooleanUtil;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Locale;
 import java.util.Set;
@@ -63,7 +64,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
             return false;
         }
 
-        if (BooleanUtil.isTrue(thisColumn.getIncluded()) != BooleanUtil.isTrue(otherColumn.getIncluded())) {
+        if (BooleanUtils.isTrue(thisColumn.getIncluded()) != BooleanUtils.isTrue(otherColumn.getIncluded())) {
             return false;
         }
 
