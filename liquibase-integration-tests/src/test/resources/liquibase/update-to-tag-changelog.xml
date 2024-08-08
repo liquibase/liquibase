@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet  id="1"  author="mallod">
+        <createTable  tableName="person">
+            <column  name="id"  type="int"  autoIncrement="true">
+                <constraints  primaryKey="true"  nullable="false"/>
+            </column>
+            <column  name="firstname"  type="varchar(50)"/>
+            <column  name="lastname"  type="varchar(50)">
+                <constraints  nullable="false"/>
+            </column>
+            <column  name="state"  type="char(2)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="tagChange" author="mallod">
+        <tagDatabase tag="aDifferentTag"/>
+    </changeSet>
+
+    <changeSet  id="2"  author="mallod">
+        <addColumn  tableName="person">
+            <column  name="username"  type="varchar(8)"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>
