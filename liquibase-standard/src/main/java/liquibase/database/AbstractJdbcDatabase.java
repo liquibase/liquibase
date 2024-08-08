@@ -952,7 +952,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     private void addMySQLReservedWordIfApplicable(String... reservedWord) {
         try {
-            if(this instanceof MySQLDatabase && (getDatabaseMajorVersion() == 8 && getDatabaseMinorVersion() >= 4)) {
+            if(this instanceof MySQLDatabase && (getDatabaseMajorVersion() >= 9 || (getDatabaseMajorVersion() == 8 && getDatabaseMinorVersion() >= 4))) {
                 reservedWords.addAll(Arrays.asList(reservedWord));
             }
         } catch (DatabaseException e) {
