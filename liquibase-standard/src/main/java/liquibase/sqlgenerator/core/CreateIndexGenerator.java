@@ -161,7 +161,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 	        while (includerator.hasNext()) {
                 AddColumnConfig column = includerator.next();
                 if (column.getComputed() == null) {
-                    buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column.getName(), false));
+                    buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column.getName()));
                 } else {
                     if (column.getComputed()) {
                         buffer.append(column.getName());
