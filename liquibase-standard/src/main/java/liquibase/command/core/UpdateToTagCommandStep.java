@@ -1,9 +1,6 @@
 package liquibase.command.core;
 
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.Scope;
-import liquibase.UpdateSummaryEnum;
+import liquibase.*;
 import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
@@ -108,7 +105,7 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
                     ch instanceof TagDatabaseChange && ((TagDatabaseChange) ch).getTag().equals(tag)
                 )
             );
-        if (! found) {
+        if (!found && !GlobalConfiguration.STRICT.getCurrentValue()) {
             String message = String.format(
                     "The tag '%s' was not found in the changelog '%s'. All changesets in the changelog were deployed.%nLearn about options for undoing these changes at https://docs.liquibase.com.",
                     tag, changeLog.getPhysicalFilePath());
