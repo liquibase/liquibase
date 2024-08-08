@@ -152,8 +152,10 @@ Global Options
       --duplicate-file-mode=PARAM
                              How to handle multiple files being found in the
                                search path that have duplicate paths. Options
-                               are WARN (log warning and choose one at random)
-                               or ERROR (fail current operation)
+                               are SILENT (do not log and choose one at
+                               random), DEBUG, INFO, WARN (log at the given
+                               level and choose one at random), or ERROR (fail
+                               current operation).
                              DEFAULT: ERROR
                              (defaults file: 'liquibase.duplicateFileMode',
                                environment variable:
@@ -440,6 +442,16 @@ Global Options
                                supportsMethodValidationLevel', environment
                                variable:
                                'LIQUIBASE_SUPPORTS_METHOD_VALIDATION_LEVEL')
+
+      --suppress-liquibase-sql=PARAM
+                             When set to true, this global property prevents
+                               DBCL and DBCLH sql from being present in console
+                               and logs during *-sql commands, such as
+                               update-sql, rollback-sql, etc.
+                             DEFAULT: false
+                             (defaults file: 'liquibase.suppressLiquibaseSql',
+                               environment variable:
+                               'LIQUIBASE_SUPPRESS_LIQUIBASE_SQL')
 
       --trim-load-data-file-header=PARAM
                              If true column headers will be trimmed in case
@@ -734,7 +746,7 @@ https://docs.liquibase.com
 
     def "help output" () {
         when:
-        Assumptions.assumeTrue(System.getProperty("skipHelpTests") != null, "Skipping help test")
+        Assumptions.assumeTrue(System.getProperty("skipHelpTests") == null, "Skipping help test")
         def oldOut = System.out
         def bytes = new ByteArrayOutputStream()
         def newOut = new PrintStream(bytes)
