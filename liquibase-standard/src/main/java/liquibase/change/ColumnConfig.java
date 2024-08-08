@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import org.apache.commons.lang3.BooleanUtils;
 
 /**
  * The standard configuration used by Change classes to represent a column.
@@ -68,7 +69,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         setName(columnSnapshot.getName());
         setComputed(BooleanUtil.isTrue(columnSnapshot.getComputed()) ? Boolean.TRUE : null);
         setDescending(BooleanUtil.isTrue(columnSnapshot.getDescending()) ? Boolean.TRUE : null);
-        setIncluded(BooleanUtil.isTrue(columnSnapshot.getIncluded()) ? Boolean.TRUE : null);
+        setIncluded(BooleanUtils.isTrue(columnSnapshot.getIncluded()) ? Boolean.TRUE : null);
         if (columnSnapshot.getType() != null) {
             setType(columnSnapshot.getType().toString());
         }
