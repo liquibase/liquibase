@@ -4,10 +4,13 @@ import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 
 import java.math.BigDecimal;
 import java.util.*;
+
+import static liquibase.diff.compare.core.DefaultDatabaseObjectComparator.compareObjectNames;
 
 public class ObjectDifferences {
 
@@ -207,33 +210,20 @@ public class ObjectDifferences {
                 return false;
             }
 
+            String object1Name = getObject1Name(referenceValue);
+            String object2Name = getObject1Name(compareToValue);
 
-            String object1Name;
-            if (referenceValue instanceof DatabaseObject) {
-                object1Name = accordingTo.correctObjectName(((DatabaseObject) referenceValue).getAttribute("name", String.class), type);
-            } else {
-                object1Name = referenceValue.toString();
-            }
+            return compareObjectNames(accordingTo, object1Name, object2Name);
 
-            String object2Name;
-            if (compareToValue instanceof DatabaseObject) {
-                object2Name = accordingTo.correctObjectName(((DatabaseObject) compareToValue).getAttribute("name", String.class), type);
-            } else {
-                object2Name = compareToValue.toString();
-            }
+        }
 
-            if ((object1Name == null) && (object2Name == null)) {
-                return true;
+        private String getObject1Name(Object objectValue) {
+            if (objectValue instanceof DatabaseObject) {
+                return accordingTo.correctObjectName(((DatabaseObject) objectValue).getAttribute("name", String.class), type);
+            } else if (type.equals(Column.class)) {
+                return accordingTo.correctObjectName(objectValue.toString(), type);
             }
-            if ((object1Name == null) || (object2Name == null)) {
-                return false;
-            }
-            if (accordingTo.isCaseSensitive()) {
-                return object1Name.equals(object2Name);
-            } else {
-                return object1Name.equalsIgnoreCase(object2Name);
-            }
-
+            return objectValue.toString();
         }
     }
 
