@@ -8,12 +8,12 @@ import liquibase.parser.LiquibaseSqlParser;
 import liquibase.parser.SqlParserFactory;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.CharUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -768,7 +768,12 @@ public class StringUtil {
      * @return an identifier of the desired length
      */
     public static String randomIdentifier(int len) {
-        return RandomStringUtils.random(len, true, false);
+        final String AB = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++)
+            sb.append(AB.charAt(ThreadLocalRandom.current().nextInt(AB.length())));
+        return sb.toString();
     }
 
     /**
