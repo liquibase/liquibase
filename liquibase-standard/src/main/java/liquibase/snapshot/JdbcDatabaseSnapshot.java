@@ -561,7 +561,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     statement.setString(2, tableName);
                 }
                 try {
-                    ResultSet columnSelectRS = statement.executeQuery(selectStatement.toString());
+                    ResultSet columnSelectRS = statement.executeQuery();
                     //
                     // Iterate the result set from the query and match the rows
                     // to the rows that were returned by getColumns() in order
