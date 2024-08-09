@@ -218,7 +218,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         DUPLICATE_FILE_MODE = builder.define("duplicateFileMode", DuplicateFileMode.class)
-                .setDescription("How to handle multiple files being found in the search path that have duplicate paths. Options are WARN (log warning and choose one at random) or ERROR (fail current operation)")
+                .setDescription("How to handle multiple files being found in the search path that have duplicate paths. Options are SILENT (do not log and choose one at random), DEBUG, INFO, WARN (log at the given level and choose one at random), or ERROR (fail current operation).")
                 .setDefaultValue(DuplicateFileMode.ERROR)
                 .build();
 
@@ -259,6 +259,9 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public enum DuplicateFileMode {
         WARN,
         ERROR,
+        INFO,
+        DEBUG,
+        SILENT
     }
 
 }

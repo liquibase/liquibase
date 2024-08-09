@@ -41,7 +41,13 @@ public abstract class PreconditionLogic extends AbstractPrecondition {
         super.load(parsedNode, resourceAccessor);
 
         for (ParsedNode child : parsedNode.getChildren()) {
-            addNestedPrecondition(toPrecondition(child, resourceAccessor));
+            if (child.getName().equals("nestedPreconditions")) {
+                for (ParsedNode child2 : child.getChildren()) {
+                    this.load(child2, resourceAccessor);
+                }
+            } else {
+                addNestedPrecondition(toPrecondition(child, resourceAccessor));
+            }
         }
     }
 
