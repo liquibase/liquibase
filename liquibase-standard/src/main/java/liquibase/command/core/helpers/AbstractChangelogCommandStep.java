@@ -8,10 +8,12 @@ import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandBuilder;
 import liquibase.command.CommandScope;
 import liquibase.exception.CommandValidationException;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -21,15 +23,15 @@ public abstract class AbstractChangelogCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> RUN_ON_CHANGE_TYPES_ARG;
     public static final CommandArgumentDefinition<String> REPLACE_IF_EXISTS_TYPES_ARG;
     public static final CommandArgumentDefinition<Boolean> SKIP_OBJECT_SORTING;
+    private static final List<String> REPLACE_IF_EXISTS_TYPES_NAMES = Arrays.asList("createProcedure", "createView");
 
     static {
         final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         RUN_ON_CHANGE_TYPES_ARG = builder.argument("runOnChangeTypes", String.class)
                 .defaultValue("none").description("Sets runOnChange=\"true\" for changesets containing solely changes of these types (e. g. createView, createProcedure, ...).").build();
-        final String replaceIfExistsTypeNames = supportedReplaceIfExistsTypes().collect(Collectors.joining(", "));
         REPLACE_IF_EXISTS_TYPES_ARG = builder.argument("replaceIfExistsTypes", String.class)
                 .defaultValue("none")
-                .description(String.format("Sets replaceIfExists=\"true\" for changes of these types (supported types: %s)", replaceIfExistsTypeNames)).build();
+                .description(String.format("Sets replaceIfExists=\"true\" for changes of these types (supported types: %s)", StringUtils.join(REPLACE_IF_EXISTS_TYPES_NAMES, ","))).build();
         SKIP_OBJECT_SORTING = builder.argument("skipObjectSorting", Boolean.class)
                 .defaultValue(false)
                 .description("When true will skip object sorting. This can be useful on databases that have a lot of packages/procedures that are " +
