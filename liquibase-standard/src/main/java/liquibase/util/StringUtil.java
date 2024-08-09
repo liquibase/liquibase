@@ -768,7 +768,7 @@ public class StringUtil {
      * @return an identifier of the desired length
      */
     public static String randomIdentifier(int len) {
-        return RandomStringUtils.random(len, true, false);
+        return RandomStringUtils.insecure().next(len, true, false);
     }
 
     /**
