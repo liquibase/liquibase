@@ -69,10 +69,9 @@ TOKEN : /* Numeric Constants */
 TOKEN:
 {
     < COMPLEX_IDENTIFIER: (<S_IDENTIFIER> | <S_QUOTED_IDENTIFIER>) ((["\r","\n"," "])* "." (["\r","\n"," "])* (<S_IDENTIFIER> | <S_QUOTED_IDENTIFIER>))+ >
-|   < S_IDENTIFIER: ( <LETTER> | <UNICODE_LETTERS> | <FIRST_CHAR_SPECIAL_CHARS> ) ( <LETTER> | <UNICODE_LETTERS> | <SPECIAL_CHARS> | <DIGIT> )* >
+|   < S_IDENTIFIER: ( <LETTER> | <UNICODE_LETTERS> | <SPECIAL_CHARS> ) ( <LETTER> | <UNICODE_LETTERS> | <SPECIAL_CHARS> | <DIGIT> )* >
 |   < #LETTER: ["a"-"z", "A"-"Z"] >
-|   < #FIRST_CHAR_SPECIAL_CHARS: "$" | "_" >
-|   < #SPECIAL_CHARS: <FIRST_CHAR_SPECIAL_CHARS> | "#" | "@" >
+|   < #SPECIAL_CHARS: "$" | "_" | "@" | "#" >
 
 |   < #ESC_S_QUOTE: ( "''" ) > /* probably the closest to a universal standard */
 |   < #ESC_D_QUOTE: ( "\"\"" ) > /* probably the 2nd closest to a universal standard */
