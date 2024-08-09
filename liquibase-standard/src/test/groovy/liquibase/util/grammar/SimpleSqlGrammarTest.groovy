@@ -63,5 +63,7 @@ class SimpleSqlGrammarTest extends Specification {
         "select \"\" from sys.dual;"                           | ["select", " ", "\"\"", " ", "from", " ", "sys.dual", ";"]
         "select q'~;\\~' from sys.dual;"                       | ["select", " ", "q", "'~;\\~'", " ", "from", " ", "sys.dual", ";"]
         "select q'{\\\n;\n\\}' from sys.dual;"                 | ["select", " ", "q", "'{\\\n;\n\\}'", " ", "from", " ", "sys.dual", ";"]
+        "declare @myvar int;"                                  | ["declare", " ", "@myvar", " ", "int", ";"]
+        "create table #temptable(col int);"                    | ["create", " ", "table", " ", "#temptable", "(", "col", " ", "int", ")", ";"]
     }
 }
