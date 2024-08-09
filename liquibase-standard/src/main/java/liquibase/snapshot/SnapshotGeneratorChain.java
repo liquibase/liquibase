@@ -3,7 +3,11 @@ package liquibase.snapshot;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.SortedSet;
 
 public class SnapshotGeneratorChain {
     private Iterator<SnapshotGenerator> snapshotGenerators;
@@ -51,34 +55,43 @@ public class SnapshotGeneratorChain {
             return null;
         }
 
-        SnapshotGenerator next = getNextValidGenerator();
-
-        if (next == null) {
-            return null;
-        }
-
-        T obj = next.snapshot(example, snapshot, this);
-        if ((obj != null) && (obj.getSnapshotId() == null)) {
-            obj.setSnapshotId(snapshotIdService.generateId());
-        }
-        return obj;
-    }
-
-    public SnapshotGenerator getNextValidGenerator() {
         if (snapshotGenerators == null) {
             return null;
         }
 
-        if (!snapshotGenerators.hasNext()) {
-            return null;
-        }
-
-        SnapshotGenerator next = snapshotGenerators.next();
-        for (Class<? extends SnapshotGenerator> removedGenerator : replacedGenerators) {
-            if (removedGenerator.equals(next.getClass())) {
-                return getNextValidGenerator();
+        boolean firstRoundDone = false;
+        SnapshotGenerator lastGenerator = null;
+        T lastObject = example;
+        while (snapshotGenerators.hasNext()) {
+            SnapshotGenerator generator = snapshotGenerators.next();
+            if (replacedGenerators.contains(generator.getClass())) {
+                continue;
             }
+            T object = generator.snapshot(lastObject, snapshot, this);
+            if ((object != null) && (object.getSnapshotId() == null)) {
+                object.setSnapshotId(snapshotIdService.generateId());
+            }
+            // only first generator in the chain is allowed to create new instances - subsequent ones are not
+            if (firstRoundDone && object != lastObject) {
+                throw new DatabaseException(String.format("Snapshot generator %s has returned a different reference from the previous generator %s.\n" +
+                                "\tSnapshot object was: %s, it is now: %s.\n" +
+                                "\tConsider declaring %1$s as being replaced by one the generator in the chain via liquibase.snapshot.SnapshotGenerator#replaces.",
+                        generator.getClass().getName(),
+                        lastGenerator.getClass().getName(),
+                        identity(lastObject),
+                        identity(object)));
+            }
+            lastObject = object;
+            lastGenerator = generator;
+            firstRoundDone = true;
         }
-        return next;
+        return lastObject;
+    }
+
+    private static String identity(Object object) {
+        if (object == null) {
+            return "null";
+        }
+        return String.format("%s@%s", object.getClass(), System.identityHashCode(object));
     }
 }
