@@ -70,6 +70,12 @@ public class MissingIndexChangeGenerator extends AbstractChangeGenerator impleme
             change.addColumn(new AddColumnConfig(column));
         }
 
+        for (String column : index.getIncludedColumns()) {
+        	AddColumnConfig c = new AddColumnConfig(new Column(column));
+        	c.setIncluded(true);
+            change.addColumn(c);
+        }
+
         return new Change[] { change };
     }
 

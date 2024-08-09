@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import org.apache.commons.lang3.BooleanUtils;
 
 /**
  * The standard configuration used by Change classes to represent a column.
@@ -58,6 +59,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     private BigInteger incrementBy;
     private String remarks;
     private Boolean descending;
+    private Boolean included;
 
     /**
      * Create a ColumnConfig object based on a {@link Column} snapshot.
@@ -67,6 +69,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         setName(columnSnapshot.getName());
         setComputed(BooleanUtil.isTrue(columnSnapshot.getComputed()) ? Boolean.TRUE : null);
         setDescending(BooleanUtil.isTrue(columnSnapshot.getDescending()) ? Boolean.TRUE : null);
+        setIncluded(BooleanUtils.isTrue(columnSnapshot.getIncluded()) ? Boolean.TRUE : null);
         if (columnSnapshot.getType() != null) {
             setType(columnSnapshot.getType().toString());
         }
@@ -721,8 +724,17 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return descending;
     }
 
+    public Boolean getIncluded() {
+        return included;
+    }
+
     public ColumnConfig setDescending(Boolean descending) {
         this.descending = descending;
+        return this;
+    }
+
+    public ColumnConfig setIncluded(Boolean included) {
+        this.included = included;
         return this;
     }
 
@@ -795,6 +807,8 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         incrementBy = parsedNode.getChildValue(null, "incrementBy", BigInteger.class);
         remarks = parsedNode.getChildValue(null, "remarks", String.class);
         descending = parsedNode.getChildValue(null, "descending", Boolean.class);
+        included= parsedNode.getChildValue(null, "included", Boolean.class);
+
 
 
         value = parsedNode.getChildValue(null, "value", String.class);
