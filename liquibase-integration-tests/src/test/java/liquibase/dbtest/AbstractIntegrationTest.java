@@ -1384,6 +1384,14 @@ public abstract class AbstractIntegrationTest {
         commandScope.execute();
     }
 
+    protected List<ChangeSet> generateChangelog() throws LiquibaseException{
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, null, new CompareControl());
+
+        DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, new DiffOutputControl(false, false, false, null));
+        List<ChangeSet> changeSets = changeLogWriter.generateChangeSets();
+        return changeSets;
+    }
+
     public static final class ApplyTestChangelog {
 
         private static void initLogLevel() {
