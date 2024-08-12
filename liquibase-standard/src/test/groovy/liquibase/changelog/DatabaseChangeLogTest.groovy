@@ -555,6 +555,50 @@ create view sql_view as select * from sql_table;'''
         warnings.contains("included file com/example/children/file2.unknown_ext is not a recognized file type")
     }
 
+    def "include throw exception if onUnknownFileFormat is FAIL and unknown file extension"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "com/example/notfound.notfound_extension": test1Xml,
+        ])
+        def onUnknownFileFormat = DatabaseChangeLog.OnUnknownFileFormat.FAIL
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, onUnknownFileFormat, new ModifyChangeSets(null, null))
+
+        then:
+        def e = thrown(UnknownChangelogFormatException)
+        assert e.getMessage().startsWith("Cannot find parser that supports com/example/notfound.notfound_extension")
+    }
+
+    def "include ignore if onUnknownFileFormat is WARN and unknown file extension"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "com/example/notfound.notfound_extension": test1Xml,
+        ])
+        def onUnknownFileFormat = DatabaseChangeLog.OnUnknownFileFormat.WARN
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, onUnknownFileFormat, new ModifyChangeSets(null, null))
+
+        def changeSets= rootChangeLog.changeSets
+
+        then:
+        changeSets.isEmpty() == true
+    }
+
+    def "include ignore if onUnknownFileFormat is SKIP and unknown file extension"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "com/example/notfound.notfound_extension": test1Xml,
+        ])
+        def onUnknownFileFormat = DatabaseChangeLog.OnUnknownFileFormat.SKIP
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, onUnknownFileFormat, new ModifyChangeSets(null, null))
+
+        def changeSets= rootChangeLog.changeSets
+
+        then:
+        changeSets.isEmpty() == true
+    }
+
     def "includeAll executes include in alphabetical order"() {
         when:
         def resourceAccessor = new MockResourceAccessor([
