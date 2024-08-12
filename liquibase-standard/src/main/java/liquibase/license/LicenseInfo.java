@@ -18,7 +18,11 @@ public class LicenseInfo {
     }
 
     public String formatExpirationDate() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
-        return dateFormat.format(expirationDate);
+        if (expirationDate != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
+            return dateFormat.format(expirationDate);
+        } else {
+            return null;
+        }
     }
 }
