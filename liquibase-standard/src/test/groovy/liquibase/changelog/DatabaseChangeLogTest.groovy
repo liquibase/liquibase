@@ -13,6 +13,7 @@ import liquibase.database.core.MockDatabase
 import liquibase.exception.ChangeLogParseException
 import liquibase.exception.SetupException
 import liquibase.exception.UnexpectedLiquibaseException
+import liquibase.exception.UnknownChangelogFormatException
 import liquibase.logging.core.BufferedLogService
 import liquibase.parser.ChangeLogParser
 import liquibase.parser.ChangeLogParserConfiguration
@@ -437,6 +438,50 @@ create view sql_view as select * from sql_table;'''
         rootChangeLog.include("com/example/.svn", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
         rootChangeLog.include("com/example/.gitkeep", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
         rootChangeLog.include("com/example/.gitignore", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+
+        def changeSets= rootChangeLog.changeSets
+
+        then:
+        changeSets.isEmpty() == true
+    }
+
+    def "include throw exception if onUnknownFileFormat is FAIL and unknown file extension"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "com/example/notfound.notfound_extension": test1Xml,
+        ])
+        def onUnknownFileFormat = DatabaseChangeLog.OnUnknownFileFormat.FAIL
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, onUnknownFileFormat, new ModifyChangeSets(null, null))
+
+        then:
+        def e = thrown(UnknownChangelogFormatException)
+        assert e.getMessage().startsWith("Cannot find parser that supports com/example/notfound.notfound_extension")
+    }
+
+    def "include ignore if onUnknownFileFormat is WARN and unknown file extension"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "com/example/notfound.notfound_extension": test1Xml,
+        ])
+        def onUnknownFileFormat = DatabaseChangeLog.OnUnknownFileFormat.WARN
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, onUnknownFileFormat, new ModifyChangeSets(null, null))
+
+        def changeSets= rootChangeLog.changeSets
+
+        then:
+        changeSets.isEmpty() == true
+    }
+
+    def "include ignore if onUnknownFileFormat is SKIP and unknown file extension"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "com/example/notfound.notfound_extension": test1Xml,
+        ])
+        def onUnknownFileFormat = DatabaseChangeLog.OnUnknownFileFormat.SKIP
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, onUnknownFileFormat, new ModifyChangeSets(null, null))
 
         def changeSets= rootChangeLog.changeSets
 
