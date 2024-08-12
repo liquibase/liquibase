@@ -408,6 +408,42 @@ create view sql_view as select * from sql_table;'''
         test2ChangeLog.isIncludeIgnore() == true
     }
 
+    def "include ignore if hidden filename"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "com/example/.hiddenfile": test1Xml,
+        ])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.include("com/example/.hiddenfile", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+
+        def changeSets= rootChangeLog.changeSets
+
+        then:
+        changeSets.isEmpty() == true
+    }
+
+    def "include ignore if version control system files"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "com/example/cvs": test1Xml,
+                "com/example/.svn": test1Xml.replace("testUser", "otherUser").replace("person", "person2"),
+                "com/example/.gitkeep": test1Xml.replace("testUser", "otherUser").replace("person", "person3"),
+                "com/example/.gitignore": test1Xml.replace("testUser", "otherUser").replace("person", "person4")
+        ])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.include("com/example/cvs", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+        rootChangeLog.include("com/example/.svn", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+        rootChangeLog.include("com/example/.gitkeep", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+        rootChangeLog.include("com/example/.gitignore", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+
+        def changeSets= rootChangeLog.changeSets
+
+        then:
+        changeSets.isEmpty() == true
+    }
+
     def "includeAll executes include in alphabetical order"() {
         when:
         def resourceAccessor = new MockResourceAccessor([
