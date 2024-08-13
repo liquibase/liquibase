@@ -87,7 +87,7 @@ jobs:
         sleep 60
         mkdir /home/runner/work/fossa_reports
 
-        curl --location 'https://app.fossa.com/api/revisions/git%2Bgithub.com%2Fliquibase%2Fliquibase%24${{ steps.get_commit_sha_oss.outputs.commit_sha_lb }}/attribution/download?format=CSV&includeDeepDependencies=true&download=true' \
+        curl --location 'https://app.fossa.com/api/revisions/git%2Bgithub.com%2Fliquibase%2Fliquibase%24${{ steps.get_commit_sha_oss.outputs.commit_sha_lb }}/attribution/download?format=CSV&includeDeepDependencies=false&includeDirectDependencies=true&download=true' \
         --header 'Authorization: Bearer ${{ secrets.FOSSA_COMBINED_REPORT }}' -o /home/runner/work/fossa_reports/liquibase.csv
         ls -l /home/runner/work/fossa_reports
         cat /home/runner/work/fossa_reports/liquibase.csv || echo "File is empty or not found"
