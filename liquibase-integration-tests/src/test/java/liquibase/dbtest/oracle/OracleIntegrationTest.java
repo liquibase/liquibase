@@ -23,7 +23,6 @@ import liquibase.sql.visitor.AbstractSqlVisitor;
 import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.core.Index;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
