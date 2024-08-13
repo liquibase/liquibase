@@ -156,6 +156,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             }
             foundRequired = true
             signature.println "  ${argDef.name} (${argDef.dataType.simpleName}) ${argDef.description ?: "MISSING DESCRIPTION"}"
+            if (!argDef.forcePrintedAliases.isEmpty()) {
+                signature.println "    Force-printed aliases: ${argDef.forcePrintedAliases}"
+            }
             if (argDef.valueObfuscator != null) {
                 signature.println("    OBFUSCATED")
             }
@@ -174,6 +177,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             foundOptional = true
             signature.println "  ${argDef.name} (${argDef.dataType.simpleName}) ${argDef.description ?:  "MISSING DESCRIPTION"}"
             signature.println "    Default: ${argDef.defaultValueDescription}"
+            if (!argDef.forcePrintedAliases.isEmpty()) {
+                signature.println "    Force-printed aliases: ${argDef.forcePrintedAliases}"
+            }
             if (argDef.valueObfuscator != null) {
                 signature.println("    OBFUSCATED")
             }
