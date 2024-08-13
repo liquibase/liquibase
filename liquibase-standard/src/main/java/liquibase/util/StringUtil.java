@@ -113,9 +113,9 @@ public class StringUtil {
                 String trimmedString;
                 if (Boolean.TRUE.equals(GlobalConfiguration.STRICT.getCurrentValue())) {
                     String sentenceWithoutDelimiter = removeEndDelimiterIfItsASlash(endDelimiter, currentString);
-                    trimmedString = sentenceWithoutDelimiter.isEmpty() ? StringUtil.trimToNull(currentString.toString()) : StringUtil.trimToNull(sentenceWithoutDelimiter);
+                    trimmedString = sentenceWithoutDelimiter.isEmpty() ? StringUtils.trimToNull(currentString.toString()) : StringUtils.trimToNull(sentenceWithoutDelimiter);
                 } else {
-                    trimmedString = StringUtil.trimToNull(currentString.toString());
+                    trimmedString = StringUtils.trimToNull(currentString.toString());
                 }
                 if (trimmedString != null) {
                     returnArray.add(trimmedString);
@@ -123,8 +123,8 @@ public class StringUtil {
                 currentString = new StringBuilder();
                 previousDelimiter = true;
             } else {
-                if (!previousDelimiter || (StringUtil.trimToNull((String) piece) != null)) { //don't include whitespace after a delimiter
-                    if ((currentString.length() > 0) || (StringUtil.trimToNull((String) piece) != null)) { //don't include whitespace before the statement
+                if (!previousDelimiter || (StringUtils.trimToNull((String) piece) != null)) { //don't include whitespace after a delimiter
+                    if ((currentString.length() > 0) || (StringUtils.trimToNull((String) piece) != null)) { //don't include whitespace before the statement
                         currentString.append(piece);
                     }
                 }
@@ -133,7 +133,7 @@ public class StringUtil {
             previousPiece = (String) piece;
         }
 
-        String trimmedString = StringUtil.trimToNull(currentString.toString());
+        String trimmedString = StringUtils.trimToNull(currentString.toString());
         if (trimmedString != null) {
             returnArray.add(trimmedString);
         }

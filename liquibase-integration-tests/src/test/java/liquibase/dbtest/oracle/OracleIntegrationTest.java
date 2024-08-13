@@ -239,7 +239,6 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void verifySlashReplacementOnStrictMode() throws DatabaseException {
         assumeNotNull(getDatabase());
-        clearDatabase();
         try {
             Scope.child(GlobalConfiguration.STRICT.getKey(), true, () -> {
                 Database database = getDatabase();
@@ -250,8 +249,6 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
             });
         } catch (Exception e) {
             Assert.fail("Should not fail. Reason: " + e.getMessage());
-        } finally {
-            clearDatabase();
         }
     }
 }
