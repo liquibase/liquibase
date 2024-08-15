@@ -6,6 +6,7 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.exception.DatabaseException;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.visitor.SqlVisitor;
@@ -44,11 +45,9 @@ public class LoggingExecutor extends AbstractExecutor {
     }
 
     /**
-     *
      * Return the name of the Executor
      *
      * @return String   The Executor name
-     *
      */
     @Override
     public String getName() {
@@ -56,11 +55,9 @@ public class LoggingExecutor extends AbstractExecutor {
     }
 
     /**
-     *
      * Return the Executor priority
      *
      * @return int      The Executor priority
-     *
      */
     @Override
     public int getPriority() {
@@ -117,12 +114,26 @@ public class LoggingExecutor extends AbstractExecutor {
     private void outputStatement(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         try {
             if (SqlGeneratorFactory.getInstance().generateStatementsVolatile(sql, database)) {
-                throw new DatabaseException(sql.getClass().getSimpleName()+" requires access to up to date database " +
+                throw new DatabaseException(sql.getClass().getSimpleName() + " requires access to up to date database " +
                         "metadata which is not available in SQL output mode");
             }
             if (sql instanceof ExecutablePreparedStatement) {
                 output.write("WARNING: This statement uses a prepared statement which cannot be execute directly " +
                         "by this script. Only works in 'update' mode\n\n");
+            }
+            if (LiquibaseCommandLineConfiguration.SUPPRESS_LIQUIBASE_SQL.getCurrentValue() &&
+                    (sql instanceof ClearDatabaseChangeLogTableStatement ||
+                    sql instanceof CreateDatabaseChangeLogLockTableStatement ||
+                    sql instanceof CreateDatabaseChangeLogTableStatement ||
+                    sql instanceof InitializeDatabaseChangeLogLockTableStatement ||
+                    sql instanceof LockDatabaseChangeLogStatement ||
+                    sql instanceof MarkChangeSetRanStatement ||
+                    sql instanceof RemoveChangeSetRanStatusStatement ||
+                    sql instanceof SelectFromDatabaseChangeLogLockStatement ||
+                    sql instanceof SelectFromDatabaseChangeLogStatement ||
+                    sql instanceof UnlockDatabaseChangeLogStatement ||
+                    sql instanceof UpdateChangeSetChecksumStatement)) {
+                return;
             }
 
             for (String statement : applyVisitors(sql, sqlVisitors)) {
@@ -141,7 +152,7 @@ public class LoggingExecutor extends AbstractExecutor {
                 output.write(statement);
 
                 if ((database instanceof MSSQLDatabase) || (database instanceof SybaseDatabase) || (database
-                    instanceof SybaseASADatabase)) {
+                        instanceof SybaseASADatabase)) {
                     output.write(StreamUtil.getLineSeparator());
                     output.write("GO");
                 } else {
@@ -247,7 +258,7 @@ public class LoggingExecutor extends AbstractExecutor {
     public boolean updatesDatabase() {
         return false;
     }
-    
+
     private class NoopWriter extends Writer {
 
         @Override
@@ -267,5 +278,5 @@ public class LoggingExecutor extends AbstractExecutor {
 
     }
 
-    
+
 }

@@ -308,6 +308,25 @@ public class Liquibase implements AutoCloseable {
         });
     }
 
+    public void updateCountSql(int count, Contexts contexts, LabelExpression labelExpression, Writer output)
+            throws LiquibaseException {
+        runInScope(() -> {
+            CommandScope updateCommand = new CommandScope(UpdateCountSqlCommandStep.COMMAND_NAME);
+            updateCommand.addArgumentValue(UpdateCountSqlCommandStep.COUNT_ARG, count);
+            updateCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase());
+            updateCommand.addArgumentValue(UpdateCountSqlCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
+            updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_ARG, databaseChangeLog);
+            updateCommand.addArgumentValue(UpdateCountSqlCommandStep.CONTEXTS_ARG, contexts != null ? contexts.toString() : null);
+            updateCommand.addArgumentValue(UpdateCountSqlCommandStep.LABEL_FILTER_ARG, labelExpression != null ? labelExpression.getOriginalString() : null);
+            updateCommand.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener);
+            updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
+            updateCommand.setOutput(WriterOutputStream.builder()
+                    .setWriter(output)
+                    .setCharset(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()).get());
+            updateCommand.execute();
+        });
+    }
+
     public void update(int changesToApply, String contexts) throws LiquibaseException {
         update(changesToApply, new Contexts(contexts), new LabelExpression());
     }
@@ -377,6 +396,26 @@ public class Liquibase implements AutoCloseable {
             updateCommand.execute();
         });
     }
+
+    public void updateToTagSql(String tag, Contexts contexts, LabelExpression labelExpression, Writer writer) throws LiquibaseException {
+        runInScope(() -> {
+            CommandScope updateCommand = new CommandScope(UpdateToTagSqlCommandStep.COMMAND_NAME);
+            updateCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase());
+            updateCommand.addArgumentValue(UpdateToTagSqlCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
+            updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_ARG, databaseChangeLog);
+            updateCommand.addArgumentValue(UpdateToTagSqlCommandStep.CONTEXTS_ARG, contexts != null ? contexts.toString() : null);
+            updateCommand.addArgumentValue(UpdateToTagSqlCommandStep.LABEL_FILTER_ARG, labelExpression != null ? labelExpression.getOriginalString() : null);
+            updateCommand.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_ARG, changeExecListener);
+            updateCommand.addArgumentValue(UpdateToTagSqlCommandStep.TAG_ARG, tag);
+            updateCommand.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters);
+            updateCommand.setOutput(WriterOutputStream.builder()
+                    .setWriter(writer)
+                    .setCharset(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()).get());
+            updateCommand.execute();
+        });
+    }
+
+
 
     public void update(int changesToApply, String contexts, Writer output) throws LiquibaseException {
         this.update(changesToApply, new Contexts(contexts), new LabelExpression(), output);
