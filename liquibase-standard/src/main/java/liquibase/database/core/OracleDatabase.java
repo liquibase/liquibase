@@ -242,7 +242,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getAutoIncrementClause(final String generationType, final Boolean defaultOnNull) {
-        if (StringUtil.isEmpty(generationType)) {
+        if (StringUtils.isEmpty(generationType)) {
             return super.getAutoIncrementClause();
         }
 

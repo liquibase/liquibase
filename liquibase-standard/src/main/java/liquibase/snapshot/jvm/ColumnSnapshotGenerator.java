@@ -18,6 +18,7 @@ import liquibase.structure.core.*;
 import liquibase.util.BooleanUtil;
 import liquibase.util.SqlUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.sql.*;
 import java.util.*;
@@ -140,7 +141,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     private static boolean hasValidObjectName(String objectName) {
-        if (StringUtil.isEmpty(objectName)) {
+        if (StringUtils.isEmpty(objectName)) {
             return false;
         }
         return !objectName.startsWith("SYS_") && !objectName.startsWith("BIN$");

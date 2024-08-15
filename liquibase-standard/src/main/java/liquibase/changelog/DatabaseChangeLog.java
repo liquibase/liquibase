@@ -35,6 +35,7 @@ import liquibase.util.FileUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -581,7 +582,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             case PROPERTY: {
                 try {
                     String contextFilter = node.getChildValue(null, CONTEXT_FILTER, String.class);
-                    if (StringUtil.isEmpty(contextFilter)) {
+                    if (StringUtils.isEmpty(contextFilter)) {
                         contextFilter = node.getChildValue(null, CONTEXT, String.class);
                     }
                     String dbms = node.getChildValue(null, DBMS, String.class);

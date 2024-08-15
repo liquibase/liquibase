@@ -27,6 +27,7 @@ import liquibase.structure.core.Schema;
 import liquibase.structure.core.Sequence;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -415,7 +416,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
     private String generateTableName(Database database, CreateTableStatement statement) {
         // In Postgresql, temp tables get their own schema and each session (connection) gets
         //its own temp schema. So - don't qualify them by schema.
-        if (!(database instanceof PostgresDatabase) || StringUtil.isEmpty(statement.getTableType()) || !statement.getTableType().trim().toLowerCase().contains("temp")) {
+        if (!(database instanceof PostgresDatabase) || StringUtils.isEmpty(statement.getTableType()) || !statement.getTableType().trim().toLowerCase().contains("temp")) {
             return database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
         } else {
             return database.escapeObjectName(statement.getTableName(), Table.class);

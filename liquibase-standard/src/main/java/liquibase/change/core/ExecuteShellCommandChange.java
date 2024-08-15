@@ -19,6 +19,7 @@ import liquibase.statement.core.CommentStatement;
 import liquibase.statement.core.RuntimeStatement;
 import liquibase.util.StringUtil;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.util.*;
@@ -94,7 +95,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
     @Override
     public ValidationErrors validate(Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
-        if (!StringUtil.isEmpty(timeout)) {
+        if (!StringUtils.isEmpty(timeout)) {
             // check for the timeout values, accept only positive value with one letter unit (s/m/h)
             Matcher matcher = TIMEOUT_PATTERN.matcher(timeout);
             if (!matcher.matches()) {
@@ -279,7 +280,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 try {
                     long valLong = Long.parseLong(val);
                     String unit = matcher.group(2);
-                    if (StringUtil.isEmpty(unit)) {
+                    if (StringUtils.isEmpty(unit)) {
                         return valLong * SECS_IN_MILLIS;
                     }
                     char u = unit.toLowerCase().charAt(0);

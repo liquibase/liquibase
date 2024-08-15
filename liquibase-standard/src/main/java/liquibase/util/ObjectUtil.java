@@ -6,6 +6,7 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -260,7 +261,7 @@ public class ObjectUtil {
                         values.add(value.name());
                     }
                     String exceptionMessage;
-                    if (StringUtil.isEmpty(name)) {
+                    if (StringUtils.isEmpty(name)) {
                         exceptionMessage = "Invalid value '"+object+"'.";
                     } else {
                         exceptionMessage = "The " + name.toLowerCase() + " value '" + object + "' is not valid.";

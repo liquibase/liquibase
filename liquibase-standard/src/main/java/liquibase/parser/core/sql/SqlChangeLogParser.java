@@ -14,6 +14,7 @@ import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 
@@ -44,7 +45,7 @@ public class SqlChangeLogParser implements ChangeLogParser {
             //
             // Handle empty files with a WARNING message
             //
-            if (StringUtil.isEmpty(sql)) {
+            if (StringUtils.isEmpty(sql)) {
                 String message = String.format("Unable to parse empty file '%s'", physicalChangeLogLocation);
                 Scope.getCurrentScope().getLog(getClass()).warning(message);
                 throw new ChangeLogParseException(message);
