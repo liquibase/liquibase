@@ -48,16 +48,26 @@ public class UUIDType extends LiquibaseDataType {
                 throw new RuntimeException(ex);
             }
         }
+//        try {
+//            if (database instanceof MySQLDatabase && (database.getDatabaseMajorVersion() == 8)) {
+//                return new DatabaseDataType("BINARY", 16);
+//            }
+//        } catch (DatabaseException e) {
+//            throw new RuntimeException(e);
+//        }
+        if (database instanceof MySQLDatabase) {
+            return new DatabaseDataType("binary", 16);
+        }
         return new DatabaseDataType("char", 36);
     }
 
     @Override
     protected String otherToSql(Object value, Database database) {
-        if (value == null) {
-            return null;
-        }
         if (database instanceof MSSQLDatabase) {
             return "'" + value.toString().toUpperCase(Locale.ENGLISH) + "'";
+        }
+        if (database instanceof MySQLDatabase && !(database instanceof MariaDBDatabase)) {
+            return value.toString().toLowerCase(Locale.ENGLISH);
         }
         return super.otherToSql(value, database);
     }

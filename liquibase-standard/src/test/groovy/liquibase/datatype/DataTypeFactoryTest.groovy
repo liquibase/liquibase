@@ -212,6 +212,7 @@ class DataTypeFactoryTest extends Specification {
         "mediumblob"                                   | new MySQLDatabase()    | "MEDIUMBLOB"                                   | BlobType      | false
         "mediumtext"                                   | new MySQLDatabase()    | "MEDIUMTEXT"                                   | ClobType      | false
         "real"                                         | new MySQLDatabase()    | "REAL"                                         | FloatType     | false
+        "uuid"                                         | new MySQLDatabase()    | "binary(16)"                                   | UUIDType      | false
         "nclob"                                        | new OracleDatabase()   | "NCLOB"                                        | ClobType      | false
         "xml"                                          | new OracleDatabase()   | "XMLTYPE"                                      | XMLType       | false
         "xmltype"                                      | new OracleDatabase()   | "XMLTYPE"                                      | XMLType       | false
