@@ -49,6 +49,18 @@ Global Options
                                variable:
                                'LIQUIBASE_ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA')
 
+      --analytics-filename=PARAM
+                             DEFAULT: ./analytics.csv
+                             (defaults file: 'liquibase.analytics.filename',
+                               environment variable:
+                               'LIQUIBASE_ANALYTICS_FILENAME')
+
+      --analytics-output-destination=PARAM
+                             DEFAULT: CSV
+                             (defaults file: 'liquibase.analytics.
+                               outputDestination', environment variable:
+                               'LIQUIBASE_ANALYTICS_OUTPUT_DESTINATION')
+
       --auto-reorg=PARAM     Should Liquibase automatically include REORG TABLE
                                commands when needed?
                              DEFAULT: true
