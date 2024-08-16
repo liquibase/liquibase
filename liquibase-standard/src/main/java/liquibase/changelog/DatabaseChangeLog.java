@@ -25,6 +25,9 @@ import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
+import liquibase.parser.core.json.JsonChangeLogParser;
+import liquibase.parser.core.xml.XMLChangeLogSAXParser;
+import liquibase.parser.core.yaml.YamlParser;
 import liquibase.precondition.Conditional;
 import liquibase.precondition.Precondition;
 import liquibase.precondition.core.PreconditionContainer;
@@ -416,11 +419,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         ExceptionUtil.doSilently(() -> {
-            if (this.physicalFilePath.toLowerCase().endsWith("json")) {
+            String physicalFilePathLowerCase = this.physicalFilePath.toLowerCase();
+            if (JsonChangeLogParser.SUPPORTED_EXTENSIONS.stream().anyMatch(ext -> physicalFilePathLowerCase.endsWith(ext))) {
                 Scope.getCurrentScope().getAnalyticsEvent().incrementJsonChangelogCount();
-            } else if (this.physicalFilePath.toLowerCase().endsWith("xml")) {
+            } else if (XMLChangeLogSAXParser.SUPPORTED_EXTENSIONS.stream().anyMatch(ext -> physicalFilePathLowerCase.endsWith(ext))) {
                 Scope.getCurrentScope().getAnalyticsEvent().incrementXmlChangelogCount();
-            } else if (this.physicalFilePath.toLowerCase().endsWith("yaml") || this.physicalFilePath.toLowerCase().endsWith("yml")) {
+            } else if (YamlParser.SUPPORTED_EXTENSIONS.stream().anyMatch(ext -> physicalFilePathLowerCase.endsWith(ext))) {
                 Scope.getCurrentScope().getAnalyticsEvent().incrementYamlChangelogCount();
             }
         });
