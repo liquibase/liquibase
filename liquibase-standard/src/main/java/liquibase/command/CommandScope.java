@@ -293,7 +293,7 @@ public class CommandScope {
 
                 return resultsBuilder.build();
             });
-        } catch (CommandExecutionException e) {
+        } catch (CommandExecutionException | RuntimeException e) {
             throw e;
         } catch (Exception e) {
             throw new CommandExecutionException(e);
