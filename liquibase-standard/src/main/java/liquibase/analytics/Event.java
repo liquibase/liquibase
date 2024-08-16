@@ -18,6 +18,14 @@ import static liquibase.util.VersionUtils.getLibraryInfoMap;
 @Data
 public class Event {
 
+    /**
+     * Cached extensions, to avoid costly lookups for each extension.
+     */
+    private final static Cache<Map<String, VersionUtils.LibraryInfo>> EXTENSIONS_CACHE = new Cache<>(() -> {
+        final Path workingDirectory = Paths.get(".").toAbsolutePath();
+        return getLibraryInfoMap();
+    });
+
     private final String command;
     private boolean reportsEnabled;
     private boolean dbclhEnabled;
@@ -105,16 +113,13 @@ public class Event {
         return properties;
     }
 
-    // todo caching here
-
     /**
      * Given the "Implementation-Name" of an extension, return its version. This is the same mechanism used by
      * the liquibase --version output.
      */
     private static String getExtensionVersion(String extensionName) {
         return ExceptionUtil.doSilently(() -> {
-            final Path workingDirectory = Paths.get(".").toAbsolutePath();
-            Map<String, VersionUtils.LibraryInfo> libraries = getLibraryInfoMap();
+            Map<String, VersionUtils.LibraryInfo> libraries = EXTENSIONS_CACHE.get();
             return libraries.get(extensionName).version;
         });
     }
