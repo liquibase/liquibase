@@ -31,6 +31,7 @@ import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
+import liquibase.util.ExceptionUtil;
 import liquibase.util.FileUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
@@ -414,6 +415,15 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+        ExceptionUtil.doSilently(() -> {
+            if (this.physicalFilePath.toLowerCase().endsWith("json")) {
+                Scope.getCurrentScope().getAnalyticsEvent().incrementJsonChangelogCount();
+            } else if (this.physicalFilePath.toLowerCase().endsWith("xml")) {
+                Scope.getCurrentScope().getAnalyticsEvent().incrementXmlChangelogCount();
+            } else if (this.physicalFilePath.toLowerCase().endsWith("yaml") || this.physicalFilePath.toLowerCase().endsWith("yml")) {
+                Scope.getCurrentScope().getAnalyticsEvent().incrementYamlChangelogCount();
+            }
+        });
         setLogicalFilePath(parsedNode.getChildValue(null, "logicalFilePath", String.class));
 
         String context = parsedNode.getChildValue(null, CONTEXT_FILTER, String.class);

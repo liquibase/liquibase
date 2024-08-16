@@ -3,6 +3,7 @@ package liquibase.command.core.helpers;
 import liquibase.Beta;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.analytics.Event;
 import liquibase.command.CleanUpCommandStep;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandResultsBuilder;
@@ -13,6 +14,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.logging.mdc.MdcKey;
+import liquibase.util.ExceptionUtil;
 import liquibase.util.StringUtil;
 
 import java.util.Collections;
@@ -136,6 +138,12 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, JdbcConnection.sanitizeUrl(url));
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_CATALOG_NAME, database.getLiquibaseCatalogName());
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SCHEMA_NAME, database.getLiquibaseSchemaName());
+        ExceptionUtil.doSilently(() -> {
+            Scope.getCurrentScope().getAnalyticsEvent().setDatabasePlatform(database.getDatabaseProductName());
+        });
+        ExceptionUtil.doSilently(() -> {
+            Scope.getCurrentScope().getAnalyticsEvent().setDatabaseVersion(database.getDatabaseProductVersion());
+        });
     }
 
     @Override
