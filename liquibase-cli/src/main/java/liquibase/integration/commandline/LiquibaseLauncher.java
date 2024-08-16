@@ -177,8 +177,8 @@ public class LiquibaseLauncher {
         // and we want to ignore them in the classpath as the installer/zip/tgz is
         // not able to update them .
         List<File> libsToIgnoreInClasspath = Arrays.asList(
-                new File(liquibaseHome, "internal/extensions/liquibase-bigquery-4.29.0.jar"),
-                new File(liquibaseHome, "internal/extensions/liquibase-bigquery-4.29.1.jar")
+                new File(liquibaseHome, "internal/extensions/liquibase-commercial-bigquery-4.29.0.jar"),
+                new File(liquibaseHome, "internal/extensions/liquibase-commercial-bigquery-4.29.1.jar")
         );
 
 
