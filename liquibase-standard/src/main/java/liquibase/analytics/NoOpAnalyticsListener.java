@@ -1,5 +1,7 @@
 package liquibase.analytics;
 
+import liquibase.Scope;
+
 public class NoOpAnalyticsListener implements UsageAnalyticsListener {
     @Override
     public int getPriority() {
@@ -8,6 +10,6 @@ public class NoOpAnalyticsListener implements UsageAnalyticsListener {
 
     @Override
     public void handleEvent(Event event) {
-        // purposefully do nothing
+        Scope.getCurrentScope().getLog(getClass()).fine("An analytics event has been received, but is being discarded because analytics is disabled.");
     }
 }
