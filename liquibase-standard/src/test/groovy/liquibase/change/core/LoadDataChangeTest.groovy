@@ -13,7 +13,6 @@ import liquibase.database.DatabaseFactory
 import liquibase.database.core.H2Database
 import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.MockDatabase
-import liquibase.database.core.MySQLDatabase
 import liquibase.exception.ValidationErrors
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
@@ -60,6 +59,7 @@ class LoadDataChangeTest extends StandardChangeTest {
         mockDb = new MockDatabase();
         mockDb.setConnection((DatabaseConnection) null)
     }
+
 
     def "loadDataEmpty database agnostic"() throws Exception {
         when:
@@ -982,6 +982,7 @@ class LoadDataChangeTest extends StandardChangeTest {
         sqlStatement.getColumnValues().keySet()[2] == " name"
         sqlStatement.getColumnValues().keySet()[3] == " description"
     }
+
 
     class ColDef {
         ColDef(Object n, String type) {
