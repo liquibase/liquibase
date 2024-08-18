@@ -47,7 +47,6 @@ import java.time.LocalTime
 class LoadDataChangeTest extends StandardChangeTest {
 
     MSSQLDatabase mssqlDb;
-    MySQLDatabase mysqlDB;
     MockDatabase mockDb;
 
     def setup() {
@@ -57,9 +56,6 @@ class LoadDataChangeTest extends StandardChangeTest {
         mssqlDb = new MSSQLDatabase();
         mssqlDb.setConnection(DatabaseFactory.getInstance().openConnection("offline:mssql",
                 "superuser", "superpass", null, resourceAccessor));
-
-        mysqlDB = new MySQLDatabase();
-        mysqlDB.setConnection((DatabaseConnection) null)
 
         mockDb = new MockDatabase();
         mockDb.setConnection((DatabaseConnection) null)
@@ -986,36 +982,6 @@ class LoadDataChangeTest extends StandardChangeTest {
         sqlStatement.getColumnValues().keySet()[2] == " name"
         sqlStatement.getColumnValues().keySet()[3] == " description"
     }
-
-//    def "MySQL UUID load"() throws Exception {
-//        when:
-//        LoadDataChange refactoring = new LoadDataChange();
-//        refactoring.setSchemaName("SCHEMA_NAME");
-//        refactoring.setTableName("TABLE_NAME");
-//        refactoring.setFile("liquibase/change/core/sample.data3.csv");
-//
-//        LoadDataColumnConfig idConfig = new LoadDataColumnConfig();
-//        idConfig.setHeader("id");
-//        idConfig.setType("UUID");
-//        refactoring.addColumn(idConfig);
-//
-//        LoadDataColumnConfig parentIdConfig = new LoadDataColumnConfig();
-//        parentIdConfig.setHeader("parent_id");
-//        parentIdConfig.setType("UUID");
-//        refactoring.addColumn(parentIdConfig);
-//
-//        SqlStatement[] sqlStatements = refactoring.generateStatements(mysqlDB);
-//
-//        then:
-//        sqlStatements.length == 1
-//        assert sqlStatements[0] instanceof InsertSetStatement
-//        println sqlStatements[0]
-//
-//        "SCHEMA_NAME" == ((InsertSetStatement) sqlStatements[0]).getSchemaName()
-//        "TABLE_NAME" == ((InsertSetStatement) sqlStatements[0]).getTableName()
-//        "c7ac2480-bc96-11e2-a300-64315073a768" == ((InsertSetStatement) sqlStatements[0]).statements.get(0).getColumnValue("id")
-//        "NULL" == ((InsertSetStatement) sqlStatements[0]).statements.get(0).getColumnValue("parent_id")
-//    }
 
     class ColDef {
         ColDef(Object n, String type) {

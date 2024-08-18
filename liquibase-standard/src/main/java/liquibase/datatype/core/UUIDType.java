@@ -63,9 +63,13 @@ public class UUIDType extends LiquibaseDataType {
 
     @Override
     protected String otherToSql(Object value, Database database) {
+        if (value == null) {
+            return null;
+        }
         if (database instanceof MSSQLDatabase) {
             return "'" + value.toString().toUpperCase(Locale.ENGLISH) + "'";
         }
+        // MYSQL displays binary(16) uuids as lowercase: https://dev.mysql.com/blog-archive/mysql-8-0-uuid-support/
         if (database instanceof MySQLDatabase && !(database instanceof MariaDBDatabase)) {
             return value.toString().toLowerCase(Locale.ENGLISH);
         }
