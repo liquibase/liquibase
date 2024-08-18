@@ -48,6 +48,7 @@ public class UUIDType extends LiquibaseDataType {
                 throw new RuntimeException(ex);
             }
         }
+        // Not sure if version specific yet
 //        try {
 //            if (database instanceof MySQLDatabase && (database.getDatabaseMajorVersion() == 8)) {
 //                return new DatabaseDataType("BINARY", 16);
