@@ -34,6 +34,7 @@ public class LockServiceCommandStep extends AbstractHelperCommandStep implements
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        isDBLocked = false;
         CommandScope commandScope = resultsBuilder.getCommandScope();
         Database database = (Database) commandScope.getDependency(Database.class);
         LockServiceFactory.getInstance().getLockService(database).waitForLock();
@@ -52,11 +53,11 @@ public class LockServiceCommandStep extends AbstractHelperCommandStep implements
                 LockServiceFactory.getInstance().getLockService(
                         (Database) resultsBuilder.getCommandScope().getDependency(Database.class)
                 ).releaseLock();
+                isDBLocked = false;
             } catch (LockException e) {
                 Scope.getCurrentScope().getLog(getClass()).severe(Liquibase.MSG_COULD_NOT_RELEASE_LOCK, e);
             }
             LockServiceFactory.getInstance().resetAll();
-            isDBLocked = false;
         }
     }
 }
