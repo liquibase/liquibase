@@ -1,9 +1,7 @@
-package liquibase.integration.commandline;
+package liquibase.util;
 
 import liquibase.Scope;
 import liquibase.logging.mdc.customobjects.Version;
-import liquibase.util.ObjectUtil;
-import liquibase.util.StringUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,8 +15,9 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
-import static liquibase.integration.commandline.LiquibaseLauncherSettings.LiquibaseLauncherSetting.LIQUIBASE_HOME;
-import static liquibase.integration.commandline.LiquibaseLauncherSettings.getSetting;
+import static liquibase.util.LiquibaseLauncherSettings.LiquibaseLauncherSetting.LIQUIBASE_HOME;
+import static liquibase.util.LiquibaseLauncherSettings.getSetting;
+
 
 public class VersionUtils {
     public static Path getLiquibaseHomePath(Path workingDirectory) throws IOException {

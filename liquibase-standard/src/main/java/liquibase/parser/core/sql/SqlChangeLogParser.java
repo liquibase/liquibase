@@ -12,6 +12,7 @@ import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.ExceptionUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
@@ -66,6 +67,10 @@ public class SqlChangeLogParser implements ChangeLogParser {
         changeSet.addChange(change);
 
         changeLog.addChangeSet(changeSet);
+
+        ExceptionUtil.doSilently(() -> {
+            Scope.getCurrentScope().getAnalyticsEvent().incrementSqlChangelogCount();
+        });
 
         return changeLog;
     }

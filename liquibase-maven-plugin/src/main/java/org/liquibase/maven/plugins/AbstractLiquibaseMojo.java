@@ -900,7 +900,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 //
                 // Add properties to this top-level scope
                 //
-                scopeValues.put("integrationDetails", integrationDetails);
+                scopeValues.put(Scope.Attr.integrationDetails.name(), integrationDetails);
                 scopeValues.put("liquibase.licenseKey", getLicenseKey());
                 String key = GlobalConfiguration.PRESERVE_SCHEMA_CASE.getKey();
                 scopeValues.put(key, preserveSchemaCase);
