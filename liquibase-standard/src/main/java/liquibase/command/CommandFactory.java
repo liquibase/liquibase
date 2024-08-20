@@ -19,11 +19,11 @@ public class CommandFactory implements SingletonObject {
     /**
      * A cache of all found command names and their corresponding command definition.
      */
-    private final Map<String[], CommandDefinition> commandDefinitions = new ConcurrentHashMap<>();
+    private static final Map<String[], CommandDefinition> commandDefinitions = new ConcurrentHashMap<>();
     /**
      * A cache of all found CommandStep classes and their corresponding override CommandStep.
      */
-    private Map<Class<? extends CommandStep>, CommandStep> commandOverrides;
+    private static Map<Class<? extends CommandStep>, CommandStep> commandOverrides;
 
 
     private final Map<String, Set<CommandArgumentDefinition<?>>> commandArgumentDefinitions = new HashMap<>();
