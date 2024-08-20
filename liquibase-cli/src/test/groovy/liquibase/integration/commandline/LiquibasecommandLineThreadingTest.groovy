@@ -11,6 +11,7 @@ class LiquibaseCommandLineThreadingTest extends Specification {
         given:
         def returnCode = 0
         def returnCode2 = 0
+        def returnCode3 = 0
 
         when:
         Thread.start {
@@ -19,10 +20,15 @@ class LiquibaseCommandLineThreadingTest extends Specification {
         Thread.start {
             returnCode2 = new LiquibaseCommandLine().execute("update", "--show-summary=OFF", "--url=jdbc:h2:mem:liquibaseThreads", "--changeLogFile=changelog.xml")
         }.join()
+        // should fail as we are not passing required arguments
+        Thread.start {
+            returnCode3 = new LiquibaseCommandLine().execute("update", "--show-summary=OFF")
+        }.join()
 
         then:
         returnCode == 0
         returnCode2 == 0
+        returnCode3 == 1
     }
 
 }
