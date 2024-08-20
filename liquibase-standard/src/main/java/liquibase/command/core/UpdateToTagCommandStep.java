@@ -6,8 +6,6 @@ import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.command.*;
-import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
-import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.database.Database;
 import liquibase.exception.ChangeNotFoundException;
 import liquibase.exception.DatabaseException;
@@ -104,13 +102,11 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
     }
 
     private void checkForTagExists(DatabaseChangeLog changeLog, String tag, Database database) throws LiquibaseException {
-        boolean found =
-            changeLog.getChangeSets().stream().anyMatch(cs ->
-                cs.getChanges().stream().anyMatch(ch ->
-                    ch instanceof TagDatabaseChange && ((TagDatabaseChange) ch).getTag().equals(tag)
-                )
-            );
-        if (!found && !GlobalConfiguration.STRICT.getCurrentValue()) {
+        List<TagDatabaseChange> tagDatabaseChangesList = getTagDatabaseChange(changeLog.getChangeSets());
+        boolean thereIsTagDatabaseChange =  tagDatabaseChangesList.size() > 0;
+        boolean thereIsTagDatabaseChangeMatching = isThereTagDatabaseChangeMatching(tagDatabaseChangesList, tag);
+
+        if (!(thereIsTagDatabaseChange && thereIsTagDatabaseChangeMatching) && !GlobalConfiguration.STRICT.getCurrentValue()) {
             String message = String.format(
                     "The tag '%s' was not found in the changelog '%s'. All changesets in the changelog were deployed.%nLearn about options for undoing these changes at https://docs.liquibase.com.",
                     tag, changeLog.getPhysicalFilePath());
@@ -120,33 +116,31 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
         }
 
         if(GlobalConfiguration.STRICT.getCurrentValue()) {
-            TagDatabaseChange tagDatabaseChange = getTagDatabaseChange(changeLog.getChangeSets());
-            boolean thereIsTagDatabaseChange =  tagDatabaseChange != null;
             if(!thereIsTagDatabaseChange) {
                 throw new ChangeNotFoundException("TagDatabaseChange", database);
             }
             else {
-                if(!isThereTagDatabaseChangeMatching(tagDatabaseChange, tag)) {
-                    throw new LiquibaseException(String.format("Command execution tag %s does not match with changeSet tag %s", tag, tagDatabaseChange.getTag()));
+                if(!thereIsTagDatabaseChangeMatching) {
+                    throw new LiquibaseException(String.format("Command execution tag %s does not match with any changeSet tag", tag));
                 }
             }
         }
     }
 
-    private TagDatabaseChange getTagDatabaseChange(List<ChangeSet> changeSetList) {
-        TagDatabaseChange tagDatabaseChange = null;
+    private List<TagDatabaseChange> getTagDatabaseChange(List<ChangeSet> changeSetList) {
+        List<TagDatabaseChange> listTagDatabaseChanges = new ArrayList<>();
         for(ChangeSet changeSet : changeSetList){
             for(Change change : changeSet.getChanges()) {
                 if(change instanceof TagDatabaseChange) {
-                    tagDatabaseChange = (TagDatabaseChange) change;
+                    listTagDatabaseChanges.add((TagDatabaseChange) change);
                 }
             }
         }
-        return tagDatabaseChange;
+        return listTagDatabaseChanges;
     }
 
-    private boolean isThereTagDatabaseChangeMatching(TagDatabaseChange tagDatabaseChange, String tag) {
-        return (tagDatabaseChange != null && tagDatabaseChange.getTag().equals(tag));
+    private boolean isThereTagDatabaseChangeMatching(List<TagDatabaseChange> tagDatabaseChange, String tag) {
+        return tagDatabaseChange.stream().anyMatch(tagDatabaseChange1 -> tagDatabaseChange1.getTag().equals(tag));
     }
 
     private UpToTagChangeSetFilter getUpToTagChangeSetFilter(String tag, List<RanChangeSet> ranChangeSetList) {
