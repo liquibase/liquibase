@@ -9,7 +9,7 @@ class LiquibaseCommandLineThreadingTest extends Specification {
     @Unroll
     def "2 threads global flags" () {
         given:
-         def returnCode = 0
+        def returnCode = 0
         def returnCode2 = 0
 
         when:
