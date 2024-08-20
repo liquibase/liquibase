@@ -35,11 +35,11 @@ public class Event {
     /**
      * SQL changelogs are different from formatted SQL. SQL changelogs are essentially raw SQL files, with no Liquibase headers or comments.
      */
-    private int sqlChangelogCount;
-    private int formattedSqlChangelogCount;
-    private int xmlChangelogCount;
-    private int jsonChangelogCount;
-    private int yamlChangelogCount;
+    private int chlog_sql;
+    private int chlog_formattedSql;
+    private int chlog_xml;
+    private int chlog_json;
+    private int chlog_yaml;
     private String databasePlatform;
     private String databaseVersion;
     private String liquibaseVersion = ExceptionUtil.doSilently(() -> {
@@ -47,13 +47,13 @@ public class Event {
     });
     // liquibase-mongodb-4.29.1
     private String mongoDbVersion;
-    private String dynamoDbVersion = getExtensionVersion("Liquibase DynamoDB Commercial Extension");
-    private String checksVersion = getExtensionVersion("Checks Extension");
-    private String awsSecretsVersion = getExtensionVersion("AWS Secrets Manager Extension");
-    private String awsS3Version = getExtensionVersion("S3 Remote Accessor Extension");
-    private String hashicorpVaultVersion = getExtensionVersion("HashiCorp Vault Extension");
+    private String ext_dynamoDb = getExtensionVersion("Liquibase DynamoDB Commercial Extension");
+    private String ext_checks = getExtensionVersion("Checks Extension");
+    private String ext_awsSecrets = getExtensionVersion("AWS Secrets Manager Extension");
+    private String ext_awsS3 = getExtensionVersion("S3 Remote Accessor Extension");
+    private String ext_hashicorpVault = getExtensionVersion("HashiCorp Vault Extension");
     // liquibase-bigquery-0-SNAPSHOT
-    private String googleBigQueryVersion;
+    private String ext_googleBigQuery;
     private String liquibaseInterface;
     private String javaVersion = ExceptionUtil.doSilently(() -> {
         return SystemUtil.getJavaVersion();
@@ -79,23 +79,23 @@ public class Event {
     }
 
     public void incrementFormattedSqlChangelogCount() {
-        formattedSqlChangelogCount++;
+        chlog_formattedSql++;
     }
 
     public void incrementSqlChangelogCount() {
-        sqlChangelogCount++;
+        chlog_sql++;
     }
 
     public void incrementYamlChangelogCount() {
-        yamlChangelogCount++;
+        chlog_yaml++;
     }
 
     public void incrementJsonChangelogCount() {
-        jsonChangelogCount++;
+        chlog_json++;
     }
 
     public void incrementXmlChangelogCount() {
-        xmlChangelogCount++;
+        chlog_xml++;
     }
 
     public Map<String, ?> getPropertiesAsMap() {
