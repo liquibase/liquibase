@@ -45,15 +45,14 @@ public class Event {
     private String liquibaseVersion = ExceptionUtil.doSilently(() -> {
         return LiquibaseUtil.getBuildVersionInfo();
     });
-    // liquibase-mongodb-4.29.1
-    private String mongoDbVersion;
+    private String mongoDbVersion = getExtensionVersion("Liquibase MongoDB Commercial Extension");
     private String ext_dynamoDb = getExtensionVersion("Liquibase DynamoDB Commercial Extension");
     private String ext_checks = getExtensionVersion("Checks Extension");
     private String ext_awsSecrets = getExtensionVersion("AWS Secrets Manager Extension");
     private String ext_awsS3 = getExtensionVersion("S3 Remote Accessor Extension");
     private String ext_hashicorpVault = getExtensionVersion("HashiCorp Vault Extension");
-    // liquibase-bigquery-0-SNAPSHOT
-    private String ext_googleBigQuery;
+    private String ext_googleBigQuery = getExtensionVersion("Liquibase BigQuery Commercial Extension");
+    private String ext_databricks = getExtensionVersion("Liquibase Commercial Databricks Extension");
     private String liquibaseInterface;
     private String javaVersion = ExceptionUtil.doSilently(() -> {
         return SystemUtil.getJavaVersion();
