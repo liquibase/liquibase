@@ -19,6 +19,8 @@ on:
   push:
     branches:
       - github-action-**
+      - test-DAT-18209-edit-workflow-file
+      
     paths-ignore:
       - '**.md'
 
