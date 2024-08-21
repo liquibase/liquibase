@@ -52,6 +52,7 @@ jobs:
   delete-dependency-packages:
     needs: setup_matrix
     runs-on: ubuntu-22.04
+    continue-on-error: true
     strategy:
       matrix:
         dependencies: ${{ fromJson(needs.setup_matrix.outputs.dependencies_matrix) }}
@@ -66,6 +67,7 @@ jobs:
   delete-extension-packages:
     needs: setup_matrix
     runs-on: ubuntu-22.04
+    continue-on-error: true
     strategy:
       matrix:
         extensions: ${{ fromJson(needs.setup_matrix.outputs.extensions_matrix) }}
@@ -110,10 +112,10 @@ jobs:
                 git clone https://github.com/liquibase/$dep.git $dep
             done
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: 17
+          java-version: 21
           distribution: 'temurin'
           cache: 'maven'
           gpg-private-key: ${{ secrets.GPG_SECRET }}
@@ -202,6 +204,7 @@ jobs:
             $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ github.ref }}" ${dep}
             $PWD/.github/util/sign-artifacts.sh ./target "${{ inputs.liquibase-version }}" "${{ github.ref }}"
             mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+            sed -i -e "s/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/<liquibase.version>${{ inputs.liquibase-version }}<\/liquibase.version>/g" pom.xml
             mvn deploy:deploy-file \
             -Dfile=./re-version/out/${dep}-${{ inputs.liquibase-version }}.jar \
             -Dsources=./re-version/out/${dep}-${{ inputs.liquibase-version }}-sources.jar \
@@ -246,6 +249,7 @@ jobs:
             $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ github.ref }}" ${ext}
             $PWD/.github/util/sign-artifacts.sh ./target "${{ inputs.liquibase-version }}" "${{ github.ref }}"
             mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+            sed -i -e "s/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/<liquibase.version>${{ inputs.liquibase-version }}<\/liquibase.version>/g" pom.xml
             mvn deploy:deploy-file \
             -Dfile=./re-version/out/${ext}-${{ inputs.liquibase-version }}.jar \
             -Dsources=./re-version/out/${ext}-${{ inputs.liquibase-version }}-sources.jar \

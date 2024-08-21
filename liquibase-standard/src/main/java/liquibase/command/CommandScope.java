@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
  */
 public class CommandScope {
 
+    public static final String DO_NOT_SEND_EXCEPTION_TO_UI = "DO_NOT_SEND_EXCEPTION_TO_UI";
     private static final String NO_PREFIX_REGEX = ".*\\.";
     public static final Pattern NO_PREFIX_PATTERN = Pattern.compile(NO_PREFIX_REGEX);
     private final CommandDefinition commandDefinition;
@@ -279,10 +280,12 @@ public class CommandScope {
             try (MdcObject primaryExceptionObject = mdcManager.put(MdcKey.EXCEPTION_DETAILS, exceptionDetails)) {
                 Scope.getCurrentScope().getLog(getClass()).info("Logging exception.");
             }
-            Scope.getCurrentScope().getUI().sendMessage("ERROR: Exception Details");
-            Scope.getCurrentScope().getUI().sendMessage(exceptionDetails.getFormattedPrimaryException());
-            Scope.getCurrentScope().getUI().sendMessage(exceptionDetails.getFormattedPrimaryExceptionReason());
-            Scope.getCurrentScope().getUI().sendMessage(exceptionDetails.getFormattedPrimaryExceptionSource());
+            if ( ! Scope.getCurrentScope().has(DO_NOT_SEND_EXCEPTION_TO_UI)) {
+                Scope.getCurrentScope().getUI().sendMessage("ERROR: Exception Details");
+                Scope.getCurrentScope().getUI().sendMessage(exceptionDetails.getFormattedPrimaryException());
+                Scope.getCurrentScope().getUI().sendMessage(exceptionDetails.getFormattedPrimaryExceptionReason());
+                Scope.getCurrentScope().getUI().sendMessage(exceptionDetails.getFormattedPrimaryExceptionSource());
+            }
         }
     }
 

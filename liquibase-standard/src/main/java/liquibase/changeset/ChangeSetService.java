@@ -135,4 +135,23 @@ public interface ChangeSetService extends Plugin {
         return null;
     }
 
+    /**
+     * Check for an override for a change-level strip comments
+     *
+     * @param stripComments The stripComments to override
+     * @return String         The override setting
+     */
+    default Boolean getOverrideStripComments(boolean stripComments) {
+        return stripComments;
+    }
+
+    /**
+     * Default implementation returns null
+     *
+     * @param changeSet Unused
+     */
+    default Boolean getStripComments(ChangeSet changeSet) {
+        return null;
+    }
+
 }

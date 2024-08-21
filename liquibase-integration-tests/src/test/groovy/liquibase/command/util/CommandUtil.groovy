@@ -133,6 +133,15 @@ class CommandUtil {
         commandScope.execute()
     }
 
+    static void runDiffChangelog(String targetDatabaseUrl, Database referenceDatabase, String changelogFile) throws CommandExecutionException {
+        CommandScope commandScope = new CommandScope(DiffChangelogCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
+        commandScope.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, CompareControl.STANDARD)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, targetDatabaseUrl)
+        commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changelogFile)
+        commandScope.execute()
+    }
+
     static void runTag(DatabaseTestSystem db, String tag) throws CommandExecutionException {
         CommandScope commandScope = new CommandScope(TagCommandStep.COMMAND_NAME)
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())

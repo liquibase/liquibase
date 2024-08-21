@@ -60,6 +60,8 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     private String remarks;
     @Setter
     private Boolean ifNotExists;
+    @Setter
+    private Boolean rowDependencies;
 
     public CreateTableChange() {
         super();
@@ -189,7 +191,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     protected CreateTableStatement generateCreateTableStatement() {
-        return new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(), getRemarks(), getTableType(), Boolean.TRUE.equals(getIfNotExists()));
+        return new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(), getRemarks(), getTableType(), Boolean.TRUE.equals(getIfNotExists()), Boolean.TRUE.equals(getRowDependencies()));
     }
 
     @Override
@@ -308,10 +310,15 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         return ifNotExists;
     }
 
+    @DatabaseChangeProperty(description = "When true, creates the table with ROWDEPENDENCIES", supportsDatabase = "oracle")
+    public Boolean getRowDependencies() {
+        return rowDependencies;
+    }
+
     @Override
     public String[] getExcludedFieldFilters(ChecksumVersion version) {
         return new String[] {
-                "ifNotExists"
+                "ifNotExists", "rowDependencies"
         };
     }
 }
