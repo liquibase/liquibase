@@ -178,9 +178,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public final void addReservedWords(Collection<String> words) {
+    public void addReservedWords(Collection<String> words) {
         reservedWords.addAll(words);
-        addMySQLReservedWordIfApplicable("MANUAL");
     }
 
     /**
@@ -948,16 +947,6 @@ public abstract class AbstractJdbcDatabase implements Database {
             return true;
         }
         return objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName) || NON_WORD_PATTERN.matcher(objectName).matches();
-    }
-
-    private void addMySQLReservedWordIfApplicable(String... reservedWord) {
-        try {
-            if(this instanceof MySQLDatabase && (getDatabaseMajorVersion() >= 9 || (getDatabaseMajorVersion() == 8 && getDatabaseMinorVersion() >= 4))) {
-                reservedWords.addAll(Arrays.asList(reservedWord));
-            }
-        } catch (DatabaseException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     protected String getQuotingStartCharacter() {

@@ -19,10 +19,7 @@ import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
 import java.sql.Types;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,7 +28,7 @@ import java.util.regex.Pattern;
  */
 public class MySQLDatabase extends AbstractJdbcDatabase {
     private static final String PRODUCT_NAME = "MySQL";
-    private static final Set<String> RESERVED_WORDS = createReservedWords();
+    private static Set<String> reservedWords = createReservedWords();
 
     /** Pattern used to extract function precision like 3 in CURRENT_TIMESTAMP(3) */
     private static final String  PRECISION_REGEX = "\\(\\d+\\)";
@@ -251,7 +248,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean isReservedWord(String string) {
-        if (RESERVED_WORDS.contains(string.toUpperCase())) {
+        if (reservedWords.contains(string.toUpperCase())) {
             return true;
         }
         return super.isReservedWord(string);
@@ -704,6 +701,21 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     public boolean getUseAffectedRows() throws DatabaseException {
         return getConnection().getURL().contains("useAffectedRows=true");
+    }
+
+    @Override
+    public void addReservedWords(Collection<String> words) {
+        addMySQLReservedWordIfApplicable("MANUAL");
+    }
+
+    private void addMySQLReservedWordIfApplicable(String... reservedWord) {
+        try {
+            if(getDatabaseMajorVersion() >= 9 || (getDatabaseMajorVersion() == 8 && getDatabaseMinorVersion() >= 4)) {
+                reservedWords.addAll(Arrays.asList(reservedWord));
+            }
+        } catch (DatabaseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
