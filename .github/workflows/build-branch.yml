@@ -36,7 +36,7 @@ jobs:
         run: |
           echo "Event Payload:"
           echo "${{ toJson(github.event) }}"
-          
+          echo "check build"
   setup:
     name: Setup
     needs: authorize
