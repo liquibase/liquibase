@@ -2,7 +2,6 @@ package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
 import liquibase.command.CommandScope;
-import liquibase.command.core.InternalHistoryCommandStep;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 
