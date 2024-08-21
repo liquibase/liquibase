@@ -32,11 +32,6 @@ jobs:
     steps:
       - run: true
 
-      - name: Output github.event Payload
-        run: |
-          echo "Event Payload:"
-          echo "${{ toJson(github.event) }}"
-          echo "check build"
   setup:
     name: Setup
     needs: authorize
