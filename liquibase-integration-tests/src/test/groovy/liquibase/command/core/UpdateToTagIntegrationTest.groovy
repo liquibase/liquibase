@@ -16,16 +16,16 @@ import spock.lang.Specification
 class UpdateToTagIntegrationTest extends Specification {
 
     @Shared
-    private DatabaseTestSystem mysql = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("mysql")
+    private DatabaseTestSystem h2 = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("h2")
 
     def "validate updateToTag is successfully executed when there is not TagDatabaseChange, but tag argument is specified "() {
         when:
         def outputStream =  new ByteArrayOutputStream()
         def updateToTagCommand = new CommandScope(UpdateToTagCommandStep.COMMAND_NAME)
         updateToTagCommand.addArgumentValue(UpdateToTagCommandStep.TAG_ARG, "testTag")
-        updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, mysql.getConnectionUrl())
-        updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, mysql.getUsername())
-        updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, mysql.getPassword())
+        updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+        updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, h2.getUsername())
+        updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, h2.getPassword())
         updateToTagCommand.addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, "liquibase/update-tests.yml")
         updateToTagCommand.setOutput(outputStream)
         def result = updateToTagCommand.execute().getResults()
@@ -45,9 +45,9 @@ class UpdateToTagIntegrationTest extends Specification {
         Scope.child(scopeSettings, {
             def updateToTagCommand = new CommandScope(UpdateToTagCommandStep.COMMAND_NAME)
             updateToTagCommand.addArgumentValue(UpdateToTagCommandStep.TAG_ARG, "testTag")
-            updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, mysql.getConnectionUrl())
-            updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, mysql.getUsername())
-            updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, mysql.getPassword())
+            updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+            updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, h2.getUsername())
+            updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, h2.getPassword())
             updateToTagCommand.addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, "liquibase/update-tests.yml")
             updateToTagCommand.execute()
         } as Scope.ScopedRunner)
@@ -62,9 +62,9 @@ class UpdateToTagIntegrationTest extends Specification {
         def outputStream =  new ByteArrayOutputStream()
         def updateToTagCommand = new CommandScope(UpdateToTagCommandStep.COMMAND_NAME)
         updateToTagCommand.addArgumentValue(UpdateToTagCommandStep.TAG_ARG, "testTag")
-        updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, mysql.getConnectionUrl())
-        updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, mysql.getUsername())
-        updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, mysql.getPassword())
+        updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+        updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, h2.getUsername())
+        updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, h2.getPassword())
         updateToTagCommand.addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, "liquibase/update-to-tag-changelog.xml")
         updateToTagCommand.setOutput(outputStream)
         def result = updateToTagCommand.execute().getResults()
@@ -86,9 +86,9 @@ class UpdateToTagIntegrationTest extends Specification {
         Scope.child(scopeSettings, {
             def updateToTagCommand = new CommandScope(UpdateToTagCommandStep.COMMAND_NAME)
             updateToTagCommand.addArgumentValue(UpdateToTagCommandStep.TAG_ARG, "testTag")
-            updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, mysql.getConnectionUrl())
-            updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, mysql.getUsername())
-            updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, mysql.getPassword())
+            updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+            updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, h2.getUsername())
+            updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, h2.getPassword())
             updateToTagCommand.addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, "liquibase/update-to-tag-changelog.xml")
             updateToTagCommand.execute()
         } as Scope.ScopedRunner)
