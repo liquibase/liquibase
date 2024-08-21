@@ -22,4 +22,3 @@ updates:
     ignore:
       - dependency-name: "actions/delete-package-versions"
         update-types: ["version-update:semver-major"]  
-
