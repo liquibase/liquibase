@@ -30,7 +30,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: true
-
+      
+      - name: Output github.event Payload
+        run: |
+          echo "Event Payload:"
+          echo "${{ toJson(github.event) }}"
   setup:
     name: Setup
     needs: authorize
