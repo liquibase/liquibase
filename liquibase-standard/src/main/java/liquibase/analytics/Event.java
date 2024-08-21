@@ -22,7 +22,6 @@ public class Event {
      * Cached extensions, to avoid costly lookups for each extension.
      */
     private final static Cache<Map<String, VersionUtils.LibraryInfo>> EXTENSIONS_CACHE = new Cache<>(() -> {
-        final Path workingDirectory = Paths.get(".").toAbsolutePath();
         return getLibraryInfoMap();
     });
 
