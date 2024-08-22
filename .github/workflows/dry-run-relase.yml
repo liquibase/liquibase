@@ -63,17 +63,15 @@ jobs:
 
       - name: Get run-tests.yml runId 
         id: get_run_id
-        uses: actions/github-script@v6
-        with:
-          script: |
-            # Fetch the list of workflow runs
-            response=$(curl -s \
-              -H "Authorization: token $GITHUB_TOKEN" \
-              -H "Accept: application/vnd.github.v3+json" \
-              "https://api.github.com/repos/liquibase/liquibase/actions/workflows/run-tests.yml/runs?status=success&per_page=1")
-            # Extract the last successful run ID
-            run_id=$(echo "$response" | jq -r '.workflow_runs[0].id')
-            echo "dry_run_id=$run_id" >> $GITHUB_OUTPUT
+        run: |
+          # Fetch the list of workflow runs
+          response=$(curl -s \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/liquibase/liquibase/actions/workflows/run-tests.yml/runs?status=success&per_page=1")
+          # Extract the last successful run ID
+          run_id=$(echo "$response" | jq -r '.workflow_runs[0].id')
+          echo "dry_run_id=$run_id" >> $GITHUB_OUTPUT
 
   dry-run-release:
     needs: [ setup ]
