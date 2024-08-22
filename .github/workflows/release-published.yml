@@ -38,20 +38,19 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-              let tag;
+            let tag;
+            if (context.payload.inputs) {
+              tag = context.payload.inputs.tag;
+            } else if (${{ inputs.tag }}) {
+              tag = "${{ inputs.tag }}";
+             } else {
+              tag = context.payload.release.tag_name;
+            }
 
-              if (context.payload.inputs && context.payload.inputs.tag) {
-                tag = context.payload.inputs.tag;
-              } else if (inputs.tag) {
-                tag = inputs.tag;
-              } else {
-                tag = context.payload.release.tag_name;
-              }
+            let version = tag.replace(/^v/, "");
 
-              let version = tag.replace(/^v/, "");
-
-              core.setOutput("tag", tag);
-              core.setOutput("version", version);
+            core.setOutput("tag", tag);
+            core.setOutput("version", version);
 
       - run: |
           echo "Publishing version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.tag }}"
