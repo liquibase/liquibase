@@ -67,16 +67,25 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            if (context.payload.inputs) {
-              core.setOutput("version", context.payload.inputs.version);
-              core.setOutput("branch", context.payload.inputs.branch || "master");
-              core.setOutput("runId", context.payload.inputs.runId);
-            } else if (context.payload.client_payload) {
-              core.setOutput("version", context.payload.client_payload.version);
-              core.setOutput("branch", context.payload.client_payload.branch || "master");
-              core.setOutput("runId", context.payload.client_payload.runId);
+            const payload = context.payload;
+            if (payload.client_payload) {
+              core.setOutput("version", payload.client_payload.version);
+              core.setOutput("branch", payload.client_payload.branch || "master");
+              core.setOutput("runId", payload.client_payload.runId);
+            } else if (payload.inputs) {
+              core.setOutput("version", payload.inputs.version);
+              core.setOutput("branch", payload.inputs.branch || "master");
+              core.setOutput("runId", payload.inputs.runId);
+            } else if (context.eventName === 'workflow_dispatch') {
+              core.setOutput("version", payload.inputs.version);
+              core.setOutput("branch", payload.inputs.branch || "master");
+              core.setOutput("runId", payload.inputs.runId);
+            } else if (context.eventName === 'workflow_call') {
+              core.setOutput("version", payload.inputs.version);
+              core.setOutput("branch", payload.inputs.branch || "master");
+              core.setOutput("runId", payload.inputs.runId);
             } else {
-              core.setFailed("No inputs found");
+              core.setFailed('Unknown event type');
             }
       - run: |
           echo "Creating version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.branch }} with artifacts from build ${{ steps.collect-data.outputs.runId }} "
