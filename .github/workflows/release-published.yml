@@ -33,6 +33,13 @@ jobs:
       tag: ${{ steps.collect-data.outputs.tag }}
       version: ${{ steps.collect-data.outputs.version }}
     steps:
+
+      - name: Debug Payload
+        uses: actions/github-script@v7
+        with:
+          script: |
+            console.log(JSON.stringify(context.payload, null, 2));
+
       - name: Collect Data
         id: collect-data
         uses: actions/github-script@v7
