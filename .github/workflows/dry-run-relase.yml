@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       dry_run_branch: ${{ steps.create_branch.outputs.dry_run_branch }}
-      dry_run_version: ${{ steps.get_version.outputs.dry_run_version }}
+      dry_run_id: ${{ steps.get_run_id.outputs.dry_run_id }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -85,5 +85,5 @@ jobs:
         run: |
           git push origin --delete ${{ needs.setup.outputs.dry_run_branch }}
           echo "Remote branch ${{ needs.setup.outputs.dry_run_branch }} deleted"
-          git push origin --delete refs/tags/${{ env.DRY_RUN_VERSION }}
-          echo "Remote tag ${{ env.DRY_RUN_VERSION }} deleted"
+          git push origin --delete refs/tags/77.7.7
+          echo "Remote tag 77.7.7 deleted"
