@@ -32,37 +32,55 @@ public class SegmentTelemetryListener implements TelemetryListener {
 
     @Override
     public void handleEvent(Event event) {
+        Thread eventThread = new Thread(() -> {
+            try {
+                LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
+
+                URL url = new URL(getDestinationUrl());
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json; utf-8");
+                conn.setRequestProperty("Accept", "application/json");
+                // Enable input and output streams
+                conn.setDoOutput(true);
+
+                DumperOptions dumperOptions = new DumperOptions();
+                dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
+                dumperOptions.setWidth(Integer.MAX_VALUE);
+                Yaml yaml = new Yaml(dumperOptions);
+                yaml.setBeanAccess(BeanAccess.FIELD);
+
+                SegmentBatch segmentBatch = SegmentBatch.fromLiquibaseEvent(event);
+                String jsonInputString = YamlSerializer.removeClassTypeMarksFromSerializedJson(yaml.dumpAs(segmentBatch, Tag.MAP, DumperOptions.FlowStyle.FLOW));
+                Scope.getCurrentScope().getLog(getClass()).fine("Sending analytics to Segment. " + segmentBatch);
+
+                IOUtils.write(jsonInputString, conn.getOutputStream(), StandardCharsets.UTF_8);
+
+                int responseCode = conn.getResponseCode();
+                String responseBody = ExceptionUtil.doSilently(() -> {
+                    return IOUtils.toString(conn.getInputStream());
+                });
+                Scope.getCurrentScope().getLog(getClass()).fine("Response from Segment: " + responseCode + " " + responseBody);
+                conn.disconnect();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        eventThread.start();
         try {
-            LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
-
-            URL url = new URL("https://api.segment.io/v1/batch");
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json; utf-8");
-            conn.setRequestProperty("Accept", "application/json");
-            // Enable input and output streams
-            conn.setDoOutput(true);
-
-            DumperOptions dumperOptions = new DumperOptions();
-            dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
-            dumperOptions.setWidth(Integer.MAX_VALUE);
-            Yaml yaml = new Yaml(dumperOptions);
-            yaml.setBeanAccess(BeanAccess.FIELD);
-
-            SegmentBatch segmentBatch = SegmentBatch.fromLiquibaseEvent(event);
-            String jsonInputString = YamlSerializer.removeClassTypeMarksFromSerializedJson(yaml.dumpAs(segmentBatch, Tag.MAP, DumperOptions.FlowStyle.FLOW));
-            Scope.getCurrentScope().getLog(getClass()).fine("Sending analytics to Segment. " + segmentBatch);
-
-            IOUtils.write(jsonInputString, conn.getOutputStream(), StandardCharsets.UTF_8);
-
-            int responseCode = conn.getResponseCode();
-            String responseBody = ExceptionUtil.doSilently(() -> {
-                return IOUtils.toString(conn.getInputStream());
-            });
-            Scope.getCurrentScope().getLog(getClass()).fine("Response from Segment: " + responseCode + " " + responseBody);
-            conn.disconnect();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            eventThread.join(getTimeoutMillis());
+        } catch (InterruptedException e) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Interrupted while waiting for telemetry event processing to Segment.", e);
         }
+    }
+
+    private int getTimeoutMillis() {
+        // todo this needs to check the config endpoint
+        return 1500;
+    }
+
+    private String getDestinationUrl() {
+        // todo this needs to check the config endpoint
+        return "https://api.segment.io/v1/batch";
     }
 }
