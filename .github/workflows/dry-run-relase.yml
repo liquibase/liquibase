@@ -38,7 +38,7 @@ jobs:
           echo "dry_run_branch=$DRY_RUN_BRANCH" >> $GITHUB_OUTPUT
           echo "dry_run_date=$DRY_RUN_DATE" >> $GITHUB_OUTPUT
           echo "New branch created: $DRY_RUN_BRANCH"
-          git push origin ${{ steps.create_branch.outputs.dry_run_branch }}
+          git push --set-upstream origin ${{ steps.create_branch.outputs.dry_run_branch }}
   
       - name: Create a liquibase-pro dry-run branch
         id: create_pro_branch
@@ -50,7 +50,7 @@ jobs:
           echo "dry_run_branch=$DRY_RUN_BRANCH" >> $GITHUB_OUTPUT
           echo "dry_run_date=$DRY_RUN_DATE" >> $GITHUB_OUTPUT
           echo "New branch created: $DRY_RUN_BRANCH"
-          git push origin ${{ steps.create_branch.outputs.dry_run_branch }}
+          git push --set-upstream origin ${{ steps.create_branch.outputs.dry_run_branch }}
 
       - name: Get run-tests.yml runId 
         id: get_run_id
