@@ -3,6 +3,7 @@ package liquibase.command;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.analytics.Event;
+import liquibase.analytics.TelemetryConfiguration;
 import liquibase.analytics.UsageAnalyticsFactory;
 import liquibase.configuration.*;
 import liquibase.database.Database;
@@ -211,7 +212,11 @@ public class CommandScope {
             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, commandName);
         }
         Event analyticsEvent = ExceptionUtil.doSilently(() -> {
-            return new Event(commandName);
+            if (TelemetryConfiguration.isTelemetryEnabled()) {
+                return new Event(commandName);
+            } else {
+                return null;
+            }
         });
 
         try {
