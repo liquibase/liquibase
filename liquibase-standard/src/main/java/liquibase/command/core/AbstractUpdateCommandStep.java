@@ -94,6 +94,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             }
             if (!isDBLocked) {
                 LockServiceFactory.getInstance().getLockService(database).waitForLock();
+                isDBLocked = true;
             }
             // waitForLock resets the changelog history service, so we need to rebuild that and generate a final deploymentId.
             ChangeLogHistoryService changelogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
@@ -136,12 +137,12 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             resultsBuilder.addResult("statusCode", 1);
             throw e;
         } finally {
-            //TODO: We should be able to remove this once we get the rest of the update family
-            // set up with the CommandFramework
-            try {
-                LockServiceFactory.getInstance().getLockService(database).releaseLock();
-            } catch (LockException e) {
-                Scope.getCurrentScope().getLog(getClass()).severe(MSG_COULD_NOT_RELEASE_LOCK, e);
+            if (isDBLocked) {
+                try {
+                    LockServiceFactory.getInstance().getLockService(database).releaseLock();
+                } catch (LockException e) {
+                    Scope.getCurrentScope().getLog(getClass()).severe(MSG_COULD_NOT_RELEASE_LOCK, e);
+                }
             }
         }
     }
