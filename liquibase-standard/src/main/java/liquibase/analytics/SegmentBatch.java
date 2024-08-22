@@ -13,7 +13,7 @@ public class SegmentBatch {
     private final Map<String, ?> context;
 
     public static SegmentBatch fromLiquibaseEvent(Event event) {
-        SegmentBatch segmentBatch = new SegmentBatch(AnalyticsConfiguration.WRITE_KEY.getCurrentValue(), null);
+        SegmentBatch segmentBatch = new SegmentBatch(TelemetryConfiguration.WRITE_KEY.getCurrentValue(), null);
         segmentBatch.getBatch().add(SegmentTrackEvent.fromLiquibaseEvent(event));
         return segmentBatch;
     }

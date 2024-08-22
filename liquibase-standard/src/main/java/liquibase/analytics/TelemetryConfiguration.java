@@ -3,7 +3,7 @@ package liquibase.analytics;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 
-public class AnalyticsConfiguration implements AutoloadedConfigurations {
+public class TelemetryConfiguration implements AutoloadedConfigurations {
 
     public static final ConfigurationDefinition<AnalyticsOutputDestination> OUTPUT_DESTINATION;
     public static final ConfigurationDefinition<String> FILENAME;

@@ -5,7 +5,6 @@ import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
 import liquibase.serializer.core.yaml.YamlSerializer;
 import liquibase.util.ExceptionUtil;
-import liquibase.util.SnakeYamlUtil;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.yaml.snakeyaml.DumperOptions;
@@ -13,8 +12,6 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.BeanAccess;
 import org.yaml.snakeyaml.nodes.Tag;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -24,8 +21,8 @@ public class SegmentAnalyticsListener implements UsageAnalyticsListener {
 
     @Override
     public int getPriority() {
-        String filename = AnalyticsConfiguration.FILENAME.getCurrentValue();
-        AnalyticsOutputDestination destination = AnalyticsConfiguration.OUTPUT_DESTINATION.getCurrentValue();
+        String filename = TelemetryConfiguration.FILENAME.getCurrentValue();
+        AnalyticsOutputDestination destination = TelemetryConfiguration.OUTPUT_DESTINATION.getCurrentValue();
         if (AnalyticsOutputDestination.SEGMENT.equals(destination)) {
             return PRIORITY_SPECIALIZED;
         } else {
