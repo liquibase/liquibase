@@ -64,6 +64,7 @@ jobs:
       version: "77.7.7"
       branch: ${{ needs.setup.outputs.dry_run_branch }}
       runId: ${{ needs.setup.outputs.dry_run_id }}
+      standalone_zip: false
       dry_run: true
     secrets: inherit
   
