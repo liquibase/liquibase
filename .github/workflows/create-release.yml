@@ -311,6 +311,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Attach Files to Dry-Run Draft Release
+        if: ${{ inputs.standalone_zip == false }} && ${{ needs.setup.outputs.dry_run == true }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.setup.outputs.version }}
+          fail_on_unmatched_files: true
+          body: Liquibase ${{ needs.setup.outputs.version }} (Dry-Run)
+          generate_release_notes: true
+          draft: true
+          files: re-version/final/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+
       - name: Attach standalone zip to Build
         if: ${{ inputs.standalone_zip == true }} && ${{ needs.setup.outputs.dry_run == false }}
         uses: actions/upload-artifact@v4

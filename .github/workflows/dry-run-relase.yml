@@ -12,16 +12,19 @@ jobs:
     outputs:
       dry_run_branch: ${{ steps.create_branch.outputs.dry_run_branch }}
       dry_run_id: ${{ steps.get_run_id.outputs.dry_run_id }}
+      dry_run_date: ${{ steps.create_branch.outputs.dry_run_date }}
     steps:
-      - name: Checkout
+      - name: Checkout liquibase
         uses: actions/checkout@v4
 
-      - name: Create a dry-run branch
+      - name: Create a liquibase dry-run branch
         id: create_branch
         run: |
-          DRY_RUN_BRANCH="dry-run-$(date +%Y%m%d%H%M%S)"
+          DRY_RUN_DATE=$(date +%Y%m%d%H%M%S)
+          DRY_RUN_BRANCH="dry-run-$DRY_RUN_DATE"
           git checkout -b $DRY_RUN_BRANCH
           echo "dry_run_branch=$DRY_RUN_BRANCH" >> $GITHUB_OUTPUT
+          echo "dry_run_date=$DRY_RUN_DATE" >> $GITHUB_OUTPUT
           echo "New branch created: $DRY_RUN_BRANCH"
               
       - name: Set up Git
@@ -29,9 +32,29 @@ jobs:
           git config user.name "liquibot"
           git config user.email "liquibot@liquibase.org"
 
-      - name: Push dry-run branch
+      - name: Push dry-run liquibase branch
         run: |
           git push origin ${{ steps.create_branch.outputs.dry_run_branch }}
+
+      - name: Checkout liquibase-pro
+        uses: actions/checkout@v4
+        with:
+          repository: liquibase/liquibase-pro
+  
+      - name: Create a liquibase-pro dry-run branch
+        id: create_pro_branch
+        run: |
+          DRY_RUN_DATE=$(date +%Y%m%d%H%M%S)
+          DRY_RUN_BRANCH="dry-run-$DRY_RUN_DATE"
+          git checkout -b $DRY_RUN_BRANCH
+          echo "dry_run_branch=$DRY_RUN_BRANCH" >> $GITHUB_OUTPUT
+          echo "dry_run_date=$DRY_RUN_DATE" >> $GITHUB_OUTPUT
+          echo "New branch created: $DRY_RUN_BRANCH"
+
+      - name: Push dry-run liquibase-pro branch
+        run: |
+          git push origin ${{ steps.create_branch.outputs.dry_run_branch }}
+
 
       - name: Get run-tests.yml runId 
         id: get_run_id
@@ -61,7 +84,7 @@ jobs:
     needs: [ setup ]
     uses: liquibase/liquibase/.github/workflows/create-release.yml@DAT-18301
     with:
-      version: "77.7.7"
+      version: "${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }}"
       branch: ${{ needs.setup.outputs.dry_run_branch }}
       runId: ${{ needs.setup.outputs.dry_run_id }}
       standalone_zip: false
@@ -72,7 +95,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ setup, dry-run-release ]
     steps:
-      - name: Checkout
+      - name: Checkout liquibase
         uses: actions/checkout@v4
 
       - name: Set up Git
@@ -80,10 +103,23 @@ jobs:
           git config user.name "liquibot"
           git config user.email "liquibot@liquibase.org"
 
-      - name: Delete branch & tag
+      - name: Delete liquibase branch & tag
         if: always()
         run: |
           git push origin --delete ${{ needs.setup.outputs.dry_run_branch }}
           echo "Remote branch ${{ needs.setup.outputs.dry_run_branch }} deleted"
-          git push origin --delete refs/tags/77.7.7
-          echo "Remote tag 77.7.7 deleted"
+          git push origin --delete refs/tags/v${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }}
+          echo "Remote tag v${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }} deleted"
+
+      - name: Checkout liquibase-pro
+        uses: actions/checkout@v4
+        with:
+          repository: liquibase/liquibase-pro
+
+      - name: Delete liquibase-pro branch & tag
+        if: always()
+        run: |
+          git push origin --delete ${{ needs.setup.outputs.dry_run_branch }}
+          echo "Remote branch ${{ needs.setup.outputs.dry_run_branch }} deleted"
+          git push origin --delete refs/tags/v${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }}
+          echo "Remote tag v${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }} deleted"
