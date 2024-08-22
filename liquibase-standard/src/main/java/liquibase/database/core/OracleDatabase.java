@@ -17,12 +17,10 @@ import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Index;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Schema;
+import liquibase.structure.core.*;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
 import java.sql.*;
@@ -258,12 +256,12 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String generatePrimaryKeyName(String tableName) {
-        if (tableName.length() > 27) {
-            //noinspection HardCodedStringLiteral
-            return "PK_" + tableName.toUpperCase(Locale.US).substring(0, 27);
+        int maximumLength = getIdentifierMaximumLength();
+        String primaryKeyName = "PK_" + tableName.toUpperCase(Locale.US);
+        if (primaryKeyName.length() > maximumLength) {
+            return primaryKeyName.substring(0, maximumLength);
         } else {
-            //noinspection HardCodedStringLiteral
-            return "PK_" + tableName.toUpperCase(Locale.US);
+            return primaryKeyName;
         }
     }
 
@@ -684,4 +682,12 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         return true;
     }
 
+    @Override
+    public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        // Internally Oracle converts int/integer to number, so when we need to extract and compare it we need number too
+        if (objectType.equals(Column.class) && StringUtils.startsWithIgnoreCase(objectName, "int")) {
+            return "NUMBER(*, 0)";
+        }
+        return super.correctObjectName(objectName, objectType);
+    }
 }
