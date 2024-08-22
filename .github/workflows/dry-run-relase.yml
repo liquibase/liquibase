@@ -66,24 +66,14 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const workflowFileName = 'run-tests.yml';
-            const workflowRuns = await github.rest.actions.listWorkflowRunsForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: workflowFileName,
-              status: 'success',
-              per_page: 1, // Fetch only the most recent successful run
-            });
-
-            if (workflowRuns.data.workflow_runs.length > 0) {
-              const lastRunId = workflowRuns.data.workflow_runs[0].id;
-              // Append the output to $GITHUB_OUTPUT
-              const fs = require('fs');
-              fs.appendFileSync(process.env.GITHUB_OUTPUT, `dry_run_id=${lastRunId}\n`);
-            } else {
-              core.setFailed(`No successful runs found for workflow ${workflowFileName}`);
-            }
-
+            # Fetch the list of workflow runs
+            response=$(curl -s \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/liquibase/liquibase/actions/workflows/run-tests.yml/runs?status=success&per_page=1")
+            # Extract the last successful run ID
+            run_id=$(echo "$response" | jq -r '.workflow_runs[0].id')
+            echo "dry_run_id=$run_id" >> $GITHUB_OUTPUT
 
   dry-run-release:
     needs: [ setup ]
