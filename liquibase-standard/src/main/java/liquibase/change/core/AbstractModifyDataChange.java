@@ -1,3 +1,4 @@
+
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
