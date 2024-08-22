@@ -116,6 +116,7 @@ jobs:
           echo "Remote tag v${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }} deleted"
 
       - name: Checkout liquibase-pro
+        if: always()
         uses: actions/checkout@v4
         with:
           repository: liquibase/liquibase-pro
