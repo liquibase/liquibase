@@ -2,6 +2,12 @@ name: Run Tests
 
 on:
   workflow_call:
+    inputs:
+      branch: 
+        description: 'The branch to run the tests on.'
+        required: false
+        default: 'master'
+        type: string
 
   workflow_dispatch:
     inputs:
@@ -12,7 +18,6 @@ on:
   push:
     branches:
       - master
-      - '*.*.*'
       
   pull_request_target:
     types:
@@ -45,9 +50,15 @@ jobs:
       thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
       setupSuccessful: "true"
     steps:
+
+      - name: Set up branch variable
+        id: set_branch
+        run: |
+          echo "BRANCH=${{ inputs.branch || github.event.pull_request.head.sha || github.ref }}" >> $GITHUB_ENV
+
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          ref: ${{ env.BRANCH }}
 
       - name: Get current date
         id: get-date

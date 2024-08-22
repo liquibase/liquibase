@@ -76,7 +76,9 @@ jobs:
 
   dry-run-run-tests:
     needs: [ setup ]
-    uses: liquibase/liquibase/.github/workflows/run-tests.yml@master
+    uses: liquibase/liquibase/.github/workflows/run-tests.yml@DAT-18301
+    with:
+      branch: ${{ needs.setup.outputs.dry_run_branch }}
     secrets: inherit
 
   dry-run-release:
