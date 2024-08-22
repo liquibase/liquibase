@@ -31,7 +31,7 @@ jobs:
       - name: Get dry-run branch
         id: get_dry_run_branch
         run: |
-          DRY_RUN_BRANCH="0-SNAPSHOT"
+          DRY_RUN_BRANCH="0"
           echo "dry_run_branch=$DRY_RUN_BRANCH" >> $GITHUB_OUTPUT
           echo "Dry run branch: $DRY_RUN_BRANCH"
 
