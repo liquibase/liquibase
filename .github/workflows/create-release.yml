@@ -8,6 +8,7 @@ on:
       branch:
         description: 'Branch to release (Defaults to master)'
         required: false
+        default: 'master'
       runId:
         description: 'RunId of liquibase/liquibase artifacts to attach'
         required: true
@@ -30,6 +31,7 @@ on:
       branch:
         description: 'Branch to release (Defaults to master)'
         required: false
+        default: 'master'
         type: string
       runId:
         description: 'RunId of liquibase/liquibase artifacts to attach'
@@ -55,40 +57,15 @@ jobs:
     name: Setup
     runs-on: ubuntu-22.04
     outputs:
-      version: ${{ steps.collect-data.outputs.version }}
-      branch: ${{ steps.collect-data.outputs.branch }}
-      runId: ${{ steps.collect-data.outputs.runId }}
+      version: ${{ inputs.version }}
+      branch: ${{ inputs.branch }}
+      runId: ${{ inputs.runId }}
       uber_jar_runId: ${{ steps.get_run_id.outputs.run_id }}
       dependencies: ${{ env.DEPENDENCIES }}
       extensions: ${{ env.EXTENSIONS }}
     steps:
-      - name: Collect Data
-        id: collect-data
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const payload = context.payload;
-            if (payload.client_payload) {
-              core.setOutput("version", payload.client_payload.version);
-              core.setOutput("branch", payload.client_payload.branch || "master");
-              core.setOutput("runId", payload.client_payload.runId);
-            } else if (payload.inputs) {
-              core.setOutput("version", payload.inputs.version);
-              core.setOutput("branch", payload.inputs.branch || "master");
-              core.setOutput("runId", payload.inputs.runId);
-            } else if (context.eventName === 'workflow_dispatch') {
-              core.setOutput("version", payload.inputs.version);
-              core.setOutput("branch", payload.inputs.branch || "master");
-              core.setOutput("runId", payload.inputs.runId);
-            } else if (context.eventName === 'workflow_call') {
-              core.setOutput("version", payload.inputs.version);
-              core.setOutput("branch", payload.inputs.branch || "master");
-              core.setOutput("runId", payload.inputs.runId);
-            } else {
-              core.setFailed('Unknown event type');
-            }
       - run: |
-          echo "Creating version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.branch }} with artifacts from build ${{ steps.collect-data.outputs.runId }} "
+          echo "Creating version ${{ inputs.version }} from ${{ inputs.branch }} with artifacts from build ${{ inputs.runId }} "
           
   owasp-scanner:
     needs: [ setup ]
