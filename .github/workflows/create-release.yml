@@ -67,9 +67,17 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            core.setOutput("version", context.payload.inputs.version);
-            core.setOutput("branch", context.payload.inputs.branch || "master");
-            core.setOutput("runId", context.payload.inputs.runId);
+            if (context.payload.inputs) {
+              core.setOutput("version", context.payload.inputs.version);
+              core.setOutput("branch", context.payload.inputs.branch || "master");
+              core.setOutput("runId", context.payload.inputs.runId);
+            } else if (context.payload.client_payload) {
+              core.setOutput("version", context.payload.client_payload.version);
+              core.setOutput("branch", context.payload.client_payload.branch || "master");
+              core.setOutput("runId", context.payload.client_payload.runId);
+            } else {
+              core.setFailed("No inputs found");
+            }
       - run: |
           echo "Creating version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.branch }} with artifacts from build ${{ steps.collect-data.outputs.runId }} "
           
