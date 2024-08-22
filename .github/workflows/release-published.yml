@@ -33,13 +33,6 @@ jobs:
       tag: ${{ steps.collect-data.outputs.tag }}
       version: ${{ steps.collect-data.outputs.version }}
     steps:
-
-      - name: Debug Payload
-        uses: actions/github-script@v7
-        with:
-          script: |
-            console.log(JSON.stringify(context.payload, null, 2));
-
       - name: Collect Data
         id: collect-data
         uses: actions/github-script@v7
@@ -48,8 +41,8 @@ jobs:
             let tag;
             if (context.payload.inputs) {
               tag = context.payload.inputs.tag;
-            } else if (context.payload.client_payload) {
-              tag = context.payload.client_payload.tag;
+            } else if (${{ inputs.tag }}) {
+              tag = ${{ inputs.tag }};
              } else {
               tag = context.payload.release.tag_name;
             }
