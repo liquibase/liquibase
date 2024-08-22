@@ -5,9 +5,6 @@ on:
   # schedule: # Trigger nightly at midnight UTC
   #   - cron: "0 0 * * *"
 
-env:
-  DRY_RUN_VERSION: "77.7.7"
-
 jobs:
 
   setup:
@@ -64,7 +61,7 @@ jobs:
     needs: [ setup ]
     uses: liquibase/liquibase/.github/workflows/create-release.yml@master
     with:
-      version: ${{ env.DRY_RUN_VERSION }}
+      version: "77.7.7"
       branch: ${{ needs.setup.outputs.dry_run_branch }}
       runId: ${{ needs.setup.outputs.dry_run_id }}
       dry_run: true
