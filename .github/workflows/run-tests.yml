@@ -332,9 +332,14 @@ jobs:
     needs: build_tests
     timeout-minutes: 30
     steps:
+      - name: Set up branch variable
+        id: set_branch
+        run: |
+          echo "BRANCH=${{ inputs.branch || github.event.pull_request.head.sha || github.ref }}" >> $GITHUB_ENV
+
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+          ref: ${{ env.BRANCH }}
 
       - name: Prepare
         id: prepare
@@ -470,8 +475,15 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Set up branch variable
+        id: set_branch
+        run: |
+          echo "BRANCH=${{ inputs.branch || github.event.pull_request.head.sha || github.ref }}" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.BRANCH }}
+          
       - name: Set GitHub Secret for Test Count
         env:
           TEST_COUNT_SECRET: ${{ secrets.TEST_COUNT_SECRET }}
