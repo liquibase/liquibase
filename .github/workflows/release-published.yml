@@ -575,8 +575,8 @@ jobs:
           gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-commercial-${version}.pom
           
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
-            -DrepositoryId=sonatype-nexus-staging \
+            -Durl=https://repo.liquibase.net/repository/sonatype-nexus-staging/ \
+            -DrepositoryId=dry-run-sonatype-nexus-staging \
             -DpomFile=liquibase-core-${version}.pom \
             -DgeneratePom=false \
             -Dfile=liquibase-core-${version}.jar \
@@ -587,8 +587,8 @@ jobs:
             -Dclassifiers=,sources,javadoc,
 
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
-            -DrepositoryId=sonatype-nexus-staging \
+            -Durl=https://repo.liquibase.net/repository/sonatype-nexus-staging/ \
+            -DrepositoryId=dry-run-sonatype-nexus-staging \
             -DpomFile=liquibase-commercial-${version}.pom \
             -DgeneratePom=false \
             -Dfile=liquibase-commercial-${version}.jar \
@@ -599,8 +599,8 @@ jobs:
             -Dclassifiers=,sources,javadoc,
 
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
-            -DrepositoryId=sonatype-nexus-staging \
+            -Durl=https://repo.liquibase.net/repository/sonatype-nexus-staging/ \
+            -DrepositoryId=dry-run-sonatype-nexus-staging \
             -DpomFile=liquibase-maven-plugin-${version}.pom \
             -DgeneratePom=false \
             -Dfile=liquibase-maven-plugin-${version}.jar \
@@ -611,8 +611,8 @@ jobs:
             -Dclassifiers=,sources,javadoc,
           
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
-            -DrepositoryId=sonatype-nexus-staging \
+            -Durl=https://repo.liquibase.net/repository/sonatype-nexus-staging/ \
+            -DrepositoryId=dry-run-sonatype-nexus-staging \
             -DpomFile=liquibase-cli-${version}.pom \
             -DgeneratePom=false \
             -Dfile=liquibase-cli-${version}.jar \
@@ -623,8 +623,8 @@ jobs:
             -Dclassifiers=,sources,javadoc,
 
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
-            -DrepositoryId=sonatype-nexus-staging \
+            -Durl=https://repo.liquibase.net/repository/sonatype-nexus-staging/ \
+            -DrepositoryId=dry-run-sonatype-nexus-staging \
             -DpomFile=liquibase-cdi-${version}.pom \
             -DgeneratePom=false \
             -Dfile=liquibase-cdi-${version}.jar \
@@ -635,8 +635,8 @@ jobs:
             -Dclassifiers=,sources,javadoc,
 
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
-            -DrepositoryId=sonatype-nexus-staging \
+            -Durl=https://repo.liquibase.net/repository/sonatype-nexus-staging/ \
+            -DrepositoryId=dry-run-sonatype-nexus-staging \
             -DpomFile=liquibase-cdi-jakarta-${version}.pom \
             -DgeneratePom=false \
             -Dfile=liquibase-cdi-jakarta-${version}.jar \
@@ -645,38 +645,3 @@ jobs:
             -Dfiles=liquibase-cdi-jakarta-${version}.jar.asc,liquibase-cdi-jakarta-${version}-sources.jar.asc,liquibase-cdi-jakarta-${version}-javadoc.jar.asc,liquibase-cdi-jakarta-${version}.pom.asc \
             -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
             -Dclassifiers=,sources,javadoc,
-
-          ## Release repository
-          ## Have to find the stagingRepositoryId that was auto-generated
-          api_output=$(curl -s -u "${{ secrets.SONATYPE_USERNAME }}:${{ secrets.SONATYPE_TOKEN }}" "https://oss.sonatype.org/service/local/staging/profile_repositories")
-          # Extract ids of repositories-item containing the string "liquibase"
-          repositories=$(echo "$api_output" | grep -B 8 "liquibase" | grep "<repositoryId>" | awk -F"<|>" '{print $3}')
-          echo "Repository IDs containing 'liquibase': $repositories"
-          for repo_id in $repositories; do
-            echo "Check if $repo_id repository is an extension"
-            api_output=$(curl -s -u "${{ secrets.SONATYPE_USERNAME }}:${{ secrets.SONATYPE_TOKEN }}" "https://oss.sonatype.org/service/local/repositories/$repo_id/content/org/liquibase/")
-            relative_path=$(echo "$api_output" | grep -oP '<relativePath>\K[^<]+' | awk 'NR==1')
-            echo "Relative path: $relative_path"
-            if [[ "$relative_path" == *"/org/liquibase/ext/"* ]]; then
-                echo "Relative path contains '/org/liquibase/ext/'. It is an extension."
-            else
-                echo "Relative path does not contain '/org/liquibase/ext/'. It is not an extension."
-                stagingRepositoryId=$repo_id
-                break
-            fi
-          done
-
-          echo "Staging Repository Id: $stagingRepositoryId"
-
-          mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-close \
-            -DnexusUrl=https://oss.sonatype.org/ \
-            -DserverId=sonatype-nexus-staging \
-            -DstagingRepositoryId=$stagingRepositoryId \
-            -DstagingProgressTimeoutMinutes=10
-
-          mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-release \
-            -DautoDropAfterRelease=true \
-            -DnexusUrl=https://oss.sonatype.org/ \
-            -DserverId=sonatype-nexus-staging \
-            -DstagingRepositoryId=$stagingRepositoryId \
-            -DstagingProgressTimeoutMinutes=10
