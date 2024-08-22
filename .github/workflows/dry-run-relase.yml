@@ -37,7 +37,7 @@ jobs:
   
 
   dry-run-release-published:
-    #needs: [ dry-run-create-release ]
+    needs: [ setup ]
     uses: liquibase/liquibase/.github/workflows/release-published.yml@DAT-18301
     with:
       #tag: "dry-run-${{ github.run_number }}"
