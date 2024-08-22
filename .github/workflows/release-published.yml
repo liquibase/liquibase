@@ -41,7 +41,7 @@ jobs:
             let tag;
             if (context.payload.inputs) {
               tag = context.payload.inputs.tag;
-            } else if (context.payload.client_payload {
+            } else if (context.payload.client_payload) {
               tag = context.payload.client_payload.tag;
              } else {
               tag = context.payload.release.tag_name;
