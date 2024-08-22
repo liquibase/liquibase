@@ -2,12 +2,6 @@ name: Run Tests
 
 on:
   workflow_call:
-    inputs:
-      branch: 
-        description: 'The branch to run the tests on.'
-        required: false
-        default: 'master'
-        type: string
 
   workflow_dispatch:
     inputs:
@@ -50,15 +44,9 @@ jobs:
       thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
       setupSuccessful: "true"
     steps:
-
-      - name: Set up branch variable
-        id: set_branch
-        run: |
-          echo "BRANCH=${{ inputs.branch || github.event.pull_request.head.sha || github.ref }}" >> $GITHUB_ENV
-
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.BRANCH }}
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
       - name: Get current date
         id: get-date
@@ -79,7 +67,7 @@ jobs:
           then
             branch_name=${GITHUB_HEAD_REF}
           else
-            branch_name=${{ env.BRANCH }}
+            branch_name=${{ github.ref_name }}
           fi 
 
           modified_branch_name=`(echo $branch_name | tr '/_' '-')`
@@ -121,14 +109,9 @@ jobs:
       OS_TYPE: ${{ matrix.os }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
     steps:
-      - name: Set up branch variable
-        id: set_branch
-        run: |
-          echo "BRANCH=${{ inputs.branch || github.event.pull_request.head.sha || github.ref }}" >> $GITHUB_ENV
-
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.BRANCH }}
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Built Code Cache
         if: ${{ matrix.java == 17}}
@@ -332,14 +315,9 @@ jobs:
     needs: build_tests
     timeout-minutes: 30
     steps:
-      - name: Set up branch variable
-        id: set_branch
-        run: |
-          echo "BRANCH=${{ inputs.branch || github.event.pull_request.head.sha || github.ref }}" >> $GITHUB_ENV
-
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.BRANCH }}
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Prepare
         id: prepare
@@ -475,15 +453,8 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
-      - name: Set up branch variable
-        id: set_branch
-        run: |
-          echo "BRANCH=${{ inputs.branch || github.event.pull_request.head.sha || github.ref }}" >> $GITHUB_ENV
-
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ env.BRANCH }}
-          
+      - name: Checkout code
+        uses: actions/checkout@v4
       - name: Set GitHub Secret for Test Count
         env:
           TEST_COUNT_SECRET: ${{ secrets.TEST_COUNT_SECRET }}
@@ -506,4 +477,3 @@ jobs:
           gh variable set TEST_COUNT_INTEGRATION_POSTGRESQL --body "${{ needs.integration-test.outputs.test_count_integration_postgresql }}"
           gh variable set TEST_COUNT_INTEGRATION_SQLITE --body "${{ needs.integration-test.outputs.test_count_integration_sqlite }}"
           gh variable set TEST_COUNT_INTEGRATION_FIREBIRD --body "${{ needs.integration-test.outputs.test_count_integration_firebird }}"
-
