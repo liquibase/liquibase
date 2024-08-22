@@ -25,19 +25,19 @@ jobs:
           run_id=$(echo "$response" | jq -r '.workflow_runs[0].id')
           echo "dry_run_id=$run_id" >> $GITHUB_OUTPUT
 
-  dry-run-create-release:
-    needs: [ setup ]
-    uses: liquibase/liquibase/.github/workflows/create-release.yml@master
-    with:
-      version: "dry-run-${{ github.run_number }}"
-      runId: ${{ needs.setup.outputs.dry_run_id }}
-      standalone_zip: false
-      dry_run: true
-    secrets: inherit
+  # dry-run-create-release:
+  #   needs: [ setup ]
+  #   uses: liquibase/liquibase/.github/workflows/create-release.yml@master
+  #   with:
+  #     version: "dry-run-${{ github.run_number }}"
+  #     runId: ${{ needs.setup.outputs.dry_run_id }}
+  #     standalone_zip: false
+  #     dry_run: true
+  #   secrets: inherit
   
 
   dry-run-release-published:
-    needs: [ dry-run-create-release ]
+    #needs: [ dry-run-create-release ]
     uses: liquibase/liquibase/.github/workflows/release-published.yml@DAT-18301
     with:
       #tag: "dry-run-${{ github.run_number }}"
