@@ -34,8 +34,6 @@ public class SegmentTelemetryListener implements TelemetryListener {
     public void handleEvent(Event event) {
         Thread eventThread = new Thread(() -> {
             try {
-                LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
-
                 URL url = new URL(getDestinationUrl());
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
