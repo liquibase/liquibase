@@ -121,9 +121,14 @@ jobs:
       OS_TYPE: ${{ matrix.os }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
     steps:
+      - name: Set up branch variable
+        id: set_branch
+        run: |
+          echo "BRANCH=${{ inputs.branch || github.event.pull_request.head.sha || github.ref }}" >> $GITHUB_ENV
+
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+          ref: ${{ env.BRANCH }}
 
       - name: Built Code Cache
         if: ${{ matrix.java == 17}}
