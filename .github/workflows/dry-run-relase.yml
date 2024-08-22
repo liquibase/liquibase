@@ -96,6 +96,7 @@ jobs:
   
   cleanup:
     runs-on: ubuntu-latest
+    if: always()
     needs: [ setup, dry-run-release ]
     steps:
       - name: Checkout liquibase
