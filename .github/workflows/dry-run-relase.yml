@@ -40,10 +40,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: liquibase/liquibase-pro
+          token: ${{ secrets.BOT_TOKEN }}
+          path: liquibase-pro
   
       - name: Create a liquibase-pro dry-run branch
         id: create_pro_branch
         run: |
+          cd liquibase-pro
           DRY_RUN_DATE=$(date +%Y%m%d%H%M%S)
           DRY_RUN_BRANCH="dry-run-$DRY_RUN_DATE"
           git checkout -b $DRY_RUN_BRANCH
@@ -115,10 +118,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: liquibase/liquibase-pro
+          token: ${{ secrets.BOT_TOKEN }}
+          path: liquibase-pro
 
       - name: Delete liquibase-pro branch & tag
         if: always()
         run: |
+          cd liquibase-pro
           git push origin --delete ${{ needs.setup.outputs.dry_run_branch }}
           echo "Remote branch ${{ needs.setup.outputs.dry_run_branch }} deleted"
           git push origin --delete refs/tags/v${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }}
