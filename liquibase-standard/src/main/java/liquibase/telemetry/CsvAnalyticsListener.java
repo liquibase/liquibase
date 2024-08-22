@@ -1,4 +1,4 @@
-package liquibase.analytics;
+package liquibase.telemetry;
 
 import liquibase.Scope;
 import org.apache.commons.io.FileUtils;
@@ -8,12 +8,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public class CsvAnalyticsListener implements UsageAnalyticsListener {
+public class CsvAnalyticsListener implements TelemetryListener {
     @Override
     public int getPriority() {
         String filename = TelemetryConfiguration.FILENAME.getCurrentValue();
-        AnalyticsOutputDestination destination = TelemetryConfiguration.OUTPUT_DESTINATION.getCurrentValue();
-        if (StringUtils.isNotEmpty(filename) && AnalyticsOutputDestination.CSV.equals(destination)) {
+        TelemetryOutputDestination destination = TelemetryConfiguration.OUTPUT_DESTINATION.getCurrentValue();
+        if (StringUtils.isNotEmpty(filename) && TelemetryOutputDestination.CSV.equals(destination)) {
             return PRIORITY_SPECIALIZED;
         } else {
             return PRIORITY_NOT_APPLICABLE;

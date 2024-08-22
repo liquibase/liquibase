@@ -1,4 +1,4 @@
-package liquibase.analytics;
+package liquibase.telemetry;
 
 import liquibase.Scope;
 import liquibase.plugin.AbstractPluginFactory;
@@ -6,14 +6,14 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class UsageAnalyticsFactory extends AbstractPluginFactory<UsageAnalyticsListener> {
+public class TelemetryFactory extends AbstractPluginFactory<TelemetryListener> {
     @Override
-    protected Class<UsageAnalyticsListener> getPluginClass() {
-        return UsageAnalyticsListener.class;
+    protected Class<TelemetryListener> getPluginClass() {
+        return TelemetryListener.class;
     }
 
     @Override
-    protected int getPriority(UsageAnalyticsListener obj, Object... args) {
+    protected int getPriority(TelemetryListener obj, Object... args) {
         return obj.getPriority();
     }
 

@@ -1,4 +1,4 @@
-package liquibase.analytics;
+package liquibase.telemetry;
 
 import liquibase.Scope;
 import liquibase.configuration.AutoloadedConfigurations;
@@ -7,7 +7,7 @@ import liquibase.license.LicenseServiceUtils;
 
 public class TelemetryConfiguration implements AutoloadedConfigurations {
 
-    public static final ConfigurationDefinition<AnalyticsOutputDestination> OUTPUT_DESTINATION;
+    public static final ConfigurationDefinition<TelemetryOutputDestination> OUTPUT_DESTINATION;
     public static final ConfigurationDefinition<String> FILENAME;
     public static final ConfigurationDefinition<String> WRITE_KEY;
     private static final ConfigurationDefinition<Boolean> ENABLED;
@@ -15,8 +15,8 @@ public class TelemetryConfiguration implements AutoloadedConfigurations {
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase.telemetry");
 
-        OUTPUT_DESTINATION = builder.define("outputDestination", AnalyticsOutputDestination.class)
-                .setDefaultValue(AnalyticsOutputDestination.CSV)
+        OUTPUT_DESTINATION = builder.define("outputDestination", TelemetryOutputDestination.class)
+                .setDefaultValue(TelemetryOutputDestination.CSV)
                 .setHidden(true)
                 .build();
 

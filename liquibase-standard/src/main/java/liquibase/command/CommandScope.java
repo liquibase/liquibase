@@ -2,9 +2,9 @@ package liquibase.command;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.analytics.Event;
-import liquibase.analytics.TelemetryConfiguration;
-import liquibase.analytics.UsageAnalyticsFactory;
+import liquibase.telemetry.Event;
+import liquibase.telemetry.TelemetryConfiguration;
+import liquibase.telemetry.TelemetryFactory;
 import liquibase.configuration.*;
 import liquibase.database.Database;
 import liquibase.exception.CommandExecutionException;
@@ -292,8 +292,8 @@ public class CommandScope {
                     } catch (Exception e) {
                         Scope.getCurrentScope().getLog(getClass()).warning("Error flushing command output stream: " + e.getMessage(), e);
                     }
-                    UsageAnalyticsFactory usageAnalyticsFactory = Scope.getCurrentScope().getSingleton(UsageAnalyticsFactory.class);
-                    usageAnalyticsFactory.handleEvent(analyticsEvent);
+                    TelemetryFactory telemetryFactory = Scope.getCurrentScope().getSingleton(TelemetryFactory.class);
+                    telemetryFactory.handleEvent(analyticsEvent);
                 }
 
                 return resultsBuilder.build();

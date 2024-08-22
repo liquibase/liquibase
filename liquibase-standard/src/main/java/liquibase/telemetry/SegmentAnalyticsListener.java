@@ -1,4 +1,4 @@
-package liquibase.analytics;
+package liquibase.telemetry;
 
 import liquibase.Scope;
 import liquibase.license.LicenseService;
@@ -17,13 +17,13 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 @NoArgsConstructor
-public class SegmentAnalyticsListener implements UsageAnalyticsListener {
+public class SegmentAnalyticsListener implements TelemetryListener {
 
     @Override
     public int getPriority() {
         String filename = TelemetryConfiguration.FILENAME.getCurrentValue();
-        AnalyticsOutputDestination destination = TelemetryConfiguration.OUTPUT_DESTINATION.getCurrentValue();
-        if (AnalyticsOutputDestination.SEGMENT.equals(destination)) {
+        TelemetryOutputDestination destination = TelemetryConfiguration.OUTPUT_DESTINATION.getCurrentValue();
+        if (TelemetryOutputDestination.SEGMENT.equals(destination)) {
             return PRIORITY_SPECIALIZED;
         } else {
             return PRIORITY_NOT_APPLICABLE;

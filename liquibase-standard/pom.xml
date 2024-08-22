@@ -376,7 +376,7 @@
                         <param>liquibase.database.LiquibaseTableNames</param>
                         <param>liquibase.changelog.visitor.ValidatingVisitorGenerator</param>
                         <param>liquibase.io.OutputFileHandler</param>
-                        <param>liquibase.analytics.UsageAnalyticsListener</param>
+                        <param>liquibase.telemetry.TelemetryListener</param>
                     </services>
                 </configuration>
                 <executions>

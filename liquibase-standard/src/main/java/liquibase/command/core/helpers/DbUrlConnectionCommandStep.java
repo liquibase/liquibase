@@ -3,7 +3,6 @@ package liquibase.command.core.helpers;
 import liquibase.Beta;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.analytics.Event;
 import liquibase.command.CleanUpCommandStep;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandResultsBuilder;
