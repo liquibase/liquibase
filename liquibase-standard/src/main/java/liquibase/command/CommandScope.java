@@ -212,11 +212,7 @@ public class CommandScope {
             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, commandName);
         }
         Event analyticsEvent = ExceptionUtil.doSilently(() -> {
-            if (TelemetryConfiguration.isTelemetryEnabled()) {
-                return new Event(commandName);
-            } else {
-                return null;
-            }
+            return new Event(commandName);
         });
 
         try {
