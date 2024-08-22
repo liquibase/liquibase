@@ -59,7 +59,7 @@ jobs:
 
   dry-run-release:
     needs: [ setup ]
-    uses: liquibase/liquibase/.github/workflows/create-release.yml@master
+    uses: liquibase/liquibase/.github/workflows/create-release.yml@DAT-18301
     with:
       version: "77.7.7"
       branch: ${{ needs.setup.outputs.dry_run_branch }}
