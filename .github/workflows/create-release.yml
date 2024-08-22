@@ -172,7 +172,7 @@ jobs:
           rm -rf re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip
           IFS=',' read -ra EXT <<< "${{ needs.setup.outputs.extensions }}"
           for i in "${EXT[@]}"; do
-            cp ~/.m2/repository/org/liquibase/ext/$i/${{ needs.setup.outputs.version }}/$i-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$i-${{ needs.setup.outputs.version }}.jar || echo "Failed to move $i artifact"
+            cp ~/.m2/repository/org/liquibase/ext/$i/${{ needs.setup.outputs.version }}/$i-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$i.jar || echo "Failed to move $i artifact"
           done
           (cd re-version/out/liquibase-${{ needs.setup.outputs.version }} && zip -r ../liquibase-${{ needs.setup.outputs.version }}.zip . && cd .. && rm -rf liquibase-${{ needs.setup.outputs.version }})
           
@@ -182,7 +182,7 @@ jobs:
           rm -rf re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz
           mkdir -p re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions
           for I in "${EXT[@]}"; do
-            cp ~/.m2/repository/org/liquibase/ext/$I/${{ needs.setup.outputs.version }}/$I-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$I-${{ needs.setup.outputs.version }}.jar || echo "Failed to move $I artifact"
+            cp ~/.m2/repository/org/liquibase/ext/$I/${{ needs.setup.outputs.version }}/$I-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$I.jar || echo "Failed to move $I artifact"
           done
           (cd re-version/out/liquibase-${{ needs.setup.outputs.version }} && tar -czvf ../liquibase-${{ needs.setup.outputs.version }}.tar.gz * && cd .. && rm -rf liquibase-${{ needs.setup.outputs.version }})
 
