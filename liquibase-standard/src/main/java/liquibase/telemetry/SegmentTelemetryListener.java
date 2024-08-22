@@ -17,7 +17,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 @NoArgsConstructor
-public class SegmentAnalyticsListener implements TelemetryListener {
+public class SegmentTelemetryListener implements TelemetryListener {
 
     @Override
     public int getPriority() {
