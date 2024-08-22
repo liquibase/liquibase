@@ -18,10 +18,12 @@ public class TelemetryFactory extends AbstractPluginFactory<TelemetryListener> {
     }
 
     public void handleEvent(Event event) {
-        try {
-            getPlugin().handleEvent(event);
-        } catch (Exception e) {
-            Scope.getCurrentScope().getLog(getClass()).warning("Failed to handle analytics event", e);
+        if (TelemetryConfiguration.isTelemetryEnabled()) {
+            try {
+                getPlugin().handleEvent(event);
+            } catch (Exception e) {
+                Scope.getCurrentScope().getLog(getClass()).warning("Failed to handle analytics event", e);
+            }
         }
     }
 }
