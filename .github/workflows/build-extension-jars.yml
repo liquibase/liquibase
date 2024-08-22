@@ -15,6 +15,10 @@ on:
         description: 'Comma separated list of extensions to release to GPM'
         required: true
         type: string
+      branch:
+        description: 'branch to check out'
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       liquibase-version:
@@ -27,6 +31,10 @@ on:
         type: string
       extensions:
         description: 'Comma separated list of extensions to release to GPM'
+        required: true
+        type: string
+      branch:
+        description: 'branch to check out'
         required: true
         type: string
 
@@ -97,7 +105,7 @@ jobs:
         name: Checkout liquibase-pro
         with:
           repository: liquibase/liquibase-pro
-          ref: "${{ github.ref }}"
+          ref: "${{ inputs.branch }}"
           path: liquibase-pro
           token: ${{ secrets.BOT_TOKEN }}
 
@@ -185,7 +193,7 @@ jobs:
         if: ${{ inputs.dependencies != '' }}
         continue-on-error: true
         run: |
-          scripts_branch=${{ github.ref }}
+          scripts_branch=${{ inputs.branch }}
           IFS=',' read -ra DEP_ARRAY <<< "${{ inputs.dependencies }}"
           for dep in "${DEP_ARRAY[@]}"; do
             dep=$(echo $dep | xargs)  # Remove leading and trailing whitespaces
@@ -201,9 +209,10 @@ jobs:
             chmod +x $PWD/.github/util/re-version.sh
             chmod +x $PWD/.github/util/sign-artifacts.sh
             chmod +x $PWD/.github/util/ManifestReversion.java
-            $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ github.ref }}" ${dep}
-            $PWD/.github/util/sign-artifacts.sh ./target "${{ inputs.liquibase-version }}" "${{ github.ref }}"
+            $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ inputs.branch }}" ${dep}
+            $PWD/.github/util/sign-artifacts.sh ./target "${{ inputs.liquibase-version }}" "${{ inputs.branch }}"
             mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+            sed -i -e "s/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/<liquibase.version>${{ inputs.liquibase-version }}<\/liquibase.version>/g" pom.xml
             mvn deploy:deploy-file \
             -Dfile=./re-version/out/${dep}-${{ inputs.liquibase-version }}.jar \
             -Dsources=./re-version/out/${dep}-${{ inputs.liquibase-version }}-sources.jar \
@@ -219,7 +228,7 @@ jobs:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         continue-on-error: true
         run: |
-          scripts_branch=${{ github.ref }}
+          scripts_branch=${{ inputs.branch }}
           git config --global credential.helper store
           echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
           IFS=',' read -ra EXT_ARRAY <<< "${{ inputs.extensions }}"
@@ -245,9 +254,10 @@ jobs:
             chmod +x $PWD/.github/util/re-version.sh
             chmod +x $PWD/.github/util/sign-artifacts.sh
             chmod +x $PWD/.github/util/ManifestReversion.java
-            $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ github.ref }}" ${ext}
-            $PWD/.github/util/sign-artifacts.sh ./target "${{ inputs.liquibase-version }}" "${{ github.ref }}"
+            $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ inputs.branch }}" ${ext}
+            $PWD/.github/util/sign-artifacts.sh ./target "${{ inputs.liquibase-version }}" "${{ inputs.branch }}"
             mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+            sed -i -e "s/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/<liquibase.version>${{ inputs.liquibase-version }}<\/liquibase.version>/g" pom.xml
             mvn deploy:deploy-file \
             -Dfile=./re-version/out/${ext}-${{ inputs.liquibase-version }}.jar \
             -Dsources=./re-version/out/${ext}-${{ inputs.liquibase-version }}-sources.jar \
