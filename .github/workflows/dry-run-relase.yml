@@ -17,6 +17,18 @@ jobs:
       - name: Checkout liquibase
         uses: actions/checkout@v4
 
+      - name: Checkout liquibase-pro
+        uses: actions/checkout@v4
+        with:
+          repository: liquibase/liquibase-pro
+          token: ${{ secrets.BOT_TOKEN }}
+          path: liquibase-pro
+
+      - name: Set up Git
+        run: |
+          git config user.name "liquibot"
+          git config user.email "liquibot@liquibase.org"
+
       - name: Create a liquibase dry-run branch
         id: create_branch
         run: |
@@ -26,22 +38,7 @@ jobs:
           echo "dry_run_branch=$DRY_RUN_BRANCH" >> $GITHUB_OUTPUT
           echo "dry_run_date=$DRY_RUN_DATE" >> $GITHUB_OUTPUT
           echo "New branch created: $DRY_RUN_BRANCH"
-              
-      - name: Set up Git
-        run: |
-          git config user.name "liquibot"
-          git config user.email "liquibot@liquibase.org"
-
-      - name: Push dry-run liquibase branch
-        run: |
           git push origin ${{ steps.create_branch.outputs.dry_run_branch }}
-
-      - name: Checkout liquibase-pro
-        uses: actions/checkout@v4
-        with:
-          repository: liquibase/liquibase-pro
-          token: ${{ secrets.BOT_TOKEN }}
-          path: liquibase-pro
   
       - name: Create a liquibase-pro dry-run branch
         id: create_pro_branch
@@ -53,12 +50,7 @@ jobs:
           echo "dry_run_branch=$DRY_RUN_BRANCH" >> $GITHUB_OUTPUT
           echo "dry_run_date=$DRY_RUN_DATE" >> $GITHUB_OUTPUT
           echo "New branch created: $DRY_RUN_BRANCH"
-
-      - name: Push dry-run liquibase-pro branch
-        run: |
-          cd liquibase-pro
           git push origin ${{ steps.create_branch.outputs.dry_run_branch }}
-
 
       - name: Get run-tests.yml runId 
         id: get_run_id
