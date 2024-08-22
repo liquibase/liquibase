@@ -20,9 +20,8 @@ jobs:
           response=$(curl -s \
             -H "Authorization: token ${{ secrets.BOT_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/liquibase/liquibase/actions/workflows/run-tests.yml/runs?status=success&per_page=1")
-          echo "response=$response"
-          # Extract the last successful run ID
+            "https://api.github.com/repos/liquibase/liquibase/actions/workflows/run-tests.yml/runs?branch=master&status=success&per_page=1")
+            # Extract the last successful run ID
           run_id=$(echo "$response" | jq -r '.workflow_runs[0].id')
           echo "dry_run_id=$run_id" >> $GITHUB_OUTPUT
 
@@ -30,7 +29,7 @@ jobs:
     needs: [ setup ]
     uses: liquibase/liquibase/.github/workflows/create-release.yml@master
     with:
-      version: "7.7.7"
+      version: "dry-run-${{ github.run_number }}"
       runId: ${{ needs.setup.outputs.dry_run_id }}
       standalone_zip: false
       dry_run: true
