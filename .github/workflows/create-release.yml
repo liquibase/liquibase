@@ -86,11 +86,12 @@ jobs:
   build-extension-jars:
    needs: [ setup ]
    #needs: [ setup, owasp-scanner ]
-   uses: liquibase/liquibase/.github/workflows/build-extension-jars.yml@master
+   uses: liquibase/liquibase/.github/workflows/build-extension-jars.yml@DAT-18301
    with:
      liquibase-version: ${{ needs.setup.outputs.version }}
      dependencies: ${{ needs.setup.outputs.dependencies }}
      extensions: ${{ needs.setup.outputs.extensions }}
+     branch: ${{ needs.setup.outputs.branch }}
    secrets: inherit
 
   reversion:
