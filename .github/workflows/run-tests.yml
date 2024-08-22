@@ -79,7 +79,7 @@ jobs:
           then
             branch_name=${GITHUB_HEAD_REF}
           else
-            branch_name=${{ github.ref_name }}
+            branch_name=${{ env.BRANCH }}
           fi 
 
           modified_branch_name=`(echo $branch_name | tr '/_' '-')`
