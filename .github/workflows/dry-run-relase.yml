@@ -56,6 +56,7 @@ jobs:
 
       - name: Push dry-run liquibase-pro branch
         run: |
+          cd liquibase-pro
           git push origin ${{ steps.create_branch.outputs.dry_run_branch }}
 
 
