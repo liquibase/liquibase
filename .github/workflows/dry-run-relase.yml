@@ -12,7 +12,7 @@ jobs:
     outputs:
       dry_run_branch: ${{ steps.create_branch.outputs.dry_run_branch }}
       dry_run_id: ${{ steps.get_run_id.outputs.dry_run_id }}
-      dry_run_date: ${{ steps.create_branch.outputs.dry_run_date }}
+      dry_run_date: ${{ steps.get_dry_run_date.outputs.dry_run_date }}
     steps:
       - name: Checkout liquibase
         uses: actions/checkout@v4
@@ -29,14 +29,20 @@ jobs:
           git config user.name "liquibot"
           git config user.email "liquibot@liquibase.org"
 
+      - name: Get dry-run date
+        id: get_dry_run_date
+        run: |
+          DRY_RUN_DATE=$(date +%Y%m%d%H%M%S)
+          echo "dry_run_date=$DRY_RUN_DATE" >> $GITHUB_OUTPUT
+          echo "Dry run date: $DRY_RUN_DATE"
+
       - name: Create a liquibase dry-run branch
         id: create_branch
         run: |
-          DRY_RUN_DATE=$(date +%Y%m%d%H%M%S)
+          DRY_RUN_DATE=${{ steps.get_dry_run_date.outputs.dry_run_date }}
           DRY_RUN_BRANCH="dry-run-$DRY_RUN_DATE"
           git checkout -b $DRY_RUN_BRANCH
           echo "dry_run_branch=$DRY_RUN_BRANCH" >> $GITHUB_OUTPUT
-          echo "dry_run_date=$DRY_RUN_DATE" >> $GITHUB_OUTPUT
           echo "New branch created: $DRY_RUN_BRANCH"
           # Set the upstream branch manually
           git push origin $DRY_RUN_BRANCH
@@ -46,11 +52,10 @@ jobs:
         id: create_pro_branch
         run: |
           cd liquibase-pro
-          DRY_RUN_DATE=$(date +%Y%m%d%H%M%S)
+          DRY_RUN_DATE=${{ steps.get_dry_run_date.outputs.dry_run_date }}
           DRY_RUN_BRANCH="dry-run-$DRY_RUN_DATE"
           git checkout -b $DRY_RUN_BRANCH
           echo "dry_run_branch=$DRY_RUN_BRANCH" >> $GITHUB_OUTPUT
-          echo "dry_run_date=$DRY_RUN_DATE" >> $GITHUB_OUTPUT
           echo "New branch created: $DRY_RUN_BRANCH"
           # Set the upstream branch manually
           git push origin $DRY_RUN_BRANCH
