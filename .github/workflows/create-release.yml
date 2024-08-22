@@ -16,6 +16,35 @@ on:
         required: true
         type: boolean
         default: false
+      dry_run: 
+        description: 'Flag to indicate if the workflow is triggered to create a dry-run release'
+        required: true
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version (example: 4.8.2)'
+        required: true
+        type: string
+      branch:
+        description: 'Branch to release (Defaults to master)'
+        required: false
+        type: string
+      runId:
+        description: 'RunId of liquibase/liquibase artifacts to attach'
+        required: true
+        type: string
+      standalone_zip:
+        description: 'Flag to indicate if the workflow is triggered to create a standalone zip'
+        required: true
+        type: boolean
+        default: false
+      dry_run: 
+        description: 'Flag to indicate if the workflow is triggered to create a dry-run release'
+        required: true
+        type: boolean
+        default: false
 
 env:
   DEPENDENCIES: "liquibase-bigquery" # Comma separated list of dependencies to release the extensions list
@@ -205,7 +234,7 @@ jobs:
           path: re-version/final
 
       - name: Set repository tags
-        if: ${{ inputs.standalone_zip == false }}
+        if: ${{ inputs.standalone_zip == false }} && ${{ needs.setup.outputs.dry_run == false }}
         run: |
           git tag -f v${{ needs.setup.outputs.version }}
           git push -f origin v${{ needs.setup.outputs.version }}
@@ -276,7 +305,7 @@ jobs:
           rm re-version/final/*.sha1
 
       - name: Attach Files to Draft Release
-        if: ${{ inputs.standalone_zip == false }}
+        if: ${{ inputs.standalone_zip == false }} && ${{ needs.setup.outputs.dry_run == false }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.setup.outputs.version }}
@@ -289,7 +318,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Attach standalone zip to Build
-        if: ${{ inputs.standalone_zip == true }}
+        if: ${{ inputs.standalone_zip == true }} && ${{ needs.setup.outputs.dry_run == false }}
         uses: actions/upload-artifact@v4
         with:
             name: liquibase-installers-${{ needs.setup.outputs.version }}
