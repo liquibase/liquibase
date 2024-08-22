@@ -66,7 +66,7 @@ jobs:
         run: |
           # Fetch the list of workflow runs
           response=$(curl -s \
-            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Authorization: token ${{ secrets.BOT_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
             "https://api.github.com/repos/liquibase/liquibase/actions/workflows/run-tests.yml/runs?status=success&per_page=1")
           echo "response=$response"
