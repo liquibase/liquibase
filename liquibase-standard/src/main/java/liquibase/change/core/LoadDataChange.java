@@ -341,6 +341,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                                 // Need the column type for handling 'NOW' or 'TODAY' type column value
                                 valueConfig.setType(columnConfig.getType());
                                 if (StringUtil.equalsWordNull(value) || StringUtil.isEmpty(value)) {
+                                    valueConfig.setValue(null);
                                     valueConfig.setValueDate(columnConfig.getDefaultValueDate());
                                 } else {
                                     valueConfig.setValueDate(value);
