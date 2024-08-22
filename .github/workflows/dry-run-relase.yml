@@ -30,8 +30,7 @@ jobs:
     needs: [ setup ]
     uses: liquibase/liquibase/.github/workflows/create-release.yml@master
     with:
-      version: "${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }}"
-      branch: ${{ needs.setup.outputs.dry_run_branch }}
+      version: "7.7.7"
       runId: ${{ needs.setup.outputs.dry_run_id }}
       standalone_zip: false
       dry_run: true
