@@ -5,76 +5,97 @@ on:
   # schedule: # Trigger nightly at midnight UTC
   #   - cron: "0 0 * * *"
 
-env:
-  DRY_RUN_VERSION: "77.7.7"
-
 jobs:
 
   setup:
     runs-on: ubuntu-latest
     outputs:
       dry_run_branch: ${{ steps.create_branch.outputs.dry_run_branch }}
-      dry_run_version: ${{ steps.get_version.outputs.dry_run_version }}
+      dry_run_id: ${{ steps.get_run_id.outputs.dry_run_id }}
+      dry_run_date: ${{ steps.get_dry_run_date.outputs.dry_run_date }}
     steps:
-      - name: Checkout
+      - name: Checkout liquibase
         uses: actions/checkout@v4
 
-      - name: Create a dry-run branch
-        id: create_branch
-        run: |
-          DRY_RUN_BRANCH="dry-run-$(date +%Y%m%d%H%M%S)"
-          git checkout -b $DRY_RUN_BRANCH
-          echo "dry_run_branch=$DRY_RUN_BRANCH" >> $GITHUB_OUTPUT
-          echo "New branch created: $DRY_RUN_BRANCH"
-              
+      - name: Checkout liquibase-pro
+        uses: actions/checkout@v4
+        with:
+          repository: liquibase/liquibase-pro
+          token: ${{ secrets.BOT_TOKEN }}
+          path: liquibase-pro
+
       - name: Set up Git
         run: |
           git config user.name "liquibot"
           git config user.email "liquibot@liquibase.org"
 
-      - name: Push dry-run branch
+      - name: Get dry-run date
+        id: get_dry_run_date
         run: |
-          git push origin ${{ steps.create_branch.outputs.dry_run_branch }}
+          DRY_RUN_DATE=$(date +%Y%m%d%H%M%S)
+          echo "dry_run_date=$DRY_RUN_DATE" >> $GITHUB_OUTPUT
+          echo "Dry run date: $DRY_RUN_DATE"
+
+      - name: Create a liquibase dry-run branch
+        id: create_branch
+        run: |
+          DRY_RUN_DATE=${{ steps.get_dry_run_date.outputs.dry_run_date }}
+          DRY_RUN_BRANCH="dry-run-$DRY_RUN_DATE"
+          git checkout -b $DRY_RUN_BRANCH
+          echo "dry_run_branch=$DRY_RUN_BRANCH" >> $GITHUB_OUTPUT
+          echo "New branch created: $DRY_RUN_BRANCH"
+          # Set the upstream branch manually
+          git push origin $DRY_RUN_BRANCH
+          git branch --set-upstream-to=origin/$DRY_RUN_BRANCH
+        
+      - name: Create a liquibase-pro dry-run branch
+        id: create_pro_branch
+        run: |
+          cd liquibase-pro
+          DRY_RUN_DATE=${{ steps.get_dry_run_date.outputs.dry_run_date }}
+          DRY_RUN_BRANCH="dry-run-$DRY_RUN_DATE"
+          git checkout -b $DRY_RUN_BRANCH
+          echo "dry_run_branch=$DRY_RUN_BRANCH" >> $GITHUB_OUTPUT
+          echo "New branch created: $DRY_RUN_BRANCH"
+          # Set the upstream branch manually
+          git push origin $DRY_RUN_BRANCH
+          git branch --set-upstream-to=origin/$DRY_RUN_BRANCH
 
       - name: Get run-tests.yml runId 
         id: get_run_id
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const workflowFileName = 'run-tests.yml';
-            const workflowRuns = await github.rest.actions.listWorkflowRunsForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: workflowFileName,
-              status: 'success',
-              per_page: 1, // Fetch only the most recent successful run
-            });
+        run: |
+          # Fetch the list of workflow runs
+          response=$(curl -s \
+            -H "Authorization: token ${{ secrets.BOT_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/liquibase/liquibase/actions/workflows/run-tests.yml/runs?status=success&per_page=1")
+          echo "response=$response"
+          # Extract the last successful run ID
+          run_id=$(echo "$response" | jq -r '.workflow_runs[0].id')
+          echo "dry_run_id=$run_id" >> $GITHUB_OUTPUT
 
-            if (workflowRuns.data.workflow_runs.length > 0) {
-              const lastRunId = workflowRuns.data.workflow_runs[0].id;
-              // Append the output to $GITHUB_OUTPUT
-              const fs = require('fs');
-              fs.appendFileSync(process.env.GITHUB_OUTPUT, `dry_run_id=${lastRunId}\n`);
-            } else {
-              core.setFailed(`No successful runs found for workflow ${workflowFileName}`);
-            }
-
+  dry-run-run-tests:
+    needs: [ setup ]
+    uses: liquibase/liquibase/.github/workflows/run-tests.yml@master
+    secrets: inherit
 
   dry-run-release:
-    needs: [ setup ]
-    uses: liquibase/liquibase/.github/workflows/create-release.yml@master
+    needs: [ setup, dry-run-run-tests ]
+    uses: liquibase/liquibase/.github/workflows/create-release.yml@DAT-18301
     with:
-      version: ${{ env.DRY_RUN_VERSION }}
+      version: "${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }}"
       branch: ${{ needs.setup.outputs.dry_run_branch }}
       runId: ${{ needs.setup.outputs.dry_run_id }}
+      standalone_zip: false
       dry_run: true
     secrets: inherit
   
   cleanup:
     runs-on: ubuntu-latest
+    if: always()
     needs: [ setup, dry-run-release ]
     steps:
-      - name: Checkout
+      - name: Checkout liquibase
         uses: actions/checkout@v4
 
       - name: Set up Git
@@ -82,10 +103,27 @@ jobs:
           git config user.name "liquibot"
           git config user.email "liquibot@liquibase.org"
 
-      - name: Delete branch & tag
+      - name: Delete liquibase branch & tag
         if: always()
         run: |
           git push origin --delete ${{ needs.setup.outputs.dry_run_branch }}
           echo "Remote branch ${{ needs.setup.outputs.dry_run_branch }} deleted"
-          git push origin --delete refs/tags/${{ env.DRY_RUN_VERSION }}
-          echo "Remote tag ${{ env.DRY_RUN_VERSION }} deleted"
+          git push origin --delete refs/tags/v${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }}
+          echo "Remote tag v${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }} deleted"
+
+      - name: Checkout liquibase-pro
+        if: always()
+        uses: actions/checkout@v4
+        with:
+          repository: liquibase/liquibase-pro
+          token: ${{ secrets.BOT_TOKEN }}
+          path: liquibase-pro
+
+      - name: Delete liquibase-pro branch & tag
+        if: always()
+        run: |
+          cd liquibase-pro
+          git push origin --delete ${{ needs.setup.outputs.dry_run_branch }}
+          echo "Remote branch ${{ needs.setup.outputs.dry_run_branch }} deleted"
+          git push origin --delete refs/tags/v${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }}
+          echo "Remote tag v${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }}.${{ needs.setup.outputs.dry_run_date }} deleted"
