@@ -7,6 +7,12 @@ on:
       tag:
         description: 'Release Tag'
         required: true
+  workflow_call:
+    inputs:
+      tag:
+        description: 'Release Tag'
+        required: true
+        type: string
 env:
   MAVEN_VERSION: '3.9.2'
 jobs:
