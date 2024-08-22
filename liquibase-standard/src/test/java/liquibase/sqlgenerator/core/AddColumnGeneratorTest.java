@@ -107,7 +107,7 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
         Sql[] sql = generatorUnderTest.generateSql(columns, new MariaDBDatabase(), new MockSqlGeneratorChain());
 
         assertEquals(1, sql.length);
-        assertEquals("ALTER TABLE " + TABLE_NAME + " ADD PERIOD INT NOT NULL", sql[0].toSql());
+        assertEquals("ALTER TABLE " + TABLE_NAME + " ADD `PERIOD` INT NOT NULL", sql[0].toSql());
     }
 
     @Test

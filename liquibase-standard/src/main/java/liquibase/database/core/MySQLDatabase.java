@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
  */
 public class MySQLDatabase extends AbstractJdbcDatabase {
     private static final String PRODUCT_NAME = "MySQL";
-    private static Set<String> reservedWords = createReservedWords();
+    private static final Set<String> RESERVED_WORDS = createReservedWords();
 
     /** Pattern used to extract function precision like 3 in CURRENT_TIMESTAMP(3) */
     private static final String  PRECISION_REGEX = "\\(\\d+\\)";
@@ -248,7 +248,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean isReservedWord(String string) {
-        if (reservedWords.contains(string.toUpperCase())) {
+        if (RESERVED_WORDS.contains(string.toUpperCase())) {
             return true;
         }
         return super.isReservedWord(string);
@@ -706,12 +706,13 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     @Override
     public void addReservedWords(Collection<String> words) {
         addMySQLReservedWordIfApplicable("MANUAL");
+        super.addReservedWords(words);
     }
 
     private void addMySQLReservedWordIfApplicable(String... reservedWord) {
         try {
             if(getDatabaseMajorVersion() >= 9 || (getDatabaseMajorVersion() == 8 && getDatabaseMinorVersion() >= 4)) {
-                reservedWords.addAll(Arrays.asList(reservedWord));
+                RESERVED_WORDS.addAll(Arrays.asList(reservedWord));
             }
         } catch (DatabaseException e) {
             throw new RuntimeException(e);
