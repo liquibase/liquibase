@@ -6,11 +6,11 @@ https://datical.atlassian.net/wiki/spaces/DEV/pages/3371335681/Liquibase+Build+P
 
 ## :fire: Liquibase DryRun Releases
 
-The `dryRun` process simulates as much as possible our current production liquibase release workflow. It mimics all important release activities in a nightly cadence so we can anticipate automation issues before the real release.
+The `dryRun` process simulates our current production Liquibase release workflow as closely as possible. It mimics all key release activities on a nightly basis, allowing us to anticipate and address any automation issues before the actual release.
 
 ## :star2: What a DryRun Release does?
 
-The following actions are the same as a regular liquibase release, no modifications:
+The following actions are identical to those in a regular Liquibase release, with no modifications:
 
 - Get latests liquibase artifacts from the `run-tests.yml` workflow
 - Build included extensions in core
@@ -31,9 +31,9 @@ The following actions are the same as a regular liquibase release, no modificati
 
 ## :wrench: How a DryRun Release works?
 
-You can check the `dry-run-release.yml` worklow but it is basically composed of calls to the existing release workflows such as `create-release.yml` and `release-published` sending them a new input: `dry_run: true` to controll which steps are executed for regular releases and dryRun release:
+You can check the `dry-run-release.yml` workflow, which is essentially composed of calls to existing release workflows such as `create-release.yml` and `release-published.yml`. It sends them a new input, `dry_run: true`, to control which steps are executed for regular releases versus dry-run releases.
 
-```yml
+```yml`
 [...]
 
   dry-run-create-release:
@@ -63,12 +63,12 @@ You can check the `dry-run-release.yml` worklow but it is basically composed of 
 Here you can see all the stuff which is tested:
 
 1. Create a draft release
-2. Get the draft release ID
+2. Retrieve the draft release ID
 3. Simulate a release publish event. In blue you can see the internal Maven deploy to `https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging`
 4. Clean up dryRun resources
 
 ![](./doc/img/dry-run.png)
 
-The process will end up with the dryRun artifacts published in our Maven repository:
+The process will conclude with the `dryRun` artifacts published in our Maven repository:
 
 ![](./doc/img/nexus.png)
