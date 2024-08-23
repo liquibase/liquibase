@@ -1,14 +1,14 @@
-# Liquibase Release Workflows
+# :zap: Liquibase Release Workflows
 
-## Liquibase Build Process Refactoring
+## :arrows_clockwise: Liquibase Build Process Refactoring
 
 https://datical.atlassian.net/wiki/spaces/DEV/pages/3371335681/Liquibase+Build+Process+Refactoring#New-Build.yml-%E2%86%92
 
-## Liquibase DryRun Releases
+## :fire: Liquibase DryRun Releases
 
 The `dryRun` process simulates as much as possible our current production liquibase release workflow. It mimics all important release activities in a nightly cadence so we can anticipate automation issues before the real release.
 
-## What a DryRun Release does?
+## :star2: What a DryRun Release does?
 
 The following actions are the same as a regular liquibase release, no modifications:
 
@@ -22,14 +22,14 @@ The following actions are the same as a regular liquibase release, no modificati
 - Delete the dryRun draft release. i.e `dry-run-10522556642`
 - Delete the dryRun repository tag. i.e `vdry-run-10522556642`
 
-## What a DryRun Release does not do?
+## :warning: What a DryRun Release does not do?
 
 - Generate PRO tags
 - Generated packages: `deb`, `rpm`, `brew` and the rest of them
 - Upload `javadocs` and `xsds` to `S3`
 - Deploy artifacts to `GPM`
 
-## How a DryRun Release works?
+## :wrench: How a DryRun Release works?
 
 You can check the `dry-run-release.yml` worklow but it is basically composed of calls to the existing release workflows such as `create-release.yml` and `release-published` sending them a new input: `dry_run: true` to controll which steps are executed for regular releases and dryRun release:
 
