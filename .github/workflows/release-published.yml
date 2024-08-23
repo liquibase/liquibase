@@ -12,6 +12,10 @@ on:
         required: true
         type: boolean
         default: false
+      dry_run_release_id:
+        description: 'The release id of the dry-run release'
+        required: false
+        type: string
   workflow_call:
     inputs:
       tag:
@@ -23,6 +27,10 @@ on:
         required: true
         type: boolean
         default: false
+      dry_run_release_id:
+        description: 'The release id of the dry-run release'
+        required: false
+        type: string
 env:
   MAVEN_VERSION: '3.9.2'
 jobs:
@@ -78,10 +86,20 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Download release assets
+        if: ${{ inputs.dry_run == false }}
         uses: robinraju/release-downloader@v1.11
         with:
           repository: "liquibase/liquibase"
           tag: "${{ needs.setup.outputs.tag }}"
+          filename: "*"
+          out-file-path: "."
+
+      - name: Download dry-run release assets
+        if: ${{ inputs.dry_run == true }}
+        uses: robinraju/release-downloader@v1.11
+        with:
+          repository: "liquibase/liquibase"
+          releaseId: "${{ inputs.dry_run_release_id }}"
           filename: "*"
           out-file-path: "."
 

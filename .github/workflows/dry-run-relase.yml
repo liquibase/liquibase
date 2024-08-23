@@ -12,7 +12,6 @@ jobs:
     outputs:
       dry_run_id: ${{ steps.get_run_id.outputs.dry_run_id }}
     steps:
-
       - name: Get run-tests.yml runId 
         id: get_run_id
         run: |
@@ -35,12 +34,34 @@ jobs:
   #     dry_run: true
   #   secrets: inherit
   
+  dry-run-get-draft-release:
+    runs-on: ubuntu-latest
+    outputs:
+      dry_run_release_id: ${{ steps.get_draft_release_id.outputs.release_id }}
+    steps:
+      - name: Get Draft Release ID 
+        id: get_draft_release_id
+        run: |
+          release_name="vdry-run-40"
+          response=$(curl -s -H "Authorization: token ${{ secrets.BOT_TOKEN }}" \
+                          -H "Accept: application/vnd.github.v3+json" \
+                          "https://api.github.com/repos/liquibase/liquibase/releases")
+          draft_release=$(echo "$response" | jq -r --arg name "$release_name" '.[] | select(.name == $name and .draft == true)')
+          if [ -z "$draft_release" ]; then
+            echo "No draft release found with the name '$release_name'"
+            exit 1
+          else
+            echo "$draft_release" | jq .
+            release_id=$(echo "$draft_release" | jq -r '.id')
+            echo "release_id=$release_id" >> $GITHUB_OUTPUT
+          fi
 
   dry-run-release-published:
-    needs: [ setup,]
+    needs: [ setup, dry-run-get-draft-release ]
     uses: liquibase/liquibase/.github/workflows/release-published.yml@DAT-18301
     with:
       tag: "vdry-run-40"
+      dry_run_release_id: ${{ needs.dry-run-get-draft-release.outputs.dry_run_release_id }}
       dry_run: true
     secrets: inherit
 
