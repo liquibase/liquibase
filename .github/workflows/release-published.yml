@@ -584,7 +584,7 @@ jobs:
           gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-commercial-${version}.pom
           
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://repo.liquibase.net/repository/sonatype-nexus-staging/ \
+            -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
             -DrepositoryId=dry-run-sonatype-nexus-staging \
             -DpomFile=liquibase-core-${version}.pom \
             -DgeneratePom=false \
@@ -596,7 +596,7 @@ jobs:
             -Dclassifiers=,sources,javadoc,
 
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://repo.liquibase.net/repository/sonatype-nexus-staging/ \
+            -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
             -DrepositoryId=dry-run-sonatype-nexus-staging \
             -DpomFile=liquibase-commercial-${version}.pom \
             -DgeneratePom=false \
@@ -608,7 +608,7 @@ jobs:
             -Dclassifiers=,sources,javadoc,
 
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://repo.liquibase.net/repository/sonatype-nexus-staging/ \
+            -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
             -DrepositoryId=dry-run-sonatype-nexus-staging \
             -DpomFile=liquibase-maven-plugin-${version}.pom \
             -DgeneratePom=false \
@@ -620,7 +620,7 @@ jobs:
             -Dclassifiers=,sources,javadoc,
           
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://repo.liquibase.net/repository/sonatype-nexus-staging/ \
+            -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
             -DrepositoryId=dry-run-sonatype-nexus-staging \
             -DpomFile=liquibase-cli-${version}.pom \
             -DgeneratePom=false \
@@ -632,7 +632,7 @@ jobs:
             -Dclassifiers=,sources,javadoc,
 
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://repo.liquibase.net/repository/sonatype-nexus-staging/ \
+            -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
             -DrepositoryId=dry-run-sonatype-nexus-staging \
             -DpomFile=liquibase-cdi-${version}.pom \
             -DgeneratePom=false \
@@ -644,7 +644,7 @@ jobs:
             -Dclassifiers=,sources,javadoc,
 
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://repo.liquibase.net/repository/sonatype-nexus-staging/ \
+            -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
             -DrepositoryId=dry-run-sonatype-nexus-staging \
             -DpomFile=liquibase-cdi-jakarta-${version}.pom \
             -DgeneratePom=false \
