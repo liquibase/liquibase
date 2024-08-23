@@ -25,40 +25,40 @@ jobs:
           run_id=$(echo "$response" | jq -r '.workflow_runs[0].id')
           echo "dry_run_id=$run_id" >> $GITHUB_OUTPUT
 
-  dry-run-create-release:
-    needs: [ setup ]
-    uses: liquibase/liquibase/.github/workflows/create-release.yml@DAT-18301
-    with:
-      version: "dry-run-${{ github.run_number }}"
-      runId: ${{ needs.setup.outputs.dry_run_id }}
-      standalone_zip: false
-      dry_run: true
-    secrets: inherit
+  # dry-run-create-release:
+  #   needs: [ setup ]
+  #   uses: liquibase/liquibase/.github/workflows/create-release.yml@DAT-18301
+  #   with:
+  #     version: "dry-run-${{ github.run_number }}"
+  #     runId: ${{ needs.setup.outputs.dry_run_id }}
+  #     standalone_zip: false
+  #     dry_run: true
+  #   secrets: inherit
   
 
   dry-run-release-published:
-    needs: [ setup, dry-run-create-release ]
+    needs: [ setup,]
     uses: liquibase/liquibase/.github/workflows/release-published.yml@DAT-18301
     with:
-      tag: "vdry-run-${{ github.run_number }}"
+      tag: "vdry-run-40"
       dry_run: true
     secrets: inherit
 
-  cleanup:
-    runs-on: ubuntu-latest
-    if: always()
-    needs: [ setup, dry-run-release-published ]
-    steps:
-      - name: Checkout liquibase
-        uses: actions/checkout@v4
+  # cleanup:
+  #   runs-on: ubuntu-latest
+  #   if: always()
+  #   needs: [ setup, dry-run-release-published ]
+  #   steps:
+  #     - name: Checkout liquibase
+  #       uses: actions/checkout@v4
 
-      - name: Set up Git
-        run: |
-          git config user.name "liquibot"
-          git config user.email "liquibot@liquibase.org"
+  #     - name: Set up Git
+  #       run: |
+  #         git config user.name "liquibot"
+  #         git config user.email "liquibot@liquibase.org"
 
-      - name: Delete liquibase branch & tag
-        if: always()
-        run: |
-          git push origin --delete refs/tags/vdry-run-${{ github.run_number }}
-          echo "Remote tag vdry-run-${{ github.run_number }} deleted"
+  #     - name: Delete liquibase branch & tag
+  #       if: always()
+  #       run: |
+  #         git push origin --delete refs/tags/vdry-run-${{ github.run_number }}
+  #         echo "Remote tag vdry-run-${{ github.run_number }} deleted"
