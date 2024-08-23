@@ -35,6 +35,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
+import java.sql.*;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
@@ -316,8 +317,8 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
 
         Set<Table> tableList = snapshot.get(Table.class);
 
-        assertEquals(tableList.size(), 1);
-        assertEquals(tableList.iterator().next().getName(), "permissiondeniedtable");
+        assertEquals(1, tableList.size());
+        assertEquals("permissiondeniedtable", tableList.iterator().next().getName());
     }
 
     @Test
@@ -326,11 +327,11 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
             return;
         }
 
-        Liquibase liquibase = createLiquibase(completeChangeLog);
+        createLiquibase(completeChangeLog);
         clearDatabase();
 
         //run again to test changelog testing logic
-        liquibase = createLiquibase("changelogs/yaml/create.procedure.back.compatibility.changelog.yaml");
+        Liquibase liquibase = createLiquibase("changelogs/yaml/create.procedure.back.compatibility.changelog.yaml");
         liquibase.setChangeLogParameter("loginuser", testSystem.getUsername());
 
         try {
@@ -342,4 +343,48 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
 
 
     }
+
+    @Test
+    public void verifyCacheIsRestartedAfterChangesHaveBeenDeployed() throws Exception {
+        assumeNotNull(this.getDatabase());
+        Liquibase liquibase = createLiquibase("changelogs/fast.check.changelog.test.xml");
+
+        liquibase.update();
+        // FastCheck will set flag to true in next execution
+        liquibase.update();
+        // All fine as expected...
+        assertTableExists("DATABASECHANGELOG");
+        assertTableExists("DATABASECHANGELOGLOCK");
+        assertTableExists("DUMMY_TABLE");
+
+        //external database cleanup
+        dropTablesOutsidefastCheck();
+
+        // FastCheck should have been reset so it will be able to detect the missing tables
+        liquibase.update();
+
+        assertTableExists("DATABASECHANGELOG");
+        assertTableExists("DATABASECHANGELOGLOCK");
+        assertTableExists("DUMMY_TABLE");
+    }
+
+    private void assertTableExists(String tableName) throws SQLException {
+        Connection connection = testSystem.getConnection();
+        DatabaseMetaData dbm = connection.getMetaData();
+        String catalog = connection.getCatalog();
+        try (ResultSet tables = dbm.getTables(catalog.toLowerCase(), null, tableName.toLowerCase(), null)) {
+            assertTrue("Table " + tableName + " not found, but should be.", tables.isBeforeFirst());
+        }
+    }
+
+    private void dropTablesOutsidefastCheck() throws SQLException {
+        Connection connection = testSystem.getConnection();
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("DROP TABLE IF EXISTS public.DATABASECHANGELOG");
+            statement.execute("DROP TABLE IF EXISTS public.DATABASECHANGELOGLOCK");
+            statement.execute("DROP TABLE IF EXISTS public.DUMMY_TABLE");
+        }
+    }
+
+
 }

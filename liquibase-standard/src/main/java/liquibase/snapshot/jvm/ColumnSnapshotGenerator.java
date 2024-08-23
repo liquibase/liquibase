@@ -372,6 +372,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     || "time".equalsIgnoreCase(columnTypeName)) {
                 columnMetadataResultSet.set("COLUMN_SIZE", columnMetadataResultSet.getInt("DECIMAL_DIGITS"));
                 columnMetadataResultSet.set("DECIMAL_DIGITS", null);
+            } else if ("int".equalsIgnoreCase(columnTypeName) || "integer".equalsIgnoreCase(columnTypeName)) {
+                columnMetadataResultSet.set("COLUMN_SIZE", null); // mssql int type does not have a size
             }
         } else if (database instanceof PostgresDatabase) {
             columnTypeName = database.unescapeDataTypeName(columnTypeName);
@@ -499,6 +501,14 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 type.setColumnSize((decimalDigits != database.getDefaultFractionalDigitsForTimestamp()) ?
                         decimalDigits : null
                 );
+            }
+
+            if (database instanceof MySQLDatabase) {
+                if (columnSize != null) {
+                    type.setColumnSize(((MySQLDatabase) database).getFSPFromTimeType(columnSize, Types.TIMESTAMP));
+                } else {
+                    type.setColumnSize(0);
+                }
             }
 
             type.setDecimalDigits(null);

@@ -5,8 +5,10 @@ import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.SetTableRemarksStatement;
+import lombok.Setter;
 
 @DatabaseChange(name = "setTableRemarks", description = "Set remarks on a table", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@Setter
 public class SetTableRemarksChange extends AbstractChange {
 
     private String catalogName;
@@ -34,17 +36,9 @@ public class SetTableRemarksChange extends AbstractChange {
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @DatabaseChangeProperty(description = "Name of the table to set remarks on")
@@ -52,17 +46,9 @@ public class SetTableRemarksChange extends AbstractChange {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
     @DatabaseChangeProperty(description = "A brief descriptive comment stored in the table metadata")
     public String getRemarks() {
         return remarks;
-    }
-
-    public void setRemarks(String remarks) {
-        this.remarks = remarks;
     }
 
     @Override

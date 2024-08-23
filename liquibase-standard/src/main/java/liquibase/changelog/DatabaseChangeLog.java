@@ -90,6 +90,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private List<ChangeVisitor> changeVisitors = new ArrayList<>();
     private final List<ChangeSet> changeSets = new ArrayList<>();
     private final List<ChangeSet> skippedChangeSets = new ArrayList<>();
+    private final List<ChangeSet> skippedBecauseOfLicenseChangeSets = new ArrayList<>();
     private ChangeLogParameters changeLogParameters;
 
     private RuntimeEnvironment runtimeEnvironment;
@@ -297,6 +298,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     public List<ChangeSet> getChangeSets() {
         return changeSets;
+    }
+
+    public List<ChangeSet> getSkippedBecauseOfLicenseChangeSets() {
+        return skippedBecauseOfLicenseChangeSets;
     }
 
     public List<ChangeSet> getSkippedChangeSets() {
@@ -1077,6 +1082,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     public static String normalizePath(String filePath) {
         if (filePath == null) {
             return null;
+        }
+
+        if (!GlobalConfiguration.PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS.getCurrentValue() && filePath.startsWith("classpath:")) {
+            filePath = filePath.substring("classpath:".length());
         }
 
         if (filePath.contains("\\")) {

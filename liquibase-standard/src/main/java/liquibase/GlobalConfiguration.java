@@ -39,6 +39,8 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
     public static final ConfigurationDefinition<Boolean> VALIDATE_XML_CHANGELOG_FILES;
 
+    public static final ConfigurationDefinition<Boolean> TRIM_LOAD_DATA_FILE_HEADER;
+
     /**
      * @deprecated No longer used
      */
@@ -52,6 +54,8 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
     public static final ConfigurationDefinition<UIServiceEnum> UI_SERVICE;
     public static final ConfigurationDefinition<SupportsMethodValidationLevelsEnum> SUPPORTS_METHOD_VALIDATION_LEVEL;
+
+    public static final ConfigurationDefinition<Boolean> PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -183,13 +187,13 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         HEADLESS = builder.define("headless", Boolean.class)
-                .setDescription("Force liquibase to think it has no access to a keyboard")
+                .setDescription("Force Liquibase to think it has no access to a keyboard")
                 .setDefaultValue(false)
                 .setCommonlyUsed(true)
                 .build();
 
         STRICT = builder.define("strict", Boolean.class)
-                .setDescription("Be stricter on allowed Liquibase configuration and setup?")
+                .setDescription("If true, Liquibase enforces certain best practices and proactively looks for common errors")
                 .setDefaultValue(false)
                 .build();
 
@@ -206,7 +210,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         PRESERVE_SCHEMA_CASE = builder.define("preserveSchemaCase", Boolean.class)
-                .setDescription("Should liquibase treat schema and catalog names as case sensitive?")
+                .setDescription("If true, Liquibase treats schema and catalog names as case sensitive")
                 .setDefaultValue(false)
                 .build();
 
@@ -216,7 +220,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         DUPLICATE_FILE_MODE = builder.define("duplicateFileMode", DuplicateFileMode.class)
-                .setDescription("How to handle multiple files being found in the search path that have duplicate paths. Options are WARN (log warning and choose one at random) or ERROR (fail current operation)")
+                .setDescription("How to handle multiple files being found in the search path that have duplicate paths. Options are SILENT (do not log and choose one at random), DEBUG, INFO, WARN (log at the given level and choose one at random), or ERROR (fail current operation).")
                 .setDefaultValue(DuplicateFileMode.ERROR)
                 .build();
 
@@ -235,7 +239,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         VALIDATE_XML_CHANGELOG_FILES = builder.define("validateXmlChangelogFiles", Boolean.class)
-                .setDescription("Will perform xsd validation of XML changelog files. When many XML changelog files are included this validation may impact Liquibase performance. Defaults to true.")
+                .setDescription("Will perform XSD validation of XML changelog files. When many XML changelog files are included, this validation may impact Liquibase performance. Defaults to true.")
                 .setDefaultValue(true)
                 .build();
 
@@ -248,11 +252,23 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDescription("Controls the level of validation performed on the supports method of Change classes. Options are OFF, WARN, FAIL.")
                 .setDefaultValue(SupportsMethodValidationLevelsEnum.WARN)
                 .build();
+        TRIM_LOAD_DATA_FILE_HEADER = builder.define("trimLoadDataFileHeader", Boolean.class)
+                .setDescription("If true column headers will be trimmed in case they were specified with spaces in the file.")
+                .setDefaultValue(false)
+                .build();
+
+        PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS = builder.define("preserveClasspathPrefixInNormalizedPaths", Boolean.class)
+                .setDescription("If true 'classpath:' prefix will be preserved in normalized paths, allowing to resolve hierarchical resources under a classpath-based root.")
+                .setDefaultValue(false)
+                .build();
     }
 
     public enum DuplicateFileMode {
         WARN,
         ERROR,
+        INFO,
+        DEBUG,
+        SILENT
     }
 
 }

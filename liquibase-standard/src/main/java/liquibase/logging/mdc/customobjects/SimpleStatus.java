@@ -43,4 +43,13 @@ public class SimpleStatus implements CustomMdcObject {
     public void setChangesetCount(int changesetCount) {
         this.changesetCount = changesetCount;
     }
+
+    @Override
+    public String toString() {
+        return "SimpleStatus{" +
+                "message='" + message + '\'' +
+                ", liquibaseTargetUrl='" + liquibaseTargetUrl + '\'' +
+                ", changesetCount=" + changesetCount +
+                '}';
+    }
 }

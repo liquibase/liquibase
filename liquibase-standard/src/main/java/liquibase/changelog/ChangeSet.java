@@ -531,6 +531,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
 
                 break;
+            case "preconditions":
             case "preConditions":
                 this.preconditions = new PreconditionContainer();
                 this.preconditions.load(child, resourceAccessor);
