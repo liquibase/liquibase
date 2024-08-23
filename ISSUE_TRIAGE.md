@@ -29,7 +29,6 @@ This typically includes the version of Liquibase being used, type of database, a
 - If the issue does not provide clear steps to reproduce the problem then ask the issue author for the steps to reproduce and add the `needs_reproduction` label.
 
 These labels can be revisited if the author can provide further clarification.
-You can see a list of issues that need revisiting by filtering on ["needs reproduction" and "needs clarification"](https://github.com/cloudflare/workers-sdk/issues?q=is%3Aopen+is%3Aissue+project%3Acloudflare%2F1+label%3A%22needs+clarification%22).
 
 If the issue does have enough information, move on to step 3.
 
