@@ -24,17 +24,18 @@ jobs:
           run_id=$(echo "$response" | jq -r '.workflow_runs[0].id')
           echo "dry_run_id=$run_id" >> $GITHUB_OUTPUT
 
-  # dry-run-create-release:
-  #   needs: [ setup ]
-  #   uses: liquibase/liquibase/.github/workflows/create-release.yml@DAT-18301
-  #   with:
-  #     version: "dry-run-${{ github.run_number }}"
-  #     runId: ${{ needs.setup.outputs.dry_run_id }}
-  #     standalone_zip: false
-  #     dry_run: true
-  #   secrets: inherit
+  dry-run-create-release:
+    needs: [ setup ]
+    uses: liquibase/liquibase/.github/workflows/create-release.yml@DAT-18301
+    with:
+      version: "dry-run-${{ github.run_id }}"
+      runId: ${{ needs.setup.outputs.dry_run_id }}
+      standalone_zip: false
+      dry_run: true
+    secrets: inherit
   
   dry-run-get-draft-release:
+    needs: [ setup, dry-run-create-release ]
     runs-on: ubuntu-latest
     outputs:
       dry_run_release_id: ${{ steps.get_draft_release_id.outputs.release_id }}
@@ -42,7 +43,7 @@ jobs:
       - name: Get Draft Release ID 
         id: get_draft_release_id
         run: |
-          release_name="vdry-run-40"
+          release_name="vdry-run-${{ github.run_id }}"
           response=$(curl -s -H "Authorization: token ${{ secrets.BOT_TOKEN }}" \
                           -H "Accept: application/vnd.github.v3+json" \
                           "https://api.github.com/repos/liquibase/liquibase/releases")
@@ -60,7 +61,7 @@ jobs:
     needs: [ setup, dry-run-get-draft-release ]
     uses: liquibase/liquibase/.github/workflows/release-published.yml@DAT-18301
     with:
-      tag: "vdry-run-40"
+      tag: "vdry-run-${{ github.run_id }}"
       dry_run_release_id: ${{ needs.dry-run-get-draft-release.outputs.dry_run_release_id }}
       dry_run: true
     secrets: inherit
@@ -81,8 +82,8 @@ jobs:
       - name: Delete liquibase dry-run tag
         if: always()
         run: |
-          git push origin --delete refs/tags/vdry-run-${{ github.run_number }}
-          echo "Remote tag vdry-run-${{ github.run_number }} deleted"
+          git push origin --delete refs/tags/vdry-run-${{ github.run_id }}
+          echo "Remote tag vdry-run-${{ github.run_id }} deleted"
 
       - name: Delete the dry-run draft release
         if: always()
