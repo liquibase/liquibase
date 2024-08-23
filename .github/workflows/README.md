@@ -25,7 +25,7 @@ The following actions are the same as a regular liquibase release, no modificati
 ## :warning: What a DryRun Release does not do?
 
 - Generate PRO tags
-- Generated packages: `deb`, `rpm`, `brew` and the rest of them
+- Generate install packages: `deb`, `rpm`, `brew` and the rest of them. (This will be covered in [DAT-18302](https://datical.atlassian.net/browse/DAT-18302))
 - Upload `javadocs` and `xsds` to `S3`
 - Deploy artifacts to `GPM`
 
