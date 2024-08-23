@@ -585,7 +585,6 @@ jobs:
           
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
             -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
-            -DrepositoryId=dry-run-sonatype-nexus-staging \
             -DpomFile=liquibase-core-${version}.pom \
             -DgeneratePom=false \
             -Dfile=liquibase-core-${version}.jar \
@@ -593,11 +592,12 @@ jobs:
             -Djavadoc=liquibase-core-${version}-javadoc.jar \
             -Dfiles=liquibase-core-${version}.jar.asc,liquibase-core-${version}-sources.jar.asc,liquibase-core-${version}-javadoc.jar.asc,liquibase-core-${version}.pom.asc \
             -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
-            -Dclassifiers=,sources,javadoc,
+            -Dclassifiers=,sources,javadoc, \
+            -Dusername=${{ secrets.REPO_LIQUIBASE_NET_USER }} \
+            -Dpassword=${{ secrets.REPO_LIQUIBASE_NET_PASSWORD }}
 
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
             -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
-            -DrepositoryId=dry-run-sonatype-nexus-staging \
             -DpomFile=liquibase-commercial-${version}.pom \
             -DgeneratePom=false \
             -Dfile=liquibase-commercial-${version}.jar \
@@ -605,11 +605,12 @@ jobs:
             -Djavadoc=liquibase-commercial-${version}-javadoc.jar \
             -Dfiles=liquibase-commercial-${version}.jar.asc,liquibase-commercial-${version}-sources.jar.asc,liquibase-commercial-${version}-javadoc.jar.asc,liquibase-commercial-${version}.pom.asc \
             -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
-            -Dclassifiers=,sources,javadoc,
+            -Dclassifiers=,sources,javadoc, \
+            -Dusername=${{ secrets.REPO_LIQUIBASE_NET_USER }} \
+            -Dpassword=${{ secrets.REPO_LIQUIBASE_NET_PASSWORD }}
 
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
             -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
-            -DrepositoryId=dry-run-sonatype-nexus-staging \
             -DpomFile=liquibase-maven-plugin-${version}.pom \
             -DgeneratePom=false \
             -Dfile=liquibase-maven-plugin-${version}.jar \
@@ -617,11 +618,12 @@ jobs:
             -Djavadoc=liquibase-maven-plugin-${version}-javadoc.jar \
             -Dfiles=liquibase-maven-plugin-${version}.jar.asc,liquibase-maven-plugin-${version}-sources.jar.asc,liquibase-maven-plugin-${version}-javadoc.jar.asc,liquibase-maven-plugin-${version}.pom.asc \
             -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
-            -Dclassifiers=,sources,javadoc,
-          
+            -Dclassifiers=,sources,javadoc, \
+            -Dusername=${{ secrets.REPO_LIQUIBASE_NET_USER }} \
+            -Dpassword=${{ secrets.REPO_LIQUIBASE_NET_PASSWORD }}
+
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
             -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
-            -DrepositoryId=dry-run-sonatype-nexus-staging \
             -DpomFile=liquibase-cli-${version}.pom \
             -DgeneratePom=false \
             -Dfile=liquibase-cli-${version}.jar \
@@ -629,11 +631,12 @@ jobs:
             -Djavadoc=liquibase-cli-${version}-javadoc.jar \
             -Dfiles=liquibase-cli-${version}.jar.asc,liquibase-cli-${version}-sources.jar.asc,liquibase-cli-${version}-javadoc.jar.asc,liquibase-cli-${version}.pom.asc \
             -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
-            -Dclassifiers=,sources,javadoc,
+            -Dclassifiers=,sources,javadoc, \
+            -Dusername=${{ secrets.REPO_LIQUIBASE_NET_USER }} \
+            -Dpassword=${{ secrets.REPO_LIQUIBASE_NET_PASSWORD }}
 
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
             -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
-            -DrepositoryId=dry-run-sonatype-nexus-staging \
             -DpomFile=liquibase-cdi-${version}.pom \
             -DgeneratePom=false \
             -Dfile=liquibase-cdi-${version}.jar \
@@ -641,11 +644,12 @@ jobs:
             -Djavadoc=liquibase-cdi-${version}-javadoc.jar \
             -Dfiles=liquibase-cdi-${version}.jar.asc,liquibase-cdi-${version}-sources.jar.asc,liquibase-cdi-${version}-javadoc.jar.asc,liquibase-cdi-${version}.pom.asc \
             -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
-            -Dclassifiers=,sources,javadoc,
+            -Dclassifiers=,sources,javadoc, \
+            -Dusername=${{ secrets.REPO_LIQUIBASE_NET_USER }} \
+            -Dpassword=${{ secrets.REPO_LIQUIBASE_NET_PASSWORD }}
 
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
             -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
-            -DrepositoryId=dry-run-sonatype-nexus-staging \
             -DpomFile=liquibase-cdi-jakarta-${version}.pom \
             -DgeneratePom=false \
             -Dfile=liquibase-cdi-jakarta-${version}.jar \
@@ -653,4 +657,6 @@ jobs:
             -Djavadoc=liquibase-cdi-jakarta-${version}-javadoc.jar \
             -Dfiles=liquibase-cdi-jakarta-${version}.jar.asc,liquibase-cdi-jakarta-${version}-sources.jar.asc,liquibase-cdi-jakarta-${version}-javadoc.jar.asc,liquibase-cdi-jakarta-${version}.pom.asc \
             -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
-            -Dclassifiers=,sources,javadoc,
+            -Dclassifiers=,sources,javadoc, \
+            -Dusername=${{ secrets.REPO_LIQUIBASE_NET_USER }} \
+            -Dpassword=${{ secrets.REPO_LIQUIBASE_NET_PASSWORD }}
