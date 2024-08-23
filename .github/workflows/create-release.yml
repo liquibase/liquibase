@@ -67,16 +67,15 @@ jobs:
       - run: |
           echo "Creating version ${{ inputs.version }} from ${{ inputs.branch }} with artifacts from build ${{ inputs.runId }} "
           
-  # owasp-scanner:
-  #   needs: [ setup ]
-  #   uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@main
-  #   with:
-  #     branch: ${{ needs.setup.outputs.branch }}
-  #   secrets: inherit
+  owasp-scanner:
+    needs: [ setup ]
+    uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@main
+    with:
+      branch: ${{ needs.setup.outputs.branch }}
+    secrets: inherit
 
   build-azure-uber-jar:
-   needs: [ setup ]
-   #needs: [ setup, owasp-scanner ]
+   needs: [ setup, owasp-scanner ]
    uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
    with:
      branch: ${{ needs.setup.outputs.branch }}
@@ -84,8 +83,7 @@ jobs:
    secrets: inherit
   
   build-extension-jars:
-   needs: [ setup ]
-   #needs: [ setup, owasp-scanner ]
+   needs: [ setup, owasp-scanner ]
    uses: liquibase/liquibase/.github/workflows/build-extension-jars.yml@master
    with:
      liquibase-version: ${{ needs.setup.outputs.version }}
@@ -231,7 +229,7 @@ jobs:
           path: re-version/final
 
       - name: Set repository tags
-        if: ${{ inputs.standalone_zip == false }} && ${{ needs.setup.outputs.dry_run == false }}
+        if: ${{ inputs.standalone_zip == false }} && ${{ inputs.dry_run == false }}
         run: |
           git tag -f v${{ needs.setup.outputs.version }}
           git push -f origin v${{ needs.setup.outputs.version }}
@@ -302,7 +300,7 @@ jobs:
           rm re-version/final/*.sha1
 
       - name: Attach Files to Draft Release
-        if: ${{ inputs.standalone_zip == false }} && ${{ needs.setup.outputs.dry_run == false }}
+        if: ${{ inputs.standalone_zip == false }} && ${{ inputs.dry_run == false }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.setup.outputs.version }}
@@ -315,7 +313,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Attach Files to Dry-Run Draft Release
-        if: ${{ inputs.standalone_zip == false }} && ${{ needs.setup.outputs.dry_run == true }}
+        if: ${{ inputs.standalone_zip == false }} && ${{ inputs.dry_run == true }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.setup.outputs.version }}
@@ -329,7 +327,7 @@ jobs:
         
 
       - name: Attach standalone zip to Build
-        if: ${{ inputs.standalone_zip == true }} && ${{ needs.setup.outputs.dry_run == false }}
+        if: ${{ inputs.standalone_zip == true }} && ${{ inputs.dry_run == false }}
         uses: actions/upload-artifact@v4
         with:
             name: liquibase-installers-${{ needs.setup.outputs.version }}
