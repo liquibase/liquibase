@@ -69,4 +69,49 @@ public class CreateIndexChangeTest extends StandardChangeTest {
         then:
         assert change.validate(database).getErrorMessages().size() == 1
     }
+
+    def "validate associatedWith is not computed on CheckSum generation"() {
+        when:
+        def index = new Index("idx_test", null, null, "test_table", new Column("test_col"))
+        index.unique = true
+        def originalChange = new CreateIndexChange()
+        originalChange.indexName = index.name
+        originalChange.tableName = index.relation.name
+        originalChange.columns = [new AddColumnConfig().setName("test_col")]
+        def originalChangeCheckSum = originalChange.generateCheckSum()
+
+        and:
+        def changeWithAssociatedWithSet = new CreateIndexChange()
+        changeWithAssociatedWithSet.indexName = index.name
+        changeWithAssociatedWithSet.tableName = index.relation.name
+        changeWithAssociatedWithSet.associatedWith = "foreignKey"
+        changeWithAssociatedWithSet.columns = [new AddColumnConfig().setName("test_col")]
+        def changeWithAssociatedWithSetCheckSum = changeWithAssociatedWithSet.generateCheckSum()
+
+        then:
+        originalChangeCheckSum == changeWithAssociatedWithSetCheckSum
+    }
+
+    def "validate create index CheckSum value is not the same if any other property is added"() {
+        when:
+        def index = new Index("idx_test", null, null, "test_table", new Column("test_col"))
+        index.unique = true
+        def originalChange = new CreateIndexChange()
+        originalChange.indexName = index.name
+        originalChange.tableName = index.relation.name
+        originalChange.columns = [new AddColumnConfig().setName("test_col")]
+        def originalChangeCheckSum = originalChange.generateCheckSum()
+
+        and:
+        def changeWithAssociatedWithSet = new CreateIndexChange()
+        changeWithAssociatedWithSet.indexName = index.name
+        changeWithAssociatedWithSet.tableName = index.relation.name
+        changeWithAssociatedWithSet.associatedWith = "foreignKey"
+        changeWithAssociatedWithSet.schemaName = "testSchema"
+        changeWithAssociatedWithSet.columns = [new AddColumnConfig().setName("test_col")]
+        def changeWithAssociatedWithSetCheckSum = changeWithAssociatedWithSet.generateCheckSum()
+
+        then:
+        originalChangeCheckSum != changeWithAssociatedWithSetCheckSum
+    }
 }

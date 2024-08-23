@@ -6,7 +6,9 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.UnknownChangelogFormatException;
 import liquibase.resource.ResourceAccessor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class ChangeLogParserFactory {
 
@@ -48,6 +50,8 @@ public class ChangeLogParserFactory {
     public ChangeLogParser getParser(String fileNameOrExtension, ResourceAccessor resourceAccessor) throws LiquibaseException {
         for (ChangeLogParser parser : parsers) {
             if (parser.supports(fileNameOrExtension, resourceAccessor)) {
+                Scope.getCurrentScope().getLog(ChangeLogParserFactory.class).fine(String.format("Matched file '%s' to parser '%s'",
+                        fileNameOrExtension, parser.getClass().getSimpleName()));
                 return parser;
             }
         }

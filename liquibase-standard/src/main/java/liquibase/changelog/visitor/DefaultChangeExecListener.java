@@ -7,6 +7,7 @@ import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.precondition.core.PreconditionContainer;
+import lombok.Getter;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,9 +19,28 @@ import java.util.stream.Collectors;
  * when the object is constructed.
  */
 public class DefaultChangeExecListener implements ChangeExecListener, ChangeLogSyncListener {
+    @Getter
     private final List<ChangeExecListener> listeners;
+    /**
+     * Get the list of ChangeSets that have been deployed during a given Liquibase command.
+     * For example: if you ran update with three ChangeSets in total and the third ChangeSet failed,
+     * this list will contain the first two ChangeSets that were executed without exception.
+     *
+     * @return the list of ChangeSets deployed during a command.
+     */
+    @Getter
     private final List<ChangeSet> deployedChangeSets = new LinkedList<>();
+    @Getter
+    private final List<ChangeSet> rolledBackChangeSets = new LinkedList<>();
+    /**
+     * Gets list of failed ChangeSets encountered during a given Liquibase command.
+     *
+     * @return the list of ChangeSets which have failed to deploy.
+     */
+    @Getter
     private final List<ChangeSet> failedChangeSets = new LinkedList<>();
+    @Getter
+    private final List<ChangeSet> failedRollbackChangeSets = new LinkedList<>();
     private final Map<ChangeSet, List<Change>> deployedChangesPerChangeSet = new ConcurrentHashMap<>();
 
     public DefaultChangeExecListener(ChangeExecListener... listeners) {
@@ -47,6 +67,7 @@ public class DefaultChangeExecListener implements ChangeExecListener, ChangeLogS
 
     @Override
     public void rolledBack(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
+        rolledBackChangeSets.add(changeSet);
         listeners.forEach(listener -> listener.rolledBack(changeSet, databaseChangeLog, database));
     }
 
@@ -79,27 +100,8 @@ public class DefaultChangeExecListener implements ChangeExecListener, ChangeLogS
 
     @Override
     public void rollbackFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Exception exception) {
+        failedRollbackChangeSets.add(changeSet);
         listeners.forEach(listener -> listener.rollbackFailed(changeSet, databaseChangeLog, database, exception));
-    }
-
-    /**
-     * Get the list of ChangeSets that have been deployed during a given Liquibase command.
-     * For example: if you ran update with three ChangeSets in total and the third ChangeSet failed,
-     * this list will contain the first two ChangeSets that were executed without exception.
-     *
-     * @return the list of ChangeSets deployed during a command.
-     */
-    public List<ChangeSet> getDeployedChangeSets() {
-        return deployedChangeSets;
-    }
-
-    /**
-     * Gets list of failed ChangeSets encountered during a given Liquibase command.
-     *
-     * @return the list of ChangeSets which have failed to deploy.
-     */
-    public List<ChangeSet> getFailedChangeSets() {
-        return failedChangeSets;
     }
 
     /**
@@ -119,11 +121,6 @@ public class DefaultChangeExecListener implements ChangeExecListener, ChangeLogS
         }
     }
 
-    /**
-     * @param changeSet
-     * @param databaseChangeLog
-     * @param database
-     */
     @Override
     public void markedRan(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
         // no-op

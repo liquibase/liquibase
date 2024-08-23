@@ -1,7 +1,9 @@
 package liquibase.command.core.helpers;
 
 import liquibase.UpdateSummaryEnum;
+import liquibase.UpdateSummaryOutputEnum;
 import liquibase.command.*;
+import liquibase.util.HelpUtil;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,6 +18,7 @@ public class ShowSummaryArgument extends AbstractCommandStep {
     protected static final String[] COMMAND_NAME = {"showSummary"};
 
     public static final CommandArgumentDefinition<UpdateSummaryEnum> SHOW_SUMMARY;
+    public static final CommandArgumentDefinition<UpdateSummaryOutputEnum> SHOW_SUMMARY_OUTPUT;
 
     static {
         CommandBuilder commandBuilder = new CommandBuilder(COMMAND_NAME);
@@ -36,6 +39,23 @@ public class ShowSummaryArgument extends AbstractCommandStep {
                     }
                     return null;
                 }).build();
+        SHOW_SUMMARY_OUTPUT = commandBuilder.argument("showSummaryOutput", UpdateSummaryOutputEnum.class).description("Summary output to report update summary results. Values can be 'log', 'console', or 'all'.")
+                .defaultValue(UpdateSummaryOutputEnum.ALL)
+                .setValueHandler(value -> {
+                    if (value == null) {
+                        return null;
+                    }
+                    if (value instanceof String && !value.equals("")) {
+                        final List<String> validValues = Arrays.asList("LOG", "CONSOLE", "ALL");
+                        if (!validValues.contains(((String) value).toUpperCase())) {
+                            throw new IllegalArgumentException("Illegal value for `showSummaryOutput'.  Valid values are 'LOG', 'CONSOLE', or 'ALL'");
+                        }
+                        return UpdateSummaryOutputEnum.valueOf(((String) value).toUpperCase());
+                    } else if (value instanceof UpdateSummaryOutputEnum) {
+                        return (UpdateSummaryOutputEnum) value;
+                    }
+                    return null;
+                }).build();
     }
 
     @Override
@@ -51,14 +71,14 @@ public class ShowSummaryArgument extends AbstractCommandStep {
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
-        UpdateSummaryEnum argumentValue = commandScope.getArgumentValue(SHOW_SUMMARY);
-        commandScope.provideDependency(UpdateSummaryEnum.class, argumentValue);
+        UpdateSummaryEnum showSummaryArgument = commandScope.getArgumentValue(SHOW_SUMMARY);
+        UpdateSummaryOutputEnum showSummaryOutputArgument = commandScope.getArgumentValue(SHOW_SUMMARY_OUTPUT);
+        commandScope.provideDependency(UpdateSummaryEnum.class, showSummaryArgument);
+        commandScope.provideDependency(UpdateSummaryOutputEnum.class, showSummaryOutputArgument);
     }
 
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        if (commandDefinition.getPipeline().size() == 1) {
-            commandDefinition.setInternal(true);
-        }
+        HelpUtil.hideCommandNameInHelpView(commandDefinition);
     }
 }

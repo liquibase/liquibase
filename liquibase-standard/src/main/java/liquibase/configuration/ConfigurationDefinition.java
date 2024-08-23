@@ -4,12 +4,14 @@ import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
+import liquibase.util.ValueHandlerUtil;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 /**
- * A higher-level/detailed definition to provide type-safety, metadata, default values, etc..
+ * A higher-level/detailed definition to provide type-safety, metadata, default values, etc.
  * Any code that is working with configurations should be using an instance of this class, rather than the lower-level, generic {@link LiquibaseConfiguration}
  * <p>
  * ConfigurationDefinitions that are registered with {@link LiquibaseConfiguration#registerDefinition(ConfigurationDefinition)} will
@@ -123,11 +125,11 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         final ProvidedValue providedValue = configurationValue.getProvidedValue();
         final Object originalValue = providedValue.getValue();
         try {
-            final DataType finalValue = valueConverter.convert(originalValue);
+            final DataType finalValue =
+               ConfigurationValueUtils.convertDataType(providedValue.getActualKey(), (DataType)originalValue, valueConverter);
             if (originalValue != finalValue) {
                 configurationValue.override(new ConvertedValueProvider<>(finalValue, providedValue).getProvidedValue(key));
             }
-
             return (ConfiguredValue<DataType>) configurationValue;
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("An invalid " + (providedValue.getSourceDescription().toLowerCase() + " value " + providedValue.getActualKey() + " detected: " + StringUtil.lowerCaseFirst(e.getMessage())), e);

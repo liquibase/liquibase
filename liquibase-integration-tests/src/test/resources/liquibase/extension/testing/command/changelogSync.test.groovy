@@ -1,9 +1,11 @@
 package liquibase.extension.testing.command
 
+
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.TagDatabaseChange
 import liquibase.exception.CommandValidationException
+import liquibase.util.TestUtil
 
 CommandTests.define {
     command = ["changelogSync"]
@@ -69,6 +71,10 @@ Optional Args:
                             ]
                     ),
             ]
+        }
+
+        expectations = {
+            TestUtil.assertAllDeploymentIdsNonNull()
         }
     }
 

@@ -19,7 +19,7 @@ public class RowCountPrecondition extends AbstractPrecondition {
     private String catalogName;
     private String schemaName;
     private String tableName;
-    private Integer expectedRows;
+    private Long expectedRows;
 
     public String getCatalogName() {
         return catalogName;
@@ -45,11 +45,11 @@ public class RowCountPrecondition extends AbstractPrecondition {
         this.tableName = tableName;
     }
 
-    public Integer getExpectedRows() {
+    public Long getExpectedRows() {
         return expectedRows;
     }
 
-    public void setExpectedRows(Integer expectedRows) {
+    public void setExpectedRows(Long expectedRows) {
         this.expectedRows = expectedRows;
     }
 
@@ -73,7 +73,7 @@ public class RowCountPrecondition extends AbstractPrecondition {
         try {
             TableRowCountStatement statement = new TableRowCountStatement(catalogName, schemaName, tableName);
 
-            int result = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForInt(statement);
+            long result = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForLong(statement);
             if (result != expectedRows) {
                 throw new PreconditionFailedException(getFailureMessage(result, expectedRows), changeLog, this);
             }
@@ -85,7 +85,7 @@ public class RowCountPrecondition extends AbstractPrecondition {
         }
     }
 
-    protected String getFailureMessage(int result, int expectedRows) {
+    protected String getFailureMessage(long result, long expectedRows) {
         return "Table "+tableName+" does not have the expected row count of "+expectedRows+". It contains "+result+" rows";
     }
 

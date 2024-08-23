@@ -51,7 +51,7 @@ public class StringChangeLogSerializerTest extends Specification {
 
     def serialized_AddColumnChange() {
         when:
-        AddColumnChange change = new AddColumnChange();
+        def change = new AddColumnChange();
 
         then:
         new StringChangeLogSerializer().serialize(change, false) == "addColumn:[\n" +
@@ -115,7 +115,7 @@ public class StringChangeLogSerializerTest extends Specification {
 
     def "serialized AddForeignKeyConstraint"() {
         when:
-        AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();
+        def change = new AddForeignKeyConstraintChange();
 
         then:
         new StringChangeLogSerializer().serialize(change, false) == "addForeignKeyConstraint:[]"
@@ -152,7 +152,7 @@ public class StringChangeLogSerializerTest extends Specification {
 
     def serialized_AddUniqueKeyConstraint() {
         when:
-        AddUniqueConstraintChange change = new AddUniqueConstraintChange();
+        def change = new AddUniqueConstraintChange();
 
         then:
         new StringChangeLogSerializer().serialize(change, false) == "addUniqueConstraint:[]"
@@ -205,7 +205,7 @@ public class StringChangeLogSerializerTest extends Specification {
 
     def "serialized SQLFileChange"() {
         when:
-        SQLFileChange change = new SQLFileChange();
+        def change = new SQLFileChange();
 
         then:
         new StringChangeLogSerializer().serialize(change, false) == "sqlFile:[\n" +
@@ -225,7 +225,7 @@ public class StringChangeLogSerializerTest extends Specification {
 
     def serialized_rawSql() {
         when:
-        RawSQLChange change = new RawSQLChange();
+        def change = new RawSQLChange();
 
         then:
         new StringChangeLogSerializer().serialize(change, false) == "sql:[\n" +
@@ -452,7 +452,7 @@ public class StringChangeLogSerializerTest extends Specification {
     @Unroll("#featureName: #value")
     def "serialize with double on java 6"() {
         when:
-        InsertDataChange change = new InsertDataChange();
+        def change = new InsertDataChange();
         change.setTableName("NUMBER_TABLE");
         change.addColumn(new ColumnConfig().setName("VALUE").setValueNumeric(new Double(value)));
 

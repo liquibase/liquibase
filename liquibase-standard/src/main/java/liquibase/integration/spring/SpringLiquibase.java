@@ -6,13 +6,20 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.OfflineConnection;
+import liquibase.database.core.DerbyDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
+import liquibase.ui.UIServiceEnum;
 import liquibase.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
@@ -57,52 +64,79 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     protected final Logger log = Scope.getCurrentScope().getLog(SpringLiquibase.class);
     protected String beanName;
 
-	protected ResourceLoader resourceLoader;
+    @Getter
+    @Setter
+    protected ResourceLoader resourceLoader;
 
-	protected DataSource dataSource;
-	protected String changeLog;
-	protected String contexts;
+    protected DataSource dataSource;
+    protected String changeLog;
+
+    @Getter
+    @Setter
+    protected String contexts;
+
+    @Getter
+    @Setter
     protected String labelFilter;
+
+    @Getter
+    @Setter
     protected String tag;
-	protected Map<String, String> parameters;
-	protected String defaultSchema;
-	protected String liquibaseSchema;
-	protected String databaseChangeLogTable;
-	protected String databaseChangeLogLockTable;
-	protected String liquibaseTablespace;
-	protected boolean dropFirst;
-	protected boolean clearCheckSums;
-	protected boolean shouldRun = true;
-	protected File rollbackFile;
+    protected Map<String, String> parameters;
 
-	protected boolean testRollbackOnUpdate = false;
+    @Getter
+    @Setter
+    protected String defaultSchema;
 
-	public SpringLiquibase() {
-		super();
-	}
+    @Getter
+    @Setter
+    protected String liquibaseSchema;
 
-	public boolean isDropFirst() {
-		return dropFirst;
-	}
+    @Getter
+    @Setter
+    protected String databaseChangeLogTable;
 
-	public void setDropFirst(boolean dropFirst) {
-		this.dropFirst = dropFirst;
-	}
+    @Getter
+    @Setter
+    protected String databaseChangeLogLockTable;
 
-	public boolean isClearCheckSums() {
-		return clearCheckSums;
-	}
+    @Getter
+    @Setter
+    protected String liquibaseTablespace;
 
-	public void setClearCheckSums(boolean clearCheckSums) {
-		this.clearCheckSums = clearCheckSums;
-	}
+    @Getter
+    @Setter
+    protected boolean dropFirst;
 
-	public void setShouldRun(boolean shouldRun) {
-		this.shouldRun = shouldRun;
-	}
+    @Getter
+    @Setter
+    protected boolean clearCheckSums;
 
-	@java.lang.SuppressWarnings("squid:S2095")
-	public String getDatabaseProductName() throws DatabaseException {
+    @Setter
+    protected boolean shouldRun = true;
+
+    @Setter
+    protected File rollbackFile;
+
+    @Setter
+    protected UpdateSummaryEnum showSummary;
+    protected UpdateSummaryOutputEnum showSummaryOutput = UpdateSummaryOutputEnum.LOG;
+
+    protected boolean testRollbackOnUpdate = false;
+
+    @Getter
+    protected UIServiceEnum uiService = UIServiceEnum.LOGGER;
+
+    @Getter
+    @Setter
+    protected Customizer<Liquibase> customizer;
+
+    public SpringLiquibase() {
+        super();
+    }
+
+    @java.lang.SuppressWarnings("squid:S2095")
+    public String getDatabaseProductName() throws DatabaseException {
         Connection connection = null;
         Database database = null;
         String name = "unknown";
@@ -110,15 +144,12 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             connection = getDataSource().getConnection();
             database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
             name = database.getDatabaseProductName();
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             throw new DatabaseException(e);
-        }
-        finally {
+        } finally {
             if (database != null) {
                 database.close();
-            }
-            else {
+            } else {
                 if (connection != null) {
                     try {
                         if (!connection.getAutoCommit()) {
@@ -129,52 +160,45 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                         log.warning("problem closing connection", e);
                     }
                 }
-		    }
-       }
-       return name;
-	}
+            }
+        }
+        return name;
+    }
 
-	/**
-	 * The DataSource that liquibase will use to perform the migration.
-	 */
-	public DataSource getDataSource() {
-		return dataSource;
-	}
+    /**
+     * The DataSource that liquibase will use to perform the migration.
+     */
+    public DataSource getDataSource() {
+        return dataSource;
+    }
 
-	/**
-	 * The DataSource that liquibase will use to perform the migration.
-	 */
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
-	}
+    /**
+     * The DataSource that liquibase will use to perform the migration.
+     */
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
-	/**
-	 * Returns a Resource that is able to resolve to a file or classpath resource.
-	 */
-	public String getChangeLog() {
-		return changeLog;
-	}
+    /**
+     * Returns a Resource that is able to resolve to a file or classpath resource.
+     */
+    public String getChangeLog() {
+        return changeLog;
+    }
 
-	/**
-	 * Sets a Spring Resource that is able to resolve to a file or classpath resource.
-	 * An example might be <code>classpath:db-changelog.xml</code>.
-	 */
-	public void setChangeLog(String dataModel) {
+    /**
+     * Sets a Spring Resource that is able to resolve to a file or classpath resource.
+     * An example might be <code>classpath:db-changelog.xml</code>.
+     */
+    public void setChangeLog(String dataModel) {
 
-		this.changeLog = dataModel;
-	}
-
-	public String getContexts() {
-		return contexts;
-	}
-
-	public void setContexts(String contexts) {
-		this.contexts = contexts;
-	}
+        this.changeLog = dataModel;
+    }
 
     /**
      * @deprecated use {@link #getLabelFilter()}
      */
+    @Deprecated
     public String getLabels() {
         return getLabelFilter();
     }
@@ -182,112 +206,65 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     /**
      * @deprecated use {@link #setLabelFilter(String)}
      */
+    @Deprecated
     public void setLabels(String labels) {
         setLabelFilter(labels);
     }
 
-    public String getLabelFilter() {
-        return labelFilter;
-    }
-
-    public void setLabelFilter(String labelFilter) {
-        this.labelFilter = labelFilter;
-    }
-
-    public String getTag() {
-        return tag;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-
-    public String getDefaultSchema() {
-		return defaultSchema;
-	}
-
-	public void setDefaultSchema(String defaultSchema) {
-		this.defaultSchema = defaultSchema;
-	}
-
-    public String getLiquibaseTablespace() {
-        return liquibaseTablespace;
-    }
-
-    public void setLiquibaseTablespace(String liquibaseTablespace) {
-        this.liquibaseTablespace = liquibaseTablespace;
-    }
-
-    public String getLiquibaseSchema() {
-        return liquibaseSchema;
-    }
-
-    public void setLiquibaseSchema(String liquibaseSchema) {
-        this.liquibaseSchema = liquibaseSchema;
-    }
-
-    public String getDatabaseChangeLogTable() {
-        return databaseChangeLogTable;
-    }
-
-    public void setDatabaseChangeLogTable(String databaseChangeLogTable) {
-        this.databaseChangeLogTable = databaseChangeLogTable;
-    }
-
-    public String getDatabaseChangeLogLockTable() {
-        return databaseChangeLogLockTable;
-    }
-
-	public void setDatabaseChangeLogLockTable(String databaseChangeLogLockTable) {
-		this.databaseChangeLogLockTable = databaseChangeLogLockTable;
-	}
-
-	/**
-	 * Returns whether a rollback should be tested at update time or not.
-	 */
-	public boolean isTestRollbackOnUpdate() {
-		return testRollbackOnUpdate;
-	}
-
-	/**
-	 * If testRollbackOnUpdate is set to true a rollback will be tested at update time.
-	 * For doing so when the update is performed
-	 * @param testRollbackOnUpdate
+    /**
+     * Returns whether a rollback should be tested at update time or not.
      */
-	public void setTestRollbackOnUpdate(boolean testRollbackOnUpdate) {
-		this.testRollbackOnUpdate = testRollbackOnUpdate;
-	}
+    public boolean isTestRollbackOnUpdate() {
+        return testRollbackOnUpdate;
+    }
 
-	/**
-	 * Executed automatically when the bean is initialized.
-	 */
-	@Override
+    /**
+     * If testRollbackOnUpdate is set to true a rollback will be tested at update time.
+     * For doing so when the update is performed
+     *
+     * @param testRollbackOnUpdate
+     */
+    public void setTestRollbackOnUpdate(boolean testRollbackOnUpdate) {
+        this.testRollbackOnUpdate = testRollbackOnUpdate;
+    }
+
+    /**
+     * Executed automatically when the bean is initialized.
+     */
+    @Override
     public void afterPropertiesSet() throws LiquibaseException {
-		final ConfiguredValue<Boolean> shouldRunProperty = LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentConfiguredValue();
+        final ConfiguredValue<Boolean> shouldRunProperty = LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentConfiguredValue();
 
-		if (!(Boolean) shouldRunProperty.getValue()) {
-            Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run because " +shouldRunProperty.getProvidedValue().describe() + " was set to false");
+        if (!(Boolean) shouldRunProperty.getValue()) {
+            Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run because " + shouldRunProperty.getProvidedValue().describe() + " was set to false");
             return;
-		}
-		if (!shouldRun) {
+        }
+        if (!shouldRun) {
             Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run because 'shouldRun' " + "property was set " +
-                "to false on " + getBeanName() + " Liquibase Spring bean.");
+                    "to false on " + getBeanName() + " Liquibase Spring bean.");
             return;
-		}
+        }
 
-		Connection c = null;
-		Liquibase liquibase = null;
         try {
-            c = getDataSource().getConnection();
-            liquibase = createLiquibase(c);
-            generateRollbackFile(liquibase);
-            performUpdate(liquibase);
-        } catch (SQLException e) {
-        	throw new DatabaseException(e);
-        } finally {
-            if (liquibase != null) {
-                liquibase.close();
-            }
+
+            Scope.child(Scope.Attr.ui.name(), this.uiService.getUiServiceClass().getDeclaredConstructor().newInstance(),
+                    () -> {
+                        Liquibase liquibase = null;
+                        try {
+                            final Connection c = getDataSource().getConnection();
+                            liquibase = createLiquibase(c);
+                            generateRollbackFile(liquibase);
+                            performUpdate(liquibase);
+                        } catch (SQLException e) {
+                            throw new DatabaseException(e);
+                        } finally {
+                            if (liquibase != null) {
+                                liquibase.close();
+                            }
+                        }
+                    });
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
         }
     }
 
@@ -295,20 +272,19 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         if (rollbackFile != null) {
 
             try (
-                    final  OutputStream outputStream = Files.newOutputStream(rollbackFile.toPath());
-                    Writer output = new OutputStreamWriter(outputStream, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()) )
-			{
+                    final OutputStream outputStream = Files.newOutputStream(rollbackFile.toPath());
+                    Writer output = new OutputStreamWriter(outputStream, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())) {
 
                 if (tag != null) {
                     liquibase.futureRollbackSQL(tag, new Contexts(getContexts()),
-                        new LabelExpression(getLabelFilter()), output);
+                            new LabelExpression(getLabelFilter()), output);
                 } else {
                     liquibase.futureRollbackSQL(new Contexts(getContexts()), new LabelExpression(getLabelFilter()), output);
                 }
             } catch (IOException e) {
                 throw new LiquibaseException("Unable to generate rollback file.", e);
             }
-       }
+        }
     }
 
     protected void performUpdate(Liquibase liquibase) throws LiquibaseException {
@@ -331,22 +307,33 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         }
     }
 
-	@java.lang.SuppressWarnings("squid:S2095")
-	protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
-		SpringResourceAccessor resourceAccessor = createResourceOpener();
-		Liquibase liquibase = new Liquibase(getChangeLog(), resourceAccessor, createDatabase(c, resourceAccessor));
-		if (parameters != null) {
-			for (Map.Entry<String, String> entry : parameters.entrySet()) {
-				liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
-			}
-		}
+    @java.lang.SuppressWarnings("squid:S2095")
+    protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
+        SpringResourceAccessor resourceAccessor = createResourceOpener();
+        Liquibase liquibase = new Liquibase(getChangeLog(), resourceAccessor, createDatabase(c, resourceAccessor));
+        if (parameters != null) {
+            for (Map.Entry<String, String> entry : parameters.entrySet()) {
+                liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
+            }
+        }
 
-		if (isDropFirst()) {
-			liquibase.dropAll();
-		}
+        if (isDropFirst()) {
+            liquibase.dropAll();
+        }
 
-		return liquibase;
-	}
+        liquibase.setShowSummaryOutput(showSummaryOutput);
+        liquibase.setShowSummary(showSummary);
+
+        if (liquibase.getDatabase() instanceof DerbyDatabase) {
+            ((DerbyDatabase) liquibase.getDatabase()).setShutdownEmbeddedDerby(false);
+        }
+
+        if (customizer != null) {
+            customizer.customize(liquibase);
+        }
+
+        return liquibase;
+    }
 
     /**
      * Subclasses may override this method to modify the database settings, such as the default schema, before returning the database object.
@@ -355,7 +342,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
      * @return a Database implementation retrieved from the {@link DatabaseFactory}
      * @throws DatabaseException if there is an error retrieving the database implementation
      */
-	protected Database createDatabase(Connection c, ResourceAccessor resourceAccessor) throws DatabaseException {
+    protected Database createDatabase(Connection c, ResourceAccessor resourceAccessor) throws DatabaseException {
 
         DatabaseConnection liquibaseConnection;
         if (c == null) {
@@ -368,16 +355,16 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
         Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(liquibaseConnection);
 		if (StringUtil.trimToNull(this.defaultSchema) != null) {
-            if (database.supportsSchemas()) {
+            if (database.supports(Schema.class)) {
                 database.setDefaultSchemaName(this.defaultSchema);
-            } else if (database.supportsCatalogs()) {
+            } else if (database.supports(Catalog.class)) {
                 database.setDefaultCatalogName(this.defaultSchema);
             }
         }
         if (StringUtil.trimToNull(this.liquibaseSchema) != null) {
-            if (database.supportsSchemas()) {
+            if (database.supports(Schema.class)) {
                 database.setLiquibaseSchemaName(this.liquibaseSchema);
-            } else if (database.supportsCatalogs()) {
+            } else if (database.supports(Catalog.class)) {
                 database.setLiquibaseCatalogName(this.liquibaseSchema);
             }
         }
@@ -390,28 +377,28 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         if (StringUtil.trimToNull(this.databaseChangeLogLockTable) != null) {
             database.setDatabaseChangeLogLockTableName(this.databaseChangeLogLockTable);
         }
-		return database;
-	}
+        return database;
+    }
 
-	public void setChangeLogParameters(Map<String, String> parameters) {
-		this.parameters = parameters;
-	}
+    public void setChangeLogParameters(Map<String, String> parameters) {
+        this.parameters = parameters;
+    }
 
-	/**
-	 * Create a new resourceOpener.
-	 */
-	protected SpringResourceAccessor createResourceOpener() {
-		return new SpringResourceAccessor(resourceLoader);
-	}
+    /**
+     * Create a new resourceOpener.
+     */
+    protected SpringResourceAccessor createResourceOpener() {
+        return new SpringResourceAccessor(resourceLoader);
+    }
 
-	/**
-	 * Gets the Spring-name of this instance.
-	 *
-	 * @return
-	 */
-	public String getBeanName() {
-		return beanName;
-	}
+    /**
+     * Gets the Spring-name of this instance.
+     *
+     * @return
+     */
+    public String getBeanName() {
+        return beanName;
+    }
 
     /**
      * Spring sets this automatically to the instance's configured bean name.
@@ -421,31 +408,21 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         this.beanName = name;
     }
 
-    public ResourceLoader getResourceLoader() {
-        return resourceLoader;
+    public void setShowSummaryOutput(UpdateSummaryOutputEnum showSummaryOutput) {
+        if (showSummaryOutput == null) {
+            return;
+        }
+        this.showSummaryOutput = showSummaryOutput;
+    }
+
+    public void setUiService(UIServiceEnum uiService) {
+        if (uiService == null) {
+            return;
+        }
+        this.uiService = uiService;
     }
 
     @Override
-    public void setResourceLoader(ResourceLoader resourceLoader) {
-        this.resourceLoader = resourceLoader;
-    }
-
-	public void setRollbackFile(File rollbackFile) {
-		this.rollbackFile = rollbackFile;
-    }
-
-    public boolean isIgnoreClasspathPrefix() {
-        return true;
-    }
-
-	/**
-	 * @deprecated Always ignoring classpath prefix
-	 */
-	public void setIgnoreClasspathPrefix(boolean ignoreClasspathPrefix) {
-
-	}
-
-	@Override
     public String toString() {
         return getClass().getName() + "(" + this.getResourceLoader().toString() + ")";
     }

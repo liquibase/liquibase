@@ -8,10 +8,13 @@ import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
+import liquibase.database.core.H2Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.resource.ResourceAccessor;
+import liquibase.sql.visitor.ReplaceSqlVisitor;
+import liquibase.sql.visitor.SqlVisitor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,6 +22,8 @@ import org.mockito.*;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Arrays;
+import java.util.List;
+
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.*;
 
@@ -27,6 +32,8 @@ public class InsertExecutablePreparedStatementTest {
 
     @Mock
     private ChangeSet changeSet;
+
+    private List<SqlVisitor> sqlVisitors = new ArrayList<>();
 
     @Mock
     private ResourceAccessor resourceAccessor;
@@ -45,6 +52,7 @@ public class InsertExecutablePreparedStatementTest {
     public void setUp() throws Exception {
         database = new MSSQLDatabase();
         preparedStatementFactory = new PreparedStatementFactory(connection);
+        when(changeSet.getSqlVisitors()).thenReturn(sqlVisitors);
         when(connection.prepareStatement(any(String.class))).thenReturn(ps);
     }
 
@@ -200,5 +208,38 @@ public class InsertExecutablePreparedStatementTest {
         verify(connection).prepareStatement("INSERT INTO DATABASECHANGELOG(MD5SUM, DATEEXECUTED) VALUES(?, GETDATE())");
         verify(ps).setString(1, "7:e27bf9c0c2313160ef960a15d44ced47");
         verify(ps, never()).setNull(eq(2), anyInt());
+    }
+
+    @Test
+    public void testApplySqlVisitors() throws Exception {
+        // given
+        ReplaceSqlVisitor visitor = new ReplaceSqlVisitor();
+        visitor.setReplace("\"KEY\"");
+        visitor.setWith("\"key\"");
+        sqlVisitors.add(visitor);
+        database = new H2Database();
+        InsertExecutablePreparedStatement statement = new InsertExecutablePreparedStatement(
+                database,
+                null,
+                null,
+                "names",
+                new ArrayList<>(Arrays.asList(
+                        new ColumnConfig()
+                                .setName("key")
+                                .setValueNumeric(1),
+                        new ColumnConfig()
+                                .setName("first")
+                                .setValue("john"),
+                        new ColumnConfig()
+                                .setName("last")
+                                .setValue("doe"))),
+                changeSet,
+                resourceAccessor);
+
+        // when
+        statement.execute(preparedStatementFactory);
+
+        // then
+        verify(connection).prepareStatement("INSERT INTO names(\"key\", first, last) VALUES(?, ?, ?)");
     }
 }

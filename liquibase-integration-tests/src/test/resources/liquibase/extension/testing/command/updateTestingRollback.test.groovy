@@ -1,8 +1,8 @@
 package liquibase.extension.testing.command
 
-import liquibase.exception.CommandValidationException
 
-import java.util.regex.Pattern
+import liquibase.exception.CommandValidationException
+import liquibase.util.TestUtil
 
 CommandTests.define {
     command = ["updateTestingRollback"]
@@ -48,6 +48,10 @@ Optional Args:
         setup {
             runChangelog "changelogs/h2/complete/rollback.changelog.xml"
             rollback 5, "changelogs/h2/complete/rollback.changelog.xml"
+        }
+
+        expectations = {
+            TestUtil.assertAllDeploymentIdsNonNull()
         }
     }
 

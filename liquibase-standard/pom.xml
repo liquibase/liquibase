@@ -11,6 +11,7 @@
 
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
+        <sonar.coverage.jacoco.xmlReportPaths>../target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <artifactId>liquibase-standard</artifactId>
@@ -21,7 +22,6 @@
         <dependency>
             <groupId>org.apache.ant</groupId>
             <artifactId>ant</artifactId>
-            <version>1.10.13</version>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
@@ -40,13 +40,6 @@
             <version>5.0.0</version>
             <scope>provided</scope>
             <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.derby</groupId>
-            <artifactId>derby</artifactId>
-            <version>10.14.2.0</version>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -115,27 +108,28 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.stefanbirkner</groupId>
-            <artifactId>system-rules</artifactId>
-            <version>1.19.0</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-params</artifactId>
-            <version>5.9.3</version>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.3</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.7.1</version>
+            <version>5.9</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-beanutils</groupId>
                     <artifactId>commons-beanutils</artifactId>
+                </exclusion>
+                <exclusion> <!-- direct dependency for better dependabot control -->
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-text</artifactId>
+                </exclusion>
+                <exclusion> <!-- direct dependency for better dependabot control -->
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-collections4</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -143,7 +137,7 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>2.0</version>
+            <version>2.2</version>
         </dependency>
 
         <!-- include as a dependency for people running java 9+ -->
@@ -151,8 +145,40 @@
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
             <version>2.3.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.activation</groupId>
+                    <artifactId>javax.activation-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.34</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>${commons-collections4.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>${commons-text.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -172,7 +198,7 @@
                     <dependency>
                         <groupId>net.java.dev.javacc</groupId>
                         <artifactId>javacc</artifactId>
-                        <version>7.0.12</version>
+                        <version>7.0.13</version>
                     </dependency>
                 </dependencies>
                 <executions>
@@ -205,6 +231,8 @@
                             javax.sql.*,
                             org.osgi.*,
                             org.yaml.snakeyaml.*,
+                            org.apache.commons.io.*;version="[${commons-io.version},3)",
+                            org.apache.commons.lang3.*,
                             *;resolution:=optional
                         </Import-Package>
                         <Export-Package>
@@ -241,7 +269,11 @@
                             osgi.serviceloader; osgi.serviceloader=liquibase.sqlgenerator.SqlGenerator,
                             osgi.serviceloader; osgi.serviceloader=liquibase.logging.mdc.MdcManager,
                             osgi.serviceloader; osgi.serviceloader=liquibase.logging.mdc.CustomMdcObject,
-                            osgi.serviceloader; osgi.serviceloader=liquibase.resource.PathHandler
+                            osgi.serviceloader; osgi.serviceloader=liquibase.resource.PathHandler,
+                            osgi.serviceloader; osgi.serviceloader=liquibase.report.ShowSummaryGenerator,
+                            osgi.serviceloader; osgi.serviceloader=liquibase.parser.LiquibaseSqlParser,
+                            osgi.serviceloader; osgi.serviceloader=liquibase.changeset.ChangeSetService,
+                            osgi.serviceloader; osgi.serviceloader=liquibase.changelog.visitor.ValidatingVisitorGenerator
                         </Provide-Capability>
                         <Require-Capability>
                             osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)",
@@ -275,7 +307,11 @@
                             osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.sqlgenerator.SqlGenerator)"; cardinality:=multiple,
                             osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.logging.mdc.MdcManager)"; cardinality:=multiple,
                             osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.logging.mdc.CustomMdcObject)"; cardinality:=multiple,
-                            osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.resource.PathHandler)"; cardinality:=multiple
+                            osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.resource.PathHandler)"; cardinality:=multiple,
+                            osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.report.ShowSummaryGenerator)"; cardinality:=multiple,
+                            osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.parser.LiquibaseSqlParser)"; cardinality:=multiple,
+                            osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.changeset.ChangeSetService)"; cardinality:=multiple,
+                            osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.changelog.visitor.ValidatingVisitorGenerator)"; cardinality:=multiple
                         </Require-Capability>
                     </instructions>
                 </configuration>
@@ -294,7 +330,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.4.2</version>
                 <executions>
                     <execution>
                         <id>default-jar</id>
@@ -334,6 +370,12 @@
                     <services>
                         <param>liquibase.logging.mdc.MdcManager</param>
                         <param>liquibase.logging.mdc.CustomMdcObject</param>
+                        <param>liquibase.report.ShowSummaryGenerator</param>
+                        <param>liquibase.changeset.ChangeSetService</param>
+                        <param>liquibase.parser.LiquibaseSqlParser</param>
+                        <param>liquibase.database.LiquibaseTableNames</param>
+                        <param>liquibase.changelog.visitor.ValidatingVisitorGenerator</param>
+                        <param>liquibase.io.OutputFileHandler</param>
                     </services>
                 </configuration>
                 <executions>

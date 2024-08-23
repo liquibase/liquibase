@@ -7,18 +7,18 @@ import liquibase.change.core.LoadDataChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
+import liquibase.command.core.DropAllCommandStep;
+import liquibase.command.core.SnapshotCommandStep;
 import liquibase.command.core.UpdateCommandStep;
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.core.H2Database;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.datatype.core.ClobType;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
@@ -36,7 +36,9 @@ import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.logging.core.JavaLogService;
+import liquibase.precondition.core.RowCountPrecondition;
 import liquibase.precondition.core.TableExistsPrecondition;
+import liquibase.precondition.core.TableIsEmptyPrecondition;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
@@ -48,6 +50,7 @@ import liquibase.statement.core.DropTableStatement;
 import liquibase.structure.core.*;
 import liquibase.test.DiffResultAssert;
 import liquibase.test.JUnitResourceAccessor;
+import liquibase.util.ExceptionUtil;
 import liquibase.util.RegexMatcher;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
@@ -66,6 +69,7 @@ import java.util.stream.Collectors;
 import static liquibase.test.SnapshotAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Base class for all database integration tests.  There is an AbstractIntegrationTest subclass for each supported database.
@@ -93,6 +97,8 @@ public abstract class AbstractIntegrationTest {
     private final String invalidSqlChangeLog;
     private final String objectQuotingStrategyChangeLog;
     private final String commonChangeLog;
+
+    private final String indexWithAssociatedWithChangeLog;
     private Database database;
     private String defaultSchemaName;
 
@@ -114,9 +120,10 @@ public abstract class AbstractIntegrationTest {
         this.objectQuotingStrategyChangeLog = "changelogs/common/object.quoting.strategy.changelog.xml";
         this.emptyRollbackSqlChangeLog = "changelogs/common/rollbackable.changelog.sql";
         this.pathChangeLog = "changelogs/common/pathChangeLog.xml";
+        this.indexWithAssociatedWithChangeLog = "changelogs/common/index.with.associatedwith.changelog.xml";
         logger = Scope.getCurrentScope().getLog(getClass());
 
-        Scope.setScopeManager(new TestScopeManager());
+        Scope.setScopeManager(new TestScopeManager(Scope.getCurrentScope()));
     }
 
     private void openConnection() throws Exception {
@@ -196,11 +203,11 @@ public abstract class AbstractIntegrationTest {
             String altSchema = testSystem.getAltSchema();
             String altCatalog = testSystem.getAltCatalog();
 
-            if (database.supportsSchemas()) {
+            if (database.supports(Schema.class)) {
                 emptyTestSchema(null, altSchema, database);
             }
             if (supportsAltCatalogTests()) {
-                if (database.supportsSchemas() && database.supportsCatalogs()) {
+                if (database.supports(Schema.class) && database.supports(Catalog.class)) {
                     emptyTestSchema(altCatalog, altSchema, database);
                 }
             }
@@ -257,7 +264,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected boolean supportsAltCatalogTests() {
-        return database.supportsCatalogs();
+        return database.supports(Catalog.class);
     }
 
     protected Properties createProperties() {
@@ -274,6 +281,17 @@ public abstract class AbstractIntegrationTest {
             database.setDefaultSchemaName(null);
             database.setOutputDefaultCatalog(true);
             database.setOutputDefaultSchema(true);
+            try {
+                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+                lockService.releaseLock();
+            } catch (Exception ignored) {
+            }
+            try {
+                CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME);
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
+                commandScope.execute();
+            } catch (Exception ignored) {
+            }
         }
         SnapshotGeneratorFactory.resetAll();
     }
@@ -626,7 +644,7 @@ public abstract class AbstractIntegrationTest {
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, database, compareControl);
 
         try {
-            assertTrue("comapring a database with itself should return a result of 'DBs are equal'",
+            assertTrue("comparing a database with itself should return a result of 'DBs are equal'",
                     diffResult.areEqual());
         } catch (AssertionError e) {
             new DiffToReport(diffResult, System.err).print();
@@ -657,7 +675,7 @@ public abstract class AbstractIntegrationTest {
                 compareControl.addSuppressedField(Column.class, "type"); //database returns different nvarchar2 info even though they are the same
             }
             if (database instanceof H2Database) {
-                //original changeset 2659-Create-MyView-with-quotes in the h2 changelog uses QUOTE_ALL_OBJECTS, but generated changesets do not use that attribute so the name comes through as differnt
+                //original changeset 2659-Create-MyView-with-quotes in the h2 changelog uses QUOTE_ALL_OBJECTS, but generated changesets do not use that attribute so the name comes through as different
                 compareControl.addSuppressedField(View.class, "name");
             }
 
@@ -738,7 +756,7 @@ public abstract class AbstractIntegrationTest {
         if (database.getShortName().equalsIgnoreCase("mssql")) {
             return; // not possible on MSSQL.
         }
-        if (!database.supportsSchemas()) {
+        if (!database.supports(Schema.class)) {
             return;
         }
 
@@ -766,6 +784,7 @@ public abstract class AbstractIntegrationTest {
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, null, compareControl);
 
         File tempFile = File.createTempFile("liquibase-test", ".xml");
+        tempFile.deleteOnExit();
 
         try (FileOutputStream output = new FileOutputStream(tempFile)) {
             new DiffToChangeLog(diffResult, new DiffOutputControl()).print(new PrintStream(output));
@@ -819,9 +838,6 @@ public abstract class AbstractIntegrationTest {
         assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
-        clearDatabase();
-
-        liquibase = createLiquibase(completeChangeLog);
         clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
@@ -978,11 +994,13 @@ public abstract class AbstractIntegrationTest {
     public void testInvalidSqlThrowsException() throws Exception {
         assumeNotNull(this.getDatabase());
         Liquibase liquibase = createLiquibase(invalidSqlChangeLog);
+        Throwable exception = null;
         try {
             liquibase.update(new Contexts());
             fail("Did not fail with invalid SQL");
         } catch (CommandExecutionException executionException) {
-            Assert.assertTrue(executionException.getMessage().contains("this sql is not valid and should throw an exception"));
+            exception = ExceptionUtil.findExceptionInCauseChain(executionException.getCause(), DatabaseException.class);
+            Assert.assertTrue(exception.getCause() instanceof DatabaseException);
         }
 
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
@@ -1078,7 +1096,7 @@ public abstract class AbstractIntegrationTest {
 
         CreateTableStatement clobTableCreator = new CreateTableStatement(
                 database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), "tableWithClob");
-        clobTableCreator.addColumn("clobColumn", new ClobType());
+        clobTableCreator.addColumn("clobColumn", DataTypeFactory.getInstance().fromDescription("clob", database));
         InsertExecutablePreparedStatement insertStatement = new InsertExecutablePreparedStatement(
                 database, database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(),
                 "tableWithClob", Arrays.asList(clobColumn),
@@ -1099,6 +1117,61 @@ public abstract class AbstractIntegrationTest {
         TableExistsPrecondition precondition = new TableExistsPrecondition();
         precondition.setTableName("standardTypesTest");
         precondition.check(this.getDatabase(), null, null, null);
+    }
+
+    @Test
+    public void testTableIsEmptyPrecondition() throws Exception {
+        assumeNotNull(this.getDatabase());
+        runChangeLogFile(commonChangeLog);
+
+        checkTableIsEmptyPrecondition("empty_table", 0L);
+        checkTableIsEmptyPrecondition("single_row_table", 1L);
+        checkTableIsEmptyPrecondition("multi_row_table", 2L);
+    }
+
+    private void checkTableIsEmptyPrecondition(String tableName, long actualRows) throws PreconditionFailedException, PreconditionErrorException {
+        TableIsEmptyPrecondition precondition = new TableIsEmptyPrecondition();
+        precondition.setTableName(tableName);
+        if (actualRows == 0L) {
+            precondition.check(this.getDatabase(), null, null, null);
+        } else {
+            PreconditionFailedException ex = assertThrows(PreconditionFailedException.class, () -> precondition.check(this.getDatabase(), null, null, null));
+            assertEquals(1, ex.getFailedPreconditions().size());
+
+            String expectedMessage = String.format("Table %s is not empty.", tableName);
+            assertEquals(expectedMessage, ex.getFailedPreconditions().get(0).getMessage());
+        }
+    }
+
+    @Test
+    public void testRowCountPrecondition() throws Exception {
+        assumeNotNull(this.getDatabase());
+        runChangeLogFile(commonChangeLog);
+
+        checkRowCountPrecondition("empty_table", 0L, 0L);
+        checkRowCountPrecondition("empty_table", 1L, 0L);
+        checkRowCountPrecondition("empty_table", Long.MAX_VALUE, 0L);
+        checkRowCountPrecondition("single_row_table", 0L, 1L);
+        checkRowCountPrecondition("single_row_table", 1L, 1L);
+        checkRowCountPrecondition("single_row_table", Long.MAX_VALUE, 1L);
+        checkRowCountPrecondition("multi_row_table", 0L, 2L);
+        checkRowCountPrecondition("multi_row_table", 2L, 2L);
+        checkRowCountPrecondition("multi_row_table", Long.MAX_VALUE, 2L);
+    }
+
+    private void checkRowCountPrecondition(String tableName, long expectedRows, long actualRows) throws PreconditionFailedException, PreconditionErrorException {
+        RowCountPrecondition precondition = new RowCountPrecondition();
+        precondition.setTableName(tableName);
+        precondition.setExpectedRows(expectedRows);
+        if (expectedRows == actualRows) {
+            precondition.check(this.getDatabase(), null, null, null);
+        } else {
+            PreconditionFailedException ex = assertThrows(PreconditionFailedException.class, () -> precondition.check(this.getDatabase(), null, null, null));
+            assertEquals(1, ex.getFailedPreconditions().size());
+
+            String expectedMessage = String.format("Table %s does not have the expected row count of %s. It contains %s rows", tableName, expectedRows, actualRows);
+            assertEquals(expectedMessage, ex.getFailedPreconditions().get(0).getMessage());
+        }
     }
 
     protected Database getDatabase(){
@@ -1197,6 +1270,90 @@ public abstract class AbstractIntegrationTest {
         assertTrue(liquibase.getDatabaseChangeLog().getChangeSets().stream().allMatch(changeSet -> changeSet.getDescription().contains(pathToSet)));
     }
 
+    @Test
+    public void allowsDbChangelogTableNameAsLowerCase() throws DatabaseException {
+        clearDatabase();
+        String oldDbChangelogTableName = this.getDatabase().getDatabaseChangeLogTableName();
+        try {
+            getDatabase().setDatabaseChangeLogTableName("lowercase");
+            CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME);
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase());
+            commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, objectQuotingStrategyChangeLog);
+            commandScope.execute();
+        } catch (Exception e) {
+            Assert.fail("Should not fail. Reason: " + e.getMessage());
+        } finally {
+            getDatabase().setDatabaseChangeLogTableName(oldDbChangelogTableName);
+        }
+    }
+
+    @Test
+    public void verifyIndexIsCreatedWhenAssociatedWithPropertyIsSetAsNone() throws DatabaseException {
+       clearDatabase();
+        try {
+            Database database = getDatabase();
+            CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME);
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
+            commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, indexWithAssociatedWithChangeLog);
+            commandScope.execute();
+
+            final CommandScope snapshotScope = new CommandScope("snapshot");
+            snapshotScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
+            snapshotScope.addArgumentValue(SnapshotCommandStep.SNAPSHOT_FORMAT_ARG, "json");
+            CommandResults results = snapshotScope.execute();
+            DatabaseSnapshot snapshot = (DatabaseSnapshot) results.getResult("snapshot");
+            Index index = snapshot.get(new Index("idx_test"));
+            Assert.assertNotNull(index );
+        } catch (Exception e) {
+            Assert.fail("Should not fail. Reason: " + e.getMessage());
+        } finally {
+            clearDatabase();
+        }
+
+    }
+
+    @Test
+    public void makeSureNoErrorIsReturnedWhenTableNameIsNotSpecified() throws DatabaseException {
+        // This is a test to validate most of the DBs do not throw an error when tableName is not
+        // specified as part of primaryKeyExistsPrecondition.
+        clearDatabase();
+        String errorMsg = "";
+        try {
+            runUpdate("changelogs/common/preconditions/preconditions.changelog.xml");
+        }catch(CommandExecutionException e) {
+            errorMsg = e.getMessage();
+        }
+        finally {
+            clearDatabase();
+        }
+
+        if(!(database instanceof H2Database || database instanceof MySQLDatabase || database instanceof HsqlDatabase
+                || database instanceof SQLiteDatabase || database instanceof DB2Database)) {
+            Assert.assertTrue(errorMsg.isEmpty());
+        }
+    }
+
+    @Test
+    public void makeSureErrorIsReturnedWhenTableNameIsNotSpecified() throws DatabaseException {
+        // This is a test to validate some DBs do require a tableName as part of primaryKeyExistsPrecondition,
+        // if it's not specified an error will be thrown.
+        clearDatabase();
+        String errorMsg = "";
+        try {
+            runUpdate("changelogs/common/preconditions/preconditions.changelog.xml");
+        }catch(CommandExecutionException e) {
+            errorMsg = e.getMessage();
+        }
+        finally {
+            clearDatabase();
+        }
+
+        if(database instanceof H2Database || database instanceof MySQLDatabase || database instanceof HsqlDatabase
+                || database instanceof SQLiteDatabase || database instanceof DB2Database) {
+            Assert.assertTrue(errorMsg.contains("Database driver requires a table name to be specified in order to search for a primary key."));
+        }
+    }
+
     private ProcessBuilder prepareExternalLiquibaseProcess() {
         String javaHome = System.getProperty("java.home");
         String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
@@ -1219,9 +1376,9 @@ public abstract class AbstractIntegrationTest {
 
     protected void runUpdate(String changelog) throws CommandExecutionException {
         CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME);
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, testSystem.getConnectionUrl());
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, testSystem.getUsername());
-        commandScope.addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, testSystem.getPassword());
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, testSystem.getConnectionUrl());
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, testSystem.getUsername());
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, testSystem.getPassword());
         commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changelog);
         commandScope.execute();
     }

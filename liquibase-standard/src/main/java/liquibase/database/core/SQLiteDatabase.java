@@ -18,8 +18,10 @@ import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -201,7 +203,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
     @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         String definition = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForObject(
-                new RawSqlStatement("SELECT sql FROM sqlite_master WHERE name=" + this.quoteObject(viewName, View.class)),
+                new RawParameterizedSqlStatement("SELECT sql FROM sqlite_master WHERE name=?", viewName),
                 String.class);
         // SQLite is friendly and already returns the form CREATE VIEW ... AS. However, we cannot use this, so we have
         // to cut off that header.
@@ -212,6 +214,19 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsSequences() {
         return false;
+    }
+
+
+
+    @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Schema.class.isAssignableFrom(object)) {
+            return false;
+        }
+        if (Sequence.class.isAssignableFrom(object)) {
+            return false;
+        }
+        return super.supports(object);
     }
 
     @Override
@@ -262,6 +277,11 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
         return false;
     }
 
+    @Override
+    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
+        return type.isAssignableFrom(Table.class);
+    }
+
     public interface AlterTableVisitor {
         ColumnConfig[] getColumnsToAdd();
 
@@ -270,5 +290,10 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
         boolean createThisColumn(ColumnConfig column);
 
         boolean createThisIndex(Index index);
+    }
+
+    @Override
+    public boolean supportsDatabaseChangeLogHistory() {
+        return true;
     }
 }

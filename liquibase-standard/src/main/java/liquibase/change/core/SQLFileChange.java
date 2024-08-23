@@ -6,7 +6,6 @@ import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.database.Database;
-import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -33,6 +32,7 @@ public class SQLFileChange extends AbstractSQLChange {
 
     private String path;
     private Boolean relativeToChangelogFile;
+    private Boolean doExpandExpressionsInGenerateChecksum = false;
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
@@ -86,6 +86,10 @@ public class SQLFileChange extends AbstractSQLChange {
         this.relativeToChangelogFile = relativeToChangelogFile;
     }
 
+    public void setDoExpandExpressionsInGenerateChecksum(Boolean doExpandExpressionsInGenerateChecksum) {
+        this.doExpandExpressionsInGenerateChecksum = doExpandExpressionsInGenerateChecksum;
+    }
+
     @Override
     public void finishInitialization() throws SetupException {
         if (path == null) {
@@ -120,18 +124,18 @@ public class SQLFileChange extends AbstractSQLChange {
             try {
                 Resource resource = getResource();
                 if (!resource.exists()) {
-                    alertOnNonExistantSqlFile(validationErrors);
+                    alertOnNonExistentSqlFile(validationErrors);
                 }
             } catch (IOException e) {
                 Scope.getCurrentScope().getLog(getClass()).warning("Failed to obtain sqlFile resource at path '" + path + "'while attempting to validate the existence of the sqlFile.", e);
-                alertOnNonExistantSqlFile(validationErrors);
+                alertOnNonExistentSqlFile(validationErrors);
             }
         }
 
         return validationErrors;
     }
 
-    private void alertOnNonExistantSqlFile(ValidationErrors validationErrors) {
+    private void alertOnNonExistentSqlFile(ValidationErrors validationErrors) {
         if (ChangeLogParserConfiguration.ON_MISSING_SQL_FILE.getCurrentValue().equals(ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN)) {
             validationErrors.addWarning(FileUtil.getFileNotFoundMessage(path));
         } else {
@@ -147,6 +151,10 @@ public class SQLFileChange extends AbstractSQLChange {
     @Override
     @DatabaseChangeProperty(isChangeProperty = false)
     public String getSql() {
+        return getSql(true);
+    }
+ 
+    public String getSql(boolean doExpandExpressions) {
         String sql = super.getSql();
         if (sql == null) {
             try (InputStream sqlStream = openSqlStream()) {
@@ -154,7 +162,7 @@ public class SQLFileChange extends AbstractSQLChange {
                     return null;
                 }
                 String content = StreamUtil.readStreamAsString(sqlStream, getEncoding());
-                if (getChangeSet() != null) {
+                if (doExpandExpressions && getChangeSet() != null) {
                     ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
                     if (parameters != null) {
                         content = parameters.expandExpressions(content, getChangeSet().getChangeLog());
@@ -198,7 +206,7 @@ public class SQLFileChange extends AbstractSQLChange {
         }
         InputStream stream = null;
         try {
-            String sqlContent = getSql();
+            String sqlContent = getSql(doExpandExpressionsInGenerateChecksum);
             Charset encoding = GlobalConfiguration.FILE_ENCODING.getCurrentValue();
             stream = new ByteArrayInputStream(sqlContent.getBytes(encoding));
             return CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);

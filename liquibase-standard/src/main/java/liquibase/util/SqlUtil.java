@@ -2,10 +2,7 @@ package liquibase.util;
 
 import liquibase.Scope;
 import liquibase.database.Database;
-import liquibase.database.core.AbstractDb2Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.*;
@@ -18,14 +15,12 @@ import liquibase.structure.core.DataType;
 
 import java.math.BigDecimal;
 import java.sql.Types;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static java.util.Locale.ENGLISH;
 import static java.util.Locale.US;
 
 public abstract class SqlUtil {
@@ -117,6 +112,13 @@ public abstract class SqlUtil {
             }
         }
 
+        if ((database instanceof PostgresDatabase || database instanceof OracleDatabase) &&
+            (liquibaseDataType instanceof CharType || liquibaseDataType instanceof ClobType) &&
+            stringVal.toUpperCase(ENGLISH).startsWith("GENERATED ALWAYS AS ")
+        ) {
+            return new DatabaseFunction(stringVal);
+        }
+
         boolean strippedSingleQuotes = false;
         if (stringVal.startsWith("'") && stringVal.endsWith("'")) {
             stringVal = stringVal.substring(1, stringVal.length() - 1);
@@ -151,9 +153,6 @@ public abstract class SqlUtil {
                 }
 
                 stringVal = stringVal.trim();
-                if (database instanceof MySQLDatabase) {
-                    return "1".equals(stringVal) || "true".equalsIgnoreCase(stringVal);
-                }
 
                 Object value = stringVal;
                 if (scanner.hasNextBoolean()) {
@@ -237,11 +236,11 @@ public abstract class SqlUtil {
             } else if (typeId == Types.JAVA_OBJECT) {
                 return new DatabaseFunction(stringVal);
             } else if (typeId == Types.LONGNVARCHAR) {
-                return stringVal;
+                return strippedSingleQuotes ? stringVal : new DatabaseFunction(stringVal);
             } else if (typeId == Types.LONGVARBINARY) {
                 return new DatabaseFunction(stringVal);
             } else if (typeId == Types.LONGVARCHAR) {
-                return stringVal;
+                return strippedSingleQuotes ? stringVal : new DatabaseFunction(stringVal);
             } else if (liquibaseDataType instanceof NCharType || typeId == Types.NCHAR || liquibaseDataType.getName().equalsIgnoreCase("NCLOB")) {
                 return stringVal;
             } else if (typeId == Types.NCLOB) {

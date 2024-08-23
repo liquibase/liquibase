@@ -1,5 +1,6 @@
 package liquibase
 
+import liquibase.util.StringUtil
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -199,6 +200,27 @@ class ContextExpressionTest extends Specification {
         ""             | true
         "test"         | false
         "test1, test2" | false
+    }
 
+    def "make sure originalString returns all available contexts set as a string"() {
+        expect:
+        def contexts = new ContextExpression("test,test2")
+        assert contexts.getOriginalString() == "test,test2"
+    }
+
+    def "make sure originalString returns all available contexts set as an array of strings"() {
+        expect:
+        def contexts = new ContextExpression((String[])["test", "test2"])
+        assert contexts.getOriginalString() == "test,test2"
+    }
+
+    @Unroll("#featureName. label: #testContexts")
+    def "make sure originalString returns all available contexts set as a collection"() {
+        expect:
+        def contexts = new ContextExpression(testContexts)
+        assert contexts.getOriginalString() == StringUtil.join(testContexts, ",")
+
+        where:
+        testContexts << [["test"], ["test1", "test2"]]
     }
 }

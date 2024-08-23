@@ -36,7 +36,7 @@ public class DoubleType  extends LiquibaseDataType {
             datatype.addAdditionalInformation(StringUtil.trimToNull(additionalInfo));
             return datatype;
         }
-        if ((database instanceof AbstractDb2Database) || (database instanceof DerbyDatabase) || (database instanceof HsqlDatabase)) {
+        if ((database instanceof AbstractDb2Database) || (database instanceof DerbyDatabase) || (database instanceof HsqlDatabase) || (database instanceof SybaseASADatabase)) {
             return new DatabaseDataType("DOUBLE");
         }
         if ((database instanceof H2Database) || (database instanceof OracleDatabase) || (database instanceof PostgresDatabase)

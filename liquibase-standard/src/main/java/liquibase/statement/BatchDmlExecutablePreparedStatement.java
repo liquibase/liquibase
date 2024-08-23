@@ -61,7 +61,7 @@ public class BatchDmlExecutablePreparedStatement extends ExecutablePreparedState
 
     @Override
     protected void executePreparedStatement(PreparedStatement stmt) throws SQLException {
-        int updateCounts[] = stmt.executeBatch();
+        int[] updateCounts = stmt.executeBatch();
         long sumUpdateCounts = 0;
         for (int updateCount : updateCounts) {
             sumUpdateCounts = updateCount;

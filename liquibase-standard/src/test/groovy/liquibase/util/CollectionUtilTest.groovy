@@ -45,7 +45,7 @@ class CollectionUtilTest extends Specification {
 
     }
 
-    def "permuations for multimap"() {
+    def "permutations for multimap"() {
         when:
         def permutations = CollectionUtil.permutations(original)
 

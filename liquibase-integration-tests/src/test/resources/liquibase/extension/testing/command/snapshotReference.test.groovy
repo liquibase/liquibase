@@ -12,6 +12,7 @@ Short Description: Capture the current state of the reference database
 Long Description: NOT SET
 Required Args:
   referenceUrl (String) The JDBC reference database connection URL
+    OBFUSCATED
 Optional Args:
   referenceDefaultCatalogName (String) The default catalog name to use for the reference database connection
     Default: null
@@ -20,6 +21,10 @@ Optional Args:
   referenceDriver (String) The JDBC driver class for the reference database
     Default: null
   referenceDriverPropertiesFile (String) The JDBC driver properties file for the reference database
+    Default: null
+  referenceLiquibaseCatalogName (String) Reference catalog to use for Liquibase objects
+    Default: null
+  referenceLiquibaseSchemaName (String) Reference schema to use for Liquibase objects
     Default: null
   referencePassword (String) The reference database password
     Default: null

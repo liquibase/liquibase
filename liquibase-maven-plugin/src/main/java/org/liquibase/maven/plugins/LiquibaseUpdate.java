@@ -1,9 +1,6 @@
 package org.liquibase.maven.plugins;
 
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.Liquibase;
-import liquibase.Scope;
+import liquibase.*;
 import liquibase.exception.LiquibaseException;
 import org.liquibase.maven.property.PropertyElement;
 
@@ -47,7 +44,6 @@ public class LiquibaseUpdate extends AbstractLiquibaseUpdateMojo {
             }
         }
     }
-
 
     @Override
     protected void printSettings(String indent) {

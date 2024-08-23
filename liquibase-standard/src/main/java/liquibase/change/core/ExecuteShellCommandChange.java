@@ -18,6 +18,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CommentStatement;
 import liquibase.statement.core.RuntimeStatement;
 import liquibase.util.StringUtil;
+import lombok.Setter;
 
 import java.io.*;
 import java.util.*;
@@ -37,9 +38,11 @@ import java.util.regex.Pattern;
 public class ExecuteShellCommandChange extends AbstractChange {
 
     protected List<String> finalCommandArray;
+    @Setter
     private String executable;
     private List<String> os;
     private final List<String> args = new ArrayList<>();
+    @Setter
     private String timeout;
     private static final String TIMEOUT_REGEX = "^\\s*(\\d+)\\s*([sSmMhH]?)\\s*$";
     private static final Pattern TIMEOUT_PATTERN = Pattern.compile(TIMEOUT_REGEX);
@@ -65,10 +68,6 @@ public class ExecuteShellCommandChange extends AbstractChange {
         return executable;
     }
 
-    public void setExecutable(String executable) {
-        this.executable = executable;
-    }
-
     public List<String> getArgs() {
         return Collections.unmodifiableList(args);
     }
@@ -80,10 +79,6 @@ public class ExecuteShellCommandChange extends AbstractChange {
     @DatabaseChangeProperty(description = "Timeout value for the executable to run", exampleValue = "10s")
     public String getTimeout() {
         return timeout;
-    }
-
-    public void setTimeout(String timeout) {
-        this.timeout = timeout;
     }
 
     @DatabaseChangeProperty(exampleValue = "Windows 7",
@@ -152,20 +147,12 @@ public class ExecuteShellCommandChange extends AbstractChange {
         }
 
         if (! shouldExecuteChange) {
-            try {
-                return new SqlStatement[]{
-                        new CommentStatement(getCommandString())
-                };
-            } finally {
-                nonExecutedCleanup();
-            }
+            return new SqlStatement[]{
+                    new CommentStatement(getCommandString())
+            };
         }
 
         return SqlStatement.EMPTY_SQL_STATEMENT;
-    }
-
-    protected void nonExecutedCleanup() {
-
     }
 
     protected List<String> createFinalCommandArray(Database database) {
@@ -236,7 +223,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
      * <p>
      * Creates a scheduled task to destroy the process in given timeout milliseconds.
      * This killer task will be cancelled if the process returns before the timeout value.
-     *  @param process
+     * @param process
      * @param timeoutInMillis waits for specified timeoutInMillis before destroying the process.
      */
     @java.lang.SuppressWarnings("squid:S2142")
@@ -303,6 +290,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
                             break;
                         case 'm':
                             valLong = valLong * MIN_IN_MILLIS;
+                            break;
                         default:
                             valLong = valLong * SECS_IN_MILLIS;
                     }

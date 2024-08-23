@@ -4,6 +4,8 @@ import liquibase.ChecksumVersion;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.core.RawSQLChange;
+import liquibase.changeset.ChangeSetService;
+import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.database.Database;
 import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.MSSQLDatabase;
@@ -14,6 +16,7 @@ import liquibase.exception.Warnings;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCompoundStatement;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.util.BooleanUtil;
 import liquibase.util.StringUtil;
 
 import java.io.ByteArrayInputStream;
@@ -36,11 +39,18 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
     private boolean stripComments;
     private boolean splitStatements;
+
+    @Deprecated
+    private Boolean originalSplitStatements;
+
+    @Deprecated
+    private Boolean ignoreOriginalSplitStatements;
     /**
      *
      * @deprecated  To be removed when splitStatements is changed to be type Boolean
      *
      */
+    @Deprecated
     private boolean splitStatementsSet;
 
     private String endDelimiter;
@@ -48,11 +58,30 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     private String dbms;
 
     protected String encoding;
+    private boolean stripCommentsUsedDefaultValue;
 
 
     protected AbstractSQLChange() {
         setStripComments(null);
         setSplitStatements(null);
+    }
+
+    @Deprecated
+    public void setOriginalSplitStatements(Boolean originalSplitStatements) {
+        this.originalSplitStatements = originalSplitStatements;
+    }
+
+    /**
+     * isOriginalSplitStatements is used by checksums v8 calculator only to define splitStatements behavior
+     */
+    @Deprecated
+    public void setIgnoreOriginalSplitStatements(Boolean ignoreOriginalSplitStatements) {
+        this.ignoreOriginalSplitStatements = ignoreOriginalSplitStatements;
+    }
+
+    @Deprecated
+    public Boolean isIgnoreOriginalSplitStatements() {
+        return ignoreOriginalSplitStatements;
     }
 
     public InputStream openSqlStream() throws IOException {
@@ -106,7 +135,20 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      */
     @DatabaseChangeProperty(description = "Set to true to remove any comments in the SQL before executing, otherwise false. Defaults to false if not set")
     public Boolean isStripComments() {
-        return stripComments;
+        ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
+        // If default value is not used, then a value was provided in the changelog, and it should be prioritized.
+        if (!stripCommentsUsedDefaultValue) {
+            return service.getOverrideStripComments(stripComments);
+        }
+        // If the default value is used, first check to see if a value was set globally.
+        Boolean global = service.getStripComments(getChangeSet());
+        if (global != null) {
+            // Use that value if it exists.
+            return global;
+        } else {
+            // Otherwise, use the default value.
+            return stripComments;
+        }
     }
 
 
@@ -115,11 +157,16 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      * Passing null sets stripComments to the default value (false).
      */
     public void setStripComments(Boolean stripComments) {
+        setStripComments(stripComments, stripComments == null);
+    }
+
+    public void setStripComments(Boolean stripComments, boolean usedDefaultValue) {
         if (stripComments == null) {
             this.stripComments = false;
         } else {
             this.stripComments = stripComments;
         }
+        this.stripCommentsUsedDefaultValue = usedDefaultValue;
     }
 
     /**
@@ -177,7 +224,11 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      */
     @DatabaseChangeProperty(description = "Delimiter to apply to the end of the statement. Defaults to ';', may be set to ''.", exampleValue = "\\nGO")
     public String getEndDelimiter() {
-        return endDelimiter;
+        ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
+        if (endDelimiter != null) {
+            return service.getOverrideDelimiter(endDelimiter);
+        }
+        return service.getEndDelimiter(getChangeSet());
     }
 
     /**
@@ -216,7 +267,12 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
             ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
             if (version.lowerOrEqualThan(ChecksumVersion.V8)) {
-                return CheckSum.compute(new NormalizingStreamV8(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false);
+                boolean isSplitStatements = this.isSplitStatements();
+                if (getChangeSet() != null && getChangeSet().getRunWith() != null
+                        && !BooleanUtil.isTrue(isIgnoreOriginalSplitStatements()) && !isSplitStatements) {
+                    isSplitStatements = BooleanUtil.isTrue(originalSplitStatements);
+                }
+                return CheckSum.compute(new NormalizingStreamV8(this.getEndDelimiter(), isSplitStatements, this.isStripComments(), stream), false);
             }
             return CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
 
@@ -253,10 +309,11 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
         String processedSQL = normalizeLineEndings(sql);
         if (this instanceof RawSQLChange && ((RawSQLChange) this).isRerunnable()) {
+            //For some reason PRINT statement execution is not working properly with PreparedStatement, so we are reverting this change for now.
             returnStatements.add(new RawSqlStatement(processedSQL, getEndDelimiter()));
             return returnStatements.toArray(EMPTY_SQL_STATEMENT);
         }
-        for (String statement : StringUtil.processMultiLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter())) {
+        for (String statement : StringUtil.processMultiLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter(), getChangeSet())) {
             if (database instanceof MSSQLDatabase) {
                 statement = statement.replaceAll("\\n", "\r\n");
             }
@@ -273,6 +330,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             if (database instanceof Db2zDatabase && escapedStatement.toUpperCase().startsWith("CALL")) {
                 returnStatements.add(new RawCompoundStatement(escapedStatement, getEndDelimiter()));
             } else {
+                //For some reason PRINT statement execution is not working properly with PreparedStatement, so we are reverting this change for now.
                 returnStatements.add(new RawSqlStatement(escapedStatement, getEndDelimiter()));
             }
         }
@@ -300,7 +358,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     }
 
     public static class NormalizingStream extends InputStream {
-        private InputStream stream;
+        private final InputStream stream;
 
         @Deprecated
         public NormalizingStream(String endDelimiter, Boolean splitStatements, Boolean stripComments, InputStream stream) {

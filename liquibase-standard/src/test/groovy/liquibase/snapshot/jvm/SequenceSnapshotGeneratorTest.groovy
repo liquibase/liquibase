@@ -3,6 +3,8 @@ package liquibase.snapshot.jvm
 import liquibase.database.Database
 import liquibase.database.core.OracleDatabase
 import liquibase.database.core.PostgresDatabase
+import liquibase.statement.SqlStatement
+import liquibase.statement.core.RawParameterizedSqlStatement
 import liquibase.structure.core.Schema
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -22,7 +24,8 @@ class SequenceSnapshotGeneratorTest extends Specification {
         schema.getCatalogName() >> changesetCatalog
 
         when:
-        String sql = sequenceSnapshotGenerator.getSelectSequenceSql(schema, database)
+        SqlStatement sqlStatement = sequenceSnapshotGenerator.getSelectSequenceStatement(schema, database)
+        String sql = ((RawParameterizedSqlStatement) sqlStatement).getSql()
 
         then:
         String ownerEqualsClause = "SEQUENCE_OWNER = "
@@ -48,7 +51,8 @@ class SequenceSnapshotGeneratorTest extends Specification {
         schema.getName() >> schemaName
 
         then:
-        String sql = sequenceSnapshotGenerator.getSelectSequenceSql(schema, database)
+        SqlStatement sqlStatement = sequenceSnapshotGenerator.getSelectSequenceStatement(schema, database)
+        String sql = sqlStatement.toString()
         sql.indexOf(expectedSchemaName) != -1
 
         where:

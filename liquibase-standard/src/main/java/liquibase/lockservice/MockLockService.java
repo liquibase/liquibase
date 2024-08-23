@@ -3,8 +3,6 @@ package liquibase.lockservice;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
-import liquibase.lockservice.DatabaseChangeLogLock;
-import liquibase.lockservice.LockService;
 import liquibase.database.core.MockDatabase;
 
 /**
@@ -30,7 +28,7 @@ public class MockLockService implements LockService {
     }
 
     @Override
-    public void setChangeLogLockRecheckTime(long changeLogLocRecheckTime) {
+    public void setChangeLogLockRecheckTime(long changeLogLockRecheckTime) {
     }
 
     @Override

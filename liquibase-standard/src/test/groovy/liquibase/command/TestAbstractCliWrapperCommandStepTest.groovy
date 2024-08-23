@@ -21,14 +21,14 @@ class TestAbstractCliWrapperCommandStepTest extends Specification {
 
         where:
         commandName | passedArguments                                     | legacyCommandArguments   | positionalArgument | expected
-        "update"    | null                                                | null                     | null               | "--showSummary, SUMMARY, update"
-        "update"    | ["changelogFile": "x"]                              | null                     | null               | "--changelogFile, x, --showSummary, SUMMARY, update"
-        "update"    | ["changelogFile": "x"]                              | ["changelogFile"]        | null               | "--showSummary, SUMMARY, update, --changelogFile, x"
-        "update"    | ["changelogFile": "x", "url": "y"]                  | null                     | null               | "--changelogFile, x, --showSummary, SUMMARY, --url, y, update"
-        "update"    | ["changelogFile": "x", "url": "y"]                  | ["changelogFile"]        | null               | "--showSummary, SUMMARY, --url, y, update, --changelogFile, x"
-        "update"    | ["changelogFile": "x", "url": "y"]                  | ["changelogFile", "url"] | null               | "--showSummary, SUMMARY, update, --changelogFile, x, --url, y"
-        "update"    | ["changelogFile": "x", "url": "y"]                  | null                     | "url"              | "--changelogFile, x, --showSummary, SUMMARY, update, y"
-        "update"    | ["changelogFile": "x", "url": "y", "password": "z"] | ["password"]             | "url"              | "--changelogFile, x, --showSummary, SUMMARY, update, --password, z, y"
+        "update"    | null                                                | null                     | null               | "--showSummary, SUMMARY, --showSummaryOutput, ALL, update"
+        "update"    | ["changelogFile": "x"]                              | null                     | null               | "--changelogFile, x, --showSummary, SUMMARY, --showSummaryOutput, ALL, update"
+        "update"    | ["changelogFile": "x"]                              | ["changelogFile"]        | null               | "--showSummary, SUMMARY, --showSummaryOutput, ALL, update, --changelogFile, x"
+        "update"    | ["changelogFile": "x", "url": "y"]                  | null                     | null               | "--changelogFile, x, --showSummary, SUMMARY, --showSummaryOutput, ALL, --url, y, update"
+        "update"    | ["changelogFile": "x", "url": "y"]                  | ["changelogFile"]        | null               | "--showSummary, SUMMARY, --showSummaryOutput, ALL, --url, y, update, --changelogFile, x"
+        "update"    | ["changelogFile": "x", "url": "y"]                  | ["changelogFile", "url"] | null               | "--showSummary, SUMMARY, --showSummaryOutput, ALL, update, --changelogFile, x, --url, y"
+        "update"    | ["changelogFile": "x", "url": "y"]                  | null                     | "url"              | "--changelogFile, x, --showSummary, SUMMARY, --showSummaryOutput, ALL, update, y"
+        "update"    | ["changelogFile": "x", "url": "y", "password": "z"] | ["password"]             | "url"              | "--changelogFile, x, --showSummary, SUMMARY, --showSummaryOutput, ALL, update, --password, z, y"
     }
 
     @Unroll

@@ -1,9 +1,12 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
+import liquibase.change.visitor.AddColumnChangeVisitor;
+import liquibase.change.visitor.ChangeVisitor;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.MySQLDatabase;
+import liquibase.parser.core.ParsedNodeException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
@@ -13,6 +16,7 @@ import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtil;
+import lombok.Setter;
 
 import java.util.*;
 
@@ -25,8 +29,11 @@ import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
     description = "Adds a new column to an existing table")
 public class AddColumnChange extends AbstractChange implements ChangeWithColumns<AddColumnConfig> {
 
+    @Setter
     private String catalogName;
+    @Setter
     private String schemaName;
+    @Setter
     private String tableName;
     private List<AddColumnConfig> columns;
 
@@ -39,26 +46,14 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "relation.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
 
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "table", description = "Name of the table to add the column to")
     public String getTableName() {
         return tableName;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
     }
 
     @Override
@@ -272,6 +267,27 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @Override
+    public void modify(ChangeVisitor changeVisitor) throws ParsedNodeException {
+        if(!changeVisitor.getName().equals("addColumn")) {
+            return;
+        }
+        String remove = ((AddColumnChangeVisitor)changeVisitor).getRemove();
+        switch (remove){
+            case "afterColumn":
+                getColumns().forEach(c -> c.setAfterColumn(null));
+                break;
+            case "beforeColumn":
+                getColumns().forEach(c -> c.setBeforeColumn(null));
+                break;
+            case "position":
+                getColumns().forEach(c -> c.setPosition(null));
+                break;
+            default:
+                throw new ParsedNodeException("Unexpected value found under removeChangeSetProperty for remove tag: " + remove);
+        }
     }
 
     private NotNullConstraint createNotNullConstraint(ConstraintsConfig constraintsConfig) {

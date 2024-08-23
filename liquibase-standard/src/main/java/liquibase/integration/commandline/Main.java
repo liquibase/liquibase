@@ -2,7 +2,6 @@ package liquibase.integration.commandline;
 
 import liquibase.*;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.command.CommandResults;
@@ -13,9 +12,9 @@ import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.Database;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.*;
 import liquibase.integration.IntegrationDetails;
-import liquibase.io.WriterOutputStream;
 import liquibase.license.LicenseInstallResult;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
@@ -36,6 +35,7 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.SystemUtil;
+import org.apache.commons.io.output.WriterOutputStream;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -234,7 +234,7 @@ public class Main {
                     try {
                         if ((args.length == 0) || ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0]))) {
                             main.printHelp(outputStream);
-                            return Integer.valueOf(0);
+                            return 0;
                         } else if (("--" + OPTIONS.VERSION).equals(args[0])) {
                             main.command = "";
                             main.parseDefaultPropertyFiles();
@@ -260,7 +260,7 @@ public class Main {
                                     System.getProperties().getProperty("java.home"),
                                     SystemUtil.getJavaVersion()
                             ));
-                            return Integer.valueOf(0);
+                            return 0;
                         }
 
                         //
@@ -283,7 +283,7 @@ public class Main {
                             main.parseOptions(args);
                             if (main.command == null) {
                                 main.printHelp(outputStream);
-                                return Integer.valueOf(0);
+                                return 0;
                             }
                             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, main.command);
                         } catch (CommandLineParsingException e) {
@@ -373,14 +373,14 @@ public class Main {
                             Scope.getCurrentScope().getUI().sendErrorMessage((
                                     String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
                                             LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentConfiguredValue().getProvidedValue().getActualKey())));
-                            return Integer.valueOf(0);
+                            return 0;
                         }
 
                         if (setupNeeded(main)) {
                             List<String> setupMessages = main.checkSetup();
                             if (!setupMessages.isEmpty()) {
                                 main.printHelp(setupMessages, isStandardOutputRequired(main.command) ? System.err : outputStream);
-                                return Integer.valueOf(1);
+                                return 1;
                             }
                         }
 
@@ -447,7 +447,7 @@ public class Main {
                         }
                     }
 
-                    return Integer.valueOf(0);
+                    return 0;
                 }
             });
     }
@@ -973,19 +973,7 @@ public class Main {
             return;
         }
 
-        final int CHANGESET_MINIMUM_IDENTIFIER_PARTS = 3;
-
-        if (COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)) {
-            for (final String param : commandParams) {
-                if ((param != null) && !param.startsWith("-")) {
-                    final String[] parts = param.split("::");
-                    if (parts.length < CHANGESET_MINIMUM_IDENTIFIER_PARTS) {
-                        messages.add(coreBundle.getString("changeset.identifier.must.have.form.filepath.id.author"));
-                        break;
-                    }
-                }
-            }
-        } else if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command) && (diffTypes != null) && diffTypes.toLowerCase
+       if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command) && (diffTypes != null) && diffTypes.toLowerCase
                 ().contains("data")) {
             messages.add(String.format(coreBundle.getString("including.data.diffchangelog.has.no.effect"),
                     OPTIONS.DIFF_TYPES, COMMANDS.GENERATE_CHANGELOG
@@ -1128,11 +1116,12 @@ public class Main {
     protected static CodePointCheck checkArg(String arg) {
         char[] chars = arg.toCharArray();
         for (int i = 0; i < chars.length; i++) {
-            for (int j = 0; j < suspiciousCodePoints.length; j++) {
-                if (suspiciousCodePoints[j] == chars[i]) {
+            char ch = chars[i];
+            for (int suspiciousCodePoint : suspiciousCodePoints) {
+                if (suspiciousCodePoint == ch) {
                     CodePointCheck codePointCheck = new CodePointCheck();
                     codePointCheck.position = i;
-                    codePointCheck.ch = chars[i];
+                    codePointCheck.ch = ch;
                     return codePointCheck;
                 }
             }
@@ -1399,7 +1388,7 @@ public class Main {
         final ResourceAccessor fileOpener = this.getFileOpenerResourceAccessor();
 
         if (COMMANDS.DIFF.equalsIgnoreCase(command) || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)
-            || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command) || COMMANDS.UPDATE.equalsIgnoreCase(command)
+            || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)
             || COMMANDS.RELEASE_LOCKS.equalsIgnoreCase(command)
             || COMMANDS.ROLLBACK.equalsIgnoreCase(command) || COMMANDS.ROLLBACK_SQL.equalsIgnoreCase(command)) {
             this.runUsingCommandFramework();
@@ -1414,7 +1403,7 @@ public class Main {
                     this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass,
                     this.liquibaseCatalogName, this.liquibaseSchemaName, this.databaseChangeLogTableName,
                     this.databaseChangeLogLockTableName);
-            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, this.url);
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, JdbcConnection.sanitizeUrl(this.url));
             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_CATALOG_NAME, database.getLiquibaseCatalogName());
             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SCHEMA_NAME, database.getLiquibaseSchemaName());
             if (this.databaseChangeLogTablespaceName != null) {
@@ -1482,7 +1471,7 @@ public class Main {
             } else if (COMMANDS.DROP_ALL.equalsIgnoreCase(command)) {
                 CommandScope dropAllCommand = new CommandScope("dropAll");
                 dropAllCommand
-                        .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, liquibase.getDatabase())
+                        .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, liquibase.getDatabase())
                         .addArgumentValue(DropAllCommandStep.CATALOG_AND_SCHEMAS_ARG, InternalSnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
                         .addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
 
@@ -1513,7 +1502,17 @@ public class Main {
                 liquibase.clearCheckSums();
                 return;
             } else if (COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)) {
-                liquibase.calculateCheckSum(commandParams.iterator().next());
+                CommandScope calculateChecksumCommand = new CommandScope("calculateChecksum");
+
+                calculateChecksumCommand
+                        .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database)
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_PATH_ARG, getCommandParam(OPTIONS.CHANGE_SET_PATH, null))
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_ID_ARG, getCommandParam(OPTIONS.CHANGE_SET_ID, null))
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_AUTHOR_ARG, getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null))
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_IDENTIFIER_ARG, getCommandParam(OPTIONS.CHANGE_SET_IDENTIFIER, null))
+                        .addArgumentValue(CalculateChecksumCommandStep.CHANGELOG_FILE_ARG, this.changeLogFile);
+
+                calculateChecksumCommand.execute();
                 return;
             } else if (COMMANDS.DB_DOC.equalsIgnoreCase(command)) {
                 if (commandParams.isEmpty()) {
@@ -1563,6 +1562,8 @@ public class Main {
                     } catch (LiquibaseException updateException) {
                         handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
                     }
+                } else if (COMMANDS.UPDATE.equalsIgnoreCase(command)) {
+                    liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()));
                 } else if (COMMANDS.UPDATE_COUNT_SQL.equalsIgnoreCase(command)) {
                     liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new
                             LabelExpression(getLabelFilter()), getOutputWriter());
@@ -1652,9 +1653,9 @@ public class Main {
                         handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
                     }
                 } else if (COMMANDS.HISTORY.equalsIgnoreCase(command)) {
-                    CommandScope historyCommand = new CommandScope("internalHistory");
-                    historyCommand.addArgumentValue(InternalHistoryCommandStep.DATABASE_ARG, database);
-                    historyCommand.addArgumentValue(InternalHistoryCommandStep.FORMAT_ARG, HistoryFormat.valueOf(format));
+                    CommandScope historyCommand = new CommandScope(HistoryCommandStep.COMMAND_NAME);
+                    historyCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
+                    historyCommand.addArgumentValue(HistoryCommandStep.FORMAT_ARG, HistoryFormat.valueOf(format));
                     historyCommand.setOutput(getOutputStream());
 
                     historyCommand.execute();
@@ -1863,13 +1864,13 @@ public class Main {
      * Set database arguments values received by Main class to the provided command scope.
      */
     private void setDatabaseArgumentsToCommand(CommandScope command) {
-        command.addArgumentValue(DbUrlConnectionCommandStep.DEFAULT_SCHEMA_NAME_ARG, defaultSchemaName)
-                .addArgumentValue(DbUrlConnectionCommandStep.DEFAULT_CATALOG_NAME_ARG, defaultCatalogName)
-                .addArgumentValue(DbUrlConnectionCommandStep.DRIVER_ARG, driver)
-                .addArgumentValue(DbUrlConnectionCommandStep.DRIVER_PROPERTIES_FILE_ARG, driverPropertiesFile)
-                .addArgumentValue(DbUrlConnectionCommandStep.USERNAME_ARG, username)
-                .addArgumentValue(DbUrlConnectionCommandStep.PASSWORD_ARG, password)
-                .addArgumentValue(DbUrlConnectionCommandStep.URL_ARG, url);
+        command.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DEFAULT_SCHEMA_NAME_ARG, defaultSchemaName)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DEFAULT_CATALOG_NAME_ARG, defaultCatalogName)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DRIVER_ARG, driver)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DRIVER_PROPERTIES_FILE_ARG, driverPropertiesFile)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, username)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, password)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, url);
     }
 
     /**
@@ -2183,6 +2184,8 @@ public class Main {
         private static final String CHANGELOG_FILE = "changeLogFile";
         private static final String DATA_OUTPUT_DIRECTORY = "dataOutputDirectory";
         private static final String DIFF_TYPES = "diffTypes";
+
+        public static final String CHANGE_SET_IDENTIFIER = "changeSetIdentifier";
         private static final String CHANGE_SET_ID = "changeSetId";
         private static final String CHANGE_SET_AUTHOR = "changeSetAuthor";
         private static final String CHANGE_SET_PATH = "changeSetPath";

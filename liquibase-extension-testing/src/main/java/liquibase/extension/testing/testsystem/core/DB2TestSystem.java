@@ -25,14 +25,10 @@ public class DB2TestSystem extends DatabaseTestSystem {
                         .withUsername(getUsername())
                         .withPassword(getPassword())
                         .withDatabaseName(getCatalog())
+                        .acceptLicense()
                         .withUrlParam("retrieveMessagesFromServerOnGetMessage", "true"),
                 this
-        ) {
-            @Override
-            public Runnable requireLicense() {
-                return ((Db2Container) this.getContainer())::acceptLicense;
-            }
-        };
+        );
     }
 
     @Override

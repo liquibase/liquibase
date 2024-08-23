@@ -6,8 +6,12 @@ import liquibase.changelog.filter.ExecutedAfterChangeSetFilter;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.logging.mdc.MdcKey;
+import liquibase.report.RollbackReportParameters;
+import liquibase.util.StringUtil;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -30,12 +34,21 @@ public class RollbackToDateCommandStep extends AbstractRollbackCommandStep {
         CommandScope commandScope = resultsBuilder.getCommandScope();
         Date dateToRollBackTo = commandScope.getArgumentValue(DATE_ARG);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
-        Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_TO_DATE, formatter.format(dateToRollBackTo));
+        String stringDateToRollbackTo = formatter.format(dateToRollBackTo);
+        Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_TO_DATE, stringDateToRollbackTo);
+
+        RollbackReportParameters rollbackReportParameters = new RollbackReportParameters();
+        rollbackReportParameters.setCommandTitle(
+                StringUtil.upperCaseFirst(StringUtil.toKabobCase(Arrays.toString(
+                        defineCommandNames()[0])).replace("[","").replace("]","").trim()));
+        resultsBuilder.addResult("rollbackReport", rollbackReportParameters);
 
         Database database = (Database) commandScope.getDependency(Database.class);
+        rollbackReportParameters.setupDatabaseInfo(database);
+        rollbackReportParameters.setRollbackDate(stringDateToRollbackTo);
 
         List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
-        this.doRollback(resultsBuilder, ranChangeSetList, new ExecutedAfterChangeSetFilter(dateToRollBackTo, ranChangeSetList));
+        Scope.child(Collections.singletonMap("rollbackReport", rollbackReportParameters), () -> this.doRollback(resultsBuilder, ranChangeSetList, new ExecutedAfterChangeSetFilter(dateToRollBackTo, ranChangeSetList), rollbackReportParameters));
     }
 
     @Override

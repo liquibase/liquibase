@@ -7,6 +7,30 @@ on:
       tag:
         description: 'Release Tag'
         required: true
+      dry_run: 
+        description: 'Flag to indicate if the workflow is triggered to create a dry-run release'
+        required: true
+        type: boolean
+        default: false
+      dry_run_release_id:
+        description: 'The release id of the dry-run release'
+        required: false
+        type: string
+  workflow_call:
+    inputs:
+      tag:
+        description: 'Release Tag'
+        required: true
+        type: string
+      dry_run: 
+        description: 'Flag to indicate if the workflow is triggered to create a dry-run release'
+        required: true
+        type: boolean
+        default: false
+      dry_run_release_id:
+        description: 'The release id of the dry-run release'
+        required: false
+        type: string
 env:
   MAVEN_VERSION: '3.9.2'
 jobs:
@@ -19,16 +43,17 @@ jobs:
     steps:
       - name: Collect Data
         id: collect-data
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             let tag;
             if (context.payload.inputs) {
               tag = context.payload.inputs.tag;
-            } else {
+            } else if ("${{ inputs.tag }}" != "") {
+              tag = "${{ inputs.tag }}";
+             } else {
               tag = context.payload.release.tag_name;
             }
-
             let version = tag.replace(/^v/, "");
 
             core.setOutput("tag", tag);
@@ -38,6 +63,7 @@ jobs:
           echo "Publishing version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.tag }}"
 
   manual_trigger_deployment:
+    if: ${{ inputs.dry_run == false }}
     name: Manually trigger deployment
     needs: [ setup ]
     runs-on: ubuntu-22.04
@@ -47,19 +73,20 @@ jobs:
         with:
           secret: ${{ secrets.GITHUB_TOKEN }}
           approvers: suryaaki2,rberezen,jnewton03,kristyldatical,sayaliM0412
-          minimum-approvals: 1
+          minimum-approvals: 2
           issue-title: "Deploying ${{ needs.setup.outputs.version }} to sonatype"
           issue-body: "Please approve or deny the deployment of version ${{ needs.setup.outputs.version }}"
           additional-approved-words: 'lgtm,✅,👍,proceed,shipit,:shipit:'
           additional-denied-words: 'stop,error,failed,fail,broken,:x:,👎'
 
   deploy_maven:
+    if: ${{ inputs.dry_run == false }}
     name: Deploy to Maven
-    needs: [ setup, manual_trigger_deployment ]
+    needs: [ setup, manual_trigger_deployment, deploy_javadocs, publish_to_github_packages, deploy_xsd, release-docker ]
     runs-on: ubuntu-22.04
     steps:
       - name: Download release assets
-        uses: robinraju/release-downloader@v1.8
+        uses: robinraju/release-downloader@v1.11
         with:
           repository: "liquibase/liquibase"
           tag: "${{ needs.setup.outputs.tag }}"
@@ -67,7 +94,7 @@ jobs:
           out-file-path: "."
 
       - name: Set up Java for publishing to Maven Central Repository
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '11'
           distribution: 'adopt'
@@ -91,24 +118,34 @@ jobs:
 
           ##extracts and sign poms
           unzip -j liquibase-core-${version}.jar META-INF/maven/org.liquibase/liquibase-core/pom.xml
+          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml ## version didn't end up in pom. So using double quotes
           mv pom.xml liquibase-core-${version}.pom
           gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-core-${version}.pom
 
           unzip -j liquibase-maven-plugin-${version}.jar META-INF/maven/org.liquibase/liquibase-maven-plugin/pom.xml
+          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
           mv pom.xml liquibase-maven-plugin-${version}.pom
           gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-maven-plugin-${version}.pom
+          
+          unzip -j liquibase-cli-${version}.jar META-INF/maven/org.liquibase/liquibase-cli/pom.xml
+          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
+          mv pom.xml liquibase-cli-${version}.pom
+          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-cli-${version}.pom
 
           unzip -j liquibase-cdi-${version}.jar META-INF/maven/org.liquibase/liquibase-cdi/pom.xml
+          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
           mv pom.xml liquibase-cdi-${version}.pom
           sed -i -e "s/<description>/<name>Liquibase CDI Plugin<\/name><description>/" liquibase-cdi-${version}.pom   ## name didn't end up in pom. Hack it in for now
           gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-cdi-${version}.pom
 
           unzip -j liquibase-cdi-jakarta-${version}.jar META-INF/maven/org.liquibase/liquibase-cdi-jakarta/pom.xml
+          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
           mv pom.xml liquibase-cdi-jakarta-${version}.pom
           sed -i -e "s/<description>/<name>Liquibase cdi-jakarta Plugin<\/name><description>/" liquibase-cdi-jakarta-${version}.pom   ## name didn't end up in pom. Hack it in for now
           gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-cdi-jakarta-${version}.pom
 
           unzip -j liquibase-commercial-${version}.jar META-INF/maven/org.liquibase/liquibase-commercial/pom.xml
+          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
           mv pom.xml liquibase-commercial-${version}.pom
           sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private<\/connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" liquibase-commercial-${version}.pom   ## scm info not in the pom          
           gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-commercial-${version}.pom
@@ -148,6 +185,18 @@ jobs:
             -Dfiles=liquibase-maven-plugin-${version}.jar.asc,liquibase-maven-plugin-${version}-sources.jar.asc,liquibase-maven-plugin-${version}-javadoc.jar.asc,liquibase-maven-plugin-${version}.pom.asc \
             -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
             -Dclassifiers=,sources,javadoc,
+          
+          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
+            -DrepositoryId=sonatype-nexus-staging \
+            -DpomFile=liquibase-cli-${version}.pom \
+            -DgeneratePom=false \
+            -Dfile=liquibase-cli-${version}.jar \
+            -Dsources=liquibase-cli-${version}-sources.jar \
+            -Djavadoc=liquibase-cli-${version}-javadoc.jar \
+            -Dfiles=liquibase-cli-${version}.jar.asc,liquibase-cli-${version}-sources.jar.asc,liquibase-cli-${version}-javadoc.jar.asc,liquibase-cli-${version}.pom.asc \
+            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
+            -Dclassifiers=,sources,javadoc,
 
           mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
             -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
@@ -175,16 +224,25 @@ jobs:
 
           ## Release repository
           ## Have to find the stagingRepositoryId that was auto-generated
-          rcList=$(mvn -B org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-list -DnexusUrl=https://oss.sonatype.org/ -DserverId=sonatype-nexus-staging)
-          #echo $rcList
+          api_output=$(curl -s -u "${{ secrets.SONATYPE_USERNAME }}:${{ secrets.SONATYPE_TOKEN }}" "https://oss.sonatype.org/service/local/staging/profile_repositories")
+          # Extract ids of repositories-item containing the string "liquibase"
+          repositories=$(echo "$api_output" | grep -B 8 "liquibase" | grep "<repositoryId>" | awk -F"<|>" '{print $3}')
+          echo "Repository IDs containing 'liquibase': $repositories"
+          for repo_id in $repositories; do
+            echo "Check if $repo_id repository is an extension"
+            api_output=$(curl -s -u "${{ secrets.SONATYPE_USERNAME }}:${{ secrets.SONATYPE_TOKEN }}" "https://oss.sonatype.org/service/local/repositories/$repo_id/content/org/liquibase/")
+            relative_path=$(echo "$api_output" | grep -oP '<relativePath>\K[^<]+' | awk 'NR==1')
+            echo "Relative path: $relative_path"
+            if [[ "$relative_path" == *"/org/liquibase/ext/"* ]]; then
+                echo "Relative path contains '/org/liquibase/ext/'. It is an extension."
+            else
+                echo "Relative path does not contain '/org/liquibase/ext/'. It is not an extension."
+                stagingRepositoryId=$repo_id
+                break
+            fi
+          done
 
-          stagingRepositoryId=$(echo $rcList | grep -o "\[INFO\] orgliquibase-[0-9]*[ ]*OPEN" | grep -o "orgliquibase-[0-9]*")
           echo "Staging Repository Id: $stagingRepositoryId"
-
-          if [ "$(echo $stagingRepositoryId | grep -o "\-" | wc -l)" != "1" ]; then
-            echo "Did not find exactly one open repository"
-            exit 1
-          fi
 
           mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-close \
             -DnexusUrl=https://oss.sonatype.org/ \
@@ -198,62 +256,64 @@ jobs:
             -DserverId=sonatype-nexus-staging \
             -DstagingRepositoryId=$stagingRepositoryId \
             -DstagingProgressTimeoutMinutes=10
-  
+
   deploy_javadocs:
+    if: ${{ inputs.dry_run == false }}
     name: Upload Javadocs
-    needs: [ setup ]
+    needs: [ setup, manual_trigger_deployment ]
     runs-on: ubuntu-22.04
     # These permissions are needed to interact with GitHub's OIDC Token endpoint.
     permissions:
       id-token: write
       contents: read
     steps:
-    - name: Download release javadocs
-      uses: robinraju/release-downloader@v1.8
-      with:
-        repository: "liquibase/liquibase"
-        tag: "${{ needs.setup.outputs.tag }}"
-        filename: "liquibase-additional*.zip"
-        out-file-path: "."
+      - name: Download release javadocs
+        uses: robinraju/release-downloader@v1.11
+        with:
+          repository: "liquibase/liquibase"
+          tag: "${{ needs.setup.outputs.tag }}"
+          filename: "liquibase-additional*.zip"
+          out-file-path: "."
 
-    - name: Unpack javadoc files and upload to s3
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.JAVADOCS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.JAVADOCS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: us-east-1
-      # unzip archives, create directory for each jar, and extract jar contents to directory.  Then delete the jar and zip files.  Then upload to s3.
-      run: |
-        unzip -j '*.zip' '*javadoc*.jar' 
-        
-        for jar in *liquibase*.jar; do
-          dir_name=$(basename "$jar" .jar)
-          dir_name=$(echo "$dir_name" | sed -E 's/(-[0-9]+(\.[0-9]+)*(-javadoc)?)//')
-          mkdir -p "$dir_name"
-          unzip -o "$jar" -d "$dir_name"
-        done
-        
-        rm -rf *.jar *.zip
-        aws s3 sync . s3://javadocsliquibasecom-origin --only-show-errors
+      - name: Unpack javadoc files and upload to s3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.JAVADOCS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.JAVADOCS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+        # unzip archives, create directory for each jar, and extract jar contents to directory.  Then delete the jar and zip files.  Then upload to s3.
+        run: |
+          unzip -j '*.zip' '*javadoc*.jar' 
+          
+          for jar in *liquibase*.jar; do
+            dir_name=$(basename "$jar" .jar)
+            dir_name=$(echo "$dir_name" | sed -E 's/(-[0-9]+(\.[0-9]+)*(-javadoc)?)//')
+            mkdir -p "$dir_name"
+            unzip -o "$jar" -d "$dir_name"
+          done
+          
+          rm -rf *.jar *.zip
+          aws s3 sync . s3://javadocsliquibasecom-origin --only-show-errors
 
   publish_to_github_packages:
+    if: ${{ inputs.dry_run == false }}
     name: Publish artifacts to Github Packages
     runs-on: ubuntu-22.04
-    needs: [ setup ]
+    needs: [ setup, manual_trigger_deployment ]
     permissions:
       contents: read
       packages: write
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Java for publishing to GitHub Repository
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
           server-id: liquibase
       - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
+        uses: stCarolas/setup-maven@v5
         with:
           maven-version: ${{ env.MAVEN_VERSION }}
 
@@ -268,23 +328,25 @@ jobs:
           TARGET_ARTIFACT_REPOSITORY: liquibase
 
   deploy_xsd:
-      name: Upload xsds
-      needs: [ setup ]
-      runs-on: ubuntu-22.04
-      outputs:
-          tag: ${{ steps.collect-data.outputs.tag }}
-          version: ${{ needs.setup.outputs.version }}
-      steps:
+    if: ${{ inputs.dry_run == false }}
+    name: Upload xsds
+    needs: [ setup, manual_trigger_deployment]
+    runs-on: ubuntu-22.04
+    outputs:
+      tag: ${{ steps.collect-data.outputs.tag }}
+      version: ${{ needs.setup.outputs.version }}
+    steps:
       - name: Download liquibase xsd
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           # Relative path under $GITHUB_WORKSPACE to place the repository
-          path: liquibase-core-repo 
+          path: liquibase-core-repo
           repository: "liquibase/liquibase"
-    
+
       - name: Download liquibase-pro xsd
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
+          ref: release
           token: ${{ secrets.BOT_TOKEN }}
           # Relative path under $GITHUB_WORKSPACE to place the repository
           path: liquibase-pro-repo
@@ -299,7 +361,7 @@ jobs:
         run: |
           aws s3 sync liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/ s3://liquibaseorg-origin/xml/ns/pro/ --content-type application/octet-stream --only-show-errors
           aws s3 sync liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ s3://liquibaseorg-origin/xml/ns/dbchangelog/ --content-type application/octet-stream --only-show-errors
-
+          aws s3 sync liquibase-pro-repo/pro/src/main/resources/schemas/ s3://liquibaseorg-origin/json/schema/ --content-type application/octet-stream --only-show-errors
 
       - name: Index.htm file upload
         env:
@@ -318,34 +380,278 @@ jobs:
             aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
           fi
 
-  # upload_deb:
-  #     name: Upload deb
-  #     needs: [ setup ]
-  #     runs-on: ubuntu-22.04
-  #     steps:
-  #       - uses: actions/checkout@v3
+      - name: Liquibase xsds SFTP upload
+        uses: wangyucode/sftp-upload-action@v2.0.2
+        with:
+          host: ${{ secrets.WPENGINE_SFTP_HOST }}
+          port: ${{ secrets.WPENGINE_SFTP_PORT }}
+          username: ${{ secrets.WPENGINE_SFTP_USER }}
+          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }}
+          compress: true
+          forceUpload: true
+          localDir: 'liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/'
+          remoteDir: '/xml/ns/dbchangelog/'
 
-  #       - name: Configure AWS credentials
-  #         uses: aws-actions/configure-aws-credentials@v2
-  #         with:
-  #           aws-access-key-id: ${{ secrets.AWS_PROD_ACCESS_KEY_ID }}
-  #           aws-secret-access-key: ${{ secrets.AWS_PROD_SECRET_ACCESS_KEY }}
-  #           aws-region: us-east-1
+      - name: Liquibase PRO xsds SFTP upload
+        uses: wangyucode/sftp-upload-action@v2.0.2
+        with:
+          host: ${{ secrets.WPENGINE_SFTP_HOST }}
+          port: ${{ secrets.WPENGINE_SFTP_PORT }}
+          username: ${{ secrets.WPENGINE_SFTP_USER }}
+          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }}
+          compress: false
+          forceUpload: true
+          localDir: 'liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/'
+          remoteDir: '/xml/ns/pro/'
 
-  #       - name: Set up Ruby
-  #         uses: ruby/setup-ruby@v1
-  #         with:
-  #           ruby-version: 3.1.4
+      - name: Liquibase flow-file schema SFTP upload
+        uses: wangyucode/sftp-upload-action@v2.0.2
+        with:
+          host: ${{ secrets.WPENGINE_SFTP_HOST }}
+          port: ${{ secrets.WPENGINE_SFTP_PORT }}
+          username: ${{ secrets.WPENGINE_SFTP_USER }}
+          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }}
+          compress: false
+          forceUpload: true
+          localDir: 'liquibase-pro-repo/pro/src/main/resources/schemas/'
+          remoteDir: '/json/schema/'
 
-  #       - name: Install deb-s3 gem
-  #         run: gem install deb-s3
-  
-  #       - name: Upload deb package
-  #         run: |
-  #           sudo apt install pinentry-tty
-  #           echo "2" | sudo update-alternatives --config pinentry
-  #           echo "${{ secrets.GPG_SECRET }}" | gpg --batch --import --pinentry-mode loopback --passphrase "${{ secrets.GPG_PASSPHRASE }}"
-  #           export GPG_TTY=$(tty)
-  #           echo '${{ secrets.GPG_PASSPHRASE }}' > pass.txt
-  #           deb-s3 upload --preserve-versions --sign "${{ secrets.GPG_SECRET_KEY_ID }}" --gpg-options "\-\-pinentry-mode loopback \-\-batch \-\-passphrase\-file pass.txt \-\-yes \-\-quiet" --bucket repo.liquibase.com liquibase-dist/target/liquibase-${{ needs.setup.outputs.version }}.deb
+      - name: Liquibase index.htm SFTP upload
+        uses: wangyucode/sftp-upload-action@v2.0.2
+        with:
+          host: ${{ secrets.WPENGINE_SFTP_HOST }}
+          port: ${{ secrets.WPENGINE_SFTP_PORT }}
+          username: ${{ secrets.WPENGINE_SFTP_USER }}
+          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }} 
+          compress: false
+          forceUpload: true
+          localDir: 'index-file/'
+          remoteDir: '/xml/ns/dbchangelog/'
+
+  release-docker:
+    if: ${{ inputs.dry_run == false }}
+    name: Release docker images
+    needs: [ setup, manual_trigger_deployment ]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Release liquibase/docker v${{ needs.setup.outputs.version }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.BOT_TOKEN }}
+          script: |
+            console.log("Sending liquibase-release event to liquibase/docker");
+
+            await github.rest.repos.createDispatchEvent({
+               "owner": "liquibase",
+               "repo": "docker",
+               "event_type": "liquibase-release",
+               "client_payload": {
+                  "liquibaseVersion": "${{ needs.setup.outputs.version }}"
+                }
+             });
+
+
+  generate-PRO-tag:
+    if: ${{ inputs.dry_run == false }}
+    name: Generate PRO tags based on OSS release
+    needs: [ setup ]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          repository: liquibase/liquibase-pro
+          event-type: oss-released-tag
+
+  package:
+    if: ${{ inputs.dry_run == false }}
+    uses: liquibase/build-logic/.github/workflows/package.yml@v0.7.8
+    needs: [ setup ]
+    secrets: inherit
+    with:
+      groupId: 'org.liquibase'
+      artifactId: 'liquibase'
+      version: ${{ needs.setup.outputs.version }}
+
+  update-docs-oss-pro-version:
+    if: ${{ inputs.dry_run == false }}
+    name: Update OSS and PRO tags based on OSS release
+    needs: [ setup ]
+    runs-on: ubuntu-latest
+    outputs:
+      latest_version: ${{ steps.get_latest_oss_version.outputs.latest_version }}
+      previous_version: ${{ steps.get_latest_oss_version.outputs.previous_version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          repository: liquibase/liquibase
+          ref: master
+          fetch-depth: 0
+
+      - name: Get the oss release version
+        id: get_latest_oss_version
+        run: |
+            echo "latest_version=$(git describe --tags $(git rev-list --tags --max-count=1) | sed 's/^v//')" >> $GITHUB_OUTPUT
+            echo "previous_version=$(git describe --tags $(git rev-list --tags --max-count=2 | tail -n 1) | sed -E 's/^v//; s/-.*//')" >> $GITHUB_OUTPUT
+
+
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          repository: liquibase/liquibase-docs
+          event-type: oss-released-version       
+          client-payload: '{"latest_version": "${{ steps.get_latest_oss_version.outputs.latest_version }}", "previous_version": "${{ steps.get_latest_oss_version.outputs.previous_version }}"}'
+
+      # dispatch an event to `liquibase-aws-license-service` repository to update pom.xml with latest OSS Release
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          repository: liquibase/liquibase-aws-license-service
+          event-type: oss-released-version  
+
+  dry_run_deploy_maven:
+    if: ${{ inputs.dry_run == true }}
+    name: Deploy to repo.liquibase.net
+    needs: [ setup ]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download dry-run release assets
+        uses: robinraju/release-downloader@v1.11
+        with:
+          repository: "liquibase/liquibase"
+          releaseId: "${{ inputs.dry_run_release_id }}"
+          filename: "*"
+          out-file-path: "."
+
+      - name: Set up Java for publishing to Maven Central Repository
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+          server-id: dry-run-sonatype-nexus-staging
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_SECRET }}
+          gpg-passphrase: GPG_PASSPHRASE
+        env:
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Publish to repo.liquibase.net
+        env:
+          MAVEN_USERNAME: ${{ secrets.REPO_LIQUIBASE_NET_USER }}
+          MAVEN_PASSWORD: ${{ secrets.REPO_LIQUIBASE_NET_PASSWORD }}
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          version=${{ needs.setup.outputs.version }}
+
+          unzip -j liquibase-additional-*.zip
+
+          ##extracts and sign poms
+          unzip -j liquibase-core-${version}.jar META-INF/maven/org.liquibase/liquibase-core/pom.xml
+          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml ## version didn't end up in pom. So using double quotes
+          mv pom.xml liquibase-core-${version}.pom
+          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-core-${version}.pom
+
+          unzip -j liquibase-maven-plugin-${version}.jar META-INF/maven/org.liquibase/liquibase-maven-plugin/pom.xml
+          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
+          mv pom.xml liquibase-maven-plugin-${version}.pom
+          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-maven-plugin-${version}.pom
           
+          unzip -j liquibase-cli-${version}.jar META-INF/maven/org.liquibase/liquibase-cli/pom.xml
+          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
+          mv pom.xml liquibase-cli-${version}.pom
+          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-cli-${version}.pom
+
+          unzip -j liquibase-cdi-${version}.jar META-INF/maven/org.liquibase/liquibase-cdi/pom.xml
+          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
+          mv pom.xml liquibase-cdi-${version}.pom
+          sed -i -e "s/<description>/<name>Liquibase CDI Plugin<\/name><description>/" liquibase-cdi-${version}.pom   ## name didn't end up in pom. Hack it in for now
+          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-cdi-${version}.pom
+
+          unzip -j liquibase-cdi-jakarta-${version}.jar META-INF/maven/org.liquibase/liquibase-cdi-jakarta/pom.xml
+          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
+          mv pom.xml liquibase-cdi-jakarta-${version}.pom
+          sed -i -e "s/<description>/<name>Liquibase cdi-jakarta Plugin<\/name><description>/" liquibase-cdi-jakarta-${version}.pom   ## name didn't end up in pom. Hack it in for now
+          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-cdi-jakarta-${version}.pom
+
+          unzip -j liquibase-commercial-${version}.jar META-INF/maven/org.liquibase/liquibase-commercial/pom.xml
+          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
+          mv pom.xml liquibase-commercial-${version}.pom
+          sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private<\/connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" liquibase-commercial-${version}.pom   ## scm info not in the pom          
+          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-commercial-${version}.pom
+          
+          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+            -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
+            -DrepositoryId=dry-run-sonatype-nexus-staging \
+            -DpomFile=liquibase-core-${version}.pom \
+            -DgeneratePom=false \
+            -Dfile=liquibase-core-${version}.jar \
+            -Dsources=liquibase-core-${version}-sources.jar \
+            -Djavadoc=liquibase-core-${version}-javadoc.jar \
+            -Dfiles=liquibase-core-${version}.jar.asc,liquibase-core-${version}-sources.jar.asc,liquibase-core-${version}-javadoc.jar.asc,liquibase-core-${version}.pom.asc \
+            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
+            -Dclassifiers=,sources,javadoc,
+
+          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+            -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
+            -DrepositoryId=dry-run-sonatype-nexus-staging \
+            -DpomFile=liquibase-commercial-${version}.pom \
+            -DgeneratePom=false \
+            -Dfile=liquibase-commercial-${version}.jar \
+            -Dsources=liquibase-commercial-${version}-sources.jar \
+            -Djavadoc=liquibase-commercial-${version}-javadoc.jar \
+            -Dfiles=liquibase-commercial-${version}.jar.asc,liquibase-commercial-${version}-sources.jar.asc,liquibase-commercial-${version}-javadoc.jar.asc,liquibase-commercial-${version}.pom.asc \
+            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
+            -Dclassifiers=,sources,javadoc,
+
+          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+            -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
+            -DrepositoryId=dry-run-sonatype-nexus-staging \
+            -DpomFile=liquibase-maven-plugin-${version}.pom \
+            -DgeneratePom=false \
+            -Dfile=liquibase-maven-plugin-${version}.jar \
+            -Dsources=liquibase-maven-plugin-${version}-sources.jar \
+            -Djavadoc=liquibase-maven-plugin-${version}-javadoc.jar \
+            -Dfiles=liquibase-maven-plugin-${version}.jar.asc,liquibase-maven-plugin-${version}-sources.jar.asc,liquibase-maven-plugin-${version}-javadoc.jar.asc,liquibase-maven-plugin-${version}.pom.asc \
+            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
+            -Dclassifiers=,sources,javadoc,
+          
+          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+            -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
+            -DrepositoryId=dry-run-sonatype-nexus-staging \
+            -DpomFile=liquibase-cli-${version}.pom \
+            -DgeneratePom=false \
+            -Dfile=liquibase-cli-${version}.jar \
+            -Dsources=liquibase-cli-${version}-sources.jar \
+            -Djavadoc=liquibase-cli-${version}-javadoc.jar \
+            -Dfiles=liquibase-cli-${version}.jar.asc,liquibase-cli-${version}-sources.jar.asc,liquibase-cli-${version}-javadoc.jar.asc,liquibase-cli-${version}.pom.asc \
+            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
+            -Dclassifiers=,sources,javadoc,
+
+          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+            -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
+            -DrepositoryId=dry-run-sonatype-nexus-staging \
+            -DpomFile=liquibase-cdi-${version}.pom \
+            -DgeneratePom=false \
+            -Dfile=liquibase-cdi-${version}.jar \
+            -Dsources=liquibase-cdi-${version}-sources.jar \
+            -Djavadoc=liquibase-cdi-${version}-javadoc.jar \
+            -Dfiles=liquibase-cdi-${version}.jar.asc,liquibase-cdi-${version}-sources.jar.asc,liquibase-cdi-${version}-javadoc.jar.asc,liquibase-cdi-${version}.pom.asc \
+            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
+            -Dclassifiers=,sources,javadoc,
+
+          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+            -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
+            -DrepositoryId=dry-run-sonatype-nexus-staging \
+            -DpomFile=liquibase-cdi-jakarta-${version}.pom \
+            -DgeneratePom=false \
+            -Dfile=liquibase-cdi-jakarta-${version}.jar \
+            -Dsources=liquibase-cdi-jakarta-${version}-sources.jar \
+            -Djavadoc=liquibase-cdi-jakarta-${version}-javadoc.jar \
+            -Dfiles=liquibase-cdi-jakarta-${version}.jar.asc,liquibase-cdi-jakarta-${version}-sources.jar.asc,liquibase-cdi-jakarta-${version}-javadoc.jar.asc,liquibase-cdi-jakarta-${version}.pom.asc \
+            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
+            -Dclassifiers=,sources,javadoc,

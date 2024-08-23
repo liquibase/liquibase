@@ -170,10 +170,29 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
         Sql[] sql = instance.generateSql(statements, new MySQLDatabase());
 
         assertEquals(5, sql.length);
-        assertEquals("ALTER TABLE schema_name.table_name ADD column1 BIGINT NULL, ADD column2 BIT(1) NULL", sql[0].toSql());
+        assertEquals("ALTER TABLE schema_name.table_name ADD column1 BIGINT NULL, ADD column2 TINYINT NULL", sql[0].toSql());
         assertEquals("UPDATE schema_name.table_name SET column1 = 0", sql[1].toSql());
         assertEquals("UPDATE schema_name.table_name SET column2 = 1", sql[2].toSql());
         assertEquals("ALTER TABLE schema_name.table_name MODIFY column1 BIGINT NOT NULL", sql[3].toSql());
-        assertEquals("ALTER TABLE schema_name.table_name MODIFY column2 BIT(1) NOT NULL", sql[4].toSql());
+        assertEquals("ALTER TABLE schema_name.table_name MODIFY column2 TINYINT NOT NULL", sql[4].toSql());
+
+        // repeat with MariaDBDatabase which shall result in TINYINT(1) for boolean column (instead of just TINYINT)
+        statements = change.generateStatements(new MariaDBDatabase());
+        sql = instance.generateSql(statements, new MariaDBDatabase());
+
+        assertEquals(5, sql.length);
+        assertEquals("ALTER TABLE schema_name.table_name ADD column1 BIGINT NULL, ADD column2 TINYINT(1) NULL", sql[0].toSql());
+        assertEquals("UPDATE schema_name.table_name SET column1 = 0", sql[1].toSql());
+        assertEquals("UPDATE schema_name.table_name SET column2 = 1", sql[2].toSql());
+        assertEquals("ALTER TABLE schema_name.table_name MODIFY column1 BIGINT NOT NULL", sql[3].toSql());
+        assertEquals("ALTER TABLE schema_name.table_name MODIFY column2 TINYINT(1) NOT NULL", sql[4].toSql());
+    }
+
+    @Test
+    public void testDefaultValueDatabaseFunctionPostgres() {
+        AddColumnStatement statement = new AddColumnStatement(null, null, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE,  new DatabaseFunction("GENERATED ALWAYS AS (value->>'foo') STORED"));
+        SqlGeneratorFactory instance = SqlGeneratorFactory.getInstance();
+        Sql[] sql = instance.generateSql(statement, new PostgresDatabase());
+        assertEquals("ALTER TABLE table_name ADD column_name COLUMN_TYPE GENERATED ALWAYS AS (value->>'foo') STORED", sql[0].toSql());
     }
 }

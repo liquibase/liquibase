@@ -1,5 +1,6 @@
 package liquibase
 
+import liquibase.util.StringUtil
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -211,6 +212,27 @@ class LabelExpressionTest extends Specification {
         ""             | true
         "test"         | false
         "test1, test2" | false
+    }
 
+    def "make sure originalString returns all available labels set as a string"() {
+        expect:
+        def labels = new LabelExpression("test,test2")
+        assert labels.getOriginalString() == "test,test2"
+    }
+
+    def "make sure originalString returns all available labels set as an array of strings"() {
+        expect:
+        def labels = new LabelExpression((String[])["test", "test2"])
+        assert labels.getOriginalString() == "test,test2"
+    }
+
+    @Unroll("#featureName. label: #testLabels")
+    def "make sure originalString returns all available labels set as a collection"() {
+        expect:
+        def labels = new LabelExpression(testLabels)
+        assert labels.getOriginalString() == StringUtil.join(testLabels, ",")
+
+        where:
+        testLabels << [["test"], ["test1", "test2"]]
     }
 }

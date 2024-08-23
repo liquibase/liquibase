@@ -35,7 +35,7 @@ public class AddAutoIncrementGeneratorMySQL extends AddAutoIncrementGenerator {
                 + " "
                 + mysqlDatabase.getTableOptionAutoIncrementStartWithClause(statement.getStartWith());
 
-            sql = concact(sql, new UnparsedSql(alterTableSql, getAffectedTable(statement)));
+            sql = concat(sql, new UnparsedSql(alterTableSql, getAffectedTable(statement)));
         }
 
         return sql;
@@ -48,7 +48,7 @@ public class AddAutoIncrementGeneratorMySQL extends AddAutoIncrementGenerator {
         return validationErrors;
     }
 
-    private Sql[] concact(Sql[] origSql, UnparsedSql unparsedSql) {
+    private Sql[] concat(Sql[] origSql, UnparsedSql unparsedSql) {
         Sql[] changedSql = new Sql[origSql.length+1];
         System.arraycopy(origSql, 0, changedSql, 0, origSql.length);
         changedSql[origSql.length] = unparsedSql;

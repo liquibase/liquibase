@@ -25,6 +25,8 @@ Optional Args:
     Default: null
   changelogFile (String) Changelog file to write results
     Default: null
+  contextFilter (String) Changeset contexts to generate
+    Default: null
   dataOutputDirectory (String) Directory to write table data to
     Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
@@ -47,6 +49,8 @@ Optional Args:
     Default: false
   includeTablespace (Boolean) Include the tablespace attribute in the changelog. Defaults to false.
     Default: false
+  labelFilter (String) Changeset labels to generate
+    Default: null
   outputSchemas (String) Output schemas names. This is a CSV list.
     Default: null
   overwriteOutputFile (Boolean) Flag to allow overwriting of output changelog file. Default: false
@@ -54,8 +58,16 @@ Optional Args:
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
+  replaceIfExistsTypes (String) Sets replaceIfExists="true" for changes of these types (supported types: createProcedure, createView)
+    Default: none
+  runOnChangeTypes (String) Sets runOnChange="true" for changesets containing solely changes of these types (e. g. createView, createProcedure, ...).
+    Default: none
   schemas (String) Schemas to include in diff
     Default: null
+  skipObjectSorting (Boolean) When true will skip object sorting. This can be useful on databases that have a lot of packages/procedures that are linked to each other
+    Default: false
+  useOrReplaceOption (Boolean) If true, will add 'OR REPLACE' option to the create view change object
+    Default: false
   username (String) Username to use to connect to the database
     Default: null
 """

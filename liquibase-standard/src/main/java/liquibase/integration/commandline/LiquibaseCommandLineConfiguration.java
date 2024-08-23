@@ -1,6 +1,5 @@
 package liquibase.integration.commandline;
 
-import liquibase.ChecksumVersion;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueConverter;
@@ -15,7 +14,7 @@ import java.util.logging.Level;
  */
 public class LiquibaseCommandLineConfiguration implements AutoloadedConfigurations {
 
-    public static final ConfigurationDefinition<Class> DRIVER;
+    public static final ConfigurationDefinition<String> DRIVER;
     public static final ConfigurationDefinition<Class> DATABASE_CLASS;
     public static final ConfigurationDefinition<String> CLASSPATH;
     public static final ConfigurationDefinition<String> DRIVER_PROPERTIES_FILE;
@@ -32,11 +31,16 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
     public static final ConfigurationDefinition<Boolean> SHOULD_RUN;
     public static final ConfigurationDefinition<ArgumentConverter> ARGUMENT_CONVERTER;
     public static final ConfigurationDefinition<String> MONITOR_PERFORMANCE;
+    public static final ConfigurationDefinition<Boolean> ADD_EMPTY_MDC_VALUES;
+    public static final ConfigurationDefinition<Boolean> SHOW_HIDDEN_ARGS;
+    public static final ConfigurationDefinition<Boolean> INCLUDE_MATCHING_TAG_IN_ROLLBACK_OLDEST;
+    public static final ConfigurationDefinition<Boolean> WORKAROUND_ORACLE_CLOB_CHARACTER_LIMIT;
+    public static final ConfigurationDefinition<Boolean> SUPPRESS_LIQUIBASE_SQL;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
 
-        DRIVER = builder.define("driver", Class.class).setDescription("Database driver class").build();
+        DRIVER = builder.define("driver", String.class).setDescription("Database driver class").build();
         DATABASE_CLASS = builder.define("databaseClass", Class.class).setDescription("Class to use for Database implementation").build();
         CLASSPATH = builder.define("classpath", String.class).setDescription("Additional classpath entries to use").build();
         DRIVER_PROPERTIES_FILE = builder.define("driverPropertiesFile", String.class)
@@ -113,6 +117,35 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                         return null;
                     }
                 })
+                .build();
+
+        ADD_EMPTY_MDC_VALUES = builder.define("addEmptyMdcValues", Boolean.class)
+                .setDescription("If true, a subset of the MdcKeys, as defined by product, will be set to empty strings upon system startup.")
+                .setDefaultValue(true)
+                .setHidden(true)
+                .build();
+
+        SHOW_HIDDEN_ARGS = builder.define("showHiddenArgs", Boolean.class)
+                .setDescription("If true, all command arguments marked as hidden will be shown in the help output, ignoring the hidden flag. NOTE, due to the order of value provider loading at such an early point in Liquibase startup, you MUST set this as a environment variable. Command line parameters will not be recognized.")
+                .setDefaultValue(false)
+                .setHidden(true)
+                .build();
+
+        INCLUDE_MATCHING_TAG_IN_ROLLBACK_OLDEST = builder.define("includeMatchingTagInRollbackOldest", Boolean.class)
+                .setDescription("If set to true, and there are multiple identical tags in the database changelog table, all of the newer matching tags will be rolled back while rolling back to the oldest tag. The default value for this option was false for all Liquibase versions equal to or older than 4.25.1.")
+                .setDefaultValue(true)
+                .setHidden(true)
+                .build();
+
+        WORKAROUND_ORACLE_CLOB_CHARACTER_LIMIT = builder.define("workaroundOracleClobCharacterLimit", Boolean.class)
+                .setDescription("If true, long strings in Oracle will be chunked at 4000 characters when an insert statement is run, to avoid running afoul of Oracle's 4000 character limit for insert statements to clob type columns (which appears as 'ORA-01704: string literal too long.')")
+                .setDefaultValue(true)
+                .setHidden(true)
+                .build();
+
+        SUPPRESS_LIQUIBASE_SQL = builder.define("suppressLiquibaseSql", Boolean.class)
+                .setDescription("When set to true, this global property prevents DBCL and DBCLH sql from being present in console and logs during *-sql commands, such as update-sql, rollback-sql, etc.")
+                .setDefaultValue(false)
                 .build();
    }
 

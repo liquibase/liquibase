@@ -1,13 +1,9 @@
 package liquibase.database;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import java.util.ArrayList;
-import java.util.List;
-import org.junit.Test;
 import liquibase.Scope;
+import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateTableChange;
+import liquibase.changelog.ChangeSet;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.sdk.executor.MockExecutor;
@@ -16,6 +12,14 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.structure.core.Table;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Base test class for database-specific tests
@@ -60,7 +64,6 @@ public abstract class AbstractJdbcDatabaseTest {
 //        verify(connection);
 //    }
 
-
     @Test
     public void defaultsWorkWithoutAConnection() {
         database.getDatabaseProductName();
@@ -68,6 +71,7 @@ public abstract class AbstractJdbcDatabaseTest {
         database.getDefaultSchemaName();
         database.getDefaultPort();
     }
+
 //    @Test
 //    public void isCorrectDatabaseImplementation() throws Exception {
 //        assertTrue(getDatabase().isCorrectDatabaseImplementation(getMockConnection()));
@@ -279,13 +283,15 @@ public abstract class AbstractJdbcDatabaseTest {
     @Test
     public void test_escapeObjectName() {
         String tableName = database.escapeObjectName("My Table  ", Table.class);
-        assertTrue(tableName.matches("[\\[\\\"`]?My Table  [\\]\\\"`]?"));
+        assertThat(tableName).isEqualToIgnoringCase(
+            database.getQuotingStartCharacter() + "My Table  " + database.getQuotingEndCharacter());
 
         tableName = database.escapeObjectName("MyTable", Table.class);
-        assertEquals("MyTable", tableName);
+        assertThat(tableName).isEqualTo("MyTable");
 
         tableName = database.escapeObjectName("My Table", Table.class);
-        assertTrue(tableName.matches("[\\[\\\"`]?My Table[\\]\\\"`]?"));
+        assertThat(tableName).isEqualToIgnoringCase(
+            database.getQuotingStartCharacter() + "My Table" + database.getQuotingEndCharacter());
     }
 
 //    @Test
@@ -299,4 +305,28 @@ public abstract class AbstractJdbcDatabaseTest {
 //            assertEquals("VARCHAR(255)", database.getDataType("java.sql.Types.VARCHAR(255)", false).toUpperCase().replaceAll("VARCHAR2", "VARCHAR"));
 //        }
 //    }
+
+    @Test
+    public void executeStatements() throws Exception {
+        final Database database = getDatabase();
+        final MockExecutor mockExecutor = Mockito.spy(new MockExecutor());
+        final List<SqlVisitor> sqlVisitors = new ArrayList<>();
+        final List<SqlVisitor> expectedSqlVisitors = getExpectedSqlVisitors(database);
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, mockExecutor);
+
+        final ChangeSet changeSet = new ChangeSet("test1", "nvoxland", false, true, "/test/me.txt", null, null, false, null);
+        CreateTableChange change = new CreateTableChange();
+        change.setTableName("testTable");
+        change.addColumn(new ColumnConfig().setName("id").setType("int"));
+        changeSet.addChange(change);
+
+        database.executeStatements(change, null, sqlVisitors);
+
+        assertEquals("CREATE TABLE testTable (id INT);", mockExecutor.getRanSql().trim());
+        Mockito.verify(mockExecutor).execute(change, expectedSqlVisitors);
+    }
+
+    protected List<SqlVisitor> getExpectedSqlVisitors(Database database) {
+        return new ArrayList<>();
+    }
 }

@@ -3,18 +3,20 @@ package liquibase.command;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.configuration.*;
+import liquibase.database.Database;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.CommandValidationException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.listener.LiquibaseListener;
 import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcManager;
 import liquibase.logging.mdc.MdcObject;
-import liquibase.util.ISODateFormat;
+import liquibase.logging.mdc.MdcValue;
+import liquibase.logging.mdc.customobjects.ExceptionDetails;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
-import java.io.FilterOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.time.Instant;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -29,6 +31,7 @@ import java.util.regex.Pattern;
  */
 public class CommandScope {
 
+    public static final String DO_NOT_SEND_EXCEPTION_TO_UI = "DO_NOT_SEND_EXCEPTION_TO_UI";
     private static final String NO_PREFIX_REGEX = ".*\\.";
     public static final Pattern NO_PREFIX_PATTERN = Pattern.compile(NO_PREFIX_REGEX);
     private final CommandDefinition commandDefinition;
@@ -48,6 +51,8 @@ public class CommandScope {
     private final String shortConfigPrefix;
 
     private OutputStream outputStream;
+    @Getter
+    private Date operationStartTime;
 
     /**
      * Creates a new scope for the given command.
@@ -129,7 +134,7 @@ public class CommandScope {
      */
     public <T> T getArgumentValue(CommandArgumentDefinition<T> argument) {
         final T value = getConfiguredValue(argument).getValue();
-        return argument.getValueConverter().convert(value);
+        return ConfigurationValueUtils.convertDataType(argument.getName(), value, argument.getValueConverter());
     }
 
     /**
@@ -139,7 +144,7 @@ public class CommandScope {
      * <p>
      * Means that this class will LockService.class using object lock
      */
-    public  CommandScope provideDependency(Class<?> clazz, Object value) {
+    public CommandScope provideDependency(Class<?> clazz, Object value) {
         this.dependencies.put(clazz, value);
 
         return this;
@@ -194,8 +199,10 @@ public class CommandScope {
      * Executes the command in this scope, and returns the results.
      */
     public CommandResults execute() throws CommandExecutionException {
-        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, new ISODateFormat().format(new Date()));
-        // We don't want to reset the command name even when defining another CommandScope during execution because we intend on keeping this value as the command entered to the console
+        operationStartTime = new Date();
+        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, Instant.ofEpochMilli(operationStartTime.getTime()).toString());
+        // We don't want to reset the command name even when defining another CommandScope during execution
+        // because we intend on keeping this value as the command entered to the console
         if (!Scope.getCurrentScope().isMdcKeyPresent(MdcKey.LIQUIBASE_COMMAND_NAME)) {
             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, String.join(" ", commandDefinition.getName()));
         }
@@ -214,20 +221,35 @@ public class CommandScope {
                 } catch (Exception runException) {
                     // Suppress the exception for now so that we can run the cleanup steps even when encountering an exception.
                     thrownException = Optional.of(runException);
+                    Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_OUTCOME, MdcValue.COMMAND_FAILED, false);
                     break;
                 }
                 executedCommands.add(command);
             }
 
+            // To find the correct database source if there was an exception
+            // we need to examine the database connection prior to closing it.
+            // That means this must run prior to any cleanup command steps.
+            Database database = (Database) getDependency(Database.class);
+            String source = null;
+            if (database != null) {
+                source = ExceptionDetails.findSource(database);
+            }
+
             // after executing our pipeline, runs cleanup in inverse order
-            for (int i = executedCommands.size() -1; i >= 0; i--) {
+            for (int i = executedCommands.size() - 1; i >= 0; i--) {
                 CommandStep command = pipeline.get(i);
                 if (command instanceof CleanUpCommandStep) {
-                    ((CleanUpCommandStep)command).cleanUp(resultsBuilder);
+                    ((CleanUpCommandStep) command).cleanUp(resultsBuilder);
                 }
             }
             if (thrownException.isPresent()) { // Now that we've executed all our cleanup, rethrow the exception if there was one
+                if (!executedCommands.isEmpty()) {
+                    logPrimaryExceptionToMdc(thrownException.get(), source);
+                }
                 throw thrownException.get();
+            } else {
+                Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_OUTCOME, MdcValue.COMMAND_SUCCESSFUL, false);
             }
         } catch (Exception e) {
             if (e instanceof CommandExecutionException) {
@@ -249,6 +271,22 @@ public class CommandScope {
         }
 
         return resultsBuilder.build();
+    }
+
+    private void logPrimaryExceptionToMdc(Throwable exception, String source) {
+        ExceptionDetails exceptionDetails = new ExceptionDetails(exception, source);
+        if (exceptionDetails.getPrimaryException() != null) {
+            MdcManager mdcManager = Scope.getCurrentScope().getMdcManager();
+            try (MdcObject primaryExceptionObject = mdcManager.put(MdcKey.EXCEPTION_DETAILS, exceptionDetails)) {
+                Scope.getCurrentScope().getLog(getClass()).info("Logging exception.");
+            }
+            if ( ! Scope.getCurrentScope().has(DO_NOT_SEND_EXCEPTION_TO_UI)) {
+                Scope.getCurrentScope().getUI().sendMessage("ERROR: Exception Details");
+                Scope.getCurrentScope().getUI().sendMessage(exceptionDetails.getFormattedPrimaryException());
+                Scope.getCurrentScope().getUI().sendMessage(exceptionDetails.getFormattedPrimaryExceptionReason());
+                Scope.getCurrentScope().getUI().sendMessage(exceptionDetails.getFormattedPrimaryExceptionSource());
+            }
+        }
     }
 
     private void addOutputFileToMdc() throws Exception {
@@ -289,6 +327,7 @@ public class CommandScope {
 
     /**
      * Returns a string of the entire defined command names, joined together with spaces
+     *
      * @param commandStep the command step to get the name of
      * @return the full command step name definition delimited by spaces or an empty string if there are no defined command names
      */

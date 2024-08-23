@@ -10,7 +10,10 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.database.jvm.SybaseASAConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.core.Index;
 
 import java.math.BigInteger;
@@ -223,7 +226,7 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
      */
     @Override
     public boolean supportsInitiallyDeferrableColumns() {
-        return false;
+        return true;
     }
 
     @Override
@@ -311,7 +314,7 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean requiresExplicitNullForColumns() {
-        /* SAP Adaptive Server Enterprise and, by extension, SQL Anywhere in ASE compatiblity mode have the
+        /* SAP Adaptive Server Enterprise and, by extension, SQL Anywhere in ASE compatibility mode have the
          * strange requirement of setting the nullability of a column to NOT NULL if neither NULL nor
          * NOT NULL are specified. See:
          * http://dcx.sap.com/index.html#sqla170/en/html/819378356ce21014a17f8d51529119ee.html
@@ -327,4 +330,14 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
          */
         return 6;
     }
+
+    @Override
+    public void afterUpdate() throws LiquibaseException {
+        /*
+         * SQL Anywhere needs recompilation of views after an update, when the underlying tables have changed.
+         * It is safe to always recompile as long as we ignore any compilation failures.
+         */
+        this.execute(new SqlStatement[] {new RawParameterizedSqlStatement("sa_recompile_views(1)")}, null);
+    }
+
 }

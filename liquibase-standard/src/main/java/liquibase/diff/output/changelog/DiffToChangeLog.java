@@ -1,10 +1,15 @@
 package liquibase.diff.output.changelog;
 
 import liquibase.GlobalConfiguration;
+import liquibase.Labels;
 import liquibase.Scope;
 import liquibase.change.Change;
+import liquibase.change.ReplaceIfExists;
 import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
+import liquibase.changeset.ChangeSetService;
+import liquibase.changeset.ChangeSetServiceFactory;
+import liquibase.command.core.helpers.AbstractChangelogCommandStep;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.*;
 import liquibase.database.core.*;
@@ -24,10 +29,11 @@ import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.StoredDatabaseLogic;
+import liquibase.structure.core.Table;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -39,6 +45,8 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class DiffToChangeLog {
@@ -55,18 +63,38 @@ public class DiffToChangeLog {
     private int changeNumber = 1;
 
     private String changeSetContext;
+    private String changeSetLabels;
     private String changeSetAuthor;
     private String changeSetPath;
+    private String[] changeSetRunOnChangeTypes;
+    private String[] changeReplaceIfExistsTypes;
     private DiffResult diffResult;
     private final DiffOutputControl diffOutputControl;
     private boolean tryDbaDependencies = true;
 
+    private boolean skipObjectSorting = false;
+
     private static final Set<Class> loggedOrderFor = new HashSet<>();
+
+    /**
+     * Creates a new DiffToChangeLog with the given DiffResult and default DiffOutputControl
+     * @param diffResult the DiffResult to convert to a ChangeLog
+     * @param diffOutputControl the DiffOutputControl to use to control the output
+     * @param skipObjectSorting if true, will skip dependency object sorting. This can be useful on databases that have a lot of packages/procedures that are linked to each other
+     */
+    public DiffToChangeLog(DiffResult diffResult, DiffOutputControl diffOutputControl, boolean skipObjectSorting) {
+        this(diffResult, diffOutputControl);
+        this.skipObjectSorting = skipObjectSorting;
+    }
 
     public DiffToChangeLog(DiffResult diffResult, DiffOutputControl diffOutputControl) {
         this.diffResult = diffResult;
         this.diffOutputControl = diffOutputControl;
         respectSchemaAndCatalogCaseIfNeeded(diffOutputControl);
+    }
+
+    public DiffToChangeLog(DiffOutputControl diffOutputControl) {
+        this.diffOutputControl = diffOutputControl;
     }
 
     private void respectSchemaAndCatalogCaseIfNeeded(DiffOutputControl diffOutputControl) {
@@ -75,16 +103,16 @@ public class DiffToChangeLog {
         }
     }
 
-    public DiffToChangeLog(DiffOutputControl diffOutputControl) {
-        this.diffOutputControl = diffOutputControl;
-    }
-
     public void setDiffResult(DiffResult diffResult) {
         this.diffResult = diffResult;
     }
 
     public void setChangeSetContext(String changeSetContext) {
         this.changeSetContext = changeSetContext;
+    }
+
+    public void setChangeSetLabels(String changeSetLabels) {
+        this.changeSetLabels = changeSetLabels;
     }
 
     public void print(String changeLogFile) throws ParserConfigurationException, IOException, DatabaseException {
@@ -231,14 +259,13 @@ public class DiffToChangeLog {
 
         Scope.getCurrentScope().getLog(getClass()).info("changeSets count: " + changeSets.size());
         if (changeSets.isEmpty()) {
-            Scope.getCurrentScope().getLog(getClass()).info("No changesets to add.");
+            Scope.getCurrentScope().getLog(getClass()).info("No changesets to add to the changelog output.");
         } else {
             Scope.getCurrentScope().getLog(getClass()).info(file + " does not exist, creating and adding " + changeSets.size() + " changesets.");
-        }
-
-        try (OutputStream stream = file.openOutputStream(new OpenOptions());
-             PrintStream out = new PrintStream(stream, true, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())) {
-            changeLogSerializer.write(changeSets, out);
+            try (OutputStream stream = file.openOutputStream(new OpenOptions());
+                 PrintStream out = new PrintStream(stream, true, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())) {
+                 changeLogSerializer.write(changeSets, out);
+            }
         }
     }
 
@@ -280,6 +307,7 @@ public class DiffToChangeLog {
             for (Map.Entry<? extends DatabaseObject, ObjectDifferences> entry : diffResult.getChangedObjects(type, comparator).entrySet()) {
                 if (!diffResult.getReferenceSnapshot().getDatabase().isLiquibaseObject(entry.getKey()) && !diffResult.getReferenceSnapshot().getDatabase().isSystemObject(entry.getKey())) {
                     Change[] changes = changeGeneratorFactory.fixChanged(entry.getKey(), entry.getValue(), diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
+                    setReplaceIfExistsTrueIfApplicable(changes);
                     addToChangeSets(changes, updateChangeSets, quotingStrategy, created);
                 }
             }
@@ -304,6 +332,7 @@ public class DiffToChangeLog {
             ObjectQuotingStrategy quotingStrategy = diffOutputControl.getObjectQuotingStrategy();
 
             Change[] changes = changeGeneratorFactory.fixMissing(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
+            setReplaceIfExistsTrueIfApplicable(changes);
             addToChangeSets(changes, createChangeSets, quotingStrategy, created);
         }
 
@@ -315,6 +344,7 @@ public class DiffToChangeLog {
             for (DatabaseObject object : sortUnexpectedObjects(diffResult.getUnexpectedObjects(type, comparator), diffResult.getReferenceSnapshot().getDatabase())) {
                 if (!diffResult.getComparisonSnapshot().getDatabase().isLiquibaseObject(object) && !diffResult.getComparisonSnapshot().getDatabase().isSystemObject(object)) {
                     Change[] changes = changeGeneratorFactory.fixUnexpected(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
+                    setReplaceIfExistsTrueIfApplicable(changes);
                     addToChangeSets(changes, deleteChangeSets, quotingStrategy, created);
                 }
             }
@@ -333,16 +363,26 @@ public class DiffToChangeLog {
         return changeSets;
     }
 
+    private void setReplaceIfExistsTrueIfApplicable(Change[] changes) {
+        if (changes !=null && diffOutputControl.isReplaceIfExistsSet()) {
+            for (Change change : changes) {
+                if (change instanceof ReplaceIfExists) {
+                    ((ReplaceIfExists) change).setReplaceIfExists(true);
+                }
+            }
+        }
+    }
+
     //
     // Because the generated changeset list can contain both add and drop
     // FK changes with the same constraint name, we make sure that the
     // drop FK goes first
     //
     private List<ChangeSet> bringDropFKToTop(List<ChangeSet> changeSets) {
-        List<ChangeSet> dropFk = changeSets.stream().filter(cs -> {
-            return cs.getChanges().stream().anyMatch(ch -> ch instanceof DropForeignKeyConstraintChange);
-        }).collect(Collectors.toList());
-        if (dropFk == null || dropFk.isEmpty()) {
+        List<ChangeSet> dropFk = changeSets.stream().filter(cs ->
+            cs.getChanges().stream().anyMatch(DropForeignKeyConstraintChange.class::isInstance)
+        ).collect(Collectors.toList());
+        if (dropFk.isEmpty()) {
             return changeSets;
         }
         List<ChangeSet> returnList = new ArrayList<>();
@@ -428,8 +468,10 @@ public class DiffToChangeLog {
                                 schemaName = obj.getSchema().getName();
                             }
 
-                            String name = schemaName + "." + obj.getName();
-                            if (dependencyOrder.contains(name)) {
+                            String objectName = obj.getName();
+                            String name = schemaName + "." + objectName;
+                            if (dependencyOrder.contains(name) ||
+                                dependencyOrder.contains(convertStoredLogicObjectName(schemaName, objectName, database))) {
                                 toSort.add(obj);
                             } else {
                                 toNotSort.add(obj);
@@ -440,6 +482,15 @@ public class DiffToChangeLog {
                     }
 
                     toSort.sort((o1, o2) -> {
+                        //
+                        // For Postgres, make tables appear before stored logic
+                        //
+                        if (database instanceof PostgresDatabase) {
+                            Integer x = determineOrderingForTablesAndStoredLogic(o1, o2);
+                            if (x != null) {
+                                return x;
+                            }
+                        }
                         String o1Schema = null;
                         if (o1.getSchema() != null) {
                             o1Schema = o1.getSchema().getName();
@@ -465,9 +516,62 @@ public class DiffToChangeLog {
                 }
             } catch (DatabaseException e) {
                 Scope.getCurrentScope().getLog(getClass()).fine("Cannot get object dependencies: " + e.getMessage());
+            } catch (StackOverflowError e) {
+                Scope.getCurrentScope().getLog(getClass()).warning("You have too many or recursive database object dependencies! " +
+                        "Liquibase is going to ignore dependency sorting and resume processing. To skip this message " +
+                        "(and save a lot of processing time) use flag " + AbstractChangelogCommandStep.SKIP_OBJECT_SORTING.getName(), e);
             }
         }
         return new ArrayList<>(objects);
+    }
+
+    private static Integer determineOrderingForTablesAndStoredLogic(DatabaseObject o1, DatabaseObject o2) {
+        if (o1 instanceof Table && o2 instanceof StoredDatabaseLogic) {
+            return -1;
+        }
+        if (o1 instanceof StoredDatabaseLogic && o2 instanceof Table) {
+            return 1;
+        }
+        return null;
+    }
+
+    /**
+     *
+     * POSTGRES ONLY:
+     *
+     * If we have a stored logic object then we edit the name
+     * to replace the parameter list with a list of just the types.
+     * This is the format that the dependency computation puts out.
+     *
+     * Example:  calculate_bonus(emp_salary numeric, emp_name character varying) becomes
+     *           calculate_bonus(numeric, character varying)
+     *
+     * @param  objectName     The input object name to work on
+     * @return String
+     *
+     */
+    private static String convertStoredLogicObjectName(String schemaName, String objectName, Database database) {
+        String name = schemaName + "." + objectName;
+        if (! (database instanceof PostgresDatabase) || ! (objectName.contains("(") && objectName.contains(")"))) {
+            return name;
+        }
+        Pattern p = Pattern.compile(".*?[(]+(.*)?[)]+[\\s]*?$");
+        Matcher m = p.matcher(objectName);
+        if (m.matches()) {
+            String originalParameters = m.group(1);
+            String editedParameters = originalParameters;
+            String[] parameters = m.group(1).split(",");
+            for (String parameter : parameters) {
+                parameter = parameter.trim();
+                String[] parts = parameter.split(" ");
+                String[] rest = Arrays.copyOfRange(parts, 1, parts.length);
+                String part = StringUtil.join(rest, " ");
+                editedParameters = editedParameters.replace(parameter, part);
+            }
+            name = schemaName + "." + objectName.replace(originalParameters, editedParameters)
+                                                .replace(", ",",");
+        }
+        return name;
     }
 
     private List<Map<String, ?>> queryForDependenciesOracle(Executor executor, List<String> schemas)
@@ -475,10 +579,10 @@ public class DiffToChangeLog {
         List<Map<String, ?>> rs = null;
         try {
             if (tryDbaDependencies) {
-                rs = executor.queryForList(new RawSqlStatement("select OWNER, NAME, REFERENCED_OWNER, REFERENCED_NAME from DBA_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(OWNER = REFERENCED_OWNER AND NAME = REFERENCED_NAME) AND (" + StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "OWNER='" + obj + "'"
+                rs = executor.queryForList(new RawParameterizedSqlStatement("select OWNER, NAME, REFERENCED_OWNER, REFERENCED_NAME from DBA_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(OWNER = REFERENCED_OWNER AND NAME = REFERENCED_NAME) AND (" + StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "OWNER='" + obj + "'"
                 ) + ")"));
             } else {
-                rs = executor.queryForList(new RawSqlStatement("select NAME, REFERENCED_OWNER, REFERENCED_NAME from USER_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(NAME = REFERENCED_NAME) AND (" + StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "REFERENCED_OWNER='" + obj + "'"
+                rs = executor.queryForList(new RawParameterizedSqlStatement("select NAME, REFERENCED_OWNER, REFERENCED_NAME from USER_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(NAME = REFERENCED_NAME) AND (" + StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "REFERENCED_OWNER='" + obj + "'"
                 ) + ")"));
             }
         } catch (DatabaseException dbe) {
@@ -489,9 +593,7 @@ public class DiffToChangeLog {
             //   to stop the recursion
             //
             String message = dbe.getMessage();
-            if (!message.contains("ORA-00942: table or view does not exist")) {
-                throw new DatabaseException(dbe);
-            } else if (!tryDbaDependencies) {
+            if (!message.contains("ORA-00942") || !tryDbaDependencies) {
                 throw new DatabaseException(dbe);
             }
             Scope.getCurrentScope().getLog(getClass()).warning("Unable to query DBA_DEPENDENCIES table. Switching to USER_DEPENDENCIES");
@@ -505,6 +607,9 @@ public class DiffToChangeLog {
      * Used by {@link #sortMissingObjects(Collection, Database)} to determine whether to go into the sorting logic.
      */
     protected boolean supportsSortingObjects(Database database) {
+        if (this.skipObjectSorting) {
+            return false;
+        }
         return (database instanceof AbstractDb2Database) || (database instanceof MSSQLDatabase) || (database instanceof
                 OracleDatabase) || database instanceof PostgresDatabase;
     }
@@ -515,8 +620,8 @@ public class DiffToChangeLog {
     protected void addDependencies(DependencyUtil.DependencyGraph<String> graph, List<String> schemas, Database database) throws DatabaseException {
         if (database instanceof DB2Database) {
             Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement("select TABSCHEMA, TABNAME, BSCHEMA, BNAME from syscat.tabdep where (" + StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "TABSCHEMA='" + obj + "'"
-            ) + ")"));
+            String sql = "select TABSCHEMA, TABNAME, BSCHEMA, BNAME from syscat.tabdep where TABSCHEMA in (" + StringUtil.join(schemas, ", ", obj -> "?") + ")";
+            List<Map<String, ?>> rs = executor.queryForList(new RawParameterizedSqlStatement(sql, schemas.toArray()));
             for (Map<String, ?> row : rs) {
                 String tabName = StringUtil.trimToNull((String) row.get("TABSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("TABNAME"));
                 String bName = StringUtil.trimToNull((String) row.get("BSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("BNAME"));
@@ -525,9 +630,8 @@ public class DiffToChangeLog {
             }
         } else if (database instanceof Db2zDatabase) {
             Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-            String db2ZosSql = "SELECT DSCHEMA AS TABSCHEMA, DNAME AS TABNAME, BSCHEMA, BNAME FROM SYSIBM.SYSDEPENDENCIES WHERE (" + StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "DSCHEMA='" + obj + "'"
-            ) + ")";
-            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(db2ZosSql));
+            String sql = "SELECT DSCHEMA AS TABSCHEMA, DNAME AS TABNAME, BSCHEMA, BNAME FROM SYSIBM.SYSDEPENDENCIES WHERE DSCHEMA IN (" + StringUtil.join(schemas, ", ", obj -> "?") + ")";
+            List<Map<String, ?>> rs = executor.queryForList(new RawParameterizedSqlStatement(sql, schemas.toArray()));
             for (Map<String, ?> row : rs) {
                 String tabName = StringUtil.trimToNull((String) row.get("TABSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("TABNAME"));
                 String bName = StringUtil.trimToNull((String) row.get("BSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("BNAME"));
@@ -613,7 +717,7 @@ public class DiffToChangeLog {
             //get non-clustered indexes -> unique clustered indexes on views dependencies
             sql += " UNION select object_schema_name(c.object_id) as referencing_schema_name, c.name as referencing_name, object_schema_name(nc.object_id) as referenced_schema_name, nc.name as referenced_name from sys.indexes c join sys.indexes nc on c.object_id=nc.object_id JOIN sys.objects o ON c.object_id = o.object_id where  c.index_id != nc.index_id and c.type_desc='CLUSTERED' and c.is_unique='true' and (not(nc.type_desc='CLUSTERED') OR nc.is_unique='false') AND o.type_desc='VIEW' AND o.name='AR_DETAIL_OPEN'";
 
-            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(sql));
+            List<Map<String, ?>> rs = executor.queryForList(new RawParameterizedSqlStatement(sql));
             if (!rs.isEmpty()) {
                 for (Map<String, ?> row : rs) {
                     String bName = StringUtil.trimToNull((String) row.get("REFERENCED_SCHEMA_NAME")) + "." + StringUtil.trimToNull((String) row.get("REFERENCED_NAME"));
@@ -627,7 +731,7 @@ public class DiffToChangeLog {
         } else if (database instanceof PostgresDatabase) {
             final String sql = queryForDependenciesPostgreSql(schemas);
             final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-            final List<Map<String, ?>> queryForListResult = executor.queryForList(new RawSqlStatement(sql));
+            final List<Map<String, ?>> queryForListResult = executor.queryForList(new RawParameterizedSqlStatement(sql));
 
             for (Map<String, ?> row : queryForListResult) {
                 String bName = StringUtil.trimToEmpty((String) row.get("REFERENCING_SCHEMA_NAME")) +
@@ -739,32 +843,39 @@ public class DiffToChangeLog {
 
     private void addToChangeSets(Change[] changes, List<ChangeSet> changeSets, ObjectQuotingStrategy quotingStrategy, String created) {
         if (changes != null) {
-            String csContext = this.changeSetContext;
-
-            if (diffOutputControl.getContext() != null) {
-                csContext = diffOutputControl.getContext().toString().replaceFirst("^\\(", "")
-                        .replaceFirst("\\)$", "");
-            }
-
+            ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
             if (useSeparateChangeSets(changes)) {
                 for (Change change : changes) {
-                    ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
-                            null, true, quotingStrategy, null);
+                    final boolean runOnChange = isContainedInRunOnChangeTypes(change);
+                    ChangeSet changeSet =
+                            service.createChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, changeSetContext,
+                                    null, null, null, true, quotingStrategy, null);
                     changeSet.setCreated(created);
                     if (diffOutputControl.getLabels() != null) {
                         changeSet.setLabels(diffOutputControl.getLabels());
+                    } else {
+                        changeSet.setLabels(new Labels(this.changeSetLabels));
+                    }
+                    if (change instanceof ReplaceIfExists && isContainedInReplaceIfExistsTypes(change)) {
+                        ((ReplaceIfExists) change).setReplaceIfExists(true);
                     }
                     changeSet.addChange(change);
                     changeSets.add(changeSet);
                 }
             } else {
-                ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, csContext,
-                        null, true, quotingStrategy, null);
+                final boolean runOnChange = Arrays.asList(changes).stream().allMatch(this::isContainedInRunOnChangeTypes);
+                ChangeSet changeSet = service.createChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, changeSetContext,
+                                        null, null, null, true, quotingStrategy, null);
                 changeSet.setCreated(created);
                 if (diffOutputControl.getLabels() != null) {
                     changeSet.setLabels(diffOutputControl.getLabels());
+                } else {
+                    changeSet.setLabels(new Labels(this.changeSetLabels));
                 }
                 for (Change change : changes) {
+                    if (change instanceof ReplaceIfExists && isContainedInReplaceIfExistsTypes(change)) {
+                        ((ReplaceIfExists) change).setReplaceIfExists(true);
+                    }
                     changeSet.addChange(change);
                 }
                 changeSets.add(changeSet);
@@ -823,6 +934,30 @@ public class DiffToChangeLog {
 
     public void setChangeSetPath(String changeSetPath) {
         this.changeSetPath = changeSetPath;
+    }
+
+    public void setChangeSetRunOnChangeTypes(final String[] runOnChangeTypes) {
+        changeSetRunOnChangeTypes = runOnChangeTypes;
+    }
+
+    protected String[] getChangeSetRunOnChangeTypes() {
+        return changeSetRunOnChangeTypes;
+    }
+
+    private boolean isContainedInRunOnChangeTypes(final Change change) {
+        return getChangeSetRunOnChangeTypes() != null && Arrays.asList(getChangeSetRunOnChangeTypes()).contains(change.getSerializedObjectName());
+    }
+
+    public void setChangeReplaceIfExistsTypes(final String[] replaceIfExistsTypes) {
+        changeReplaceIfExistsTypes = replaceIfExistsTypes;
+    }
+
+    protected String[] getChangeReplaceIfExistsTypes() {
+        return changeReplaceIfExistsTypes;
+    }
+
+    private boolean isContainedInReplaceIfExistsTypes(final Change change) {
+        return getChangeReplaceIfExistsTypes() != null && Arrays.asList(getChangeReplaceIfExistsTypes()).contains(change.getSerializedObjectName());
     }
 
     public void setIdRoot(String idRoot) {
@@ -974,20 +1109,10 @@ public class DiffToChangeLog {
             }
         }
 
-
-        private Node getNode(Class<? extends DatabaseObject> type) {
-            Node node = allNodes.get(type);
-            if (node == null) {
-                node = new Node(type);
-            }
-            return node;
-        }
-
-
         static class Node {
             public final Class<? extends DatabaseObject> type;
-            public final HashSet<Edge> inEdges;
-            public final HashSet<Edge> outEdges;
+            public final Set<Edge> inEdges;
+            public final Set<Edge> outEdges;
 
             public Node(Class<? extends DatabaseObject> type) {
                 this.type = type;

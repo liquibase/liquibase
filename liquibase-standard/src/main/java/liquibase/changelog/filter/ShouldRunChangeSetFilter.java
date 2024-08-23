@@ -14,6 +14,8 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
 
     private final Map<String, RanChangeSet> ranChangeSets;
     private final boolean ignoreClasspathPrefix;
+    public static final String CHANGESET_ALREADY_RAN_MESSAGE = "Changeset already ran";
+
 
     public ShouldRunChangeSetFilter(Database database, boolean ignoreClasspathPrefix) throws DatabaseException {
         this.ignoreClasspathPrefix = ignoreClasspathPrefix;
@@ -55,16 +57,16 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
     @Override
     @SuppressWarnings({"RedundantIfStatement"})
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
-        for (RanChangeSet ranChangeSet : this.ranChangeSets.values()) {
-            if (ranChangeSet.isSameAs(changeSet)) {
-                if (changeSet.shouldAlwaysRun()) {
-                    return new ChangeSetFilterResult(true, "Changeset always runs", this.getClass(), getMdcName(), getDisplayName());
-                }
-                if (changeSet.shouldRunOnChange() && checksumChanged(changeSet, ranChangeSet)) {
-                    return new ChangeSetFilterResult(true, "Changeset checksum changed", this.getClass(), getMdcName(), getDisplayName());
-                }
-                return new ChangeSetFilterResult(false, "Changeset already ran", this.getClass(), getMdcName(), getDisplayName());
+        String key = changeSet.toNormalizedString();
+        RanChangeSet ranChangeSet = this.ranChangeSets.get(key);
+        if (ranChangeSet != null && ranChangeSet.isSameAs(changeSet)) {
+            if (changeSet.shouldAlwaysRun()) {
+                return new ChangeSetFilterResult(true, "Changeset always runs", this.getClass(), getMdcName(), getDisplayName());
             }
+            if (changeSet.shouldRunOnChange() && checksumChanged(changeSet, ranChangeSet)) {
+                return new ChangeSetFilterResult(true, "Changeset checksum changed", this.getClass(), getMdcName(), getDisplayName());
+            }
+            return new ChangeSetFilterResult(false, CHANGESET_ALREADY_RAN_MESSAGE, this.getClass(), getMdcName(), getDisplayName());
         }
         return new ChangeSetFilterResult(true, "Changeset has not ran yet", this.getClass(), getMdcName(), getDisplayName());
     }

@@ -39,6 +39,9 @@ import java.util.logging.Level;
  */
 public class JdbcExecutor extends AbstractExecutor {
 
+    public static final String SHOULD_UPDATE_ROWS_AFFECTED_SCOPE_KEY = "shouldUpdateRowsAffected";
+    public static final String ROWS_AFFECTED_SCOPE_KEY = "rowsAffected";
+
     /**
      * Return the name of the Executor
      *
@@ -72,6 +75,9 @@ public class JdbcExecutor extends AbstractExecutor {
                 throw new DatabaseException("Cannot execute commands against an offline database");
             }
             stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement();
+            if (Boolean.TRUE.equals(SqlConfiguration.ALWAYS_SET_FETCH_SIZE.getCurrentValue())) {
+                stmt.setFetchSize(database.getFetchSize());
+            }
             Statement stmtToUse = stmt;
 
             Object object = action.doInStatement(stmtToUse);
@@ -102,7 +108,9 @@ public class JdbcExecutor extends AbstractExecutor {
     }
 
     private void showSqlWarnings(Statement stmtToUse) throws SQLException {
-        if (! SqlConfiguration.SHOW_SQL_WARNING_MESSAGES.getCurrentValue() || stmtToUse.getWarnings() == null) {
+        if (Boolean.TRUE.equals(! SqlConfiguration.SHOW_SQL_WARNING_MESSAGES.getCurrentValue() ||
+            stmtToUse == null) ||
+            stmtToUse.getWarnings() == null) {
             return;
         }
         SQLWarning sqlWarning = stmtToUse.getWarnings();
@@ -153,10 +161,7 @@ public class JdbcExecutor extends AbstractExecutor {
             String finalSql = applyVisitors((RawParameterizedSqlStatement) sql, sqlVisitors);
 
             try (PreparedStatement pstmt = factory.create(finalSql)) {
-                final List<?> parameters = ((RawParameterizedSqlStatement) sql).getParameters();
-                for (int i = 0; i < parameters.size(); i++) {
-                    pstmt.setObject(i, parameters.get(i));
-                }
+                setParameters(pstmt, (RawParameterizedSqlStatement) sql);
                 pstmt.execute();
 
                 return;
@@ -178,6 +183,34 @@ public class JdbcExecutor extends AbstractExecutor {
         }
 
         execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
+    }
+
+    private void setParameters(final PreparedStatement pstmt, final RawParameterizedSqlStatement sql) throws SQLException {
+        final List<Object> parameters = sql.getParameters();
+        for (int i = 0; i < parameters.size(); i++) {
+            Object parameter = parameters.get(i);
+            if(parameter instanceof ArrayList){
+                int finalI = i;
+                ((ArrayList<?>) parameter).forEach(param -> {
+                    try {
+                        setParameter(pstmt, finalI, param);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+            else {
+                setParameter(pstmt, i, parameter);
+            }
+        }
+    }
+
+    private static void setParameter(PreparedStatement pstmt, int parameterIndex, Object parameter) throws SQLException {
+        if (parameter instanceof String) {
+            pstmt.setString(parameterIndex + 1, (String) parameter);
+        } else {
+            pstmt.setObject(parameterIndex + 1, parameter);
+        }
     }
 
     private String applyVisitors(RawParameterizedSqlStatement sql, List<SqlVisitor> sqlVisitors) {
@@ -204,10 +237,7 @@ public class JdbcExecutor extends AbstractExecutor {
             String finalSql = applyVisitors((RawParameterizedSqlStatement) sql, sqlVisitors);
 
             try (PreparedStatement pstmt = factory.create(finalSql)) {
-                final List<?> parameters = ((RawParameterizedSqlStatement) sql).getParameters();
-                for (int i = 0; i < parameters.size(); i++) {
-                    pstmt.setObject(i, parameters.get(0));
-                }
+                setParameters(pstmt, (RawParameterizedSqlStatement) sql);
                 return rse.extractData(pstmt.executeQuery());
             } catch (SQLException e) {
                 throw new DatabaseException(e);
@@ -493,8 +523,9 @@ public class JdbcExecutor extends AbstractExecutor {
 
     private void addUpdateCountToScope(int updateCount) {
         if (updateCount > -1) {
-            AtomicInteger scopeRowsAffected = Scope.getCurrentScope().get("rowsAffected", AtomicInteger.class);
-            if (scopeRowsAffected != null) {
+            AtomicInteger scopeRowsAffected = Scope.getCurrentScope().get(ROWS_AFFECTED_SCOPE_KEY, AtomicInteger.class);
+            Boolean shouldUpdateRowsAffected = Scope.getCurrentScope().get(SHOULD_UPDATE_ROWS_AFFECTED_SCOPE_KEY, true);
+            if (scopeRowsAffected != null && Boolean.TRUE.equals(shouldUpdateRowsAffected)) {
                 scopeRowsAffected.addAndGet(updateCount);
             }
         }

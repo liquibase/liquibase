@@ -9,8 +9,8 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DatabaseUtils;
 import liquibase.exception.DatabaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
-import liquibase.logging.mdc.MdcKey;
 import liquibase.resource.ResourceAccessor;
+import liquibase.structure.core.Schema;
 import liquibase.util.StringUtil;
 
 import java.util.ResourceBundle;
@@ -49,8 +49,9 @@ public abstract class AbstractDatabaseConnectionCommandStep extends AbstractHelp
                                         String defaultSchemaName,
                                         String defaultCatalogName,
                                         String driver,
-                                        String driverPropertiesFile)
-            throws DatabaseException {
+                                        String driverPropertiesFile,
+                                        String liquibaseCatalogName,
+                                        String liquibaseSchemaName) throws DatabaseException {
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         String databaseClassName = null;
         Class<?> databaseClass = LiquibaseCommandLineConfiguration.DATABASE_CLASS.getCurrentValue();
@@ -62,8 +63,6 @@ public abstract class AbstractDatabaseConnectionCommandStep extends AbstractHelp
         if (clazz != null) {
             propertyProviderClass = clazz.getName();
         }
-        String liquibaseCatalogName = StringUtil.trimToNull(GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValue());
-        String liquibaseSchemaName = StringUtil.trimToNull(GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentValue());
         String databaseChangeLogTablespaceName = StringUtil.trimToNull(GlobalConfiguration.LIQUIBASE_TABLESPACE_NAME.getCurrentValue());
         String databaseChangeLogLockTableName = StringUtil.trimToNull(GlobalConfiguration.DATABASECHANGELOGLOCK_TABLE_NAME.getCurrentValue());
         String databaseChangeLogTableName = StringUtil.trimToNull(GlobalConfiguration.DATABASECHANGELOG_TABLE_NAME.getCurrentValue());
@@ -75,7 +74,7 @@ public abstract class AbstractDatabaseConnectionCommandStep extends AbstractHelp
             database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver,
                     databaseClassName, driverPropertiesFile, propertyProviderClass, resourceAccessor);
 
-            if (!database.supportsSchemas()) {
+            if (!database.supports(Schema.class)) {
                 if ((defaultSchemaName != null) && (defaultCatalogName == null)) {
                     defaultCatalogName = defaultSchemaName;
                 }

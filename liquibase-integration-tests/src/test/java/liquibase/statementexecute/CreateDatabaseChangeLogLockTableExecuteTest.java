@@ -62,7 +62,7 @@ public class CreateDatabaseChangeLogLockTableExecuteTest extends AbstractExecute
     
         assertCorrect(new String[]{"create table databasechangeloglock (" +
                 "id integer not null, " +
-                "locked number(1) not null, " +
+                "locked boolean not null, " +
                 "lockgranted timestamp, " +
                 "lockedby varchar2(255), " +
                 "constraint pk_databasechangeloglock primary key (id))"}, OracleDatabase.class);

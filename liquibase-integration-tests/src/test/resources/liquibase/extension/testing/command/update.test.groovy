@@ -10,6 +10,7 @@ import liquibase.exception.CommandValidationException
 import java.util.regex.Pattern
 
 import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNotNull
 
 CommandTests.define {
     command = ["update"]
@@ -42,6 +43,8 @@ Optional Args:
     OBFUSCATED
   showSummary (UpdateSummaryEnum) Type of update results summary to show.  Values can be 'off', 'summary', or 'verbose'.
     Default: SUMMARY
+  showSummaryOutput (UpdateSummaryOutputEnum) Summary output to report update summary results. Values can be 'log', 'console', or 'all'.
+    Default: ALL
   username (String) Username to use to connect to the database
     Default: null
 """
@@ -56,7 +59,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         expectedDatabaseContent = [
@@ -73,6 +77,7 @@ Optional Args:
              for (RanChangeSet ranChangeSet : ranChangeSets) {
                  assertEquals(expectedOrder, ranChangeSet.getOrderExecuted())
                  expectedOrder++
+                 assertNotNull(ranChangeSet.getDeploymentId())
              }
         }
 
@@ -89,7 +94,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         expectedDatabaseContent = [
@@ -122,7 +128,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/ignoredChangeset.txt")
@@ -153,40 +160,37 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/changeSetWithLabels.txt")
 
         expectedFileContent = [ "target/test-classes/changeSetWithLabels.txt":
                    [
-                     "UPDATE SUMMARY",
-                     "Run:                          1",
-                     "Previously run:               0",
-                     "Filtered out:                40",
-                     "-------------------------------",
-                     "Total change sets:           41",
-                     "FILTERED CHANGE SETS SUMMARY",
-                     "Label mismatch:              40",
-                     "+--------------------------------------------------------------+-------------------------------+",
-                     "| Changeset Info                                               | Reason Skipped                |",
-                     "+--------------------------------------------------------------+-------------------------------+",
-                     "|                                                              | Labels does not match 'first' |",
-                     "| changelogs/h2/complete/simple.changelog.labels.xml::1.1::nvo |                               |",
-                     "| xland                                                        |                               |",
-                     "+--------------------------------------------------------------+-------------------------------+",
-                     "|                                                              | Labels does not match 'first' |",
-                     "| changelogs/h2/complete/simple.changelog.labels.xml::2::nvoxl |                               |",
-                     "| and                                                          |                               |",
-                     "+--------------------------------------------------------------+-------------------------------+",
-                     "|                                                              | Labels does not match 'first' |",
-                     "| changelogs/h2/complete/simple.changelog.labels.xml::3::nvoxl |                               |",
-                     "| and                                                          |                               |",
-                     "+--------------------------------------------------------------+-------------------------------+",
-                     "|                                                              | Labels does not match 'first' |",
-                     "| changelogs/h2/complete/simple.changelog.labels.xml::5::nvoxl |                               |",
-                     "| and                                                          |                               |",
-                     "+--------------------------------------------------------------+-------------------------------+"
+                     """UPDATE SUMMARY
+                     Run:                          1
+                     Previously run:               0
+                     Filtered out:                40
+                     -------------------------------
+                     Total change sets:           41
+                     FILTERED CHANGE SETS SUMMARY
+                     Label mismatch:              40
+                     +--------------------------------------------------------------+-------------------------------+
+                     | Changeset Info                                               | Reason Skipped                |
+                     +--------------------------------------------------------------+-------------------------------+
+                     | changelogs/h2/complete/simple.changelog.labels.xml::1.1::nvo | Labels does not match 'first' |
+                     | xland                                                        |                               |
+                     +--------------------------------------------------------------+-------------------------------+
+                     | changelogs/h2/complete/simple.changelog.labels.xml::2::nvoxl | Labels does not match 'first' |
+                     | and                                                          |                               |
+                     +--------------------------------------------------------------+-------------------------------+
+                     | changelogs/h2/complete/simple.changelog.labels.xml::3::nvoxl | Labels does not match 'first' |
+                     | and                                                          |                               |
+                     +--------------------------------------------------------------+-------------------------------+
+                     | changelogs/h2/complete/simple.changelog.labels.xml::5::nvoxl | Labels does not match 'first' |
+                     | and                                                          |                               |
+                     +--------------------------------------------------------------+-------------------------------+"""
                      ]
         ]
 
@@ -205,29 +209,29 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/changeSetWithLabels.txt")
 
         expectedFileContent = [ "target/test-classes/changeSetWithLabels.txt":
            [
-                "UPDATE SUMMARY",
-                "Run:                          2",
-                "Previously run:               0",
-                "Filtered out:                 1",
-                "-------------------------------",
-                "Total change sets:            3",
-                "FILTERED CHANGE SETS SUMMARY",
-                "Context mismatch:             1",
-                "Label mismatch:               1",
-                "+--------------------------------------------------------------+------------------------------------------+",
-                "| Changeset Info                                               | Reason Skipped                           |",
-                "+--------------------------------------------------------------+------------------------------------------+",
-                "|                                                              | Context does not match 'firstcontext'    |",
-                "| changelogs/h2/complete/simple.changelog.labels.context.xml:: | Labels does not match 'first'            |",
-                "| 2::nvoxland                                                  |                                          |",
-                "+--------------------------------------------------------------+------------------------------------------+"
+                """UPDATE SUMMARY
+                Run:                          2
+                Previously run:               0
+                Filtered out:                 1
+                -------------------------------
+                Total change sets:            3
+                FILTERED CHANGE SETS SUMMARY
+                Context mismatch:             1
+                Label mismatch:               1
+                +--------------------------------------------------------------+------------------------------------------+
+                | Changeset Info                                               | Reason Skipped                           |
+                +--------------------------------------------------------------+------------------------------------------+
+                | changelogs/h2/complete/simple.changelog.labels.context.xml:: | Context does not match 'firstcontext'    |
+                | 2::nvoxland                                                  | Labels does not match 'first'            |
+                +--------------------------------------------------------------+------------------------------------------+"""
            ]
         ]
     }
@@ -245,12 +249,80 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/changeSetWithComplicatedLabelsAndContext.txt")
 
         expectedFileContent = [ "target/test-classes/changeSetWithComplicatedLabelsAndContext.txt":
+             [
+               "UPDATE SUMMARY",
+               "Run:                          2",
+               "Previously run:               0",
+               "Filtered out:                 4",
+               "-------------------------------",
+               "Total change sets:            6",
+               "FILTERED CHANGE SETS SUMMARY",
+               "Context mismatch:             2",
+               "Label mismatch:               3",
+               "DBMS mismatch:                1"
+             ]
+        ]
+    }
+
+    run "Happy path with a change set that has complicated labels and contexts with log output", {
+        arguments = [
+                url                 : { it.url },
+                username            : { it.username },
+                password            : { it.password },
+                changelogFile       : "changelogs/h2/complete/summary-changelog.xml",
+                labelFilter         : "testtable1",
+                contextFilter       : "none",
+                showSummary         : "summary",
+                showSummaryOutput   : "log"
+        ]
+
+        expectedResults = [
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
+        ]
+
+        expectedLogs = [
+                "UPDATE SUMMARY",
+                "Run:                          2",
+                "Previously run:               0",
+                "Filtered out:                 4",
+                "-------------------------------",
+                "Total change sets:            6",
+                "FILTERED CHANGE SETS SUMMARY",
+                "Context mismatch:             2",
+                "Label mismatch:               3",
+                "DBMS mismatch:                1"
+        ]
+    }
+
+    run "Happy path with skipped change sets propagated from an included changelog", {
+        arguments = [
+                url          : { it.url },
+                username     : { it.username },
+                password     : { it.password },
+                changelogFile: "changelogs/h2/complete/summary.root.changelog.xml",
+                labelFilter  : "testtable1",
+                contextFilter: "none",
+                showSummary  : "summary"
+        ]
+
+        expectedResults = [
+                statusCode: 0,
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
+        ]
+
+        outputFile = new File("target/test-classes/changeSetSkippedPropagatedToRoot.txt")
+
+        expectedFileContent = [ "target/test-classes/changeSetSkippedPropagatedToRoot.txt":
              [
                "UPDATE SUMMARY",
                "Run:                          2",
@@ -277,28 +349,28 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         outputFile = new File("target/test-classes/mismatchedDBMS.txt")
 
         expectedFileContent = [ "target/test-classes/mismatchedDBMS.txt":
             [
-              "UPDATE SUMMARY",
-              "Run:                          2",
-              "Previously run:               0",
-              "Filtered out:                 1",
-              "-------------------------------",
-              "Total change sets:            3",
-              "FILTERED CHANGE SETS SUMMARY",
-              "DBMS mismatch:                1",
-              "+--------------------------------------------------------------+--------------------------------+",
-              "| Changeset Info                                               | Reason Skipped                 |",
-              "+--------------------------------------------------------------+--------------------------------+",
-              "|                                                              | mismatched DBMS value of 'foo' |",
-              "| changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvox |                                |",
-              "| land                                                         |                                |",
-              "+--------------------------------------------------------------+--------------------------------+"
+              """UPDATE SUMMARY
+              Run:                          2
+              Previously run:               0
+              Filtered out:                 1
+              -------------------------------
+              Total change sets:            3
+              FILTERED CHANGE SETS SUMMARY
+              DBMS mismatch:                1
+              +--------------------------------------------------------------+--------------------------------+
+              | Changeset Info                                               | Reason Skipped                 |
+              +--------------------------------------------------------------+--------------------------------+
+              | changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvox | mismatched DBMS value of 'foo' |
+              | land                                                         |                                |
+              +--------------------------------------------------------------+--------------------------------+"""
            ]
         ]
     }
@@ -313,7 +385,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         expectedDatabaseContent = [
@@ -367,6 +440,19 @@ Optional Args:
         expectedException = IllegalArgumentException.class
     }
 
+    run "Run with a bad global flag value throws an exception", {
+        arguments = [
+                url          : { it.url },
+                username     : { it.username },
+                password     : { it.password },
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml"
+        ]
+        globalArguments = ["liquibase.preserveSchemaCase": "foo"]
+
+        expectedException = CommandExecutionException.class
+        expectedExceptionMessage = Pattern.compile(".*WARNING:  The input for 'liquibase.preserveSchemaCase' is 'foo', which is not valid.  Options: 'true' or 'false'.*")
+    }
+
     run "Should use LoggingChangeExecListener", {
         arguments = [
                 url                    : { it.url },
@@ -378,7 +464,8 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
 
         expectedLogs = [
@@ -397,7 +484,64 @@ Optional Args:
 
         expectedResults = [
                 statusCode: 0,
-                defaultChangeExecListener: 'not_null'
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
+    }
+
+    run "Deployment fails on first changeset", {
+        arguments = [
+                url          : { it.url },
+                username     : { it.username },
+                password     : { it.password },
+                changelogFile: "changelogs/common/invalid.sql.changelog.xml",
+                showSummary: "VERBOSE"
+        ]
+
+        outputFile = new File("target/test-classes/happyPath.txt")
+
+        expectedFileContent = [ "target/test-classes/happyPath.txt":
+                                        [
+                                                """
+UPDATE SUMMARY
+Run:                          0
+Previously run:               0
+Filtered out:                 0
+-------------------------------
+Total change sets:            1
+"""
+                                        ]
+        ]
+        expectedException = CommandExecutionException
+    }
+
+    run "Ignore on includeAll", {
+        arguments = [
+                url          : { it.url },
+                username     : { it.username },
+                password     : { it.password },
+                changelogFile: "changelogs/common/includerelative/pathinclude1.ignored.changelog.xml",
+                showSummary: "VERBOSE"
+        ]
+
+        expectedOutput = """
+UPDATE SUMMARY
+Run:                          1
+Previously run:               0
+Filtered out:                 1
+-------------------------------
+Total change sets:            2
+
+
+FILTERED CHANGE SETS SUMMARY
+Ignored:                      1
+
++--------------------------------------------------------------+----------------------+
+| Changeset Info                                               | Reason Skipped       |
++--------------------------------------------------------------+----------------------+
+| changelogs/common/includerelative/includeAll/pathinclude2.ch | Changeset is ignored |
+| angelog.xml::1::nvoxland                                     |                      |
++--------------------------------------------------------------+----------------------+
+"""
     }
 }

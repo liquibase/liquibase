@@ -2,46 +2,36 @@ package liquibase.database;
 
 import liquibase.exception.DatabaseException;
 import liquibase.resource.ResourceAccessor;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Properties;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 public class DatabaseFactoryTest {
 
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    @TempDir
+    public File temporaryFolder;
 
     private ResourceAccessor resourceAccessor;
     private DatabaseFactory databaseFactory;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         resourceAccessor = mock(ResourceAccessor.class);
         DatabaseFactory.reset();
         databaseFactory = DatabaseFactory.getInstance();
-    }
-
-    @After
-    public void tearDown() {
-        temporaryFolder.delete();
     }
 
     @Test
@@ -68,11 +58,9 @@ public class DatabaseFactoryTest {
 
     @Test
     public void openConnectionThrowsExceptionWhenDriverCannotBeFoundByUrl() throws Exception {
-        expectedException.expect(instanceOf(DatabaseException.class));
-        expectedException.expectCause(instanceOf(RuntimeException.class));
-        expectedException.expectMessage(containsString("Driver class was not specified and could not be determined from the url"));
-
-        databaseFactory.openConnection("not:a:driver", "", "", null, resourceAccessor);
+        DatabaseException expectedException = assertThrows(DatabaseException.class, () -> databaseFactory.openConnection("not:a:driver", "", "", null, resourceAccessor));
+        assertThat(expectedException.getCause(), instanceOf(RuntimeException.class));
+        assertThat(expectedException.getMessage(), containsString("Driver class was not specified and could not be determined from the url"));
     }
 
     @Test
@@ -84,7 +72,7 @@ public class DatabaseFactoryTest {
 
     @Test
     public void openConnectionLoadsDriverPropertiesFromGivenFile() throws Exception {
-        File propsFile = temporaryFolder.newFile("db-factory-test-connection-props.properties");
+        File propsFile = new File(temporaryFolder, "db-factory-test-connection-props.properties");
         Properties expectedProps = new Properties();
         expectedProps.setProperty("param1", "value1");
         expectedProps.setProperty("param2", "value2");
@@ -108,13 +96,11 @@ public class DatabaseFactoryTest {
 
     @Test
     public void openConnectionThrowsRuntimeExceptionWhenDriverPropertiesFileNotFound() throws Exception {
-        expectedException.expect(instanceOf(DatabaseException.class));
-        expectedException.expectCause(instanceOf(RuntimeException.class));
-        expectedException.expectMessage(containsString("Can't open JDBC Driver specific properties from the file"));
-
-        databaseFactory.openConnection("jdbc:h2:mem:DatabaseFactoryTest", "sa", "", null, null, "unknown file", null, resourceAccessor);
+        DatabaseException expectedException = assertThrows(DatabaseException.class, () -> databaseFactory.openConnection("jdbc:h2:mem:DatabaseFactoryTest", "sa", "", null, null, "unknown file", null, resourceAccessor));
+        assertThat(expectedException.getCause(), instanceOf(RuntimeException.class));
+        assertThat(expectedException.getMessage(), containsString("Can't open JDBC Driver specific properties from the file"));
     }
-    
+
     @Test
     public void openConnectionReturnsAConnection() throws Exception {
         DatabaseConnection dbConnection = databaseFactory.openConnection("jdbc:h2:mem:DatabaseFactoryTest", "sa", "", null, resourceAccessor);

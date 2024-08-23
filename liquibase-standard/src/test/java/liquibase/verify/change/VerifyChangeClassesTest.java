@@ -33,8 +33,8 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
 
 
     @BeforeClass
-    public static void setUpClass() {
-        Scope.setScopeManager(new TestScopeManager());
+    public static void setUpClass() throws Exception {
+        Scope.setScopeManager(new TestScopeManager(Scope.getCurrentScope()));
     }
 
     @Test

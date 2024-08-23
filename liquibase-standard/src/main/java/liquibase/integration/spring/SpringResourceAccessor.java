@@ -1,13 +1,19 @@
 package liquibase.integration.spring;
 
+import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.AbstractResourceAccessor;
 import org.springframework.core.io.*;
+
+import static java.net.URLDecoder.*;
+
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.UnsupportedOperationException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -88,13 +94,16 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
         //have to fall back to figuring out the path as best we can
         try {
             String url = resource.getURL().toExternalForm();
+
+            url = decodeUrl(resource, url);
+
             if (url.contains("!")) {
                 return url.replaceFirst(".*!", "");
             } else {
                 while (!getResource("classpath:" + url).exists()) {
                     String newUrl = url.replaceFirst("^/?.*?/", "");
                     if (newUrl.equals(url)) {
-                        throw new UnexpectedLiquibaseException("Could determine path for " + resource.getURL().toExternalForm());
+                        throw new UnexpectedLiquibaseException("Could not determine path for " + resource.getURL().toExternalForm());
                     }
                     url = newUrl;
                 }
@@ -173,11 +182,11 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
      * Default implementation adds "classpath:" and removes duplicated /'s and classpath:'s
      */
     protected String finalizeSearchPath(String searchPath) {
-        if(searchPath.matches("^classpath\\*?:.*")) {
-            searchPath = searchPath.replace("classpath:","").replace("classpath*:","");
-            searchPath = "classpath*:/" +searchPath;
-        } else if(!searchPath.matches("^\\w+:.*")) {
-            searchPath = "classpath*:/" +searchPath;
+        if (searchPath.matches("^classpath\\*?:.*")) {
+            searchPath = searchPath.replace("classpath:", "").replace("classpath*:", "");
+            searchPath = "classpath*:/" + searchPath;
+        } else if (!searchPath.matches("^\\w+:.*")) {
+            searchPath = "classpath*:/" + searchPath;
         }
         searchPath = searchPath.replace("\\", "/");
         searchPath = searchPath.replaceAll("//+", "/");
@@ -185,6 +194,15 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
         searchPath = StringUtils.cleanPath(searchPath);
 
         return searchPath;
+    }
+
+    private String decodeUrl(Resource resource, String url) throws IOException {
+        try {
+            url = decode(resource.getURL().toExternalForm(), StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Failed to decode path " + url + "; continuing without decoding.", e);
+        }
+        return url;
     }
 
 }

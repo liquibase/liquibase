@@ -13,7 +13,7 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtil;
@@ -52,7 +52,7 @@ public class ColumnAutoIncrementService {
             Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
             try {
                 String query = this.getQueryForDatabaseAndSchema(database, schema);
-                List<Map<String, ?>> rows = executor.queryForList(new RawSqlStatement(query));
+                List<Map<String, ?>> rows = executor.queryForList(new RawParameterizedSqlStatement(query));
                 for (Map<String, ?> row : rows) {
                     String schemaName = (String) row.get("SCHEMA_NAME");
                     String tableName = (String) row.get("TABLE_NAME");
@@ -81,7 +81,7 @@ public class ColumnAutoIncrementService {
                     "CAST(seed_value AS bigint) AS start_value, " +
                     "CAST(increment_value AS bigint) AS increment_by " +
                     "FROM sys.identity_columns " +
-                    "WHERE sys.schemas = '" + schema.getName() + "'";
+                    "WHERE object_schema_name(object_id) = '" + schema.getName() + "'";
         } else if (database instanceof PostgresDatabase) {
             int version = 9;
             try {

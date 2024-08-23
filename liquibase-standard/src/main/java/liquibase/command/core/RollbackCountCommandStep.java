@@ -6,7 +6,11 @@ import liquibase.changelog.filter.CountChangeSetFilter;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.logging.mdc.MdcKey;
+import liquibase.report.RollbackReportParameters;
+import liquibase.util.StringUtil;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class RollbackCountCommandStep extends AbstractRollbackCommandStep {
@@ -28,10 +32,19 @@ public class RollbackCountCommandStep extends AbstractRollbackCommandStep {
         Integer changesToRollback = commandScope.getArgumentValue(COUNT_ARG);
         Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_COUNT, String.valueOf(changesToRollback));
 
+        RollbackReportParameters rollbackReportParameters = new RollbackReportParameters();
+        rollbackReportParameters.setCommandTitle(
+                StringUtil.upperCaseFirst(StringUtil.toKabobCase(Arrays.toString(
+                        defineCommandNames()[0])).replace("[","").replace("]","").trim()));
+        resultsBuilder.addResult("rollbackReport", rollbackReportParameters);
+
         Database database = (Database) commandScope.getDependency(Database.class);
+        rollbackReportParameters.setupDatabaseInfo(database);
+        rollbackReportParameters.setRollbackCount(changesToRollback);
 
         List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
-        this.doRollback(resultsBuilder, ranChangeSetList, new CountChangeSetFilter(changesToRollback));
+
+        Scope.child(Collections.singletonMap("rollbackReport", rollbackReportParameters), () -> this.doRollback(resultsBuilder, ranChangeSetList, new CountChangeSetFilter(changesToRollback), rollbackReportParameters));
     }
 
     @Override

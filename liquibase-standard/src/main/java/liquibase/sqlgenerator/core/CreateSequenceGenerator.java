@@ -16,7 +16,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
 
     @Override
     public boolean supports(CreateSequenceStatement statement, Database database) {
-        return database.supportsSequences();
+        return database.supports(Sequence.class);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
                     queryStringBuilder.append(" IF NOT EXISTS ");
                 }
             } catch (DatabaseException e) {
-                // we can not determinate the PostgreSQL version so we do not add this statement
+                // we can not determine the PostgreSQL version so we do not add this statement
             }
         }
         queryStringBuilder.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
@@ -112,14 +112,15 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             }
         }
 
-        if (!(database instanceof MariaDBDatabase) && statement.getOrdered() != null) {
-            if (!(database instanceof SybaseASADatabase)) {
-                if (statement.getOrdered()) {
-                    queryStringBuilder.append(" ORDER");
-                } else {
-                   if (database instanceof OracleDatabase) {
-                       queryStringBuilder.append(" NOORDER");
-                   }
+        boolean databaseSupportsOrderedSequences = !(database instanceof MariaDBDatabase
+                        || database instanceof SybaseASADatabase
+                        || database instanceof MSSQLDatabase);
+        if (databaseSupportsOrderedSequences && statement.getOrdered() != null) {
+            if (statement.getOrdered()) {
+                queryStringBuilder.append(" ORDER");
+            } else {
+                if (database instanceof OracleDatabase) {
+                    queryStringBuilder.append(" NOORDER");
                 }
             }
         }
@@ -145,7 +146,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         try {
             return database instanceof PostgresDatabase && database.getDatabaseMajorVersion() < 10;
         } catch (DatabaseException e) {
-            // we can't determinate the PostgreSQL version so we shouldn't throw validation error as it might work for this DB
+            // we can't determine the PostgreSQL version so we shouldn't throw validation error as it might work for this DB
             return false;
         }
     }
@@ -155,7 +156,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             // H2 supports the `AS <dataType>` clause since version 2.0
             return database instanceof H2Database && database.getDatabaseMajorVersion() < 2;
         } catch (DatabaseException e) {
-            // we can't determinate the H2 version so we shouldn't throw validation error as it might work for this DB
+            // we can't determine the H2 version so we shouldn't throw validation error as it might work for this DB
             return false;
         }
     }

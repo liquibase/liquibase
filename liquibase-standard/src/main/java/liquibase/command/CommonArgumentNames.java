@@ -7,6 +7,7 @@ public enum CommonArgumentNames {
     USERNAME("username"),
     PASSWORD("password"),
     URL("url"),
+    REFERENCE_URL("referenceUrl"),
     CHANGELOG_FILE("changelogFile");
 
     private final String argumentName;

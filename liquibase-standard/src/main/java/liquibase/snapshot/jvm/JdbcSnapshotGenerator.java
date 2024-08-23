@@ -140,11 +140,16 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
             } else {
                 catalogs = ((JdbcConnection) database.getConnection()).getMetaData().getCatalogs();
             }
-            while (catalogs.next()) {
-                if (((AbstractJdbcDatabase) database).jdbcCallsCatalogsSchemas()) {
-                    returnList.add(catalogs.getString("TABLE_SCHEM"));
-                } else {
-                    returnList.add(catalogs.getString("TABLE_CAT"));
+            if (catalogs == null) {
+                String message = "Unable to retrieve the list of catalog names from the database metadata";
+                Scope.getCurrentScope().getLog(getClass()).warning(message);
+            } else {
+                while (catalogs.next()) {
+                    if (((AbstractJdbcDatabase) database).jdbcCallsCatalogsSchemas()) {
+                        returnList.add(catalogs.getString("TABLE_SCHEM"));
+                    } else {
+                        returnList.add(catalogs.getString("TABLE_CAT"));
+                    }
                 }
             }
         } finally {
@@ -158,7 +163,7 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
             
         }
 
-        if (returnList.size() == 0) {
+        if (returnList.isEmpty()) {
             returnList.add(database.getDefaultCatalogName());
         }
         return returnList.toArray(new String[0]);

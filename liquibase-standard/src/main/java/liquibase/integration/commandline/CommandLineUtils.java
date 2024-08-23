@@ -4,11 +4,10 @@ import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.CommandScope;
-import liquibase.command.core.*;
-import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
-import liquibase.command.core.helpers.DiffOutputControlCommandStep;
-import liquibase.command.core.helpers.PreCompareCommandStep;
-import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep;
+import liquibase.command.core.DiffChangelogCommandStep;
+import liquibase.command.core.DiffCommandStep;
+import liquibase.command.core.GenerateChangelogCommandStep;
+import liquibase.command.core.helpers.*;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
@@ -21,13 +20,12 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.LiquibaseUtil;
+import liquibase.structure.core.Schema;
 import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ResourceBundle;
 
 import static java.util.ResourceBundle.getBundle;
@@ -96,7 +94,7 @@ public class CommandLineUtils {
             Database database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver,
                     databaseClass, driverPropertiesFile, propertyProviderClass, resourceAccessor);
 
-            if (!database.supportsSchemas()) {
+            if (!database.supports(Schema.class)) {
                 if ((defaultSchemaName != null) && (defaultCatalogName == null)) {
                     defaultCatalogName = defaultSchemaName;
                 }
@@ -164,7 +162,7 @@ public class CommandLineUtils {
 
         diffCommand
                 .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, targetDatabase)
                 .addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
                 .addArgumentValue(PreCompareCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
                 .addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(snapshotTypes))
@@ -188,6 +186,10 @@ public class CommandLineUtils {
         }
     }
 
+    /**
+     * @deprecated Use version with  String runOnChangeTypes, String replaceIfExistsTypes instead - {@link #doDiffToChangeLog(String, Database, Database, String, DiffOutputControl, ObjectChangeFilter, String, String, String)}
+     */
+    @Deprecated
     public static void doDiffToChangeLog(String changeLogFile,
                                          Database referenceDatabase,
                                          Database targetDatabase,
@@ -197,7 +199,7 @@ public class CommandLineUtils {
                                          String snapshotTypes)
             throws LiquibaseException, IOException, ParserConfigurationException {
         doDiffToChangeLog(changeLogFile, referenceDatabase, targetDatabase, author, diffOutputControl, objectChangeFilter,
-                snapshotTypes, null);
+                snapshotTypes, AbstractChangelogCommandStep.RUN_ON_CHANGE_TYPES_ARG.getDefaultValue(), AbstractChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG.getDefaultValue());
     }
 
     public static void doDiffToChangeLog(String changeLogFile,
@@ -207,14 +209,47 @@ public class CommandLineUtils {
                                          DiffOutputControl diffOutputControl,
                                          ObjectChangeFilter objectChangeFilter,
                                          String snapshotTypes,
+                                         String runOnChangeTypes,
+                                         String replaceIfExistsTypes)
+            throws LiquibaseException, IOException, ParserConfigurationException {
+        doDiffToChangeLog(changeLogFile, referenceDatabase, targetDatabase, author, diffOutputControl, objectChangeFilter,
+                snapshotTypes, null, runOnChangeTypes, replaceIfExistsTypes);
+    }
+
+    /**
+     * @deprecated Use version with  String runOnChangeTypes, String replaceIfExistsTypes instead - {@link #doDiffToChangeLog(String, Database, Database, String, DiffOutputControl, ObjectChangeFilter, String, CompareControl.SchemaComparison[], String, String)}
+     */
+    @Deprecated
+    public static void doDiffToChangeLog(String changeLogFile,
+                                         Database referenceDatabase,
+                                         Database targetDatabase,
+                                         String author,
+                                         DiffOutputControl diffOutputControl,
+                                         ObjectChangeFilter objectChangeFilter,
+                                         String snapshotTypes,
                                          CompareControl.SchemaComparison[] schemaComparisons)
+            throws LiquibaseException, IOException, ParserConfigurationException {
+        doDiffToChangeLog(changeLogFile, referenceDatabase, targetDatabase, author, diffOutputControl, objectChangeFilter,
+                snapshotTypes, schemaComparisons, AbstractChangelogCommandStep.RUN_ON_CHANGE_TYPES_ARG.getDefaultValue(), AbstractChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG.getDefaultValue());
+    }
+
+    public static void doDiffToChangeLog(String changeLogFile,
+                                         Database referenceDatabase,
+                                         Database targetDatabase,
+                                         String author,
+                                         DiffOutputControl diffOutputControl,
+                                         ObjectChangeFilter objectChangeFilter,
+                                         String snapshotTypes,
+                                         CompareControl.SchemaComparison[] schemaComparisons,
+                                         String runOnChangeTypes,
+                                         String replaceIfExistsTypes)
             throws LiquibaseException, IOException, ParserConfigurationException {
 
 
         CommandScope command = new CommandScope("diffChangeLog");
         command
                 .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, targetDatabase)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, targetDatabase)
                 .addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(snapshotTypes))
                 .addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
                 .addArgumentValue(PreCompareCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
@@ -222,7 +257,12 @@ public class CommandLineUtils {
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_CATALOG_ARG, diffOutputControl.getIncludeCatalog())
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, diffOutputControl.getIncludeSchema())
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_TABLESPACE_ARG, diffOutputControl.getIncludeTablespace())
-                .addArgumentValue(DiffChangelogCommandStep.AUTHOR_ARG, author);
+                .addArgumentValue(DiffChangelogCommandStep.AUTHOR_ARG, author)
+                .addArgumentValue(DiffChangelogCommandStep.RUN_ON_CHANGE_TYPES_ARG, runOnChangeTypes)
+                .addArgumentValue(DiffChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG, replaceIfExistsTypes);
+        if(diffOutputControl.isReplaceIfExistsSet()) {
+            command.addArgumentValue(GenerateChangelogCommandStep.USE_OR_REPLACE_OPTION, true);
+        }
         command.setOutput(System.out);
         try {
             command.execute();
@@ -231,25 +271,61 @@ public class CommandLineUtils {
         }
     }
 
+    /**
+     * @deprecated Use version with  String runOnChangeTypes, String replaceIfExistsTypes instead - {@link #doGenerateChangeLog(String, Database, String, String, String, String, String, String, DiffOutputControl, String, String)}
+     */
+    @Deprecated
     public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String catalogName,
                                            String schemaName, String snapshotTypes, String author, String context,
                                            String dataDir, DiffOutputControl diffOutputControl) throws
             IOException, ParserConfigurationException, LiquibaseException {
         doGenerateChangeLog(changeLogFile, originalDatabase, new CatalogAndSchema[]{new CatalogAndSchema(catalogName,
-                schemaName)}, snapshotTypes, author, context, dataDir, diffOutputControl);
+                schemaName)}, snapshotTypes, author, context, dataDir, diffOutputControl,
+                AbstractChangelogCommandStep.RUN_ON_CHANGE_TYPES_ARG.getDefaultValue(), AbstractChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG.getDefaultValue());
+    }
+
+    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String catalogName,
+                                           String schemaName, String snapshotTypes, String author, String context,
+                                           String dataDir, DiffOutputControl diffOutputControl, String runOnChangeTypes, String replaceIfExistsTypes) throws
+            IOException, ParserConfigurationException, LiquibaseException {
+        doGenerateChangeLog(changeLogFile, originalDatabase, new CatalogAndSchema[]{new CatalogAndSchema(catalogName,
+                schemaName)}, snapshotTypes, author, context, dataDir, diffOutputControl, runOnChangeTypes, replaceIfExistsTypes);
+    }
+
+    /**
+     * @deprecated Use version with  String runOnChangeTypes, String replaceIfExistsTypes instead - {@link #doGenerateChangeLog(String, Database, String, String, String, String, String, String, DiffOutputControl, String, String)}
+     */
+    @Deprecated
+    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, CatalogAndSchema[]
+            schemas, String snapshotTypes, String author, String context, String dataDir, DiffOutputControl diffOutputControl)
+            throws IOException, ParserConfigurationException, LiquibaseException {
+        doGenerateChangeLog(changeLogFile, originalDatabase, schemas, snapshotTypes, author, context, dataDir, diffOutputControl,
+                AbstractChangelogCommandStep.RUN_ON_CHANGE_TYPES_ARG.getDefaultValue(), AbstractChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG.getDefaultValue());
     }
 
 
     public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, CatalogAndSchema[]
             schemas, String snapshotTypes, String author, String context, String dataDir, DiffOutputControl
-                                                   diffOutputControl) throws IOException, ParserConfigurationException,
+                                                   diffOutputControl, String runOnChangeTypes, String replaceIfExistsTypes) throws IOException, ParserConfigurationException,
             LiquibaseException {
-        doGenerateChangeLog(changeLogFile, originalDatabase, schemas, snapshotTypes, author, context, dataDir, diffOutputControl, false);
+        doGenerateChangeLog(changeLogFile, originalDatabase, schemas, snapshotTypes, author, context, dataDir, diffOutputControl, false, runOnChangeTypes, replaceIfExistsTypes);
+    }
+
+    /**
+     * @deprecated Use version with  String runOnChangeTypes, String replaceIfExistsTypes instead - {@link #doGenerateChangeLog(String, Database, CatalogAndSchema[], String, String, String, String, DiffOutputControl, String, String)}
+     */
+    @Deprecated
+
+    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, CatalogAndSchema[]
+            schemas, String snapshotTypes, String author, String context, String dataDir, DiffOutputControl
+                                                   diffOutputControl, boolean overwriteOutputFile) throws IOException, ParserConfigurationException, LiquibaseException {
+        doGenerateChangeLog(changeLogFile, originalDatabase, schemas, snapshotTypes, author, context, dataDir, diffOutputControl, overwriteOutputFile,
+                AbstractChangelogCommandStep.RUN_ON_CHANGE_TYPES_ARG.getDefaultValue(), AbstractChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG.getDefaultValue());
     }
 
     public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, CatalogAndSchema[]
             schemas, String snapshotTypes, String author, String context, String dataDir, DiffOutputControl
-                                                   diffOutputControl, boolean overwriteOutputFile) throws IOException, ParserConfigurationException,
+            diffOutputControl, boolean overwriteOutputFile, String runOnChangeTypes, String replaceIfExistsTypes) throws IOException, ParserConfigurationException,
             LiquibaseException {
         CompareControl.SchemaComparison[] comparisons = new CompareControl.SchemaComparison[schemas.length];
         int i = 0;
@@ -262,7 +338,7 @@ public class CommandLineUtils {
         CommandScope command = new CommandScope("generateChangeLog");
         command
                 .addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, originalDatabase)
-                .addArgumentValue(DbUrlConnectionCommandStep.DATABASE_ARG, originalDatabase)
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, originalDatabase)
                 .addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(snapshotTypes))
                 .addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, compareControl)
                 .addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
@@ -271,8 +347,14 @@ public class CommandLineUtils {
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_TABLESPACE_ARG, diffOutputControl.getIncludeTablespace())
                 .addArgumentValue(GenerateChangelogCommandStep.AUTHOR_ARG, author)
                 .addArgumentValue(GenerateChangelogCommandStep.CONTEXT_ARG, context)
-                .addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, overwriteOutputFile);
+                .addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, overwriteOutputFile)
+                .addArgumentValue(GenerateChangelogCommandStep.RUN_ON_CHANGE_TYPES_ARG, runOnChangeTypes)
+                .addArgumentValue(GenerateChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG, replaceIfExistsTypes);
 
+
+        if(diffOutputControl.isReplaceIfExistsSet()) {
+            command.addArgumentValue(GenerateChangelogCommandStep.USE_OR_REPLACE_OPTION, true);
+        }
         command.setOutput(System.out);
         try {
             command.execute();

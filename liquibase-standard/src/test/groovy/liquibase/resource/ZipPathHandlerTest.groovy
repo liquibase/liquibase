@@ -29,6 +29,7 @@ class ZipPathHandlerTest extends Specification {
         "file:/C:/path/here.jar"               | ":\\path\\here.jar"
         "jar:file:/C:/path/here.jar"           | ":\\path\\here.jar"
         "file:/C:/path/with%20spaces/here.jar" | ":\\path\\with spaces\\here.jar"
+        "jar:file:/C:/path/outer.jar!/BOOT-INF/lib/embedded.jar!/" | ":\\path\\outer.jar"
     }
 
     @Unroll
@@ -44,6 +45,6 @@ class ZipPathHandlerTest extends Specification {
         "file:/C:/path/here.jar"          | Plugin.PRIORITY_SPECIALIZED
         "jar:file:/C:/path/here.jar!/bar" | Plugin.PRIORITY_NOT_APPLICABLE
         "jar:file:/C:/path/here.jar"      | Plugin.PRIORITY_SPECIALIZED
-
+        "jar:file:/C:/path/outer.jar!/BOOT-INF/lib/embedded.jar!/" | Plugin.PRIORITY_SPECIALIZED
     }
 }

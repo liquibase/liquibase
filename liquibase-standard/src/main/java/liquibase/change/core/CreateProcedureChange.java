@@ -9,6 +9,7 @@ import liquibase.changelog.PropertyExpandingStream;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.core.*;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
@@ -17,6 +18,7 @@ import liquibase.statement.core.CreateProcedureStatement;
 import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
+import lombok.Setter;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -26,16 +28,24 @@ import java.nio.charset.Charset;
 import java.util.Map;
 
 @DatabaseChange(name = "createProcedure", description = "Defines a stored procedure.", priority = ChangeMetaData.PRIORITY_DEFAULT)
-public class CreateProcedureChange extends AbstractChange implements DbmsTargetedChange {
+public class CreateProcedureChange extends AbstractChange implements DbmsTargetedChange, ReplaceIfExists {
+    @Setter
     private String comments;
+    @Setter
     private String catalogName;
+    @Setter
     private String schemaName;
+    @Setter
     private String procedureName;
+    @Setter
     private String procedureText;
     private String dbms;
 
+    @Setter
     private String path;
+    @Setter
     private Boolean relativeToChangelogFile;
+    @Setter
     private String encoding;
     private Boolean replaceIfExists;
 
@@ -54,17 +64,9 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @DatabaseChangeProperty(exampleValue = "new_customer",
@@ -73,17 +75,9 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         return procedureName;
     }
 
-    public void setProcedureName(String procedureName) {
-        this.procedureName = procedureName;
-    }
-
     @DatabaseChangeProperty(exampleValue = "utf8", description = "Encoding used in the file you specify in 'path'")
     public String getEncoding() {
         return encoding;
-    }
-
-    public void setEncoding(String encoding) {
-        this.encoding = encoding;
     }
 
     @DatabaseChangeProperty(
@@ -94,18 +88,10 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         return path;
     }
 
-    public void setPath(String path) {
-        this.path = path;
-    }
-
     @DatabaseChangeProperty(description = "Specifies whether the file path is relative to the changelog file " +
         "rather than looked up in the search path. Default: false.")
     public Boolean isRelativeToChangelogFile() {
         return relativeToChangelogFile;
-    }
-
-    public void setRelativeToChangelogFile(Boolean relativeToChangelogFile) {
-        this.relativeToChangelogFile = relativeToChangelogFile;
     }
 
     @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE, version = {ChecksumVersion.V8})
@@ -113,6 +99,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     /**
      * @deprecated Use getProcedureText() instead
      */
+    @Deprecated
     public String getProcedureBody() {
         return procedureText;
     }
@@ -132,13 +119,10 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             isChangeProperty = false, version = {ChecksumVersion.V8})
     @DatabaseChangeProperty(
         description = procedureTextDescription,
-            serializationType = SerializationType.DIRECT_VALUE)
+            serializationType = SerializationType.DIRECT_VALUE,
+            alternatePropertyNames = {"procedureBody"})
     public String getProcedureText() {
         return procedureText;
-    }
-
-    public void setProcedureText(String procedureText) {
-        this.procedureText = procedureText;
     }
 
     @Override
@@ -164,16 +148,13 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         return comments;
     }
 
-    public void setComments(String comments) {
-        this.comments = comments;
-    }
-
     @DatabaseChangeProperty(description = "If the stored procedure defined by createProcedure already exists, " +
         "alter it instead of creating it. Default: false")
     public Boolean getReplaceIfExists() {
         return replaceIfExists;
     }
 
+    @Override
     public void setReplaceIfExists(Boolean replaceIfExists) {
         this.replaceIfExists = replaceIfExists;
     }
@@ -203,7 +184,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         }
 
         if ((this.getReplaceIfExists() != null) && (DatabaseList.definitionMatches(getDbms(), database, true))) {
-            if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase) {
+            if (databaseSupportsReplaceIfExists(database)) {
                 if (this.getReplaceIfExists() && (this.getProcedureName() == null)) {
                     validate.addError("procedureName is required if replaceIfExists = true");
                 }
@@ -303,9 +284,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         CheckSum checkSum;
         try {
             if (getPath() == null) {
-                String procedureText = sqlText;
                 Charset encoding = GlobalConfiguration.FILE_ENCODING.getCurrentValue();
-                if (procedureText != null) {
+                if (sqlText != null) {
                     stream = new ByteArrayInputStream(sqlText.getBytes(encoding));
                 }
             }
@@ -374,7 +354,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             procedureText = StringUtil.trimToNull(getProcedureText());
         } else {
             if (getChangeSet() == null) {
-                //only try to read a file when inside a changest. Not when analyizing supported
+                //only try to read a file when inside a changest. Not when analyzing supported
                 procedureText = "NO CHANGESET";
             } else {
                 try {
@@ -445,5 +425,33 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         } else {
             return super.createExampleValueMetaData(parameterName, changePropertyAnnotation);
         }
+    }
+
+    private static boolean databaseSupportsReplaceIfExists(Database database) {
+        if (database instanceof MSSQLDatabase) {
+            return true;
+        }
+        if (database instanceof MySQLDatabase) {
+            return true;
+        }
+        if (database instanceof DB2Database) {
+            return true;
+        }
+
+        if (database instanceof Db2zDatabase) {
+           try {
+                int major = database.getDatabaseMajorVersion();
+                if (major > 12) {
+                    return true;
+                }
+                if (major < 12) {
+                    return false;
+                }
+                return database.getDatabaseMinorVersion() >= 1;
+            } catch (DatabaseException e) {
+                return false;
+            }
+        }
+        return false;
     }
 }

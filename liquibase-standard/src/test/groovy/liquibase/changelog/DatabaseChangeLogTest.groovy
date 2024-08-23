@@ -6,6 +6,9 @@ import liquibase.Labels
 import liquibase.Scope
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.RawSQLChange
+import liquibase.change.visitor.ChangeVisitor
+import liquibase.database.Database
+import liquibase.database.core.MockDatabase
 import liquibase.exception.SetupException
 import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.logging.core.BufferedLogService
@@ -19,12 +22,14 @@ import liquibase.resource.ResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.util.FileUtil
+import org.mockito.Mock
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
 import java.nio.file.Paths
 import java.util.logging.Level
+import java.util.stream.Stream
 
 class DatabaseChangeLogTest extends Specification {
 
@@ -71,6 +76,16 @@ class DatabaseChangeLogTest extends Specification {
                 <constraints nullable="false"/>
             </column>
         </createTable>
+    </changeSet>
+</databaseChangeLog>'''
+
+    def test3Xml = '''<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:pro="http://www.liquibase.org/xml/ns/pro" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+    http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-latest.xsd ">       
+
+    <changeSet id="1" author="jlyle" runAlways="true">
+        <empty/>
     </changeSet>
 </databaseChangeLog>'''
 
@@ -156,6 +171,34 @@ create view sql_view as select * from sql_table;'''
 
         ((CreateTableChange) changeLogFromChildren.changeSets[1].changes[0]).tableName == "my_other_table"
         ((CreateTableChange) changeLogFromValue.changeSets[1].changes[0]).tableName == "my_other_table"
+    }
+    def "load handles removeChangeSetProperty"() {
+        when:
+        def children = [
+                new ParsedNode(null, "removeChangeSetProperty").setValue([change: "addColumn", dbms: "mock", "remove": "afterColumn"]),
+                new ParsedNode(null, "changeSet").addChildren([id: "1", author: "kirangodishala", createTable: [tableName: "my_table"]]),
+        ]
+        def nodeWithChildren = new ParsedNode(null, "databaseChangeLog").addChildren([logicalFilePath: "com/example/logical.xml"])
+        for (child in children) {
+            nodeWithChildren.addChild(child)
+        }
+
+        def changeLogFromChildren = new DatabaseChangeLog()
+        Database database = new MockDatabase();
+        changeLogFromChildren.setChangeLogParameters(new ChangeLogParameters(database))
+
+        changeLogFromChildren.load(nodeWithChildren, resourceSupplier.simpleResourceAccessor)
+
+        then:
+
+        changeLogFromChildren.changeVisitors.size() == 1
+        changeLogFromChildren.changeSets.size() == 1
+
+
+        ((ChangeVisitor) changeLogFromChildren.changeVisitors[0]).change == "addColumn"
+        ((ChangeVisitor) changeLogFromChildren.changeVisitors[0]).dbms == ["mock"] as HashSet
+        ((ChangeVisitor) changeLogFromChildren.changeVisitors[0]).remove == "afterColumn"
+
     }
 
     def "included changelog files have their preconditions and changes included in root changelog"() {
@@ -447,8 +490,7 @@ create view sql_view as select * from sql_table;'''
 
         then:
         def e = thrown(SetupException)
-        assert e.getMessage().startsWith("Could not find directory or directory was empty for includeAll '")
-
+        assert e.getMessage().startsWith("Could not find directory, directory was empty, or no changelogs matched the provided search criteria for includeAll '")
     }
 
     def "includeAll throws exception when circular reference is detected"() {
@@ -514,7 +556,58 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         e.message == "Cannot find parser that supports com/example/test1.invalid"
     }
 
-    def "include fails if file does not exist"() {
+    def "include fails if XML file is empty"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": ""])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([include: [file: "com/example/test1.xml"]])
+                , resourceAccessor)
+
+
+        then:
+        def e = thrown(SetupException)
+        e.getMessage().contains("Premature end of file.")
+    }
+
+    def "include fails if SQL file is empty"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.sql": ""])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([include: [file: "com/example/test1.sql"]])
+                , resourceAccessor)
+
+
+        then:
+        def e = thrown(SetupException)
+        e.getMessage().contains("Unable to parse empty file")
+    }
+
+    def "include fails if JSON file is empty"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.json": ""])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([include: [file: "com/example/test1.json"]])
+                , resourceAccessor)
+
+
+        then:
+        def e = thrown(SetupException)
+        e.getMessage().contains("Empty file com/example/test1.json")
+    }
+
+    def "include fails if file is empty"() {
         when:
         def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml])
 
@@ -648,13 +741,14 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         "../path/changelog.xml"               | "../path/changelog.xml"
         "..\\..\\path\\changelog.xml"         | "../../path/changelog.xml"
         "../../path/changelog.xml"            | "../../path/changelog.xml"
+        "path/../path/changelog.xml"          | "path/changelog.xml"
     }
 
-    def "relative paths for changelog include are not resolved to their full path"() {
+    def "relative paths for changelog include are resolved as normalized path"() {
         given:
         def changelog = new DatabaseChangeLog("com/example/root1.xml")
         def resourceAccessor = new MockResourceAccessor(["com/example/root1.xml"               : test1Xml,
-                                                         "com/example/../../path/changelog.xml": test2Xml])
+                                                         "path/changelog.xml": test2Xml])
 
         when:
         boolean result = changelog.include("../../path/changelog.xml", true, false,
@@ -717,6 +811,266 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         1        | 3                 | 4
         0        | 2                 | 2
         0        | Integer.MAX_VALUE | 4
+    }
+
+    @Unroll
+    def "includeAll (various scenarios) finds all expected changelogs with MinDepth: #minDepth and MaxDepth: #maxDepth"() {
+        when:
+        def relativeToken = "#RELATIVE_TO_CHANGELOG_FILE#"
+        def pathToken = "#PATH#"
+        def childChangelogXml = '''<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:pro="http://www.liquibase.org/xml/ns/pro" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+    http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-latest.xsd ">       
+
+    <includeAll errorIfMissingOrEmpty="false" relativeToChangelogFile="''' + relativeToken + '''" path="''' + pathToken + '''" minDepth="''' + minDepth + '''" maxDepth="''' + maxDepth + '''" />
+</databaseChangeLog>'''
+
+        // Multiple scenarios are included in the same test because all scenarios should produce the same results and
+        // consistency needs to be tested across scenarios
+
+        // Scenario 1: includeAll in root changelog, relativeToChangelogFile false, path from root
+        def s1RootPath = "com/example"
+        def s1RootChangelog = s1RootPath + "/s1.xml"
+        def s1ChangelogPathRelative = "s1"
+        def s1ChangelogPath = s1ChangelogPathRelative
+        def s1ResourceMap = new HashMap<String, String>()
+        s1ResourceMap.put(s1RootChangelog,                              "")
+        s1ResourceMap.put(s1ChangelogPath + "/changelog.xml",           test2Xml)
+        s1ResourceMap.put(s1ChangelogPath + "/a/changelog.xml",         test2Xml)
+        s1ResourceMap.put(s1ChangelogPath + "/a/b/changelog-1.xml",     test2Xml)
+        s1ResourceMap.put(s1ChangelogPath + "/a/b/changelog-2.xml",     test2Xml)
+        s1ResourceMap.put(s1ChangelogPath + "/a/b/c/changelog.xml",     test2Xml)
+        s1ResourceMap.put(s1ChangelogPath + "/a/b/c/d/changelog.xml",   test2Xml)
+        s1ResourceMap.put(s1ChangelogPath + "/a/b/c/d/e/changelog.xml", test2Xml)
+        def s1ResourceAccessor = new MockResourceAccessor(s1ResourceMap)
+
+        def s1DatabaseChangeLog = new DatabaseChangeLog(s1RootChangelog)
+        s1DatabaseChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([includeAll: [relativeToChangelogFile: false, path: s1ChangelogPath, minDepth: minDepth, maxDepth: maxDepth, errorIfMissingOrEmpty: false]]), s1ResourceAccessor)
+
+
+        // Scenario 2: includeAll in root changelog, relativeToChangelogFile false, path from child
+        def s2RootPath = "com/example"
+        def s2RootChangelog = s2RootPath + "/s2.xml"
+        def s2ChangelogPathRelative = "s2"
+        def s2ChangelogPath = s2RootPath + "/" + s2ChangelogPathRelative
+        def s2ResourceMap = new HashMap<String, String>()
+        s2ResourceMap.put(s2RootChangelog,                              "")
+        s2ResourceMap.put(s2ChangelogPath + "/changelog.xml",           test2Xml)
+        s2ResourceMap.put(s2ChangelogPath + "/a/changelog.xml",         test2Xml)
+        s2ResourceMap.put(s2ChangelogPath + "/a/b/changelog-1.xml",     test2Xml)
+        s2ResourceMap.put(s2ChangelogPath + "/a/b/changelog-2.xml",     test2Xml)
+        s2ResourceMap.put(s2ChangelogPath + "/a/b/c/changelog.xml",     test2Xml)
+        s2ResourceMap.put(s2ChangelogPath + "/a/b/c/d/changelog.xml",   test2Xml)
+        s2ResourceMap.put(s2ChangelogPath + "/a/b/c/d/e/changelog.xml", test2Xml)
+        def s2ResourceAccessor = new MockResourceAccessor(s2ResourceMap)
+
+        def s2DatabaseChangeLog = new DatabaseChangeLog(s2RootChangelog)
+        s2DatabaseChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([includeAll: [relativeToChangelogFile: false, path: s2ChangelogPath, minDepth: minDepth, maxDepth: maxDepth, errorIfMissingOrEmpty: false]]), s2ResourceAccessor)
+
+        // Scenario 3: includeAll in root changelog, relativeToChangelogFile true, path single child
+        def s3RootPath = "com/example"
+        def s3RootChangelog = s3RootPath + "/s3.xml"
+        def s3ChangelogPathRelative = "s3"
+        def s3ChangelogPath = s3RootPath + "/" + s3ChangelogPathRelative
+        def s3ResourceMap = new HashMap<String, String>()
+        s3ResourceMap.put(s3RootChangelog,                              "")
+        s3ResourceMap.put(s3ChangelogPath + "/changelog.xml",           test2Xml)
+        s3ResourceMap.put(s3ChangelogPath + "/a/changelog.xml",         test2Xml)
+        s3ResourceMap.put(s3ChangelogPath + "/a/b/changelog-1.xml",     test2Xml)
+        s3ResourceMap.put(s3ChangelogPath + "/a/b/changelog-2.xml",     test2Xml)
+        s3ResourceMap.put(s3ChangelogPath + "/a/b/c/changelog.xml",     test2Xml)
+        s3ResourceMap.put(s3ChangelogPath + "/a/b/c/d/changelog.xml",   test2Xml)
+        s3ResourceMap.put(s3ChangelogPath + "/a/b/c/d/e/changelog.xml", test2Xml)
+        def s3ResourceAccessor = new MockResourceAccessor(s3ResourceMap)
+
+        def s3DatabaseChangeLog = new DatabaseChangeLog(s3RootChangelog)
+        s3DatabaseChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([includeAll: [relativeToChangelogFile: true, path: s3ChangelogPathRelative, minDepth: minDepth, maxDepth: maxDepth, errorIfMissingOrEmpty: false]]), s3ResourceAccessor)
+
+
+        // Scenario 4: includeAll in root changelog, relativeToChangelogFile true, path multi child
+        def s4RootPath = "com/example"
+        def s4RootChangelog = s4RootPath + "/s4.xml"
+        def s4ChangelogPathRelative = "s4_1/s4_2/s4_3"
+        def s4ChangelogPath = s4RootPath + "/" + s4ChangelogPathRelative
+        def s4ResourceMap = new HashMap<String, String>()
+        s4ResourceMap.put(s4RootChangelog,                              "")
+        s4ResourceMap.put(s4ChangelogPath + "/changelog.xml",           test2Xml)
+        s4ResourceMap.put(s4ChangelogPath + "/a/changelog.xml",         test2Xml)
+        s4ResourceMap.put(s4ChangelogPath + "/a/b/changelog-1.xml",     test2Xml)
+        s4ResourceMap.put(s4ChangelogPath + "/a/b/changelog-2.xml",     test2Xml)
+        s4ResourceMap.put(s4ChangelogPath + "/a/b/c/changelog.xml",     test2Xml)
+        s4ResourceMap.put(s4ChangelogPath + "/a/b/c/d/changelog.xml",   test2Xml)
+        s4ResourceMap.put(s4ChangelogPath + "/a/b/c/d/e/changelog.xml", test2Xml)
+        def s4ResourceAccessor = new MockResourceAccessor(s4ResourceMap)
+
+        def s4DatabaseChangeLog = new DatabaseChangeLog(s4RootChangelog)
+        s4DatabaseChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([includeAll: [relativeToChangelogFile: true, path: s4ChangelogPathRelative, minDepth: minDepth, maxDepth: maxDepth, errorIfMissingOrEmpty: false]]), s4ResourceAccessor)
+
+        // Scenario 5: includeAll in child changelog, relativeToChangelogFile false, path from root
+        def s5RootPath = "com/example"
+        def s5RootChangelog = s5RootPath + "/s5.xml"
+        def s5ChildChangelogPathRelative = "s5Child"
+        def s5ChildChangelog = s5RootPath + "/" + s5ChildChangelogPathRelative + "/changelog.xml"
+        def s5ChangelogPathRelative = "s5"
+        def s5ChangelogPath = s5ChangelogPathRelative
+        def s5ResourceMap = new HashMap<String, String>()
+        s5ResourceMap.put(s5RootChangelog,                              "")
+        s5ResourceMap.put(s5ChildChangelog,                             childChangelogXml.replace(relativeToken, "false").replace(pathToken, s5ChangelogPath))
+        s5ResourceMap.put(s5ChangelogPath + "/changelog.xml",           test2Xml)
+        s5ResourceMap.put(s5ChangelogPath + "/a/changelog.xml",         test2Xml)
+        s5ResourceMap.put(s5ChangelogPath + "/a/b/changelog-1.xml",     test2Xml)
+        s5ResourceMap.put(s5ChangelogPath + "/a/b/changelog-2.xml",     test2Xml)
+        s5ResourceMap.put(s5ChangelogPath + "/a/b/c/changelog.xml",     test2Xml)
+        s5ResourceMap.put(s5ChangelogPath + "/a/b/c/d/changelog.xml",   test2Xml)
+        s5ResourceMap.put(s5ChangelogPath + "/a/b/c/d/e/changelog.xml", test2Xml)
+        def s5ResourceAccessor = new MockResourceAccessor(s5ResourceMap)
+
+        def s5DatabaseChangeLog = new DatabaseChangeLog(s5RootChangelog)
+        s5DatabaseChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([include: [relativeToChangelogFile: false, file: s5ChildChangelog]]), s5ResourceAccessor)
+
+        // Scenario 6: includeAll in child changelog, relativeToChangelogFile false, path from child
+        def s6RootPath = "com/example"
+        def s6RootChangelog = s6RootPath + "/s6.xml"
+        def s6ChildChangelogPathRelative = "s6Child"
+        def s6ChildChangelog = s6RootPath + "/" + s6ChildChangelogPathRelative + "/changelog.xml"
+        def s6ChangelogPathRelative = "s6"
+        def s6ChangelogPath = s6RootPath + "/" + s6ChildChangelogPathRelative + "/" + s6ChangelogPathRelative
+        def s6ResourceMap = new HashMap<String, String>()
+        s6ResourceMap.put(s6RootChangelog,                              "")
+        s6ResourceMap.put(s6ChildChangelog,                             childChangelogXml.replace(relativeToken, "false").replace(pathToken, s6ChangelogPath))
+        s6ResourceMap.put(s6ChangelogPath + "/changelog.xml",           test2Xml)
+        s6ResourceMap.put(s6ChangelogPath + "/a/changelog.xml",         test2Xml)
+        s6ResourceMap.put(s6ChangelogPath + "/a/b/changelog-1.xml",     test2Xml)
+        s6ResourceMap.put(s6ChangelogPath + "/a/b/changelog-2.xml",     test2Xml)
+        s6ResourceMap.put(s6ChangelogPath + "/a/b/c/changelog.xml",     test2Xml)
+        s6ResourceMap.put(s6ChangelogPath + "/a/b/c/d/changelog.xml",   test2Xml)
+        s6ResourceMap.put(s6ChangelogPath + "/a/b/c/d/e/changelog.xml", test2Xml)
+        def s6ResourceAccessor = new MockResourceAccessor(s6ResourceMap)
+
+        def s6DatabaseChangeLog = new DatabaseChangeLog(s6RootChangelog)
+        s6DatabaseChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([include: [relativeToChangelogFile: false, file: s6ChildChangelog]]), s6ResourceAccessor)
+
+        // Scenario 7: includeAll in child changelog, relativeToChangelogFile true, path single child
+        def s7RootPath = "com/example"
+        def s7RootChangelog = s7RootPath + "/s7.xml"
+        def s7ChildChangelogPathRelative = "s7Child"
+        def s7ChildChangelog = s7RootPath + "/" + s7ChildChangelogPathRelative + "/changelog.xml"
+        def s7ChangelogPathRelative = "s7"
+        def s7ChangelogPath = s7RootPath + "/" + s7ChildChangelogPathRelative + "/" + s7ChangelogPathRelative
+        def s7ResourceMap = new HashMap<String, String>()
+        s7ResourceMap.put(s7RootChangelog,                              "")
+        s7ResourceMap.put(s7ChildChangelog,                             childChangelogXml.replace(relativeToken, "true").replace(pathToken, s7ChangelogPathRelative))
+        s7ResourceMap.put(s7ChangelogPath + "/changelog.xml",           test2Xml)
+        s7ResourceMap.put(s7ChangelogPath + "/a/changelog.xml",         test2Xml)
+        s7ResourceMap.put(s7ChangelogPath + "/a/b/changelog-1.xml",     test2Xml)
+        s7ResourceMap.put(s7ChangelogPath + "/a/b/changelog-2.xml",     test2Xml)
+        s7ResourceMap.put(s7ChangelogPath + "/a/b/c/changelog.xml",     test2Xml)
+        s7ResourceMap.put(s7ChangelogPath + "/a/b/c/d/changelog.xml",   test2Xml)
+        s7ResourceMap.put(s7ChangelogPath + "/a/b/c/d/e/changelog.xml", test2Xml)
+        def s7ResourceAccessor = new MockResourceAccessor(s7ResourceMap)
+
+        def s7DatabaseChangeLog = new DatabaseChangeLog(s7RootChangelog)
+        s7DatabaseChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([include: [relativeToChangelogFile: false, file: s7ChildChangelog]]), s7ResourceAccessor)
+
+        // Scenario 8: includeAll in child changelog, relativeToChangelogFile true, path multi child
+        def s8RootPath = "com/example"
+        def s8RootChangelog = s8RootPath + "/s8.xml"
+        def s8ChildChangelogPathRelative = "s8Child"
+        def s8ChildChangelog = s8RootPath + "/" + s8ChildChangelogPathRelative + "/changelog.xml"
+        def s8ChangelogPathRelative = "s8_1/s8_2/s8_3"
+        def s8ChangelogPath = s8RootPath + "/" + s8ChildChangelogPathRelative + "/" + s8ChangelogPathRelative
+        def s8ResourceMap = new HashMap<String, String>()
+        s8ResourceMap.put(s8RootChangelog,                              "")
+        s8ResourceMap.put(s8ChildChangelog,                             childChangelogXml.replace(relativeToken, "true").replace(pathToken, s8ChangelogPathRelative))
+        s8ResourceMap.put(s8ChangelogPath + "/changelog.xml",           test2Xml)
+        s8ResourceMap.put(s8ChangelogPath + "/a/changelog.xml",         test2Xml)
+        s8ResourceMap.put(s8ChangelogPath + "/a/b/changelog-1.xml",     test2Xml)
+        s8ResourceMap.put(s8ChangelogPath + "/a/b/changelog-2.xml",     test2Xml)
+        s8ResourceMap.put(s8ChangelogPath + "/a/b/c/changelog.xml",     test2Xml)
+        s8ResourceMap.put(s8ChangelogPath + "/a/b/c/d/changelog.xml",   test2Xml)
+        s8ResourceMap.put(s8ChangelogPath + "/a/b/c/d/e/changelog.xml", test2Xml)
+        def s8ResourceAccessor = new MockResourceAccessor(s8ResourceMap)
+
+        def s8DatabaseChangeLog = new DatabaseChangeLog(s8RootChangelog)
+        s8DatabaseChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([include: [relativeToChangelogFile: false, file: s8ChildChangelog]]), s8ResourceAccessor)
+
+        then:
+        s1DatabaseChangeLog.getChangeSets().size() == expectedIncludeAllChangesetsToDeploy
+        s2DatabaseChangeLog.getChangeSets().size() == expectedIncludeAllChangesetsToDeploy
+        s3DatabaseChangeLog.getChangeSets().size() == expectedIncludeAllChangesetsToDeploy
+        s4DatabaseChangeLog.getChangeSets().size() == expectedIncludeAllChangesetsToDeploy
+        s5DatabaseChangeLog.getChangeSets().size() == expectedIncludeAllChangesetsToDeploy
+        s6DatabaseChangeLog.getChangeSets().size() == expectedIncludeAllChangesetsToDeploy
+        s7DatabaseChangeLog.getChangeSets().size() == expectedIncludeAllChangesetsToDeploy
+        s8DatabaseChangeLog.getChangeSets().size() == expectedIncludeAllChangesetsToDeploy
+
+        where:
+        minDepth    | maxDepth          | expectedIncludeAllChangesetsToDeploy
+        0           | Integer.MAX_VALUE | 7
+        0           | 0                 | 0
+        0           | 1                 | 1
+        1           | 1                 | 1
+        1           | 2                 | 2
+        2           | 2                 | 1
+        2           | 3                 | 3
+        3           | 3                 | 2
+        3           | 4                 | 3
+        4           | 4                 | 1
+        4           | 5                 | 2
+        5           | 5                 | 1
+        5           | 6                 | 2
+        6           | 6                 | 1
+        6           | 7                 | 1
+        7           | 7                 | 0
+        7           | 8                 | 0
+        7           | Integer.MAX_VALUE | 0
+        1           | 3                 | 4
+        0           | 2                 | 2
+        3           | 8                 | 5
+    }
+
+    @Unroll
+    def "includeAll finds all expected changelogs with EndsWithFilter: #endsWithFilter"() {
+        when:
+        def rootChangeLogPath = "com/example/root.xml"
+        def includedAllChangeLogPath = "changelogs"
+        def resourceAccessor = new MockResourceAccessor(["com/example/root.xml": "",
+                                                         "changelogs/changelog-1.xml": test3Xml,
+                                                         "changelogs/morechangelogs/changelog-2.xml": test3Xml,
+                                                         "changelogs/morechangelogs/withMore/changelog-3.xml": test3Xml,
+                                                         "changelogs/morechangelogs/withMore/changelog-4.xml": test3Xml,
+                                                         "changelogs/morechangelogs/AndMore/changelog-4.xml": test3Xml])
+
+        def rootChangeLog = new DatabaseChangeLog(rootChangeLogPath)
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([includeAll: [path: includedAllChangeLogPath, endsWithFilter:endsWithFilter, errorIfMissingOrEmpty:false]]), resourceAccessor)
+
+        then:
+        rootChangeLog.getChangeSets().size() == expectedIncludeAllChangesetsToDeploy
+
+        where:
+        endsWithFilter  | expectedIncludeAllChangesetsToDeploy
+        null            | 5
+        ""              | 5
+        "1.XML"         | 1
+        "2.XML"         | 1
+        "3.XML"         | 1
+        "4.XML"         | 2
+        "5.XML"         | 0
+        "1.xml"         | 1
+        "2.xml"         | 1
+        "3.xml"         | 1
+        "4.xml"         | 2
+        "5.xml"         | 0
     }
 
 }

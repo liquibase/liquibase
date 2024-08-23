@@ -2,6 +2,7 @@ package liquibase.command.core;
 
 import liquibase.Scope;
 import liquibase.command.*;
+import liquibase.command.core.helpers.AbstractChangelogCommandStep;
 import liquibase.command.core.helpers.DiffOutputControlCommandStep;
 import liquibase.command.providers.ReferenceDatabase;
 import liquibase.database.Database;
@@ -20,12 +21,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class DiffChangelogCommandStep extends AbstractCommandStep {
+public class DiffChangelogCommandStep extends AbstractChangelogCommandStep {
 
     public static final String[] COMMAND_NAME = {"diffChangelog"};
 
     public static final CommandArgumentDefinition<String> AUTHOR_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
+    public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
+    public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
+    public static final CommandArgumentDefinition<Boolean> USE_OR_REPLACE_OPTION;
 
     static {
         final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -33,6 +37,21 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
                 .description("Changelog file to write results").required().build();
         AUTHOR_ARG = builder.argument("author", String.class)
                 .description("Specifies the author for changesets in the generated changelog").build();
+        LABEL_FILTER_ARG = builder.argument("labelFilter", String.class)
+                .addAlias("labels")
+                .description("Changeset labels to generate")
+                .build();
+        CONTEXTS_ARG = builder.argument("contextFilter", String.class)
+                .addAlias("contexts")
+                .description("Changeset contexts to generate")
+                .build();
+        USE_OR_REPLACE_OPTION = builder.argument("useOrReplaceOption", Boolean.class)
+                .description("If true, will add 'OR REPLACE' option to the create view change object")
+                .defaultValue(false)
+                .build();
+        builder.addArgument(AbstractChangelogCommandStep.RUN_ON_CHANGE_TYPES_ARG).build();
+        builder.addArgument(AbstractChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG).build();
+        builder.addArgument(AbstractChangelogCommandStep.SKIP_OBJECT_SORTING).build();
     }
 
     @Override
@@ -62,6 +81,9 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
             CommandScope commandScope = resultsBuilder.getCommandScope();
             Database referenceDatabase = (Database) commandScope.getDependency(ReferenceDatabase.class);
             DiffOutputControl diffOutputControl = (DiffOutputControl) resultsBuilder.getResult(DiffOutputControlCommandStep.DIFF_OUTPUT_CONTROL.getName());
+            if (commandScope.getArgumentValue(DiffChangelogCommandStep.USE_OR_REPLACE_OPTION)) {
+                diffOutputControl.setReplaceIfExistsSet(true);
+            }
             referenceDatabase.setOutputDefaultSchema(diffOutputControl.getIncludeSchema());
 
             InternalSnapshotCommandStep.logUnsupportedDatabase(referenceDatabase, this.getClass());
@@ -74,8 +96,12 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
                 Scope.getCurrentScope().addMdcValue(MdcKey.DIFF_CHANGELOG_FILE, changeLogFile);
                 referenceDatabase.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
 
-                DiffToChangeLog changeLogWriter = createDiffToChangeLogObject(diffResult, diffOutputControl);
+                DiffToChangeLog changeLogWriter = createDiffToChangeLogObject(diffResult, diffOutputControl, commandScope.getArgumentValue(AbstractChangelogCommandStep.SKIP_OBJECT_SORTING));
+                changeLogWriter.setChangeSetContext(commandScope.getArgumentValue(CONTEXTS_ARG));
+                changeLogWriter.setChangeSetLabels(commandScope.getArgumentValue(LABEL_FILTER_ARG));
                 changeLogWriter.setChangeSetAuthor(commandScope.getArgumentValue(AUTHOR_ARG));
+                changeLogWriter.setChangeSetRunOnChangeTypes(commandScope.getArgumentValue(RUN_ON_CHANGE_TYPES_ARG).split("\\s*,\\s*"));
+                changeLogWriter.setChangeReplaceIfExistsTypes(commandScope.getArgumentValue(REPLACE_IF_EXISTS_TYPES_ARG).split("\\s*,\\s*"));
                 if (StringUtil.trimToNull(changeLogFile) == null) {
                     changeLogWriter.print(outputStream);
                 } else {
@@ -91,8 +117,9 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
             }
         } catch (Exception e) {
             try (MdcObject diffChangelogOutcome = Scope.getCurrentScope().addMdcValue(MdcKey.DIFF_CHANGELOG_OUTCOME, MdcValue.COMMAND_FAILED)) {
-                Scope.getCurrentScope().getLog(getClass()).warning("Diff changelog command failed");
+                Scope.getCurrentScope().getLog(getClass()).warning("Diff changelog command failed: " + e.getMessage());
             }
+            throw e;
         }
 
     }
@@ -100,10 +127,12 @@ public class DiffChangelogCommandStep extends AbstractCommandStep {
     @Override
     public void validate(CommandScope commandScope) throws CommandValidationException {
         commandScope.addArgumentValue(DiffCommandStep.FORMAT_ARG, "none");
+        validateReplaceIfExistsTypes(commandScope);
+        validateRunOnChangeTypes(commandScope);
     }
 
-    protected DiffToChangeLog createDiffToChangeLogObject(DiffResult diffResult, DiffOutputControl diffOutputControl) {
-        return new DiffToChangeLog(diffResult, diffOutputControl);
+    protected DiffToChangeLog createDiffToChangeLogObject(DiffResult diffResult, DiffOutputControl diffOutputControl, boolean skipObjectSorting) {
+        return new DiffToChangeLog(diffResult, diffOutputControl, skipObjectSorting);
     }
 
 }

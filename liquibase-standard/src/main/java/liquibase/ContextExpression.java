@@ -2,27 +2,32 @@ package liquibase;
 
 import liquibase.util.ExpressionMatcher;
 import liquibase.util.StringUtil;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.*;
 
 /**
  * Encapsulates logic for evaluating if a set of runtime contexts matches a context expression string.
  */
+@NoArgsConstructor
+@Setter
 public class ContextExpression {
 
-    private final HashSet<String> contexts = new HashSet<>();
+    private HashSet<String> contexts = new HashSet<>();
+    @Getter
     private String originalString;
-
-    public ContextExpression() {
-    }
 
     public ContextExpression(String... contexts) {
         if (contexts.length == 1) {
             parseContextString(contexts[0]);
+            originalString = contexts[0];
         } else {
             for (String context : contexts) {
                 parseContextString(context.toLowerCase());
             }
+            originalString = StringUtil.join(contexts, ",");
         }
     }
 
@@ -36,6 +41,7 @@ public class ContextExpression {
             for (String context : contexts) {
                 this.contexts.add(context.toLowerCase());
             }
+            originalString = StringUtil.join(contexts, ",");
         }
     }
 
@@ -110,7 +116,4 @@ public class ContextExpression {
         return true;
     }
 
-    public String getOriginalString() {
-        return originalString;
-    }
 }

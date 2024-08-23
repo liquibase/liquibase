@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.ChecksumVersion;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
@@ -8,6 +9,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateIndexStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,17 +24,25 @@ import java.util.List;
     appliesTo = "index")
 public class CreateIndexChange extends AbstractChange implements ChangeWithColumns<AddColumnConfig> {
 
+    @Setter
     private String catalogName;
+    @Setter
     private String schemaName;
+    @Setter
     private String tableName;
+    @Setter
     private String indexName;
+    @Setter
     private Boolean unique;
+    @Setter
     private String tablespace;
     private List<AddColumnConfig> columns;
 
     // Contain associations of index
     // for example: foreignKey, primaryKey or uniqueConstraint
+    @Setter
     private String associatedWith;
+    @Setter
     private Boolean clustered;
 
 
@@ -45,17 +55,9 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         return indexName;
     }
 
-    public void setIndexName(String indexName) {
-        this.indexName = indexName;
-    }
-
     @DatabaseChangeProperty(since = "3.0", description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
     }
 
     @DatabaseChangeProperty(mustEqualExisting ="index.schema", description = "Name of the database schema")
@@ -63,18 +65,10 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         return schemaName;
     }
 
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "index.table", description = "Name of the table to add the index on",
         exampleValue = "person")
     public String getTableName() {
         return tableName;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
     }
 
     @Override
@@ -101,10 +95,6 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     @DatabaseChangeProperty(description = "Tablepace to create the index in. Corresponds to file group in mssql")
     public String getTablespace() {
         return tablespace;
-    }
-
-    public void setTablespace(String tablespace) {
-        this.tablespace = tablespace;
     }
 
     @Override
@@ -173,36 +163,20 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     }
 
     /**
-     * @param isUnique the isUnique to set
-     */
-    public void setUnique(Boolean isUnique) {
-        this.unique = isUnique;
-    }
-
-    /**
      * @return Index associations. Valid values:<br>
      * <li>primaryKey</li>
      * <li>foreignKey</li>
      * <li>uniqueConstraint</li>
      * <li>none</li>
      * */
-    @DatabaseChangeProperty(isChangeProperty = false,
-        description = "Index associations. Valid values: primaryKey, foreignKey, uniqueConstriant, none")
+    @DatabaseChangeProperty(description = "Index associations. Valid values: primaryKey, foreignKey, uniqueConstriant, none")
     public String getAssociatedWith() {
         return associatedWith;
-    }
-
-    public void setAssociatedWith(String associatedWith) {
-        this.associatedWith = associatedWith;
     }
 
     @DatabaseChangeProperty(description = "Whether to create a clustered index")
     public Boolean getClustered() {
         return clustered;
-    }
-
-    public void setClustered(Boolean clustered) {
-        this.clustered = clustered;
     }
 
     @Override
@@ -243,5 +217,12 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
             }
         }
         return validationErrors;
+    }
+
+    @Override
+    public String[] getExcludedFieldFilters(ChecksumVersion version) {
+        return new String[]{
+                "associatedWith"
+        };
     }
 }

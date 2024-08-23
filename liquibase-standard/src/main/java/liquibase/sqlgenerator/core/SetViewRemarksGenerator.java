@@ -15,7 +15,8 @@ public class SetViewRemarksGenerator extends AbstractSqlGenerator<SetViewRemarks
 
     @Override
     public boolean supports(SetViewRemarksStatement statement, Database database) {
-        return (database instanceof OracleDatabase) || (database instanceof PostgresDatabase) || (database instanceof MSSQLDatabase) || (database instanceof DB2Database);
+        return (database instanceof OracleDatabase) || (database instanceof PostgresDatabase) || (database instanceof MSSQLDatabase) || (database instanceof DB2Database)
+                || (database instanceof SybaseASADatabase);
     }
 
     @Override
@@ -29,7 +30,7 @@ public class SetViewRemarksGenerator extends AbstractSqlGenerator<SetViewRemarks
     public Sql[] generateSql(SetViewRemarksStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql = "";
         String remarksEscaped = database.escapeStringForDatabase(StringUtil.trimToEmpty(statement.getRemarks()));
-        if (database instanceof OracleDatabase || database instanceof PostgresDatabase || database instanceof DB2Database) {
+        if (database instanceof OracleDatabase || database instanceof PostgresDatabase || database instanceof DB2Database || database instanceof SybaseASADatabase) {
             String sqlPlaceholder = "COMMENT ON %s %s IS '%s'";
             String targetNameEscaped = database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName());
             String targetObject;

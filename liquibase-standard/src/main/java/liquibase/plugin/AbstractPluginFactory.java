@@ -21,7 +21,7 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
 
     /**
      * Returns the priority of the given object based on the passed args array.
-     * The args are created as as part of the custom public getPlugin method in implementations are are passed through {@link #getPlugin(Object...)}
+     * The args are created as part of the custom public getPlugin method in implementations are passed through {@link #getPlugin(Object...)}
      */
     protected abstract int getPriority(T obj, Object... args);
 
@@ -30,7 +30,7 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
      * This method is called by a public implementation-specific methods.
      * Normally this does not need to be overridden, instead override {@link #getPriority(Plugin, Object...)} to compute the priority of each object for the scope and arguments passed to this method.
      * <p>
-     * However, if there is a {@link Scope} key of "liquibase.plugin.${plugin.interface.class.Name}", an instance of that class will always be ran first.
+     * However, if there is a {@link Scope} key of "liquibase.plugin.${plugin.interface.class.Name}", an instance of that class will always be run first.
      *
      * @return null if no plugins are found or have a priority greater than zero.
      */

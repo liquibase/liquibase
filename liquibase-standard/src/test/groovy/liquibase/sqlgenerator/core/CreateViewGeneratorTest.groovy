@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core
 
 import liquibase.database.core.HsqlDatabase
+import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.OracleDatabase
 import liquibase.database.core.PostgresDatabase
 import liquibase.sqlgenerator.SqlGeneratorFactory
@@ -64,7 +65,7 @@ class CreateViewGeneratorTest extends Specification {
         sql[0].toString() == "CREATE OR REPLACE VIEW PUBLIC.my_view AS " + selectQuery + ";"
     }
 
-    def "creates drop view statement for Postgres when replace is true and alwaysDropInsteadOfReplace propery is set"() {
+    def "creates drop view statement for Postgres when replace is true and alwaysDropInsteadOfReplace property is set"() {
         given:
         System.setProperty("liquibase.alwaysDropInsteadOfReplace", alwaysDropInsteadOfReplacePropValue)
 
@@ -98,6 +99,27 @@ class CreateViewGeneratorTest extends Specification {
         new OracleDatabase() | "true" | 1
         new PostgresDatabase() | "false" | 1
         new PostgresDatabase() | "true" | 2
+    }
+
+    def "full definition is used if it contains CREATE OR ALTER"() {
+        when:
+        def fullDefinition =
+"CREATE OR ALTER VIEW dbo.myView AS\nSELECT compvalcol, idxclustercol\nFROM primary_table"
+
+        def statement = new CreateViewStatement("PUBLIC", "schem", "my_view", fullDefinition, true)
+        statement.setFullDefinition(true)
+        def generators = SqlGeneratorFactory.instance.getGenerators(statement, new MSSQLDatabase())
+
+        then:
+        generators.size() > 0
+        generators[0] instanceof CreateViewGenerator
+
+        when:
+        def sql = SqlGeneratorFactory.instance.generateSql(statement, new MSSQLDatabase())
+
+        then:
+        sql.length == 1
+        sql[0].toString() == fullDefinition + ";"
     }
 
 }

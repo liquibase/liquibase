@@ -60,7 +60,7 @@ public class SqlGeneratorFactory {
 
     public void register(SqlGenerator generator) {
         if (this.generators.size() == 0) {
-            //handle case in tests wher we clear out the generators
+            //handle case in tests where we clear out the generators
             this.generatorsByKey.clear();
         }
         generators.add(generator);

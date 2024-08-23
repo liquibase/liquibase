@@ -3,6 +3,8 @@ package liquibase.command.core;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.changeset.ChangeSetService;
+import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
@@ -12,7 +14,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockService;
 import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -20,7 +22,10 @@ import liquibase.util.StringUtil;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 
 public class ExecuteSqlCommandStep extends AbstractCommandStep {
 
@@ -63,7 +68,7 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
         final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         final String sqlText = getSqlScript(sql, sqlFile);
         final StringBuilder out = new StringBuilder();
-        final String[] sqlStrings = StringUtil.processMultiLineSQL(sqlText, true, true, commandScope.getArgumentValue(DELIMITER_ARG));
+        final String[] sqlStrings = StringUtil.processMultiLineSQL(sqlText, true, true, determineEndDelimiter(commandScope), null);
 
         ChangeLogParameters changeLogParameters = new ChangeLogParameters(database);
         for (String sqlString : sqlStrings) {
@@ -71,7 +76,7 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
             if (sqlString.toLowerCase().matches("\\s*select .*")) {
                 out.append(handleSelect(sqlString, executor));
             } else {
-                executor.execute(new RawSqlStatement(sqlString));
+                executor.execute(new RawParameterizedSqlStatement(sqlString));
                 out.append("Successfully Executed: ").append(sqlString).append("\n");
             }
             out.append("\n");
@@ -82,34 +87,50 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
         resultsBuilder.addResult("output", out.toString());
     }
 
-    private void handleOutput(CommandResultsBuilder resultsBuilder, String output) throws IOException {
+    protected static String determineEndDelimiter(CommandScope commandScope) {
+        String delimiter = commandScope.getArgumentValue(DELIMITER_ARG);
+        return getEndDelimiter(delimiter);
+    }
+
+    public static String getEndDelimiter(String delimiter) {
+        if (delimiter == null) {
+            ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
+            delimiter = service.getEndDelimiter(null);
+        }
+        return delimiter;
+    }
+
+    protected void handleOutput(CommandResultsBuilder resultsBuilder, String output) throws IOException {
         String charsetName = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
         Writer outputWriter = new OutputStreamWriter(resultsBuilder.getOutputStream(), charsetName);
         outputWriter.write(output);
         outputWriter.flush();
     }
 
-    private String getSqlScript(String sql, String sqlFile) throws IOException, LiquibaseException {
+    protected String getSqlScript(String sql, String sqlFile) throws IOException, LiquibaseException {
+        return getSqlFromSource(sql, sqlFile);
+    }
+
+    public static String getSqlFromSource(String sql, String sqlFile) throws IOException, LiquibaseException {
         if (sqlFile == null) {
             return sql;
-        } else {
-            final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-            Resource resource = pathHandlerFactory.getResource(sqlFile);
-            if (!resource.exists()) {
-                throw new LiquibaseException(FileUtil.getFileNotFoundMessage(sqlFile));
-            }
-            return StreamUtil.readStreamAsString(resource.openInputStream());
+        } 
+        final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+        Resource resource = pathHandlerFactory.getResource(sqlFile);
+        if (!resource.exists()) {
+            throw new LiquibaseException(FileUtil.getFileNotFoundMessage(sqlFile));
         }
+        return StreamUtil.readStreamAsString(resource.openInputStream());
     }
 
     private String handleSelect(String sqlString, Executor executor) throws DatabaseException {
         StringBuilder out = new StringBuilder();
-        List<Map<String, ?>> rows = executor.queryForList(new RawSqlStatement(sqlString));
+        List<Map<String, ?>> rows = executor.queryForList(new RawParameterizedSqlStatement(sqlString));
         out.append("Output of ").append(sqlString).append(":\n");
         if (rows.isEmpty()) {
             out.append("-- Empty Resultset --\n");
         } else {
-            SortedSet<String> keys = new TreeSet<>();
+            LinkedHashSet<String> keys = new LinkedHashSet<>();
             for (Map<String, ?> row : rows) {
                 keys.addAll(row.keySet());
             }

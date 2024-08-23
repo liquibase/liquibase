@@ -27,10 +27,12 @@ public class LabelExpression {
     public LabelExpression(String... labels) {
         if (labels.length == 1) {
             parseLabelString(labels[0]);
+            originalString = labels[0];
         } else {
             for (String label : labels) {
                 parseLabelString(label.toLowerCase());
             }
+            originalString = StringUtil.join(labels, ",");
         }
     }
 
@@ -47,6 +49,7 @@ public class LabelExpression {
             for (String label : labels) {
                 this.labels.add(label.toLowerCase());
             }
+            originalString = StringUtil.join(labels, ",");
         }
     }
 

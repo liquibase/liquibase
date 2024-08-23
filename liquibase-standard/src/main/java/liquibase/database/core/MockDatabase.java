@@ -4,7 +4,10 @@ import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.change.Change;
-import liquibase.changelog.*;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.RanChangeSet;
 import liquibase.database.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
@@ -14,7 +17,9 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
+import liquibase.structure.core.Sequence;
 
 import java.io.Writer;
 import java.math.BigInteger;
@@ -425,6 +430,22 @@ public class MockDatabase implements Database, InternalDatabase {
         return null;
     }
 
+
+
+    @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Schema.class.isAssignableFrom(object)) {
+            return supportsSchemas;
+        }
+        if (Catalog.class.isAssignableFrom(object)) {
+            return supportsCatalogs;
+        }
+        if (Sequence.class.isAssignableFrom(object)) {
+            return supportsSequences;
+        }
+        return true;
+    }
+
     @Override
     public boolean supportsSchemas() {
         return supportsSchemas;
@@ -564,7 +585,7 @@ public class MockDatabase implements Database, InternalDatabase {
     @Override
     public void executeRollbackStatements(final SqlStatement[] statements, final List<SqlVisitor> sqlVisitors) {
     }
-    
+
     @Override
     public void saveRollbackStatement(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) {
     }
@@ -819,6 +840,11 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public boolean requiresExplicitNullForColumns() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
         return false;
     }
 }

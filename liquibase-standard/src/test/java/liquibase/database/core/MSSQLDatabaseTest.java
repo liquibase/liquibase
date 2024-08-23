@@ -4,9 +4,12 @@ import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.DatabaseException;
-import org.junit.Test;
+import liquibase.sql.visitor.SqlVisitor;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for {@link MSSQLDatabase}
@@ -149,5 +152,13 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
         assertEquals("int", database.unescapeDataTypeString("[int]"));
         assertEquals("decimal(19, 2)", database.unescapeDataTypeString("decimal(19, 2)"));
         assertEquals("decimal(19, 2)", database.unescapeDataTypeString("[decimal](19, 2)"));
+    }
+
+    @Override
+    protected List<SqlVisitor> getExpectedSqlVisitors(Database database) {
+        if (database instanceof MSSQLDatabase) {
+            return MSSQLDatabase.addSqlVisitors(super.getExpectedSqlVisitors(database));
+        }
+        return super.getExpectedSqlVisitors(database);
     }
 }
