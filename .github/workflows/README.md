@@ -33,7 +33,7 @@ The following actions are identical to those in a regular Liquibase release, wit
 
 You can check the `dry-run-release.yml` workflow, which is essentially composed of calls to existing release workflows such as `create-release.yml` and `release-published.yml`. It sends them a new input, `dry_run: true`, to control which steps are executed for regular releases versus dry-run releases.
 
-```yml`
+```yml
 [...]
 
   dry-run-create-release:
