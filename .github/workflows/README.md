@@ -17,7 +17,7 @@ The following actions are identical to those in a regular Liquibase release, wit
 - Build azure uber jars
 - Re-version artifacts to `dry-run-GITHUB_RUN_ID` version. i.e `dry-run-10522556642`
 - Build installers
-- Attach artifacts to a dryRun draft release
+- Attach artifacts (`zip` and `tar` files ) to a dryRun draft release
 - Deploy artifacts to Maven, to our internal Maven repository: `https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging`
 - Delete the dryRun draft release. i.e `dry-run-10522556642`
 - Delete the dryRun repository tag. i.e `vdry-run-10522556642`
