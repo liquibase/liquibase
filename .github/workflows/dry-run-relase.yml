@@ -2,8 +2,8 @@ name: Dry run release
 
 on:
   workflow_dispatch: # Trigger on demand
-  # schedule: # Trigger nightly at midnight UTC
-  #   - cron: "0 0 * * *"
+  schedule: # Trigger nightly at midnight UTC
+    - cron: "0 0 * * *"
 
 jobs:
 
