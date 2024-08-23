@@ -41,8 +41,6 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     private static final String DATABASE_UP_TO_DATE_MESSAGE = "Database is up to date, no changesets to execute";
     private boolean isFastCheckEnabled = true;
 
-    private boolean isDBLocked = true;
-
     public abstract String getChangelogFileArg(CommandScope commandScope);
 
     public abstract String getContextsArg(CommandScope commandScope);
@@ -81,6 +79,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         DatabaseChangelogCommandStep.addCommandFiltersMdc(labelExpression, contexts);
         customMdcLogging(commandScope);
 
+        final LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         ChangeExecListener changeExecListener = getChangeExecListener(resultsBuilder, commandScope);
         try {
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
@@ -92,8 +91,8 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                 updateReportParameters.getOperationInfo().setUpdateSummaryMsg(DATABASE_UP_TO_DATE_MESSAGE);
                 return;
             }
-            if (!isDBLocked) {
-                LockServiceFactory.getInstance().getLockService(database).waitForLock();
+            if (!lockService.hasChangeLogLock()) {
+                lockService.waitForLock();
             }
             // waitForLock resets the changelog history service, so we need to rebuild that and generate a final deploymentId.
             ChangeLogHistoryService changelogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
@@ -139,7 +138,9 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             //TODO: We should be able to remove this once we get the rest of the update family
             // set up with the CommandFramework
             try {
-                LockServiceFactory.getInstance().getLockService(database).releaseLock();
+                if (lockService.hasChangeLogLock()) {
+                    lockService.releaseLock();
+                }
             } catch (LockException e) {
                 Scope.getCurrentScope().getLog(getClass()).severe(MSG_COULD_NOT_RELEASE_LOCK, e);
             }
@@ -288,10 +289,6 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     @Beta
     public void postUpdateLog(int rowsAffected) {
 
-    }
-
-    protected void setDBLock(boolean locked) {
-        isDBLocked = locked;
     }
 
     /**

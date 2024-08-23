@@ -99,9 +99,4 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
         return deps;
     }
 
-    @Override
-    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        setDBLock(false);
-        super.run(resultsBuilder);
-    }
 }

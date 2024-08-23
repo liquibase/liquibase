@@ -278,9 +278,12 @@ public class StandardLockService implements LockService {
             String lockedBy;
             if (locks.length > 0) {
                 DatabaseChangeLogLock lock = locks[0];
-                lockedBy = lock.getLockedBy() + " since " +
-                        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
-                                .format(lock.getLockGranted());
+                lockedBy = lock.getLockedBy();
+                if (lock.getLockGranted() != null) {
+                    lockedBy = lockedBy + " since " +
+                            DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+                                    .format(lock.getLockGranted());
+                }
             } else {
                 lockedBy = "UNKNOWN";
             }
@@ -357,7 +360,16 @@ public class StandardLockService implements LockService {
 
     @Override
     public void releaseLock() throws LockException {
+        if (!hasChangeLogLock) {
+            Scope.getCurrentScope().getLog(getClass()).fine(
+                            "Lock service is not holding the lock. Ignoring release request."
+                    );
+            return;
+        }
+        doReleaseLock();
+    }
 
+    private void doReleaseLock() throws LockException {
         ObjectQuotingStrategy incomingQuotingStrategy = null;
         if (this.quotingStrategy != null) {
             incomingQuotingStrategy = database.getObjectQuotingStrategy();
@@ -482,7 +494,7 @@ public class StandardLockService implements LockService {
     @Override
     public void forceReleaseLock() throws LockException, DatabaseException {
         this.init();
-        releaseLock();
+        doReleaseLock();
     }
 
     @Override
