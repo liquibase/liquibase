@@ -86,20 +86,10 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Download release assets
-        if: ${{ inputs.dry_run == false }}
         uses: robinraju/release-downloader@v1.11
         with:
           repository: "liquibase/liquibase"
           tag: "${{ needs.setup.outputs.tag }}"
-          filename: "*"
-          out-file-path: "."
-
-      - name: Download dry-run release assets
-        if: ${{ inputs.dry_run == true }}
-        uses: robinraju/release-downloader@v1.11
-        with:
-          repository: "liquibase/liquibase"
-          releaseId: "${{ inputs.dry_run_release_id }}"
           filename: "*"
           out-file-path: "."
 
@@ -529,11 +519,11 @@ jobs:
     needs: [ setup ]
     runs-on: ubuntu-22.04
     steps:
-      - name: Download release assets
+      - name: Download dry-run release assets
         uses: robinraju/release-downloader@v1.11
         with:
           repository: "liquibase/liquibase"
-          tag: "${{ needs.setup.outputs.tag }}"
+          releaseId: "${{ inputs.dry_run_release_id }}"
           filename: "*"
           out-file-path: "."
 
