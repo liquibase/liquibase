@@ -41,12 +41,12 @@ jobs:
             let tag;
             if (context.payload.inputs) {
               tag = context.payload.inputs.tag;
-            } else if (${{ inputs.tag }}) {
+            } else if ("${{ inputs.tag }}" != "") {
               tag = "${{ inputs.tag }}";
              } else {
               tag = context.payload.release.tag_name;
             }
-
+            console.log(tag);
             let version = tag.replace(/^v/, "");
 
             core.setOutput("tag", tag);
