@@ -94,6 +94,7 @@
             <xsd:attribute name="labels" type="xsd:string"/>
             <xsd:attribute name="ignore" type="xsd:string"/>
             <xsd:attribute name="created" type="xsd:string"/>
+            <xsd:attribute name="logicalFilePath" type="xsd:string"/>
             <xsd:anyAttribute namespace="##other" processContents="lax"/>
         </xsd:complexType>
     </xsd:element>
@@ -113,6 +114,7 @@
             <xsd:attribute name="maxDepth" type="integerExp"/>
             <xsd:attribute name="endsWithFilter" type="xsd:string"/>
             <xsd:attribute name="ignore" type="xsd:string"/>
+            <xsd:attribute name="logicalFilePath" type="xsd:string"/>
             <xsd:anyAttribute namespace="##other" processContents="lax"/>
         </xsd:complexType>
     </xsd:element>
