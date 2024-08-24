@@ -1,8 +1,12 @@
 package liquibase.command;
 
+import liquibase.GlobalConfiguration;
 import liquibase.exception.CommandValidationException;
 import liquibase.util.StringUtil;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -56,5 +60,19 @@ public abstract class AbstractCommandStep implements CommandStep {
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
 
+    }
+
+    /**
+     * @param resultsBuilder
+     * @param output
+     * @throws IOException
+     *
+     * Writes the output of command results to the stdout buffer
+     */
+    protected void handleOutput(CommandResultsBuilder resultsBuilder, String output) throws IOException {
+        String charsetName = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
+        Writer outputWriter = new OutputStreamWriter(resultsBuilder.getOutputStream(), charsetName);
+        outputWriter.write(output);
+        outputWriter.flush();
     }
 }
