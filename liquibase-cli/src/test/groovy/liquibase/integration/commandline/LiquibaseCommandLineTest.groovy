@@ -49,18 +49,6 @@ Global Options
                                variable:
                                'LIQUIBASE_ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA')
 
-      --analytics-filename=PARAM
-                             DEFAULT: ./analytics.csv
-                             (defaults file: 'liquibase.analytics.filename',
-                               environment variable:
-                               'LIQUIBASE_ANALYTICS_FILENAME')
-
-      --analytics-output-destination=PARAM
-                             DEFAULT: CSV
-                             (defaults file: 'liquibase.analytics.
-                               outputDestination', environment variable:
-                               'LIQUIBASE_ANALYTICS_OUTPUT_DESTINATION')
-
       --auto-reorg=PARAM     Should Liquibase automatically include REORG TABLE
                                commands when needed?
                              DEFAULT: true
@@ -464,6 +452,15 @@ Global Options
                              (defaults file: 'liquibase.suppressLiquibaseSql',
                                environment variable:
                                'LIQUIBASE_SUPPRESS_LIQUIBASE_SQL')
+
+      --telemetry-enabled=PARAM
+                             Enable or disable sending product usage data and
+                               analytics to Liquibase. Learn more at https:
+                               //docs.liquibase.com/telemetry. DEFAULT: true
+                               for OSS users | false for PRO users
+                             (defaults file: 'liquibase.telemetry.enabled',
+                               environment variable:
+                               'LIQUIBASE_TELEMETRY_ENABLED')
 
       --trim-load-data-file-header=PARAM
                              If true column headers will be trimmed in case

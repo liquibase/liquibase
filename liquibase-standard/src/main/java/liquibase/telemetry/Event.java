@@ -1,4 +1,4 @@
-package liquibase.analytics;
+package liquibase.telemetry;
 
 import liquibase.Scope;
 import liquibase.integration.IntegrationDetails;

@@ -1,4 +1,4 @@
-package liquibase.analytics;
+package liquibase.telemetry;
 
 import liquibase.plugin.Plugin;
 
@@ -7,7 +7,7 @@ import liquibase.plugin.Plugin;
  * and is designed for handling events related to usage analytics. Implementations
  * of this interface should define how specific events are handled.
  */
-public interface UsageAnalyticsListener extends Plugin {
+public interface TelemetryListener extends Plugin {
 
     int getPriority();
 
@@ -17,5 +17,5 @@ public interface UsageAnalyticsListener extends Plugin {
      *
      * @param event the event to be handled.
      */
-    void handleEvent(Event event);
+    void handleEvent(Event event) throws Exception;
 }

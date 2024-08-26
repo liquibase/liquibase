@@ -1,8 +1,8 @@
-package liquibase.analytics;
+package liquibase.telemetry;
 
 import liquibase.Scope;
 
-public class NoOpAnalyticsListener implements UsageAnalyticsListener {
+public class NoOpAnalyticsListener implements TelemetryListener {
     @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
