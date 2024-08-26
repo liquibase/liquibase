@@ -1,5 +1,9 @@
 package liquibase.telemetry;
 
+import liquibase.Scope;
+import liquibase.telemetry.configuration.SegmentTelemetryConfiguration;
+import liquibase.telemetry.configuration.TelemetryConfiguration;
+import liquibase.telemetry.configuration.TelemetryConfigurationFactory;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -12,8 +16,14 @@ public class SegmentBatch {
     private final String writeKey;
     private final Map<String, ?> context;
 
-    public static SegmentBatch fromLiquibaseEvent(Event event) {
-        SegmentBatch segmentBatch = new SegmentBatch(TelemetryConfiguration.WRITE_KEY.getCurrentValue(), null);
+    public static SegmentBatch fromLiquibaseEvent(Event event) throws Exception {
+        TelemetryConfigurationFactory telemetryConfigurationFactory = Scope.getCurrentScope().getSingleton(TelemetryConfigurationFactory.class);
+        TelemetryConfiguration telemetryConfiguration = telemetryConfigurationFactory.getPlugin();
+        String writeKey = null;
+        if (telemetryConfiguration instanceof SegmentTelemetryConfiguration) {
+            writeKey = ((SegmentTelemetryConfiguration) telemetryConfiguration).getWriteKey();
+        }
+        SegmentBatch segmentBatch = new SegmentBatch(writeKey, null);
         segmentBatch.getBatch().add(SegmentTrackEvent.fromLiquibaseEvent(event));
         return segmentBatch;
     }

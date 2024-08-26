@@ -1,9 +1,11 @@
 package liquibase.telemetry;
 
 import liquibase.Scope;
-import liquibase.license.LicenseService;
-import liquibase.license.LicenseServiceFactory;
 import liquibase.serializer.core.yaml.YamlSerializer;
+import liquibase.telemetry.configuration.SegmentTelemetryConfiguration;
+import liquibase.telemetry.configuration.TelemetryArgs;
+import liquibase.telemetry.configuration.TelemetryConfiguration;
+import liquibase.telemetry.configuration.TelemetryConfigurationFactory;
 import liquibase.util.ExceptionUtil;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.IOUtils;
@@ -21,8 +23,8 @@ public class SegmentTelemetryListener implements TelemetryListener {
 
     @Override
     public int getPriority() {
-        String filename = TelemetryConfiguration.FILENAME.getCurrentValue();
-        TelemetryOutputDestination destination = TelemetryConfiguration.OUTPUT_DESTINATION.getCurrentValue();
+        String filename = TelemetryArgs.FILENAME.getCurrentValue();
+        TelemetryOutputDestination destination = TelemetryArgs.OUTPUT_DESTINATION.getCurrentValue();
         if (TelemetryOutputDestination.SEGMENT.equals(destination)) {
             return PRIORITY_SPECIALIZED;
         } else {
@@ -31,10 +33,13 @@ public class SegmentTelemetryListener implements TelemetryListener {
     }
 
     @Override
-    public void handleEvent(Event event) {
+    public void handleEvent(Event event) throws Exception {
+        TelemetryConfigurationFactory telemetryConfigurationFactory = Scope.getCurrentScope().getSingleton(TelemetryConfigurationFactory.class);
+        SegmentTelemetryConfiguration telemetryConfiguration = ((SegmentTelemetryConfiguration) telemetryConfigurationFactory.getPlugin());
+        int timeoutMillis = telemetryConfiguration.getTimeoutMillis();
         Thread eventThread = new Thread(() -> {
             try {
-                URL url = new URL(getDestinationUrl());
+                URL url = new URL(telemetryConfiguration.getDestinationUrl());
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -66,19 +71,9 @@ public class SegmentTelemetryListener implements TelemetryListener {
         });
         eventThread.start();
         try {
-            eventThread.join(getTimeoutMillis());
+            eventThread.join(timeoutMillis);
         } catch (InterruptedException e) {
             Scope.getCurrentScope().getLog(getClass()).fine("Interrupted while waiting for telemetry event processing to Segment.", e);
         }
-    }
-
-    private int getTimeoutMillis() {
-        // todo this needs to check the config endpoint
-        return 1500;
-    }
-
-    private String getDestinationUrl() {
-        // todo this needs to check the config endpoint
-        return "https://api.segment.io/v1/batch";
     }
 }

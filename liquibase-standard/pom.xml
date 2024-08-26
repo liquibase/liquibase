@@ -377,6 +377,7 @@
                         <param>liquibase.changelog.visitor.ValidatingVisitorGenerator</param>
                         <param>liquibase.io.OutputFileHandler</param>
                         <param>liquibase.telemetry.TelemetryListener</param>
+                        <param>liquibase.telemetry.configuration.TelemetryConfiguration</param>
                     </services>
                 </configuration>
                 <executions>

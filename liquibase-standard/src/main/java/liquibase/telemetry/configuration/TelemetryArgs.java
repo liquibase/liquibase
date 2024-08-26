@@ -1,11 +1,13 @@
-package liquibase.telemetry;
+package liquibase.telemetry.configuration;
 
 import liquibase.Scope;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.license.LicenseServiceUtils;
+import liquibase.telemetry.TelemetryFactory;
+import liquibase.telemetry.TelemetryOutputDestination;
 
-public class TelemetryConfiguration implements AutoloadedConfigurations {
+public class TelemetryArgs implements AutoloadedConfigurations {
 
     public static final ConfigurationDefinition<TelemetryOutputDestination> OUTPUT_DESTINATION;
     public static final ConfigurationDefinition<String> FILENAME;
@@ -30,33 +32,25 @@ public class TelemetryConfiguration implements AutoloadedConfigurations {
                 .build();
 
         ENABLED = builder.define("enabled", Boolean.class)
-                .setDescription("CHANGE ME")
+                .setDescription("Enable or disable sending product usage data and analytics to Liquibase. Learn more at https://docs.liquibase.com/telemetry. DEFAULT: true for OSS users | false for PRO users")
                 .build();
     }
 
-    public static boolean isTelemetryEnabled() {
+    public static boolean isTelemetryEnabled() throws Exception {
         // if the user set enabled to false, that overrides all
         Boolean userSuppliedEnabled = ENABLED.getCurrentValue();
         if (Boolean.FALSE.equals(userSuppliedEnabled)) {
-            Scope.getCurrentScope().getLog(TelemetryConfiguration.class).info("User has disabled telemetry.");
+            Scope.getCurrentScope().getLog(TelemetryArgs.class).info("User has disabled telemetry.");
             return false;
         }
 
         boolean proLicenseValid = LicenseServiceUtils.isProLicenseValid();
-        if (!proLicenseValid) {
-            return isOssTelemetryEnabled();
+        TelemetryConfigurationFactory telemetryConfigurationFactory = Scope.getCurrentScope().getSingleton(TelemetryConfigurationFactory.class);
+        if (proLicenseValid) {
+            return telemetryConfigurationFactory.getPlugin().isProTelemetryEnabled();
         } else {
-            return isProTelemetryEnabled();
+            return telemetryConfigurationFactory.getPlugin().isOssTelemetryEnabled();
         }
     }
 
-    private static boolean isOssTelemetryEnabled() {
-        // todo this needs to check the config endpoint
-        return true;
-    }
-
-    private static boolean isProTelemetryEnabled() {
-        // todo this needs to check the config endpoint
-        return false;
-    }
 }

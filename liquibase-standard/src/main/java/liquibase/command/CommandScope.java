@@ -3,7 +3,6 @@ package liquibase.command;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.telemetry.Event;
-import liquibase.telemetry.TelemetryConfiguration;
 import liquibase.telemetry.TelemetryFactory;
 import liquibase.configuration.*;
 import liquibase.database.Database;

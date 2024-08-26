@@ -17,5 +17,5 @@ public interface TelemetryListener extends Plugin {
      *
      * @param event the event to be handled.
      */
-    void handleEvent(Event event);
+    void handleEvent(Event event) throws Exception;
 }
