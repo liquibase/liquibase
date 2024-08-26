@@ -76,21 +76,21 @@ jobs:
         echo "Fetching commits for branch: $BRANCH_NAME"
 
         # Fetch commits between branch and master
-        MASTER_COMMITS=$(gh api -H "Accept: application/vnd.github.v3+json" /repos/${{ github.repository }}/compare/master...$BRANCH_NAME || echo "null")
-        if [ "$MASTER_COMMITS" = "null" ]; then
+        MASTER_COMMITS_RESPONSE=$(gh api -H "Accept: application/vnd.github.v3+json" /repos/${{ github.repository }}/compare/master...$BRANCH_NAME || echo "error")
+        if [[ "$MASTER_COMMITS_RESPONSE" == "error" || "$MASTER_COMMITS_RESPONSE" == "null" ]]; then
           echo "No differences found between branch $BRANCH_NAME and master."
           MASTER_COMMITS=""
         else
-          MASTER_COMMITS=$(echo "$MASTER_COMMITS" | jq -r '.commits[].sha' | tr '\n' ',' | sed 's/,$//')
+          MASTER_COMMITS=$(echo "$MASTER_COMMITS_RESPONSE" | jq -r '.commits[].sha' | tr '\n' ',' | sed 's/,$//')
         fi
 
         # Fetch commits between branch and release
-        RELEASE_COMMITS=$(gh api -H "Accept: application/vnd.github.v3+json" /repos/${{ github.repository }}/compare/release...$BRANCH_NAME || echo "null")
-        if [ "$RELEASE_COMMITS" = "null" ]; then
+        RELEASE_COMMITS_RESPONSE=$(gh api -H "Accept: application/vnd.github.v3+json" /repos/${{ github.repository }}/compare/release...$BRANCH_NAME || echo "error")
+        if [[ "$RELEASE_COMMITS_RESPONSE" == "error" || "$RELEASE_COMMITS_RESPONSE" == "null" ]]; then
           echo "No differences found between branch $BRANCH_NAME and release."
           RELEASE_COMMITS=""
         else
-          RELEASE_COMMITS=$(echo "$RELEASE_COMMITS" | jq -r '.commits[].sha' | tr '\n' ',' | sed 's/,$//')
+          RELEASE_COMMITS=$(echo "$RELEASE_COMMITS_RESPONSE" | jq -r '.commits[].sha' | tr '\n' ',' | sed 's/,$//')
         fi
 
         echo "MASTER_COMMITS=$MASTER_COMMITS" >> $GITHUB_ENV
