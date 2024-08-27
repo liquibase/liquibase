@@ -1,20 +1,31 @@
 package liquibase.telemetry.configuration;
 
+import liquibase.Scope;
 import liquibase.util.Cache;
 import lombok.Data;
+import org.yaml.snakeyaml.Yaml;
+
+import java.io.InputStream;
+import java.net.URL;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Data
 public class SegmentTelemetryConfiguration implements TelemetryConfiguration {
     private final static Cache<RemoteTelemetryConfiguration> remoteTelemetryConfiguration = new Cache<>(() -> {
-        // todo this needs to be fetched from the config endpoint
-        // todo this should only wait a certain amount of time before it too gives up
-        return new RemoteTelemetryConfiguration(
-                1500000000,
-                "https://api.segment.io/v1/batch",
-                true,
-                false,
-                TelemetryArgs.WRITE_KEY.getCurrentValue()
-        );
+        String url = TelemetryArgs.CONFIG_ENDPOINT_URL.getCurrentValue();
+        AtomicReference<RemoteTelemetryConfiguration> remoteTelemetryConfiguration = new AtomicReference<>();
+        Thread thread = new Thread(() -> {
+            try {
+                InputStream input = new URL(url).openStream();
+                Yaml yaml = new Yaml();
+                remoteTelemetryConfiguration.set(yaml.loadAs(input, RemoteTelemetryConfiguration.class));
+            } catch (Exception e) {
+                Scope.getCurrentScope().getLog(SegmentTelemetryConfiguration.class).fine("Failed to load telemetry configuration from " + url, e);
+            }
+        });
+        thread.start();
+        thread.join(TelemetryArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getCurrentValue());
+        return remoteTelemetryConfiguration.get();
     });
 
     @Override
@@ -30,12 +41,14 @@ public class SegmentTelemetryConfiguration implements TelemetryConfiguration {
         return remoteTelemetryConfiguration.get().getEndpointData();
     }
 
+    @Override
     public boolean isOssTelemetryEnabled() throws Exception {
-        return remoteTelemetryConfiguration.get().isEnabledOss();
+        return remoteTelemetryConfiguration.get().isSendOss();
     }
 
+    @Override
     public boolean isProTelemetryEnabled() throws Exception {
-        return remoteTelemetryConfiguration.get().isEnabledPro();
+        return remoteTelemetryConfiguration.get().isSendPro();
     }
 
     public String getWriteKey() throws Exception {

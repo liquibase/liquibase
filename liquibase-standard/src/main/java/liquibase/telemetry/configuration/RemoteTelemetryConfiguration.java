@@ -4,9 +4,9 @@ import lombok.Data;
 
 @Data
 public class RemoteTelemetryConfiguration {
-    private final int timeoutMs;
-    private final String endpointData;
-    private final boolean enabledOss;
-    private final boolean enabledPro;
-    private final String writeKey;
+    private int timeoutMs;
+    private String endpointData;
+    private boolean sendOss;
+    private boolean sendPro;
+    private String writeKey;
 }
