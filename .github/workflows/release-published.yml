@@ -447,7 +447,7 @@ jobs:
                "event_type": "liquibase-release",
                "client_payload": {
                   "liquibaseVersion": "${{ needs.setup.outputs.version }}"
-                  "dryRun": ${{ inputs.dry_run }}
+                  "dryRun": "${{ inputs.dry_run }}"
                 }
              });
 
