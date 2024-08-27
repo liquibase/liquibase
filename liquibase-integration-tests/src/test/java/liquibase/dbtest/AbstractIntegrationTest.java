@@ -4,6 +4,7 @@ import groovy.lang.Tuple2;
 import liquibase.*;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.LoadDataChange;
+import liquibase.change.custom.ExampleCustomTaskChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -565,17 +566,22 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
-    public void testRollbackableChangeLog() throws Exception {
+    public synchronized void testRollbackableChangeLog() throws Exception {
         assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(rollbackChangeLog);
         clearDatabase();
+        ExampleCustomTaskChange.resetCounts();
 
         liquibase = createLiquibase(rollbackChangeLog);
         liquibase.update(this.contexts);
+        assertEquals(1, ExampleCustomTaskChange.executeCallCount);
+        assertEquals(0, ExampleCustomTaskChange.rollbackCallCount);
 
         liquibase = createLiquibase(rollbackChangeLog);
         liquibase.rollback(new Date(0), this.contexts);
+        assertEquals(1, ExampleCustomTaskChange.executeCallCount);
+        assertEquals(1, ExampleCustomTaskChange.rollbackCallCount);
 
         liquibase = createLiquibase(rollbackChangeLog);
         liquibase.update(this.contexts);
