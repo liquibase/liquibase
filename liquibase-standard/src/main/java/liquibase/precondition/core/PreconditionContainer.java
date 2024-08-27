@@ -8,18 +8,19 @@ import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
+import liquibase.precondition.Precondition;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class PreconditionContainer extends AndPrecondition implements ChangeLogChild {
 
@@ -275,6 +276,7 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
         this.setOnFail(parsedNode.getChildValue(null, "onFail", String.class));
         this.setOnFailMessage(parsedNode.getChildValue(null, "onFailMessage", String.class));
         this.setOnSqlOutput(parsedNode.getChildValue(null, "onSqlOutput", String.class));
+        this.addNestedPrecondition(parsedNode.getChildValue(null, "nestedPreconditions", Precondition.class));
 
         super.load(parsedNode, resourceAccessor);
     }
@@ -282,5 +284,37 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
     @Override
     public String getName() {
         return "preConditions";
+    }
+
+    @Override
+    public Set<String> getSerializableFields() {
+        return new LinkedHashSet<>(
+                Arrays.asList(
+                        "onError", "onFail", "onSqlOutput", "onFailMessage", "onErrorMessage", "nestedPreconditions"
+                )
+        );
+    }
+
+    @Override
+    public Object getSerializableFieldValue(String field) {
+        if ("onError".equals(field)) {
+            return this.getOnError().key;
+        }
+        if("onFail".equals(field)) {
+            return this.getOnFail().key;
+        }
+        if("onSqlOutput".equals(field)) {
+            return this.getOnSqlOutput().key;
+        }
+        if("onFailMessage".equals(field)) {
+            return this.getOnFailMessage();
+        }
+        if("onErrorMessage".equals(field)) {
+            return this.getOnErrorMessage();
+        }
+        if("nestedPreconditions".equals(field)) {
+            return this.getNestedPreconditions();
+        }
+        throw new UnexpectedLiquibaseException("Unexpected field request on Precondition: " + field);
     }
 }

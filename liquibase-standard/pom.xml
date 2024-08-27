@@ -110,7 +110,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.10.2</version>
+            <version>5.10.3</version>
             <scope>test</scope>
         </dependency>
 
@@ -122,6 +122,14 @@
                 <exclusion>
                     <groupId>commons-beanutils</groupId>
                     <artifactId>commons-beanutils</artifactId>
+                </exclusion>
+                <exclusion> <!-- direct dependency for better dependabot control -->
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-text</artifactId>
+                </exclusion>
+                <exclusion> <!-- direct dependency for better dependabot control -->
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-collections4</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -148,13 +156,28 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.32</version>
+            <version>1.18.34</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>${commons-io.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>${commons-collections4.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>${commons-text.version}</version>
         </dependency>
     </dependencies>
 
@@ -208,6 +231,8 @@
                             javax.sql.*,
                             org.osgi.*,
                             org.yaml.snakeyaml.*,
+                            org.apache.commons.io.*;version="[${commons-io.version},3)",
+                            org.apache.commons.lang3.*,
                             *;resolution:=optional
                         </Import-Package>
                         <Export-Package>
@@ -247,7 +272,8 @@
                             osgi.serviceloader; osgi.serviceloader=liquibase.resource.PathHandler,
                             osgi.serviceloader; osgi.serviceloader=liquibase.report.ShowSummaryGenerator,
                             osgi.serviceloader; osgi.serviceloader=liquibase.parser.LiquibaseSqlParser,
-                            osgi.serviceloader; osgi.serviceloader=liquibase.changeset.ChangeSetService
+                            osgi.serviceloader; osgi.serviceloader=liquibase.changeset.ChangeSetService,
+                            osgi.serviceloader; osgi.serviceloader=liquibase.changelog.visitor.ValidatingVisitorGenerator
                         </Provide-Capability>
                         <Require-Capability>
                             osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)",
@@ -284,7 +310,8 @@
                             osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.resource.PathHandler)"; cardinality:=multiple,
                             osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.report.ShowSummaryGenerator)"; cardinality:=multiple,
                             osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.parser.LiquibaseSqlParser)"; cardinality:=multiple,
-                            osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.changeset.ChangeSetService)"; cardinality:=multiple
+                            osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.changeset.ChangeSetService)"; cardinality:=multiple,
+                            osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.changelog.visitor.ValidatingVisitorGenerator)"; cardinality:=multiple
                         </Require-Capability>
                     </instructions>
                 </configuration>
@@ -303,7 +330,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.4.1</version>
+                <version>3.4.2</version>
                 <executions>
                     <execution>
                         <id>default-jar</id>
