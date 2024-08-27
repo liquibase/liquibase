@@ -47,6 +47,10 @@ on:
         required: true
         type: boolean
         default: false
+    outputs:
+      dry_run_release_url:
+        description: 'The URL of the created release'
+        value: ${{ jobs.build-installers.outputs.dry_run_release_url }}
 
 env:
   DEPENDENCIES: "liquibase-bigquery" # Comma separated list of dependencies to release the extensions list
