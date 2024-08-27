@@ -429,6 +429,7 @@ jobs:
           remoteDir: '/xml/ns/dbchangelog/'
 
   release-docker:
+    if: always()
     name: Release docker images
     needs: [ setup, manual_trigger_deployment ]
     runs-on: ubuntu-22.04
