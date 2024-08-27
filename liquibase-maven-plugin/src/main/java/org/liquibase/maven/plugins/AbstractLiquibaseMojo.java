@@ -750,6 +750,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         this.vaultNamespace = vaultNamespace;
     }
 
+    /**
+     * When set to true, this global property prevents DBCL and DBCLH sql from being present in console and logs during *-sql commands, such as update-sql, rollback-sql, etc.
+     *
+     * @parameter property = "liquibase.suppressLiquibaseSql"
+     */
+    @PropertyElement(key =  "liquibase.suppressLiquibaseSql")
+    protected Boolean suppressLiquibaseSql;
+
     protected String commandName;
     protected DefaultChangeExecListener defaultChangeExecListener;
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
@@ -1027,6 +1035,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                         innerScopeValues.put("liquibase.dbclhistory.enabled", isDbclHistoryEnabled());
                         innerScopeValues.put("liquibase.dbclhistory.captureSql", isDbclHistoryCaptureSql());
                         innerScopeValues.put("liquibase.dbclhistory.captureExtensions", isDbclHistoryCaptureExtensions());
+                        innerScopeValues.put(LiquibaseCommandLineConfiguration.SUPPRESS_LIQUIBASE_SQL.getKey(), suppressLiquibaseSql);
                         Scope.child(innerScopeValues, () -> performLiquibaseTask(liquibase));
                     } catch (LiquibaseException e) {
                         cleanup(database);
