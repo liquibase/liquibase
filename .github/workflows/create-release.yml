@@ -244,6 +244,8 @@ jobs:
     runs-on: macos-13 #needs macos for apple notarization
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      dry_run_release_url: ${{ fromJSON(steps.attach-files-dry-run.outputs.assets)[0].browser_download_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -313,6 +315,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Attach Files to Dry-Run Draft Release
+        id: attach-files-dry-run
         if: ${{ inputs.standalone_zip == false && inputs.dry_run == true }}
         uses: softprops/action-gh-release@v2
         with:
