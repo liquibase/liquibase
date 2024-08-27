@@ -429,7 +429,7 @@ jobs:
           remoteDir: '/xml/ns/dbchangelog/'
 
   release-docker:
-    if: ${{ inputs.dry_run == false }}
+    if: always()
     name: Release docker images
     needs: [ setup, manual_trigger_deployment ]
     runs-on: ubuntu-22.04
@@ -446,7 +446,8 @@ jobs:
                "repo": "docker",
                "event_type": "liquibase-release",
                "client_payload": {
-                  "liquibaseVersion": "${{ needs.setup.outputs.version }}"
+                  "liquibaseVersion": "${{ needs.setup.outputs.version }}",
+                  "dryRun": "${{ inputs.dry_run }}"
                 }
              });
 
@@ -465,14 +466,14 @@ jobs:
           event-type: oss-released-tag
 
   package:
-    if: ${{ inputs.dry_run == false }}
-    uses: liquibase/build-logic/.github/workflows/package.yml@v0.7.8
+    uses: liquibase/build-logic/.github/workflows/package.yml@main
     needs: [ setup ]
     secrets: inherit
     with:
       groupId: 'org.liquibase'
       artifactId: 'liquibase'
       version: ${{ needs.setup.outputs.version }}
+      dry_run: ${{ inputs.dry_run }}
 
   update-docs-oss-pro-version:
     if: ${{ inputs.dry_run == false }}
