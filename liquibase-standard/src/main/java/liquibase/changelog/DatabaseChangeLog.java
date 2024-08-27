@@ -38,6 +38,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -54,6 +55,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private static final Pattern SLASH_PATTERN = Pattern.compile("^/");
     private static final Pattern DOUBLE_BACK_SLASH_PATTERN = Pattern.compile("\\\\");
     private static final Pattern NO_LETTER_PATTERN = Pattern.compile("^[a-zA-Z]:");
+    private static final String CLASSPATH_PROTOCOL = "classpath:";
     public static final String SEEN_CHANGELOGS_PATHS_SCOPE_KEY = "SEEN_CHANGELOG_PATHS";
     public static final String FILE = "file";
     public static final String CONTEXT_FILTER = "contextFilter";
@@ -980,7 +982,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         if (isRelativePath) {
             try {
                 fileName = resourceAccessor.get(this.getPhysicalFilePath()).resolveSibling(fileName).getPath();
-                fileName = normalizePath(Paths.get(fileName).toString());
+                fileName = normalizePath(normalizePathViaPaths(fileName, false));
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
@@ -1084,7 +1086,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             return null;
         }
 
-        if (!GlobalConfiguration.PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS.getCurrentValue() && filePath.startsWith("classpath:")) {
+        if (!GlobalConfiguration.PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS.getCurrentValue() && filePath.startsWith(CLASSPATH_PROTOCOL)) {
             filePath = filePath.substring("classpath:".length());
         }
 
@@ -1106,7 +1108,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         we fall back to path normalization using Paths.get(), which might fail on Windows.
          */
         if (normalized == null) {
-            normalized = Paths.get(filePath).normalize().toString();
+            normalized = normalizePathViaPaths(filePath, true);
         }
         filePath = normalized;
 
@@ -1115,6 +1117,21 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
 
         return filePath;
+    }
+
+    private static String normalizePathViaPaths(String filePath, boolean normalizePath) {
+        if (filePath == null) {
+            return null;
+        }
+
+        // preserve URL protocol when normalizing the path
+        boolean classpathUrl = filePath.startsWith(CLASSPATH_PROTOCOL);
+        Path path = classpathUrl
+                ? Paths.get(filePath.substring(CLASSPATH_PROTOCOL.length()))
+                : Paths.get(filePath);
+
+        Path normalizedPath = normalizePath ? path.normalize() : path;
+        return classpathUrl ? CLASSPATH_PROTOCOL + normalizedPath : normalizedPath.toString();
     }
 
     public void clearCheckSums() {
