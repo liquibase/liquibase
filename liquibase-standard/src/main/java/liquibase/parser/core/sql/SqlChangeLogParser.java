@@ -12,9 +12,15 @@ import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
+import liquibase.snapshot.SnapshotControl;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
@@ -89,14 +95,15 @@ public class SqlChangeLogParser implements ChangeLogParser {
      *
      */
     private String generateId(String physicalChangeLogLocation, Database database) {
-        if (database == null) {
+        if (database == null || isOldFormat(database)) {
             return "raw";
         }
+
         List<RanChangeSet> ranChangeSets = new ArrayList<>();
         try {
             ranChangeSets = new ArrayList<>(
-                    Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getRanChangeSets());
-        } catch (DatabaseException dbe) {
+               Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getRanChangeSets());
+        } catch (Exception dbe) {
             return "raw";
         }
 
@@ -110,5 +117,24 @@ public class SqlChangeLogParser implements ChangeLogParser {
             return "raw";
         }
         return "raw_" + DatabaseChangeLog.normalizePath(physicalChangeLogLocation).replace("/", "_");
+    }
+
+    /**
+     *
+     * Handle the possibility that the changelog is an old format
+     *
+     * @param   database          The database in question
+     * @return  boolean
+     *
+     */
+    private static boolean isOldFormat(Database database) {
+        Table changeLogTable = null;
+        try {
+            changeLogTable = SnapshotGeneratorFactory.getInstance().getDatabaseChangeLogTable(new SnapshotControl
+                    (database, false, Table.class, Column.class), database);
+        } catch (LiquibaseException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+        return changeLogTable != null && changeLogTable.getColumn("ORDEREXECUTED") == null;
     }
 }
