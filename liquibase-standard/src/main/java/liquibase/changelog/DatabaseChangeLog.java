@@ -1060,19 +1060,38 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
             this.getPreconditions().addNestedPrecondition(preconditions);
         }
+
+        List<RanChangeSet> ranChangeSets = new ArrayList<>();
+        Database database = Scope.getCurrentScope().getDatabase();
+        if (database != null && logicalFilePath != null) {
+            ranChangeSets = database.getRanChangeSetList();
+        }
         for (ChangeSet changeSet : changeLog.getChangeSets()) {
             if (modifyChangeSets != null) {
                 modifyChangeSets(modifyChangeSets, changeSet);
             }
-            changeSet.setLogicalFilePath(logicalFilePath);
-            if (StringUtils.isNotEmpty(logicalFilePath)) {
-                changeSet.setFilePath(logicalFilePath);
+            if (logicalFilePath != null && ! getRanChangeSet(changeSet, ranChangeSets)) {
+                changeSet.setLogicalFilePath(logicalFilePath);
+                if (StringUtils.isNotEmpty(logicalFilePath)) {
+                    changeSet.setFilePath(logicalFilePath);
+                }
             }
             addChangeSet(changeSet);
         }
         skippedChangeSets.addAll(changeLog.getSkippedChangeSets());
 
         return true;
+    }
+
+    private boolean getRanChangeSet(ChangeSet changeSet, List<RanChangeSet> ranChangeSets) {
+        Optional<RanChangeSet> ranChangeSet =
+            ranChangeSets.stream().filter( rc -> {
+                return
+                  rc.getId().equals(changeSet.getId()) &&
+                  rc.getAuthor().equals(changeSet.getAuthor()) &&
+                  rc.getStoredChangeLog().equals(changeSet.getFilePath());
+            }).findFirst();
+        return ranChangeSet.isPresent();
     }
 
     private void modifyChangeSets(ModifyChangeSets modifyChangeSets, ChangeSet changeSet) {

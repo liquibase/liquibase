@@ -20,10 +20,11 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
     private int minDepth;
     private int maxDepth;
     private String endsWithFilter;
+    private String logicalFilePath;
 
     @Override
     public Set<String> getSerializableFields() {
-        return new LinkedHashSet<>(Arrays.asList("path", "errorIfMissingOrEmpty", "relativeToChangelogFile", "resourceFilter", "context", "minDepth", "maxDepth", "endsWithFilter"));
+        return new LinkedHashSet<>(Arrays.asList("path", "errorIfMissingOrEmpty", "relativeToChangelogFile", "resourceFilter", "context", "minDepth", "maxDepth", "endsWithFilter","logicalFilePath"));
     }
 
     @Override
