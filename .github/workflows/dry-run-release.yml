@@ -26,7 +26,7 @@ jobs:
 
   dry-run-create-release:
     needs: [ setup ]
-    uses: liquibase/liquibase/.github/workflows/create-release.yml@master
+    uses: liquibase/liquibase/.github/workflows/create-release.yml@DAT-18302
     with:
       version: "dry-run-${{ github.run_id }}"
       runId: ${{ needs.setup.outputs.dry_run_id }}
