@@ -59,7 +59,7 @@ jobs:
 
   dry-run-release-published:
     needs: [ setup, dry-run-get-draft-release ]
-    uses: liquibase/liquibase/.github/workflows/release-published.yml@DAT-18302
+    uses: liquibase/liquibase/.github/workflows/release-published.yml@master
     with:
       tag: "vdry-run-${{ github.run_id }}"
       dry_run_release_id: ${{ needs.dry-run-get-draft-release.outputs.dry_run_release_id }}
