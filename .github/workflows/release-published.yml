@@ -16,6 +16,10 @@ on:
         description: 'The release id of the dry-run release'
         required: false
         type: string
+      dry_run_release_url:
+        description: 'The release url of the dry-run release'
+        required: false
+        type: string
   workflow_call:
     inputs:
       tag:
@@ -31,6 +35,11 @@ on:
         description: 'The release id of the dry-run release'
         required: false
         type: string
+      dry_run_release_url:
+        description: 'The release url of the dry-run release'
+        required: false
+        type: string
+
 env:
   MAVEN_VERSION: '3.9.2'
 jobs:
