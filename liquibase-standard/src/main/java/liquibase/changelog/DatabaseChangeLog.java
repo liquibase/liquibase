@@ -1070,7 +1070,13 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             if (modifyChangeSets != null) {
                 modifyChangeSets(modifyChangeSets, changeSet);
             }
-            if (logicalFilePath != null && ! getRanChangeSet(changeSet, ranChangeSets)) {
+
+            //
+            // Do not update the logical file path if the change set has
+            // already been executed because this would cause the addition
+            // of another DBCL entry.
+            //
+            if (logicalFilePath != null && ! ranChangeSetExists(changeSet, ranChangeSets)) {
                 changeSet.setLogicalFilePath(logicalFilePath);
                 if (StringUtils.isNotEmpty(logicalFilePath)) {
                     changeSet.setFilePath(logicalFilePath);
@@ -1083,7 +1089,16 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return true;
     }
 
-    private boolean getRanChangeSet(ChangeSet changeSet, List<RanChangeSet> ranChangeSets) {
+    /**
+     *
+     * Return true if there is a RanChangeSet instance for the change set
+     *
+     * @param  changeSet                 The ChangeSet in question
+     * @param  ranChangeSets             The list of RanChangeSet to iterate
+     * @return boolean
+     *
+     */
+    private boolean ranChangeSetExists(ChangeSet changeSet, List<RanChangeSet> ranChangeSets) {
         Optional<RanChangeSet> ranChangeSet =
             ranChangeSets.stream().filter( rc -> {
                 return
