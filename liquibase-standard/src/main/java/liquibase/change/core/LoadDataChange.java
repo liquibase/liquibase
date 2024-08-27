@@ -39,6 +39,7 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.csv.CSVReader;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -212,7 +213,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
      */
     protected String columnIdString(int index, LoadDataColumnConfig columnConfig) {
         return " / column[" + index + "]" +
-                (StringUtil.trimToNull(columnConfig.getName()) != null ?
+                (StringUtils.trimToNull(columnConfig.getName()) != null ?
                         " (name:'" + columnConfig.getName() + "')" : "");
     }
 
@@ -262,13 +263,13 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
             // Start at '1' to take into account the header (already processed):
             int lineNumber = 1;
 
-            boolean isCommentingEnabled = StringUtil.isNotEmpty(commentLineStartsWith);
+            boolean isCommentingEnabled = StringUtils.isNotEmpty(commentLineStartsWith);
 
             List<LoadDataRowConfig> rows = new ArrayList<>();
             while ((line = reader.readNext()) != null) {
                 lineNumber++;
                 if
-                ((line.length == 0) || ((line.length == 1) && (StringUtil.trimToNull(line[0]) == null)) ||
+                ((line.length == 0) || ((line.length == 1) && (StringUtils.trimToNull(line[0]) == null)) ||
                         (isCommentingEnabled && isLineCommented(line))
                 ) {
                     //nothing interesting on this line
@@ -314,7 +315,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                         valueConfig.setName(columnName);
                         valueConfig.setAllowUpdate(columnConfig.getAllowUpdate());
 
-                        if (StringUtil.isEmpty(value)) {
+                        if (StringUtils.isEmpty(value)) {
                             value = columnConfig.getDefaultValue();
                         }
                         if (isNull) {
@@ -340,7 +341,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             try {
                                 // Need the column type for handling 'NOW' or 'TODAY' type column value
                                 valueConfig.setType(columnConfig.getType());
-                                if (StringUtil.equalsWordNull(value) || StringUtil.isEmpty(value)) {
+                                if (StringUtil.equalsWordNull(value) || StringUtils.isEmpty(value)) {
                                     valueConfig.setValue(null);
                                     valueConfig.setValueDate(columnConfig.getDefaultValueDate());
                                 } else {
@@ -635,7 +636,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                 return c;
             }
         }
-        if (null == StringUtil.trimToNull(name)) {
+        if (null == StringUtils.trimToNull(name)) {
             throw new UnexpectedLiquibaseException("Unreferenced unnamed column is not supported");
         }
         LoadDataColumnConfig cfg = new LoadDataColumnConfig();
@@ -669,7 +670,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     }
 
     private boolean isLineCommented(String[] line) {
-        return StringUtil.startsWith(line[0], commentLineStartsWith);
+        return StringUtils.startsWith(line[0], commentLineStartsWith);
     }
 
     @Override
@@ -701,7 +702,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         Reader streamReader = StreamUtil.readStreamWithReader(stream, getEncoding());
 
         char quotchar;
-        if (StringUtil.trimToEmpty(this.quotchar).isEmpty()) {
+        if (StringUtils.trimToEmpty(this.quotchar).isEmpty()) {
             // hope this is impossible to have a field surrounded with non ascii char 0x01
             quotchar = '\1';
         } else {

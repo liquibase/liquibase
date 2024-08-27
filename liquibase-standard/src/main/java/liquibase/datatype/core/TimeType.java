@@ -7,7 +7,7 @@ import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
-import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -25,7 +25,7 @@ public class TimeType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
+        String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
         if (database instanceof InformixDatabase) {
             return new DatabaseDataType("DATETIME HOUR TO FRACTION", 5);
         }
