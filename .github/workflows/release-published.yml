@@ -446,7 +446,7 @@ jobs:
                "repo": "docker",
                "event_type": "liquibase-release",
                "client_payload": {
-                  "liquibaseVersion": "${{ needs.setup.outputs.version }}"
+                  "liquibaseVersion": "${{ needs.setup.outputs.version }}",
                   "dryRun": "${{ inputs.dry_run }}"
                 }
              });
