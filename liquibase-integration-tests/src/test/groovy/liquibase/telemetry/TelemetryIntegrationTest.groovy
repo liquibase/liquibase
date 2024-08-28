@@ -106,31 +106,6 @@ class TelemetryIntegrationTest extends Specification {
         cleanup:
         simpleWebserver.stop()
     }
-
-    /**
-     * @param isExpectedValueString if the expected value will be rendered as a string in the JSON output, set to true
-     * @param isExpectedValueTruncated if the expected value is only a subset of the actual expected value, set this to
-     * true so that the generated search string does not have a closing quote
-     * @return
-     */
-    boolean verifyKeyValueInBody(String body, String key, Object expectedValue, boolean isExpectedValueString = true, boolean isExpectedValueTruncated = false) {
-        // flush stream handler before doing any comparisons, because some log messages might be queued and not pushed to the stream yet
-        String searchString = '"'+key+'":'
-        if (isExpectedValueString) {
-            searchString += '"'
-        }
-        if (expectedValue != null) {
-            searchString += expectedValue
-            if (isExpectedValueString && !isExpectedValueTruncated) {
-                searchString += '"'
-            }
-        }
-        if (!body.contains(searchString)) {
-            throw new ComparisonFailure("The specified key and value do not exist in the output stream.", searchString, body)
-        }
-        return true
-    }
-
 }
 
 class SimpleWebserver extends NanoHTTPD {
