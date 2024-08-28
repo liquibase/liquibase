@@ -18,9 +18,8 @@ on:
         type: string
       dry_run_release_url: 
         description: 'URL of the dry-run release'
-        required: true
-        type: boolean
-        default: false
+        required: false
+        type: string
   workflow_call:
     inputs:
       tag:
@@ -38,9 +37,8 @@ on:
         type: string
       dry_run_release_url: 
         description: 'URL of the dry-run release'
-        required: true
-        type: boolean
-        default: false
+        required: false
+        type: string
 
 env:
   MAVEN_VERSION: '3.9.2'
