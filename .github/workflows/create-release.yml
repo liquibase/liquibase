@@ -126,11 +126,11 @@ jobs:
           run_id=${{ github.run_id }}
           echo "uber_jar_runId=${run_id}" >> $GITHUB_OUTPUT
 
-      - name: Download liquibase-pro-azure-artifacts
-        uses: actions/download-artifact@v4
-        with: 
-          name: liquibase-pro-azure-artifacts
-          path: liquibase-pro/liquibase-azure-deps
+      # - name: Download liquibase-pro-azure-artifacts
+      #   uses: actions/download-artifact@v4
+      #   with: 
+      #     name: liquibase-pro-azure-artifacts
+      #     path: liquibase-pro/liquibase-azure-deps
 
       - name: Generate repositories and servers JSON
         id: generate-json
