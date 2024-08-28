@@ -336,9 +336,10 @@ jobs:
       - name: Debug Output
         if: ${{ inputs.dry_run == true }}
         run: |
-          echo "Outputs: ${{ steps.attach-files-dry-run.outputs }}"
+          echo "JSON output from attach-files-dry-run:"
+          echo '${{ toJson(steps.attach-files-dry-run.outputs) }}' | jq .
         
-
+        
       - name: Attach standalone zip to Build
         if: ${{ inputs.standalone_zip == true && inputs.dry_run == false }}
         uses: actions/upload-artifact@v4
