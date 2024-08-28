@@ -1110,6 +1110,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         if (normalized == null) {
             normalized = normalizePathViaPaths(filePath, true);
         }
+        
+        if (normalized == null) {
+            return null;
+        }
+
         filePath = normalized;
 
         if (filePath.contains("\\")) {
