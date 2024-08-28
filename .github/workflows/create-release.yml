@@ -339,11 +339,8 @@ jobs:
         shell: bash
         run: |
           url=$(echo '${{ toJson(steps.attach-files-dry-run.outputs) }}' | jq -r '.url')
-          echo "dry_run_release_url=$url"
-          echo "dry_run_release_url=$url" >> $GITHUB_ENV
+          echo $url
           echo "dry_run_release_url=$url" >> $GITHUB_OUTPUT
-        
-        
         
       - name: Attach standalone zip to Build
         if: ${{ inputs.standalone_zip == true && inputs.dry_run == false }}
