@@ -287,8 +287,10 @@ public class CommandScope {
                     } catch (Exception e) {
                         Scope.getCurrentScope().getLog(getClass()).warning("Error flushing command output stream: " + e.getMessage(), e);
                     }
-                    TelemetryFactory telemetryFactory = Scope.getCurrentScope().getSingleton(TelemetryFactory.class);
-                    telemetryFactory.handleEvent(analyticsEvent);
+                    ExceptionUtil.doSilently(() -> {
+                        TelemetryFactory telemetryFactory = Scope.getCurrentScope().getSingleton(TelemetryFactory.class);
+                        telemetryFactory.handleEvent(analyticsEvent);
+                    });
                 }
 
                 return resultsBuilder.build();
