@@ -331,6 +331,11 @@ jobs:
           files: re-version/final/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Debug Output
+        if: ${{ inputs.dry_run == true }}
+        run: |
+          echo "Outputs: ${{ steps.attach-files-dry-run.outputs }}"
         
 
       - name: Attach standalone zip to Build
