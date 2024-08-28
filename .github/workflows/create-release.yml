@@ -338,9 +338,11 @@ jobs:
         id: extract-dry-run-url
         shell: bash
         run: |
-          url=$(echo '${{ toJson(steps.attach-files-dry-run.outputs) }}' | jq -r '.url')
+          url=$(echo '${{ toJson(steps.attach-files-dry-run.outputs) }}' | jq -r '.assets | fromjson | .[0].browser_download_url')
           echo $url
-          echo "dry_run_release_url=$url" >> $GITHUB_OUTPUT
+          base_url=$(dirname "$full_url")
+          echo $base_url
+          echo "dry_run_release_url=$base_url" >> $GITHUB_OUTPUT
         
       - name: Attach standalone zip to Build
         if: ${{ inputs.standalone_zip == true && inputs.dry_run == false }}
