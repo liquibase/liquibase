@@ -340,7 +340,7 @@ jobs:
         run: |
           url=$(echo '${{ toJson(steps.attach-files-dry-run.outputs) }}' | jq -r '.assets | fromjson | .[0].browser_download_url')
           echo $url
-          base_url=$(dirname "$full_url")
+          base_url=$(dirname "$url")
           echo $base_url
           echo "dry_run_release_url=$base_url" >> $GITHUB_OUTPUT
         
