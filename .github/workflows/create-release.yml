@@ -250,7 +250,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     outputs:
-      dry_run_release_url: ${{ fromJSON(steps.attach-files-dry-run.outputs.assets)[0].upload_url }}
+      dry_run_release_url: ${{ steps.extract-dry-run-url.outputs.dry_run_release_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -333,11 +333,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Debug Output
-        if: ${{ inputs.dry_run == true }}
+      - name: Extract dry-run release URL
+        if: ${{ inputs.standalone_zip == false && inputs.dry_run == true }}
+        id: extract-dry-run-url
+        shell: bash
         run: |
-          echo "JSON output from attach-files-dry-run:"
-          echo '${{ toJson(steps.attach-files-dry-run.outputs) }}' | jq .
+          url=$(echo '${{ steps.attach-files-dry-run.outputs }}' | jq -r '.url')
+          echo "dry_run_release_url=$url"
+          echo "dry_run_release_url=$url" >> $GITHUB_ENV
+          echo "dry_run_release_url=$url" >> $GITHUB_OUTPUT
+        
         
         
       - name: Attach standalone zip to Build
