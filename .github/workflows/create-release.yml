@@ -249,7 +249,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     outputs:
-      dry_run_release_url: ${{ fromJSON(steps.attach-files-dry-run.outputs.assets)[0].browser_download_url }}
+      dry_run_release_url: ${{ fromJSON(steps.attach-files-dry-run.outputs.assets)[0].upload_url }}
     steps:
       - uses: actions/checkout@v4
 
