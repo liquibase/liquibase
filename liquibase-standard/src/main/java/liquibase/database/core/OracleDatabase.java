@@ -256,12 +256,12 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String generatePrimaryKeyName(String tableName) {
-        if (tableName.length() > 27) {
-            //noinspection HardCodedStringLiteral
-            return "PK_" + tableName.toUpperCase(Locale.US).substring(0, 27);
+        int maximumLength = getIdentifierMaximumLength();
+        String primaryKeyName = "PK_" + tableName.toUpperCase(Locale.US);
+        if (primaryKeyName.length() > maximumLength) {
+            return primaryKeyName.substring(0, maximumLength);
         } else {
-            //noinspection HardCodedStringLiteral
-            return "PK_" + tableName.toUpperCase(Locale.US);
+            return primaryKeyName;
         }
     }
 

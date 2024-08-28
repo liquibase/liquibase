@@ -381,13 +381,18 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                                 valueConfig.setValue(value);
                                 needsPreparedStatement = true;
                             } else {
+                                // If the value is not base64 encoded we are expecting the value to be a
+                                // valid path to another file which holds the entire value we are expecting
+                                // to load into the db.
                                 valueConfig.setValueBlobFile(value);
                                 needsPreparedStatement = true;
                             }
                         } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.CLOB) {
+                            // Similar to the blob case, we expect ALL clobs found using loadData to be a valid path to a file.
+                            // We then load the entire file into the value when executing the statement.
                             valueConfig.setValueClobFile(value);
                             needsPreparedStatement = true;
-                        } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.UUID) {
+                        }  else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.UUID) {
                             valueConfig.setType(columnConfig.getType());
                             if ("NULL".equalsIgnoreCase(value)) {
                                 valueConfig.setValue(null);

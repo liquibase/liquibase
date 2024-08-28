@@ -504,6 +504,14 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 );
             }
 
+            if (database instanceof MySQLDatabase) {
+                if (columnSize != null) {
+                    type.setColumnSize(((MySQLDatabase) database).getFSPFromTimeType(columnSize, Types.TIMESTAMP));
+                } else {
+                    type.setColumnSize(0);
+                }
+            }
+
             type.setDecimalDigits(null);
         } else {
             type.setColumnSize(columnSize);
