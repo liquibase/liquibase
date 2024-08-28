@@ -338,7 +338,7 @@ jobs:
         id: extract-dry-run-url
         shell: bash
         run: |
-          url=$(echo '${{ steps.attach-files-dry-run.outputs }}' | jq -r '.url')
+          url=$(echo '${{ toJson(steps.attach-files-dry-run.outputs) }}' | jq -r '.url')
           echo "dry_run_release_url=$url"
           echo "dry_run_release_url=$url" >> $GITHUB_ENV
           echo "dry_run_release_url=$url" >> $GITHUB_OUTPUT
