@@ -16,8 +16,12 @@ on:
         description: 'The release id of the dry-run release'
         required: false
         type: string
-      dry_run_release_url: 
-        description: 'URL of the dry-run release'
+      dry_run_zip_url: 
+        description: 'URL of the dry-run zip release'
+        required: false
+        type: string
+      dry_run_tar_gz_url: 
+        description: 'URL of the dry-run tar.gz release'
         required: false
         type: string
   workflow_call:
@@ -35,8 +39,12 @@ on:
         description: 'The release id of the dry-run release'
         required: false
         type: string
-      dry_run_release_url: 
-        description: 'URL of the dry-run release'
+      dry_run_zip_url: 
+        description: 'URL of the dry-run zip release'
+        required: false
+        type: string
+      dry_run_tar_gz_url: 
+        description: 'URL of the dry-run tar.gz release'
         required: false
         type: string
 
@@ -483,7 +491,8 @@ jobs:
       artifactId: 'liquibase'
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run }}
-      dry_run_release_url: ${{ inputs.dry_run_release_url }}
+      dry_run_zip_url: ${{ inputs.dry_run_zip_url }}
+      dry_run_tar_gz_url: ${{ inputs.dry_run_tar_gz_url }}
 
   update-docs-oss-pro-version:
     if: ${{ inputs.dry_run == false }}
