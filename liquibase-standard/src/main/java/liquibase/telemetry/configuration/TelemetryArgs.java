@@ -5,6 +5,7 @@ import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.license.LicenseServiceUtils;
 import liquibase.telemetry.TelemetryFactory;
+import org.apache.commons.lang3.BooleanUtils;
 import liquibase.telemetry.TelemetryOutputDestination;
 
 public class TelemetryArgs implements AutoloadedConfigurations {
@@ -47,7 +48,7 @@ public class TelemetryArgs implements AutoloadedConfigurations {
         boolean proLicenseValid = LicenseServiceUtils.isProLicenseValid();
         TelemetryConfigurationFactory telemetryConfigurationFactory = Scope.getCurrentScope().getSingleton(TelemetryConfigurationFactory.class);
         if (proLicenseValid) {
-            return telemetryConfigurationFactory.getPlugin().isProTelemetryEnabled();
+            return BooleanUtils.and(new Boolean[]{telemetryConfigurationFactory.getPlugin().isProTelemetryEnabled(), userSuppliedEnabled});
         } else {
             return telemetryConfigurationFactory.getPlugin().isOssTelemetryEnabled();
         }
