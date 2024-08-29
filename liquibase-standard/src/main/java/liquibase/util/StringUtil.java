@@ -17,39 +17,10 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Various utility methods for working with strings.
- * @deprecated use {@link StringUtils} instead
- */
-public class StringUtil {
+public class StringUtil extends StringUtils {
     private static final Pattern upperCasePattern = Pattern.compile(".*[A-Z].*");
     private static final Pattern lowerCasePattern = Pattern.compile(".*[a-z].*");
     private static final Pattern spacePattern = Pattern.compile(" ");
-
-    /**
-     * Returns the trimmed (left and right) version of the input string. If null is passed, an empty string is returned.
-     *
-     * @param string the input string to trim
-     * @return the trimmed string, or an empty string if the input was null.
-     * @deprecated use {@link StringUtils#trimToEmpty(String)} instead
-     */
-    @Deprecated
-    public static String trimToEmpty(String string) {
-        return StringUtils.trimToEmpty(string);
-    }
-
-    /**
-     * Returns the trimmed (left and right) form of the input string. If the string is empty after trimming (or null
-     * was passed in the first place), null is returned, i.e. the input string is reduced to nothing.
-     *
-     * @param string the string to trim
-     * @return the trimmed string or null
-     * @deprecated use {@link StringUtils#trimToNull(String)} instead
-     */
-    @Deprecated
-    public static String trimToNull(String string) {
-        return StringUtils.trimToNull(string);
-    }
 
     /**
      * Removes any comments from multiple line SQL using {@link #stripComments(String, ChangeSet)}
@@ -477,26 +448,10 @@ public class StringUtil {
         return returnList;
     }
 
-    /**
-     * @deprecated use {@link StringUtils#repeat(String, int)} instead
-     */
-    @Deprecated
-    public static String repeat(String string, int times) {
-        return StringUtils.repeat(string, times);
-    }
-
-    /**
-     * @deprecated use {@link StringUtils#join(Object[], String)} instead
-     */
-    @Deprecated
     public static String join(Integer[] array, String delimiter) {
         return StringUtils.join(array, delimiter);
     }
 
-    /**
-     * @deprecated use {@link StringUtils#join(int[], char)} instead
-     */
-    @Deprecated
     public static String join(int[] array, String delimiter) {
         return StringUtils.join(ArrayUtils.toObject(array), delimiter);
     }
@@ -627,72 +582,6 @@ public class StringUtil {
         }
 
         return StringUtil.repeat(" ", length - value.length()) + value;
-    }
-
-    /**
-     *
-     * Returns true if the input string contains the specified value
-     *
-     * @param  value                  String to be checked
-     * @param  containsValue          String to look for
-     * @return true if String contains the value
-     * @deprecated use {@link StringUtils#contains(CharSequence, CharSequence)} instead
-     */
-    @Deprecated
-    public static boolean contains(String value, String containsValue) {
-        return StringUtils.contains(value, containsValue);
-    }
-
-    /**
-     * Returns true if the input string is the empty string (null-safe).
-     *
-     * @param value String to be checked
-     * @return true if String is null or empty
-     * @deprecated use {@link StringUtils#isEmpty(CharSequence)} instead
-     */
-    @Deprecated
-    public static boolean isEmpty(String value) {
-        return StringUtils.isEmpty(value);
-    }
-
-    /**
-     * Returns true if the input string is NOT the empty string. If the string is null, false is returned.
-     *
-     * @param value String to be checked
-     * @return true if string is not null and not empty (length > 0)
-     * @deprecated use {@link StringUtils#isNotEmpty(CharSequence)} instead
-     */
-    @Deprecated
-    public static boolean isNotEmpty(String value) {
-        return StringUtils.isNotEmpty(value);
-    }
-
-    /**
-     * Checks whether the given <code>value</code> starts with the specified <code>startsWith</code> string.
-     *
-     * @param value      the string to check
-     * @param startsWith the prefix to check for
-     * @return <code>true</code> if <code>value</code> starts with <code>startsWith</code>, <code>false</code> otherwise.
-     * Returns <code>false</code> if either argument is <code>null</code>.
-     * @deprecated use {@link StringUtils#startsWith(CharSequence, CharSequence)} instead
-     */
-    @Deprecated
-    public static boolean startsWith(String value, String startsWith) {
-        return StringUtils.startsWith(value, startsWith);
-    }
-
-    /**
-     * Checks whether the given <code>value</code> ends with the specified <code>endsWith</code> string.
-     *
-     * @param value      the string to check
-     * @param endsWith   the prefix to check for
-     * @return <code>true</code> if <code>value</code> ends with <code>endsWith</code>, <code>false</code> otherwise.
-     * Returns <code>false</code> if either argument is <code>null</code>.
-     * @deprecated use {@link StringUtils#endsWith(CharSequence, CharSequence)} instead
-     */
-    @Deprecated
-    public static boolean endsWith(String value, String endsWith) {
-        return StringUtils.endsWith(value, endsWith);
     }
 
     /**
@@ -1119,27 +1008,6 @@ public class StringUtil {
     @Deprecated
     public static String toLowerWithoutWhitespaces(String value) {
         return StringUtils.toRootLowerCase(StringUtils.deleteWhitespace(value));
-    }
-
-    /**
-     * <p>Checks whether the char sequence is numeric by checking that all chars in the sequence are
-     * numbers, so (-1, 1.0 and 1F) will return false
-     *
-     * @param cs the arg to check if it is numeric
-     * @return true if convertible to numeric and false otherwise
-     * @deprecated use {@link StringUtils#isNumeric(CharSequence)} instead
-     */
-    @Deprecated
-    public static boolean isNumeric(CharSequence cs) {
-        return StringUtils.isNumeric(cs);
-    }
-
-    /**
-     * @deprecated use {@link StringUtils#isEmpty(CharSequence)}
-     */
-    @Deprecated
-    public static boolean isEmpty(CharSequence cs) {
-        return StringUtils.isEmpty(cs);
     }
 
     /**
