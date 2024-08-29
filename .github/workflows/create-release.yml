@@ -14,12 +14,12 @@ on:
         required: true
       standalone_zip:
         description: 'Flag to indicate if the workflow is triggered to create a standalone zip'
-        required: true
+        required: false
         type: boolean
         default: false
       dry_run: 
         description: 'Flag to indicate if the workflow is triggered to create a dry-run release'
-        required: true
+        required: false
         type: boolean
         default: false
   workflow_call:
@@ -47,6 +47,13 @@ on:
         required: true
         type: boolean
         default: false
+    outputs:
+      dry_run_zip_url:
+        description: 'The URL of the created zip file'
+        value: ${{ jobs.build-installers.outputs.dry_run_zip_url }}
+      dry_run_tar_gz_url:
+        description: 'The URL of the created tar.gz file'
+        value: ${{ jobs.build-installers.outputs.dry_run_tar_gz_url }}
 
 env:
   DEPENDENCIES: "liquibase-bigquery" # Comma separated list of dependencies to release the extensions list
@@ -196,7 +203,7 @@ jobs:
           rm -rf re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip
           IFS=',' read -ra EXT <<< "${{ needs.setup.outputs.extensions }}"
           for i in "${EXT[@]}"; do
-            cp ~/.m2/repository/org/liquibase/ext/$i/${{ needs.setup.outputs.version }}/$i-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$i.jar || echo "Failed to move $i artifact"
+            cp ~/.m2/repository/org/liquibase/ext/$i/${{ needs.setup.outputs.version }}/$i-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$i-${{ needs.setup.outputs.version }}.jar || echo "Failed to move $i artifact"
           done
           (cd re-version/out/liquibase-${{ needs.setup.outputs.version }} && zip -r ../liquibase-${{ needs.setup.outputs.version }}.zip . && cd .. && rm -rf liquibase-${{ needs.setup.outputs.version }})
           
@@ -206,7 +213,7 @@ jobs:
           rm -rf re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz
           mkdir -p re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions
           for I in "${EXT[@]}"; do
-            cp ~/.m2/repository/org/liquibase/ext/$I/${{ needs.setup.outputs.version }}/$I-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$I.jar || echo "Failed to move $I artifact"
+            cp ~/.m2/repository/org/liquibase/ext/$I/${{ needs.setup.outputs.version }}/$I-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$I-${{ needs.setup.outputs.version }}.jar || echo "Failed to move $I artifact"
           done
           (cd re-version/out/liquibase-${{ needs.setup.outputs.version }} && tar -czvf ../liquibase-${{ needs.setup.outputs.version }}.tar.gz * && cd .. && rm -rf liquibase-${{ needs.setup.outputs.version }})
 
@@ -244,6 +251,9 @@ jobs:
     runs-on: macos-13 #needs macos for apple notarization
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      dry_run_zip_url: ${{ steps.extract-dry-run-url.outputs.dry_run_zip_url }}
+      dry_run_tar_gz_url: ${{ steps.extract-dry-run-url.outputs.dry_run_tar_gz_url }} 
     steps:
       - uses: actions/checkout@v4
 
@@ -313,6 +323,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Attach Files to Dry-Run Draft Release
+        id: attach-files-dry-run
         if: ${{ inputs.standalone_zip == false && inputs.dry_run == true }}
         uses: softprops/action-gh-release@v2
         with:
@@ -324,8 +335,20 @@ jobs:
           files: re-version/final/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
 
+      - name: Extract dry-run release URL
+        if: ${{ inputs.standalone_zip == false && inputs.dry_run == true }}
+        id: extract-dry-run-url
+        shell: bash
+        run: |
+          assets_json=$(echo '${{ toJson(steps.attach-files-dry-run.outputs) }}' | jq -r '.assets | fromjson')
+          tar_gz_url=$(echo "$assets_json" | jq -r '.[] | select(.name | test("^liquibase-dry-run-.*\\.tar\\.gz$")) | .url')
+          zip_url=$(echo "$assets_json" | jq -r '.[] | select(.name | test("^liquibase-dry-run-.*\\.zip$")) | .url')
+          echo $tar_gz_url
+          echo $zip_url
+          echo "dry_run_tar_gz_url=$tar_gz_url" >> $GITHUB_OUTPUT
+          echo "dry_run_zip_url=$zip_url" >> $GITHUB_OUTPUT
+        
       - name: Attach standalone zip to Build
         if: ${{ inputs.standalone_zip == true && inputs.dry_run == false }}
         uses: actions/upload-artifact@v4
