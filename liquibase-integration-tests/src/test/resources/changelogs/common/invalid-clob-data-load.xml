@@ -17,6 +17,6 @@
     </changeSet>
 
     <changeSet id="2" author="your.name" labels="example-label" context="example-context">
-        <loadData file="names.csv" tableName="person" relativeToChangelogFile="true"/>
+        <loadData file="invalid-clob-load.csv" tableName="person" relativeToChangelogFile="true"/>
     </changeSet>
 </databaseChangeLog>

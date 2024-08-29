@@ -14,12 +14,12 @@ on:
         required: true
       standalone_zip:
         description: 'Flag to indicate if the workflow is triggered to create a standalone zip'
-        required: true
+        required: false
         type: boolean
         default: false
       dry_run: 
         description: 'Flag to indicate if the workflow is triggered to create a dry-run release'
-        required: true
+        required: false
         type: boolean
         default: false
   workflow_call:
@@ -47,6 +47,13 @@ on:
         required: true
         type: boolean
         default: false
+    outputs:
+      dry_run_zip_url:
+        description: 'The URL of the created zip file'
+        value: ${{ jobs.build-installers.outputs.dry_run_zip_url }}
+      dry_run_tar_gz_url:
+        description: 'The URL of the created tar.gz file'
+        value: ${{ jobs.build-installers.outputs.dry_run_tar_gz_url }}
 
 env:
   DEPENDENCIES: "liquibase-bigquery" # Comma separated list of dependencies to release the extensions list
@@ -67,16 +74,15 @@ jobs:
       - run: |
           echo "Creating version ${{ inputs.version }} from ${{ inputs.branch }} with artifacts from build ${{ inputs.runId }} "
           
-  # owasp-scanner:
-  #   needs: [ setup ]
-  #   uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@main
-  #   with:
-  #     branch: ${{ needs.setup.outputs.branch }}
-  #   secrets: inherit
+  owasp-scanner:
+    needs: [ setup ]
+    uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@main
+    with:
+      branch: ${{ needs.setup.outputs.branch }}
+    secrets: inherit
 
   build-azure-uber-jar:
-   needs: [ setup ]
-   #needs: [ setup, owasp-scanner ]
+   needs: [ setup, owasp-scanner ]
    uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
    with:
      branch: ${{ needs.setup.outputs.branch }}
@@ -84,8 +90,7 @@ jobs:
    secrets: inherit
   
   build-extension-jars:
-   needs: [ setup ]
-   #needs: [ setup, owasp-scanner ]
+   needs: [ setup, owasp-scanner ]
    uses: liquibase/liquibase/.github/workflows/build-extension-jars.yml@master
    with:
      liquibase-version: ${{ needs.setup.outputs.version }}
@@ -231,7 +236,7 @@ jobs:
           path: re-version/final
 
       - name: Set repository tags
-        if: ${{ inputs.standalone_zip == false }} && ${{ needs.setup.outputs.dry_run == false }}
+        if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
         run: |
           git tag -f v${{ needs.setup.outputs.version }}
           git push -f origin v${{ needs.setup.outputs.version }}
@@ -246,6 +251,9 @@ jobs:
     runs-on: macos-13 #needs macos for apple notarization
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      dry_run_zip_url: ${{ steps.extract-dry-run-url.outputs.dry_run_zip_url }}
+      dry_run_tar_gz_url: ${{ steps.extract-dry-run-url.outputs.dry_run_tar_gz_url }} 
     steps:
       - uses: actions/checkout@v4
 
@@ -302,7 +310,7 @@ jobs:
           rm re-version/final/*.sha1
 
       - name: Attach Files to Draft Release
-        if: ${{ inputs.standalone_zip == false }} && ${{ needs.setup.outputs.dry_run == false }}
+        if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.setup.outputs.version }}
@@ -315,7 +323,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Attach Files to Dry-Run Draft Release
-        if: ${{ inputs.standalone_zip == false }} && ${{ needs.setup.outputs.dry_run == true }}
+        id: attach-files-dry-run
+        if: ${{ inputs.standalone_zip == false && inputs.dry_run == true }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.setup.outputs.version }}
@@ -326,10 +335,22 @@ jobs:
           files: re-version/final/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
 
+      - name: Extract dry-run release URL
+        if: ${{ inputs.standalone_zip == false && inputs.dry_run == true }}
+        id: extract-dry-run-url
+        shell: bash
+        run: |
+          assets_json=$(echo '${{ toJson(steps.attach-files-dry-run.outputs) }}' | jq -r '.assets | fromjson')
+          tar_gz_url=$(echo "$assets_json" | jq -r '.[] | select(.name | test("^liquibase-dry-run-.*\\.tar\\.gz$")) | .url')
+          zip_url=$(echo "$assets_json" | jq -r '.[] | select(.name | test("^liquibase-dry-run-.*\\.zip$")) | .url')
+          echo $tar_gz_url
+          echo $zip_url
+          echo "dry_run_tar_gz_url=$tar_gz_url" >> $GITHUB_OUTPUT
+          echo "dry_run_zip_url=$zip_url" >> $GITHUB_OUTPUT
+        
       - name: Attach standalone zip to Build
-        if: ${{ inputs.standalone_zip == true }} && ${{ needs.setup.outputs.dry_run == false }}
+        if: ${{ inputs.standalone_zip == true && inputs.dry_run == false }}
         uses: actions/upload-artifact@v4
         with:
             name: liquibase-installers-${{ needs.setup.outputs.version }}
