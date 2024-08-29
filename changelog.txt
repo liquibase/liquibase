@@ -73,7 +73,6 @@ Changes in version 4.29.2 (2024.09.03)
 
 ## Security, Driver and Other Updates
 
-* Bump slf4j.version from 1.7.36 to 2.0.13 in https://github.com/liquibase/liquibase/pull/6106 by @dependabot
 * Bump org.testcontainers:testcontainers-bom from 1.19.8 to 1.20.1 in https://github.com/liquibase/liquibase/pull/6155 by @dependabot
 * Bump org.apache.commons:commons-lang3 from 3.14.0 to 3.15.0 in https://github.com/liquibase/liquibase/pull/6112 by @dependabot
 * Bump org.apache.maven.plugins:maven-javadoc-plugin from 3.7.0 to 3.8.0 in https://github.com/liquibase/liquibase/pull/6116 by @dependabot
