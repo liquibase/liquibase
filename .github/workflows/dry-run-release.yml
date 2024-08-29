@@ -2,8 +2,9 @@ name: Dry run release
 
 on:
   workflow_dispatch: # Trigger on demand
-  schedule: # Trigger nightly at midnight UTC
-    - cron: "0 0 * * *"
+  schedule: # Trigger weekly all Wednesdays at midnight UTC
+    # Trigger weekly on Wednesday at midnight Austin time (Standard Time)
+    - cron: "0 6 * * 3"
 
 jobs:
 
