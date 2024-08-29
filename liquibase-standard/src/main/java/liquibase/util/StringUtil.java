@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("java:S3252")
 public class StringUtil extends StringUtils {
     private static final Pattern upperCasePattern = Pattern.compile(".*[A-Z].*");
     private static final Pattern lowerCasePattern = Pattern.compile(".*[a-z].*");
@@ -448,10 +449,18 @@ public class StringUtil extends StringUtils {
         return returnList;
     }
 
+    /**
+     * @deprecated use {@link StringUtils#join(Object[], String)} instead
+     */
+    @Deprecated
     public static String join(Integer[] array, String delimiter) {
         return StringUtils.join(array, delimiter);
     }
 
+    /**
+     * @deprecated use {@link StringUtils#join(int[], char)} instead
+     */
+    @Deprecated
     public static String join(int[] array, String delimiter) {
         return StringUtils.join(ArrayUtils.toObject(array), delimiter);
     }
