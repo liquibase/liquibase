@@ -65,7 +65,7 @@ Optional Args:
         ]
     }
 
-    run "Variables are property expanded for execute-sql", {
+    run "Variables are properly expanded for execute-sql", {
         arguments = [
                 url     : { it.url },
                 username: { it.username },
@@ -79,7 +79,7 @@ Optional Args:
         }
         expectedOutput = [
                 'Output of select * from databasechangelog:',
-                'AUTHOR | COMMENTS | CONTEXTS | DATEEXECUTED | DEPLOYMENT_ID | DESCRIPTION | EXECTYPE | FILENAME | ID | LABELS | LIQUIBASE | MD5SUM | ORDEREXECUTED | TAG |'
+                'ID | AUTHOR | FILENAME | DATEEXECUTED | ORDEREXECUTED | EXECTYPE | MD5SUM | DESCRIPTION | COMMENTS | TAG | LIQUIBASE | CONTEXTS | LABELS | DEPLOYMENT_ID |'
         ]
     }
 
