@@ -3,6 +3,7 @@ package liquibase.telemetry;
 import liquibase.Scope;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
+import liquibase.util.ExceptionUtil;
 import lombok.Data;
 
 import java.util.Map;
@@ -43,8 +44,10 @@ public class SegmentTrackEvent {
     private final String messageId = UUID.randomUUID().toString();
 
     public static SegmentTrackEvent fromLiquibaseEvent(Event event) {
-        LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
-        String userId = licenseService.getLicenseInfoObject().getIssuedTo();
+        String userId = ExceptionUtil.doSilently(() -> {
+            LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
+            return licenseService.getLicenseInfoObject().getIssuedTo();
+        });
         SegmentTrackEvent segmentTrackEvent = new SegmentTrackEvent(
                 userId,
                 UUID.randomUUID().toString(), // todo this should be more sophisticated in the future
