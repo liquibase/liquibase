@@ -10,30 +10,25 @@ import liquibase.telemetry.TelemetryOutputDestination;
 
 public class TelemetryArgs implements AutoloadedConfigurations {
 
-    public static final ConfigurationDefinition<TelemetryOutputDestination> OUTPUT_DESTINATION;
-    public static final ConfigurationDefinition<String> FILENAME;
-    public static final ConfigurationDefinition<String> WRITE_KEY;
     private static final ConfigurationDefinition<Boolean> ENABLED;
+    public static final ConfigurationDefinition<String> CONFIG_ENDPOINT_URL;
+    public static final ConfigurationDefinition<Integer> CONFIG_ENDPOINT_TIMEOUT_MILLIS;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase.telemetry");
 
-        OUTPUT_DESTINATION = builder.define("outputDestination", TelemetryOutputDestination.class)
-                .setDefaultValue(TelemetryOutputDestination.CSV)
-                .setHidden(true)
-                .build();
-
-        FILENAME = builder.define("filename", String.class)
-                .setDefaultValue("./analytics.csv")
-                .setHidden(true)
-                .build();
-
-        WRITE_KEY = builder.define("writeKey", String.class)
-                .setHidden(true)
-                .build();
-
         ENABLED = builder.define("enabled", Boolean.class)
                 .setDescription("Enable or disable sending product usage data and analytics to Liquibase. Learn more at https://docs.liquibase.com/telemetry. DEFAULT: true for OSS users | false for PRO users")
+                .build();
+
+        CONFIG_ENDPOINT_URL = builder.define("configEndpointUrl", String.class)
+                .setDefaultValue("https://analytics.liquibase.com/config-segment.yaml")
+                .setHidden(true)
+                .build();
+
+        CONFIG_ENDPOINT_TIMEOUT_MILLIS = builder.define("configEndpointTimeoutMillis", Integer.class)
+                .setDefaultValue(1500)
+                .setHidden(true)
                 .build();
     }
 

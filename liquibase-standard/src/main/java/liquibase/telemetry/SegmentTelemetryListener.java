@@ -23,9 +23,13 @@ public class SegmentTelemetryListener implements TelemetryListener {
 
     @Override
     public int getPriority() {
-        String filename = TelemetryArgs.FILENAME.getCurrentValue();
-        TelemetryOutputDestination destination = TelemetryArgs.OUTPUT_DESTINATION.getCurrentValue();
-        if (TelemetryOutputDestination.SEGMENT.equals(destination)) {
+        boolean telemetryEnabled = false;
+        try {
+            telemetryEnabled = TelemetryArgs.isTelemetryEnabled();
+        } catch (Exception e) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Failed to determine if telemetry is enabled", e);
+        }
+        if (telemetryEnabled) {
             return PRIORITY_SPECIALIZED;
         } else {
             return PRIORITY_NOT_APPLICABLE;
