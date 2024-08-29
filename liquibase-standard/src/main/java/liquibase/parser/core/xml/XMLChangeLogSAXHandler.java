@@ -11,7 +11,7 @@ import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.PreconditionFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.sql.visitor.SqlVisitorFactory;
-import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -100,7 +100,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
         ParsedNode node = nodeStack.pop();
         try {
             String seenText = this.textStack.pop().toString();
-            if (!"".equals(StringUtil.trimToEmpty(seenText))) {
+            if (!StringUtils.trimToEmpty(seenText).isEmpty()) {
                 node.setValue(seenText.trim());
             }
         } catch (ParsedNodeException e) {
