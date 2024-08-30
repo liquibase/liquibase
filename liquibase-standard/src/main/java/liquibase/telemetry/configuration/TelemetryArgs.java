@@ -6,7 +6,6 @@ import liquibase.configuration.ConfigurationDefinition;
 import liquibase.license.LicenseServiceUtils;
 import liquibase.telemetry.TelemetryFactory;
 import org.apache.commons.lang3.BooleanUtils;
-import liquibase.telemetry.TelemetryOutputDestination;
 
 public class TelemetryArgs implements AutoloadedConfigurations {
 
