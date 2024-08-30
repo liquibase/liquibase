@@ -38,5 +38,12 @@ class UUIDTypeTest extends Specification {
 //        "dfd8e505-0bb7-4d3e-b341-ad17190d8c9e"                  | new MySQLDatabase() | "uuid_to_bin('dfd8e505-0bb7-4d3e-b341-ad17190d8c9e')"
 //        UUID.fromString("DFD8E505-0BB7-4D3E-B341-AD17190D8C9E") | new MySQLDatabase() | "uuid_to_bin('dfd8e505-0bb7-4d3e-b341-ad17190d8c9e')"
 //        UUID.fromString("dfd8e505-0bb7-4d3e-b341-ad17190d8c9e") | new MySQLDatabase() | "uuid_to_bin('dfd8e505-0bb7-4d3e-b341-ad17190d8c9e')"
+        null                                                    | new MariaDBDatabase() | null
+        "NULL"                                                  | new MariaDBDatabase() | null
+        new DatabaseFunction("UUID()")                          | new MariaDBDatabase() | "UUID()"
+        "DFD8E505-0BB7-4D3E-B341-AD17190D8C9E"                  | new MariaDBDatabase() | "dfd8e505-0bb7-4d3e-b341-ad17190d8c9e"
+        "dfd8e505-0bb7-4d3e-b341-ad17190d8c9e"                  | new MariaDBDatabase() | "dfd8e505-0bb7-4d3e-b341-ad17190d8c9e"
+        UUID.fromString("DFD8E505-0BB7-4D3E-B341-AD17190D8C9E") | new MariaDBDatabase() | "dfd8e505-0bb7-4d3e-b341-ad17190d8c9e"
+        UUID.fromString("dfd8e505-0bb7-4d3e-b341-ad17190d8c9e") | new MariaDBDatabase() | "dfd8e505-0bb7-4d3e-b341-ad17190d8c9e"
     }
 }
