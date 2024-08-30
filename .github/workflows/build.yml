@@ -18,9 +18,9 @@ jobs:
     permissions:
       contents: write  # Ensures the workflow can read/write branches
     env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
-    outputs:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # authenticate GitHub Actions to the GitHub API.
+      github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }} # accessing a private repository
+     outputs:
       branchExistsInBoth: ${{ steps.check-branch.outputs.branchExistsInBoth }}
       thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
       latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
