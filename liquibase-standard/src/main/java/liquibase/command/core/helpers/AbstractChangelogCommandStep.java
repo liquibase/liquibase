@@ -33,7 +33,7 @@ public abstract class AbstractChangelogCommandStep extends AbstractCommandStep {
                 .defaultValue("none").description("Sets runOnChange=\"true\" for changesets containing solely changes of these types (e. g. createView, createProcedure, ...).").build();
         REPLACE_IF_EXISTS_TYPES_ARG = builder.argument("replaceIfExistsTypes", String.class)
                 .defaultValue("none")
-                .description(String.format("Sets replaceIfExists=\"true\" for changes of these types (supported types: %s)", StringUtils.join(REPLACE_IF_EXISTS_TYPES_NAMES, ","))).build();
+                .description(String.format("Sets replaceIfExists=\"true\" for changes of these types (supported types: %s)", StringUtils.join(REPLACE_IF_EXISTS_TYPES_NAMES, ", "))).build();
         SKIP_OBJECT_SORTING = builder.argument("skipObjectSorting", Boolean.class)
                 .defaultValue(false)
                 .description("When true will skip object sorting. This can be useful on databases that have a lot of packages/procedures that are " +
