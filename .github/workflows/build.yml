@@ -19,6 +19,7 @@ jobs:
       contents: write  # Ensures the workflow can read/write branches
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
     outputs:
       branchExistsInBoth: ${{ steps.check-branch.outputs.branchExistsInBoth }}
       thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
