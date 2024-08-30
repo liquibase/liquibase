@@ -331,15 +331,16 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                         }
                         continue;
                     } else {
+                        String ignoreCountAttribute = ignoreLinesMatcher.group(1);
                         try {
-                            long ignoreCount = Long.parseLong(ignoreLinesMatcher.group(1));
+                            long ignoreCount = Long.parseLong(ignoreCountAttribute);
                             while (ignoreCount > 0 && reader.readLine() != null) {
                                 ignoreCount--;
                                 count++;
                             }
                             continue;
                         } catch (NumberFormatException | NullPointerException nfe) {
-                            throw new ChangeLogParseException("Unknown ignoreLines syntax");
+                            throw new ChangeLogParseException(String.format("Unknown ignoreLines syntax: \"%s\"", ignoreCountAttribute), nfe);
                         }
                     }
                 } else if (altIgnoreLinesOneDashMatcher.matches() || altIgnoreMatcher.matches()) {
@@ -858,7 +859,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
             try {
                 stripComments = Boolean.parseBoolean(matcher.group(1));
             } catch (Exception e) {
-                throw new ChangeLogParseException("Cannot parse " + changeSet + " " + matcher.toString().replaceAll("\\.*", "") + " as a boolean");
+                throw new ChangeLogParseException("Cannot parse " + changeSet + " " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
             }
         }
         return stripComments;

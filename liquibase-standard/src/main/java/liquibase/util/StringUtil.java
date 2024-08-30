@@ -1117,7 +1117,7 @@ public class StringUtil {
             }
         } catch (UnsupportedEncodingException uoe) {
             // Consume and fall through
-            Scope.getCurrentScope().getLog(StringUtil.class).warning("Error using encoding " + encoding);
+            Scope.getCurrentScope().getLog(StringUtil.class).warning("Error using encoding " + encoding + ": " + uoe);
         }
         return string.getBytes(StandardCharsets.UTF_8);
     }
