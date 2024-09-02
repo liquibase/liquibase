@@ -349,7 +349,7 @@ public class JdbcExecutor extends AbstractExecutor {
                 for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
                     listener.writeSqlWillRun(sqlToExecute[0]);
                 }
-                return stmt.executeUpdate(sqlToExecute[0]);
+                return PrepareStatementExecutor.executeUpdate(sqlToExecute[0], (JdbcConnection) database.getConnection());
             }
 
 
@@ -404,24 +404,21 @@ public class JdbcExecutor extends AbstractExecutor {
 
             try {
                 if (sql instanceof CallableSql) {
-                    CallableStatement call = null;
                     ResultSet resultSet = null;
                     try {
-                        call = ((JdbcConnection) con).getUnderlyingConnection().prepareCall(stmtText);
-                        resultSet = call.executeQuery();
+                        resultSet = PrepareStatementExecutor.executeQuery(stmtText, (JdbcConnection) con);
                         checkCallStatus(resultSet, ((CallableSql) sql).getExpectedStatus());
                     } finally {
-                        JdbcUtil.close(resultSet, call);
+                        JdbcUtil.closeResultSet(resultSet);
                     }
                 } else {
                     Statement stmt = null;
                     try {
                         if (sqlStatement instanceof CompoundStatement) {
-                            stmt = ((JdbcConnection) con).getUnderlyingConnection().prepareStatement(stmtText);
-                            ((PreparedStatement)stmt).execute();
+                            PrepareStatementExecutor.execute(stmtText, (JdbcConnection) con);
                         } else {
                             stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement();
-                            stmt.execute(stmtText);
+                            PrepareStatementExecutor.execute(stmtText, (JdbcConnection) con);
                         }
                     } finally {
                         JdbcUtil.closeStatement(stmt);
@@ -488,7 +485,7 @@ public class JdbcExecutor extends AbstractExecutor {
                 try {
                     //if execute returns false, we can retrieve the affected rows count
                     // (true used when resultset is returned)
-                    if (!stmt.execute(statement)) {
+                    if (!PrepareStatementExecutor.execute(statement, (JdbcConnection) database.getConnection())) {
                         int updateCount = stmt.getUpdateCount();
                         addUpdateCountToScope(updateCount);
                         log.log(sqlLogLevel, updateCount + " row(s) affected", null);
@@ -569,7 +566,7 @@ public class JdbcExecutor extends AbstractExecutor {
                 }
 
                 try {
-                    rs = stmt.executeQuery(sqlToExecute[0]);
+                    rs = PrepareStatementExecutor.executeQuery(sqlToExecute[0], (JdbcConnection) database.getConnection());
                     ResultSet rsToUse = rs;
                     return rse.extractData(rsToUse);
                 } finally {
@@ -583,7 +580,6 @@ public class JdbcExecutor extends AbstractExecutor {
                 }
             }
         }
-
 
         @Override
         public SqlStatement getStatement() {
@@ -616,6 +612,23 @@ public class JdbcExecutor extends AbstractExecutor {
         @Override
         public SqlStatement getStatement() {
             return sql;
+        }
+    }
+
+    private static class PrepareStatementExecutor {
+        private static ResultSet executeQuery(String sql, JdbcConnection con) throws SQLException {
+            PreparedStatement statement = con.getUnderlyingConnection().prepareStatement(sql);
+            return statement.executeQuery();
+        }
+
+        private static boolean execute(String sql, JdbcConnection con) throws SQLException {
+            PreparedStatement statement = con.getUnderlyingConnection().prepareStatement(sql);
+            return statement.execute();
+        }
+
+        private static int executeUpdate(String sql, JdbcConnection con) throws SQLException {
+            PreparedStatement statement = con.getUnderlyingConnection().prepareStatement(sql);
+            return statement.executeUpdate();
         }
     }
 }
