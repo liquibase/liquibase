@@ -37,6 +37,7 @@ import liquibase.structure.core.Table;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayOutputStream;
@@ -194,7 +195,7 @@ public class DiffToChangeLog {
 
                                 innerXml = innerXml.replaceFirst(DATABASE_CHANGE_LOG_CLOSING_XML_TAG, "");
                                 innerXml = innerXml.trim();
-                                if ("".equals(innerXml)) {
+                                if (innerXml.isEmpty()) {
                                     Scope.getCurrentScope().getLog(getClass()).info("No changes found, nothing to do");
                                     return;
                                 }
@@ -623,8 +624,8 @@ public class DiffToChangeLog {
             String sql = "select TABSCHEMA, TABNAME, BSCHEMA, BNAME from syscat.tabdep where TABSCHEMA in (" + StringUtil.join(schemas, ", ", obj -> "?") + ")";
             List<Map<String, ?>> rs = executor.queryForList(new RawParameterizedSqlStatement(sql, schemas.toArray()));
             for (Map<String, ?> row : rs) {
-                String tabName = StringUtil.trimToNull((String) row.get("TABSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("TABNAME"));
-                String bName = StringUtil.trimToNull((String) row.get("BSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("BNAME"));
+                String tabName = StringUtils.trimToNull((String) row.get("TABSCHEMA")) + "." + StringUtils.trimToNull((String) row.get("TABNAME"));
+                String bName = StringUtils.trimToNull((String) row.get("BSCHEMA")) + "." + StringUtils.trimToNull((String) row.get("BNAME"));
 
                 graph.add(bName, tabName);
             }
@@ -633,8 +634,8 @@ public class DiffToChangeLog {
             String sql = "SELECT DSCHEMA AS TABSCHEMA, DNAME AS TABNAME, BSCHEMA, BNAME FROM SYSIBM.SYSDEPENDENCIES WHERE DSCHEMA IN (" + StringUtil.join(schemas, ", ", obj -> "?") + ")";
             List<Map<String, ?>> rs = executor.queryForList(new RawParameterizedSqlStatement(sql, schemas.toArray()));
             for (Map<String, ?> row : rs) {
-                String tabName = StringUtil.trimToNull((String) row.get("TABSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("TABNAME"));
-                String bName = StringUtil.trimToNull((String) row.get("BSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("BNAME"));
+                String tabName = StringUtils.trimToNull((String) row.get("TABSCHEMA")) + "." + StringUtils.trimToNull((String) row.get("TABNAME"));
+                String bName = StringUtils.trimToNull((String) row.get("BSCHEMA")) + "." + StringUtils.trimToNull((String) row.get("BNAME"));
 
                 graph.add(bName, tabName);
             }
@@ -645,16 +646,16 @@ public class DiffToChangeLog {
                 String tabName = null;
                 if (tryDbaDependencies) {
                     tabName =
-                            StringUtil.trimToNull((String) row.get("OWNER")) + "." +
-                                    StringUtil.trimToNull((String) row.get("NAME"));
+                            StringUtils.trimToNull((String) row.get("OWNER")) + "." +
+                                    StringUtils.trimToNull((String) row.get("NAME"));
                 } else {
                     tabName =
-                            StringUtil.trimToNull((String) row.get("REFERENCED_OWNER")) + "." +
-                                    StringUtil.trimToNull((String) row.get("NAME"));
+                            StringUtils.trimToNull((String) row.get("REFERENCED_OWNER")) + "." +
+                                    StringUtils.trimToNull((String) row.get("NAME"));
                 }
                 String bName =
-                        StringUtil.trimToNull((String) row.get("REFERENCED_OWNER")) + "." +
-                                StringUtil.trimToNull((String) row.get("REFERENCED_NAME"));
+                        StringUtils.trimToNull((String) row.get("REFERENCED_OWNER")) + "." +
+                                StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
 
                 graph.add(bName, tabName);
             }
@@ -720,8 +721,8 @@ public class DiffToChangeLog {
             List<Map<String, ?>> rs = executor.queryForList(new RawParameterizedSqlStatement(sql));
             if (!rs.isEmpty()) {
                 for (Map<String, ?> row : rs) {
-                    String bName = StringUtil.trimToNull((String) row.get("REFERENCED_SCHEMA_NAME")) + "." + StringUtil.trimToNull((String) row.get("REFERENCED_NAME"));
-                    String tabName = StringUtil.trimToNull((String) row.get("REFERENCING_SCHEMA_NAME")) + "." + StringUtil.trimToNull((String) row.get("REFERENCING_NAME"));
+                    String bName = StringUtils.trimToNull((String) row.get("REFERENCED_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
+                    String tabName = StringUtils.trimToNull((String) row.get("REFERENCING_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCING_NAME"));
 
                     if (!bName.equals(tabName)) {
                         graph.add(bName, tabName);
@@ -734,10 +735,10 @@ public class DiffToChangeLog {
             final List<Map<String, ?>> queryForListResult = executor.queryForList(new RawParameterizedSqlStatement(sql));
 
             for (Map<String, ?> row : queryForListResult) {
-                String bName = StringUtil.trimToEmpty((String) row.get("REFERENCING_SCHEMA_NAME")) +
-                        "." + StringUtil.trimToEmpty((String)row.get("REFERENCING_NAME"));
-                String tabName = StringUtil.trimToEmpty((String)row.get("REFERENCED_SCHEMA_NAME")) +
-                        "." + StringUtil.trimToEmpty((String)row.get("REFERENCED_NAME"));
+                String bName = StringUtils.trimToEmpty((String) row.get("REFERENCING_SCHEMA_NAME")) +
+                        "." + StringUtils.trimToEmpty((String)row.get("REFERENCING_NAME"));
+                String tabName = StringUtils.trimToEmpty((String)row.get("REFERENCED_SCHEMA_NAME")) +
+                        "." + StringUtils.trimToEmpty((String)row.get("REFERENCED_NAME"));
 
                 if (!(tabName.isEmpty() || bName.isEmpty())) {
                     graph.add(bName.replace("\"", ""), tabName.replace("\"", ""));
@@ -917,7 +918,7 @@ public class DiffToChangeLog {
             return changeSetAuthor;
         }
         String author = System.getProperty("user.name");
-        if (StringUtil.trimToNull(author) == null) {
+        if (StringUtils.trimToNull(author) == null) {
             return "diff-generated";
         } else {
             return author + " (generated)";
