@@ -12,6 +12,7 @@ on:
   push:
     branches:
       - master
+      - '*.*.*'
       
   pull_request_target:
     types:
@@ -477,4 +478,3 @@ jobs:
           gh variable set TEST_COUNT_INTEGRATION_POSTGRESQL --body "${{ needs.integration-test.outputs.test_count_integration_postgresql }}"
           gh variable set TEST_COUNT_INTEGRATION_SQLITE --body "${{ needs.integration-test.outputs.test_count_integration_sqlite }}"
           gh variable set TEST_COUNT_INTEGRATION_FIREBIRD --body "${{ needs.integration-test.outputs.test_count_integration_firebird }}"
-
