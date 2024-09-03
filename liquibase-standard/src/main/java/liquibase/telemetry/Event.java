@@ -5,6 +5,7 @@ import liquibase.integration.IntegrationDetails;
 import liquibase.util.*;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
 import java.nio.file.Path;
@@ -44,14 +45,6 @@ public class Event {
     private String liquibaseVersion = ExceptionUtil.doSilently(() -> {
         return LiquibaseUtil.getBuildVersionInfo();
     });
-    private String mongoDbVersion = getExtensionVersion("Liquibase MongoDB Commercial Extension");
-    private String ext_dynamoDb = getExtensionVersion("Liquibase DynamoDB Commercial Extension");
-    private String ext_checks = getExtensionVersion("Checks Extension");
-    private String ext_awsSecrets = getExtensionVersion("AWS Secrets Manager Extension");
-    private String ext_awsS3 = getExtensionVersion("S3 Remote Accessor Extension");
-    private String ext_hashicorpVault = getExtensionVersion("HashiCorp Vault Extension");
-    private String ext_googleBigQuery = getExtensionVersion("Liquibase BigQuery Commercial Extension");
-    private String ext_databricks = getExtensionVersion("Liquibase Commercial Databricks Extension");
     private String liquibaseInterface;
     private String javaVersion = ExceptionUtil.doSilently(() -> {
         return SystemUtil.getJavaVersion();
@@ -108,17 +101,23 @@ public class Event {
                 throw new RuntimeException(e);
             }
         }
+        addExtensionsToProperties(properties);
         return properties;
     }
 
-    /**
-     * Given the "Implementation-Name" of an extension, return its version. This is the same mechanism used by
-     * the liquibase --version output.
-     */
-    private static String getExtensionVersion(String extensionName) {
-        return ExceptionUtil.doSilently(() -> {
-            Map<String, VersionUtils.LibraryInfo> libraries = EXTENSIONS_CACHE.get();
-            return libraries.get(extensionName).version;
+    private void addExtensionsToProperties(Map<String, Object> properties) {
+        ExceptionUtil.doSilently(() -> {
+            Map<String, VersionUtils.LibraryInfo> extensionInfoMap = EXTENSIONS_CACHE.get();
+            for (Map.Entry<String, VersionUtils.LibraryInfo> extensionInfo : extensionInfoMap.entrySet()) {
+                String name = extensionInfo.getKey();
+                VersionUtils.LibraryInfo libraryInfo = extensionInfo.getValue();
+                if (StringUtils.containsIgnoreCase(name, "liquibase")
+                        || StringUtils.containsIgnoreCase(name, "commercial")
+                        || StringUtils.containsIgnoreCase(libraryInfo.file.getName(), "liquibase")
+                        || StringUtils.containsIgnoreCase(libraryInfo.file.getName(), "commercial")) {
+                    properties.put("ext_" + StringUtil.toCamelCase(name).replace(" ", ""), libraryInfo.version);
+                }
+            }
         });
     }
 }
