@@ -129,7 +129,7 @@ jobs:
           echo "uber_jar_runId=${run_id}" >> $GITHUB_OUTPUT
 
       - name: Download liquibase-pro-azure-artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v4.1.7
         with: 
           name: liquibase-pro-azure-artifacts
           path: liquibase-pro/liquibase-azure-deps
