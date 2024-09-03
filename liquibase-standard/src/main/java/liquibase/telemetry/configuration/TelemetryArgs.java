@@ -42,9 +42,17 @@ public class TelemetryArgs implements AutoloadedConfigurations {
         boolean proLicenseValid = LicenseServiceUtils.isProLicenseValid();
         TelemetryConfigurationFactory telemetryConfigurationFactory = Scope.getCurrentScope().getSingleton(TelemetryConfigurationFactory.class);
         if (proLicenseValid) {
-            return BooleanUtils.and(new Boolean[]{telemetryConfigurationFactory.getPlugin().isProTelemetryEnabled(), userSuppliedEnabled});
+            Boolean enabled = BooleanUtils.and(new Boolean[]{telemetryConfigurationFactory.getPlugin().isProTelemetryEnabled(), userSuppliedEnabled});
+            if (Boolean.FALSE.equals(enabled)) {
+                Scope.getCurrentScope().getLog(TelemetryArgs.class).info("Telemetry is disabled, because a pro license was detected and telemetry was not enabled by the user or because it was turned off by Liquibase.");
+            }
+            return enabled;
         } else {
-            return telemetryConfigurationFactory.getPlugin().isOssTelemetryEnabled();
+            boolean enabled = telemetryConfigurationFactory.getPlugin().isOssTelemetryEnabled();
+            if (Boolean.FALSE.equals(enabled)) {
+                Scope.getCurrentScope().getLog(TelemetryArgs.class).info("Telemetry is disabled, because it was turned off by Liquibase.");
+            }
+            return enabled;
         }
     }
 
