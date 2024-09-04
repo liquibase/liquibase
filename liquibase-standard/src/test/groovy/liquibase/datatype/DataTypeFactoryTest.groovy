@@ -205,13 +205,13 @@ class DataTypeFactoryTest extends Specification {
         "MEDIUMINT"                                    | new MySQLDatabase()    | "MEDIUMINT"                                    | MediumIntType | false
         "MEDIUMINT UNSIGNED"                           | new MySQLDatabase()    | "MEDIUMINT UNSIGNED"                           | MediumIntType | false
         "BIGINT"                                       | new MySQLDatabase()    | "BIGINT"                                       | BigIntType    | false
+        "uuid"                                         | new MySQLDatabase()    | "BINARY(16)"                                   | UUIDType      | false
         "BIGINT UNSIGNED"                              | new MySQLDatabase()    | "BIGINT UNSIGNED"                              | BigIntType    | false
         "tinyblob"                                     | new MySQLDatabase()    | "TINYBLOB"                                     | BlobType      | false
         "tinytext"                                     | new MySQLDatabase()    | "TINYTEXT"                                     | ClobType      | false
         "mediumblob"                                   | new MySQLDatabase()    | "MEDIUMBLOB"                                   | BlobType      | false
         "mediumtext"                                   | new MySQLDatabase()    | "MEDIUMTEXT"                                   | ClobType      | false
         "real"                                         | new MySQLDatabase()    | "REAL"                                         | FloatType     | false
-        "uuid"                                         | new MySQLDatabase()    | "BINARY(16)"                                   | UUIDType      | false
         "nclob"                                        | new OracleDatabase()   | "NCLOB"                                        | ClobType      | false
         "xml"                                          | new OracleDatabase()   | "XMLTYPE"                                      | XMLType       | false
         "xmltype"                                      | new OracleDatabase()   | "XMLTYPE"                                      | XMLType       | false

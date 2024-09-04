@@ -194,6 +194,8 @@ public class DataTypeFactory {
             }
         } else if (database != null) {
             // convert classes to list of LiquibaseDataType
+            // filtering out those that don't support the database
+            // and sorting by priority
             List<LiquibaseDataType> dataTypeList = classes.stream()
                     .map(dataTypeClass -> {
                         try {
