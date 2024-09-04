@@ -19,7 +19,7 @@ import java.nio.file.Files;
 public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {
 
     /**
-     * Specifies the <i>changelog</i> file for Liquibase Quality Checks to use.
+     * Specifies the <i>changelog</i> file for Liquibase Policy Checks to use.
      *
      * @parameter property="liquibase.changeLogFile"
      */
@@ -27,7 +27,7 @@ public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {
     protected String changeLogFile;
 
     /**
-     * Specifies the <i>format</i> file for Liquibase Quality Checks to use. If not specified, the default
+     * Specifies the <i>format</i> file for Liquibase Policy Checks to use. If not specified, the default
      * format will be used.
      *
      * @parameter property="liquibase.format"
@@ -44,7 +44,7 @@ public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {
     protected String checksScope;
 
     /**
-     * Allows automatic backup and updating of liquibase.checks.conf file when new quality checks are available. Options: [on|off]
+     * Allows automatic backup and updating of liquibase.checks.conf file when new policy checks are available. Options: [on|off]
      *
      * @parameter property="liquibase.autoUpdate"
      */

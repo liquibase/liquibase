@@ -2,7 +2,6 @@ package liquibase.license;
 
 import liquibase.Scope;
 import liquibase.exception.CommandValidationException;
-import liquibase.util.StringUtil;
 
 /**
  *
@@ -10,9 +9,6 @@ import liquibase.util.StringUtil;
  *
  */
 public class LicenseServiceUtils {
-
-  public static final String TRIAL_LICENSE_URL = "https://liquibase.com/trial";
-  private static final String BASE_INVALID_LICENSE_MESSAGE = "Using '%s' requires a valid Liquibase Pro or Labs license. Get a free license key at " + TRIAL_LICENSE_URL + ".";
 
   /**
    * Check for a Liquibase Pro License.
@@ -38,7 +34,9 @@ public class LicenseServiceUtils {
    */
   public static void checkProLicenseAndThrowException(String[] commandNames) throws CommandValidationException {
     if (!isProLicenseValid()) {
-      throw new CommandValidationException(String.format(BASE_INVALID_LICENSE_MESSAGE + " Add liquibase.licenseKey=<yourKey> into your defaults file or use --license-key=<yourKey> before your command in the CLI.", StringUtil.join(commandNames, " ")));
+      LicenseServiceFactory licenseServiceFactory = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class);
+      LicenseService licenseService = licenseServiceFactory.getLicenseService();
+      throw new CommandValidationException(licenseService.getInvalidLicenseMessage(commandNames));
     }
   }
 }
