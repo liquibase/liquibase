@@ -11,7 +11,6 @@ import liquibase.telemetry.configuration.TelemetryArgs
 import liquibase.telemetry.configuration.TelemetryConfigurationFactory
 import liquibase.util.LiquibaseUtil
 import liquibase.util.SystemUtil
-import org.junit.ComparisonFailure
 import org.springframework.test.util.TestSocketUtils
 import org.yaml.snakeyaml.Yaml
 import spock.lang.Shared
@@ -37,18 +36,10 @@ class TelemetryIntegrationTest extends Specification {
      */
     def "test sending telemetry happy path"() {
         setup:
-        // Start the webserver
-        SimpleWebserver simpleWebserver = new SimpleWebserver()
-        // Clear the cached telemetry config info that was loaded when the drop all command step executed automatically during test setup
-        TelemetryConfigurationFactory telemetryConfigurationFactory = Scope.getCurrentScope().getSingleton(TelemetryConfigurationFactory.class);
-        SegmentTelemetryConfiguration telemetryConfiguration = ((SegmentTelemetryConfiguration) telemetryConfigurationFactory.getPlugin());
-        telemetryConfiguration.remoteTelemetryConfiguration.clearCache()
+        SimpleWebserver simpleWebserver = startup()
 
         when:
-        Map<String, ?> scopeVars = new HashMap<>()
-        scopeVars.put(TelemetryArgs.CONFIG_ENDPOINT_URL.getKey(), "http://localhost:" + simpleWebserver.port + "/config-segment.yaml")
-        scopeVars.put(TelemetryArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getKey(), TimeUnit.SECONDS.toMillis(60)) // to allow for debugging, otherwise the thread gets killed fast
-        Scope.child(scopeVars, () -> {
+        executeCommandWithTelemetry(simpleWebserver, () -> {
             CommandUtil.runDropAll(h2)
         } as Scope.ScopedRunner)
 
@@ -105,6 +96,23 @@ class TelemetryIntegrationTest extends Specification {
 
         cleanup:
         simpleWebserver.stop()
+    }
+
+    static void executeCommandWithTelemetry(SimpleWebserver simpleWebserver, Scope.ScopedRunner scopedRunner) {
+        Map<String, ?> scopeVars = new HashMap<>()
+        scopeVars.put(TelemetryArgs.CONFIG_ENDPOINT_URL.getKey(), "http://localhost:" + simpleWebserver.port + "/config-segment.yaml")
+        scopeVars.put(TelemetryArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getKey(), TimeUnit.SECONDS.toMillis(60)) // to allow for debugging, otherwise the thread gets killed fast
+        Scope.child(scopeVars, scopedRunner)
+    }
+
+    static SimpleWebserver startup() {
+        // Start the webserver
+        SimpleWebserver simpleWebserver = new SimpleWebserver()
+        // Clear the cached telemetry config info that was loaded when the drop all command step executed automatically during test setup
+        TelemetryConfigurationFactory telemetryConfigurationFactory = Scope.getCurrentScope().getSingleton(TelemetryConfigurationFactory.class);
+        SegmentTelemetryConfiguration telemetryConfiguration = ((SegmentTelemetryConfiguration) telemetryConfigurationFactory.getPlugin());
+        telemetryConfiguration.remoteTelemetryConfiguration.clearCache()
+        return simpleWebserver
     }
 }
 

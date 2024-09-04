@@ -213,6 +213,7 @@ public class CommandScope {
         Event analyticsEvent = ExceptionUtil.doSilently(() -> {
             return new Event(commandName);
         });
+        Event parentAnalyticsEvent = Scope.getCurrentScope().getAnalyticsEvent();
 
         try {
             return Scope.child(Collections.singletonMap(Scope.Attr.analyticsEvent.toString(), analyticsEvent), () -> {
@@ -288,8 +289,12 @@ public class CommandScope {
                         Scope.getCurrentScope().getLog(getClass()).warning("Error flushing command output stream: " + e.getMessage(), e);
                     }
                     ExceptionUtil.doSilently(() -> {
-                        TelemetryFactory telemetryFactory = Scope.getCurrentScope().getSingleton(TelemetryFactory.class);
-                        telemetryFactory.handleEvent(analyticsEvent);
+                        if (parentAnalyticsEvent == null) {
+                            TelemetryFactory telemetryFactory = Scope.getCurrentScope().getSingleton(TelemetryFactory.class);
+                            telemetryFactory.handleEvent(analyticsEvent);
+                        } else {
+                            parentAnalyticsEvent.getChildEvents().add(analyticsEvent);
+                        }
                     });
                 }
 
