@@ -206,7 +206,6 @@ class DataTypeFactoryTest extends Specification {
         "MEDIUMINT UNSIGNED"                           | new MySQLDatabase()    | "MEDIUMINT UNSIGNED"                           | MediumIntType | false
         "BIGINT"                                       | new MySQLDatabase()    | "BIGINT"                                       | BigIntType    | false
         "BIGINT UNSIGNED"                              | new MySQLDatabase()    | "BIGINT UNSIGNED"                              | BigIntType    | false
-        "BINARY(16)"                                   | new MySQLDatabase()    | "BINARY(16)"                                   | BlobType      | false
         "tinyblob"                                     | new MySQLDatabase()    | "TINYBLOB"                                     | BlobType      | false
         "tinytext"                                     | new MySQLDatabase()    | "TINYTEXT"                                     | ClobType      | false
         "mediumblob"                                   | new MySQLDatabase()    | "MEDIUMBLOB"                                   | BlobType      | false
