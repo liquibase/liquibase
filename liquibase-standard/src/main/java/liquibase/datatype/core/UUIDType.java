@@ -10,7 +10,7 @@ import liquibase.exception.DatabaseException;
 
 import java.util.Locale;
 
-@DataTypeInfo(name = "uuid", aliases = { "binary(16)", "binary", "uniqueidentifier", "java.util.UUID" }, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DATABASE)
+@DataTypeInfo(name = "uuid", aliases = { "binary(16)", "binary", "uniqueidentifier", "java.util.UUID" }, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class UUIDType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
@@ -79,4 +79,16 @@ public class UUIDType extends LiquibaseDataType {
         return LoadDataChange.LOAD_DATA_TYPE.UUID;
     }
 
+    @Override
+    public int getPriority(Database database) {
+        try {
+            if (!(database instanceof MariaDBDatabase) && database instanceof MySQLDatabase && database.getDatabaseMajorVersion() >= 8) {
+                return PRIORITY_DATABASE;
+            }
+        } catch (DatabaseException e) {
+            throw new RuntimeException(e);
+        }
+
+        return super.getPriority();
+    }
 }

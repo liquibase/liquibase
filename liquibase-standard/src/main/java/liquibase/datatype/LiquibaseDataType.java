@@ -67,6 +67,15 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         return priority;
     }
 
+    /**
+     * Returns the priority of this data type for the given database.
+     * @param database the database to check against
+     * @return the priority
+     */
+    public int getPriority(Database database) {
+        return priority;
+    }
+
     public boolean supports(Database database) {
         return true;
     }

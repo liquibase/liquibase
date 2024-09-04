@@ -16,6 +16,7 @@ import liquibase.util.StringUtil;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class DataTypeFactory {
 
@@ -191,17 +192,26 @@ public class DataTypeFactory {
             } else {
                 liquibaseDataType = new UnknownType(dataTypeName);
             }
-        } else {
-            // Iterate through the list (which is already sorted by priority) until we find a class
-            // for this dataTypeName that supports the given database.
-            Iterator<Class<? extends LiquibaseDataType>> iterator = classes.iterator();
-            do {
-                try {
-                    liquibaseDataType = iterator.next().getConstructor().newInstance();
-                } catch (Exception e) {
-                    throw new UnexpectedLiquibaseException(e);
-                }
-            } while ((database != null) && !liquibaseDataType.supports(database) && iterator.hasNext());
+        } else if (database != null) {
+            // convert classes to list of LiquibaseDataType
+            List<LiquibaseDataType> dataTypeList = classes.stream()
+                    .map(dataTypeClass -> {
+                        try {
+                            return dataTypeClass.getConstructor().newInstance();
+                        } catch (Exception e) {
+                            throw new UnexpectedLiquibaseException(e);
+                        }
+                    })
+                    .filter(x -> x.supports(database))
+                    .sorted(Comparator.comparingInt((LiquibaseDataType dataType) -> dataType.getPriority(database)).reversed())
+                    .collect(Collectors.toList());
+
+            if (!dataTypeList.isEmpty()) {
+                liquibaseDataType = dataTypeList.get(0);
+            }
+            else {
+                liquibaseDataType = new UnknownType(dataTypeName);
+            }
         }
         //
         // We can assert that liquibaseDataType will be non-null at this point
