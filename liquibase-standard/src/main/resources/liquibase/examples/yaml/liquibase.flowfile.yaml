@@ -12,7 +12,7 @@ stages:
         
     actions:
       #
-      # Quality Checks for changelog
+      # Policy Checks for changelog
       #
       - type: liquibase
         command: checks run
@@ -24,7 +24,7 @@ stages:
         command: update
           
       #
-      # Quality Checks for database
+      # Policy Checks for database
       #
       - type: liquibase
         command: checks run

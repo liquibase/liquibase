@@ -675,3 +675,4 @@ jobs:
             -Dfiles=liquibase-cdi-jakarta-${version}.jar.asc,liquibase-cdi-jakarta-${version}-sources.jar.asc,liquibase-cdi-jakarta-${version}-javadoc.jar.asc,liquibase-cdi-jakarta-${version}.pom.asc \
             -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
             -Dclassifiers=,sources,javadoc,
+            
