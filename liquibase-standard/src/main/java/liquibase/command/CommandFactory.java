@@ -236,6 +236,17 @@ public class CommandFactory implements SingletonObject {
 
     }
 
+    /**
+     *
+     * Reset the COMMAND_DEFINITIONS cache.  Added for tests.
+     *
+     * @return
+     *
+     */
+    public void resetCommandDefinitions() {
+        COMMAND_DEFINITIONS.clear();
+    }
+
     //
     // Find and cache all instances of CommandStep
     //
