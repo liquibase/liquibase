@@ -670,7 +670,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             } catch (ReflectiveOperationException e) {
                 //take default comparator
                 Scope.getCurrentScope().getLog(getClass()).info("no resourceComparator defined - taking default " +
-                        "implementation");
+                        "implementation", e);
                 resourceComparator = getStandardChangeLogComparator();
             }
         }
@@ -877,7 +877,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 unsortedResources = resourceAccessor.search(path, searchOptions);
             } catch (IOException e) {
                 if (errorIfMissingOrEmpty) {
-                    throw new IOException(String.format("Could not find/read changelogs from %s directory", pathName));
+                    throw new IOException(String.format("Could not find/read changelogs from %s directory", pathName), e);
                 }
             }
             SortedSet<Resource> resources = new TreeSet<>((o1, o2) -> resourceComparator.compare(o1.getPath(), o2.getPath()));
@@ -1046,7 +1046,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             boolean matchesFileExtension = StringUtil.trimToEmpty(normalizedFilePath).matches("\\.\\w+$");
             if (matchesFileExtension || onUnknownFileFormat == OnUnknownFileFormat.WARN) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
-                        "included file " + normalizedFilePath + "/" + normalizedFilePath + " is not a recognized file type"
+                        "included file " + normalizedFilePath + "/" + normalizedFilePath + " is not a recognized file type", e
                 );
             }
             return false;
