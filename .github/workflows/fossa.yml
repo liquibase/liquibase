@@ -1,0 +1,21 @@
+name: Fossa Report Generation
+
+on:
+  workflow_dispatch:
+    inputs:
+      distinct_id:
+
+jobs:
+  fossa-scan:
+    uses: liquibase/build-logic/.github/workflows/fossa.yml@main
+    secrets: inherit
+    with:
+      org: Datical
+
+  # https://github.com/Codex-/return-dispatch/blob/main/README.md?plain=1#L35
+  display-distinct-id:
+    runs-on: ubuntu-latest
+    steps:
+      -   name: echo distinct ID ${{ github.event.inputs.distinct_id }}
+          run: echo ${{ github.event.inputs.distinct_id }}
+
