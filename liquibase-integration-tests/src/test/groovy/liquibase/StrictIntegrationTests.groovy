@@ -5,6 +5,8 @@ import liquibase.command.core.UpdateSqlCommandStep
 import liquibase.command.core.UpdateToTagCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.exception.CommandExecutionException
+import liquibase.extension.testing.setup.SetupEnvironmentVariableProvider
+import liquibase.extension.testing.setup.TestSetupEnvironment
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
@@ -22,7 +24,12 @@ class StrictIntegrationTests extends Specification {
         def scopeSettings = [
                 (GlobalConfiguration.STRICT.getKey()): Boolean.TRUE
         ]
-        Scope.child(scopeSettings, {
+//        String[] remove = System.getenv().keySet().toArray(new String[System.getenv().size()])
+        String[] remove = [:]
+        def setup = new SetupEnvironmentVariableProvider(scopeSettings, remove)
+        TestSetupEnvironment testSetupEnvironment = new TestSetupEnvironment(h2, null)
+        setup.setup(testSetupEnvironment)
+        Scope.child([:], {
             def updateToTagCommand = new CommandScope(UpdateToTagCommandStep.COMMAND_NAME)
             updateToTagCommand.addArgumentValue(UpdateToTagCommandStep.TAG_ARG, "testTag")
             updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
@@ -35,6 +42,8 @@ class StrictIntegrationTests extends Specification {
         then:
         final CommandExecutionException exception = thrown()
         exception.message.contains("Change 'TagDatabaseChange' not found or supported")
+        cleanup:
+        setup.cleanup()
     }
 
     def "validate exception is thrown if STRICT global argument is set as true, there is a TagDatabaseChange, but tag argument specified does not match with TagDatabaseChange's tag"() {
@@ -42,7 +51,11 @@ class StrictIntegrationTests extends Specification {
         def scopeSettings = [
                 (GlobalConfiguration.STRICT.getKey()): Boolean.TRUE
         ]
-        Scope.child(scopeSettings, {
+        String[] remove = [:]
+        def setup = new SetupEnvironmentVariableProvider(scopeSettings, remove)
+        TestSetupEnvironment testSetupEnvironment = new TestSetupEnvironment(h2, null)
+        setup.setup(testSetupEnvironment)
+        Scope.child([:], {
             def updateToTagCommand = new CommandScope(UpdateToTagCommandStep.COMMAND_NAME)
             updateToTagCommand.addArgumentValue(UpdateToTagCommandStep.TAG_ARG, "testTag")
             updateToTagCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
@@ -58,5 +71,6 @@ class StrictIntegrationTests extends Specification {
 
         cleanup:
         Scope.exit(Scope.getCurrentScope().getScopeId())
+        setup.cleanup()
     }
 }
