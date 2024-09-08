@@ -561,7 +561,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     statement.setString(2, tableName);
                 }
                 try {
-                    ResultSet columnSelectRS = statement.executeQuery(selectStatement.toString());
+                    ResultSet columnSelectRS = statement.executeQuery();
                     //
                     // Iterate the result set from the query and match the rows
                     // to the rows that were returned by getColumns() in order
@@ -824,7 +824,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 if (database instanceof DB2Database) {
                     if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
-                        executeAndExtract(getDB2ForAs400Sql(jdbcSchemaName, tableName), database);
+                        return executeAndExtract(getDB2ForAs400Sql(jdbcSchemaName, tableName), database);
                     }
                     return querytDB2Luw(jdbcSchemaName, tableName);
                 } else if (database instanceof Db2zDatabase) {
@@ -863,7 +863,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
                     String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
                     if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
-                        executeAndExtract(getDB2ForAs400Sql(jdbcSchemaName, null), database);
+                        return executeAndExtract(getDB2ForAs400Sql(jdbcSchemaName, null), database);
                     }
                     return querytDB2Luw(jdbcSchemaName, null);
                 } else if (database instanceof Db2zDatabase) {
