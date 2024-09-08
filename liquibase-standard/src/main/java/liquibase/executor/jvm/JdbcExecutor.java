@@ -39,6 +39,9 @@ import java.util.logging.Level;
  */
 public class JdbcExecutor extends AbstractExecutor {
 
+    public static final String SHOULD_UPDATE_ROWS_AFFECTED_SCOPE_KEY = "shouldUpdateRowsAffected";
+    public static final String ROWS_AFFECTED_SCOPE_KEY = "rowsAffected";
+
     /**
      * Return the name of the Executor
      *
@@ -72,6 +75,9 @@ public class JdbcExecutor extends AbstractExecutor {
                 throw new DatabaseException("Cannot execute commands against an offline database");
             }
             stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement();
+            if (Boolean.TRUE.equals(SqlConfiguration.ALWAYS_SET_FETCH_SIZE.getCurrentValue())) {
+                stmt.setFetchSize(database.getFetchSize());
+            }
             Statement stmtToUse = stmt;
 
             Object object = action.doInStatement(stmtToUse);
@@ -182,7 +188,28 @@ public class JdbcExecutor extends AbstractExecutor {
     private void setParameters(final PreparedStatement pstmt, final RawParameterizedSqlStatement sql) throws SQLException {
         final List<Object> parameters = sql.getParameters();
         for (int i = 0; i < parameters.size(); i++) {
-            pstmt.setObject(i + 1, parameters.get(i));
+            Object parameter = parameters.get(i);
+            if(parameter instanceof ArrayList){
+                int finalI = i;
+                ((ArrayList<?>) parameter).forEach(param -> {
+                    try {
+                        setParameter(pstmt, finalI, param);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+            else {
+                setParameter(pstmt, i, parameter);
+            }
+        }
+    }
+
+    private static void setParameter(PreparedStatement pstmt, int parameterIndex, Object parameter) throws SQLException {
+        if (parameter instanceof String) {
+            pstmt.setString(parameterIndex + 1, (String) parameter);
+        } else {
+            pstmt.setObject(parameterIndex + 1, parameter);
         }
     }
 
@@ -496,8 +523,9 @@ public class JdbcExecutor extends AbstractExecutor {
 
     private void addUpdateCountToScope(int updateCount) {
         if (updateCount > -1) {
-            AtomicInteger scopeRowsAffected = Scope.getCurrentScope().get("rowsAffected", AtomicInteger.class);
-            if (scopeRowsAffected != null) {
+            AtomicInteger scopeRowsAffected = Scope.getCurrentScope().get(ROWS_AFFECTED_SCOPE_KEY, AtomicInteger.class);
+            Boolean shouldUpdateRowsAffected = Scope.getCurrentScope().get(SHOULD_UPDATE_ROWS_AFFECTED_SCOPE_KEY, true);
+            if (scopeRowsAffected != null && Boolean.TRUE.equals(shouldUpdateRowsAffected)) {
                 scopeRowsAffected.addAndGet(updateCount);
             }
         }

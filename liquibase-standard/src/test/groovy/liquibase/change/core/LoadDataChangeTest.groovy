@@ -1,6 +1,7 @@
 package liquibase.change.core
 
 import liquibase.ChecksumVersion
+import liquibase.GlobalConfiguration
 import liquibase.Scope
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
@@ -9,13 +10,15 @@ import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.Database
 import liquibase.database.DatabaseConnection
 import liquibase.database.DatabaseFactory
+import liquibase.database.core.H2Database
 import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.MockDatabase
 import liquibase.exception.ValidationErrors
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
+import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.resource.ResourceAccessor
+import liquibase.resource.SearchPathResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.statement.DatabaseFunction
@@ -40,46 +43,46 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
-public class LoadDataChangeTest extends StandardChangeTest {
+class LoadDataChangeTest extends StandardChangeTest {
 
-    MSSQLDatabase mssqlDb;
-    MockDatabase mockDb;
+    MSSQLDatabase mssqlDb
+    MockDatabase mockDb
 
     def setup() {
         ResourceAccessor resourceAccessor = TestContext.getInstance().getTestResourceAccessor()
         String offlineUrl
 
-        mssqlDb = new MSSQLDatabase();
+        mssqlDb = new MSSQLDatabase()
         mssqlDb.setConnection(DatabaseFactory.getInstance().openConnection("offline:mssql",
-                "superuser", "superpass", null, resourceAccessor));
+                "superuser", "superpass", null, resourceAccessor))
 
-        mockDb = new MockDatabase();
+        mockDb = new MockDatabase()
         mockDb.setConnection((DatabaseConnection) null)
     }
 
 
     def "loadDataEmpty database agnostic"() throws Exception {
         when:
-        LoadDataChange refactoring = new LoadDataChange();
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile("liquibase/change/core/empty.data.csv");
-        refactoring.setSeparator(",");
+        LoadDataChange refactoring = new LoadDataChange()
+        refactoring.setSchemaName("SCHEMA_NAME")
+        refactoring.setTableName("TABLE_NAME")
+        refactoring.setFile("liquibase/change/core/empty.data.csv")
+        refactoring.setSeparator(",")
 
-        SqlStatement[] sqlStatement = refactoring.generateStatements(mssqlDb);
+        SqlStatement[] sqlStatement = refactoring.generateStatements(mssqlDb)
         then:
         sqlStatement.length == 0
     }
 
     def "loadDataEmpty not using InsertSetStatement"() throws Exception {
         when:
-        LoadDataChange refactoring = new LoadDataChange();
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile("liquibase/change/core/empty.data.csv");
-        refactoring.setSeparator(",");
+        LoadDataChange refactoring = new LoadDataChange()
+        refactoring.setSchemaName("SCHEMA_NAME")
+        refactoring.setTableName("TABLE_NAME")
+        refactoring.setFile("liquibase/change/core/empty.data.csv")
+        refactoring.setSeparator(",")
 
-        SqlStatement[] sqlStatements = refactoring.generateStatements(mockDb);
+        SqlStatement[] sqlStatements = refactoring.generateStatements(mockDb)
 
         then:
         sqlStatements.length == 0
@@ -89,24 +92,24 @@ public class LoadDataChangeTest extends StandardChangeTest {
     @Unroll("multiple formats with the same data for #fileName")
     def "multiple formats with the same data using InsertSetStatement"() throws Exception {
         when:
-        LoadDataChange refactoring = new LoadDataChange();
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile(fileName);
+        LoadDataChange refactoring = new LoadDataChange()
+        refactoring.setSchemaName("SCHEMA_NAME")
+        refactoring.setTableName("TABLE_NAME")
+        refactoring.setFile(fileName)
         if (separator != null) {
-            refactoring.setSeparator(separator);
+            refactoring.setSeparator(separator)
         }
         if (quotChar != null) {
-            refactoring.setQuotchar(quotChar);
+            refactoring.setQuotchar(quotChar)
         }
 
-        SqlStatement[] sqlStatement = refactoring.generateStatements(new MSSQLDatabase());
+        SqlStatement[] sqlStatement = refactoring.generateStatements(new MSSQLDatabase())
         then:
         sqlStatement.length == 1
         assert sqlStatement[0] instanceof InsertSetStatement
 
         when:
-        SqlStatement[] sqlStatements = ((InsertSetStatement) sqlStatement[0]).getStatementsArray();
+        SqlStatement[] sqlStatements = ((InsertSetStatement) sqlStatement[0]).getStatementsArray()
 
         then:
         sqlStatements.length == 2
@@ -134,18 +137,18 @@ public class LoadDataChangeTest extends StandardChangeTest {
     @Unroll("multiple formats with the same data for #fileName")
     def "multiple formats with the same data not using InsertSetStatement"() throws Exception {
         when:
-        LoadDataChange refactoring = new LoadDataChange();
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile(fileName);
+        LoadDataChange refactoring = new LoadDataChange()
+        refactoring.setSchemaName("SCHEMA_NAME")
+        refactoring.setTableName("TABLE_NAME")
+        refactoring.setFile(fileName)
         if (separator != null) {
-            refactoring.setSeparator(separator);
+            refactoring.setSeparator(separator)
         }
         if (quotChar != null) {
-            refactoring.setQuotchar(quotChar);
+            refactoring.setQuotchar(quotChar)
         }
 
-        SqlStatement[] sqlStatements = refactoring.generateStatements(mockDb);
+        SqlStatement[] sqlStatements = refactoring.generateStatements(mockDb)
 
         then:
         sqlStatements.length == 2
@@ -172,28 +175,28 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
     def "generateStatement_excel using InsertSetStatement"() throws Exception {
         when:
-        LoadDataChange refactoring = new LoadDataChange();
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile("liquibase/change/core/sample.data1-excel.csv");
+        LoadDataChange refactoring = new LoadDataChange()
+        refactoring.setSchemaName("SCHEMA_NAME")
+        refactoring.setTableName("TABLE_NAME")
+        refactoring.setFile("liquibase/change/core/sample.data1-excel.csv")
 
-        LoadDataColumnConfig ageConfig = new LoadDataColumnConfig();
-        ageConfig.setHeader("age");
-        ageConfig.setType("NUMERIC");
-        refactoring.addColumn(ageConfig);
+        LoadDataColumnConfig ageConfig = new LoadDataColumnConfig()
+        ageConfig.setHeader("age")
+        ageConfig.setType("NUMERIC")
+        refactoring.addColumn(ageConfig)
 
-        LoadDataColumnConfig activeConfig = new LoadDataColumnConfig();
-        activeConfig.setHeader("active");
-        activeConfig.setType("BOOLEAN");
-        refactoring.addColumn(activeConfig);
+        LoadDataColumnConfig activeConfig = new LoadDataColumnConfig()
+        activeConfig.setHeader("active")
+        activeConfig.setType("BOOLEAN")
+        refactoring.addColumn(activeConfig)
 
-        SqlStatement[] sqlStatement = refactoring.generateStatements(new MSSQLDatabase());
+        SqlStatement[] sqlStatement = refactoring.generateStatements(new MSSQLDatabase())
         then:
         sqlStatement.length == 1
         assert sqlStatement[0] instanceof InsertSetStatement
 
         when:
-        SqlStatement[] sqlStatements = ((InsertSetStatement) sqlStatement[0]).getStatementsArray();
+        SqlStatement[] sqlStatements = ((InsertSetStatement) sqlStatement[0]).getStatementsArray()
 
         then:
         sqlStatements.length == 2
@@ -217,22 +220,22 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
     def "generateStatement_excel not using InsertStatement"() throws Exception {
         when:
-        LoadDataChange refactoring = new LoadDataChange();
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile("liquibase/change/core/sample.data1-excel.csv");
+        LoadDataChange refactoring = new LoadDataChange()
+        refactoring.setSchemaName("SCHEMA_NAME")
+        refactoring.setTableName("TABLE_NAME")
+        refactoring.setFile("liquibase/change/core/sample.data1-excel.csv")
 
-        LoadDataColumnConfig ageConfig = new LoadDataColumnConfig();
-        ageConfig.setHeader("age");
-        ageConfig.setType("NUMERIC");
-        refactoring.addColumn(ageConfig);
+        LoadDataColumnConfig ageConfig = new LoadDataColumnConfig()
+        ageConfig.setHeader("age")
+        ageConfig.setType("NUMERIC")
+        refactoring.addColumn(ageConfig)
 
-        LoadDataColumnConfig activeConfig = new LoadDataColumnConfig();
-        activeConfig.setHeader("active");
-        activeConfig.setType("BOOLEAN");
-        refactoring.addColumn(activeConfig);
+        LoadDataColumnConfig activeConfig = new LoadDataColumnConfig()
+        activeConfig.setHeader("active")
+        activeConfig.setType("BOOLEAN")
+        refactoring.addColumn(activeConfig)
 
-        SqlStatement[] sqlStatements = refactoring.generateStatements(mockDb);
+        SqlStatement[] sqlStatements = refactoring.generateStatements(mockDb)
 
         then:
         sqlStatements.length == 2
@@ -256,22 +259,22 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
     def "generateStatement_uuid not using InsertStatement"() throws Exception {
         when:
-        LoadDataChange refactoring = new LoadDataChange();
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile("liquibase/change/core/sample.data3.csv");
+        LoadDataChange refactoring = new LoadDataChange()
+        refactoring.setSchemaName("SCHEMA_NAME")
+        refactoring.setTableName("TABLE_NAME")
+        refactoring.setFile("liquibase/change/core/sample.data3.csv")
 
-        LoadDataColumnConfig idConfig = new LoadDataColumnConfig();
-        idConfig.setHeader("id");
-        idConfig.setType("UUID");
-        refactoring.addColumn(idConfig);
+        LoadDataColumnConfig idConfig = new LoadDataColumnConfig()
+        idConfig.setHeader("id")
+        idConfig.setType("UUID")
+        refactoring.addColumn(idConfig)
 
-        LoadDataColumnConfig parentIdConfig = new LoadDataColumnConfig();
-        parentIdConfig.setHeader("parent_id");
-        parentIdConfig.setType("UUID");
-        refactoring.addColumn(parentIdConfig);
+        LoadDataColumnConfig parentIdConfig = new LoadDataColumnConfig()
+        parentIdConfig.setHeader("parent_id")
+        parentIdConfig.setType("UUID")
+        refactoring.addColumn(parentIdConfig)
 
-        SqlStatement[] sqlStatements = refactoring.generateStatements(mockDb);
+        SqlStatement[] sqlStatements = refactoring.generateStatements(mockDb)
 
         then:
         sqlStatements.length == 2
@@ -294,9 +297,9 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
     def getConfirmationMessage() throws Exception {
         when:
-        LoadDataChange refactoring = new LoadDataChange();
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile("FILE_NAME");
+        LoadDataChange refactoring = new LoadDataChange()
+        refactoring.setTableName("TABLE_NAME")
+        refactoring.setFile("FILE_NAME")
 
         then:
         "Data loaded from 'FILE_NAME' into table 'TABLE_NAME'" == refactoring.getConfirmationMessage()
@@ -305,16 +308,16 @@ public class LoadDataChangeTest extends StandardChangeTest {
     @Unroll
     def "generateChecksum produces different values with each field - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
-        LoadDataChange refactoring = new LoadDataChange();
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile("liquibase/change/core/sample.data1.csv");
+        LoadDataChange refactoring = new LoadDataChange()
+        refactoring.setSchemaName("SCHEMA_NAME")
+        refactoring.setTableName("TABLE_NAME")
+        refactoring.setFile("liquibase/change/core/sample.data1.csv")
 
         String md5sum1 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
             return refactoring.generateCheckSum().toString()
         } as Scope.ScopedRunnerWithReturn<String>)
 
-        refactoring.setFile("liquibase/change/core/sample.data2.csv");
+        refactoring.setFile("liquibase/change/core/sample.data2.csv")
         String md5sum2 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
             return refactoring.generateCheckSum().toString()
         } as Scope.ScopedRunnerWithReturn<String>)
@@ -372,25 +375,25 @@ public class LoadDataChangeTest extends StandardChangeTest {
         def changelog = new DatabaseChangeLog("liquibase/changelog.xml")
         ChangeSet changeSet = new ChangeSet(null, null, true, false,
                 "logical or physical file name",
-                null, null, false, null, changelog);
+                null, null, false, null, changelog)
 
-        LoadDataChange relativeChange = new LoadDataChange();
+        LoadDataChange relativeChange = new LoadDataChange()
 
-        relativeChange.setSchemaName("SCHEMA_NAME");
-        relativeChange.setTableName("TABLE_NAME");
-        relativeChange.setRelativeToChangelogFile(Boolean.TRUE);
-        relativeChange.setChangeSet(changeSet);
-        relativeChange.setFile("change/core/sample.data1.csv");
+        relativeChange.setSchemaName("SCHEMA_NAME")
+        relativeChange.setTableName("TABLE_NAME")
+        relativeChange.setRelativeToChangelogFile(Boolean.TRUE)
+        relativeChange.setChangeSet(changeSet)
+        relativeChange.setFile("change/core/sample.data1.csv")
 
-        SqlStatement[] relativeStatements = relativeChange.generateStatements(mockDb);
+        SqlStatement[] relativeStatements = relativeChange.generateStatements(mockDb)
 
-        LoadUpdateDataChange nonRelativeChange = new LoadUpdateDataChange();
-        nonRelativeChange.setSchemaName("SCHEMA_NAME");
-        nonRelativeChange.setTableName("TABLE_NAME");
-        nonRelativeChange.setChangeSet(changeSet);
-        nonRelativeChange.setFile("liquibase/change/core/sample.data1.csv");
+        LoadUpdateDataChange nonRelativeChange = new LoadUpdateDataChange()
+        nonRelativeChange.setSchemaName("SCHEMA_NAME")
+        nonRelativeChange.setTableName("TABLE_NAME")
+        nonRelativeChange.setChangeSet(changeSet)
+        nonRelativeChange.setFile("liquibase/change/core/sample.data1.csv")
 
-        SqlStatement[] nonRelativeStatements = nonRelativeChange.generateStatements(mockDb);
+        SqlStatement[] nonRelativeStatements = nonRelativeChange.generateStatements(mockDb)
 
         then:
         assert relativeStatements != null
@@ -428,17 +431,17 @@ public class LoadDataChangeTest extends StandardChangeTest {
     @Unroll
     def "checksum does not change when no comments in CSV and comment property changes - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
-        LoadDataChange refactoring = new LoadDataChange();
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile("liquibase/change/core/sample.data1.csv");
+        LoadDataChange refactoring = new LoadDataChange()
+        refactoring.setSchemaName("SCHEMA_NAME")
+        refactoring.setTableName("TABLE_NAME")
+        refactoring.setFile("liquibase/change/core/sample.data1.csv")
 
         refactoring.setCommentLineStartsWith("") //comments disabled
         String md5sum1 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
             return refactoring.generateCheckSum().toString()
         } as Scope.ScopedRunnerWithReturn<String>)
 
-        refactoring.setCommentLineStartsWith("#");
+        refactoring.setCommentLineStartsWith("#")
         String md5sum2 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
             return refactoring.generateCheckSum().toString()
         } as Scope.ScopedRunnerWithReturn<String>)
@@ -456,17 +459,17 @@ public class LoadDataChangeTest extends StandardChangeTest {
     @Unroll
     def "checksum changes when there are comments in CSV - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
-        LoadDataChange refactoring = new LoadDataChange();
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile("liquibase/change/core/sample.data1-withComments.csv");
+        LoadDataChange refactoring = new LoadDataChange()
+        refactoring.setSchemaName("SCHEMA_NAME")
+        refactoring.setTableName("TABLE_NAME")
+        refactoring.setFile("liquibase/change/core/sample.data1-withComments.csv")
 
         refactoring.setCommentLineStartsWith("") //comments disabled
         String md5sum1 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
             return refactoring.generateCheckSum().toString()
         } as Scope.ScopedRunnerWithReturn<String>)
 
-        refactoring.setCommentLineStartsWith("#");
+        refactoring.setCommentLineStartsWith("#")
         String md5sum2 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
             return refactoring.generateCheckSum().toString()
         } as Scope.ScopedRunnerWithReturn<String>)
@@ -484,18 +487,18 @@ public class LoadDataChangeTest extends StandardChangeTest {
     @Unroll
     def "checksum same for CSV files with comments and file with removed comments manually - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
-        LoadDataChange refactoring = new LoadDataChange();
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile("liquibase/change/core/sample.data1-withComments.csv");
+        LoadDataChange refactoring = new LoadDataChange()
+        refactoring.setSchemaName("SCHEMA_NAME")
+        refactoring.setTableName("TABLE_NAME")
+        refactoring.setFile("liquibase/change/core/sample.data1-withComments.csv")
 
-        refactoring.setCommentLineStartsWith("#");
+        refactoring.setCommentLineStartsWith("#")
         String md5sum1 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
             return refactoring.generateCheckSum().toString()
         } as Scope.ScopedRunnerWithReturn<String>)
 
-        refactoring.setFile("liquibase/change/core/sample.data1-removedComments.csv");
-        refactoring.setCommentLineStartsWith(""); //disable comments just in case
+        refactoring.setFile("liquibase/change/core/sample.data1-removedComments.csv")
+        refactoring.setCommentLineStartsWith("") //disable comments just in case
         String md5sum2 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
             return refactoring.generateCheckSum().toString()
         } as Scope.ScopedRunnerWithReturn<String>)
@@ -512,20 +515,20 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
     def "usePreparedStatements set to false produces InsertSetStatement"() throws Exception {
         when:
-        LoadDataChange loadDataChange = new LoadDataChange();
-        loadDataChange.setSchemaName("SCHEMA_NAME");
-        loadDataChange.setTableName("TABLE_NAME");
-        loadDataChange.setUsePreparedStatements(Boolean.FALSE);
-        loadDataChange.setFile("liquibase/change/core/sample.data1.csv");
+        LoadDataChange loadDataChange = new LoadDataChange()
+        loadDataChange.setSchemaName("SCHEMA_NAME")
+        loadDataChange.setTableName("TABLE_NAME")
+        loadDataChange.setUsePreparedStatements(Boolean.FALSE)
+        loadDataChange.setFile("liquibase/change/core/sample.data1.csv")
 
-        SqlStatement[] sqlStatement = loadDataChange.generateStatements(new MSSQLDatabase());
+        SqlStatement[] sqlStatement = loadDataChange.generateStatements(new MSSQLDatabase())
 
         then:
         sqlStatement.length == 1
         assert sqlStatement[0] instanceof InsertSetStatement
 
         when:
-        SqlStatement[] sqlStatements = ((InsertSetStatement) sqlStatement[0]).getStatementsArray();
+        SqlStatement[] sqlStatements = ((InsertSetStatement) sqlStatement[0]).getStatementsArray()
 
         then:
         sqlStatements.length == 2
@@ -544,20 +547,20 @@ public class LoadDataChangeTest extends StandardChangeTest {
     }
     def "usePreparedStatements set to true produces PreparedStatement"() throws Exception {
         when:
-        LoadDataChange loadDataChange = new LoadDataChange();
-        loadDataChange.setSchemaName("SCHEMA_NAME");
-        loadDataChange.setTableName("TABLE_NAME");
-        loadDataChange.setUsePreparedStatements(Boolean.TRUE);
-        loadDataChange.setFile("liquibase/change/core/sample.data1.csv");
+        LoadDataChange loadDataChange = new LoadDataChange()
+        loadDataChange.setSchemaName("SCHEMA_NAME")
+        loadDataChange.setTableName("TABLE_NAME")
+        loadDataChange.setUsePreparedStatements(Boolean.TRUE)
+        loadDataChange.setFile("liquibase/change/core/sample.data1.csv")
 
-        SqlStatement[] sqlStatement = loadDataChange.generateStatements(new MSSQLDatabase() { public boolean supportsBatchUpdates() { return true; } });
+        SqlStatement[] sqlStatement = loadDataChange.generateStatements(new MSSQLDatabase() { public boolean supportsBatchUpdates() { return true } })
 
         then:
         sqlStatement.length == 1
         assert sqlStatement[0] instanceof ExecutablePreparedStatement
 
         when:
-        SqlStatement[] sqlStatements = ((ExecutablePreparedStatement) sqlStatement[0]).getIndividualStatements();
+        SqlStatement[] sqlStatements = ((ExecutablePreparedStatement) sqlStatement[0]).getIndividualStatements()
 
         then:
         sqlStatements.length == 2
@@ -575,20 +578,20 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
     def "DB Batch Update Support usePrepared False produces InsertSetStatement"() throws Exception {
         when:
-        LoadDataChange loadDataChange = new LoadDataChange();
-        loadDataChange.setSchemaName("SCHEMA_NAME");
-        loadDataChange.setTableName("TABLE_NAME");
-        loadDataChange.setUsePreparedStatements(Boolean.FALSE);
-        loadDataChange.setFile("liquibase/change/core/sample.data1.csv");
+        LoadDataChange loadDataChange = new LoadDataChange()
+        loadDataChange.setSchemaName("SCHEMA_NAME")
+        loadDataChange.setTableName("TABLE_NAME")
+        loadDataChange.setUsePreparedStatements(Boolean.FALSE)
+        loadDataChange.setFile("liquibase/change/core/sample.data1.csv")
 
-        SqlStatement[] sqlStatement = loadDataChange.generateStatements(new MSSQLDatabase() { public boolean supportsBatchUpdates() { return true; } });
+        SqlStatement[] sqlStatement = loadDataChange.generateStatements(new MSSQLDatabase() { public boolean supportsBatchUpdates() { return true } })
 
         then:
         sqlStatement.length == 1
         assert sqlStatement[0] instanceof InsertSetStatement
 
         when:
-        SqlStatement[] sqlStatements = ((InsertSetStatement) sqlStatement[0]).getStatementsArray();
+        SqlStatement[] sqlStatements = ((InsertSetStatement) sqlStatement[0]).getStatementsArray()
 
         then:
         sqlStatements.length == 2
@@ -631,7 +634,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
     def mockDB = new MockDatabase() {
         @Override
         public String correctObjectName(final String name, final Class<? extends DatabaseObject> objectType) {
-            return name;
+            return name
         }
     }
 
@@ -639,13 +642,13 @@ public class LoadDataChangeTest extends StandardChangeTest {
         ((InsertStatement) sqlStatement).getColumnValue(colName.toString())
     }
 
-    def "empty values"() {
+    def "validate load data sets values successfully"() {
         when:
         def table = testTable("table")
         SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory(table)
 
         LoadDataChange change = new LoadDataChange()
-        change.setFile("liquibase/change/core/sample.data.with.emptys.csv")
+        change.setFile("liquibase/change/core/sample.data.csv")
         change.setTableName(table.name)
 
         SqlStatement[] sqlStatements = change.generateStatements(mockDB)
@@ -660,23 +663,44 @@ public class LoadDataChangeTest extends StandardChangeTest {
         columnValue(sqlStatements[0], Col.num) == 2
         def dCol = columnValue(sqlStatements[0], Col.date)
         assert dCol instanceof Timestamp
-        ((Timestamp) dCol).toLocalDateTime() == LocalDateTime.parse("2008-03-02T12:13:00")
-        columnValue(sqlStatements[0], Col.bool) == Boolean.TRUE
-
-        // All other NULL or empty fields are null
-        [Col.name, Col.num, Col.num, Col.bool].each {
-            columnValue(sqlStatements[1], it) == "NULL"
-            columnValue(sqlStatements[2], it) == "NULL"
-        }
+        assert ((Timestamp) dCol).toLocalDateTime() == LocalDateTime.parse("2008-03-02T12:13:00")
+        assert columnValue(sqlStatements[0], Col.bool) == Boolean.TRUE
     }
 
-    def "defaultXXX"() {
+    def "validate load data works successfully with empty and null and invalid values"() {
+        when:
+        def table = testTable("table")
+        SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory(table)
+
+        LoadDataChange change = new LoadDataChange()
+        change.setFile("liquibase/change/core/sample.data.with.null.and.emptys.csv")
+        change.setTableName(table.name)
+
+        SqlStatement[] sqlStatements = change.generateStatements(mockDB)
+
+        then:
+        // All other NULL or empty fields are null
+        [Col.name, Col.num, Col.date, Col.bool].each {
+            assert columnValue(sqlStatements[0], it) == "NULL"
+        }
+        columnValue(sqlStatements[1], Col.name) == ""
+        [Col.num, Col.num, Col.bool].each {
+            assert columnValue(sqlStatements[1], it) == "NULL"
+        }
+        columnValue(sqlStatements[2], Col.name) == "'NULL'"
+        [Col.num, Col.date].each {
+            assert ((DatabaseFunction)columnValue(sqlStatements[2], it)).getValue() == "'NULL'"
+        }
+        columnValue(sqlStatements[2], Col.bool) == false
+    }
+
+    def "validate load data set default values successfully only for empty entries"() {
         when:
         def table = testTable("table")
         LoadDataChange change = new LoadDataChange()
 
         change.load(new liquibase.parser.core.ParsedNode(null, "loadData").addChildren([
-                file     : "liquibase/change/core/sample.data.with.emptys.csv",
+                file     : "liquibase/change/core/sample.data.with.null.and.emptys.csv",
                 tableName: table.name
         ]).setValue([
                 [column: [name: "id", header: "num", defaultValueNumeric: 1]],
@@ -687,88 +711,60 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
         SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory(table)
 
-        SqlStatement[] sqlStatements = change.generateStatements(mockDB);
+        SqlStatement[] sqlStatements = change.generateStatements(mockDB)
 
         then:
-        columnValue(sqlStatements[0], Col.name) == "Fred"
-        columnValue(sqlStatements[0], Col.id) == 2
-        def dCol = columnValue(sqlStatements[0], Col.date)
-        assert dCol instanceof Timestamp
-        ((Timestamp) dCol).toLocalDateTime() == LocalDateTime.parse("2008-03-02T12:13:00")
-        columnValue(sqlStatements[0], Col.bool) == Boolean.TRUE
-        // All  NULL fields are still null
-        for (Col n : [Col.name, Col.id, Col.date, Col.bool]) {
-            columnValue(sqlStatements[1], n) == null
-        }
-        columnValue(sqlStatements[2], Col.name) == "defName"
-        columnValue(sqlStatements[2], Col.id) == 1
-        def dCol2 = columnValue(sqlStatements[2], Col.date)
+        columnValue(sqlStatements[0], Col.name) != "defName"
+        columnValue(sqlStatements[0], Col.id) != 1
+        columnValue(sqlStatements[1], Col.name) == "defName"
+        columnValue(sqlStatements[1], Col.id) == 1
+        def dCol2 = columnValue(sqlStatements[1], Col.date)
         assert dCol2 instanceof Timestamp
         ((Timestamp) dCol2).toLocalDateTime() == LocalDateTime.parse("2020-01-02T03:04:05")
-        columnValue(sqlStatements[2], Col.bool) == Boolean.TRUE
+        columnValue(sqlStatements[1], Col.bool) == Boolean.TRUE
+        columnValue(sqlStatements[2], Col.name) != "defName"
+        columnValue(sqlStatements[2], Col.id) != 1
     }
 
-    def "defaults"() {
-        when:
-        def table = testTable("table")
-        LoadDataChange change = new LoadDataChange()
 
-        change.load(new liquibase.parser.core.ParsedNode(null, "loadData").addChildren([
-                file     : "liquibase/change/core/sample.data.with.emptys.csv",
-                tableName: table.name
-        ]).setValue([
-                [column: [name: "id", header: "num", defaultValue: 1]],
-                [column: [name: "name", defaultValue: "defName"]],
-                [column: [name: "date", defaultValue: "2020-01-02 03:04:05"]],
-                [column: [name: "bool", defaultValue: "t"]]
-        ]), new ClassLoaderResourceAccessor())
-
-        SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory(table)
-
-        SqlStatement[] sqlStatements = change.generateStatements(mockDB);
-
-        then:
-        columnValue(sqlStatements[0], Col.name) == "Fred"
-        columnValue(sqlStatements[0], Col.id) == 2
-        def dCol = columnValue(sqlStatements[0], Col.date)
-        assert dCol instanceof Timestamp
-        ((Timestamp) dCol).toLocalDateTime() == LocalDateTime.parse("2008-03-02T12:13:00")
-        columnValue(sqlStatements[0], Col.bool) == Boolean.TRUE
-        // All  NULL fields are still null
-        [Col.name, Col.id, Col.date, Col.bool].each {
-            columnValue( sqlStatements[1], it) == null
-        }
-        columnValue(sqlStatements[2], Col.name) == "defName"
-        columnValue(sqlStatements[2], Col.id) == 1
-        def dCol2 = columnValue(sqlStatements[2], Col.date)
-        assert dCol2 instanceof Timestamp
-        ((Timestamp) dCol2).toLocalDateTime() == LocalDateTime.parse("2020-01-02T03:04:05")
-        columnValue(sqlStatements[2], Col.bool) == Boolean.TRUE
-    }
-
-    def "inconsistent NULL handling"() {
+    def "NULL placeholder handling"() {
         when:
         LoadDataChange change = new LoadDataChange()
 
         change.load(new liquibase.parser.core.ParsedNode(null, "loadData").addChildren([
-                file     : "liquibase/change/core/sample.data.with.emptys.csv",
+                file     : "liquibase/change/core/sample.data.with.nulls.csv",
                 tableName: "table.name"
         ]).setValue([
                 [column: [name: "name", type: "STRING"]],
-                [column: [name: "date"]],
+                [column: [name: "middlename", type: "STRING", nullPlaceholder: ""]],
+                [column: [name: "surname", nullPlaceholder: ""]],
+                [column: [name: "job", type: "STRING", nullPlaceholder: "NONE"]],
         ]), new ClassLoaderResourceAccessor())
 
         SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory()
 
         SqlStatement[] sqlStatements = change.generateStatements(mockDB)
-        then:
-        columnValue(sqlStatements[1], Col.name) == "NULL"
-        columnValue(sqlStatements[1], Col.num) == "NULL"    // FIX this was ""
-        columnValue(sqlStatements[1], Col.date) == "NULL"   // FIX this was" "
-
-        columnValue(sqlStatements[3], Col.name) == " s"
-        columnValue(sqlStatements[3], Col.num) == " s"    // FIX this was "s"
-        columnValue(sqlStatements[3], Col.date) == " s"   // FIX this was "s"
+        then: // any NULL value for the statement is seen here as a 'NULL' string
+        //Fred,Twinkletoes,Flintstone,Crane operator
+        columnValue(sqlStatements[0], WorkerCol.name) == "Fred"
+        columnValue(sqlStatements[0], WorkerCol.middlename) == "Twinkletoes"
+        columnValue(sqlStatements[0], WorkerCol.surname) == "Flintstone"
+        columnValue(sqlStatements[0], WorkerCol.job) == "Crane operator"
+        //null,null,null,null
+        columnValue(sqlStatements[1], WorkerCol.name) == "NULL" // NULL sql ref
+        columnValue(sqlStatements[1], WorkerCol.middlename) == "null"
+        columnValue(sqlStatements[1], WorkerCol.surname) == "null"
+        columnValue(sqlStatements[1], WorkerCol.job) == "null"
+        //,,,
+        columnValue(sqlStatements[2], WorkerCol.name) == ""
+        columnValue(sqlStatements[2], WorkerCol.middlename) == "NULL" // NULL sql ref
+        columnValue(sqlStatements[2], WorkerCol.surname) == "NULL" // NULL sql ref
+        columnValue(sqlStatements[2], WorkerCol.job) == ""
+        //NONE,NONE,NONE,NONE
+        columnValue(sqlStatements[3], WorkerCol.name) == "NONE"
+        columnValue(sqlStatements[3], WorkerCol.middlename) == "NONE"
+        columnValue(sqlStatements[3], WorkerCol.surname) == "NONE"
+        columnValue(sqlStatements[3], WorkerCol.job) == "NULL" // NULL sql ref
     }
 
     def "temporal values work for DATE, DATETIME and TIME column configs"() {
@@ -836,7 +832,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
                 [column: [name: "a", header:"name", index:1, type: "STRING"]],
                 [column: [name: "username", type: "STRING"]]
         ]), new ClassLoaderResourceAccessor())
-        ValidationErrors foundErrors = change.validate(mockDB);
+        ValidationErrors foundErrors = change.validate(mockDB)
         SqlStatement[] sqlStatements = change.generateStatements(mockDB)
 
         then:
@@ -878,7 +874,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         given:
         SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory()
         FakeLoadDataChangeExtension change = new FakeLoadDataChangeExtension()
-        change.setFile("liquibase/change/core/sample.data1.csv");
+        change.setFile("liquibase/change/core/sample.data1.csv")
 
 
         when:
@@ -896,6 +892,49 @@ public class LoadDataChangeTest extends StandardChangeTest {
         ]
     }
 
+    def "validate CSV column headers are trimmed when TRIM_LOAD_DATA_FILE_HEADER is set to true"() {
+        when:
+        LoadDataChange change = new LoadDataChange()
+        SqlStatement[] sqlStatements
+
+        Scope.child([(GlobalConfiguration.TRIM_LOAD_DATA_FILE_HEADER.key): true], {
+
+        change.load(new ParsedNode(null, "loadData").addChildren([
+                file     : "liquibase/load-data.test.csv",
+                tableName: "CONFIG_STATE"
+                ]), new SearchPathResourceAccessor("target/test-classes/"))
+
+        sqlStatements = change.generateStatements(new H2Database())
+        } as Scope.ScopedRunner)
+
+        then:
+        def sqlStatement = ((InsertStatement) sqlStatements[0])
+        sqlStatement.getColumnValues().keySet()[0] == "config_state_id"
+        sqlStatement.getColumnValues().keySet()[1] == "code"
+        sqlStatement.getColumnValues().keySet()[2] == "name"
+        sqlStatement.getColumnValues().keySet()[3] == "description"
+    }
+
+    def "validate CSV column headers are NOT trimmed when TRIM_LOAD_DATA_FILE_HEADER is set to its default value"() {
+        when:
+        LoadDataChange change = new LoadDataChange()
+        SqlStatement[] sqlStatements
+
+        change.load(new ParsedNode(null, "loadData").addChildren([
+                file     : "liquibase/load-data.test.csv",
+                tableName: "CONFIG_STATE"
+        ]), new SearchPathResourceAccessor("target/test-classes/"))
+
+        sqlStatements = change.generateStatements(new H2Database())
+
+        then:
+        def sqlStatement = ((InsertStatement) sqlStatements[0])
+        sqlStatement.getColumnValues().keySet()[0] == "config_state_id"
+        sqlStatement.getColumnValues().keySet()[1] == " code"
+        sqlStatement.getColumnValues().keySet()[2] == " name"
+        sqlStatement.getColumnValues().keySet()[3] == " description"
+    }
+
 
     class ColDef {
         ColDef(Object n, String type) {
@@ -910,7 +949,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         name, num, date, bool, id, datetime, time
 
         String s() {
-            return name();
+            return name()
         }
     }
 
@@ -918,6 +957,13 @@ public class LoadDataChangeTest extends StandardChangeTest {
         regular, space_left, space_right, space_both, empty
     }
 
+    enum WorkerCol {
+        name, middlename, surname, job
+
+        String s() {
+            return name();
+        }
+    }
     class FakeLoadDataChangeExtension extends LoadDataChange {
         def rows
 

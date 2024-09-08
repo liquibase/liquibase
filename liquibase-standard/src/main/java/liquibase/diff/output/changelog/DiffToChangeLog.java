@@ -9,8 +9,7 @@ import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
 import liquibase.changeset.ChangeSetService;
 import liquibase.changeset.ChangeSetServiceFactory;
-import liquibase.command.CommandScope;
-import liquibase.command.core.GenerateChangelogCommandStep;
+import liquibase.command.core.helpers.AbstractChangelogCommandStep;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.*;
 import liquibase.database.core.*;
@@ -31,15 +30,14 @@ import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.statement.core.RawParameterizedSqlStatement;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.StoredDatabaseLogic;
-import liquibase.structure.core.StoredProcedure;
-import liquibase.structure.core.View;
+import liquibase.structure.core.Table;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayOutputStream;
@@ -48,6 +46,8 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class DiffToChangeLog {
@@ -73,7 +73,20 @@ public class DiffToChangeLog {
     private final DiffOutputControl diffOutputControl;
     private boolean tryDbaDependencies = true;
 
+    private boolean skipObjectSorting = false;
+
     private static final Set<Class> loggedOrderFor = new HashSet<>();
+
+    /**
+     * Creates a new DiffToChangeLog with the given DiffResult and default DiffOutputControl
+     * @param diffResult the DiffResult to convert to a ChangeLog
+     * @param diffOutputControl the DiffOutputControl to use to control the output
+     * @param skipObjectSorting if true, will skip dependency object sorting. This can be useful on databases that have a lot of packages/procedures that are linked to each other
+     */
+    public DiffToChangeLog(DiffResult diffResult, DiffOutputControl diffOutputControl, boolean skipObjectSorting) {
+        this(diffResult, diffOutputControl);
+        this.skipObjectSorting = skipObjectSorting;
+    }
 
     public DiffToChangeLog(DiffResult diffResult, DiffOutputControl diffOutputControl) {
         this.diffResult = diffResult;
@@ -81,14 +94,14 @@ public class DiffToChangeLog {
         respectSchemaAndCatalogCaseIfNeeded(diffOutputControl);
     }
 
+    public DiffToChangeLog(DiffOutputControl diffOutputControl) {
+        this.diffOutputControl = diffOutputControl;
+    }
+
     private void respectSchemaAndCatalogCaseIfNeeded(DiffOutputControl diffOutputControl) {
         if (this.diffResult.getComparisonSnapshot().getDatabase() instanceof AbstractDb2Database) {
             diffOutputControl.setRespectSchemaAndCatalogCase(true);
         }
-    }
-
-    public DiffToChangeLog(DiffOutputControl diffOutputControl) {
-        this.diffOutputControl = diffOutputControl;
     }
 
     public void setDiffResult(DiffResult diffResult) {
@@ -182,7 +195,7 @@ public class DiffToChangeLog {
 
                                 innerXml = innerXml.replaceFirst(DATABASE_CHANGE_LOG_CLOSING_XML_TAG, "");
                                 innerXml = innerXml.trim();
-                                if ("".equals(innerXml)) {
+                                if (innerXml.isEmpty()) {
                                     Scope.getCurrentScope().getLog(getClass()).info("No changes found, nothing to do");
                                     return;
                                 }
@@ -352,10 +365,10 @@ public class DiffToChangeLog {
     }
 
     private void setReplaceIfExistsTrueIfApplicable(Change[] changes) {
-        if(changes !=null && diffOutputControl.isReplaceIfExistsSet()) {
-            for(int i=0; i < changes.length; i++) {
-                if (changes[i] instanceof ReplaceIfExists) {
-                    ((ReplaceIfExists) changes[i]).setReplaceIfExists(true);
+        if (changes !=null && diffOutputControl.isReplaceIfExistsSet()) {
+            for (Change change : changes) {
+                if (change instanceof ReplaceIfExists) {
+                    ((ReplaceIfExists) change).setReplaceIfExists(true);
                 }
             }
         }
@@ -367,10 +380,10 @@ public class DiffToChangeLog {
     // drop FK goes first
     //
     private List<ChangeSet> bringDropFKToTop(List<ChangeSet> changeSets) {
-        List<ChangeSet> dropFk = changeSets.stream().filter(cs -> {
-            return cs.getChanges().stream().anyMatch(ch -> ch instanceof DropForeignKeyConstraintChange);
-        }).collect(Collectors.toList());
-        if (dropFk == null || dropFk.isEmpty()) {
+        List<ChangeSet> dropFk = changeSets.stream().filter(cs ->
+            cs.getChanges().stream().anyMatch(DropForeignKeyConstraintChange.class::isInstance)
+        ).collect(Collectors.toList());
+        if (dropFk.isEmpty()) {
             return changeSets;
         }
         List<ChangeSet> returnList = new ArrayList<>();
@@ -456,8 +469,10 @@ public class DiffToChangeLog {
                                 schemaName = obj.getSchema().getName();
                             }
 
-                            String name = schemaName + "." + obj.getName();
-                            if (dependencyOrder.contains(name)) {
+                            String objectName = obj.getName();
+                            String name = schemaName + "." + objectName;
+                            if (dependencyOrder.contains(name) ||
+                                dependencyOrder.contains(convertStoredLogicObjectName(schemaName, objectName, database))) {
                                 toSort.add(obj);
                             } else {
                                 toNotSort.add(obj);
@@ -468,6 +483,15 @@ public class DiffToChangeLog {
                     }
 
                     toSort.sort((o1, o2) -> {
+                        //
+                        // For Postgres, make tables appear before stored logic
+                        //
+                        if (database instanceof PostgresDatabase) {
+                            Integer x = determineOrderingForTablesAndStoredLogic(o1, o2);
+                            if (x != null) {
+                                return x;
+                            }
+                        }
                         String o1Schema = null;
                         if (o1.getSchema() != null) {
                             o1Schema = o1.getSchema().getName();
@@ -493,9 +517,62 @@ public class DiffToChangeLog {
                 }
             } catch (DatabaseException e) {
                 Scope.getCurrentScope().getLog(getClass()).fine("Cannot get object dependencies: " + e.getMessage());
+            } catch (StackOverflowError e) {
+                Scope.getCurrentScope().getLog(getClass()).warning("You have too many or recursive database object dependencies! " +
+                        "Liquibase is going to ignore dependency sorting and resume processing. To skip this message " +
+                        "(and save a lot of processing time) use flag " + AbstractChangelogCommandStep.SKIP_OBJECT_SORTING.getName(), e);
             }
         }
         return new ArrayList<>(objects);
+    }
+
+    private static Integer determineOrderingForTablesAndStoredLogic(DatabaseObject o1, DatabaseObject o2) {
+        if (o1 instanceof Table && o2 instanceof StoredDatabaseLogic) {
+            return -1;
+        }
+        if (o1 instanceof StoredDatabaseLogic && o2 instanceof Table) {
+            return 1;
+        }
+        return null;
+    }
+
+    /**
+     *
+     * POSTGRES ONLY:
+     *
+     * If we have a stored logic object then we edit the name
+     * to replace the parameter list with a list of just the types.
+     * This is the format that the dependency computation puts out.
+     *
+     * Example:  calculate_bonus(emp_salary numeric, emp_name character varying) becomes
+     *           calculate_bonus(numeric, character varying)
+     *
+     * @param  objectName     The input object name to work on
+     * @return String
+     *
+     */
+    private static String convertStoredLogicObjectName(String schemaName, String objectName, Database database) {
+        String name = schemaName + "." + objectName;
+        if (! (database instanceof PostgresDatabase) || ! (objectName.contains("(") && objectName.contains(")"))) {
+            return name;
+        }
+        Pattern p = Pattern.compile(".*?[(]+(.*)?[)]+[\\s]*?$");
+        Matcher m = p.matcher(objectName);
+        if (m.matches()) {
+            String originalParameters = m.group(1);
+            String editedParameters = originalParameters;
+            String[] parameters = m.group(1).split(",");
+            for (String parameter : parameters) {
+                parameter = parameter.trim();
+                String[] parts = parameter.split(" ");
+                String[] rest = Arrays.copyOfRange(parts, 1, parts.length);
+                String part = StringUtil.join(rest, " ");
+                editedParameters = editedParameters.replace(parameter, part);
+            }
+            name = schemaName + "." + objectName.replace(originalParameters, editedParameters)
+                                                .replace(", ",",");
+        }
+        return name;
     }
 
     private List<Map<String, ?>> queryForDependenciesOracle(Executor executor, List<String> schemas)
@@ -503,10 +580,10 @@ public class DiffToChangeLog {
         List<Map<String, ?>> rs = null;
         try {
             if (tryDbaDependencies) {
-                rs = executor.queryForList(new RawSqlStatement("select OWNER, NAME, REFERENCED_OWNER, REFERENCED_NAME from DBA_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(OWNER = REFERENCED_OWNER AND NAME = REFERENCED_NAME) AND (" + StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "OWNER='" + obj + "'"
+                rs = executor.queryForList(new RawParameterizedSqlStatement("select OWNER, NAME, REFERENCED_OWNER, REFERENCED_NAME from DBA_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(OWNER = REFERENCED_OWNER AND NAME = REFERENCED_NAME) AND (" + StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "OWNER='" + obj + "'"
                 ) + ")"));
             } else {
-                rs = executor.queryForList(new RawSqlStatement("select NAME, REFERENCED_OWNER, REFERENCED_NAME from USER_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(NAME = REFERENCED_NAME) AND (" + StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "REFERENCED_OWNER='" + obj + "'"
+                rs = executor.queryForList(new RawParameterizedSqlStatement("select NAME, REFERENCED_OWNER, REFERENCED_NAME from USER_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(NAME = REFERENCED_NAME) AND (" + StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "REFERENCED_OWNER='" + obj + "'"
                 ) + ")"));
             }
         } catch (DatabaseException dbe) {
@@ -517,9 +594,7 @@ public class DiffToChangeLog {
             //   to stop the recursion
             //
             String message = dbe.getMessage();
-            if (!message.contains("ORA-00942: table or view does not exist")) {
-                throw new DatabaseException(dbe);
-            } else if (!tryDbaDependencies) {
+            if (!message.contains("ORA-00942") || !tryDbaDependencies) {
                 throw new DatabaseException(dbe);
             }
             Scope.getCurrentScope().getLog(getClass()).warning("Unable to query DBA_DEPENDENCIES table. Switching to USER_DEPENDENCIES");
@@ -533,6 +608,9 @@ public class DiffToChangeLog {
      * Used by {@link #sortMissingObjects(Collection, Database)} to determine whether to go into the sorting logic.
      */
     protected boolean supportsSortingObjects(Database database) {
+        if (this.skipObjectSorting) {
+            return false;
+        }
         return (database instanceof AbstractDb2Database) || (database instanceof MSSQLDatabase) || (database instanceof
                 OracleDatabase) || database instanceof PostgresDatabase;
     }
@@ -546,8 +624,8 @@ public class DiffToChangeLog {
             String sql = "select TABSCHEMA, TABNAME, BSCHEMA, BNAME from syscat.tabdep where TABSCHEMA in (" + StringUtil.join(schemas, ", ", obj -> "?") + ")";
             List<Map<String, ?>> rs = executor.queryForList(new RawParameterizedSqlStatement(sql, schemas.toArray()));
             for (Map<String, ?> row : rs) {
-                String tabName = StringUtil.trimToNull((String) row.get("TABSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("TABNAME"));
-                String bName = StringUtil.trimToNull((String) row.get("BSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("BNAME"));
+                String tabName = StringUtils.trimToNull((String) row.get("TABSCHEMA")) + "." + StringUtils.trimToNull((String) row.get("TABNAME"));
+                String bName = StringUtils.trimToNull((String) row.get("BSCHEMA")) + "." + StringUtils.trimToNull((String) row.get("BNAME"));
 
                 graph.add(bName, tabName);
             }
@@ -556,8 +634,8 @@ public class DiffToChangeLog {
             String sql = "SELECT DSCHEMA AS TABSCHEMA, DNAME AS TABNAME, BSCHEMA, BNAME FROM SYSIBM.SYSDEPENDENCIES WHERE DSCHEMA IN (" + StringUtil.join(schemas, ", ", obj -> "?") + ")";
             List<Map<String, ?>> rs = executor.queryForList(new RawParameterizedSqlStatement(sql, schemas.toArray()));
             for (Map<String, ?> row : rs) {
-                String tabName = StringUtil.trimToNull((String) row.get("TABSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("TABNAME"));
-                String bName = StringUtil.trimToNull((String) row.get("BSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("BNAME"));
+                String tabName = StringUtils.trimToNull((String) row.get("TABSCHEMA")) + "." + StringUtils.trimToNull((String) row.get("TABNAME"));
+                String bName = StringUtils.trimToNull((String) row.get("BSCHEMA")) + "." + StringUtils.trimToNull((String) row.get("BNAME"));
 
                 graph.add(bName, tabName);
             }
@@ -568,16 +646,16 @@ public class DiffToChangeLog {
                 String tabName = null;
                 if (tryDbaDependencies) {
                     tabName =
-                            StringUtil.trimToNull((String) row.get("OWNER")) + "." +
-                                    StringUtil.trimToNull((String) row.get("NAME"));
+                            StringUtils.trimToNull((String) row.get("OWNER")) + "." +
+                                    StringUtils.trimToNull((String) row.get("NAME"));
                 } else {
                     tabName =
-                            StringUtil.trimToNull((String) row.get("REFERENCED_OWNER")) + "." +
-                                    StringUtil.trimToNull((String) row.get("NAME"));
+                            StringUtils.trimToNull((String) row.get("REFERENCED_OWNER")) + "." +
+                                    StringUtils.trimToNull((String) row.get("NAME"));
                 }
                 String bName =
-                        StringUtil.trimToNull((String) row.get("REFERENCED_OWNER")) + "." +
-                                StringUtil.trimToNull((String) row.get("REFERENCED_NAME"));
+                        StringUtils.trimToNull((String) row.get("REFERENCED_OWNER")) + "." +
+                                StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
 
                 graph.add(bName, tabName);
             }
@@ -640,11 +718,11 @@ public class DiffToChangeLog {
             //get non-clustered indexes -> unique clustered indexes on views dependencies
             sql += " UNION select object_schema_name(c.object_id) as referencing_schema_name, c.name as referencing_name, object_schema_name(nc.object_id) as referenced_schema_name, nc.name as referenced_name from sys.indexes c join sys.indexes nc on c.object_id=nc.object_id JOIN sys.objects o ON c.object_id = o.object_id where  c.index_id != nc.index_id and c.type_desc='CLUSTERED' and c.is_unique='true' and (not(nc.type_desc='CLUSTERED') OR nc.is_unique='false') AND o.type_desc='VIEW' AND o.name='AR_DETAIL_OPEN'";
 
-            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(sql));
+            List<Map<String, ?>> rs = executor.queryForList(new RawParameterizedSqlStatement(sql));
             if (!rs.isEmpty()) {
                 for (Map<String, ?> row : rs) {
-                    String bName = StringUtil.trimToNull((String) row.get("REFERENCED_SCHEMA_NAME")) + "." + StringUtil.trimToNull((String) row.get("REFERENCED_NAME"));
-                    String tabName = StringUtil.trimToNull((String) row.get("REFERENCING_SCHEMA_NAME")) + "." + StringUtil.trimToNull((String) row.get("REFERENCING_NAME"));
+                    String bName = StringUtils.trimToNull((String) row.get("REFERENCED_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
+                    String tabName = StringUtils.trimToNull((String) row.get("REFERENCING_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCING_NAME"));
 
                     if (!bName.equals(tabName)) {
                         graph.add(bName, tabName);
@@ -654,13 +732,13 @@ public class DiffToChangeLog {
         } else if (database instanceof PostgresDatabase) {
             final String sql = queryForDependenciesPostgreSql(schemas);
             final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-            final List<Map<String, ?>> queryForListResult = executor.queryForList(new RawSqlStatement(sql));
+            final List<Map<String, ?>> queryForListResult = executor.queryForList(new RawParameterizedSqlStatement(sql));
 
             for (Map<String, ?> row : queryForListResult) {
-                String bName = StringUtil.trimToEmpty((String) row.get("REFERENCING_SCHEMA_NAME")) +
-                        "." + StringUtil.trimToEmpty((String)row.get("REFERENCING_NAME"));
-                String tabName = StringUtil.trimToEmpty((String)row.get("REFERENCED_SCHEMA_NAME")) +
-                        "." + StringUtil.trimToEmpty((String)row.get("REFERENCED_NAME"));
+                String bName = StringUtils.trimToEmpty((String) row.get("REFERENCING_SCHEMA_NAME")) +
+                        "." + StringUtils.trimToEmpty((String)row.get("REFERENCING_NAME"));
+                String tabName = StringUtils.trimToEmpty((String)row.get("REFERENCED_SCHEMA_NAME")) +
+                        "." + StringUtils.trimToEmpty((String)row.get("REFERENCED_NAME"));
 
                 if (!(tabName.isEmpty() || bName.isEmpty())) {
                     graph.add(bName.replace("\"", ""), tabName.replace("\"", ""));
@@ -766,13 +844,6 @@ public class DiffToChangeLog {
 
     private void addToChangeSets(Change[] changes, List<ChangeSet> changeSets, ObjectQuotingStrategy quotingStrategy, String created) {
         if (changes != null) {
-            String csContext = this.changeSetContext;
-
-            if (diffOutputControl.getContext() != null) {
-                csContext = diffOutputControl.getContext().toString().replaceFirst("^\\(", "")
-                        .replaceFirst("\\)$", "");
-            }
-
             ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
             if (useSeparateChangeSets(changes)) {
                 for (Change change : changes) {
@@ -793,7 +864,7 @@ public class DiffToChangeLog {
                     changeSets.add(changeSet);
                 }
             } else {
-                final boolean runOnChange = Arrays.asList(changes).stream().allMatch(change -> isContainedInRunOnChangeTypes(change));
+                final boolean runOnChange = Arrays.asList(changes).stream().allMatch(this::isContainedInRunOnChangeTypes);
                 ChangeSet changeSet = service.createChangeSet(generateId(changes), getChangeSetAuthor(), false, runOnChange, this.changeSetPath, changeSetContext,
                                         null, null, null, true, quotingStrategy, null);
                 changeSet.setCreated(created);
@@ -847,7 +918,7 @@ public class DiffToChangeLog {
             return changeSetAuthor;
         }
         String author = System.getProperty("user.name");
-        if (StringUtil.trimToNull(author) == null) {
+        if (StringUtils.trimToNull(author) == null) {
             return "diff-generated";
         } else {
             return author + " (generated)";
@@ -1039,20 +1110,10 @@ public class DiffToChangeLog {
             }
         }
 
-
-        private Node getNode(Class<? extends DatabaseObject> type) {
-            Node node = allNodes.get(type);
-            if (node == null) {
-                node = new Node(type);
-            }
-            return node;
-        }
-
-
         static class Node {
             public final Class<? extends DatabaseObject> type;
-            public final HashSet<Edge> inEdges;
-            public final HashSet<Edge> outEdges;
+            public final Set<Edge> inEdges;
+            public final Set<Edge> outEdges;
 
             public Node(Class<? extends DatabaseObject> type) {
                 this.type = type;

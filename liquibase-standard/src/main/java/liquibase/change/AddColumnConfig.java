@@ -5,7 +5,11 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.structure.core.Column;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class AddColumnConfig extends ColumnConfig {
 
     private String afterColumn;
@@ -17,30 +21,6 @@ public class AddColumnConfig extends ColumnConfig {
     }
 
     public AddColumnConfig() {
-    }
-
-    public String getAfterColumn() {
-        return afterColumn;
-    }
-
-    public void setAfterColumn(String afterColumn) {
-        this.afterColumn = afterColumn;
-    }
-
-    public String getBeforeColumn() {
-        return beforeColumn;
-    }
-
-    public void setBeforeColumn(String beforeColumn) {
-        this.beforeColumn = beforeColumn;
-    }
-
-    public Integer getPosition() {
-        return position;
-    }
-
-    public void setPosition(Integer position) {
-        this.position = position;
     }
 
     @Override

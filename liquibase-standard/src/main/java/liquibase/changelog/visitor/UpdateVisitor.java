@@ -21,6 +21,7 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -62,7 +63,8 @@ public class UpdateVisitor implements ChangeSetVisitor {
         logMdcData(changeSet);
 
         // if we don't have shouldRunChangeSetFilter go on with the old behavior assuming that it has been validated before
-        boolean isAccepted = this.shouldRunChangeSetFilter == null || this.shouldRunChangeSetFilter.accepts(changeSet).isAccepted();
+        boolean isAccepted = !changeSetInSkippedBecauseOfLicenseList(changeSet) &&
+                (this.shouldRunChangeSetFilter == null || this.shouldRunChangeSetFilter.accepts(changeSet).isAccepted());
         CheckSum oldChecksum = updateCheckSumIfRequired(changeSet);
         if (isAccepted) {
             executeAcceptedChange(changeSet, databaseChangeLog, database);
@@ -71,6 +73,11 @@ public class UpdateVisitor implements ChangeSetVisitor {
             upgradeCheckSumVersionForAlreadyExecutedOrNullChange(changeSet, database, oldChecksum);
             this.database.commit();
         }
+    }
+
+    private static boolean changeSetInSkippedBecauseOfLicenseList(ChangeSet changeSet) {
+        List<ChangeSet> skippedChangeSets = changeSet.getChangeLog().getSkippedBecauseOfLicenseChangeSets();
+        return skippedChangeSets.stream().anyMatch(c -> c == changeSet);
     }
 
     /**
@@ -125,11 +132,11 @@ public class UpdateVisitor implements ChangeSetVisitor {
         if (!Objects.equals(runStatus, RunStatus.NOT_RAN) && Objects.equals(execType, ExecType.EXECUTED)) {
             execType = ExecType.RERAN;
         }
-        fireRan(changeSet, databaseChangeLog, database, execType);
         addAttributesForMdc(changeSet, execType);
         // reset object quoting strategy after running changeset
         this.database.setObjectQuotingStrategy(previousStr);
         this.database.markChangeSetExecStatus(changeSet, execType);
+        fireRan(changeSet, databaseChangeLog, database, execType);
     }
 
     protected void fireRunFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, MigrationFailedException e) {

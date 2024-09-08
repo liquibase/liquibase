@@ -457,4 +457,15 @@ END testSP;
         <dropNotNullConstraint tableName="unnamed_constraint" columnName="id"/>
     </changeSet>
 
+    <changeSet id="create-table-with-rowdependencies" author="matheusviegas">
+        <createTable tableName="test_rowdeps" rowDependencies="true">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="description" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>

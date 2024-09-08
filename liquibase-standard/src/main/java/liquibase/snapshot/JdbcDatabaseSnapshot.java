@@ -5,6 +5,7 @@ import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.LiquibaseTableNamesFactory;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
@@ -20,7 +21,6 @@ import liquibase.util.StringUtil;
 
 import java.sql.*;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
@@ -411,7 +411,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
             @Override
             protected boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-                return !(tableName.equalsIgnoreCase(database.getDatabaseChangeLogTableName()) || tableName.equalsIgnoreCase(database.getDatabaseChangeLogLockTableName()));
+                LiquibaseTableNamesFactory liquibaseTableNamesFactory = Scope.getCurrentScope().getSingleton(LiquibaseTableNamesFactory.class);
+                List<String> liquibaseTableNames = liquibaseTableNamesFactory.getLiquibaseTableNames(database);
+                return liquibaseTableNames.stream().noneMatch(tableName::equalsIgnoreCase);
             }
 
             @Override
@@ -559,7 +561,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     statement.setString(2, tableName);
                 }
                 try {
-                    ResultSet columnSelectRS = statement.executeQuery(selectStatement.toString());
+                    ResultSet columnSelectRS = statement.executeQuery();
                     //
                     // Iterate the result set from the query and match the rows
                     // to the rows that were returned by getColumns() in order
@@ -822,7 +824,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 if (database instanceof DB2Database) {
                     if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
-                        executeAndExtract(getDB2ForAs400Sql(jdbcSchemaName, tableName), database);
+                        return executeAndExtract(getDB2ForAs400Sql(jdbcSchemaName, tableName), database);
                     }
                     return querytDB2Luw(jdbcSchemaName, tableName);
                 } else if (database instanceof Db2zDatabase) {
@@ -861,7 +863,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
                     String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
                     if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
-                        executeAndExtract(getDB2ForAs400Sql(jdbcSchemaName, null), database);
+                        return executeAndExtract(getDB2ForAs400Sql(jdbcSchemaName, null), database);
                     }
                     return querytDB2Luw(jdbcSchemaName, null);
                 } else if (database instanceof Db2zDatabase) {
@@ -1088,11 +1090,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
             @Override
             protected boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-                if (tableName.equalsIgnoreCase(database.getDatabaseChangeLogTableName()) ||
-                        tableName.equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
-                    return false;
-                }
-                return true;
+                LiquibaseTableNamesFactory liquibaseTableNamesFactory = Scope.getCurrentScope().getSingleton(LiquibaseTableNamesFactory.class);
+                List<String> liquibaseTableNames = liquibaseTableNamesFactory.getLiquibaseTableNames(database);
+                return liquibaseTableNames.stream().noneMatch(tableName::equalsIgnoreCase);
             }
 
             @Override

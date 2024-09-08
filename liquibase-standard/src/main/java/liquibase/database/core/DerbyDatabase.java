@@ -8,8 +8,10 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Sequence;
 
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -71,6 +73,18 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
     @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
+    }
+
+
+    @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Schema.class.isAssignableFrom(object)) {
+            return false;
+        }
+        if (Sequence.class.isAssignableFrom(object)) {
+            return ((driverVersionMajor == 10) && (driverVersionMinor >= 6)) || (driverVersionMajor >= 11);
+        }
+        return super.supports(object);
     }
 
     @Override
@@ -225,7 +239,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
             return null;
         }
         try {
-            return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForObject(new RawSqlStatement("select current schema from sysibm.sysdummy1"), String.class);
+            return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForObject(new RawParameterizedSqlStatement("select current schema from sysibm.sysdummy1"), String.class);
         } catch (Exception e) {
             Scope.getCurrentScope().getLog(getClass()).info("Error getting default schema", e);
         }

@@ -8,14 +8,17 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.Warnings;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Sequence;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
+import java.sql.Types;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
@@ -113,7 +116,6 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsSequences() {
-
         return false;
     }
 
@@ -186,6 +188,17 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Schema.class.isAssignableFrom(object)) {
+            return false;
+        }
+        if (Sequence.class.isAssignableFrom(object)) {
+            return false;
+        }
+        return super.supports(object);
+    }
+
+    @Override
     public boolean supportsSchemas() {
         return false;
     }
@@ -207,14 +220,14 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean disableForeignKeyChecks() throws DatabaseException {
-        boolean enabled = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForInt(new RawSqlStatement("SELECT @@FOREIGN_KEY_CHECKS")) == 1;
-        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=0"));
+        boolean enabled = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForInt(new RawParameterizedSqlStatement("SELECT @@FOREIGN_KEY_CHECKS")) == 1;
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(new RawParameterizedSqlStatement("SET FOREIGN_KEY_CHECKS=0"));
         return enabled;
     }
 
     @Override
     public void enableForeignKeyChecks() throws DatabaseException {
-        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=1"));
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(new RawParameterizedSqlStatement("SET FOREIGN_KEY_CHECKS=1"));
     }
 
     @Override
@@ -257,6 +270,16 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             return 0;
         }
 
+    }
+
+    public Integer getFSPFromTimeType(int columnSize, int jdbcType) {
+        if (jdbcType == Types.TIMESTAMP) {
+            if (columnSize > 20 && columnSize < 27) {
+                return columnSize % 10;
+            }
+        }
+
+        return 0;
     }
 
     @Override
@@ -673,4 +696,14 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
         return type.isAssignableFrom(Table.class);
     }
+
+    @Override
+    public boolean supportsDatabaseChangeLogHistory() {
+        return true;
+    }
+
+    public boolean getUseAffectedRows() throws DatabaseException {
+        return getConnection().getURL().contains("useAffectedRows=true");
+    }
+
 }

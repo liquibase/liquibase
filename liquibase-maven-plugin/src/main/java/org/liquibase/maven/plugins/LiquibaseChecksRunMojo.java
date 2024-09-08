@@ -19,7 +19,7 @@ import java.nio.file.Files;
 public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {
 
     /**
-     * Specifies the <i>changelog</i> file for Liquibase Quality Checks to use.
+     * Specifies the <i>changelog</i> file for Liquibase Policy Checks to use.
      *
      * @parameter property="liquibase.changeLogFile"
      */
@@ -27,7 +27,7 @@ public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {
     protected String changeLogFile;
 
     /**
-     * Specifies the <i>format</i> file for Liquibase Quality Checks to use. If not specified, the default
+     * Specifies the <i>format</i> file for Liquibase Policy Checks to use. If not specified, the default
      * format will be used.
      *
      * @parameter property="liquibase.format"
@@ -44,7 +44,7 @@ public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {
     protected String checksScope;
 
     /**
-     * Allows automatic backup and updating of liquibase.checks.conf file when new quality checks are available. Options: [on|off]
+     * Allows automatic backup and updating of liquibase.checks.conf file when new policy checks are available. Options: [on|off]
      *
      * @parameter property="liquibase.autoUpdate"
      */
@@ -82,6 +82,12 @@ public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {
     @PropertyElement
     protected File outputFile;
 
+    /**
+     * @parameter property="liquibase.sqlParserExceptionLogAtLevel"
+     */
+    @PropertyElement
+    protected String sqlParserExceptionLogAtLevel;
+
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws CommandExecutionException {
         CommandScope liquibaseCommand = new CommandScope("checks", "run");
@@ -99,6 +105,7 @@ public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {
         addArgumentIfNotEmpty(liquibaseCommand, defaultCatalogName, "defaultCatalogName");
         addArgumentIfNotEmpty(liquibaseCommand, driver, "driver");
         addArgumentIfNotEmpty(liquibaseCommand, driverPropertiesFile, "driverPropertiesFile");
+        addArgumentIfNotEmpty(liquibaseCommand, sqlParserExceptionLogAtLevel, "sqlParserExceptionLogAtLevel");
         if (outputFile != null) {
             try {
                 liquibaseCommand.setOutput(Files.newOutputStream(outputFile.toPath()));

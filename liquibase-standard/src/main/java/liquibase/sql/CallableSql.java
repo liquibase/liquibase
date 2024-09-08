@@ -1,6 +1,7 @@
 package liquibase.sql;
 
 import liquibase.structure.DatabaseObject;
+import lombok.Getter;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -8,7 +9,9 @@ import java.util.Collections;
 public class CallableSql implements Sql {
 
     private final String sql;
+    @Getter
     private final String endDelimiter;
+    @Getter
     private final String expectedStatus;
 
     public CallableSql(String sql, String expectedStatus) {
@@ -24,15 +27,6 @@ public class CallableSql implements Sql {
     @Override
     public String toSql() {
         return sql;
-    }
-
-    @Override
-    public String getEndDelimiter() {
-        return endDelimiter;
-    }
-
-    public String getExpectedStatus() {
-        return expectedStatus;
     }
 
     @Override

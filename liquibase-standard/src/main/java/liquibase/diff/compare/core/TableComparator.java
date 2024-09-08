@@ -31,7 +31,7 @@ public class TableComparator  implements DatabaseObjectComparator {
             return false;
         }
 
-        //short circut chain.isSameObject for performance reasons. There can be a lot of tables in a database and they are compared a lot
+        //short circuit chain.isSameObject for performance reasons. There can be a lot of tables in a database and they are compared a lot
         if (!DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo)) {
             return false;
         }

@@ -18,6 +18,24 @@ class ClearCheckSumsIntegrationTest extends Specification {
     @Shared
     private DatabaseTestSystem h2 = (DatabaseTestSystem) Scope.currentScope.getSingleton(TestSystemFactory.class).getTestSystem("h2")
 
+    def "clearing checksums in an empty database does not throw an exception"() {
+        given:
+        CommandUtil.runDropAll(h2)
+
+        when:
+        def h2Database = h2.getDatabaseFromFactory()
+        def commandResults = new CommandScope("clearChecksums")
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+                .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, h2Database)
+                .execute()
+
+        then:
+        commandResults.results.size() == 0
+
+        cleanup:
+        CommandUtil.runDropAll(h2)
+    }
+
     def "validate checksums are cleared"() {
         given:
         def updateCommand = new CommandScope(UpdateCommandStep.COMMAND_NAME)

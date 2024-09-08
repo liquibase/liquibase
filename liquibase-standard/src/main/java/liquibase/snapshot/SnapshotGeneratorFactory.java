@@ -2,16 +2,14 @@ package liquibase.snapshot;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
-import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.ObjectQuotingStrategy;
-import liquibase.database.OfflineConnection;
+import liquibase.database.*;
+import liquibase.database.core.MariaDBDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
@@ -106,13 +104,25 @@ public class SnapshotGeneratorFactory {
          * SELECT COUNT(*) on that table. If that works, we count that as confirmation of existence.
          */
         // @todo Actually, there may be extreme cases (distorted table statistics etc.) where a COUNT(*) might not be so cheap. Maybe SELECT a dummy constant is the better way?
-        if ((example instanceof Table) && (example.getName().equals(database.getDatabaseChangeLogTableName()) ||
-            example.getName().equals(database.getDatabaseChangeLogLockTableName()))) {
+        LiquibaseTableNamesFactory liquibaseTableNamesFactory = Scope.getCurrentScope().getSingleton(LiquibaseTableNamesFactory.class);
+        List<String> liquibaseTableNames = liquibaseTableNamesFactory.getLiquibaseTableNames(database);
+        if ((example instanceof Table) && (liquibaseTableNames.stream().anyMatch(tableName -> example.getName().equals(tableName)))) {
             try {
+                //
+                // Handle MariaDB differently to avoid the
+                // Error: 1146-42S02: Table 'intuser_db.DATABASECHANGELOGLOCK' doesn't exist
+                //
+                if (database instanceof MariaDBDatabase) {
+                    String sql = "select table_name from information_schema.TABLES where TABLE_SCHEMA = ? and TABLE_NAME = ?;";
+                    List<Map<String, ?>> res = Scope.getCurrentScope().getSingleton(ExecutorService.class)
+                            .getExecutor("jdbc", database)
+                            .queryForList(new RawParameterizedSqlStatement(sql, database.getLiquibaseCatalogName(), example.getName()));
+                    return !res.isEmpty();
+                }
                 Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForInt(
-                        new RawSqlStatement("SELECT COUNT(*) FROM " +
-                                database.escapeObjectName(database.getLiquibaseCatalogName(),
-                                        database.getLiquibaseSchemaName(), example.getName(), Table.class)));
+                    new RawParameterizedSqlStatement(String.format("SELECT COUNT(*) FROM %s",
+                        database.escapeObjectName(database.getLiquibaseCatalogName(),
+                        database.getLiquibaseSchemaName(), example.getName(), Table.class))));
                 return true;
             } catch (DatabaseException e) {
                 if (database instanceof PostgresDatabase) { // throws "current transaction is aborted" unless we roll back the connection

@@ -12,10 +12,12 @@ import java.util.Properties;
 
 public class LiquibaseUtil {
 
+    public static final String DEV_VERSION = "DEV";
+
     private static Properties liquibaseBuildProperties;
 
     /**
-     * Return the configured build.version. Will always be "DEV" for non-release builds.
+     * Return the configured build.version. Will always be DEV_VERSION for non-release builds.
      */
     public static String getBuildVersion() {
         return getBuildInfo("build.version");
@@ -26,7 +28,7 @@ public class LiquibaseUtil {
      */
     public static String getBuildVersionInfo() {
         String version = getBuildInfo("build.version");
-        if (version.equals("DEV")) {
+        if (version.equals(DEV_VERSION)) {
             final String buildCommit = getBuildInfo("build.commit");
             if (buildCommit.equals("unknown")) {
                 version = "[local build]";

@@ -1,5 +1,6 @@
 package liquibase.util
 
+import liquibase.UpdateSummaryEnum
 import liquibase.change.ColumnConfig
 import liquibase.change.ConstraintsConfig
 import liquibase.change.core.AddAutoIncrementChange
@@ -72,7 +73,7 @@ class ObjectUtilTest extends Specification {
         new PreconditionContainer()  | "onSqlOutput"          | "IGNORE"      | PreconditionContainer.OnSqlOutputOption.class
     }
 
-    def convert() {
+    def "convert #input"() {
         expect:
         ObjectUtil.convert(input, targetClass) == expected
 
@@ -106,21 +107,42 @@ class ObjectUtilTest extends Specification {
 
         "true"                                 | Boolean               | true
         "TruE"                                 | Boolean               | true
+        "TRUE"                                 | Boolean               | true
         "t"                                    | Boolean               | true
         "T"                                    | Boolean               | true
         "yes"                                  | Boolean               | true
         "false"                                | Boolean               | false
-
+        "FALSE"                                | Boolean               | false
+        "FaLsE"                                | Boolean               | false
         [1, 2, 3] as Object[]                  | List                  | [1, 2, 3] as List
         [1, 2, 3] as Set                       | List                  | [1, 2, 3] as List
         "a value"                              | StringClauses         | new StringClauses().append("a value")
         Object.class.name                      | Class                 | Object
         "/path/to/file.txt"                    | File                  | new File("/path/to/file.txt")
-
+        "OFF"                                  | UpdateSummaryEnum.class | UpdateSummaryEnum.OFF
+        "SUMMARY"                              | UpdateSummaryEnum.class | UpdateSummaryEnum.SUMMARY
+        "SUMmary"                              | UpdateSummaryEnum.class | UpdateSummaryEnum.SUMMARY
+        "summary"                              | UpdateSummaryEnum.class | UpdateSummaryEnum.SUMMARY
+        "VERBOSE"                              | UpdateSummaryEnum.class | UpdateSummaryEnum.VERBOSE
     }
 
     @Unroll
-    def "convert with invalid inputs throws an exception"() {
+    def "Should log warning using parameterName #parameterName when unable to find valid value"() {
+        when:
+        //This shows as a warning but passes as expected. Not sure what to do about that.
+        ObjectUtil.convert(input, clazz, parameterName)
+        then:
+        def e = thrown(IllegalArgumentException)
+        e.message == expected
+
+        where:
+        clazz                    | input  | parameterName  | expected
+        UpdateSummaryEnum.class  | "blah" | "Summary Mode" | "The summary mode value 'blah' is not valid. Acceptable values are 'OFF', 'SUMMARY', 'VERBOSE'"
+        UpdateSummaryEnum.class  | "blah" | null           | "Invalid value 'blah'. Acceptable values are 'OFF', 'SUMMARY', 'VERBOSE'"
+    }
+
+    @Unroll
+    def "convert with invalid input #input throws an exception"() {
         when:
         ObjectUtil.convert(input, targetClass)
 
@@ -130,7 +152,7 @@ class ObjectUtilTest extends Specification {
 
         where:
         input                                  | targetClass            | expected
-        "test"                                 | HistoryFormat          | "Invalid value test. Acceptable values are TABULAR, TEXT"
+        "test"                                 | HistoryFormat          | "Invalid value 'test'. Acceptable values are 'TABULAR', 'TEXT'"
         "xyz"                                  | Integer                | "java.lang.NumberFormatException: For input string: \"xyz\""
     }
 

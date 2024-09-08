@@ -19,9 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Base test class for database-specific tests
@@ -313,6 +311,7 @@ public abstract class AbstractJdbcDatabaseTest {
         final Database database = getDatabase();
         final MockExecutor mockExecutor = Mockito.spy(new MockExecutor());
         final List<SqlVisitor> sqlVisitors = new ArrayList<>();
+        final List<SqlVisitor> expectedSqlVisitors = getExpectedSqlVisitors(database);
         Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, mockExecutor);
 
         final ChangeSet changeSet = new ChangeSet("test1", "nvoxland", false, true, "/test/me.txt", null, null, false, null);
@@ -324,6 +323,10 @@ public abstract class AbstractJdbcDatabaseTest {
         database.executeStatements(change, null, sqlVisitors);
 
         assertEquals("CREATE TABLE testTable (id INT);", mockExecutor.getRanSql().trim());
-        Mockito.verify(mockExecutor).execute(change, sqlVisitors);
+        Mockito.verify(mockExecutor).execute(change, expectedSqlVisitors);
+    }
+
+    protected List<SqlVisitor> getExpectedSqlVisitors(Database database) {
+        return new ArrayList<>();
     }
 }

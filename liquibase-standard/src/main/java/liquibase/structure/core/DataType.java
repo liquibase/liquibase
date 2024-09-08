@@ -65,6 +65,9 @@ public class DataType extends AbstractLiquibaseSerializable {
     public String toString() {
         String subtypeData = null;
         String value = typeName;
+        if (value == null) {
+            return value;
+        }
         if(value.contains("FOR BIT DATA")){
             value = typeName.replaceAll("\\(.*","");
             subtypeData = " FOR BIT DATA";

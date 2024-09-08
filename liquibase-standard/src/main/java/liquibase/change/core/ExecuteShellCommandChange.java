@@ -18,6 +18,8 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CommentStatement;
 import liquibase.statement.core.RuntimeStatement;
 import liquibase.util.StringUtil;
+import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.util.*;
@@ -37,9 +39,11 @@ import java.util.regex.Pattern;
 public class ExecuteShellCommandChange extends AbstractChange {
 
     protected List<String> finalCommandArray;
+    @Setter
     private String executable;
     private List<String> os;
     private final List<String> args = new ArrayList<>();
+    @Setter
     private String timeout;
     private static final String TIMEOUT_REGEX = "^\\s*(\\d+)\\s*([sSmMhH]?)\\s*$";
     private static final Pattern TIMEOUT_PATTERN = Pattern.compile(TIMEOUT_REGEX);
@@ -65,10 +69,6 @@ public class ExecuteShellCommandChange extends AbstractChange {
         return executable;
     }
 
-    public void setExecutable(String executable) {
-        this.executable = executable;
-    }
-
     public List<String> getArgs() {
         return Collections.unmodifiableList(args);
     }
@@ -80,10 +80,6 @@ public class ExecuteShellCommandChange extends AbstractChange {
     @DatabaseChangeProperty(description = "Timeout value for the executable to run", exampleValue = "10s")
     public String getTimeout() {
         return timeout;
-    }
-
-    public void setTimeout(String timeout) {
-        this.timeout = timeout;
     }
 
     @DatabaseChangeProperty(exampleValue = "Windows 7",
@@ -99,7 +95,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
     @Override
     public ValidationErrors validate(Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
-        if (!StringUtil.isEmpty(timeout)) {
+        if (!StringUtils.isEmpty(timeout)) {
             // check for the timeout values, accept only positive value with one letter unit (s/m/h)
             Matcher matcher = TIMEOUT_PATTERN.matcher(timeout);
             if (!matcher.matches()) {
@@ -284,7 +280,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 try {
                     long valLong = Long.parseLong(val);
                     String unit = matcher.group(2);
-                    if (StringUtil.isEmpty(unit)) {
+                    if (StringUtils.isEmpty(unit)) {
                         return valLong * SECS_IN_MILLIS;
                     }
                     char u = unit.toLowerCase().charAt(0);
@@ -349,13 +345,13 @@ public class ExecuteShellCommandChange extends AbstractChange {
         for (ParsedNode arg : argsNode.getChildren(null, "arg")) {
             addArg(arg.getChildValue(null, "value", String.class));
         }
-        String passedValue = StringUtil.trimToNull(parsedNode.getChildValue(null, "os", String.class));
+        String passedValue = StringUtils.trimToNull(parsedNode.getChildValue(null, "os", String.class));
         if (passedValue == null) {
             this.os = new ArrayList<>();
         } else {
-            List<String> os = StringUtil.splitAndTrim(StringUtil.trimToEmpty(parsedNode.getChildValue(null, "os",
+            List<String> os = StringUtil.splitAndTrim(StringUtils.trimToEmpty(parsedNode.getChildValue(null, "os",
                     String.class)), ",");
-            if ((os.size() == 1) && ("".equals(os.get(0)))) {
+            if ((os.size() == 1) && (StringUtils.isEmpty(os.get(0)))) {
                 this.os = null;
             } else if (!os.isEmpty()) {
                 this.os = os;

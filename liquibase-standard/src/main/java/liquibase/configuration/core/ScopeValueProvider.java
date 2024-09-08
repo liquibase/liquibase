@@ -34,8 +34,4 @@ public class ScopeValueProvider extends AbstractConfigurationValueProvider {
         return null;
     }
 
-    protected Properties getSystemProperties() {
-        return System.getProperties();
-    }
-
 }

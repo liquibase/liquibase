@@ -1,6 +1,9 @@
 package liquibase.util;
 
-import liquibase.*;
+import liquibase.GlobalConfiguration;
+import liquibase.Scope;
+import liquibase.UpdateSummaryEnum;
+import liquibase.UpdateSummaryOutputEnum;
 import liquibase.changelog.ChangeLogIterator;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.ChangeSetStatus;
@@ -9,6 +12,8 @@ import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.filter.ShouldRunChangeSetFilter;
+import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.changelog.visitor.StatusVisitor;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.mdc.MdcKey;
@@ -17,6 +22,7 @@ import liquibase.logging.mdc.customobjects.UpdateSummary;
 import liquibase.report.ShowSummaryGenerator;
 import liquibase.report.ShowSummaryGeneratorFactory;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -62,22 +68,41 @@ public class ShowSummaryUtil {
      */
     public static void showUpdateSummary(DatabaseChangeLog changeLog, UpdateSummaryEnum showSummary, UpdateSummaryOutputEnum showSummaryOutput, StatusVisitor statusVisitor, OutputStream outputStream, ChangeLogIterator runChangeLogIterator)
             throws LiquibaseException, IOException {
-        buildSummaryDetails(changeLog, showSummary, showSummaryOutput, statusVisitor, outputStream, runChangeLogIterator);
+        buildSummaryDetails(changeLog, showSummary, showSummaryOutput, statusVisitor, outputStream, runChangeLogIterator, null);
     }
 
     /**
      * Show a summary of the changesets which were executed AND return an object with the records of what has happened.
      *
-     * @param changeLog         The changelog used in this update
-     * @param showSummary       Flag to control whether we show the summary
-     * @param showSummaryOutput Flag to control where we show the summary
-     * @param statusVisitor     The StatusVisitor used to determine statuses
-     * @param outputStream      The OutputStream to use for the summary
+     * @param changeLog          The changelog used in this update
+     * @param showSummary        Flag to control whether we show the summary
+     * @param showSummaryOutput  Flag to control where we show the summary
+     * @param statusVisitor      The StatusVisitor used to determine statuses
+     * @param outputStream       The OutputStream to use for the summary
+     * @return the details of the update summary
+     * @throws LiquibaseException Thrown by this method
+     * @throws IOException        Thrown by this method
+     * @deprecated use {@link ShowSummaryUtil#buildSummaryDetails(DatabaseChangeLog, UpdateSummaryEnum, UpdateSummaryOutputEnum, StatusVisitor, OutputStream, ChangeLogIterator, ChangeExecListener)} instead.
+     */
+    @Deprecated
+    public static UpdateSummaryDetails buildSummaryDetails(DatabaseChangeLog changeLog, UpdateSummaryEnum showSummary, UpdateSummaryOutputEnum showSummaryOutput, StatusVisitor statusVisitor, OutputStream outputStream, ChangeLogIterator runChangeLogIterator) throws LiquibaseException, IOException {
+        return buildSummaryDetails(changeLog, showSummary, showSummaryOutput, statusVisitor,outputStream, runChangeLogIterator, null);
+    }
+
+    /**
+     * Show a summary of the changesets which were executed AND return an object with the records of what has happened.
+     *
+     * @param changeLog          The changelog used in this update
+     * @param showSummary        Flag to control whether we show the summary
+     * @param showSummaryOutput  Flag to control where we show the summary
+     * @param statusVisitor      The StatusVisitor used to determine statuses
+     * @param outputStream       The OutputStream to use for the summary
+     * @param changeExecListener
      * @return the details of the update summary
      * @throws LiquibaseException Thrown by this method
      * @throws IOException        Thrown by this method
      */
-    public static UpdateSummaryDetails buildSummaryDetails(DatabaseChangeLog changeLog, UpdateSummaryEnum showSummary, UpdateSummaryOutputEnum showSummaryOutput, StatusVisitor statusVisitor, OutputStream outputStream, ChangeLogIterator runChangeLogIterator)
+    public static UpdateSummaryDetails buildSummaryDetails(DatabaseChangeLog changeLog, UpdateSummaryEnum showSummary, UpdateSummaryOutputEnum showSummaryOutput, StatusVisitor statusVisitor, OutputStream outputStream, ChangeLogIterator runChangeLogIterator, ChangeExecListener changeExecListener)
             throws LiquibaseException, IOException {
         //
         // Check the global flag to turn the summary off
@@ -93,6 +118,7 @@ public class ShowSummaryUtil {
         //
         List<ChangeSetStatus> denied = statusVisitor.getChangeSetsToSkip();
         List<ChangeSet> skippedChangeSets = changeLog.getSkippedChangeSets();
+        List<ChangeSet> skippedBecauseOfLicenseChangeSets = changeLog.getSkippedBecauseOfLicenseChangeSets();
 
         //
         // Filter the skipped list to remove changes which were:
@@ -113,12 +139,12 @@ public class ShowSummaryUtil {
         //
         // Only show the summary
         //
-        UpdateSummaryDetails summaryDetails = showSummary(changeLog, statusVisitor, skippedChangeSets, filterDenied, outputStream, showSummaryOutput, runChangeLogIterator);
+        UpdateSummaryDetails summaryDetails = showSummary(changeLog, statusVisitor, skippedChangeSets, skippedBecauseOfLicenseChangeSets, filterDenied, outputStream, showSummaryOutput, runChangeLogIterator, changeExecListener);
         summaryDetails.getSummary().setValue(showSummary.toString());
         boolean shouldPrintDetailTable = showSummary != UpdateSummaryEnum.SUMMARY && (!skippedChangeSets.isEmpty() || !denied.isEmpty() || !additionalChangeSetStatus.isEmpty());
 
         // Show the details too
-        FilteredChanges filteredChanges = showDetailTable(skippedChangeSets, filterDenied, outputStream, shouldPrintDetailTable, showSummaryOutput, additionalChangeSetStatus, runChangeLogIterator);
+        FilteredChanges filteredChanges = showDetailTable(skippedChangeSets, skippedBecauseOfLicenseChangeSets, filterDenied, outputStream, shouldPrintDetailTable, showSummaryOutput, additionalChangeSetStatus, runChangeLogIterator);
         summaryDetails.getSummary().setSkipped(filteredChanges.getMdcSkipCounts());
         summaryDetails.setSkipped(filteredChanges.getSkippedChangesetsMessage());
         try (MdcObject updateSummaryMdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_SUMMARY, summaryDetails.getSummary())) {
@@ -131,12 +157,13 @@ public class ShowSummaryUtil {
     // Show the details
     //
     private static FilteredChanges showDetailTable(List<ChangeSet> skippedChangeSets,
-                                                              List<ChangeSetStatus> filterDenied,
-                                                              OutputStream outputStream,
-                                                              boolean shouldPrintDetailTable,
-                                                              UpdateSummaryOutputEnum showSummaryOutput,
-                                                              List<ChangeSetStatus> additionalChangesets,
-                                                              ChangeLogIterator runChangeLogIterator)
+                                                   List<ChangeSet> skippedBecauseOfLicenseChangeSets,
+                                                   List<ChangeSetStatus> filterDenied,
+                                                   OutputStream outputStream,
+                                                   boolean shouldPrintDetailTable,
+                                                   UpdateSummaryOutputEnum showSummaryOutput,
+                                                   List<ChangeSetStatus> additionalChangesets,
+                                                   ChangeLogIterator runChangeLogIterator)
             throws IOException, LiquibaseException {
         String totalSkippedMdcKey = "totalSkipped";
         //
@@ -153,20 +180,17 @@ public class ShowSummaryUtil {
         SortedMap<String, Integer> mdcSkipCounts = new TreeMap<>();
         mdcSkipCounts.put(totalSkippedMdcKey, skippedChangeSets.size() + filterDenied.size());
 
-        List<ChangeSetStatus> finalList = createFinalStatusList(skippedChangeSets, filterDenied, mdcSkipCounts);
+        List<ChangeSetStatus> finalList = createFinalStatusList(skippedChangeSets, skippedBecauseOfLicenseChangeSets, filterDenied, mdcSkipCounts);
         ShowSummaryGeneratorFactory showSummaryGeneratorFactory = Scope.getCurrentScope().getSingleton(ShowSummaryGeneratorFactory.class);
         ShowSummaryGenerator showSummaryGenerator = showSummaryGeneratorFactory.getShowSummaryGenerator();
         finalList.addAll(showSummaryGenerator.getAllAdditionalChangeSetStatus(runChangeLogIterator));
 
-        finalList.sort(new Comparator<ChangeSetStatus>() {
-            @Override
-            public int compare(ChangeSetStatus o1, ChangeSetStatus o2) {
-                ChangeSet c1 = o1.getChangeSet();
-                ChangeSet c2 = o2.getChangeSet();
-                int order1 = determineOrderInChangelog(c1);
-                int order2 = determineOrderInChangelog(c2);
-                return Integer.compare(order1, order2);
-            }
+        finalList.sort((o1, o2) -> {
+            ChangeSet c1 = o1.getChangeSet();
+            ChangeSet c2 = o2.getChangeSet();
+            int order1 = determineOrderInChangelog(c1);
+            int order2 = determineOrderInChangelog(c2);
+            return Integer.compare(order1, order2);
         });
 
         // Filtered because of labels or context
@@ -219,6 +243,30 @@ public class ShowSummaryUtil {
 
     }
 
+    /**
+     *
+     * This class is internally used to generate the summary line
+     *
+     */
+    private static class SkippedBecauseOfLicenseFilter implements ChangeSetFilter {
+        public static final String MDC_NAME = "skippedBecauseOfLicense";
+        public static final String DISPLAY_NAME = "Skipped because of license";
+
+        @Override
+        public ChangeSetFilterResult accepts(ChangeSet changeSet) {
+            return null;
+        }
+
+        @Override
+        public String getMdcName() {
+            return ChangeSetFilter.super.getMdcName();
+        }
+
+        @Override
+        public String getDisplayName() {
+            return ChangeSetFilter.super.getDisplayName();
+        }
+    }
     private static void printDetailTable(List<List<String>> table, OutputStream outputStream) throws IOException, LiquibaseException {
         List<Integer> widths = new ArrayList<>();
         widths.add(60);
@@ -230,16 +278,24 @@ public class ShowSummaryUtil {
     //
     // Create a final list of changesets to be displayed
     //
-    private static List<ChangeSetStatus> createFinalStatusList(List<ChangeSet> skippedChangeSets, List<ChangeSetStatus> filterDenied, SortedMap<String, Integer> mdcSkipCounts) {
+    private static List<ChangeSetStatus> createFinalStatusList(List<ChangeSet> skippedChangeSets, List<ChangeSet> skippedBecauseOfLicenseChangeSets, List<ChangeSetStatus> filterDenied, SortedMap<String, Integer> mdcSkipCounts) {
         //
         // Add skipped during changelog parsing to the final list
         //
         List<ChangeSetStatus> finalList = new ArrayList<>(filterDenied);
         skippedChangeSets.forEach(skippedChangeSet -> {
-            String dbmsList = String.format("'%s'", StringUtil.join(skippedChangeSet.getDbmsSet(), ", "));
+            String dbmsList = String.format("'%s'", StringUtils.join(skippedChangeSet.getDbmsSet(), ", "));
             String mismatchMessage = String.format("mismatched DBMS value of %s", dbmsList);
             ChangeSetStatus changeSetStatus = new ChangeSetStatus(skippedChangeSet);
             ChangeSetFilterResult filterResult = new ChangeSetFilterResult(false, mismatchMessage, DbmsChangeSetFilter.class, DbmsChangeSetFilter.MDC_NAME, DbmsChangeSetFilter.DISPLAY_NAME);
+            changeSetStatus.setFilterResults(Collections.singleton(filterResult));
+            finalList.add(changeSetStatus);
+        });
+        skippedBecauseOfLicenseChangeSets.forEach(skippedChangeSet -> {
+            String mismatchMessage = "skipped because of license";
+            ChangeSetStatus changeSetStatus = new ChangeSetStatus(skippedChangeSet);
+            ChangeSetFilterResult filterResult =
+               new ChangeSetFilterResult(false, mismatchMessage, SkippedBecauseOfLicenseFilter.class, SkippedBecauseOfLicenseFilter.MDC_NAME, SkippedBecauseOfLicenseFilter.DISPLAY_NAME);
             changeSetStatus.setFilterResults(Collections.singleton(filterResult));
             finalList.add(changeSetStatus);
         });
@@ -267,20 +323,20 @@ public class ShowSummaryUtil {
     private static UpdateSummaryDetails showSummary(DatabaseChangeLog changeLog,
                                                     StatusVisitor statusVisitor,
                                                     List<ChangeSet> skippedChangeSets,
+                                                    List<ChangeSet> skippedBecauseOfLicenseChangeSets,
                                                     List<ChangeSetStatus> filterDenied,
                                                     OutputStream outputStream,
                                                     UpdateSummaryOutputEnum showSummaryOutput,
-                                                    ChangeLogIterator runChangeLogIterator) throws LiquibaseException {
+                                                    ChangeLogIterator runChangeLogIterator,
+                                                    ChangeExecListener changeExecListener) throws LiquibaseException {
         StringBuilder builder = new StringBuilder();
         builder.append(System.lineSeparator());
-        int totalInChangelog = changeLog.getChangeSets().size() + skippedChangeSets.size();
         int skipped = skippedChangeSets.size();
+        int skippedBecauseOfLicense = skippedBecauseOfLicenseChangeSets.size();
         int filtered = filterDenied.size();
-        ShowSummaryGeneratorFactory showSummaryGeneratorFactory = Scope.getCurrentScope().getSingleton(ShowSummaryGeneratorFactory.class);
-        ShowSummaryGenerator showSummaryGenerator = showSummaryGeneratorFactory.getShowSummaryGenerator();
-        int additional = showSummaryGenerator.getAllAdditionalChangeSetStatus(runChangeLogIterator).size();
-        int totalAccepted = statusVisitor.getChangeSetsToRun().size() - additional;
-        int totalPreviouslyRun = totalInChangelog - filtered - skipped - totalAccepted - additional;
+        int totalAccepted = calculateAccepted(statusVisitor, changeExecListener);
+        int totalPreviouslyRun = calculatePreviouslyRun(statusVisitor);
+        int totalInChangelog = CollectionUtil.createIfNull(changeLog.getChangeSets()).size() + CollectionUtil.createIfNull(changeLog.getSkippedChangeSets()).size();
         UpdateSummary updateSummaryMdc = new UpdateSummary(null, totalAccepted, totalPreviouslyRun, null, totalInChangelog);
 
         String message = "UPDATE SUMMARY";
@@ -295,10 +351,12 @@ public class ShowSummaryUtil {
         builder.append(message);
         builder.append(System.lineSeparator());
 
-        message = String.format("Filtered out:            %6d", filtered + skipped);
+        message = String.format("Filtered out:            %6d", filtered + skipped + skippedBecauseOfLicense);
         builder.append(message);
         builder.append(System.lineSeparator());
 
+        ShowSummaryGeneratorFactory showSummaryGeneratorFactory = Scope.getCurrentScope().getSingleton(ShowSummaryGeneratorFactory.class);
+        ShowSummaryGenerator showSummaryGenerator = showSummaryGeneratorFactory.getShowSummaryGenerator();
         showSummaryGenerator.appendAdditionalSummaryMessages(builder, runChangeLogIterator);
 
         message = "-------------------------------";
@@ -311,7 +369,7 @@ public class ShowSummaryUtil {
         builder.append(System.lineSeparator());
 
         final Map<String, Integer> filterSummaryMap = new LinkedHashMap<>();
-        List<ChangeSetStatus> finalList = createFinalStatusList(skippedChangeSets, filterDenied, null);
+        List<ChangeSetStatus> finalList = createFinalStatusList(skippedChangeSets, skippedBecauseOfLicenseChangeSets, filterDenied, null);
         finalList.forEach(status -> {
             status.getFilterResults().forEach(result -> {
                 if (!result.isAccepted()) {
@@ -341,6 +399,28 @@ public class ShowSummaryUtil {
         updateSummaryDetails.setSummary(updateSummaryMdc);
         updateSummaryDetails.setOutput(outputMessage);
         return updateSummaryDetails;
+    }
+
+    private static int calculatePreviouslyRun(StatusVisitor statusVisitor) {
+        return (int) statusVisitor.getStatuses().stream().filter(
+                s -> s.getFilterResults().stream().anyMatch(
+                        fr -> fr.getFilter().isAssignableFrom(ShouldRunChangeSetFilter.class) && !fr.isAccepted() && fr.getMessage().equals(ShouldRunChangeSetFilter.CHANGESET_ALREADY_RAN_MESSAGE)
+                )
+        ).count();
+    }
+
+    /**
+     * Calculate the accepted number of changesets.
+     * The status visitor provides a list of changesets that are expected to execute, not the actual list of
+     * executed changesets. We retain this code despite its inaccuracy for backwards compatibility, in case
+     * a change exec listener is not provided.
+     */
+    private static int calculateAccepted(StatusVisitor statusVisitor, ChangeExecListener changeExecListener) {
+        int ran = statusVisitor.getChangeSetsToRun().size();
+        if (changeExecListener instanceof DefaultChangeExecListener) {
+            ran = ((DefaultChangeExecListener) changeExecListener).getDeployedChangeSets().size();
+        }
+        return ran;
     }
 
     //
