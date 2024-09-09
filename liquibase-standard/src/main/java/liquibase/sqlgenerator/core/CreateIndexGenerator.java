@@ -120,20 +120,23 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
             buffer.append("CLUSTER ");
         }
 	    buffer.append(database.escapeTableName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName())).append("(");
-	    Iterator<AddColumnConfig> spliterator = Arrays.asList(statement.getColumns()).iterator();
+	    Iterator<AddColumnConfig> iterator = Arrays.asList(statement.getColumns()).iterator();
         List <AddColumnConfig> includedColumns = new LinkedList<>();
-        List <AddColumnConfig> normalColumns = new LinkedList<>();
-        while(spliterator.hasNext()){
-            AddColumnConfig curr = spliterator.next();
-            if(curr.getIncluded() != null && curr.getIncluded()){
-                includedColumns.add(curr);
-            }
-            else{
-                normalColumns.add(curr);
-            }
-        }
+	    if(database instanceof MSSQLDatabase) {
+	        List <AddColumnConfig> normalColumns = new LinkedList<>();
+	        while(iterator.hasNext()){
+	            AddColumnConfig curr = iterator.next();
+	            if(curr.getIncluded() != null && curr.getIncluded()){
+	                includedColumns.add(curr);
+	            }
+	            else{
+	                normalColumns.add(curr);
+	            }
+	        }
+	        iterator =normalColumns.iterator();
+	    }
 
-         Iterator<AddColumnConfig> iterator =normalColumns.iterator();
+
 	    while (iterator.hasNext()) {
             AddColumnConfig column = iterator.next();
             if (column.getComputed() == null) {
