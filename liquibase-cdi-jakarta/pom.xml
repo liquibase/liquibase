@@ -9,7 +9,6 @@
     </parent>
 
     <description>Configures Liquibase for use in a CDI 3.0+ environment</description>
-    <name>Liquibase cdi-jakarta Plugin</name>
 
     <artifactId>liquibase-cdi-jakarta</artifactId>
 
