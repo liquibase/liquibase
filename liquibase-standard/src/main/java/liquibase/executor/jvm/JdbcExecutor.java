@@ -155,6 +155,9 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public void execute(final SqlStatement sql, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
+        if (database.getConnection() instanceof OfflineConnection) {
+            return;
+        }
         if (sql instanceof RawParameterizedSqlStatement) {
             PreparedStatementFactory factory = new PreparedStatementFactory((JdbcConnection) database.getConnection());
 
