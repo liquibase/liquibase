@@ -83,9 +83,14 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                     Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : ("A".equals(ascOrDesc) ? Boolean
                             .FALSE : null);
-                    Boolean included = row.getBoolean("IS_INCLUDED_COLUMN");
-                    Column c = new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getRelation()).setIncluded(included);
-                    index.addColumn(c);
+                    if (database instanceof MSSQLDatabase) {
+                        Boolean included = row.getBoolean("IS_INCLUDED_COLUMN");
+                        Column c = new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getRelation()).setIncluded(included);
+                        index.addColumn(c);
+                    	
+                    }else {
+                    	index.addColumn(new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getRelation()));
+                    }
                 }
 
 
