@@ -35,7 +35,7 @@ public class CatalogSnapshotGenerator extends JdbcSnapshotGenerator {
             for (String potentialCatalogName : getDatabaseCatalogNames(database)) {
                 Catalog catalog = new Catalog(potentialCatalogName);
                 if ((catalog.getAttribute("name",String.class) == null ||
-                     catalog.getName() != null && catalog.getName().equalsIgnoreCase(example.getName())) &&
+                     catalog.toString() != null && catalog.toString().equalsIgnoreCase(example.toString())) &&
                     DatabaseObjectComparatorFactory.getInstance().isSameObject(catalog, example, snapshot.getSchemaComparisons(), database)) {
                     if (match == null) {
                         match = catalog;
