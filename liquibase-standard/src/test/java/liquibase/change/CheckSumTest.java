@@ -1,7 +1,6 @@
 package liquibase.change;
 
 import liquibase.ChecksumVersion;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
