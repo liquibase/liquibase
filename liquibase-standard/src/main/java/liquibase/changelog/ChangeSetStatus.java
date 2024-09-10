@@ -5,7 +5,6 @@ import liquibase.change.CheckSum;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.exception.LiquibaseException;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 
 import java.util.Date;
 import java.util.Set;

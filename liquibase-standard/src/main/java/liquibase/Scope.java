@@ -67,6 +67,7 @@ public class Scope {
         osgiPlatform,
         checksumVersion,
         latestChecksumVersion,
+        checksumAlgorithm,
         /**
          * A <code>Map<String, String></code> of arguments/configuration properties used in the maven invocation of Liquibase.
          */
@@ -96,7 +97,8 @@ public class Scope {
             rootScope.values.put(Attr.logService.name(), new JavaLogService());
             rootScope.values.put(Attr.serviceLocator.name(), new StandardServiceLocator());
             rootScope.values.put(Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor());
-            rootScope.values.put(Attr.latestChecksumVersion.name(), ChecksumVersion.V9);
+            rootScope.values.put(Attr.checksumAlgorithm.name(), GlobalConfiguration.CHECKSUM_ALGORITHM.getCurrentValue().getAlgorithm());
+            rootScope.values.put(Attr.latestChecksumVersion.name(), ChecksumVersion.V10);
             rootScope.values.put(Attr.checksumVersion.name(), ChecksumVersion.latest());
 
             rootScope.values.put(Attr.ui.name(), new ConsoleUIService());

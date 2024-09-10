@@ -9,7 +9,6 @@ import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.core.OracleDatabase
 import liquibase.database.core.PostgresDatabase
 import liquibase.exception.ValidationErrors
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.parser.core.ParsedNode
 import liquibase.database.core.MockDatabase
 import liquibase.sdk.resource.MockResourceAccessor
