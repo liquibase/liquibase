@@ -9,6 +9,7 @@
     </parent>
 
     <description>Configures Liquibase for use in a CDI environment</description>
+    <name>Liquibase CDI Plugin</name>
 
     <artifactId>liquibase-cdi</artifactId>
 

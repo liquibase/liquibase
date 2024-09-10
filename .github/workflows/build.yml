@@ -258,22 +258,12 @@ jobs:
 
           ##create installer - disabled here but run as nightly job and as part of release workflow
           #cp liquibase-dist/target/liquibase-*-installer-* artifacts
-
-          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts
-          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT-sources.jar artifacts
-          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT-javadoc.jar artifacts
           
-          cp liquibase-cli/target/liquibase-cli-0-SNAPSHOT.jar artifacts
-          cp liquibase-cli/target/liquibase-cli-0-SNAPSHOT-sources.jar artifacts
-          cp liquibase-cli/target/liquibase-cli-0-SNAPSHOT-javadoc.jar artifacts
-
-          cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar artifacts
-          cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT-sources.jar artifacts
-          cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT-javadoc.jar artifacts
-
-          cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT.jar artifacts
-          cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT-sources.jar artifacts
-          cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT-javadoc.jar artifacts
+          for i in 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-cdi' 'liquibase-cdi-jakarta' 'liquibase-standard'; do
+            cp $i/target/$i-0-SNAPSHOT.jar artifacts
+            cp $i/target/$i-0-SNAPSHOT-sources.jar artifacts
+            cp $i/target/$i-0-SNAPSHOT-javadoc.jar artifacts
+          done
 
           echo "Source code not available for liquibase-commercial" > /tmp/readme.source.txt
           (cd /tmp && jar cf liquibase-commercial-${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT-sources.jar readme.source.txt)
@@ -293,15 +283,13 @@ jobs:
 
           ##prepare branch-named convenience artifacts directories
           mkdir artifacts-named
+          
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}.tar.gz
-          #cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/internal/lib/liquibase-core.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchName }}.jar
-          cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts-named/liquibase-core-${{ needs.setup.outputs.thisBranchName }}.jar
-          cp liquibase-maven-plugin/target/liquibase-maven-plugin-0-SNAPSHOT.jar artifacts-named/liquibase-maven-plugin-${{ needs.setup.outputs.thisBranchName }}.jar
-          cp liquibase-cli/target/liquibase-cli-0-SNAPSHOT.jar artifacts-named/liquibase-cli-${{ needs.setup.outputs.thisBranchName }}.jar
-          cp liquibase-cdi/target/liquibase-cdi-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-${{ needs.setup.outputs.thisBranchName }}.jar
-          cp liquibase-cdi-jakarta/target/liquibase-cdi-jakarta-0-SNAPSHOT.jar artifacts-named/liquibase-cdi-jakarta-${{ needs.setup.outputs.thisBranchName }}.jar
-          cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}.jar
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}-deps.jar
+          
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-standard' 'liquibase-cdi' 'liquibase-cdi-jakarta' ' liquibase-extension-testing'; do
+            cp $i/target/$i-0-SNAPSHOT.jar artifacts-named/$i-${{ needs.setup.outputs.thisBranchName }}.jar
+          done
 
           #check why only this step has branchName when there is a standalone PR
           cp $commercialJarM2Location artifacts-named/liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}.jar
