@@ -11,7 +11,8 @@ import java.util.Arrays;
 @Getter
 public enum ChecksumVersion {
 
-    V9(9, "Version used from Liquibase 4.22.0 till now", "4.22.0"),
+    V10(10, "Liquibase 5.0.0 supporting multiple checksum algorythims", "5.0.0"),
+    V9(9, "Version used from Liquibase 4.22.0 and remaining of 4.x series", "4.22.0"),
     V8(8, "Version used from Liquibase 3.5.0 until 4.21.1", "3.5.0"),
     V7(7, "Old version", "?"),
     V6(6, "Old version", "?"),

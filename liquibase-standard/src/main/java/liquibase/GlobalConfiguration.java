@@ -1,5 +1,6 @@
 package liquibase;
 
+import liquibase.checksums.ChecksumAlgorithm;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.ui.UIServiceEnum;
@@ -54,6 +55,8 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
     public static final ConfigurationDefinition<UIServiceEnum> UI_SERVICE;
     public static final ConfigurationDefinition<SupportsMethodValidationLevelsEnum> SUPPORTS_METHOD_VALIDATION_LEVEL;
+
+    public static final ConfigurationDefinition<ChecksumAlgorithm> CHECKSUM_ALGORITHM;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -253,6 +256,11 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         TRIM_LOAD_DATA_FILE_HEADER = builder.define("trimLoadDataFileHeader", Boolean.class)
                 .setDescription("If true column headers will be trimmed in case they were specified with spaces in the file.")
                 .setDefaultValue(false)
+                .build();
+
+        CHECKSUM_ALGORITHM = builder.define("checksumAlgorithm", ChecksumAlgorithm.class)
+                .setDescription("Changes the hashing algorithm that Liquibase uses to calculate checksums.")
+                .setDefaultValue(ChecksumAlgorithm.MD5)
                 .build();
     }
 
