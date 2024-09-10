@@ -558,6 +558,9 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
     }
 
     def "include fails if XML file is empty"() {
+        given:
+        Locale.setDefault(Locale.ENGLISH)
+
         when:
         def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": ""])
 
