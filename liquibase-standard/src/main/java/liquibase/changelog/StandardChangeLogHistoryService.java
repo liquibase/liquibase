@@ -127,7 +127,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             boolean hasLiquibase = changeLogTable.getColumn("LIQUIBASE") != null;
             boolean hasContexts = changeLogTable.getColumn("CONTEXTS") != null;
             boolean hasLabels = changeLogTable.getColumn("LABELS") != null;
-            boolean hasSmallChecksum = changeLogTable.getColumn("MD5SUM").getType().getColumnSize() < Integer.parseInt(MD5_COLUMN_SIZE);
+            boolean hasShortChecksum = changeLogTable.getColumn("MD5SUM").getType().getColumnSize() < Integer.parseInt(MD5_COLUMN_SIZE);
             boolean liquibaseColumnNotRightSize = false;
             if (!(this.getDatabase() instanceof SQLiteDatabase)) {
                 DataType type = changeLogTable.getColumn("LIQUIBASE").getType();
@@ -247,7 +247,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 }
             }
 
-            if (hasSmallChecksum) {
+            if (hasShortChecksum) {
                 executor.comment("Modifying size of databasechangelog.md5sum column");
                 statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(),
                         getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "MD5SUM",
