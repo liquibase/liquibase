@@ -453,12 +453,12 @@ Global Options
                                environment variable:
                                'LIQUIBASE_SUPPRESS_LIQUIBASE_SQL')
 
-      --telemetry-enabled=PARAM
+      --analytics-enabled=PARAM
                              Enable or disable sending product usage data and
                                analytics to Liquibase. Learn more at https:
-                               //docs.liquibase.com/telemetry. DEFAULT: true
+                               //docs.liquibase.com/analytics. DEFAULT: true
                                for OSS users | false for PRO users
-                             (defaults file: 'liquibase.telemetry.enabled',
+                             (defaults file: 'liquibase.analytics.enabled',
                                environment variable:
                                'LIQUIBASE_TELEMETRY_ENABLED')
 

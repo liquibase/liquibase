@@ -22,13 +22,13 @@ public class SegmentAnalyticsListener implements AnalyticsListener {
 
     @Override
     public int getPriority() {
-        boolean telemetryEnabled = false;
+        boolean analyticsEnabled = false;
         try {
-            telemetryEnabled = AnalyticsArgs.isTelemetryEnabled();
+            analyticsEnabled = AnalyticsArgs.isAnalyticsEnabled();
         } catch (Exception e) {
-            Scope.getCurrentScope().getLog(getClass()).fine("Failed to determine if telemetry is enabled", e);
+            Scope.getCurrentScope().getLog(getClass()).fine("Failed to determine if analytics is enabled", e);
         }
-        if (telemetryEnabled) {
+        if (analyticsEnabled) {
             return PRIORITY_SPECIALIZED;
         } else {
             return PRIORITY_NOT_APPLICABLE;
@@ -38,11 +38,11 @@ public class SegmentAnalyticsListener implements AnalyticsListener {
     @Override
     public void handleEvent(Event event) throws Exception {
         AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
-        SegmentAnalyticsConfiguration telemetryConfiguration = ((SegmentAnalyticsConfiguration) analyticsConfigurationFactory.getPlugin());
-        int timeoutMillis = telemetryConfiguration.getTimeoutMillis();
+        SegmentAnalyticsConfiguration analyticsConfiguration = ((SegmentAnalyticsConfiguration) analyticsConfigurationFactory.getPlugin());
+        int timeoutMillis = analyticsConfiguration.getTimeoutMillis();
         Thread eventThread = new Thread(() -> {
             try {
-                URL url = new URL(telemetryConfiguration.getDestinationUrl());
+                URL url = new URL(analyticsConfiguration.getDestinationUrl());
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -76,7 +76,7 @@ public class SegmentAnalyticsListener implements AnalyticsListener {
         try {
             eventThread.join(timeoutMillis);
         } catch (InterruptedException e) {
-            Scope.getCurrentScope().getLog(getClass()).fine("Interrupted while waiting for telemetry event processing to Segment.", e);
+            Scope.getCurrentScope().getLog(getClass()).fine("Interrupted while waiting for analytics event processing to Segment.", e);
         }
     }
 }

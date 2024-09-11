@@ -26,22 +26,22 @@ class AnalyticsIntegrationTest extends Specification {
 
     /**
      * This test starts up a simple webserver that runs in a separate thread from the test thread, and handles the two
-     * API calls made by the telemetry code.
-     * Because the webserver thread is separate from the test thread, when debugging the telemetry code, you'll likely
+     * API calls made by the analytics code.
+     * Because the webserver thread is separate from the test thread, when debugging the analytics code, you'll likely
      * need to right click on your breakpoint and change "suspend" from "all" to "thread". If you suspend all of the
-     * threads, the webserver won't respond to the calls made by the API. Additionally, the telemetry API calls
+     * threads, the webserver won't respond to the calls made by the API. Additionally, the analytics API calls
      * themselves occur in a different thread, which is done so that the thread can be killed if the calls exceed
      * a preset amount of time. That timeout was increased to 1 minute for this test, but if your debugging takes
      * longer than a minute, the test will unexpectedly die.
      */
-    def "test sending telemetry happy path"() {
+    def "test sending analytics happy path"() {
         setup:
         // Start the webserver
         SimpleWebserver simpleWebserver = new SimpleWebserver()
-        // Clear the cached telemetry config info that was loaded when the drop all command step executed automatically during test setup
-        AnalyticsConfigurationFactory telemetryConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
-        SegmentAnalyticsConfiguration telemetryConfiguration = ((SegmentAnalyticsConfiguration) telemetryConfigurationFactory.getPlugin());
-        telemetryConfiguration.remoteTelemetryConfiguration.clearCache()
+        // Clear the cached analytics config info that was loaded when the drop all command step executed automatically during test setup
+        AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
+        SegmentAnalyticsConfiguration analyticsConfiguration = ((SegmentAnalyticsConfiguration) analyticsConfigurationFactory.getPlugin());
+        analyticsConfiguration.remoteAnalyticsConfiguration.clearCache()
 
         when:
         Map<String, ?> scopeVars = new HashMap<>()

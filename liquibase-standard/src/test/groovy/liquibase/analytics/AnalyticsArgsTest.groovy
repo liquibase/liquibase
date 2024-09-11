@@ -12,9 +12,9 @@ class AnalyticsArgsTest extends Specification {
     @Unroll
     def "test all permutations of options for enabling/disabling for oss"(Boolean userCliOption, boolean remoteOssEnabled, boolean isEnabled) {
         setup:
-        def telemetryConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class)
-        def existingConfig = telemetryConfigurationFactory.getPlugin()
-        telemetryConfigurationFactory.removeInstance(existingConfig)
+        def analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class)
+        def existingConfig = analyticsConfigurationFactory.getPlugin()
+        analyticsConfigurationFactory.removeInstance(existingConfig)
         def mockConfig = new AnalyticsConfiguration() {
             @Override
             int getPriority() {
@@ -22,30 +22,30 @@ class AnalyticsArgsTest extends Specification {
             }
 
             @Override
-            boolean isOssTelemetryEnabled() throws Exception {
+            boolean isOssAnalyticsEnabled() throws Exception {
                 return remoteOssEnabled
             }
 
             @Override
-            boolean isProTelemetryEnabled() throws Exception {
+            boolean isProAnalyticsEnabled() throws Exception {
                 return true
             }
         }
-        telemetryConfigurationFactory.register(mockConfig)
+        analyticsConfigurationFactory.register(mockConfig)
 
         when:
         Map<String, ?> scopeKeys = new HashMap<>()
         scopeKeys.put(AnalyticsArgs.ENABLED.getKey(), userCliOption)
         Boolean actuallyEnabled = Scope.child(scopeKeys, () -> {
-            return AnalyticsArgs.isTelemetryEnabled()
+            return AnalyticsArgs.isAnalyticsEnabled()
         } as Scope.ScopedRunnerWithReturn)
 
         then:
         actuallyEnabled == isEnabled
 
         cleanup:
-        telemetryConfigurationFactory.removeInstance(mockConfig)
-        telemetryConfigurationFactory.register(existingConfig)
+        analyticsConfigurationFactory.removeInstance(mockConfig)
+        analyticsConfigurationFactory.register(existingConfig)
 
         where:
         userCliOption | remoteOssEnabled | isEnabled

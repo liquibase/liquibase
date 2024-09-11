@@ -11,21 +11,21 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Data
 public class SegmentAnalyticsConfiguration implements AnalyticsConfiguration {
-    private final static Cache<RemoteAnalyticsConfiguration> remoteTelemetryConfiguration = new Cache<>(() -> {
+    private final static Cache<RemoteAnalyticsConfiguration> remoteAnalyticsConfiguration = new Cache<>(() -> {
         String url = AnalyticsArgs.CONFIG_ENDPOINT_URL.getCurrentValue();
-        AtomicReference<RemoteAnalyticsConfiguration> remoteTelemetryConfiguration = new AtomicReference<>();
+        AtomicReference<RemoteAnalyticsConfiguration> remoteAnalyticsConfiguration = new AtomicReference<>();
         Thread thread = new Thread(() -> {
             try {
                 InputStream input = new URL(url).openStream();
                 Yaml yaml = new Yaml();
-                remoteTelemetryConfiguration.set(yaml.loadAs(input, RemoteAnalyticsConfiguration.class));
+                remoteAnalyticsConfiguration.set(yaml.loadAs(input, RemoteAnalyticsConfiguration.class));
             } catch (Exception e) {
-                Scope.getCurrentScope().getLog(SegmentAnalyticsConfiguration.class).fine("Failed to load telemetry configuration from " + url, e);
+                Scope.getCurrentScope().getLog(SegmentAnalyticsConfiguration.class).fine("Failed to load analytics configuration from " + url, e);
             }
         });
         thread.start();
         thread.join(AnalyticsArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getCurrentValue());
-        return remoteTelemetryConfiguration.get();
+        return remoteAnalyticsConfiguration.get();
     });
 
     @Override
@@ -34,24 +34,24 @@ public class SegmentAnalyticsConfiguration implements AnalyticsConfiguration {
     }
 
     public int getTimeoutMillis() throws Exception {
-        return remoteTelemetryConfiguration.get().getTimeoutMs();
+        return remoteAnalyticsConfiguration.get().getTimeoutMs();
     }
 
     public String getDestinationUrl() throws Exception {
-        return remoteTelemetryConfiguration.get().getEndpointData();
+        return remoteAnalyticsConfiguration.get().getEndpointData();
     }
 
     @Override
-    public boolean isOssTelemetryEnabled() throws Exception {
-        return remoteTelemetryConfiguration.get().isSendOss();
+    public boolean isOssAnalyticsEnabled() throws Exception {
+        return remoteAnalyticsConfiguration.get().isSendOss();
     }
 
     @Override
-    public boolean isProTelemetryEnabled() throws Exception {
-        return remoteTelemetryConfiguration.get().isSendPro();
+    public boolean isProAnalyticsEnabled() throws Exception {
+        return remoteAnalyticsConfiguration.get().isSendPro();
     }
 
     public String getWriteKey() throws Exception {
-        return remoteTelemetryConfiguration.get().getWriteKey();
+        return remoteAnalyticsConfiguration.get().getWriteKey();
     }
 }

@@ -21,7 +21,7 @@ public class AnalyticsFactory extends AbstractPluginFactory<AnalyticsListener> {
 
     public void handleEvent(Event event) {
         try {
-            if (AnalyticsArgs.isTelemetryEnabled()) {
+            if (AnalyticsArgs.isAnalyticsEnabled()) {
                 getPlugin().handleEvent(event);
             }
         } catch (Exception e) {
