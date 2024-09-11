@@ -1,23 +1,22 @@
-package liquibase.telemetry.configuration;
+package liquibase.analytics.configuration;
 
 import liquibase.Scope;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.license.LicenseServiceUtils;
-import liquibase.telemetry.TelemetryFactory;
 import org.apache.commons.lang3.BooleanUtils;
 
-public class TelemetryArgs implements AutoloadedConfigurations {
+public class AnalyticsArgs implements AutoloadedConfigurations {
 
     private static final ConfigurationDefinition<Boolean> ENABLED;
     public static final ConfigurationDefinition<String> CONFIG_ENDPOINT_URL;
     public static final ConfigurationDefinition<Integer> CONFIG_ENDPOINT_TIMEOUT_MILLIS;
 
     static {
-        ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase.telemetry");
+        ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase.analytics");
 
         ENABLED = builder.define("enabled", Boolean.class)
-                .setDescription("Enable or disable sending product usage data and analytics to Liquibase. Learn more at https://docs.liquibase.com/telemetry. DEFAULT: true for OSS users | false for PRO users")
+                .setDescription("Enable or disable sending product usage data and analytics to Liquibase. Learn more at https://docs.liquibase.com/analytics. DEFAULT: true for OSS users | false for PRO users")
                 .build();
 
         CONFIG_ENDPOINT_URL = builder.define("configEndpointUrl", String.class)
@@ -31,26 +30,26 @@ public class TelemetryArgs implements AutoloadedConfigurations {
                 .build();
     }
 
-    public static boolean isTelemetryEnabled() throws Exception {
+    public static boolean isAnalyticsEnabled() throws Exception {
         // if the user set enabled to false, that overrides all
         Boolean userSuppliedEnabled = ENABLED.getCurrentValue();
         if (Boolean.FALSE.equals(userSuppliedEnabled)) {
-            Scope.getCurrentScope().getLog(TelemetryArgs.class).info("User has disabled telemetry.");
+            Scope.getCurrentScope().getLog(AnalyticsArgs.class).info("User has disabled analytics.");
             return false;
         }
 
         boolean proLicenseValid = LicenseServiceUtils.isProLicenseValid();
-        TelemetryConfigurationFactory telemetryConfigurationFactory = Scope.getCurrentScope().getSingleton(TelemetryConfigurationFactory.class);
+        AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
         if (proLicenseValid) {
-            Boolean enabled = BooleanUtils.and(new Boolean[]{telemetryConfigurationFactory.getPlugin().isProTelemetryEnabled(), userSuppliedEnabled});
+            Boolean enabled = BooleanUtils.and(new Boolean[]{analyticsConfigurationFactory.getPlugin().isProAnalyticsEnabled(), userSuppliedEnabled});
             if (Boolean.FALSE.equals(enabled)) {
-                Scope.getCurrentScope().getLog(TelemetryArgs.class).info("Telemetry is disabled, because a pro license was detected and telemetry was not enabled by the user or because it was turned off by Liquibase.");
+                Scope.getCurrentScope().getLog(AnalyticsArgs.class).info("Analytics is disabled, because a pro license was detected and analytics was not enabled by the user or because it was turned off by Liquibase.");
             }
             return enabled;
         } else {
-            boolean enabled = telemetryConfigurationFactory.getPlugin().isOssTelemetryEnabled();
+            boolean enabled = analyticsConfigurationFactory.getPlugin().isOssAnalyticsEnabled();
             if (Boolean.FALSE.equals(enabled)) {
-                Scope.getCurrentScope().getLog(TelemetryArgs.class).info("Telemetry is disabled, because it was turned off by Liquibase.");
+                Scope.getCurrentScope().getLog(AnalyticsArgs.class).info("Analytics is disabled, because it was turned off by Liquibase.");
             }
             return enabled;
         }

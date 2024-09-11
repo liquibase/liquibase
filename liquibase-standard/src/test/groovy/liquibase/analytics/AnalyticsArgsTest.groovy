@@ -1,51 +1,51 @@
-package liquibase.telemetry
+package liquibase.analytics
 
 import liquibase.Scope
-import liquibase.telemetry.configuration.TelemetryArgs
-import liquibase.telemetry.configuration.TelemetryConfiguration
-import liquibase.telemetry.configuration.TelemetryConfigurationFactory
+import liquibase.analytics.configuration.AnalyticsArgs
+import liquibase.analytics.configuration.AnalyticsConfiguration
+import liquibase.analytics.configuration.AnalyticsConfigurationFactory
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class TelemetryArgsTest extends Specification {
+class AnalyticsArgsTest extends Specification {
 
     @Unroll
     def "test all permutations of options for enabling/disabling for oss"(Boolean userCliOption, boolean remoteOssEnabled, boolean isEnabled) {
         setup:
-        def telemetryConfigurationFactory = Scope.getCurrentScope().getSingleton(TelemetryConfigurationFactory.class)
-        def existingConfig = telemetryConfigurationFactory.getPlugin()
-        telemetryConfigurationFactory.removeInstance(existingConfig)
-        def mockConfig = new TelemetryConfiguration() {
+        def analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class)
+        def existingConfig = analyticsConfigurationFactory.getPlugin()
+        analyticsConfigurationFactory.removeInstance(existingConfig)
+        def mockConfig = new AnalyticsConfiguration() {
             @Override
             int getPriority() {
                 return PRIORITY_SPECIALIZED
             }
 
             @Override
-            boolean isOssTelemetryEnabled() throws Exception {
+            boolean isOssAnalyticsEnabled() throws Exception {
                 return remoteOssEnabled
             }
 
             @Override
-            boolean isProTelemetryEnabled() throws Exception {
+            boolean isProAnalyticsEnabled() throws Exception {
                 return true
             }
         }
-        telemetryConfigurationFactory.register(mockConfig)
+        analyticsConfigurationFactory.register(mockConfig)
 
         when:
         Map<String, ?> scopeKeys = new HashMap<>()
-        scopeKeys.put(TelemetryArgs.ENABLED.getKey(), userCliOption)
+        scopeKeys.put(AnalyticsArgs.ENABLED.getKey(), userCliOption)
         Boolean actuallyEnabled = Scope.child(scopeKeys, () -> {
-            return TelemetryArgs.isTelemetryEnabled()
+            return AnalyticsArgs.isAnalyticsEnabled()
         } as Scope.ScopedRunnerWithReturn)
 
         then:
         actuallyEnabled == isEnabled
 
         cleanup:
-        telemetryConfigurationFactory.removeInstance(mockConfig)
-        telemetryConfigurationFactory.register(existingConfig)
+        analyticsConfigurationFactory.removeInstance(mockConfig)
+        analyticsConfigurationFactory.register(existingConfig)
 
         where:
         userCliOption | remoteOssEnabled | isEnabled

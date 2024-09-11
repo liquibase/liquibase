@@ -1,17 +1,16 @@
-package liquibase.telemetry
+package liquibase.analytics
 
 import fi.iki.elonen.NanoHTTPD
 import liquibase.Scope
+import liquibase.analytics.configuration.AnalyticsArgs
+import liquibase.analytics.configuration.AnalyticsConfigurationFactory
+import liquibase.analytics.configuration.SegmentAnalyticsConfiguration
 import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
-import liquibase.telemetry.configuration.SegmentTelemetryConfiguration
-import liquibase.telemetry.configuration.TelemetryArgs
-import liquibase.telemetry.configuration.TelemetryConfigurationFactory
 import liquibase.util.LiquibaseUtil
 import liquibase.util.SystemUtil
-import org.junit.ComparisonFailure
 import org.springframework.test.util.TestSocketUtils
 import org.yaml.snakeyaml.Yaml
 import spock.lang.Shared
@@ -20,34 +19,34 @@ import spock.lang.Specification
 import java.util.concurrent.TimeUnit
 
 @LiquibaseIntegrationTest
-class TelemetryIntegrationTest extends Specification {
+class AnalyticsIntegrationTest extends Specification {
 
     @Shared
     private DatabaseTestSystem h2 = Scope.currentScope.getSingleton(TestSystemFactory).getTestSystem("h2") as DatabaseTestSystem
 
     /**
      * This test starts up a simple webserver that runs in a separate thread from the test thread, and handles the two
-     * API calls made by the telemetry code.
-     * Because the webserver thread is separate from the test thread, when debugging the telemetry code, you'll likely
+     * API calls made by the analytics code.
+     * Because the webserver thread is separate from the test thread, when debugging the analytics code, you'll likely
      * need to right click on your breakpoint and change "suspend" from "all" to "thread". If you suspend all of the
-     * threads, the webserver won't respond to the calls made by the API. Additionally, the telemetry API calls
+     * threads, the webserver won't respond to the calls made by the API. Additionally, the analytics API calls
      * themselves occur in a different thread, which is done so that the thread can be killed if the calls exceed
      * a preset amount of time. That timeout was increased to 1 minute for this test, but if your debugging takes
      * longer than a minute, the test will unexpectedly die.
      */
-    def "test sending telemetry happy path"() {
+    def "test sending analytics happy path"() {
         setup:
         // Start the webserver
         SimpleWebserver simpleWebserver = new SimpleWebserver()
-        // Clear the cached telemetry config info that was loaded when the drop all command step executed automatically during test setup
-        TelemetryConfigurationFactory telemetryConfigurationFactory = Scope.getCurrentScope().getSingleton(TelemetryConfigurationFactory.class);
-        SegmentTelemetryConfiguration telemetryConfiguration = ((SegmentTelemetryConfiguration) telemetryConfigurationFactory.getPlugin());
-        telemetryConfiguration.remoteTelemetryConfiguration.clearCache()
+        // Clear the cached analytics config info that was loaded when the drop all command step executed automatically during test setup
+        AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
+        SegmentAnalyticsConfiguration analyticsConfiguration = ((SegmentAnalyticsConfiguration) analyticsConfigurationFactory.getPlugin());
+        analyticsConfiguration.remoteAnalyticsConfiguration.clearCache()
 
         when:
         Map<String, ?> scopeVars = new HashMap<>()
-        scopeVars.put(TelemetryArgs.CONFIG_ENDPOINT_URL.getKey(), "http://localhost:" + simpleWebserver.port + "/config-segment.yaml")
-        scopeVars.put(TelemetryArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getKey(), TimeUnit.SECONDS.toMillis(60)) // to allow for debugging, otherwise the thread gets killed fast
+        scopeVars.put(AnalyticsArgs.CONFIG_ENDPOINT_URL.getKey(), "http://localhost:" + simpleWebserver.port + "/config-segment.yaml")
+        scopeVars.put(AnalyticsArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getKey(), TimeUnit.SECONDS.toMillis(60)) // to allow for debugging, otherwise the thread gets killed fast
         Scope.child(scopeVars, () -> {
             CommandUtil.runDropAll(h2)
         } as Scope.ScopedRunner)
