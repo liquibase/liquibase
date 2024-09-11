@@ -15,7 +15,8 @@ import java.util.logging.Level
 
 class LiquibaseCommandLineTest extends Specification {
 
-    def expectedHelpOutput = """Usage: liquibase [GLOBAL OPTIONS] [COMMAND] [COMMAND OPTIONS]
+    def expectedHelpOutput = """
+Usage: liquibase [GLOBAL OPTIONS] [COMMAND] [COMMAND OPTIONS]
 Command-specific help: "liquibase <command-name> --help"
 
 Global Options
