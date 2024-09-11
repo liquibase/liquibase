@@ -1,4 +1,4 @@
-package liquibase.telemetry.configuration;
+package liquibase.analytics.configuration;
 
 import liquibase.plugin.AbstractPluginFactory;
 import lombok.AccessLevel;

@@ -1,4 +1,4 @@
-package liquibase.telemetry;
+package liquibase.analytics;
 
 import liquibase.plugin.Plugin;
 

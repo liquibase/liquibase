@@ -1,9 +1,9 @@
-package liquibase.telemetry;
+package liquibase.analytics;
 
 import liquibase.Scope;
-import liquibase.telemetry.configuration.SegmentTelemetryConfiguration;
-import liquibase.telemetry.configuration.TelemetryConfiguration;
-import liquibase.telemetry.configuration.TelemetryConfigurationFactory;
+import liquibase.analytics.configuration.SegmentTelemetryConfiguration;
+import liquibase.analytics.configuration.TelemetryConfiguration;
+import liquibase.analytics.configuration.TelemetryConfigurationFactory;
 import lombok.Data;
 
 import java.util.ArrayList;

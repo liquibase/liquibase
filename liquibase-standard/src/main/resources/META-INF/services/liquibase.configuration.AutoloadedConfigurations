@@ -3,4 +3,4 @@ liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 liquibase.logging.core.DefaultLoggerConfiguration
 liquibase.sql.SqlConfiguration
 liquibase.parser.ChangeLogParserConfiguration
-liquibase.telemetry.configuration.TelemetryArgs
+liquibase.analytics.configuration.TelemetryArgs

@@ -1,10 +1,8 @@
-package liquibase.telemetry;
+package liquibase.analytics;
 
 import liquibase.Scope;
+import liquibase.analytics.configuration.TelemetryArgs;
 import liquibase.plugin.AbstractPluginFactory;
-import liquibase.telemetry.configuration.RemoteTelemetryConfiguration;
-import liquibase.telemetry.configuration.TelemetryArgs;
-import liquibase.util.Cache;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

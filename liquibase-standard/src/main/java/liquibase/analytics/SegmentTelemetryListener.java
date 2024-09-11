@@ -1,11 +1,10 @@
-package liquibase.telemetry;
+package liquibase.analytics;
 
 import liquibase.Scope;
+import liquibase.analytics.configuration.SegmentTelemetryConfiguration;
+import liquibase.analytics.configuration.TelemetryArgs;
+import liquibase.analytics.configuration.TelemetryConfigurationFactory;
 import liquibase.serializer.core.yaml.YamlSerializer;
-import liquibase.telemetry.configuration.SegmentTelemetryConfiguration;
-import liquibase.telemetry.configuration.TelemetryArgs;
-import liquibase.telemetry.configuration.TelemetryConfiguration;
-import liquibase.telemetry.configuration.TelemetryConfigurationFactory;
 import liquibase.util.ExceptionUtil;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.IOUtils;

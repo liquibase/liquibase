@@ -2,8 +2,8 @@ package liquibase.command;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.telemetry.Event;
-import liquibase.telemetry.TelemetryFactory;
+import liquibase.analytics.Event;
+import liquibase.analytics.TelemetryFactory;
 import liquibase.configuration.*;
 import liquibase.database.Database;
 import liquibase.exception.CommandExecutionException;

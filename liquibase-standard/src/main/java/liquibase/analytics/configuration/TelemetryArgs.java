@@ -1,10 +1,9 @@
-package liquibase.telemetry.configuration;
+package liquibase.analytics.configuration;
 
 import liquibase.Scope;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.license.LicenseServiceUtils;
-import liquibase.telemetry.TelemetryFactory;
 import org.apache.commons.lang3.BooleanUtils;
 
 public class TelemetryArgs implements AutoloadedConfigurations {

@@ -1,9 +1,9 @@
-package liquibase.telemetry
+package liquibase.analytics
 
 import liquibase.Scope
-import liquibase.telemetry.configuration.TelemetryArgs
-import liquibase.telemetry.configuration.TelemetryConfiguration
-import liquibase.telemetry.configuration.TelemetryConfigurationFactory
+import liquibase.analytics.configuration.TelemetryArgs
+import liquibase.analytics.configuration.TelemetryConfiguration
+import liquibase.analytics.configuration.TelemetryConfigurationFactory
 import spock.lang.Specification
 import spock.lang.Unroll
 
