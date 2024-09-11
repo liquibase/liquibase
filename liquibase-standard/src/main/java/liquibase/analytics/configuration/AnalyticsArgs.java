@@ -6,7 +6,7 @@ import liquibase.configuration.ConfigurationDefinition;
 import liquibase.license.LicenseServiceUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
-public class TelemetryArgs implements AutoloadedConfigurations {
+public class AnalyticsArgs implements AutoloadedConfigurations {
 
     private static final ConfigurationDefinition<Boolean> ENABLED;
     public static final ConfigurationDefinition<String> CONFIG_ENDPOINT_URL;
@@ -34,22 +34,22 @@ public class TelemetryArgs implements AutoloadedConfigurations {
         // if the user set enabled to false, that overrides all
         Boolean userSuppliedEnabled = ENABLED.getCurrentValue();
         if (Boolean.FALSE.equals(userSuppliedEnabled)) {
-            Scope.getCurrentScope().getLog(TelemetryArgs.class).info("User has disabled telemetry.");
+            Scope.getCurrentScope().getLog(AnalyticsArgs.class).info("User has disabled telemetry.");
             return false;
         }
 
         boolean proLicenseValid = LicenseServiceUtils.isProLicenseValid();
-        TelemetryConfigurationFactory telemetryConfigurationFactory = Scope.getCurrentScope().getSingleton(TelemetryConfigurationFactory.class);
+        AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
         if (proLicenseValid) {
-            Boolean enabled = BooleanUtils.and(new Boolean[]{telemetryConfigurationFactory.getPlugin().isProTelemetryEnabled(), userSuppliedEnabled});
+            Boolean enabled = BooleanUtils.and(new Boolean[]{analyticsConfigurationFactory.getPlugin().isProTelemetryEnabled(), userSuppliedEnabled});
             if (Boolean.FALSE.equals(enabled)) {
-                Scope.getCurrentScope().getLog(TelemetryArgs.class).info("Telemetry is disabled, because a pro license was detected and telemetry was not enabled by the user or because it was turned off by Liquibase.");
+                Scope.getCurrentScope().getLog(AnalyticsArgs.class).info("Telemetry is disabled, because a pro license was detected and telemetry was not enabled by the user or because it was turned off by Liquibase.");
             }
             return enabled;
         } else {
-            boolean enabled = telemetryConfigurationFactory.getPlugin().isOssTelemetryEnabled();
+            boolean enabled = analyticsConfigurationFactory.getPlugin().isOssTelemetryEnabled();
             if (Boolean.FALSE.equals(enabled)) {
-                Scope.getCurrentScope().getLog(TelemetryArgs.class).info("Telemetry is disabled, because it was turned off by Liquibase.");
+                Scope.getCurrentScope().getLog(AnalyticsArgs.class).info("Telemetry is disabled, because it was turned off by Liquibase.");
             }
             return enabled;
         }

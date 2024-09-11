@@ -3,7 +3,7 @@ package liquibase.analytics.configuration;
 import lombok.Data;
 
 @Data
-public class RemoteTelemetryConfiguration {
+public class RemoteAnalyticsConfiguration {
     private int timeoutMs;
     private String endpointData;
     private boolean sendOss;

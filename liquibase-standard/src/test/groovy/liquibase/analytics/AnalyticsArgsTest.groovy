@@ -1,21 +1,21 @@
 package liquibase.analytics
 
 import liquibase.Scope
-import liquibase.analytics.configuration.TelemetryArgs
-import liquibase.analytics.configuration.TelemetryConfiguration
-import liquibase.analytics.configuration.TelemetryConfigurationFactory
+import liquibase.analytics.configuration.AnalyticsArgs
+import liquibase.analytics.configuration.AnalyticsConfiguration
+import liquibase.analytics.configuration.AnalyticsConfigurationFactory
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class TelemetryArgsTest extends Specification {
+class AnalyticsArgsTest extends Specification {
 
     @Unroll
     def "test all permutations of options for enabling/disabling for oss"(Boolean userCliOption, boolean remoteOssEnabled, boolean isEnabled) {
         setup:
-        def telemetryConfigurationFactory = Scope.getCurrentScope().getSingleton(TelemetryConfigurationFactory.class)
+        def telemetryConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class)
         def existingConfig = telemetryConfigurationFactory.getPlugin()
         telemetryConfigurationFactory.removeInstance(existingConfig)
-        def mockConfig = new TelemetryConfiguration() {
+        def mockConfig = new AnalyticsConfiguration() {
             @Override
             int getPriority() {
                 return PRIORITY_SPECIALIZED
@@ -35,9 +35,9 @@ class TelemetryArgsTest extends Specification {
 
         when:
         Map<String, ?> scopeKeys = new HashMap<>()
-        scopeKeys.put(TelemetryArgs.ENABLED.getKey(), userCliOption)
+        scopeKeys.put(AnalyticsArgs.ENABLED.getKey(), userCliOption)
         Boolean actuallyEnabled = Scope.child(scopeKeys, () -> {
-            return TelemetryArgs.isTelemetryEnabled()
+            return AnalyticsArgs.isTelemetryEnabled()
         } as Scope.ScopedRunnerWithReturn)
 
         then:

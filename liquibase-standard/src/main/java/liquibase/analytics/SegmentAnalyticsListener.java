@@ -1,9 +1,9 @@
 package liquibase.analytics;
 
 import liquibase.Scope;
-import liquibase.analytics.configuration.SegmentTelemetryConfiguration;
-import liquibase.analytics.configuration.TelemetryArgs;
-import liquibase.analytics.configuration.TelemetryConfigurationFactory;
+import liquibase.analytics.configuration.SegmentAnalyticsConfiguration;
+import liquibase.analytics.configuration.AnalyticsArgs;
+import liquibase.analytics.configuration.AnalyticsConfigurationFactory;
 import liquibase.serializer.core.yaml.YamlSerializer;
 import liquibase.util.ExceptionUtil;
 import lombok.NoArgsConstructor;
@@ -18,13 +18,13 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 @NoArgsConstructor
-public class SegmentTelemetryListener implements TelemetryListener {
+public class SegmentAnalyticsListener implements AnalyticsListener {
 
     @Override
     public int getPriority() {
         boolean telemetryEnabled = false;
         try {
-            telemetryEnabled = TelemetryArgs.isTelemetryEnabled();
+            telemetryEnabled = AnalyticsArgs.isTelemetryEnabled();
         } catch (Exception e) {
             Scope.getCurrentScope().getLog(getClass()).fine("Failed to determine if telemetry is enabled", e);
         }
@@ -37,8 +37,8 @@ public class SegmentTelemetryListener implements TelemetryListener {
 
     @Override
     public void handleEvent(Event event) throws Exception {
-        TelemetryConfigurationFactory telemetryConfigurationFactory = Scope.getCurrentScope().getSingleton(TelemetryConfigurationFactory.class);
-        SegmentTelemetryConfiguration telemetryConfiguration = ((SegmentTelemetryConfiguration) telemetryConfigurationFactory.getPlugin());
+        AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
+        SegmentAnalyticsConfiguration telemetryConfiguration = ((SegmentAnalyticsConfiguration) analyticsConfigurationFactory.getPlugin());
         int timeoutMillis = telemetryConfiguration.getTimeoutMillis();
         Thread eventThread = new Thread(() -> {
             try {

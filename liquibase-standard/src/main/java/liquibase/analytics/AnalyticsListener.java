@@ -7,7 +7,7 @@ import liquibase.plugin.Plugin;
  * and is designed for handling events related to usage analytics. Implementations
  * of this interface should define how specific events are handled.
  */
-public interface TelemetryListener extends Plugin {
+public interface AnalyticsListener extends Plugin {
 
     int getPriority();
 

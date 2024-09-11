@@ -2,6 +2,9 @@ package liquibase.analytics
 
 import fi.iki.elonen.NanoHTTPD
 import liquibase.Scope
+import liquibase.analytics.configuration.AnalyticsArgs
+import liquibase.analytics.configuration.AnalyticsConfigurationFactory
+import liquibase.analytics.configuration.SegmentAnalyticsConfiguration
 import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
@@ -16,7 +19,7 @@ import spock.lang.Specification
 import java.util.concurrent.TimeUnit
 
 @LiquibaseIntegrationTest
-class TelemetryIntegrationTest extends Specification {
+class AnalyticsIntegrationTest extends Specification {
 
     @Shared
     private DatabaseTestSystem h2 = Scope.currentScope.getSingleton(TestSystemFactory).getTestSystem("h2") as DatabaseTestSystem
@@ -36,14 +39,14 @@ class TelemetryIntegrationTest extends Specification {
         // Start the webserver
         SimpleWebserver simpleWebserver = new SimpleWebserver()
         // Clear the cached telemetry config info that was loaded when the drop all command step executed automatically during test setup
-        liquibase.analytics.configuration.TelemetryConfigurationFactory telemetryConfigurationFactory = Scope.getCurrentScope().getSingleton(liquibase.analytics.configuration.TelemetryConfigurationFactory.class);
-        liquibase.analytics.configuration.SegmentTelemetryConfiguration telemetryConfiguration = ((liquibase.analytics.configuration.SegmentTelemetryConfiguration) telemetryConfigurationFactory.getPlugin());
+        AnalyticsConfigurationFactory telemetryConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
+        SegmentAnalyticsConfiguration telemetryConfiguration = ((SegmentAnalyticsConfiguration) telemetryConfigurationFactory.getPlugin());
         telemetryConfiguration.remoteTelemetryConfiguration.clearCache()
 
         when:
         Map<String, ?> scopeVars = new HashMap<>()
-        scopeVars.put(liquibase.analytics.configuration.TelemetryArgs.CONFIG_ENDPOINT_URL.getKey(), "http://localhost:" + simpleWebserver.port + "/config-segment.yaml")
-        scopeVars.put(liquibase.analytics.configuration.TelemetryArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getKey(), TimeUnit.SECONDS.toMillis(60)) // to allow for debugging, otherwise the thread gets killed fast
+        scopeVars.put(AnalyticsArgs.CONFIG_ENDPOINT_URL.getKey(), "http://localhost:" + simpleWebserver.port + "/config-segment.yaml")
+        scopeVars.put(AnalyticsArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getKey(), TimeUnit.SECONDS.toMillis(60)) // to allow for debugging, otherwise the thread gets killed fast
         Scope.child(scopeVars, () -> {
             CommandUtil.runDropAll(h2)
         } as Scope.ScopedRunner)
