@@ -1,11 +1,10 @@
-package liquibase.telemetry;
+package liquibase.analytics;
 
 import liquibase.Scope;
+import liquibase.analytics.configuration.SegmentAnalyticsConfiguration;
+import liquibase.analytics.configuration.AnalyticsArgs;
+import liquibase.analytics.configuration.AnalyticsConfigurationFactory;
 import liquibase.serializer.core.yaml.YamlSerializer;
-import liquibase.telemetry.configuration.SegmentTelemetryConfiguration;
-import liquibase.telemetry.configuration.TelemetryArgs;
-import liquibase.telemetry.configuration.TelemetryConfiguration;
-import liquibase.telemetry.configuration.TelemetryConfigurationFactory;
 import liquibase.util.ExceptionUtil;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.IOUtils;
@@ -19,17 +18,17 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 @NoArgsConstructor
-public class SegmentTelemetryListener implements TelemetryListener {
+public class SegmentAnalyticsListener implements AnalyticsListener {
 
     @Override
     public int getPriority() {
-        boolean telemetryEnabled = false;
+        boolean analyticsEnabled = false;
         try {
-            telemetryEnabled = TelemetryArgs.isTelemetryEnabled();
+            analyticsEnabled = AnalyticsArgs.isAnalyticsEnabled();
         } catch (Exception e) {
-            Scope.getCurrentScope().getLog(getClass()).fine("Failed to determine if telemetry is enabled", e);
+            Scope.getCurrentScope().getLog(getClass()).fine("Failed to determine if analytics is enabled", e);
         }
-        if (telemetryEnabled) {
+        if (analyticsEnabled) {
             return PRIORITY_SPECIALIZED;
         } else {
             return PRIORITY_NOT_APPLICABLE;
@@ -38,12 +37,12 @@ public class SegmentTelemetryListener implements TelemetryListener {
 
     @Override
     public void handleEvent(Event event) throws Exception {
-        TelemetryConfigurationFactory telemetryConfigurationFactory = Scope.getCurrentScope().getSingleton(TelemetryConfigurationFactory.class);
-        SegmentTelemetryConfiguration telemetryConfiguration = ((SegmentTelemetryConfiguration) telemetryConfigurationFactory.getPlugin());
-        int timeoutMillis = telemetryConfiguration.getTimeoutMillis();
+        AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
+        SegmentAnalyticsConfiguration analyticsConfiguration = ((SegmentAnalyticsConfiguration) analyticsConfigurationFactory.getPlugin());
+        int timeoutMillis = analyticsConfiguration.getTimeoutMillis();
         Thread eventThread = new Thread(() -> {
             try {
-                URL url = new URL(telemetryConfiguration.getDestinationUrl());
+                URL url = new URL(analyticsConfiguration.getDestinationUrl());
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -77,7 +76,7 @@ public class SegmentTelemetryListener implements TelemetryListener {
         try {
             eventThread.join(timeoutMillis);
         } catch (InterruptedException e) {
-            Scope.getCurrentScope().getLog(getClass()).fine("Interrupted while waiting for telemetry event processing to Segment.", e);
+            Scope.getCurrentScope().getLog(getClass()).fine("Interrupted while waiting for analytics event processing to Segment.", e);
         }
     }
 }

@@ -2,8 +2,8 @@ package liquibase.command;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.telemetry.Event;
-import liquibase.telemetry.TelemetryFactory;
+import liquibase.analytics.Event;
+import liquibase.analytics.AnalyticsFactory;
 import liquibase.configuration.*;
 import liquibase.database.Database;
 import liquibase.exception.CommandExecutionException;
@@ -290,8 +290,8 @@ public class CommandScope {
                     }
                     ExceptionUtil.doSilently(() -> {
                         if (parentAnalyticsEvent == null) {
-                            TelemetryFactory telemetryFactory = Scope.getCurrentScope().getSingleton(TelemetryFactory.class);
-                            telemetryFactory.handleEvent(analyticsEvent);
+                            AnalyticsFactory analyticsFactory = Scope.getCurrentScope().getSingleton(AnalyticsFactory.class);
+                            analyticsFactory.handleEvent(analyticsEvent);
                         } else {
                             parentAnalyticsEvent.getChildEvents().add(analyticsEvent);
                         }

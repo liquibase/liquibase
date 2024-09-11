@@ -1,6 +1,6 @@
 package liquibase;
 
-import liquibase.telemetry.Event;
+import liquibase.analytics.Event;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
