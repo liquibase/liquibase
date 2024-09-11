@@ -15,8 +15,7 @@ import java.util.logging.Level
 
 class LiquibaseCommandLineTest extends Specification {
 
-    def expectedHelpOutput = """
-Usage: liquibase [GLOBAL OPTIONS] [COMMAND] [COMMAND OPTIONS]
+    def expectedHelpOutput = """Usage: liquibase [GLOBAL OPTIONS] [COMMAND] [COMMAND OPTIONS]
 Command-specific help: "liquibase <command-name> --help"
 
 Global Options
@@ -48,6 +47,15 @@ Global Options
                                alwaysOverrideStoredLogicSchema', environment
                                variable:
                                'LIQUIBASE_ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA')
+
+      --analytics-enabled=PARAM
+                             Enable or disable sending product usage data and
+                               analytics to Liquibase. Learn more at https:
+                               //docs.liquibase.com/analytics. DEFAULT: true
+                               for OSS users | false for PRO users
+                             (defaults file: 'liquibase.analytics.enabled',
+                               environment variable:
+                               'LIQUIBASE_ANALYTICS_ENABLED')
 
       --auto-reorg=PARAM     Should Liquibase automatically include REORG TABLE
                                commands when needed?
@@ -452,15 +460,6 @@ Global Options
                              (defaults file: 'liquibase.suppressLiquibaseSql',
                                environment variable:
                                'LIQUIBASE_SUPPRESS_LIQUIBASE_SQL')
-
-      --analytics-enabled=PARAM
-                             Enable or disable sending product usage data and
-                               analytics to Liquibase. Learn more at https:
-                               //docs.liquibase.com/analytics. DEFAULT: true
-                               for OSS users | false for PRO users
-                             (defaults file: 'liquibase.analytics.enabled',
-                               environment variable:
-                               'LIQUIBASE_TELEMETRY_ENABLED')
 
       --trim-load-data-file-header=PARAM
                              If true column headers will be trimmed in case
