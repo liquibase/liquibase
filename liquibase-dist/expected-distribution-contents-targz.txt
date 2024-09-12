@@ -78,6 +78,8 @@
 │       ├── opencsv.jar
 │       ├── picocli.jar
 │       ├── postgresql.jar
+│       ├── slf4j-api.jar
+│       ├── slf4j-simple.jar
 │       ├── snakeyaml.jar
 │       ├── snowflake-jdbc.jar
 │       └── sqlite-jdbc.jar

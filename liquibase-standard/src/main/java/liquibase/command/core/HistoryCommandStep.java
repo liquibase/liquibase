@@ -1,52 +1,53 @@
 package liquibase.command.core;
 
+import liquibase.Scope;
+import liquibase.changelog.ChangeLogHistoryService;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
+import liquibase.changelog.RanChangeSet;
 import liquibase.command.*;
-import liquibase.configuration.ConfigurationValueObfuscator;
-import liquibase.exception.CommandExecutionException;
+import liquibase.database.Database;
+import liquibase.exception.LiquibaseException;
+import liquibase.logging.mdc.MdcKey;
+import liquibase.logging.mdc.MdcObject;
+import liquibase.logging.mdc.customobjects.History;
+import liquibase.util.TableOutput;
 
-public class HistoryCommandStep extends AbstractCliWrapperCommandStep {
+import java.io.PrintWriter;
+import java.text.DateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+
+
+public class HistoryCommandStep extends AbstractCommandStep {
 
     public static final String[] COMMAND_NAME = {"history"};
 
-    public static final CommandArgumentDefinition<String> URL_ARG;
-    public static final CommandArgumentDefinition<String> DEFAULT_SCHEMA_NAME_ARG;
-    public static final CommandArgumentDefinition<String> DEFAULT_CATALOG_NAME_ARG;
-    public static final CommandArgumentDefinition<String> USERNAME_ARG;
-    public static final CommandArgumentDefinition<String> PASSWORD_ARG;
-    public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
-    public static final CommandArgumentDefinition<String> DRIVER_ARG;
-    public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
     public static final CommandArgumentDefinition<HistoryFormat> FORMAT_ARG;
+    public static final CommandArgumentDefinition<DateFormat> DATE_FORMAT_ARG;
+    public static final CommandResultDefinition<DeploymentHistory> DEPLOYMENTS_RESULT;
+
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
-        URL_ARG = builder.argument(CommonArgumentNames.URL, String.class).required()
-                .description("The JDBC database connection URL").build();
-        DEFAULT_SCHEMA_NAME_ARG = builder.argument("defaultSchemaName", String.class)
-                .description("The default schema name to use for the database connection").build();
-        DEFAULT_CATALOG_NAME_ARG = builder.argument("defaultCatalogName", String.class)
-                .description("The default catalog name to use for the database connection").build();
-        DRIVER_ARG = builder.argument("driver", String.class)
-                .description("The JDBC driver class").build();
-        DRIVER_PROPERTIES_FILE_ARG = builder.argument("driverPropertiesFile", String.class)
-                .description("The JDBC driver properties file").build();
-        USERNAME_ARG = builder.argument(CommonArgumentNames.USERNAME, String.class)
-                .description("Username to use to connect to the database").build();
-        PASSWORD_ARG = builder.argument(CommonArgumentNames.PASSWORD, String.class)
-                .description("Password to use to connect to the database")
-                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
-                .build();
-        CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class)
-                .description("The root changelog").build();
         FORMAT_ARG = builder.argument("format", HistoryFormat.class)
                 .description("History output format")
                 .defaultValue(HistoryFormat.TABULAR)
                 .build();
+        DATE_FORMAT_ARG = builder.argument("dateFormat", DateFormat.class)
+                .defaultValue(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT), "Platform specific 'short' format")
+                .hidden()
+                .build();
+        DEPLOYMENTS_RESULT = builder.result("deployments", DeploymentHistory.class).build();
+    }
+
+    @Override
+    public List<Class<?>> requiredDependencies() {
+        return Collections.singletonList(Database.class);
     }
 
     @Override
     public String[][] defineCommandNames() {
-        return new String[][] { COMMAND_NAME };
+        return new String[][]{COMMAND_NAME};
     }
 
     @Override
@@ -55,7 +56,193 @@ public class HistoryCommandStep extends AbstractCliWrapperCommandStep {
     }
 
     @Override
-    protected String[] collectArguments(CommandScope commandScope) throws CommandExecutionException {
-        return collectArguments(commandScope, null, null);
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        try (PrintWriter output = new PrintWriter(resultsBuilder.getOutputStream())) {
+
+            CommandScope commandScope = resultsBuilder.getCommandScope();
+
+            DeploymentHistory deploymentHistory = new DeploymentHistory();
+
+            Database database = (Database) commandScope.getDependency(Database.class);
+
+            ChangeLogHistoryService historyService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
+
+            String headerMsg = "Liquibase History for " + database.getConnection().getURL();
+            output.println(headerMsg);
+            output.println("");
+
+            ReportPrinter deployment = null;
+            List<RanChangeSet> ranChangeSets = historyService.getRanChangeSets();
+            List<History.Changeset> mdcChangesets = new ArrayList<>(ranChangeSets.size());
+            for (RanChangeSet ranChangeSet : ranChangeSets) {
+                final String thisDeploymentId = ranChangeSet.getDeploymentId();
+                if (deployment == null || !Objects.equals(thisDeploymentId, deployment.getDeploymentId())) {
+                    if (deployment != null) {
+                        deployment.printReport(output);
+                    }
+                    deployment = DeploymentPrinterFactory.create(commandScope);
+                    deploymentHistory.deployments.add(deployment);
+                }
+                deployment.addChangeSet(ranChangeSet);
+                mdcChangesets.add(new History.Changeset(ranChangeSet));
+            }
+
+            if (deployment == null) {
+                output.println("No changesets deployed");
+            } else {
+                deployment.printReport(output);
+            }
+
+            try (MdcObject historyMdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.HISTORY, new History(database.getConnection().getURL(), ranChangeSets.size(), mdcChangesets))) {
+                Scope.getCurrentScope().getLog(getClass()).fine(headerMsg);
+            }
+
+            resultsBuilder.addResult(DEPLOYMENTS_RESULT, deploymentHistory);
+            output.flush();
+        }
+    }
+
+    public static class DeploymentHistory {
+        final List<ReportPrinter> deployments = new ArrayList<>();
+
+        @Override
+        public String toString() {
+            return deployments.size() + " past deployments";
+        }
+    }
+
+    interface ReportPrinter {
+        String getDeploymentId();
+
+        void addChangeSet(RanChangeSet changeSet);
+
+        void printReport(PrintWriter output) throws LiquibaseException;
+    }
+
+    static class DeploymentPrinterFactory {
+
+        static ReportPrinter create(CommandScope scope) {
+            switch (scope.getArgumentValue(FORMAT_ARG)) {
+                case TABULAR:
+                    return new TabularDeploymentDetails(scope);
+                case TEXT:
+                default:
+                    return new LegacyDeploymentDetails(scope);
+            }
+        }
+    }
+
+    public static class LegacyDeploymentDetails implements ReportPrinter {
+        private final CommandScope commandScope;
+        List<RanChangeSet> changeSets = new ArrayList<>();
+
+        public LegacyDeploymentDetails(CommandScope commandScope) {
+            this.commandScope = commandScope;
+        }
+
+        @Override
+        public void addChangeSet(RanChangeSet changeSet) {
+            changeSets.add(changeSet);
+        }
+
+        @Override
+        public void printReport(PrintWriter output) {
+            DateFormat dateFormat = commandScope.getArgumentValue(DATE_FORMAT_ARG);
+            if (dateFormat == null) {
+                dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
+            }
+
+            String executionTime = null;
+            RanChangeSet firstChangeSet = changeSets.get(0);
+            if (changeSets.size() > 1) {
+                RanChangeSet last = changeSets.get(changeSets.size() - 1);
+
+                long executionMs = last.getDateExecuted().getTime() - firstChangeSet.getDateExecuted().getTime();
+                executionTime = (executionMs / 1000F) + "s";
+            }
+            String message = "- Database updated at " + dateFormat.format(firstChangeSet.getDateExecuted()) + ". Applied " + changeSets.size() + " changeset(s)";
+
+            if (executionTime != null) {
+                message += " in " + executionTime;
+            }
+
+            message += ", DeploymentId: " + firstChangeSet.getDeploymentId();
+
+            output.println(message);
+
+            for (RanChangeSet changeSet : changeSets) {
+                output.println("  " + changeSet.toString());
+            }
+
+            output.println("");
+        }
+
+        @Override
+        public String getDeploymentId() {
+            return changeSets.stream()
+                    .findFirst()
+                    .map(RanChangeSet::getDeploymentId)
+                    .orElse(null);
+        }
+    }
+
+    public static class TabularDeploymentDetails implements ReportPrinter {
+
+        private static final List<String> HEADERS = Arrays.asList(
+                "Deployment ID",
+                "Update Date",
+                "Changelog Path",
+                "Changeset Author",
+                "Changeset ID",
+                "Tag");
+
+        private final List<RanChangeSet> changeSets;
+        private final CommandScope commandScope;
+
+        public TabularDeploymentDetails(CommandScope commandScope) {
+            this.commandScope = commandScope;
+            this.changeSets = new ArrayList<>();
+        }
+
+        @Override
+        public void addChangeSet(RanChangeSet changeSet) {
+            changeSets.add(changeSet);
+        }
+
+        @Override
+        public void printReport(PrintWriter output) throws LiquibaseException {
+            DateFormat dateFormat = getDateFormat();
+            List<List<String>> data = changeSets.stream()
+                    .map(
+                            changeSet -> Arrays.asList(
+                                    changeSet.getDeploymentId(),
+                                    dateFormat.format(changeSet.getDateExecuted()),
+                                    changeSet.getChangeLog(),
+                                    changeSet.getAuthor(),
+                                    changeSet.getId(),
+                                    changeSet.getTag() == null ? "" : changeSet.getTag()
+                            )
+                    )
+                    .collect(Collectors.toList());
+            data.add(0, HEADERS);
+            TableOutput.formatUnwrappedOutput(data, true, output);
+            output.println();
+        }
+
+        @Override
+        public String getDeploymentId() {
+            return changeSets.stream()
+                    .findFirst()
+                    .map(RanChangeSet::getDeploymentId)
+                    .orElse(null);
+        }
+
+        private DateFormat getDateFormat() {
+            DateFormat dateFormat = commandScope.getArgumentValue(DATE_FORMAT_ARG);
+            if (dateFormat == null) {
+                dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
+            }
+            return dateFormat;
+        }
     }
 }

@@ -5,7 +5,9 @@ import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.RanChangeSet
-import liquibase.command.core.InternalHistoryCommandStep
+import liquibase.command.core.HistoryCommandStep
+import liquibase.command.core.HistoryFormat
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.database.Database
 import liquibase.database.DatabaseConnection
 import liquibase.util.StringUtil
@@ -16,9 +18,9 @@ import java.text.SimpleDateFormat
 
 import static liquibase.servicelocator.PrioritizedService.PRIORITY_DATABASE
 
-class InternalHistoryCommandStepTest extends Specification {
+class HistoryCommandStepTest extends Specification {
 
-    InternalHistoryCommandStep historyCommand
+    HistoryCommandStep historyCommand
 
     ByteArrayOutputStream outputStream
 
@@ -40,7 +42,7 @@ class InternalHistoryCommandStepTest extends Specification {
         changeLogHistoryService.getPriority() >> PRIORITY_DATABASE
         changeLogHistoryServiceFactory.register(changeLogHistoryService)
 
-        historyCommand = new InternalHistoryCommandStep()
+        historyCommand = new HistoryCommandStep()
         outputStream = new ByteArrayOutputStream()
     }
 
@@ -50,10 +52,10 @@ class InternalHistoryCommandStepTest extends Specification {
 
     def "displays the history in tabular format"() {
         given:
-        def command = new CommandScope("history")
-                .addArgumentValue("database", database)
-                .addArgumentValue("dateFormat", new SimpleDateFormat("yyyy"))
-                .addArgumentValue("format", format)
+        def command = new CommandScope(HistoryCommandStep.COMMAND_NAME)
+                .provideDependency(Database.class, database)
+                .addArgumentValue(HistoryCommandStep.DATE_FORMAT_ARG, new SimpleDateFormat("yyyy"))
+                .addArgumentValue(HistoryCommandStep.FORMAT_ARG.getName(), format)
 
         def builder = new CommandResultsBuilder(command, outputStream)
 
@@ -90,10 +92,10 @@ Liquibase History for jdbc:some://url
 
     def "displays the history in text format"() {
         given:
-        def command = new CommandScope("history")
-                .addArgumentValue("database", database)
-                .addArgumentValue("dateFormat", new SimpleDateFormat("yyyy"))
-                .addArgumentValue("format", "text")
+        def command = new CommandScope(HistoryCommandStep.COMMAND_NAME)
+                .provideDependency(Database.class, database)
+                .addArgumentValue(HistoryCommandStep.DATE_FORMAT_ARG, new SimpleDateFormat("yyyy"))
+                .addArgumentValue(HistoryCommandStep.FORMAT_ARG, HistoryFormat.TEXT)
 
         def builder = new CommandResultsBuilder(command, outputStream)
 

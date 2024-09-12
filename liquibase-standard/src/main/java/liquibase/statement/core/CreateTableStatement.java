@@ -33,6 +33,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     private final Set<String> computedColumns = new HashSet<>();
 
     private boolean ifNotExists;
+    private boolean rowDependencies;
     private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
 
     public CreateTableStatement(String catalogName, String schemaName, String tableName) {
@@ -59,6 +60,16 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     public CreateTableStatement(String catalogName, String schemaName, String tableName, String remarks, String tableType, boolean ifNotExists) {
         this(catalogName, schemaName, tableName, remarks, tableType);
         this.ifNotExists = ifNotExists;
+    }
+
+    public CreateTableStatement(String catalogName, String schemaName, String tableName, boolean ifNotExists, boolean rowDependencies) {
+        this(catalogName, schemaName, tableName, ifNotExists);
+        this.rowDependencies = rowDependencies;
+    }
+
+    public CreateTableStatement(String catalogName, String schemaName, String tableName, String remarks, String tableType, boolean ifNotExists, boolean rowDependencies) {
+        this(catalogName, schemaName, tableName, remarks, tableType, ifNotExists);
+        this.rowDependencies = rowDependencies;
     }
 
     public String getCatalogName() {
@@ -302,4 +313,13 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     public void setIfNotExists(boolean ifNotExists) {
         this.ifNotExists = ifNotExists;
     }
+
+    public boolean isRowDependencies() {
+        return rowDependencies;
+    }
+
+    public void setRowDependencies(boolean rowDependencies) {
+        this.rowDependencies = rowDependencies;
+    }
+
 }
