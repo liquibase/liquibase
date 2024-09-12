@@ -58,6 +58,7 @@ public class SegmentAnalyticsListener implements AnalyticsListener {
 
                 SegmentBatch segmentBatch = SegmentBatch.fromLiquibaseEvent(event);
                 String jsonInputString = YamlSerializer.removeClassTypeMarksFromSerializedJson(yaml.dumpAs(segmentBatch, Tag.MAP, DumperOptions.FlowStyle.FLOW));
+                // This log message is purposefully being logged at fine level, not using the configurable log-level param, so that users always know what is being sent to Segment.
                 Scope.getCurrentScope().getLog(getClass()).fine("Sending analytics to Segment. " + segmentBatch);
 
                 IOUtils.write(jsonInputString, conn.getOutputStream(), StandardCharsets.UTF_8);
