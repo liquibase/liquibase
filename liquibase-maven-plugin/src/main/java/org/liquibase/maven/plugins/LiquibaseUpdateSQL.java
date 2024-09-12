@@ -5,6 +5,7 @@ import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import liquibase.util.StringUtil;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.liquibase.maven.property.PropertyElement;
 
@@ -40,8 +41,10 @@ public class LiquibaseUpdateSQL extends AbstractLiquibaseUpdateMojo {
 	protected void doUpdate(Liquibase liquibase) throws LiquibaseException {
 		if (changesToApply > 0) {
 			liquibase.updateCountSql(changesToApply, new Contexts(contexts), new LabelExpression(getLabelFilter()), outputWriter);
-		} else {
+		} else if (StringUtil.isNotEmpty(toTag)) {
 			liquibase.updateToTagSql(toTag, new Contexts(contexts), new LabelExpression(getLabelFilter()), outputWriter);
+		} else {
+			liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()), outputWriter);
 		}
 	}
 

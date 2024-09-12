@@ -43,7 +43,7 @@ jobs:
     - run: |
         echo "Version to delete ${{ steps.version.outputs.ids }} for ${{ needs.extract-branch-info.outputs.branch_name }}-SNAPSHOT"
     
-    - uses: actions/delete-package-versions@v3
+    - uses: actions/delete-package-versions@v5
       if: ${{ steps.version.outputs.ids != '' }}
       with:
         package-type: maven
