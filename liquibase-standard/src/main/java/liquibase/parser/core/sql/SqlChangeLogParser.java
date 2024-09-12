@@ -1,21 +1,33 @@
 package liquibase.parser.core.sql;
 
+import liquibase.ChecksumVersion;
 import liquibase.Scope;
+import liquibase.change.Change;
+import liquibase.change.CheckSum;
 import liquibase.change.core.RawSQLChange;
-import liquibase.changelog.ChangeLogParameters;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.*;
 import liquibase.changeset.ChangeSetService;
 import liquibase.changeset.ChangeSetServiceFactory;
+import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.ChangeLogParseException;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
+import liquibase.snapshot.SnapshotControl;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @SuppressWarnings("java:S2583")
 public class SqlChangeLogParser implements ChangeLogParser {
@@ -39,11 +51,11 @@ public class SqlChangeLogParser implements ChangeLogParser {
         RawSQLChange change = new RawSQLChange();
 
         try {
-            Resource sqlResource = resourceAccessor.getExisting(physicalChangeLogLocation);
-            String sql = StreamUtil.readStreamAsString(sqlResource.openInputStream());
             //
             // Handle empty files with a WARNING message
             //
+            Resource sqlResource = resourceAccessor.getExisting(physicalChangeLogLocation);
+            String sql = StreamUtil.readStreamAsString(sqlResource.openInputStream());
             if (StringUtil.isEmpty(sql)) {
                 String message = String.format("Unable to parse empty file '%s'", physicalChangeLogLocation);
                 Scope.getCurrentScope().getLog(getClass()).warning(message);
@@ -56,10 +68,11 @@ public class SqlChangeLogParser implements ChangeLogParser {
         change.setSplitStatements(false);
         change.setStripComments(false);
 
+        Database database = Scope.getCurrentScope().getDatabase();
         ChangeSetServiceFactory factory = ChangeSetServiceFactory.getInstance();
         ChangeSetService service = factory.createChangeSetService();
         ChangeSet changeSet =
-           service.createChangeSet("raw", "includeAll",
+           service.createChangeSet(generateId(physicalChangeLogLocation, database), "includeAll",
                 false, false, physicalChangeLogLocation, null,
                   null, null, null, true,
                          ObjectQuotingStrategy.LEGACY, changeLog);
@@ -68,5 +81,60 @@ public class SqlChangeLogParser implements ChangeLogParser {
         changeLog.addChangeSet(changeSet);
 
         return changeLog;
+    }
+
+    /**
+     *
+     * Generate an change set ID based on the SQL file path, unless there is an existing
+     * ran change set with an id/author of "raw::includeAll", which has always been
+     * the hardcoded combination for SQL changelog change sets
+     *
+     * @param   physicalChangeLogLocation    the path to the changelog
+     * @param   database                     the database we are using
+     * @return  String                       a change set ID
+     *
+     */
+    private String generateId(String physicalChangeLogLocation, Database database) {
+        if (database == null || isOldFormat(database)) {
+            return "raw";
+        }
+
+        List<RanChangeSet> ranChangeSets = new ArrayList<>();
+        try {
+            ranChangeSets = new ArrayList<>(
+               Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getRanChangeSets());
+        } catch (Exception dbe) {
+            return "raw";
+        }
+
+        Optional<RanChangeSet> ranChangeSet =
+            ranChangeSets.stream().filter(rc -> {
+                return rc.getId().equals("raw") &&
+                       rc.getAuthor().equals("includeAll") &&
+                       rc.getChangeLog().equals(physicalChangeLogLocation);
+            }).findFirst();
+        if (ranChangeSet.isPresent()) {
+            return "raw";
+        }
+        return "raw_" + DatabaseChangeLog.normalizePath(physicalChangeLogLocation).replace("/", "_");
+    }
+
+    /**
+     *
+     * Handle the possibility that the changelog is an old format
+     *
+     * @param   database          The database in question
+     * @return  boolean
+     *
+     */
+    private static boolean isOldFormat(Database database) {
+        Table changeLogTable = null;
+        try {
+            changeLogTable = SnapshotGeneratorFactory.getInstance().getDatabaseChangeLogTable(new SnapshotControl
+                    (database, false, Table.class, Column.class), database);
+        } catch (LiquibaseException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+        return changeLogTable != null && changeLogTable.getColumn("ORDEREXECUTED") == null;
     }
 }

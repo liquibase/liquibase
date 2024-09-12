@@ -1,5 +1,6 @@
 package liquibase.dbtest.oracle;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
@@ -41,13 +42,15 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
     String viewOnSchemaChangeLog;
     String customExecutorChangeLog;
     String indexWithAssociatedWithChangeLog;
+    String strictChangelog;
 
     public OracleIntegrationTest() throws Exception {
         super("oracle", DatabaseFactory.getInstance().getDatabase("oracle"));
-         indexOnSchemaChangeLog = "changelogs/oracle/complete/indexOnSchema.xml";
-         viewOnSchemaChangeLog = "changelogs/oracle/complete/viewOnSchema.xml";
-         customExecutorChangeLog = "changelogs/oracle/complete/sqlplusExecutor.xml";
-         indexWithAssociatedWithChangeLog = "changelogs/common/index.with.associatedwith.changelog.xml";
+        indexOnSchemaChangeLog = "changelogs/oracle/complete/indexOnSchema.xml";
+        viewOnSchemaChangeLog = "changelogs/oracle/complete/viewOnSchema.xml";
+        customExecutorChangeLog = "changelogs/oracle/complete/sqlplusExecutor.xml";
+        indexWithAssociatedWithChangeLog = "changelogs/common/index.with.associatedwith.changelog.xml";
+        strictChangelog = "changelogs/oracle/complete/strict.changelog.xml";
         // Respect a user-defined location for sqlnet.ora, tnsnames.ora etc. stored in the environment
         // variable TNS_ADMIN. This allowes the use of TNSNAMES.
         if (System.getenv("TNS_ADMIN") != null)
@@ -125,10 +128,6 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
             e.printDescriptiveError(System.out);
             throw e;
         }
-
-
-
-
     }
 
     @Test
@@ -215,7 +214,6 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
         } finally {
             clearDatabase();
         }
-
     }
 
     @Test
@@ -235,5 +233,21 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
 
         String generatedChangeLog = baos.toString();
         assertTrue("Text '" + textToTest + "' not found in generated change log: " + generatedChangeLog, generatedChangeLog.contains(textToTest));
+    }
+
+    @Test
+    public void verifySlashReplacementOnStrictMode() throws DatabaseException {
+        assumeNotNull(getDatabase());
+        try {
+            Scope.child(GlobalConfiguration.STRICT.getKey(), true, () -> {
+                Database database = getDatabase();
+                CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME);
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
+                commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, strictChangelog);
+                commandScope.execute();
+            });
+        } catch (Exception e) {
+            Assert.fail("Should not fail. Reason: " + e.getMessage());
+        }
     }
 }
