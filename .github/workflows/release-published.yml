@@ -57,7 +57,7 @@ jobs:
     outputs:
       tag: ${{ steps.collect-data.outputs.tag }}
       version: ${{ steps.collect-data.outputs.version }}
-      ref_branch: $${{ steps.ref-branch.outputs.branch }}
+      ref_branch: ${{ steps.ref-branch.outputs.branch }}
     steps:
       - name: Collect Data
         id: collect-data
