@@ -114,7 +114,9 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
             logMdc(url, database);
             return database;
         } else {
-            return commandScope.getArgumentValue(DATABASE_ARG);
+            Database database = commandScope.getArgumentValue(DATABASE_ARG);
+            logMdc(database.getConnection().getURL(), database);
+            return database;
         }
     }
 
