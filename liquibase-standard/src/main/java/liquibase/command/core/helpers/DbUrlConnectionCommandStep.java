@@ -100,24 +100,23 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
      * @throws DatabaseException Thrown when there is a connection error
      */
     public Database obtainDatabase(CommandScope commandScope) throws DatabaseException {
-        if (commandScope.getArgumentValue(DATABASE_ARG) == null) {
+        Database database = commandScope.getArgumentValue(DATABASE_ARG);
+        if (database == null) {
             String url = commandScope.getArgumentValue(URL_ARG);
-            String username = commandScope.getArgumentValue(USERNAME_ARG);
-            String password = commandScope.getArgumentValue(PASSWORD_ARG);
-            String defaultSchemaName = commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.DEFAULT_SCHEMA_NAME_ARG);
-            String defaultCatalogName = commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.DEFAULT_CATALOG_NAME_ARG);
-            String driver = getDriver(commandScope);
-            String driverPropertiesFile = commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.DRIVER_PROPERTIES_FILE_ARG);
-            Database database = createDatabaseObject(url, username, password, defaultSchemaName, defaultCatalogName, driver, driverPropertiesFile,
-                    StringUtil.trimToNull(GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValue()),
-                    StringUtil.trimToNull(GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentValue()));
-            logMdc(url, database);
-            return database;
-        } else {
-            Database database = commandScope.getArgumentValue(DATABASE_ARG);
-            logMdc(database.getConnection().getURL(), database);
-            return database;
+            database = createDatabaseObject(
+                url,
+                commandScope.getArgumentValue(USERNAME_ARG),
+                commandScope.getArgumentValue(PASSWORD_ARG),
+                commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.DEFAULT_SCHEMA_NAME_ARG),
+                commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.DEFAULT_CATALOG_NAME_ARG),
+                getDriver(commandScope),
+                commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.DRIVER_PROPERTIES_FILE_ARG),
+                StringUtil.trimToNull(GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValue()),
+                StringUtil.trimToNull(GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentValue())
+            );
         }
+        logMdc(database.getConnection().getURL(), database);
+        return database;
     }
 
     private static String getDriver(CommandScope commandScope) {
