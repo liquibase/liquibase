@@ -26,7 +26,7 @@ public class SegmentAnalyticsListener implements AnalyticsListener {
         try {
             analyticsEnabled = AnalyticsArgs.isAnalyticsEnabled();
         } catch (Exception e) {
-            Scope.getCurrentScope().getLog(getClass()).fine("Failed to determine if analytics is enabled", e);
+            Scope.getCurrentScope().getLog(getClass()).log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Failed to determine if analytics is enabled", e);
         }
         if (analyticsEnabled) {
             return PRIORITY_SPECIALIZED;
@@ -66,7 +66,7 @@ public class SegmentAnalyticsListener implements AnalyticsListener {
                 String responseBody = ExceptionUtil.doSilently(() -> {
                     return IOUtils.toString(conn.getInputStream());
                 });
-                Scope.getCurrentScope().getLog(getClass()).fine("Response from Segment: " + responseCode + " " + responseBody);
+                Scope.getCurrentScope().getLog(getClass()).log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Response from Segment: " + responseCode + " " + responseBody, null);
                 conn.disconnect();
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -76,7 +76,7 @@ public class SegmentAnalyticsListener implements AnalyticsListener {
         try {
             eventThread.join(timeoutMillis);
         } catch (InterruptedException e) {
-            Scope.getCurrentScope().getLog(getClass()).fine("Interrupted while waiting for analytics event processing to Segment.", e);
+            Scope.getCurrentScope().getLog(getClass()).log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Interrupted while waiting for analytics event processing to Segment.", e);
         }
     }
 }

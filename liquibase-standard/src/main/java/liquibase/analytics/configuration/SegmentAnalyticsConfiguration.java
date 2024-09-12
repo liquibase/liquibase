@@ -20,7 +20,7 @@ public class SegmentAnalyticsConfiguration implements AnalyticsConfiguration {
                 Yaml yaml = new Yaml();
                 remoteAnalyticsConfiguration.set(yaml.loadAs(input, RemoteAnalyticsConfiguration.class));
             } catch (Exception e) {
-                Scope.getCurrentScope().getLog(SegmentAnalyticsConfiguration.class).fine("Failed to load analytics configuration from " + url, e);
+                Scope.getCurrentScope().getLog(SegmentAnalyticsConfiguration.class).log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Failed to load analytics configuration from " + url, e);
             }
         });
         thread.start();
