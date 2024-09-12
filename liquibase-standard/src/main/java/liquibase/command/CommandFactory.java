@@ -3,6 +3,7 @@ package liquibase.command;
 import liquibase.Scope;
 import liquibase.SingletonObject;
 import liquibase.servicelocator.ServiceLocator;
+import liquibase.util.CollectionUtil;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StringUtil;
 
@@ -160,11 +161,15 @@ public class CommandFactory implements SingletonObject {
      */
     public SortedSet<CommandDefinition> getCommands(boolean includeInternal) {
         Map<String, String[]> commandNames = new HashMap<>();
-        for (CommandStep step : findAllInstances()) {
+        Collection<CommandStep> allFoundInstances = findAllInstances();
+        for (CommandStep step : allFoundInstances) {
             String[][] names = step.defineCommandNames();
             if (names != null) {
                 for (String[] name : names) {
-                    commandNames.put(StringUtil.join(name, " "), name);
+                    String key = StringUtil.join(name, " ");
+                    if (! step.isStub() || findKeyInMapIgnoreCase(key, commandNames) == null) {
+                        commandNames.put(key, name);
+                    }
                 }
             }
         }
@@ -183,6 +188,15 @@ public class CommandFactory implements SingletonObject {
 
         return Collections.unmodifiableSortedSet(commands);
 
+    }
+    private static String findKeyInMapIgnoreCase(String key, Map<String, String[]> map) {
+        for (Map.Entry<String, String[]> mapEntry : map.entrySet()) {
+            String actualKey = mapEntry.getKey();
+            if (actualKey.equalsIgnoreCase(key)) {
+                return actualKey;
+            }
+        }
+        return null;
     }
 
     /**
@@ -256,6 +270,11 @@ public class CommandFactory implements SingletonObject {
 
             ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
             this.allInstances.addAll(serviceLocator.findInstances(CommandStep.class));
+            //
+            // Sort all command stubs to the bottom of the list so that any non-stubs
+            // will come first
+            //
+            ((List<CommandStep>) this.allInstances).sort(Comparator.comparing(CommandStep::isStub));
         }
 
         return this.allInstances;
