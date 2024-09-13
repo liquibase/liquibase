@@ -16,8 +16,6 @@ public class RemoteAnalyticsConfiguration {
     private List<ExtensionName> extensions;
 
     @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class ExtensionName {
         /**
          * The name of the extension in the manifest file.
