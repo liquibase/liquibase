@@ -91,10 +91,10 @@ class AnalyticsIntegrationTest extends Specification {
         properties.get("ext_dynamoDb") == "null"
         properties.get("ext_googleBigQuery") == "null"
         properties.get("ext_hashicorpVault") == "null"
+        properties.get("ext_mongoDb") == "null"
         properties.get("javaVersion") == SystemUtil.getJavaVersion()
         properties.get("liquibaseInterface") == "null"
         properties.get("liquibaseVersion") == LiquibaseUtil.getBuildVersionInfo()
-        properties.get("mongoDbVersion") == "null"
         properties.get("operationOutcome") == "success"
         properties.get("os") == System.getProperty("os.name")
         properties.get("osArch") == System.getProperty("os.arch")
@@ -127,6 +127,23 @@ endpointData: http://localhost:$port/v1/batch
 sendOss: true
 sendPro: true
 writeKey: ${writeKey}
+extensions:
+- manifestName: Liquibase MongoDB Commercial Extension
+  displayName: ext_mongoDb
+- manifestName: Liquibase DynamoDB Commercial Extension
+  displayName: ext_dynamoDb
+- manifestName: Checks Extension
+  displayName: ext_checks
+- manifestName: AWS Secrets Manager Extension
+  displayName: ext_awsSecrets
+- manifestName: S3 Remote Accessor Extension
+  displayName: ext_awsS3
+- manifestName: HashiCorp Vault Extension
+  displayName: ext_hashicorpVault
+- manifestName: Liquibase BigQuery Commercial Extension
+  displayName: ext_googleBigQuery
+- manifestName: Liquibase Commercial Databricks Extension
+  displayName: ext_databricks
 """)
         }
         if (session.getUri().equals("/v1/batch") && session.getMethod() == Method.POST) {
