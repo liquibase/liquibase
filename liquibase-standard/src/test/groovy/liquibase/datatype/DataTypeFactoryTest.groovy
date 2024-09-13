@@ -99,8 +99,8 @@ class DataTypeFactoryTest extends Specification {
         "nchar(4000)"                                  | new MSSQLDatabase()    | "nchar(4000)"                                  | NCharType     | false
         "[nchar](4000)"                                | new MSSQLDatabase()    | "nchar(4000)"                                  | NCharType     | false
         "nclob"                                        | new MSSQLDatabase()    | "nvarchar(MAX)"                                | ClobType      | false
-        "ntext"                                        | new MSSQLDatabase()    | "nvarchar (max)"                               | ClobType      | false
-        "[ntext]"                                      | new MSSQLDatabase()    | "nvarchar (max)"                               | ClobType      | false
+        "ntext"                                        | new MSSQLDatabase()    | "nvarchar (max)"                               | NVarcharType      | false
+        "[ntext]"                                      | new MSSQLDatabase()    | "nvarchar (max)"                               | NVarcharType      | false
         "number"                                       | new MSSQLDatabase()    | "numeric(18, 0)"                               | NumberType    | false
         "numeric"                                      | new MSSQLDatabase()    | "numeric(18, 0)"                               | NumberType    | false
         "[numeric]"                                    | new MSSQLDatabase()    | "numeric(18, 0)"                               | NumberType    | false
@@ -125,8 +125,8 @@ class DataTypeFactoryTest extends Specification {
         "sql_variant"                                  | new MSSQLDatabase()    | "sql_variant"                                  | UnknownType   | false
         "[sql_variant]"                                | new MSSQLDatabase()    | "sql_variant"                                  | UnknownType   | false
         "sql_variant(5, 6)"                            | new MSSQLDatabase()    | "sql_variant"                                  | UnknownType   | false
-        "text"                                         | new MSSQLDatabase()    | "varchar (max)"                                | ClobType      | false
-        "[text]"                                       | new MSSQLDatabase()    | "varchar (max)"                                | ClobType      | false
+        "text"                                         | new MSSQLDatabase()    | "varchar (max)"                                | VarcharType      | false
+        "[text]"                                       | new MSSQLDatabase()    | "varchar (max)"                                | VarcharType      | false
         "time"                                         | new MSSQLDatabase()    | "time"                                         | TimeType      | false
         "[time]"                                       | new MSSQLDatabase()    | "time"                                         | TimeType      | false
         "time(6)"                                      | new MSSQLDatabase()    | "time(6)"                                      | TimeType      | false
@@ -175,16 +175,16 @@ class DataTypeFactoryTest extends Specification {
         "[nchar] COLLATE Latin1_General_BIN"           | new MSSQLDatabase()    | "nchar(1) COLLATE Latin1_General_BIN"          | NCharType     | false
         "nchar(255) COLLATE Latin1_General_BIN"        | new MSSQLDatabase()    | "nchar(255) COLLATE Latin1_General_BIN"        | NCharType     | false
         "[nchar](255) COLLATE Latin1_General_BIN"      | new MSSQLDatabase()    | "nchar(255) COLLATE Latin1_General_BIN"        | NCharType     | false
-        "ntext COLLATE Latin1_General_BIN"             | new MSSQLDatabase()    | "nvarchar (max) COLLATE Latin1_General_BIN"    | ClobType      | false
-        "[ntext] COLLATE Latin1_General_BIN"           | new MSSQLDatabase()    | "nvarchar (max) COLLATE Latin1_General_BIN"    | ClobType      | false
+        "ntext COLLATE Latin1_General_BIN"             | new MSSQLDatabase()    | "nvarchar (max) COLLATE Latin1_General_BIN"    | NVarcharType      | false
+        "[ntext] COLLATE Latin1_General_BIN"           | new MSSQLDatabase()    | "nvarchar (max) COLLATE Latin1_General_BIN"    | NVarcharType      | false
         "nvarchar COLLATE Latin1_General_BIN"          | new MSSQLDatabase()    | "nvarchar(1) COLLATE Latin1_General_BIN"       | NVarcharType  | false
         "[nvarchar] COLLATE Latin1_General_BIN"        | new MSSQLDatabase()    | "nvarchar(1) COLLATE Latin1_General_BIN"       | NVarcharType  | false
         "nvarchar(255) COLLATE Latin1_General_BIN"     | new MSSQLDatabase()    | "nvarchar(255) COLLATE Latin1_General_BIN"     | NVarcharType  | false
         "[nvarchar](255) COLLATE Latin1_General_BIN"   | new MSSQLDatabase()    | "nvarchar(255) COLLATE Latin1_General_BIN"     | NVarcharType  | false
         "nvarchar(MAX) COLLATE Latin1_General_BIN"     | new MSSQLDatabase()    | "nvarchar(MAX) COLLATE Latin1_General_BIN"     | NVarcharType  | false
         "[nvarchar](MAX) COLLATE Latin1_General_BIN"   | new MSSQLDatabase()    | "nvarchar(MAX) COLLATE Latin1_General_BIN"     | NVarcharType  | false
-        "text COLLATE Latin1_General_BIN"              | new MSSQLDatabase()    | "varchar (max) COLLATE Latin1_General_BIN"     | ClobType      | false
-        "[text] COLLATE Latin1_General_BIN"            | new MSSQLDatabase()    | "varchar (max) COLLATE Latin1_General_BIN"     | ClobType      | false
+        "text COLLATE Latin1_General_BIN"              | new MSSQLDatabase()    | "varchar (max) COLLATE Latin1_General_BIN"     | VarcharType      | false
+        "[text] COLLATE Latin1_General_BIN"            | new MSSQLDatabase()    | "varchar (max) COLLATE Latin1_General_BIN"     | VarcharType      | false
         "varchar COLLATE Latin1_General_BIN"           | new MSSQLDatabase()    | "varchar(1) COLLATE Latin1_General_BIN"        | VarcharType   | false
         "[varchar] COLLATE Latin1_General_BIN"         | new MSSQLDatabase()    | "varchar(1) COLLATE Latin1_General_BIN"        | VarcharType   | false
         "varchar(255) COLLATE Latin1_General_BIN"      | new MSSQLDatabase()    | "varchar(255) COLLATE Latin1_General_BIN"      | VarcharType   | false
@@ -208,9 +208,9 @@ class DataTypeFactoryTest extends Specification {
         "BIGINT UNSIGNED"                              | new MySQLDatabase()    | "BIGINT UNSIGNED"                              | BigIntType    | false
         "BINARY(16)"                                   | new MySQLDatabase()    | "BINARY(16)"                                   | BlobType      | false
         "tinyblob"                                     | new MySQLDatabase()    | "TINYBLOB"                                     | BlobType      | false
-        "tinytext"                                     | new MySQLDatabase()    | "TINYTEXT"                                     | ClobType      | false
+        "tinytext"                                     | new MySQLDatabase()    | "TINYTEXT"                                     | VarcharType      | false
         "mediumblob"                                   | new MySQLDatabase()    | "MEDIUMBLOB"                                   | BlobType      | false
-        "mediumtext"                                   | new MySQLDatabase()    | "MEDIUMTEXT"                                   | ClobType      | false
+        "mediumtext"                                   | new MySQLDatabase()    | "MEDIUMTEXT"                                   | VarcharType      | false
         "real"                                         | new MySQLDatabase()    | "REAL"                                         | FloatType     | false
         "nclob"                                        | new OracleDatabase()   | "NCLOB"                                        | ClobType      | false
         "xml"                                          | new OracleDatabase()   | "XMLTYPE"                                      | XMLType       | false
@@ -270,8 +270,8 @@ class DataTypeFactoryTest extends Specification {
         "TINYINT(20)"                                  | new SybaseDatabase()   | "TINYINT"                                      | TinyIntType   | false
         "long binary"                                  | new SybaseDatabase()   | "IMAGE"                                        | BlobType      | false
         "long varbinary"                               | new SybaseDatabase()   | "IMAGE"                                        | BlobType      | false
-        "long varchar"                                 | new SybaseDatabase()   | "TEXT"                                         | ClobType      | false
-        "long nvarchar"                                | new SybaseDatabase()   | "TEXT"                                         | ClobType      | false
+        "long varchar"                                 | new SybaseDatabase()   | "TEXT"                                         | VarcharType      | false
+        "long nvarchar"                                | new SybaseDatabase()   | "TEXT"                                         | NVarcharType      | false
         "character varying"                            | new SybaseDatabase()   | "VARCHAR"                                      | VarcharType   | false
         "uuid"                                         | new MariaDBDatabase()  | "UUID"                                         | UUIDType      | false
     }

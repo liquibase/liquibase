@@ -1,0 +1,29 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+  http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+    
+    
+    <changeSet id="createTableWithClobTypes" author="tfernandez">
+        <createTable tableName="testClobText">
+            <column name="text" type="text"/>
+            <column name="nText" type="ntext"/>
+            <column name="longText" type="longtext"/>
+            <column name="longVarchar" type="longvarchar"/>
+            <column name="longVarchar2" type="long varchar"/>
+            <column name="longNVarchar" type="longnvarchar"/>
+            <column name="longNVarchar2" type="long nvarchar"/>
+            <column name="tinyText" type="tinytext"/>
+            <column name="mediumText" type="mediumtext"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="loadDataWithClobTypes" author="tfernandez">
+        <loadData tableName="testClobText" file="liquibase/change/core/sample.data.with.text.clob.types.csv"/>
+    </changeSet>
+    
+</databaseChangeLog>

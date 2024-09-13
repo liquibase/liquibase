@@ -60,7 +60,6 @@ class LoadDataChangeTest extends StandardChangeTest {
         mockDb.setConnection((DatabaseConnection) null)
     }
 
-
     def "loadDataEmpty database agnostic"() throws Exception {
         when:
         LoadDataChange refactoring = new LoadDataChange()

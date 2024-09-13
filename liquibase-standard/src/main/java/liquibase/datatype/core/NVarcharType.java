@@ -11,7 +11,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Locale;
 
-@DataTypeInfo(name="nvarchar", aliases = {"java.sql.Types.NVARCHAR", "nvarchar2", "national"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name="nvarchar", aliases = {"java.sql.Types.NVARCHAR", "nvarchar2", "national", "longnvarchar", "ntext", "java.sql.Types.LONGNVARCHAR", "long nvarchar"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class NVarcharType extends CharType {
 
     @Override

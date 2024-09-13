@@ -10,7 +10,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Locale;
 
-@DataTypeInfo(name="varchar", aliases = {"java.sql.Types.VARCHAR", "java.lang.String", "varchar2", "character varying"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name="varchar", aliases = {"java.lang.String", "varchar2", "character varying", "longvarchar", "text", "longtext", "java.sql.Types.LONGVARCHAR", "long varchar", "tinytext", "mediumtext", "java.sql.Types.VARCHAR"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class VarcharType extends CharType {
 
     @Override

@@ -1,0 +1,11 @@
+databaseChangeLog:
+- changeSet:
+    id: '1'
+    author: nvoxland
+    objectQuotingStrategy: LEGACY
+    rollback:
+      sqlFile:
+        path: test/rollbackFile.sql
+        splitStatements: true
+        stripComments: false
+
