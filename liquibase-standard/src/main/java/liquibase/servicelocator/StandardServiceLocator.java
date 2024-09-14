@@ -3,8 +3,10 @@ package liquibase.servicelocator;
 import liquibase.Scope;
 import liquibase.exception.ServiceNotFoundException;
 import liquibase.logging.Logger;
+import liquibase.util.SystemUtil;
 
 import java.util.*;
+import java.util.logging.Level;
 
 public class StandardServiceLocator implements ServiceLocator {
 
@@ -26,7 +28,6 @@ public class StandardServiceLocator implements ServiceLocator {
                 allInstances.add(service);
             } catch (Throwable e) {
                 new ServiceLoadExceptionHandler().handleException(e);
-                log.fine(e.getMessage(), e);
             }
         }
 
@@ -39,8 +40,11 @@ public class StandardServiceLocator implements ServiceLocator {
      */
     static class ServiceLoadExceptionHandler {
         void handleException(Throwable e) {
-            Logger log = Scope.getCurrentScope().getLog(getClass());
-            log.info("Cannot load service", e);
+            Level level = Level.INFO;
+            if (e instanceof UnsupportedClassVersionError && !SystemUtil.isAtLeastJava11() && e.getMessage().contains("BigQuery")) {
+                level = Level.FINE;
+            }
+            Scope.getCurrentScope().getLog(getClass()).log(level,"Cannot load service: " + e.getMessage(), e);
         }
     }
 }

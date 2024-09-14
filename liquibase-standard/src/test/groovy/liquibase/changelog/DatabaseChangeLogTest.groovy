@@ -275,6 +275,7 @@ create view sql_view as select * from sql_table;'''
                 "com/example/test.sql" : testSql
         ])
 
+        Database database = new MockDatabase();
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
         rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
         rootChangeLog.getChangeLogParameters().set("loginUser", "testUser")
@@ -415,7 +416,7 @@ create view sql_view as select * from sql_table;'''
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
         changeLogFile
-                .includeAll("com/example/children", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false, 0,
+                .includeAll("com/example/children", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false, null, 0,
                         Integer.MAX_VALUE)
 
         then:
@@ -486,7 +487,7 @@ create view sql_view as select * from sql_table;'''
                 "com/example/not/fileX.sql"     : "file X",
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("com/example/missing", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false, 0, Integer.MAX_VALUE)
+        changeLogFile.includeAll("com/example/missing", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false, null, 0, Integer.MAX_VALUE)
 
         then:
         def e = thrown(SetupException)
@@ -515,7 +516,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
                 "include-all-dir/include-all.xml": changelogText,
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("include-all-dir", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false, 0, Integer.MAX_VALUE)
+        changeLogFile.includeAll("include-all-dir", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false, null, 0, Integer.MAX_VALUE)
 
         then:
         SetupException e = thrown()
@@ -532,7 +533,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
                 "com/example/not/fileX.sql"     : "file X",
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("com/example/missing", false, null, false, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false, 0, Integer.MAX_VALUE)
+        changeLogFile.includeAll("com/example/missing", false, null, false, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false, null, 0, Integer.MAX_VALUE)
         then:
         changeLogFile.changeSets.collect { it.filePath } == []
 
@@ -557,6 +558,9 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
     }
 
     def "include fails if XML file is empty"() {
+        given:
+        Locale.setDefault(Locale.ENGLISH)
+
         when:
         def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": ""])
 
@@ -752,7 +756,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         when:
         boolean result = changelog.include("../../path/changelog.xml", true, false,
-                resourceAccessor, null, new Labels(), false, DatabaseChangeLog.OnUnknownFileFormat.WARN)
+                resourceAccessor, null, new Labels(), false, null, DatabaseChangeLog.OnUnknownFileFormat.WARN)
 
         then:
         result
