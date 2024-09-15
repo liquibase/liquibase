@@ -131,7 +131,6 @@ public class UpdateVisitor implements ChangeSetVisitor {
         }
 
         if (!(executor instanceof LoggingExecutor)) {
-            Scope.getCurrentScope().getUI().sendMessage("Running Changeset: " + changeSet);
             Scope.getCurrentScope().getUI().sendMessage("Changeset execution:" + changeSet.getExecutionMilliseconds() + "ms");
         }
         Scope.getCurrentScope().getLog(getClass()).fine("Changeset execution:" + changeSet.getExecutionMilliseconds() + "ms");
