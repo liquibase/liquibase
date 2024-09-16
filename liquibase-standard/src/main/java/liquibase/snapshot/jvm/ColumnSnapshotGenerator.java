@@ -373,11 +373,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 columnMetadataResultSet.set("COLUMN_SIZE", columnMetadataResultSet.getInt("DECIMAL_DIGITS"));
                 columnMetadataResultSet.set("DECIMAL_DIGITS", null);
             } else if ("int".equalsIgnoreCase(columnTypeName) || "integer".equalsIgnoreCase(columnTypeName)) {
-                // mssql int type sometimes does not have a size, but if it does then include it in the type name
-                Integer columnSize = columnMetadataResultSet.getInt("COLUMN_SIZE");
-                if (columnSize == null) {
-                    columnMetadataResultSet.set("COLUMN_SIZE", null);
-                }
+                // mssql int type sometimes does not have a size
+                // NOTE:  I am commenting this line out currently to fix an issue with older snapshots
+                // columnMetadataResultSet.set("COLUMN_SIZE", null);
             }
         } else if (database instanceof PostgresDatabase) {
             columnTypeName = database.unescapeDataTypeName(columnTypeName);
