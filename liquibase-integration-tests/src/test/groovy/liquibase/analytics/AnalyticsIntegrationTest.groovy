@@ -11,6 +11,7 @@ import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.util.LiquibaseUtil
 import liquibase.util.SystemUtil
+import org.apache.commons.lang3.StringUtils
 import org.springframework.test.util.TestSocketUtils
 import org.yaml.snakeyaml.Yaml
 import spock.lang.Shared
@@ -101,6 +102,9 @@ class AnalyticsIntegrationTest extends Specification {
         properties.get("osVersion") == System.getProperty("os.version")
         properties.get("reportsEnabled") == false
         properties.get("structuredLogsEnabled") == false
+        properties.get("isDocker") == StringUtils.isNotEmpty(System.getenv("CI"))
+        properties.get("isLiquibaseDocker") == false
+        properties.get("isAwsLiquibaseDocker") == false
 
         cleanup:
         simpleWebserver.stop()
