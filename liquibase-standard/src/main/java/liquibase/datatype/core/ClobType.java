@@ -43,32 +43,6 @@ public class ClobType extends LiquibaseDataType {
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
         if (database instanceof MSSQLDatabase) {
-            if (originalDefinition.toLowerCase(Locale.US).startsWith("text") ||
-                originalDefinition.toLowerCase(Locale.US).startsWith("[text]") ||
-                originalDefinition.toLowerCase(Locale.US).startsWith("ntext") ||
-                originalDefinition.toLowerCase(Locale.US).startsWith("[ntext]")) {
-                if (! Boolean.TRUE.equals(GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue())) {
-                    return new DatabaseDataType(database.escapeDataTypeName(originalDefinition));
-                }
-                String stringType = "varchar";
-                if (originalDefinition.toLowerCase(Locale.US).contains("ntext")) {
-                    stringType = "nvarchar";
-                }
-                DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName(stringType));
-                // If there is additional specification after ntext or text (e.g.  COLLATE), import that.
-                String originalExtraInfo = originalDefinition.replaceFirst("^(?i)\\[?ntext\\]?\\s*", "");
-                originalExtraInfo = originalExtraInfo.replaceFirst("^(?i)\\[?text\\]?\\s*", "");
-                type.addAdditionalInformation("(max)");
-                if(!StringUtil.isEmpty(originalExtraInfo)) {
-                    //if we still have something like (25555) remove it
-                    //since we already set it to max, otherwise add collate or other info
-                    if(originalExtraInfo.lastIndexOf(")") < (originalExtraInfo.length() - 1)) {
-                        type.addAdditionalInformation(originalExtraInfo.substring(originalExtraInfo.lastIndexOf(")") + 1));
-                    }
-                }
-                return type;
-            }
-
             if (Boolean.TRUE.equals(GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue())) {
                 if ("nclob".equals(originalDefinition.toLowerCase(Locale.US))) {
                     return new DatabaseDataType(database.escapeDataTypeName("nvarchar"), "MAX");
@@ -80,13 +54,7 @@ public class ClobType extends LiquibaseDataType {
         } else if (database instanceof SybaseASADatabase) {
             return new DatabaseDataType("LONG VARCHAR");
         } else if (database instanceof MySQLDatabase) {
-            if (originalDefinition.toLowerCase(Locale.US).startsWith("text")) {
-                return new DatabaseDataType("TEXT");
-            } else if (originalDefinition.toLowerCase(Locale.US).startsWith("tinytext")) {
-                return new DatabaseDataType("TINYTEXT");
-            } else if (originalDefinition.toLowerCase(Locale.US).startsWith("mediumtext")) {
-                return new DatabaseDataType("MEDIUMTEXT");
-            } else if (originalDefinition.toLowerCase(Locale.US).startsWith("nclob")) {
+            if (originalDefinition.toLowerCase(Locale.US).startsWith("nclob")) {
                 DatabaseDataType type = new DatabaseDataType("LONGTEXT");
                 type.addAdditionalInformation("CHARACTER SET utf8");
                 return type;
@@ -94,23 +62,17 @@ public class ClobType extends LiquibaseDataType {
                 return new DatabaseDataType("LONGTEXT");
             }
         } else if ((database instanceof H2Database) || (database instanceof HsqlDatabase)) {
-            if (originalDefinition.toLowerCase(Locale.US).startsWith("longvarchar") || originalDefinition.startsWith("java.sql.Types.LONGVARCHAR")) {
-                return new DatabaseDataType("LONGVARCHAR");
-            } else {
-                return new DatabaseDataType("CLOB");
-            }
+
+            return new DatabaseDataType("CLOB");
+
         } else if ((database instanceof PostgresDatabase) || (database instanceof SQLiteDatabase) || (database
-            instanceof SybaseDatabase)) {
+                instanceof SybaseDatabase)) {
             return new DatabaseDataType("TEXT");
         } else if (database instanceof OracleDatabase) {
             if ("nclob".equals(originalDefinition.toLowerCase(Locale.US))) {
                 return new DatabaseDataType("NCLOB");
             }
             return new DatabaseDataType("CLOB");
-        } else if (database instanceof InformixDatabase) {
-            if (originalDefinition.toLowerCase(Locale.US).startsWith("text")) {
-                return new DatabaseDataType("TEXT");
-            }
         }
         return super.toDatabaseDataType(database);
     }

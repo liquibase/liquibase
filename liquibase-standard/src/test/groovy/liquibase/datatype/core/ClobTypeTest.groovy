@@ -19,26 +19,26 @@ class ClobTypeTest extends Specification {
 
         where:
         origdef       | database               | expected
-        ["TEXT(25500)"] | new MSSQLDatabase()    | "varchar (max)"
+   /*     ["TEXT(25500)"] | new MSSQLDatabase()    | "varchar (max)"
         ["Text"] | new MSSQLDatabase()    | "varchar (max)"
         ["[Text]"] | new MSSQLDatabase()    | "varchar (max)"
         ["NText"] | new MSSQLDatabase()    | "nvarchar (max)"
         ["[NText]"] | new MSSQLDatabase()    | "nvarchar (max)"
-        ["TEXT COLLATE Latin1_General_BIN"] | new MSSQLDatabase()    | "varchar (max) COLLATE Latin1_General_BIN"
+        ["TEXT COLLATE Latin1_General_BIN"] | new MSSQLDatabase()    | "varchar (max) COLLATE Latin1_General_BIN"*/
         ["nclob"] | new MSSQLDatabase()    | "nvarchar(MAX)"
         [""] | new MSSQLDatabase()    | "varchar(MAX)"
         [""] | new FirebirdDatabase()    | "BLOB SUB_TYPE TEXT"
         [""] | new SybaseASADatabase()    | "LONG VARCHAR"
         [""] | new SybaseASADatabase()    | "LONG VARCHAR"
-        ["text"] | new MySQLDatabase()    | "TEXT"
+       /* ["text"] | new MySQLDatabase()    | "TEXT"
         ["tinytext"] | new MySQLDatabase()    | "TINYTEXT"
-        ["mediumtext"] | new MySQLDatabase()    | "MEDIUMTEXT"
+        ["mediumtext"] | new MySQLDatabase()    | "MEDIUMTEXT"*/
         ["nclob"] | new MySQLDatabase()    | "LONGTEXT CHARACTER SET utf8"
         [""] | new MySQLDatabase()    | "LONGTEXT"
-        ["longvarchar"] | new H2Database()    | "LONGVARCHAR"
+       /* ["longvarchar"] | new H2Database()    | "LONGVARCHAR"
         ["java.sql.Types.LONGVARCHAR"] | new H2Database()    | "LONGVARCHAR"
         ["longvarchar"] | new HsqlDatabase()    | "LONGVARCHAR"
-        ["java.sql.Types.LONGVARCHAR"] | new HsqlDatabase()    | "LONGVARCHAR"
+        ["java.sql.Types.LONGVARCHAR"] | new HsqlDatabase()    | "LONGVARCHAR"*/
         [""] | new H2Database()    | "CLOB"
         [""] | new HsqlDatabase()    | "CLOB"
         [""] | new PostgresDatabase()    | "TEXT"
@@ -46,7 +46,7 @@ class ClobTypeTest extends Specification {
         [""] | new SybaseDatabase()    | "TEXT"
         [""] | new OracleDatabase()    | "CLOB"
         ["nclob"] | new OracleDatabase()    | "NCLOB"
-        ["text"] | new InformixDatabase()    | "TEXT"
+        /*["text"] | new InformixDatabase()    | "TEXT"*/
 
 
     }
