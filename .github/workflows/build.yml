@@ -1,7 +1,6 @@
-
 name: Build and Publish
 
-#the concurrency check will cancel in-progress runs on non-master branches and pull requests on forked repositories regardless of the target branch.
+# The concurrency check will cancel in-progress runs on non-master branches and pull requests on forked repositories regardless of the target branch.
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref == 'master' && 'master' || github.run_id }}
   cancel-in-progress: true
@@ -18,7 +17,8 @@ jobs:
     permissions:
       contents: write  # Ensures the workflow can read/write branches
     env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # authenticate GitHub Actions to the GitHub API.
+      github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }} # accessing a private repository
     outputs:
       branchExistsInBoth: ${{ steps.check-branch.outputs.branchExistsInBoth }}
       thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}

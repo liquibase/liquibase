@@ -103,8 +103,8 @@ jobs:
       - name: Notify Slack on Build Failure
         uses: rtCamp/action-slack-notify@v2
         env:
-          SLACK_COLOR: ${{ job.status }}
-          SLACK_MESSAGE: "View details on GitHub Actions: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} <@S056Q5RG38F>"
+          SLACK_COLOR: failure
+          SLACK_MESSAGE: "View details on GitHub Actions: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} <@U040C8J8143> <@U04P39MS2SW> <@UHHJ6UAEQ> <@U042HRTL4DT>" # Jandro, Sailee, Jake, Filipe
           SLACK_TITLE: "❌ ${{ github.repository }} ❌ Build failed on branch ${{ github.ref }} for commit ${{ github.sha }} in repository ${{github.repository}}"
           SLACK_USERNAME: liquibot
           SLACK_WEBHOOK: ${{ secrets.DRY_RUN_RELEASE_SLACK_WEBHOOK }}

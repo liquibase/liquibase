@@ -57,6 +57,7 @@ jobs:
     outputs:
       tag: ${{ steps.collect-data.outputs.tag }}
       version: ${{ steps.collect-data.outputs.version }}
+      ref_branch: ${{ steps.ref-branch.outputs.branch }}
     steps:
       - name: Collect Data
         id: collect-data
@@ -78,6 +79,16 @@ jobs:
 
       - run: |
           echo "Publishing version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.tag }}"
+
+        # Use the 'release' branch for hotfix changes;
+        # otherwise, use the 'master' branch for regular updates.
+      - name: Ref branch to checkout
+        id: ref-branch
+        run: |
+          if [ "${{ github.ref_name }}" == "release" ]; then
+            echo "branch=release" >> $GITHUB_OUTPUT
+          else
+            echo "branch=master" >> $GITHUB_OUTPUT
 
   manual_trigger_deployment:
     if: ${{ inputs.dry_run == false }}
@@ -363,7 +374,7 @@ jobs:
       - name: Download liquibase-pro xsd
         uses: actions/checkout@v4
         with:
-          ref: release
+          ref: "${{ needs.setup.outputs.ref_branch }}"
           token: ${{ secrets.BOT_TOKEN }}
           # Relative path under $GITHUB_WORKSPACE to place the repository
           path: liquibase-pro-repo
@@ -490,9 +501,9 @@ jobs:
       groupId: 'org.liquibase'
       artifactId: 'liquibase'
       version: ${{ needs.setup.outputs.version }}
-      dry_run: ${{ inputs.dry_run }}
-      dry_run_zip_url: ${{ inputs.dry_run_zip_url }}
-      dry_run_tar_gz_url: ${{ inputs.dry_run_tar_gz_url }}
+      dry_run: ${{ inputs.dry_run || false}}
+      dry_run_zip_url: ${{ inputs.dry_run_zip_url || '' }}
+      dry_run_tar_gz_url: ${{ inputs.dry_run_tar_gz_url || '' }}
 
   update-docs-oss-pro-version:
     if: ${{ inputs.dry_run == false }}
@@ -507,13 +518,17 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: liquibase/liquibase
-          ref: master
+          ref: "${{ needs.setup.outputs.ref_branch }}"
           fetch-depth: 0
 
       - name: Get the oss release version
         id: get_latest_oss_version
         run: |
+            # Fetch all tags from the remote
+            git fetch --tags
+            # Get the latest tag
             echo "latest_version=$(git describe --tags $(git rev-list --tags --max-count=1) | sed 's/^v//')" >> $GITHUB_OUTPUT
+            # Get the previous tag (second latest)
             echo "previous_version=$(git describe --tags $(git rev-list --tags --max-count=2 | tail -n 1) | sed -E 's/^v//; s/-.*//')" >> $GITHUB_OUTPUT
 
 
