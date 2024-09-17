@@ -1088,6 +1088,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             runChangelog(changeLogPath, null)
         }
 
+        static void setSystemProperty(String key, String value) {
+            System.setProperty(key, value)
+        }
+
         /**
          * Run a changelog
          */
