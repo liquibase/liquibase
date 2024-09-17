@@ -1,10 +1,16 @@
 package liquibase.analytics;
 
 import liquibase.Scope;
+import liquibase.analytics.configuration.AnalyticsConfigurationFactory;
+import liquibase.analytics.configuration.RemoteAnalyticsConfiguration;
+import liquibase.analytics.configuration.SegmentAnalyticsConfiguration;
 import liquibase.integration.IntegrationDetails;
 import liquibase.util.*;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
 import java.nio.file.Path;
@@ -44,14 +50,6 @@ public class Event {
     private String liquibaseVersion = ExceptionUtil.doSilently(() -> {
         return LiquibaseUtil.getBuildVersionInfo();
     });
-    private String mongoDbVersion = getExtensionVersion("Liquibase MongoDB Commercial Extension");
-    private String ext_dynamoDb = getExtensionVersion("Liquibase DynamoDB Commercial Extension");
-    private String ext_checks = getExtensionVersion("Checks Extension");
-    private String ext_awsSecrets = getExtensionVersion("AWS Secrets Manager Extension");
-    private String ext_awsS3 = getExtensionVersion("S3 Remote Accessor Extension");
-    private String ext_hashicorpVault = getExtensionVersion("HashiCorp Vault Extension");
-    private String ext_googleBigQuery = getExtensionVersion("Liquibase BigQuery Commercial Extension");
-    private String ext_databricks = getExtensionVersion("Liquibase Commercial Databricks Extension");
     private String liquibaseInterface;
     private String javaVersion = ExceptionUtil.doSilently(() -> {
         return SystemUtil.getJavaVersion();
@@ -112,7 +110,31 @@ public class Event {
                 throw new RuntimeException(e);
             }
         }
+        addExtensionsToProperties(properties);
         return properties;
+    }
+
+    private void addExtensionsToProperties(Map<String, Object> properties) {
+        ExceptionUtil.doSilently(() -> {
+            AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
+            SegmentAnalyticsConfiguration analyticsConfiguration = ((SegmentAnalyticsConfiguration) analyticsConfigurationFactory.getPlugin());
+            List<RemoteAnalyticsConfiguration.ExtensionName> extensionNames = analyticsConfiguration.getExtensionNames();
+            if (extensionNames != null) {
+                for (RemoteAnalyticsConfiguration.ExtensionName extensionName : extensionNames) {
+                    String manifestName = extensionName.getManifestName();
+                    String displayName = extensionName.getDisplayName();
+                    String extensionVersion = getExtensionVersion(manifestName);
+
+                    // Always insert the version if it's not null.
+                    // If the version is null, the extension is not installed, or there are multiple versions of the
+                    // same extension where the manifest name has changed over time. Thus, we should not replace any
+                    // existing versions in the properties with a null, if a version already exists in the properties.
+                    if (extensionVersion != null || !properties.containsKey(displayName)) {
+                        properties.put(displayName, extensionVersion);
+                    }
+                }
+            }
+        });
     }
 
     /**
