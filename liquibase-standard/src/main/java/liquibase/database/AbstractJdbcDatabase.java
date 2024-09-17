@@ -178,7 +178,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public final void addReservedWords(Collection<String> words) {
+    public void addReservedWords(Collection<String> words) {
         reservedWords.addAll(words);
     }
 
