@@ -18,6 +18,7 @@ import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
+import java.sql.Types;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
@@ -186,8 +187,6 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         return false;
     }
 
-
-
     @Override
     public boolean supports(Class<? extends DatabaseObject> object) {
         if (Schema.class.isAssignableFrom(object)) {
@@ -271,6 +270,16 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             return 0;
         }
 
+    }
+
+    public Integer getFSPFromTimeType(int columnSize, int jdbcType) {
+        if (jdbcType == Types.TIMESTAMP) {
+            if (columnSize > 20 && columnSize < 27) {
+                return columnSize % 10;
+            }
+        }
+
+        return 0;
     }
 
     @Override

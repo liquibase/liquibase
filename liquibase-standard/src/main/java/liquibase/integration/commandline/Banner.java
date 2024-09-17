@@ -3,10 +3,11 @@ package liquibase.integration.commandline;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.util.LiquibaseUtil;
-import liquibase.util.StringUtil;
+import liquibase.util.SystemUtil;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,6 +24,7 @@ public class Banner {
     private String version;
     private String build;
     private String built;
+    private String javaVersion;
     private String path;
     private String licensee;
     private String licenseEndDate;
@@ -31,6 +33,7 @@ public class Banner {
         version = LiquibaseUtil.getBuildVersionInfo();
         built = LiquibaseUtil.getBuildTime();
         build = LiquibaseUtil.getBuildNumber();
+        javaVersion = SystemUtil.getJavaVersion();
     }
 
     @Override
@@ -52,10 +55,10 @@ public class Banner {
         Calendar calendar = Calendar.getInstance();
         ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
         banner.append(String.format(
-                coreBundle.getString("starting.liquibase.at.timestamp"), dateFormat.format(calendar.getTime())
+                coreBundle.getString("starting.liquibase.at.timestamp"), dateFormat.format(calendar.getTime()), javaVersion
         ));
 
-        if (StringUtil.isNotEmpty(version) && StringUtil.isNotEmpty(built)) {
+        if (StringUtils.isNotEmpty(version) && StringUtils.isNotEmpty(built)) {
             version = version + " #" + build;
             banner.append(String.format(coreBundle.getString("liquibase.version.builddate"), version, built));
         }

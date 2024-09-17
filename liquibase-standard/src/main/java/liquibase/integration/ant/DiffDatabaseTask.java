@@ -4,6 +4,8 @@ import liquibase.GlobalConfiguration;
 import liquibase.diff.DiffResult;
 import liquibase.diff.output.report.DiffToReport;
 import liquibase.exception.DatabaseException;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.resources.FileResource;
@@ -13,9 +15,11 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 
+@Setter
 public class DiffDatabaseTask extends AbstractDatabaseDiffTask {
     private FileResource outputFile;
 
+    @Getter
     private String outputEncoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
 
     @Override
@@ -47,15 +51,4 @@ public class DiffDatabaseTask extends AbstractDatabaseDiffTask {
         }
     }
 
-    public void setOutputFile(FileResource outputFile) {
-        this.outputFile = outputFile;
-    }
-
-    public String getOutputEncoding() {
-        return outputEncoding;
-    }
-
-    public void setOutputEncoding(String outputEncoding) {
-        this.outputEncoding = outputEncoding;
-    }
 }

@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import com.opencsv.exceptions.CsvMalformedLineException;
 import liquibase.CatalogAndSchema;
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeSet;
@@ -37,6 +38,8 @@ import liquibase.util.ObjectUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.csv.CSVReader;
+import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,14 +64,19 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     public static final Pattern BASE64_PATTERN = Pattern.compile("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$");
     private static final Logger LOG = Scope.getCurrentScope().getLog(LoadDataChange.class);
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    @Setter
     private String file;
     private String commentLineStartsWith = DEFAULT_COMMENT_PATTERN;
+    @Setter
     private Boolean relativeToChangelogFile;
+    @Setter
     private String encoding;
     private String separator = CSVReader.DEFAULT_SEPARATOR + "";
+    @Setter
     private String quotchar = CSVReader.DEFAULT_QUOTE_CHARACTER + "";
     private List<LoadDataColumnConfig> columns = new ArrayList<>();
 
+    @Setter
     private Boolean usePreparedStatements;
 
     /**
@@ -80,7 +88,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
      * If not, the value "toString()" representation (trimmed of spaces left and right) is returned.
      */
     protected static String getValueToWrite(Object value) {
-        if ((value == null) || "NULL".equalsIgnoreCase(value.toString())) {
+        if ((value == null) || StringUtil.equalsWordNull(value.toString())) {
             return "";
         } else {
             return value.toString().trim();
@@ -117,18 +125,10 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         return file;
     }
 
-    public void setFile(String file) {
-        this.file = file;
-    }
-
     @DatabaseChangeProperty(
         description = "Whether to use prepared statements instead of INSERT statement strings (if the database supports it)")
     public Boolean getUsePreparedStatements() {
         return usePreparedStatements;
-    }
-
-    public void setUsePreparedStatements(Boolean usePreparedStatements) {
-        this.usePreparedStatements = usePreparedStatements;
     }
 
     @DatabaseChangeProperty(supportsDatabase = ALL,
@@ -142,7 +142,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         //if the value is null (not provided) we want to use default value
         if (commentLineStartsWith == null) {
             this.commentLineStartsWith = DEFAULT_COMMENT_PATTERN;
-        } else if ("".equals(commentLineStartsWith)) {
+        } else if (commentLineStartsWith.isEmpty()) {
             this.commentLineStartsWith = null;
         } else {
             this.commentLineStartsWith = commentLineStartsWith;
@@ -155,18 +155,10 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         return relativeToChangelogFile;
     }
 
-    public void setRelativeToChangelogFile(Boolean relativeToChangelogFile) {
-        this.relativeToChangelogFile = relativeToChangelogFile;
-    }
-
     @DatabaseChangeProperty(exampleValue = "UTF-8", supportsDatabase = ALL,
         description = "Encoding of the CSV file (defaults to UTF-8)")
     public String getEncoding() {
         return encoding;
-    }
-
-    public void setEncoding(String encoding) {
-        this.encoding = encoding;
     }
 
     @DatabaseChangeProperty(exampleValue = ",", supportsDatabase = ALL,
@@ -187,10 +179,6 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
             "Default: " + CSVReader.DEFAULT_QUOTE_CHARACTER)
     public String getQuotchar() {
         return quotchar;
-    }
-
-    public void setQuotchar(String quotchar) {
-        this.quotchar = quotchar;
     }
 
     @Override
@@ -225,7 +213,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
      */
     protected String columnIdString(int index, LoadDataColumnConfig columnConfig) {
         return " / column[" + index + "]" +
-                (StringUtil.trimToNull(columnConfig.getName()) != null ?
+                (StringUtils.trimToNull(columnConfig.getName()) != null ?
                         " (name:'" + columnConfig.getName() + "')" : "");
     }
 
@@ -275,13 +263,13 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
             // Start at '1' to take into account the header (already processed):
             int lineNumber = 1;
 
-            boolean isCommentingEnabled = StringUtil.isNotEmpty(commentLineStartsWith);
+            boolean isCommentingEnabled = StringUtils.isNotEmpty(commentLineStartsWith);
 
             List<LoadDataRowConfig> rows = new ArrayList<>();
             while ((line = reader.readNext()) != null) {
                 lineNumber++;
                 if
-                ((line.length == 0) || ((line.length == 1) && (StringUtil.trimToNull(line[0]) == null)) ||
+                ((line.length == 0) || ((line.length == 1) && (StringUtils.trimToNull(line[0]) == null)) ||
                         (isCommentingEnabled && isLineCommented(line))
                 ) {
                     //nothing interesting on this line
@@ -317,20 +305,20 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                         if (columnConfig.getName() != null) {
                             columnName = columnConfig.getName();
                         }
-
+                        final boolean isNull = isNullValue(value, columnConfig);
                         //
                         // Always set the type for the valueConfig if the value is NULL
                         //
-                        if ("NULL".equalsIgnoreCase(value)) {
+                        if (isNull) {
                             valueConfig.setType(columnConfig.getType());
                         }
                         valueConfig.setName(columnName);
                         valueConfig.setAllowUpdate(columnConfig.getAllowUpdate());
 
-                        if (value.isEmpty()) {
+                        if (StringUtils.isEmpty(value)) {
                             value = columnConfig.getDefaultValue();
                         }
-                        if (StringUtil.equalsWordNull(value)) {
+                        if (isNull) {
                             valueConfig.setValue(null);
                         } else if (columnConfig.getType() == null) {
                             // columnConfig did not specify a type
@@ -350,20 +338,18 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                         } else if (columnConfig.getType().equalsIgnoreCase("date")
                                 || columnConfig.getType().equalsIgnoreCase("datetime")
                                 || columnConfig.getType().equalsIgnoreCase("time")) {
-                            if ("NULL".equalsIgnoreCase(value) || "".equals(value)) {
-                                valueConfig.setValue(null);
-                            } else {
-                                try {
-                                    // Need the column type for handling 'NOW' or 'TODAY' type column value
-                                    valueConfig.setType(columnConfig.getType());
-                                    if (value != null) {
-                                        valueConfig.setValueDate(value);
-                                    } else {
-                                        valueConfig.setValueDate(columnConfig.getDefaultValueDate());
-                                    }
-                                } catch (DateParseException e) {
-                                    throw new UnexpectedLiquibaseException(e);
+                            try {
+                                // Need the column type for handling 'NOW' or 'TODAY' type column value
+                                valueConfig.setType(columnConfig.getType());
+                                if (StringUtil.equalsWordNull(value) || StringUtils.isEmpty(value)) {
+                                    valueConfig.setValue(null);
+                                    valueConfig.setValueDate(columnConfig.getDefaultValueDate());
+                                } else {
+                                    valueConfig.setValueDate(value);
                                 }
+                            }
+                            catch (DateParseException e) {
+                                throw new UnexpectedLiquibaseException(e);
                             }
                         } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.STRING) {
                             valueConfig.setType(columnConfig.getType());
@@ -387,29 +373,34 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             valueConfig.setValueComputed(function);
 
                         } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.BLOB.toString())) {
-                            if ("NULL".equalsIgnoreCase(value)) {
+                            if (StringUtil.equalsWordNull(value)) {
                                 valueConfig.setValue(null);
                             } else if (BASE64_PATTERN.matcher(value).matches()) {
                                 valueConfig.setType(columnConfig.getType());
                                 valueConfig.setValue(value);
                                 needsPreparedStatement = true;
                             } else {
+                                // If the value is not base64 encoded we are expecting the value to be a
+                                // valid path to another file which holds the entire value we are expecting
+                                // to load into the db.
                                 valueConfig.setValueBlobFile(value);
                                 needsPreparedStatement = true;
                             }
                         } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.CLOB) {
+                            // Similar to the blob case, we expect ALL clobs found using loadData to be a valid path to a file.
+                            // We then load the entire file into the value when executing the statement.
                             valueConfig.setValueClobFile(value);
                             needsPreparedStatement = true;
-                        } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.UUID) {
+                        }  else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.UUID) {
                             valueConfig.setType(columnConfig.getType());
-                            if ("NULL".equalsIgnoreCase(value)) {
+                            if (StringUtil.equalsWordNull(value)) {
                                 valueConfig.setValue(null);
                             } else {
                                 valueConfig.setValue(value);
                             }
                         } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.OTHER.toString())) {
                             valueConfig.setType(columnConfig.getType());
-                            if ("NULL".equalsIgnoreCase(value)) {
+                            if (StringUtil.equalsWordNull(value)) {
                                 valueConfig.setValue(null);
                             } else {
                                 valueConfig.setValue(value);
@@ -650,7 +641,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                 return c;
             }
         }
-        if (null == StringUtil.trimToNull(name)) {
+        if (null == StringUtils.trimToNull(name)) {
             throw new UnexpectedLiquibaseException("Unreferenced unnamed column is not supported");
         }
         LoadDataColumnConfig cfg = new LoadDataColumnConfig();
@@ -667,8 +658,16 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
      */
     private void addColumnsFromHeaders(String[] headers) {
         int i = 0;
+        boolean shouldTrimHeader = GlobalConfiguration.TRIM_LOAD_DATA_FILE_HEADER.getCurrentValue();
+        LoadDataColumnConfig loadDataColumnConfig;
         for (String columnNameFromHeader : headers) {
-            LoadDataColumnConfig loadDataColumnConfig = columnConfigFromName(columnNameFromHeader, i);
+            if(shouldTrimHeader) {
+                loadDataColumnConfig = columnConfigFromName(columnNameFromHeader.trim(), i);
+            }
+            else {
+                loadDataColumnConfig = columnConfigFromName(columnNameFromHeader, i);
+            }
+
             loadDataColumnConfig.setIndex(i);
             loadDataColumnConfig.setHeader(columnNameFromHeader);
             i++;
@@ -676,7 +675,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     }
 
     private boolean isLineCommented(String[] line) {
-        return StringUtil.startsWith(line[0], commentLineStartsWith);
+        return StringUtils.startsWith(line[0], commentLineStartsWith);
     }
 
     @Override
@@ -708,7 +707,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         Reader streamReader = StreamUtil.readStreamWithReader(stream, getEncoding());
 
         char quotchar;
-        if (StringUtil.trimToEmpty(this.quotchar).isEmpty()) {
+        if (StringUtils.trimToEmpty(this.quotchar).isEmpty()) {
             // hope this is impossible to have a field surrounded with non ascii char 0x01
             quotchar = '\1';
         } else {
@@ -891,6 +890,17 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                 return statementSet.getStatementsArray();
             }
         }
+    }
+
+    protected boolean isNullValue(final String value, final LoadDataColumnConfig column) {
+        final String nullPlaceholder = column.getNullPlaceholder();
+        final boolean retValue;
+        if (nullPlaceholder == null) {
+            retValue = StringUtil.equalsWordNull(value);
+        } else {
+            retValue = nullPlaceholder.equals(value);
+        }
+        return retValue;
     }
 
     @SuppressWarnings("HardCodedStringLiteral")

@@ -6,12 +6,14 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RenameViewStatement;
 import liquibase.structure.core.View;
+import lombok.Setter;
 
 /**
  * Renames an existing view.
  */
 @DatabaseChange(name = "renameView", description = "Renames an existing view", priority = ChangeMetaData.PRIORITY_DEFAULT,
     appliesTo = "view")
+@Setter
 public class RenameViewChange extends AbstractChange {
     private String catalogName;
     private String schemaName;
@@ -23,17 +25,9 @@ public class RenameViewChange extends AbstractChange {
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "view.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @DatabaseChangeProperty(mustEqualExisting = "view", description = "Name of the existing view to rename")
@@ -41,17 +35,9 @@ public class RenameViewChange extends AbstractChange {
         return oldViewName;
     }
 
-    public void setOldViewName(String oldViewName) {
-        this.oldViewName = oldViewName;
-    }
-
     @DatabaseChangeProperty(description = "New name for the view")
     public String getNewViewName() {
         return newViewName;
-    }
-
-    public void setNewViewName(String newViewName) {
-        this.newViewName = newViewName;
     }
 
     @Override

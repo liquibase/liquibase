@@ -187,4 +187,12 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
         assertEquals("ALTER TABLE schema_name.table_name MODIFY column1 BIGINT NOT NULL", sql[3].toSql());
         assertEquals("ALTER TABLE schema_name.table_name MODIFY column2 TINYINT(1) NOT NULL", sql[4].toSql());
     }
+
+    @Test
+    public void testDefaultValueDatabaseFunctionPostgres() {
+        AddColumnStatement statement = new AddColumnStatement(null, null, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE,  new DatabaseFunction("GENERATED ALWAYS AS (value->>'foo') STORED"));
+        SqlGeneratorFactory instance = SqlGeneratorFactory.getInstance();
+        Sql[] sql = instance.generateSql(statement, new PostgresDatabase());
+        assertEquals("ALTER TABLE table_name ADD column_name COLUMN_TYPE GENERATED ALWAYS AS (value->>'foo') STORED", sql[0].toSql());
+    }
 }
