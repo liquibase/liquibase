@@ -32,7 +32,7 @@ public class NVarcharType extends CharType {
         }
         if (database instanceof MSSQLDatabase) {
 
-            if (originalDefinition.toLowerCase(Locale.US).startsWith("ntext") ||
+            if (originalDefinition != null && originalDefinition.toLowerCase(Locale.US).startsWith("ntext") ||
                     originalDefinition.toLowerCase(Locale.US).startsWith("[ntext]")){
                 if (! Boolean.TRUE.equals(GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue())) {
                     return new DatabaseDataType(database.escapeDataTypeName(originalDefinition));
@@ -70,7 +70,7 @@ public class NVarcharType extends CharType {
                 type.addAdditionalInformation(getAdditionalInformation());
                 return type;
             }
-        } else if ((database instanceof PostgresDatabase) || (database instanceof SQLiteDatabase) || (database
+        } else if ((database instanceof SQLiteDatabase) || (database
                 instanceof SybaseDatabase)) {
             return new DatabaseDataType("TEXT");
         }

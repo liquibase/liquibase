@@ -28,7 +28,7 @@ public class VarcharType extends CharType {
         }
 
         if (database instanceof MSSQLDatabase) {
-            if (originalDefinition.toLowerCase(Locale.US).startsWith("text") ||
+            if (originalDefinition != null && originalDefinition.toLowerCase(Locale.US).startsWith("text") ||
                     originalDefinition.toLowerCase(Locale.US).startsWith("[text]")){
                 if (! Boolean.TRUE.equals(GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue())) {
                     return new DatabaseDataType(database.escapeDataTypeName(originalDefinition));
@@ -93,7 +93,7 @@ public class VarcharType extends CharType {
                 return new DatabaseDataType("TINYTEXT");
             } else if (originalDefinition.toLowerCase(Locale.US).startsWith("mediumtext")) {
                 return new DatabaseDataType("MEDIUMTEXT");}
-        } else if ((database instanceof PostgresDatabase) || (database instanceof SQLiteDatabase) || (database
+        } else if ((database instanceof SQLiteDatabase) || (database
                 instanceof SybaseDatabase)) {
             if (originalDefinition.toLowerCase(Locale.US).startsWith("character varying") || originalDefinition.toLowerCase(Locale.US).startsWith("varchar")) {
                 Object[] parameters = getParameters();
