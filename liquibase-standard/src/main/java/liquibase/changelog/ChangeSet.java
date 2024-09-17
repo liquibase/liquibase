@@ -976,6 +976,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.EXECUTED.value.toLowerCase());
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, stopInstant.toString());
             Scope.getCurrentScope().getLog(getClass()).fine("ChangeSet " + toString() + " has been successfully rolled back.");
+            Scope.getCurrentScope().getLog(getClass()).fine("Rollback executed in " + this.getExecutionMilliseconds() + "ms");
         } catch (Exception e) {
             stopInstant = Instant.now();
             setErrorMsg(e.getMessage());
