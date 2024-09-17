@@ -102,7 +102,7 @@ class AnalyticsIntegrationTest extends Specification {
         properties.get("osVersion") == System.getProperty("os.version")
         properties.get("reportsEnabled") == false
         properties.get("structuredLogsEnabled") == false
-        properties.get("isDocker") == StringUtils.isNotEmpty(System.getenv("CI"))
+        properties.get("isDocker") == false
         properties.get("isLiquibaseDocker") == false
         properties.get("isAwsLiquibaseDocker") == false
 
