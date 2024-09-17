@@ -87,7 +87,7 @@ public class VarcharType extends CharType {
                 return type;
             }
         } else if (database instanceof MySQLDatabase){
-            if (originalDefinition.toLowerCase(Locale.US).startsWith("text")) {
+            if (originalDefinition != null && originalDefinition.toLowerCase(Locale.US).startsWith("text")) {
                 return new DatabaseDataType("TEXT");
             } else if (originalDefinition.toLowerCase(Locale.US).startsWith("tinytext")) {
                 return new DatabaseDataType("TINYTEXT");
@@ -95,7 +95,7 @@ public class VarcharType extends CharType {
                 return new DatabaseDataType("MEDIUMTEXT");}
         } else if ((database instanceof SQLiteDatabase) || (database
                 instanceof SybaseDatabase)) {
-            if (originalDefinition.toLowerCase(Locale.US).startsWith("character varying") || originalDefinition.toLowerCase(Locale.US).startsWith("varchar")) {
+            if (originalDefinition != null && (originalDefinition.toLowerCase(Locale.US).startsWith("character varying") || originalDefinition.toLowerCase(Locale.US).startsWith("varchar"))) {
                 Object[] parameters = getParameters();
                 if (parameters.length > 0) {
                     if (!parameters[0].toString().matches("\\d+") || (new BigInteger(parameters[0].toString()).compareTo(BigInteger.valueOf(8000L)) > 0)) {
@@ -109,11 +109,11 @@ public class VarcharType extends CharType {
                 }
                 return new DatabaseDataType("VARCHAR",parameters);
             }else if ((database instanceof H2Database) || (database instanceof HsqlDatabase)) {
-                if (originalDefinition.toLowerCase(Locale.US).startsWith("longvarchar") || originalDefinition.startsWith("java.sql.Types.LONGVARCHAR")) {
+                if (originalDefinition != null && (originalDefinition.toLowerCase(Locale.US).startsWith("longvarchar") || originalDefinition.startsWith("java.sql.Types.LONGVARCHAR"))) {
                     return new DatabaseDataType("LONGVARCHAR");
                 }
             } else if (database instanceof InformixDatabase) {
-                if (originalDefinition.toLowerCase(Locale.US).startsWith("text")) {
+                if (originalDefinition != null && originalDefinition.toLowerCase(Locale.US).startsWith("text")) {
                     return new DatabaseDataType("TEXT");
                 }
             }
