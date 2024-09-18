@@ -28,8 +28,8 @@ public class VarcharType extends CharType {
         }
 
         if (database instanceof MSSQLDatabase) {
-            if (originalDefinition != null && originalDefinition.toLowerCase(Locale.US).startsWith("text") ||
-                    originalDefinition.toLowerCase(Locale.US).startsWith("[text]")){
+            if (originalDefinition != null && (originalDefinition.toLowerCase(Locale.US).startsWith("text") ||
+                    originalDefinition.toLowerCase(Locale.US).startsWith("[text]"))){
                 if (! Boolean.TRUE.equals(GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue())) {
                     return new DatabaseDataType(database.escapeDataTypeName(originalDefinition));
                 }
