@@ -718,7 +718,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * Enable or disable sending product usage data and analytics to Liquibase.
      *
-     * @parameter property="liquibase.databaseChangelogHistoryCaptureExtensions"
+     * @parameter property="liquibase.analyticsEnabled"
      */
     @PropertyElement(key = "liquibase.analytics.enabled")
     protected Boolean analyticsEnabled;
