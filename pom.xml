@@ -495,7 +495,7 @@
                 <configuration>
                     <attach>true</attach>
                     <author>false</author>
-                    <doctitle>Liquibase ${version} API</doctitle>
+                    <doctitle>Liquibase ${project.version} API</doctitle>
                     <quiet>true</quiet>
                     <doclint>none</doclint>
                     <encoding>UTF-8</encoding>
