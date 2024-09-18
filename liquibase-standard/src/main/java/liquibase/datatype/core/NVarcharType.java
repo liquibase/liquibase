@@ -32,8 +32,8 @@ public class NVarcharType extends CharType {
         }
         if (database instanceof MSSQLDatabase) {
 
-            if (originalDefinition != null && originalDefinition.toLowerCase(Locale.US).startsWith("ntext") ||
-                    originalDefinition.toLowerCase(Locale.US).startsWith("[ntext]")){
+            if (originalDefinition != null && (originalDefinition.toLowerCase(Locale.US).startsWith("ntext") ||
+                    originalDefinition.toLowerCase(Locale.US).startsWith("[ntext]"))){
                 if (! Boolean.TRUE.equals(GlobalConfiguration.CONVERT_DATA_TYPES.getCurrentValue())) {
                     return new DatabaseDataType(database.escapeDataTypeName(originalDefinition));
                 }
