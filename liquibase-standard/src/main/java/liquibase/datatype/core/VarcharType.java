@@ -87,12 +87,15 @@ public class VarcharType extends CharType {
                 return type;
             }
         } else if (database instanceof MySQLDatabase){
-            if (originalDefinition != null && originalDefinition.toLowerCase(Locale.US).startsWith("text")) {
-                return new DatabaseDataType("TEXT");
-            } else if (originalDefinition.toLowerCase(Locale.US).startsWith("tinytext")) {
-                return new DatabaseDataType("TINYTEXT");
-            } else if (originalDefinition.toLowerCase(Locale.US).startsWith("mediumtext")) {
-                return new DatabaseDataType("MEDIUMTEXT");}
+            if (originalDefinition != null){
+                if (originalDefinition.toLowerCase(Locale.US).startsWith("text")) {
+                    return new DatabaseDataType("TEXT");
+                } else if (originalDefinition.toLowerCase(Locale.US).startsWith("tinytext")) {
+                    return new DatabaseDataType("TINYTEXT");
+                } else if (originalDefinition.toLowerCase(Locale.US).startsWith("mediumtext")) {
+                    return new DatabaseDataType("MEDIUMTEXT");}
+            }
+
         } else if ((database instanceof SQLiteDatabase) || (database
                 instanceof SybaseDatabase)) {
             if (originalDefinition != null && (originalDefinition.toLowerCase(Locale.US).startsWith("character varying") || originalDefinition.toLowerCase(Locale.US).startsWith("varchar"))) {
