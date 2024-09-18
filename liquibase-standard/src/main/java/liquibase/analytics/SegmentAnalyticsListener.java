@@ -4,6 +4,8 @@ import liquibase.Scope;
 import liquibase.analytics.configuration.SegmentAnalyticsConfiguration;
 import liquibase.analytics.configuration.AnalyticsArgs;
 import liquibase.analytics.configuration.AnalyticsConfigurationFactory;
+import liquibase.license.LicenseService;
+import liquibase.license.LicenseServiceFactory;
 import liquibase.serializer.core.yaml.YamlSerializer;
 import liquibase.util.ExceptionUtil;
 import lombok.NoArgsConstructor;
@@ -40,6 +42,14 @@ public class SegmentAnalyticsListener implements AnalyticsListener {
         AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
         SegmentAnalyticsConfiguration analyticsConfiguration = ((SegmentAnalyticsConfiguration) analyticsConfigurationFactory.getPlugin());
         int timeoutMillis = analyticsConfiguration.getTimeoutMillis();
+        /**
+         * It is important to obtain the userId here outside of the newly created thread. {@link Scope} stores its stuff
+         * in a ThreadLocal, so if you tried to get the value inside the thread, the value could be different.
+         */
+        String userId = ExceptionUtil.doSilently(() -> {
+            LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
+            return licenseService.getLicenseInfoObject().getIssuedTo();
+        });
         Thread eventThread = new Thread(() -> {
             try {
                 URL url = new URL(analyticsConfiguration.getDestinationUrl());
@@ -56,7 +66,7 @@ public class SegmentAnalyticsListener implements AnalyticsListener {
                 Yaml yaml = new Yaml(dumperOptions);
                 yaml.setBeanAccess(BeanAccess.FIELD);
 
-                SegmentBatch segmentBatch = SegmentBatch.fromLiquibaseEvent(event);
+                SegmentBatch segmentBatch = SegmentBatch.fromLiquibaseEvent(event, userId);
                 String jsonInputString = YamlSerializer.removeClassTypeMarksFromSerializedJson(yaml.dumpAs(segmentBatch, Tag.MAP, DumperOptions.FlowStyle.FLOW));
                 Scope.getCurrentScope().getLog(getClass()).fine("Sending analytics to Segment. " + segmentBatch);
 

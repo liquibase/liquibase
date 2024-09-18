@@ -13,6 +13,10 @@ import java.util.concurrent.atomic.AtomicReference;
 @Data
 public class SegmentAnalyticsConfiguration implements AnalyticsConfiguration {
     private final static Cache<RemoteAnalyticsConfiguration> remoteAnalyticsConfiguration = new Cache<>(() -> {
+        /**
+         * It is important to obtain the URL here outside of the newly created thread. {@link Scope} stores its stuff
+         * in a ThreadLocal, so if you tried to get the value inside the thread, the value could be different.
+         */
         String url = AnalyticsArgs.CONFIG_ENDPOINT_URL.getCurrentValue();
         AtomicReference<RemoteAnalyticsConfiguration> remoteAnalyticsConfiguration = new AtomicReference<>();
         Thread thread = new Thread(() -> {
