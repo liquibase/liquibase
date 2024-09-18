@@ -101,8 +101,8 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
      */
     public Database obtainDatabase(CommandScope commandScope) throws DatabaseException {
         Database database = commandScope.getArgumentValue(DATABASE_ARG);
+        String url = commandScope.getArgumentValue(URL_ARG);
         if (database == null) {
-            String url = commandScope.getArgumentValue(URL_ARG);
             database = createDatabaseObject(
                 url,
                 commandScope.getArgumentValue(USERNAME_ARG),
@@ -115,7 +115,7 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
                 StringUtil.trimToNull(GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentValue())
             );
         }
-        logMdc(database.getConnection().getURL(), database);
+        logMdc(url == null ? database.getConnection().getURL() : url, database);
         return database;
     }
 
