@@ -86,15 +86,17 @@ class AnalyticsIntegrationTest extends Specification {
         properties.get("exceptionClass") == "null"
         properties.get("ext_awsS3") == "null"
         properties.get("ext_awsSecrets") == "null"
+        properties.get("ext_bigQuery_commercial") == "null"
+        properties.get("ext_bigQueryOss") == "null"
         properties.get("ext_checks") == "null"
-        properties.get("ext_databricks") == "null"
-        properties.get("ext_dynamoDb") == "null"
-        properties.get("ext_googleBigQuery") == "null"
+        properties.get("ext_databricks_commercial") == "null"
+        properties.get("ext_dynamoDb_commercial") == "null"
         properties.get("ext_hashicorpVault") == "null"
+        properties.get("ext_mongoDb_commercial") == "null"
+        properties.get("ext_mongoDbOss") == "null"
         properties.get("javaVersion") == SystemUtil.getJavaVersion()
         properties.get("liquibaseInterface") == "null"
         properties.get("liquibaseVersion") == LiquibaseUtil.getBuildVersionInfo()
-        properties.get("mongoDbVersion") == "null"
         properties.get("operationOutcome") == "success"
         properties.get("os") == System.getProperty("os.name")
         properties.get("osArch") == System.getProperty("os.arch")
@@ -127,6 +129,27 @@ endpointData: http://localhost:$port/v1/batch
 sendOss: true
 sendPro: true
 writeKey: ${writeKey}
+extensions:
+- manifestName: Liquibase MongoDB Commercial Extension
+  displayName: ext_mongoDb_commercial
+- manifestName: Liquibase DynamoDB Commercial Extension
+  displayName: ext_dynamoDb_commercial
+- manifestName: Checks Extension
+  displayName: ext_checks
+- manifestName: AWS Secrets Manager Extension
+  displayName: ext_awsSecrets
+- manifestName: S3 Remote Accessor Extension
+  displayName: ext_awsS3
+- manifestName: HashiCorp Vault Extension
+  displayName: ext_hashicorpVault
+- manifestName: Liquibase BigQuery Commercial Extension
+  displayName: ext_bigQuery_commercial
+- manifestName: Liquibase Commercial Databricks Extension
+  displayName: ext_databricks_commercial
+- manifestName: Liquibase Extension Google BigQuery support
+  displayName: ext_bigQueryOss
+- manifestName: Liquibase MongoDB Extension
+  displayName: ext_mongoDbOss
 """)
         }
         if (session.getUri().equals("/v1/batch") && session.getMethod() == Method.POST) {
