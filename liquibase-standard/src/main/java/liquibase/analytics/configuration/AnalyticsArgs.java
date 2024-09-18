@@ -8,7 +8,7 @@ import org.apache.commons.lang3.BooleanUtils;
 
 public class AnalyticsArgs implements AutoloadedConfigurations {
 
-    private static final ConfigurationDefinition<Boolean> ENABLED;
+    public static final ConfigurationDefinition<Boolean> ENABLED;
     public static final ConfigurationDefinition<String> CONFIG_ENDPOINT_URL;
     public static final ConfigurationDefinition<Integer> CONFIG_ENDPOINT_TIMEOUT_MILLIS;
 

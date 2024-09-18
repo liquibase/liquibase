@@ -3,6 +3,7 @@ package org.liquibase.maven.plugins;
 import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
+import liquibase.analytics.configuration.AnalyticsArgs;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
@@ -714,6 +715,13 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     @PropertyElement(key = "liquibase.databaseChangelogHistory.captureExtensions")
     protected Boolean databaseChangelogHistoryCaptureExtensions;
 
+    /**
+     * Enable or disable sending product usage data and analytics to Liquibase.
+     *
+     * @parameter property="liquibase.databaseChangelogHistoryCaptureExtensions"
+     */
+    @PropertyElement(key = "liquibase.analytics.enabled")
+    protected Boolean analyticsEnabled;
 
     /**
      * When set to true, this global property prevents DBCL and DBCLH sql from being present in console and logs during *-sql commands, such as update-sql, rollback-sql, etc.
@@ -864,6 +872,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 scopeValues.put(Scope.Attr.resourceAccessor.name(), getResourceAccessor(mavenClassLoader));
                 scopeValues.put(Scope.Attr.classLoader.name(), getClassLoaderIncludingProjectClasspath());
                 scopeValues.put(Scope.Attr.mavenConfigurationProperties.name(), getConfigurationProperties());
+                if (analyticsEnabled != null) {
+                    scopeValues.put(AnalyticsArgs.ENABLED.getKey(), analyticsEnabled);
+                }
 
                 IntegrationDetails integrationDetails = new IntegrationDetails();
                 integrationDetails.setName("maven");
