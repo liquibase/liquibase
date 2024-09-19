@@ -16,7 +16,7 @@ public class SegmentBatch {
     private final String writeKey;
     private final Map<String, ?> context;
 
-    public static SegmentBatch fromLiquibaseEvent(Event event, String licenseIssuedTo) throws Exception {
+    public static SegmentBatch fromLiquibaseEvent(Event event, String userId) throws Exception {
         AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
         AnalyticsConfiguration analyticsConfiguration = analyticsConfigurationFactory.getPlugin();
         String writeKey = null;
@@ -24,7 +24,7 @@ public class SegmentBatch {
             writeKey = ((SegmentAnalyticsConfiguration) analyticsConfiguration).getWriteKey();
         }
         SegmentBatch segmentBatch = new SegmentBatch(writeKey, null);
-        segmentBatch.getBatch().add(SegmentTrackEvent.fromLiquibaseEvent(event, licenseIssuedTo));
+        segmentBatch.getBatch().add(SegmentTrackEvent.fromLiquibaseEvent(event, userId));
         return segmentBatch;
     }
 }

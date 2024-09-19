@@ -10,6 +10,7 @@ import liquibase.serializer.core.yaml.YamlSerializer;
 import liquibase.util.ExceptionUtil;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.BeanAccess;
@@ -46,10 +47,17 @@ public class SegmentAnalyticsListener implements AnalyticsListener {
          * It is important to obtain the userId here outside of the newly created thread. {@link Scope} stores its stuff
          * in a ThreadLocal, so if you tried to get the value inside the thread, the value could be different.
          */
+        LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
         String userId = ExceptionUtil.doSilently(() -> {
-            LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
-            return licenseService.getLicenseInfoObject().getIssuedTo();
+            String issuedTo = licenseService.getLicenseInfoObject().getIssuedTo();
+            // Append the end of the license key to the license issued to name. Some customers have multiple keys
+            // associated to them (with the same name) and we need to tell them apart.
+            if (StringUtils.isNotEmpty(issuedTo)) {
+                issuedTo += "-" + StringUtils.right(licenseService.getLicenseKey().getValue(), AnalyticsArgs.LICENSE_KEY_CHARS.getCurrentValue());
+            }
+            return issuedTo;
         });
+
         Thread eventThread = new Thread(() -> {
             try {
                 URL url = new URL(analyticsConfiguration.getDestinationUrl());

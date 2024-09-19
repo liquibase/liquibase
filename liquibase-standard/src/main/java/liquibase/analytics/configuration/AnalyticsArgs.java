@@ -11,6 +11,7 @@ public class AnalyticsArgs implements AutoloadedConfigurations {
     private static final ConfigurationDefinition<Boolean> ENABLED;
     public static final ConfigurationDefinition<String> CONFIG_ENDPOINT_URL;
     public static final ConfigurationDefinition<Integer> CONFIG_ENDPOINT_TIMEOUT_MILLIS;
+    public static final ConfigurationDefinition<Integer> LICENSE_KEY_CHARS;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase.analytics");
@@ -27,6 +28,12 @@ public class AnalyticsArgs implements AutoloadedConfigurations {
         CONFIG_ENDPOINT_TIMEOUT_MILLIS = builder.define("configEndpointTimeoutMillis", Integer.class)
                 .setDefaultValue(1500)
                 .setHidden(true)
+                .build();
+
+        LICENSE_KEY_CHARS = builder.define("licenseKeyChars", Integer.class)
+                .setDefaultValue(12)
+                .setHidden(true)
+                .setDescription("Number of characters of the license key that should be appended to the userId. This is used in the event that the same customer has multiple license keys associated with them.")
                 .build();
     }
 

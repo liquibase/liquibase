@@ -43,9 +43,9 @@ public class SegmentTrackEvent {
     private final Map<String, ?> context;
     private final String messageId = UUID.randomUUID().toString();
 
-    public static SegmentTrackEvent fromLiquibaseEvent(Event event, String licenseIssuedTo) {
+    public static SegmentTrackEvent fromLiquibaseEvent(Event event, String userId) {
         SegmentTrackEvent segmentTrackEvent = new SegmentTrackEvent(
-                licenseIssuedTo,
+                userId,
                 UUID.randomUUID().toString(), // todo this should be more sophisticated in the future
                 event.getPropertiesAsMap(),
                 null
