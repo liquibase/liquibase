@@ -15,6 +15,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -245,7 +246,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                 //
                 // Handle empty files with a WARNING message
                 //
-                if (StringUtil.isEmpty(firstLine)) {
+                if (StringUtils.isEmpty(firstLine)) {
                     Scope.getCurrentScope().getLog(getClass()).warning(String.format("Skipping empty file '%s'", changeLogFile));
                     return false;
                 }
