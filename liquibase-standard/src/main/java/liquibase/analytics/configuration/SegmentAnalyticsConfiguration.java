@@ -8,6 +8,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
@@ -57,5 +58,9 @@ public class SegmentAnalyticsConfiguration implements AnalyticsConfiguration {
 
     public String getWriteKey() throws Exception {
         return remoteAnalyticsConfiguration.get().getWriteKey();
+    }
+
+    public List<RemoteAnalyticsConfiguration.ExtensionName> getExtensionNames() throws Exception {
+        return remoteAnalyticsConfiguration.get().getExtensions();
     }
 }
