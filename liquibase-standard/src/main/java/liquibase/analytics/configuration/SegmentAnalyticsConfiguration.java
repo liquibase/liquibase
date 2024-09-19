@@ -1,6 +1,7 @@
 package liquibase.analytics.configuration;
 
 import liquibase.Scope;
+import liquibase.logging.Logger;
 import liquibase.util.Cache;
 import lombok.Data;
 import org.yaml.snakeyaml.Yaml;
@@ -8,10 +9,13 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
 
 @Data
 public class SegmentAnalyticsConfiguration implements AnalyticsConfiguration {
     private final static Cache<RemoteAnalyticsConfiguration> remoteAnalyticsConfiguration = new Cache<>(() -> {
+        Logger log = Scope.getCurrentScope().getLog(SegmentAnalyticsConfiguration.class);
+        Level logLevel = AnalyticsArgs.LOG_LEVEL.getCurrentValue();
         String url = AnalyticsArgs.CONFIG_ENDPOINT_URL.getCurrentValue();
         AtomicReference<RemoteAnalyticsConfiguration> remoteAnalyticsConfiguration = new AtomicReference<>();
         Thread thread = new Thread(() -> {
@@ -20,7 +24,7 @@ public class SegmentAnalyticsConfiguration implements AnalyticsConfiguration {
                 Yaml yaml = new Yaml();
                 remoteAnalyticsConfiguration.set(yaml.loadAs(input, RemoteAnalyticsConfiguration.class));
             } catch (Exception e) {
-                Scope.getCurrentScope().getLog(SegmentAnalyticsConfiguration.class).log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Failed to load analytics configuration from " + url, e);
+                log.log(logLevel, "Failed to load analytics configuration from " + url, e);
             }
         });
         thread.start();
