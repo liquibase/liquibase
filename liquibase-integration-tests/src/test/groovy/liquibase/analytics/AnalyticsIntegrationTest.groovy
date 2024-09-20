@@ -36,18 +36,10 @@ class AnalyticsIntegrationTest extends Specification {
      */
     def "test sending analytics happy path"() {
         setup:
-        // Start the webserver
-        SimpleWebserver simpleWebserver = new SimpleWebserver()
-        // Clear the cached analytics config info that was loaded when the drop all command step executed automatically during test setup
-        AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
-        SegmentAnalyticsConfiguration analyticsConfiguration = ((SegmentAnalyticsConfiguration) analyticsConfigurationFactory.getPlugin());
-        analyticsConfiguration.remoteAnalyticsConfiguration.clearCache()
+        SimpleWebserver simpleWebserver = startup()
 
         when:
-        Map<String, ?> scopeVars = new HashMap<>()
-        scopeVars.put(AnalyticsArgs.CONFIG_ENDPOINT_URL.getKey(), "http://localhost:" + simpleWebserver.port + "/config-segment.yaml")
-        scopeVars.put(AnalyticsArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getKey(), TimeUnit.SECONDS.toMillis(60)) // to allow for debugging, otherwise the thread gets killed fast
-        Scope.child(scopeVars, () -> {
+        executeCommandWithAnalytics(simpleWebserver, () -> {
             CommandUtil.runDropAll(h2)
         } as Scope.ScopedRunner)
 
@@ -106,6 +98,23 @@ class AnalyticsIntegrationTest extends Specification {
 
         cleanup:
         simpleWebserver.stop()
+    }
+
+    static void executeCommandWithAnalytics(SimpleWebserver simpleWebserver, Scope.ScopedRunner scopedRunner) {
+        Map<String, ?> scopeVars = new HashMap<>()
+        scopeVars.put(AnalyticsArgs.CONFIG_ENDPOINT_URL.getKey(), "http://localhost:" + simpleWebserver.port + "/config-segment.yaml")
+        scopeVars.put(AnalyticsArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getKey(), TimeUnit.SECONDS.toMillis(60)) // to allow for debugging, otherwise the thread gets killed fast
+        Scope.child(scopeVars, scopedRunner)
+    }
+
+    static SimpleWebserver startup() {
+        // Start the webserver
+        SimpleWebserver simpleWebserver = new SimpleWebserver()
+        // Clear the cached analytics config info that was loaded when the drop all command step executed automatically during test setup
+        AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
+        SegmentAnalyticsConfiguration analyticsConfiguration = ((SegmentAnalyticsConfiguration) analyticsConfigurationFactory.getPlugin());
+        analyticsConfiguration.remoteAnalyticsConfiguration.clearCache()
+        return simpleWebserver
     }
 }
 
