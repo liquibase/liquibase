@@ -18,17 +18,21 @@ class StrictIntegrationTests extends Specification {
 
     @Shared
     private DatabaseTestSystem h2 = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("h2")
+    @Shared
+    private SetupEnvironmentVariableProvider environmentVariableProvider
 
-    def "validate exception is thrown if STRICT global argument is set as true and there is not TagDatabaseChange, but tag argument is specified "() {
-        when:
+    def setup() {
         def scopeSettings = [
                 (GlobalConfiguration.STRICT.getKey()): Boolean.TRUE
         ]
-//        String[] remove = System.getenv().keySet().toArray(new String[System.getenv().size()])
         String[] remove = [:]
-        def setup = new SetupEnvironmentVariableProvider(scopeSettings, remove)
+        environmentVariableProvider = new SetupEnvironmentVariableProvider(scopeSettings, remove)
         TestSetupEnvironment testSetupEnvironment = new TestSetupEnvironment(h2, null)
-        setup.setup(testSetupEnvironment)
+        environmentVariableProvider.setup(testSetupEnvironment)
+    }
+
+    def "validate exception is thrown if STRICT global argument is set as true and there is not TagDatabaseChange, but tag argument is specified "() {
+        when:
         Scope.child([:], {
             def updateToTagCommand = new CommandScope(UpdateToTagCommandStep.COMMAND_NAME)
             updateToTagCommand.addArgumentValue(UpdateToTagCommandStep.TAG_ARG, "testTag")
@@ -43,18 +47,11 @@ class StrictIntegrationTests extends Specification {
         final CommandExecutionException exception = thrown()
         exception.message.contains("Change 'TagDatabaseChange' not found or supported")
         cleanup:
-        setup.cleanup()
+        environmentVariableProvider.cleanup()
     }
 
     def "validate exception is thrown if STRICT global argument is set as true, there is a TagDatabaseChange, but tag argument specified does not match with TagDatabaseChange's tag"() {
         when:
-        def scopeSettings = [
-                (GlobalConfiguration.STRICT.getKey()): Boolean.TRUE
-        ]
-        String[] remove = [:]
-        def setup = new SetupEnvironmentVariableProvider(scopeSettings, remove)
-        TestSetupEnvironment testSetupEnvironment = new TestSetupEnvironment(h2, null)
-        setup.setup(testSetupEnvironment)
         Scope.child([:], {
             def updateToTagCommand = new CommandScope(UpdateToTagCommandStep.COMMAND_NAME)
             updateToTagCommand.addArgumentValue(UpdateToTagCommandStep.TAG_ARG, "testTag")
@@ -71,6 +68,6 @@ class StrictIntegrationTests extends Specification {
 
         cleanup:
         Scope.exit(Scope.getCurrentScope().getScopeId())
-        setup.cleanup()
+        environmentVariableProvider.cleanup()
     }
 }
