@@ -5,6 +5,7 @@ import liquibase.analytics.configuration.SegmentAnalyticsConfiguration;
 import liquibase.analytics.configuration.AnalyticsConfiguration;
 import liquibase.analytics.configuration.AnalyticsConfigurationFactory;
 import lombok.Data;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,18 @@ public class SegmentBatch {
             writeKey = ((SegmentAnalyticsConfiguration) analyticsConfiguration).getWriteKey();
         }
         SegmentBatch segmentBatch = new SegmentBatch(writeKey, null);
-        segmentBatch.getBatch().add(SegmentTrackEvent.fromLiquibaseEvent(event, userId));
+        addEventsToBatch(event, segmentBatch, userId);
         return segmentBatch;
+    }
+
+    private static void addEventsToBatch(Event event, SegmentBatch segmentBatch, String userId) {
+        List<Event> childEvents = event.getChildEvents();
+        segmentBatch.getBatch().add(SegmentTrackEvent.fromLiquibaseEvent(event, userId));
+        if (CollectionUtils.isNotEmpty(childEvents)) {
+            // if there are children, recursively add all of the children events to the batch
+            for (Event childEvent : childEvents) {
+                addEventsToBatch(childEvent, segmentBatch, userId);
+            }
+        }
     }
 }

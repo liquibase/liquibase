@@ -6,6 +6,7 @@ import liquibase.analytics.configuration.AnalyticsArgs;
 import liquibase.analytics.configuration.AnalyticsConfigurationFactory;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
+import liquibase.logging.Logger;
 import liquibase.serializer.core.yaml.YamlSerializer;
 import liquibase.util.ExceptionUtil;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,7 @@ import org.yaml.snakeyaml.nodes.Tag;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
 
 @NoArgsConstructor
 public class SegmentAnalyticsListener implements AnalyticsListener {
@@ -29,7 +31,7 @@ public class SegmentAnalyticsListener implements AnalyticsListener {
         try {
             analyticsEnabled = AnalyticsArgs.isAnalyticsEnabled();
         } catch (Exception e) {
-            Scope.getCurrentScope().getLog(getClass()).fine("Failed to determine if analytics is enabled", e);
+            Scope.getCurrentScope().getLog(getClass()).log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Failed to determine if analytics is enabled", e);
         }
         if (analyticsEnabled) {
             return PRIORITY_SPECIALIZED;
@@ -43,6 +45,8 @@ public class SegmentAnalyticsListener implements AnalyticsListener {
         AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
         SegmentAnalyticsConfiguration analyticsConfiguration = ((SegmentAnalyticsConfiguration) analyticsConfigurationFactory.getPlugin());
         int timeoutMillis = analyticsConfiguration.getTimeoutMillis();
+        Level logLevel = AnalyticsArgs.LOG_LEVEL.getCurrentValue();
+        Logger logger = Scope.getCurrentScope().getLog(getClass());
         /**
          * It is important to obtain the userId here outside of the newly created thread. {@link Scope} stores its stuff
          * in a ThreadLocal, so if you tried to get the value inside the thread, the value could be different.
@@ -76,7 +80,8 @@ public class SegmentAnalyticsListener implements AnalyticsListener {
 
                 SegmentBatch segmentBatch = SegmentBatch.fromLiquibaseEvent(event, userId);
                 String jsonInputString = YamlSerializer.removeClassTypeMarksFromSerializedJson(yaml.dumpAs(segmentBatch, Tag.MAP, DumperOptions.FlowStyle.FLOW));
-                Scope.getCurrentScope().getLog(getClass()).fine("Sending analytics to Segment. " + segmentBatch);
+                // This log message is purposefully being logged at fine level, not using the configurable log-level param, so that users always know what is being sent to Segment.
+                logger.log(logLevel, "Sending analytics to Segment. " + segmentBatch, null);
 
                 IOUtils.write(jsonInputString, conn.getOutputStream(), StandardCharsets.UTF_8);
 
@@ -84,7 +89,7 @@ public class SegmentAnalyticsListener implements AnalyticsListener {
                 String responseBody = ExceptionUtil.doSilently(() -> {
                     return IOUtils.toString(conn.getInputStream());
                 });
-                Scope.getCurrentScope().getLog(getClass()).fine("Response from Segment: " + responseCode + " " + responseBody);
+                logger.log(logLevel, "Response from Segment: " + responseCode + " " + responseBody, null);
                 conn.disconnect();
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -94,7 +99,7 @@ public class SegmentAnalyticsListener implements AnalyticsListener {
         try {
             eventThread.join(timeoutMillis);
         } catch (InterruptedException e) {
-            Scope.getCurrentScope().getLog(getClass()).fine("Interrupted while waiting for analytics event processing to Segment.", e);
+            logger.log(logLevel, "Interrupted while waiting for analytics event processing to Segment.", e);
         }
     }
 }

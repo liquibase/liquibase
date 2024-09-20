@@ -6,11 +6,14 @@ import liquibase.configuration.ConfigurationDefinition;
 import liquibase.license.LicenseServiceUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
+import java.util.logging.Level;
+
 public class AnalyticsArgs implements AutoloadedConfigurations {
 
     private static final ConfigurationDefinition<Boolean> ENABLED;
     public static final ConfigurationDefinition<String> CONFIG_ENDPOINT_URL;
     public static final ConfigurationDefinition<Integer> CONFIG_ENDPOINT_TIMEOUT_MILLIS;
+    public static final ConfigurationDefinition<Level> LOG_LEVEL;
     public static final ConfigurationDefinition<Integer> LICENSE_KEY_CHARS;
 
     static {
@@ -30,6 +33,11 @@ public class AnalyticsArgs implements AutoloadedConfigurations {
                 .setHidden(true)
                 .build();
 
+        LOG_LEVEL = builder.define("logLevel", Level.class)
+                .setDefaultValue(Level.OFF)
+                .setHidden(true)
+                .build();
+
         LICENSE_KEY_CHARS = builder.define("licenseKeyChars", Integer.class)
                 .setDefaultValue(12)
                 .setHidden(true)
@@ -41,7 +49,7 @@ public class AnalyticsArgs implements AutoloadedConfigurations {
         // if the user set enabled to false, that overrides all
         Boolean userSuppliedEnabled = ENABLED.getCurrentValue();
         if (Boolean.FALSE.equals(userSuppliedEnabled)) {
-            Scope.getCurrentScope().getLog(AnalyticsArgs.class).info("User has disabled analytics.");
+            Scope.getCurrentScope().getLog(AnalyticsArgs.class).log(LOG_LEVEL.getCurrentValue(), "User has disabled analytics.", null);
             return false;
         }
 
@@ -50,13 +58,13 @@ public class AnalyticsArgs implements AutoloadedConfigurations {
         if (proLicenseValid) {
             Boolean enabled = BooleanUtils.and(new Boolean[]{analyticsConfigurationFactory.getPlugin().isProAnalyticsEnabled(), userSuppliedEnabled});
             if (Boolean.FALSE.equals(enabled)) {
-                Scope.getCurrentScope().getLog(AnalyticsArgs.class).info("Analytics is disabled, because a pro license was detected and analytics was not enabled by the user or because it was turned off by Liquibase.");
+                Scope.getCurrentScope().getLog(AnalyticsArgs.class).log(LOG_LEVEL.getCurrentValue(), "Analytics is disabled, because a pro license was detected and analytics was not enabled by the user or because it was turned off by Liquibase.", null);
             }
             return enabled;
         } else {
             boolean enabled = analyticsConfigurationFactory.getPlugin().isOssAnalyticsEnabled();
             if (Boolean.FALSE.equals(enabled)) {
-                Scope.getCurrentScope().getLog(AnalyticsArgs.class).info("Analytics is disabled, because it was turned off by Liquibase.");
+                Scope.getCurrentScope().getLog(AnalyticsArgs.class).log(LOG_LEVEL.getCurrentValue(), "Analytics is disabled, because it was turned off by Liquibase.", null);
             }
             return enabled;
         }

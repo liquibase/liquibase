@@ -15,10 +15,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static liquibase.util.VersionUtils.getLibraryInfoMap;
 
@@ -65,8 +63,11 @@ public class Event {
     private String osArch = ExceptionUtil.doSilently(() -> {
         return System.getProperty("os.arch");
     });
-    // Thinking that this could be a list of events created via flow command?
-    // private List<Event> childEvents;
+    /**
+     * This is a list of events created during the execution of the current command, because some commands
+     * execute other commands inside of them, like the flow command.
+     */
+    private List<Event> childEvents = new ArrayList<>();
 
     public Event(String command) {
         this.command = command;
@@ -98,7 +99,8 @@ public class Event {
 
     public Map<String, ?> getPropertiesAsMap() {
         Map<String, Object> properties = new HashMap<>();
-        for (Fields field : Fields.values()) {
+        // Exclude the childEvents field because it should be handled separately
+        for (Fields field : Arrays.stream(Fields.values()).filter(f -> f != Fields.childEvents).collect(Collectors.toList())) {
             try {
                 Field refField = this.getClass().getDeclaredField(field.toString());
                 refField.setAccessible(true);
