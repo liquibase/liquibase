@@ -6,6 +6,8 @@ import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.exception.ValidationFailedException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.core.DatabaseObjectFactory;
 import org.junit.Test;
 
 import java.io.File;
@@ -86,6 +88,7 @@ public class SQLiteIntegrationTest extends AbstractIntegrationTest {
     @Override
     public void tearDown() throws Exception {
         super.tearDown();
+        DatabaseObjectFactory.getInstance().reset();
         try {
             String url = getDatabase().getConnection().getURL()
                     .replaceFirst("jdbc:sqlite:", ""); // remove the prefix of the URL jdbc:sqlite:C:\path\to\tmp\dir\liquibase.db
