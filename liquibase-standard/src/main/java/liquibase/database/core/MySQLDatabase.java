@@ -19,10 +19,7 @@ import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
 import java.sql.Types;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -704,6 +701,22 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     public boolean getUseAffectedRows() throws DatabaseException {
         return getConnection().getURL().contains("useAffectedRows=true");
+    }
+
+    @Override
+    public void addReservedWords(Collection<String> words) {
+        addMySQLReservedWordIfApplicable("MANUAL");
+        super.addReservedWords(words);
+    }
+
+    private void addMySQLReservedWordIfApplicable(String... reservedWord) {
+        try {
+            if(getDatabaseMajorVersion() >= 9 || (getDatabaseMajorVersion() == 8 && getDatabaseMinorVersion() >= 4)) {
+                RESERVED_WORDS.addAll(Arrays.asList(reservedWord));
+            }
+        } catch (DatabaseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
