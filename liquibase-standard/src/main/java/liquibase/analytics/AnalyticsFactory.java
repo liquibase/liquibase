@@ -25,7 +25,7 @@ public class AnalyticsFactory extends AbstractPluginFactory<AnalyticsListener> {
                 getPlugin().handleEvent(event);
             }
         } catch (Exception e) {
-            Scope.getCurrentScope().getLog(getClass()).warning("Failed to handle analytics event", e);
+            Scope.getCurrentScope().getLog(getClass()).log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Failed to handle analytics event", e);
         }
     }
 }
