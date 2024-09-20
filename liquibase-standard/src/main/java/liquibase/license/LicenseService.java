@@ -1,5 +1,6 @@
 package liquibase.license; 
 
+import liquibase.configuration.ConfiguredValue;
 import liquibase.plugin.Plugin;
 
 import java.util.Date;
@@ -96,4 +97,7 @@ public interface LicenseService extends Plugin {
     return null;
   }
 
+  default ConfiguredValue<String> getLicenseKey() {
+    return null;
+  }
 }

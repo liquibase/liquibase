@@ -17,7 +17,7 @@ public class SegmentBatch {
     private final String writeKey;
     private final Map<String, ?> context;
 
-    public static SegmentBatch fromLiquibaseEvent(Event event) throws Exception {
+    public static SegmentBatch fromLiquibaseEvent(Event event, String userId) throws Exception {
         AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
         AnalyticsConfiguration analyticsConfiguration = analyticsConfigurationFactory.getPlugin();
         String writeKey = null;
@@ -25,17 +25,17 @@ public class SegmentBatch {
             writeKey = ((SegmentAnalyticsConfiguration) analyticsConfiguration).getWriteKey();
         }
         SegmentBatch segmentBatch = new SegmentBatch(writeKey, null);
-        addEventsToBatch(event, segmentBatch);
+        addEventsToBatch(event, segmentBatch, userId);
         return segmentBatch;
     }
 
-    private static void addEventsToBatch(Event event, SegmentBatch segmentBatch) {
+    private static void addEventsToBatch(Event event, SegmentBatch segmentBatch, String userId) {
         List<Event> childEvents = event.getChildEvents();
-        segmentBatch.getBatch().add(SegmentTrackEvent.fromLiquibaseEvent(event));
+        segmentBatch.getBatch().add(SegmentTrackEvent.fromLiquibaseEvent(event, userId));
         if (CollectionUtils.isNotEmpty(childEvents)) {
             // if there are children, recursively add all of the children events to the batch
             for (Event childEvent : childEvents) {
-                addEventsToBatch(childEvent, segmentBatch);
+                addEventsToBatch(childEvent, segmentBatch, userId);
             }
         }
     }
