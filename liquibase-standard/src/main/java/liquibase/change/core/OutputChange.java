@@ -56,9 +56,10 @@ public class OutputChange extends AbstractChange {
         return new SqlStatement[] { new RuntimeStatement() {
             @Override
             public Sql[] generate(Database database) {
-                // Why do these return null?
-                Boolean shouldExecute1 = Scope.getCurrentScope().get(Change.SHOULD_EXECUTE, Boolean.class);
-                Boolean shouldExecute2 = shouldExecuteChange(database);
+                if (! shouldExecuteChange(database)) {
+                    return null;
+                }
+
                 String target = getTarget();
                 if ("STDOUT".equalsIgnoreCase(target)) {
                     System.out.println(getMessage());
