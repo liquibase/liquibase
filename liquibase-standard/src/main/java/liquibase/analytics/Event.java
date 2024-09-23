@@ -73,7 +73,13 @@ public class Event {
         this.command = command;
         liquibaseInterface = ExceptionUtil.doSilently(() -> {
             IntegrationDetails integrationDetails = Scope.getCurrentScope().get(Scope.Attr.integrationDetails, IntegrationDetails.class);
-            return integrationDetails.getName();
+            if (integrationDetails != null) {
+                return integrationDetails.getName();
+            } else {
+                // If no integration details exist in the scope, we assume that the CommandScope is being constructed
+                // directly and thus is a JavaAPI.
+                return "JavaAPI";
+            }
         });
     }
 

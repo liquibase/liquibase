@@ -87,7 +87,7 @@ class AnalyticsIntegrationTest extends Specification {
         properties.get("ext_mongoDb_commercial") == "null"
         properties.get("ext_mongoDbOss") == "null"
         properties.get("javaVersion") == SystemUtil.getJavaVersion()
-        properties.get("liquibaseInterface") == "null"
+        properties.get("liquibaseInterface") == "JavaAPI"
         properties.get("liquibaseVersion") == LiquibaseUtil.getBuildVersionInfo()
         properties.get("operationOutcome") == "success"
         properties.get("os") == System.getProperty("os.name")
