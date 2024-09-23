@@ -294,6 +294,7 @@ public abstract class AbstractIntegrationTest {
             }
         }
         SnapshotGeneratorFactory.resetAll();
+        DatabaseObjectFactory.getInstance().reset();
     }
 
     protected boolean shouldRollBack() {

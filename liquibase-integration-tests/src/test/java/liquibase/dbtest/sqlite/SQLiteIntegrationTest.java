@@ -88,7 +88,6 @@ public class SQLiteIntegrationTest extends AbstractIntegrationTest {
     @Override
     public void tearDown() throws Exception {
         super.tearDown();
-        DatabaseObjectFactory.getInstance().reset();
         try {
             String url = getDatabase().getConnection().getURL()
                     .replaceFirst("jdbc:sqlite:", ""); // remove the prefix of the URL jdbc:sqlite:C:\path\to\tmp\dir\liquibase.db
