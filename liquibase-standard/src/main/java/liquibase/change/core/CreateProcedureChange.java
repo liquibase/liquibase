@@ -430,7 +430,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         }
     }
 
-    private static boolean databaseSupportsReplaceIfExists(Database database) {
+    public static boolean databaseSupportsReplaceIfExists(Database database) {
         List<Class<? extends AbstractJdbcDatabase>> supported = Arrays.asList(
                 MSSQLDatabase.class,
                 MySQLDatabase.class,
