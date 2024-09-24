@@ -269,7 +269,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                         }
                     });
         } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
+            throw new LiquibaseException(e);
         }
     }
 

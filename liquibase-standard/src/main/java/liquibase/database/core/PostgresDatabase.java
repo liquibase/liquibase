@@ -33,8 +33,8 @@ import java.util.*;
 public class PostgresDatabase extends AbstractJdbcDatabase {
     private static final String dbFullVersion = null;
     public static final String PRODUCT_NAME = "PostgreSQL";
-    public static final int MINIMUM_DBMS_MAJOR_VERSION = 9;
-    public static final int MINIMUM_DBMS_MINOR_VERSION = 2;
+    public static final int MINIMUM_DBMS_MAJOR_VERSION = 12;
+    public static final int MINIMUM_DBMS_MINOR_VERSION = 20;
     /**
      * The data type names which are valid for auto-increment columns.
      */
