@@ -10,7 +10,11 @@ import java.util.logging.Level;
 
 public class AnalyticsArgs implements AutoloadedConfigurations {
 
-    private static final ConfigurationDefinition<Boolean> ENABLED;
+    /**
+     * Do not access this value directly to check whether analytics are enabled.
+     * Instead, use the method {@link AnalyticsArgs#isAnalyticsEnabled}
+     */
+    public static final ConfigurationDefinition<Boolean> ENABLED;
     public static final ConfigurationDefinition<String> CONFIG_ENDPOINT_URL;
     public static final ConfigurationDefinition<Integer> CONFIG_ENDPOINT_TIMEOUT_MILLIS;
     public static final ConfigurationDefinition<Level> LOG_LEVEL;
@@ -45,6 +49,13 @@ public class AnalyticsArgs implements AutoloadedConfigurations {
                 .build();
     }
 
+    /**
+     * Check whether analytics are enabled. This method handles all the various ways that
+     * analytics can be enabled or disabled and should be the primary way to validate
+     * whether analytics are turned on. You should not use the argument {@link AnalyticsArgs#ENABLED}.
+     * @return true if analytics are enabled, false otherwise.
+     * @throws Exception if there was a problem determining the enabled status of analytics
+     */
     public static boolean isAnalyticsEnabled() throws Exception {
         // if the user set enabled to false, that overrides all
         Boolean userSuppliedEnabled = ENABLED.getCurrentValue();

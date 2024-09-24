@@ -18,10 +18,8 @@ import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
+import java.sql.Types;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -186,8 +184,6 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         return false;
     }
 
-
-
     @Override
     public boolean supports(Class<? extends DatabaseObject> object) {
         if (Schema.class.isAssignableFrom(object)) {
@@ -271,6 +267,16 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             return 0;
         }
 
+    }
+
+    public Integer getFSPFromTimeType(int columnSize, int jdbcType) {
+        if (jdbcType == Types.TIMESTAMP) {
+            if (columnSize > 20 && columnSize < 27) {
+                return columnSize % 10;
+            }
+        }
+
+        return 0;
     }
 
     @Override
@@ -695,6 +701,22 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     public boolean getUseAffectedRows() throws DatabaseException {
         return getConnection().getURL().contains("useAffectedRows=true");
+    }
+
+    @Override
+    public void addReservedWords(Collection<String> words) {
+        addMySQLReservedWordIfApplicable("MANUAL");
+        super.addReservedWords(words);
+    }
+
+    private void addMySQLReservedWordIfApplicable(String... reservedWord) {
+        try {
+            if(getDatabaseMajorVersion() >= 9 || (getDatabaseMajorVersion() == 8 && getDatabaseMinorVersion() >= 4)) {
+                RESERVED_WORDS.addAll(Arrays.asList(reservedWord));
+            }
+        } catch (DatabaseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

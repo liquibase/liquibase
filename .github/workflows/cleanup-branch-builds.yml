@@ -8,6 +8,7 @@ on:
       - 'github-action-**'
       - 'dependabot-**'
       - 'feat/**'
+
 jobs:
 
   extract-branch-info:
@@ -20,9 +21,10 @@ jobs:
       - name: Extract branch name
         id: get-branch-name
         run: |
-            branch_name=${GITHUB_REF#refs/heads/}
-            echo "Branch name is $branch_name"
-            echo "branch_name=$branch_name" >> $GITHUB_OUTPUT
+          branch_name=${{ github.event.ref }}
+          branch_name=${branch_name#refs/heads/}
+          echo "Branch name is $branch_name"
+          echo "branch_name=$branch_name" >> $GITHUB_OUTPUT
 
   delete-dat-package:
     name: Delete DAT-SNAPSHOT Github Package for Branch
@@ -41,7 +43,7 @@ jobs:
     - run: |
         echo "Version to delete ${{ steps.version.outputs.ids }} for ${{ needs.extract-branch-info.outputs.branch_name }}-SNAPSHOT"
     
-    - uses: actions/delete-package-versions@v3
+    - uses: actions/delete-package-versions@v5
       if: ${{ steps.version.outputs.ids != '' }}
       with:
         package-type: maven
@@ -65,33 +67,40 @@ jobs:
 
     steps:
 
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0 
-        ref: ${{ github.event.ref }}
-
-    - name: Get commits between ${{ needs.extract-branch-info.outputs.branch_name }} and master
+    - name: Fetch commits between branch and master via GitHub API
+      id: fetch-commits
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        git fetch origin master
-        COMMITS=$(git rev-list --reverse ${GITHUB_SHA}..origin/master)
-        COMMITS_LIST=$(echo "$COMMITS" | tr '\n' ',' | sed 's/,$//')
-        echo "COMMITS_LIST=$COMMITS_LIST" >> $GITHUB_ENV
-        echo "Commits between $BRANCH_NAME and master: $COMMITS_LIST"
+        BRANCH_NAME=${{ needs.extract-branch-info.outputs.branch_name }}
+        echo "Fetching commits for branch: $BRANCH_NAME"
 
-    - name: Get commits between ${{ needs.extract-branch-info.outputs.branch_name }} and release
-      run: |
-        git fetch origin release
-        COMMITS=$(git rev-list --reverse ${GITHUB_SHA}..origin/release)
-        COMMITS_LIST=$(echo "$COMMITS" | tr '\n' ',' | sed 's/,$//')
-        echo "COMMITS_LIST_RELEASE=$COMMITS_LIST" >> $GITHUB_ENV
-        echo "Commits between $BRANCH_NAME and release: $COMMITS_LIST"
+        # Fetch commits between branch and master
+        MASTER_COMMITS_RESPONSE=$(gh api -H "Accept: application/vnd.github.v3+json" /repos/${{ github.repository }}/compare/master...$BRANCH_NAME || echo "error")
+        if [[ "$MASTER_COMMITS_RESPONSE" == "error" || "$MASTER_COMMITS_RESPONSE" == "null" ]]; then
+          echo "No differences found between branch $BRANCH_NAME and master."
+          MASTER_COMMITS=""
+        else
+          MASTER_COMMITS=$(echo "$MASTER_COMMITS_RESPONSE" | jq -r '.commits[].sha' | tr '\n' ',' | sed 's/,$//')
+        fi
+
+        # Fetch commits between branch and release
+        RELEASE_COMMITS_RESPONSE=$(gh api -H "Accept: application/vnd.github.v3+json" /repos/${{ github.repository }}/compare/release...$BRANCH_NAME || echo "error")
+        if [[ "$RELEASE_COMMITS_RESPONSE" == "error" || "$RELEASE_COMMITS_RESPONSE" == "null" ]]; then
+          echo "No differences found between branch $BRANCH_NAME and release."
+          RELEASE_COMMITS=""
+        else
+          RELEASE_COMMITS=$(echo "$RELEASE_COMMITS_RESPONSE" | jq -r '.commits[].sha' | tr '\n' ',' | sed 's/,$//')
+        fi
+
+        echo "MASTER_COMMITS=$MASTER_COMMITS" >> $GITHUB_ENV
+        echo "RELEASE_COMMITS=$RELEASE_COMMITS" >> $GITHUB_ENV
 
     - name: Prepare list of package versions to delete
       id: prepare-packages
       run: |
-        MASTER_COMMITS="${{ env.COMMITS_LIST }}"
-        RELEASE_COMMITS="${{ env.COMMITS_LIST_RELEASE }}"
+        MASTER_COMMITS="${{ env.MASTER_COMMITS }}"
+        RELEASE_COMMITS="${{ env.env.RELEASE_COMMITS }}"
         PACKAGE_VERSIONS=""
 
         for COMMIT in $(echo "$MASTER_COMMITS,$RELEASE_COMMITS" | tr ',' '\n'); do

@@ -3,6 +3,7 @@ package org.liquibase.maven.plugins;
 import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
+import liquibase.analytics.configuration.AnalyticsArgs;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
@@ -714,6 +715,48 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     @PropertyElement(key = "liquibase.databaseChangelogHistory.captureExtensions")
     protected Boolean databaseChangelogHistoryCaptureExtensions;
 
+    /**
+     * Enable or disable sending product usage data and analytics to Liquibase.
+     *
+     * @parameter property="liquibase.analyticsEnabled"
+     */
+    @PropertyElement(key = "liquibase.analytics.enabled")
+    protected Boolean analyticsEnabled;
+    /**
+     * Specifies the vault URL
+     *
+     * @parameter property="liquibase.vault.addr"
+     */
+    @PropertyElement
+    protected String vaultAddr;
+
+    public void setVaultAddr(String vaultAddr) {
+        this.vaultAddr = vaultAddr;
+    }
+
+    /**
+     * Specifies the vault token
+     *
+     * @parameter property="liquibase.vault.token"
+     */
+    @PropertyElement
+    protected String vaultToken;
+
+    public void setVaultToken(String vaultToken) {
+        this.vaultToken = vaultToken;
+    }
+
+    /**
+     * Specifies the vault namespace
+     *
+     * @parameter property="liquibase.vault.namespace"
+     */
+    @PropertyElement
+    protected String vaultNamespace;
+
+    public void setVaultNamespace(String vaultNamespace) {
+        this.vaultNamespace = vaultNamespace;
+    }
 
     /**
      * When set to true, this global property prevents DBCL and DBCLH sql from being present in console and logs during *-sql commands, such as update-sql, rollback-sql, etc.
@@ -864,6 +907,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 scopeValues.put(Scope.Attr.resourceAccessor.name(), getResourceAccessor(mavenClassLoader));
                 scopeValues.put(Scope.Attr.classLoader.name(), getClassLoaderIncludingProjectClasspath());
                 scopeValues.put(Scope.Attr.mavenConfigurationProperties.name(), getConfigurationProperties());
+                if (analyticsEnabled != null) {
+                    scopeValues.put(AnalyticsArgs.ENABLED.getKey(), analyticsEnabled);
+                }
+                handleVaultProperties(scopeValues);
 
                 IntegrationDetails integrationDetails = new IntegrationDetails();
                 integrationDetails.setName("maven");
@@ -922,6 +969,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     Database database = null;
                     try {
                         if (databaseConnectionRequired()) {
+                            //
+                            // Calling the setters again will allow the code to utilize any secret
+                            // manager settings which weren't available when the url/username/password
+                            // values were loaded the first time
+                            //
+                            setUrl(this.url);
+                            setUsername(this.username);
+                            setPassword(this.password);
                             String dbPassword = (emptyPassword || (password == null)) ? "" : password;
                             String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile.getAbsolutePath();
                             database = CommandLineUtils.createDatabaseObject(mavenClassLoader,
@@ -1048,6 +1103,18 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             getLog().warn("Failed to obtain values for configuration properties", e);
         }
         return configurationProperties;
+    }
+
+    private void handleVaultProperties(Map<String, Object> scopeValues) {
+        if (StringUtil.isNotEmpty(this.vaultAddr)) {
+            scopeValues.put("liquibase.vault.addr", this.vaultAddr);
+        }
+        if (StringUtil.isNotEmpty(this.vaultToken)) {
+            scopeValues.put("liquibase.vault.token", this.vaultToken);
+        }
+        if (StringUtil.isNotEmpty(this.vaultNamespace)) {
+            scopeValues.put("liquibase.vault.namespace", this.vaultNamespace);
+        }
     }
 
     protected Field getField(Class clazz, String name) throws NoSuchFieldException {
