@@ -6,6 +6,7 @@ import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.PropertyExpandingStream;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.core.*;
@@ -25,6 +26,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 @DatabaseChange(name = "createProcedure", description = "Defines a stored procedure.", priority = ChangeMetaData.PRIORITY_DEFAULT)
@@ -428,13 +431,14 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     }
 
     private static boolean databaseSupportsReplaceIfExists(Database database) {
-        if (database instanceof MSSQLDatabase) {
-            return true;
-        }
-        if (database instanceof MySQLDatabase) {
-            return true;
-        }
-        if (database instanceof DB2Database) {
+        List<Class<? extends AbstractJdbcDatabase>> supported = Arrays.asList(
+                MSSQLDatabase.class,
+                MySQLDatabase.class,
+                DB2Database.class,
+                PostgresDatabase.class
+        );
+
+        if (supported.contains(database.getClass())) {
             return true;
         }
 
