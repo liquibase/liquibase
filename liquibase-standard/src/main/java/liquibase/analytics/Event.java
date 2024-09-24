@@ -11,8 +11,10 @@ import lombok.experimental.FieldNameConstants;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.lang.reflect.Field;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -68,12 +70,43 @@ public class Event {
      * execute other commands inside of them, like the flow command.
      */
     private List<Event> childEvents = new ArrayList<>();
+    /**
+     * Is the code running in a docker container?
+     */
+    private boolean isDocker;
+    /**
+     * Is the code running in a docker container that is created/maintained by Liquibase?
+     */
+    private boolean isLiquibaseDocker;
+    /**
+     * Is the code running in the AWS specific docker container that is created/maintained by Liquibase. Note that this
+     * is a different from the container that is published to the public ECR. This is the container that someone uses
+     * when they purchase Liquibase Pro through the AWS Marketplace.
+     */
+    private boolean isAwsLiquibaseDocker;
 
     public Event(String command) {
         this.command = command;
         liquibaseInterface = ExceptionUtil.doSilently(() -> {
             IntegrationDetails integrationDetails = Scope.getCurrentScope().get(Scope.Attr.integrationDetails, IntegrationDetails.class);
             return integrationDetails.getName();
+        });
+        isLiquibaseDocker = ExceptionUtil.doSilently(() -> {
+            return BooleanUtils.toBoolean(System.getenv("DOCKER_LIQUIBASE"));
+        });
+        isAwsLiquibaseDocker = ExceptionUtil.doSilently(() -> {
+            return BooleanUtils.toBoolean(System.getenv("DOCKER_AWS_LIQUIBASE"));
+        });
+        isDocker = ExceptionUtil.doSilently(() -> {
+            if (isLiquibaseDocker || isAwsLiquibaseDocker) {
+                return true;
+            }
+            boolean dockerenvExists = Files.exists(Paths.get("/.dockerenv"));
+            if (dockerenvExists) {
+                return true;
+            }
+            String cgroupContent = new String(Files.readAllBytes(Paths.get("/proc/1/cgroup")));
+            return cgroupContent.contains("docker") || cgroupContent.contains("kubepods");
         });
     }
 
