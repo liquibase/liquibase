@@ -100,7 +100,8 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
      * @throws DatabaseException Thrown when there is a connection error
      */
     public Database obtainDatabase(CommandScope commandScope) throws DatabaseException {
-        if (commandScope.getArgumentValue(DATABASE_ARG) == null) {
+        Database argumentValue = commandScope.getArgumentValue(DATABASE_ARG);
+        if (argumentValue == null) {
             String url = commandScope.getArgumentValue(URL_ARG);
             String username = commandScope.getArgumentValue(USERNAME_ARG);
             String password = commandScope.getArgumentValue(PASSWORD_ARG);
@@ -114,7 +115,8 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
             logMdc(url, database);
             return database;
         } else {
-            return commandScope.getArgumentValue(DATABASE_ARG);
+            logMdc(argumentValue.getConnection().getURL(), argumentValue);
+            return argumentValue;
         }
     }
 
