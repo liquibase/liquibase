@@ -12,7 +12,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
-
+// add a comment
     @Setter
     private String searchPath;
     @Setter
