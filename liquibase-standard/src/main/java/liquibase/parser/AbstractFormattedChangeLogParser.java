@@ -436,6 +436,8 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     }
 
                     String changeSetId = changeLogParameters.expandExpressions(StringUtil.stripEnclosingQuotes(idGroup), changeLog);
+                    validateChangeSetId(changeSetId, line, count);
+
                     String changeSetAuthor = changeLogParameters.expandExpressions(StringUtil.stripEnclosingQuotes(authorGroup), changeLog);
 
                     changeSet = configureChangeSet(changeLog, runOnChange, runAlways, runInTransaction, failOnError, runWith, runWithSpoolFile, context, labels, logicalFilePath, dbms, ignore, changeSetId, changeSetAuthor);
@@ -715,6 +717,16 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     protected boolean handleAdditionalLines(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, String line)
         throws ChangeLogParseException {
         return false;
+    }
+
+    private void validateChangeSetId(String changeSetId, String line, int count) throws ChangeLogParseException {
+        String parsed = changeSetId.replace(":","").replace(" ","");
+        if (StringUtil.isEmpty(parsed)) {
+            String message =
+               "Unexpected formatting in formatted changelog at line %d. The change set ID cannot be empty.%n" +
+               "Learn all the options at https://docs.liquibase.com/concepts/changelogs/sql-format.html";
+            throw new ChangeLogParseException("\n" + String.format(message, count));
+        }
     }
 
     private void handleRollbackSequence(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, DatabaseChangeLog changeLog, StringBuilder currentRollbackSequence, ChangeSet changeSet, Matcher rollbackSplitStatementsPatternMatcher, boolean rollbackSplitStatements, String rollbackEndDelimiter) throws ChangeLogParseException {
