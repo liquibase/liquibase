@@ -22,7 +22,7 @@ import java.util.*;
 public class LiquibaseConfiguration implements SingletonObject {
 
     private final SortedSet<ConfigurationValueProvider> configurationValueProviders;
-    private final SortedSet<ConfigurationDefinition<?>> definitions = new TreeSet<>();
+    private final static SortedSet<ConfigurationDefinition<?>> definitions = new TreeSet<>();
     public static final String REGISTERED_VALUE_PROVIDERS_KEY = "REGISTERED_VALUE_PROVIDERS";
 
     /**
@@ -205,7 +205,7 @@ public class LiquibaseConfiguration implements SingletonObject {
      */
     public SortedSet<ConfigurationDefinition<?>> getRegisteredDefinitions(boolean includeInternal) {
         SortedSet<ConfigurationDefinition<?>> returnSet = new TreeSet<>();
-        for (ConfigurationDefinition<?> definition : this.definitions) {
+        for (ConfigurationDefinition<?> definition : definitions) {
             if (includeInternal || !definition.isInternal()) {
                 returnSet.add(definition);
             }
