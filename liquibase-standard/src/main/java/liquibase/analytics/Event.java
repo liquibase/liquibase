@@ -91,13 +91,9 @@ public class Event {
             IntegrationDetails integrationDetails = Scope.getCurrentScope().get(Scope.Attr.integrationDetails, IntegrationDetails.class);
             return integrationDetails.getName();
         });
-        isLiquibaseDocker = ExceptionUtil.doSilently(() -> {
-            return BooleanUtils.toBoolean(System.getenv("DOCKER_LIQUIBASE"));
-        });
-        isAwsLiquibaseDocker = ExceptionUtil.doSilently(() -> {
-            return BooleanUtils.toBoolean(System.getenv("DOCKER_AWS_LIQUIBASE"));
-        });
-        isDocker = ExceptionUtil.doSilently(() -> {
+        isLiquibaseDocker = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("DOCKER_LIQUIBASE"))));
+        isAwsLiquibaseDocker = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("DOCKER_AWS_LIQUIBASE"))));
+        isDocker = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> {
             if (isLiquibaseDocker || isAwsLiquibaseDocker) {
                 return true;
             }
@@ -107,7 +103,7 @@ public class Event {
             }
             String cgroupContent = new String(Files.readAllBytes(Paths.get("/proc/1/cgroup")));
             return cgroupContent.contains("docker") || cgroupContent.contains("kubepods");
-        });
+        }));
     }
 
     public void incrementFormattedSqlChangelogCount() {
