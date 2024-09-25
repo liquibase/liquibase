@@ -719,6 +719,9 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         return false;
     }
 
+    //
+    // If the change set ID is empty after removing colons and blank spaces then it is invalid
+    //
     private void validateChangeSetId(String changeSetId, String line, int count) throws ChangeLogParseException {
         String parsed = changeSetId.replace(":","").replace(" ","");
         if (StringUtil.isEmpty(parsed)) {

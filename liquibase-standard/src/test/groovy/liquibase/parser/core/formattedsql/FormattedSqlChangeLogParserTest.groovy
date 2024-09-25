@@ -177,6 +177,15 @@ alter table test_table add column name2 varchar(20);
 
 -- rollback changesetId:create changeSetAuthor:the_user
 
+--ChangeSet nvoxland::4
+create table table222 (
+    id int primary key
+);
+create table table333 (
+    id int primary key
+);
+--rollback drop table table222;
+
 """.trim()
 
     private static final String VALID_CHANGELOG_WITH_IGNORE_PROP = """
@@ -427,7 +436,7 @@ create table table1 (
 
         changeLog.getLogicalFilePath() == "asdf.sql"
 
-        changeLog.getChangeSets().size() == 25
+        changeLog.getChangeSets().size() == 26
 
         changeLog.getChangeSets().get(0).getAuthor() == "nvoxland"
         changeLog.getChangeSets().get(0).getId() == "1"
