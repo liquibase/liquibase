@@ -26,7 +26,7 @@ public abstract class AbstractChangelogCommandStep extends AbstractCommandStep {
         final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         RUN_ON_CHANGE_TYPES_ARG = builder.argument("runOnChangeTypes", String.class)
                 .defaultValue("none").description("Sets runOnChange=\"true\" for changesets containing solely changes of these types (e. g. createView, createProcedure, ...).").build();
-        final String replaceIfExistsTypeNames = supportedReplaceIfExistsTypes().collect(Collectors.joining(", "));
+        final String replaceIfExistsTypeNames ="";
         REPLACE_IF_EXISTS_TYPES_ARG = builder.argument("replaceIfExistsTypes", String.class)
                 .defaultValue("none")
                 .description(String.format("Sets replaceIfExists=\"true\" for changes of these types (supported types: %s)", replaceIfExistsTypeNames)).build();
