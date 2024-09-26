@@ -73,7 +73,7 @@ Optional Args:
     Default: null
   referenceUsername (String) The reference database username
     Default: null
-  replaceIfExistsTypes (String) Sets replaceIfExists="true" for changes of these types (supported types: createProcedure, createView)
+  replaceIfExistsTypes (String) Sets replaceIfExists="true" for changes of these types
     Default: none
   runOnChangeTypes (String) Sets runOnChange="true" for changesets containing solely changes of these types (e. g. createView, createProcedure, ...).
     Default: none
