@@ -720,15 +720,25 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     }
 
     //
-    // If the change set ID is empty after removing colons and blank spaces then it is invalid
     //
+
+    /**
+     *
+     * If the change set ID is empty after removing colons and blank spaces then it is invalid
+     *
+     * @param  changeSetId                  the change set ID to validate
+     * @param  line                         the line in the formatted SQL file
+     * @param  count                        the line number
+     * @throws ChangeLogParseException      thrown if the change set ID is empty
+     *
+     */
     private void validateChangeSetId(String changeSetId, String line, int count) throws ChangeLogParseException {
         String parsed = changeSetId.replace(":","").replace(" ","");
         if (StringUtil.isEmpty(parsed)) {
             String message =
-               "Unexpected formatting in formatted changelog at line %d. The change set ID cannot be empty.%n" +
+               "Unexpected formatting in formatted changelog at line %d. The change set ID cannot be empty.%n%s%n" +
                "Learn all the options at https://docs.liquibase.com/concepts/changelogs/sql-format.html";
-            throw new ChangeLogParseException("\n" + String.format(message, count));
+            throw new ChangeLogParseException("\n" + String.format(message, count, line));
         }
     }
 
