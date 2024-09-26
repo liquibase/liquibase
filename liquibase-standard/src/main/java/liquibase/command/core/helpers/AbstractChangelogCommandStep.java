@@ -26,10 +26,9 @@ public abstract class AbstractChangelogCommandStep extends AbstractCommandStep {
         final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         RUN_ON_CHANGE_TYPES_ARG = builder.argument("runOnChangeTypes", String.class)
                 .defaultValue("none").description("Sets runOnChange=\"true\" for changesets containing solely changes of these types (e. g. createView, createProcedure, ...).").build();
-        final String replaceIfExistsTypeNames ="";
         REPLACE_IF_EXISTS_TYPES_ARG = builder.argument("replaceIfExistsTypes", String.class)
                 .defaultValue("none")
-                .description(String.format("Sets replaceIfExists=\"true\" for changes of these types (supported types: %s)", replaceIfExistsTypeNames)).build();
+                .description("Sets replaceIfExists=\"true\" for changes of these types").build();
         SKIP_OBJECT_SORTING = builder.argument("skipObjectSorting", Boolean.class)
                 .defaultValue(false)
                 .description("When true will skip object sorting. This can be useful on databases that have a lot of packages/procedures that are " +
@@ -51,7 +50,7 @@ public abstract class AbstractChangelogCommandStep extends AbstractCommandStep {
         supportedReplaceIfExistsTypes.add("none");
         replaceIfExistsTypes.removeAll(supportedReplaceIfExistsTypes);
         if (!replaceIfExistsTypes.isEmpty())
-            throw new CommandValidationException("Invalid types for --replace-if-exists-types: " + replaceIfExistsTypes.stream().collect(Collectors.joining(", ")));
+            throw new CommandValidationException("Invalid types for --replace-if-exists-types: " + replaceIfExistsTypes.stream().collect(Collectors.joining(", ")) + ". Valid types are: " + supportedReplaceIfExistsTypes().collect(Collectors.joining(", ")));
     }
 
     protected static Stream<String> supportedRunOnChangeTypes() {
