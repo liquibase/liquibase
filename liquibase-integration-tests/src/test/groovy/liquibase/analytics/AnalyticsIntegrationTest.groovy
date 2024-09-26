@@ -4,14 +4,13 @@ import fi.iki.elonen.NanoHTTPD
 import liquibase.Scope
 import liquibase.analytics.configuration.AnalyticsArgs
 import liquibase.analytics.configuration.AnalyticsConfigurationFactory
-import liquibase.analytics.configuration.SegmentAnalyticsConfiguration
+import liquibase.analytics.configuration.LiquibaseRemoteAnalyticsConfiguration
 import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.util.LiquibaseUtil
 import liquibase.util.SystemUtil
-import org.apache.commons.lang3.StringUtils
 import org.springframework.test.util.TestSocketUtils
 import org.yaml.snakeyaml.Yaml
 import spock.lang.Shared
@@ -116,7 +115,7 @@ class AnalyticsIntegrationTest extends Specification {
         SimpleWebserver simpleWebserver = new SimpleWebserver()
         // Clear the cached analytics config info that was loaded when the drop all command step executed automatically during test setup
         AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
-        SegmentAnalyticsConfiguration analyticsConfiguration = ((SegmentAnalyticsConfiguration) analyticsConfigurationFactory.getPlugin());
+        LiquibaseRemoteAnalyticsConfiguration analyticsConfiguration = ((LiquibaseRemoteAnalyticsConfiguration) analyticsConfigurationFactory.getPlugin());
         analyticsConfiguration.remoteAnalyticsConfiguration.clearCache()
         return simpleWebserver
     }
