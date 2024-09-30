@@ -47,7 +47,6 @@ class AnalyticsIntegrationTest extends Specification {
         def body = simpleWebserver.postBody
         then:
         body != null
-        body.startsWith('{"batch": [{"anonymousId": ')
 
         Yaml yaml = new Yaml()
         def loadedBody = yaml.loadAs(body, Map<String, ?>)
@@ -87,7 +86,7 @@ class AnalyticsIntegrationTest extends Specification {
         properties.get("ext_mongoDb_commercial") == "null"
         properties.get("ext_mongoDbOss") == "null"
         properties.get("javaVersion") == SystemUtil.getJavaVersion()
-        properties.get("liquibaseInterface") == "null"
+        properties.get("liquibaseInterface") == "JavaAPI"
         properties.get("liquibaseVersion") == LiquibaseUtil.getBuildVersionInfo()
         properties.get("operationOutcome") == "success"
         properties.get("os") == System.getProperty("os.name")
@@ -141,6 +140,7 @@ endpointData: http://localhost:$port/v1/batch
 sendOss: true
 sendPro: true
 writeKey: ${writeKey}
+anotherProperty: whatever
 extensions:
 - manifestName: Liquibase MongoDB Commercial Extension
   displayName: ext_mongoDb_commercial

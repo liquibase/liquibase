@@ -46,6 +46,15 @@ public class AnalyticsArgs implements AutoloadedConfigurations {
                 .setDefaultValue(12)
                 .setHidden(true)
                 .setDescription("Number of characters of the license key that should be appended to the userId. This is used in the event that the same customer has multiple license keys associated with them.")
+                .setValueHandler((value -> {
+                    int maxChars = 36;
+                    try {
+                        Integer chars = Integer.valueOf(String.valueOf(value));
+                        return Math.min(chars, maxChars);
+                    } catch (Exception e) {
+                        return maxChars;
+                    }
+                }))
                 .build();
     }
 

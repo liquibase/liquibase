@@ -4,11 +4,16 @@ import liquibase.Scope;
 import liquibase.logging.Logger;
 import liquibase.util.Cache;
 import lombok.Data;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
@@ -27,7 +32,8 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
             try {
                 InputStream input = new URL(url).openStream();
                 Yaml yaml = new Yaml();
-                remoteAnalyticsConfiguration.set(yaml.loadAs(input, RemoteAnalyticsConfiguration.class));
+                Map<String, Object> loaded = yaml.loadAs(input, Map.class);
+                remoteAnalyticsConfiguration.set(RemoteAnalyticsConfiguration.fromYaml(loaded));
             } catch (Exception e) {
                 log.log(logLevel, "Failed to load analytics configuration from " + url, e);
             }
