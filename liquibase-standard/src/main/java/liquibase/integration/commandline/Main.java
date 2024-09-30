@@ -15,7 +15,6 @@ import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.*;
 import liquibase.integration.IntegrationDetails;
-import liquibase.io.WriterOutputStream;
 import liquibase.license.LicenseInstallResult;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
@@ -36,6 +35,7 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.SystemUtil;
+import org.apache.commons.io.output.WriterOutputStream;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -1653,9 +1653,9 @@ public class Main {
                         handleUpdateException(database, updateException, defaultChangeExecListener, rollbackOnError);
                     }
                 } else if (COMMANDS.HISTORY.equalsIgnoreCase(command)) {
-                    CommandScope historyCommand = new CommandScope("internalHistory");
-                    historyCommand.addArgumentValue(InternalHistoryCommandStep.DATABASE_ARG, database);
-                    historyCommand.addArgumentValue(InternalHistoryCommandStep.FORMAT_ARG, HistoryFormat.valueOf(format));
+                    CommandScope historyCommand = new CommandScope(HistoryCommandStep.COMMAND_NAME);
+                    historyCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
+                    historyCommand.addArgumentValue(HistoryCommandStep.FORMAT_ARG, HistoryFormat.valueOf(format));
                     historyCommand.setOutput(getOutputStream());
 
                     historyCommand.execute();

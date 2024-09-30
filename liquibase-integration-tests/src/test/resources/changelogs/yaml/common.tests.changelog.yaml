@@ -635,5 +635,23 @@ databaseChangeLog:
             replace: INVALID TABLE NAME
             with: validTableName
 
+  - changeSet:
+      id: precondition-test
+      author: mallod
+      objectQuotingStrategy: LEGACY
+      preconditions:
+        preConditions:
+          nestedPreconditions:
+            - or:
+                nestedPreconditions:
+                  - sqlCheck:
+                      expectedResult: '0'
+                      sql: select count(*) from team
+                  - not:
+                      nestedPreconditions:
+                        - sqlCheck:
+                            expectedResult: '0'
+                            sql: select count(*) from referenced_table
+
 #  - includeAll:
 #      path: com/example/packaged

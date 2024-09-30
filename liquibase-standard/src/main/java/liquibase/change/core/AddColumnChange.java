@@ -16,6 +16,7 @@ import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtil;
+import lombok.Setter;
 
 import java.util.*;
 
@@ -28,8 +29,11 @@ import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
     description = "Adds a new column to an existing table")
 public class AddColumnChange extends AbstractChange implements ChangeWithColumns<AddColumnConfig> {
 
+    @Setter
     private String catalogName;
+    @Setter
     private String schemaName;
+    @Setter
     private String tableName;
     private List<AddColumnConfig> columns;
 
@@ -42,26 +46,14 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "relation.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
     }
 
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "table", description = "Name of the table to add the column to")
     public String getTableName() {
         return tableName;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
     }
 
     @Override

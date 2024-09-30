@@ -12,7 +12,6 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.*;
 import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.snapshot.SnapshotControl;
 import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -168,8 +167,18 @@ public abstract class AbstractJdbcDatabase implements Database {
         return !supportsDDLInTransaction();
     }
 
+    /**
+     * Used for TEST only
+     *
+     * @param previousAutoCommit
+     *
+     */
+    public void setPreviousAutoCommit(Boolean previousAutoCommit) {
+        this.previousAutoCommit = previousAutoCommit;
+    }
+
     @Override
-    public final void addReservedWords(Collection<String> words) {
+    public void addReservedWords(Collection<String> words) {
         reservedWords.addAll(words);
     }
 
@@ -1123,13 +1132,17 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void close() throws DatabaseException {
+        boolean tryingToSetAutoCommit = false;
         Scope.getCurrentScope().getSingleton(ExecutorService.class).clearExecutor("jdbc", this);
-        try (final DatabaseConnection connection = getConnection()) {
-            if (connection != null && previousAutoCommit != null) {
-                connection.setAutoCommit(previousAutoCommit);
+        try (final DatabaseConnection localConnection = getConnection()) {
+            if (localConnection != null && previousAutoCommit != null) {
+                tryingToSetAutoCommit = true;
+                localConnection.setAutoCommit(previousAutoCommit);
             }
         } catch (final DatabaseException e) {
-            Scope.getCurrentScope().getLog(getClass()).warning("Failed to restore the auto commit to " + previousAutoCommit);
+            if (tryingToSetAutoCommit) {
+                Scope.getCurrentScope().getLog(getClass()).warning("Failed to restore the auto commit to " + previousAutoCommit);
+            }
             throw e;
         }
     }

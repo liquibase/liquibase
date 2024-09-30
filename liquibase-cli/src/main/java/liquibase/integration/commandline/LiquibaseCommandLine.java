@@ -31,6 +31,7 @@ import liquibase.ui.ConsoleUIService;
 import liquibase.ui.LoggerUIService;
 import liquibase.ui.UIService;
 import liquibase.util.*;
+import org.apache.commons.lang3.StringUtils;
 import picocli.CommandLine;
 
 import java.io.*;
@@ -245,7 +246,9 @@ public class LiquibaseCommandLine {
         //
         Level level = determineLogLevel(exception);
 
-        Scope.getCurrentScope().getLog(getClass()).log(level, uiMessage, exception);
+        if (showExceptionInLog(exception)) {
+            Scope.getCurrentScope().getLog(getClass()).log(level, uiMessage, exception);
+        }
 
         boolean printUsage = false;
         try (final StringWriter suggestionWriter = new StringWriter();
@@ -264,7 +267,7 @@ public class LiquibaseCommandLine {
                     || exception instanceof CommandLineParsingException) {
                 System.err.println("Error parsing command line: " + uiMessage);
                 printUsage = true;
-            } else if (exception.getCause() != null && exception.getCause() instanceof CommandFailedException) {
+            } else if (exception.getCause() instanceof CommandFailedException) {
                 System.err.println(uiMessage);
             } else {
                 System.err.println("\nUnexpected error running Liquibase: " + uiMessage);
@@ -286,7 +289,7 @@ public class LiquibaseCommandLine {
 
             suggestionsPrintWriter.flush();
             final String suggestions = suggestionWriter.toString();
-            if (suggestions.length() > 0) {
+            if (!suggestions.isEmpty()) {
                 System.err.println();
                 System.err.println(suggestions);
             }
@@ -301,6 +304,20 @@ public class LiquibaseCommandLine {
             }
         }
         return 1;
+    }
+
+    //
+    // Honor the expected flag on a CommandFailedException
+    //
+    private boolean showExceptionInLog(Throwable exception) {
+        Throwable t = exception;
+        while (t != null) {
+            if (t instanceof CommandFailedException && ((CommandFailedException) t).isExpected()) {
+                return false;
+            }
+            t = t.getCause();
+        }
+        return true;
     }
 
     //
@@ -960,13 +977,16 @@ public class LiquibaseCommandLine {
                     if (def.isRequired()) {
                         description = "[REQUIRED] " + description;
                     }
+                    if (!def.getForcePrintedAliases().isEmpty()) {
+                        String pluralized = def.getForcePrintedAliases().size() > 1 ? "aliases" : "alias";
+                        description = pluralized + ": " + def.getForcePrintedAliases().stream().map(LiquibaseCommandLine::convertArgumentNameToKabobCase).collect(Collectors.joining("', '", "'", "'")) + "\n" + description;
+                    }
 
                     builder.description(description + "\n");
 
                     if (def.getDataType().equals(Boolean.class)) {
                         builder.arity("0..1");
                     }
-
 
                     if (i > 0) {
                         builder.hidden(true);
@@ -1222,11 +1242,22 @@ public class LiquibaseCommandLine {
         baseNames.addAll(def.getAliases());
 
         for (String baseName : baseNames) {
-            returnList.add("--" + StringUtil.toKabobCase(baseName).replace(".", "-"));
+            returnList.add(convertArgumentNameToKabobCase(baseName));
             returnList.add("--" + baseName.replace("\\.", ""));
         }
 
         return returnList.toArray(new String[0]);
+    }
+
+    /**
+     * Converts a given argument name to kabob case and formats it as a command line argument.
+     * The resulting string will be prefixed with "--" and all periods in the baseName will be replaced with hyphens.
+     *
+     * @param baseName the base argument name to be converted
+     * @return the kabob case formatted argument name prefixed with "--"
+     */
+    private static String convertArgumentNameToKabobCase(String baseName) {
+        return "--" + StringUtil.toKabobCase(baseName).replace(".", "-");
     }
 
     protected static String[] toArgNames(ConfigurationDefinition<?> def) {
@@ -1236,7 +1267,7 @@ public class LiquibaseCommandLine {
 
         List<String> returns = new CaseInsensitiveList();
         for (String key : keys) {
-            insertWithoutDuplicates(returns, "--" + StringUtil.toKabobCase(key.replaceFirst("^liquibase.", "")).replace(".", "-"));
+            insertWithoutDuplicates(returns, convertArgumentNameToKabobCase(key.replaceFirst("^liquibase.", "")));
             insertWithoutDuplicates(returns, "--" + StringUtil.toKabobCase(key.replace(".", "-")));
             insertWithoutDuplicates(returns, "--" + key.replaceFirst("^liquibase.", "").replaceAll("\\.", ""));
             insertWithoutDuplicates(returns, "--" + key.replaceAll("\\.", ""));

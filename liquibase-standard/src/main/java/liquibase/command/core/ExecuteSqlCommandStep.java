@@ -2,6 +2,7 @@ package liquibase.command.core;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.changeset.ChangeSetService;
 import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.command.*;
@@ -13,7 +14,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockService;
 import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -69,11 +70,13 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
         final StringBuilder out = new StringBuilder();
         final String[] sqlStrings = StringUtil.processMultiLineSQL(sqlText, true, true, determineEndDelimiter(commandScope), null);
 
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters(database);
         for (String sqlString : sqlStrings) {
+            sqlString = changeLogParameters.expandExpressions(sqlString, null);
             if (sqlString.toLowerCase().matches("\\s*select .*")) {
                 out.append(handleSelect(sqlString, executor));
             } else {
-                executor.execute(new RawSqlStatement(sqlString));
+                executor.execute(new RawParameterizedSqlStatement(sqlString));
                 out.append("Successfully Executed: ").append(sqlString).append("\n");
             }
             out.append("\n");
@@ -86,6 +89,10 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
 
     protected static String determineEndDelimiter(CommandScope commandScope) {
         String delimiter = commandScope.getArgumentValue(DELIMITER_ARG);
+        return getEndDelimiter(delimiter);
+    }
+
+    public static String getEndDelimiter(String delimiter) {
         if (delimiter == null) {
             ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
             delimiter = service.getEndDelimiter(null);
@@ -101,21 +108,24 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
     }
 
     protected String getSqlScript(String sql, String sqlFile) throws IOException, LiquibaseException {
+        return getSqlFromSource(sql, sqlFile);
+    }
+
+    public static String getSqlFromSource(String sql, String sqlFile) throws IOException, LiquibaseException {
         if (sqlFile == null) {
             return sql;
-        } else {
-            final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-            Resource resource = pathHandlerFactory.getResource(sqlFile);
-            if (!resource.exists()) {
-                throw new LiquibaseException(FileUtil.getFileNotFoundMessage(sqlFile));
-            }
-            return StreamUtil.readStreamAsString(resource.openInputStream());
+        } 
+        final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+        Resource resource = pathHandlerFactory.getResource(sqlFile);
+        if (!resource.exists()) {
+            throw new LiquibaseException(FileUtil.getFileNotFoundMessage(sqlFile));
         }
+        return StreamUtil.readStreamAsString(resource.openInputStream());
     }
 
     private String handleSelect(String sqlString, Executor executor) throws DatabaseException {
         StringBuilder out = new StringBuilder();
-        List<Map<String, ?>> rows = executor.queryForList(new RawSqlStatement(sqlString));
+        List<Map<String, ?>> rows = executor.queryForList(new RawParameterizedSqlStatement(sqlString));
         out.append("Output of ").append(sqlString).append(":\n");
         if (rows.isEmpty()) {
             out.append("-- Empty Resultset --\n");

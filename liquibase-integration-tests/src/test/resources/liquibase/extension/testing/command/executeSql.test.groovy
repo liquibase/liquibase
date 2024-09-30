@@ -1,5 +1,7 @@
 package liquibase.extension.testing.command
 
+import liquibase.extension.testing.setup.SetupEnvironmentVariableProvider
+
 CommandTests.define {
     command = ["executeSql"]
     signature = """
@@ -62,4 +64,23 @@ Optional Args:
                 "Successfully Executed: insert into person values (1, 'Wes Anderson', '1 Way', '2 Go', 'Budapest', 'US')"
         ]
     }
+
+    run "Variables are properly expanded for execute-sql", {
+        arguments = [
+                url     : { it.url },
+                username: { it.username },
+                password: { it.password },
+                sql     : 'select * from ${DBCL}'
+        ]
+
+        setup {
+            setSystemProperty("DBCL", "databasechangelog")
+            runChangelog "changelogs/h2/complete/example.changelog.sql"
+        }
+        expectedOutput = [
+                'Output of select * from databasechangelog:',
+                'ID | AUTHOR | FILENAME | DATEEXECUTED | ORDEREXECUTED | EXECTYPE | MD5SUM | DESCRIPTION | COMMENTS | TAG | LIQUIBASE | CONTEXTS | LABELS | DEPLOYMENT_ID |'
+        ]
+    }
+
 }

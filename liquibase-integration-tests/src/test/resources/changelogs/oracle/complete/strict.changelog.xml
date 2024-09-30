@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="14" author="nvoxland">
+        <createTable tableName="liquibaseRunInfo">
+            <column name="timesRan" type="int"/>
+        </createTable>
+        <insert tableName="liquibaseRunInfo">
+            <column name="timesRan" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+
+        <changeSet id="SlashEndDelimiterTest" author="mallod">
+            <sql endDelimiter="/" splitStatements="true" stripComments="false">
+                SELECT * FROM DUAL/
+                update liquibaseRunInfo set timesRan=timesRan+1/
+            </sql>
+        </changeSet>
+        <changeSet id="dividedAndSlashEndDelimiterTest" author="mallod">
+            <sql endDelimiter="/" splitStatements="true" stripComments="false">
+                SELECT 6 / 3 FROM DUAL/
+                update liquibaseRunInfo set timesRan=timesRan+1/
+            </sql>
+        </changeSet>
+</databaseChangeLog>

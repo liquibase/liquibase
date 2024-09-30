@@ -58,6 +58,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     private String dbms;
 
     protected String encoding;
+    private boolean stripCommentsUsedDefaultValue;
 
 
     protected AbstractSQLChange() {
@@ -134,7 +135,20 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      */
     @DatabaseChangeProperty(description = "Set to true to remove any comments in the SQL before executing, otherwise false. Defaults to false if not set")
     public Boolean isStripComments() {
-        return stripComments;
+        ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
+        // If default value is not used, then a value was provided in the changelog, and it should be prioritized.
+        if (!stripCommentsUsedDefaultValue) {
+            return service.getOverrideStripComments(stripComments);
+        }
+        // If the default value is used, first check to see if a value was set globally.
+        Boolean global = service.getStripComments(getChangeSet());
+        if (global != null) {
+            // Use that value if it exists.
+            return global;
+        } else {
+            // Otherwise, use the default value.
+            return stripComments;
+        }
     }
 
 
@@ -143,11 +157,16 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      * Passing null sets stripComments to the default value (false).
      */
     public void setStripComments(Boolean stripComments) {
+        setStripComments(stripComments, stripComments == null);
+    }
+
+    public void setStripComments(Boolean stripComments, boolean usedDefaultValue) {
         if (stripComments == null) {
             this.stripComments = false;
         } else {
             this.stripComments = stripComments;
         }
+        this.stripCommentsUsedDefaultValue = usedDefaultValue;
     }
 
     /**
@@ -290,6 +309,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
         String processedSQL = normalizeLineEndings(sql);
         if (this instanceof RawSQLChange && ((RawSQLChange) this).isRerunnable()) {
+            //For some reason PRINT statement execution is not working properly with PreparedStatement, so we are reverting this change for now.
             returnStatements.add(new RawSqlStatement(processedSQL, getEndDelimiter()));
             return returnStatements.toArray(EMPTY_SQL_STATEMENT);
         }
@@ -310,6 +330,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             if (database instanceof Db2zDatabase && escapedStatement.toUpperCase().startsWith("CALL")) {
                 returnStatements.add(new RawCompoundStatement(escapedStatement, getEndDelimiter()));
             } else {
+                //For some reason PRINT statement execution is not working properly with PreparedStatement, so we are reverting this change for now.
                 returnStatements.add(new RawSqlStatement(escapedStatement, getEndDelimiter()));
             }
         }

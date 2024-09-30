@@ -1,8 +1,11 @@
 package liquibase.command.util
 
+import liquibase.CatalogAndSchema
 import liquibase.Scope
 import liquibase.TagVersionEnum
 import liquibase.UpdateSummaryEnum
+import liquibase.changelog.ChangeLogHistoryService
+import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.command.CommandScope
 import liquibase.command.core.*
 import liquibase.command.core.helpers.*
@@ -14,6 +17,7 @@ import liquibase.lockservice.LockServiceFactory
 import liquibase.resource.ResourceAccessor
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
+import liquibase.snapshot.DatabaseSnapshot
 
 class CommandUtil {
 
@@ -81,6 +85,29 @@ class CommandUtil {
         OutputStream outputStream = new FileOutputStream(new File(outputFile))
         commandScope.setOutput(outputStream)
         commandScope.execute()
+        outputStream.close()
+    }
+
+    /**
+     * Take a snapshot of the database and the specified schemas.
+     */
+    static DatabaseSnapshot takeDatabaseSnapshot(Database database, String... schema) {
+        final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database)
+        changeLogService.init()
+        changeLogService.reset()
+
+        CatalogAndSchema[] schemas = new CatalogAndSchema[schema.size()]
+        for(int i = 0; i < schema.size(); i++) {
+            schemas[i] = new CatalogAndSchema(null, schema[i])
+        }
+        CommandScope snapshotCommand = new CommandScope("internalSnapshot")
+        snapshotCommand
+                .addArgumentValue(InternalSnapshotCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(InternalSnapshotCommandStep.SCHEMAS_ARG, schemas)
+                .addArgumentValue(InternalSnapshotCommandStep.SERIALIZER_FORMAT_ARG, "txt")
+
+        def snapshotResults = snapshotCommand.execute()
+        return (DatabaseSnapshot) snapshotResults.getResult("snapshot")
     }
 
     static void runDiff(DatabaseTestSystem db, Database targetDatabase, Database referenceDatabase,
@@ -103,6 +130,15 @@ class CommandUtil {
         commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
         OutputStream outputStream = new FileOutputStream(new File(outputFile))
         commandScope.setOutput(outputStream)
+        commandScope.execute()
+    }
+
+    static void runDiffChangelog(String targetDatabaseUrl, Database referenceDatabase, String changelogFile) throws CommandExecutionException {
+        CommandScope commandScope = new CommandScope(DiffChangelogCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
+        commandScope.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, CompareControl.STANDARD)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, targetDatabaseUrl)
+        commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changelogFile)
         commandScope.execute()
     }
 

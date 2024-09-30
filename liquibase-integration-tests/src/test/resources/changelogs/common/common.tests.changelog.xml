@@ -696,6 +696,8 @@
 
     <includeAll path="changelogs/common/pathincluded/" minDepth="0" maxDepth="1"/>
 
+    <include relativeToChangelogFile="true" file="depthboundincludeall/changelog.xml" />
+
     <include file="includerelative\pathinclude1.changelog.xml" relativeToChangelogFile="true"/> <!-- try with dos style path -->
 
     <changeSet id="autocommitTest" author="nvoxland" runInTransaction="false">
@@ -1347,6 +1349,12 @@
             <not>
                 <tableIsEmpty tableName="multi_row_table"/>
             </not>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="check-uniqueConstraintExists" author="mpvvliet">
+        <preConditions onFail="WARN">
+            <uniqueConstraintExists tableName="createTableNamedUqConst" constraintName="uq_uqtest1"/>
         </preConditions>
     </changeSet>
 

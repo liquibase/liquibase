@@ -18,11 +18,64 @@ jobs:
     # Checkout the code to the GitHub runner
     - name: Checkout Code
       uses: actions/checkout@v4
+      
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+    
+        #look for dependencies in maven
+    - name: maven-settings-xml-action
+      uses: whelk-io/maven-settings-xml-action@v22
+      with:
+        repositories: |
+          [
+            {
+              "id": "liquibase",
+              "url": "https://maven.pkg.github.com/liquibase/liquibase",
+              "releases": {
+                "enabled": "false"
+              },
+              "snapshots": {
+                "enabled": "true",
+                "updatePolicy": "always"
+              }
+            },
+            {
+              "id": "liquibase-pro",
+              "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
+              "releases": {
+                "enabled": "false"
+              },
+              "snapshots": {
+                "enabled": "true",
+                "updatePolicy": "always"
+              }
+            }
+          ]
+        servers: |
+          [
+            {
+              "id": "liquibase-pro",
+              "username": "liquibot",
+              "password": "${{ secrets.LIQUIBOT_PAT }}"
+            },
+            {
+              "id": "liquibase",
+              "username": "liquibot",
+              "password": "${{ secrets.LIQUIBOT_PAT }}"
+            }
+          ]
 
+    - name: Install Maven dependencies (excluding test scope)
+      run: mvn clean install -DskipTests
+      
     - name: run FOSSA CLI
       uses: fossas/fossa-action@main
       with:
         api-key: ${{ secrets.FOSSA_API_KEY }}
+        branch: ${{ github.ref }}
 
     - name: Get the commit sha
       id: get_commit_sha_oss
@@ -42,6 +95,7 @@ jobs:
           --data-urlencode 'bom_column_settings%5B%5D=Authors' \
           --data-urlencode 'bom_column_settings%5B%5D=DeclaredLicense' \
           --data-urlencode 'bom_column_settings%5B%5D=PackageHomepage' \
+        
 
         curl --location 'https://app.fossa.com/api/revisions/git%2Bgithub.com%2Fliquibase%2Fliquibase%24${{ steps.get_commit_sha_oss.outputs.commit_sha_lb }}/attribution/download?format=CSV&includeDeepDependencies=true&download=true' \
         --header 'Authorization: Bearer ${{ secrets.FOSSA_API_KEY }}' -o /home/runner/fossa_reports/liquibase.csv
@@ -68,8 +122,9 @@ jobs:
     needs: [ fossa-scan ]
     steps:
       - name: Dispatch event to PRO repository
-        uses: peter-evans/repository-dispatch@v1
+        uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           repository: liquibase/liquibase-pro
           event-type: FOSSA_Scan_PRO
+          client-payload: '{"repository": "${{ github.repository }}", "branch": "${{ github.ref }}", "sha": "${{ github.sha }}", "server_url": "${{ github.server_url }}", "run_id": "${{ github.run_id }}"}'
