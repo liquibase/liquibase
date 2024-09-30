@@ -196,7 +196,7 @@ public class LiquibaseConfiguration implements SingletonObject {
      * Registers a {@link ConfigurationDefinition} so it will be returned by {@link #getRegisteredDefinitions(boolean)}
      */
     public void registerDefinition(ConfigurationDefinition<?> definition) {
-        this.definitions.add(definition);
+        definitions.add(definition);
     }
 
     /**
