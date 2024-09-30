@@ -158,8 +158,11 @@ public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
                     changeLogWriter.print(outputStream);
                 }
             }
-            if (StringUtil.trimToNull(changeLogFile) != null) {
+            if (!changeLogWriter.generateChangeSets().isEmpty()) {
                 Scope.getCurrentScope().getUI().sendMessage("Generated changelog written to " + changeLogFile);
+            }
+            else {
+                Scope.getCurrentScope().getUI().sendMessage(String.format("Changelog not generated. There are not changesets to write to %s changelog", changeLogFile));
             }
         } finally {
             referenceDatabase.setObjectQuotingStrategy(originalStrategy);
