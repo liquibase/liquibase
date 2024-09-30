@@ -141,6 +141,7 @@ endpointData: http://localhost:$port/v1/batch
 sendOss: true
 sendPro: true
 writeKey: ${writeKey}
+anotherProperty: whatever
 extensions:
 - manifestName: Liquibase MongoDB Commercial Extension
   displayName: ext_mongoDb_commercial
