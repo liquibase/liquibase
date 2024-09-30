@@ -133,7 +133,7 @@ public class Event {
     }
 
     public Map<String, ?> getPropertiesAsMap() {
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, Object> properties = new LinkedHashMap<>();
         // Exclude the childEvents field because it should be handled separately
         for (Fields field : Arrays.stream(Fields.values()).filter(f -> f != Fields.childEvents).collect(Collectors.toList())) {
             try {

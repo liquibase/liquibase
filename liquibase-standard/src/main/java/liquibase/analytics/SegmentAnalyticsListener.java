@@ -75,13 +75,14 @@ public class SegmentAnalyticsListener implements AnalyticsListener {
                 DumperOptions dumperOptions = new DumperOptions();
                 dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
                 dumperOptions.setWidth(Integer.MAX_VALUE);
+                dumperOptions.setPrettyFlow(true);
                 Yaml yaml = new Yaml(dumperOptions);
                 yaml.setBeanAccess(BeanAccess.FIELD);
 
                 SegmentBatch segmentBatch = SegmentBatch.fromLiquibaseEvent(event, userId);
                 String jsonInputString = YamlSerializer.removeClassTypeMarksFromSerializedJson(yaml.dumpAs(segmentBatch, Tag.MAP, DumperOptions.FlowStyle.FLOW));
                 // This log message is purposefully being logged at fine level, not using the configurable log-level param, so that users always know what is being sent to Segment.
-                logger.log(logLevel, "Sending analytics to Segment. " + segmentBatch, null);
+                logger.log(logLevel, "Sending analytics to Segment." + System.lineSeparator() + jsonInputString, null);
 
                 IOUtils.write(jsonInputString, conn.getOutputStream(), StandardCharsets.UTF_8);
 

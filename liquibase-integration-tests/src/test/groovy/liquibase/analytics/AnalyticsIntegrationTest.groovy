@@ -48,7 +48,6 @@ class AnalyticsIntegrationTest extends Specification {
         def body = simpleWebserver.postBody
         then:
         body != null
-        body.startsWith('{"batch": [{"anonymousId": ')
 
         Yaml yaml = new Yaml()
         def loadedBody = yaml.loadAs(body, Map<String, ?>)
