@@ -105,7 +105,7 @@ class AnalyticsIntegrationTest extends Specification {
 
     static void executeCommandWithAnalytics(SimpleWebserver simpleWebserver, Scope.ScopedRunner scopedRunner) {
         Map<String, ?> scopeVars = new HashMap<>()
-        scopeVars.put(AnalyticsArgs.CONFIG_ENDPOINT_URL.getKey(), "http://localhost:" + simpleWebserver.port + "/config-segment.yaml")
+        scopeVars.put(AnalyticsArgs.CONFIG_ENDPOINT_URL.getKey(), "http://localhost:" + simpleWebserver.port + "/config-analytics.yaml")
         scopeVars.put(AnalyticsArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getKey(), TimeUnit.SECONDS.toMillis(60)) // to allow for debugging, otherwise the thread gets killed fast
         Scope.child(scopeVars, scopedRunner)
     }
@@ -134,7 +134,7 @@ class SimpleWebserver extends NanoHTTPD {
 
     @Override
     public Response serve(IHTTPSession session) {
-        if (session.getUri().equals("/config-segment.yaml") && session.getMethod() == Method.GET) {
+        if (session.getUri().equals("/config-analytics.yaml") && session.getMethod() == Method.GET) {
             return newFixedLengthResponse("""
 timeoutMs: ${TimeUnit.SECONDS.toMillis(60)}
 endpointData: http://localhost:$port/v1/batch
