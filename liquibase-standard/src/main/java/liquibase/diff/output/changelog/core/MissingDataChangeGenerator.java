@@ -23,6 +23,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.regex.Pattern;
 
 public class MissingDataChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
 
@@ -60,15 +62,22 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                 return null;
             }
 
-            String sql = "SELECT * FROM " + referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getName(), table.getName());
-            stmt = ((JdbcConnection) referenceDatabase.getConnection()).createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            stmt.setFetchSize(1000);
+            JdbcConnection connection = (JdbcConnection) referenceDatabase.getConnection();
+            // first identify all column names dynamically w/ "SELECT * FROM table WHERE 1=0"
+            String sql = "SELECT * FROM " + referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getName(), table.getName()) + " WHERE 1=0";
+            stmt = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            stmt.setFetchSize(1);
             rs = stmt.executeQuery(sql);
 
-            List<String> columnNames = new ArrayList<>();
-            for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
-                columnNames.add(rs.getMetaData().getColumnName(i + 1));
-            }
+            List<String> columnNames = identifyColumnNames(rs, outputControl);
+            // replace "*" in SELECT statement with list of filtered column names, also remove WHERE-clause
+            sql = sql.replace("*", String.join(",", columnNames));
+
+            // remove WHERE-clause
+            sql = sql.replace(" WHERE 1=0", "");
+            stmt = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            stmt.setFetchSize(1000);
+            rs = stmt.executeQuery(sql);
 
             List<Change> changes = new ArrayList<>();
             while (rs.next()) {
@@ -85,7 +94,6 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                 for (int i = 0; i < columnNames.size(); i++) {
                     ColumnConfig column = new ColumnConfig();
                     column.setName(columnNames.get(i));
-
                     Object value = JdbcUtil.getResultSetValue(rs, i + 1);
                     if (value == null) {
                         column.setValue(null);
@@ -105,7 +113,6 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                     }
 
                     change.addColumn(column);
-
                 }
 
                 // for each row, add a new change
@@ -130,5 +137,58 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                 }
             }
         }
+    }
+
+    private List<String> identifyColumnNames (final ResultSet rs, final DiffOutputControl outputControl) throws SQLException {
+        List<String> columnNames = new ArrayList<>();
+        String includeObjects = extractColumnInfo(outputControl.getIncludeObjects());
+        String excludeObjects = extractColumnInfo(outputControl.getExcludeObjects());
+        boolean withIncludeAll = Objects.isNull(excludeObjects) && Objects.isNull(includeObjects);
+        boolean withIncludeOnly = Objects.nonNull(includeObjects);
+        boolean withExcludeOnly = Objects.nonNull(excludeObjects);
+        Pattern pattern = null;
+
+        if (withIncludeOnly) {
+            pattern = Pattern.compile(includeObjects);
+        }
+
+        if (withExcludeOnly) {
+            pattern = Pattern.compile(excludeObjects);
+        }
+
+        // filter by "exportObjects" pattern
+        for (int i = 1; i < rs.getMetaData().getColumnCount() + 1; i++) {
+            String columnName = rs.getMetaData().getColumnName(i);
+            if (withIncludeAll ||
+                (withIncludeOnly && pattern.matcher(columnName).matches()) ||
+                (withExcludeOnly && !pattern.matcher(columnName).matches()))
+            {
+                columnNames.add(columnName);
+            }
+        }
+
+        return columnNames;
+    }
+
+    private String extractColumnInfo (final String s) {
+        if (null == s) {
+            return null;
+        }
+
+        int commaPos = s.indexOf(',');
+        int colPos = s.indexOf("column:") + 7;
+
+        if (6 < colPos) {
+            if (commaPos < colPos) {
+                return s.substring(colPos).trim();
+            }
+            return s.substring(colPos, commaPos).trim();
+        }
+
+        if (s.contains("table:")) {
+            return null;
+        }
+
+        return s.trim();
     }
 }
