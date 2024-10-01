@@ -54,4 +54,23 @@ class UpdateTestingRollbackCommandsIntegrationTest extends Specification {
         cleanup:
         CommandUtil.runDropAll(h2)
     }
+
+    def "run UpdateTestingRollback specifying a tag with changelog parameter from Liquibase class"() {
+        when:
+        def testTag = "testTag"
+        def liquibase = new Liquibase("liquibase/update-tests.yml", new ClassLoaderResourceAccessor(), h2.getDatabaseFromFactory())
+        liquibase.updateTestingRollback(testTag, new Contexts(), new LabelExpression())
+
+        then:
+        def resultSet = h2.getConnection().createStatement().executeQuery("select count(1) from databasechangelog")
+        resultSet.next()
+        resultSet.getInt(1) == 1
+
+        def rsTableExist = h2.getConnection().createStatement().executeQuery("select count(1) from example_table")
+        rsTableExist.next()
+        rsTableExist.getInt(1) == 0
+
+        cleanup:
+        CommandUtil.runDropAll(h2)
+    }
 }
