@@ -380,7 +380,7 @@ public class StringUtil {
      * @return The String without the comments in
      */
     public static String stripComments(String multiLineSQL, ChangeSet changeSet) {
-        if (StringUtil.isEmpty(multiLineSQL)) {
+        if (StringUtils.isEmpty(multiLineSQL)) {
             return multiLineSQL;
         }
         SqlParserFactory sqlParserFactory = Scope.getCurrentScope().getSingleton(SqlParserFactory.class);
@@ -1117,7 +1117,7 @@ public class StringUtil {
             }
         } catch (UnsupportedEncodingException uoe) {
             // Consume and fall through
-            Scope.getCurrentScope().getLog(StringUtil.class).warning("Error using encoding " + encoding);
+            Scope.getCurrentScope().getLog(StringUtil.class).warning("Error using encoding " + encoding + ": " + uoe);
         }
         return string.getBytes(StandardCharsets.UTF_8);
     }
