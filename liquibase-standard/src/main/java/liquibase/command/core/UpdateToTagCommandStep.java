@@ -46,10 +46,6 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        //
-        // Reinitialize boolean to handle case where the command
-        // instance might be reused
-        //
         warningMessageShown = false;
         this.setFastCheckEnabled(false);
         super.run(resultsBuilder);
