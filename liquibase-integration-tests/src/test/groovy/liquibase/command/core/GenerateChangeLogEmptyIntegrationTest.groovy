@@ -29,17 +29,7 @@ class GenerateChangeLogEmptyIntegrationTest extends Specification {
 
         when:
         def outputFileName = 'test/test-classes/output.postgresql.sql'
-        CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
-        commandScope.addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, true)
-        commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, outputFileName)
-        commandScope.addArgumentValue(PreCompareCommandStep.DIFF_TYPES_ARG, "data")
-        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
-        OutputStream outputStream = new ByteArrayOutputStream()
-        commandScope.setOutput(outputStream)
-        commandScope.execute()
+        CommandUtil.runGenerateChangelog(db, outputFileName, "data")
 
         then:
         !Files.exists(Path.of(outputFileName))
@@ -49,9 +39,6 @@ class GenerateChangeLogEmptyIntegrationTest extends Specification {
 
         then:
         noExceptionThrown()
-
-        cleanup:
-        CommandUtil.runDropAll(db)
     }
 
     def "Should generate changelog file with non-empty table"() {
@@ -66,17 +53,7 @@ COMMIT;
 
         when:
         def outputFileName = 'test/test-classes/output.postgresql.sql'
-        CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
-        commandScope.addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, true)
-        commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, outputFileName)
-        commandScope.addArgumentValue(PreCompareCommandStep.DIFF_TYPES_ARG, "data")
-        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
-        OutputStream outputStream = new ByteArrayOutputStream()
-        commandScope.setOutput(outputStream)
-        commandScope.execute()
+        CommandUtil.runGenerateChangelog(db, outputFileName, "data")
 
         then:
         def outputFile = new File(outputFileName)
@@ -93,7 +70,6 @@ INSERT INTO "public"."TEST" ("b") VALUES ('Geronimo!');
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(db)
         outputFile.delete()
     }
 }
