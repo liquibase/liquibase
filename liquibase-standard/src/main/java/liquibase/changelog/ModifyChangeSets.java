@@ -11,6 +11,7 @@ import liquibase.parser.core.ParsedNodeException;
 public class ModifyChangeSets {
     private final String runWith;
     private final String runWithSpool;
+    private final boolean stripComments;
 
     /**
      *
@@ -20,17 +21,25 @@ public class ModifyChangeSets {
     public ModifyChangeSets(ParsedNode node) throws ParsedNodeException  {
         this.runWith = (String) node.getChildValue(null, "runWith");
         this.runWithSpool = (String) node.getChildValue(null, "runWithSpoolFile");
+        Object stripCommentsValue = node.getChildValue(null, "stripComments");
+        if (stripCommentsValue != null) {
+            this.stripComments = (boolean)stripCommentsValue;
+        } else {
+            this.stripComments = false;
+        }
     }
 
     /**
      *
-     * @param runWith      The native executor to execute all included change sets with. Can be null
-     * @param runWithSpool The name of the spool file to be created
+     * @param runWith       The native executor to execute all included change sets with. Can be null
+     * @param runWithSpool  The name of the spool file to be created
+     * @param stripComment  Whether or not to strip comments from SQL
      *
      */
-    public ModifyChangeSets(String runWith, String runWithSpool) {
+    public ModifyChangeSets(String runWith, String runWithSpool, boolean stripComments) {
         this.runWith = runWith;
         this.runWithSpool = runWithSpool;
+        this.stripComments = stripComments;
     }
 
     public String getRunWith() {
@@ -39,5 +48,9 @@ public class ModifyChangeSets {
 
     public String getRunWithSpool() {
         return runWithSpool;
+    }
+
+    public boolean isStripComments() {
+        return stripComments;
     }
 }

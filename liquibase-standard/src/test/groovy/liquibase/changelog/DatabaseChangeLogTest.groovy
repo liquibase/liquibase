@@ -265,6 +265,8 @@ create view sql_view as select * from sql_table;'''
         ((CreateTableChange) rootChangeLog.getChangeSet("com/example/root.xml", "nvoxland", "1").changes[0]).tableName == "test_table"
         rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").getRunWith() == "psql"
         rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").getRunWith() == "psql"
+        rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").isStripComments() == "psql"
+        rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").getRunWith() == "psql"
     }
 
     def "includeAll files have preconditions and changeSets loaded"() {

@@ -53,5 +53,6 @@ public class StandardChangeSetService implements ChangeSetService {
         if (changeSet.getRunWithSpoolFile() == null) {
             changeSet.setRunWithSpoolFile(modifyChangeSets != null ? modifyChangeSets.getRunWithSpool() : null);
         }
+        changeSet.setStripComments(modifyChangeSets != null && modifyChangeSets.isStripComments());
     }
 }
