@@ -35,13 +35,14 @@ else
   # sudo apt install -y $INSTALL4J_CACHE/install4j_linux-x64_10_0_7.deb
 
   # installer automation for macos-latest; macos needed for apple notarizing
-  wget -nv --directory-prefix=$INSTALL4J_CACHE -nc https://download.ej-technologies.com/install4j/install4j_macos_10_0_7.dmg
-  sleep 5
-  hdiutil attach /Users/runner/.install4j10/install4j_macos_10_0_7.dmg
-  sleep 5
-  cp -rf /Volumes/install4j/install4j.app /Applications
-  sleep 5
-  hdiutil detach /Volumes/install4j
+  # Commenting out code that was used to download and install Install4J on macOS:
+#  wget -nv --directory-prefix=$INSTALL4J_CACHE -nc https://download.ej-technologies.com/install4j/install4j_macos_10_0_7.dmg
+#  sleep 5
+#  hdiutil attach /Users/runner/.install4j10/install4j_macos_10_0_7.dmg
+#  sleep 5
+#  cp -rf /Volumes/install4j/install4j.app /Applications
+#  sleep 5
+#  hdiutil detach /Volumes/install4j
 
 fi
 
@@ -51,8 +52,11 @@ if [ ! -e target/keys ]; then
   echo "WARNING: not signing installer because target/keys directory does not exist."
   INSTALL4J_ARGS="$INSTALL4J_ARGS --disable-signing"
 else
-  INSTALL4J_ARGS="$INSTALL4J_ARGS --win-keystore-password=$INSTALL4J_WINDOWS_KEY_PASSWORD --mac-keystore-password=$INSTALL4J_APPLE_KEY_PASSWORD --apple-id=$INSTALL4J_APPLE_ID --apple-id-password=$INSTALL4J_APPLE_ID_PASSWORD"
+  INSTALL4J_ARGS="$INSTALL4J_ARGS --win-keystore-password=$INSTALL4J_WINDOWS_KEY_PASSWORD"
+  # Commenting out mac-related signing arguments
+  # INSTALL4J_ARGS="$INSTALL4J_ARGS --mac-keystore-password=$INSTALL4J_APPLE_KEY_PASSWORD --apple-id=$INSTALL4J_APPLE_ID --apple-id-password=$INSTALL4J_APPLE_ID_PASSWORD"
 fi
+
 
 "$install4jc" --license=$INSTALL4J_10_LICENSE
 "$install4jc" $INSTALL4J_ARGS src/main/install4j/liquibase.install4j
