@@ -18,13 +18,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
 @Data
-public class SegmentAnalyticsConfiguration implements AnalyticsConfiguration {
+public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfiguration {
     private final static Cache<RemoteAnalyticsConfiguration> remoteAnalyticsConfiguration = new Cache<>(() -> {
         /**
          * It is important to obtain the URL here outside of the newly created thread. {@link Scope} stores its stuff
          * in a ThreadLocal, so if you tried to get the value inside the thread, the value could be different.
          */
-        Logger log = Scope.getCurrentScope().getLog(SegmentAnalyticsConfiguration.class);
+        Logger log = Scope.getCurrentScope().getLog(AnalyticsConfiguration.class);
         Level logLevel = AnalyticsArgs.LOG_LEVEL.getCurrentValue();
         String url = AnalyticsArgs.CONFIG_ENDPOINT_URL.getCurrentValue();
         AtomicReference<RemoteAnalyticsConfiguration> remoteAnalyticsConfiguration = new AtomicReference<>();

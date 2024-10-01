@@ -1,16 +1,12 @@
 package liquibase.analytics;
 
-import liquibase.Scope;
-import liquibase.license.LicenseService;
-import liquibase.license.LicenseServiceFactory;
-import liquibase.util.ExceptionUtil;
 import lombok.Data;
 
 import java.util.Map;
 import java.util.UUID;
 
 @Data
-public class SegmentTrackEvent {
+public class AnalyticsTrackEvent {
     private final String type = "track";
     /**
      * Unique identifier for the user in your database.
@@ -43,13 +39,13 @@ public class SegmentTrackEvent {
     private final Map<String, ?> context;
     private final String messageId = UUID.randomUUID().toString();
 
-    public static SegmentTrackEvent fromLiquibaseEvent(Event event, String userId) {
-        SegmentTrackEvent segmentTrackEvent = new SegmentTrackEvent(
+    public static AnalyticsTrackEvent fromLiquibaseEvent(Event event, String userId) {
+        AnalyticsTrackEvent analyticsTrackEvent = new AnalyticsTrackEvent(
                 userId,
                 UUID.randomUUID().toString(), // todo this should be more sophisticated in the future
                 event.getPropertiesAsMap(),
                 null
         );
-        return segmentTrackEvent;
+        return analyticsTrackEvent;
     }
 }

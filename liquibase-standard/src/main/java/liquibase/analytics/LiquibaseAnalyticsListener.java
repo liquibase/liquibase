@@ -1,9 +1,9 @@
 package liquibase.analytics;
 
 import liquibase.Scope;
-import liquibase.analytics.configuration.SegmentAnalyticsConfiguration;
 import liquibase.analytics.configuration.AnalyticsArgs;
 import liquibase.analytics.configuration.AnalyticsConfigurationFactory;
+import liquibase.analytics.configuration.LiquibaseRemoteAnalyticsConfiguration;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
 import liquibase.logging.Logger;
@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 
 @NoArgsConstructor
-public class SegmentAnalyticsListener implements AnalyticsListener {
+public class LiquibaseAnalyticsListener implements AnalyticsListener {
 
     @Override
     public int getPriority() {
@@ -31,7 +31,7 @@ public class SegmentAnalyticsListener implements AnalyticsListener {
         try {
             analyticsEnabled = AnalyticsArgs.isAnalyticsEnabled();
         } catch (Exception e) {
-            Scope.getCurrentScope().getLog(getClass()).log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Failed to determine if analytics is enabled", e);
+            Scope.getCurrentScope().getLog(AnalyticsListener.class).log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Failed to determine if analytics is enabled", e);
         }
         if (analyticsEnabled) {
             return PRIORITY_SPECIALIZED;
@@ -43,10 +43,10 @@ public class SegmentAnalyticsListener implements AnalyticsListener {
     @Override
     public void handleEvent(Event event) throws Exception {
         AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
-        SegmentAnalyticsConfiguration analyticsConfiguration = ((SegmentAnalyticsConfiguration) analyticsConfigurationFactory.getPlugin());
+        LiquibaseRemoteAnalyticsConfiguration analyticsConfiguration = ((LiquibaseRemoteAnalyticsConfiguration) analyticsConfigurationFactory.getPlugin());
         int timeoutMillis = analyticsConfiguration.getTimeoutMillis();
         Level logLevel = AnalyticsArgs.LOG_LEVEL.getCurrentValue();
-        Logger logger = Scope.getCurrentScope().getLog(getClass());
+        Logger logger = Scope.getCurrentScope().getLog(AnalyticsListener.class);
         /**
          * It is important to obtain the userId here outside of the newly created thread. {@link Scope} stores its stuff
          * in a ThreadLocal, so if you tried to get the value inside the thread, the value could be different.
@@ -79,10 +79,10 @@ public class SegmentAnalyticsListener implements AnalyticsListener {
                 Yaml yaml = new Yaml(dumperOptions);
                 yaml.setBeanAccess(BeanAccess.FIELD);
 
-                SegmentBatch segmentBatch = SegmentBatch.fromLiquibaseEvent(event, userId);
-                String jsonInputString = YamlSerializer.removeClassTypeMarksFromSerializedJson(yaml.dumpAs(segmentBatch, Tag.MAP, DumperOptions.FlowStyle.FLOW));
+                AnalyticsBatch analyticsBatch = AnalyticsBatch.fromLiquibaseEvent(event, userId);
+                String jsonInputString = YamlSerializer.removeClassTypeMarksFromSerializedJson(yaml.dumpAs(analyticsBatch, Tag.MAP, DumperOptions.FlowStyle.FLOW));
                 // This log message is purposefully being logged at fine level, not using the configurable log-level param, so that users always know what is being sent to Segment.
-                logger.log(logLevel, "Sending analytics to Segment." + System.lineSeparator() + jsonInputString, null);
+                logger.log(logLevel, "Sending anonymous data to Liquibase analytics endpoint. " + System.lineSeparator() + jsonInputString, null);
 
                 IOUtils.write(jsonInputString, conn.getOutputStream(), StandardCharsets.UTF_8);
 
@@ -90,7 +90,7 @@ public class SegmentAnalyticsListener implements AnalyticsListener {
                 String responseBody = ExceptionUtil.doSilently(() -> {
                     return IOUtils.toString(conn.getInputStream());
                 });
-                logger.log(logLevel, "Response from Segment: " + responseCode + " " + responseBody, null);
+                logger.log(logLevel, "Response from Liquibase analytics endpoint: " + responseCode + " " + responseBody, null);
                 conn.disconnect();
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -100,7 +100,7 @@ public class SegmentAnalyticsListener implements AnalyticsListener {
         try {
             eventThread.join(timeoutMillis);
         } catch (InterruptedException e) {
-            logger.log(logLevel, "Interrupted while waiting for analytics event processing to Segment.", e);
+            logger.log(logLevel, "Interrupted while waiting for analytics event processing.", e);
         }
     }
 }

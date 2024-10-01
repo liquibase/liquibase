@@ -3,19 +3,15 @@ package liquibase.analytics;
 import liquibase.Scope;
 import liquibase.analytics.configuration.AnalyticsConfigurationFactory;
 import liquibase.analytics.configuration.RemoteAnalyticsConfiguration;
-import liquibase.analytics.configuration.SegmentAnalyticsConfiguration;
+import liquibase.analytics.configuration.LiquibaseRemoteAnalyticsConfiguration;
 import liquibase.integration.IntegrationDetails;
 import liquibase.util.*;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.lang.reflect.Field;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -152,7 +148,7 @@ public class Event {
     private void addExtensionsToProperties(Map<String, Object> properties) {
         ExceptionUtil.doSilently(() -> {
             AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
-            SegmentAnalyticsConfiguration analyticsConfiguration = ((SegmentAnalyticsConfiguration) analyticsConfigurationFactory.getPlugin());
+            LiquibaseRemoteAnalyticsConfiguration analyticsConfiguration = ((LiquibaseRemoteAnalyticsConfiguration) analyticsConfigurationFactory.getPlugin());
             List<RemoteAnalyticsConfiguration.ExtensionName> extensionNames = analyticsConfiguration.getExtensionNames();
             if (extensionNames != null) {
                 for (RemoteAnalyticsConfiguration.ExtensionName extensionName : extensionNames) {
