@@ -89,6 +89,7 @@ jobs:
             echo "branch=release" >> $GITHUB_OUTPUT
           else
             echo "branch=master" >> $GITHUB_OUTPUT
+          fi
 
   manual_trigger_deployment:
     if: ${{ inputs.dry_run == false }}
