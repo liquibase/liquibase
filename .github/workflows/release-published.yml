@@ -87,8 +87,10 @@ jobs:
         run: |
           if [ "${{ github.ref_name }}" == "release" ]; then
             echo "branch=release" >> $GITHUB_OUTPUT
-          else
+          elif [ "${{ github.ref_name }}" == "master" ]; then
             echo "branch=master" >> $GITHUB_OUTPUT
+          else
+            echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
 
   manual_trigger_deployment:
