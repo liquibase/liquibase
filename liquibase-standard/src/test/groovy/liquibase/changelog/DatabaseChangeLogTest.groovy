@@ -251,7 +251,7 @@ create view sql_view as select * from sql_table;'''
                 new ParsedNode(null, "databaseChangeLog")
                         .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
         def modifyNode =
-                new ParsedNode(null, "modifyChangeSets").addChildren([runWith: "psql"])
+                new ParsedNode(null, "modifyChangeSets").addChildren([runWith: "psql", stripComments: true])
         modifyNode
                 .addChildren([include: [file: "com/example/test1.xml"]])
                 .addChildren([include: [file: "com/example/test2.xml"]])
@@ -892,7 +892,12 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         def s3DatabaseChangeLog = new DatabaseChangeLog(s3RootChangelog)
         s3DatabaseChangeLog.load(new ParsedNode(null, "databaseChangeLog")
-                .addChildren([includeAll: [relativeToChangelogFile: true, path: s3ChangelogPathRelative, minDepth: minDepth, maxDepth: maxDepth, errorIfMissingOrEmpty: false]]), s3ResourceAccessor)
+                .addChildren([includeAll: [relativeToChangelogFile: true,
+                                           path: s3ChangelogPathRelative,
+                                           minDepth: minDepth,
+                                           maxDepth: maxDepth,
+                                           errorIfMissingOrEmpty: false,
+                                           modifyChangeSets: new ModifyChangeSets(null, null, true)]]), s3ResourceAccessor)
 
 
         // Scenario 4: includeAll in root changelog, relativeToChangelogFile true, path multi child

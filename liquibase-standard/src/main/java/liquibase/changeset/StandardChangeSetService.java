@@ -40,9 +40,15 @@ public class StandardChangeSetService implements ChangeSetService {
     }
     @Override
     public ModifyChangeSets createModifyChangeSets(ParsedNode node) throws ParsedNodeException {
+        Object stripCommentsValue = node.getChildValue(null, "stripComments");
+        boolean stripComments = false;
+        if (stripCommentsValue != null) {
+            stripComments = (boolean)stripCommentsValue;
+        }
         return new ModifyChangeSets(
                 (String) node.getChildValue(null, "runWith"),
-                (String) node.getChildValue(null, "runWithSpoolFile"));
+                (String) node.getChildValue(null, "runWithSpoolFile"),
+                stripComments);
     }
 
     @Override
