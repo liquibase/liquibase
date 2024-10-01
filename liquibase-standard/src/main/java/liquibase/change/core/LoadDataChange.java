@@ -41,6 +41,7 @@ import liquibase.util.csv.CSVReader;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -387,9 +388,21 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                                 needsPreparedStatement = true;
                             }
                         } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.CLOB) {
-                            // Similar to the blob case, we expect ALL clobs found using loadData to be a valid path to a file.
-                            // We then load the entire file into the value when executing the statement.
-                            valueConfig.setValueClobFile(value);
+                            // Previously, we expected all clobs found using loadData to be a valid path to a file.
+                            // To maintain backwards compatibility, we will first try to find the file.
+                            // If found, we then load the entire file into the value when executing the statement.
+                            // If not found, we load the value as a string.
+
+                            File file = new File(value);
+                            if (file.exists()) {
+                                valueConfig.setValueClobFile(value);
+                            } else {
+                                /*
+                                * the URL needs to be updated with the location of the documentation for this
+                                * */
+                                LOG.fine(String.format("File %s not found. Inserting the value as a string. See https://docs.liquibase.com for more information.", value));
+                                valueConfig.setDefaultValue(value);
+                            }
                             needsPreparedStatement = true;
                         }  else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.UUID) {
                             valueConfig.setType(columnConfig.getType());

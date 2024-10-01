@@ -13,6 +13,7 @@ import liquibase.database.DatabaseFactory
 import liquibase.database.core.H2Database
 import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.MockDatabase
+import liquibase.database.core.PostgresDatabase
 import liquibase.exception.ValidationErrors
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
@@ -60,6 +61,16 @@ class LoadDataChangeTest extends StandardChangeTest {
         mockDb.setConnection((DatabaseConnection) null)
     }
 
+/*    def "column with clob datatype is path or string"(){
+        when:
+        LoadDataChange refactoring = new LoadDataChange()
+        refactoring.setSchemaName("SCHEMA_NAME")
+        refactoring.setTableName("TABLE_NAME")
+        refactoring.setFile("liquibase/change/core/sample.data.for.clob.types.csv")
+        refactoring.setSeparator(",")
+
+        SqlStatement[] sqlStatement = refactoring.generateStatements(new PostgresDatabase())
+    }*/
 
     def "loadDataEmpty database agnostic"() throws Exception {
         when:
