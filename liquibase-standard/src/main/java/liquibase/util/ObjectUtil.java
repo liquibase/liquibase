@@ -159,9 +159,9 @@ public class ObjectUtil {
         } catch (IllegalArgumentException e) {
             if (finalValue != null) {
                 throw new UnexpectedLiquibaseException("Cannot call " + method
-                        + " with value of type " + finalValue.getClass().getName());
+                        + " with value of type " + finalValue.getClass().getName(), e);
             } else {
-                throw new UnexpectedLiquibaseException("Cannot call " + method + " with a null argument");
+                throw new UnexpectedLiquibaseException("Cannot call " + method + " with a null argument", e);
             }
         }
     }
@@ -197,7 +197,7 @@ public class ObjectUtil {
             throw new UnexpectedLiquibaseException(e);
         } catch (IllegalArgumentException e) {
             throw new UnexpectedLiquibaseException("Cannot call " + method + " with value of type "
-                + (propertyValue == null ? "null" : propertyValue.getClass().getName()));
+                + (propertyValue == null ? "null" : propertyValue.getClass().getName()), e);
         }
     }
 
