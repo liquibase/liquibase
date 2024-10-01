@@ -35,14 +35,13 @@ else
   # sudo apt install -y $INSTALL4J_CACHE/install4j_linux-x64_10_0_7.deb
 
   # installer automation for macos-latest; macos needed for apple notarizing
-  # Commenting out code that was used to download and install Install4J on macOS:
-#  wget -nv --directory-prefix=$INSTALL4J_CACHE -nc https://download.ej-technologies.com/install4j/install4j_macos_10_0_7.dmg
-#  sleep 5
-#  hdiutil attach /Users/runner/.install4j10/install4j_macos_10_0_7.dmg
-#  sleep 5
-#  cp -rf /Volumes/install4j/install4j.app /Applications
-#  sleep 5
-#  hdiutil detach /Volumes/install4j
+  wget -nv --directory-prefix=$INSTALL4J_CACHE -nc https://download.ej-technologies.com/install4j/install4j_macos_10_0_7.dmg
+  sleep 5
+  hdiutil attach /Users/runner/.install4j10/install4j_macos_10_0_7.dmg
+  sleep 5
+  cp -rf /Volumes/install4j/install4j.app /Applications
+  sleep 5
+  hdiutil detach /Volumes/install4j
 
 fi
 
