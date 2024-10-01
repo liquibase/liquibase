@@ -1,5 +1,7 @@
 package liquibase.changeset;
 
+import liquibase.change.AbstractSQLChange;
+import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ModifyChangeSets;
@@ -59,6 +61,10 @@ public class StandardChangeSetService implements ChangeSetService {
         if (changeSet.getRunWithSpoolFile() == null) {
             changeSet.setRunWithSpoolFile(modifyChangeSets != null ? modifyChangeSets.getRunWithSpool() : null);
         }
-        changeSet.setStripComments(modifyChangeSets != null && modifyChangeSets.isStripComments());
+        for (Change change : changeSet.getChanges()) {
+            if (change instanceof AbstractSQLChange) {
+                ((AbstractSQLChange)change).setStripComments(modifyChangeSets != null && modifyChangeSets.isStripComments());
+            }
+        }
     }
 }

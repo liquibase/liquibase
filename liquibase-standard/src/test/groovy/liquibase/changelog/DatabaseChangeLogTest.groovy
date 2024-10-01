@@ -265,8 +265,6 @@ create view sql_view as select * from sql_table;'''
         ((CreateTableChange) rootChangeLog.getChangeSet("com/example/root.xml", "nvoxland", "1").changes[0]).tableName == "test_table"
         rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").getRunWith() == "psql"
         rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").getRunWith() == "psql"
-        rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").isStripComments() == "psql"
-        rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").getRunWith() == "psql"
     }
 
     def "includeAll files have preconditions and changeSets loaded"() {
@@ -327,7 +325,7 @@ create view sql_view as select * from sql_table;'''
                 new ParsedNode(null, "databaseChangeLog")
                         .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
         def modifyNode =
-                new ParsedNode(null, "modifyChangeSets").addChildren([runWith: "psql"])
+                new ParsedNode(null, "modifyChangeSets").addChildren([runWith: "psql", stripComments: true])
         modifyNode
                 .addChildren([includeAll: [path: "com/example", resourceComparator: "liquibase.changelog.ReversedChangeLogNamesComparator"]])
         topLevel.addChild(modifyNode)
@@ -342,6 +340,7 @@ create view sql_view as select * from sql_table;'''
         rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").getRunWith() == "psql"
         rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").getRunWith() == "psql"
         ((RawSQLChange) rootChangeLog.getChangeSet("com/example/test.sql", "includeAll", "raw").changes[0]).sql == testSql
+        ((RawSQLChange) rootChangeLog.getChangeSets().get(3).changes[0]).isStripComments()
 
         // assert reversed order
         ((CreateTableChange) rootChangeLog.getChangeSets().get(0).changes[0]).tableName == "test_table"
