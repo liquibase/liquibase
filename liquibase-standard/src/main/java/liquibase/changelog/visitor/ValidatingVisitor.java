@@ -17,6 +17,7 @@ import liquibase.precondition.core.PreconditionContainer;
 import liquibase.util.StringUtil;
 import liquibase.util.ValidatingVisitorUtil;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
@@ -182,8 +183,8 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     }
 
     private boolean areChangeSetAttributesValid(ChangeSet changeSet) {
-        boolean authorEmpty = StringUtil.isEmpty(changeSet.getAuthor());
-        boolean idEmpty = StringUtil.isEmpty(changeSet.getId());
+        boolean authorEmpty = StringUtils.isEmpty(changeSet.getAuthor());
+        boolean idEmpty = StringUtils.isEmpty(changeSet.getId());
         boolean strictCurrentValue = GlobalConfiguration.STRICT.getCurrentValue();
 
         boolean valid = false;

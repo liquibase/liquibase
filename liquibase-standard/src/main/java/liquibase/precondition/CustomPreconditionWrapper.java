@@ -56,7 +56,7 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
-    
+
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
             throws PreconditionFailedException, PreconditionErrorException {
@@ -69,21 +69,21 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
                 customPrecondition = (CustomPrecondition) Class.forName(className).getConstructor().newInstance();
             }
         } catch (Exception e) {
-            throw new PreconditionFailedException("Could not open custom precondition class "+className, changeLog, this);
+            throw new PreconditionFailedException("Could not open custom precondition class "+className, changeLog, this, e);
         }
 
         for (String param : params) {
             try {
                 ObjectUtil.setProperty(customPrecondition, param, paramValues.get(param));
             } catch (Exception e) {
-                throw new PreconditionFailedException("Error setting parameter "+param+" on custom precondition "+className, changeLog, this);
+                throw new PreconditionFailedException("Error setting parameter "+param+" on custom precondition "+className, changeLog, this, e);
             }
         }
 
         try {
             customPrecondition.check(database);
         } catch (CustomPreconditionFailedException e) {
-            throw new PreconditionFailedException(new FailedPrecondition("Custom Precondition Failed: "+e.getMessage(), changeLog, this));
+            throw new PreconditionFailedException(new FailedPrecondition("Custom Precondition Failed: "+e.getMessage(), changeLog, this), e);
         } catch (CustomPreconditionErrorException e) {
             throw new PreconditionErrorException(new ErrorPrecondition(e, changeLog, this));
         }

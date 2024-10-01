@@ -686,8 +686,8 @@ class ChangeSetTest extends Specification {
         contents.contains(expectKeys)
 
         cleanup:
-        outputFile.delete()
         outputStream.close()
+        outputFile.delete()
     }
 
     def "validate rollback serialization doesn't duplicate rollback key on a XML changelog format"() {
@@ -708,8 +708,8 @@ class ChangeSetTest extends Specification {
         contents.contains(expectedKeys)
 
         cleanup:
-        outputFile.delete()
         outputStream.close()
+        outputFile.delete()
     }
 
     def "validate rollback serialization works as expected when having to rollback a SQLFile change"() {
@@ -734,8 +734,8 @@ class ChangeSetTest extends Specification {
         contents.contains(expectedKeys)
 
         cleanup:
-        outputFile.delete()
         outputStream.close()
+        outputFile.delete()
     }
 
 }

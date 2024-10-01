@@ -19,6 +19,7 @@ import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigInteger;
 import java.nio.charset.Charset;
@@ -250,7 +251,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             return "";
         }
 
-        if (StringUtil.isEmpty(generationType)) {
+        if (StringUtils.isEmpty(generationType)) {
             return super.getAutoIncrementClause();
         }
 

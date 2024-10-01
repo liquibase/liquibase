@@ -9,6 +9,7 @@ import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Locale;
 
@@ -59,7 +60,7 @@ public class ClobType extends LiquibaseDataType {
                 String originalExtraInfo = originalDefinition.replaceFirst("^(?i)\\[?ntext\\]?\\s*", "");
                 originalExtraInfo = originalExtraInfo.replaceFirst("^(?i)\\[?text\\]?\\s*", "");
                 type.addAdditionalInformation("(max)");
-                if(!StringUtil.isEmpty(originalExtraInfo)) {
+                if(!StringUtils.isEmpty(originalExtraInfo)) {
                     //if we still have something like (25555) remove it
                     //since we already set it to max, otherwise add collate or other info
                     if(originalExtraInfo.lastIndexOf(")") < (originalExtraInfo.length() - 1)) {

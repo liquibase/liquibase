@@ -155,17 +155,13 @@ public class Main {
 
     /**
      * Entry point. This is what gets executes when starting this program from the command line. This is actually
-     * a simple wrapper so that an errorlevel of != 0 is guaranteed in case of an uncaught exception.
+     * a simple wrapper so that an errorLevel of != 0 is guaranteed in case of an uncaught exception.
      *
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         int errorLevel = 0;
-        try {
-            errorLevel = run(args);
-        } catch (Throwable e) {
-            System.exit(-1);
-        }
+        errorLevel = run(args);
 
         System.exit(errorLevel);
     }
@@ -1064,7 +1060,7 @@ public class Main {
                 }
             } catch (IllegalAccessException e) {
                 throw new UnexpectedLiquibaseException(
-                        String.format(coreBundle.getString("parameter.unknown"), entry.getKey())
+                        String.format(coreBundle.getString("parameter.unknown"), entry.getKey()), e
                 );
             }
         }
@@ -1253,7 +1249,7 @@ public class Main {
         } catch (IllegalAccessException | NoSuchFieldException e) {
             if (!okIfNotAField) {
                 throw new CommandLineParsingException(
-                        String.format(coreBundle.getString("option.unknown"), attributeName)
+                        String.format(coreBundle.getString("option.unknown"), attributeName), e
                 );
             }
         }

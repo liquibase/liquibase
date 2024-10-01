@@ -17,11 +17,15 @@ public class PreconditionFailedException extends Exception {
     private final List<FailedPrecondition> failedPreconditions;
 
     public PreconditionFailedException(String message, DatabaseChangeLog changeLog, Precondition precondition) {
-        this(new FailedPrecondition(message, changeLog, precondition));
+        this(new FailedPrecondition(message, changeLog, precondition), null);
     }
 
-    public PreconditionFailedException(FailedPrecondition failedPrecondition) {
-        super("Preconditions Failed");
+    public PreconditionFailedException(String message, DatabaseChangeLog changeLog, Precondition precondition, Throwable cause) {
+        this(new FailedPrecondition(message, changeLog, precondition), cause);
+    }
+
+    public PreconditionFailedException(FailedPrecondition failedPrecondition, Throwable cause) {
+        super("Preconditions Failed", cause);
         this.failedPreconditions = new ArrayList<>();
         failedPreconditions.add(failedPrecondition);
     }

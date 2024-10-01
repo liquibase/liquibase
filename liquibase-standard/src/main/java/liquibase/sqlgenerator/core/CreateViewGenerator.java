@@ -17,6 +17,7 @@ import liquibase.structure.core.Relation;
 import liquibase.structure.core.View;
 import liquibase.util.StringClauses;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -126,7 +127,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
     }
 
     private String determineSchemaSpec(String schemaName) {
-        if (StringUtil.isEmpty(schemaName)) {
+        if (StringUtils.isEmpty(schemaName)) {
             return "";
         }
         return "[" + schemaName + "].";

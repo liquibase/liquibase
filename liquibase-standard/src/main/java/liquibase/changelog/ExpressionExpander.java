@@ -92,6 +92,7 @@ class ExpressionExpander {
             }
         } catch (IOException exception) {
             // Unreachable as we initialize the StringReader with a non-null string
+            throw new RuntimeException(exception);
         }
 
         if (inExpression) {

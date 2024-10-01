@@ -14,24 +14,19 @@ import static org.junit.Assert.assertTrue;
 public class InsertOrUpdateGeneratorMSSQLTest {
 
 
-    public static Object invokePrivateMethod(Object o, String methodName, Object[] params) {
+    public static <T> T invokePrivateMethod(Object o, String methodName, Object[] params) throws InvocationTargetException, IllegalAccessException {
         // Check we have valid arguments...
         Assert.assertNotNull(o);
         Assert.assertNotNull(methodName);
-//            Assert.assertNotNull(params);
+        //            Assert.assertNotNull(params);
 
         // Go and find the private method...
-        final Method methods[] = o.getClass().getDeclaredMethods();
-        for (int i = 0; i < methods.length; ++i) {
-            if (methodName.equals(methods[i].getName())) {
-                try {
-                    methods[i].setAccessible(true);
-                    return methods[i].invoke(o, params);
-                } catch (IllegalAccessException ex) {
-                    Assert.fail("IllegalAccessException accessing " + methodName);
-                } catch (InvocationTargetException ite) {
-                    Assert.fail("InvocationTargetException accessing " + methodName);
-                }
+        final Method[] methods = o.getClass().getDeclaredMethods();
+        for (Method method : methods) {
+            if (methodName.equals(method.getName())) {
+                method.setAccessible(true);
+              //noinspection unchecked
+              return (T) method.invoke(o, params);
             }
         }
         Assert.fail("Method '" + methodName + "' not found");
@@ -39,7 +34,7 @@ public class InsertOrUpdateGeneratorMSSQLTest {
     }
 
     @Test
-    public void getRecordCheck(){
+    public void getRecordCheck() throws InvocationTargetException, IllegalAccessException {
         InsertOrUpdateGeneratorMSSQL generator = new InsertOrUpdateGeneratorMSSQL();
         MSSQLDatabase database = new MSSQLDatabase();
 
@@ -49,7 +44,7 @@ public class InsertOrUpdateGeneratorMSSQLTest {
 
         String where = "1 = 1";
 
-        String recordCheck = (String)invokePrivateMethod(generator,"getRecordCheck", new Object[] {statement,database,where});
+        String recordCheck = invokePrivateMethod(generator,"getRecordCheck", new Object[] {statement,database,where});
 
         Integer lineNumber = 0;
         String[] lines = recordCheck.split("\n");
@@ -62,7 +57,7 @@ public class InsertOrUpdateGeneratorMSSQLTest {
     }
 
     @Test
-    public void getInsert(){
+    public void getInsert() throws InvocationTargetException, IllegalAccessException {
         InsertOrUpdateGeneratorMSSQL generator = new InsertOrUpdateGeneratorMSSQL();
         MSSQLDatabase database = new MSSQLDatabase();
 
@@ -74,7 +69,7 @@ public class InsertOrUpdateGeneratorMSSQLTest {
 
         Class c = InsertOrUpdateGenerator.class.getClass();
         //InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain
-        String insertStatement = (String)invokePrivateMethod(generator,"getInsertStatement", new Object[] {statement,database,null});
+        String insertStatement = invokePrivateMethod(generator,"getInsertStatement", new Object[] {statement,database,null});
 
         Integer lineNumber = 0;
         String[] lines = insertStatement.split("\n");
@@ -86,7 +81,7 @@ public class InsertOrUpdateGeneratorMSSQLTest {
     }
 
     @Test
-    public void getElse(){
+    public void getElse() throws InvocationTargetException, IllegalAccessException {
         InsertOrUpdateGeneratorMSSQL generator = new InsertOrUpdateGeneratorMSSQL();
         MSSQLDatabase database = new MSSQLDatabase();
 
@@ -98,7 +93,7 @@ public class InsertOrUpdateGeneratorMSSQLTest {
 
         Class c = InsertOrUpdateGenerator.class.getClass();
         //InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain
-        String insertStatement = (String)invokePrivateMethod(generator,"getElse", new Object[] {database});
+        String insertStatement = invokePrivateMethod(generator,"getElse", new Object[] {database});
 
         Integer lineNumber = 0;
         String[] lines = insertStatement.split("\n");
@@ -106,7 +101,7 @@ public class InsertOrUpdateGeneratorMSSQLTest {
     }
 
     @Test
-     public void getUpdate(){
+     public void getUpdate() throws InvocationTargetException, IllegalAccessException {
          InsertOrUpdateGeneratorMSSQL generator = new InsertOrUpdateGeneratorMSSQL();
          MSSQLDatabase database = new MSSQLDatabase();
 
@@ -117,7 +112,7 @@ public class InsertOrUpdateGeneratorMSSQLTest {
 
          Class c = InsertOrUpdateGenerator.class.getClass();
         //InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause, SqlGeneratorChain sqlGeneratorChain
-         String insertStatement = (String)invokePrivateMethod(generator,"getUpdateStatement", new Object[] {statement,database,where,null});
+         String insertStatement = invokePrivateMethod(generator,"getUpdateStatement", new Object[] {statement,database,where,null});
 
          Integer lineNumber = 0;
          String[] lines = insertStatement.split("\n");

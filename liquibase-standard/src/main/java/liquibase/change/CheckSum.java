@@ -7,6 +7,7 @@ import liquibase.util.StringUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,7 +54,7 @@ public final class CheckSum {
      * Parse the given storedCheckSum string value and return a new CheckSum object.
      */
     public static CheckSum parse(String checksumValue) {
-        if (StringUtil.isEmpty(checksumValue)) {
+        if (StringUtils.isEmpty(checksumValue)) {
             return null;
         }
         // The general layout of a checksum is:

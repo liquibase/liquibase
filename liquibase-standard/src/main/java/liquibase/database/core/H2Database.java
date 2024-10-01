@@ -313,7 +313,7 @@ public class H2Database extends AbstractJdbcDatabase {
         try {
             return new ISODateFormat().parse(dateAsString);
         } catch (ParseException e) {
-            throw new DateParseException(dateAsString);
+            throw new DateParseException(String.format("Invalid date value '%s': %s", dateAsString, e));
         }
     }
 

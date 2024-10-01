@@ -109,23 +109,17 @@ public class InsertOrUpdateGeneratorInformixTest {
   }
 
 
-  private static Object invokePrivateMethod(Object o, String methodName, Object[] params) {
+  private static Object invokePrivateMethod(Object o, String methodName, Object[] params) throws InvocationTargetException, IllegalAccessException {
     // Check we have valid arguments...
     assertNotNull(o);
     assertNotNull(methodName);
 
     // Go and find the private method...
-    final Method methods[] = o.getClass().getDeclaredMethods();
-    for (int i = 0; i < methods.length; ++i) {
-      if (methodName.equals(methods[i].getName())) {
-        try {
-          methods[i].setAccessible(true);
-          return methods[i].invoke(o, params);
-        } catch (IllegalAccessException ex) {
-          fail("IllegalAccessException accessing " + methodName);
-        } catch (InvocationTargetException ite) {
-          fail("InvocationTargetException accessing " + methodName);
-        }
+    final Method[] methods = o.getClass().getDeclaredMethods();
+    for (Method method : methods) {
+      if (methodName.equals(method.getName())) {
+        method.setAccessible(true);
+        return method.invoke(o, params);
       }
     }
     fail("Method '" + methodName + "' not found");

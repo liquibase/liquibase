@@ -46,6 +46,7 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        warningMessageShown = false;
         this.setFastCheckEnabled(false);
         super.run(resultsBuilder);
     }

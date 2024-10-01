@@ -156,7 +156,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
             }
         } catch (DatabaseException e) {
-            Scope.getCurrentScope().getLog(getClass()).warning("Cannot set auto commit to " + getAutoCommitMode() + " on connection");
+            Scope.getCurrentScope().getLog(getClass()).warning("Cannot set auto commit to " + getAutoCommitMode() + " on connection: " + e);
         }
 
         this.connection.attached(this);
@@ -203,7 +203,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         try {
             return connection.getDatabaseProductName();
         } catch (DatabaseException e) {
-            throw new RuntimeException("Cannot get database name");
+            throw new RuntimeException("Cannot get database name", e);
         }
     }
 
@@ -484,7 +484,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 }
             }
         } catch (ParseException e) {
-            throw new DateParseException(dateAsString);
+            throw new DateParseException(String.format("Invalid date value '%s': %s", dateAsString, e));
         }
     }
 

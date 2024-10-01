@@ -42,11 +42,7 @@ public class UUIDType extends LiquibaseDataType {
                 return new DatabaseDataType("UUID");
             }
         } catch (DatabaseException e) {
-            try {
-                throw new DatabaseException("UUID data type is not supported in versions lower than 10.7");
-            } catch (DatabaseException ex) {
-                throw new RuntimeException(ex);
-            }
+            throw new RuntimeException("UUID data type is not supported in versions lower than 10.7", e);
         }
         return new DatabaseDataType("char", 36);
     }
