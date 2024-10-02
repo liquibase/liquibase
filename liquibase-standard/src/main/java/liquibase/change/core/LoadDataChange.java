@@ -401,7 +401,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                                 * the URL needs to be updated with the location of the documentation for this
                                 * */
                                 LOG.fine(String.format("File %s not found. Inserting the value as a string. See https://docs.liquibase.com for more information.", value));
-                                valueConfig.setDefaultValue(value);
+                                valueConfig.setValue(value);
                             }
                             needsPreparedStatement = true;
                         }  else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.UUID) {
