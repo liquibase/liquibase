@@ -61,16 +61,36 @@ class LoadDataChangeTest extends StandardChangeTest {
         mockDb.setConnection((DatabaseConnection) null)
     }
 
-/*    def "column with clob datatype is path or string"(){
+    def "column with clob datatype is path or string"(){
         when:
-        LoadDataChange refactoring = new LoadDataChange()
-        refactoring.setSchemaName("SCHEMA_NAME")
-        refactoring.setTableName("TABLE_NAME")
-        refactoring.setFile("liquibase/change/core/sample.data.for.clob.types.csv")
-        refactoring.setSeparator(",")
+        def changelog = new DatabaseChangeLog("liquibase/changelog.xml")
+        ChangeSet changeSet = new ChangeSet(null, null, true, false,
+                "logical or physical file name",
+                null, null, false, null, changelog)
 
-        SqlStatement[] sqlStatement = refactoring.generateStatements(new PostgresDatabase())
-    }*/
+        LoadDataChange change = new LoadDataChange()
+
+        change.setSchemaName("SCHEMA_NAME")
+        change.setTableName("TABLE_NAME")
+        change.setRelativeToChangelogFile(Boolean.TRUE)
+        change.setChangeSet(changeSet)
+        change.setFile("/change/core/sample.data.for.clob.types.csv")
+
+        SqlStatement[] stmt = change.generateStatements(new PostgresDatabase())
+
+        then:
+        stmt.length == 1
+        assert stmt[0] instanceof InsertSetStatement
+        assert ((InsertSetStatement)stmt[0]).getStatements() instanceof LinkedList<InsertStatement>
+
+        InsertStatement insSt = (InsertStatement)((InsertSetStatement)stmt[0]).getStatements()[0]
+        "SCHEMA_NAME" == insSt.getSchemaName()
+        "TABLE_NAME" == insSt.getTableName()
+        "File in root" == insSt.getColumnValue("exists")
+        "nothing.txt" == insSt.getColumnValue("doesnt")
+        "sample text" == insSt.getColumnValue("string")
+
+    }
 
     def "loadDataEmpty database agnostic"() throws Exception {
         when:
