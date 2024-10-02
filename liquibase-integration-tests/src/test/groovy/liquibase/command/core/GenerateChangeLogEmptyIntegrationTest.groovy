@@ -25,7 +25,7 @@ class GenerateChangeLogEmptyIntegrationTest extends Specification {
 
     def "Should not generate changelog file with empty table"() {
         given:
-        db.executeSql("create table \"TEST\" (b VARCHAR(10));")
+        db.executeSql("create table \"TEST_CHANGELOG_NOT_GENERATED\" (b VARCHAR(10));")
 
         when:
         def outputFileName = 'test/test-classes/output.postgresql.sql'
@@ -38,7 +38,7 @@ class GenerateChangeLogEmptyIntegrationTest extends Specification {
     def "Should generate changelog file with non-empty table"() {
         given:
         db.executeSql("""
-create table "TEST" (
+create table "TEST_CHANGELOG_GENERATED" (
   b VARCHAR(10)
 );
 INSERT INTO "TEST" (b) VALUES ('Geronimo!');
