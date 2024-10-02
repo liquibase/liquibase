@@ -69,7 +69,7 @@ jobs:
       dry_run_zip_url: ${{ needs.dry-run-create-release.outputs.dry_run_zip_url }}
       dry_run_tar_gz_url: ${{ needs.dry-run-create-release.outputs.dry_run_tar_gz_url }}
       dry_run: true
-      dry_run_branch_name: ${{ needs.dry-run-create-release.outputs.dry_run_tar_gz_url }}
+      dry_run_branch_name: ${{ needs.dry-run-create-release.outputs.dry_run_branch_name }}
     secrets: inherit
 
   cleanup:
