@@ -20,7 +20,7 @@ public class UpdateTestingRollbackCommandStep extends AbstractCommandStep {
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         TAG_ARG = builder.argument("tag", String.class)
-                .hidden()
+                .description("The tag to update to")
                 .build();
     }
 
