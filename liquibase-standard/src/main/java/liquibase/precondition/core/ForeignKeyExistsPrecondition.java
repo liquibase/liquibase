@@ -14,7 +14,12 @@ import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
+@Setter
+@Getter
 public class ForeignKeyExistsPrecondition extends AbstractPrecondition {
     private String catalogName;
     private String schemaName;
@@ -24,38 +29,6 @@ public class ForeignKeyExistsPrecondition extends AbstractPrecondition {
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
-    }
-
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
-    public String getForeignKeyTableName() {
-        return foreignKeyTableName;
-    }
-
-    public void setForeignKeyTableName(String foreignKeyTableName) {
-        this.foreignKeyTableName = foreignKeyTableName;
-    }
-
-    public String getForeignKeyName() {
-        return foreignKeyName;
-    }
-
-    public void setForeignKeyName(String foreignKeyName) {
-        this.foreignKeyName = foreignKeyName;
     }
 
     @Override
@@ -74,12 +47,12 @@ public class ForeignKeyExistsPrecondition extends AbstractPrecondition {
             ForeignKey example = new ForeignKey();
             example.setName(getForeignKeyName());
             example.setForeignKeyTable(new Table());
-            if (StringUtil.trimToNull(getForeignKeyTableName()) != null) {
+            if (StringUtils.trimToNull(getForeignKeyTableName()) != null) {
                 example.getForeignKeyTable().setName(getForeignKeyTableName());
             }
             example.getForeignKeyTable().setSchema(new Schema(getCatalogName(), getSchemaName()));
 
-            if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
+            if (!SnapshotGeneratorFactory.getInstance().has(example, database, false)) {
                 throw new PreconditionFailedException("Foreign Key " +
                     database.escapeIndexName(catalogName, schemaName, foreignKeyName) + " does not exist",
                     changeLog,
