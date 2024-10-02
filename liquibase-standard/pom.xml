@@ -179,6 +179,12 @@
             <artifactId>commons-text</artifactId>
             <version>${commons-text.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.nanohttpd</groupId>
+            <artifactId>nanohttpd</artifactId>
+            <version>2.2.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
