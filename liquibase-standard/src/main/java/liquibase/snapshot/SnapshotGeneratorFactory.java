@@ -153,10 +153,10 @@ public class SnapshotGeneratorFactory {
             return true;
         }
         CatalogAndSchema catalogAndSchema = example.getSchema() == null ? database.getDefaultSchema() : example.getSchema().toCatalogAndSchema();
-        DatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database,
-                new SnapshotControl(database, false, example.getClass()).setWarnIfObjectNotFound(false)
-        );
-
+        SnapshotControl replacedSnapshotControl = new SnapshotControl(database, false, example.getClass());
+        replacedSnapshotControl.setWarnIfObjectNotFound(false);
+        replacedSnapshotControl.setSearchNestedObjects(snapshotControl.shouldSearchNestedObjects());
+        DatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database, snapshotControl);
         for (DatabaseObject obj : snapshot.get(example.getClass())) {
             if (DatabaseObjectComparatorFactory.getInstance().isSameObject(example, obj, null, database)) {
                 return true;
