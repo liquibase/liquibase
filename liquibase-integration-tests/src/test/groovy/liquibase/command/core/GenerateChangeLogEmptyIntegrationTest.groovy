@@ -48,6 +48,8 @@ COMMIT;
         when:
         def outputFileName = 'test/test-classes/output.postgresql.sql'
         CommandUtil.runGenerateChangelog(db, outputFileName, "data")
+        //Adding sleep to test if a little time wait time is needed to get the file written
+        Thread.sleep(1500)
 
         then:
         def outputFile = new File(outputFileName)
