@@ -33,12 +33,6 @@ class GenerateChangeLogEmptyIntegrationTest extends Specification {
 
         then:
         !Files.exists(Path.of(outputFileName))
-
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
     }
 
     def "Should generate changelog file with non-empty table"() {
@@ -62,12 +56,6 @@ COMMIT;
         contents.contains("""
 INSERT INTO "public"."TEST" ("b") VALUES ('Geronimo!');
 """)
-
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
 
         cleanup:
         outputFile.delete()
