@@ -41,7 +41,7 @@ class GenerateChangeLogEmptyIntegrationTest extends Specification {
 create table "TEST_CHANGELOG_GENERATED" (
   b VARCHAR(10)
 );
-INSERT INTO "TEST" (b) VALUES ('Geronimo!');
+INSERT INTO "TEST_CHANGELOG_GENERATED" (b) VALUES ('Geronimo!');
 COMMIT;
 """)
 
@@ -54,7 +54,7 @@ COMMIT;
         Files.exists(Path.of(outputFileName))
         def contents = FileUtil.getContents(outputFile)
         contents.contains("""
-INSERT INTO "public"."TEST" ("b") VALUES ('Geronimo!');
+INSERT INTO "public"."TEST_CHANGELOG_GENERATED" ("b") VALUES ('Geronimo!');
 """)
 
         cleanup:
