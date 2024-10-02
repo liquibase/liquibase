@@ -35,6 +35,16 @@ public class ModifyChangeSets {
      *
      * @param runWith       The native executor to execute all included change sets with. Can be null
      * @param runWithSpool  The name of the spool file to be created
+     *
+     */
+    public ModifyChangeSets(String runWith, String runWithSpool) {
+        this(runWith, runWithSpool, false);
+    }
+
+    /**
+     *
+     * @param runWith       The native executor to execute all included change sets with. Can be null
+     * @param runWithSpool  The name of the spool file to be created
      * @param stripComments Boolean flag to strip comments from SQL
      *
      */
