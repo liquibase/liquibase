@@ -22,6 +22,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -157,15 +158,15 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
                     "If --changeset-identifier is not provided than --changeset-id, --changeset-author and --changeset-path must be specified. " +
                     "Missing argument: ";
 
-            if (StringUtil.isEmpty(commandScope.getArgumentValue(CHANGESET_ID_ARG))) {
+            if (StringUtils.isEmpty(commandScope.getArgumentValue(CHANGESET_ID_ARG))) {
                 errorMessage = errorMessage + " '--changeset-id',";
             }
 
-            if (StringUtil.isEmpty(commandScope.getArgumentValue(CHANGESET_AUTHOR_ARG))) {
+            if (StringUtils.isEmpty(commandScope.getArgumentValue(CHANGESET_AUTHOR_ARG))) {
                 errorMessage = errorMessage + " '--changeset-author',";
             }
 
-            if (StringUtil.isEmpty(commandScope.getArgumentValue(CHANGESET_PATH_ARG))) {
+            if (StringUtils.isEmpty(commandScope.getArgumentValue(CHANGESET_PATH_ARG))) {
                 errorMessage = errorMessage + " '--changeset-path',";
             }
 
@@ -176,11 +177,11 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
     }
 
     private List<String> validateAndExtractParts(String changeSetIdentifier, String changeLogFile) throws LiquibaseException {
-        if (StringUtil.isEmpty(changeSetIdentifier)) {
+        if (StringUtils.isEmpty(changeSetIdentifier)) {
             throw new LiquibaseException(new IllegalArgumentException(CHANGESET_IDENTIFIER_ARG.getName()));
         }
 
-        if (StringUtil.isEmpty(changeLogFile)) {
+        if (StringUtils.isEmpty(changeLogFile)) {
             throw new LiquibaseException(new IllegalArgumentException(CHANGELOG_FILE_ARG.getName()));
         }
 

@@ -19,6 +19,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
@@ -306,7 +307,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 liquibaseCommand.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase);
                 liquibaseCommand.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, diffTypes));
                 liquibaseCommand.addArgumentValue(PreCompareCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter);
-                if (StringUtil.isEmpty(diffTypes)) {
+                if (StringUtils.isEmpty(diffTypes)) {
                     liquibaseCommand.addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, new Class[0]);
                 } else {
                     liquibaseCommand.addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(diffTypes));
