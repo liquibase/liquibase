@@ -2,7 +2,6 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.DatabaseFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
@@ -12,9 +11,6 @@ import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.ForeignKeyConstraintType;
 import liquibase.structure.core.Table;
 import lombok.Setter;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Adds a foreign key constraint to an existing column.
@@ -54,24 +50,6 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
 
     private String onUpdate;
     private String onDelete;
-
-
-    @Override
-    protected String[] createSupportedDatabasesMetaData(
-        String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
-        if ("deferrable".equals(parameterName) || "initiallyDeferred".equals(parameterName)) {
-            List<String> supported = new ArrayList<>();
-            for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
-                if (database.supportsInitiallyDeferrableColumns()) {
-                    supported.add(database.getShortName());
-                }
-            }
-            return supported.toArray(new String[0]);
-
-        } else {
-            return super.createSupportedDatabasesMetaData(parameterName, changePropertyAnnotation);
-        }
-    }
 
     @DatabaseChangeProperty(since = "3.0", mustEqualExisting ="column.relation.catalog",
         description = "Name of the database catalog of the base table")
