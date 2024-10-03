@@ -50,7 +50,9 @@ public class ForeignKeyExistsPrecondition extends AbstractPrecondition {
             if (StringUtils.trimToNull(getForeignKeyTableName()) != null) {
                 example.getForeignKeyTable().setName(getForeignKeyTableName());
             }
-            example.getForeignKeyTable().setSchema(new Schema(getCatalogName(), getSchemaName()));
+            String catalogName = getCatalogName() != null ? getCatalogName() : database.getDefaultCatalogName();
+            String schemaName = getSchemaName() != null ? getSchemaName() : database.getDefaultSchemaName();
+            example.getForeignKeyTable().setSchema(new Schema(catalogName, schemaName));
 
             if (!SnapshotGeneratorFactory.getInstance().has(example, database, false)) {
                 throw new PreconditionFailedException("Foreign Key " +
