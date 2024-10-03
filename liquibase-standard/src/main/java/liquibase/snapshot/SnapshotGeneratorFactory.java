@@ -179,17 +179,17 @@ public class SnapshotGeneratorFactory {
     }
 
     /**
-     * Checks if a specific object is present in a database. Enable or disable searching nested objects.
+     * Checks if a specific object is present in a database. When using this method the database snapshot will
+     * NOT search through nested objects.
      *
      * @param example  The DatabaseObject to check for existence
      * @param database The DBMS in which the object might exist
-     * @param searchNestedObjects whether to search nested objects, if true this is equivalent to calling {@link SnapshotGeneratorFactory#has(DatabaseObject, Database)}
      * @return true if object exists, false otherwise
      * @throws DatabaseException       If a problem occurs in the DBMS-specific code
      * @throws InvalidExampleException If the object cannot be checked properly, e.g. if the object name is ambiguous
      */
-    public boolean has(DatabaseObject example, Database database, boolean searchNestedObjects) throws DatabaseException, InvalidExampleException {
-        return checkExistence(example, database, searchNestedObjects);
+    public boolean hasIgnoreNested(DatabaseObject example, Database database) throws DatabaseException, InvalidExampleException {
+        return checkExistence(example, database, false);
     }
 
     /**

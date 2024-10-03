@@ -13,7 +13,6 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -54,7 +53,7 @@ public class ForeignKeyExistsPrecondition extends AbstractPrecondition {
             String schemaName = getSchemaName() != null ? getSchemaName() : database.getDefaultSchemaName();
             example.getForeignKeyTable().setSchema(new Schema(catalogName, schemaName));
 
-            if (!SnapshotGeneratorFactory.getInstance().has(example, database, false)) {
+            if (!SnapshotGeneratorFactory.getInstance().hasIgnoreNested(example, database)) {
                 throw new PreconditionFailedException("Foreign Key " +
                     database.escapeIndexName(catalogName, schemaName, foreignKeyName) + " does not exist",
                     changeLog,
