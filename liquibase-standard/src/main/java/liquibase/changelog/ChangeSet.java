@@ -38,6 +38,7 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.Instant;
 import java.util.*;
@@ -870,7 +871,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * @return String                           The mapped value
      */
     public static String lookupExecutor(String executorName) {
-        if (StringUtil.isEmpty(executorName)) {
+        if (StringUtils.isEmpty(executorName)) {
             return null;
         }
         String key = "liquibase." + executorName.toLowerCase() + ".executor";

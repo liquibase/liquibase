@@ -15,6 +15,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -245,7 +246,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                 //
                 // Handle empty files with a WARNING message
                 //
-                if (StringUtil.isEmpty(firstLine)) {
+                if (StringUtils.isEmpty(firstLine)) {
                     Scope.getCurrentScope().getLog(getClass()).warning(String.format("Skipping empty file '%s'", changeLogFile));
                     return false;
                 }
@@ -330,15 +331,16 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                         }
                         continue;
                     } else {
+                        String ignoreCountAttribute = ignoreLinesMatcher.group(1);
                         try {
-                            long ignoreCount = Long.parseLong(ignoreLinesMatcher.group(1));
+                            long ignoreCount = Long.parseLong(ignoreCountAttribute);
                             while (ignoreCount > 0 && reader.readLine() != null) {
                                 ignoreCount--;
                                 count++;
                             }
                             continue;
                         } catch (NumberFormatException | NullPointerException nfe) {
-                            throw new ChangeLogParseException("Unknown ignoreLines syntax");
+                            throw new ChangeLogParseException(String.format("Unknown ignoreLines syntax: \"%s\"", ignoreCountAttribute), nfe);
                         }
                     }
                 } else if (altIgnoreLinesOneDashMatcher.matches() || altIgnoreMatcher.matches()) {
@@ -882,7 +884,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
             try {
                 stripComments = Boolean.parseBoolean(matcher.group(1));
             } catch (Exception e) {
-                throw new ChangeLogParseException("Cannot parse " + changeSet + " " + matcher.toString().replaceAll("\\.*", "") + " as a boolean");
+                throw new ChangeLogParseException("Cannot parse " + changeSet + " " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
             }
         }
         return stripComments;
