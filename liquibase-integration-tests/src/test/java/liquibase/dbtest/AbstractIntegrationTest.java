@@ -189,6 +189,7 @@ public abstract class AbstractIntegrationTest {
                     database.commit();
                 }
             } catch (SQLException e) {
+                logger.warning(String.format("Failed to drop table %s", database.getDatabaseChangeLogLockTableName()), e);
                 if (database instanceof PostgresDatabase) { // throws "current transaction is aborted" unless we roll back the connection
                     database.rollback();
                 }
