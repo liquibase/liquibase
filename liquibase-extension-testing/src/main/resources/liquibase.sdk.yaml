@@ -51,7 +51,7 @@ liquibase:
 
       mssql:
         imageName: mcr.microsoft.com/mssql/server
-        version: 2017-latest
+        version: 2022-latest
         setup:
           username: SA
           password: A_Str0ng_Required_Password

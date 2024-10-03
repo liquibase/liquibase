@@ -108,7 +108,7 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
             try {
                 testSystem.stop();
             } catch (Exception e) {
-                Scope.getCurrentScope().getLog(getClass()).warning("Cannot stop "+testSystem.getDefinition());
+                Scope.getCurrentScope().getLog(getClass()).warning("Cannot stop " + testSystem.getDefinition(), e);
             }
 
         }

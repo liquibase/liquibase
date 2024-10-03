@@ -104,12 +104,12 @@ public class LiquibaseLauncher {
         final URLClassLoader classloader = new URLClassLoader(libUrls.toArray(new URL[0]), parentLoader);
         Thread.currentThread().setContextClassLoader(classloader);
 
-        Class<?> cli = null;
+        Class<?> cli;
         try {
             cli = classloader.loadClass(LiquibaseCommandLine.class.getName());
         } catch (ClassNotFoundException classNotFoundException) {
             throw new RuntimeException(
-                String.format("Unable to find Liquibase classes in the configured home: '%s'.", liquibaseHome)
+                String.format("Unable to find Liquibase classes in the configured home: '%s'.", liquibaseHome), classNotFoundException
             );
         }
 
@@ -173,6 +173,15 @@ public class LiquibaseLauncher {
                 new File(liquibaseHome, "internal/extensions"),
         };
 
+        // We released libraries containing the version in the file name,
+        // and we want to ignore them in the classpath as the installer/zip/tgz is
+        // not able to update them .
+        List<File> libsToIgnoreInClasspath = Arrays.asList(
+                new File(liquibaseHome, "internal/extensions/liquibase-commercial-bigquery-4.29.0.jar"),
+                new File(liquibaseHome, "internal/extensions/liquibase-commercial-bigquery-4.29.1.jar")
+        );
+
+
         for (File libDirFile : libDirs) {
             debug("Looking for libraries in " + libDirFile.getAbsolutePath());
 
@@ -189,6 +198,11 @@ public class LiquibaseLauncher {
             for (File lib : files) {
                 if (lib.getName().toLowerCase(Locale.US).endsWith(".jar") && !lib.getName().toLowerCase(Locale.US).equals("liquibase-core.jar")) {
                     try {
+                        if (libsToIgnoreInClasspath.stream().anyMatch(l -> l.getAbsoluteFile().equals(lib.getAbsoluteFile()))) {
+                            debug("Ignoring " + lib.getAbsolutePath() + " in classpath");
+                            continue; // skip the file if it is in the ignore list
+                        }
+
                         urls.add(lib.toURI().toURL());
                         debug("Added " + lib.getAbsolutePath() + " to classpath");
                     } catch (Exception e) {
