@@ -57,7 +57,7 @@ class GenerateChangeLogEmptyIntegrationTest extends Specification {
         } as Scope.ScopedRunner)
 
         when:
-        def outputFileName = 'test/test-classes/output.postgresql.sql'
+        def outputFileName = 'test/test-classes/output2.postgresql.sql'
         CommandUtil.runGenerateChangelog(db, outputFileName, "tables, data")
         def outputFile = new File(outputFileName)
         def fileContent = FileUtil.getContents(outputFile)
@@ -72,7 +72,7 @@ class GenerateChangeLogEmptyIntegrationTest extends Specification {
 
     def "Should NOT generate changelog file from an empty DB"() {
         given:
-        def outputFileName = 'test/test-classes/output.postgresql.sql'
+        def outputFileName = 'test/test-classes/emptyOutput.postgresql.sql'
 
         when:
         CommandUtil.runGenerateChangelog(db, outputFileName)
