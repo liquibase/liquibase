@@ -31,7 +31,6 @@ import liquibase.ui.ConsoleUIService;
 import liquibase.ui.LoggerUIService;
 import liquibase.ui.UIService;
 import liquibase.util.*;
-import org.apache.commons.lang3.StringUtils;
 import picocli.CommandLine;
 
 import java.io.*;
@@ -51,7 +50,7 @@ import java.util.stream.Stream;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
-import static liquibase.integration.commandline.VersionUtils.*;
+import static liquibase.util.VersionUtils.*;
 import static liquibase.util.SystemUtil.isWindows;
 
 
@@ -693,7 +692,7 @@ public class LiquibaseCommandLine {
 
         final IntegrationDetails integrationDetails = new IntegrationDetails();
         integrationDetails.setName(LiquibaseCommandLineConfiguration.INTEGRATION_NAME.getCurrentValue());
-        returnMap.put("integrationDetails", integrationDetails);
+        returnMap.put(Scope.Attr.integrationDetails.name(), integrationDetails);
 
         final ClassLoader classLoader = configureClassLoader();
 
