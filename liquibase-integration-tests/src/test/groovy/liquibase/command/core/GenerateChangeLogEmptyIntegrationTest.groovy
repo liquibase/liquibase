@@ -1,14 +1,11 @@
 package liquibase.command.core
 
 import liquibase.Scope
-import liquibase.command.CommandScope
-import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
-import liquibase.command.core.helpers.DiffOutputControlCommandStep
-import liquibase.command.core.helpers.PreCompareCommandStep
 import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
+import liquibase.resource.SearchPathResourceAccessor
 import liquibase.util.FileUtil
 
 import spock.lang.Shared
@@ -23,43 +20,64 @@ class GenerateChangeLogEmptyIntegrationTest extends Specification {
     @Shared
     private DatabaseTestSystem db = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("postgresql")
 
-    def "Should not generate changelog file with empty table"() {
+    def "Should generate changelog file with empty table"() {
         given:
-        db.executeSql("create table \"TEST_CHANGELOG_NOT_GENERATED\" (b VARCHAR(10));")
+        def changelogFileName = "target/test-classes/changelogs/update.changelog.sql"
+        def resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
+        def scopeSettings = [
+                (Scope.Attr.resourceAccessor.name()) : resourceAccessor
+        ]
+        Scope.child(scopeSettings, {
+            CommandUtil.runUpdate(db, changelogFileName, "generateChangelogWithEmptyTable", null, null)
+        } as Scope.ScopedRunner)
 
         when:
         def outputFileName = 'test/test-classes/output.postgresql.sql'
-        CommandUtil.runGenerateChangelog(db, outputFileName, "data")
+        CommandUtil.runGenerateChangelog(db, outputFileName, "tables, data")
+        def outputFile = new File(outputFileName)
+        def fileContent = FileUtil.getContents(outputFile)
 
         then:
-        !Files.exists(Path.of(outputFileName))
+        fileContent.containsIgnoreCase("create table \"generate_changelog_test_sql\"")
+        !fileContent.containsIgnoreCase("INSERT INTO \"generate_changelog_test_sql\"")
+
+        cleanup:
+        outputFile.delete()
     }
 
     def "Should generate changelog file with non-empty table"() {
         given:
-        db.executeSql("""
-create table "TEST_CHANGELOG_GENERATED" (
-  b VARCHAR(10)
-);
-INSERT INTO "TEST_CHANGELOG_GENERATED" (b) VALUES ('Geronimo!');
-COMMIT;
-""")
+        def changelogFileName = "target/test-classes/changelogs/update.changelog.sql"
+        def resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
+        def scopeSettings = [
+                (Scope.Attr.resourceAccessor.name()) : resourceAccessor
+        ]
+        Scope.child(scopeSettings, {
+            CommandUtil.runUpdate(db, changelogFileName, "both", null, null)
+        } as Scope.ScopedRunner)
 
         when:
         def outputFileName = 'test/test-classes/output.postgresql.sql'
-        CommandUtil.runGenerateChangelog(db, outputFileName, "data")
-        //Adding sleep to test if a little time wait time is needed to get the file written
-        Thread.sleep(1500)
+        CommandUtil.runGenerateChangelog(db, outputFileName, "tables, data")
+        def outputFile = new File(outputFileName)
+        def fileContent = FileUtil.getContents(outputFile)
 
         then:
-        def outputFile = new File(outputFileName)
-        Files.exists(Path.of(outputFileName))
-        def contents = FileUtil.getContents(outputFile)
-        contents.contains("""
-INSERT INTO "public"."TEST_CHANGELOG_GENERATED" ("b") VALUES ('Geronimo!');
-""")
+        fileContent.containsIgnoreCase("CREATE TABLE \"generate_changelog_test_sql\"")
+        fileContent.containsIgnoreCase("INSERT INTO \"generate_changelog_test_sql\"")
 
         cleanup:
         outputFile.delete()
+    }
+
+    def "Should NOT generate changelog file from an empty DB"() {
+        given:
+        def outputFileName = 'test/test-classes/output.postgresql.sql'
+
+        when:
+        CommandUtil.runGenerateChangelog(db, outputFileName)
+
+        then:
+        !Files.exists(Path.of(outputFileName))
     }
 }

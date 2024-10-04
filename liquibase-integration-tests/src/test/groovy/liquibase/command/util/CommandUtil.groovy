@@ -84,7 +84,6 @@ class CommandUtil {
         commandScope.addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, true)
         commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, outputFile)
         commandScope.addArgumentValue(PreCompareCommandStep.DIFF_TYPES_ARG, diffType)
-        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
         OutputStream outputStream = new ByteArrayOutputStream()
         commandScope.setOutput(outputStream)
         commandScope.execute()
