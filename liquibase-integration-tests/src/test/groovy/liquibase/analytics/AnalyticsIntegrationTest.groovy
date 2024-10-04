@@ -9,6 +9,7 @@ import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.util.LiquibaseUtil
 import liquibase.util.SystemUtil
 import org.yaml.snakeyaml.Yaml
+import spock.lang.IgnoreIf
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -95,6 +96,31 @@ class AnalyticsIntegrationTest extends Specification {
         properties.get("isAwsLiquibaseDocker") == false
         properties.get("isCi") == false
         properties.get("isGithubActions") == false
+
+        cleanup:
+        simpleWebserver.stop()
+    }
+
+    @IgnoreIf({ !System.getenv("GITHUB_ACTIONS") })
+    def "test only in GitHub Actions"() {
+        setup:
+        TestAnalyticsWebserver simpleWebserver = new TestAnalyticsWebserver()
+
+        when:
+        executeCommandWithAnalytics(simpleWebserver, () -> {
+            CommandUtil.runDropAll(h2)
+        } as Scope.ScopedRunner)
+
+
+        def body = simpleWebserver.postBody
+        then:
+        Yaml yaml = new Yaml()
+        def loadedBody = yaml.loadAs(body, Map<String, ?>)
+        def batch = loadedBody.get("batch")
+        def trackEvent = batch.get(0)
+        def properties = trackEvent.get("properties")
+        properties.get("isCi") == true
+        properties.get("isGithubActions") == true
 
         cleanup:
         simpleWebserver.stop()
