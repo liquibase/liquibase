@@ -1363,7 +1363,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 }
             } catch (Exception e) {
                 getLog().info("  '" + key + "' in properties file is not being used by this "
-                        + "task.");
+                        + "task.", e);
             }
         }
     }

@@ -7,7 +7,6 @@ import spock.lang.Unroll
 class LiquibaseCommandLineThreadingTest extends Specification {
 
     @Unroll
-    @Ignore("this test causes later tests to fail, because the global argument definitions are not stored statically, but are instantiated statically, thus hiding them from other threads")
     def "2 threads global flags" () {
         given:
         def returnCode = 0

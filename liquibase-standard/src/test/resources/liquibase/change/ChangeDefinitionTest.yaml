@@ -108,13 +108,13 @@ addForeignKeyConstraint: |
     Required For: all
   deferrable boolean 
     Description: Defines whether the foreign key is deferrable
-    Supported: asany,edb,oracle,postgresql,sqlite
+    Supported: asany,edb,oracle,postgresql
   deleteCascade boolean 
     Description: Deprecated. This is true to set onDelete to Cascade, priority given to onDelete tag if one exists
     Supported: asany,cockroachdb,db2,db2z,derby,edb,firebird,h2,hsqldb,informix,ingres,mariadb,mssql,mysql,oracle,postgresql
   initiallyDeferred boolean 
     Description: Defines whether the foreign key is initially deferred
-    Supported: asany,edb,oracle,postgresql,sqlite
+    Supported: asany,edb,oracle,postgresql
   onDelete string 
     Description: ON DELETE functionality. Possible values: 'CASCADE', 'SET NULL', 'SET DEFAULT', 'RESTRICT', 'NO ACTION'
     Supported: asany,cockroachdb,db2,db2z,derby,edb,firebird,h2,hsqldb,informix,ingres,mariadb,mssql,mysql,oracle,postgresql
@@ -390,7 +390,7 @@ createProcedure: |
     Supported: all
   replaceIfExists boolean 
     Description: If the stored procedure defined by createProcedure already exists, alter it instead of creating it. Default: false
-    Supported: db2,db2z,mariadb,mssql,mysql
+    Supported: cockroachdb,db2,db2z,edb,mariadb,mssql,mysql,postgresql
   schemaName string 
     Description: Name of the database schema
     Supported: all

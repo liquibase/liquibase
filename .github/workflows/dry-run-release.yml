@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       dry_run_id: ${{ steps.get_run_id.outputs.dry_run_id }}
+      dry_run_branch_name: ${{ steps.get_run_id.dry_run_branch_name }}
     steps:
       - name: Get run-tests.yml runId 
         id: get_run_id
@@ -24,6 +25,7 @@ jobs:
             # Extract the last successful run ID
           run_id=$(echo "$response" | jq -r '.workflow_runs[0].id')
           echo "dry_run_id=$run_id" >> $GITHUB_OUTPUT
+          echo "dry_run_branch_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
 
   dry-run-create-release:
     needs: [ setup ]
@@ -67,6 +69,7 @@ jobs:
       dry_run_zip_url: ${{ needs.dry-run-create-release.outputs.dry_run_zip_url }}
       dry_run_tar_gz_url: ${{ needs.dry-run-create-release.outputs.dry_run_tar_gz_url }}
       dry_run: true
+      dry_run_branch_name: ${{ needs.dry-run-create-release.outputs.dry_run_branch_name }}
     secrets: inherit
 
   cleanup:
