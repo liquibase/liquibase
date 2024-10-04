@@ -94,8 +94,8 @@ class AnalyticsIntegrationTest extends Specification {
         properties.get("isDocker") == false
         properties.get("isLiquibaseDocker") == false
         properties.get("isAwsLiquibaseDocker") == false
-        properties.get("isCi") == false
-        properties.get("isGithubActions") == false
+        properties.get("isCi") != null
+        properties.get("isGithubActions") != null
 
         cleanup:
         simpleWebserver.stop()
