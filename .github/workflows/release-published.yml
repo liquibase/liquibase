@@ -24,6 +24,10 @@ on:
         description: 'URL of the dry-run tar.gz release'
         required: false
         type: string
+      dry_run_branch_name:
+        description: 'The branch name of the dry-run'
+        required: false
+        type: string
   workflow_call:
     inputs:
       tag:
@@ -47,7 +51,10 @@ on:
         description: 'URL of the dry-run tar.gz release'
         required: false
         type: string
-
+      dry_run_branch_name:
+        description: 'The branch name of the dry-run'
+        required: false
+        type: string
 env:
   MAVEN_VERSION: '3.9.2'
 jobs:
@@ -58,6 +65,7 @@ jobs:
       tag: ${{ steps.collect-data.outputs.tag }}
       version: ${{ steps.collect-data.outputs.version }}
       ref_branch: ${{ steps.ref-branch.outputs.branch }}
+      dry_run_branch_name: ${{ inputs.dry_run_branch_name }}
     steps:
       - name: Collect Data
         id: collect-data
@@ -87,8 +95,11 @@ jobs:
         run: |
           if [ "${{ github.ref_name }}" == "release" ]; then
             echo "branch=release" >> $GITHUB_OUTPUT
-          else
+          elif [ "${{ github.ref_name }}" == "master" ]; then
             echo "branch=master" >> $GITHUB_OUTPUT
+          else
+            echo "branch=${{ inputs.dry_run_branch_name }}" >> $GITHUB_OUTPUT
+          fi
 
   manual_trigger_deployment:
     if: ${{ inputs.dry_run == false }}

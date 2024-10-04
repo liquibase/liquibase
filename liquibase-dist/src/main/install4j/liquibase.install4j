@@ -8,7 +8,8 @@
     <variables>
       <variable name="liquibaseVersion" value="0-SNAPSHOT" />
     </variables>
-    <codeSigning macEnabled="true" macPkcs12File="../../../target/keys/datical_apple.p12" windowsEnabled="true" windowsPkcs12File="../../../target/keys/datical_windows.pfx" macNotarize="true" appleId="daticaldev@datical.com" useAscProvider="true" ascProvider="BQ3PYUB226">
+    <codeSigning windowsEnabled="true" windowsPkcs12File="../../../target/keys/datical_windows.pfx" >
+    <!-- <codeSigning macEnabled="true" macPkcs12File="../../../target/keys/datical_apple.p12" windowsEnabled="true" windowsPkcs12File="../../../target/keys/datical_windows.pfx" macNotarize="true" appleId="daticaldev@datical.com" useAscProvider="true" ascProvider="BQ3PYUB226"> -->
       <macSearchedJars>
         <entry>jna-*</entry>
         <entry>swt-*</entry>
@@ -535,16 +536,18 @@ return console.askYesNo(message, true);
         </modules>
       </jreBundle>
     </windows>
+<!--
     <macosFolder name="macOS Folder" id="154" installDir="liquibase" customInstallBaseDir="/usr/local/opt">
       <excludedLaunchers>
-        <launcher id="156" />
-        <launcher id="158" />
+       <launcher id="156" />
+       <launcher id="158" />
       </excludedLaunchers>
       <jreBundle>
         <modules>
-          <defaultModules set="jre" />
+         <defaultModules set="jre" />
         </modules>
       </jreBundle>
     </macosFolder>
+-->
   </mediaSets>
 </install4j>

@@ -236,7 +236,7 @@ public class LiquibaseCommandLine {
             cause = cause.getCause();
         }
 
-        if (StringUtil.isEmpty(uiMessage)) {
+        if (StringUtils.isEmpty(uiMessage)) {
             uiMessage = exception.getClass().getName();
         }
 
