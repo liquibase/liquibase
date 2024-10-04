@@ -2,8 +2,8 @@ package liquibase.analytics;
 
 import liquibase.Scope;
 import liquibase.analytics.configuration.AnalyticsConfigurationFactory;
-import liquibase.analytics.configuration.RemoteAnalyticsConfiguration;
 import liquibase.analytics.configuration.LiquibaseRemoteAnalyticsConfiguration;
+import liquibase.analytics.configuration.RemoteAnalyticsConfiguration;
 import liquibase.integration.IntegrationDetails;
 import liquibase.util.*;
 import lombok.Data;
@@ -80,6 +80,16 @@ public class Event {
      * when they purchase Liquibase Pro through the AWS Marketplace.
      */
     private boolean isAwsLiquibaseDocker;
+    /**
+     * Is the code running in GitHub actions? See
+     * https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#default-environment-variables:~:text=actions/checkout.-,GITHUB_ACTIONS,-Always%20set%20to
+     */
+    private boolean isGithubActions = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("GITHUB_ACTIONS"))));;
+    /**
+     * Is the code running in a CI environment? See
+     * https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#default-environment-variables:~:text=Description-,CI,-Always%20set%20to
+     */
+    private boolean isCi = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("CI"))));;
 
     public Event(String command) {
         this.command = command;
