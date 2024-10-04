@@ -28,7 +28,7 @@ class GenerateChangeLogEmptyIntegrationTest extends Specification {
         db.executeSql("create table \"TEST_CHANGELOG_NOT_GENERATED\" (b VARCHAR(10));")
 
         when:
-        def outputFileName = 'test/test-classes/output.postgresql.sql'
+        def outputFileName = 'target/test/test-classes/output.postgresql.sql'
         CommandUtil.runGenerateChangelog(db, outputFileName, "data")
 
         then:
@@ -46,7 +46,7 @@ COMMIT;
 """)
 
         when:
-        def outputFileName = 'test/test-classes/output.postgresql.sql'
+        def outputFileName = 'target/test/test-classes/output.postgresql.sql'
         CommandUtil.runGenerateChangelog(db, outputFileName, "data")
         //Adding sleep to test if a little time wait time is needed to get the file written
         Thread.sleep(1500)
