@@ -31,6 +31,7 @@ import liquibase.ui.ConsoleUIService;
 import liquibase.ui.LoggerUIService;
 import liquibase.ui.UIService;
 import liquibase.util.*;
+import org.apache.commons.lang3.StringUtils;
 import picocli.CommandLine;
 
 import java.io.*;
@@ -50,8 +51,8 @@ import java.util.stream.Stream;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
-import static liquibase.util.VersionUtils.*;
 import static liquibase.util.SystemUtil.isWindows;
+import static liquibase.util.VersionUtils.*;
 
 
 public class LiquibaseCommandLine {
