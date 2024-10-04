@@ -177,6 +177,15 @@ alter table test_table add column name2 varchar(20);
 
 -- rollback changesetId:create changeSetAuthor:the_user
 
+--changeset nvoxland::4
+create table table222 (
+    id int primary key
+);
+create table table333 (
+    id int primary key
+);
+--rollback drop table table222;
+
 """.trim()
 
     private static final String VALID_CHANGELOG_WITH_IGNORE_PROP = """
@@ -256,6 +265,13 @@ create table table1 (
 --rollback drop table table1;
 """
 
+    private static final String INVALID_CHANGESET_ID =
+"""
+--changeset nvoxland:: ::sid
+create table table222 (
+    id int primary key
+);
+"""
     private static final String INVALID_CHANGELOG = "select * from table1"
     private static final String INVALID_CHANGELOG_INVALID_PRECONDITION =
             "--liquibase formatted sql\n" +
@@ -401,9 +417,16 @@ create table table1 (
         assert new MockFormattedSqlChangeLogParser(VALID_ALL_CAPS_CHANGELOG).supports("BLAH.SQL", new JUnitResourceAccessor())
     }
 
-    def invalidPrecondition() throws Exception {
+    def invalidChangesetID() throws Exception {
         when:
         new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_INVALID_PRECONDITION).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        then:
+        thrown(ChangeLogParseException)
+    }
+
+    def invalidPrecondition() throws Exception {
+        when:
+        new MockFormattedSqlChangeLogParser(INVALID_CHANGESET_ID).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
         then:
         thrown(ChangeLogParseException)
     }
@@ -427,7 +450,7 @@ create table table1 (
 
         changeLog.getLogicalFilePath() == "asdf.sql"
 
-        changeLog.getChangeSets().size() == 25
+        changeLog.getChangeSets().size() == 26
 
         changeLog.getChangeSets().get(0).getAuthor() == "nvoxland"
         changeLog.getChangeSets().get(0).getId() == "1"

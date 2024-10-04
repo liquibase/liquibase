@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.change.core.CreateProcedureChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
@@ -36,7 +37,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("procedureText", statement.getProcedureText());
         if (statement.getReplaceIfExists() != null) {
-            if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase || database instanceof DB2Database || database instanceof Db2zDatabase) {
+            if (CreateProcedureChange.databaseSupportsReplaceIfExists(database)) {
                 if (statement.getReplaceIfExists() && (statement.getProcedureName() == null)) {
                     validationErrors.addError("procedureName is required if replaceIfExists = true");
                 }
