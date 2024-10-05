@@ -94,24 +94,6 @@ public class OfflineChangeLogHistoryServiceTest {
         assertTrue(writer.toString().contains("INSERT INTO PUBLIC.DATABASECHANGELOG"));
     }
 
-    @Test
-    public void testGenerateDeploymentId() throws Exception{
-        StringWriter writer = new StringWriter();
-        OfflineChangeLogHistoryService service = createService(writer, "data_only");
-        ChangeSet changeSet = createChangeSet();
-        // When
-        service.init();
-        service.setExecType(changeSet, ChangeSet.ExecType.EXECUTED);
-        writer.close();
-
-        service.generateDeploymentId();
-        String deploymentId = service.getDeploymentId();
-
-        assertTrue(deploymentId.length() == 10);
-
-    }
-
-
     /**
      *
      * Create OfflineChangeLogHistoryService and register LoggingExecutor

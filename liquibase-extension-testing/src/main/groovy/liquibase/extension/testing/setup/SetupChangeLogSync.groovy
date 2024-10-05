@@ -28,7 +28,6 @@ class SetupChangeLogSync extends TestSetup {
 
         final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database)
         changeLogService.init()
-        changeLogService.generateDeploymentId()
 
         changeLogService.reset()
         CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(

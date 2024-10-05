@@ -20,6 +20,7 @@ class UpdateIntegrationTest extends Specification {
     def "check execution parameters are correctly replaced" () {
         given:
         CommandUtil.runUpdate(testDatabase,"src/test/resources/changelogs/h2/update/execution-parameter.xml")
+        String expectedDeploymentId = Scope.getCurrentScope().getDeploymentId();
         String sql = "select * from parameter_value_tests order by id"
 
         when:
@@ -34,13 +35,13 @@ class UpdateIntegrationTest extends Specification {
 
         then:
         assert output == """Output of select * from parameter_value_tests order by id:
-ID | CHANGELOG_FILE | CHANGESET_ID | CHANGESET_AUTHOR |
-1 | src/test/resources/changelogs/h2/update/execution-parameter/1.xml | 1.1 | jlyle | 
-2 | src/test/resources/changelogs/h2/update/execution-parameter/1.xml | 1.2 | not_jlyle | 
-3 | src/test/resources/changelogs/h2/update/execution-parameter/1.xml | 1.3 | jlyle | 
-4 | src/test/resources/changelogs/h2/update/execution-parameter/2.xml | 2.1 | jlyle | 
-5 | src/test/resources/changelogs/h2/update/execution-parameter/2.xml | 2.2 | not_jlyle | 
-6 | src/test/resources/changelogs/h2/update/execution-parameter/2.xml | 2.3 | jlyle | 
+ID | DEPLOYMENT_ID | CHANGELOG_FILE | CHANGESET_ID | CHANGESET_AUTHOR |
+1 | """ + expectedDeploymentId + """ | src/test/resources/changelogs/h2/update/execution-parameter/1.xml | 1.1 | jlyle | 
+2 | """ + expectedDeploymentId + """ | src/test/resources/changelogs/h2/update/execution-parameter/1.xml | 1.2 | not_jlyle | 
+3 | """ + expectedDeploymentId + """ | src/test/resources/changelogs/h2/update/execution-parameter/1.xml | 1.3 | jlyle | 
+4 | """ + expectedDeploymentId + """ | src/test/resources/changelogs/h2/update/execution-parameter/2.xml | 2.1 | jlyle | 
+5 | """ + expectedDeploymentId + """ | src/test/resources/changelogs/h2/update/execution-parameter/2.xml | 2.2 | not_jlyle | 
+6 | """ + expectedDeploymentId + """ | src/test/resources/changelogs/h2/update/execution-parameter/2.xml | 2.3 | jlyle | 
 
 """
 
