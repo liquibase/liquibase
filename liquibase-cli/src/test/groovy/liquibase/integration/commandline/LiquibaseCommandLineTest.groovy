@@ -2,6 +2,7 @@ package liquibase.integration.commandline
 
 import liquibase.Scope
 import liquibase.command.CommandBuilder
+import liquibase.command.CommandFactory
 import liquibase.configuration.ConfigurationDefinition
 import liquibase.exception.LiquibaseException
 import liquibase.logging.core.BufferedLogService
@@ -624,7 +625,11 @@ https://docs.liquibase.com
     @Unroll
     def "toArgNames for command arguments"() {
         expect:
-        LiquibaseCommandLine.toArgNames(new CommandBuilder(["argTest"] as String[][]).argument(argName, String).build()).join(", ") == expected
+        LiquibaseCommandLine.toArgNames(new CommandBuilder([["argTest"]] as String[][]).argument(argName, String).build()).join(", ") == expected
+
+        cleanup:
+        final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
+        commandFactory.unregister(["argTest"] as String[])
 
         where:
         argName          | expected
@@ -661,6 +666,10 @@ https://docs.liquibase.com
     def "toArgNames for command arguments and aliases"() {
         expect:
         LiquibaseCommandLine.toArgNames(new CommandBuilder([["argCommand"]] as String[][]).argument(argName, String).addAlias(alias).build()).join(", ") == expected
+
+        cleanup:
+        final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
+        commandFactory.unregister(["argCommand"] as String[])
 
         where:
         prefix          | argName          | alias                 | expected
