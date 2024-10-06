@@ -393,7 +393,7 @@ class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         changeLog.getChangeSets()[0].getLogicalFilePath() == "create_table_account_bank_enum.xml"
 
         and: "changeSet 2"
-        changeLog.getChangeSets()[1].getAuthor() == "Author2"
+        changeLog.getChangeSets()[1].getAuthor() == "unknown"
         changeLog.getChangeSets()[1].getId() == "createTable_financial_institution_enum"
         changeLog.getChangeSets()[1].getLogicalFilePath() == "create_table_financial_institution_enum.xml"
     }

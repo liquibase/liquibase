@@ -3,7 +3,11 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd" logicalFilePath="base.xml">
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <property name="table.schema" value="default" global="false"/>
+    <property name="table.name" value="default_table" global="false"/>
+    <property name="table.author" value="unknown" global="false"/>
 
     <changeSet author="${table.author}" logicalFilePath="create_table_${table.name}.xml"  id="createTable_${table.name}" >
         <createTable schemaName="${table.schema}" tableName="${table.name}">
