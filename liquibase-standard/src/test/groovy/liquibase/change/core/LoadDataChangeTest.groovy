@@ -86,7 +86,7 @@ class LoadDataChangeTest extends StandardChangeTest {
         InsertStatement insSt = (InsertStatement)((InsertSetStatement)stmt[0]).getStatements()[0]
         "SCHEMA_NAME" == insSt.getSchemaName()
         "TABLE_NAME" == insSt.getTableName()
-        "File in root" == insSt.getColumnValue("exists")
+        "TESTDATA" == insSt.getColumnValue("exists")
         "nothing.txt" == insSt.getColumnValue("doesnt")
         "sample text" == insSt.getColumnValue("string")
 
