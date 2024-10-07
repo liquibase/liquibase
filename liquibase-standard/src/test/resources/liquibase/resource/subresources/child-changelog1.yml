@@ -1,0 +1,4 @@
+databaseChangeLog:
+  - include:
+      file: child-changelog2.yml
+      relativeToChangelogFile: true

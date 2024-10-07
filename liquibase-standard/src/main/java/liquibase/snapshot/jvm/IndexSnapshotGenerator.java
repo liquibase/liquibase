@@ -83,8 +83,16 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                     Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : ("A".equals(ascOrDesc) ? Boolean
                             .FALSE : null);
-                    index.addColumn(new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getRelation()));
+                    if (database instanceof MSSQLDatabase) {
+                        Boolean included = row.getBoolean("IS_INCLUDED_COLUMN");
+                        Column c = new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getRelation()).setIncluded(included);
+                        index.addColumn(c);
+                    	
+                    }else {
+                    	index.addColumn(new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getRelation()));
+                    }
                 }
+
 
                 //add clustered indexes first, than all others in case there is a clustered and non-clustered version of the same index. Prefer the clustered version
                 List<Index> stillToAdd = new ArrayList<>();

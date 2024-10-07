@@ -343,6 +343,7 @@
 
     <xsd:attributeGroup name="column">
         <xsd:attribute name="name" type="xsd:string" use="required"/>
+        <xsd:attribute name="included" type="booleanExp"/>
         <xsd:attribute name="computed" type="booleanExp"/>
         <xsd:attribute name="descending" type="booleanExp"/>
         <xsd:attribute name="type" type="xsd:string"/>
