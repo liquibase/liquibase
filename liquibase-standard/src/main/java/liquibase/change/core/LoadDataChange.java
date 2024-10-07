@@ -51,6 +51,7 @@ import java.util.zip.GZIPInputStream;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.change.ChangeParameterMetaData.ALL;
+import static liquibase.util.FileUtil.getContents;
 
 @DatabaseChange(name = "loadData",
         description = "Loads data from a CSV file into an existing table",
@@ -394,7 +395,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             // If not found, we load the value as a string.
 
                             File file = new File(value);
-                            if (file.exists()) {
+                            if (getContents(file) != null) {
                                 valueConfig.setValueClobFile(value);
                             } else {
                                 /*
