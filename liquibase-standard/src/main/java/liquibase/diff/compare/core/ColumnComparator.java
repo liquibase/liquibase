@@ -2,6 +2,7 @@ package liquibase.diff.compare.core;
 
 import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
@@ -10,8 +11,8 @@ import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.DataType;
 import liquibase.util.BooleanUtil;
-
 import java.util.Locale;
 import java.util.Set;
 
@@ -79,25 +80,39 @@ public class ColumnComparator implements DatabaseObjectComparator {
 
         ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo, compareControl, exclude);
 
-        differences.compare("name", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
-        differences.compare("type", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
+        DataType type1 = ((Column) databaseObject1).getType();
+        DataType type2 = ((Column) databaseObject1).getType();
 
-        boolean autoIncrement1 = ((Column) databaseObject1).isAutoIncrement();
-        boolean autoIncrement2 = ((Column) databaseObject2).isAutoIncrement();
+        differences.compare("name", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
+        compareTypes(databaseObject1, databaseObject2, accordingTo, type1, type2, differences);
+        postgresqlAutoIncrementCompare((Column) databaseObject1, (Column) databaseObject2, accordingTo, compareControl, differences);
+
+        return differences;
+    }
+
+    private void compareTypes(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DataType type1, DataType type2, ObjectDifferences differences) {
+        if (accordingTo instanceof MSSQLDatabase && type1.getTypeName().equalsIgnoreCase("int") && type2.getTypeName().equalsIgnoreCase("int")) {
+            type1.setColumnSize(null);
+            type2.setColumnSize(null);
+        }
+        differences.compare("type", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
+    }
+
+    private void postgresqlAutoIncrementCompare(Column databaseObject1, Column databaseObject2, Database accordingTo, CompareControl compareControl, ObjectDifferences differences) {
+        boolean autoIncrement1 = databaseObject1.isAutoIncrement();
+        boolean autoIncrement2 = databaseObject2.isAutoIncrement();
 
         if (autoIncrement1 != autoIncrement2 && !compareControl.isSuppressedField(Column.class, "autoIncrementInformation")) { //only compare if autoIncrement or not since there are sometimes expected differences in start/increment/etc. value.
             differences.addDifference("autoIncrement", autoIncrement1, autoIncrement2);
         }
         if (accordingTo instanceof PostgresDatabase && autoIncrement1 && autoIncrement2) {
-            String type1 = ((Column) databaseObject1).getType().getTypeName();
-            String type2 = ((Column) databaseObject2).getType().getTypeName();
-            boolean typesEquivalent = isPostgresAutoIncrementEquivalentType(type1, type2) || isPostgresAutoIncrementEquivalentType(type2, type1);
+            String type1Name = databaseObject1.getType().getTypeName();
+            String type2Name = databaseObject2.getType().getTypeName();
+            boolean typesEquivalent = isPostgresAutoIncrementEquivalentType(type1Name, type2Name) || isPostgresAutoIncrementEquivalentType(type2Name, type1Name);
             if (typesEquivalent) {
                 differences.removeDifference("type");
             }
         }
-
-        return differences;
     }
 
     /**
