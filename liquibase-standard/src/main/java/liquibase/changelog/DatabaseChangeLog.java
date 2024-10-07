@@ -962,6 +962,21 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return include(fileName, isRelativePath, errorIfMissing, resourceAccessor, includeContextFilter, labels, ignore, null, logEveryUnknownFileFormat ? OnUnknownFileFormat.WARN : OnUnknownFileFormat.SKIP);
     }
 
+    /**
+     * @deprecated use {@link DatabaseChangeLog#include(String, boolean, boolean, ResourceAccessor, ContextExpression, Labels, Boolean, String, OnUnknownFileFormat)}
+     */
+    public boolean include(String fileName,
+                           boolean isRelativePath,
+                           boolean errorIfMissing,
+                           ResourceAccessor resourceAccessor,
+                           ContextExpression includeContextFilter,
+                           Labels labels,
+                           Boolean ignore,
+                           OnUnknownFileFormat onUnknownFileFormat)
+            throws LiquibaseException {
+        return include(fileName, isRelativePath, errorIfMissing, resourceAccessor, includeContextFilter, labels, ignore, null, onUnknownFileFormat, new ModifyChangeSets(null, null));
+    }
+
     public boolean include(String fileName,
                            boolean isRelativePath,
                            boolean errorIfMissing,
