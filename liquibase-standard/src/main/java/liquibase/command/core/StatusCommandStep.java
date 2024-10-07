@@ -110,8 +110,6 @@ public class StatusCommandStep extends AbstractCommandStep {
 
         resultsBuilder.addResult("status", new SimpleStatus(message, database.getConnection().getURL(), unrunChangeSets));
         out.flush();
-
-        resultsBuilder.addResult("undeployed", unrunChangeSets.size());
     }
 
     public List<ChangeSet> listUnrunChangeSets(Contexts contexts, LabelExpression labels, DatabaseChangeLog changeLog, Database database) throws Exception {
