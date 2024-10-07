@@ -85,12 +85,15 @@ public class ColumnComparator implements DatabaseObjectComparator {
 
         differences.compare("name", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
         compareTypes(databaseObject1, databaseObject2, accordingTo, type1, type2, differences);
-        postgresqlAutoIncrementCompare((Column) databaseObject1, (Column) databaseObject2, accordingTo, compareControl, differences);
+        autoIncrementCompare((Column) databaseObject1, (Column) databaseObject2, accordingTo, compareControl, differences);
 
         return differences;
     }
 
     private void compareTypes(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DataType type1, DataType type2, ObjectDifferences differences) {
+        // until 4.29.1 we used to snapshot MSSQL column sizes for int columns, but now we don't as it's not necessary
+        // (they are not really sizes, but rather display widths). So we need to ignore them in comparison as old snapshots
+        // will have them and new ones won't.
         if (accordingTo instanceof MSSQLDatabase && type1.getTypeName().equalsIgnoreCase("int") && type2.getTypeName().equalsIgnoreCase("int")) {
             type1.setColumnSize(null);
             type2.setColumnSize(null);
@@ -98,7 +101,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
         differences.compare("type", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
     }
 
-    private void postgresqlAutoIncrementCompare(Column databaseObject1, Column databaseObject2, Database accordingTo, CompareControl compareControl, ObjectDifferences differences) {
+    private void autoIncrementCompare(Column databaseObject1, Column databaseObject2, Database accordingTo, CompareControl compareControl, ObjectDifferences differences) {
         boolean autoIncrement1 = databaseObject1.isAutoIncrement();
         boolean autoIncrement2 = databaseObject2.isAutoIncrement();
 
