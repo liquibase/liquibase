@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.logging.mdc.customobjects.Version;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -101,7 +102,7 @@ public class VersionUtils {
      */
     private static void handleCompilerJarEdgeCase(File pathEntryFile, JarFile jarFile, LibraryInfo libraryInfo) {
         try {
-            if (pathEntryFile.toString().endsWith("compiler.jar") && StringUtil.isEmpty(libraryInfo.version)) {
+            if (pathEntryFile.toString().endsWith("compiler.jar") && StringUtils.isEmpty(libraryInfo.version)) {
                 ZipEntry entry = jarFile.getEntry("META-INF/maven/com.github.spullara.mustache.java/compiler/pom.properties");
                 InputStream inputStream = jarFile.getInputStream(entry);
 

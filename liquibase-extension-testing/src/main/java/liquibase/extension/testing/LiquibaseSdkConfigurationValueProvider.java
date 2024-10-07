@@ -38,7 +38,7 @@ public class LiquibaseSdkConfigurationValueProvider extends AbstractMapConfigura
 
             }
         } catch (IOException e) {
-            Scope.getCurrentScope().getLog(getClass()).info("Cannot find liquibase.test.yaml");
+            Scope.getCurrentScope().getLog(getClass()).info("Cannot find liquibase.test.yaml", e);
         }
     }
 

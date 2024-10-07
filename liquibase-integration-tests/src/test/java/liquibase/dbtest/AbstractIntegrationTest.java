@@ -189,6 +189,7 @@ public abstract class AbstractIntegrationTest {
                     database.commit();
                 }
             } catch (SQLException e) {
+                logger.warning(String.format("Failed to drop table %s", database.getDatabaseChangeLogLockTableName()), e);
                 if (database instanceof PostgresDatabase) { // throws "current transaction is aborted" unless we roll back the connection
                     database.rollback();
                 }
@@ -294,6 +295,7 @@ public abstract class AbstractIntegrationTest {
             }
         }
         SnapshotGeneratorFactory.resetAll();
+        DatabaseObjectFactory.getInstance().reset();
     }
 
     protected boolean shouldRollBack() {
@@ -1381,6 +1383,14 @@ public abstract class AbstractIntegrationTest {
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, testSystem.getPassword());
         commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changelog);
         commandScope.execute();
+    }
+
+    protected List<ChangeSet> generateChangelog() throws LiquibaseException{
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, null, new CompareControl());
+
+        DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, new DiffOutputControl(false, false, false, null));
+        List<ChangeSet> changeSets = changeLogWriter.generateChangeSets();
+        return changeSets;
     }
 
     public static final class ApplyTestChangelog {

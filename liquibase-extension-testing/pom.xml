@@ -99,12 +99,12 @@
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-suite</artifactId>
-            <version>1.10.3</version>
+            <version>1.11.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>5.3.37</version>
+            <version>5.3.39</version>
             <scope>compile</scope>
         </dependency>
 
