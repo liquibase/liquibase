@@ -113,8 +113,8 @@ public class ChangeLogParameters {
      * The passed database is used as a default value for {@link #getDatabase()}
      */
     public ChangeLogParameters(Database database) {
-        globalParameters.addAll(System.getenv().entrySet().stream().map(e -> new ChangeLogParameter(e.getKey(), e.getValue())).collect(Collectors.toList()));
-        globalParameters.addAll(System.getProperties().entrySet().stream().map(e -> new ChangeLogParameter(String.valueOf(e.getKey()), e.getValue())).collect(Collectors.toList()));
+        globalParameters.addAll(System.getenv().entrySet().stream().map(e -> new ChangeLogParameter(e.getKey(), e.getValue(), false)).collect(Collectors.toList()));
+        globalParameters.addAll(System.getProperties().entrySet().stream().map(e -> new ChangeLogParameter(String.valueOf(e.getKey()), e.getValue(), false)).collect(Collectors.toList()));
 
         if (database != null) {
             this.set("database.autoIncrementClause", database.getAutoIncrementClause(null, null, null, null));
@@ -207,7 +207,7 @@ public class ChangeLogParameters {
      * Just because you call this with a particular key, does not mean it will override the existing value. See the class description for more details on how values act as if they are immutable.
      */
     public void set(String key, Object value, ContextExpression contexts, Labels labels, String... databases) {
-        globalParameters.add(new ChangeLogParameter(key, value, contexts, labels, databases));
+        globalParameters.add(new ChangeLogParameter(key, value, contexts, labels, databases, false));
     }
 
     /**
@@ -228,7 +228,7 @@ public class ChangeLogParameters {
             localParams = new ArrayList<>();
             this.localParameters.put(changelogKey, localParams);
         }
-        localParams.add(new ChangeLogParameter(key, value, contexts, labels, databases));
+        localParams.add(new ChangeLogParameter(key, value, contexts, labels, databases, true));
     }
 
     /**
@@ -358,16 +358,23 @@ public class ChangeLogParameters {
         private final Labels validLabels;
         @Getter
         private final List<String> validDatabases;
+        @Getter
+        private final boolean filterable;
 
         public ChangeLogParameter(String key, Object value) {
-            this(key, value, null, null, null);
+            this(key, value, null, null, null, true);
         }
 
-        public ChangeLogParameter(String key, Object value, ContextExpression validContexts, Labels labels, String[] validDatabases) {
+        public ChangeLogParameter(String key, Object value, boolean filterable) {
+            this(key, value, null, null, null, false);
+        }
+
+        public ChangeLogParameter(String key, Object value, ContextExpression validContexts, Labels labels, String[] validDatabases, boolean filterable) {
             this.key = key;
             this.value = value;
             this.validContexts = validContexts == null ? new ContextExpression() : validContexts;
             this.validLabels = labels == null ? new Labels() : labels;
+            this.filterable = filterable;
 
             if (validDatabases == null) {
                 this.validDatabases = null;
@@ -398,10 +405,12 @@ public class ChangeLogParameters {
         }
 
         public boolean matches(ChangeLogParameter parameter) {
-            return (labels == null || labels.matches(parameter.getLabels()))
-                    && (contexts == null || parameter.getValidContexts().matches(contexts))
-                    && (database == null || DatabaseList.definitionMatches(parameter.getValidDatabases(), database, true))
-                    ;
+            if (parameter.isFilterable()) {
+                return (labels == null || labels.matches(parameter.getLabels()))
+                        && (contexts == null || parameter.getValidContexts().matches(contexts))
+                        && (database == null || DatabaseList.definitionMatches(parameter.getValidDatabases(), database, true));
+            }
+            return true;
         }
     }
 
