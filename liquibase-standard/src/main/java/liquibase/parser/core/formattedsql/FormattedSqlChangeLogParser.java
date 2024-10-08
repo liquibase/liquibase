@@ -23,6 +23,10 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
 
     private static final String ON_SQL_OUTPUT_REGEX = ".*onSqlOutput:(\\w+).*";
     private static final Pattern ON_SQL_OUTPUT_PATTERN = Pattern.compile(ON_SQL_OUTPUT_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String ON_FAIL = "onFail";
+    public static final String ON_ERROR = "onError";
+    public static final String ON_SQL_OUTPUT = "onSqlOutput";
+    public static final String ON_UPDATE = "onUpdate";
 
 
     @Override
@@ -64,17 +68,17 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
             Matcher onSqlOutputMatcher = ON_SQL_OUTPUT_PATTERN.matcher(body);
 
             PreconditionContainer pc = new PreconditionContainer();
-            pc.setOnFail(StringUtil.trimToNull(parseString(onFailMatcher)));
-            pc.setOnError(StringUtil.trimToNull(parseString(onErrorMatcher)));
+            pc.setOnFail(StringUtil.trimToNull(parseString(onFailMatcher, ON_FAIL)));
+            pc.setOnError(StringUtil.trimToNull(parseString(onErrorMatcher, ON_ERROR)));
 
             if (onSqlOutputMatcher.matches() && onUpdateSqlMatcher.matches()) {
                 throw new IllegalArgumentException("Please modify the changelog to have preconditions set with either " +
                         "'onUpdateSql' or 'onSqlOutput', and not with both.");
             }
             if (onSqlOutputMatcher.matches()) {
-                pc.setOnSqlOutput(StringUtil.trimToNull(parseString(onSqlOutputMatcher)));
+                pc.setOnSqlOutput(StringUtil.trimToNull(parseString(onSqlOutputMatcher, ON_SQL_OUTPUT)));
             } else {
-                pc.setOnSqlOutput(StringUtil.trimToNull(parseString(onUpdateSqlMatcher)));
+                pc.setOnSqlOutput(StringUtil.trimToNull(parseString(onUpdateSqlMatcher, ON_UPDATE)));
             }
             changeSet.setPreconditions(pc);
         }
