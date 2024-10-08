@@ -366,7 +366,7 @@ public class ChangeLogParameters {
         }
 
         public ChangeLogParameter(String key, Object value, boolean filterable) {
-            this(key, value, null, null, null, false);
+            this(key, value, null, null, null, filterable);
         }
 
         public ChangeLogParameter(String key, Object value, ContextExpression validContexts, Labels labels, String[] validDatabases, boolean filterable) {
