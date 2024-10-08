@@ -42,7 +42,7 @@ public class AnalyticsTrackEvent {
     public static AnalyticsTrackEvent fromLiquibaseEvent(Event event, String userId) {
         AnalyticsTrackEvent analyticsTrackEvent = new AnalyticsTrackEvent(
                 userId,
-                UUID.randomUUID().toString(), // todo this should be more sophisticated in the future
+                new AnonymousSeed().generateId().toString(),
                 event.getPropertiesAsMap(),
                 null
         );
