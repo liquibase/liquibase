@@ -28,8 +28,13 @@ import java.util.stream.Collectors;
  * In determining which property value is actually "first set", context, label, and dbms filtering is taken into account.
  * <p>
  * Properties can be defined as "global" or "local". Global properties span all change logs.
- * A global setting configured in an included changelog is still available to all changesets
- * Local properties are  only available in the change log that they are defined in -- not even in changelogs "included" by the file that defines the property.
+ * A global setting configured in an included changelog is still available to all changesets.
+ * By default, global properties such as environment variables are set up to not be filterable.
+ * This implies that they will ignore any label, context or dbms filters that are requested on the given execution.
+ * This is different from globals set up <b>inside</b> a changelog which can and will be filtered if they have a label, context
+ * or dbms associated with the property.
+ * <p>
+ * Local properties are only available in the change log that they are defined in -- not even in changelogs "included" by the file that defines the property.
  */
 public class ChangeLogParameters {
 
@@ -113,6 +118,8 @@ public class ChangeLogParameters {
      * The passed database is used as a default value for {@link #getDatabase()}
      */
     public ChangeLogParameters(Database database) {
+        // Set up environment variables and system properties to NOT be filterable.
+        // This way they are still available in cases where we have a required filter such as @filter.
         globalParameters.addAll(System.getenv().entrySet().stream().map(e -> new ChangeLogParameter(e.getKey(), e.getValue(), false)).collect(Collectors.toList()));
         globalParameters.addAll(System.getProperties().entrySet().stream().map(e -> new ChangeLogParameter(String.valueOf(e.getKey()), e.getValue(), false)).collect(Collectors.toList()));
 
@@ -405,6 +412,10 @@ public class ChangeLogParameters {
         }
 
         public boolean matches(ChangeLogParameter parameter) {
+            // When we are checking whether a parameter matches the filter, we validate that the parameter is filterable.
+            // If it is not filterable, we still want to check if it has any associated filterable attributes
+            // because while global properties are set up by default to NOT be filterable, they still can have filterable
+            // attributes which we want to respect if they are set up in the changelog itself.
             if (parameter.isFilterable() || hasFilterableProperties(parameter)) {
                 return (labels == null || labels.matches(parameter.getLabels()))
                         && (contexts == null || parameter.getValidContexts().matches(contexts))
@@ -413,6 +424,12 @@ public class ChangeLogParameters {
             return true;
         }
 
+        /**
+         * Check if the provided ChangeLogParameter has any filterable attributes.
+         *
+         * @param parameter the parameter to check
+         * @return true if there is a label, context or dbms associated with the parameter, false otherwise
+         */
         private boolean hasFilterableProperties(ChangeLogParameter parameter) {
             boolean hasContext = false;
             boolean hasLabel = false;
