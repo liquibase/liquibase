@@ -157,5 +157,8 @@ class ChangeLogParametersTest extends Specification {
 
         then:
         changeLogParameters.getValue("SOME_PROPERTY", null) == "This should not be filtered"
+
+        cleanup:
+        System.clearProperty("SOME_PROPERTY")
     }
 }
