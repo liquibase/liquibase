@@ -165,7 +165,7 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
                     }
                 }
             } catch (NoSuchMethodException e) {
-                throw new UnexpectedLiquibaseException(String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, plugin.getClass().getName()));
+                throw new UnexpectedLiquibaseException(String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, plugin.getClass().getName()), e);
             }
         }
     }

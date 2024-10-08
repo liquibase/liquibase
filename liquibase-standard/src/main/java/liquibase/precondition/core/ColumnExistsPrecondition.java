@@ -166,7 +166,7 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
             // column or table does not exist
             throw new PreconditionFailedException(format(
                     "Column %s.%s.%s does not exist", schemaName,
-                    tableName, columnName), changeLog, this);
+                    tableName, columnName), changeLog, this, e);
         }
     }
 

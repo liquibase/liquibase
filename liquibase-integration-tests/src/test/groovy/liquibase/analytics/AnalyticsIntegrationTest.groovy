@@ -1,17 +1,13 @@
 package liquibase.analytics
 
-import fi.iki.elonen.NanoHTTPD
 import liquibase.Scope
 import liquibase.analytics.configuration.AnalyticsArgs
-import liquibase.analytics.configuration.AnalyticsConfigurationFactory
-import liquibase.analytics.configuration.LiquibaseRemoteAnalyticsConfiguration
 import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.util.LiquibaseUtil
 import liquibase.util.SystemUtil
-import org.springframework.test.util.TestSocketUtils
 import org.yaml.snakeyaml.Yaml
 import spock.lang.Shared
 import spock.lang.Specification
@@ -36,7 +32,7 @@ class AnalyticsIntegrationTest extends Specification {
      */
     def "test sending analytics happy path"() {
         setup:
-        SimpleWebserver simpleWebserver = startup()
+        TestAnalyticsWebserver simpleWebserver = new TestAnalyticsWebserver()
 
         when:
         executeCommandWithAnalytics(simpleWebserver, () -> {
@@ -102,80 +98,10 @@ class AnalyticsIntegrationTest extends Specification {
         simpleWebserver.stop()
     }
 
-    static void executeCommandWithAnalytics(SimpleWebserver simpleWebserver, Scope.ScopedRunner scopedRunner) {
+    static void executeCommandWithAnalytics(TestAnalyticsWebserver simpleWebserver, Scope.ScopedRunner scopedRunner) {
         Map<String, ?> scopeVars = new HashMap<>()
-        scopeVars.put(AnalyticsArgs.CONFIG_ENDPOINT_URL.getKey(), "http://localhost:" + simpleWebserver.port + "/config-analytics.yaml")
+        scopeVars.put(AnalyticsArgs.CONFIG_ENDPOINT_URL.getKey(), "http://localhost:" + simpleWebserver.getListeningPort() + "/config-analytics.yaml")
         scopeVars.put(AnalyticsArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getKey(), TimeUnit.SECONDS.toMillis(60)) // to allow for debugging, otherwise the thread gets killed fast
         Scope.child(scopeVars, scopedRunner)
-    }
-
-    static SimpleWebserver startup() {
-        // Start the webserver
-        SimpleWebserver simpleWebserver = new SimpleWebserver()
-        // Clear the cached analytics config info that was loaded when the drop all command step executed automatically during test setup
-        AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
-        LiquibaseRemoteAnalyticsConfiguration analyticsConfiguration = ((LiquibaseRemoteAnalyticsConfiguration) analyticsConfigurationFactory.getPlugin());
-        analyticsConfiguration.remoteAnalyticsConfiguration.clearCache()
-        return simpleWebserver
-    }
-}
-
-class SimpleWebserver extends NanoHTTPD {
-
-    public static final int port = TestSocketUtils.findAvailableTcpPort()
-    public static final String writeKey = "not-needed-for-tests"
-    public static String postBody = null
-
-    public SimpleWebserver() throws IOException {
-        super(port)
-        start(NanoHTTPD.SOCKET_READ_TIMEOUT, true);
-    }
-
-    @Override
-    public Response serve(IHTTPSession session) {
-        if (session.getUri().equals("/config-analytics.yaml") && session.getMethod() == Method.GET) {
-            return newFixedLengthResponse("""
-timeoutMs: ${TimeUnit.SECONDS.toMillis(60)}
-endpointData: http://localhost:$port/v1/batch
-sendOss: true
-sendPro: true
-writeKey: ${writeKey}
-anotherProperty: whatever
-extensions:
-- manifestName: Liquibase MongoDB Commercial Extension
-  displayName: ext_mongoDb_commercial
-- manifestName: Liquibase DynamoDB Commercial Extension
-  displayName: ext_dynamoDb_commercial
-- manifestName: Checks Extension
-  displayName: ext_checks
-- manifestName: AWS Secrets Manager Extension
-  displayName: ext_awsSecrets
-- manifestName: S3 Remote Accessor Extension
-  displayName: ext_awsS3
-- manifestName: HashiCorp Vault Extension
-  displayName: ext_hashicorpVault
-- manifestName: Liquibase BigQuery Commercial Extension
-  displayName: ext_bigQuery_commercial
-- manifestName: Liquibase Commercial Databricks Extension
-  displayName: ext_databricks_commercial
-- manifestName: Liquibase Extension Google BigQuery support
-  displayName: ext_bigQueryOss
-- manifestName: Liquibase MongoDB Extension
-  displayName: ext_mongoDbOss
-""")
-        }
-        if (session.getUri().equals("/v1/batch") && session.getMethod() == Method.POST) {
-            // This is an intentional way of obtaining the POST request body.
-            // See https://stackoverflow.com/a/23171590 for more details.
-            Map<String, String> files = new HashMap<String, String>();
-            session.parseBody(files);
-            postBody = files.get("postData")
-            return newFixedLengthResponse("""
-{
-  "success": true
-}
-""")
-        }
-        throw new RuntimeException("Another request was made to the server, and it shouldn't have been.")
     }
 }

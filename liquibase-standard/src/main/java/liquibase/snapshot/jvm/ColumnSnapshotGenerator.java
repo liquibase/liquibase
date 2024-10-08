@@ -18,6 +18,7 @@ import liquibase.structure.core.*;
 import liquibase.util.BooleanUtil;
 import liquibase.util.SqlUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.sql.*;
 import java.util.*;
@@ -140,7 +141,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     private static boolean hasValidObjectName(String objectName) {
-        if (StringUtil.isEmpty(objectName)) {
+        if (StringUtils.isEmpty(objectName)) {
             return false;
         }
         return !objectName.startsWith("SYS_") && !objectName.startsWith("BIN$");
@@ -580,19 +581,19 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         if (database instanceof SybaseASADatabase) {
             String defaultValue = (String) columnMetadataResultSet.get(COLUMN_DEF_COL);
+            if (defaultValue != null) {
+                // SQL Anywhere returns `CURRENT DATE` (without underscore), which no other RDBMS would understand
+               defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+DATE\\b", "{fn CURDATE()}");
 
-           // SQL Anywhere returns `CURRENT DATE` (without underscore), which no other RDBMS would understand
-           defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+DATE\\b", "{fn CURDATE()}");
+               // SQL Anywhere returns `CURRENT TIME` (without underscore), which no other RDBMS would understand
+               defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+TIME\\b", "{fn CURTIME()}");
 
-           // SQL Anywhere returns `CURRENT TIME` (without underscore), which no other RDBMS would understand
-           defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+TIME\\b", "{fn CURTIME()}");
+               // SQL Anywhere returns `CURRENT TIMESTAMP` (without underscore), which no other RDBMS would understand
+               defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+TIMESTAMP\\b", "{fn NOW()}");
 
-           // SQL Anywhere returns `CURRENT TIMESTAMP` (without underscore), which no other RDBMS would understand
-           defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+TIMESTAMP\\b", "{fn NOW()}");
-
-           // SQL Anywhere returns `CURRENT USER` (without underscore), which no other RDBMS would understand
-           defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+USER\\b", "{fn USER()}");
-
+               // SQL Anywhere returns `CURRENT USER` (without underscore), which no other RDBMS would understand
+               defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+USER\\b", "{fn USER()}");
+           }
            columnMetadataResultSet.set(COLUMN_DEF_COL, defaultValue);
 
            if (YES_VALUE.equals(columnMetadataResultSet.get(IS_GENERATED_COLUMN))) {

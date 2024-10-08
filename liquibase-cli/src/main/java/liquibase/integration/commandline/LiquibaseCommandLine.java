@@ -32,6 +32,7 @@ import liquibase.ui.LoggerUIService;
 import liquibase.ui.UIService;
 import liquibase.util.*;
 import org.apache.commons.lang3.SystemProperties;
+import org.apache.commons.lang3.StringUtils;
 import picocli.CommandLine;
 
 import java.io.*;
@@ -237,7 +238,7 @@ public class LiquibaseCommandLine {
             cause = cause.getCause();
         }
 
-        if (StringUtil.isEmpty(uiMessage)) {
+        if (StringUtils.isEmpty(uiMessage)) {
             uiMessage = exception.getClass().getName();
         }
 
@@ -692,7 +693,7 @@ public class LiquibaseCommandLine {
         returnMap.put(COMMAND_ARGUMENTS, args);
 
         final IntegrationDetails integrationDetails = new IntegrationDetails();
-        integrationDetails.setName("cli");
+        integrationDetails.setName(LiquibaseCommandLineConfiguration.INTEGRATION_NAME.getCurrentValue());
         returnMap.put(Scope.Attr.integrationDetails.name(), integrationDetails);
 
         final ClassLoader classLoader = configureClassLoader();

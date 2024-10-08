@@ -427,14 +427,11 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         }
     }
 
-    private static boolean databaseSupportsReplaceIfExists(Database database) {
-        if (database instanceof MSSQLDatabase) {
-            return true;
-        }
-        if (database instanceof MySQLDatabase) {
-            return true;
-        }
-        if (database instanceof DB2Database) {
+    public static boolean databaseSupportsReplaceIfExists(Database database) {
+        if (database instanceof MSSQLDatabase ||
+                database instanceof MySQLDatabase ||
+                database instanceof DB2Database ||
+                database instanceof PostgresDatabase) {
             return true;
         }
 
