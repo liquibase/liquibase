@@ -405,12 +405,28 @@ public class ChangeLogParameters {
         }
 
         public boolean matches(ChangeLogParameter parameter) {
-            if (parameter.isFilterable()) {
+            if (parameter.isFilterable() || hasFilterableProperties(parameter)) {
                 return (labels == null || labels.matches(parameter.getLabels()))
                         && (contexts == null || parameter.getValidContexts().matches(contexts))
                         && (database == null || DatabaseList.definitionMatches(parameter.getValidDatabases(), database, true));
             }
             return true;
+        }
+
+        private boolean hasFilterableProperties(ChangeLogParameter parameter) {
+            boolean hasContext = false;
+            boolean hasLabel = false;
+            boolean hasDbms = false;
+            if (parameter.getValidContexts() != null) {
+                hasContext = !parameter.getValidContexts().isEmpty();
+            }
+            if (parameter.getLabels() != null) {
+                hasLabel = !parameter.getLabels().isEmpty();
+            }
+            if (parameter.getValidDatabases() != null) {
+                hasDbms = !parameter.getValidDatabases().isEmpty();
+            }
+            return hasContext || hasLabel || hasDbms;
         }
     }
 
