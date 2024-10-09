@@ -1,10 +1,12 @@
 package liquibase.checksums;
 
+import lombok.Getter;
+
+@Getter
 public enum ChecksumAlgorithm {
     MD5("MD5"),
     SHA1("SHA-1"),
-    SHA256("SHA-256"),
-    SHA512("SHA-512");
+    SHA256("SHA-256");
 
     private final String algorithm;
 
@@ -12,7 +14,4 @@ public enum ChecksumAlgorithm {
         this.algorithm = algorithm;
     }
 
-    public String getAlgorithm() {
-        return algorithm;
-    }
 }
