@@ -393,9 +393,8 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             // To maintain backwards compatibility, we will first try to find the file.
                             // If found, we then load the entire file into the value when executing the statement.
                             // If not found, we load the value as a string.
-
-                            File file = new File(value);
-                            if (getContents(file) != null) {
+                            Resource r = (Scope.getCurrentScope().getResourceAccessor().get(value));
+                            if (r.exists()){
                                 valueConfig.setValueClobFile(value);
                             } else {
                                 /*
