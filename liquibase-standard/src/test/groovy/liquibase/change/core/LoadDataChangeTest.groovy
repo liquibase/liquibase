@@ -61,6 +61,8 @@ class LoadDataChangeTest extends StandardChangeTest {
         mockDb.setConnection((DatabaseConnection) null)
     }
 
+
+
     def "column with clob datatype is path or string"(){
         when:
         def changelog = new DatabaseChangeLog("liquibase/changelog.xml")
@@ -68,7 +70,26 @@ class LoadDataChangeTest extends StandardChangeTest {
                 "logical or physical file name",
                 null, null, false, null, changelog)
 
+
+        def dir = new File('.').absolutePath
+        println(dir)
+
+
         LoadDataChange change = new LoadDataChange()
+        LoadDataColumnConfig col1 = new LoadDataColumnConfig()
+        col1.setType(LoadDataChange.LOAD_DATA_TYPE.CLOB)
+        col1.setName("exists")
+        change.addColumn(col1)
+
+        LoadDataColumnConfig col2 = new LoadDataColumnConfig()
+        col2.setType(LoadDataChange.LOAD_DATA_TYPE.CLOB)
+        col2.setName("doesnt")
+        change.addColumn(col2)
+
+        LoadDataColumnConfig col3 = new LoadDataColumnConfig()
+        col3.setType(LoadDataChange.LOAD_DATA_TYPE.CLOB)
+        col3.setName("string")
+        change.addColumn(col3)
 
         change.setSchemaName("SCHEMA_NAME")
         change.setTableName("TABLE_NAME")
@@ -77,6 +98,7 @@ class LoadDataChangeTest extends StandardChangeTest {
         change.setFile("/change/core/sample.data.for.clob.types.csv")
 
         SqlStatement[] stmt = change.generateStatements(new PostgresDatabase())
+        println(stmt)
 
         then:
         stmt.length == 1
