@@ -7,5 +7,4 @@
     <include file="0001-account-bank-enum.xml" relativeToChangelogFile="true"/>
     <include file="0002-financial-institution-enum.xml" relativeToChangelogFile="true"/>
 
-
 </databaseChangeLog>
