@@ -100,7 +100,6 @@ class LoadDataChangeTest extends StandardChangeTest {
         }
 
         SqlStatement[] stmt = change.generateStatements(mockDBCsv)
-        println(stmt)
 
         then:
         stmt.length == 1
