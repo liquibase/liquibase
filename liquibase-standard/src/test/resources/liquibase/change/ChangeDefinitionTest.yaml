@@ -390,7 +390,7 @@ createProcedure: |
     Supported: all
   replaceIfExists boolean 
     Description: If the stored procedure defined by createProcedure already exists, alter it instead of creating it. Default: false
-    Supported: db2,db2z,mariadb,mssql,mysql
+    Supported: cockroachdb,db2,db2z,edb,mariadb,mssql,mysql,postgresql
   schemaName string 
     Description: Name of the database schema
     Supported: all

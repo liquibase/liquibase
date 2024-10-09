@@ -352,6 +352,12 @@
     <changeSet id="tranKeywordTest" author="mallod">
         <sqlFile path="changelogs/mssql/issues/transaction.test.sql" endDelimiter="GO"/>
     </changeSet>
+    <changeSet id="indexIncludeTest" author="satwell">
+        <createIndex indexName="idx_include_test" tableName="TestChange2">
+            <column name="name"/>
+            <column name="name2" included="true"/>
+        </createIndex>
+    </changeSet>
 
 
 </databaseChangeLog>
