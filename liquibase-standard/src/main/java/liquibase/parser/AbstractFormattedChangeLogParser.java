@@ -648,6 +648,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
             if (commentMatcher.groupCount() == 1) {
                 changeSet.setComments(commentMatcher.group(1));
             }
+            Scope.getCurrentScope().getLog(getClass()).fine("Matched comment '" + changeSet.getComments() + "'");
         } else if (altCommentOneDashMatcher.matches() || altCommentPluralMatcher.matches()) {
             String message = String.format(EXCEPTION_MESSAGE, physicalChangeLogLocation, count, getSequenceName(), "--comment <comment>", getDocumentationLink());
             throw new ChangeLogParseException("\n" + message);
@@ -658,6 +659,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
             } else if (validCheckSumMatcher.groupCount() == 1) {
                 changeSet.addValidCheckSum(validCheckSumMatcher.group(1));
             }
+            Scope.getCurrentScope().getLog(getClass()).fine("Matched validChecksum '" + changeSet.getValidCheckSums() + "'");
         } else if (altValidCheckSumOneDashMatcher.matches()) {
             String message = String.format(EXCEPTION_MESSAGE, physicalChangeLogLocation, count, getSequenceName(), "--validChecksum <checksum>", getDocumentationLink());
             throw new ChangeLogParseException("\n" + message);
@@ -666,6 +668,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                 String message = String.format(EXCEPTION_MESSAGE, physicalChangeLogLocation, count, getSequenceName(), String.format("--rollback <rollback %s>", getSequenceName()), getDocumentationLink());
                 throw new ChangeLogParseException("\n" + message);
             }
+            Scope.getCurrentScope().getLog(getClass()).fine("Matched rollback");
             currentRollbackSequence.append(rollbackMatcher.group(1)).append(System.lineSeparator());
         } else if (altRollbackMatcher.matches()) {
             String message = String.format(EXCEPTION_MESSAGE, physicalChangeLogLocation, count, getSequenceName(), String.format("--rollback <rollback %s>", getSequenceName()), getDocumentationLink());
@@ -674,6 +677,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
             if (rollbackMultiLineStartMatcher.groupCount() == 0) {
                 currentRollbackSequence.append(extractMultiLineRollBack(reader));
             }
+            Scope.getCurrentScope().getLog(getClass()).fine("Matched alternative format rollback");
         } else if (preconditionsMatcher.matches()) {
             handlePreconditionsCase(changeSet, count, preconditionsMatcher);
         } else if (altPreconditionsOneDashMatcher.matches()) {
