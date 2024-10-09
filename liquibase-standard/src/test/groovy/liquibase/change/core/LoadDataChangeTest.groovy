@@ -13,7 +13,6 @@ import liquibase.database.DatabaseFactory
 import liquibase.database.core.H2Database
 import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.MockDatabase
-import liquibase.database.core.PostgresDatabase
 import liquibase.exception.ValidationErrors
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
@@ -22,6 +21,7 @@ import liquibase.resource.ResourceAccessor
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
+import liquibase.statement.BatchDmlExecutablePreparedStatement
 import liquibase.statement.DatabaseFunction
 import liquibase.statement.ExecutablePreparedStatement
 import liquibase.statement.ExecutablePreparedStatementBase
@@ -70,11 +70,6 @@ class LoadDataChangeTest extends StandardChangeTest {
                 "logical or physical file name",
                 null, null, false, null, changelog)
 
-
-        def dir = new File('.').absolutePath
-        println(dir)
-
-
         LoadDataChange change = new LoadDataChange()
         LoadDataColumnConfig col1 = new LoadDataColumnConfig()
         col1.setType(LoadDataChange.LOAD_DATA_TYPE.CLOB)
@@ -95,22 +90,30 @@ class LoadDataChangeTest extends StandardChangeTest {
         change.setTableName("TABLE_NAME")
         change.setRelativeToChangelogFile(Boolean.TRUE)
         change.setChangeSet(changeSet)
-        change.setFile("/change/core/sample.data.for.clob.types.csv")
+        change.setFile("change/core/sample.data.for.clob.types.csv")
 
-        SqlStatement[] stmt = change.generateStatements(new PostgresDatabase())
+        def mockDBCsv = new MockDatabase() {
+            @Override
+            boolean supportsBatchUpdates() {
+                return true
+            }
+        }
+
+        SqlStatement[] stmt = change.generateStatements(mockDBCsv)
         println(stmt)
 
         then:
         stmt.length == 1
-        assert stmt[0] instanceof InsertSetStatement
-        assert ((InsertSetStatement)stmt[0]).getStatements() instanceof LinkedList<InsertStatement>
+        assert stmt[0] instanceof BatchDmlExecutablePreparedStatement
 
-        InsertStatement insSt = (InsertStatement)((InsertSetStatement)stmt[0]).getStatements()[0]
-        "SCHEMA_NAME" == insSt.getSchemaName()
-        "TABLE_NAME" == insSt.getTableName()
-        "TESTDATA" == insSt.getColumnValue("exists")
-        "nothing.txt" == insSt.getColumnValue("doesnt")
-        "sample text" == insSt.getColumnValue("string")
+        List<ExecutablePreparedStatementBase> insSt = ((BatchDmlExecutablePreparedStatement) stmt[0]).getIndividualStatements()
+        List<LoadDataColumnConfig> columns = insSt.get(0).getColumns()
+
+        "SCHEMA_NAME" == insSt.get(0).getSchemaName()
+        "TABLE_NAME" == insSt.get(0).getTableName()
+        "liquibase/change/core/SQLFileTestData.sql" == columns.get(0).getValueClobFile()
+        "nothing.txt" == columns.get(1).getValue()
+        "sample text" == columns.get(2).getValue()
 
     }
 
