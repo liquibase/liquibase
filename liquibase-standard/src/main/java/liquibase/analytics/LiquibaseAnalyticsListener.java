@@ -81,7 +81,6 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
 
                 AnalyticsBatch analyticsBatch = AnalyticsBatch.fromLiquibaseEvent(event, userId);
                 String jsonInputString = YamlSerializer.removeClassTypeMarksFromSerializedJson(yaml.dumpAs(analyticsBatch, Tag.MAP, DumperOptions.FlowStyle.FLOW));
-                // This log message is purposefully being logged at fine level, not using the configurable log-level param, so that users always know what is being sent to Segment.
                 logger.log(logLevel, "Sending anonymous data to Liquibase analytics endpoint. " + System.lineSeparator() + jsonInputString, null);
 
                 IOUtils.write(jsonInputString, conn.getOutputStream(), StandardCharsets.UTF_8);
