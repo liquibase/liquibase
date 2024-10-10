@@ -94,6 +94,7 @@ liquibase.sqlgenerator.core.SelectFromDatabaseChangeLogGenerator
 liquibase.sqlgenerator.core.SelectFromDatabaseChangeLogLockGenerator
 liquibase.sqlgenerator.core.SetColumnRemarksGenerator
 liquibase.sqlgenerator.core.SetNullableGenerator
+liquibase.sqlgenerator.core.SetNullableGeneratorSQLite
 liquibase.sqlgenerator.core.SetTableRemarksGenerator
 liquibase.sqlgenerator.core.SetViewRemarksGenerator
 liquibase.sqlgenerator.core.StoredProcedureGenerator
