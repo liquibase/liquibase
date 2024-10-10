@@ -1,6 +1,10 @@
 Liquibase License Information (Used by Liquibase OSS)
 Version: ${project.version}
 
+Liquibase ships with a Usage data agreement:
+
+- Liquibase Usage Data Agreement - usage-data.txt
+
 Liquibase ships with 3rd party components using the following licenses:
 
 - Apache 2.0 License - https://opensource.org/licenses/Apache-2.0
