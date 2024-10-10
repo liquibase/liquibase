@@ -15,6 +15,13 @@ public class ExampleCustomTaskChange implements CustomTaskChange, CustomTaskRoll
     @SuppressWarnings({"UnusedDeclaration", "FieldCanBeLocal"})
     private ResourceAccessor resourceAccessor;
 
+    public static int executeCallCount = 0;
+    public static int rollbackCallCount = 0;
+
+    public static void resetCounts() {
+        executeCallCount = 0;
+        rollbackCallCount = 0;
+    }
 
     public String getHelloTo() {
         return helloTo;
@@ -27,11 +34,13 @@ public class ExampleCustomTaskChange implements CustomTaskChange, CustomTaskRoll
     @Override
     public void execute(Database database) throws CustomChangeException {
         Scope.getCurrentScope().getLog(getClass()).info("Hello "+getHelloTo());
+        executeCallCount++;
     }
 
     @Override
     public void rollback(Database database) throws CustomChangeException, RollbackImpossibleException {
         Scope.getCurrentScope().getLog(getClass()).info("Goodbye "+getHelloTo());
+        rollbackCallCount++;
     }
 
     @Override
