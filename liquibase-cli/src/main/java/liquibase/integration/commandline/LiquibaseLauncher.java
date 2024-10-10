@@ -12,8 +12,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static liquibase.integration.commandline.LiquibaseLauncherSettings.LiquibaseLauncherSetting.*;
-import static liquibase.integration.commandline.LiquibaseLauncherSettings.getSetting;
+import static liquibase.util.LiquibaseLauncherSettings.LiquibaseLauncherSetting.*;
+import static liquibase.util.LiquibaseLauncherSettings.getSetting;
 
 /**
  * Launcher which builds up the classpath needed to run Liquibase, then calls {@link LiquibaseCommandLine#main(String[])}.

@@ -1,5 +1,6 @@
 package liquibase;
 
+import liquibase.analytics.Event;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -70,7 +71,9 @@ public class Scope {
         /**
          * A <code>Map<String, String></code> of arguments/configuration properties used in the maven invocation of Liquibase.
          */
-        mavenConfigurationProperties
+        mavenConfigurationProperties,
+        analyticsEvent,
+        integrationDetails
     }
 
     public static final String JAVA_PROPERTIES = "javaProperties";
@@ -507,6 +510,14 @@ public class Scope {
         }
 
         return returnList;
+    }
+
+    /**
+     * Get the current analytics event. This can return null if analytics is not enabled.
+     * @return
+     */
+    public Event getAnalyticsEvent() {
+        return Scope.getCurrentScope().get(Attr.analyticsEvent, Event.class);
     }
 
     @Override
