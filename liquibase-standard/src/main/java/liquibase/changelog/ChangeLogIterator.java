@@ -132,7 +132,7 @@ public class ChangeLogIterator {
                             try {
                                 visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
                                 if (visitor instanceof UpdateVisitor &&
-                                    changeSet.getExecType().equals(ChangeSet.ExecType.FAILED) &&
+                                    ChangeSet.ExecType.FAILED.equals(changeSet.getExecType()) &&
                                     BooleanUtils.isFalse(changeSet.getFailOnError())) {
                                     exceptionChangeSets.add(changeSet);
                                 }
