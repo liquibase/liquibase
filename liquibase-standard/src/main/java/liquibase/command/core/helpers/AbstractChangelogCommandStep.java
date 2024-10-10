@@ -8,7 +8,6 @@ import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandBuilder;
 import liquibase.command.CommandScope;
 import liquibase.exception.CommandValidationException;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,7 +55,7 @@ public abstract class AbstractChangelogCommandStep extends AbstractCommandStep {
         supportedReplaceIfExistsTypes.add("none");
         replaceIfExistsTypes.removeAll(supportedReplaceIfExistsTypes);
         if (!replaceIfExistsTypes.isEmpty())
-            throw new CommandValidationException("Invalid types for --replace-if-exists-types: " + replaceIfExistsTypes.stream().collect(Collectors.joining(", ")) + ". Valid types are: " + supportedReplaceIfExistsTypes().collect(Collectors.joining(", ")));
+            throw new CommandValidationException("Invalid types for --replace-if-exists-types: " + replaceIfExistsTypes.stream().collect(Collectors.joining(", ")) + ". Valid types are: " + REPLACE_IF_EXISTS_TYPES_NAMES.stream().collect(Collectors.joining(", ")));
     }
 
     protected static Stream<String> supportedRunOnChangeTypes() {
