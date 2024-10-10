@@ -97,7 +97,7 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                         column.setValueDate((Date) value);
                     } else if (value instanceof byte[]) {
                         if (referenceDatabase instanceof InformixDatabase) {
-                            column.setValue(new String((byte[]) value, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
+                            column.setValue(new String((byte[]) value, GlobalConfiguration.FILE_ENCODING.getCurrentValue()));
                         }
                         column.setValueComputed(new DatabaseFunction("UNSUPPORTED FOR DIFF: BINARY DATA"));
                     } else { // fall back to simple string
