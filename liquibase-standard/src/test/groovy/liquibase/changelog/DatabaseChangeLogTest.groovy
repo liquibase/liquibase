@@ -415,7 +415,6 @@ create view sql_view as select * from sql_table;'''
                 "com/example/.hiddenfile": test1Xml,
         ])
 
-        // TODO: Not use deprecated
         BufferedLogService bufferLog = new BufferedLogService()
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
 
@@ -562,7 +561,7 @@ create view sql_view as select * from sql_table;'''
         ])
         def onUnknownFileFormat = DatabaseChangeLog.OnUnknownFileFormat.FAIL
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-        rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, onUnknownFileFormat, new ModifyChangeSets(null, null))
+        rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, onUnknownFileFormat, new ModifyChangeSets(null, null))
 
         then:
         def e = thrown(UnknownChangelogFormatException)
@@ -576,7 +575,7 @@ create view sql_view as select * from sql_table;'''
         ])
         def onUnknownFileFormat = DatabaseChangeLog.OnUnknownFileFormat.WARN
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-        rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, onUnknownFileFormat, new ModifyChangeSets(null, null))
+        rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, onUnknownFileFormat, new ModifyChangeSets(null, null))
 
         def changeSets= rootChangeLog.changeSets
 
@@ -591,7 +590,7 @@ create view sql_view as select * from sql_table;'''
         ])
         def onUnknownFileFormat = DatabaseChangeLog.OnUnknownFileFormat.SKIP
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-        rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, onUnknownFileFormat, new ModifyChangeSets(null, null))
+        rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, onUnknownFileFormat, new ModifyChangeSets(null, null))
 
         def changeSets= rootChangeLog.changeSets
 
