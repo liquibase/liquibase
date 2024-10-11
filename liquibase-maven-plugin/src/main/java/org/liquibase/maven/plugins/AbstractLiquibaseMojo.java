@@ -5,6 +5,7 @@ import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
+import liquibase.command.CommandScope;
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
 import liquibase.configuration.ConfiguredValueModifierFactory;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -49,6 +50,7 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Handler;
 
 import static java.util.ResourceBundle.getBundle;
@@ -833,6 +835,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
 
         Map<String, Object> scopeAttrs = new HashMap<>();
+        //
+        // Add this to the Scope in order to trim down the exception stack trace
+        //
+        scopeAttrs.put(CommandScope.SUPPRESS_SHOWING_EXCEPTION_IN_LOG, new AtomicBoolean());
         if (!useScopeLogger) {
             // If the specified log format does not require the use of the standard Liquibase logger, just return the
             // Maven log service as is traditionally done.
