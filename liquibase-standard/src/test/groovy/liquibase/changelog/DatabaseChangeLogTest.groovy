@@ -416,7 +416,7 @@ create view sql_view as select * from sql_table;'''
         ])
 
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-        rootChangeLog.include("com/example/.hiddenfile", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+        rootChangeLog.include("com/example/.hiddenfile", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
 
         def changeSets= rootChangeLog.changeSets
 
@@ -434,10 +434,10 @@ create view sql_view as select * from sql_table;'''
         ])
 
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-        rootChangeLog.include("com/example/cvs", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
-        rootChangeLog.include("com/example/.svn", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
-        rootChangeLog.include("com/example/.gitkeep", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
-        rootChangeLog.include("com/example/.gitignore", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+        rootChangeLog.include("com/example/cvs", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+        rootChangeLog.include("com/example/.svn", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+        rootChangeLog.include("com/example/.gitkeep", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+        rootChangeLog.include("com/example/.gitignore", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
 
         def changeSets= rootChangeLog.changeSets
 
@@ -452,7 +452,7 @@ create view sql_view as select * from sql_table;'''
         ])
         def onUnknownFileFormat = DatabaseChangeLog.OnUnknownFileFormat.FAIL
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-        rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, onUnknownFileFormat, new ModifyChangeSets(null, null))
+        rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, onUnknownFileFormat, new ModifyChangeSets(null, null))
 
         then:
         def e = thrown(UnknownChangelogFormatException)
@@ -466,7 +466,7 @@ create view sql_view as select * from sql_table;'''
         ])
         def onUnknownFileFormat = DatabaseChangeLog.OnUnknownFileFormat.WARN
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-        rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, onUnknownFileFormat, new ModifyChangeSets(null, null))
+        rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, onUnknownFileFormat, new ModifyChangeSets(null, null))
 
         def changeSets= rootChangeLog.changeSets
 
@@ -481,7 +481,7 @@ create view sql_view as select * from sql_table;'''
         ])
         def onUnknownFileFormat = DatabaseChangeLog.OnUnknownFileFormat.SKIP
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-        rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, onUnknownFileFormat, new ModifyChangeSets(null, null))
+        rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, onUnknownFileFormat, new ModifyChangeSets(null, null))
 
         def changeSets= rootChangeLog.changeSets
 
