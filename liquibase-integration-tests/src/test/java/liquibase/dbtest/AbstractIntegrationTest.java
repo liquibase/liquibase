@@ -568,28 +568,40 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
-    public synchronized void testRollbackableChangeLog() throws Exception {
+    public void testRollbackableChangeLog() throws Exception {
         assumeNotNull(this.getDatabase());
+        Map<String, Object> initialMap =  new HashMap<>();
+        initialMap.put(ExampleCustomTaskChange.COUNT_MAP_EXECUTE_CALL_COUNT, 0);
+        initialMap.put(ExampleCustomTaskChange.COUNT_MAP_ROLLBACK_CALL_COUNT, 0);
 
-        Liquibase liquibase = createLiquibase(rollbackChangeLog);
-        clearDatabase();
-        ExampleCustomTaskChange.resetCounts();
+        Scope.child(ExampleCustomTaskChange.SCOPE_ATTR_CALL_COUNT_MAP, initialMap, () -> {
+            Liquibase liquibase = createLiquibase(rollbackChangeLog);
+            clearDatabase();
 
-        liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.update(this.contexts);
-        assertEquals(1, ExampleCustomTaskChange.executeCallCount);
-        assertEquals(0, ExampleCustomTaskChange.rollbackCallCount);
+            liquibase = createLiquibase(rollbackChangeLog);
+            liquibase.update(this.contexts);
 
-        liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.rollback(new Date(0), this.contexts);
-        assertEquals(1, ExampleCustomTaskChange.executeCallCount);
-        assertEquals(1, ExampleCustomTaskChange.rollbackCallCount);
+            Map<String, Object> map = Scope.getCurrentScope().get(ExampleCustomTaskChange.SCOPE_ATTR_CALL_COUNT_MAP, Map.class);
+            Integer executeCallCountInteger = (Integer) map.get(ExampleCustomTaskChange.COUNT_MAP_EXECUTE_CALL_COUNT);
+            Integer rollbackCallCount = (Integer)map.get(ExampleCustomTaskChange.COUNT_MAP_ROLLBACK_CALL_COUNT);
+            // call `execute` method
+            assertEquals(1, (int)executeCallCountInteger);
+            assertEquals(0, (int)rollbackCallCount);
 
-        liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.update(this.contexts);
+            liquibase = createLiquibase(rollbackChangeLog);
+            liquibase.rollback(new Date(0), this.contexts);
+            executeCallCountInteger = (Integer) map.get(ExampleCustomTaskChange.COUNT_MAP_EXECUTE_CALL_COUNT) ;
+            rollbackCallCount = (Integer)map.get(ExampleCustomTaskChange.COUNT_MAP_ROLLBACK_CALL_COUNT);
+            // call `rollback` method
+            assertEquals(1, (int)executeCallCountInteger);
+            assertEquals(1, (int)rollbackCallCount);
 
-        liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.rollback(new Date(0), this.contexts);
+            liquibase = createLiquibase(rollbackChangeLog);
+            liquibase.update(this.contexts);
+
+            liquibase = createLiquibase(rollbackChangeLog);
+            liquibase.rollback(new Date(0), this.contexts);
+        });
     }
 
     @Test
