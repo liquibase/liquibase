@@ -15,6 +15,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -245,7 +246,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                 //
                 // Handle empty files with a WARNING message
                 //
-                if (StringUtil.isEmpty(firstLine)) {
+                if (StringUtils.isEmpty(firstLine)) {
                     Scope.getCurrentScope().getLog(getClass()).warning(String.format("Skipping empty file '%s'", changeLogFile));
                     return false;
                 }
@@ -330,15 +331,16 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                         }
                         continue;
                     } else {
+                        String ignoreCountAttribute = ignoreLinesMatcher.group(1);
                         try {
-                            long ignoreCount = Long.parseLong(ignoreLinesMatcher.group(1));
+                            long ignoreCount = Long.parseLong(ignoreCountAttribute);
                             while (ignoreCount > 0 && reader.readLine() != null) {
                                 ignoreCount--;
                                 count++;
                             }
                             continue;
                         } catch (NumberFormatException | NullPointerException nfe) {
-                            throw new ChangeLogParseException("Unknown ignoreLines syntax");
+                            throw new ChangeLogParseException(String.format("Unknown ignoreLines syntax: \"%s\"", ignoreCountAttribute), nfe);
                         }
                     }
                 } else if (altIgnoreLinesOneDashMatcher.matches() || altIgnoreMatcher.matches()) {
@@ -436,6 +438,8 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     }
 
                     String changeSetId = changeLogParameters.expandExpressions(StringUtil.stripEnclosingQuotes(idGroup), changeLog);
+                    validateChangeSetId(changeSetId, line, count);
+
                     String changeSetAuthor = changeLogParameters.expandExpressions(StringUtil.stripEnclosingQuotes(authorGroup), changeLog);
 
                     changeSet = configureChangeSet(changeLog, runOnChange, runAlways, runInTransaction, failOnError, runWith, runWithSpoolFile, context, labels, logicalFilePath, dbms, ignore, changeSetId, changeSetAuthor);
@@ -717,6 +721,29 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         return false;
     }
 
+    //
+    //
+
+    /**
+     *
+     * If the change set ID is empty after removing colons and blank spaces then it is invalid
+     *
+     * @param  changeSetId                  the change set ID to validate
+     * @param  line                         the line in the formatted SQL file
+     * @param  count                        the line number
+     * @throws ChangeLogParseException      thrown if the change set ID is empty
+     *
+     */
+    private void validateChangeSetId(String changeSetId, String line, int count) throws ChangeLogParseException {
+        String parsed = changeSetId.replace(":","").replace(" ","");
+        if (StringUtil.isEmpty(parsed)) {
+            String message =
+               "Unexpected formatting in formatted changelog at line %d. The change set ID cannot be empty.%n%s%n" +
+               "Learn all the options at https://docs.liquibase.com/concepts/changelogs/sql-format.html";
+            throw new ChangeLogParseException("\n" + String.format(message, count, line));
+        }
+    }
+
     private void handleRollbackSequence(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, DatabaseChangeLog changeLog, StringBuilder currentRollbackSequence, ChangeSet changeSet, Matcher rollbackSplitStatementsPatternMatcher, boolean rollbackSplitStatements, String rollbackEndDelimiter) throws ChangeLogParseException {
         String currentRollbackSequenceAsString = currentRollbackSequence.toString();
         if (StringUtil.trimToNull(currentRollbackSequenceAsString) != null) {
@@ -857,7 +884,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
             try {
                 stripComments = Boolean.parseBoolean(matcher.group(1));
             } catch (Exception e) {
-                throw new ChangeLogParseException("Cannot parse " + changeSet + " " + matcher.toString().replaceAll("\\.*", "") + " as a boolean");
+                throw new ChangeLogParseException("Cannot parse " + changeSet + " " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
             }
         }
         return stripComments;
