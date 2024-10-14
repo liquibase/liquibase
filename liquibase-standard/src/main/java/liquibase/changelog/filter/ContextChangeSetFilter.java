@@ -35,8 +35,9 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
         }
 
         Collection<ContextExpression> inheritableContexts = changeSet.getInheritableContextFilter();
-        ContextExpression expressionToCheck = new ContextExpression(contexts.getContexts());
-        if (expressionToCheck.matches(new Contexts(changeSet.buildFullContext())) && ContextExpression.matchesAll(inheritableContexts, contexts)) {
+        ContextExpression expressionToCheck = new ContextExpression(changeSet.getContextFilter().getContexts());
+        if (expressionToCheck.matches(contexts)
+                && ContextExpression.matchesAll(inheritableContexts, contexts)) {
             return new ChangeSetFilterResult(true, "Context matches '"+contexts.toString()+"'", this.getClass(), getMdcName(), getDisplayName());
         } else {
             return new ChangeSetFilterResult(false, "Context does not match '"+contexts.toString()+"'", this.getClass(), getMdcName(), getDisplayName());
