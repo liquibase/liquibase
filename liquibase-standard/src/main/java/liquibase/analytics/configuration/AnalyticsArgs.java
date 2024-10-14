@@ -28,7 +28,7 @@ public class AnalyticsArgs implements AutoloadedConfigurations {
                 .build();
 
         CONFIG_ENDPOINT_URL = builder.define("configEndpointUrl", String.class)
-                .setDefaultValue("https://analytics.liquibase.com/config-analytics.yaml")
+                .setDefaultValue("https://config.liquibase.com/analytics.yaml")
                 .setHidden(true)
                 .build();
 
