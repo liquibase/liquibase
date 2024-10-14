@@ -1,6 +1,5 @@
 package liquibase.diff.output.changelog.core;
 
-import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.InsertDataChange;
@@ -12,6 +11,7 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
+import liquibase.exception.CommandExecutionException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
@@ -81,19 +81,20 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                 stmt = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
                 stmt.setFetchSize(1);
                 rs = stmt.executeQuery(queryToRetrieveTableMetaDataOnly);
+                boolean isCaseSensitive = referenceDatabase.isCaseSensitive();
                 // filter which column names to use for export below
-                columnNames = identifyColumnNames(rs, excludeObjects, includeObjects);
+                columnNames = identifyColumnNames(rs, excludeObjects, includeObjects, isCaseSensitive);
 
-                // the filtering _may_ have
+                // the filtering has
                 //   a) excluded ALL columns
                 //   b) included NO columns
                 if (columnNames.isEmpty()) {
-                    Scope.getCurrentScope().getLog(MissingObjectChangeGenerator.class).warning("Filtering w/ excludeObjects or includeObjects had no effect, thus ALL columns are considered.");
+                    throw new CommandExecutionException(String.format("No columns matched with excludeObjects '%s' / includeObjects '%s'", excludeObjects, includeObjects));
                 }
-                else {
-                    // replace "*" in original SELECT statement with list of filtered column names
-                    sql = sql.replace("*", String.join(",", columnNames));
-                }
+
+                String replacement = "\"" + String.join("\", \"", columnNames) + "\"";
+                // replace "*" in original SELECT statement with list of filtered column names
+                sql = sql.replace("*", replacement);
             }
 
             stmt = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -169,7 +170,7 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
         }
     }
 
-    private List<String> identifyColumnNames (final ResultSet rs, String excludeObjects, String includeObjects) throws SQLException {
+    private List<String> identifyColumnNames (final ResultSet rs, String excludeObjects, String includeObjects, final boolean isCaseSensitive) throws SQLException {
         List<String> columnNames = new ArrayList<>();
         excludeObjects = extractColumnInfo(excludeObjects);
         includeObjects = extractColumnInfo(includeObjects);
@@ -178,11 +179,11 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
         Pattern pattern = null;
 
         if (withExcludeOnly) {
-            pattern = Pattern.compile(excludeObjects);
+            pattern = Pattern.compile(excludeObjects, isCaseSensitive ? 0 : Pattern.CASE_INSENSITIVE);
         }
 
         if (withIncludeOnly) {
-            pattern = Pattern.compile(includeObjects);
+            pattern = Pattern.compile(includeObjects, isCaseSensitive ? 0 : Pattern.CASE_INSENSITIVE);
         }
 
         for (int i = 1; i < rs.getMetaData().getColumnCount() + 1; i++) {
@@ -192,7 +193,7 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
             if ((withIncludeOnly && pattern.matcher(columnName).matches()) ||
                 (withExcludeOnly && !pattern.matcher(columnName).matches()))
             {
-                columnNames.add(columnName);
+                columnNames.add(isCaseSensitive ? "\\\"" + columnName + "\\\"" : columnName);
             }
         }
 
