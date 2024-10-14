@@ -11,6 +11,8 @@ import liquibase.serializer.LiquibaseSerializable;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.DatabaseObjectFactory;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -25,6 +27,8 @@ public class SnapshotControl implements LiquibaseSerializable {
     private ObjectChangeFilter objectChangeFilter;
     private SnapshotListener snapshotListener;
     private boolean warnIfObjectNotFound = true;
+    @Setter
+    private boolean searchNestedObjects = true;
     
     
     /**
@@ -184,6 +188,15 @@ public class SnapshotControl implements LiquibaseSerializable {
      */
     public boolean isWarnIfObjectNotFound() {
         return warnIfObjectNotFound;
+    }
+
+    /**
+     * When searchNestedObjects is false this indicates to stop searching the snapshot the moment
+     * an example object has been found. With this disabled we will not search for nested objects.
+     * @return the search nested objects configuration
+     */
+    public boolean shouldSearchNestedObjects() {
+        return searchNestedObjects;
     }
     
     /**
