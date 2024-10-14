@@ -1,7 +1,6 @@
 package liquibase.diff.output.changelog.core;
 
 import liquibase.Scope;
-import liquibase.ScopeManager;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.InsertDataChange;
