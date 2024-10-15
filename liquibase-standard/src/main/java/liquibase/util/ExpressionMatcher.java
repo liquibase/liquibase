@@ -115,6 +115,9 @@ public final class ExpressionMatcher {
         }
 
         for (String item : items) {
+            if (item.startsWith("@")) {
+                item = item.substring(1).trim();
+            }
             if (item.equalsIgnoreCase(expression)) {
                 return !notExpression;
             }
