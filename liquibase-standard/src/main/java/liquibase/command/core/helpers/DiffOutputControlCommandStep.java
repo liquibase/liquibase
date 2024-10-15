@@ -20,6 +20,7 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
     public static final CommandArgumentDefinition<Boolean> INCLUDE_CATALOG_ARG;
     public static final CommandArgumentDefinition<Boolean> INCLUDE_SCHEMA_ARG;
     public static final CommandArgumentDefinition<Boolean> INCLUDE_TABLESPACE_ARG;
+    public static final CommandArgumentDefinition<Boolean> PRESERVE_NULL_VALUES;
 
     public static final CommandArgumentDefinition<String> EXCLUDE_OBJECTS;
     public static final CommandArgumentDefinition<String> INCLUDE_OBJECTS;
@@ -35,6 +36,8 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
                 .description("If true, the schema will be included in generated changeSets. Defaults to false.").build();
         INCLUDE_TABLESPACE_ARG = builder.argument("includeTablespace", Boolean.class).defaultValue(false)
                 .description("Include the tablespace attribute in the changelog. Defaults to false.").build();
+        PRESERVE_NULL_VALUES = builder.argument("preserveNullValues", Boolean.class).defaultValue(true)
+                .description("If true, NULL values in columns are included in generated changeSets. Defaults to true.").build();
 
         EXCLUDE_OBJECTS = builder.argument("excludeObjects", String.class).defaultValue(null)
                 .description("Regular expression of columns to exclude. Defaults to null.").build();
