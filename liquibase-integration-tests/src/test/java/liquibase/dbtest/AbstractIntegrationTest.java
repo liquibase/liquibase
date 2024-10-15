@@ -578,7 +578,6 @@ public abstract class AbstractIntegrationTest {
             Liquibase liquibase = createLiquibase(rollbackChangeLog);
             clearDatabase();
 
-            liquibase = createLiquibase(rollbackChangeLog);
             liquibase.update(this.contexts);
 
             Map<String, Object> map = Scope.getCurrentScope().get(ExampleCustomTaskChange.SCOPE_ATTR_CALL_COUNT_MAP, Map.class);
@@ -588,7 +587,6 @@ public abstract class AbstractIntegrationTest {
             assertEquals(1, (int)executeCallCountInteger);
             assertEquals(0, (int)rollbackCallCount);
 
-            liquibase = createLiquibase(rollbackChangeLog);
             liquibase.rollback(new Date(0), this.contexts);
             executeCallCountInteger = (Integer) map.get(ExampleCustomTaskChange.COUNT_MAP_EXECUTE_CALL_COUNT) ;
             rollbackCallCount = (Integer)map.get(ExampleCustomTaskChange.COUNT_MAP_ROLLBACK_CALL_COUNT);
@@ -596,10 +594,8 @@ public abstract class AbstractIntegrationTest {
             assertEquals(1, (int)executeCallCountInteger);
             assertEquals(1, (int)rollbackCallCount);
 
-            liquibase = createLiquibase(rollbackChangeLog);
             liquibase.update(this.contexts);
 
-            liquibase = createLiquibase(rollbackChangeLog);
             liquibase.rollback(new Date(0), this.contexts);
         });
     }
