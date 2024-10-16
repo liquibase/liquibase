@@ -39,7 +39,6 @@ class GenerateChangeLogEmptyIntegrationTest extends Specification {
 
         then:
         fileContent.containsIgnoreCase("create table \"generate_changelog_test_sql\"")
-//        !fileContent.containsIgnoreCase("INSERT INTO \"generate_changelog_test_sql\"")
 
         cleanup:
         outputFile.delete()
