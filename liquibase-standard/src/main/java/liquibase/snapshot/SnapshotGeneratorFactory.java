@@ -6,6 +6,7 @@ import liquibase.Scope;
 import liquibase.SupportsMethodValidationLevelsEnum;
 import liquibase.database.*;
 import liquibase.database.core.MariaDBDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
