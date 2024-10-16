@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+						 xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+						 www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+	<changeSet id="1" author="">
+		<validCheckSum>1:any
+			<comment>validCheckSum comment</comment>
+		</validCheckSum>
+		<validCheckSum>2:aaafdfadsf</validCheckSum>
+		<comment>changeSet comment 1</comment>
+		<sql><comment>sql comment</comment>
+			SELECT COUNT(*) FROM DATABASECHANGELOG</sql>
+		<comment>changeSet comment 2</comment>
+		<sql>SELECT COUNT(*) FROM DATABASECHANGELOGLOCK</sql>
+		<createProcedure>
+			<comment>createProcedure comment</comment>
+			SELECT 1 FROM DATABASECHANGELOG
+		</createProcedure>
+	</changeSet>
+</databaseChangeLog>

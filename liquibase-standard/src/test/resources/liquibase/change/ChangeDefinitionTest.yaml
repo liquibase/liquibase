@@ -330,7 +330,7 @@ alterSequence: |
 
 createIndex: |
   associatedWith string 
-    Description: Index associations. Valid values: primaryKey, foreignKey, uniqueConstriant, none
+    Description: Index associations. Valid values: primaryKey, foreignKey, uniqueConstraint, none
     Supported: all
   catalogName string (since 3.0)
     Description: Name of the database catalog
