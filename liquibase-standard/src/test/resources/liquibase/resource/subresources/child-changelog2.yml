@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: cs2
+      author: wesley (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  name: ACCT_NUM
+                  type: NUMBER(*, 0)
+              - column:
+                  name: AMOUNT
+                  type: NUMBER(10, 2)
+            tableName: ACCOUNT
+            tablespace: USERS
