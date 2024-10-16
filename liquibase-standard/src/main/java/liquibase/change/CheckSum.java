@@ -83,7 +83,7 @@ public final class CheckSum {
      * Compute a storedCheckSum of the given string.
      */
     public static CheckSum compute(String valueToChecksum) {
-        return new CheckSum(ComputeChecksumService.getInstance().compute(
+        return new CheckSum(ComputeChecksumService.compute(
                 //remove "Unknown" unicode char 65533
                 Normalizer.normalize(StringUtil.standardizeLineEndings(valueToChecksum)
                         .replace("\uFFFD", ""), Normalizer.Form.NFC)
@@ -117,7 +117,7 @@ public final class CheckSum {
             };
         }
 
-        return new CheckSum(ComputeChecksumService.getInstance().compute(newStream), Scope.getCurrentScope().getChecksumVersion().getVersion());
+        return new CheckSum(ComputeChecksumService.compute(newStream), Scope.getCurrentScope().getChecksumVersion().getVersion());
     }
 
     @Override
