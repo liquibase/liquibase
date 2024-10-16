@@ -14,6 +14,8 @@ import liquibase.structure.core.Schema;
 import liquibase.structure.core.Sequence;
 import liquibase.util.StringUtil;
 import lombok.Getter;
+import org.apache.commons.collections4.iterators.ReverseListIterator;
+import org.apache.commons.lang3.stream.Streams;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,7 +31,7 @@ import java.util.stream.Collectors;
  * <p>
  * Properties can be defined as "global" or "local". Global properties span all change logs.
  * A global setting configured in an included changelog is still available to all changesets
- * Local properties are  only available in the change log that they are defined in -- not even in changelogs "included" by the file that defines the property.
+ * Local properties are available in the change log that they are defined AND in included changelogs.
  */
 public class ChangeLogParameters {
 
@@ -307,34 +309,24 @@ public class ChangeLogParameters {
     }
 
     private ChangeLogParameter getChangelogParameter(String key, DatabaseChangeLog changeLog, Filter filter) {
-        List<ChangeLogParameter> localList = null;
         if (changeLog != null) {
             LiquibaseExecutionParameter executionParameter = LiquibaseExecutionParameter.findByName(key);
             if (executionParameter != null) {
                 return new ChangeLogParameter(executionParameter.name(), executionParameter.getValue(changeLog));
             }
-
-            localList = localParameters.get(getLocalKey(changeLog));
-            if (localList != null) {
-                localList = new ArrayList<>(localList); // make a copy as we don't want to reverse the original list
-                Collections.reverse(localList);
-            }
         }
 
-        for (List<ChangeLogParameter> paramList : Arrays.asList(globalParameters, localList)) {
-            if (paramList == null) {
-                continue;
-            }
-
-            for (ChangeLogParameter parameter : paramList) {
-                if (parameter.getKey().equalsIgnoreCase(key) && (filter == null || filter.matches(parameter))) {
-                    return parameter;
-                }
-            }
-
+        List<List<ChangeLogParameter>> parameters = new ArrayList<>();
+        for (DatabaseChangeLog cl = changeLog; cl != null; cl = cl.getParentChangeLog()) {
+            parameters.add(localParameters.get(getLocalKey(cl)));
         }
+        parameters.add(globalParameters);
 
-        return null;
+        return Streams.of(new ReverseListIterator<>(parameters))
+            .filter(Objects::nonNull)
+            .flatMap(List::stream)
+            .filter(parameter -> parameter.getKey().equalsIgnoreCase(key) && (filter == null || filter.matches(parameter)))
+            .findFirst().orElse(null);
     }
 
     /**
