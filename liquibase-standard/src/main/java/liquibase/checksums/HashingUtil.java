@@ -8,7 +8,14 @@ import java.io.InputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 
+/**
+ * Utility class for hashing
+ */
 public class HashingUtil {
+
+    private HashingUtil() {
+        // prevent instantiation
+    }
 
     /**
      * Used to build output as Hex
