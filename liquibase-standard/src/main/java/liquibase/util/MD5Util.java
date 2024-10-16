@@ -1,5 +1,6 @@
 package liquibase.util;
 
+import liquibase.checksums.ChecksumAlgorithm;
 import liquibase.checksums.HashingUtil;
 
 import java.io.InputStream;
@@ -12,12 +13,12 @@ import java.io.InputStream;
 public class MD5Util {
 
     public static String computeMD5(String input) {
-        return HashingUtil.compute(input, "MD5");
+        return HashingUtil.compute(input, ChecksumAlgorithm.MD5.getAlgorithm());
 
     }
 
     public static String computeMD5(InputStream stream) {
-        return HashingUtil.compute(stream, "MD5");
+        return HashingUtil.compute(stream, ChecksumAlgorithm.MD5.getAlgorithm());
     }
 
 }
