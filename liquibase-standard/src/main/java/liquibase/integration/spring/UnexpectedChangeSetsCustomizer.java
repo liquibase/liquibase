@@ -51,11 +51,7 @@ public class UnexpectedChangeSetsCustomizer<T extends Liquibase> implements Cust
                     changeSet.getId(),
                     changeSet.getChangeLog().getFilePath(),
                     changeSet.getAuthor())).forEach(applied::add);
-            UnexpectedChangesetsCommandStep.listUnexpectedChangeSets(
-                liquibase.getDatabase(),
-                liquibase.getDatabaseChangeLog(),
-                new Contexts(),
-                new LabelExpression()).stream().map(changeSet -> new ChangeSetInfo(
+            liquibase.listUnexpectedChangeSets(contexts, labelExpression).stream().map(changeSet -> new ChangeSetInfo(
                     changeSet.getId(),
                     changeSet.getChangeLog(),
                     changeSet.getAuthor())).forEach(unexpected::add);
