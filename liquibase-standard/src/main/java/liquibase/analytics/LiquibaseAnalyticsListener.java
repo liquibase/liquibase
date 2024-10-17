@@ -20,6 +20,7 @@ import org.yaml.snakeyaml.nodes.Tag;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
 @NoArgsConstructor
@@ -74,6 +75,7 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
             }
             return issuedTo;
         });
+        AtomicBoolean timedOut = new AtomicBoolean(true);
 
         Thread eventThread = new Thread(() -> {
             try {
@@ -107,12 +109,16 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+            timedOut.set(false);
         });
         eventThread.start();
         try {
             eventThread.join(timeoutMillis);
         } catch (InterruptedException e) {
             logger.log(logLevel, "Interrupted while waiting for analytics event processing.", e);
+        }
+        if (timedOut.get()) {
+            logger.log(logLevel, "Timed out while waiting for analytics event processing.", null);
         }
     }
 }
