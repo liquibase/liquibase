@@ -237,7 +237,7 @@ public class LiquibaseCommandLine {
             cause = cause.getCause();
         }
 
-        if (StringUtil.isEmpty(uiMessage)) {
+        if (StringUtils.isEmpty(uiMessage)) {
             uiMessage = exception.getClass().getName();
         }
 
@@ -898,6 +898,7 @@ public class LiquibaseCommandLine {
 
     private void addSubcommand(CommandDefinition commandDefinition, CommandLine rootCommand) {
         List<String[]> commandNames = expandCommandNames(commandDefinition);
+        Boolean showHidden = LiquibaseCommandLineConfiguration.SHOW_HIDDEN_ARGS.getCurrentValue();
 
         boolean showCommand = true;
         for (String[] commandName : commandNames) {
@@ -991,7 +992,7 @@ public class LiquibaseCommandLine {
                     if (i > 0) {
                         builder.hidden(true);
                     } else {
-                        builder.hidden(def.getHidden() && !LiquibaseCommandLineConfiguration.SHOW_HIDDEN_ARGS.getCurrentValue());
+                        builder.hidden(def.getHidden() && !showHidden);
                     }
 
                     subCommandSpec.addOption(builder.build());
