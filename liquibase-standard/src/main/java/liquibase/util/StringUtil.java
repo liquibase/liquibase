@@ -943,7 +943,7 @@ public class StringUtil {
             return null;
         }
         String reversedString = StringUtils.reverse(sqlString);
-        int length = reversedString.length();
+        int length = reversedString.length() - 1;
         int idxClosingLastChar = -1, idxOpeningFirstChar = -1;
         for (int i = 0; i < reversedString.length(); i++) {
             if (idxClosingLastChar < 0) {
