@@ -87,78 +87,135 @@ public class SnapshotGeneratorFactory {
     }
 
     /**
-     * Checks if a specific object is present in a database
-     * @param example The DatabaseObject to check for existence
-     * @param database The DBMS in which the object might exist
-     * @return true if object existence can be confirmed, false otherwise
-     * @throws DatabaseException If a problem occurs in the DBMS-specific code
-     * @throws InvalidExampleException If the object cannot be checked properly, e.g. if the object name is ambiguous
+     * Initialize the types to use for the snapshot
+     *
+     * @param example the example object to search for
+     * @param database the database to snapshot
+     * @return the Database Object types to search for
      */
-    public boolean has(DatabaseObject example, Database database) throws DatabaseException, InvalidExampleException {
-        // @todo I have seen duplicates in types - maybe convert the List into a Set? Need to understand it more thoroughly.
-        List<Class<? extends DatabaseObject>> types = new ArrayList<>(getContainerTypes(example.getClass(), database));
+    private Set<Class<? extends DatabaseObject>> initializeSnapshotTypes(DatabaseObject example, Database database) {
+        Set<Class<? extends DatabaseObject>> types = new HashSet<>(getContainerTypes(example.getClass(), database));
         types.add(example.getClass());
+        return types;
+    }
 
-        /*
-         * Does the query concern the DATABASECHANGELOG / DATABASECHANGELOGLOCK table? If so, we do a quick & dirty
-         * SELECT COUNT(*) on that table. If that works, we count that as confirmation of existence.
-         */
-        // @todo Actually, there may be extreme cases (distorted table statistics etc.) where a COUNT(*) might not be so cheap. Maybe SELECT a dummy constant is the better way?
-        LiquibaseTableNamesFactory liquibaseTableNamesFactory = Scope.getCurrentScope().getSingleton(LiquibaseTableNamesFactory.class);
-        List<String> liquibaseTableNames = liquibaseTableNamesFactory.getLiquibaseTableNames(database);
-        if ((example instanceof Table) && (liquibaseTableNames.stream().anyMatch(tableName -> example.getName().equals(tableName)))) {
+    /**
+     * Check if the example object is a liquibase managed table
+     *
+     * @param example the database object to search for
+     * @param database the database to search
+     * @param liquibaseTableNames the list of liquibase table names
+     * @return true if the table exists, false otherwise
+     * @throws DatabaseException if there was an exception encountered when rolling back the postgres database
+     */
+    private boolean checkLiquibaseTablesExistence(DatabaseObject example, Database database, List<String> liquibaseTableNames) throws DatabaseException {
+        if (example instanceof Table && liquibaseTableNames.contains(example.getName())) {
             try {
-                //
-                // Handle MariaDB differently to avoid the
-                // Error: 1146-42S02: Table 'intuser_db.DATABASECHANGELOGLOCK' doesn't exist
-                //
                 if (database instanceof MariaDBDatabase) {
+                    // Handle MariaDB differently to avoid the
+                    // Error: 1146-42S02: Table 'intuser_db.DATABASECHANGELOGLOCK' doesn't exist
                     String sql = "select table_name from information_schema.TABLES where TABLE_SCHEMA = ? and TABLE_NAME = ?;";
                     List<Map<String, ?>> res = Scope.getCurrentScope().getSingleton(ExecutorService.class)
                             .getExecutor("jdbc", database)
                             .queryForList(new RawParameterizedSqlStatement(sql, database.getLiquibaseCatalogName(), example.getName()));
                     return !res.isEmpty();
                 }
+                // Does the query concern the DATABASECHANGELOG / DATABASECHANGELOGLOCK table? If so, we do a quick & dirty
+                // SELECT COUNT(*) on that table. If that works, we count that as confirmation of existence.
+                // @todo Actually, there may be extreme cases (distorted table statistics etc.) where a COUNT(*) might not be so cheap. Maybe SELECT a dummy constant is the better way?
                 Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForInt(
-                    new RawParameterizedSqlStatement(String.format("SELECT COUNT(*) FROM %s",
-                        database.escapeObjectName(database.getLiquibaseCatalogName(),
-                        database.getLiquibaseSchemaName(), example.getName(), Table.class))));
+                        new RawParameterizedSqlStatement(String.format("SELECT COUNT(*) FROM %s",
+                                database.escapeObjectName(database.getLiquibaseCatalogName(),
+                                        database.getLiquibaseSchemaName(), example.getName(), Table.class))));
                 return true;
             } catch (DatabaseException e) {
-                if (database instanceof PostgresDatabase) { // throws "current transaction is aborted" unless we roll back the connection
-                    database.rollback();
+                if (database instanceof PostgresDatabase) {
+                    database.rollback(); // throws "current transaction is aborted" unless we roll back the connection
                 }
                 return false;
             }
         }
+        return false;
+    }
 
-        /*
-          * If the query is about another object, try to create a snapshot of the of the object (or used the cached
-          * snapshot. If that works, we count that as confirmation of existence.
-          */
-
-        SnapshotControl snapshotControl = (new SnapshotControl(database, false, types.toArray(new Class[0])));
-        snapshotControl.setWarnIfObjectNotFound(false);
-
-        if (createSnapshot(example, database,snapshotControl) != null) {
+    /**
+     * Create and search the database snapshot for the example object.
+     *
+     * @param example The DatabaseObject to check for existence
+     * @param database The DBMS in which the object might exist
+     * @param snapshotControl the snapshot configuration to use
+     * @return true if the example object exists, false otherwise
+     * @throws DatabaseException if there was a problem searching the DBMS
+     * @throws InvalidExampleException if provided an invalid example DatabaseObject
+     */
+    private boolean createAndCheckSnapshot(DatabaseObject example, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
+        if (createSnapshot(example, database, snapshotControl) != null) {
             return true;
         }
-        CatalogAndSchema catalogAndSchema;
-        if (example.getSchema() == null) {
-            catalogAndSchema = database.getDefaultSchema();
-        } else {
-            catalogAndSchema = example.getSchema().toCatalogAndSchema();
-        }
-        DatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database,
-            new SnapshotControl(database, false, example.getClass()).setWarnIfObjectNotFound(false)
-        );
-
+        CatalogAndSchema catalogAndSchema = example.getSchema() == null ? database.getDefaultSchema() : example.getSchema().toCatalogAndSchema();
+        SnapshotControl replacedSnapshotControl = new SnapshotControl(database, false, example.getClass());
+        replacedSnapshotControl.setWarnIfObjectNotFound(false);
+        replacedSnapshotControl.setSearchNestedObjects(snapshotControl.shouldSearchNestedObjects());
+        DatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database, snapshotControl);
         for (DatabaseObject obj : snapshot.get(example.getClass())) {
             if (DatabaseObjectComparatorFactory.getInstance().isSameObject(example, obj, null, database)) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Checks if a specific object is present in a database
+     *
+     * @param example  The DatabaseObject to check for existence
+     * @param database The DBMS in which the object might exist
+     * @return true if object exists, false otherwise
+     * @throws DatabaseException       If a problem occurs in the DBMS-specific code
+     * @throws InvalidExampleException If the object cannot be checked properly, e.g. if the object name is ambiguous
+     */
+    public boolean has(DatabaseObject example, Database database) throws DatabaseException, InvalidExampleException {
+        return checkExistence(example, database, true);
+    }
+
+    /**
+     * Checks if a specific object is present in a database. When using this method the database snapshot will
+     * NOT search through nested objects.
+     *
+     * @param example  The DatabaseObject to check for existence
+     * @param database The DBMS in which the object might exist
+     * @return true if object exists, false otherwise
+     * @throws DatabaseException       If a problem occurs in the DBMS-specific code
+     * @throws InvalidExampleException If the object cannot be checked properly, e.g. if the object name is ambiguous
+     */
+    public boolean hasIgnoreNested(DatabaseObject example, Database database) throws DatabaseException, InvalidExampleException {
+        return checkExistence(example, database, false);
+    }
+
+    /**
+     * Common method to check if a specific object is present in a database
+     *
+     * @param example   The DatabaseObject to check for existence
+     * @param database  The DBMS in which the object might exist
+     * @param searchNestedObjects Whether to use fast check
+     * @return true if object existence can be confirmed, false otherwise
+     * @throws DatabaseException       If a problem occurs in the DBMS-specific code
+     * @throws InvalidExampleException If the object cannot be checked properly, e.g. if the object name is ambiguous
+     */
+    private boolean checkExistence(DatabaseObject example, Database database, boolean searchNestedObjects) throws DatabaseException, InvalidExampleException {
+        Set<Class<? extends DatabaseObject>> types = initializeSnapshotTypes(example, database);
+        LiquibaseTableNamesFactory liquibaseTableNamesFactory = Scope.getCurrentScope().getSingleton(LiquibaseTableNamesFactory.class);
+        List<String> liquibaseTableNames = liquibaseTableNamesFactory.getLiquibaseTableNames(database);
+
+        if (checkLiquibaseTablesExistence(example, database, liquibaseTableNames)) {
+            return true;
+        }
+
+        SnapshotControl snapshotControl = new SnapshotControl(database, false, types.toArray(new Class[0]));
+        snapshotControl.setWarnIfObjectNotFound(false);
+        snapshotControl.setSearchNestedObjects(searchNestedObjects);
+
+        return createAndCheckSnapshot(example, database, snapshotControl);
     }
 
     public DatabaseSnapshot createSnapshot(CatalogAndSchema example, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
