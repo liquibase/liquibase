@@ -3,6 +3,7 @@ package org.liquibase.maven.plugins;
 import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
+import liquibase.analytics.configuration.AnalyticsArgs;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
@@ -715,6 +716,13 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected Boolean databaseChangelogHistoryCaptureExtensions;
 
     /**
+     * Enable or disable sending product usage data and analytics to Liquibase.
+     *
+     * @parameter property="liquibase.analyticsEnabled"
+     */
+    @PropertyElement(key = "liquibase.analytics.enabled")
+    protected Boolean analyticsEnabled;
+    /**
      * Specifies the vault URL
      *
      * @parameter property="liquibase.vault.addr"
@@ -899,6 +907,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 scopeValues.put(Scope.Attr.resourceAccessor.name(), getResourceAccessor(mavenClassLoader));
                 scopeValues.put(Scope.Attr.classLoader.name(), getClassLoaderIncludingProjectClasspath());
                 scopeValues.put(Scope.Attr.mavenConfigurationProperties.name(), getConfigurationProperties());
+                if (analyticsEnabled != null) {
+                    scopeValues.put(AnalyticsArgs.ENABLED.getKey(), analyticsEnabled);
+                }
                 handleVaultProperties(scopeValues);
 
                 IntegrationDetails integrationDetails = new IntegrationDetails();
@@ -936,7 +947,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 //
                 // Add properties to this top-level scope
                 //
-                scopeValues.put("integrationDetails", integrationDetails);
+                scopeValues.put(Scope.Attr.integrationDetails.name(), integrationDetails);
                 scopeValues.put("liquibase.licenseKey", getLicenseKey());
                 String key = GlobalConfiguration.PRESERVE_SCHEMA_CASE.getKey();
                 scopeValues.put(key, preserveSchemaCase);

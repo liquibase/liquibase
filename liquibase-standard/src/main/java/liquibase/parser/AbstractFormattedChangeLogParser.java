@@ -12,6 +12,7 @@ import liquibase.changeset.ChangeSetService;
 import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.ExceptionUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import org.apache.commons.lang3.NotImplementedException;
@@ -301,6 +302,9 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         changeLog.setChangeLogParameters(changeLogParameters);
 
         changeLog.setPhysicalFilePath(physicalChangeLogLocation);
+        ExceptionUtil.doSilently(() -> {
+            Scope.getCurrentScope().getAnalyticsEvent().incrementFormattedSqlChangelogCount();
+        });
 
         try (BufferedReader reader = new BufferedReader(StreamUtil.readStreamWithReader(openChangeLogFile(physicalChangeLogLocation, resourceAccessor), null))) {
             StringBuilder currentSequence = new StringBuilder();
