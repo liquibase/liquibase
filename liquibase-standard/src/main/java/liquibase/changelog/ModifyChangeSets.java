@@ -3,6 +3,7 @@ package liquibase.changelog;
 import liquibase.Scope;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
+import liquibase.util.ObjectUtil;
 import lombok.Getter;
 
 /**
@@ -25,7 +26,7 @@ public class ModifyChangeSets {
         this.runWithSpool = (String) node.getChildValue(null, "runWithSpoolFile");
         Object stripCommentsValue = node.getChildValue(null, "stripComments");
         if (stripCommentsValue != null) {
-            this.stripComments = (boolean)stripCommentsValue;
+            this.stripComments = ObjectUtil.convert(stripCommentsValue, Boolean.class);
         } else {
             this.stripComments = false;
         }

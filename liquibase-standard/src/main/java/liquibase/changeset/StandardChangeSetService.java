@@ -8,6 +8,7 @@ import liquibase.changelog.ModifyChangeSets;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
+import liquibase.util.ObjectUtil;
 
 /**
  *
@@ -45,7 +46,7 @@ public class StandardChangeSetService implements ChangeSetService {
         Object stripCommentsValue = node.getChildValue(null, "stripComments");
         boolean stripComments = false;
         if (stripCommentsValue != null) {
-            stripComments = (boolean)stripCommentsValue;
+            stripComments = ObjectUtil.convert(stripCommentsValue, Boolean.class);
         }
         return new ModifyChangeSets(
                 (String) node.getChildValue(null, "runWith"),
