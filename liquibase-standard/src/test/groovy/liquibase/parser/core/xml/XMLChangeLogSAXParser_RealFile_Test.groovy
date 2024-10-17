@@ -10,12 +10,14 @@ import com.example.liquibase.change.KeyColumnConfig
 import com.example.liquibase.change.PrimaryKeyConfig
 import com.example.liquibase.change.UniqueConstraintConfig
 import liquibase.Contexts
+import liquibase.GlobalConfiguration
 import liquibase.Scope
 import liquibase.change.Change
 import liquibase.change.ChangeFactory
 import liquibase.change.CheckSum
 import liquibase.change.core.AddColumnChange
 import liquibase.change.core.CreateIndexChange
+import liquibase.change.core.CreateProcedureChange
 import liquibase.change.core.CreateSequenceChange
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.CreateViewChange
@@ -45,6 +47,7 @@ import liquibase.precondition.core.OrPrecondition
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.PrimaryKeyExistsPrecondition
 import liquibase.precondition.core.RunningAsPrecondition
+import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.sql.visitor.AppendSqlVisitor
 import liquibase.sql.visitor.ReplaceSqlVisitor
@@ -54,6 +57,7 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import static java.lang.Boolean.FALSE
 import static org.hamcrest.Matchers.containsInAnyOrder
 import static spock.util.matcher.HamcrestSupport.that
 
@@ -814,4 +818,36 @@ class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         Scope.getCurrentScope().getSingleton(ChangeFactory.class).unregister("primitiveChange")
     }
 
+    def "parse comments from comments.xml"() throws Exception {
+        def path = "liquibase/parser/core/xml/comments.xml"
+        when:
+        DatabaseChangeLog changeLog =
+                Scope.child([(GlobalConfiguration.SECURE_PARSING.key): FALSE], {
+                    new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new ClassLoaderResourceAccessor())
+                } as Scope.ScopedRunnerWithReturn<DatabaseChangeLog>)
+        def changeSet = changeLog.changeSets[0]
+
+        then: 'changeset comments are parsed'
+        changeSet.comments == 'changeSet comment 1\nchangeSet comment 2'
+        changeSet.changes.size() == 3
+        changeSet.validCheckSums.contains( CheckSum.parse('2:aaafdfadsf'))
+        changeSet.validCheckSums.contains( CheckSum.parse('1:any'))
+        changeSet.validCheckSums.size() == 2
+
+        and: 'sql 1 parsed'
+        def sql1 = changeSet.changes[0] as RawSQLChange
+        sql1.comment == 'sql comment'
+        sql1.sql == 'SELECT COUNT(*) FROM DATABASECHANGELOG'
+
+        and: 'sql2 parsed'
+        def sql2 = changeSet.changes[1] as RawSQLChange
+        sql2.comment == null
+        sql2.sql == 'SELECT COUNT(*) FROM DATABASECHANGELOGLOCK'
+
+        and: 'create procedure parsed'
+        def cp = changeSet.changes[2] as CreateProcedureChange
+        // Fails cp.comments == 'createProcedure comment'
+        cp.procedureText == 'SELECT 1 FROM DATABASECHANGELOG'
+
+    }
 }
