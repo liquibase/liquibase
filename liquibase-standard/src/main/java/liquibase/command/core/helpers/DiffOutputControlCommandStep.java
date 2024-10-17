@@ -23,6 +23,7 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
 
     public static final CommandResultDefinition<DiffOutputControl> DIFF_OUTPUT_CONTROL;
 
+    public static final CommandArgumentDefinition<Boolean> PRESERVE_NULL_VALUES;
 
     static {
         final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -34,6 +35,9 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
                 .description("Include the tablespace attribute in the changelog. Defaults to false.").build();
 
         DIFF_OUTPUT_CONTROL = builder.result("diffOutputControl", DiffOutputControl.class).build();
+
+        PRESERVE_NULL_VALUES = builder.argument("preserverNullValues", Boolean.class).defaultValue(true)
+                .description("If true, preserves NULL values in columns. Defaults to true.").build();
     }
 
     @Override
@@ -81,6 +85,8 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
         if (objectChangeFilter != null) {
             diffOutputControl.setObjectChangeFilter(objectChangeFilter);
         }
+
+        diffOutputControl.setPreserveNullValues(commandScope.getArgumentValue(PRESERVE_NULL_VALUES));
 
         return diffOutputControl;
     }

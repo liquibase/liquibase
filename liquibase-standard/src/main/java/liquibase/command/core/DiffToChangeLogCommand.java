@@ -71,6 +71,7 @@ public class DiffToChangeLogCommand extends DiffCommand {
         commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, getDiffOutputControl().getIncludeSchema());
         commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_CATALOG_ARG, getDiffOutputControl().getIncludeCatalog());
         commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_TABLESPACE_ARG, getDiffOutputControl().getIncludeTablespace());
+        commandScope.addArgumentValue(DiffOutputControlCommandStep.PRESERVE_NULL_VALUES, getDiffOutputControl().getPreserveNullValues());
 
         commandScope.setOutput(getOutputStream());
         commandScope.execute();
