@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
@@ -38,6 +39,7 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
         Level logLevel = AnalyticsArgs.LOG_LEVEL.getCurrentValue();
         String url = AnalyticsArgs.CONFIG_ENDPOINT_URL.getCurrentValue();
         AtomicReference<RemoteAnalyticsConfiguration> remoteAnalyticsConfiguration = new AtomicReference<>();
+        AtomicBoolean timedOut = new AtomicBoolean(true);
         Thread thread = new Thread(() -> {
             try {
                 InputStream input = new URL(url).openStream();
@@ -47,9 +49,13 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
             } catch (Exception e) {
                 log.log(logLevel, "Failed to load analytics configuration from " + url, e);
             }
+            timedOut.set(false);
         });
         thread.start();
         thread.join(AnalyticsArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getCurrentValue());
+        if (timedOut.get()) {
+            log.log(logLevel, "Timed out while attempting to load analytics configuration from " + url, null);
+        }
         return remoteAnalyticsConfiguration.get();
     });
 
