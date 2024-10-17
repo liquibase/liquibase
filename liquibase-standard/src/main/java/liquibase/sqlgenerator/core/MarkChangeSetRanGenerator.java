@@ -60,7 +60,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                 final String description = StringUtil.limitSize(changeSet.getDescription(), 250);
                 final String md5Sum = changeSet.generateCheckSum(ChecksumVersion.latest()).toString();
 				final String execType = statement.getExecType().value;
-				final String deploymentId = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getDeploymentId();
+				final String deploymentId = Scope.getCurrentScope().getDeploymentId();
 
 				if (statement.getExecType().ranBefore) {
 	                runStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
