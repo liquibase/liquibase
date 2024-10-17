@@ -3,7 +3,6 @@ package liquibase.integration.spring;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
-import liquibase.command.core.UnexpectedChangesetsCommandStep;
 import liquibase.exception.LiquibaseException;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
