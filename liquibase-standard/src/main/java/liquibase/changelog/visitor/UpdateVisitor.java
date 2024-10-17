@@ -129,6 +129,12 @@ public class UpdateVisitor implements ChangeSetVisitor {
             fireRunFailed(changeSet, databaseChangeLog, database, e);
             throw e;
         }
+
+        if (!(executor instanceof LoggingExecutor)) {
+            Scope.getCurrentScope().getUI().sendMessage("Ran Changeset    : " + changeSet + " [" + changeSet.getExecutionMilliseconds() + "ms]");
+        }
+        Scope.getCurrentScope().getLog(getClass()).fine("Ran Changeset    : " + changeSet + " [" + changeSet.getExecutionMilliseconds() + "ms]");
+
         if (!Objects.equals(runStatus, RunStatus.NOT_RAN) && Objects.equals(execType, ExecType.EXECUTED)) {
             execType = ExecType.RERAN;
         }
