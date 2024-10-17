@@ -16,12 +16,32 @@ import java.util.function.Consumer;
 
 public class UnexpectedChangeSetsCustomizer<T extends Liquibase> implements Customizer<T>, ApplicationListener<ContextRefreshedEvent> {
 
-    private final Set<ChangeSetInfo> applied = new HashSet<>(), unexpected = new HashSet<>();
+    private final Set<ChangeSetInfo> applied, unexpected;
 
     private final Consumer<Set<ChangeSetInfo>> unexpectedChangeSetsConsumer;
 
+    private final Contexts contexts;
+    private final LabelExpression labelExpression;
+
     public UnexpectedChangeSetsCustomizer(Consumer<Set<ChangeSetInfo>> unexpectedChangeSetsConsumer) {
         this.unexpectedChangeSetsConsumer = unexpectedChangeSetsConsumer;
+        contexts = new Contexts();
+        labelExpression = new LabelExpression();
+        applied = new HashSet<>();
+        unexpected = new HashSet<>();
+    }
+
+    UnexpectedChangeSetsCustomizer(
+            Set<ChangeSetInfo> applied,
+            Set<ChangeSetInfo> unexpected,
+            Consumer<Set<ChangeSetInfo>> unexpectedChangeSetsConsumer,
+            Contexts contexts,
+            LabelExpression labelExpression) {
+        this.applied = applied;
+        this.unexpected = unexpected;
+        this.unexpectedChangeSetsConsumer = unexpectedChangeSetsConsumer;
+        this.contexts = contexts;
+        this.labelExpression = labelExpression;
     }
 
     @Override
@@ -42,6 +62,18 @@ public class UnexpectedChangeSetsCustomizer<T extends Liquibase> implements Cust
         } catch (LiquibaseException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    public Customizer<T> with(SpringLiquibase liquibase) {
+        return with(new Contexts(liquibase.getContexts()), new LabelExpression(liquibase.getLabelFilter()));
+    }
+
+    public Customizer<T> with(Contexts contexts, LabelExpression labelExpression) {
+        return new UnexpectedChangeSetsCustomizer<>(applied,
+                unexpected,
+                unexpectedChangeSetsConsumer,
+                contexts,
+                labelExpression);
     }
 
     @Override
