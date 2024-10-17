@@ -4,7 +4,6 @@ import liquibase.ChecksumVersion;
 import liquibase.Scope;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StreamUtil;
 import org.junit.Test;

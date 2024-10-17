@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.changelog.StandardChangeLogHistoryService;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.SybaseDatabase;
@@ -40,7 +41,7 @@ public class CreateDatabaseChangeLogTableGeneratorSybase extends AbstractSqlGene
                             "DATEEXECUTED " + DataTypeFactory.getInstance().fromDescription("datetime", database).toDatabaseDataType(database) + " NOT NULL, " +
                             "ORDEREXECUTED INT NOT NULL, " +
                             "EXECTYPE VARCHAR(10) NOT NULL, " +
-                            "MD5SUM VARCHAR(35) NULL, " +
+                            "MD5SUM VARCHAR(" + StandardChangeLogHistoryService.MD5_COLUMN_SIZE + ") NULL, " +
                             "DESCRIPTION VARCHAR(255) NULL, " +
                             "COMMENTS VARCHAR(255) NULL, " +
                             "TAG VARCHAR(255) NULL, " +
