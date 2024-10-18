@@ -19,12 +19,14 @@
              src="${liquibase.test.ant.basedir}/sql/h2-setup.sql"/>
         <mkdir dir="${temp.dir}"/>
         <lb:updateDatabase databaseref="test-db" changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"/>
+        <db:startTestAnalyticsWebserver/>
     </target>
 
     <target name="tearDown">
         <sql driver="${jdbc.driver}" url="${jdbc.url}" userid="${db.user}" password="${db.password}" encoding="UTF-8"
              src="${liquibase.test.ant.basedir}/sql/h2-teardown.sql"/>
         <delete dir="${temp.dir}"/>
+        <db:stopTestAnalyticsWebserver/>
     </target>
 
     <target name="testDropAllTask">
@@ -33,6 +35,7 @@
             <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
         </lb:dropAllDatabaseObjects>
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}" table="TEST_USERS"/>
+        <db:assertAnalyticsPostBodyIsAnt/>
     </target>
 
     <target name="testDropAllTaskDatabaseRef">
@@ -41,5 +44,6 @@
         <lb:dropAllDatabaseObjects databaseref="test-db"/>
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                                     table="TEST_USERS"/>
+        <db:assertAnalyticsPostBodyIsAnt/>
     </target>
 </project>

@@ -21,6 +21,7 @@ import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
+import liquibase.util.ExceptionUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -83,6 +84,10 @@ public class SqlChangeLogParser implements ChangeLogParser {
         changeSet.addChange(change);
 
         changeLog.addChangeSet(changeSet);
+
+        ExceptionUtil.doSilently(() -> {
+            Scope.getCurrentScope().getAnalyticsEvent().incrementSqlChangelogCount();
+        });
 
         return changeLog;
     }
