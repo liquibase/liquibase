@@ -128,7 +128,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
             Scope.getCurrentScope().addMdcValue(MdcKey.ROWS_AFFECTED, String.valueOf(rowsAffected.get()));
             logDeploymentOutcomeMdc(changeExecListener, true, updateReportParameters);
-            postUpdateLog(rowsAffected.get());
+            postUpdateLog(rowsAffected.get(), runChangeLogIterator.getExceptionChangeSets());
         } catch (Exception e) {
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
             addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
@@ -283,12 +283,42 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         isFastCheckEnabled = fastCheckEnabled;
     }
 
-    /**
-     * Log
-     */
-    @Beta
-    public void postUpdateLog(int rowsAffected) {
 
+    /**
+     * Generate post update log messages
+     * @param rowsAffected # of rows affected
+     * @param exceptionChangeSets list of changesets that failed
+     */
+    public void postUpdateLog(int rowsAffected, List<ChangeSet> exceptionChangeSets) {
+    }
+
+    /**
+     * Generic method called by all Update commands that actually apply the change to the database (ie !update-sql)
+     * @param rowsAffected
+     * @param exceptionChangeSets
+     */
+    protected void postUpdateLogForActualUpdate(int rowsAffected, List<ChangeSet> exceptionChangeSets) {
+        if (exceptionChangeSets != null && !exceptionChangeSets.isEmpty()) {
+            Scope.getCurrentScope().getUI().sendMessage("Errors encountered while deploying the following changesets, for more information use the --log-level flag: ");
+            for (ChangeSet changeSet : exceptionChangeSets) {
+                Scope.getCurrentScope().getUI().sendMessage("     " + changeSet.toString(false));
+            }
+            Scope.getCurrentScope().getUI().sendMessage("");
+        }
+        if (rowsAffected > -1) {
+            Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("update.successful.with.row.count"), rowsAffected));
+        } else {
+            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
+        }
+    }
+
+
+    /**
+     * @deprecated Use {@link #postUpdateLog(int, List)} instead
+     */
+    @Deprecated
+    public void postUpdateLog(int rowsAffected) {
+        this.postUpdateLog(rowsAffected, Collections.emptyList());
     }
 
     protected void setDBLock(boolean locked) {
