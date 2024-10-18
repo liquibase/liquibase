@@ -82,10 +82,11 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         customMdcLogging(commandScope);
 
         ChangeExecListener changeExecListener = getChangeExecListener(resultsBuilder, commandScope);
+        ChangeLogIterator runChangeLogIterator = null;
         try {
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
             updateReportParameters.setChangelogArgValue(databaseChangeLog.getFilePath());
-            ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
+            runChangeLogIterator = getStandardChangelogIterator(commandScope, database, contexts, labelExpression, databaseChangeLog);
             preRun(commandScope, runChangeLogIterator, changeLogParameters);
             if (isFastCheckEnabled && isUpToDate(commandScope, database, databaseChangeLog, contexts, labelExpression, resultsBuilder.getOutputStream())) {
                 updateReportParameters.getOperationInfo().setRowsAffected(0);
@@ -109,12 +110,13 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             HashMap<String, Object> scopeValues = new HashMap<>();
             scopeValues.put("showSummary", getShowSummary(commandScope));
             scopeValues.put(ROWS_AFFECTED_SCOPE_KEY, rowsAffected);
+            ChangeLogIterator finalRunChangeLogIterator = runChangeLogIterator;
             Scope.child(scopeValues, () -> {
                 try {
-                    runChangeLogIterator.run(new UpdateVisitor(database, changeExecListener, new ShouldRunChangeSetFilter(database)),
+                    finalRunChangeLogIterator.run(new UpdateVisitor(database, changeExecListener, new ShouldRunChangeSetFilter(database)),
                             new RuntimeEnvironment(database, contexts, labelExpression));
                 } finally {
-                    UpdateSummaryDetails details = ShowSummaryUtil.buildSummaryDetails(databaseChangeLog, getShowSummary(commandScope), getShowSummaryOutput(commandScope), statusVisitor, resultsBuilder.getOutputStream(), runChangeLogIterator, changeExecListener);
+                    UpdateSummaryDetails details = ShowSummaryUtil.buildSummaryDetails(databaseChangeLog, getShowSummary(commandScope), getShowSummaryOutput(commandScope), statusVisitor, resultsBuilder.getOutputStream(), finalRunChangeLogIterator, changeExecListener);
                     if (details != null) {
                         updateReportParameters.getOperationInfo().setUpdateSummaryMsg(details.getOutput());
                         updateReportParameters.getChangesetInfo().addAllToPendingChangesetInfoList(details.getSkipped());
@@ -127,12 +129,12 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             resultsBuilder.addResult("statusCode", 0);
             addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
             Scope.getCurrentScope().addMdcValue(MdcKey.ROWS_AFFECTED, String.valueOf(rowsAffected.get()));
-            logDeploymentOutcomeMdc(changeExecListener, true, updateReportParameters);
+            logDeploymentOutcomeMdc(changeExecListener, true, updateReportParameters, runChangeLogIterator);
             postUpdateLog(rowsAffected.get());
         } catch (Exception e) {
             DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
             addChangelogFileToMdc(getChangelogFileArg(commandScope), databaseChangeLog);
-            logDeploymentOutcomeMdc(changeExecListener, false, updateReportParameters);
+            logDeploymentOutcomeMdc(changeExecListener, false, updateReportParameters, runChangeLogIterator);
             updateReportParameters.getOperationInfo().setException(e.getCause() != null ? e.getCause().getMessage() : e.getMessage());
             resultsBuilder.addResult("statusCode", 1);
             throw e;
@@ -195,16 +197,27 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
     }
 
-    private void logDeploymentOutcomeMdc(ChangeExecListener defaultListener, boolean success, UpdateReportParameters updateReportParameters) {
+    private void logDeploymentOutcomeMdc(ChangeExecListener defaultListener, boolean success, UpdateReportParameters updateReportParameters,
+                                         ChangeLogIterator runChangeLogIterator) {
         String successLog = "Update command completed successfully.";
         String failureLog = "Update command encountered an exception.";
         if (defaultListener instanceof DefaultChangeExecListener) {
             List<ChangeSet> deployedChangeSets = ((DefaultChangeExecListener) defaultListener).getDeployedChangeSets();
             int deployedChangeSetCount = deployedChangeSets.size();
             List<ChangeSet> failedChangeSets = ((DefaultChangeExecListener) defaultListener).getFailedChangeSets();
+            List<ChangeSet> exceptionChangeSets;
+            int exceptionChangeSetsCount = 0;
             int failedChangeSetCount = failedChangeSets.size();
+            if (runChangeLogIterator != null && ! runChangeLogIterator.getExceptionChangeSets().isEmpty()) {
+                exceptionChangeSets = runChangeLogIterator.getExceptionChangeSets();
+                exceptionChangeSetsCount = exceptionChangeSets.size();
+                deployedChangeSetCount -= exceptionChangeSetsCount;
+                failedChangeSetCount += exceptionChangeSetsCount;
+            } else {
+                exceptionChangeSets = new ArrayList<>();
+            }
             ChangesetsUpdated changesetsUpdated = new ChangesetsUpdated(deployedChangeSets);
-            updateReportParameters.getChangesetInfo().setChangesetCount(deployedChangeSetCount + failedChangeSetCount);
+            updateReportParameters.getChangesetInfo().setChangesetCount(deployedChangeSetCount + failedChangeSetCount - exceptionChangeSetsCount);
             updateReportParameters.getChangesetInfo().setFailedChangesetCount(failedChangeSetCount);
             updateReportParameters.getChangesetInfo().addAllToChangesetInfoList(deployedChangeSets, false);
             updateReportParameters.getChangesetInfo().addAllToChangesetInfoList(failedChangeSets, false);
@@ -213,6 +226,8 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                 // and update the count to reflect only skipped(pending) changes by removing the failed count
                 updateReportParameters.getChangesetInfo().getPendingChangesetInfoList()
                         .removeIf(pendingChangesetInfo -> failedChangeSets.stream().anyMatch(changeSet -> changeSet.equals(pendingChangesetInfo.getChangeSet())));
+                updateReportParameters.getChangesetInfo().getPendingChangesetInfoList()
+                        .removeIf(pendingChangesetInfo -> exceptionChangeSets.stream().anyMatch(changeSet -> changeSet.equals(pendingChangesetInfo.getChangeSet())));
                 updateReportParameters.getChangesetInfo().setPendingChangesetCount(updateReportParameters.getChangesetInfo().getPendingChangesetCount() - failedChangeSetCount);
             }
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, String.valueOf(deployedChangeSetCount));
