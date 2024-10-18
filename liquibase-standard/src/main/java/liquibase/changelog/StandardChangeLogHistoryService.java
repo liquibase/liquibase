@@ -143,7 +143,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     Integer columnSize = type.getColumnSize();
                     checksumNotRightSize = (columnSize != null) && (columnSize < 35);
                 } else {
-                    liquibaseColumnNotRightSize = false;
+                    checksumNotRightSize = false;
                 }
             }
             boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
@@ -234,14 +234,33 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     getLabelsSize() + ")", null));
             }
 
+            boolean deploymentIdColumnNotRightSize = false;
             if (!hasDeploymentIdColumn) {
                 executor.comment("Adding missing databasechangelog.deployment_id column");
                 statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
-                    getDatabaseChangeLogTableName(), "DEPLOYMENT_ID", "VARCHAR(10)", null));
+                    getDatabaseChangeLogTableName(), "DEPLOYMENT_ID", charTypeName + "(36)", null));
                 if (database instanceof DB2Database) {
                     statementsToExecute.add(new ReorganizeTableStatement(getLiquibaseCatalogName(),
                         getLiquibaseSchemaName(), getDatabaseChangeLogTableName()));
                 }
+            }
+            else {
+                if (!(this.getDatabase() instanceof SQLiteDatabase)) {
+                    DataType type = changeLogTable.getColumn("DEPLOYMENT_ID").getType();
+                    if (type.getTypeName().toLowerCase().startsWith("varchar") || type.getTypeName().toLowerCase().startsWith("character varying")) {
+                        Integer columnSize = type.getColumnSize();
+                        deploymentIdColumnNotRightSize = (columnSize != null) && (columnSize < 36);
+                    } else {
+                        deploymentIdColumnNotRightSize = false;
+                    }
+                }
+            }
+
+            if (deploymentIdColumnNotRightSize) {
+                executor.comment("Modifying size of databasechangelog.deployment_id column");
+
+                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
+                        getDatabaseChangeLogTableName(), "DEPLOYMENT_ID", charTypeName + "(36)"));
             }
 
             SqlStatement databaseChangeLogStatement = new SelectFromDatabaseChangeLogStatement(
