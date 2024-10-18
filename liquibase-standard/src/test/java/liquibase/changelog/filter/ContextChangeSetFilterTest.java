@@ -117,6 +117,14 @@ public class ContextChangeSetFilterTest {
     }
 
     @Test
+    public void requiredContext() {
+        ContextChangeSetFilter filter = new ContextChangeSetFilter(new Contexts("@required"));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "required", null, null)).isAccepted());
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "@required", null, null)).isAccepted());
+        assertFalse(filter.accepts(new ChangeSet(null, null, false, false, null, null, null, null)).isAccepted());
+    }
+
+    @Test
     public void multiContexts() {
         ContextChangeSetFilter[] filterArray = {
                 new ContextChangeSetFilter(new Contexts("test1", "test2")),
