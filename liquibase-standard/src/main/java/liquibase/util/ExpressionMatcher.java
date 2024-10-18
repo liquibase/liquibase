@@ -115,6 +115,12 @@ public final class ExpressionMatcher {
         }
 
         for (String item : items) {
+            if (item.startsWith("@")) {
+                // If the "item" aka the context/filter to check has an @ symbol
+                // we also need to validate that it matches (excluding the @)
+                // so trim it off before validation.
+                item = item.substring(1).trim();
+            }
             if (item.equalsIgnoreCase(expression)) {
                 return !notExpression;
             }
