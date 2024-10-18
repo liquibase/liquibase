@@ -208,6 +208,10 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             List<ChangeSet> exceptionChangeSets;
             int exceptionChangeSetsCount = 0;
             int failedChangeSetCount = failedChangeSets.size();
+            //
+            // Use the changelog iterator to retrieve information about change sets which
+            // had an exception, but were marked as fail_on_error=false
+            //
             if (runChangeLogIterator != null && ! runChangeLogIterator.getExceptionChangeSets().isEmpty()) {
                 exceptionChangeSets = runChangeLogIterator.getExceptionChangeSets();
                 exceptionChangeSetsCount = exceptionChangeSets.size();
