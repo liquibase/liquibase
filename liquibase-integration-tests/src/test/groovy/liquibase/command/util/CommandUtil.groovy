@@ -64,6 +64,22 @@ class CommandUtil {
         execUpdateCountCommandInScope(resourceAccessor, db, changelogFile, count)
     }
 
+    static void runReleaseLocks(DatabaseTestSystem db) {
+        CommandScope commandScope = new CommandScope(ReleaseLocksCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+        commandScope.execute()
+    }
+
+    static void runHistory(DatabaseTestSystem db) {
+        CommandScope commandScope = new CommandScope(HistoryCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+        commandScope.execute()
+    }
+
     static void runGenerateChangelog(DatabaseTestSystem db, String outputFile) throws CommandExecutionException {
         CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())

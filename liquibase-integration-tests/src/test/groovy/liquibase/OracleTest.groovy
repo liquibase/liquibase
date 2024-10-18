@@ -5,8 +5,10 @@ import liquibase.exception.CommandExecutionException
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
+import liquibase.resource.SearchPathResourceAccessor
 import spock.lang.Shared
 import spock.lang.Specification
+import spock.lang.Timeout
 
 import java.sql.ResultSet
 
@@ -54,5 +56,36 @@ class OracleTest extends Specification {
         then:
         def exception = thrown(CommandExecutionException)
         exception.cause.message.contains("Could not find clob file: this is not a valid file path so this will error if loaded into a clob/blob type column via load data! Make sure the value of the clob is a valid path to a file containing the clob's actual value to be loaded.")
+    }
+
+    @Timeout(value = 25)
+    def "performance test"() {
+        def changelogfile = "src/test/resources/changelogs/common/example-changelog.xml"
+        when:
+        CommandUtil.runUpdateCount(oracle, changelogfile, 1)
+
+        oracle.executeSql("""
+DECLARE
+   v_counter NUMBER := 1;
+BEGIN
+   FOR i IN 1..40000 LOOP
+      INSERT INTO DATABASECHANGELOG(ID, AUTHOR, FILENAME, DATEEXECUTED, ORDEREXECUTED, EXECTYPE, MD5SUM, DESCRIPTION, COMMENTS, TAG, LIQUIBASE, CONTEXTS, LABELS, DEPLOYMENT_ID) 
+      VALUES (TO_CHAR(v_counter), 'your.name', 'big.sql', TIMESTAMP '2024-04-24 16:12:31.507774', 100, 'EXECUTED', '9:22921d38f361c5f294e6a5092bb1b654', 'sql', 'example comment', NULL, 'DEV', 'example-context', 'example-label', '3975120367');
+      v_counter := v_counter + 1;
+   END LOOP;
+END;
+""")
+        CommandUtil.runTag(oracle, "tag")
+
+        CommandUtil.runUpdateCount(oracle, changelogfile, 1)
+
+        CommandUtil.runReleaseLocks(oracle)
+
+        CommandUtil.runHistory(oracle)
+
+        CommandUtil.runRollback(new SearchPathResourceAccessor(".,target/test-classes"), oracle, changelogfile, "tag")
+
+        then:
+        noExceptionThrown()
     }
 }
