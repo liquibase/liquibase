@@ -1,6 +1,7 @@
 package liquibase.analytics.configuration;
 
 import liquibase.Scope;
+import liquibase.configuration.ConfiguredValue;
 import liquibase.logging.Logger;
 import liquibase.util.Cache;
 import lombok.Data;
@@ -71,7 +72,12 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
      * @throws Exception if there is an issue fetching the configuration
      */
     public int getTimeoutMillis() throws Exception {
-        return remoteAnalyticsConfiguration.get().getTimeoutMs();
+        ConfiguredValue<Integer> userTimeoutMillis = AnalyticsArgs.TIMEOUT_MILLIS.getCurrentConfiguredValue();
+        if (userTimeoutMillis.found()) {
+            return userTimeoutMillis.getValue();
+        } else {
+            return remoteAnalyticsConfiguration.get().getTimeoutMs();
+        }
     }
 
     /**
