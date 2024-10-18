@@ -1,0 +1,12 @@
+{
+   "databaseChangeLog": [
+       {
+         "modifyChangeSets": 
+         {
+           "endDelimiter" : ";",
+           "stripComments": "true",
+           "include": {"file": "liquibase/parser/core/sql/changelog.sql", "ignore": "false"}
+         }
+       }
+   ]
+}
