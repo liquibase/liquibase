@@ -10,7 +10,7 @@ import liquibase.exception.DatabaseException;
 
 import java.util.Locale;
 
-@DataTypeInfo(name = "uuid", aliases = { "uniqueidentifier", "java.util.UUID" }, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name = "uuid", aliases = { "binary(16)", "binary", "uniqueidentifier", "java.util.UUID" }, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class UUIDType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
@@ -44,6 +44,13 @@ public class UUIDType extends LiquibaseDataType {
         } catch (DatabaseException e) {
             throw new RuntimeException("UUID data type is not supported in versions lower than 10.7", e);
         }
+        try {
+            if (database instanceof MySQLDatabase && (database.getDatabaseMajorVersion() >= 8)) {
+                return new DatabaseDataType("BINARY", 16);
+            }
+        } catch (DatabaseException e) {
+            throw new RuntimeException(e);
+        }
         return new DatabaseDataType("char", 36);
     }
 
@@ -55,6 +62,11 @@ public class UUIDType extends LiquibaseDataType {
         if (database instanceof MSSQLDatabase) {
             return "'" + value.toString().toUpperCase(Locale.ENGLISH) + "'";
         }
+        // MYSQL displays binary(16) uuids as lowercase: https://dev.mysql.com/blog-archive/mysql-8-0-uuid-support/
+        // MariaDB displays as lowercase as well: https://mariadb.com/kb/en/uuid-data-type/
+        if (database instanceof MySQLDatabase) {
+            return value.toString().toLowerCase(Locale.ENGLISH);
+        }
         return super.otherToSql(value, database);
     }
 
@@ -63,4 +75,16 @@ public class UUIDType extends LiquibaseDataType {
         return LoadDataChange.LOAD_DATA_TYPE.UUID;
     }
 
+    @Override
+    public int getPriority(Database database) {
+        try {
+            if (!(database instanceof MariaDBDatabase) && database instanceof MySQLDatabase && database.getDatabaseMajorVersion() >= 8) {
+                return PRIORITY_DATABASE;
+            }
+        } catch (DatabaseException e) {
+            throw new RuntimeException(e);
+        }
+
+        return super.getPriority();
+    }
 }
