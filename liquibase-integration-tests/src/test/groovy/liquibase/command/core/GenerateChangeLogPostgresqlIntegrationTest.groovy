@@ -20,8 +20,33 @@ class GenerateChangeLogPostgresqlIntegrationTest extends Specification {
     // Postgresql has case-insensitive table / column names: 'TEST.foo' == 'tEsT.FoO' == 'test.FOO'
 
     @Shared
-    private DatabaseTestSystem db =
-            (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("postgresql")
+    private DatabaseTestSystem db = (DatabaseTestSystem) Scope.getCurrentScope()
+            .getSingleton(TestSystemFactory.class)
+            .getTestSystem("postgresql")
+
+    private void callGenerateChangeLog(
+            String outputFileName,
+            String excludeObjects,
+            String includeObjects)
+    {
+        CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, true)
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, outputFileName)
+        commandScope.addArgumentValue(PreCompareCommandStep.DIFF_TYPES_ARG, 'data')
+        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
+        if (null != excludeObjects) {
+            commandScope.addArgumentValue(DiffOutputControlCommandStep.EXCLUDE_OBJECTS, excludeObjects)
+        }
+        if (null != includeObjects) {
+            commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_OBJECTS, includeObjects)
+        }
+        OutputStream outputStream = new ByteArrayOutputStream()
+        commandScope.setOutput(outputStream)
+        commandScope.execute()
+    }
 
     def "Should export full database table TEST when neither excludeObjects nor includeObjects are used"() {
         given:
@@ -38,17 +63,7 @@ COMMIT;
 
         when:
         def outputFileName = 'test/test-classes/output.postgresql.sql'
-        CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
-        commandScope.addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, true)
-        commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, outputFileName)
-        commandScope.addArgumentValue(PreCompareCommandStep.DIFF_TYPES_ARG, 'data')
-        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
-        OutputStream outputStream = new ByteArrayOutputStream()
-        commandScope.setOutput(outputStream)
-        commandScope.execute()
+        callGenerateChangeLog (outputFileName, null, null)
 
         then:
         def outputFile = new File(outputFileName)
@@ -84,18 +99,7 @@ COMMIT;
 
         when:
         def outputFileName = 'test/test-classes/output.postgresql.sql'
-        CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
-        commandScope.addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, true)
-        commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, outputFileName)
-        commandScope.addArgumentValue(PreCompareCommandStep.DIFF_TYPES_ARG, 'data')
-        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
-        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_OBJECTS, "table:TEST, column:(?!foo\$).*") // skip only 'foo'
-        OutputStream outputStream = new ByteArrayOutputStream()
-        commandScope.setOutput(outputStream)
-        commandScope.execute()
+        callGenerateChangeLog (outputFileName, null, 'table:TEST, column:(?!foo\$).*') // skip only 'foo'
 
         then:
         def outputFile = new File(outputFileName)
@@ -130,18 +134,7 @@ COMMIT;
 
         when:
         def outputFileName = 'test/test-classes/output.postgresql.sql'
-        CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
-        commandScope.addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, true)
-        commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, outputFileName)
-        commandScope.addArgumentValue(PreCompareCommandStep.DIFF_TYPES_ARG, 'data')
-        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
-        commandScope.addArgumentValue(DiffOutputControlCommandStep.EXCLUDE_OBJECTS, 'column:^.foo$') // skip 'afoo' and 'bfoo'
-        OutputStream outputStream = new ByteArrayOutputStream()
-        commandScope.setOutput(outputStream)
-        commandScope.execute()
+        callGenerateChangeLog (outputFileName, 'column:^.foo$',  null) // skip 'afoo' and 'bfoo'
 
         then:
         def outputFile = new File(outputFileName)
@@ -177,18 +170,7 @@ COMMIT;
 
         when:
         def outputFileName = 'test/test-classes/output.postgresql.sql'
-        CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
-        commandScope.addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, true)
-        commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, outputFileName)
-        commandScope.addArgumentValue(PreCompareCommandStep.DIFF_TYPES_ARG, 'data')
-        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
-        commandScope.addArgumentValue(DiffOutputControlCommandStep.EXCLUDE_OBJECTS, 'column:^.FoO$') // skip 'afoo' and 'bfoo'
-        OutputStream outputStream = new ByteArrayOutputStream()
-        commandScope.setOutput(outputStream)
-        commandScope.execute()
+        callGenerateChangeLog (outputFileName, 'column:^.FoO$',  null) // skip 'afoo' and 'bfoo'
 
         then:
         def outputFile = new File(outputFileName)
@@ -225,18 +207,7 @@ COMMIT;
 
         when:
         def outputFileName = 'test/test-classes/output.postgresql.sql'
-        CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
-        commandScope.addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, true)
-        commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, outputFileName)
-        commandScope.addArgumentValue(PreCompareCommandStep.DIFF_TYPES_ARG, 'data')
-        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
-        commandScope.addArgumentValue(DiffOutputControlCommandStep.EXCLUDE_OBJECTS, 'column:^.FoO$') // skip 'afoo' and 'bfoo'
-        OutputStream outputStream = new ByteArrayOutputStream()
-        commandScope.setOutput(outputStream)
-        commandScope.execute()
+        callGenerateChangeLog (outputFileName, 'column:^.FoO$',  null) // skip 'afoo' and 'bfoo'
 
         then:
         def outputFile = new File(outputFileName)
@@ -272,18 +243,7 @@ COMMIT;
 
         when:
         def outputFileName = 'test/test-classes/output.postgresql.sql'
-        CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
-        commandScope.addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, true)
-        commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, outputFileName)
-        commandScope.addArgumentValue(PreCompareCommandStep.DIFF_TYPES_ARG, 'data')
-        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, true)
-        commandScope.addArgumentValue(DiffOutputControlCommandStep.EXCLUDE_OBJECTS, 'column:^.*') // ALL columns are excluded, this is a mistake
-        OutputStream outputStream = new ByteArrayOutputStream()
-        commandScope.setOutput(outputStream)
-        commandScope.execute()
+        callGenerateChangeLog (outputFileName, 'column:^.*',  null) // ALL columns are excluded, this is a mistake
 
         then:
         def e = thrown(CommandExecutionException)
