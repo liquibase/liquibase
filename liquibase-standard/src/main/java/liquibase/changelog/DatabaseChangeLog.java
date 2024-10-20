@@ -505,8 +505,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
                 Labels labels = new Labels(node.getChildValue(null, LABELS, String.class));
                 Boolean ignore = node.getChildValue(null, IGNORE, Boolean.class);
-                try {
-                    include(path,
+                if (this.checkPreconditions(node, resourceAccessor)) {
+                    try {
+                        include(path,
                             node.getChildValue(null, RELATIVE_TO_CHANGELOG_FILE, false),
                             node.getChildValue(null, ERROR_IF_MISSING, true),
                             resourceAccessor,
@@ -516,8 +517,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                             node.getChildValue(null, LOGICAL_FILE_PATH, String.class),
                             OnUnknownFileFormat.FAIL,
                             (ModifyChangeSets) nodeScratch.get(MODIFY_CHANGE_SETS));
-                } catch (LiquibaseException e) {
-                    throw new SetupException(e);
+                    } catch (LiquibaseException e) {
+                        throw new SetupException(e);
+                    }
                 }
                 break;
             }
@@ -548,7 +550,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 if (ignore == null) {
                     ignore = false;
                 }
-                includeAll(path,
+                if (this.checkPreconditions(node, resourceAccessor)) {
+                    includeAll(path,
                         node.getChildValue(null, RELATIVE_TO_CHANGELOG_FILE, false), resourceFilter,
                         node.getChildValue(null, ERROR_IF_MISSING_OR_EMPTY, true),
                         resourceComparator,
@@ -561,7 +564,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         node.getChildValue(null, MAX_DEPTH, Integer.MAX_VALUE),
                         node.getChildValue(null, ENDS_WITH_FILTER, ""),
                         (ModifyChangeSets) nodeScratch.get(MODIFY_CHANGE_SETS));
-                break;
+                    break;
+                }
             }
             case PRE_CONDITIONS: {
                 PreconditionContainer parsedContainer = new PreconditionContainer();
@@ -1207,6 +1211,34 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         for (ChangeSet changeSet : getChangeSets()) {
             changeSet.clearCheckSum();
         }
+    }
+
+    private boolean checkPreconditions(ParsedNode parentNode, ResourceAccessor resourceAccessor)
+				throws ParsedNodeException {
+
+        ParsedNode preconditionsNode = parentNode.getChild(null, PRE_CONDITIONS);
+
+        if(preconditionsNode != null) {
+
+            PreconditionContainer preconditionsContainer = new PreconditionContainer();
+            preconditionsContainer.load(preconditionsNode, resourceAccessor);
+
+				 for (Precondition next : preconditionsContainer.getNestedPreconditions()) {
+
+					try {
+					 next.check(Scope.getCurrentScope().getDatabase(), this);
+					} catch (PreconditionFailedException e) {
+					 Scope.getCurrentScope()
+               .getLog(DatabaseChangeLog.class)
+               .warning(String.format(
+                       "Cannot perform %s because specified %s precondition failed", parentNode.getName(), next.getName()), e);
+					 return false;
+					} catch (PreconditionErrorException e) {
+					 throw new RuntimeException(e);
+					}
+				 }
+        }
+        return true;
     }
 
     /**
