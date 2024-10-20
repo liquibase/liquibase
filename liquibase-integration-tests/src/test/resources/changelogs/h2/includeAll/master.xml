@@ -1,0 +1,24 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <property name="foo" value="bar"/>
+    <includeAll path="not_include" relativeToChangelogFile="true">
+        <preConditions onFail="WARN">
+            <tableExists tableName="NOT_EXISTANT_TABLE" />
+        </preConditions>
+    </includeAll>
+
+    <includeAll path="include" relativeToChangelogFile="true" logicalFilePath="included">
+        <preConditions onFail="WARN">
+            <changeLogPropertyDefined property="foo" value="bar"/>
+        </preConditions>
+    </includeAll>
+
+    <changeSet  id="default"  author="cagliostro">
+        <createTable tableName="DEFAULT_TABLE">
+            <column name="ID" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

@@ -1271,6 +1271,34 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
     }
 
+    private boolean checkPreconditions(ParsedNode parentNode, ResourceAccessor resourceAccessor)
+				throws ParsedNodeException {
+
+        ParsedNode preconditionsNode = parentNode.getChild(null, PRE_CONDITIONS);
+
+        if(preconditionsNode != null) {
+
+            PreconditionContainer preconditionsContainer = new PreconditionContainer();
+            preconditionsContainer.load(preconditionsNode, resourceAccessor);
+
+				 for (Precondition next : preconditionsContainer.getNestedPreconditions()) {
+
+					try {
+					 next.check(Scope.getCurrentScope().getDatabase(), this);
+					} catch (PreconditionFailedException e) {
+					 Scope.getCurrentScope()
+               .getLog(DatabaseChangeLog.class)
+               .warning(String.format(
+                       "Cannot perform %s because specified %s precondition failed", parentNode.getName(), next.getName()), e);
+					 return false;
+					} catch (PreconditionErrorException e) {
+					 throw new RuntimeException(e);
+					}
+				 }
+        }
+        return true;
+    }
+
     /**
      * Holder for the PreconditionContainer for this changelog, plus any nested changelogs.
      */

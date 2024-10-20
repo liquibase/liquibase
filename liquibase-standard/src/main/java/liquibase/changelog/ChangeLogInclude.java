@@ -1,6 +1,7 @@
 package liquibase.changelog;
 
 import liquibase.ContextExpression;
+import liquibase.precondition.core.PreconditionContainer;
 import liquibase.serializer.AbstractLiquibaseSerializable;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +17,7 @@ public class ChangeLogInclude extends AbstractLiquibaseSerializable implements C
     private Boolean relativeToChangelogFile;
     private Boolean errorIfMissing;
     private ContextExpression context;
+    private PreconditionContainer preconditions;
 
     @Override
     public Set<String> getSerializableFields() {
