@@ -84,6 +84,23 @@
     <!-- include -->
     <xsd:element name="include">
         <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="preConditions" minOccurs="0" maxOccurs="1">
+                    <xsd:complexType>
+                        <xsd:choice>
+                            <xsd:group ref="PreConditionChildren" maxOccurs="unbounded"/>
+                        </xsd:choice>
+                        <xsd:attribute name="onFailMessage" type="xsd:string"/>
+                        <xsd:attribute name="onErrorMessage" type="xsd:string"/>
+                        <xsd:attribute name="onFail"
+                                       type="onChangeSetPreconditionErrorOrFail"/>
+                        <xsd:attribute name="onError"
+                                       type="onChangeSetPreconditionErrorOrFail"/>
+                        <xsd:attribute name="onSqlOutput"
+                                       type="onChangeLogPreconditionOnSqlOutput"/>
+                    </xsd:complexType>
+                </xsd:element>
+            </xsd:sequence>
             <xsd:attribute name="id" type="xsd:string"/>
             <xsd:attribute name="author" type="xsd:string"/>
             <xsd:attribute name="file" type="xsd:string" use="required"/>
@@ -102,6 +119,23 @@
     <!-- includeAll -->
     <xsd:element name="includeAll">
         <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="preConditions" minOccurs="0" maxOccurs="1">
+                    <xsd:complexType>
+                        <xsd:choice>
+                            <xsd:group ref="PreConditionChildren" maxOccurs="unbounded"/>
+                        </xsd:choice>
+                        <xsd:attribute name="onFailMessage" type="xsd:string"/>
+                        <xsd:attribute name="onErrorMessage" type="xsd:string"/>
+                        <xsd:attribute name="onFail"
+                                       type="onChangeSetPreconditionErrorOrFail"/>
+                        <xsd:attribute name="onError"
+                                       type="onChangeSetPreconditionErrorOrFail"/>
+                        <xsd:attribute name="onSqlOutput"
+                                       type="onChangeLogPreconditionOnSqlOutput"/>
+                    </xsd:complexType>
+                </xsd:element>
+            </xsd:sequence>
             <xsd:attribute name="path" type="xsd:string" use="required"/>
             <xsd:attribute name="errorIfMissingOrEmpty" type="booleanExp" default="true"/>
             <xsd:attribute name="relativeToChangelogFile" type="booleanExp"/>

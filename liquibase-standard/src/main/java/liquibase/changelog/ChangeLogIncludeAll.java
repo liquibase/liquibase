@@ -1,6 +1,7 @@
 package liquibase.changelog;
 
 import liquibase.ContextExpression;
+import liquibase.precondition.core.PreconditionContainer;
 import liquibase.serializer.AbstractLiquibaseSerializable;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,6 +22,7 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
     private int maxDepth;
     private String endsWithFilter;
     private String logicalFilePath;
+    private PreconditionContainer preconditions;
 
     @Override
     public Set<String> getSerializableFields() {
