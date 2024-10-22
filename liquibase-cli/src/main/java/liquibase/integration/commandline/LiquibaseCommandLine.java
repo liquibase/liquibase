@@ -237,7 +237,7 @@ public class LiquibaseCommandLine {
             cause = cause.getCause();
         }
 
-        if (StringUtil.isEmpty(uiMessage)) {
+        if (StringUtils.isEmpty(uiMessage)) {
             uiMessage = exception.getClass().getName();
         }
 
@@ -246,7 +246,7 @@ public class LiquibaseCommandLine {
         //
         Level level = determineLogLevel(exception);
 
-        if (showExceptionInLog(exception)) {
+        if (ExceptionUtil.showExceptionInLog(exception)) {
             Scope.getCurrentScope().getLog(getClass()).log(level, uiMessage, exception);
         }
 
@@ -304,20 +304,6 @@ public class LiquibaseCommandLine {
             }
         }
         return 1;
-    }
-
-    //
-    // Honor the expected flag on a CommandFailedException
-    //
-    private boolean showExceptionInLog(Throwable exception) {
-        Throwable t = exception;
-        while (t != null) {
-            if (t instanceof CommandFailedException && ((CommandFailedException) t).isExpected()) {
-                return false;
-            }
-            t = t.getCause();
-        }
-        return true;
     }
 
     //
@@ -898,6 +884,7 @@ public class LiquibaseCommandLine {
 
     private void addSubcommand(CommandDefinition commandDefinition, CommandLine rootCommand) {
         List<String[]> commandNames = expandCommandNames(commandDefinition);
+        Boolean showHidden = LiquibaseCommandLineConfiguration.SHOW_HIDDEN_ARGS.getCurrentValue();
 
         boolean showCommand = true;
         for (String[] commandName : commandNames) {
@@ -991,7 +978,7 @@ public class LiquibaseCommandLine {
                     if (i > 0) {
                         builder.hidden(true);
                     } else {
-                        builder.hidden(def.getHidden() && !LiquibaseCommandLineConfiguration.SHOW_HIDDEN_ARGS.getCurrentValue());
+                        builder.hidden(def.getHidden() && !showHidden);
                     }
 
                     subCommandSpec.addOption(builder.build());

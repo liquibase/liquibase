@@ -395,6 +395,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 if (!testDef.expectedResults.isEmpty()) {
                     for (def returnedResult : results.getResults().entrySet()) {
                         def expectedResult = testDef.expectedResults.get(returnedResult.getKey())
+                        if (expectedResult == null) {
+                            // No expected result in the map so just skip this one
+                            continue
+                        }
                         def expectedValue = expectedResult instanceof Closure ? expectedResult.call() : String.valueOf(expectedResult)
                         def seenValue = String.valueOf(returnedResult.getValue())
 
@@ -1086,6 +1090,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
          */
         void runChangelog(String changeLogPath) {
             runChangelog(changeLogPath, null)
+        }
+
+        static void setSystemProperty(String key, String value) {
+            System.setProperty(key, value)
         }
 
         /**

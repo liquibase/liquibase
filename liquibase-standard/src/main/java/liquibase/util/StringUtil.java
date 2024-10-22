@@ -8,19 +8,15 @@ import liquibase.parser.LiquibaseSqlParser;
 import liquibase.parser.SqlParserFactory;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.CharUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Various utility methods for working with strings.
- * @deprecated use {@link StringUtils} instead
- */
 public class StringUtil {
     private static final Pattern upperCasePattern = Pattern.compile(".*[A-Z].*");
     private static final Pattern lowerCasePattern = Pattern.compile(".*[a-z].*");
@@ -110,16 +106,21 @@ public class StringUtil {
             }
 
             if (isInClause == 0 && splitStatements && (piece instanceof String) && isDelimiter((String) piece, previousPiece, endDelimiter)) {
-                String sentenceWithoutDelimiter = removeEndDelimiterIfItsASlash(endDelimiter, currentString);
-                String trimmedString = sentenceWithoutDelimiter.isEmpty() ? StringUtil.trimToNull(currentString.toString()):StringUtil.trimToNull(sentenceWithoutDelimiter);
+                String trimmedString;
+                if (Boolean.TRUE.equals(GlobalConfiguration.STRICT.getCurrentValue())) {
+                    String sentenceWithoutDelimiter = removeEndDelimiterIfItsASlash(endDelimiter, currentString);
+                    trimmedString = sentenceWithoutDelimiter.isEmpty() ? StringUtils.trimToNull(currentString.toString()) : StringUtils.trimToNull(sentenceWithoutDelimiter);
+                } else {
+                    trimmedString = StringUtils.trimToNull(currentString.toString());
+                }
                 if (trimmedString != null) {
                     returnArray.add(trimmedString);
                 }
                 currentString = new StringBuilder();
                 previousDelimiter = true;
             } else {
-                if (!previousDelimiter || (StringUtil.trimToNull((String) piece) != null)) { //don't include whitespace after a delimiter
-                    if ((currentString.length() > 0) || (StringUtil.trimToNull((String) piece) != null)) { //don't include whitespace before the statement
+                if (!previousDelimiter || (StringUtils.trimToNull((String) piece) != null)) { //don't include whitespace after a delimiter
+                    if ((currentString.length() > 0) || (StringUtils.trimToNull((String) piece) != null)) { //don't include whitespace before the statement
                         currentString.append(piece);
                     }
                 }
@@ -128,7 +129,7 @@ public class StringUtil {
             previousPiece = (String) piece;
         }
 
-        String trimmedString = StringUtil.trimToNull(currentString.toString());
+        String trimmedString = StringUtils.trimToNull(currentString.toString());
         if (trimmedString != null) {
             returnArray.add(trimmedString);
         }
@@ -225,8 +226,13 @@ public class StringUtil {
         } else {
             if (endDelimiter.length() == 1) {
                 if ("/".equals(endDelimiter)) {
-                    if (previousPiece != null) {
-                        return previousPiece.contentEquals(endDelimiter) && piece.startsWith("\n");
+                    if (Boolean.TRUE.equals(GlobalConfiguration.STRICT.getCurrentValue())) {
+                        if (previousPiece != null) {
+                            return previousPiece.contentEquals(endDelimiter) && piece.startsWith("\n");
+                        }
+                    } else if (previousPiece != null && !previousPiece.endsWith("\n")) {
+                        //don't count /'s the are there for comments for division signs or any other use besides a / at the beginning of a line
+                        return false;
                     }
                 }
                 return StringUtils.equalsIgnoreCase(piece, endDelimiter);
@@ -374,7 +380,7 @@ public class StringUtil {
      * @return The String without the comments in
      */
     public static String stripComments(String multiLineSQL, ChangeSet changeSet) {
-        if (StringUtil.isEmpty(multiLineSQL)) {
+        if (StringUtils.isEmpty(multiLineSQL)) {
             return multiLineSQL;
         }
         SqlParserFactory sqlParserFactory = Scope.getCurrentScope().getSingleton(SqlParserFactory.class);
@@ -768,7 +774,12 @@ public class StringUtil {
      * @return an identifier of the desired length
      */
     public static String randomIdentifier(int len) {
-        return RandomStringUtils.random(len, true, false);
+        final String AB = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++)
+            sb.append(AB.charAt(ThreadLocalRandom.current().nextInt(AB.length())));
+        return sb.toString();
     }
 
     /**
@@ -779,11 +790,12 @@ public class StringUtil {
             return null;
         }
 
-        if (string.length() == 1) {
+        int length = string.length();
+        if (length == 1) {
             return string;
         }
 
-        StringBuilder outString = new StringBuilder();
+        StringBuilder outString = new StringBuilder(length);
         char[] charString = string.toCharArray();
         for (int i = 0; i < charString.length; i++) {
             char letter = charString[i];
@@ -1106,7 +1118,7 @@ public class StringUtil {
             }
         } catch (UnsupportedEncodingException uoe) {
             // Consume and fall through
-            Scope.getCurrentScope().getLog(StringUtil.class).warning("Error using encoding " + encoding);
+            Scope.getCurrentScope().getLog(StringUtil.class).warning("Error using encoding " + encoding + ": " + uoe);
         }
         return string.getBytes(StandardCharsets.UTF_8);
     }

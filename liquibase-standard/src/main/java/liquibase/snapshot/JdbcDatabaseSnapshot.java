@@ -537,9 +537,6 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         }
                     } catch (SQLException sqle) {
                         throw new RuntimeException(sqle);
-                        //
-                        // Do not stop
-                        //
                     }
                     return;
                 }
@@ -591,6 +588,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     //
                     // Do not stop
                     //
+                    Scope.getCurrentScope().getLog(getClass()).severe("Failed to get column types for table " + tableName, sqle);
                 }
                 finally {
                     JdbcUtil.closeStatement(statement);
@@ -824,7 +822,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 if (database instanceof DB2Database) {
                     if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
-                        executeAndExtract(getDB2ForAs400Sql(jdbcSchemaName, tableName), database);
+                        return executeAndExtract(getDB2ForAs400Sql(jdbcSchemaName, tableName), database);
                     }
                     return querytDB2Luw(jdbcSchemaName, tableName);
                 } else if (database instanceof Db2zDatabase) {
@@ -863,7 +861,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
                     String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
                     if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
-                        executeAndExtract(getDB2ForAs400Sql(jdbcSchemaName, null), database);
+                        return executeAndExtract(getDB2ForAs400Sql(jdbcSchemaName, null), database);
                     }
                     return querytDB2Luw(jdbcSchemaName, null);
                 } else if (database instanceof Db2zDatabase) {
@@ -1913,7 +1911,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                     }
                                 }
                             } catch (DatabaseException e) {
-                                Scope.getCurrentScope().getLog(getClass()).fine("Cannot determine h2 version, using default unique constraint query");
+                                Scope.getCurrentScope().getLog(getClass()).fine("Cannot determine h2 version, using default unique constraint query", e);
                             }
                         }
                         if (sql == null) {
