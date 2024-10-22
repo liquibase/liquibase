@@ -1,9 +1,12 @@
 package liquibase.snapshot;
 
 import liquibase.CatalogAndSchema;
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.SupportsMethodValidationLevelsEnum;
 import liquibase.database.*;
 import liquibase.database.core.MariaDBDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
@@ -13,18 +16,23 @@ import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
+import liquibase.util.LiquibaseUtil;
 
 import java.util.*;
+
+import static liquibase.snapshot.SnapshotGenerator.PRIORITY_NONE;
 
 public class SnapshotGeneratorFactory {
 
     private static SnapshotGeneratorFactory instance;
 
     private final List<SnapshotGenerator> generators = new ArrayList<>();
+    protected static final String SUPPORTS_METHOD_REQUIRED_MESSAGE = "%s class does not properly implement the 'getPriority(Class<? extends DatabaseObject>, Database)' method and may incorrectly override other snapshot generators causing unexpected behavior. Please report this to the Liquibase developers or if you are developing this change please fix it ;)";
 
     protected SnapshotGeneratorFactory() {
         try {
             for (SnapshotGenerator generator : Scope.getCurrentScope().getServiceLocator().findInstances(SnapshotGenerator.class)) {
+                verifyPriorityMethodImplementedCorrectly(generator);
                 register(generator);
             }
 
@@ -32,6 +40,40 @@ public class SnapshotGeneratorFactory {
             throw new UnexpectedLiquibaseException(e);
         }
 
+    }
+
+    /**
+     * Ensure that the getPriority method returns PRIORITY_NONE when an unexpected database is supplied to the method.
+     * This ensures that no snapshot generator accidentally returns PRIORITY_SPECIALIZED for all databases, instead of
+     * only for the database that it is supposed to work with.
+     * @param generator
+     */
+    private void verifyPriorityMethodImplementedCorrectly(SnapshotGenerator generator) {
+        if (GlobalConfiguration.SUPPORTS_METHOD_VALIDATION_LEVEL.getCurrentValue().equals(SupportsMethodValidationLevelsEnum.OFF)) {
+            return;
+        }
+
+        try {
+            int priority = generator.getPriority(null, new MockDatabase());
+            if (priority != PRIORITY_NONE) {
+                if (LiquibaseUtil.getBuildVersion().equals(LiquibaseUtil.DEV_VERSION)) {
+                    throw new UnexpectedLiquibaseException(String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, generator.getClass().getName()));
+                }
+                switch (GlobalConfiguration.SUPPORTS_METHOD_VALIDATION_LEVEL.getCurrentValue()) {
+                    case WARN:
+                        Scope.getCurrentScope().getLog(getClass()).warning(String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, generator.getClass().getName()));
+                        break;
+                    case FAIL:
+                        throw new UnexpectedLiquibaseException(String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, generator.getClass().getName()));
+                    default:
+                        break;
+                }
+            }
+        } catch (UnexpectedLiquibaseException ue) {
+            throw ue;
+        } catch (Exception e) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Failed to check validity of getPriority method in " + generator.getClass().getSimpleName() + " snapshot generator.", e);
+        }
     }
 
     /**

@@ -80,7 +80,12 @@ public class ContextExpression {
         if (runtimeContexts == null) {
             runtimeContexts = new Contexts();
         }
-        if (this.contexts.isEmpty()) {
+        // If there are required runtime contexts, we need to evaluate those match as well
+        boolean noRequiredRuntime = runtimeContexts.getContexts()
+                .stream()
+                .noneMatch(context -> context.startsWith("@"));
+
+        if (this.contexts.isEmpty() && noRequiredRuntime) {
             return true;
         }
 
