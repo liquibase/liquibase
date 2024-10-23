@@ -67,7 +67,7 @@ Optional Args:
             // Create the source changelog and properties file
             // We cleanup source files and the target that was created during the test
             //
-            createTempResource("changelogs/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
+            createTempResource("changelogs/init/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
             createTempResource("liquibase.sql.properties", "examples/sql/liquibase.properties", "target")
             cleanResources(
                     "target/examples/sql/example-changelog.sql",
@@ -120,7 +120,7 @@ Optional Args:
             // Create the source changelog and properties file
             // We cleanup source files and the target that was created during the test
             //
-            createTempResource("changelogs/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
+            createTempResource("changelogs/init/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
             createTempResource("liquibase.sql.properties", "examples/sql/liquibase.properties", "target")
             cleanResources(
                     "target/examples/sql/example-changelog.sql",
@@ -169,7 +169,7 @@ Optional Args:
             // Create the source changelog and properties file
             // We cleanup source files and the target that was created during the test
             //
-            createTempResource("changelogs/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
+            createTempResource("changelogs/init/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
             createTempResource("liquibase.sql.properties", "examples/sql/liquibase.properties", "target")
             cleanResources(
                     "target/examples/sql/example-changelog.sql",
@@ -217,7 +217,7 @@ Optional Args:
             // Create the source changelog and properties file
             // We cleanup source files and the target that was created during the test
             //
-            createTempResource("changelogs/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
+            createTempResource("changelogs/init/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
             createTempResource("liquibase.sql.properties", "examples/sql/liquibase.properties", "target")
             cleanResources(
                     "target/examples/sql/example-changelog.sql",
@@ -294,7 +294,7 @@ Optional Args:
         String projectDirectory = "target/test-classes/projectDirectory"+ StringUtil.randomIdentifer(10)
         String defaultsFile = InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()
         setup {
-            createTempResource("changelogs/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
+            createTempResource("changelogs/init/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
             createTempResource("liquibase.sql.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("target/examples/sql/example-changelog.sql", "target/examples/sql/liquibase.properties", projectDirectory)
         }
@@ -317,7 +317,7 @@ Optional Args:
     run "Happy path with non-default arguments", {
         String projectDirectory = "target/test-classes/projectDirectory"+ StringUtil.randomIdentifer(10)
         setup {
-            createTempResource("changelogs/example-changelog.sql", "examples/xml/example-changelog.xml", "target")
+            createTempResource("changelogs/init/example-changelog.sql", "examples/xml/example-changelog.xml", "target")
             createTempResource("liquibase.xml.properties", "examples/xml/liquibase.properties", "target")
             cleanResources("target/examples/xml/example-changelog.xml", "target/examples/xml/liquibase.properties", projectDirectory)
         }
@@ -350,7 +350,7 @@ Optional Args:
         String projectDirectory = "target/test-classes/projectDirectory"+ StringUtil.randomIdentifer(10)
         String defaultsFile = InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()
         setup {
-            createTempResource("changelogs/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
+            createTempResource("changelogs/init/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
             createTempResource("liquibase.xml.properties", "examples/xml/liquibase.properties", "target")
             cleanResources("target/examples/xml/example-changelog.xml", "target/examples/xml/liquibase.properties", projectDirectory)
         }
@@ -380,7 +380,7 @@ Optional Args:
         String projectDirectory = "target/test-classes/projectDirectory"
         String defaultsFile = InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()
         setup {
-            createTempResource("changelogs/example-changelog.json", "examples/json/example-changelog.json", "target")
+            createTempResource("changelogs/init/example-changelog.json", "examples/json/example-changelog.json", "target")
             createTempResource("liquibase.yaml.properties", "examples/json/liquibase.properties", "target")
             cleanResources("target/examples/json/example-changelog.json", "target/examples/json/liquibase.properties", projectDirectory)
         }
@@ -410,7 +410,7 @@ Optional Args:
         String projectDirectory = "target/test-classes/projectDirectory"
         String defaultsFile = InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()
         setup {
-            createTempResource("changelogs/example-changelog.yaml", "examples/yaml/example-changelog.yaml", "target")
+            createTempResource("changelogs/init/example-changelog.yaml", "examples/yaml/example-changelog.yaml", "target")
             createTempResource("liquibase.yaml.properties", "examples/yaml/liquibase.properties", "target")
             cleanResources("target/examples/yaml/example-changelog.yaml", "target/examples/yaml/liquibase.properties", projectDirectory)
         }
@@ -441,7 +441,7 @@ Optional Args:
         String projectDirectory = "target/test-classes/projectDirectory"
         String defaultsFile = InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()
         setup {
-            createTempResource("changelogs/example-changelog.yaml", "examples/yaml/example-changelog.yaml", "target")
+            createTempResource("changelogs/init/example-changelog.yaml", "examples/yaml/example-changelog.yaml", "target")
             createTempResource("liquibase.yaml.properties", "examples/yaml/liquibase.properties", "target")
             cleanResources("target/examples/yaml/example-changelog.yaml", "target/examples/yaml/liquibase.properties", projectDirectory)
         }
@@ -467,7 +467,7 @@ Optional Args:
         String projectDirectory = "target/test-classes/projectDirectory"
         String defaultsFile = "liquibase.new.properties"
         setup {
-            createTempResource("changelogs/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
+            createTempResource("changelogs/init/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("target/examples/sql/example-changelog.sql", "examples/sql/liquibase.properties", projectDirectory)
         }
@@ -491,8 +491,8 @@ Optional Args:
         String projectDirectory = "target/test-classes/projectDirectory"
         String defaultsFile = InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()
         setup {
-            createTempResource("changelogs/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
-            createTempResource("liquibase/liquibase.sample.properties", "examples/sql/liquibase.properties", "target")
+            createTempResource("changelogs/init/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
+            createTempResource("liquibase.sample.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("target/examples/sql/example-changelog.sql", "target/examples/sql/liquibase.properties", projectDirectory)
         }
         arguments = [
@@ -528,7 +528,7 @@ Optional Args:
                 format: "xml"
         ]
         setup {
-            createTempResource("changelogs/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
+            createTempResource("changelogs/init/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
             createTempResource("liquibase.yaml.properties", "liquibase.properties", projectDirectory)
             cleanResources("simple-changelog.xml", "liquibase.properties", projectDirectory)
         }
@@ -552,7 +552,7 @@ Optional Args:
                 url: "jdbc:oracle:thin@localhost:1521/BUCKET_01"
         ]
         setup {
-            createTempResource("changelogs/changelog.with.all.unparsable.changesets.sql", "simple.changelog.sql", projectDirectory )
+            createTempResource("changelogs/init/example-changelog.sql", "simple.changelog.sql", projectDirectory )
             createTempResource("liquibase.xml.properties", "liquibase.properties", projectDirectory)
             cleanResources("simple.changelog.sql", "liquibase.properties", projectDirectory)
         }
@@ -574,7 +574,7 @@ Optional Args:
         String defaultsFile = InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()
         setup {
             createTempDirectoryResource(projectDirectory)
-            createTempResource("changelogs/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
+            createTempResource("changelogs/init/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("target/examples/sql/example-changelog.sql", "target/examples/sql/liquibase.properties", projectDirectory)
         }
@@ -596,7 +596,7 @@ Optional Args:
        String defaultsFile = InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()
        setup {
            createTempDirectoryResource(projectDirectory)
-           createTempResource("changelogs/example-changelog.sql", "my-changelog.sql", "target/test-classes/projectDirectory")
+           createTempResource("changelogs/init/example-changelog.sql", "my-changelog.sql", "target/test-classes/projectDirectory")
            createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
            cleanResources("target/examples/sql/liquibase.properties", projectDirectory)
        }
@@ -627,7 +627,7 @@ Optional Args:
         String defaultsFile = InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()
         setup {
             createTempDirectoryResource(projectDirectory)
-            createTempResource("changelogs/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
+            createTempResource("changelogs/init/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
             createTempResource("liquibase.yaml.properties", "liquibase.properties", projectDirectory)
             cleanResources("target/examples/sql/liquibase.properties", projectDirectory)
         }
@@ -647,7 +647,7 @@ Optional Args:
     run "Error if changelog file has path elements", {
         String projectDirectory = "target/test-classes/projectDirectory" + StringUtil.randomIdentifer(10)
         setup {
-            createTempResource("changelogs/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
+            createTempResource("changelogs/init/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("target/examples/sql/example-changelog.sql", "target/examples/sql/liquibase.properties", projectDirectory)
         }
@@ -662,7 +662,7 @@ Optional Args:
     run "Error if changelog file has Mac path elements", {
         String projectDirectory = "target/test-classes/projectDirectory"
         setup {
-            createTempResource("changelogs/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
+            createTempResource("changelogs/init/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("target/examples/sql/example-changelog.sql", "target/examples/sql/liquibase.properties", projectDirectory)
         }
@@ -679,7 +679,7 @@ Optional Args:
                 projectDir: "target/test-classes/two-tables.xml"
         ]
         setup {
-            createTempResource("changelogs/two-tables.xml", "two-tables.xml")
+            createTempResource("changelogs/init/example-changelog.xml", "two-tables.xml")
             cleanResources("two-tables.xml")
         }
         expectedException = CommandExecutionException.class
@@ -696,7 +696,7 @@ Optional Args:
                 url: "jdbc:oracle:thin@localhost:1521/BUCKET_01"
         ]
         setup {
-            createTempResource("changelogs/changelog.with.all.unparsable.changesets.sql", "simple.changelog.sql", projectDirectory )
+            createTempResource("changelogs/init/example-changelog.sql", "simple.changelog.sql", projectDirectory )
             createTempResource("liquibase.yaml.properties", "liquibase.properties", projectDirectory)
             cleanResources("simple.changelog.sql", "liquibase.properties", projectDirectory)
         }
@@ -721,7 +721,7 @@ Optional Args:
                 projectDir: projectDirectory
         ]
         setup {
-            createTempResource("changelogs/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
+            createTempResource("changelogs/init/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("target/examples/sql/example-changelog.sql", "target/examples/sql/liquibase.properties", "example-changelog.sql", "liquibase.properties")
         }
@@ -750,7 +750,7 @@ Optional Args:
                 projectDir: projectDirectory
         ]
         setup {
-            createTempResource("changelogs/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
+            createTempResource("changelogs/init/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("target/examples/sql/example-changelog.sql", "target/examples/sql/liquibase.properties", "example-changelog.sql", "liquibase.properties")
         }
@@ -785,7 +785,7 @@ Enter password to connect to JDBC url [letmein]: """,
                 projectDefaultsFile: projectsDefaultsFile // we specify a project defaults file parameter here because we need to make sure that we have a unique name that won't conflict with any existing files
         ]
         setup {
-            createTempResource("changelogs/example-changelog.sql", "examples/sql/example-changelog.sql")
+            createTempResource("changelogs/init/example-changelog.sql", "examples/sql/example-changelog.sql")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties")
             cleanResources("target/examples/sql/example-changelog.sql", "target/examples/sql/liquibase.properties", "example-changelog.sql", projectsDefaultsFile, new File(InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()).getAbsolutePath(),
                     "liquibase.flowvariables.yaml",
@@ -822,7 +822,7 @@ No files created. Set 'liquibase.command.init.project.projectGuide=off' in your 
     run "Interactive with custom path", {
         String defaultsFile = "banana.properties"
         setup {
-            createTempResource("changelogs/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
+            createTempResource("changelogs/init/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("target/examples/xml/example-changelog.xml", "target/examples/sql/liquibase.properties", "newdir")
         }
@@ -859,7 +859,7 @@ Setting up new Liquibase project in '""","newdir",
     run "Interactive with no extension provided for the changelog file", {
         String defaultsFile = "banana.properties"
         setup {
-            createTempResource("changelogs/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
+            createTempResource("changelogs/init/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("target/examples/xml/example-changelog.xml", "target/examples/sql/liquibase.properties", "newdir")
         }
@@ -891,7 +891,7 @@ Setting up new Liquibase project in '""","newdir",
     run "Interactive with no extension provided for the changelog file and uppercase format", {
         String defaultsFile = "banana.properties"
         setup {
-            createTempResource("changelogs/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
+            createTempResource("changelogs/init/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("target/examples/xml/example-changelog.xml", "target/examples/sql/liquibase.properties", "newdir")
         }
@@ -926,7 +926,7 @@ Setting up new Liquibase project in '""","newdir",
     run "Interactive with existing liquibase.properties file", {
         String defaultsFile = "banana.properties"
         setup {
-            createTempResource("changelogs/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
+            createTempResource("changelogs/init/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             Properties properties = new Properties()
             properties.put("liquibase.command.url", "jdbc:h2:tcp://localhost:9090/mem:dev")
@@ -972,7 +972,7 @@ Setting up new Liquibase project in '"""
     run "Interactive with no extension provided for the changelog file and invalid format", {
         String defaultsFile = "banana.properties"
         setup {
-            createTempResource("changelogs/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
+            createTempResource("changelogs/init/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("target/examples/xml/example-changelog.xml", "target/examples/sql/liquibase.properties", "newdir")
         }
@@ -1013,7 +1013,7 @@ Setting up new Liquibase project in '""","newdir",
         ]
         setup {
             createTempResource("liquibase.yaml.properties", "liquibase.properties", projectDirectory)
-            createTempResource("changelogs/example-changelog.sql", "example-changelog.sql", projectDirectory)
+            createTempResource("changelogs/init/example-changelog.sql", "example-changelog.sql", projectDirectory)
             cleanResources(projectDirectory)
         }
         testUI = new CommandTests.TestUIWithAnswers(["y"] as String[])
@@ -1040,7 +1040,7 @@ Setting up new Liquibase project in""","To use the new project files, please cd 
         String directory = "projectDirectory" + StringUtil.randomIdentifer(10)
         String projectDirectory = "target/test-classes/" + directory
         setup {
-            createTempResource("changelogs/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
+            createTempResource("changelogs/init/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("target/examples/xml/example-changelog.xml", "target/examples/sql/liquibase.properties", projectDirectory)
         }
@@ -1074,7 +1074,7 @@ Setting up new Liquibase project in '""",projectDirectory,
     run "Interactive with changelogfile argument", {
         String defaultsFile = "banana.properties"
         setup {
-            createTempResource("changelogs/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
+            createTempResource("changelogs/init/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("target/examples/xml/example-changelog.xml", "target/examples/sql/liquibase.properties", "newdir")
         }
@@ -1107,7 +1107,7 @@ Setting up new Liquibase project in '""","newdir'...",
     run "Interactive with format argument", {
         String defaultsFile = "banana.properties"
         setup {
-            createTempResource("changelogs/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
+            createTempResource("changelogs/init/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("target/examples/xml/example-changelog.xml", "target/examples/sql/liquibase.properties", "newdir")
         }
@@ -1145,7 +1145,7 @@ Setting up new Liquibase project in ""","newdir'...",
     run "Interactive with defaultsfile argument", {
         String defaultsFile = "newdefaultsfile.properties"
         setup {
-            createTempResource("changelogs/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
+            createTempResource("changelogs/init/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("target/examples/xml/example-changelog.xml", "target/examples/sql/liquibase.properties", "newdir")
         }
@@ -1178,7 +1178,7 @@ Setting up new Liquibase project in '""","newdir'...",
     run "Interactive with username argument", {
         String defaultsFile = "banana.properties"
         setup {
-            createTempResource("changelogs/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
+            createTempResource("changelogs/init/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("target/examples/xml/example-changelog.xml", "target/examples/sql/liquibase.properties", "newdir")
         }
@@ -1211,7 +1211,7 @@ Setting up new Liquibase project in '""","newdir'...",
     run "Interactive with url argument", {
         String defaultsFile = "banana.properties"
         setup {
-            createTempResource("changelogs/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
+            createTempResource("changelogs/init/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("target/examples/xml/example-changelog.xml", "target/examples/sql/liquibase.properties", "newdir")
         }
@@ -1247,7 +1247,7 @@ Setting up new Liquibase project in '""","newdir'...",
     run "Interactive with password argument", {
         String defaultsFile = "banana.properties"
         setup {
-            createTempResource("changelogs/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
+            createTempResource("changelogs/init/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("target/examples/xml/example-changelog.xml", "target/examples/sql/liquibase.properties", "newdir")
         }
@@ -1282,7 +1282,7 @@ Setting up new Liquibase project in '""","newdir'...",
         String projectDirectory = "target/test-classes/projectDirectory"+ StringUtil.randomIdentifer(10)
         setup {
             createTempDirectoryResource(projectDirectory)
-            createTempResource("changelogs/example-changelog.sql", "my-existing-changelog.sql", projectDirectory)
+            createTempResource("changelogs/init/example-changelog.sql", "my-existing-changelog.sql", projectDirectory)
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("target/examples/sql/liquibase.properties", projectDirectory)
         }
@@ -1317,8 +1317,8 @@ Enter password to connect to JDBC url [letmein]:"""
         String projectDirectory = "target/test-classes/projectDirectory"+ StringUtil.randomIdentifer(10)
         setup {
             createTempDirectoryResource(projectDirectory)
-            createTempResource("changelogs/example-changelog.sql", "my-existing-changelog.sql", projectDirectory, new Date(120, 02, 10))
-            createTempResource("changelogs/example-changelog.sql", "my-other-newer-existing-changelog.sql", projectDirectory)
+            createTempResource("changelogs/init/example-changelog.sql", "my-existing-changelog.sql", projectDirectory, new Date(120, 02, 10))
+            createTempResource("changelogs/init/example-changelog.sql", "my-other-newer-existing-changelog.sql", projectDirectory)
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("examples/sql/liquibase.properties", projectDirectory)
         }
@@ -1344,7 +1344,7 @@ Enter password to connect to JDBC url [letmein]:"""
 
     run "Interactive skipping changelog file", {
         setup {
-            createTempResource("changelogs/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
+            createTempResource("changelogs/init/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("examples/xml/example-changelog.xml", "examples/sql/liquibase.properties", "dir")
         }
@@ -1377,7 +1377,7 @@ Setting up new Liquibase project in '
 
     run "Interactive skipping defaults file", {
         setup {
-            createTempResource("changelogs/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
+            createTempResource("changelogs/init/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("examples/xml/example-changelog.xml", "examples/sql/liquibase.properties", "dir")
         }
@@ -1403,7 +1403,7 @@ Setting up new Liquibase project in '""", "dir'..."
 
     run "Interactive skipping both files", {
         setup {
-            createTempResource("changelogs/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
+            createTempResource("changelogs/init/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("examples/xml/example-changelog.xml", "examples/sql/liquibase.properties", "dir")
         }
@@ -1434,7 +1434,7 @@ For more details, visit the Getting Started Guide at https://docs.liquibase.com/
         String defaultsFile = InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()
         setup {
             createTempDirectoryResource(projectDirectory)
-            createTempResource("changelogs/example-changelog.sql", "my-changelog.sql", "target/test-classes/projectDirectory")
+            createTempResource("changelogs/init/example-changelog.sql", "my-changelog.sql", "target/test-classes/projectDirectory")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("target/examples/sql/liquibase.properties", projectDirectory)
         }
@@ -1471,7 +1471,7 @@ For more details, visit the Getting Started Guide at https://docs.liquibase.com/
         String defaultsFile = "banana.properties"
         String projectDirectory = "newdir"
         setup {
-            createTempResource("changelogs/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
+            createTempResource("changelogs/init/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
             cleanResources("target/examples/xml/example-changelog.xml", "target/examples/sql/liquibase.properties", "newdir")
         }
