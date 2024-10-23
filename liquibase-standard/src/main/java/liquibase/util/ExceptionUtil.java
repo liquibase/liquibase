@@ -1,5 +1,6 @@
 package liquibase.util;
 
+import liquibase.command.CommandFailedException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -20,5 +21,19 @@ public class ExceptionUtil {
         } else {
             return findExceptionInCauseChain(exceptionToSearchIn.getCause(), desiredCause);
         }
+    }
+
+    //
+    // Honor the expected flag on a CommandFailedException
+    //
+    public static boolean showExceptionInLog(Throwable exception) {
+        Throwable t = exception;
+        while (t != null) {
+            if (t instanceof CommandFailedException && ((CommandFailedException) t).isExpected()) {
+                return false;
+            }
+            t = t.getCause();
+        }
+        return true;
     }
 }
