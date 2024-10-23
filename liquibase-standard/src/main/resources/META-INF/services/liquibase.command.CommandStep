@@ -52,3 +52,5 @@ liquibase.command.core.helpers.PreCompareCommandStep
 liquibase.command.core.helpers.ReferenceDatabaseOutputWriterCommandStep
 liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep
 liquibase.command.core.helpers.ShowSummaryArgument
+liquibase.command.core.init.InitProjectCommandStep
+liquibase.command.core.init.InitCopyCommandStep

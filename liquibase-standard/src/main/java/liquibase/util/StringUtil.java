@@ -11,6 +11,7 @@ import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -1170,5 +1171,14 @@ public class StringUtil {
             chunks.add(chunk);
         }
         return chunks;
+    }
+
+    /**
+     *
+     * Remove the "file://" prefix from a URI if it exists.
+     *
+     */
+    public static String stripUriPrefix(URI uri) {
+        return uri.toString().replace("file://","");
     }
 }
