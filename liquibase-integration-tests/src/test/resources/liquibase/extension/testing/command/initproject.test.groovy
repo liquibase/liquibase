@@ -723,7 +723,7 @@ Optional Args:
         setup {
             createTempResource("changelogs/init/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
-            cleanResources("target/examples/sql/example-changelog.sql", "target/examples/sql/liquibase.properties", "example-changelog.sql", "liquibase.properties")
+            cleanResources("target/examples/sql/example-changelog.sql", "target/examples/sql/liquibase.properties", "${projectDirectory}/example-changelog.sql", "${projectDirectory}/liquibase.properties")
         }
         testUI = new CommandTests.TestUIWithAnswers(["y"] as String[])
         expectedUI = [
@@ -752,7 +752,7 @@ Optional Args:
         setup {
             createTempResource("changelogs/init/example-changelog.sql", "examples/sql/example-changelog.sql", "target")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties", "target")
-            cleanResources("target/examples/sql/example-changelog.sql", "target/examples/sql/liquibase.properties", "example-changelog.sql", "liquibase.properties")
+            cleanResources("target/examples/sql/example-changelog.sql", "target/examples/sql/liquibase.properties", "${projectDirectory}/example-changelog.sql", "${projectDirectory}/liquibase.properties")
         }
         testUI = new CommandTests.TestUIWithAnswers(["c", "", "", "", "", "", ""] as String[])
         expectedUI = [
