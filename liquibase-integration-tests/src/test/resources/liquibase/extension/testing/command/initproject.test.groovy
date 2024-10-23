@@ -530,7 +530,7 @@ Optional Args:
         setup {
             createTempResource("changelogs/init/example-changelog.xml", "examples/xml/example-changelog.xml", "target")
             createTempResource("liquibase.yaml.properties", "liquibase.properties", projectDirectory)
-            cleanResources("simple-changelog.xml", "liquibase.properties", projectDirectory)
+            cleanResources("${projectDirectory}/simple-changelog.xml", "${projectDirectory}/liquibase.properties", projectDirectory)
         }
         expectFileToExist = new File("target/test-classes/projectDirectory/simple-changelog.xml")
         expectedFileContent = [
@@ -554,7 +554,7 @@ Optional Args:
         setup {
             createTempResource("changelogs/init/example-changelog.sql", "simple.changelog.sql", projectDirectory )
             createTempResource("liquibase.xml.properties", "liquibase.properties", projectDirectory)
-            cleanResources("simple.changelog.sql", "liquibase.properties", projectDirectory)
+            cleanResources("${projectDirectory}/simple.changelog.sql", "${projectDirectory}/liquibase.properties", projectDirectory)
         }
         expectFileToExist = new File(projectDirectory, "liquibase.properties.backup.01")
         expectedUI = Pattern.compile("The defaults file .*liquibase.properties. was backed up and then updated with your supplied values.")
@@ -698,7 +698,7 @@ Optional Args:
         setup {
             createTempResource("changelogs/init/example-changelog.sql", "simple.changelog.sql", projectDirectory )
             createTempResource("liquibase.yaml.properties", "liquibase.properties", projectDirectory)
-            cleanResources("simple.changelog.sql", "liquibase.properties", projectDirectory)
+            cleanResources("${projectDirectory}/simple.changelog.sql", "${projectDirectory}/liquibase.properties", projectDirectory)
         }
         expectedFileContent = [
             "target/test-classes/projectDirectory/liquibase.properties" : [CommandTests.assertContains("jdbc:oracle:thin@localhost:1521/BUCKET_01")]
