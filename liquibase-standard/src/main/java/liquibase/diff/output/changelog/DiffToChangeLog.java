@@ -38,6 +38,7 @@ import liquibase.util.DependencyUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemProperties;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayOutputStream;
@@ -917,7 +918,7 @@ public class DiffToChangeLog {
         if (changeSetAuthor != null) {
             return changeSetAuthor;
         }
-        String author = System.getProperty("user.name");
+        String author = SystemProperties.getUserName();
         if (StringUtils.trimToNull(author) == null) {
             return "diff-generated";
         } else {
