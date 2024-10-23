@@ -208,7 +208,7 @@ public class Main {
             }
         }
 
-        scopeObjects.put("integrationDetails", integrationDetails);
+        scopeObjects.put(Scope.Attr.integrationDetails.name(), integrationDetails);
 
         if (!Main.runningFromNewCli) {
             List<UIService> uiOutputServices = new ArrayList<>();
@@ -990,7 +990,7 @@ public class Main {
      */
     protected void parsePropertiesFile(InputStream propertiesInputStream) throws IOException,
             CommandLineParsingException {
-        final IntegrationDetails integrationDetails = Scope.getCurrentScope().get("integrationDetails", IntegrationDetails.class);
+        final IntegrationDetails integrationDetails = Scope.getCurrentScope().get(Scope.Attr.integrationDetails, IntegrationDetails.class);
 
         Properties props = new Properties();
         props.load(propertiesInputStream);

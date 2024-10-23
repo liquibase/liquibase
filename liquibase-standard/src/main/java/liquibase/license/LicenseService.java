@@ -1,5 +1,6 @@
 package liquibase.license; 
 
+import liquibase.configuration.ConfiguredValue;
 import liquibase.plugin.Plugin;
 import liquibase.util.StringUtil;
 
@@ -103,4 +104,7 @@ public interface LicenseService extends Plugin {
     return String.format(BASE_INVALID_LICENSE_MESSAGE + " Add liquibase.licenseKey=<yourKey> into your defaults file or use --license-key=<yourKey> before your command in the CLI.", StringUtil.join(commandNames, " "));
   }
 
+  default ConfiguredValue<String> getLicenseKey() {
+    return null;
+  }
 }
