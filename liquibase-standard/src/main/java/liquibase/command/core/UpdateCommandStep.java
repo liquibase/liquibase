@@ -86,7 +86,7 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
 
     @Override
     public void postUpdateLog(int rowsAffected, List<ChangeSet> exceptionChangeSets) {
-        postUpdateLogForActualUpdate(rowsAffected, exceptionChangeSets);
+        postUpdateLogForActualUpdate(rowsAffected, exceptionChangeSets, coreBundle.getString("update.successful.with.row.count"), coreBundle.getString("update.successful"));
     }
 
     @Override

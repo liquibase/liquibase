@@ -112,6 +112,6 @@ public class UpdateCountCommandStep extends AbstractUpdateCommandStep {
 
     @Override
     public void postUpdateLog(int rowsAffected, List<ChangeSet> exceptionChangeSets) {
-        this.postUpdateLogForActualUpdate(rowsAffected, exceptionChangeSets);
+        this.postUpdateLogForActualUpdate(rowsAffected, exceptionChangeSets, coreBundle.getString("update.count.successful.with.row.count"), coreBundle.getString("update.count.successful"));
     }
 }

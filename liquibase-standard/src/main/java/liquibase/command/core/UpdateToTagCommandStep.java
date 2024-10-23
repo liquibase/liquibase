@@ -175,6 +175,6 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
 
     @Override
     public void postUpdateLog(int rowsAffected, List<ChangeSet> exceptionChangeSets) {
-        this.postUpdateLogForActualUpdate(rowsAffected, exceptionChangeSets);
+        this.postUpdateLogForActualUpdate(rowsAffected, exceptionChangeSets, coreBundle.getString("update.to.tag.successful.with.row.count"), coreBundle.getString("update.to.tag.successful"));
     }
 }

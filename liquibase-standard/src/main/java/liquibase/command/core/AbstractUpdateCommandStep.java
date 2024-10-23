@@ -294,10 +294,12 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
 
     /**
      * Generic method called by all Update commands that actually apply the change to the database (ie !update-sql)
-     * @param rowsAffected
-     * @param exceptionChangeSets
+     * @param rowsAffected # of rows affected
+     * @param exceptionChangeSets list of changesets that failed
+     * @param messageWithRowCount message to display when rowsAffected > -1
+     * @param messageWithoutRowCount message to display when rowsAffected == -1
      */
-    protected void postUpdateLogForActualUpdate(int rowsAffected, List<ChangeSet> exceptionChangeSets) {
+    protected void postUpdateLogForActualUpdate(int rowsAffected, List<ChangeSet> exceptionChangeSets, String messageWithRowCount, String messageWithoutRowCount) {
         if (exceptionChangeSets != null && !exceptionChangeSets.isEmpty()) {
             Scope.getCurrentScope().getUI().sendMessage("Errors encountered while deploying the following changesets, for more information use the --log-level flag: ");
             for (ChangeSet changeSet : exceptionChangeSets) {
@@ -306,9 +308,9 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             Scope.getCurrentScope().getUI().sendMessage("");
         }
         if (rowsAffected > -1) {
-            Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("update.successful.with.row.count"), rowsAffected));
+            Scope.getCurrentScope().getUI().sendMessage(String.format(messageWithRowCount, rowsAffected));
         } else {
-            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
+            Scope.getCurrentScope().getUI().sendMessage(messageWithoutRowCount);
         }
     }
 
