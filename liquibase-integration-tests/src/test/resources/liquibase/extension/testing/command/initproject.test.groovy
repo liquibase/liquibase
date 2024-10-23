@@ -715,7 +715,7 @@ Optional Args:
     }
 
     run "Interactive happy path taking defaults, non default directory", {
-        String projectDirectory = "target/test-classes"
+        String projectDirectory = "target/test-classes/" + StringUtil.randomIdentifier(10)
         String defaultsFile = InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()
         arguments = [
                 projectDir: projectDirectory
@@ -733,7 +733,7 @@ Optional Args:
                 "example-changelog.sql'",
                 "Created example defaults file '",
                 "liquibase.properties'",
-                "To use the new project files, please cd into 'target/test-classes', make sure your database is active and accessible by opening a new terminal window to run \"liquibase init start-h2\", and then return to this terminal window to run \"liquibase update\" command. For more details, visit the Getting Started Guide at https://docs.liquibase.com/start/home.html"
+                "To use the new project files, please cd into '${projectDirectory}', make sure your database is active and accessible by opening a new terminal window to run \"liquibase init start-h2\", and then return to this terminal window to run \"liquibase update\" command. For more details, visit the Getting Started Guide at https://docs.liquibase.com/start/home.html"
         ]
         expectedResults = [
                 statusCode   : 0,
@@ -744,7 +744,7 @@ Optional Args:
     }
 
     run "Interactive happy path taking defaults by going through customization flow, non default directory", {
-        String projectDirectory = "target/test-classes"
+        String projectDirectory = "target/test-classes/" + StringUtil.randomIdentifier(10)
         String defaultsFile = InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()
         arguments = [
                 projectDir: projectDirectory
@@ -769,7 +769,7 @@ Enter password to connect to JDBC url [letmein]: """,
                 "example-changelog.sql'",
                 "Created example defaults file '",
                 "liquibase.properties'",
-                "To use the new project files, please cd into 'target/test-classes', make sure your database is active and accessible by opening a new terminal window to run \"liquibase init start-h2\", and then return to this terminal window to run \"liquibase update\" command. For more details, visit the Getting Started Guide at https://docs.liquibase.com/start/home.html"
+                "To use the new project files, please cd into '${projectDirectory}', make sure your database is active and accessible by opening a new terminal window to run \"liquibase init start-h2\", and then return to this terminal window to run \"liquibase update\" command. For more details, visit the Getting Started Guide at https://docs.liquibase.com/start/home.html"
         ]
         expectedResults = [
                 statusCode   : 0,
