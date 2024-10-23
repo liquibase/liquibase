@@ -246,7 +246,7 @@ public class LiquibaseCommandLine {
         //
         Level level = determineLogLevel(exception);
 
-        if (showExceptionInLog(exception)) {
+        if (ExceptionUtil.showExceptionInLog(exception)) {
             Scope.getCurrentScope().getLog(getClass()).log(level, uiMessage, exception);
         }
 
@@ -304,20 +304,6 @@ public class LiquibaseCommandLine {
             }
         }
         return 1;
-    }
-
-    //
-    // Honor the expected flag on a CommandFailedException
-    //
-    private boolean showExceptionInLog(Throwable exception) {
-        Throwable t = exception;
-        while (t != null) {
-            if (t instanceof CommandFailedException && ((CommandFailedException) t).isExpected()) {
-                return false;
-            }
-            t = t.getCause();
-        }
-        return true;
     }
 
     //
