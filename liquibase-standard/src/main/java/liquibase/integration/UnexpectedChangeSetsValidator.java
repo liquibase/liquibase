@@ -42,7 +42,7 @@ public class UnexpectedChangeSetsValidator<T extends Liquibase> implements Consu
         try {
             liquibase.getDatabaseChangeLog().getChangeSets().stream().map(changeSet -> new ChangeSetInfo(
                     changeSet.getId(),
-                    changeSet.getChangeLog().getFilePath(),
+                    changeSet.getFilePath(),
                     changeSet.getAuthor())).forEach(applied::add);
             liquibase.listUnexpectedChangeSets(contexts, labelExpression).stream().map(changeSet -> new ChangeSetInfo(
                     changeSet.getId(),
