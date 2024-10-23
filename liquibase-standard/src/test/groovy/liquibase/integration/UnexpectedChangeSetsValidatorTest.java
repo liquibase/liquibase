@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 public class UnexpectedChangeSetsValidatorTest {
@@ -42,8 +43,8 @@ public class UnexpectedChangeSetsValidatorTest {
 
     @Test
     public void detects_no_unexpected_change_set() throws Exception {
-        ChangeSet changeSet1 = new ChangeSet("id1", "author1", true, true, "filePath1", null, null, null);
-        ChangeSet changeSet2 = new ChangeSet("id2", "author2", true, true, "filePath2", null, null, null);
+        ChangeSet changeSet1 = new ChangeSet("id1", "author1", true, true, "filePath1", null, null, databaseChangeLog);
+        ChangeSet changeSet2 = new ChangeSet("id2", "author2", true, true, "filePath2", null, null, databaseChangeLog);
 
         when(liquibase.listUnexpectedChangeSets(new Contexts(), new LabelExpression())).thenReturn(Collections.emptyList());
         when(databaseChangeLog.getChangeSets()).thenReturn(Arrays.asList(
@@ -57,11 +58,11 @@ public class UnexpectedChangeSetsValidatorTest {
 
     @Test
     public void detects_unexpected_change_set() throws Exception {
-        ChangeSet changeSet1 = new ChangeSet("id1", "author1", true, true, "filePath1", null, null, null);
-        ChangeSet changeSet2 = new ChangeSet("id2", "author2", true, true, "filePath2", null, null, null);
+        ChangeSet changeSet1 = new ChangeSet("id1", "author1", true, true, "filePath1", null, null, databaseChangeLog);
+        ChangeSet changeSet2 = new ChangeSet("id2", "author2", true, true, "filePath2", null, null, databaseChangeLog);
         ChangeSet changeSet3 = new ChangeSet("id3", "author3", true, true, "filePath3", null, null, null);
 
-        when(liquibase.listUnexpectedChangeSets(new Contexts(), new LabelExpression())).thenReturn(Collections.singletonList(new RanChangeSet(changeSet3)));
+        when(liquibase.listUnexpectedChangeSets(any(), any())).thenReturn(Collections.singletonList(new RanChangeSet(changeSet3)));
         when(databaseChangeLog.getChangeSets()).thenReturn(Arrays.asList(
                 changeSet1,
                 changeSet2));
@@ -73,10 +74,10 @@ public class UnexpectedChangeSetsValidatorTest {
 
     @Test
     public void can_filter_change_sets_of_multiple_instances() throws Exception {
-        ChangeSet changeSet1 = new ChangeSet("id1", "author1", true, true, "filePath1", null, null, null);
-        ChangeSet changeSet2 = new ChangeSet("id2", "author2", true, true, "filePath2", null, null, null);
-        ChangeSet changeSet3 = new ChangeSet("id3", "author3", true, true, "filePath3", null, null, null);
-        ChangeSet changeSet4 = new ChangeSet("id4", "author4", true, true, "filePath4", null, null, null);
+        ChangeSet changeSet1 = new ChangeSet("id1", "author1", true, true, "filePath1", null, null, databaseChangeLog);
+        ChangeSet changeSet2 = new ChangeSet("id2", "author2", true, true, "filePath2", null, null, databaseChangeLog);
+        ChangeSet changeSet3 = new ChangeSet("id3", "author3", true, true, "filePath3", null, null, databaseChangeLog);
+        ChangeSet changeSet4 = new ChangeSet("id4", "author4", true, true, "filePath4", null, null, databaseChangeLog);
 
         when(liquibase.listUnexpectedChangeSets(new Contexts(), new LabelExpression())).thenReturn(Arrays.asList(
                 new RanChangeSet(changeSet1),
