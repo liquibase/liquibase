@@ -6,6 +6,8 @@ import liquibase.change.core.LoadDataChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
+import liquibase.database.core.MariaDBDatabase;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.datatype.DataTypeFactory;
@@ -32,6 +34,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.sql.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -241,7 +244,11 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         if (col.getValue() != null) {
             LOG.fine("value is string/UUID/blob = " + col.getValue());
             if (col.getType() != null && col.getType().equalsIgnoreCase(LoadDataChange.LOAD_DATA_TYPE.UUID.name())) {
-                stmt.setObject(i, UUID.fromString(col.getValue()));
+                if (database instanceof MySQLDatabase && !(database instanceof MariaDBDatabase))  {
+                    stmt.setBytes(i, uuidToBytes(UUID.fromString(col.getValue())));
+                } else {
+                    stmt.setObject(i, UUID.fromString(col.getValue()));
+                }
             } else if (col.getType() != null && col.getType().equalsIgnoreCase(LoadDataChange.LOAD_DATA_TYPE.OTHER.name())) {
                 stmt.setObject(i, col.getValue(), Types.OTHER);
             } else if (LoadDataChange.LOAD_DATA_TYPE.BLOB.name().equalsIgnoreCase(col.getType())) {
@@ -388,6 +395,18 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                 }
             }
         }
+    }
+
+    /**
+     * Converts a UUID to a byte array
+     * @param value the UUID to convert
+     * @return the byte array representation of the UUID
+     */
+    private byte[] uuidToBytes(UUID value) {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(16);
+        byteBuffer.putLong(value.getMostSignificantBits());
+        byteBuffer.putLong(value.getLeastSignificantBits());
+        return byteBuffer.array();
     }
 
     @SuppressWarnings("java:S2583")
