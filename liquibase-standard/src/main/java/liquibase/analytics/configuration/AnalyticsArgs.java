@@ -19,6 +19,7 @@ public class AnalyticsArgs implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Integer> CONFIG_ENDPOINT_TIMEOUT_MILLIS;
     public static final ConfigurationDefinition<Level> LOG_LEVEL;
     public static final ConfigurationDefinition<Integer> LICENSE_KEY_CHARS;
+    public static final ConfigurationDefinition<Integer> TIMEOUT_MILLIS;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase.analytics");
@@ -30,6 +31,11 @@ public class AnalyticsArgs implements AutoloadedConfigurations {
         CONFIG_ENDPOINT_URL = builder.define("configEndpointUrl", String.class)
                 .setDefaultValue("https://config.liquibase.com/analytics.yaml")
                 .setHidden(true)
+                .build();
+
+        TIMEOUT_MILLIS = builder.define("timeoutMillis", Integer.class)
+                .setHidden(true)
+                .setDescription("By default, the timeout for sending data to the remote endpoint is configured in the config endpoint. Any value set here will override that value.")
                 .build();
 
         CONFIG_ENDPOINT_TIMEOUT_MILLIS = builder.define("configEndpointTimeoutMillis", Integer.class)
