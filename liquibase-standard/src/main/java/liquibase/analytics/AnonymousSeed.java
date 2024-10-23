@@ -79,11 +79,11 @@ public class AnonymousSeed {
      *
      * @return a UUID generated from the system data, or a random UUID if insufficient data is available
      */
-    public UUID generateId() {
+    public String generateId() {
         // If we only have a username, then we don't have robust enough seed data, so use a random ID.
         if (StringUtils.isEmpty(machineId) && StringUtils.isEmpty(macAddresses)) {
-            return UUID.randomUUID();
+            return "random-" + UUID.randomUUID();
         }
-        return UUID.nameUUIDFromBytes(StringUtils.join(username, macAddresses, machineId).getBytes());
+        return String.valueOf(UUID.nameUUIDFromBytes(StringUtils.join(username, macAddresses, machineId).getBytes()));
     }
 }
