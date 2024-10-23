@@ -82,4 +82,20 @@ public class FormattedSqlChangeLogSerializerTest {
         serializer.serialize(changeSetWithInvalidDb, true);
     }
 
+    @Test
+    public void serialize_changeSetWithLogicalFilePath() {
+        changeSet.setLogicalFilePath("foo/bar/baz.sql");
+
+        AddAutoIncrementChange statement = new AddAutoIncrementChange();
+        statement.setTableName("table_name");
+        statement.setColumnName("column_name");
+        statement.setColumnDataType("int");
+        changeSet.addChange(statement);
+        Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(statement, database);
+        String expectedSql = "-- changeset testAuthor:1 logicalFilePath: \"foo/bar/baz.sql\"\n" + sqls[0].toSql() + ";\n";
+
+        String serialized = serializer.serialize(changeSet, true);
+        assertEquals(expectedSql, serialized);
+    }
+
 }
