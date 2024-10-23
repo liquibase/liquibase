@@ -25,7 +25,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
-    private static final String DATABASE_CHANGE_LOG = "databaseChangeLog";
 
     @Override
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {

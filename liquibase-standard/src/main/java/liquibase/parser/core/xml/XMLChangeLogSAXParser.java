@@ -72,7 +72,10 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
     }
 
     @Override
-    protected ParsedNode parseToNode(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
+    protected ParsedNode parseToNode(String physicalChangeLogLocation,
+                                     ChangeLogParameters changeLogParameters,
+                                     ResourceAccessor resourceAccessor)
+          throws ChangeLogParseException {
         try {
             Resource resource = resourceAccessor.get(physicalChangeLogLocation);
             SAXParser parser = saxParserFactory.newSAXParser();
@@ -83,6 +86,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
                     Scope.getCurrentScope().getLog(getClass()).fine("Cannot enable ACCESS_EXTERNAL_SCHEMA: " + e.getMessage(), e);
                 }
             }
+
             trySetSchemaLanguageProperty(parser);
 
             XMLReader xmlReader = parser.getXMLReader();
@@ -130,7 +134,12 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
         } catch (IOException e) {
             throw new ChangeLogParseException("Error Reading Changelog File: " + e.getMessage(), e);
         } catch (SAXParseException e) {
-            throw new ChangeLogParseException("Error parsing line " + e.getLineNumber() + " column " + e.getColumnNumber() + " of " + physicalChangeLogLocation + ": " + e.getMessage(), e);
+            String errMsg =  e.getMessage();
+            if(e.getMessage().startsWith("cvc-elt.1.a")){
+                errMsg = '"' + DATABASE_CHANGE_LOG + "\" expected as root element";
+            }
+            throw new ChangeLogParseException("Error parsing line " + e.getLineNumber() + " column "
+                  + e.getColumnNumber() + " of " + physicalChangeLogLocation + ": " + errMsg, e);
         } catch (SAXException e) {
             Throwable parentCause = e.getException();
             while (parentCause != null) {
