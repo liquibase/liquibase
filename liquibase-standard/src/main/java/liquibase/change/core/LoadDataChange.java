@@ -393,13 +393,13 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             // If found, we then load the entire file into the value when executing the statement.
                             // If not found, we load the value as a string.
                             Resource r;
-                            if (BooleanUtils.isTrue(isRelativeToChangelogFile())) {
-                                r = Scope.getCurrentScope().getResourceAccessor().get(getRelativeTo()).resolveSibling(file);
+                            if (getRelativeTo() != null) {
+                                r = Scope.getCurrentScope().getResourceAccessor().get(getRelativeTo()).resolveSibling(value);
                             } else {
                                 r = Scope.getCurrentScope().getResourceAccessor().get(value);
                             }
 
-                            if (r.exists()){
+                            if (r.exists()) {
                                 valueConfig.setValueClobFile(value);
                             } else {
                                 LOG.fine(String.format("File %s not found. Inserting the value as a string. See https://docs.liquibase.com for more information.", value));

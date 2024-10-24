@@ -110,7 +110,7 @@ class LoadDataChangeTest extends StandardChangeTest {
 
         "SCHEMA_NAME" == insSt.get(0).getSchemaName()
         "TABLE_NAME" == insSt.get(0).getTableName()
-        "liquibase/change/core/SQLFileTestData.sql" == columns.get(0).getValueClobFile()
+        "change/core/SQLFileTestData.sql" == columns.get(0).getValueClobFile()
         "nothing.txt" == columns.get(1).getValue()
         "sample text" == columns.get(2).getValue()
 
