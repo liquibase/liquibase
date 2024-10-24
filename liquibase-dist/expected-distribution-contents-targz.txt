@@ -109,6 +109,7 @@
 │       ├── ipla.txt
 │       ├── lgpl-2.1.txt
 │       ├── lgpl-3.0.txt
-│       └── mit.txt
+│       ├── mit.txt
+│       └── usage-data.txt
 ├── liquibase
 └── liquibase.bat

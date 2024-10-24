@@ -185,6 +185,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         json = json.replaceAll("!!timestamp \"([^\"]*)\"", "$1");
         json = json.replaceAll("!!float \"([^\"]*)\"", "$1");
         json = json.replaceAll("!!liquibase.[^\\s]+ (\"\\w+\")", "$1");
+        json = json.replace("!!null \"null\"", "\"null\"");
         return json;
     }
 

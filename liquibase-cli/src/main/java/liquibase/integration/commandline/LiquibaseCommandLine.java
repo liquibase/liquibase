@@ -31,6 +31,7 @@ import liquibase.ui.ConsoleUIService;
 import liquibase.ui.LoggerUIService;
 import liquibase.ui.UIService;
 import liquibase.util.*;
+import org.apache.commons.lang3.SystemProperties;
 import org.apache.commons.lang3.StringUtils;
 import picocli.CommandLine;
 
@@ -51,8 +52,8 @@ import java.util.stream.Stream;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
-import static liquibase.integration.commandline.VersionUtils.*;
 import static liquibase.util.SystemUtil.isWindows;
+import static liquibase.util.VersionUtils.*;
 
 
 public class LiquibaseCommandLine {
@@ -246,7 +247,7 @@ public class LiquibaseCommandLine {
         //
         Level level = determineLogLevel(exception);
 
-        if (showExceptionInLog(exception)) {
+        if (ExceptionUtil.showExceptionInLog(exception)) {
             Scope.getCurrentScope().getLog(getClass()).log(level, uiMessage, exception);
         }
 
@@ -304,20 +305,6 @@ public class LiquibaseCommandLine {
             }
         }
         return 1;
-    }
-
-    //
-    // Honor the expected flag on a CommandFailedException
-    //
-    private boolean showExceptionInLog(Throwable exception) {
-        Throwable t = exception;
-        while (t != null) {
-            if (t instanceof CommandFailedException && ((CommandFailedException) t).isExpected()) {
-                return false;
-            }
-            t = t.getCause();
-        }
-        return true;
     }
 
     //
@@ -469,7 +456,7 @@ public class LiquibaseCommandLine {
     private void logMdcData() throws IOException {
         MdcManager mdcManager = Scope.getCurrentScope().getMdcManager();
         String localHostName = NetUtil.getLocalHostName();
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SYSTEM_USER, System.getProperty("user.name"), false);
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SYSTEM_USER, SystemProperties.getUserName(), false);
         try (MdcObject version = mdcManager.put(MdcKey.LIQUIBASE_VERSION, LiquibaseUtil.getBuildVersion());
              MdcObject systemName = mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_NAME, localHostName);
              // The host name here is purposefully the same as the system name. The system name is retained for backwards compatibility.
@@ -692,8 +679,8 @@ public class LiquibaseCommandLine {
         returnMap.put(COMMAND_ARGUMENTS, args);
 
         final IntegrationDetails integrationDetails = new IntegrationDetails();
-        integrationDetails.setName("cli");
-        returnMap.put("integrationDetails", integrationDetails);
+        integrationDetails.setName(LiquibaseCommandLineConfiguration.INTEGRATION_NAME.getCurrentValue());
+        returnMap.put(Scope.Attr.integrationDetails.name(), integrationDetails);
 
         final ClassLoader classLoader = configureClassLoader();
 
