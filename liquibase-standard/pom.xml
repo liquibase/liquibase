@@ -384,6 +384,8 @@
                         <param>liquibase.io.OutputFileHandler</param>
                         <param>liquibase.analytics.AnalyticsListener</param>
                         <param>liquibase.analytics.configuration.AnalyticsConfiguration</param>
+                        <param>liquibase.command.CommandStep</param>
+                        <param>liquibase.command.copy.ProjectCopier</param>
                     </services>
                 </configuration>
                 <executions>
