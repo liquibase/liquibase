@@ -88,6 +88,12 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
             builder.append(outputContexts);
             builder.append("\"");
         }
+        String logicalFilePath = changeSet.getLogicalFilePath();
+        if (logicalFilePath != null && ! logicalFilePath.isEmpty()) {
+            builder.append(" logicalFilePath: \"");
+            builder.append(logicalFilePath);
+            builder.append("\"");
+        }
         builder.append("\n");
     }
 
