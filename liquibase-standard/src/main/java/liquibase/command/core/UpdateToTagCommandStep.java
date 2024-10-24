@@ -104,7 +104,7 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
 
     private void checkForTagExists(DatabaseChangeLog changeLog, String tag, Database database) throws LiquibaseException {
         List<TagDatabaseChange> tagDatabaseChangesList = getTagDatabaseChange(changeLog.getChangeSets());
-        boolean thereIsTagDatabaseChange =  tagDatabaseChangesList.size() > 0;
+        boolean thereIsTagDatabaseChange = !tagDatabaseChangesList.isEmpty();
         boolean thereIsTagDatabaseChangeMatching = isThereTagDatabaseChangeMatching(tagDatabaseChangesList, tag);
 
         if (!(thereIsTagDatabaseChange && thereIsTagDatabaseChangeMatching) && !GlobalConfiguration.STRICT.getCurrentValue()) {
@@ -174,11 +174,7 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
     }
 
     @Override
-    public void postUpdateLog(int rowsAffected) {
-        if (rowsAffected > -1) {
-            Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("update.to.tag.successful.with.row.count"), rowsAffected));
-        } else {
-            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.to.tag.successful"));
-        }
+    public void postUpdateLog(int rowsAffected, List<ChangeSet> exceptionChangeSets) {
+        this.postUpdateLogForActualUpdate(rowsAffected, exceptionChangeSets, coreBundle.getString("update.to.tag.successful.with.row.count"), coreBundle.getString("update.to.tag.successful"));
     }
 }
