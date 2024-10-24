@@ -397,9 +397,6 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             if (r.exists()){
                                 valueConfig.setValueClobFile(value);
                             } else {
-                                /*
-                                * the URL needs to be updated with the location of the documentation for this
-                                * */
                                 LOG.fine(String.format("File %s not found. Inserting the value as a string. See https://docs.liquibase.com for more information.", value));
                                 valueConfig.setValue(value);
                             }
