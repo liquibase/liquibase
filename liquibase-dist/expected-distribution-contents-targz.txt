@@ -57,8 +57,8 @@
 │       ├── example-changelog.yaml
 │       ├── example-changeset-yaml.txt
 │       ├── liquibase.advanced.flowfile.yaml
-│       ├── liquibase.checks-package.yaml
 │       ├── liquibase.checks-package-header.yaml
+│       ├── liquibase.checks-package.yaml
 │       ├── liquibase.create-checks-packages.flow.yaml
 │       ├── liquibase.customlogdata.yaml
 │       ├── liquibase.endstage.flow
