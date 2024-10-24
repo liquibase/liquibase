@@ -37,9 +37,11 @@ public class InitProjectCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<Boolean> COPY_EXAMPLE_FLOW_FILES;
     public static final CommandArgumentDefinition<Boolean> COPY_EXAMPLE_CHECKS_PACKAGE_FILE;
+
     public enum FileTypeEnum {
         sql, xml, json, yml, yaml
     }
+
     public static final String SHOULD_BACKUP_DEFAULTS_FILE_ARG = "shouldBackupDefaultsFile";
 
     /**
@@ -51,55 +53,55 @@ public class InitProjectCommandStep extends AbstractCommandStep {
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         INIT_PROJECT_DIR_ARG = builder.argument("projectDir", String.class)
-            .description("Relative or fully qualified path to the directory where the project files will be created")
-            .defaultValue((String) InitProjectPromptingEnum.PROJECT_DIR.defaultValue)
-            .build();
+                .description("Relative or fully qualified path to the directory where the project files will be created")
+                .defaultValue((String) InitProjectPromptingEnum.PROJECT_DIR.defaultValue)
+                .build();
         INIT_FORMAT_ARG = builder.argument("format", String.class)
-            .description("Format of the project changelog sql|xml|json|yaml|yml")
-            .defaultValue(InitProjectPromptingEnum.FILETYPE.defaultValue.toString())
-            .build();
+                .description("Format of the project changelog sql|xml|json|yaml|yml")
+                .defaultValue(InitProjectPromptingEnum.FILETYPE.defaultValue.toString())
+                .build();
         INIT_DEFAULTS_FILE_ARG = builder.argument("projectDefaultsFile", String.class)
-            .description(DEFAULTS_FILE.getDescription())
-            .defaultValue(DEFAULTS_FILE.getDefaultValue())
-            .build();
+                .description(DEFAULTS_FILE.getDescription())
+                .defaultValue(DEFAULTS_FILE.getDefaultValue())
+                .build();
         INIT_PROJECT_GUIDE_ARG = builder.argument("projectGuide", Boolean.class)
-            .description("Allow interactive prompts for init project")
-            .defaultValue(true)
-            .build();
+                .description("Allow interactive prompts for init project")
+                .defaultValue(true)
+                .build();
         INIT_PROJECT_RECURSIVE_ARG = builder.argument("recursive", Boolean.class)
-            .description("For remote project locations, recursive copy all project files to the remote location")
-            .defaultValue(false)
-            .hidden()
-            .build();
+                .description("For remote project locations, recursive copy all project files to the remote location")
+                .defaultValue(false)
+                .hidden()
+                .build();
         INIT_PROJECT_KEEP_TEMP_FILES_ARG = builder.argument("keepTempFiles", Boolean.class)
                 .description("For remote project locations, do not delete temporary project files")
                 .defaultValue(false)
                 .build();
         INIT_CHANGELOG_FILE_ARG = builder.argument(CommonArgumentNames.CHANGELOG_FILE, String.class)
-            .description("Relative or fully qualified path to the changelog file")
-            .defaultValue((String) InitProjectPromptingEnum.SAMPLE_CHANGELOG_NAME.defaultValue)
-            .build();
+                .description("Relative or fully qualified path to the changelog file")
+                .defaultValue((String) InitProjectPromptingEnum.SAMPLE_CHANGELOG_NAME.defaultValue)
+                .build();
         URL_ARG = builder.argument(CommonArgumentNames.URL, String.class)
-            .description("The JDBC database connection URL")
-            .defaultValue((String) InitProjectPromptingEnum.JDBC_URL.defaultValue)
-            .build();
+                .description("The JDBC database connection URL")
+                .defaultValue((String) InitProjectPromptingEnum.JDBC_URL.defaultValue)
+                .build();
         USERNAME_ARG = builder.argument(CommonArgumentNames.USERNAME, String.class)
-            .description("Username to use to connect to the database")
-            .defaultValue((String) InitProjectPromptingEnum.USERNAME.defaultValue)
-            .build();
+                .description("Username to use to connect to the database")
+                .defaultValue((String) InitProjectPromptingEnum.USERNAME.defaultValue)
+                .build();
         PASSWORD_ARG = builder.argument(CommonArgumentNames.PASSWORD, String.class)
-            .description("Password to use to connect to the database")
-            .defaultValue((String) InitProjectPromptingEnum.PASSWORD.defaultValue)
-            .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
-            .build();
+                .description("Password to use to connect to the database")
+                .defaultValue((String) InitProjectPromptingEnum.PASSWORD.defaultValue)
+                .setValueObfuscator(ConfigurationValueObfuscator.STANDARD)
+                .build();
         COPY_EXAMPLE_FLOW_FILES = builder.argument("copyExampleFlowFiles", Boolean.class)
-            .defaultValue(true)
-            .hidden()
-            .build();
+                .defaultValue(true)
+                .hidden()
+                .build();
         COPY_EXAMPLE_CHECKS_PACKAGE_FILE = builder.argument("copyExampleChecksPackageFile", Boolean.class)
-            .defaultValue(true)
-            .hidden()
-            .build();
+                .defaultValue(true)
+                .hidden()
+                .build();
     }
 
     private void doPrompt(ConfiguredValue<String> configuredValue, CommandArgumentDefinition<String> commandArgumentDefinition, CommandScope commandScope, InitProjectPromptingEnum enumToPrompt, InteractivePromptingValueProvider interactivePromptingValueProvider) throws Exception {
@@ -125,7 +127,7 @@ public class InitProjectCommandStep extends AbstractCommandStep {
         CommandScope commandScope = resultsBuilder.getCommandScope();
         ConfiguredValue<Boolean> projectGuideConfig = commandScope.getConfiguredValue(INIT_PROJECT_GUIDE_ARG);
         Map<String, Object> scopeValues = new HashMap<>();
-        if (! projectGuideConfig.wasDefaultValueUsed()) {
+        if (!projectGuideConfig.wasDefaultValueUsed()) {
             Boolean projectGuide = projectGuideConfig.getValue();
             if (Boolean.TRUE.equals(projectGuide)) {
                 scopeValues.put(GlobalConfiguration.HEADLESS.getKey(), false);
@@ -409,6 +411,7 @@ public class InitProjectCommandStep extends AbstractCommandStep {
 
     /**
      * Determine if the user skipped a particular prompt by entering the "s" value.
+     *
      * @return true if skipped
      */
     private boolean isSkipped(ConfiguredValue<String> promptedValue) {
@@ -438,7 +441,7 @@ public class InitProjectCommandStep extends AbstractCommandStep {
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         super.adjustCommandDefinition(commandDefinition);
         commandDefinition.setShortDescription(
-            "Creates the directory and files needed to run Liquibase commands. Run without any flags on the CLI, or set via Environment variable, etc. will launch an interactive guide to walk users through setting up the necessary project's default and changelog files. This guide can be turned off by setting the 'liquibase.command.init.project.projectGuide=off'");
+                "Creates the directory and files needed to run Liquibase commands. Run without any flags on the CLI, or set via Environment variable, etc. will launch an interactive guide to walk users through setting up the necessary project's default and changelog files. This guide can be turned off by setting the 'liquibase.command.init.project.projectGuide=off'");
         commandDefinition.setGroupShortDescription(new String[]{"init"}, "Init commands");
         commandDefinition.addAlias(ALIAS);
     }

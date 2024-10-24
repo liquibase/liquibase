@@ -12,6 +12,7 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
 import java.io.*;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -30,72 +31,64 @@ public class InitProjectUtil {
     public static final String MODIFIED_DEFAULTS_FILE_CONTENTS = "modifiedDefaultsFileContents";
 
     /**
-     *
      * Create the project directory, including any non-existent segments
      *
-     * @param   projectDirFile    Directory to create
-     * @throws  CommandExecutionException
-     *
+     * @param projectDirFile Directory to create
+     * @throws CommandExecutionException
      */
     public static void createProjectDirectory(File projectDirFile) throws CommandExecutionException {
-        if (! projectDirFile.exists()) {
+        if (!projectDirFile.exists()) {
             boolean b = projectDirFile.mkdirs();
-            if (! (b || projectDirFile.exists())) {
+            if (!(b || projectDirFile.exists())) {
                 String message = "Unable to create specified project directory '" + projectDirFile.getAbsolutePath() + "'.\n" +
-                "Please check permission and try 'liquibase init project' again";
+                        "Please check permission and try 'liquibase init project' again";
                 throw new CommandExecutionException(message);
             }
         }
     }
 
     /**
-     *
      * Make sure the changelog path does not have any path elements
      *
-     * @param changelogFilePath          Path to changelog
-     *
+     * @param changelogFilePath Path to changelog
      */
     public static void validateChangelogFilePath(String changelogFilePath) {
         new FilenameGetter().validate(changelogFilePath);
-   }
+    }
 
     /**
-     *
      * Make sure the input project directory is not a file
      *
-     * @param   projectDirFile                 The project directory File object
+     * @param projectDirFile The project directory File object
      * @throws CommandExecutionException
-     *
      */
     public static void validateProjectDirectory(File projectDirFile) throws CommandExecutionException {
         if (projectDirFile.exists() && projectDirFile.isFile()) {
             String message =
-            System.lineSeparator() + System.lineSeparator() + "The specified project directory '" + projectDirFile.getAbsolutePath() + "' cannot be a file" + System.lineSeparator() + System.lineSeparator();
+                    System.lineSeparator() + System.lineSeparator() + "The specified project directory '" + projectDirFile.getAbsolutePath() + "' cannot be a file" + System.lineSeparator() + System.lineSeparator();
             throw new CommandExecutionException(message);
         }
     }
 
     /**
-     *
      * Update the defaults file with any argument values
      *
-     * @param   defaultsFile      The defaults file we are updating
-     * @param   newDefaultsFile   True if this is a new file False if not
-     * @param   format            The current format value
-     * @param   changelogConfig   The ConfiguredValue for changelogfile
-     * @param   urlConfig         The ConfiguredValue for url
-     * @param   usernameConfig    The ConfiguredValue for username
-     * @param   passwordConfig    The ConfiguredValue for password
+     * @param defaultsFile                The defaults file we are updating
+     * @param newDefaultsFile             True if this is a new file False if not
+     * @param format                      The current format value
+     * @param changelogConfig             The ConfiguredValue for changelogfile
+     * @param urlConfig                   The ConfiguredValue for url
+     * @param usernameConfig              The ConfiguredValue for username
+     * @param passwordConfig              The ConfiguredValue for password
      * @param changelogFileCreationResult boolean indicating whether the changelogfile was copied into the project directory. If
-     *                            the file was not copied, then an empty changelogfile property is used in the defaults
-     *                            file.
-     * @param shouldBackupDefaultsFile If false, the defaults file will not be backed up and the caller will be responsible
-     *                                 for both backing up the existing defaults file AND writing the new contents of the
-     *                                 modified defaults file. The contents of the modified will be returned in the
-     *                                 results builder.
-     * @param resultsBuilder The results builder
-     * @throws  IOException
-     *
+     *                                    the file was not copied, then an empty changelogfile property is used in the defaults
+     *                                    file.
+     * @param shouldBackupDefaultsFile    If false, the defaults file will not be backed up and the caller will be responsible
+     *                                    for both backing up the existing defaults file AND writing the new contents of the
+     *                                    modified defaults file. The contents of the modified will be returned in the
+     *                                    results builder.
+     * @param resultsBuilder              The results builder
+     * @throws IOException
      */
     public static void updateDefaultsFile(File defaultsFile, boolean newDefaultsFile, String format, ConfiguredValue<String> changelogConfig, ConfiguredValue<String> urlConfig, ConfiguredValue<String> usernameConfig, ConfiguredValue<String> passwordConfig, FileCreationResultEnum changelogFileCreationResult, Boolean shouldBackupDefaultsFile, CommandResultsBuilder resultsBuilder) throws IOException {
         String contents = FileUtil.getContents(defaultsFile);
@@ -156,15 +149,14 @@ public class InitProjectUtil {
 
 
     /**
-     *
      * Make a backup copy of the checks or flow file
      *
-     * @param resource               The resource to back up
-     * @param backupResource         The resource to back up to
-     * @param contents               The contents of the file
-     * @param extraMessage           Extra message text to include
-     * @param printMessage           Should the warning message be printed to the console? If an exception occurs, the
-     *                               exception message will be printed regardless of the value of printMessage.
+     * @param resource       The resource to back up
+     * @param backupResource The resource to back up to
+     * @param contents       The contents of the file
+     * @param extraMessage   Extra message text to include
+     * @param printMessage   Should the warning message be printed to the console? If an exception occurs, the
+     *                       exception message will be printed regardless of the value of printMessage.
      */
     public static String makeBackup(Resource resource, Resource backupResource, String contents, String extraMessage, boolean printMessage) {
         //
@@ -175,9 +167,9 @@ public class InitProjectUtil {
                 outputStream.write(contents.getBytes());
             }
             String message =
-                    "The file '" + StringUtil.stripUriPrefix(resource.getUri()) +
+                    "The file '" + stripFileUriPrefix(resource.getUri()) +
                             "' has been updated so it can be used by your current version of Liquibase, and to simplify resolving merge conflicts in Source Control. No action is required from you. Your original file was backed up as '" +
-                            StringUtil.stripUriPrefix(backupResource.getUri()) + "'." +
+                            stripFileUriPrefix(backupResource.getUri()) + "'." +
                             (extraMessage != null ? extraMessage : "");
             if (printMessage) {
                 Scope.getCurrentScope().getLog(InitProjectUtil.class).warning(message);
@@ -194,6 +186,7 @@ public class InitProjectUtil {
 
     /**
      * Print out a message to the console and logs indicating that the defaults file was backed up.
+     *
      * @param absolutePath the path of the defaults file that was backed up (not the path of the backup file)
      */
     public static void outputBackedUpDefaultsFileMessage(String absolutePath) {
@@ -207,63 +200,57 @@ public class InitProjectUtil {
     }
 
     /**
-     *
      * Replace the contents where "key=<some value>" with the value from the ConfiguredValue
      *
-     * @param   key                  The property key to replace
-     * @param   config               The ConfiguredValue of the property
-     * @param   contents             The current defaults file contents
+     * @param key             The property key to replace
+     * @param config          The ConfiguredValue of the property
+     * @param contents        The current defaults file contents
      * @param newDefaultsFile Specify whether the defaults file was newly created (true), or it already existed (false)
-     * @return  String
-     *
+     * @return String
      */
     public static String replaceProperty(String key, ConfiguredValue<String> config, String contents, boolean newDefaultsFile) {
         return replaceProperty(key, config.getValue(), contents, newDefaultsFile);
     }
 
     /**
-     *
      * Replace the contents where "key=<some value>" with the value from the ConfiguredValue
      *
-     * @param   key                  The property key to replace
-     * @param   configValue          The property value
-     * @param   contents             The current defaults file contents
+     * @param key             The property key to replace
+     * @param configValue     The property value
+     * @param contents        The current defaults file contents
      * @param newDefaultsFile Specify whether the defaults file was newly created (true), or it already existed (false)
-     * @return  String
-     *
+     * @return String
      */
     public static String replaceProperty(String key, String configValue, String contents, boolean newDefaultsFile) {
         return replaceProperty(key, configValue, contents, false, true, true, newDefaultsFile, false);
     }
 
     /**
-     *
      * Replace the contents where "key=<some value>" with the value from the ConfiguredValue
      *
-     * @param   key                  The property key to replace
-     * @param   configValue          The property value
-     * @param   contents             The current defaults file contents
-     * @param commented              If true, put in the new value with the entire line commented out with a # symbol
-     * @param includeKeyPrefix If true, the key will be prefixed with liquibase.command. unless it is found exactly
-     *                         as written in the existing contents.
-     * @param addPropertyIfMissing   If true, the key specified will be added to the file contents if it does not already
-     *                               exist. If false, and the key does not already exist, it will not be added.
-     * @param newDefaultsFile Specify whether the defaults file was newly created (true), or it already existed (false)
+     * @param key                      The property key to replace
+     * @param configValue              The property value
+     * @param contents                 The current defaults file contents
+     * @param commented                If true, put in the new value with the entire line commented out with a # symbol
+     * @param includeKeyPrefix         If true, the key will be prefixed with liquibase.command. unless it is found exactly
+     *                                 as written in the existing contents.
+     * @param addPropertyIfMissing     If true, the key specified will be added to the file contents if it does not already
+     *                                 exist. If false, and the key does not already exist, it will not be added.
+     * @param newDefaultsFile          Specify whether the defaults file was newly created (true), or it already existed (false)
      * @param useExistingValueIfExists If true, and the defaults file already existed and the existing value in the defaults
      *                                 file is not empty, it will remain there, untouched.
-     * @return  String
-     *
+     * @return String
      */
     public static String replaceProperty(String key, String configValue, String contents, boolean commented, boolean includeKeyPrefix, boolean addPropertyIfMissing, boolean newDefaultsFile, boolean useExistingValueIfExists) {
         String newContents = contents;
         String regex = "^[\\s]*liquibase\\.command\\." + key + "[\\s]*[=:][\\s]*(.*?)$";
         String keyWithPrefix = (includeKeyPrefix ? "liquibase.command." : "") + key;
-        Pattern p = Pattern.compile(regex, Pattern.DOTALL|Pattern.MULTILINE|Pattern.CASE_INSENSITIVE);
+        Pattern p = Pattern.compile(regex, Pattern.DOTALL | Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
         Matcher m = p.matcher(contents.toLowerCase());
         if (m.find()) {
             String obfuscatedValue = obfuscateValue(configValue, key);
             String existingValue = m.group(1).trim();
-            Scope.getCurrentScope().getLog(InitProjectUtil.class).info("Replacing value for 'liquibase.command." + key + "' with '" + obfuscatedValue  + "'");
+            Scope.getCurrentScope().getLog(InitProjectUtil.class).info("Replacing value for 'liquibase.command." + key + "' with '" + obfuscatedValue + "'");
             if (useExistingValueIfExists && !newDefaultsFile && StringUtil.isNotEmpty(existingValue)) {
                 return newContents;
             }
@@ -272,7 +259,7 @@ public class InitProjectUtil {
             newContents = newContents.replace(keyWithPrefix + ":" + configValue, "liquibase.command." + key + ": " + configValue);
         } else {
             regex = "^[\\s]*(?i)" + key + "[\\s]*[=:][\\s]*(.*?)$";
-            p = Pattern.compile(regex, Pattern.DOTALL|Pattern.MULTILINE|Pattern.CASE_INSENSITIVE);
+            p = Pattern.compile(regex, Pattern.DOTALL | Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
             m = p.matcher(contents.toLowerCase());
             if (m.find()) {
                 String obfuscatedValue = obfuscateValue(configValue, key);
@@ -296,8 +283,9 @@ public class InitProjectUtil {
 
     /**
      * Obfuscate the value if the corresponding key indicates some kind of secure item.
+     *
      * @param configValue the value to obfuscate
-     * @param key the key which the value corresponds to
+     * @param key         the key which the value corresponds to
      * @return the obfuscated value
      */
     private static String obfuscateValue(String configValue, String key) {
@@ -313,8 +301,9 @@ public class InitProjectUtil {
 
     /**
      * Determine if the property should be commented out in the defaults file.
-     * @param commented              If true, put in the new value with the entire line commented out with a # symbol
-     * @param newDefaultsFile Specify whether the defaults file was newly created (true), or it already existed (false)
+     *
+     * @param commented                     If true, put in the new value with the entire line commented out with a # symbol
+     * @param newDefaultsFile               Specify whether the defaults file was newly created (true), or it already existed (false)
      * @param isChangelogPropertyValueEmpty true if the existing value is null or empty
      * @return true if the value should be commented
      */
@@ -323,16 +312,14 @@ public class InitProjectUtil {
     }
 
     /**
-     *
      * Copy the example properties file to the project directory
      * Return the File object representing the properties file
      *
-     * @param   format                         The format of the associated changelog
-     * @param   projectDirFile                 The project directory File object
-     * @param   targetDefaultsFilename         The name we will give to the copied file
-     * @return  File                           The new properties File object
-     * @throws  CommandExecutionException
-     *
+     * @param format                 The format of the associated changelog
+     * @param projectDirFile         The project directory File object
+     * @param targetDefaultsFilename The name we will give to the copied file
+     * @return File                           The new properties File object
+     * @throws CommandExecutionException
      */
     public static File copyExampleProperties(String format, String projectDirFile, String targetDefaultsFilename) throws CommandExecutionException {
         try {
@@ -369,20 +356,18 @@ public class InitProjectUtil {
     }
 
     /**
-     *
      * Copy the example changelog file of the format specified to the project directory if necessary
      * Return the File object representing the properties file
      *
-     * @param   format                         The format of the changelog
-     * @param   projectDirFile                 The project directory File object
-     * @param   changelogFilePath              The path to the changelog
-     * @param   changelogFileConfig            Changelog file argument config
-     * @return  boolean                        True if copied and false if not
-     * @throws  CommandExecutionException
-     *
+     * @param format              The format of the changelog
+     * @param projectDirFile      The project directory File object
+     * @param changelogFilePath   The path to the changelog
+     * @param changelogFileConfig Changelog file argument config
+     * @return boolean                        True if copied and false if not
+     * @throws CommandExecutionException
      */
     public static FileCreationResultEnum copyExampleChangelog(String format, File projectDirFile, String changelogFilePath, ConfiguredValue<String> changelogFileConfig)
-        throws CommandExecutionException {
+            throws CommandExecutionException {
         try {
             //
             // If we have the file in the project directory then we do not need to copy the sample
@@ -391,8 +376,8 @@ public class InitProjectUtil {
             if (changelogFilePath != null && listOfChangelogs != null && listOfChangelogs.length > 0) {
                 final File changelogFile = new File(projectDirFile, changelogFilePath);
                 boolean foundMatch =
-                    Arrays.stream(listOfChangelogs)
-                          .anyMatch(f -> f.getAbsolutePath().equalsIgnoreCase(changelogFile.getAbsolutePath()));
+                        Arrays.stream(listOfChangelogs)
+                                .anyMatch(f -> f.getAbsolutePath().equalsIgnoreCase(changelogFile.getAbsolutePath()));
                 if (foundMatch) {
                     return FileCreationResultEnum.already_existed;
                 }
@@ -598,15 +583,13 @@ public class InitProjectUtil {
     }
 
     /**
-     *
      * Given a path to a changelog file, determine the format
      * based on the extension.  If the format is unrecognized
      * then return null. If there is no extension then return the default format.
      *
-     * @param     changelogFilePath   The path to the changelog file
-     * @param     defaultFormat       The default format
-     * @return    String
-     *
+     * @param changelogFilePath The path to the changelog file
+     * @param defaultFormat     The default format
+     * @return String
      */
     public static String determineFormatType(String changelogFilePath, String defaultFormat) {
         String extension = getExtension(changelogFilePath);
@@ -629,13 +612,11 @@ public class InitProjectUtil {
     }
 
     /**
-     *
      * Return any extension, i.e. the part of the path after
      * the last '.' character
      *
-     * @param   changelogFilePath   The path to the changelog file to check
-     * @return  String
-     *
+     * @param changelogFilePath The path to the changelog file to check
+     * @return String
      */
     public static String getExtension(String changelogFilePath) {
         if (changelogFilePath.isEmpty()) {
@@ -645,16 +626,14 @@ public class InitProjectUtil {
         if (parts.length == 1) {
             return null;
         }
-        return parts[parts.length-1].toLowerCase();
+        return parts[parts.length - 1].toLowerCase();
     }
 
     /**
-     *
      * Return true if a file with a name matching *changelog* is found in the project directory
      *
-     * @param   projectDirFile              The File object for the project directory
-     * @return  File[]                      The list of changelog files
-     *
+     * @param projectDirFile The File object for the project directory
+     * @return File[]                      The list of changelog files
      */
     public static File[] findChangeLogsInProjectDir(File projectDirFile) {
         FileFilter fileFilter = file -> !file.isDirectory() && file.getName().toLowerCase().contains("changelog") && hasRecognizedExtension(file);
@@ -662,12 +641,10 @@ public class InitProjectUtil {
     }
 
     /**
-     *
      * Check a file against the recognized extensions
      *
-     * @param   file           The File object to check
-     * @return  boolean        True if recognized extension false if not
-     *
+     * @param file The File object to check
+     * @return boolean        True if recognized extension false if not
      */
     public static boolean hasRecognizedExtension(File file) {
         return determineFormatType(file.getName(), null) != null;
@@ -682,7 +659,7 @@ public class InitProjectUtil {
         boolean looking = true;
         while (looking) {
             looking = backupFile.exists();
-            if (! looking) {
+            if (!looking) {
                 looking = false;
             } else {
                 version++;
@@ -701,5 +678,18 @@ public class InitProjectUtil {
             return "0" + Integer.toString(version);
         }
         return Integer.toString(version);
+    }
+
+    /**
+     * Remove the "file://" prefix from a URI if it exists.
+     *
+     * @param uri the URI to modify
+     * @return the string of the URI with the "file://" removed or an empty string if URI is null
+     */
+    private static String stripFileUriPrefix(URI uri) {
+        if (uri == null) {
+            return "";
+        }
+        return uri.toString().replace("file://", "");
     }
 }

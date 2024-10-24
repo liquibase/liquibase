@@ -1172,13 +1172,4 @@ public class StringUtil {
         }
         return chunks;
     }
-
-    /**
-     *
-     * Remove the "file://" prefix from a URI if it exists.
-     *
-     */
-    public static String stripUriPrefix(URI uri) {
-        return uri.toString().replace("file://","");
-    }
 }
