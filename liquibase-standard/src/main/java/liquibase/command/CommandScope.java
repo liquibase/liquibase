@@ -2,6 +2,8 @@ package liquibase.command;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.analytics.Event;
+import liquibase.analytics.AnalyticsFactory;
 import liquibase.configuration.*;
 import liquibase.database.Database;
 import liquibase.exception.CommandExecutionException;
@@ -13,6 +15,7 @@ import liquibase.logging.mdc.MdcManager;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.MdcValue;
 import liquibase.logging.mdc.customobjects.ExceptionDetails;
+import liquibase.util.ExceptionUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
 
@@ -203,74 +206,105 @@ public class CommandScope {
         Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_START_TIME, Instant.ofEpochMilli(operationStartTime.getTime()).toString());
         // We don't want to reset the command name even when defining another CommandScope during execution
         // because we intend on keeping this value as the command entered to the console
+        String commandName = String.join(" ", commandDefinition.getName());
         if (!Scope.getCurrentScope().isMdcKeyPresent(MdcKey.LIQUIBASE_COMMAND_NAME)) {
-            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, String.join(" ", commandDefinition.getName()));
+            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, commandName);
         }
-        CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
-        final List<CommandStep> pipeline = commandDefinition.getPipeline();
-        final List<CommandStep> executedCommands = new ArrayList<>();
-        Optional<Exception> thrownException = Optional.empty();
-        validate();
+        Event analyticsEvent = ExceptionUtil.doSilently(() -> {
+            return new Event(commandName);
+        });
+        Event parentAnalyticsEvent = Scope.getCurrentScope().getAnalyticsEvent();
+
         try {
-            addOutputFileToMdc();
-            for (CommandStep command : pipeline) {
+            return Scope.child(Collections.singletonMap(Scope.Attr.analyticsEvent.toString(), analyticsEvent), () -> {
+                CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
+                final List<CommandStep> pipeline = commandDefinition.getPipeline();
+                final List<CommandStep> executedCommands = new ArrayList<>();
+                Optional<Exception> thrownException = Optional.empty();
+                validate();
                 try {
-                    Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, getCommandStepName(command));
-                    Scope.getCurrentScope().getLog(CommandScope.class).fine(String.format("Executing internal command %s", getCommandStepName(command)));
-                    command.run(resultsBuilder);
-                } catch (Exception runException) {
-                    // Suppress the exception for now so that we can run the cleanup steps even when encountering an exception.
-                    thrownException = Optional.of(runException);
-                    Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_OUTCOME, MdcValue.COMMAND_FAILED, false);
-                    break;
-                }
-                executedCommands.add(command);
-            }
+                    addOutputFileToMdc();
+                    for (CommandStep command : pipeline) {
+                        try {
+                            Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, getCommandStepName(command));
+                            Scope.getCurrentScope().getLog(CommandScope.class).fine(String.format("Executing internal command %s", getCommandStepName(command)));
+                            command.run(resultsBuilder);
+                        } catch (Exception runException) {
+                            // Suppress the exception for now so that we can run the cleanup steps even when encountering an exception.
+                            thrownException = Optional.of(runException);
+                            ExceptionUtil.doSilently(() -> {
+                                analyticsEvent.setOperationOutcome(MdcValue.COMMAND_FAILED);
+                            });
+                            Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_OUTCOME, MdcValue.COMMAND_FAILED, false);
+                            break;
+                        }
+                        executedCommands.add(command);
+                    }
 
-            // To find the correct database source if there was an exception
-            // we need to examine the database connection prior to closing it.
-            // That means this must run prior to any cleanup command steps.
-            Database database = (Database) getDependency(Database.class);
-            String source = null;
-            if (database != null) {
-                source = ExceptionDetails.findSource(database);
-            }
+                    // To find the correct database source if there was an exception
+                    // we need to examine the database connection prior to closing it.
+                    // That means this must run prior to any cleanup command steps.
+                    Database database = (Database) getDependency(Database.class);
+                    String source = null;
+                    if (database != null) {
+                        source = ExceptionDetails.findSource(database);
+                    }
 
-            // after executing our pipeline, runs cleanup in inverse order
-            for (int i = executedCommands.size() - 1; i >= 0; i--) {
-                CommandStep command = pipeline.get(i);
-                if (command instanceof CleanUpCommandStep) {
-                    ((CleanUpCommandStep) command).cleanUp(resultsBuilder);
+                    // after executing our pipeline, runs cleanup in inverse order
+                    for (int i = executedCommands.size() - 1; i >= 0; i--) {
+                        CommandStep command = pipeline.get(i);
+                        if (command instanceof CleanUpCommandStep) {
+                            ((CleanUpCommandStep) command).cleanUp(resultsBuilder);
+                        }
+                    }
+                    if (thrownException.isPresent()) { // Now that we've executed all our cleanup, rethrow the exception if there was one
+                        if (!executedCommands.isEmpty()) {
+                            logPrimaryExceptionToMdc(thrownException.get(), source);
+                        }
+                        throw thrownException.get();
+                    } else {
+                        ExceptionUtil.doSilently(() -> {
+                            analyticsEvent.setOperationOutcome(MdcValue.COMMAND_SUCCESSFUL);
+                        });
+                        Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_OUTCOME, MdcValue.COMMAND_SUCCESSFUL, false);
+                    }
+                } catch (Exception e) {
+                    ExceptionUtil.doSilently(() -> {
+                        analyticsEvent.setExceptionClass(e.getClass().getName());
+                    });
+                    if (e instanceof CommandExecutionException) {
+                        throw (CommandExecutionException) e;
+                    } else {
+                        throw new CommandExecutionException(e);
+                    }
+                } finally {
+                    try (MdcObject operationStopTime = Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString())) {
+                        Scope.getCurrentScope().getLog(getClass()).info("Command execution complete");
+                    }
+                    try {
+                        if (this.outputStream != null) {
+                            this.outputStream.flush();
+                        }
+                    } catch (Exception e) {
+                        Scope.getCurrentScope().getLog(getClass()).warning("Error flushing command output stream: " + e.getMessage(), e);
+                    }
+                    ExceptionUtil.doSilently(() -> {
+                        if (parentAnalyticsEvent == null) {
+                            AnalyticsFactory analyticsFactory = Scope.getCurrentScope().getSingleton(AnalyticsFactory.class);
+                            analyticsFactory.handleEvent(analyticsEvent);
+                        } else {
+                            parentAnalyticsEvent.getChildEvents().add(analyticsEvent);
+                        }
+                    });
                 }
-            }
-            if (thrownException.isPresent()) { // Now that we've executed all our cleanup, rethrow the exception if there was one
-                if (!executedCommands.isEmpty()) {
-                    logPrimaryExceptionToMdc(thrownException.get(), source);
-                }
-                throw thrownException.get();
-            } else {
-                Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_OUTCOME, MdcValue.COMMAND_SUCCESSFUL, false);
-            }
+
+                return resultsBuilder.build();
+            });
+        } catch (CommandExecutionException | RuntimeException e) {
+            throw e;
         } catch (Exception e) {
-            if (e instanceof CommandExecutionException) {
-                throw (CommandExecutionException) e;
-            } else {
-                throw new CommandExecutionException(e);
-            }
-        } finally {
-            try (MdcObject operationStopTime = Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_STOP_TIME, Instant.ofEpochMilli(new Date().getTime()).toString())) {
-                Scope.getCurrentScope().getLog(getClass()).info("Command execution complete");
-            }
-            try {
-                if (this.outputStream != null) {
-                    this.outputStream.flush();
-                }
-            } catch (Exception e) {
-                Scope.getCurrentScope().getLog(getClass()).warning("Error flushing command output stream: " + e.getMessage(), e);
-            }
+            throw new CommandExecutionException(e);
         }
-
-        return resultsBuilder.build();
     }
 
     private void logPrimaryExceptionToMdc(Throwable exception, String source) {

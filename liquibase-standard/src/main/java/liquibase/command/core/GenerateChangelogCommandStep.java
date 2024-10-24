@@ -2,10 +2,7 @@ package liquibase.command.core;
 
 import liquibase.Scope;
 import liquibase.command.*;
-import liquibase.command.core.helpers.AbstractChangelogCommandStep;
-import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
-import liquibase.command.core.helpers.DiffOutputControlCommandStep;
-import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep;
+import liquibase.command.core.helpers.*;
 import liquibase.command.providers.ReferenceDatabase;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.database.Database;
@@ -120,6 +117,7 @@ public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
         }
 
         final Database referenceDatabase = (Database) commandScope.getDependency(ReferenceDatabase.class);
+        DbUrlConnectionCommandStep.logMdc(referenceDatabase.getConnection().getURL(), referenceDatabase);
         DiffOutputControl diffOutputControl = (DiffOutputControl) resultsBuilder.getResult(DiffOutputControlCommandStep.DIFF_OUTPUT_CONTROL.getName());
         diffOutputControl.setDataDir(commandScope.getArgumentValue(DATA_OUTPUT_DIR_ARG));
         referenceDatabase.setOutputDefaultSchema(diffOutputControl.getIncludeSchema());
