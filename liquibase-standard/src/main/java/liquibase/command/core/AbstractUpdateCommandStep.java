@@ -301,11 +301,11 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
      */
     protected void postUpdateLogForActualUpdate(int rowsAffected, List<ChangeSet> exceptionChangeSets, String messageWithRowCount, String messageWithoutRowCount) {
         if (exceptionChangeSets != null && !exceptionChangeSets.isEmpty()) {
-            Scope.getCurrentScope().getUI().sendMessage("Errors encountered while deploying the following changesets, for more information use the --log-level flag: ");
+            Scope.getCurrentScope().getUI().sendMessage("Errors encountered while deploying the following changesets: ");
             for (ChangeSet changeSet : exceptionChangeSets) {
                 Scope.getCurrentScope().getUI().sendMessage("     " + changeSet.toString(false));
             }
-            Scope.getCurrentScope().getUI().sendMessage("");
+            Scope.getCurrentScope().getUI().sendMessage("For more information use the --log-level flag.\n");
         }
         if (rowsAffected > -1) {
             Scope.getCurrentScope().getUI().sendMessage(String.format(messageWithRowCount, rowsAffected));
