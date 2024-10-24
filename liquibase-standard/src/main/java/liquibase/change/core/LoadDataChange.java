@@ -39,9 +39,9 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.csv.CSVReader;
 import lombok.Setter;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -51,7 +51,6 @@ import java.util.zip.GZIPInputStream;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.change.ChangeParameterMetaData.ALL;
-import static liquibase.util.FileUtil.getContents;
 
 @DatabaseChange(name = "loadData",
         description = "Loads data from a CSV file into an existing table",
@@ -393,7 +392,13 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             // To maintain backwards compatibility, we will first try to find the file.
                             // If found, we then load the entire file into the value when executing the statement.
                             // If not found, we load the value as a string.
-                            Resource r = (Scope.getCurrentScope().getResourceAccessor().get(value));
+                            Resource r;
+                            if (BooleanUtils.isTrue(isRelativeToChangelogFile())) {
+                                r = Scope.getCurrentScope().getResourceAccessor().get(getRelativeTo()).resolveSibling(file);
+                            } else {
+                                r = Scope.getCurrentScope().getResourceAccessor().get(value);
+                            }
+
                             if (r.exists()){
                                 valueConfig.setValueClobFile(value);
                             } else {
