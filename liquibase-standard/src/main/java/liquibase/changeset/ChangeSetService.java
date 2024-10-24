@@ -94,11 +94,12 @@ public interface ChangeSetService extends Plugin {
      *
      * @param  runWith                    The runWith value
      * @param  runWithSpool               The runWithSpool value
+     * @param  stripComments              Remove comments from the SQL
      * @return ModifyChangeSets           The object which will perform the modifications
      *
      */
-    default ModifyChangeSets createModifyChangeSets(String runWith, String runWithSpool) {
-        return new ModifyChangeSets(runWith, runWithSpool);
+    default ModifyChangeSets createModifyChangeSets(String runWith, String runWithSpool, boolean stripComments) {
+        return new ModifyChangeSets(runWith, runWithSpool, stripComments);
     }
 
     /**
