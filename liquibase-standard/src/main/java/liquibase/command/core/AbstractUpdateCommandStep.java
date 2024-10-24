@@ -205,15 +205,16 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             List<ChangeSet> deployedChangeSets = ((DefaultChangeExecListener) defaultListener).getDeployedChangeSets();
             int deployedChangeSetCount = deployedChangeSets.size();
             List<ChangeSet> failedChangeSets = ((DefaultChangeExecListener) defaultListener).getFailedChangeSets();
-            List<ChangeSet> exceptionChangeSets;
             int exceptionChangeSetsCount = 0;
             int failedChangeSetCount = failedChangeSets.size();
             //
             // Use the changelog iterator to retrieve information about change sets which
             // had an exception, but were marked as fail_on_error=false
             //
-            if (runChangeLogIterator != null && ! runChangeLogIterator.getExceptionChangeSets().isEmpty()) {
-                exceptionChangeSets = runChangeLogIterator.getExceptionChangeSets();
+            List<ChangeSet> exceptionChangeSets =
+                    runChangeLogIterator != null ? uniqueExceptionChangesets(runChangeLogIterator.getExceptionChangeSets(), failedChangeSets) :
+                                                   new ArrayList<>();
+            if (runChangeLogIterator != null && ! exceptionChangeSets.isEmpty()) {
                 exceptionChangeSetsCount = exceptionChangeSets.size();
                 deployedChangeSetCount -= exceptionChangeSetsCount;
                 failedChangeSetCount += exceptionChangeSetsCount;
@@ -230,8 +231,9 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                 // and update the count to reflect only skipped(pending) changes by removing the failed count
                 updateReportParameters.getChangesetInfo().getPendingChangesetInfoList()
                         .removeIf(pendingChangesetInfo -> failedChangeSets.stream().anyMatch(changeSet -> changeSet.equals(pendingChangesetInfo.getChangeSet())));
+                List<ChangeSet> finalExceptionChangeSets = exceptionChangeSets;
                 updateReportParameters.getChangesetInfo().getPendingChangesetInfoList()
-                        .removeIf(pendingChangesetInfo -> exceptionChangeSets.stream().anyMatch(changeSet -> changeSet.equals(pendingChangesetInfo.getChangeSet())));
+                        .removeIf(pendingChangesetInfo -> finalExceptionChangeSets.stream().anyMatch(changeSet -> changeSet.equals(pendingChangesetInfo.getChangeSet())));
                 updateReportParameters.getChangesetInfo().setPendingChangesetCount(updateReportParameters.getChangesetInfo().getPendingChangesetCount() - failedChangeSetCount);
             }
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, String.valueOf(deployedChangeSetCount));
@@ -246,6 +248,12 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         try (MdcObject deploymentOutcomeMdc = Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, deploymentOutcome)) {
             Scope.getCurrentScope().getLog(getClass()).info(success ? successLog : failureLog);
         }
+    }
+
+    private List<ChangeSet> uniqueExceptionChangesets(List<ChangeSet> exceptionChangeSets, List<ChangeSet> failedChangeSets) {
+        return exceptionChangeSets.stream().filter(e -> {
+            return failedChangeSets.stream().noneMatch(f -> f.equals(e));
+        }).collect(Collectors.toList());
     }
 
     @Beta
