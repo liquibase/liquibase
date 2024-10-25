@@ -5,6 +5,7 @@ import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.integration.IntegrationDetails;
 import liquibase.integration.ant.type.ChangeLogParametersType;
 import liquibase.integration.ant.type.DatabaseType;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
@@ -48,6 +49,7 @@ public abstract class BaseLiquibaseTask extends Task {
     @Override
     public void init() throws BuildException {
         scopeValues.put(Scope.Attr.logService.name(), new AntTaskLogService(this));
+        scopeValues.put(Scope.Attr.integrationDetails.name(), new IntegrationDetails("ant"));
         classpath = new Path(getProject());
     }
 

@@ -11,6 +11,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.integration.IntegrationDetails;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
@@ -30,6 +31,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -246,8 +249,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         }
 
         try {
-
-            Scope.child(Scope.Attr.ui.name(), this.uiService.getUiServiceClass().getDeclaredConstructor().newInstance(),
+            Map<String, Object> scopeVars = new HashMap<>();
+            scopeVars.put(Scope.Attr.ui.name(), this.uiService.getUiServiceClass().getDeclaredConstructor().newInstance());
+            scopeVars.put(Scope.Attr.integrationDetails.name(), new IntegrationDetails("spring"));
+            Scope.child(scopeVars,
                     () -> {
                         Liquibase liquibase = null;
                         try {
