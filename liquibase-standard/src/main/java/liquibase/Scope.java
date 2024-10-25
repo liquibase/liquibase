@@ -57,6 +57,7 @@ public class Scope {
         executeMode,
         lineSeparator,
         serviceLocator,
+        deploymentId,
 
         /**
          * @deprecated use {@link GlobalConfiguration#FILE_ENCODING}
@@ -121,6 +122,7 @@ public class Scope {
 
             rootScope.values.put(Attr.serviceLocator.name(), serviceLocator);
             rootScope.values.put(Attr.osgiPlatform.name(), ContainerChecker.isOsgiPlatform());
+            rootScope.values.put(Attr.deploymentId.name(), UUID.randomUUID().toString());
         }
         return scopeManager.get().getCurrentScope();
     }
@@ -367,6 +369,8 @@ public class Scope {
     public Database getDatabase() {
         return get(Attr.database, Database.class);
     }
+
+    public String getDeploymentId() { return get(Attr.deploymentId, String.class); }
 
     public ClassLoader getClassLoader() {
         return get(Attr.classLoader, Thread.currentThread().getContextClassLoader());
