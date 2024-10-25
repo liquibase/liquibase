@@ -82,9 +82,9 @@ examples/sql/liquibase.create-checks-packages.flow.yaml
 examples/sql/liquibase.endstage.flow
 examples/sql/liquibase.advanced.flowfile.yaml
 examples/sql/liquibase.psql.conf
-examples/sql/liquibase.checks-package-header.yaml
 examples/sql/liquibase.flowfile.yaml
 examples/sql/liquibase.sqlplus.conf
+examples/sql/liquibase.checks-package-header.yaml
 examples/sql/blank-changelog.sql
 examples/sql/liquibase.customlogdata.yaml
 examples/sql/example-changelog.sql
