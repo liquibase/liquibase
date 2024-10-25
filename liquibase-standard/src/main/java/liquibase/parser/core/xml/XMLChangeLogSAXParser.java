@@ -17,11 +17,14 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.Set;
 
 public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
     public static final String LIQUIBASE_SCHEMA_VERSION;
     private final SAXParserFactory saxParserFactory;
+    public static final Set<String> SUPPORTED_EXTENSIONS = Collections.singleton("xml");
 
     static {
         LIQUIBASE_SCHEMA_VERSION = computeSchemaVersion(LiquibaseUtil.getBuildVersion());
@@ -53,7 +56,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
     @Override
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
-        return changeLogFile.toLowerCase().endsWith("xml");
+        return SUPPORTED_EXTENSIONS.stream().anyMatch(ext -> changeLogFile.toLowerCase().endsWith(ext));
     }
 
     protected SAXParserFactory getSaxParserFactory() {
