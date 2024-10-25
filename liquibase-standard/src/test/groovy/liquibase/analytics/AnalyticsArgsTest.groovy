@@ -4,13 +4,11 @@ import liquibase.Scope
 import liquibase.analytics.configuration.AnalyticsArgs
 import liquibase.analytics.configuration.AnalyticsConfiguration
 import liquibase.analytics.configuration.AnalyticsConfigurationFactory
-import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
 
 class AnalyticsArgsTest extends Specification {
 
-    @Ignore
     @Unroll
     def "test all permutations of options for enabling/disabling for oss"(Boolean userCliOption, boolean remoteOssEnabled, boolean isEnabled) {
         setup:
