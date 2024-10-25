@@ -21,9 +21,11 @@ class AntTestAnalyticsWebserver extends Task {
             // We must use system properties, as they persist into the Ant execution.
             System.setProperty(AnalyticsArgs.CONFIG_ENDPOINT_URL.getKey(), "http://localhost:" + testAnalyticsWebserver.getListeningPort() + "/config-analytics.yaml");
             System.setProperty(AnalyticsArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getKey(), String.valueOf(TimeUnit.SECONDS.toMillis(60)));
+            System.setProperty(AnalyticsArgs.DEV_OVERRIDE.getKey(), true.toString())
         } else {
             System.clearProperty(AnalyticsArgs.CONFIG_ENDPOINT_URL.getKey())
             System.clearProperty(AnalyticsArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getKey())
+            System.clearProperty(AnalyticsArgs.DEV_OVERRIDE.getKey())
             testAnalyticsWebserver.stop()
         }
     }
