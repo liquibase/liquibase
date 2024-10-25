@@ -24,8 +24,8 @@ examples/xml/example-changeset-xml.txt
 examples/xml/liquibase.advanced.flowfile.yaml
 examples/xml/liquibase.psql.conf
 examples/xml/liquibase.flowfile.yaml
-examples/xml/liquibase.checks-package-header.yaml
 examples/xml/liquibase.sqlplus.conf
+examples/xml/liquibase.checks-package-header.yaml
 examples/xml/liquibase.customlogdata.yaml
 examples/xml/liquibase.sqlcmd.conf
 examples/json/
@@ -44,8 +44,8 @@ examples/json/blank-changelog.json
 examples/json/liquibase.advanced.flowfile.yaml
 examples/json/example-changeset-json.txt
 examples/json/liquibase.flowfile.yaml
-examples/json/liquibase.checks-package-header.yaml
 examples/json/example-changelog.json
+examples/json/liquibase.checks-package-header.yaml
 examples/json/liquibase.customlogdata.yaml
 examples/yaml/
 examples/yaml/liquibase.properties
@@ -77,13 +77,13 @@ examples/sql/checks-packages/liquibase.checks.access-control.yaml
 examples/sql/checks-packages/liquibase.checks.coding-standards.yaml
 examples/sql/liquibase.flowvariables.yaml
 examples/sql/liquibase.checks-package.yaml
-examples/sql/liquibase.create-checks-packages.flow.yaml
 examples/sql/example-changeset-sql.txt
+examples/sql/liquibase.create-checks-packages.flow.yaml
 examples/sql/liquibase.endstage.flow
 examples/sql/liquibase.advanced.flowfile.yaml
 examples/sql/liquibase.psql.conf
-examples/sql/liquibase.flowfile.yaml
 examples/sql/liquibase.checks-package-header.yaml
+examples/sql/liquibase.flowfile.yaml
 examples/sql/liquibase.sqlplus.conf
 examples/sql/blank-changelog.sql
 examples/sql/liquibase.customlogdata.yaml
