@@ -9,12 +9,14 @@ import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.util.LiquibaseUtil
 import liquibase.util.SystemUtil
 import org.yaml.snakeyaml.Yaml
+import spock.lang.Ignore
 import spock.lang.IgnoreIf
 import spock.lang.Shared
 import spock.lang.Specification
 
 import java.util.concurrent.TimeUnit
 
+@Ignore
 @LiquibaseIntegrationTest
 class AnalyticsIntegrationTest extends Specification {
 

@@ -1,10 +1,7 @@
 package liquibase.analytics.configuration;
 
-import liquibase.Scope;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
-import liquibase.license.LicenseServiceUtils;
-import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.logging.Level;
 
@@ -72,28 +69,7 @@ public class AnalyticsArgs implements AutoloadedConfigurations {
      * @throws Exception if there was a problem determining the enabled status of analytics
      */
     public static boolean isAnalyticsEnabled() throws Exception {
-        // if the user set enabled to false, that overrides all
-        Boolean userSuppliedEnabled = ENABLED.getCurrentValue();
-        if (Boolean.FALSE.equals(userSuppliedEnabled)) {
-            Scope.getCurrentScope().getLog(AnalyticsArgs.class).log(LOG_LEVEL.getCurrentValue(), "User has disabled analytics.", null);
-            return false;
-        }
-
-        boolean proLicenseValid = LicenseServiceUtils.isProLicenseValid();
-        AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
-        if (proLicenseValid) {
-            Boolean enabled = BooleanUtils.and(new Boolean[]{analyticsConfigurationFactory.getPlugin().isProAnalyticsEnabled(), userSuppliedEnabled});
-            if (Boolean.FALSE.equals(enabled)) {
-                Scope.getCurrentScope().getLog(AnalyticsArgs.class).log(LOG_LEVEL.getCurrentValue(), "Analytics is disabled, because a pro license was detected and analytics was not enabled by the user or because it was turned off by Liquibase.", null);
-            }
-            return enabled;
-        } else {
-            boolean enabled = analyticsConfigurationFactory.getPlugin().isOssAnalyticsEnabled();
-            if (Boolean.FALSE.equals(enabled)) {
-                Scope.getCurrentScope().getLog(AnalyticsArgs.class).log(LOG_LEVEL.getCurrentValue(), "Analytics is disabled, because it was turned off by Liquibase.", null);
-            }
-            return enabled;
-        }
+        return false;
     }
 
 }
