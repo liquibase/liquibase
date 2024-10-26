@@ -1,6 +1,7 @@
 package liquibase.database;
 
 import liquibase.database.jvm.JdbcConnection;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +16,12 @@ public class ConnectionServiceFactoryTest {
     public void setUp() {
         ConnectionServiceFactory.reset();
         connectionServiceFactory = ConnectionServiceFactory.getInstance();
+    }
+
+    @AfterEach
+    public void tearDown() {
+        ConnectionServiceFactory.reset();
+        DatabaseFactory.reset();
     }
 
     @Test
