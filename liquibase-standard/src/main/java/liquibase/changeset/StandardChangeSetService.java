@@ -63,8 +63,10 @@ public class StandardChangeSetService implements ChangeSetService {
             changeSet.setRunWithSpoolFile(modifyChangeSets != null ? modifyChangeSets.getRunWithSpool() : null);
         }
         for (Change change : changeSet.getChanges()) {
-            if (change instanceof AbstractSQLChange) {
-                ((AbstractSQLChange)change).setStripComments(modifyChangeSets != null && modifyChangeSets.isStripComments());
+            if (change instanceof AbstractSQLChange &&
+                ((AbstractSQLChange)change).isStripCommentsUsedDefaultValue() &&
+                modifyChangeSets != null && modifyChangeSets.isStripComments() != null) {
+                ((AbstractSQLChange)change).setStripComments(modifyChangeSets.isStripComments());
             }
         }
     }

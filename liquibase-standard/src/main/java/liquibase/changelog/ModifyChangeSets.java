@@ -14,7 +14,7 @@ import lombok.Getter;
 public class ModifyChangeSets {
     private final String runWith;
     private final String runWithSpool;
-    private final boolean stripComments;
+    private Boolean stripComments;
 
     /**
      *
@@ -27,8 +27,6 @@ public class ModifyChangeSets {
         Object stripCommentsValue = node.getChildValue(null, "stripComments");
         if (stripCommentsValue != null) {
             this.stripComments = ObjectUtil.convert(stripCommentsValue, Boolean.class);
-        } else {
-            this.stripComments = false;
         }
     }
 
@@ -63,7 +61,7 @@ public class ModifyChangeSets {
         return runWithSpool;
     }
 
-    public boolean isStripComments() {
+    public Boolean isStripComments() {
         return stripComments;
     }
 }
