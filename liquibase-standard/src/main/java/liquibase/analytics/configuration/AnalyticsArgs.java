@@ -1,7 +1,12 @@
 package liquibase.analytics.configuration;
 
+import liquibase.Scope;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
+import liquibase.license.LicenseServiceUtils;
+import liquibase.logging.Logger;
+import liquibase.util.LiquibaseUtil;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.logging.Level;
 
@@ -13,6 +18,7 @@ public class AnalyticsArgs implements AutoloadedConfigurations {
      */
     public static final ConfigurationDefinition<Boolean> ENABLED;
     public static final ConfigurationDefinition<String> CONFIG_ENDPOINT_URL;
+    private static final ConfigurationDefinition<Boolean> DEV_OVERRIDE;
     public static final ConfigurationDefinition<Integer> CONFIG_ENDPOINT_TIMEOUT_MILLIS;
     public static final ConfigurationDefinition<Level> LOG_LEVEL;
     public static final ConfigurationDefinition<Integer> LICENSE_KEY_CHARS;
@@ -28,6 +34,12 @@ public class AnalyticsArgs implements AutoloadedConfigurations {
         CONFIG_ENDPOINT_URL = builder.define("configEndpointUrl", String.class)
                 .setDefaultValue("https://config.liquibase.com/analytics.yaml")
                 .setHidden(true)
+                .build();
+
+        DEV_OVERRIDE = builder.define("devOverride", Boolean.class)
+                .setDescription("By default, Liquibase will not send analytics in dev (non release) builds. To override this behavior, set this value to true and provide a value for " + CONFIG_ENDPOINT_URL.getKey())
+                .setHidden(true)
+                .setDefaultValue(false)
                 .build();
 
         TIMEOUT_MILLIS = builder.define("timeoutMillis", Integer.class)
@@ -69,7 +81,43 @@ public class AnalyticsArgs implements AutoloadedConfigurations {
      * @throws Exception if there was a problem determining the enabled status of analytics
      */
     public static boolean isAnalyticsEnabled() throws Exception {
-        return false;
+        Boolean devOverride = DEV_OVERRIDE.getCurrentValue();
+        Logger log = Scope.getCurrentScope().getLog(AnalyticsArgs.class);
+        if (LiquibaseUtil.isDevVersion() && Boolean.FALSE.equals(devOverride)) {
+            log.severe("Analytics is disabled because this is not a release build and the user has not provided a value for the "+DEV_OVERRIDE.getKey()+" option.");
+            return false;
+        }
+        String configEndpointUrl = CONFIG_ENDPOINT_URL.getCurrentValue();
+        if (Boolean.TRUE.equals(devOverride) && CONFIG_ENDPOINT_URL.getDefaultValue().equals(configEndpointUrl)) {
+            log.severe("Analytics is disabled because " + DEV_OVERRIDE.getKey() + " was set to true, but the default " +
+                    "value was used for the " + CONFIG_ENDPOINT_URL.getKey() + " property. This is not permitted, because " +
+                    "dev versions of Liquibase should not be pushing analytics towards the prod analytics stack. To resolve " +
+                    "this, provide a value for " + CONFIG_ENDPOINT_URL.getKey() + " that is not the default value.");
+            return false;
+        }
+
+        // if the user set enabled to false, that overrides all
+        Boolean userSuppliedEnabled = ENABLED.getCurrentValue();
+        if (Boolean.FALSE.equals(userSuppliedEnabled)) {
+            log.log(LOG_LEVEL.getCurrentValue(), "User has disabled analytics.", null);
+            return false;
+        }
+
+        boolean proLicenseValid = LicenseServiceUtils.isProLicenseValid();
+        AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
+        if (proLicenseValid) {
+            Boolean enabled = BooleanUtils.and(new Boolean[]{analyticsConfigurationFactory.getPlugin().isProAnalyticsEnabled(), userSuppliedEnabled});
+            if (Boolean.FALSE.equals(enabled)) {
+                log.log(LOG_LEVEL.getCurrentValue(), "Analytics is disabled, because a pro license was detected and analytics was not enabled by the user or because it was turned off by Liquibase.", null);
+            }
+            return enabled;
+        } else {
+            boolean enabled = analyticsConfigurationFactory.getPlugin().isOssAnalyticsEnabled();
+            if (Boolean.FALSE.equals(enabled)) {
+                log.log(LOG_LEVEL.getCurrentValue(), "Analytics is disabled, because it was turned off by Liquibase.", null);
+            }
+            return enabled;
+        }
     }
 
 }
