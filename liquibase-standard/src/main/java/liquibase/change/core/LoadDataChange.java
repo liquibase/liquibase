@@ -39,6 +39,7 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.csv.CSVReader;
 import lombok.Setter;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -387,9 +388,23 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                                 needsPreparedStatement = true;
                             }
                         } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.CLOB) {
-                            // Similar to the blob case, we expect ALL clobs found using loadData to be a valid path to a file.
-                            // We then load the entire file into the value when executing the statement.
-                            valueConfig.setValueClobFile(value);
+                            // Previously, we expected all clobs found using loadData to be a valid path to a file.
+                            // To maintain backwards compatibility, we will first try to find the file.
+                            // If found, we then load the entire file into the value when executing the statement.
+                            // If not found, we load the value as a string.
+                            Resource r;
+                            if (getRelativeTo() != null) {
+                                r = Scope.getCurrentScope().getResourceAccessor().get(getRelativeTo()).resolveSibling(value);
+                            } else {
+                                r = Scope.getCurrentScope().getResourceAccessor().get(value);
+                            }
+
+                            if (r.exists()) {
+                                valueConfig.setValueClobFile(value);
+                            } else {
+                                LOG.fine(String.format("File %s not found. Inserting the value as a string. See https://docs.liquibase.com for more information.", value));
+                                valueConfig.setValue(value);
+                            }
                             needsPreparedStatement = true;
                         }  else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.UUID) {
                             valueConfig.setType(columnConfig.getType());
