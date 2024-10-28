@@ -188,32 +188,8 @@ Gathering anonymous usage analytics allows us to better understand how Liquibase
 - (#6245) Bump actions/delete-package-versions from 3 to 5 @dependabot
 - (#6199) Bump junit-jupiter.version from 5.10.3 to 5.11.0 @dependabot
 
-
-
-##  Contributors
-
-@andrus @catull @asolntsev @wwillard7800 @begin @raphw @bmoers @deblockt @chrstnbrn @filipelautert @anton-erofeev @abrackx @StevenMassaro @dependabot @momosetkn @rozenshteyn @liquibot @MalloD12 @sayaliM0412 @stephenatwell @tati-qalified @Evan-Christensen
-
-
 **Full Changelog**: https://github.com/liquibase/liquibase/compare/v4.29.2...v4.30.0
 
-
-### Get Certified
-Learn all the Liquibase fundamentals from free online courses by Liquibase experts and see how to apply them in the real world at https://learn.liquibase.com/.
-
-### Read the Documentation
-Please check out and contribute to the continually improving docs, now at https://docs.liquibase.com/.
-
-### Join the Community
-Our community has built a lot. From extensions to integrations, you’ve helped make Liquibase the amazing open source project that it is today. Keep contributing to making it stronger:
-
-[Contribute code](https://www.liquibase.org/development/contribute.html)
-[Make doc updates](https://github.com/Datical/liquibase-docs)
-[Help by asking and answering questions](https://forum.liquibase.org/)
-[Join our Discord server](https://discord.gg/qAMHY5U8)
-[Sign up to provide feedback to the product team](https://forms.gle/bsoD5K6iLLvkdqhC8)
-
-Thanks to everyone who helps make Liquibase better!
 
 Changes in version 4.29.2 (2024.09.03)
 
