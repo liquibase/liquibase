@@ -23,6 +23,10 @@ public class LiquibaseUtil {
         return getBuildInfo("build.version");
     }
 
+    public static boolean isDevVersion() {
+        return LiquibaseUtil.getBuildVersion().equals(LiquibaseUtil.DEV_VERSION);
+    }
+
     /**
      * Return the build version for release builds and a more descriptive string for snapshot builds.
      */

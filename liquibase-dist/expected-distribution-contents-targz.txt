@@ -7,10 +7,18 @@
 ├── examples
 │   ├── json
 │   │   ├── blank-changelog.json
+│   │   ├── checks-packages
+│   │   │   ├── liquibase.checks.access-control.yaml
+│   │   │   ├── liquibase.checks.changeset-standards.yaml
+│   │   │   ├── liquibase.checks.coding-standards.yaml
+│   │   │   ├── liquibase.checks.data-protection.yaml
+│   │   │   └── liquibase.checks.schema-protection.yaml
 │   │   ├── example-changelog.json
 │   │   ├── example-changeset-json.txt
 │   │   ├── liquibase.advanced.flowfile.yaml
+│   │   ├── liquibase.checks-package-header.yaml
 │   │   ├── liquibase.checks-package.yaml
+│   │   ├── liquibase.create-checks-packages.flow.yaml
 │   │   ├── liquibase.customlogdata.yaml
 │   │   ├── liquibase.endstage.flow
 │   │   ├── liquibase.flowfile.yaml
@@ -18,10 +26,18 @@
 │   │   └── liquibase.properties
 │   ├── sql
 │   │   ├── blank-changelog.sql
+│   │   ├── checks-packages
+│   │   │   ├── liquibase.checks.access-control.yaml
+│   │   │   ├── liquibase.checks.changeset-standards.yaml
+│   │   │   ├── liquibase.checks.coding-standards.yaml
+│   │   │   ├── liquibase.checks.data-protection.yaml
+│   │   │   └── liquibase.checks.schema-protection.yaml
 │   │   ├── example-changelog.sql
 │   │   ├── example-changeset-sql.txt
 │   │   ├── liquibase.advanced.flowfile.yaml
+│   │   ├── liquibase.checks-package-header.yaml
 │   │   ├── liquibase.checks-package.yaml
+│   │   ├── liquibase.create-checks-packages.flow.yaml
 │   │   ├── liquibase.customlogdata.yaml
 │   │   ├── liquibase.endstage.flow
 │   │   ├── liquibase.flowfile.yaml
@@ -34,10 +50,18 @@
 │   ├── start-h2.bat
 │   ├── xml
 │   │   ├── blank-changelog.xml
+│   │   ├── checks-packages
+│   │   │   ├── liquibase.checks.access-control.yaml
+│   │   │   ├── liquibase.checks.changeset-standards.yaml
+│   │   │   ├── liquibase.checks.coding-standards.yaml
+│   │   │   ├── liquibase.checks.data-protection.yaml
+│   │   │   └── liquibase.checks.schema-protection.yaml
 │   │   ├── example-changelog.xml
 │   │   ├── example-changeset-xml.txt
 │   │   ├── liquibase.advanced.flowfile.yaml
+│   │   ├── liquibase.checks-package-header.yaml
 │   │   ├── liquibase.checks-package.yaml
+│   │   ├── liquibase.create-checks-packages.flow.yaml
 │   │   ├── liquibase.customlogdata.yaml
 │   │   ├── liquibase.endstage.flow
 │   │   ├── liquibase.flowfile.yaml
