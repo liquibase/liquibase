@@ -11,6 +11,6 @@ import org.apache.tools.ant.taskdefs.condition.Condition
 class AnalyticsWebserverPostBodyIsAnt extends ProjectComponent implements Condition{
     @Override
     boolean eval() throws BuildException {
-        return TestAnalyticsWebserver.postBody.contains('liquibaseInterface": "ant')
+        return TestAnalyticsWebserver.postBody != null && TestAnalyticsWebserver.postBody.contains('liquibaseInterface": "ant')
     }
 }
