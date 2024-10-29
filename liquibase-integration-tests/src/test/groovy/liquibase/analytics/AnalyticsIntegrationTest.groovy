@@ -9,14 +9,12 @@ import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.util.LiquibaseUtil
 import liquibase.util.SystemUtil
 import org.yaml.snakeyaml.Yaml
-import spock.lang.Ignore
 import spock.lang.IgnoreIf
 import spock.lang.Shared
 import spock.lang.Specification
 
 import java.util.concurrent.TimeUnit
 
-@Ignore
 @LiquibaseIntegrationTest
 class AnalyticsIntegrationTest extends Specification {
 
@@ -132,6 +130,7 @@ class AnalyticsIntegrationTest extends Specification {
         Map<String, ?> scopeVars = new HashMap<>()
         scopeVars.put(AnalyticsArgs.CONFIG_ENDPOINT_URL.getKey(), "http://localhost:" + simpleWebserver.getListeningPort() + "/config-analytics.yaml")
         scopeVars.put(AnalyticsArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getKey(), TimeUnit.SECONDS.toMillis(60)) // to allow for debugging, otherwise the thread gets killed fast
+        scopeVars.put(AnalyticsArgs.DEV_OVERRIDE.getKey(), true)
         Scope.child(scopeVars, scopedRunner)
     }
 }

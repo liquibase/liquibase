@@ -4,13 +4,11 @@ import liquibase.Scope
 import liquibase.analytics.configuration.AnalyticsArgs
 import liquibase.analytics.configuration.AnalyticsConfiguration
 import liquibase.analytics.configuration.AnalyticsConfigurationFactory
-import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
 
 class AnalyticsArgsTest extends Specification {
 
-    @Ignore
     @Unroll
     def "test all permutations of options for enabling/disabling for oss"(Boolean userCliOption, boolean remoteOssEnabled, boolean isEnabled) {
         setup:
@@ -38,6 +36,8 @@ class AnalyticsArgsTest extends Specification {
         when:
         Map<String, ?> scopeKeys = new HashMap<>()
         scopeKeys.put(AnalyticsArgs.ENABLED.getKey(), userCliOption)
+        scopeKeys.put(AnalyticsArgs.DEV_OVERRIDE.getKey(), true)
+        scopeKeys.put(AnalyticsArgs.CONFIG_ENDPOINT_URL.getKey(), "some other value")
         Boolean actuallyEnabled = Scope.child(scopeKeys, () -> {
             return AnalyticsArgs.isAnalyticsEnabled()
         } as Scope.ScopedRunnerWithReturn)
