@@ -4,10 +4,11 @@ import liquibase.Scope;
 import liquibase.command.*;
 import liquibase.command.copy.ProjectCopier;
 import liquibase.command.copy.ProjectCopierFactory;
+import liquibase.command.core.helpers.AbstractHelperCommandStep;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.exception.UnexpectedLiquibaseException;
 
-public class InitCopyCommandStep extends AbstractCommandStep {
+public class InitCopyCommandStep extends AbstractHelperCommandStep {
 
     public static final String[] COMMAND_NAME = {"init", "copy"};
     private static final String[] ALIAS = {"init", "project-clone"};
