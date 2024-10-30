@@ -56,7 +56,7 @@ public class SnapshotGeneratorFactory {
         try {
             int priority = generator.getPriority(null, new MockDatabase());
             if (priority != PRIORITY_NONE) {
-                if (LiquibaseUtil.getBuildVersion().equals(LiquibaseUtil.DEV_VERSION)) {
+                if (LiquibaseUtil.isDevVersion()) {
                     throw new UnexpectedLiquibaseException(String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, generator.getClass().getName()));
                 }
                 switch (GlobalConfiguration.SUPPORTS_METHOD_VALIDATION_LEVEL.getCurrentValue()) {

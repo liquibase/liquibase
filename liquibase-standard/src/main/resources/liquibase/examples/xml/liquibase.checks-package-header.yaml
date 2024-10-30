@@ -1,0 +1,25 @@
+## This is a Liquibase checks packages formatted yaml file.
+## It contains just one or more 'checksPackages' objects
+## with one or more named checks-settings-files.
+
+## These checks-settings-files listed in a package are processed sequentially
+## during 'liquibase checks run' or 'liquibase checks show' commands
+## which specify this file as the checks-settings-file property.
+
+## Learn more at https://docs.liquibase.com/policy-checks
+
+#### This checks package file "liquibase.checks-package.yaml"
+#### contains 5 different packages, detailed below.
+
+## Example: run ALL packages: 
+####  liquibase checks run --checks-settings-file=liquibase.checks-package.yaml --checks-scope=changelog,database
+
+## Example: run a specific package: 
+#### liquibase checks run --checks-settings-file=liquibase.checks-package.yaml --checks-packages=data-protections.pkg
+## or
+#### liquibase checks run --checks-settings-file=liquibase.checks-package.yaml --checks-packages=changeset-standards.pkg
+## or
+#### liquibase checks run --checks-settings-file=liquibase.checks-package.yaml --checks-packages=all-standards.pkg
+
+#### The list of checksPackages
+
