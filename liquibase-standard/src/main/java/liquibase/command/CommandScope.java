@@ -293,7 +293,7 @@ public class CommandScope {
                             AnalyticsFactory analyticsFactory = Scope.getCurrentScope().getSingleton(AnalyticsFactory.class);
                             analyticsFactory.handleEvent(analyticsEvent);
                         } else {
-                            parentAnalyticsEvent.getChildEvents().add(analyticsEvent);
+                            parentAnalyticsEvent.addChildEvent(analyticsEvent);
                         }
                     });
                 }
