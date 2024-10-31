@@ -111,7 +111,8 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         changeSet.setStoredFilePath(ran?ranChangeSet.getStoredChangeLog():null);
         boolean shouldValidate = !ran || changeSet.shouldRunOnChange() || changeSet.shouldAlwaysRun();
 
-        if (!areChangeSetAttributesValid(changeSet)) {
+        // Only strictly check changeset ids when a changeset has not been ran or is about to run
+        if (!areChangeSetAttributesValid(changeSet, shouldValidate)) {
             changeSet.setValidationFailed(true);
             shouldValidate = false;
         }
@@ -182,9 +183,16 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         }
     }
 
-    private boolean areChangeSetAttributesValid(ChangeSet changeSet) {
+    /**
+     * Check changesets for required attributes. If strictIdCheck is true then spaces will not be allowed in the id.
+     *
+     * @param changeSet     the changeset to check
+     * @param strictIdCheck whether to allow spaces in the changeset id
+     * @return true if the changeset attributes are valid, false otherwise
+     */
+    private boolean areChangeSetAttributesValid(ChangeSet changeSet, boolean strictIdCheck) {
         boolean authorEmpty = StringUtils.isEmpty(changeSet.getAuthor());
-        boolean idEmpty = StringUtils.isBlank(changeSet.getId());
+        boolean idEmpty = strictIdCheck ? StringUtils.isBlank(changeSet.getId()) : StringUtils.isEmpty(changeSet.getId());
         boolean strictCurrentValue = GlobalConfiguration.STRICT.getCurrentValue();
 
         boolean valid = false;
