@@ -1,6 +1,7 @@
 package liquibase.analytics;
 
 import liquibase.Scope;
+import liquibase.analytics.configuration.AnalyticsArgs;
 import liquibase.analytics.configuration.AnalyticsConfigurationFactory;
 import liquibase.analytics.configuration.LiquibaseRemoteAnalyticsConfiguration;
 import liquibase.analytics.configuration.RemoteAnalyticsConfiguration;
@@ -187,5 +188,21 @@ public class Event {
             Map<String, VersionUtils.LibraryInfo> libraries = EXTENSIONS_CACHE.get();
             return libraries.get(extensionName).version;
         });
+    }
+
+    /**
+     * Add the child event only if analytics is enabled.
+     * If unable to determine analytics enabled status no event will be added.
+     *
+     * @param event the event to add
+     */
+    public void addChildEvent(Event event) {
+        try {
+            if (AnalyticsArgs.isAnalyticsEnabled()) {
+                getChildEvents().add(event);
+            }
+        } catch (Exception analyticsEnabledException) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Failed to add child event: could not determine analytics status", analyticsEnabledException);
+        }
     }
 }
