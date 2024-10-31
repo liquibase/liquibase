@@ -110,7 +110,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.11.0</version>
+            <version>5.11.3</version>
             <scope>test</scope>
         </dependency>
 
@@ -178,6 +178,12 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>
             <version>${commons-text.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.nanohttpd</groupId>
+            <artifactId>nanohttpd</artifactId>
+            <version>2.2.0</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -376,6 +382,8 @@
                         <param>liquibase.database.LiquibaseTableNames</param>
                         <param>liquibase.changelog.visitor.ValidatingVisitorGenerator</param>
                         <param>liquibase.io.OutputFileHandler</param>
+                        <param>liquibase.analytics.AnalyticsListener</param>
+                        <param>liquibase.analytics.configuration.AnalyticsConfiguration</param>
                     </services>
                 </configuration>
                 <executions>
