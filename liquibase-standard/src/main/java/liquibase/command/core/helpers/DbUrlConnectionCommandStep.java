@@ -9,6 +9,7 @@ import liquibase.command.CommandResultsBuilder;
 import liquibase.command.CommandScope;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
@@ -16,6 +17,10 @@ import liquibase.logging.mdc.MdcKey;
 import liquibase.util.ExceptionUtil;
 import liquibase.util.StringUtil;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
@@ -116,7 +121,21 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
             );
         }
         logMdc(url == null ? database.getConnection().getURL() : url, database);
+        try {
+            DatabaseConnection connection = database.getConnection();
+            Connection underlyingConnection = connection.getUnderlyingConnection();
+            Scope.getCurrentScope().getUI().sendMessage("========== url: " + connection.getURL() + "; cleaned url: " + removeQueryParameters(connection.getURL()) +
+                    "; schema: " + underlyingConnection.getSchema() + "; catalog: " + underlyingConnection.getCatalog());
+        } catch (SQLException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
         return database;
+    }
+
+    public static String removeQueryParameters(String jdbcUrl) throws URISyntaxException {
+        URI uri = new URI(jdbcUrl.substring(5)); // remove "jdbc:" prefix
+        URI cleanedUri = new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), null, uri.getFragment());
+        return "jdbc:" + cleanedUri.toString();
     }
 
     private static String getDriver(CommandScope commandScope) {
