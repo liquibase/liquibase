@@ -4,7 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       distinct_id:
-
+      # Tag to use from :https://github.com/Datical/DaticalDB-installer/tags. Have this variable to be near an DaticalDb-installer version variable which is used during its report generation
+      # https://datical.atlassian.net/browse/DAT-18632
+      version_number_for_report_generation:
+        description: 'Typically supply the DaticalDb-installer version variable which is used during its report generation to be stored in the s3 bucket. eg 8.7.352'
+        required: true
+        
 jobs:
   fossa-scan:
     uses: liquibase/build-logic/.github/workflows/fossa.yml@main
