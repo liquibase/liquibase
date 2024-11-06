@@ -1097,6 +1097,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         if (database != null && logicalFilePath != null) {
             ranChangeSets = database.getRanChangeSetList();
         }
+        String changelogLogicalFilePath = this.logicalFilePath;
+        if (changelogLogicalFilePath != null) {
+            logicalFilePath = changelogLogicalFilePath;
+        }
         for (ChangeSet changeSet : changeLog.getChangeSets()) {
             if (modifyChangeSets != null) {
                 modifyChangeSets(modifyChangeSets, changeSet);
@@ -1107,7 +1111,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             // already been executed because this would cause the addition
             // of another DBCL entry.
             //
-            if (logicalFilePath != null && ! ranChangeSetExists(changeSet, ranChangeSets)) {
+            String changesetLogicalFilePath = changeSet.getLogicalFilePath();
+            if (logicalFilePath != null && changesetLogicalFilePath == null && ! ranChangeSetExists(changeSet, ranChangeSets)) {
                 changeSet.setLogicalFilePath(logicalFilePath);
                 if (StringUtils.isNotEmpty(logicalFilePath)) {
                     changeSet.setFilePath(logicalFilePath);
