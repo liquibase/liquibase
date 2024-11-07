@@ -1,12 +1,19 @@
 package liquibase.integration.commandline;
 
 import liquibase.Scope;
+import liquibase.resource.DirectoryPathHandler;
+import liquibase.resource.Resource;
+import liquibase.util.LiquibaseLauncherSettings;
 import liquibase.util.StringUtil;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -99,14 +106,11 @@ public class LiquibaseLauncher {
             }
         }
 
-        ClassLoader parentLoader = getClassLoader(parentLoaderSetting);
-
-        final URLClassLoader classloader = new URLClassLoader(libUrls.toArray(new URL[0]), parentLoader);
-        Thread.currentThread().setContextClassLoader(classloader);
+        Thread.currentThread().setContextClassLoader(configureClassLoader(getClassLoader(parentLoaderSetting), args, libUrls));
 
         Class<?> cli;
         try {
-            cli = classloader.loadClass(LiquibaseCommandLine.class.getName());
+            cli = Thread.currentThread().getContextClassLoader().loadClass(LiquibaseCommandLine.class.getName());
         } catch (ClassNotFoundException classNotFoundException) {
             throw new RuntimeException(
                 String.format("Unable to find Liquibase classes in the configured home: '%s'.", liquibaseHome), classNotFoundException
@@ -114,6 +118,89 @@ public class LiquibaseLauncher {
         }
 
         cli.getMethod("main", String[].class).invoke(null, new Object[]{args});
+    }
+
+    protected static ClassLoader configureClassLoader(ClassLoader parentLoader, String[] args, List<URL> libUrls) throws IllegalArgumentException, IOException {
+
+        String classpath = getParameter(LIQUIBASE_CLASSPATH, ".*classpath.*", args, true);
+
+        final List<URL> urls = new ArrayList<>(libUrls);
+        if (classpath != null) {
+            String[] classpathSoFar;
+            if (System.getProperties().getProperty("os.name").toLowerCase().startsWith("windows")) {
+                classpathSoFar = classpath.split(";");
+            } else {
+                classpathSoFar = classpath.split(":");
+            }
+
+            for (String classpathEntry : classpathSoFar) {
+                File classPathFile = new File(classpathEntry);
+                if (!classPathFile.exists()) {
+                    throw new IllegalArgumentException(classPathFile.getAbsolutePath() + " does not exist");
+                }
+
+                try {
+                    URL newUrl = new File(classpathEntry).toURI().toURL();
+                    debug(newUrl.toExternalForm() + " added to class loader");
+                    urls.add(newUrl);
+                } catch (MalformedURLException e) {
+                    throw new IllegalArgumentException(e);
+                }
+            }
+        }
+
+        final ClassLoader classLoader;
+        if (!"false".equals(getSetting(LIQUIBASE_INCLUDE_SYSTEM_CLASSPATH))) {
+            classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), parentLoader));
+        } else {
+            classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), null));
+        }
+        return classLoader;
+    }
+
+    private static String getParameter(LiquibaseLauncherSettings.LiquibaseLauncherSetting param, String cmd, String[] args, boolean verifyDefaultsFile) throws IOException {
+        // read classpath from system properties
+        String classpath = getSetting(param);
+
+        if (classpath == null) {
+            //read it from command line args
+            for (String arg : args) {
+                if (arg.matches(cmd)) {
+                    String[] cp = arg.split("=");
+                    if (cp.length == 2) {
+                        classpath = cp[1];
+                        break;
+                    }
+                }
+            }
+        }
+        if (classpath == null && verifyDefaultsFile) {
+            //read it from properties file!
+            String propertiesFile = getParameter(LIQUIBASE_DEFAULTS_FILE, "--.*defaults.*[fF]ile=.*", args, false);
+            Resource resource = new DirectoryPathHandler().getResource(propertiesFile);
+            if (resource.exists()) {
+                try (InputStream defaultsStream = resource.openInputStream()) {
+                    if (defaultsStream != null) {
+                        Properties properties = new Properties();
+                        properties.load(defaultsStream);
+                        Optional<Map.Entry<Object, Object>> property = properties.entrySet().stream()
+                                .filter(entry -> entry.getKey().toString().matches(cmd))
+                                .findFirst();
+                        if (property.isPresent()) {
+                            classpath = property.get().getValue().toString();
+                        }
+                    }
+                }
+            } else {
+                InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(propertiesFile);
+                if (inputStream != null) {
+                    Properties properties = new Properties();
+                    properties.load(inputStream);
+                    classpath = properties.getProperty(cmd);
+                }
+            }
+        }
+        return classpath;
     }
 
     private static ClassLoader getClassLoader(String parentLoaderSetting) {
