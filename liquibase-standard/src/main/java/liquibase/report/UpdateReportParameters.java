@@ -17,4 +17,9 @@ public class UpdateReportParameters implements UpdateRollbackReportParameters {
     private final CustomData customData = new CustomData();
     private final ChangesetInfo changesetInfo = new ChangesetInfo();
     private final Date date = new Date();
+
+    @Override
+    public void suppressSql() {
+        changesetInfo.suppressSql();
+    }
 }

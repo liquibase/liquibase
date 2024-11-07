@@ -59,4 +59,9 @@ public class RollbackReportParameters implements UpdateRollbackReportParameters 
                 // Intentionally not using the formatted version for this last item.
                 exceptionDetails.getPrimaryExceptionReason()));
     }
+
+    @Override
+    public void suppressSql() {
+        changesetInfo.suppressSql();
+    }
 }
