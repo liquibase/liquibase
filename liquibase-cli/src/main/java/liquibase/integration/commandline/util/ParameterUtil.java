@@ -30,24 +30,27 @@ public class ParameterUtil {
     public static String getParameter(LiquibaseLauncherSettings.LiquibaseLauncherSetting param, String cmd, String[] args, boolean verifyDefaultsFile) throws IOException {
         // read parameter from system properties
         String parameter = getSetting(param);
+        if (parameter != null) {
+            return parameter;
+        }
 
-        if (parameter == null) {
-            //read it from command line args
-            for (String arg : args) {
-                if (arg.matches("--.*" + cmd + "=.*")) {
-                    String[] cp = arg.split("=");
-                    if (cp.length == 2) {
-                        parameter = cp[1];
-                        break;
-                    }
+        //read it from command line args
+        for (String arg : args) {
+            if (arg.matches("--.*" + cmd + "=.*")) {
+                String[] cp = arg.split("=");
+                if (cp.length == 2) {
+                    return cp[1];
                 }
             }
         }
-        if (parameter == null && verifyDefaultsFile) {
+
+        if (verifyDefaultsFile) {
             //read it from properties file!
-            parameter = getParameterFromPropertiesFile(cmd, args, parameter);
+            return getParameterFromPropertiesFile(cmd, args, parameter);
         }
-        return parameter;
+
+        //give up
+        return null;
     }
 
     private static String getParameterFromPropertiesFile(String cmd, String[] args, String parameter) throws IOException {
