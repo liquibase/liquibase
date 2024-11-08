@@ -1,14 +1,10 @@
 package liquibase.integration.commandline;
 
 import liquibase.Scope;
-import liquibase.resource.DirectoryPathHandler;
-import liquibase.resource.Resource;
-import liquibase.util.LiquibaseLauncherSettings;
 import liquibase.util.StringUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -19,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static liquibase.integration.commandline.util.ParameterUtil.getParameter;
 import static liquibase.util.LiquibaseLauncherSettings.LiquibaseLauncherSetting.*;
 import static liquibase.util.LiquibaseLauncherSettings.getSetting;
 
@@ -122,7 +119,7 @@ public class LiquibaseLauncher {
 
     protected static ClassLoader configureClassLoader(ClassLoader parentLoader, String[] args, List<URL> libUrls) throws IllegalArgumentException, IOException {
 
-        String classpath = getParameter(LIQUIBASE_CLASSPATH, ".*classpath.*", args, true);
+        String classpath = getParameter(LIQUIBASE_CLASSPATH, "classpath", args, true);
 
         final List<URL> urls = new ArrayList<>(libUrls);
         if (classpath != null) {
@@ -156,51 +153,6 @@ public class LiquibaseLauncher {
             classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), null));
         }
         return classLoader;
-    }
-
-    private static String getParameter(LiquibaseLauncherSettings.LiquibaseLauncherSetting param, String cmd, String[] args, boolean verifyDefaultsFile) throws IOException {
-        // read classpath from system properties
-        String classpath = getSetting(param);
-
-        if (classpath == null) {
-            //read it from command line args
-            for (String arg : args) {
-                if (arg.matches(cmd)) {
-                    String[] cp = arg.split("=");
-                    if (cp.length == 2) {
-                        classpath = cp[1];
-                        break;
-                    }
-                }
-            }
-        }
-        if (classpath == null && verifyDefaultsFile) {
-            //read it from properties file!
-            String propertiesFile = getParameter(LIQUIBASE_DEFAULTS_FILE, "--.*defaults.*[fF]ile=.*", args, false);
-            Resource resource = new DirectoryPathHandler().getResource(propertiesFile);
-            if (resource.exists()) {
-                try (InputStream defaultsStream = resource.openInputStream()) {
-                    if (defaultsStream != null) {
-                        Properties properties = new Properties();
-                        properties.load(defaultsStream);
-                        Optional<Map.Entry<Object, Object>> property = properties.entrySet().stream()
-                                .filter(entry -> entry.getKey().toString().matches(cmd))
-                                .findFirst();
-                        if (property.isPresent()) {
-                            classpath = property.get().getValue().toString();
-                        }
-                    }
-                }
-            } else {
-                InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(propertiesFile);
-                if (inputStream != null) {
-                    Properties properties = new Properties();
-                    properties.load(inputStream);
-                    classpath = properties.getProperty(cmd);
-                }
-            }
-        }
-        return classpath;
     }
 
     private static ClassLoader getClassLoader(String parentLoaderSetting) {
