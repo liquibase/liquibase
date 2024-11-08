@@ -64,4 +64,9 @@ public class RollbackReportParameters implements UpdateRollbackReportParameters 
     public void suppressSql() {
         changesetInfo.suppressSql();
     }
+
+    @Override
+    public void suppressException() {
+        operationInfo.suppressException();
+    }
 }

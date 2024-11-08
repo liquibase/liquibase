@@ -18,4 +18,6 @@ public interface UpdateRollbackReportParameters {
     String getCommandTitle();
 
     void suppressSql();
+
+    void suppressException();
 }

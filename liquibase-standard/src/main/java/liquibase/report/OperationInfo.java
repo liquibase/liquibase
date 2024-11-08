@@ -13,4 +13,8 @@ public class OperationInfo {
     private Boolean rollbackOnError = Boolean.FALSE; // assume false unless set
     private String labels;
     private String contexts;
+
+    public void suppressException() {
+        this.exception = "Exception Suppressed";
+    }
 }
