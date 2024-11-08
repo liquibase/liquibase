@@ -46,28 +46,27 @@ public class ParameterUtil {
 
         if (verifyDefaultsFile) {
             //read it from properties file!
-            return getParameterFromPropertiesFile(cmd, args, parameter);
+            return getParameterFromPropertiesFile(cmd, args);
         }
 
         //give up
         return null;
     }
 
-    private static String getParameterFromPropertiesFile(String cmd, String[] args, String parameter) throws IOException {
+    private static String getParameterFromPropertiesFile(String cmd, String[] args) throws IOException {
         String propertiesFile = getParameter(LIQUIBASE_DEFAULTS_FILE, "defaults.*[fF]ile", args, false);
         Resource resource = new DirectoryPathHandler().getResource(propertiesFile);
         if (resource.exists()) {
             try (InputStream defaultsStream = resource.openInputStream()) {
-                parameter = getPropertyFromInputStream(cmd, parameter, defaultsStream);
+                return getPropertyFromInputStream(cmd, defaultsStream);
             }
         } else {
             InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(propertiesFile);
-            parameter = getPropertyFromInputStream(cmd, parameter, inputStream);
+            return getPropertyFromInputStream(cmd, inputStream);
         }
-        return parameter;
     }
 
-    private static String getPropertyFromInputStream(String cmd, String parameter, InputStream defaultsStream) throws IOException {
+    private static String getPropertyFromInputStream(String cmd, InputStream defaultsStream) throws IOException {
         if (defaultsStream != null) {
             Properties properties = new Properties();
             properties.load(defaultsStream);
@@ -75,9 +74,9 @@ public class ParameterUtil {
                     .filter(entry -> entry.getKey().toString().matches(cmd))
                     .findFirst();
             if (property.isPresent()) {
-                parameter = property.get().getValue().toString();
+                return property.get().getValue().toString();
             }
         }
-        return parameter;
+        return null;
     }
 }
