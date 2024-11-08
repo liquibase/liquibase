@@ -1,5 +1,6 @@
 package liquibase.integration.commandline.util;
 
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.resource.DirectoryPathHandler;
 import liquibase.resource.Resource;
 import liquibase.util.LiquibaseLauncherSettings;
@@ -55,6 +56,9 @@ public class ParameterUtil {
 
     private static String getParameterFromPropertiesFile(String cmd, String[] args) throws IOException {
         String propertiesFile = getParameter(LIQUIBASE_DEFAULTS_FILE, "defaults.*[fF]ile", args, false);
+        if (propertiesFile == null) {
+            propertiesFile = LiquibaseCommandLineConfiguration.DEFAULTS_FILE.getDefaultValue();
+        }
         Resource resource = new DirectoryPathHandler().getResource(propertiesFile);
         if (resource.exists()) {
             try (InputStream defaultsStream = resource.openInputStream()) {
