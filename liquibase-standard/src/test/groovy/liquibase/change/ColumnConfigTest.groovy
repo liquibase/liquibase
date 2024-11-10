@@ -431,6 +431,8 @@ class ColumnConfigTest extends Specification {
             testValue = "347.22"
         } else if (field in ["descending"]) {
             testValue = true
+        } else if (field in ["included"]) {
+            testValue = true
         }
         node.addChild(null, field, testValue)
         try {

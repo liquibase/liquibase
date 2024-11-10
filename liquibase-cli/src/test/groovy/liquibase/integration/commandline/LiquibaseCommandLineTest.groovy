@@ -50,6 +50,15 @@ Global Options
                                variable:
                                'LIQUIBASE_ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA')
 
+      --analytics-enabled=PARAM
+                             Enable or disable sending product usage data and
+                               analytics to Liquibase. Learn more at https:
+                               //docs.liquibase.com/analytics. DEFAULT: true
+                               for OSS users | false for PRO users
+                             (defaults file: 'liquibase.analytics.enabled',
+                               environment variable:
+                               'LIQUIBASE_ANALYTICS_ENABLED')
+
       --auto-reorg=PARAM     Should Liquibase automatically include REORG TABLE
                                commands when needed?
                              DEFAULT: true
@@ -353,6 +362,18 @@ Global Options
                              (defaults file: 'liquibase.outputLineSeparator',
                                environment variable:
                                'LIQUIBASE_OUTPUT_LINE_SEPARATOR')
+
+      --preserve-classpath-prefix-in-normalized-paths=PARAM
+                             If true 'classpath:' prefix will be preserved in
+                               normalized paths, allowing to resolve
+                               hierarchical resources under a classpath-based
+                               root.
+                             DEFAULT: false
+                             (defaults file: 'liquibase.
+                               preserveClasspathPrefixInNormalizedPaths',
+                               environment variable:
+                               'LIQUIBASE_PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZE
+                               D_PATHS')
 
       --preserve-schema-case=PARAM
                              If true, Liquibase treats schema and catalog names

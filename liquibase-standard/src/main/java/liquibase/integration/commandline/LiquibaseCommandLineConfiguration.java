@@ -36,6 +36,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
     public static final ConfigurationDefinition<Boolean> INCLUDE_MATCHING_TAG_IN_ROLLBACK_OLDEST;
     public static final ConfigurationDefinition<Boolean> WORKAROUND_ORACLE_CLOB_CHARACTER_LIMIT;
     public static final ConfigurationDefinition<Boolean> SUPPRESS_LIQUIBASE_SQL;
+    public static final ConfigurationDefinition<String> INTEGRATION_NAME;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -146,6 +147,12 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
         SUPPRESS_LIQUIBASE_SQL = builder.define("suppressLiquibaseSql", Boolean.class)
                 .setDescription("When set to true, this global property prevents DBCL and DBCLH sql from being present in console and logs during *-sql commands, such as update-sql, rollback-sql, etc.")
                 .setDefaultValue(false)
+                .build();
+
+        INTEGRATION_NAME = builder.define("integrationName", String.class)
+                .setDefaultValue("cli")
+                .setDescription("The name of the integration used to invoke Liquibase, for example, cli, or JavaAPI. It is not required to specify this value. This is primarily used by wrappers around Liquibase (like Gradle), so that analytics can be differentiated for those integrations.")
+                .setHidden(true)
                 .build();
    }
 

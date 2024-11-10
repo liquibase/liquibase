@@ -25,12 +25,16 @@ import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
+import liquibase.parser.core.json.JsonChangeLogParser;
+import liquibase.parser.core.xml.XMLChangeLogSAXParser;
+import liquibase.parser.core.yaml.YamlParser;
 import liquibase.precondition.Conditional;
 import liquibase.precondition.Precondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
+import liquibase.util.ExceptionUtil;
 import liquibase.util.FileUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
@@ -39,6 +43,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -55,6 +60,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private static final Pattern SLASH_PATTERN = Pattern.compile("^/");
     private static final Pattern DOUBLE_BACK_SLASH_PATTERN = Pattern.compile("\\\\");
     private static final Pattern NO_LETTER_PATTERN = Pattern.compile("^[a-zA-Z]:");
+    private static final String CLASSPATH_PROTOCOL = "classpath:";
     public static final String SEEN_CHANGELOGS_PATHS_SCOPE_KEY = "SEEN_CHANGELOG_PATHS";
     public static final String FILE = "file";
     public static final String CONTEXT_FILTER = "contextFilter";
@@ -417,6 +423,16 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+        ExceptionUtil.doSilently(() -> {
+            String physicalFilePathLowerCase = this.physicalFilePath.toLowerCase();
+            if (JsonChangeLogParser.SUPPORTED_EXTENSIONS.stream().anyMatch(ext -> physicalFilePathLowerCase.endsWith(ext))) {
+                Scope.getCurrentScope().getAnalyticsEvent().incrementJsonChangelogCount();
+            } else if (XMLChangeLogSAXParser.SUPPORTED_EXTENSIONS.stream().anyMatch(ext -> physicalFilePathLowerCase.endsWith(ext))) {
+                Scope.getCurrentScope().getAnalyticsEvent().incrementXmlChangelogCount();
+            } else if (YamlParser.SUPPORTED_EXTENSIONS.stream().anyMatch(ext -> physicalFilePathLowerCase.endsWith(ext))) {
+                Scope.getCurrentScope().getAnalyticsEvent().incrementYamlChangelogCount();
+            }
+        });
         setLogicalFilePath(parsedNode.getChildValue(null, LOGICAL_FILE_PATH, String.class));
 
         String context = parsedNode.getChildValue(null, CONTEXT_FILTER, String.class);
@@ -960,6 +976,21 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return include(fileName, isRelativePath, errorIfMissing, resourceAccessor, includeContextFilter, labels, ignore, null, logEveryUnknownFileFormat ? OnUnknownFileFormat.WARN : OnUnknownFileFormat.SKIP);
     }
 
+    /**
+     * @deprecated use {@link DatabaseChangeLog#include(String, boolean, boolean, ResourceAccessor, ContextExpression, Labels, Boolean, String, OnUnknownFileFormat)}
+     */
+    public boolean include(String fileName,
+                           boolean isRelativePath,
+                           boolean errorIfMissing,
+                           ResourceAccessor resourceAccessor,
+                           ContextExpression includeContextFilter,
+                           Labels labels,
+                           Boolean ignore,
+                           OnUnknownFileFormat onUnknownFileFormat)
+            throws LiquibaseException {
+        return include(fileName, isRelativePath, errorIfMissing, resourceAccessor, includeContextFilter, labels, ignore, null, onUnknownFileFormat, new ModifyChangeSets(null, null));
+    }
+
     public boolean include(String fileName,
                            boolean isRelativePath,
                            boolean errorIfMissing,
@@ -991,7 +1022,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         if (isRelativePath) {
             try {
                 fileName = resourceAccessor.get(this.getPhysicalFilePath()).resolveSibling(fileName).getPath();
-                fileName = normalizePath(Paths.get(fileName).toString());
+                fileName = normalizePath(normalizePathViaPaths(fileName, false));
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
@@ -1133,7 +1164,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             return null;
         }
 
-        if (filePath.startsWith("classpath:")) {
+        if (!GlobalConfiguration.PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS.getCurrentValue() && filePath.startsWith(CLASSPATH_PROTOCOL)) {
             filePath = filePath.substring("classpath:".length());
         }
 
@@ -1155,8 +1186,13 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         we fall back to path normalization using Paths.get(), which might fail on Windows.
          */
         if (normalized == null) {
-            normalized = Paths.get(filePath).normalize().toString();
+            normalized = normalizePathViaPaths(filePath, true);
         }
+        
+        if (normalized == null) {
+            return null;
+        }
+
         filePath = normalized;
 
         if (filePath.contains("\\")) {
@@ -1164,6 +1200,21 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
 
         return filePath;
+    }
+
+    private static String normalizePathViaPaths(String filePath, boolean normalizePath) {
+        if (filePath == null) {
+            return null;
+        }
+
+        // preserve URL protocol when normalizing the path
+        boolean classpathUrl = filePath.startsWith(CLASSPATH_PROTOCOL);
+        Path path = classpathUrl
+                ? Paths.get(filePath.substring(CLASSPATH_PROTOCOL.length()))
+                : Paths.get(filePath);
+
+        Path normalizedPath = normalizePath ? path.normalize() : path;
+        return classpathUrl ? CLASSPATH_PROTOCOL + normalizedPath : normalizedPath.toString();
     }
 
     public void clearCheckSums() {
