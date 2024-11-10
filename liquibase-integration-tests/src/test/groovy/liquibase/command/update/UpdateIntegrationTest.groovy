@@ -11,6 +11,7 @@ import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.logging.core.BufferedLogService
+import liquibase.resource.SearchPathResourceAccessor
 import liquibase.ui.ConsoleUIService
 import spock.lang.Shared
 import spock.lang.Specification
@@ -53,51 +54,26 @@ ID | CHANGELOG_FILE | CHANGESET_ID | CHANGESET_AUTHOR |
         CommandUtil.runDropAll(testDatabase)
     }
 
-    def "jmltodo" () {
-        //ATTEMPT 1
+    def "output change type only outputs single time to console" () {
         given:
+        def changelogFileName = "src/test/resources/changelogs/h2/update/output.xml"
+        def resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
+        def scopeSettings = [
+                (Scope.Attr.resourceAccessor.name()) : resourceAccessor
+        ]
+
+        Scope.Attr.logService.name()
+        ConsoleUIService console = Scope.getCurrentScope().getUI() as ConsoleUIService
         def outputStream = new ByteArrayOutputStream()
-        def commandResults
+        console.setOutputStream(new PrintStream(outputStream))
 
         when:
-        BufferedLogService bufferLog = new BufferedLogService()
-
-        Scope.child([
-                (Scope.Attr.logService.name()) : bufferLog,
-        ], {
-            CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-            commandScope.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, "test2")
-            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, testDatabase.getConnectionUrl())
-            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, testDatabase.getUsername())
-            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, testDatabase.getPassword())
-            commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "src/test/resources/changelogs/h2/update/output.xml")
-            commandScope.setOutput(outputStream)
-            commandResults = commandScope.execute()
+        Scope.child(scopeSettings, {
+            CommandUtil.runUpdate(testDatabase, changelogFileName, null, null, null)
         } as Scope.ScopedRunner)
 
-        System.out.println("JMLTEST")
-        System.out.println(bufferLog.getLogAsString(Level.SEVERE))
-
-//        //ATTEMPT 2
-//        given:
-//        Scope.Attr.logService.name()
-//        def changelogFile = 'src/test/resources/changelogs/h2/update/output.xml'
-//        ConsoleUIService console = Scope.getCurrentScope().getUI() as ConsoleUIService
-//        def outputStream = new ByteArrayOutputStream()
-//        console.setOutputStream(new PrintStream(outputStream))
-//
-//        when:
-//        CommandUtil.runUpdate(testDatabase, changelogFile)
-//        String outputString = outputStream.toString()
-//        System.out.println("JMLTEST1")
-//        System.out.println(outputString)
-
-//        then:
-//        noExceptionThrown()
-//        assert outputString.contains("Rolling Back Changeset: target/test-classes/changelogs/pgsql/rollback/rollback-to-tag-changelog.xml::4b::createTable::Liquibase Pro User")
-//        assert outputString.contains("Rolling Back Changeset: target/test-classes/changelogs/pgsql/rollback/rollback-to-tag-changelog.xml::13.2::testuser")
-
         then:
+        String outputString = outputStream.toString()
         1==0
 
         cleanup:
