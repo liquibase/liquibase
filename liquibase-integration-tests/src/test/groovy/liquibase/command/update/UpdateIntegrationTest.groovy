@@ -4,7 +4,6 @@ import liquibase.Scope
 import liquibase.command.CommandResults
 import liquibase.command.CommandScope
 import liquibase.command.core.ExecuteSqlCommandStep
-import liquibase.command.core.UpdateCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
@@ -12,7 +11,6 @@ import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.logging.core.BufferedLogService
 import liquibase.resource.SearchPathResourceAccessor
-import liquibase.ui.ConsoleUIService
 import spock.lang.Shared
 import spock.lang.Specification
 import java.util.logging.Level
