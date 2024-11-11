@@ -58,6 +58,8 @@ Optional Args:
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
+| preserveNullValues (Boolean) If true, NULL values in columns are included in generated changeSets. Defaults to true.
+|   Default: true
   replaceIfExistsTypes (String) Sets replaceIfExists="true" for changes of these types (supported types: createProcedure, createView)
     Default: none
   runOnChangeTypes (String) Sets runOnChange="true" for changesets containing solely changes of these types (e. g. createView, createProcedure, ...).
