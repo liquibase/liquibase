@@ -109,7 +109,7 @@ internal/lib/liquibase-commercial.jar
 internal/lib/commons-lang3.jar
 internal/lib/liquibase-core.jar
 internal/lib/postgresql.jar
-internal/lib/slf4j-simple.jar
+internal/lib/slf4j-nop.jar
 internal/lib/sqlite-jdbc.jar
 internal/lib/opencsv.jar
 internal/lib/commons-text.jar
