@@ -12,6 +12,7 @@ import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
+import liquibase.util.StringUtil;
 
 import java.util.Date;
 
