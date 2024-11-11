@@ -803,7 +803,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 stopInstant = Instant.now();
                 Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, stopInstant.toString());
                 Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, execType.value.toLowerCase());
-                log.info("ChangeSet " + toString(false) + " ran successfully in " + (stopInstant.toEpochMilli() - startInstant.toEpochMilli()) + "ms");
+                log.info("ChangeSet " + toString(false) + " ran successfully in " + getExecutionMilliseconds() + "ms");
             } else {
                 log.fine("Skipping ChangeSet: " + this);
             }
