@@ -178,11 +178,18 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         alterTable += getDefaultClause(statement, database);
 
         if (!statement.isNullable()) {
+            String notNullConstraintName = null;
             for (ColumnConstraint constraint : statement.getConstraints()) {
                 if (constraint instanceof NotNullConstraint) {
                     NotNullConstraint notNullConstraint = (NotNullConstraint) constraint;
                     if (StringUtil.isNotEmpty(notNullConstraint.getConstraintName())) {
-                        alterTable += " CONSTRAINT " + database.escapeConstraintName(notNullConstraint.getConstraintName());
+                        notNullConstraintName = notNullConstraint.getConstraintName();
+                    }
+                    //
+                    // Handle non-Snowflake database
+                    //
+                    if (! database.getShortName().equalsIgnoreCase("snowflake") && StringUtil.isNotEmpty(notNullConstraintName)) {
+                        alterTable += " CONSTRAINT " + database.escapeConstraintName(notNullConstraintName);
                         break;
                     }
                 }
@@ -190,6 +197,11 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
             alterTable += " NOT NULL";
             if (database instanceof OracleDatabase) {
                 alterTable += !statement.shouldValidateNullable() ? " ENABLE NOVALIDATE " : "";
+            } else if (database.getShortName().equalsIgnoreCase("snowflake") && notNullConstraintName != null) {
+                //
+                // Snowflake syntax puts the name after the NOT NULL
+                //
+                alterTable += " CONSTRAINT " + database.escapeConstraintName(notNullConstraintName) + " UNIQUE";
             }
         } else {
             if ((database instanceof SybaseDatabase) || (database instanceof SybaseASADatabase) || (database
