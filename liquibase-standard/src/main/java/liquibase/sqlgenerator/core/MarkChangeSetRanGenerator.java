@@ -2,8 +2,6 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.ChecksumVersion;
 import liquibase.Scope;
-import liquibase.change.Change;
-import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.column.LiquibaseColumn;

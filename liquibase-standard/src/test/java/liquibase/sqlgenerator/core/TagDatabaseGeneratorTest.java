@@ -40,7 +40,7 @@ public class TagDatabaseGeneratorTest {
 //    }
 
     @Test
-    public void testMSSQL() throws Exception {
+    public void testMSSQL() {
         TagDatabaseStatement statement = new TagDatabaseStatement("v1.0");
         Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, new MSSQLDatabase());
 
