@@ -2,10 +2,7 @@ package liquibase.integration.commandline;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.command.CommandArgumentDefinition;
-import liquibase.command.CommandDefinition;
-import liquibase.command.CommandFactory;
-import liquibase.command.CommandFailedException;
+import liquibase.command.*;
 import liquibase.command.core.*;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueProvider;
@@ -46,6 +43,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -277,7 +275,8 @@ public class LiquibaseCommandLine {
                 if (Level.OFF.equals(this.configuredLogLevel)) {
                     System.err.println("For more information, please use the --log-level flag");
                 } else {
-                    if (LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentValue() == null) {
+                    if (LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentValue() == null &&
+                        ! CommandScope.isSuppressExceptionLogging()) {
                         exception.printStackTrace(System.err);
                     }
                 }
@@ -305,6 +304,23 @@ public class LiquibaseCommandLine {
             }
         }
         return 1;
+    }
+
+    //
+    // Honor the expected flag on a CommandFailedException
+    //
+    private boolean showExceptionInLog(Throwable exception) {
+        if (CommandScope.isSuppressExceptionLogging()) {
+            return false;
+        }
+        Throwable t = exception;
+        while (t != null) {
+            if (t instanceof CommandFailedException && ((CommandFailedException) t).isExpected()) {
+                return false;
+            }
+            t = t.getCause();
+        }
+        return true;
     }
 
     //
@@ -407,8 +423,6 @@ public class LiquibaseCommandLine {
                                 Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + commandName + "' was executed successfully.");
                             }
                         }
-
-
                         return response;
                     });
                 } finally {
@@ -713,7 +727,11 @@ public class LiquibaseCommandLine {
                 (LiquibaseCommandLineConfiguration.ArgumentConverter) argument -> "--" + StringUtil.toKabobCase(argument));
 
         returnMap.put(Scope.JAVA_PROPERTIES, javaProperties);
-
+        //
+        // Load this object for setting suppression of exception logging flag
+        // Methods in the CommandScope class are used to set and retrieve the flag
+        //
+        returnMap.put(CommandScope.SUPPRESS_SHOWING_EXCEPTION_IN_LOG, new AtomicBoolean());
         return returnMap;
     }
 
