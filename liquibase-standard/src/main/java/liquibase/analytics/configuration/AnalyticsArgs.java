@@ -99,7 +99,7 @@ public class AnalyticsArgs implements AutoloadedConfigurations {
         // if the user set enabled to false, that overrides all
         Boolean userSuppliedEnabled = ENABLED.getCurrentValue();
         if (Boolean.FALSE.equals(userSuppliedEnabled)) {
-            log.log(LOG_LEVEL.getCurrentValue(), "User has disabled analytics.", null);
+            log.log(Level.INFO, "User has disabled analytics.", null);
             return false;
         }
 
