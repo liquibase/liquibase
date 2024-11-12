@@ -22,6 +22,7 @@ import liquibase.statement.core.MarkChangeSetRanStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
+import liquibase.util.TagUtil;
 
 public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSetRanStatement> {
 
@@ -53,7 +54,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                     return EMPTY_SQL; //don't mark
                 }
 
-                final String tag = getTagFromChangeset(changeSet);
+                final String tag = TagUtil.getTagFromChangeset(changeSet);
                 final int orderExecuted = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getNextSequenceValue();
 	            final DatabaseFunction dateExecuted = new DatabaseFunction(dateValue);
                 final String liquibaseVersion = getLiquibaseBuildVersion();
@@ -110,18 +111,6 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
         } finally {
             database.setObjectQuotingStrategy(currentStrategy);
         }
-    }
-
-    public static String getTagFromChangeset(ChangeSet changeSet) {
-        if (changeSet != null) {
-            for (Change change : changeSet.getChanges()) {
-                if (change instanceof TagDatabaseChange) {
-                    TagDatabaseChange tagChange = (TagDatabaseChange) change;
-                    return tagChange.getTag();
-                }
-            }
-        }
-        return null;
     }
 
     public static String getLiquibaseBuildVersion() {

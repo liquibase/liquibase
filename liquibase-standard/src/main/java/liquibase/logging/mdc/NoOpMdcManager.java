@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * Default MDC manager, which does nothing.
  */
-public class NoOpMdcManager implements MdcManager {
+    public class NoOpMdcManager implements MdcManager {
     @Override
     public MdcObject put(String key, String value) {
         return new MdcObject(key, value);

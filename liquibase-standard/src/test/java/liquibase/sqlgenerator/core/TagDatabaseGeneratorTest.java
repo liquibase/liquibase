@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.core.HsqlDatabase;
+import liquibase.database.AbstractJdbcDatabase;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -60,18 +61,64 @@ public class TagDatabaseGeneratorTest {
     }
 
     @Test
-    public void testHsql() throws Exception {
+    public void testOtherDb() {
         TagDatabaseStatement statement = new TagDatabaseStatement("v1.0");
-        Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, new HsqlDatabase());
+
+        Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, new OtherDb());
 
         assertEquals(1, sql.length);
         assertEquals(
                 "UPDATE DATABASECHANGELOG " +
                 "SET TAG = 'v1.0' " +
-                "WHERE DATEEXECUTED = (" +
-                    "SELECT MAX(DATEEXECUTED) " +
-                    "FROM DATABASECHANGELOG" +
+                "WHERE ORDEREXECUTED = (" +
+                  "SELECT MAX(ORDEREXECUTED) FROM DATABASECHANGELOG " +
+                  "WHERE DATEEXECUTED = (" +
+                    "SELECT MAX(DATEEXECUTED) FROM DATABASECHANGELOG" +
+                  ")" +
                 ")",
                 sql[0].toSql());
+    }
+
+    private static class OtherDb extends AbstractJdbcDatabase {
+
+        @Override
+        protected String getDefaultDatabaseProductName() {
+            return null;
+        }
+
+        @Override
+        public boolean isCorrectDatabaseImplementation(final DatabaseConnection conn) {
+            return false;
+        }
+
+        @Override
+        public String getDefaultDriver(final String url) {
+            return null;
+        }
+
+        @Override
+        public String getShortName() {
+            return "OtherDb";
+        }
+
+        @Override
+        public Integer getDefaultPort() {
+            return null;
+        }
+
+        @Override
+        public boolean supportsInitiallyDeferrableColumns() {
+            return false;
+        }
+
+        @Override
+        public boolean supportsTablespaces() {
+            return false;
+        }
+
+        @Override
+        public int getPriority() {
+            return 0;
+        }
     }
 }

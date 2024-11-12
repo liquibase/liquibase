@@ -33,6 +33,7 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
             String dateColumnNameEscaped = database.escapeObjectName("DATEEXECUTED", Column.class);
             String tagColumnNameEscaped = database.escapeObjectName("TAG", Column.class);
             String tagEscaped = DataTypeFactory.getInstance().fromObject(statement.getTag(), database).objectToSql(statement.getTag(), database);
+
             if (database instanceof MySQLDatabase) {
                 return new Sql[]{
                         new UnparsedSql(
@@ -118,13 +119,13 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
 
                 //Only uses dateexecuted as a default. Depending on the timestamp resolution, multiple rows may be tagged which normally works fine but can cause confusion and some issues.
                 //We cannot use orderexecuted alone because it is only guaranteed to be incrementing per update call.
-                //TODO: Better handle other databases to use dateexecuted desc, orderexecuted desc.
                 UpdateStatement updateStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                         .addNewColumnValue("TAG", statement.getTag())
                         .setWhereClause(
-                                dateColumnNameEscaped + " = (" +
-                                        "SELECT MAX(" + dateColumnNameEscaped + ") " +
-                                        "FROM " + tableNameEscaped +
+                                orderColumnNameEscaped + " = (" +
+                                        "SELECT MAX(" + orderColumnNameEscaped + ") FROM " + tableNameEscaped + " " +
+                                        "WHERE " + dateColumnNameEscaped + " = (" +
+                                          "SELECT MAX(" + dateColumnNameEscaped + ") FROM " + tableNameEscaped + ")" +
                                         ")");
 
                 return SqlGeneratorFactory.getInstance().generateSql(updateStatement, database);
