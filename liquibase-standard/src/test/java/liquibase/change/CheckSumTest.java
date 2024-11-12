@@ -1,7 +1,9 @@
 package liquibase.change;
 
 import liquibase.ChecksumVersion;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
+import liquibase.GlobalConfiguration;
+import liquibase.Scope;
+import liquibase.checksums.ChecksumAlgorithm;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -16,6 +18,29 @@ public class CheckSumTest {
         CheckSum checkSum = CheckSum.parse(checksumString);
         assertEquals(3, checkSum.getVersion());
         assertEquals(checksumString, checkSum.toString());
+    }
+
+    @Test
+    public void getDefaultAlgorithmIsMd5() {
+        assertEquals(GlobalConfiguration.CHECKSUM_ALGORITHM.getDefaultValue(), ChecksumAlgorithm.MD5);
+    }
+
+    @Test
+    public void sha1Checksum() throws Exception {
+        Scope.child(GlobalConfiguration.CHECKSUM_ALGORITHM.getKey(), ChecksumAlgorithm.SHA1, () -> {
+            CheckSum checkSum = CheckSum.compute("asdf");
+            assertEquals(ChecksumVersion.V9.getVersion(), checkSum.getVersion());
+            assertEquals("3da541559918a808c2402bba5012f6c60b27661c", checkSum.getStoredCheckSum());
+        });
+    }
+
+    @Test
+    public void sha256Checksum() throws Exception {
+        Scope.child(GlobalConfiguration.CHECKSUM_ALGORITHM.getKey(), ChecksumAlgorithm.SHA256, () -> {
+            CheckSum checkSum = CheckSum.compute("asdf");
+            assertEquals(ChecksumVersion.V9.getVersion(), checkSum.getVersion());
+            assertEquals("f0e4c2f76c58916ec258f246851bea091d14d4247a2fc3e18694461b1816e13b", checkSum.getStoredCheckSum());
+        });
     }
 
     @Test

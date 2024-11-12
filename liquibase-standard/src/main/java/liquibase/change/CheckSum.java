@@ -1,8 +1,8 @@
 package liquibase.change;
 
-import liquibase.ChecksumVersion;
 import liquibase.Scope;
-import liquibase.util.MD5Util;
+import liquibase.ChecksumVersion;
+import liquibase.checksums.ComputeChecksumService;
 import liquibase.util.StringUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -83,7 +83,7 @@ public final class CheckSum {
      * Compute a storedCheckSum of the given string.
      */
     public static CheckSum compute(String valueToChecksum) {
-        return new CheckSum(MD5Util.computeMD5(
+        return new CheckSum(ComputeChecksumService.compute(
                 //remove "Unknown" unicode char 65533
                 Normalizer.normalize(StringUtil.standardizeLineEndings(valueToChecksum)
                         .replace("\uFFFD", ""), Normalizer.Form.NFC)
@@ -117,7 +117,7 @@ public final class CheckSum {
             };
         }
 
-        return new CheckSum(MD5Util.computeMD5(newStream), Scope.getCurrentScope().getChecksumVersion().getVersion());
+        return new CheckSum(ComputeChecksumService.compute(newStream), Scope.getCurrentScope().getChecksumVersion().getVersion());
     }
 
     @Override
