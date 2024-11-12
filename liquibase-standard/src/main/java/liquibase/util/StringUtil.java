@@ -11,6 +11,7 @@ import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -790,11 +791,12 @@ public class StringUtil {
             return null;
         }
 
-        if (string.length() == 1) {
+        int length = string.length();
+        if (length == 1) {
             return string;
         }
 
-        StringBuilder outString = new StringBuilder();
+        StringBuilder outString = new StringBuilder(length);
         char[] charString = string.toCharArray();
         for (int i = 0; i < charString.length; i++) {
             char letter = charString[i];

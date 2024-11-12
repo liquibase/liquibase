@@ -2,10 +2,7 @@ package liquibase.integration.commandline;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.command.CommandArgumentDefinition;
-import liquibase.command.CommandDefinition;
-import liquibase.command.CommandFactory;
-import liquibase.command.CommandFailedException;
+import liquibase.command.*;
 import liquibase.command.core.*;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueProvider;
@@ -31,6 +28,7 @@ import liquibase.ui.ConsoleUIService;
 import liquibase.ui.LoggerUIService;
 import liquibase.ui.UIService;
 import liquibase.util.*;
+import org.apache.commons.lang3.SystemProperties;
 import org.apache.commons.lang3.StringUtils;
 import picocli.CommandLine;
 
@@ -45,14 +43,15 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
-import static liquibase.integration.commandline.VersionUtils.*;
 import static liquibase.util.SystemUtil.isWindows;
+import static liquibase.util.VersionUtils.*;
 
 
 public class LiquibaseCommandLine {
@@ -246,7 +245,7 @@ public class LiquibaseCommandLine {
         //
         Level level = determineLogLevel(exception);
 
-        if (showExceptionInLog(exception)) {
+        if (ExceptionUtil.showExceptionInLog(exception)) {
             Scope.getCurrentScope().getLog(getClass()).log(level, uiMessage, exception);
         }
 
@@ -276,7 +275,8 @@ public class LiquibaseCommandLine {
                 if (Level.OFF.equals(this.configuredLogLevel)) {
                     System.err.println("For more information, please use the --log-level flag");
                 } else {
-                    if (LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentValue() == null) {
+                    if (LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentValue() == null &&
+                        ! CommandScope.isSuppressExceptionLogging()) {
                         exception.printStackTrace(System.err);
                     }
                 }
@@ -310,6 +310,9 @@ public class LiquibaseCommandLine {
     // Honor the expected flag on a CommandFailedException
     //
     private boolean showExceptionInLog(Throwable exception) {
+        if (CommandScope.isSuppressExceptionLogging()) {
+            return false;
+        }
         Throwable t = exception;
         while (t != null) {
             if (t instanceof CommandFailedException && ((CommandFailedException) t).isExpected()) {
@@ -420,8 +423,6 @@ public class LiquibaseCommandLine {
                                 Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + commandName + "' was executed successfully.");
                             }
                         }
-
-
                         return response;
                     });
                 } finally {
@@ -469,7 +470,7 @@ public class LiquibaseCommandLine {
     private void logMdcData() throws IOException {
         MdcManager mdcManager = Scope.getCurrentScope().getMdcManager();
         String localHostName = NetUtil.getLocalHostName();
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SYSTEM_USER, System.getProperty("user.name"), false);
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SYSTEM_USER, SystemProperties.getUserName(), false);
         try (MdcObject version = mdcManager.put(MdcKey.LIQUIBASE_VERSION, LiquibaseUtil.getBuildVersion());
              MdcObject systemName = mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_NAME, localHostName);
              // The host name here is purposefully the same as the system name. The system name is retained for backwards compatibility.
@@ -692,8 +693,8 @@ public class LiquibaseCommandLine {
         returnMap.put(COMMAND_ARGUMENTS, args);
 
         final IntegrationDetails integrationDetails = new IntegrationDetails();
-        integrationDetails.setName("cli");
-        returnMap.put("integrationDetails", integrationDetails);
+        integrationDetails.setName(LiquibaseCommandLineConfiguration.INTEGRATION_NAME.getCurrentValue());
+        returnMap.put(Scope.Attr.integrationDetails.name(), integrationDetails);
 
         final ClassLoader classLoader = configureClassLoader();
 
@@ -726,7 +727,11 @@ public class LiquibaseCommandLine {
                 (LiquibaseCommandLineConfiguration.ArgumentConverter) argument -> "--" + StringUtil.toKabobCase(argument));
 
         returnMap.put(Scope.JAVA_PROPERTIES, javaProperties);
-
+        //
+        // Load this object for setting suppression of exception logging flag
+        // Methods in the CommandScope class are used to set and retrieve the flag
+        //
+        returnMap.put(CommandScope.SUPPRESS_SHOWING_EXCEPTION_IN_LOG, new AtomicBoolean());
         return returnMap;
     }
 
@@ -898,6 +903,7 @@ public class LiquibaseCommandLine {
 
     private void addSubcommand(CommandDefinition commandDefinition, CommandLine rootCommand) {
         List<String[]> commandNames = expandCommandNames(commandDefinition);
+        Boolean showHidden = LiquibaseCommandLineConfiguration.SHOW_HIDDEN_ARGS.getCurrentValue();
 
         boolean showCommand = true;
         for (String[] commandName : commandNames) {
@@ -991,7 +997,7 @@ public class LiquibaseCommandLine {
                     if (i > 0) {
                         builder.hidden(true);
                     } else {
-                        builder.hidden(def.getHidden() && !LiquibaseCommandLineConfiguration.SHOW_HIDDEN_ARGS.getCurrentValue());
+                        builder.hidden(def.getHidden() && !showHidden);
                     }
 
                     subCommandSpec.addOption(builder.build());

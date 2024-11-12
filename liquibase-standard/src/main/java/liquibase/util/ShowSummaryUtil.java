@@ -22,6 +22,7 @@ import liquibase.logging.mdc.customobjects.UpdateSummary;
 import liquibase.report.ShowSummaryGenerator;
 import liquibase.report.ShowSummaryGeneratorFactory;
 import lombok.Data;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -334,7 +335,7 @@ public class ShowSummaryUtil {
         int skipped = skippedChangeSets.size();
         int skippedBecauseOfLicense = skippedBecauseOfLicenseChangeSets.size();
         int filtered = filterDenied.size();
-        int totalAccepted = calculateAccepted(statusVisitor, changeExecListener);
+        int totalAccepted = calculateAccepted(statusVisitor, changeExecListener, runChangeLogIterator);
         int totalPreviouslyRun = calculatePreviouslyRun(statusVisitor);
         int totalInChangelog = CollectionUtil.createIfNull(changeLog.getChangeSets()).size() + CollectionUtil.createIfNull(changeLog.getSkippedChangeSets()).size();
         UpdateSummary updateSummaryMdc = new UpdateSummary(null, totalAccepted, totalPreviouslyRun, null, totalInChangelog);
@@ -415,10 +416,11 @@ public class ShowSummaryUtil {
      * executed changesets. We retain this code despite its inaccuracy for backwards compatibility, in case
      * a change exec listener is not provided.
      */
-    private static int calculateAccepted(StatusVisitor statusVisitor, ChangeExecListener changeExecListener) {
+    private static int calculateAccepted(StatusVisitor statusVisitor, ChangeExecListener changeExecListener, ChangeLogIterator runChangeLogIterator) {
         int ran = statusVisitor.getChangeSetsToRun().size();
         if (changeExecListener instanceof DefaultChangeExecListener) {
             ran = ((DefaultChangeExecListener) changeExecListener).getDeployedChangeSets().size();
+            ran -= (int) runChangeLogIterator.getExceptionChangeSets().stream().filter(changeSet -> BooleanUtils.isFalse(changeSet.getFailOnError())).count();
         }
         return ran;
     }

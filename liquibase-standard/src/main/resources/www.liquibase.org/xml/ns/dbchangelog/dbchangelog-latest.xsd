@@ -243,6 +243,7 @@
                             <xsd:attribute name="runWith" type="xsd:string" />
                             <xsd:attribute name="runWithSpoolFile" type="xsd:string" />
                             <xsd:attribute name="endDelimiter" type="xsd:string" />
+                            <xsd:attribute name="stripComments" type="xsd:boolean" />
                         </xsd:complexType>
                     </xsd:element>
                 </xsd:choice>
@@ -343,6 +344,7 @@
 
     <xsd:attributeGroup name="column">
         <xsd:attribute name="name" type="xsd:string" use="required"/>
+        <xsd:attribute name="included" type="booleanExp"/>
         <xsd:attribute name="computed" type="booleanExp"/>
         <xsd:attribute name="descending" type="booleanExp"/>
         <xsd:attribute name="type" type="xsd:string"/>

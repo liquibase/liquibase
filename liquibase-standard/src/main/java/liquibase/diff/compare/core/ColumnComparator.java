@@ -13,6 +13,8 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 import liquibase.util.BooleanUtil;
+import org.apache.commons.lang3.BooleanUtils;
+
 import java.util.Locale;
 import java.util.Set;
 
@@ -61,6 +63,10 @@ public class ColumnComparator implements DatabaseObjectComparator {
         }
 
         if (BooleanUtil.isTrue(thisColumn.getComputed()) != BooleanUtil.isTrue(otherColumn.getComputed())) {
+            return false;
+        }
+
+        if (BooleanUtils.isTrue(thisColumn.getIncluded()) != BooleanUtils.isTrue(otherColumn.getIncluded())) {
             return false;
         }
 
