@@ -420,7 +420,7 @@ jobs:
           fi
 
       - name: Liquibase xsds SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.2
+        uses: wangyucode/sftp-upload-action@v2.0.3
         with:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
           port: ${{ secrets.WPENGINE_SFTP_PORT }}
@@ -432,7 +432,7 @@ jobs:
           remoteDir: '/xml/ns/dbchangelog/'
 
       - name: Liquibase PRO xsds SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.2
+        uses: wangyucode/sftp-upload-action@v2.0.3
         with:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
           port: ${{ secrets.WPENGINE_SFTP_PORT }}
@@ -444,7 +444,7 @@ jobs:
           remoteDir: '/xml/ns/pro/'
 
       - name: Liquibase flow-file schema SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.2
+        uses: wangyucode/sftp-upload-action@v2.0.3
         with:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
           port: ${{ secrets.WPENGINE_SFTP_PORT }}
@@ -456,7 +456,7 @@ jobs:
           remoteDir: '/json/schema/'
 
       - name: Liquibase index.htm SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.2
+        uses: wangyucode/sftp-upload-action@v2.0.3
         with:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
           port: ${{ secrets.WPENGINE_SFTP_PORT }}
@@ -486,7 +486,7 @@ jobs:
                "event_type": "liquibase-release",
                "client_payload": {
                   "liquibaseVersion": "${{ needs.setup.outputs.version }}",
-                  "dryRun": "${{ inputs.dry_run }}"
+                  "dryRun": "${{ github.event.inputs.dry_run || false }}"
                 }
              });
 
@@ -539,8 +539,8 @@ jobs:
             git fetch --tags
             # Get the latest tag
             echo "latest_version=$(git describe --tags $(git rev-list --tags --max-count=1) | sed 's/^v//')" >> $GITHUB_OUTPUT
-            # Get the previous tag (second latest)
-            echo "previous_version=$(git describe --tags $(git rev-list --tags --max-count=2 | tail -n 1) | sed -E 's/^v//; s/-.*//')" >> $GITHUB_OUTPUT
+            # Get the previous released version tag
+            echo "previous_version=$(git describe --tags --abbrev=0 | sed 's/^v//')" >> $GITHUB_OUTPUT
 
 
       - name: Repository Dispatch

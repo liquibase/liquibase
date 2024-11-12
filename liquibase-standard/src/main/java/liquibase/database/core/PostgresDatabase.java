@@ -75,6 +75,9 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         super.sequenceCurrentValueFunction = "currval('%s')";
         super.unmodifiableDataTypes.addAll(Arrays.asList("bool", "int4", "int8", "float4", "float8", "bigserial", "serial", "oid", "bytea", "date", "timestamptz", "text", "int2[]", "int4[]", "int8[]", "float4[]", "float8[]", "bool[]", "varchar[]", "text[]", "numeric[]"));
         super.unquotedObjectsAreUppercased = false;
+
+        systemTablesAndViews.add("pg_stat_statements");
+        systemTablesAndViews.add("pg_stat_statements_info");
     }
 
     @Override

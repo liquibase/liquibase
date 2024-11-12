@@ -11,10 +11,19 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
+import liquibase.changelog.ChangeSet;
+import liquibase.change.Change;
+import liquibase.change.AddColumnConfig;
+import liquibase.change.core.CreateIndexChange;
+import liquibase.diff.DiffGeneratorFactory;
+import liquibase.diff.DiffResult;
+import liquibase.diff.compare.CompareControl;
+import liquibase.diff.output.changelog.DiffToChangeLog;
 import org.junit.Test;
 
 import java.sql.Time;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Date;
 
 import static org.junit.Assert.*;
@@ -166,5 +175,53 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
                 assertFalse("Parameter found in " + table.getName() + "." + column.getName(), foundTypeDefinition.contains("("));
             }
         }
+    }
+
+    @Test
+    /**
+     * ensure included columns are marked as included when generating a changelog.
+     *
+     * Reference: https://github.com/liquibase/liquibase/issues/1697
+     */
+    public void generateChangelogCreateIndexIncludeTest() throws Exception {
+        assumeNotNull(this.getDatabase());
+        clearDatabase();
+
+        //Liquibase liquibase = createLiquibase("changelogs/mssql/issues/feature.index.include.xml");
+        //liquibase.update((String) null);
+        runUpdate("changelogs/mssql/issues/feature.index.include.xml");
+
+        List<ChangeSet> changeSets = generateChangelog();
+        
+        boolean found = false;
+
+        for (ChangeSet changeSet : changeSets) {
+            for(Change change : changeSet.getChanges()){
+                if (change instanceof CreateIndexChange){
+                    CreateIndexChange indexChange = (CreateIndexChange)change;
+                    if (indexChange.getIndexName().equals("idx_include_test")){
+                        List<AddColumnConfig>columns = indexChange.getColumns();
+                        assertEquals(columns.size(),2);
+                        boolean foundName = false;
+                        boolean foundName2 = false;
+                        for(AddColumnConfig column : columns){
+                            if(column.getName().equals("name")){
+                                 assertEquals(column.getIncluded(),null);
+                                 foundName=true;
+                            }
+                            if(column.getName().equals("name2")){
+                                 assertEquals(column.getIncluded(),true);
+                                 foundName2=true;
+                            }
+                        }
+                        if(foundName==true && foundName2==true){
+                            found=true;
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        assertTrue(found);
     }
 }

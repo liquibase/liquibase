@@ -4,6 +4,7 @@ import groovy.lang.Tuple2;
 import liquibase.*;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.LoadDataChange;
+import liquibase.change.custom.ExampleCustomTaskChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -569,21 +570,34 @@ public abstract class AbstractIntegrationTest {
     @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testRollbackableChangeLog() throws Exception {
         assumeNotNull(this.getDatabase());
+        Map<String, Object> initialMap =  new HashMap<>();
+        initialMap.put(ExampleCustomTaskChange.COUNT_MAP_EXECUTE_CALL_COUNT, 0);
+        initialMap.put(ExampleCustomTaskChange.COUNT_MAP_ROLLBACK_CALL_COUNT, 0);
 
-        Liquibase liquibase = createLiquibase(rollbackChangeLog);
-        clearDatabase();
+        Scope.child(ExampleCustomTaskChange.SCOPE_ATTR_CALL_COUNT_MAP, initialMap, () -> {
+            Liquibase liquibase = createLiquibase(rollbackChangeLog);
+            clearDatabase();
 
-        liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.update(this.contexts);
+            liquibase.update(this.contexts);
 
-        liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.rollback(new Date(0), this.contexts);
+            Map<String, Object> map = Scope.getCurrentScope().get(ExampleCustomTaskChange.SCOPE_ATTR_CALL_COUNT_MAP, Map.class);
+            Integer executeCallCountInteger = (Integer) map.get(ExampleCustomTaskChange.COUNT_MAP_EXECUTE_CALL_COUNT);
+            Integer rollbackCallCount = (Integer)map.get(ExampleCustomTaskChange.COUNT_MAP_ROLLBACK_CALL_COUNT);
+            // call `execute` method
+            assertEquals(1, (int)executeCallCountInteger);
+            assertEquals(0, (int)rollbackCallCount);
 
-        liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.update(this.contexts);
+            liquibase.rollback(new Date(0), this.contexts);
+            executeCallCountInteger = (Integer) map.get(ExampleCustomTaskChange.COUNT_MAP_EXECUTE_CALL_COUNT) ;
+            rollbackCallCount = (Integer)map.get(ExampleCustomTaskChange.COUNT_MAP_ROLLBACK_CALL_COUNT);
+            // call `rollback` method
+            assertEquals(1, (int)executeCallCountInteger);
+            assertEquals(1, (int)rollbackCallCount);
 
-        liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.rollback(new Date(0), this.contexts);
+            liquibase.update(this.contexts);
+
+            liquibase.rollback(new Date(0), this.contexts);
+        });
     }
 
     @Test
@@ -1383,6 +1397,14 @@ public abstract class AbstractIntegrationTest {
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, testSystem.getPassword());
         commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changelog);
         commandScope.execute();
+    }
+
+    protected List<ChangeSet> generateChangelog() throws LiquibaseException{
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, null, new CompareControl());
+
+        DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, new DiffOutputControl(false, false, false, null));
+        List<ChangeSet> changeSets = changeLogWriter.generateChangeSets();
+        return changeSets;
     }
 
     public static final class ApplyTestChangelog {
