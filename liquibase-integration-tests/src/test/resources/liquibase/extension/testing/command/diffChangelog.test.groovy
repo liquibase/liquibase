@@ -99,7 +99,7 @@ Optional Args:
         ]
 
         setup {
-            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "diffChangelog-test.xml")
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_BOTH, "diffChangelog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "FirstTable",
@@ -169,7 +169,7 @@ Optional Args:
         ]
 
         setup {
-            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "diffChangeLog-test.xml")
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_BOTH, "diffChangeLog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "SharedTable",
@@ -228,7 +228,7 @@ Optional Args:
         ]
 
         setup {
-            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "diffChangelogOrder-test.xml")
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_BOTH, "diffChangelogOrder-test.xml")
             database = [
                     new CreateTableChange(
                         tableName: "person",
