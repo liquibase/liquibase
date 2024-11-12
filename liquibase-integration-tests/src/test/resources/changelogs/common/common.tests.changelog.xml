@@ -1358,4 +1358,10 @@
         </preConditions>
     </changeSet>
 
+    <changeSet id="createProcedureWithOnlyBlockCommentAsBody" author="mallod">
+        <createProcedure>
+            /*CREATE PROC... */
+        </createProcedure>
+    </changeSet>
+
 </databaseChangeLog>
