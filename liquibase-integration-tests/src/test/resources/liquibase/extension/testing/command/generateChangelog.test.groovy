@@ -82,7 +82,7 @@ Optional Args:
             changelogFile: "target/test-classes/changelog-test.xml"
         ]
         setup {
-            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "changelog-test.xml")
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_BOTH, "changelog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "FirstTable",
@@ -182,7 +182,7 @@ Optional Args:
             includeObjects: "table:FIRSTTABLE"
         ]
         setup {
-            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "changelog-test.xml")
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_BOTH, "changelog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "FirstTable",
@@ -239,7 +239,7 @@ Optional Args:
         ]
 
         setup {
-            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "generateChangelog-test.xml")
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_BOTH, "generateChangelog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "person",

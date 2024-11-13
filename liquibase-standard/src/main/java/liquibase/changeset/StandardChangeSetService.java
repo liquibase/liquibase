@@ -1,11 +1,14 @@
 package liquibase.changeset;
 
+import liquibase.change.AbstractSQLChange;
+import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ModifyChangeSets;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
+import liquibase.util.ObjectUtil;
 
 /**
  *
@@ -40,9 +43,15 @@ public class StandardChangeSetService implements ChangeSetService {
     }
     @Override
     public ModifyChangeSets createModifyChangeSets(ParsedNode node) throws ParsedNodeException {
+        Object stripCommentsValue = node.getChildValue(null, "stripComments");
+        boolean stripComments = false;
+        if (stripCommentsValue != null) {
+            stripComments = ObjectUtil.convert(stripCommentsValue, Boolean.class);
+        }
         return new ModifyChangeSets(
                 (String) node.getChildValue(null, "runWith"),
-                (String) node.getChildValue(null, "runWithSpoolFile"));
+                (String) node.getChildValue(null, "runWithSpoolFile"),
+                stripComments);
     }
 
     @Override
@@ -52,6 +61,13 @@ public class StandardChangeSetService implements ChangeSetService {
         }
         if (changeSet.getRunWithSpoolFile() == null) {
             changeSet.setRunWithSpoolFile(modifyChangeSets != null ? modifyChangeSets.getRunWithSpool() : null);
+        }
+        for (Change change : changeSet.getChanges()) {
+            if (change instanceof AbstractSQLChange &&
+                ((AbstractSQLChange)change).isStripCommentsUsedDefaultValue() &&
+                modifyChangeSets != null && modifyChangeSets.isStripComments() != null) {
+                ((AbstractSQLChange)change).setStripComments(modifyChangeSets.isStripComments());
+            }
         }
     }
 }

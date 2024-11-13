@@ -265,6 +265,7 @@ public abstract class AbstractRollbackCommandStep extends AbstractCommandStep {
                 rollbackReportParameters.setSuccess(false);
             }
         }
+        CommandScope.suppressExceptionLogging(true);
     }
 
     @Override

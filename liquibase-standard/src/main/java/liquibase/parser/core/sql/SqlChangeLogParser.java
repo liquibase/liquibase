@@ -71,7 +71,7 @@ public class SqlChangeLogParser implements ChangeLogParser {
             throw new ChangeLogParseException(e);
         }
         change.setSplitStatements(false);
-        change.setStripComments(false);
+        change.setStripComments(false, true);
 
         Database database = Scope.getCurrentScope().getDatabase();
         ChangeSetServiceFactory factory = ChangeSetServiceFactory.getInstance();

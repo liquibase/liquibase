@@ -1,0 +1,47 @@
+databaseChangeLog:
+- changeSet:
+      id:  1
+      author:  your.name
+      changes:
+       - createTable:
+            tableName:  person
+            columns:
+              - column:
+                  name:  id
+                  type:  int
+                  autoIncrement:  true
+                  constraints:
+                    primaryKey:  true
+                    nullable:  false
+              - column:
+                  name:  name
+                  type:  varchar(50)
+
+- changeSet:
+      id:  2
+      author:  your.name
+      changes:
+       - createTable:
+            tableName:  company
+            columns:
+              - column:
+                  name:  id
+                  type:  int
+                  autoIncrement:  true
+                  constraints:
+                    primaryKey:  true
+                    nullable:  false
+              - column:
+                  name:  name
+                  type:  varchar(50)
+
+- changeSet:
+      id:  3
+      author:  your.name
+      changes:
+       - addColumn:
+            tableName:  company
+            columns:
+              - column:
+                  name:  country
+                  type:  varchar(2) 
