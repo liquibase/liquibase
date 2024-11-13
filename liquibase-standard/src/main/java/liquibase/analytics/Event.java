@@ -91,6 +91,10 @@ public class Event {
      * https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#default-environment-variables:~:text=Description-,CI,-Always%20set%20to
      */
     private boolean isCi = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("CI"))));;
+    /**
+     * Is the code running in Liquibase IO?
+     */
+    private boolean isIO = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("isIO"))));;
 
     public Event(String command) {
         this.command = command;
