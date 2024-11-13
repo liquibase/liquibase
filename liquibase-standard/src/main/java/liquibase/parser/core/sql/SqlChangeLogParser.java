@@ -21,8 +21,10 @@ import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
+import liquibase.util.ExceptionUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -56,7 +58,10 @@ public class SqlChangeLogParser implements ChangeLogParser {
             //
             Resource sqlResource = resourceAccessor.getExisting(physicalChangeLogLocation);
             String sql = StreamUtil.readStreamAsString(sqlResource.openInputStream());
-            if (StringUtil.isEmpty(sql)) {
+            //
+            // Handle empty files with a WARNING message
+            //
+            if (StringUtils.isEmpty(sql)) {
                 String message = String.format("Unable to parse empty file '%s'", physicalChangeLogLocation);
                 Scope.getCurrentScope().getLog(getClass()).warning(message);
                 throw new ChangeLogParseException(message);
@@ -66,7 +71,7 @@ public class SqlChangeLogParser implements ChangeLogParser {
             throw new ChangeLogParseException(e);
         }
         change.setSplitStatements(false);
-        change.setStripComments(false);
+        change.setStripComments(false, true);
 
         Database database = Scope.getCurrentScope().getDatabase();
         ChangeSetServiceFactory factory = ChangeSetServiceFactory.getInstance();
@@ -79,6 +84,10 @@ public class SqlChangeLogParser implements ChangeLogParser {
         changeSet.addChange(change);
 
         changeLog.addChangeSet(changeSet);
+
+        ExceptionUtil.doSilently(() -> {
+            Scope.getCurrentScope().getAnalyticsEvent().incrementSqlChangelogCount();
+        });
 
         return changeLog;
     }

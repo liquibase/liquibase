@@ -2,6 +2,7 @@ package liquibase.integration.commandline
 
 import liquibase.Scope
 import liquibase.command.CommandBuilder
+import liquibase.command.CommandFactory
 import liquibase.configuration.ConfigurationDefinition
 import liquibase.exception.LiquibaseException
 import liquibase.logging.core.BufferedLogService
@@ -48,6 +49,15 @@ Global Options
                                alwaysOverrideStoredLogicSchema', environment
                                variable:
                                'LIQUIBASE_ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA')
+
+      --analytics-enabled=PARAM
+                             Enable or disable sending product usage data and
+                               analytics to Liquibase. Learn more at https:
+                               //docs.liquibase.com/analytics. DEFAULT: true
+                               for OSS users | false for PRO users
+                             (defaults file: 'liquibase.analytics.enabled',
+                               environment variable:
+                               'LIQUIBASE_ANALYTICS_ENABLED')
 
       --auto-reorg=PARAM     Should Liquibase automatically include REORG TABLE
                                commands when needed?
@@ -353,6 +363,18 @@ Global Options
                                environment variable:
                                'LIQUIBASE_OUTPUT_LINE_SEPARATOR')
 
+      --preserve-classpath-prefix-in-normalized-paths=PARAM
+                             If true 'classpath:' prefix will be preserved in
+                               normalized paths, allowing to resolve
+                               hierarchical resources under a classpath-based
+                               root.
+                             DEFAULT: false
+                             (defaults file: 'liquibase.
+                               preserveClasspathPrefixInNormalizedPaths',
+                               environment variable:
+                               'LIQUIBASE_PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZE
+                               D_PATHS')
+
       --preserve-schema-case=PARAM
                              If true, Liquibase treats schema and catalog names
                                as case sensitive
@@ -624,7 +646,11 @@ https://docs.liquibase.com
     @Unroll
     def "toArgNames for command arguments"() {
         expect:
-        LiquibaseCommandLine.toArgNames(new CommandBuilder(["argTest"] as String[][]).argument(argName, String).build()).join(", ") == expected
+        LiquibaseCommandLine.toArgNames(new CommandBuilder([["argTest"]] as String[][]).argument(argName, String).build()).join(", ") == expected
+
+        cleanup:
+        final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
+        commandFactory.unregister(["argTest"] as String[])
 
         where:
         argName          | expected
@@ -661,6 +687,10 @@ https://docs.liquibase.com
     def "toArgNames for command arguments and aliases"() {
         expect:
         LiquibaseCommandLine.toArgNames(new CommandBuilder([["argCommand"]] as String[][]).argument(argName, String).addAlias(alias).build()).join(", ") == expected
+
+        cleanup:
+        final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
+        commandFactory.unregister(["argCommand"] as String[])
 
         where:
         prefix          | argName          | alias                 | expected

@@ -12,8 +12,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static liquibase.integration.commandline.LiquibaseLauncherSettings.LiquibaseLauncherSetting.*;
-import static liquibase.integration.commandline.LiquibaseLauncherSettings.getSetting;
+import static liquibase.util.LiquibaseLauncherSettings.LiquibaseLauncherSetting.*;
+import static liquibase.util.LiquibaseLauncherSettings.getSetting;
 
 /**
  * Launcher which builds up the classpath needed to run Liquibase, then calls {@link LiquibaseCommandLine#main(String[])}.
@@ -104,12 +104,12 @@ public class LiquibaseLauncher {
         final URLClassLoader classloader = new URLClassLoader(libUrls.toArray(new URL[0]), parentLoader);
         Thread.currentThread().setContextClassLoader(classloader);
 
-        Class<?> cli = null;
+        Class<?> cli;
         try {
             cli = classloader.loadClass(LiquibaseCommandLine.class.getName());
         } catch (ClassNotFoundException classNotFoundException) {
             throw new RuntimeException(
-                String.format("Unable to find Liquibase classes in the configured home: '%s'.", liquibaseHome)
+                String.format("Unable to find Liquibase classes in the configured home: '%s'.", liquibaseHome), classNotFoundException
             );
         }
 

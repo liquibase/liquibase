@@ -22,7 +22,7 @@ import java.util.*;
 public class LiquibaseConfiguration implements SingletonObject {
 
     private final SortedSet<ConfigurationValueProvider> configurationValueProviders;
-    private final SortedSet<ConfigurationDefinition<?>> definitions = new TreeSet<>();
+    private final static SortedSet<ConfigurationDefinition<?>> definitions = new TreeSet<>();
     public static final String REGISTERED_VALUE_PROVIDERS_KEY = "REGISTERED_VALUE_PROVIDERS";
 
     /**
@@ -104,6 +104,10 @@ public class LiquibaseConfiguration implements SingletonObject {
 
     public SortedSet<ConfigurationValueProvider> getProviders() {
         return Collections.unmodifiableSortedSet(this.configurationValueProviders);
+    }
+
+    public ConfigurationValueProvider getProvider(ConfigurationValueProvider provider) {
+        return this.configurationValueProviders.stream().filter(cvp -> cvp.getClass() == provider.getClass()).findFirst().orElse(null);
     }
 
     /**
@@ -196,7 +200,7 @@ public class LiquibaseConfiguration implements SingletonObject {
      * Registers a {@link ConfigurationDefinition} so it will be returned by {@link #getRegisteredDefinitions(boolean)}
      */
     public void registerDefinition(ConfigurationDefinition<?> definition) {
-        this.definitions.add(definition);
+        definitions.add(definition);
     }
 
     /**
@@ -205,7 +209,7 @@ public class LiquibaseConfiguration implements SingletonObject {
      */
     public SortedSet<ConfigurationDefinition<?>> getRegisteredDefinitions(boolean includeInternal) {
         SortedSet<ConfigurationDefinition<?>> returnSet = new TreeSet<>();
-        for (ConfigurationDefinition<?> definition : this.definitions) {
+        for (ConfigurationDefinition<?> definition : definitions) {
             if (includeInternal || !definition.isInternal()) {
                 returnSet.add(definition);
             }

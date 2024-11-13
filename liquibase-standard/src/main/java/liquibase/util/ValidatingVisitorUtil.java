@@ -14,6 +14,7 @@ import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -100,7 +101,7 @@ public class ValidatingVisitorUtil {
     }
 
     private static boolean checkLiquibaseVersionMinorThan(String version, int major, int minor) {
-        if (StringUtil.isEmpty(version)) {
+        if (StringUtils.isEmpty(version)) {
             return false;
         }
         String[] liquibaseVersion = version.split("\\.");

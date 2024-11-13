@@ -24,6 +24,10 @@ on:
         description: 'URL of the dry-run tar.gz release'
         required: false
         type: string
+      dry_run_branch_name:
+        description: 'The branch name of the dry-run'
+        required: false
+        type: string
   workflow_call:
     inputs:
       tag:
@@ -47,7 +51,10 @@ on:
         description: 'URL of the dry-run tar.gz release'
         required: false
         type: string
-
+      dry_run_branch_name:
+        description: 'The branch name of the dry-run'
+        required: false
+        type: string
 env:
   MAVEN_VERSION: '3.9.2'
 jobs:
@@ -58,6 +65,7 @@ jobs:
       tag: ${{ steps.collect-data.outputs.tag }}
       version: ${{ steps.collect-data.outputs.version }}
       ref_branch: ${{ steps.ref-branch.outputs.branch }}
+      dry_run_branch_name: ${{ inputs.dry_run_branch_name }}
     steps:
       - name: Collect Data
         id: collect-data
@@ -87,8 +95,11 @@ jobs:
         run: |
           if [ "${{ github.ref_name }}" == "release" ]; then
             echo "branch=release" >> $GITHUB_OUTPUT
-          else
+          elif [ "${{ github.ref_name }}" == "master" ]; then
             echo "branch=master" >> $GITHUB_OUTPUT
+          else
+            echo "branch=${{ inputs.dry_run_branch_name }}" >> $GITHUB_OUTPUT
+          fi
 
   manual_trigger_deployment:
     if: ${{ inputs.dry_run == false }}
@@ -409,7 +420,7 @@ jobs:
           fi
 
       - name: Liquibase xsds SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.2
+        uses: wangyucode/sftp-upload-action@v2.0.3
         with:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
           port: ${{ secrets.WPENGINE_SFTP_PORT }}
@@ -421,7 +432,7 @@ jobs:
           remoteDir: '/xml/ns/dbchangelog/'
 
       - name: Liquibase PRO xsds SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.2
+        uses: wangyucode/sftp-upload-action@v2.0.3
         with:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
           port: ${{ secrets.WPENGINE_SFTP_PORT }}
@@ -433,7 +444,7 @@ jobs:
           remoteDir: '/xml/ns/pro/'
 
       - name: Liquibase flow-file schema SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.2
+        uses: wangyucode/sftp-upload-action@v2.0.3
         with:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
           port: ${{ secrets.WPENGINE_SFTP_PORT }}
@@ -445,7 +456,7 @@ jobs:
           remoteDir: '/json/schema/'
 
       - name: Liquibase index.htm SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.2
+        uses: wangyucode/sftp-upload-action@v2.0.3
         with:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
           port: ${{ secrets.WPENGINE_SFTP_PORT }}
@@ -475,7 +486,7 @@ jobs:
                "event_type": "liquibase-release",
                "client_payload": {
                   "liquibaseVersion": "${{ needs.setup.outputs.version }}",
-                  "dryRun": "${{ inputs.dry_run }}"
+                  "dryRun": "${{ github.event.inputs.dry_run || false }}"
                 }
              });
 
@@ -528,8 +539,8 @@ jobs:
             git fetch --tags
             # Get the latest tag
             echo "latest_version=$(git describe --tags $(git rev-list --tags --max-count=1) | sed 's/^v//')" >> $GITHUB_OUTPUT
-            # Get the previous tag (second latest)
-            echo "previous_version=$(git describe --tags $(git rev-list --tags --max-count=2 | tail -n 1) | sed -E 's/^v//; s/-.*//')" >> $GITHUB_OUTPUT
+            # Get the previous released version tag
+            echo "previous_version=$(git describe --tags --abbrev=0 | sed 's/^v//')" >> $GITHUB_OUTPUT
 
 
       - name: Repository Dispatch
