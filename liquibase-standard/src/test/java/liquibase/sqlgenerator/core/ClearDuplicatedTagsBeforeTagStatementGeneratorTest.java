@@ -2,11 +2,11 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
+import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.statement.core.TagDatabaseStatement;
 import org.junit.Test;
 
-import static liquibase.sqlgenerator.SqlGenerator.EMPTY_SQL;
 import static org.junit.Assert.assertEquals;
 
 public class ClearDuplicatedTagsBeforeTagStatementGeneratorTest {
@@ -26,17 +26,17 @@ public class ClearDuplicatedTagsBeforeTagStatementGeneratorTest {
     }
 
     @Test
-    public void whenNullTag_returnEmptyStatement() {
+    public void whenNullTagInStatement_validationFails() {
         // given
         ClearDuplicatedTagsBeforeTagStatementGenerator generator = new ClearDuplicatedTagsBeforeTagStatementGenerator();
         TagDatabaseStatement statement = new TagDatabaseStatement(null);
         Database database = new PostgresDatabase();
 
         // when
-        Sql[] sqls = generator.generateSql(statement, database);
+        ValidationErrors validate = generator.validate(statement, database, null);
 
         // then
-        assertEquals(EMPTY_SQL, sqls);
+        assertEquals(1, validate.getErrorMessages().size());
     }
 
 }

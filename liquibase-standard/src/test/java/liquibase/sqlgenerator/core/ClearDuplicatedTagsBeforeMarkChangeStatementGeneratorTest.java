@@ -6,6 +6,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
+import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 import org.junit.Test;
@@ -41,6 +42,19 @@ public class ClearDuplicatedTagsBeforeMarkChangeStatementGeneratorTest {
 
         // then
         assertEquals(EMPTY_SQL, sqls);
+    }
+
+    @Test
+    public void whenChangeSetEmptyInStatement_validationFails() {
+        // given
+        ClearDuplicatedTagsBeforeMarkChangeStatementGenerator generator = new ClearDuplicatedTagsBeforeMarkChangeStatementGenerator();
+        MarkChangeSetRanStatement statement = new MarkChangeSetRanStatement(null, ChangeSet.ExecType.EXECUTED);
+
+        // when
+        ValidationErrors validate = generator.validate(statement, new PostgresDatabase(), null);
+
+        // then
+        assertEquals(1, validate.getErrorMessages().size());
     }
 
     @Test

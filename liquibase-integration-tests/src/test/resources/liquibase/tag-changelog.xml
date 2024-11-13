@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="TAG-0" author="dev1">
+        <tagDatabase tag="release/0.1"/>
+    </changeSet>
+    <changeSet id="TAG-1" author="dev1">
+        <tagDatabase tag="release/1.0"/>
+    </changeSet>
+    <changeSet id="TAG-1" author="dev2">
+        <tagDatabase tag="release/1.0"/>
+    </changeSet>
+    <changeSet id="comment_change" author="dev2">
+        <comment>Comment change</comment>
+    </changeSet>
+</databaseChangeLog>

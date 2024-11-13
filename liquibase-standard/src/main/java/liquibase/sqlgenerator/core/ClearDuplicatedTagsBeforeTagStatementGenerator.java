@@ -23,10 +23,6 @@ public class ClearDuplicatedTagsBeforeTagStatementGenerator extends ChainableAbs
 
     @Override
     public Sql[] generateSql(TagDatabaseStatement statement, Database database) {
-        String tag = statement.getTag();
-        if (tag == null) {
-            return EMPTY_SQL;
-        }
-        return TagUtil.buildClearDuplicatedTagSql(database, tag);
+        return TagUtil.buildClearDuplicatedTagSql(database, statement.getTag());
     }
 }
