@@ -137,9 +137,9 @@ class ValidatingVisitorTest extends Specification {
         handler.validationPassed()
     }
 
-    void "validate visit error on empty id"() throws Exception {
+    void "validate visit error on empty id"(String id) throws Exception {
         when:
-        def changeSet = new ChangeSet("", "emptyId", false, false, "path/changelog", null, null, null)
+        def changeSet = new ChangeSet(id, "emptyId", false, false, "path/changelog", null, null, null)
         ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<>())
         handler.visit(changeSet, new DatabaseChangeLog(), null, null)
 
@@ -147,6 +147,8 @@ class ValidatingVisitorTest extends Specification {
         handler.getValidationErrors().getErrorMessages().size() == 1
         handler.getValidationErrors().getErrorMessages().get(0).contains("ChangeSet Id is empty")
         !handler.validationPassed()
+        where:
+        id << ["", " ", "   "]
     }
 
     void "validate visit error on empty author and id"() throws Exception {
