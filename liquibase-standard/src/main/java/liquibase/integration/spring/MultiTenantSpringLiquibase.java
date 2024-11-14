@@ -114,7 +114,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 
     @Getter
     @Setter
-    protected boolean disableAnalytics;
+    protected boolean analyticsEnabled;
 
     @Getter
     @Setter
@@ -212,7 +212,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
         liquibase.setDropFirst(dropFirst);
         liquibase.setClearCheckSums(clearCheckSums);
         liquibase.setLicenseKey(licenseKey);
-        liquibase.setDisableAnalytics(disableAnalytics);
+        liquibase.setAnalyticsEnabled(analyticsEnabled);
         liquibase.setShouldRun(shouldRun);
         liquibase.setRollbackFile(rollbackFile);
         liquibase.setResourceLoader(resourceLoader);
