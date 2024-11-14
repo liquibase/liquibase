@@ -259,8 +259,13 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             Map<String, Object> scopeVars = new HashMap<>();
             scopeVars.put(Scope.Attr.ui.name(), this.uiService.getUiServiceClass().getDeclaredConstructor().newInstance());
             scopeVars.put(Scope.Attr.integrationDetails.name(), new IntegrationDetails("spring"));
+            if (disableAnalytics) {
+                log.info("Disabling Liquibase analytics.");
+            }
             scopeVars.put(AnalyticsArgs.ENABLED.getKey(), !disableAnalytics);
+
             if (this.licenseKey != null) {
+                log.info("Using liquibase PRO licenseKey");
                 scopeVars.put("licenseKey", licenseKey);
             }
             Scope.child(scopeVars,
