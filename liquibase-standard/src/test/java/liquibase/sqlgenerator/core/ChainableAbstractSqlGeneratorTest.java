@@ -55,7 +55,8 @@ public class ChainableAbstractSqlGeneratorTest {
         }
 
         @Override
-        public ValidationErrors validate(final TagDatabaseStatement statement, final Database database, final SqlGeneratorChain<TagDatabaseStatement> sqlGeneratorChain) {
+        public ValidationErrors validate(final TagDatabaseStatement statement, final Database database,
+                                         final SqlGeneratorChain<TagDatabaseStatement> sqlGeneratorChain) {
             return null;
         }
 
