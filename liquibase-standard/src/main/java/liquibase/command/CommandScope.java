@@ -22,6 +22,7 @@ import lombok.Getter;
 import java.io.*;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 /**
@@ -35,6 +36,7 @@ import java.util.regex.Pattern;
 public class CommandScope {
 
     public static final String DO_NOT_SEND_EXCEPTION_TO_UI = "DO_NOT_SEND_EXCEPTION_TO_UI";
+    public static final String SUPPRESS_SHOWING_EXCEPTION_IN_LOG = "SUPPRESS_SHOWING_EXCEPTION_IN_LOG";
     private static final String NO_PREFIX_REGEX = ".*\\.";
     public static final Pattern NO_PREFIX_PATTERN = Pattern.compile(NO_PREFIX_REGEX);
     private final CommandDefinition commandDefinition;
@@ -71,6 +73,26 @@ public class CommandScope {
         shortConfigPrefix = "liquibase.command";
 
 
+    }
+
+    /**
+     *
+     * Set flag to turn on/off exception logging, to prevent stack traces from being shown multiple times
+     *
+     */
+    public static void suppressExceptionLogging(boolean suppressLoggingFlag) {
+        AtomicBoolean suppressLogging = Scope.getCurrentScope().get(SUPPRESS_SHOWING_EXCEPTION_IN_LOG, AtomicBoolean.class);
+        if (suppressLogging == null) {
+            return;
+        }
+        suppressLogging.set(suppressLoggingFlag);
+    }
+
+    public static boolean isSuppressExceptionLogging() {
+        if (! Scope.getCurrentScope().has(SUPPRESS_SHOWING_EXCEPTION_IN_LOG)) {
+            return false;
+        }
+        return Scope.getCurrentScope().get(SUPPRESS_SHOWING_EXCEPTION_IN_LOG, AtomicBoolean.class).get();
     }
 
     /**
@@ -293,7 +315,7 @@ public class CommandScope {
                             AnalyticsFactory analyticsFactory = Scope.getCurrentScope().getSingleton(AnalyticsFactory.class);
                             analyticsFactory.handleEvent(analyticsEvent);
                         } else {
-                            parentAnalyticsEvent.getChildEvents().add(analyticsEvent);
+                            parentAnalyticsEvent.addChildEvent(analyticsEvent);
                         }
                     });
                 }

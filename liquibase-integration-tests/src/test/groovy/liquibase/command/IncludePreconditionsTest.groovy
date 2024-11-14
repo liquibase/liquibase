@@ -48,7 +48,7 @@ class IncludePreconditionsTest extends Specification {
         def changelogResultSet = h2.getConnection().createStatement().executeQuery("select * from databasechangelog")
         h2.getConnection().createStatement().executeQuery("select * from INCLUDED_TABLE")
         h2.getConnection().createStatement().executeQuery("select * from DEFAULT_TABLE")
-        def executed = Arrays.stream(outputString.split("\r\n")).filter {
+        def executed = Arrays.stream(outputString.split(System.lineSeparator())).filter {
             s->s.startsWith("Running Changeset")
         }.toList()
         then:
@@ -62,7 +62,5 @@ class IncludePreconditionsTest extends Specification {
             def filename = changelogResultSet.getString("filename")
             filename == "changelogs/h2/include/master.xml" || filename == "included";
         }
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 }

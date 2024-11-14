@@ -1,6 +1,7 @@
 package liquibase.analytics;
 
 import liquibase.Scope;
+import liquibase.analytics.configuration.AnalyticsArgs;
 import liquibase.analytics.configuration.AnalyticsConfigurationFactory;
 import liquibase.analytics.configuration.LiquibaseRemoteAnalyticsConfiguration;
 import liquibase.analytics.configuration.RemoteAnalyticsConfiguration;
@@ -84,12 +85,16 @@ public class Event {
      * Is the code running in GitHub actions? See
      * https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#default-environment-variables:~:text=actions/checkout.-,GITHUB_ACTIONS,-Always%20set%20to
      */
-    private boolean isGithubActions = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("GITHUB_ACTIONS"))));;
+    private boolean isGithubActions = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("GITHUB_ACTIONS"))));
     /**
      * Is the code running in a CI environment? See
      * https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#default-environment-variables:~:text=Description-,CI,-Always%20set%20to
      */
-    private boolean isCi = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("CI"))));;
+    private boolean isCi = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("CI"))));
+    /**
+     * Is the code running in Liquibase IO?
+     */
+    private boolean isIO = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("isIO"))));
 
     public Event(String command) {
         this.command = command;
@@ -187,5 +192,21 @@ public class Event {
             Map<String, VersionUtils.LibraryInfo> libraries = EXTENSIONS_CACHE.get();
             return libraries.get(extensionName).version;
         });
+    }
+
+    /**
+     * Add the child event only if analytics is enabled.
+     * If unable to determine analytics enabled status no event will be added.
+     *
+     * @param event the event to add
+     */
+    public void addChildEvent(Event event) {
+        try {
+            if (AnalyticsArgs.isAnalyticsEnabled()) {
+                getChildEvents().add(event);
+            }
+        } catch (Exception analyticsEnabledException) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Failed to add child event: could not determine analytics status", analyticsEnabledException);
+        }
     }
 }

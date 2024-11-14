@@ -29,6 +29,9 @@ class IncludeAllPreconditionsTest extends Specification {
         ConsoleUIService console = Scope.getCurrentScope().getUI() as ConsoleUIService
         def outputStream = new ByteArrayOutputStream()
         console.setOutputStream(new PrintStream(outputStream))
+        def errorStream = new ByteArrayOutputStream()
+        console.setOutputStream(new PrintStream(outputStream))
+        console.setErrorStream(new PrintStream(errorStream))
         when:
         String changelogFile = "changelogs/h2/includeAll/master.xml"
         def changelog =
@@ -53,11 +56,10 @@ class IncludeAllPreconditionsTest extends Specification {
         outputString.contains("WARNING: Executing changelogs/h2/includeAll/master.xml despite precondition failure due to onFail='WARN':")
         outputString.contains("1 preconditions failed")
         outputString.contains("changelogs/h2/includeAll/master.xml : Table PUBLIC.NOT_EXISTANT_TABLE does not exist")
+        outputString.contains("Cannot perform includeAll because specified tableExists precondition failed")
         while (changelogResultSet.next()) {
             def filename = changelogResultSet.getString("filename")
             filename == "changelogs/h2/includeAll/master.xml" || filename == "included";
         }
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 }
