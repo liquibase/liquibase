@@ -103,6 +103,8 @@ public class ColumnComparator implements DatabaseObjectComparator {
         if (accordingTo instanceof MSSQLDatabase && type1.getTypeName().equalsIgnoreCase("int") && type2.getTypeName().equalsIgnoreCase("int")) {
             type1.setColumnSize(null);
             type2.setColumnSize(null);
+            databaseObject1.getAttribute("type", DataType.class).setColumnSize(null);
+            databaseObject2.getAttribute("type", DataType.class).setColumnSize(null);
         }
         differences.compare("type", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
     }
