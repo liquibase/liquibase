@@ -111,7 +111,7 @@
 │       ├── picocli.jar
 │       ├── postgresql.jar
 │       ├── slf4j-api.jar
-│       ├── slf4j-simple.jar
+│       ├── slf4j-nop.jar
 │       ├── snakeyaml.jar
 │       ├── snowflake-jdbc.jar
 │       └── sqlite-jdbc.jar
