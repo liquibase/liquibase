@@ -212,7 +212,9 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
         if (value instanceof ColumnConfig) {
             ColumnConfig columnConfig = (ColumnConfig) value;
-            if (!preserveNullValues && columnConfig.isNull()) {
+            ConstraintsConfig constraintsConfig = columnConfig.getConstraints();
+            boolean constraintsIsNullable = null != constraintsConfig && constraintsConfig.isNullable() != null && constraintsConfig.isNullable();
+            if (!preserveNullValues && constraintsIsNullable && columnConfig.isNull()) {
                 return;
             }
             node.appendChild(createNode((LiquibaseSerializable) value));
