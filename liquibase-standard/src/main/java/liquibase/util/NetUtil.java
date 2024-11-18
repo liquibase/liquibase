@@ -102,7 +102,10 @@ public class NetUtil {
      * @throws UnknownHostException
      */
     public static boolean isIPV4Compatible() throws SocketException, UnknownHostException {
-        return ((Inet6Address) getLocalHost()).isIPv4CompatibleAddress();
+        if(localHost == null) {
+            getLocalHost();
+        }
+        return localHost instanceof Inet4Address;
     }
 
 
