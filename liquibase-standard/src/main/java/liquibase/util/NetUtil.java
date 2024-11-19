@@ -2,10 +2,7 @@ package liquibase.util;
 
 import liquibase.Scope;
 
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.Enumeration;
 
 public class NetUtil {
@@ -96,6 +93,19 @@ public class NetUtil {
             }
         }
         return hostName;
+    }
+
+    /**
+     *
+     * @return true if local host address is compatible with IPv4 protocol
+     * @throws SocketException
+     * @throws UnknownHostException
+     */
+    public static boolean isIPV4Compatible() throws SocketException, UnknownHostException {
+        if(localHost == null) {
+            getLocalHost();
+        }
+        return localHost instanceof Inet4Address;
     }
 
 
