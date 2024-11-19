@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2" author="jlyle">
+        <createTable tableName="table1">
+            <column name="id" type="number" autoIncrement="true" />
+            <column name="changelog_file" type="varchar(4000)" />
+            <column name="changeset_id" type="varchar(4000)" />
+            <column name="changeset_author" type="varchar(4000)" />
+        </createTable>
+    </changeSet>
+    <changeSet id="3" author="jlyle" logicalFilePath="changeSetLogical">
+        <createTable tableName="table2">
+            <column name="id" type="number" autoIncrement="true" />
+            <column name="changelog_file" type="varchar(4000)" />
+            <column name="changeset_id" type="varchar(4000)" />
+            <column name="changeset_author" type="varchar(4000)" />
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
