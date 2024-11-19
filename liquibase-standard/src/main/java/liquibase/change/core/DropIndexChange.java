@@ -63,7 +63,7 @@ public class DropIndexChange extends AbstractChange {
     }
 
     @DatabaseChangeProperty(isChangeProperty = false,
-        description = "Index associations. Valid values: primaryKey, foreignKey, uniqueConstriant, none")
+        description = "Index associations. Valid values: primaryKey, foreignKey, uniqueConstraint, none")
     public String getAssociatedWith() {
         return associatedWith;
     }

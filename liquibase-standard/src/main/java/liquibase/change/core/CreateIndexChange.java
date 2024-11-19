@@ -169,7 +169,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
      * <li>uniqueConstraint</li>
      * <li>none</li>
      * */
-    @DatabaseChangeProperty(description = "Index associations. Valid values: primaryKey, foreignKey, uniqueConstriant, none")
+    @DatabaseChangeProperty(description = "Index associations. Valid values: primaryKey, foreignKey, uniqueConstraint, none")
     public String getAssociatedWith() {
         return associatedWith;
     }

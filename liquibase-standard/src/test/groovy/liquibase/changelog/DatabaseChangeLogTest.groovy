@@ -1,6 +1,7 @@
 package liquibase.changelog
 
 import liquibase.ContextExpression
+import liquibase.GlobalConfiguration
 import liquibase.LabelExpression
 import liquibase.Labels
 import liquibase.Scope
@@ -9,11 +10,13 @@ import liquibase.change.core.RawSQLChange
 import liquibase.change.visitor.ChangeVisitor
 import liquibase.database.Database
 import liquibase.database.core.MockDatabase
+import liquibase.exception.ChangeLogParseException
 import liquibase.exception.SetupException
 import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.logging.core.BufferedLogService
 import liquibase.parser.ChangeLogParserConfiguration
 import liquibase.parser.core.ParsedNode
+import liquibase.parser.core.xml.XMLChangeLogSAXParser
 import liquibase.precondition.core.OrPrecondition
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.RunningAsPrecondition
@@ -29,12 +32,13 @@ import spock.lang.Unroll
 
 import java.nio.file.Paths
 import java.util.logging.Level
-import java.util.stream.Stream
+
+import static java.lang.Boolean.FALSE
+import static liquibase.parser.ChangeLogParser.DATABASE_CHANGE_LOG
 
 class DatabaseChangeLogTest extends Specification {
 
-    @Shared
-            resourceSupplier = new ResourceSupplier()
+    @Shared resourceSupplier = new ResourceSupplier()
     def test1Xml = '''<databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -172,6 +176,7 @@ create view sql_view as select * from sql_table;'''
         ((CreateTableChange) changeLogFromChildren.changeSets[1].changes[0]).tableName == "my_other_table"
         ((CreateTableChange) changeLogFromValue.changeSets[1].changes[0]).tableName == "my_other_table"
     }
+
     def "load handles removeChangeSetProperty"() {
         when:
         def children = [
@@ -763,7 +768,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         result
     }
 
-
     def "warning message is logged when changelog include fails because file does not exist"() {
         when:
         def rootChangeLogPath = "com/example/root.xml"
@@ -1083,4 +1087,65 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         "5.xml"         | 0
     }
 
+    @Unroll
+    def "#tag as root element"() {
+        when:
+        String content = """<$tag xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+                                    www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"/>
+        """
+        String rootChangeLogPath = "root.xml"
+        def resourceAccessor = new MockResourceAccessor([(rootChangeLogPath): content])
+
+        DatabaseChangeLog changeLog =
+           Scope.child([(GlobalConfiguration.SECURE_PARSING.key): FALSE], {
+               // Create a new parser instead of using the parserFactory to make sure SECURE_PARSING is used
+               new XMLChangeLogSAXParser().parse(rootChangeLogPath, new ChangeLogParameters(), resourceAccessor)
+           } as Scope.ScopedRunnerWithReturn<DatabaseChangeLog>)
+
+        then:
+        ChangeLogParseException e = thrown()
+        /Error parsing line 4 column 99 of root.xml: "$DATABASE_CHANGE_LOG" expected as root element/ == e.message
+        where:
+        tag << [
+            'addAutoIncrement', 'addColumn',
+            'addDefaultValue',  'addForeignKeyConstraint',
+            'addLookupTable',   'addNotNullConstraint',
+            'addPrimaryKey',    'addUniqueConstraint',
+            'alterSequence',    'and',
+            'changeLogPropertyDefined',
+            'changeSetExecuted','column',
+            'columnExists',     'comment',
+            'constraints',      'createIndex',
+            'createProcedure',  'createSequence',
+            'createTable',      'createView',
+            'customChange',     'customPrecondition',
+            'dbms',             'delete',
+            'dropAllForeignKeyConstraints','dropColumn',
+            'dropDefaultValue', 'dropForeignKeyConstraint',
+            'dropIndex',        'dropNotNullConstraint',
+            'dropPrimaryKey',   'dropProcedure',
+            'dropSequence'  ,   'dropTable',
+            'dropUniqueConstraint','dropView',
+            'empty',            'executeCommand',
+            'expectedQuotingStrategy','foreignKeyConstraintExists',
+            'include',          'includeAll',
+            'insert',           'loadData',
+            'loadUpdateData',   'mergeColumns',
+            'modifyDataType',   'not',
+            'or',   'output',   'param',
+            'primaryKeyExists', 'preConditions',
+            'renameSequence',   'renameTable',
+            'renameView',       'rollback',
+            'rowCount',         'runningAs',
+            'sequenceExists',   'setColumnRemarks',
+            'setTableRemarks',  'sql',
+            'sqlCheck',         'sqlFile',
+            'stop',             'tableExists',
+            'tableIsEmpty',     'tagDatabase',
+            'uniqueConstraintExists', 'update',
+            'viewExists',       'whereParams'
+            ]
+    }
 }
