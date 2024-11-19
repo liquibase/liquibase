@@ -54,20 +54,31 @@ ID | CHANGELOG_FILE | CHANGESET_ID | CHANGESET_AUTHOR |
     def "output change type only outputs single time to console" () {
         given:
         def changelogFileName = "src/test/resources/changelogs/h2/update/output.xml"
+        def targetString = "INFO Some output text to identify"
         def resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
         def bufferLog = new BufferedLogService()
         def scopeSettings = [
                 (Scope.Attr.resourceAccessor.name()) : resourceAccessor,
                 (Scope.Attr.logService.name()) : bufferLog,
         ]
+        def infoLog
+        def firstIndex
+        def lastIndex
 
         when:
         Scope.child(scopeSettings, {
             CommandUtil.runUpdate(testDatabase, changelogFileName, null, null, null)
         } as Scope.ScopedRunner)
+        infoLog = bufferLog.getLogAsString(Level.INFO)
+        firstIndex = infoLog.indexOf(targetString)
+        lastIndex = infoLog.lastIndexOf(targetString)
 
         then:
-        bufferLog.getLogAsString(Level.INFO).contains("INFO Output: Some output text to identify")
+        // Ensure output exits in log at least once
+        firstIndex != -1
+
+        //Ensure output exits in log at most once
+        firstIndex == lastIndex
 
         cleanup:
         testDatabase.getConnection().close()
