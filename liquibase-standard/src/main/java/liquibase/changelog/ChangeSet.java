@@ -1629,17 +1629,13 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         AtomicReference<SqlStatement[]> statementsReference = new AtomicReference<>();
         Map<String, Object> scopeValues = new HashMap<>();
         scopeValues.put(Change.SHOULD_EXECUTE, Boolean.FALSE);
-        StringBuilder sqlStatementsMdc = new StringBuilder();
-        Scope.child(scopeValues, () -> {
-            statementsReference.set(generateRollbackStatements ?
-                    change.generateRollbackStatements(database) : change.generateStatements(database));
-            sqlStatementsMdc.append(Arrays.stream(statementsReference.get())
+        Scope.child(scopeValues, () -> statementsReference.set(generateRollbackStatements ?
+               change.generateRollbackStatements(database) : change.generateStatements(database)));
+        String sqlStatementsMdc = Arrays.stream(statementsReference.get())
                     .map(statement -> SqlUtil.getSqlString(statement, SqlGeneratorFactory.getInstance(), database))
-                    .collect(Collectors.joining("\n")));
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SQL, sqlStatementsMdc.toString());
-        });
-
-        return sqlStatementsMdc.toString();
+                    .collect(Collectors.joining("\n"));
+        getCurrentScope().addMdcValue(MdcKey.CHANGESET_SQL, sqlStatementsMdc);
+        return sqlStatementsMdc;
     }
 
     private List<ChangeVisitor> getChangeVisitors(){
