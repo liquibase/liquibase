@@ -1133,7 +1133,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             // of another DBCL entry.  Also, skip setting the logical file
             // path for raw SQL change sets
             //
-            if (logicalFilePath != null && ! (parser instanceof SqlChangeLogParser) && ! ranChangeSetExists(changeSet, ranChangeSets)) {
+            if (logicalFilePath != null && changeSet.getLogicalFilePath() == null &&
+                ! (parser instanceof SqlChangeLogParser) && ! ranChangeSetExists(changeSet, ranChangeSets)) {
                 changeSet.setLogicalFilePath(logicalFilePath);
                 if (StringUtils.isNotEmpty(logicalFilePath)) {
                     changeSet.setFilePath(logicalFilePath);
