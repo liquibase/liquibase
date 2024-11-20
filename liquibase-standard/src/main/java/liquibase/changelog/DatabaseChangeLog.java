@@ -34,6 +34,7 @@ import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
+import liquibase.ui.UIService;
 import liquibase.util.ExceptionUtil;
 import liquibase.util.FileUtil;
 import liquibase.util.StringUtil;
@@ -1249,28 +1250,43 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
         ParsedNode preconditionsNode = parentNode.getChild(null, PRE_CONDITIONS);
 
-        if(preconditionsNode != null) {
+        if (preconditionsNode != null) {
 
             PreconditionContainer preconditionsContainer = new PreconditionContainer();
             preconditionsContainer.load(preconditionsNode, resourceAccessor);
 
             for (Precondition next : preconditionsContainer.getNestedPreconditions()) {
-
+                String warningMessage = String.format("Error occurred while evaluating precondition %s", next.getName());
                 try {
                     next.check(Scope.getCurrentScope().getDatabase(), this);
                 } catch (PreconditionFailedException e) {
-                    String message = String.format(
-                        "Cannot perform %s because specified %s precondition failed",
-                        parentNode.getName(), next.getName());
-                    Scope.getCurrentScope().getLog(getClass()).warning(message, e);
-                    Scope.getCurrentScope().getUI().sendMessage(message);
-                    return false;
+                    if (PreconditionContainer.FailOption.HALT.equals(preconditionsContainer.getOnFail())) {
+                        throw new RuntimeException(e);
+                    } else if (PreconditionContainer.FailOption.WARN.equals(preconditionsContainer.getOnFail())) {
+                        sendIncludePreconditionWarningMessage(warningMessage, e);
+                    } else {
+                        return false;
+                    }
                 } catch (PreconditionErrorException e) {
-                    throw new RuntimeException(e);
+                    if (PreconditionContainer.ErrorOption.HALT.equals(preconditionsContainer.getOnError())) {
+                        throw new RuntimeException(e);
+                    } else if (PreconditionContainer.ErrorOption.WARN.equals(preconditionsContainer.getOnError())) {
+                        sendIncludePreconditionWarningMessage(warningMessage, e);
+                    } else {
+                        return false;
+                    }
                 }
             }
         }
         return true;
+    }
+
+    private static void sendIncludePreconditionWarningMessage(String message, Throwable e) {
+        Scope currentScope = Scope.getCurrentScope();
+        Logger logger = currentScope.getLog(DatabaseChangeLog.class);
+        UIService ui = currentScope.getUI();
+        logger.warning(message, e);
+        ui.sendMessage(message);
     }
 
     /**
