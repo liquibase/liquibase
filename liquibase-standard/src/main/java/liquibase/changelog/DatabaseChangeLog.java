@@ -1115,7 +1115,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
         List<RanChangeSet> ranChangeSets = new ArrayList<>();
         Database database = Scope.getCurrentScope().getDatabase();
-        if (database != null && logicalFilePath != null) {
+        if (database != null) {
             ranChangeSets = database.getRanChangeSetList();
         }
         for (ChangeSet changeSet : changeLog.getChangeSets()) {
