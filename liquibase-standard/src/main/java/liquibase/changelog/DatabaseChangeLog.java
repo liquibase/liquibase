@@ -1118,6 +1118,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         if (database != null) {
             ranChangeSets = database.getRanChangeSetList();
         }
+        String changelogLogicalFilePath = this.logicalFilePath;
+        if (changelogLogicalFilePath != null) {
+            logicalFilePath = changelogLogicalFilePath;
+        }
         for (ChangeSet changeSet : changeLog.getChangeSets()) {
             if (modifyChangeSets != null) {
                 modifyChangeSets(modifyChangeSets, changeSet);
