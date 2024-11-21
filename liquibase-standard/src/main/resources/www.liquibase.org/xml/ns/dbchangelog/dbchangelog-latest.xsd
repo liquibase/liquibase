@@ -59,6 +59,14 @@
         </xsd:restriction>
     </xsd:simpleType>
 
+    <xsd:simpleType name="onIncludeErrorOrFail">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="HALT"/>
+            <xsd:enumeration value="WARN"/>
+            <xsd:enumeration value="CONTINUE"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
     <xsd:simpleType name="onChangeLogPreconditionOnSqlOutput">
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="TEST"/>
@@ -93,9 +101,9 @@
                         <xsd:attribute name="onFailMessage" type="xsd:string"/>
                         <xsd:attribute name="onErrorMessage" type="xsd:string"/>
                         <xsd:attribute name="onFail"
-                                       type="onChangeSetPreconditionErrorOrFail"/>
+                                       type="onIncludeErrorOrFail"/>
                         <xsd:attribute name="onError"
-                                       type="onChangeSetPreconditionErrorOrFail"/>
+                                       type="onIncludeErrorOrFail"/>
                         <xsd:attribute name="onSqlOutput"
                                        type="onChangeLogPreconditionOnSqlOutput"/>
                     </xsd:complexType>
@@ -128,9 +136,9 @@
                         <xsd:attribute name="onFailMessage" type="xsd:string"/>
                         <xsd:attribute name="onErrorMessage" type="xsd:string"/>
                         <xsd:attribute name="onFail"
-                                       type="onChangeSetPreconditionErrorOrFail"/>
+                                       type="onIncludeErrorOrFail"/>
                         <xsd:attribute name="onError"
-                                       type="onChangeSetPreconditionErrorOrFail"/>
+                                       type="onIncludeErrorOrFail"/>
                         <xsd:attribute name="onSqlOutput"
                                        type="onChangeLogPreconditionOnSqlOutput"/>
                     </xsd:complexType>

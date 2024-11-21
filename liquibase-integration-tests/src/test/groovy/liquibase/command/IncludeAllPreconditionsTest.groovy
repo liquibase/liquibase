@@ -24,14 +24,7 @@ class IncludeAllPreconditionsTest extends Specification {
     @Shared
     private DatabaseTestSystem h2 = Scope.currentScope.getSingleton(TestSystemFactory).getTestSystem("h2") as DatabaseTestSystem
 
-    def "run includeAll with preconditions"() {
-        given:
-        ConsoleUIService console = Scope.getCurrentScope().getUI() as ConsoleUIService
-        def outputStream = new ByteArrayOutputStream()
-        console.setOutputStream(new PrintStream(outputStream))
-        def errorStream = new ByteArrayOutputStream()
-        console.setOutputStream(new PrintStream(outputStream))
-        console.setErrorStream(new PrintStream(errorStream))
+    def "run include with preconditions fail option WARN"() {
         when:
         String changelogFile = "changelogs/h2/includeAll/master.xml"
         def changelog =
@@ -47,19 +40,20 @@ class IncludeAllPreconditionsTest extends Specification {
             updateCommand.addArgumentValue(UpdateCommandStep.CHANGELOG_ARG, changelog)
             updateCommand.execute()
         } as Scope.ScopedRunner)
-        String outputString = outputStream.toString()
         def changelogResultSet = h2.getConnection().createStatement().executeQuery("select * from databasechangelog")
         h2.getConnection().createStatement().executeQuery("select * from INCLUDED_TABLE")
         h2.getConnection().createStatement().executeQuery("select * from DEFAULT_TABLE")
+        h2.getConnection().createStatement().executeQuery("select * from TEST_PRECONDITION_TABLE")
         then:
         noExceptionThrown()
-        outputString.contains("WARNING: Executing changelogs/h2/includeAll/master.xml despite precondition failure due to onFail='WARN':")
-        outputString.contains("1 preconditions failed")
-        outputString.contains("changelogs/h2/includeAll/master.xml : Table PUBLIC.NOT_EXISTANT_TABLE does not exist")
-        outputString.contains("Cannot perform includeAll because specified tableExists precondition failed")
+        List<String> includedFiles = new ArrayList<>(3)
         while (changelogResultSet.next()) {
             def filename = changelogResultSet.getString("filename")
-            filename == "changelogs/h2/includeAll/master.xml" || filename == "included";
+            includedFiles.add(filename)
         }
+        includedFiles.size() == 3
+        includedFiles.count("included") == 1
+        includedFiles.count("test_precondition") == 1
+        includedFiles.count("changelogs/h2/includeAll/master.xml") == 1
     }
 }
