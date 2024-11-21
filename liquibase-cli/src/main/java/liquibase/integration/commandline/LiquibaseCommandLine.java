@@ -28,19 +28,14 @@ import liquibase.ui.ConsoleUIService;
 import liquibase.ui.LoggerUIService;
 import liquibase.ui.UIService;
 import liquibase.util.*;
-import org.apache.commons.lang3.SystemProperties;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemProperties;
 import picocli.CommandLine;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -50,7 +45,6 @@ import java.util.stream.Stream;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
-import static liquibase.util.SystemUtil.isWindows;
 import static liquibase.util.VersionUtils.*;
 
 
@@ -92,7 +86,6 @@ public class LiquibaseCommandLine {
         //we don't ship jansi, so we know we can disable it without having to do the slow class checking
         System.setProperty("org.fusesource.jansi.Ansi.disable", "true");
         final LiquibaseCommandLine cli = new LiquibaseCommandLine();
-
         int returnCode = cli.execute(args);
 
         System.exit(returnCode);
@@ -696,8 +689,6 @@ public class LiquibaseCommandLine {
         integrationDetails.setName(LiquibaseCommandLineConfiguration.INTEGRATION_NAME.getCurrentValue());
         returnMap.put(Scope.Attr.integrationDetails.name(), integrationDetails);
 
-        final ClassLoader classLoader = configureClassLoader();
-
         returnMap.putAll(configureLogging());
 
         //
@@ -705,7 +696,7 @@ public class LiquibaseCommandLine {
         // any logging that might happen
         //
         Map<String, String> javaProperties = addJavaPropertiesToChangelogParameters();
-        Scope.child(new HashMap<>(javaProperties), () -> returnMap.putAll(configureResourceAccessor(classLoader)));
+        Scope.child(new HashMap<>(javaProperties), () -> returnMap.putAll(configureResourceAccessor(Thread.currentThread().getContextClassLoader())));
 
         UIService defaultUiService = getDefaultUiService();
 
@@ -857,48 +848,6 @@ public class LiquibaseCommandLine {
                 new ClassLoaderResourceAccessor(classLoader)));
 
         return returnMap;
-    }
-
-    protected ClassLoader configureClassLoader() throws IllegalArgumentException {
-        final String classpath = LiquibaseCommandLineConfiguration.CLASSPATH.getCurrentValue();
-
-        final List<URL> urls = new ArrayList<>();
-        if (classpath != null) {
-            String[] classpathSoFar;
-            if (isWindows()) {
-                classpathSoFar = classpath.split(";");
-            } else {
-                classpathSoFar = classpath.split(":");
-            }
-
-            for (String classpathEntry : classpathSoFar) {
-                File classPathFile = new File(classpathEntry);
-                if (!classPathFile.exists()) {
-                    throw new IllegalArgumentException(classPathFile.getAbsolutePath() + " does not exist");
-                }
-
-                try {
-                    URL newUrl = new File(classpathEntry).toURI().toURL();
-                    Scope.getCurrentScope().getLog(getClass()).fine(newUrl.toExternalForm() + " added to class loader");
-                    urls.add(newUrl);
-                } catch (MalformedURLException e) {
-                    throw new IllegalArgumentException(e);
-                }
-            }
-        }
-
-        final ClassLoader classLoader;
-        if (LiquibaseCommandLineConfiguration.INCLUDE_SYSTEM_CLASSPATH.getCurrentValue()) {
-            classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), Thread.currentThread()
-                    .getContextClassLoader()));
-
-        } else {
-            classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), null));
-        }
-
-        Thread.currentThread().setContextClassLoader(classLoader);
-
-        return classLoader;
     }
 
     private void addSubcommand(CommandDefinition commandDefinition, CommandLine rootCommand) {

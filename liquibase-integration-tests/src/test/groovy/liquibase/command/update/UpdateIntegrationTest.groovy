@@ -5,15 +5,16 @@ import liquibase.command.CommandResults
 import liquibase.command.CommandScope
 import liquibase.command.core.ExecuteSqlCommandStep
 import liquibase.command.core.HistoryCommandStep
-import liquibase.command.core.UpdateCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
-import liquibase.ui.ConsoleUIService
+import liquibase.logging.core.BufferedLogService
+import liquibase.resource.SearchPathResourceAccessor
 import spock.lang.Shared
 import spock.lang.Specification
+import java.util.logging.Level
 
 @LiquibaseIntegrationTest
 class UpdateIntegrationTest extends Specification {
@@ -77,6 +78,40 @@ ID | CHANGELOG_FILE | CHANGESET_ID | CHANGESET_AUTHOR |
 
         cleanup:
         testDatabase.getConnection().close()
-        CommandUtil.runDropAll(testDatabase)
     }
+
+    def "output change type only outputs single time to console" () {
+        given:
+        def changelogFileName = "src/test/resources/changelogs/h2/update/output.xml"
+        def targetString = "INFO Some output text to identify"
+        def resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
+        def bufferLog = new BufferedLogService()
+        def scopeSettings = [
+                (Scope.Attr.resourceAccessor.name()) : resourceAccessor,
+                (Scope.Attr.logService.name()) : bufferLog,
+        ]
+        def infoLog
+        def firstIndex
+        def lastIndex
+
+        when:
+        Scope.child(scopeSettings, {
+            CommandUtil.runUpdate(testDatabase, changelogFileName, null, null, null)
+        } as Scope.ScopedRunner)
+        infoLog = bufferLog.getLogAsString(Level.INFO)
+        firstIndex = infoLog.indexOf(targetString)
+        lastIndex = infoLog.lastIndexOf(targetString)
+
+        then:
+        // Ensure output exits in log at least once
+        firstIndex != -1
+
+        //Ensure output exits in log at most once
+        firstIndex == lastIndex
+
+        cleanup:
+        testDatabase.getConnection().close()
+    }
+
+
 }
