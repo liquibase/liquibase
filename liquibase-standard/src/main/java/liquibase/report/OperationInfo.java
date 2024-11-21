@@ -1,6 +1,7 @@
 package liquibase.report;
 
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 @Data
 public class OperationInfo {
@@ -15,6 +16,8 @@ public class OperationInfo {
     private String contexts;
 
     public void suppressException() {
-        this.exception = "Exception Suppressed";
+        if (StringUtils.isNotEmpty(this.exception)) {
+            this.exception = "Exception Suppressed";
+        }
     }
 }
