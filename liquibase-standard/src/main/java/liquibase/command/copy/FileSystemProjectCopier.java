@@ -1,6 +1,7 @@
 package liquibase.command.copy;
 
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.util.FileUtil;
 
 import java.io.File;
 
@@ -59,6 +60,11 @@ public class FileSystemProjectCopier implements ProjectCopier {
      */
     @Override
     public void copy(String source, String target, boolean recursive) {
-        throw new UnexpectedLiquibaseException("The command 'init copy' requires s3:// paths and cannot be used with local file system paths. Learn more at https://docs.liquibase.com/commands/init/copy.html");
+        try {
+            String contents = FileUtil.getContents(new File(source));
+            FileUtil.write(contents, new File(target));
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException("Could not copy files!", e);
+        }
     }
 }
