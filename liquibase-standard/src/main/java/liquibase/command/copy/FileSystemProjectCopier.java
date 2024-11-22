@@ -64,7 +64,7 @@ public class FileSystemProjectCopier implements ProjectCopier {
             String contents = FileUtil.getContents(new File(source));
             FileUtil.write(contents, new File(target));
         } catch (Exception e) {
-            throw new UnexpectedLiquibaseException("Could not copy files!", e);
+            throw new UnexpectedLiquibaseException("Unable to copy file(s)! Make sure you are targeting a valid path for the new file.", e);
         }
     }
 }
