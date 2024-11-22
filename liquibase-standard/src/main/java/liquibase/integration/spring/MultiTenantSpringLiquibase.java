@@ -110,11 +110,11 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 
     @Getter
     @Setter
-    protected String licenseKey;
+    protected String licenseKey = null;
 
     @Getter
     @Setter
-    protected boolean analyticsEnabled;
+    protected Boolean analyticsEnabled = null;
 
     @Getter
     @Setter
