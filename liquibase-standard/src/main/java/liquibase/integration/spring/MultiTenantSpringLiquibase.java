@@ -110,6 +110,14 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 
     @Getter
     @Setter
+    protected String licenseKey;
+
+    @Getter
+    @Setter
+    protected boolean analyticsEnabled;
+
+    @Getter
+    @Setter
     private boolean shouldRun = true;
 
     @Getter
@@ -203,6 +211,8 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
         liquibase.setLabelFilter(labelFilter);
         liquibase.setDropFirst(dropFirst);
         liquibase.setClearCheckSums(clearCheckSums);
+        liquibase.setLicenseKey(licenseKey);
+        liquibase.setAnalyticsEnabled(analyticsEnabled);
         liquibase.setShouldRun(shouldRun);
         liquibase.setRollbackFile(rollbackFile);
         liquibase.setResourceLoader(resourceLoader);
