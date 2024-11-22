@@ -120,7 +120,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     @Getter
     @Setter
-    protected boolean analyticsEnabled = true;
+    protected Boolean analyticsEnabled = null;
 
     @Setter
     protected boolean shouldRun = true;
@@ -259,7 +259,9 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             Map<String, Object> scopeVars = new HashMap<>();
             scopeVars.put(Scope.Attr.ui.name(), this.uiService.getUiServiceClass().getDeclaredConstructor().newInstance());
             scopeVars.put(Scope.Attr.integrationDetails.name(), new IntegrationDetails("spring"));
-            scopeVars.put(AnalyticsArgs.ENABLED.getKey(), analyticsEnabled);
+            if (this.analyticsEnabled != null) {
+                scopeVars.put(AnalyticsArgs.ENABLED.getKey(), this.analyticsEnabled);
+            }
 
             if (this.licenseKey != null) {
                 log.fine("Using PRO licenseKey.");
