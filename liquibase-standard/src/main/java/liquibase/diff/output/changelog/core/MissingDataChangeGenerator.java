@@ -5,6 +5,7 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.core.InsertDataChange;
 import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.output.DiffOutputControl;
@@ -186,11 +187,14 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
             pattern = Pattern.compile(includeObjects, isCaseSensitive ? 0 : Pattern.CASE_INSENSITIVE);
         }
 
+        boolean noFiltering = null == pattern;
+
         for (int i = 1; i < rs.getMetaData().getColumnCount() + 1; i++) {
             String columnName = rs.getMetaData().getColumnName(i);
 
             // only collect columns which are either explicitly "included" or "not excluded"
-            if ((withIncludeOnly && pattern.matcher(columnName).matches()) ||
+            if (noFiltering ||
+                (withIncludeOnly && pattern.matcher(columnName).matches()) ||
                 (withExcludeOnly && !pattern.matcher(columnName).matches()))
             {
                 columnNames.add(isCaseSensitive ? "\\\"" + columnName + "\\\"" : columnName);
