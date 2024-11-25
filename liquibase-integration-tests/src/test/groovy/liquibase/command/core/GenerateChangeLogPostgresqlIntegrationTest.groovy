@@ -258,4 +258,41 @@ COMMIT;
         cleanup:
         CommandUtil.runDropAll(db)
     }
+
+    def "Should export table TEST w/ neither excludeObjects nor includeObjects"() {
+        // Quoted columns is a form of case-sensitive columns.
+        given:
+        db.executeSql("""
+CREATE TABLE "TEST" (
+    "AFOO" VARCHAR(4),
+    "BFOO" VARCHAR(4),
+    "FOO"  VARCHAR(4),
+    "FOOL" VARCHAR(4)
+);
+INSERT INTO "TEST" ("AFOO", "BFOO", "FOO", "FOOL") VALUES ('AFOO', 'BFOO', 'FOO', 'FOOL');
+COMMIT;
+""")
+
+        when:
+        def outputFileName = 'test/test-classes/output.postgresql.sql'
+        callGenerateChangeLog (outputFileName, null,null) // no filtering, capture all columns
+
+        then:
+        def outputFile = new File(outputFileName)
+        def contents = FileUtil.getContents(outputFile)
+        contents.contains("""
+INSERT INTO "public"."TEST" ("AFOO", "BFOO", "FOO", "FOOL") VALUES ('AFOO', 'BFOO', 'FOO', 'FOOL');
+"""
+        )
+
+        when:
+        CommandUtil.runDropAll(db)
+
+        then:
+        noExceptionThrown()
+
+        cleanup:
+        CommandUtil.runDropAll(db)
+    }
+
 }
