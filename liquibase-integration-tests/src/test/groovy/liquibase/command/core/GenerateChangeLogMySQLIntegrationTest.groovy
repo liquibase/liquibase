@@ -3,6 +3,7 @@ package liquibase.command.core
 import liquibase.Scope
 import liquibase.command.CommandScope
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
+import liquibase.command.core.helpers.PreCompareCommandStep
 import liquibase.command.util.CommandUtil
 import liquibase.exception.CommandExecutionException
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
@@ -179,6 +180,27 @@ create table str4 (
         outputFile.delete()
         CommandUtil.runDropAll(mysql)
     }
+
+//    def "column value set with nullPlaceholder should be null"() {
+//        given:
+//        CommandUtil.runUpdate(mysql, "changelogs/mysql/complete/nullPlaceholder.test.changelog.xml", null, null, null)
+//
+//        when:
+//        def outputFile = "output.changelog.file.xml"
+//        CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
+//        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, mysql.getConnectionUrl())
+//        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, mysql.getUsername())
+//        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, mysql.getPassword())
+//        commandScope.addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, true)
+//        commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, outputFile)
+//        commandScope.addArgumentValue(PreCompareCommandStep.DIFF_TYPES_ARG, "table,data")
+//        commandScope.execute()
+//
+//        then:
+//        def outFileContent = FileUtil.getContents(new File(outputFile))
+//        outFileContent.contains("<column name=\"col2\"/>")
+//    }
+
 
     static void runGenerateChangelog(DatabaseTestSystem db, String outputFile, boolean useOrReplaceOption) throws CommandExecutionException {
         CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)

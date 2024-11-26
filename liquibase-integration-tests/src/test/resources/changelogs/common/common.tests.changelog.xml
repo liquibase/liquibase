@@ -1364,20 +1364,4 @@
         </createProcedure>
     </changeSet>
 
-    <changeSet id="nullPlaceHolderTest_CreateTable" author="mallod">
-        <createTable tableName="nullPlaceholderTable">
-            <column name="colKey" type="int"/>
-            <column name="col2" type="varchar(200)"/>
-        </createTable>
-    </changeSet>
-
-    <changeSet id="nullPlaceHolderTest" author="mallod">
-        <loadData tableName="nullPlaceholderTable"
-                  file="nullPlacerholderTestData.csv"
-                  relativeToChangelogFile="true">
-            <column name="test_col" type="COMPUTED" nullPlaceholder="testNullPlaceholder"/>
-            <column name="other_col" type="varchar(100)"/>
-        </loadData>
-    </changeSet>
-
 </databaseChangeLog>
