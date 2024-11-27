@@ -85,12 +85,16 @@ public class Event {
      * Is the code running in GitHub actions? See
      * https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#default-environment-variables:~:text=actions/checkout.-,GITHUB_ACTIONS,-Always%20set%20to
      */
-    private boolean isGithubActions = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("GITHUB_ACTIONS"))));;
+    private boolean isGithubActions = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("GITHUB_ACTIONS"))));
     /**
      * Is the code running in a CI environment? See
      * https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#default-environment-variables:~:text=Description-,CI,-Always%20set%20to
      */
-    private boolean isCi = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("CI"))));;
+    private boolean isCi = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("CI"))));
+    /**
+     * Is the code running in Liquibase IO?
+     */
+    private boolean isIO = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("isIO"))));
 
     public Event(String command) {
         this.command = command;
