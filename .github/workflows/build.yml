@@ -104,7 +104,7 @@ jobs:
 
   ### MATCHING BRANCH RUN THIS LOGIC
   build_publish_branch:
-    name: Artifacts- Build & Package
+    name: Artifacts - Build & Package
     runs-on: macos-latest
     needs: [ setup ]
     permissions:
@@ -287,7 +287,7 @@ jobs:
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}.tar.gz
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}-deps.jar
           
-          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-cdi' 'liquibase-cdi-jakarta' ' liquibase-extension-testing'; do
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-cdi' 'liquibase-cdi-jakarta' 'liquibase-extension-testing'; do
             cp $i/target/$i-0-SNAPSHOT.jar artifacts-named/$i-${{ needs.setup.outputs.thisBranchName }}.jar
           done
 
