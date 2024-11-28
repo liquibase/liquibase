@@ -188,7 +188,7 @@ jobs:
           version=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT
           ./mvnw versions:set -DnewVersion="$version"
 
-      - name: Artifacts- Build & Sign
+      - name: Artifacts - Build & Sign
         env:
           INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
           INSTALL4J_APPLE_KEY: ${{ secrets.INSTALL4J_APPLE_KEY }}
