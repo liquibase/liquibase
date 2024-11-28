@@ -15,6 +15,7 @@
     </properties>
 
     <artifactId>liquibase-standard</artifactId>
+    <name>Liquibase Standard base library</name>
     <packaging>jar</packaging>
 
     <dependencies>
