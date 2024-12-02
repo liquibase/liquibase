@@ -87,8 +87,11 @@ public class HistoryCommandStep extends AbstractCommandStep {
             boolean onlyTags = BooleanUtils.isTrue(commandScope.getArgumentValue(TAGS_ARG));
             String filterTag = commandScope.getArgumentValue(TAG_ARG);
             for (RanChangeSet ranChangeSet : ranChangeSets) {
-                deployment = getOrUpdateReportPrinter(ranChangeSet, onlyTags, filterTag, deployment, output, commandScope, deploymentHistory);
-                if (deployment == null) continue;
+                if ((onlyTags && StringUtils.isBlank(ranChangeSet.getTag()))
+                    || (filterTag != null && !Objects.equals(filterTag, ranChangeSet.getTag()))) {
+                    continue;
+                }
+                deployment = getOrUpdateReportPrinter(ranChangeSet, deployment, output, commandScope, deploymentHistory);
                 mdcChangesets.add(new History.Changeset(ranChangeSet));
             }
 
@@ -107,13 +110,7 @@ public class HistoryCommandStep extends AbstractCommandStep {
         }
     }
 
-    private static ReportPrinter getOrUpdateReportPrinter(RanChangeSet ranChangeSet, boolean onlyTags, String filterTag, ReportPrinter deployment, PrintWriter output, CommandScope commandScope, DeploymentHistory deploymentHistory) throws LiquibaseException {
-        if (onlyTags && StringUtils.isBlank(ranChangeSet.getTag())) {
-            return deployment;
-        }
-        if (filterTag != null && !Objects.equals(filterTag, ranChangeSet.getTag())) {
-            return deployment;
-        }
+    private static ReportPrinter getOrUpdateReportPrinter(RanChangeSet ranChangeSet, ReportPrinter deployment, PrintWriter output, CommandScope commandScope, DeploymentHistory deploymentHistory) throws LiquibaseException {
         final String thisDeploymentId = ranChangeSet.getDeploymentId();
         if (deployment == null || !Objects.equals(thisDeploymentId, deployment.getDeploymentId())) {
             if (deployment != null) {
