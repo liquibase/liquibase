@@ -197,8 +197,9 @@ create table str4 (
         commandScope.execute()
 
         then:
-        def outFileContent = FileUtil.getContents(new File(outputFile))
-        outFileContent.contains("<column name=\"col2\"/>")
+        def outputFileContent = FileUtil.getContents(new File(outputFile))
+        outputFileContent.contains("<column name=\"col2\"/>")
+        outputFileContent.contains("<column name=\"col2\" value=\"there\"/>")
     }
 
 
