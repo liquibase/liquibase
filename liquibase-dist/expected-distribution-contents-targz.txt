@@ -90,6 +90,8 @@
 │       ├── liquibase.flowvariables.yaml
 │       └── liquibase.properties
 ├── internal
+│   ├── extensions
+│   │   └── liquibase-checks.jar
 │   └── lib
 │       ├── commons-collections4.jar
 │       ├── commons-io.jar

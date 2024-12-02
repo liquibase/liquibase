@@ -90,6 +90,8 @@ examples/sql/liquibase.customlogdata.yaml
 examples/sql/example-changelog.sql
 examples/sql/liquibase.sqlcmd.conf
 internal/
+internal/extensions/
+internal/extensions/liquibase-checks.jar
 internal/lib/
 internal/lib/jaybird.jar
 internal/lib/ojdbc8.jar
