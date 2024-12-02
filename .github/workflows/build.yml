@@ -272,7 +272,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: liquibase-zip-${{ needs.setup.outputs.thisBranchName }}
-          path: liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/*
+          path: artifacts/*.zip
 
       - name: Archive Convenience Artifacts
         uses: actions/upload-artifact@v3
