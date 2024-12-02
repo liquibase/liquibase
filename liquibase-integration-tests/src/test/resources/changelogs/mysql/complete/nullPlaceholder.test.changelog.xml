@@ -13,11 +13,9 @@
     </changeSet>
 
     <changeSet id="nullPlaceHolderTest" author="mallod">
-        <loadData tableName="nullPlaceholderTable"
-                  file="nullPlaceHolderTestData.csv"
-                  relativeToChangelogFile="true">
-            <column name="colKey" type="COMPUTED" nullPlaceholder="testNullPlaceholder"/>
-            <column name="col2" type="varchar(100)"/>
+        <loadData tableName="nullPlaceholderTable" file="nullPlaceHolderTestData.csv" relativeToChangelogFile="true">
+            <column name="colKey" type="COMPUTED"/>
+            <column name="col2" type="varchar(100)" nullPlaceholder="testNullPlaceholder"/>
         </loadData>
     </changeSet>
 
