@@ -7,7 +7,8 @@ import java.io.File;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ZipIT {
     @Test
@@ -18,14 +19,15 @@ public class ZipIT {
         StringBuilder zipContents = new StringBuilder();
         try (ZipFile zipFile = new ZipFile(zipPath)) {
             zipFile.stream()
+                    .filter(entry -> !entry.isDirectory())
                     .map(ZipEntry::getName)
                     .forEach(fileName -> {
                         zipContents.append(fileName);
                         zipContents.append("\n");
                     });
         }
-        String expected = FileUtil.getContents(new File("expected-distribution-contents-zip.txt"));
+        String expected = FileUtil.getContents(new File("expected-distribution-contents.txt"));
         assertNotNull(expected);
-        assertTrue(ArchiveUtils.linesEqual(expected, zipContents.toString()), "Generated zip matches expected zip contents");
+        assertEquals(ArchiveUtils.getSortedLines(expected), ArchiveUtils.getSortedLines(zipContents.toString()), "Generated zip matches expected zip contents");
     }
 }

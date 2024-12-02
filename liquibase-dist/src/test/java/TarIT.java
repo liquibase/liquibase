@@ -10,7 +10,8 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class TarIT {
     @Test
@@ -28,8 +29,8 @@ public class TarIT {
             }
             currentEntry = tarInput.getNextEntry();
         }
-        String expected = FileUtil.getContents(new File("expected-distribution-contents-targz.txt"));
+        String expected = FileUtil.getContents(new File("expected-distribution-contents.txt"));
         assertNotNull(expected);
-        assertTrue(ArchiveUtils.linesEqual(expected, tarContents.toString()), "Generated tar matches expected tar contents");
+        assertEquals(ArchiveUtils.getSortedLines(expected), ArchiveUtils.getSortedLines(tarContents.toString()), "Generated tar matches expected tar contents");
     }
 }

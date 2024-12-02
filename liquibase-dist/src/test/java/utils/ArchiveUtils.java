@@ -20,9 +20,7 @@ public class ArchiveUtils {
         throw new IOException("No matching archive found in directory: " + directory);
     }
 
-    public static boolean linesEqual(String expected, String actual) {
-        String sortedExpected = Arrays.stream(expected.split("\n")).sorted().collect(Collectors.joining(""));
-        String sortedActual = Arrays.stream(actual.split("\n")).sorted().collect(Collectors.joining(""));
-        return sortedExpected.equals(sortedActual);
+    public static String getSortedLines(String expected) {
+        return Arrays.stream(expected.split("\n")).sorted().collect(Collectors.joining("\n"));
     }
 }
