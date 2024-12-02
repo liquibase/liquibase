@@ -15,7 +15,7 @@ liquibase:
         altCatalog: lbcat2
         altSchema: lbschem2
         altTablespace: liquibase2
-        keepRunning: false
+        keepRunning: true
 
       test: h2,hsqldb,sqlite
 
