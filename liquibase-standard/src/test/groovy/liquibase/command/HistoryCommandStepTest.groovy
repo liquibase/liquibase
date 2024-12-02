@@ -11,6 +11,7 @@ import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.database.Database
 import liquibase.database.DatabaseConnection
 import liquibase.util.StringUtil
+import org.junit.Ignore
 import spock.lang.Specification
 
 import java.nio.charset.StandardCharsets
@@ -33,9 +34,9 @@ class HistoryCommandStepTest extends Specification {
     def setup() {
         changeLogHistoryService = Mock(ChangeLogHistoryService)
         changeLogHistoryService.getRanChangeSets() >> [
-                new RanChangeSet("some/change/log", "some/id", "me", null, new Date(1670000000000), "", ChangeSet.ExecType.EXECUTED, "", "", null, null, "deployment-id-1"),
+                new RanChangeSet("some/change/log", "some/id", "me", null, new Date(1670000000000), "tag1", ChangeSet.ExecType.EXECUTED, "", "", null, null, "deployment-id-1"),
                 new RanChangeSet("some/change/log", "some/other/id", "me", null, new Date(1670000000000), "", ChangeSet.ExecType.EXECUTED, "", "", null, null, "deployment-id-1"),
-                new RanChangeSet("some/change/log", "yet/another/id", "me", null, new Date(1675000000000), "", ChangeSet.ExecType.EXECUTED, "", "", null, null, "deployment-id-2")
+                new RanChangeSet("some/change/log", "yet/another/id", "me", null, new Date(1675000000000), "tag2", ChangeSet.ExecType.EXECUTED, "", "", null, null, "deployment-id-2")
         ]
         database = databaseAt("jdbc:some://url")
         changeLogHistoryService.supports(database) >> true
@@ -67,19 +68,19 @@ class HistoryCommandStepTest extends Specification {
         StringUtil.standardizeLineEndings(output.trim()) == StringUtil.standardizeLineEndings("""
 Liquibase History for jdbc:some://url
 
-+-----------------+-------------+-----------------+------------------+---------------+-----+
-| Deployment ID   | Update Date | Changelog Path  | Changeset Author | Changeset ID  | Tag |
-+-----------------+-------------+-----------------+------------------+---------------+-----+
-| deployment-id-1 | 2022        | some/change/log | me               | some/id       |     |
-+-----------------+-------------+-----------------+------------------+---------------+-----+
-| deployment-id-1 | 2022        | some/change/log | me               | some/other/id |     |
-+-----------------+-------------+-----------------+------------------+---------------+-----+
++-----------------+-------------+-----------------+------------------+---------------+------+
+| Deployment ID   | Update Date | Changelog Path  | Changeset Author | Changeset ID  | Tag  |
++-----------------+-------------+-----------------+------------------+---------------+------+
+| deployment-id-1 | 2022        | some/change/log | me               | some/id       | tag1 |
++-----------------+-------------+-----------------+------------------+---------------+------+
+| deployment-id-1 | 2022        | some/change/log | me               | some/other/id |      |
++-----------------+-------------+-----------------+------------------+---------------+------+
 
-+-----------------+-------------+-----------------+------------------+----------------+-----+
-| Deployment ID   | Update Date | Changelog Path  | Changeset Author | Changeset ID   | Tag |
-+-----------------+-------------+-----------------+------------------+----------------+-----+
-| deployment-id-2 | 2023        | some/change/log | me               | yet/another/id |     |
-+-----------------+-------------+-----------------+------------------+----------------+-----+
++-----------------+-------------+-----------------+------------------+----------------+------+
+| Deployment ID   | Update Date | Changelog Path  | Changeset Author | Changeset ID   | Tag  |
++-----------------+-------------+-----------------+------------------+----------------+------+
+| deployment-id-2 | 2023        | some/change/log | me               | yet/another/id | tag2 |
++-----------------+-------------+-----------------+------------------+----------------+------+
 
 """.trim())
 
@@ -123,4 +124,64 @@ Liquibase History for jdbc:some://url
         database.getConnection() >> connection
         return database
     }
+
+    def "displays only tagged changeset"() {
+        given:
+        def command = new CommandScope(HistoryCommandStep.COMMAND_NAME)
+                .provideDependency(Database.class, database)
+                .addArgumentValue(HistoryCommandStep.DATE_FORMAT_ARG, new SimpleDateFormat("yyyy"))
+                .addArgumentValue(HistoryCommandStep.TAGS_ARG.getName(), true)
+
+        def builder = new CommandResultsBuilder(command, outputStream)
+
+        when:
+        historyCommand.run(builder)
+
+        then:
+        def output = new String(outputStream.toByteArray(), StandardCharsets.UTF_8)
+        StringUtil.standardizeLineEndings(output.trim()) == StringUtil.standardizeLineEndings("""
+Liquibase History for jdbc:some://url
+
++-----------------+-------------+-----------------+------------------+--------------+------+
+| Deployment ID   | Update Date | Changelog Path  | Changeset Author | Changeset ID | Tag  |
++-----------------+-------------+-----------------+------------------+--------------+------+
+| deployment-id-1 | 2022        | some/change/log | me               | some/id      | tag1 |
++-----------------+-------------+-----------------+------------------+--------------+------+
+
++-----------------+-------------+-----------------+------------------+----------------+------+
+| Deployment ID   | Update Date | Changelog Path  | Changeset Author | Changeset ID   | Tag  |
++-----------------+-------------+-----------------+------------------+----------------+------+
+| deployment-id-2 | 2023        | some/change/log | me               | yet/another/id | tag2 |
++-----------------+-------------+-----------------+------------------+----------------+------+
+
+""".trim())
+    }
+
+
+    def "displays only a given tag"() {
+        given:
+        def command = new CommandScope(HistoryCommandStep.COMMAND_NAME)
+                .provideDependency(Database.class, database)
+                .addArgumentValue(HistoryCommandStep.DATE_FORMAT_ARG, new SimpleDateFormat("yyyy"))
+                .addArgumentValue(HistoryCommandStep.TAG_ARG.getName(), "tag2")
+
+        def builder = new CommandResultsBuilder(command, outputStream)
+
+        when:
+        historyCommand.run(builder)
+
+        then:
+        def output = new String(outputStream.toByteArray(), StandardCharsets.UTF_8)
+        StringUtil.standardizeLineEndings(output.trim()) == StringUtil.standardizeLineEndings("""
+Liquibase History for jdbc:some://url
+
++-----------------+-------------+-----------------+------------------+----------------+------+
+| Deployment ID   | Update Date | Changelog Path  | Changeset Author | Changeset ID   | Tag  |
++-----------------+-------------+-----------------+------------------+----------------+------+
+| deployment-id-2 | 2023        | some/change/log | me               | yet/another/id | tag2 |
++-----------------+-------------+-----------------+------------------+----------------+------+
+
+""".trim())
+    }
+
 }

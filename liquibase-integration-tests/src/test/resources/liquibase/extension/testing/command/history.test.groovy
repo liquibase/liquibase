@@ -26,6 +26,10 @@ Optional Args:
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
+  tag (String) Include only changesets with the given tag
+    Default: null
+  tags (Boolean) Include only tagged changesets
+    Default: false
   username (String) Username to use to connect to the database
     Default: null
 """

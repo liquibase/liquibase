@@ -11,6 +11,8 @@ import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.customobjects.History;
 import liquibase.util.TableOutput;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.PrintWriter;
 import java.text.DateFormat;
@@ -24,8 +26,9 @@ public class HistoryCommandStep extends AbstractCommandStep {
 
     public static final CommandArgumentDefinition<HistoryFormat> FORMAT_ARG;
     public static final CommandArgumentDefinition<DateFormat> DATE_FORMAT_ARG;
+    public static final CommandArgumentDefinition<Boolean> TAGS_ARG;
+    public static final CommandArgumentDefinition<String> TAG_ARG;
     public static final CommandResultDefinition<DeploymentHistory> DEPLOYMENTS_RESULT;
-
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -36,6 +39,13 @@ public class HistoryCommandStep extends AbstractCommandStep {
         DATE_FORMAT_ARG = builder.argument("dateFormat", DateFormat.class)
                 .defaultValue(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT), "Platform specific 'short' format")
                 .hidden()
+                .build();
+        TAGS_ARG = builder.argument("tags", Boolean.class)
+                .description("Include only tagged changesets")
+                .defaultValue(false)
+                .build();
+        TAG_ARG = builder.argument("tag", String.class)
+                .description("Include only changesets with the given tag")
                 .build();
         DEPLOYMENTS_RESULT = builder.result("deployments", DeploymentHistory.class).build();
     }
@@ -74,16 +84,11 @@ public class HistoryCommandStep extends AbstractCommandStep {
             ReportPrinter deployment = null;
             List<RanChangeSet> ranChangeSets = historyService.getRanChangeSets();
             List<History.Changeset> mdcChangesets = new ArrayList<>(ranChangeSets.size());
+            boolean onlyTags = BooleanUtils.isTrue(commandScope.getArgumentValue(TAGS_ARG));
+            String filterTag = commandScope.getArgumentValue(TAG_ARG);
             for (RanChangeSet ranChangeSet : ranChangeSets) {
-                final String thisDeploymentId = ranChangeSet.getDeploymentId();
-                if (deployment == null || !Objects.equals(thisDeploymentId, deployment.getDeploymentId())) {
-                    if (deployment != null) {
-                        deployment.printReport(output);
-                    }
-                    deployment = DeploymentPrinterFactory.create(commandScope);
-                    deploymentHistory.deployments.add(deployment);
-                }
-                deployment.addChangeSet(ranChangeSet);
+                deployment = getOrUpdateReportPrinter(ranChangeSet, onlyTags, filterTag, deployment, output, commandScope, deploymentHistory);
+                if (deployment == null) continue;
                 mdcChangesets.add(new History.Changeset(ranChangeSet));
             }
 
@@ -100,6 +105,25 @@ public class HistoryCommandStep extends AbstractCommandStep {
             resultsBuilder.addResult(DEPLOYMENTS_RESULT, deploymentHistory);
             output.flush();
         }
+    }
+
+    private static ReportPrinter getOrUpdateReportPrinter(RanChangeSet ranChangeSet, boolean onlyTags, String filterTag, ReportPrinter deployment, PrintWriter output, CommandScope commandScope, DeploymentHistory deploymentHistory) throws LiquibaseException {
+        if (onlyTags && StringUtils.isBlank(ranChangeSet.getTag())) {
+            return deployment;
+        }
+        if (filterTag != null && !Objects.equals(filterTag, ranChangeSet.getTag())) {
+            return deployment;
+        }
+        final String thisDeploymentId = ranChangeSet.getDeploymentId();
+        if (deployment == null || !Objects.equals(thisDeploymentId, deployment.getDeploymentId())) {
+            if (deployment != null) {
+                deployment.printReport(output);
+            }
+            deployment = DeploymentPrinterFactory.create(commandScope);
+            deploymentHistory.deployments.add(deployment);
+        }
+        deployment.addChangeSet(ranChangeSet);
+        return deployment;
     }
 
     public static class DeploymentHistory {
