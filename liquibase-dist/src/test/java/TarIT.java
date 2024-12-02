@@ -18,7 +18,7 @@ public class TarIT {
     @DisplayName("Generated tar should match expected contents")
     void checkTarContents() throws Exception {
         String tarPath = ArchiveUtils.getGeneratedArchivePath("target", "liquibase", ".tar.gz");
-        assertNotNull(tarPath, "There is a tar generated");
+        assertNotNull(tarPath, "Unable to find generated tar!");
         TarArchiveInputStream tarInput = new TarArchiveInputStream(new GzipCompressorInputStream(Files.newInputStream(Paths.get(tarPath))));
         TarArchiveEntry currentEntry = tarInput.getNextEntry();
         StringBuilder tarContents = new StringBuilder();
@@ -31,6 +31,6 @@ public class TarIT {
         }
         String expected = FileUtil.getContents(new File("expected-distribution-contents.txt"));
         assertNotNull(expected);
-        assertEquals(ArchiveUtils.getSortedLines(expected), ArchiveUtils.getSortedLines(tarContents.toString()), "Generated tar matches expected tar contents");
+        assertEquals(ArchiveUtils.getSortedLines(expected), ArchiveUtils.getSortedLines(tarContents.toString()), "Generated tar does not match expected tar contents. Did you add a new dependency?");
     }
 }

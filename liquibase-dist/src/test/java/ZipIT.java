@@ -15,7 +15,7 @@ public class ZipIT {
     @DisplayName("Generated zip should match expected contents")
     void checkZipContents() throws Exception {
         String zipPath = ArchiveUtils.getGeneratedArchivePath("target", "liquibase", ".zip");
-        assertNotNull(zipPath, "There is a zip generated");
+        assertNotNull(zipPath, "Unable to find generated zip!");
         StringBuilder zipContents = new StringBuilder();
         try (ZipFile zipFile = new ZipFile(zipPath)) {
             zipFile.stream()
@@ -28,6 +28,6 @@ public class ZipIT {
         }
         String expected = FileUtil.getContents(new File("expected-distribution-contents.txt"));
         assertNotNull(expected);
-        assertEquals(ArchiveUtils.getSortedLines(expected), ArchiveUtils.getSortedLines(zipContents.toString()), "Generated zip matches expected zip contents");
+        assertEquals(ArchiveUtils.getSortedLines(expected), ArchiveUtils.getSortedLines(zipContents.toString()), "Generated zip does not match expected zip contents. Did you add a new dependency?");
     }
 }
