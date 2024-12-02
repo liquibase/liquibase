@@ -445,7 +445,7 @@ jobs:
 
   run-build-publish-file:
     needs: [ build_tests,integration-test ]
-    uses: liquibase/liquibase/.github/workflows/build.yml@master
+    uses: liquibase/liquibase/.github/workflows/build.yml@DAT-18855
     secrets: inherit
 
 
