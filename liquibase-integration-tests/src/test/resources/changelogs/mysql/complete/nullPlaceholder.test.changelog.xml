@@ -16,8 +16,8 @@
         <loadData tableName="nullPlaceholderTable"
                   file="nullPlaceHolderTestData.csv"
                   relativeToChangelogFile="true">
-            <column name="test_col" type="COMPUTED" nullPlaceholder="testNullPlaceholder"/>
-            <column name="other_col" type="varchar(100)"/>
+            <column name="colKey" type="COMPUTED" nullPlaceholder="testNullPlaceholder"/>
+            <column name="col2" type="varchar(100)"/>
         </loadData>
     </changeSet>
 
