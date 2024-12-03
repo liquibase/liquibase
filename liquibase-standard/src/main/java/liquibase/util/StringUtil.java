@@ -11,16 +11,13 @@ import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Various utility methods for working with strings.
- * @deprecated use {@link StringUtils} instead
- */
 public class StringUtil {
     private static final Pattern upperCasePattern = Pattern.compile(".*[A-Z].*");
     private static final Pattern lowerCasePattern = Pattern.compile(".*[a-z].*");
@@ -384,7 +381,7 @@ public class StringUtil {
      * @return The String without the comments in
      */
     public static String stripComments(String multiLineSQL, ChangeSet changeSet) {
-        if (StringUtil.isEmpty(multiLineSQL)) {
+        if (StringUtils.isEmpty(multiLineSQL)) {
             return multiLineSQL;
         }
         SqlParserFactory sqlParserFactory = Scope.getCurrentScope().getSingleton(SqlParserFactory.class);
@@ -794,11 +791,12 @@ public class StringUtil {
             return null;
         }
 
-        if (string.length() == 1) {
+        int length = string.length();
+        if (length == 1) {
             return string;
         }
 
-        StringBuilder outString = new StringBuilder();
+        StringBuilder outString = new StringBuilder(length);
         char[] charString = string.toCharArray();
         for (int i = 0; i < charString.length; i++) {
             char letter = charString[i];
@@ -946,6 +944,7 @@ public class StringUtil {
             return null;
         }
         String reversedString = StringUtils.reverse(sqlString);
+        int length = reversedString.length() - 1;
         int idxClosingLastChar = -1, idxOpeningFirstChar = -1;
         for (int i = 0; i < reversedString.length(); i++) {
             if (idxClosingLastChar < 0) {
@@ -953,9 +952,11 @@ public class StringUtil {
                 char c = reversedString.charAt(i);
                 if (c == '/') {
                     // check the second one
-                    char s = reversedString.charAt(i + 1);
-                    if (s == '*') {
-                        idxClosingLastChar = i;
+                    if (i + 1 < length) {
+                        char s = reversedString.charAt(i + 1);
+                        if (s == '*') {
+                            idxClosingLastChar = i;
+                        }
                     }
                 } else if (!Character.isWhitespace(c)) {
                     // does not look like it ends with block comment, return null
@@ -967,7 +968,11 @@ public class StringUtil {
                 if (c == '/') {
                     // check the previous one
                     char s = reversedString.charAt(i - 1);
-                    char e = reversedString.charAt(i + 1);
+                    char e = s;
+                    if (i + 1 < length) {
+                        e = reversedString.charAt(i + 1);
+                    }
+
                     // if it was not escaped
                     if (s == '*' && e != '\\') {
                         idxOpeningFirstChar = i;
@@ -1121,7 +1126,7 @@ public class StringUtil {
             }
         } catch (UnsupportedEncodingException uoe) {
             // Consume and fall through
-            Scope.getCurrentScope().getLog(StringUtil.class).warning("Error using encoding " + encoding);
+            Scope.getCurrentScope().getLog(StringUtil.class).warning("Error using encoding " + encoding + ": " + uoe);
         }
         return string.getBytes(StandardCharsets.UTF_8);
     }

@@ -537,9 +537,6 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         }
                     } catch (SQLException sqle) {
                         throw new RuntimeException(sqle);
-                        //
-                        // Do not stop
-                        //
                     }
                     return;
                 }
@@ -591,6 +588,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     //
                     // Do not stop
                     //
+                    Scope.getCurrentScope().getLog(getClass()).severe("Failed to get column types for table " + tableName, sqle);
                 }
                 finally {
                     JdbcUtil.closeStatement(statement);
@@ -1913,7 +1911,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                     }
                                 }
                             } catch (DatabaseException e) {
-                                Scope.getCurrentScope().getLog(getClass()).fine("Cannot determine h2 version, using default unique constraint query");
+                                Scope.getCurrentScope().getLog(getClass()).fine("Cannot determine h2 version, using default unique constraint query", e);
                             }
                         }
                         if (sql == null) {

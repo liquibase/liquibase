@@ -4,16 +4,20 @@ import liquibase.Scope;
 import liquibase.util.StringUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static liquibase.integration.commandline.LiquibaseLauncherSettings.LiquibaseLauncherSetting.*;
-import static liquibase.integration.commandline.LiquibaseLauncherSettings.getSetting;
+import static liquibase.integration.commandline.util.ParameterUtil.getParameter;
+import static liquibase.util.LiquibaseLauncherSettings.LiquibaseLauncherSetting.*;
+import static liquibase.util.LiquibaseLauncherSettings.getSetting;
 
 /**
  * Launcher which builds up the classpath needed to run Liquibase, then calls {@link LiquibaseCommandLine#main(String[])}.
@@ -99,21 +103,56 @@ public class LiquibaseLauncher {
             }
         }
 
-        ClassLoader parentLoader = getClassLoader(parentLoaderSetting);
+        Thread.currentThread().setContextClassLoader(configureClassLoader(getClassLoader(parentLoaderSetting), args, libUrls));
 
-        final URLClassLoader classloader = new URLClassLoader(libUrls.toArray(new URL[0]), parentLoader);
-        Thread.currentThread().setContextClassLoader(classloader);
-
-        Class<?> cli = null;
+        Class<?> cli;
         try {
-            cli = classloader.loadClass(LiquibaseCommandLine.class.getName());
+            cli = Thread.currentThread().getContextClassLoader().loadClass(LiquibaseCommandLine.class.getName());
         } catch (ClassNotFoundException classNotFoundException) {
             throw new RuntimeException(
-                String.format("Unable to find Liquibase classes in the configured home: '%s'.", liquibaseHome)
+                String.format("Unable to find Liquibase classes in the configured home: '%s'.", liquibaseHome), classNotFoundException
             );
         }
 
         cli.getMethod("main", String[].class).invoke(null, new Object[]{args});
+    }
+
+    protected static ClassLoader configureClassLoader(ClassLoader parentLoader, String[] args, List<URL> libUrls) throws IllegalArgumentException, IOException {
+
+        String classpath = getParameter(LIQUIBASE_CLASSPATH, "classpath", args, true);
+
+        final List<URL> urls = new ArrayList<>(libUrls);
+        if (classpath != null) {
+            String[] classpathSoFar;
+            if (System.getProperties().getProperty("os.name").toLowerCase().startsWith("windows")) {
+                classpathSoFar = classpath.split(";");
+            } else {
+                classpathSoFar = classpath.split(":");
+            }
+
+            for (String classpathEntry : classpathSoFar) {
+                File classPathFile = new File(classpathEntry);
+                if (!classPathFile.exists()) {
+                    throw new IllegalArgumentException(classPathFile.getAbsolutePath() + " does not exist");
+                }
+
+                try {
+                    URL newUrl = new File(classpathEntry).toURI().toURL();
+                    debug(newUrl.toExternalForm() + " added to class loader");
+                    urls.add(newUrl);
+                } catch (MalformedURLException e) {
+                    throw new IllegalArgumentException(e);
+                }
+            }
+        }
+
+        final ClassLoader classLoader;
+        if (!"false".equals(getSetting(LIQUIBASE_INCLUDE_SYSTEM_CLASSPATH))) {
+            classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), parentLoader));
+        } else {
+            classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), null));
+        }
+        return classLoader;
     }
 
     private static ClassLoader getClassLoader(String parentLoaderSetting) {

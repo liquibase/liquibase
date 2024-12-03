@@ -5,6 +5,7 @@ import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.changelog.visitor.SkippedChangeSetVisitor;
+import liquibase.changelog.visitor.UpdateVisitor;
 import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -14,6 +15,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.util.BooleanUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.*;
 
@@ -129,6 +131,11 @@ public class ChangeLogIterator {
 
                             try {
                                 visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
+                                if (visitor instanceof UpdateVisitor &&
+                                    ChangeSet.ExecType.FAILED.equals(changeSet.getExecType()) &&
+                                    BooleanUtils.isFalse(changeSet.getFailOnError())) {
+                                    exceptionChangeSets.add(changeSet);
+                                }
                             } catch (Exception e) {
                                 exceptionChangeSets.add(changeSet);
                                 skippedDueToExceptionChangeSets.addAll(changeSetList.subList(finalI + 1, changeSetList.size()));
@@ -174,7 +181,7 @@ public class ChangeLogIterator {
         catch (UnexpectedLiquibaseException ule) {
             String message = String.format(MSG_COULD_NOT_FIND_EXECUTOR, executorName, changeSet);
             Scope.getCurrentScope().getLog(getClass()).severe(message);
-            throw new LiquibaseException(message);
+            throw new LiquibaseException(message, ule);
         }
         //
         // ASSERT: the Executor is valid

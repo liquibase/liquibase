@@ -341,6 +341,7 @@ public class CommandLineUtils {
                 .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, originalDatabase)
                 .addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(snapshotTypes))
                 .addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, compareControl)
+                .addArgumentValue(PreCompareCommandStep.OBJECT_CHANGE_FILTER_ARG, diffOutputControl.getObjectChangeFilter())
                 .addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_CATALOG_ARG, diffOutputControl.getIncludeCatalog())
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, diffOutputControl.getIncludeSchema())

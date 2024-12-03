@@ -35,11 +35,13 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
         }
 
         Collection<ContextExpression> inheritableContexts = changeSet.getInheritableContextFilter();
-        if (changeSet.getContextFilter().isEmpty() && inheritableContexts.isEmpty()) {
-            return new ChangeSetFilterResult(true, "Changeset runs under all contexts", this.getClass(), getMdcName(), getDisplayName());
-        }
-
-        if (changeSet.getContextFilter().matches(contexts) && ContextExpression.matchesAll(inheritableContexts, contexts)) {
+        ContextExpression providedContext = new ContextExpression(contexts.getContexts());
+        // Because contexts can have logic in both the command arguments (eg --context-filter="x OR y"
+        // and in the changeset, we need to evaluate matches from both sides
+        // as match only checks one side of the context at a time
+        if ((providedContext.matches(new Contexts(changeSet.buildFullContext()))
+                || changeSet.getContextFilter().matches(contexts))
+                && ContextExpression.matchesAll(inheritableContexts, contexts)) {
             return new ChangeSetFilterResult(true, "Context matches '"+contexts.toString()+"'", this.getClass(), getMdcName(), getDisplayName());
         } else {
             return new ChangeSetFilterResult(false, "Context does not match '"+contexts.toString()+"'", this.getClass(), getMdcName(), getDisplayName());

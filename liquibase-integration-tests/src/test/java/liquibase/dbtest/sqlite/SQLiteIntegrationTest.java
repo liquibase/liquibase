@@ -6,6 +6,8 @@ import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.exception.ValidationFailedException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.core.DatabaseObjectFactory;
 import org.junit.Test;
 
 import java.io.File;

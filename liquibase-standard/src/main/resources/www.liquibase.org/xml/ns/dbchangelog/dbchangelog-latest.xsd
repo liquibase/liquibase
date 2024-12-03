@@ -94,6 +94,7 @@
             <xsd:attribute name="labels" type="xsd:string"/>
             <xsd:attribute name="ignore" type="xsd:string"/>
             <xsd:attribute name="created" type="xsd:string"/>
+            <xsd:attribute name="logicalFilePath" type="xsd:string"/>
             <xsd:anyAttribute namespace="##other" processContents="lax"/>
         </xsd:complexType>
     </xsd:element>
@@ -113,6 +114,7 @@
             <xsd:attribute name="maxDepth" type="integerExp"/>
             <xsd:attribute name="endsWithFilter" type="xsd:string"/>
             <xsd:attribute name="ignore" type="xsd:string"/>
+            <xsd:attribute name="logicalFilePath" type="xsd:string"/>
             <xsd:anyAttribute namespace="##other" processContents="lax"/>
         </xsd:complexType>
     </xsd:element>
@@ -241,6 +243,7 @@
                             <xsd:attribute name="runWith" type="xsd:string" />
                             <xsd:attribute name="runWithSpoolFile" type="xsd:string" />
                             <xsd:attribute name="endDelimiter" type="xsd:string" />
+                            <xsd:attribute name="stripComments" type="xsd:boolean" />
                         </xsd:complexType>
                     </xsd:element>
                 </xsd:choice>
@@ -341,6 +344,7 @@
 
     <xsd:attributeGroup name="column">
         <xsd:attribute name="name" type="xsd:string" use="required"/>
+        <xsd:attribute name="included" type="booleanExp"/>
         <xsd:attribute name="computed" type="booleanExp"/>
         <xsd:attribute name="descending" type="booleanExp"/>
         <xsd:attribute name="type" type="xsd:string"/>

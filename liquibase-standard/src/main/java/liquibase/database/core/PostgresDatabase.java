@@ -19,6 +19,7 @@ import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigInteger;
 import java.nio.charset.Charset;
@@ -74,6 +75,9 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         super.sequenceCurrentValueFunction = "currval('%s')";
         super.unmodifiableDataTypes.addAll(Arrays.asList("bool", "int4", "int8", "float4", "float8", "bigserial", "serial", "oid", "bytea", "date", "timestamptz", "text", "int2[]", "int4[]", "int8[]", "float4[]", "float8[]", "bool[]", "varchar[]", "text[]", "numeric[]"));
         super.unquotedObjectsAreUppercased = false;
+
+        systemTablesAndViews.add("pg_stat_statements");
+        systemTablesAndViews.add("pg_stat_statements_info");
     }
 
     @Override
@@ -250,7 +254,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             return "";
         }
 
-        if (StringUtil.isEmpty(generationType)) {
+        if (StringUtils.isEmpty(generationType)) {
             return super.getAutoIncrementClause();
         }
 

@@ -3,11 +3,7 @@ package liquibase.parser.core.xml;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.logging.Logger;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.InputStreamList;
 import liquibase.resource.Resource;
-import liquibase.resource.ResourceAccessor;
 import liquibase.util.LiquibaseUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -16,7 +12,6 @@ import org.xml.sax.ext.EntityResolver2;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -104,7 +99,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
             boolean found = versionMatcher.find();
             if (found) {
                 String buildVersion = LiquibaseUtil.getBuildVersion();
-                if (!buildVersion.equals(LiquibaseUtil.DEV_VERSION)) {
+                if (!LiquibaseUtil.isDevVersion()) {
                     String xsdVersion = versionMatcher.group("version");
                     if (!buildVersion.startsWith(xsdVersion)) {
                         hasWarnedAboutMismatchedXsdVersion = true;
