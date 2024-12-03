@@ -26,6 +26,7 @@ import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.parser.core.json.JsonChangeLogParser;
+import liquibase.parser.core.sql.SqlChangeLogParser;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.parser.core.yaml.YamlParser;
 import liquibase.precondition.Conditional;
@@ -1047,6 +1048,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
         final String normalizedFilePath = fileName;
 
+        ChangeLogParser parser = null;
         DatabaseChangeLog changeLog;
         try {
             DatabaseChangeLog rootChangeLogInstance = ROOT_CHANGE_LOG.get();
@@ -1065,12 +1067,13 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         throw new ChangeLogParseException(FileUtil.getFileNotFoundMessage(normalizedFilePath));
                     }
                 }
-                ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(normalizedFilePath, resourceAccessor);
+                parser = ChangeLogParserFactory.getInstance().getParser(normalizedFilePath, resourceAccessor);
 
                 if (modifyChangeSets != null) {
                     // Some parser need to know it's not a top level changelog, in modifyChangeSets flow 'runWith' attributes are added later on
+                    ChangeLogParser finalParser = parser;
                     changeLog = Scope.child(Collections.singletonMap(MODIFY_CHANGE_SETS, true),
-                            () -> parser.parse(normalizedFilePath, changeLogParameters, resourceAccessor));
+                            () -> finalParser.parse(normalizedFilePath, changeLogParameters, resourceAccessor));
                 } else {
                     changeLog = parser.parse(normalizedFilePath, changeLogParameters, resourceAccessor);
                 }
@@ -1112,7 +1115,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
         List<RanChangeSet> ranChangeSets = new ArrayList<>();
         Database database = Scope.getCurrentScope().getDatabase();
-        if (database != null && logicalFilePath != null) {
+        if (database != null) {
+            Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).init();
             ranChangeSets = database.getRanChangeSetList();
         }
         String changelogLogicalFilePath = this.logicalFilePath;
@@ -1127,10 +1131,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             //
             // Do not update the logical file path if the change set has
             // already been executed because this would cause the addition
-            // of another DBCL entry.
+            // of another DBCL entry.  Also, skip setting the logical file
+            // path for raw SQL change sets
             //
-            String changesetLogicalFilePath = changeSet.getLogicalFilePath();
-            if (logicalFilePath != null && changesetLogicalFilePath == null && ! ranChangeSetExists(changeSet, ranChangeSets)) {
+            if (logicalFilePath != null && changeSet.getLogicalFilePath() == null &&
+                ! (parser instanceof SqlChangeLogParser) && ! ranChangeSetExists(changeSet, ranChangeSets)) {
                 changeSet.setLogicalFilePath(logicalFilePath);
                 if (StringUtils.isNotEmpty(logicalFilePath)) {
                     changeSet.setFilePath(logicalFilePath);
