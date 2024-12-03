@@ -36,6 +36,7 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.util.SqlUtil;
 import liquibase.util.StreamUtil;
+import liquibase.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -44,6 +45,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+
+import static liquibase.Scope.getCurrentScope;
 
 /**
  * Encapsulates a changeSet and all its associated changes.
