@@ -207,6 +207,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
     private void setValueOnNode(Element node, String objectNamespace, String objectName, Object value, LiquibaseSerializable.SerializationType serializationType, String parentNamespace) {
         if (value == null) {
+            node.setAttribute("value", "null");
             return;
         }
 
@@ -307,7 +308,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                     ) {
                 //ok
             } else {
-                throw new UnexpectedLiquibaseException(INVALID_STRING_ENCODING_MESSAGE);
+                throw new UnexpectedLiquibaseException(INVALID_STRING_ENCODING_MESSAGE + " with codePoint " + codePoint);
             }
         }
 

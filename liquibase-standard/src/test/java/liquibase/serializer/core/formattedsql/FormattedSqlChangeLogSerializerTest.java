@@ -40,7 +40,7 @@ public class FormattedSqlChangeLogSerializerTest {
         changeSetWithContextAndLabels.setLabels(new Labels("label1"));
         changeSetWithContextAndLabels.setContextFilter(new ContextExpression("context1"));
         String serialized = serializer.serialize(changeSetWithContextAndLabels, true);
-        assertEquals(serialized, ("-- changeset testAuthor:1 labels: \"label1\" contextFilter: \"context1\"\n"));
+        assertEquals(serialized, ("-- changeset testAuthor:1 labels:\"label1\" contextFilter:\"context1\"\n"));
     }
 
     @Test
@@ -80,6 +80,22 @@ public class FormattedSqlChangeLogSerializerTest {
         ChangeSet changeSetWithInvalidDb = new ChangeSet("1", "testAuthor",
                 false, false, "path/to/changeLogFile.LALALA.sql", null, null, null);
         serializer.serialize(changeSetWithInvalidDb, true);
+    }
+
+    @Test
+    public void serialize_changeSetWithLogicalFilePath() {
+        changeSet.setLogicalFilePath("foo/bar/baz.sql");
+
+        AddAutoIncrementChange statement = new AddAutoIncrementChange();
+        statement.setTableName("table_name");
+        statement.setColumnName("column_name");
+        statement.setColumnDataType("int");
+        changeSet.addChange(statement);
+        Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(statement, database);
+        String expectedSql = "-- changeset testAuthor:1 logicalFilePath:\"foo/bar/baz.sql\"\n" + sqls[0].toSql() + ";\n";
+
+        String serialized = serializer.serialize(changeSet, true);
+        assertEquals(expectedSql, serialized);
     }
 
 }

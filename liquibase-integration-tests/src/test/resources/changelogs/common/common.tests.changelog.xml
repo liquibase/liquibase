@@ -1358,4 +1358,10 @@
         </preConditions>
     </changeSet>
 
+    <changeSet id="createProcedureWithOnlyBlockCommentAsBody" author="mallod" dbms="postgresql, h2, mssql, mysql, sqlite">
+        <createProcedure>
+            /*CREATE PROC... */
+        </createProcedure>
+    </changeSet>
+
 </databaseChangeLog>
