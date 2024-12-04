@@ -451,8 +451,6 @@ INSERT INTO "public"."SECONDARY" ("ID") VALUES (2);
         when:
         def outputFileName = 'test/test-classes/output.postgresql.sql'
         callGenerateChangeLog (outputFileName, null, "table:.*, column:(?!ID).*\$")
-        // Here the column ID is only excluded from the table "PERSON", but not from the table "SECONDARY".
-        // It has no effect on "SECONDARY", because the filtering is a logical AND condition.
 
         then:
         def outputFile = new File(outputFileName)
