@@ -26,8 +26,8 @@ public class HistoryCommandStep extends AbstractCommandStep {
 
     public static final CommandArgumentDefinition<HistoryFormat> FORMAT_ARG;
     public static final CommandArgumentDefinition<DateFormat> DATE_FORMAT_ARG;
-    public static final CommandArgumentDefinition<Boolean> TAGS_ARG;
-    public static final CommandArgumentDefinition<String> TAG_ARG;
+    public static final CommandArgumentDefinition<Boolean> SHOW_TAGS_ARG;
+    public static final CommandArgumentDefinition<String> TAG_FILTER_ARG;
     public static final CommandResultDefinition<DeploymentHistory> DEPLOYMENTS_RESULT;
 
     static {
@@ -40,12 +40,12 @@ public class HistoryCommandStep extends AbstractCommandStep {
                 .defaultValue(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT), "Platform specific 'short' format")
                 .hidden()
                 .build();
-        TAGS_ARG = builder.argument("tags", Boolean.class)
+        SHOW_TAGS_ARG = builder.argument("showTags", Boolean.class)
                 .description("Include only tagged changesets")
                 .defaultValue(false)
                 .build();
-        TAG_ARG = builder.argument("tag", String.class)
-                .description("Include only changesets with the given tag")
+        TAG_FILTER_ARG = builder.argument("tagFilter", String.class)
+                .description("Receives a list of comma separated tags to filter the changesets")
                 .build();
         DEPLOYMENTS_RESULT = builder.result("deployments", DeploymentHistory.class).build();
     }
@@ -84,11 +84,13 @@ public class HistoryCommandStep extends AbstractCommandStep {
             ReportPrinter deployment = null;
             List<RanChangeSet> ranChangeSets = historyService.getRanChangeSets();
             List<History.Changeset> mdcChangesets = new ArrayList<>(ranChangeSets.size());
-            boolean onlyTags = BooleanUtils.isTrue(commandScope.getArgumentValue(TAGS_ARG));
-            String filterTag = commandScope.getArgumentValue(TAG_ARG);
+            boolean onlyTags = BooleanUtils.isTrue(commandScope.getArgumentValue(SHOW_TAGS_ARG));
+            List<String> filterTag = commandScope.getArgumentValue(TAG_FILTER_ARG) != null ?
+                            Arrays.stream(commandScope.getArgumentValue(TAG_FILTER_ARG).trim().split(","))
+                                .map(String::trim).collect(Collectors.toList()) : null;
             for (RanChangeSet ranChangeSet : ranChangeSets) {
                 if ((onlyTags && StringUtils.isBlank(ranChangeSet.getTag()))
-                    || (filterTag != null && !Objects.equals(filterTag, ranChangeSet.getTag()))) {
+                    || (filterTag != null && !filterTag.contains(ranChangeSet.getTag()))) {
                     continue;
                 }
                 deployment = getOrUpdateReportPrinter(ranChangeSet, deployment, output, commandScope, deploymentHistory);
@@ -96,7 +98,13 @@ public class HistoryCommandStep extends AbstractCommandStep {
             }
 
             if (deployment == null) {
-                output.println("No changesets deployed");
+                if (onlyTags) {
+                    output.println("No tagged changesets deployed");
+                } else if (filterTag != null) {
+                    output.println("No changesets with tag(s) " + filterTag + " deployed");
+                } else {
+                    output.println("No changesets deployed");
+                }
             } else {
                 deployment.printReport(output);
             }

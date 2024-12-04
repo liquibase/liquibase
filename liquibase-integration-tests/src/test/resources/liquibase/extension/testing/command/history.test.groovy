@@ -26,10 +26,10 @@ Optional Args:
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
-  tag (String) Include only changesets with the given tag
-    Default: null
-  tags (Boolean) Include only tagged changesets
+  showTags (Boolean) Include only tagged changesets
     Default: false
+  tagFilter (String) Receives a list of comma separated tags to filter the changesets
+    Default: null
   username (String) Username to use to connect to the database
     Default: null
 """
