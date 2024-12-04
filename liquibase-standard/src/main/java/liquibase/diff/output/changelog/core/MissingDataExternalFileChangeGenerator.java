@@ -156,7 +156,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
 
                 LoadDataChange change = new LoadDataChange();
                 change.setFile(externalFileResource.getPath());
-                change.setEncoding(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
+                change.setEncoding(GlobalConfiguration.FILE_ENCODING.getCurrentValue().name());
                 if (outputControl.getIncludeCatalog()) {
                     change.setCatalogName(table.getSchema().getCatalogName());
                 }
