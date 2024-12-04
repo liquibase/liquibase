@@ -133,7 +133,7 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
         CheckSum checkSum = changeSet.generateCheckSum(
                 ranChangeSet != null && ranChangeSet.getLastCheckSum() != null ?
                         ChecksumVersion.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion()) : ChecksumVersion.latest());
-        handleOutput(resultsBuilder, checkSum.toString());
+        handleOutput(resultsBuilder, checkSum.toString() + System.lineSeparator());
         resultsBuilder.addResult(CHECKSUM_RESULT, checkSum);
     }
 
