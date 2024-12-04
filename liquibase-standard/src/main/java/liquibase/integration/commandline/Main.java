@@ -126,7 +126,6 @@ public class Main {
     protected Boolean includeTablespace;
     protected Boolean deactivate;
     protected String outputSchemasAs;
-    protected Boolean preserveNullValues;
     protected String referenceSchemas;
     protected String schemas;
     protected String snapshotFormat;
@@ -1758,7 +1757,6 @@ public class Main {
                 .addArgumentValue(GenerateChangelogCommandStep.CONTEXT_ARG, StringUtil.trimToNull(changeSetContext))
                 .addArgumentValue(GenerateChangelogCommandStep.DATA_OUTPUT_DIR_ARG, StringUtil.trimToNull(dataOutputDirectory))
                 .addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, shouldOverwriteOutputFile)
-                .addArgumentValue(DiffOutputControlCommandStep.PRESERVE_NULL_VALUES, preserveNullValues)
                 .setOutput(System.out);
 
         this.setDatabaseArgumentsToCommand(generateChangelogCommand);
@@ -1774,7 +1772,6 @@ public class Main {
                 .addArgumentValue(DiffOutputControlCommandStep.EXCLUDE_OBJECTS, excludeObjects)
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_OBJECTS, includeObjects)
                 .addArgumentValue(DiffChangelogCommandStep.AUTHOR_ARG, StringUtil.trimToNull(changeSetAuthor))
-                .addArgumentValue(DiffOutputControlCommandStep.PRESERVE_NULL_VALUES, preserveNullValues)
                 .setOutput(getOutputStream());
 
         this.setPreCompareArgumentsToCommand(diffChangelogCommand);
@@ -2205,7 +2202,6 @@ public class Main {
         private static final String INCLUDE_SCHEMA = "includeSchema";
         private static final String INCLUDE_TABLESPACE = "includeTablespace";
         private static final String OUTPUT_SCHEMAS_AS = "outputSchemasAs";
-        private static final String PRESERVE_NULL_VALUES = "preserveNullValues";
         private static final String REFERENCE_DEFAULT_CATALOG_NAME = "referenceDefaultCatalogName";
         private static final String REFERENCE_DEFAULT_SCHEMA_NAME = "referenceDefaultSchemaName";
         private static final String REFERENCE_DRIVER = "referenceDriver";
