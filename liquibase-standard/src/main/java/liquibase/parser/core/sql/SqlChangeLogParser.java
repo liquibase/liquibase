@@ -116,16 +116,17 @@ public class SqlChangeLogParser implements ChangeLogParser {
             return "raw";
         }
 
+        String interimId = "raw_" + DatabaseChangeLog.normalizePath(physicalChangeLogLocation).replace("/", "_");
         Optional<RanChangeSet> ranChangeSet =
             ranChangeSets.stream().filter(rc -> {
-                return rc.getId().equals("raw") &&
+                return rc.getId().equals(interimId) &&
                        rc.getAuthor().equals("includeAll") &&
                        rc.getChangeLog().equals(physicalChangeLogLocation);
             }).findFirst();
         if (ranChangeSet.isPresent()) {
-            return "raw";
+            return interimId;
         }
-        return "raw_" + DatabaseChangeLog.normalizePath(physicalChangeLogLocation).replace("/", "_");
+        return "raw";
     }
 
     /**
