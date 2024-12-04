@@ -1,6 +1,5 @@
 package liquibase.extension.testing.command
 
-
 import liquibase.change.ColumnConfig
 import liquibase.change.ConstraintsConfig
 import liquibase.change.core.AddPrimaryKeyChange
@@ -37,11 +36,11 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  excludeObjects (String) Regular expression of columns to exclude. Defaults to null.
+  excludeObjects (String) Objects to exclude in diff. Defaults to null.
     Default: null
   includeCatalog (Boolean) If true, the catalog will be included in generated changeSets. Defaults to false.
     Default: false
-  includeObjects (String) Regular expression of columns to include. Defaults to null.
+  includeObjects (String) Objects to include in diff. Defaults to null.
     Default: null
   includeSchema (Boolean) If true, the schema will be included in generated changeSets. Defaults to false.
     Default: false
@@ -54,8 +53,6 @@ Optional Args:
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
-  preserveNullValues (Boolean) If true, NULL values in columns are included in generated changeSets. Defaults to true.
-    Default: true
   referenceDefaultCatalogName (String) The default catalog name to use for the reference database connection
     Default: null
   referenceDefaultSchemaName (String) The default schema name to use for the reference database connection
