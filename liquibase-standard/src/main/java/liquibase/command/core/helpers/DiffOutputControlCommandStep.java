@@ -20,7 +20,6 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
     public static final CommandArgumentDefinition<Boolean> INCLUDE_CATALOG_ARG;
     public static final CommandArgumentDefinition<Boolean> INCLUDE_SCHEMA_ARG;
     public static final CommandArgumentDefinition<Boolean> INCLUDE_TABLESPACE_ARG;
-    public static final CommandArgumentDefinition<Boolean> PRESERVE_NULL_VALUES;
 
     public static final CommandArgumentDefinition<String> EXCLUDE_OBJECTS;
     public static final CommandArgumentDefinition<String> INCLUDE_OBJECTS;
