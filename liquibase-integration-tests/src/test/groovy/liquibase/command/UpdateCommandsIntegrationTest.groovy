@@ -127,8 +127,9 @@ class UpdateCommandsIntegrationTest extends Specification {
 
     def "column value set with nullPlaceholder should be null"() {
         given:
-        def outputFile = "update-sql.output.mysql.sql"
-        def outputStream = new FileOutputStream(new File(outputFile))
+        def outputFileName = "update-sql.output.mysql.sql"
+        def outputFile = new File(outputFileName)
+        def outputStream = new FileOutputStream(outputFile)
         def resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
         def scopeSettings = [
                 (Scope.Attr.resourceAccessor.name()): resourceAccessor
@@ -147,9 +148,12 @@ class UpdateCommandsIntegrationTest extends Specification {
         } as Scope.ScopedRunnerWithReturn<Void>)
 
         then:
-        def outputFileContent = FileUtil.getContents(new File(outputFile))
+        def outputFileContent = FileUtil.getContents(outputFile)
         //As can be seen in the below assertion, we are verifying nullPlaceholder set is translated as a NULL column value
         outputFileContent.containsIgnoreCase("INSERT INTO public.nullPlaceholderTable (colKey, col2) VALUES (1+1, NULL);")
         outputFileContent.containsIgnoreCase("INSERT INTO public.nullPlaceholderTable (colKey, col2) VALUES (5, 'there');")
+
+        cleanup:
+        outputFile.delete()
     }
 }
