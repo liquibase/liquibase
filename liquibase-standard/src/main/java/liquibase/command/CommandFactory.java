@@ -72,6 +72,7 @@ public class CommandFactory implements SingletonObject {
         Collection<CommandStep> allCommandStepInstances = findAllInstances();
         Map<Class<? extends CommandStep>, CommandStep> overrides = findAllOverrides(allCommandStepInstances);
         for (CommandStep step : allCommandStepInstances) {
+
             // order > 0 means is means that this CommandStep has been declared as part of this command
             if (step.getOrder(commandDefinition) > 0) {
                 Optional<CommandStep> overrideStep = getOverride(overrides, step);
@@ -166,10 +167,7 @@ public class CommandFactory implements SingletonObject {
             String[][] names = step.defineCommandNames();
             if (names != null) {
                 for (String[] name : names) {
-                    String key = StringUtil.join(name, " ");
-                    if (! step.isStub() || findKeyInMapIgnoreCase(key, commandNames) == null) {
-                        commandNames.put(key, name);
-                    }
+                    commandNames.put(StringUtil.join(name, " "), name);
                 }
             }
         }
@@ -188,15 +186,6 @@ public class CommandFactory implements SingletonObject {
 
         return Collections.unmodifiableSortedSet(commands);
 
-    }
-    private static String findKeyInMapIgnoreCase(String key, Map<String, String[]> map) {
-        for (Map.Entry<String, String[]> mapEntry : map.entrySet()) {
-            String actualKey = mapEntry.getKey();
-            if (actualKey.equalsIgnoreCase(key)) {
-                return actualKey;
-            }
-        }
-        return null;
     }
 
     /**
@@ -267,17 +256,36 @@ public class CommandFactory implements SingletonObject {
     private synchronized Collection<CommandStep> findAllInstances() {
         if (this.allInstances == null) {
             this.allInstances = new ArrayList<>();
-
             ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
             this.allInstances.addAll(serviceLocator.findInstances(CommandStep.class));
-            //
-            // Sort all command stubs to the bottom of the list so that any non-stubs
-            // will come first
-            //
-            ((List<CommandStep>) this.allInstances).sort(Comparator.comparing(CommandStep::isStub));
+            filterStubInstances();
         }
-
         return this.allInstances;
+    }
+
+    //
+    // Sort all command stubs to the bottom of the list so that any non-stubs
+    // will come first.  If a stub is found and the non-stub is present, the stub
+    // is removed from the list.
+    //
+    private void filterStubInstances() {
+        ((List<CommandStep>) this.allInstances).sort(Comparator.comparing(CommandStep::isStub));
+        Set<String> commandNames = new LinkedHashSet<>();
+        Collection<CommandStep> toRemove = new ArrayList<>();
+        for (CommandStep step : this.allInstances) {
+            String[][] names = step.defineCommandNames();
+            if (names != null) {
+                for (String[] name : names) {
+                    String key = StringUtil.join(name, " ").toLowerCase();
+                    if (step.isStub() && commandNames.contains(key)) {
+                        toRemove.add(step);
+                    } else {
+                        commandNames.add(key);
+                    }
+                }
+            }
+        }
+        this.allInstances.removeAll(toRemove);
     }
 
     /**
