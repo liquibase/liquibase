@@ -184,6 +184,7 @@
             <groupId>org.nanohttpd</groupId>
             <artifactId>nanohttpd</artifactId>
             <version>2.3.1</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
