@@ -3,7 +3,6 @@ package liquibase.command;
 import liquibase.Scope;
 import liquibase.SingletonObject;
 import liquibase.servicelocator.ServiceLocator;
-import liquibase.util.CollectionUtil;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StringUtil;
 
