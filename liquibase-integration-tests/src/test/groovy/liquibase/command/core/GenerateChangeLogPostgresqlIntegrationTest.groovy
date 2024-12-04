@@ -295,4 +295,187 @@ INSERT INTO "public"."TEST" ("AFOO", "BFOO", "FOO", "FOOL") VALUES ('AFOO', 'BFO
         CommandUtil.runDropAll(db)
     }
 
+    def "Should NOT include ID columns of table PERSON"() {
+        given:
+        CommandUtil.runUpdate(db, "src/test/resources/changelogs/pgsql/update/create-PERSON-and-SECONDARY.sql")
+
+        when:
+        def outputFileName = 'test/test-classes/output.postgresql.sql'
+        callGenerateChangeLog (outputFileName, null, "table:PERSON, column:(?!ID).*\$")
+
+        then:
+        def outputFile = new File(outputFileName)
+        def contents = FileUtil.getContents(outputFile)
+        contents.contains("""
+INSERT INTO "public"."PERSON" ("FIRSTNAME", "LASTNAME", "STATE") VALUES ('John', 'Kennedy', 'DC');
+INSERT INTO "public"."PERSON" ("FIRSTNAME", "LASTNAME", "STATE") VALUES ('Jacqueline', 'Kennedy', 'DC');
+"""
+        )
+
+        when:
+        CommandUtil.runDropAll(db)
+
+        then:
+        noExceptionThrown()
+
+        cleanup:
+        CommandUtil.runDropAll(db)
+        outputFile.delete()
+    }
+
+    def "Should ONLY include ID columns of table PERSON"() {
+        given:
+        CommandUtil.runUpdate(db, "src/test/resources/changelogs/pgsql/update/create-PERSON-and-SECONDARY.sql")
+
+        when:
+        def outputFileName = 'test/test-classes/output.postgresql.sql'
+        callGenerateChangeLog (outputFileName, null, "table:PERSON, column:ID")
+
+        then:
+        def outputFile = new File(outputFileName)
+        def contents = FileUtil.getContents(outputFile)
+        contents.contains("""
+INSERT INTO "public"."PERSON" ("ID") VALUES (1);
+INSERT INTO "public"."PERSON" ("ID") VALUES (2);
+"""
+        )
+
+        when:
+        CommandUtil.runDropAll(db)
+
+        then:
+        noExceptionThrown()
+
+        cleanup:
+        CommandUtil.runDropAll(db)
+        outputFile.delete()
+    }
+
+    def "Should exclude table PERSON, as well as column ID"() {
+        given:
+        CommandUtil.runUpdate(db, "src/test/resources/changelogs/pgsql/update/create-PERSON-and-SECONDARY.sql")
+
+        when:
+        def outputFileName = 'test/test-classes/output.postgresql.sql'
+        callGenerateChangeLog (outputFileName, "table:PERSON, column:ID", null)
+
+        then:
+        def outputFile = new File(outputFileName)
+        def contents = FileUtil.getContents(outputFile)
+        contents.contains("""
+INSERT INTO "public"."SECONDARY" ("ADDRESS", "COUNTRY", "REGION") VALUES ('1600 Pennsylvania Avenue', 'United States', 'NA');
+INSERT INTO "public"."SECONDARY" ("ADDRESS", "COUNTRY", "REGION") VALUES ('280 Mulberry Street', 'United States', 'NA');
+"""
+        )
+
+        when:
+        CommandUtil.runDropAll(db)
+
+        then:
+        noExceptionThrown()
+
+        cleanup:
+        CommandUtil.runDropAll(db)
+        outputFile.delete()
+    }
+
+    def "Should exclude table PERSON, but not column ID"() {
+        given:
+        CommandUtil.runUpdate(db, "src/test/resources/changelogs/pgsql/update/create-PERSON-and-SECONDARY.sql")
+
+        when:
+        def outputFileName = 'test/test-classes/output.postgresql.sql'
+        callGenerateChangeLog (outputFileName, "table:PERSON, column:(?!ID.*\$)", null)
+        // Here the column ID is only excluded from the table "PERSON", but not from the table "SECONDARY".
+        // It has no effect on "SECONDARY", because the filtering is a logical AND condition.
+
+        then:
+        def outputFile = new File(outputFileName)
+        def contents = FileUtil.getContents(outputFile)
+        contents.contains("""
+INSERT INTO "public"."SECONDARY" ("ID", "ADDRESS", "COUNTRY", "REGION") VALUES (1, '1600 Pennsylvania Avenue', 'United States', 'NA');
+INSERT INTO "public"."SECONDARY" ("ID", "ADDRESS", "COUNTRY", "REGION") VALUES (2, '280 Mulberry Street', 'United States', 'NA');
+"""
+        )
+
+        when:
+        CommandUtil.runDropAll(db)
+
+        then:
+        noExceptionThrown()
+
+        cleanup:
+        CommandUtil.runDropAll(db)
+        outputFile.delete()
+    }
+
+    def "Should include column ID"() {
+        given:
+        CommandUtil.runUpdate(db, "src/test/resources/changelogs/pgsql/update/create-PERSON-and-SECONDARY.sql")
+
+        when:
+        def outputFileName = 'test/test-classes/output.postgresql.sql'
+        callGenerateChangeLog (outputFileName, null, "table:.*, column:ID")
+        // Here the column ID is only excluded from the table "PERSON", but not from the table "SECONDARY".
+        // It has no effect on "SECONDARY", because the filtering is a logical AND condition.
+
+        then:
+        def outputFile = new File(outputFileName)
+        def contents = FileUtil.getContents(outputFile)
+        contents.contains("""
+INSERT INTO "public"."PERSON" ("ID") VALUES (1);
+INSERT INTO "public"."PERSON" ("ID") VALUES (2);
+"""
+        )
+        contents.contains("""
+INSERT INTO "public"."SECONDARY" ("ID") VALUES (1);
+INSERT INTO "public"."SECONDARY" ("ID") VALUES (2);
+"""
+        )
+
+        when:
+        CommandUtil.runDropAll(db)
+
+        then:
+        noExceptionThrown()
+
+        cleanup:
+        CommandUtil.runDropAll(db)
+        outputFile.delete()
+    }
+
+    def "Should exclude column ID"() {
+        given:
+        CommandUtil.runUpdate(db, "src/test/resources/changelogs/pgsql/update/create-PERSON-and-SECONDARY.sql")
+
+        when:
+        def outputFileName = 'test/test-classes/output.postgresql.sql'
+        callGenerateChangeLog (outputFileName, null, "table:.*, column:(?!ID).*\$")
+        // Here the column ID is only excluded from the table "PERSON", but not from the table "SECONDARY".
+        // It has no effect on "SECONDARY", because the filtering is a logical AND condition.
+
+        then:
+        def outputFile = new File(outputFileName)
+        def contents = FileUtil.getContents(outputFile)
+        contents.contains("""
+INSERT INTO "public"."PERSON" ("FIRSTNAME", "LASTNAME", "STATE") VALUES ('John', 'Kennedy', 'DC');
+INSERT INTO "public"."PERSON" ("FIRSTNAME", "LASTNAME", "STATE") VALUES ('Jacqueline', 'Kennedy', 'DC');
+"""
+        )
+        contents.contains("""
+INSERT INTO "public"."SECONDARY" ("ADDRESS", "COUNTRY", "REGION") VALUES ('1600 Pennsylvania Avenue', 'United States', 'NA');
+INSERT INTO "public"."SECONDARY" ("ADDRESS", "COUNTRY", "REGION") VALUES ('280 Mulberry Street', 'United States', 'NA');
+"""
+        )
+
+        when:
+        CommandUtil.runDropAll(db)
+
+        then:
+        noExceptionThrown()
+
+        cleanup:
+        CommandUtil.runDropAll(db)
+        outputFile.delete()
+    }
 }
