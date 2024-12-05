@@ -11,6 +11,8 @@ import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.customobjects.History;
 import liquibase.util.TableOutput;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.PrintWriter;
 import java.text.DateFormat;
@@ -24,8 +26,9 @@ public class HistoryCommandStep extends AbstractCommandStep {
 
     public static final CommandArgumentDefinition<HistoryFormat> FORMAT_ARG;
     public static final CommandArgumentDefinition<DateFormat> DATE_FORMAT_ARG;
+    public static final CommandArgumentDefinition<Boolean> SHOW_TAGS_ARG;
+    public static final CommandArgumentDefinition<String> TAG_FILTER_ARG;
     public static final CommandResultDefinition<DeploymentHistory> DEPLOYMENTS_RESULT;
-
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -36,6 +39,13 @@ public class HistoryCommandStep extends AbstractCommandStep {
         DATE_FORMAT_ARG = builder.argument("dateFormat", DateFormat.class)
                 .defaultValue(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT), "Platform specific 'short' format")
                 .hidden()
+                .build();
+        SHOW_TAGS_ARG = builder.argument("showTags", Boolean.class)
+                .description("Include only tagged changesets")
+                .defaultValue(false)
+                .build();
+        TAG_FILTER_ARG = builder.argument("tagFilter", String.class)
+                .description("Receives a list of comma separated tags to filter the changesets")
                 .build();
         DEPLOYMENTS_RESULT = builder.result("deployments", DeploymentHistory.class).build();
     }
@@ -74,21 +84,27 @@ public class HistoryCommandStep extends AbstractCommandStep {
             ReportPrinter deployment = null;
             List<RanChangeSet> ranChangeSets = historyService.getRanChangeSets();
             List<History.Changeset> mdcChangesets = new ArrayList<>(ranChangeSets.size());
+            boolean onlyTags = BooleanUtils.isTrue(commandScope.getArgumentValue(SHOW_TAGS_ARG));
+            List<String> filterTag = commandScope.getArgumentValue(TAG_FILTER_ARG) != null ?
+                            Arrays.stream(commandScope.getArgumentValue(TAG_FILTER_ARG).trim().split(","))
+                                .map(String::trim).collect(Collectors.toList()) : null;
             for (RanChangeSet ranChangeSet : ranChangeSets) {
-                final String thisDeploymentId = ranChangeSet.getDeploymentId();
-                if (deployment == null || !Objects.equals(thisDeploymentId, deployment.getDeploymentId())) {
-                    if (deployment != null) {
-                        deployment.printReport(output);
-                    }
-                    deployment = DeploymentPrinterFactory.create(commandScope);
-                    deploymentHistory.deployments.add(deployment);
+                if ((onlyTags && StringUtils.isBlank(ranChangeSet.getTag()))
+                    || (filterTag != null && !filterTag.contains(ranChangeSet.getTag()))) {
+                    continue;
                 }
-                deployment.addChangeSet(ranChangeSet);
+                deployment = getOrUpdateReportPrinter(ranChangeSet, deployment, output, commandScope, deploymentHistory);
                 mdcChangesets.add(new History.Changeset(ranChangeSet));
             }
 
             if (deployment == null) {
-                output.println("No changesets deployed");
+                if (onlyTags) {
+                    output.println("No tagged changesets deployed");
+                } else if (filterTag != null) {
+                    output.println("No changesets with tag(s) " + filterTag + " deployed");
+                } else {
+                    output.println("No changesets deployed");
+                }
             } else {
                 deployment.printReport(output);
             }
@@ -100,6 +116,19 @@ public class HistoryCommandStep extends AbstractCommandStep {
             resultsBuilder.addResult(DEPLOYMENTS_RESULT, deploymentHistory);
             output.flush();
         }
+    }
+
+    private static ReportPrinter getOrUpdateReportPrinter(RanChangeSet ranChangeSet, ReportPrinter deployment, PrintWriter output, CommandScope commandScope, DeploymentHistory deploymentHistory) throws LiquibaseException {
+        final String thisDeploymentId = ranChangeSet.getDeploymentId();
+        if (deployment == null || !Objects.equals(thisDeploymentId, deployment.getDeploymentId())) {
+            if (deployment != null) {
+                deployment.printReport(output);
+            }
+            deployment = DeploymentPrinterFactory.create(commandScope);
+            deploymentHistory.deployments.add(deployment);
+        }
+        deployment.addChangeSet(ranChangeSet);
+        return deployment;
     }
 
     public static class DeploymentHistory {
