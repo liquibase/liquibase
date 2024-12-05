@@ -338,7 +338,7 @@ jobs:
           fi
 
       - name: Liquibase xsds SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.3
+        uses: wangyucode/sftp-upload-action@v2.0.4
         with:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
           port: ${{ secrets.WPENGINE_SFTP_PORT }}
@@ -350,7 +350,7 @@ jobs:
           remoteDir: '/xml/ns/dbchangelog/'
 
       - name: Liquibase PRO xsds SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.3
+        uses: wangyucode/sftp-upload-action@v2.0.4
         with:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
           port: ${{ secrets.WPENGINE_SFTP_PORT }}
@@ -362,7 +362,7 @@ jobs:
           remoteDir: '/xml/ns/pro/'
 
       - name: Liquibase flow-file schema SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.3
+        uses: wangyucode/sftp-upload-action@v2.0.4
         with:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
           port: ${{ secrets.WPENGINE_SFTP_PORT }}
@@ -374,7 +374,7 @@ jobs:
           remoteDir: '/json/schema/'
 
       - name: Liquibase index.htm SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.3
+        uses: wangyucode/sftp-upload-action@v2.0.4
         with:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
           port: ${{ secrets.WPENGINE_SFTP_PORT }}
