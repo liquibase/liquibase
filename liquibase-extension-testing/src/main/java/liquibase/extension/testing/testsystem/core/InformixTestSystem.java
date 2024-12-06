@@ -1,8 +1,11 @@
 package liquibase.extension.testing.testsystem.core;
 
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
+import liquibase.extension.testing.testsystem.InformixContainer;
 import liquibase.extension.testing.testsystem.wrapper.DatabaseWrapper;
-import liquibase.extension.testing.testsystem.wrapper.UnimplementedWrapper;
+import liquibase.extension.testing.testsystem.wrapper.DockerDatabaseWrapper;
+import org.jetbrains.annotations.NotNull;
+import org.testcontainers.utility.DockerImageName;
 
 public class InformixTestSystem  extends DatabaseTestSystem {
 
@@ -15,8 +18,11 @@ public class InformixTestSystem  extends DatabaseTestSystem {
     }
 
     @Override
-    protected DatabaseWrapper createContainerWrapper() throws Exception {
-        return new UnimplementedWrapper();
+    protected @NotNull DatabaseWrapper createContainerWrapper() {
+        return new DockerDatabaseWrapper(
+                new InformixContainer(DockerImageName.parse(getImageName()).withTag(getVersion())),
+                this
+        );
     }
 
     @Override

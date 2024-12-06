@@ -17,7 +17,7 @@ liquibase:
         altTablespace: liquibase2
         keepRunning: true
 
-      test: h2,hsqldb,sqlite
+      test: h2,hsqldb,sqlite,informix
 
       cockroachdb:
         version: latest-v21.2
@@ -85,3 +85,7 @@ liquibase:
       firebird:
         imageName: jacobalberty/firebird
         version: v4
+
+      informix:
+        imageName: icr.io/informix/informix-developer-database
+        version: latest
