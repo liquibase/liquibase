@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="loadDataTest" author="mallod">
+        <createTable tableName="loadDataTestTable">
+            <column name="colKey" type="int"/>
+            <column name="col2" type="varchar(200)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="loadDataTest2" author="mallod">
+        <loadData tableName="loadDataTestTable" file="loaDataTestData.csv" relativeToChangelogFile="true">
+            <column name="colKey" type="COMPUTED"/>
+            <column name="col2" type="varchar(100)"/>
+        </loadData>
+    </changeSet>
+
+</databaseChangeLog>
