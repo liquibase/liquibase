@@ -613,7 +613,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     protected Change toChange(ParsedNode value, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         Change change = getCurrentScope().getSingleton(ChangeFactory.class).create(value.getName());
         if (change == null) {
-            boolean parsingForChecks = ChangeFactory.getNoExceptionOnUnsupportedChangeType();
+            boolean parsingForChecks = ChangeFactory.isNoExceptionOnUnsupportedChangeType();
             if (!value.getChildren().isEmpty() && !parsingForChecks &&
                 ChangeLogParserConfiguration.CHANGELOG_PARSE_MODE.getCurrentValue().equals(ChangeLogParserConfiguration.ChangelogParseMode.STRICT)) {
                 String message = "";

@@ -123,7 +123,7 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
             if (database != null && performSupportsDatabaseValidation) {
                 plugins.removeIf(a -> !a.supports(database));
                 if (plugins.isEmpty()) {
-                    if (! getNoExceptionOnUnsupportedChangeType()) {
+                    if (! isNoExceptionOnUnsupportedChangeType()) {
                         throw new UnexpectedLiquibaseException(String.format("No registered %s plugin found for %s database", name, database.getDisplayName()));
                     } else {
                         return null;
@@ -139,7 +139,7 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
         }
     }
 
-    public static boolean getNoExceptionOnUnsupportedChangeType() {
+    public static boolean isNoExceptionOnUnsupportedChangeType() {
         return Scope.getCurrentScope().has(NO_EXCEPTION_ON_UNSUPPORTED_CHANGE_TYPE) && Scope.getCurrentScope().get(NO_EXCEPTION_ON_UNSUPPORTED_CHANGE_TYPE, Boolean.class);
     }
 
