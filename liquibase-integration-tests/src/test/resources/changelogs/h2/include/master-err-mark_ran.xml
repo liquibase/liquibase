@@ -1,0 +1,26 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <property name="foo" value="bar"/>
+    <include file="under_precondition.xml" relativeToChangelogFile="true" logicalFilePath="under_precondition">
+        <preConditions onError="MARK_RAN">
+            <sqlCheck expectedResult="TRUE">
+                WRONG SQL
+            </sqlCheck>
+        </preConditions>
+    </include>
+
+    <include file="include.xml" relativeToChangelogFile="true" logicalFilePath="included">
+        <preConditions onFail="HALT">
+            <changeLogPropertyDefined property="foo" value="bar"/>
+        </preConditions>
+    </include>
+
+    <changeSet id="default"  author="cagliostro">
+        <createTable tableName="DEFAULT_TABLE">
+            <column name="ID" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
