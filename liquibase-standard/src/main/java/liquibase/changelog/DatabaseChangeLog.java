@@ -1,6 +1,32 @@
 package liquibase.changelog;
 
-import liquibase.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import liquibase.ContextExpression;
+import liquibase.Contexts;
+import liquibase.GlobalConfiguration;
+import liquibase.LabelExpression;
+import liquibase.Labels;
+import liquibase.RuntimeEnvironment;
+import liquibase.Scope;
 import liquibase.change.visitor.ChangeVisitor;
 import liquibase.change.visitor.ChangeVisitorFactory;
 import liquibase.changelog.filter.ContextChangeSetFilter;
@@ -14,7 +40,19 @@ import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.exception.*;
+import liquibase.exception.ChangeLogParseException;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.SetupException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.UnknownChangeLogParameterException;
+import liquibase.exception.UnknownChangelogFormatException;
+import liquibase.exception.ValidationFailedException;
+import liquibase.include.ChangeLogInclude;
+import liquibase.include.ChangeLogIncludeAll;
+import liquibase.include.IncludeService;
+import liquibase.include.IncludeServiceFactory;
 import liquibase.logging.Logger;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcValue;
@@ -41,14 +79,6 @@ import liquibase.util.StringUtil;
 import lombok.Getter;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 
 /**
@@ -136,6 +166,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     @Getter
     private ParsedNode currentlyLoadedChangeSetNode;
+
+    @Getter
+    private List<ChangeLogInclude> includeList = new ArrayList<>();
+
+    @Getter
+    private List<ChangeLogIncludeAll> includeAllList = new ArrayList<>();
+
+    public static final AtomicInteger CHANGESET_ORDER = new AtomicInteger(0);
 
     public DatabaseChangeLog() {
     }
@@ -588,73 +626,16 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     private void handleIncludeAll(ParsedNode node, ResourceAccessor resourceAccessor, Map<String, Object> nodeScratch)
         throws ParsedNodeException, SetupException {
-        if(this.checkPreconditions(node, resourceAccessor)) {
-            String path = node.getChildValue(null, PATH, String.class);
-            String resourceFilterDef = node.getChildValue(null, FILTER, String.class);
-            if (resourceFilterDef == null) {
-                resourceFilterDef = node.getChildValue(null, RESOURCE_FILTER, String.class);
-            }
-            IncludeAllFilter resourceFilter = null;
-            if (resourceFilterDef != null) {
-                try {
-                    resourceFilter = (IncludeAllFilter) Class.forName(resourceFilterDef).getConstructor().newInstance();
-                } catch (ReflectiveOperationException e) {
-                    throw new SetupException(e);
-                }
-            }
-
-            String resourceComparatorDef = node.getChildValue(null, RESOURCE_COMPARATOR, String.class);
-            Comparator<String> resourceComparator = determineResourceComparator(resourceComparatorDef);
-
-            ContextExpression includeAllNodeContextFilter = determineContextExpression(node);
-            Labels labels = new Labels(node.getChildValue(null, LABELS, String.class));
-            Boolean ignore = node.getChildValue(null, IGNORE, Boolean.class);
-            if (ignore == null) {
-                ignore = false;
-            }
-            includeAll(path,
-                node.getChildValue(null, RELATIVE_TO_CHANGELOG_FILE, false), resourceFilter,
-                node.getChildValue(null, ERROR_IF_MISSING_OR_EMPTY, true),
-                resourceComparator,
-                resourceAccessor,
-                includeAllNodeContextFilter,
-                labels,
-                ignore,
-                node.getChildValue(null, LOGICAL_FILE_PATH, String.class),
-                node.getChildValue(null, MIN_DEPTH, 0),
-                node.getChildValue(null, MAX_DEPTH, Integer.MAX_VALUE),
-                node.getChildValue(null, ENDS_WITH_FILTER, ""),
-                (ModifyChangeSets) nodeScratch.get(MODIFY_CHANGE_SETS));
-        }
+        IncludeServiceFactory factory = Scope.getCurrentScope().getSingleton(IncludeServiceFactory.class);
+        IncludeService service = factory.getIncludeService();
+        this.includeAllList.add(service.createChangelogIncludeAll(node, resourceAccessor, this, nodeScratch));
     }
 
     private void handleInclude(ParsedNode node, ResourceAccessor resourceAccessor, Map<String, Object> nodeScratch)
-        throws ParsedNodeException, SetupException {
-        if(this.checkPreconditions(node, resourceAccessor)) {
-            String path = node.getChildValue(null, FILE, String.class);
-            if (path == null) {
-                throw new UnexpectedLiquibaseException("No 'file' attribute on 'include'");
-            }
-            path = path.replace('\\', '/');
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, path);
-            ContextExpression includeNodeContextFilter = determineContextExpression(node);
-            Labels labels = new Labels(node.getChildValue(null, LABELS, String.class));
-            Boolean ignore = node.getChildValue(null, IGNORE, Boolean.class);
-            try {
-                include(path,
-                    node.getChildValue(null, RELATIVE_TO_CHANGELOG_FILE, false),
-                    node.getChildValue(null, ERROR_IF_MISSING, true),
-                    resourceAccessor,
-                    includeNodeContextFilter,
-                    labels,
-                    ignore,
-                    node.getChildValue(null, LOGICAL_FILE_PATH, String.class),
-                    OnUnknownFileFormat.FAIL,
-                    (ModifyChangeSets) nodeScratch.get(MODIFY_CHANGE_SETS));
-            } catch (LiquibaseException e) {
-                throw new SetupException(e);
-            }
-        }
+				throws ParsedNodeException, SetupException {
+        IncludeServiceFactory factory = Scope.getCurrentScope().getSingleton(IncludeServiceFactory.class);
+        IncludeService service = factory.getIncludeService();
+        this.includeList.add(service.createChangelogInclude(node, resourceAccessor, this, nodeScratch));
     }
 
     private static ContextExpression determineContextExpression(ParsedNode node) throws ParsedNodeException {
@@ -682,23 +663,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         } else {
             handleSkippedChangeSet(node);
         }
-    }
-
-    public Comparator<String> determineResourceComparator(String resourceComparatorDef) {
-        Comparator<String> resourceComparator;
-        if (resourceComparatorDef == null) {
-            resourceComparator = getStandardChangeLogComparator();
-        } else {
-            try {
-                resourceComparator = (Comparator<String>) Class.forName(resourceComparatorDef).getConstructor().newInstance();
-            } catch (ReflectiveOperationException e) {
-                //take default comparator
-                Scope.getCurrentScope().getLog(getClass()).info("no resourceComparator defined - taking default " +
-                    "implementation", e);
-                resourceComparator = getStandardChangeLogComparator();
-            }
-        }
-        return resourceComparator;
     }
 
     private ModifyChangeSets createModifyChangeSets(ParsedNode node) throws ParsedNodeException {

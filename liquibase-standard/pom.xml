@@ -280,7 +280,8 @@
                             osgi.serviceloader; osgi.serviceloader=liquibase.report.ShowSummaryGenerator,
                             osgi.serviceloader; osgi.serviceloader=liquibase.parser.LiquibaseSqlParser,
                             osgi.serviceloader; osgi.serviceloader=liquibase.changeset.ChangeSetService,
-                            osgi.serviceloader; osgi.serviceloader=liquibase.changelog.visitor.ValidatingVisitorGenerator
+                            osgi.serviceloader; osgi.serviceloader=liquibase.changelog.visitor.ValidatingVisitorGenerator,
+                            osgi.serviceloader; osgi.serviceloader=liquibase.include.IncludeService
                         </Provide-Capability>
                         <Require-Capability>
                             osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)",
@@ -318,7 +319,8 @@
                             osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.report.ShowSummaryGenerator)"; cardinality:=multiple,
                             osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.parser.LiquibaseSqlParser)"; cardinality:=multiple,
                             osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.changeset.ChangeSetService)"; cardinality:=multiple,
-                            osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.changelog.visitor.ValidatingVisitorGenerator)"; cardinality:=multiple
+                            osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.changelog.visitor.ValidatingVisitorGenerator)"; cardinality:=multiple,
+                            osgi.serviceloader; filter:="(osgi.serviceloader=liquibase.include.IncludeService)"; cardinality:=multiple
                         </Require-Capability>
                     </instructions>
                 </configuration>
@@ -387,6 +389,7 @@
                         <param>liquibase.analytics.configuration.AnalyticsConfiguration</param>
                         <param>liquibase.command.CommandStep</param>
                         <param>liquibase.command.copy.ProjectCopier</param>
+                        <param>liquibase.include.IncludeService</param>
                     </services>
                 </configuration>
                 <executions>

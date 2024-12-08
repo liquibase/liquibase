@@ -8,10 +8,8 @@ import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.visitor.IncludeVisitor;
 import liquibase.command.*;
-import liquibase.configuration.ConfigurationValueProvider;
-import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.lockservice.LockServiceFactory;
@@ -24,7 +22,6 @@ import liquibase.util.StringUtil;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -132,6 +129,7 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         } else {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changeLogFile);
         }
+        new IncludeVisitor().visit(changelog);
         return changelog;
     }
 
