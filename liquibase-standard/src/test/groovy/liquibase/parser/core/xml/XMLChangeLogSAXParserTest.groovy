@@ -7,6 +7,7 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.changelog.filter.ChangeSetFilterResult
 import liquibase.changelog.visitor.ChangeSetVisitor
+import liquibase.changelog.visitor.IncludeVisitor
 import liquibase.database.Database
 import liquibase.database.core.MockDatabase
 import liquibase.exception.ChangeLogParseException
@@ -57,7 +58,7 @@ class XMLChangeLogSAXParserTest extends Specification {
         def xmlParser = new XMLChangeLogSAXParser()
         final def changeLog = xmlParser.parse("liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/master.changelog.xml",
                 new ChangeLogParameters(), new JUnitResourceAccessor())
-
+        new IncludeVisitor().visit(changeLog)
         when:
         final def changeSets = new ArrayList<ChangeSet>()
         Scope.child(GlobalConfiguration.ALLOW_DUPLICATED_CHANGESETS_IDENTIFIERS.key, allowDuplicatedChangesetIdentifiers, { ->

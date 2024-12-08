@@ -4,6 +4,11 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <property name="foo" value="bar"/>
+    <changeSet id="default"  author="cagliostro">
+        <createTable tableName="DEFAULT_TABLE">
+            <column name="ID" type="BIGINT"/>
+        </createTable>
+    </changeSet>
     <include file="under_precondition.xml" relativeToChangelogFile="true" logicalFilePath="under_precondition">
         <preConditions onFail="WARN">
             <tableExists tableName="NOT_EXISTANT_TABLE" />
@@ -16,9 +21,5 @@
         </preConditions>
     </include>
 
-    <changeSet id="default"  author="cagliostro">
-        <createTable tableName="DEFAULT_TABLE">
-            <column name="ID" type="BIGINT"/>
-        </createTable>
-    </changeSet>
+
 </databaseChangeLog>
