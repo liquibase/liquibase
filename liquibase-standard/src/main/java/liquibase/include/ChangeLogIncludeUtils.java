@@ -26,6 +26,7 @@ import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.database.Database;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.UnknownChangelogFormatException;
@@ -36,6 +37,7 @@ import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
+import liquibase.parser.core.sql.SqlChangeLogParser;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.FileUtil;
@@ -122,7 +124,7 @@ public final class ChangeLogIncludeUtils {
 																						 SortedSet<ChangeSet> changeSetAccumulator,
 																						 SortedSet<ChangeSet> skippedChangeSetAccumulator) {
 
-	DatabaseChangeLog changeLog = include.getChildChangelog();
+	DatabaseChangeLog changeLog = include.getNestedChangelog();
 	changeSetAccumulator.addAll(ChangeLogIncludeUtils.getNestedChangeSets(include));
 	skippedChangeSetAccumulator.addAll(ChangeLogIncludeUtils.getNestedSkippedChangeSets(include));
 	for(ChangeLogInclude i : changeLog.getIncludeList()) {
@@ -150,19 +152,33 @@ public final class ChangeLogIncludeUtils {
  }
 
  private static SortedSet<ChangeSet> getNestedChangeSets(ChangeLogInclude include) {
-	return getNestedChangeSets(include.getDatabase(), include.getLogicalFilePath(),
-			include.getChildChangelog(), include.getModifyChangeSets(), include.getPreconditions());
+	try {
+	 boolean isRawSql = (ChangeLogParserFactory.getInstance().getParser(include.getNestedChangelog().getPhysicalFilePath(),
+			 include.getResourceAccessor()) instanceof SqlChangeLogParser);
+	 return getNestedChangeSets(include.getDatabase(), include.getLogicalFilePath(),
+			 include.getNestedChangelog(), include.getModifyChangeSets(), include.getPreconditions(), isRawSql);
+	} catch (LiquibaseException e) {
+	 throw new RuntimeException(e);
+	}
  }
 
  private static SortedSet<ChangeSet> getNestedChangeSets(ChangeLogIncludeAll includeAll) {
 	SortedSet<ChangeSet> result = new TreeSet<>();
-	includeAll.getNestedChangeLogs().forEach(changelog -> result.addAll(getNestedChangeSets(includeAll.getDatabase(), includeAll.getLogicalFilePath(),
-			changelog, includeAll.getModifyChangeSets(), includeAll.getPreconditions())));
+	includeAll.getNestedChangeLogs().forEach(changelog -> {
+	 try {
+		result.addAll(getNestedChangeSets(includeAll.getDatabase(), includeAll.getLogicalFilePath(),
+				changelog, includeAll.getModifyChangeSets(), includeAll.getPreconditions(),
+				(ChangeLogParserFactory.getInstance().getParser(changelog.getPhysicalFilePath(),
+						includeAll.getResourceAccessor()) instanceof SqlChangeLogParser)));
+	 } catch (LiquibaseException e) {
+		throw new RuntimeException(e);
+	 }
+	});
 	return result;
  }
 
  private static SortedSet<ChangeSet> getNestedSkippedChangeSets(ChangeLogInclude include) {
-	return new TreeSet<>(include.getChildChangelog().getSkippedChangeSets());
+	return new TreeSet<>(include.getNestedChangelog().getSkippedChangeSets());
  }
 
  private static SortedSet<ChangeSet> getNestedSkippedChangeSets(ChangeLogIncludeAll includeAll) {
@@ -244,7 +260,8 @@ public final class ChangeLogIncludeUtils {
  }
 
  private static SortedSet<ChangeSet> getNestedChangeSets(Database database, String logicalFilePath,
-																												 DatabaseChangeLog childChangeLog, ModifyChangeSets modifyChangeSets, PreconditionContainer preconditions) {
+																												 DatabaseChangeLog childChangeLog, ModifyChangeSets modifyChangeSets,
+																												 PreconditionContainer preconditions, boolean isRawSql) {
 	SortedSet<ChangeSet> result = new TreeSet<>();
 	List<RanChangeSet> ranChangeSets = new ArrayList<>(1);
 	if (database != null && logicalFilePath != null) {

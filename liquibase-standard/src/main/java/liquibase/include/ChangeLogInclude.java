@@ -44,7 +44,7 @@ public class ChangeLogInclude extends AbstractLiquibaseSerializable implements C
     private PreconditionContainer preconditions;
     private Labels labels;
     private String logicalFilePath;
-    private DatabaseChangeLog childChangelog;
+    private DatabaseChangeLog nestedChangelog;
     private ResourceAccessor resourceAccessor;
     private DatabaseChangeLog parentChangeLog;
     private ModifyChangeSets modifyChangeSets;
@@ -66,7 +66,7 @@ public class ChangeLogInclude extends AbstractLiquibaseSerializable implements C
         this.file = node.getChildValue(null, FILE, String.class);
         this.context = ChangeLogIncludeUtils.getContextExpression(node);
         this.preconditions = ChangeLogIncludeUtils.getPreconditions(node, resourceAccessor);
-        this.childChangelog = ChangeLogIncludeUtils.getChangeLog(this);
+        this.nestedChangelog = ChangeLogIncludeUtils.getChangeLog(this);
     }
 
     @Override
