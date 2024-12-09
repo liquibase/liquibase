@@ -10,6 +10,7 @@ import liquibase.change.core.RawSQLChange;
 import liquibase.change.core.SQLFileChange;
 import liquibase.change.visitor.ChangeVisitor;
 import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.command.CommandScope;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
@@ -668,7 +669,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             return ExecType.MARK_RAN;
         }
 
-        startInstant = Instant.now();
+        setStartTime();
         getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, startInstant.toString());
 
         boolean skipChange = false;
@@ -802,7 +803,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     execType = ExecType.EXECUTED;
                 }
 
-                stopInstant = Instant.now();
+                setStopTime();
                 getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, stopInstant.toString());
                 getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, execType.value.toLowerCase());
                 log.info("ChangeSet " + toString(false) + " ran successfully in " + getExecutionMilliseconds() + "ms");
@@ -811,11 +812,17 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
 
         } catch (Exception e) {
-            stopInstant = Instant.now();
+            setStopTime();
             getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, stopInstant.toString());
             getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.FAILED.value.toLowerCase());
             log.severe(String.format("ChangeSet %s encountered an exception.", toString(false)), e);
             setErrorMsg(e.getMessage());
+
+            //
+            // Set the suppression flag so that additional logging of the exception won't happen
+            //
+            CommandScope.suppressExceptionLogging(true);
+
             try {
                 database.rollback();
             } catch (Exception e1) {
@@ -845,6 +852,16 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
         return execType;
+    }
+
+    private void setStopTime() {
+        stopInstant = Instant.now();
+        operationStopTime = Date.from(stopInstant);
+    }
+
+    private void setStartTime() {
+        startInstant = Instant.now();
+        operationStartTime = Date.from(startInstant);
     }
 
     //
@@ -908,7 +925,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     public void rollback(Database database, ChangeExecListener listener) throws RollbackFailedException {
-        startInstant = Instant.now();
+        setStartTime();
         getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, startInstant.toString());
         addChangeSetMdcProperties();
         getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, getDeploymentId());
@@ -974,7 +991,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             if (runInTransaction) {
                 database.commit();
             }
-            stopInstant = Instant.now();
+            setStopTime();
             rollbackExecType = ExecType.EXECUTED;
             getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, ExecType.EXECUTED.value.toLowerCase());
             getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, stopInstant.toString());
