@@ -14,10 +14,10 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 public class InformixContainer<SELF extends InformixContainer<SELF>> extends JdbcDatabaseContainer<SELF> {
 
     public static final int INFORMIX_PORT = 9088;
-    static final String DEFAULT_USER = "informix";
-    static final String DEFAULT_PASSWORD = "in4mix";
     private static final String IFX_CONFIG_DIR = "/opt/ibm/config/";
     private String databaseName = "sysadmin";
+    private String username = "informix";
+    private String password = "in4mix";
 
     public InformixContainer(DockerImageName dockerImageName) {
         super(dockerImageName);
@@ -41,18 +41,30 @@ public class InformixContainer<SELF extends InformixContainer<SELF>> extends Jdb
     @Override
     public String getJdbcUrl() {
         String additionalUrlParams = constructUrlParameters(";", ";");
-        return MessageFormat.format("jdbc:informix-sqli://{0}:{1}/{2}:INFORMIXSERVER=informix{3}",
+        return MessageFormat.format("jdbc:informix-sqli://{0}:{1}/{2}:INFORMIXSERVER=informix;{3}",
                 getContainerIpAddress(), String.valueOf(getMappedPort(INFORMIX_PORT)), getDatabaseName(), additionalUrlParams);
     }
 
     @Override
     public String getUsername() {
-        return DEFAULT_USER;
+        return username;
     }
 
     @Override
     public String getPassword() {
-        return DEFAULT_PASSWORD;
+        return password;
+    }
+
+    @Override
+    public SELF withUsername(String username) {
+        this.username = username;
+        return self();
+    }
+
+    @Override
+    public SELF withPassword(String password) {
+        this.password = password;
+        return self();
     }
 
     @Override

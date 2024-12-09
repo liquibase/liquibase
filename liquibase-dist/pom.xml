@@ -149,6 +149,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.ibm.informix</groupId>
+            <artifactId>jdbc</artifactId>
+            <version>4.50.11</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
