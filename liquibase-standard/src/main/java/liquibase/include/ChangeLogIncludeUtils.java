@@ -26,9 +26,13 @@ import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.database.Database;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.UnknownChangelogFormatException;
+import liquibase.logging.Logger;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
 import liquibase.parser.ChangeLogParser;
@@ -36,8 +40,10 @@ import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
+import liquibase.precondition.Precondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
+import liquibase.ui.UIService;
 import liquibase.util.FileUtil;
 import org.apache.commons.lang3.StringUtils;
 
@@ -58,6 +64,14 @@ public final class ChangeLogIncludeUtils {
 	changeLog.getSkippedChangeSets().clear();
 	changeSetAccumulator.forEach(changeLog::addChangeSet);
 	changeLog.getSkippedChangeSets().addAll(skippedChangeSetAccumulator);
+ }
+
+ static void sendIncludePreconditionWarningMessage(String message, Throwable e) {
+	Scope currentScope = Scope.getCurrentScope();
+	Logger logger = currentScope.getLog(DatabaseChangeLog.class);
+	UIService ui = currentScope.getUI();
+	logger.warning(message, e);
+	ui.sendMessage(message);
  }
 
  static String normalizeFilePath(String file, String parentChangelogPhysicalFilePath, boolean isRelative, ResourceAccessor resourceAccessor) {
@@ -122,14 +136,16 @@ public final class ChangeLogIncludeUtils {
 																						 SortedSet<ChangeSet> changeSetAccumulator,
 																						 SortedSet<ChangeSet> skippedChangeSetAccumulator) {
 
-	DatabaseChangeLog changeLog = include.getChildChangelog();
-	changeSetAccumulator.addAll(ChangeLogIncludeUtils.getNestedChangeSets(include));
-	skippedChangeSetAccumulator.addAll(ChangeLogIncludeUtils.getNestedSkippedChangeSets(include));
-	for(ChangeLogInclude i : changeLog.getIncludeList()) {
-	 flatChangeLogChangeSets(i, changeSetAccumulator, skippedChangeSetAccumulator);
-	}
-	for(ChangeLogIncludeAll i : changeLog.getIncludeAllList()) {
-	 flatChangeLogChangeSets(i, changeSetAccumulator, skippedChangeSetAccumulator);
+	DatabaseChangeLog changeLog = include.getNestedChangelog();
+	if(changeLog != null) {
+	 changeSetAccumulator.addAll(ChangeLogIncludeUtils.getNestedChangeSets(include));
+	 skippedChangeSetAccumulator.addAll(ChangeLogIncludeUtils.getNestedSkippedChangeSets(include));
+	 for(ChangeLogInclude i : changeLog.getIncludeList()) {
+		flatChangeLogChangeSets(i, changeSetAccumulator, skippedChangeSetAccumulator);
+	 }
+	 for(ChangeLogIncludeAll i : changeLog.getIncludeAllList()) {
+		flatChangeLogChangeSets(i, changeSetAccumulator, skippedChangeSetAccumulator);
+	 }
 	}
  }
 
@@ -137,32 +153,35 @@ public final class ChangeLogIncludeUtils {
 																						 SortedSet<ChangeSet> changeSetAccumulator,
 																						 SortedSet<ChangeSet> skippedChangeSetAccumulator) {
 
-	changeSetAccumulator.addAll(ChangeLogIncludeUtils.getNestedChangeSets(includeAll));
-	skippedChangeSetAccumulator.addAll(ChangeLogIncludeUtils.getNestedSkippedChangeSets(includeAll));
-	includeAll.getNestedChangeLogs().forEach(changeLog -> {
-	 for(ChangeLogIncludeAll i : changeLog.getIncludeAllList()) {
-		flatChangeLogChangeSets(i, changeSetAccumulator, skippedChangeSetAccumulator);
-	 }
-	 for(ChangeLogInclude i : changeLog.getIncludeList()) {
-		flatChangeLogChangeSets(i, changeSetAccumulator, skippedChangeSetAccumulator);
-	 }
-	});
+	if(!includeAll.getNestedChangeLogs().isEmpty()) {
+	 changeSetAccumulator.addAll(ChangeLogIncludeUtils.getNestedChangeSets(includeAll));
+	 skippedChangeSetAccumulator.addAll(ChangeLogIncludeUtils.getNestedSkippedChangeSets(includeAll));
+	 includeAll.getNestedChangeLogs().forEach(changeLog -> {
+		for(ChangeLogIncludeAll i : changeLog.getIncludeAllList()) {
+		 flatChangeLogChangeSets(i, changeSetAccumulator, skippedChangeSetAccumulator);
+		}
+		for(ChangeLogInclude i : changeLog.getIncludeList()) {
+		 flatChangeLogChangeSets(i, changeSetAccumulator, skippedChangeSetAccumulator);
+		}
+	 });
+	}
  }
 
  private static SortedSet<ChangeSet> getNestedChangeSets(ChangeLogInclude include) {
 	return getNestedChangeSets(include.getDatabase(), include.getLogicalFilePath(),
-			include.getChildChangelog(), include.getModifyChangeSets(), include.getPreconditions());
+			include.getNestedChangelog(), include.getModifyChangeSets(), include.getPreconditions(), include.isMarkRun());
  }
 
  private static SortedSet<ChangeSet> getNestedChangeSets(ChangeLogIncludeAll includeAll) {
 	SortedSet<ChangeSet> result = new TreeSet<>();
 	includeAll.getNestedChangeLogs().forEach(changelog -> result.addAll(getNestedChangeSets(includeAll.getDatabase(), includeAll.getLogicalFilePath(),
-			changelog, includeAll.getModifyChangeSets(), includeAll.getPreconditions())));
+			changelog, includeAll.getModifyChangeSets(), includeAll.getPreconditions(),
+			includeAll.isMarkRun())));
 	return result;
  }
 
  private static SortedSet<ChangeSet> getNestedSkippedChangeSets(ChangeLogInclude include) {
-	return new TreeSet<>(include.getChildChangelog().getSkippedChangeSets());
+	return new TreeSet<>(include.getNestedChangelog().getSkippedChangeSets());
  }
 
  private static SortedSet<ChangeSet> getNestedSkippedChangeSets(ChangeLogIncludeAll includeAll) {
@@ -244,7 +263,8 @@ public final class ChangeLogIncludeUtils {
  }
 
  private static SortedSet<ChangeSet> getNestedChangeSets(Database database, String logicalFilePath,
-																												 DatabaseChangeLog childChangeLog, ModifyChangeSets modifyChangeSets, PreconditionContainer preconditions) {
+																												 DatabaseChangeLog childChangeLog, ModifyChangeSets modifyChangeSets,
+																												 PreconditionContainer preconditions, boolean markRun) {
 	SortedSet<ChangeSet> result = new TreeSet<>();
 	List<RanChangeSet> ranChangeSets = new ArrayList<>(1);
 	if (database != null && logicalFilePath != null) {
@@ -259,13 +279,20 @@ public final class ChangeLogIncludeUtils {
 		modifyChangeSets(changeSet, modifyChangeSets);
 	 }
 	 String changeSetLogicalFilePath = changeSet.getLogicalFilePath();
-	 if (logicalFilePath != null && changeSetLogicalFilePath == null && !ranChangeSetExists(changeSet, ranChangeSets)) {
+
+	 boolean isRawSql = childChangeLog.getPhysicalFilePath() != null
+			 && childChangeLog.getPhysicalFilePath().endsWith(".sql");
+
+	 if (logicalFilePath != null && changeSetLogicalFilePath == null
+			 &&!isRawSql && !ranChangeSetExists(changeSet, ranChangeSets)) {
 		changeSet.setLogicalFilePath(logicalFilePath);
 		if (StringUtils.isNotEmpty(logicalFilePath)) {
 		 changeSet.setFilePath(logicalFilePath);
 		}
 	 }
-	 setChangeSetPreconditions(changeSet, preconditions);
+	 if(markRun)
+		changeSet.setPreconditions(preconditions);
+
 	 result.add(changeSet);
 	}
 	return result;
@@ -284,19 +311,6 @@ public final class ChangeLogIncludeUtils {
 							rc.getAuthor().equals(changeSet.getAuthor()) &&
 							rc.getStoredChangeLog().equals(changeSet.getFilePath())).findFirst();
 	return ranChangeSet.isPresent();
- }
-
- private static void setChangeSetPreconditions(ChangeSet changeSet, PreconditionContainer preconditions) {
-	if(isBlank(changeSet.getPreconditions()))
-	 changeSet.setPreconditions(preconditions);
-	else {
-	 if(!isBlank(preconditions)) {
-		PreconditionContainer mergedPreconditions = new PreconditionContainer();
-		mergedPreconditions.getNestedPreconditions().addAll(preconditions.getNestedPreconditions());
-		mergedPreconditions.getNestedPreconditions().addAll(changeSet.getPreconditions().getNestedPreconditions());
-		changeSet.setPreconditions(mergedPreconditions);
-	 }
-	}
  }
 
  private static boolean isBlank(PreconditionContainer precondition) {

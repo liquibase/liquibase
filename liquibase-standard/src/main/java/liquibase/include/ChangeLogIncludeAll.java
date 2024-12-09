@@ -34,11 +34,15 @@ import static liquibase.changelog.DatabaseChangeLog.normalizePath;
 import liquibase.changelog.IncludeAllFilter;
 import liquibase.changelog.ModifyChangeSets;
 import liquibase.database.Database;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.SetupException;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
+import liquibase.precondition.Conditional;
+import liquibase.precondition.Precondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
@@ -50,7 +54,7 @@ import org.apache.commons.lang3.StringUtils;
 
 @Getter(AccessLevel.PACKAGE)
 @Setter(AccessLevel.PACKAGE)
-public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implements ChangeLogChild {
+public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implements Conditional, ChangeLogChild {
 
     private static final Logger LOG = Scope.getCurrentScope().getLog(ChangeLogIncludeAll.class);
     private String path;
@@ -64,12 +68,15 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
     private String logicalFilePath;
     private Labels labels;
     private Boolean ignore;
+    @Getter(AccessLevel.PUBLIC)
+    @Setter(AccessLevel.PUBLIC)
     private PreconditionContainer preconditions;
     private ResourceAccessor resourceAccessor;
     private DatabaseChangeLog parentChangeLog;
     private ModifyChangeSets modifyChangeSets;
     private final Database database = Scope.getCurrentScope().getDatabase();
     private List<DatabaseChangeLog> nestedChangeLogs = new ArrayList<>(10);
+    private boolean markRun = false;
 
     public ChangeLogIncludeAll(ParsedNode node, ResourceAccessor resourceAccessor,
                             DatabaseChangeLog parentChangeLog, ModifyChangeSets modifyChangeSets)
@@ -93,6 +100,7 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
         this.path = node.getChildValue(null, PATH, String.class);
         this.preconditions = ChangeLogIncludeUtils.getPreconditions(node, resourceAccessor);
         this.setNestedChangeLogs(node);
+        this.checkPreconditions();
     }
 
     @Override
@@ -108,6 +116,41 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    private void checkPreconditions() {
+        PreconditionContainer preconditionContainer = this.getPreconditions();
+        if(preconditionContainer != null) {
+
+            for(Precondition p : preconditionContainer.getNestedPreconditions()) {
+                String warningMessage = null;
+                try {
+                    warningMessage = String.format("Error occurred while evaluating precondition %s", p.getName());
+                    p.check(this.getDatabase(), this.getParentChangeLog());
+                } catch (PreconditionFailedException e) {
+                    if (PreconditionContainer.FailOption.HALT.equals(preconditionContainer.getOnFail())) {
+                        throw new RuntimeException(e);
+                    } else if (PreconditionContainer.FailOption.WARN.equals(preconditionContainer.getOnFail())) {
+                        ChangeLogIncludeUtils.sendIncludePreconditionWarningMessage(warningMessage, e);
+                    } else if (PreconditionContainer.FailOption.MARK_RAN.equals(preconditionContainer.getOnFail())) {
+                        this.setMarkRun(true);
+                    } else {
+                        this.nestedChangeLogs.clear();
+                    }
+                } catch (PreconditionErrorException e) {
+                    if (PreconditionContainer.ErrorOption.HALT.equals(preconditionContainer.getOnError())) {
+                        throw new RuntimeException(e);
+                    } else if (PreconditionContainer.ErrorOption.WARN.equals(preconditionContainer.getOnError())) {
+                        ChangeLogIncludeUtils.sendIncludePreconditionWarningMessage(warningMessage, e);
+                    } else if (PreconditionContainer.ErrorOption.MARK_RAN.equals(preconditionContainer.getOnError())) {
+                        this.setMarkRun(true);
+                    }
+                    else {
+                        this.nestedChangeLogs.clear();
+                    }
+                }
+            }
+        }
     }
 
     private void setNestedChangeLogs(ParsedNode node) throws ParsedNodeException, SetupException {

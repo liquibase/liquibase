@@ -5,7 +5,9 @@ import liquibase.changelog.ChangeLogParameters
 import liquibase.command.core.UpdateCommandStep
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
+import liquibase.exception.ChangeLogParseException
 import liquibase.exception.MigrationFailedException
+import liquibase.exception.PreconditionFailedException
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
@@ -73,10 +75,10 @@ class IncludeAllPreconditionsTest extends Specification {
             updateCommand.execute()
         } as Scope.ScopedRunner)
         then:
-        def commandExecutionException = thrown(liquibase.exception.CommandExecutionException)
-        def migrationFailedException = commandExecutionException.getCause().getCause();
-        migrationFailedException.class == MigrationFailedException.class
-        migrationFailedException.getMessage().contains("test_precondition::test_precondition::cagliostro")
+        def changeLogParseException = thrown(ChangeLogParseException)
+        def preconditionFailedException = changeLogParseException.getCause().getCause();
+        preconditionFailedException.class == PreconditionFailedException.class
+        preconditionFailedException.getMessage().contains("Preconditions Failed")
 
     }
 
