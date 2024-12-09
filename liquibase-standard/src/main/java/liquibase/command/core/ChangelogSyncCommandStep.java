@@ -60,7 +60,6 @@ public class ChangelogSyncCommandStep extends AbstractCommandStep {
         final ChangeLogParameters changeLogParameters = (ChangeLogParameters) commandScope.getDependency(ChangeLogParameters.class);
         final ChangeLogHistoryService changeLogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
         changeLogHistoryService.init();
-        changeLogHistoryService.generateDeploymentId();
         try {
             ChangeLogIterator runChangeLogIterator = buildChangeLogIterator(tag, changeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database);
             AtomicInteger changesetCount = new AtomicInteger(0);
