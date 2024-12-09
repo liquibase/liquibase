@@ -5,7 +5,6 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.core.InsertDataChange;
 import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
-import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.output.DiffOutputControl;
