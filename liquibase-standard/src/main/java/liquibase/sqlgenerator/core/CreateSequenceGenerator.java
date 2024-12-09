@@ -50,7 +50,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
                 validationErrors.checkDisallowedField("dataType", statement.getDataType(), database, H2Database.class);
             }
         } else {
-            validationErrors.checkDisallowedField("dataType", statement.getDataType(), database, HsqlDatabase.class, OracleDatabase.class, MySQLDatabase.class, MSSQLDatabase.class, CockroachDatabase.class, FirebirdDatabase.class);
+            validationErrors.checkDisallowedField("dataType", statement.getDataType(), database, OracleDatabase.class, MySQLDatabase.class, CockroachDatabase.class, FirebirdDatabase.class);
         }
 
 
@@ -73,12 +73,13 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             }
         }
         queryStringBuilder.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
-        if (database instanceof HsqlDatabase || database instanceof Db2zDatabase) {
-            queryStringBuilder.append(" AS BIGINT ");
-        } else if (statement.getDataType() != null) {
+        if (statement.getDataType() != null) {
             if (!(isH2WithoutAsDatatypeSupport(database) || database instanceof CockroachDatabase || database instanceof SybaseASADatabase)) {
                 queryStringBuilder.append(" AS ").append(statement.getDataType());
             }
+        } else if (database instanceof HsqlDatabase || database instanceof AbstractDb2Database) {
+            // these default to INTEGER if data-type is not specified
+            queryStringBuilder.append(" AS BIGINT");
         }
         if (!(database instanceof MariaDBDatabase) && statement.getStartValue() != null) {
             queryStringBuilder.append(" START WITH ").append(statement.getStartValue());
@@ -97,14 +98,17 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         }
 
         if (statement.getCacheSize() != null) {
-            if (database instanceof OracleDatabase || database instanceof Db2zDatabase || database instanceof PostgresDatabase || database instanceof MariaDBDatabase || database instanceof SybaseASADatabase) {
+            if (database instanceof OracleDatabase || database instanceof AbstractDb2Database || database instanceof PostgresDatabase
+                    || database instanceof MariaDBDatabase || database instanceof SybaseASADatabase || database instanceof MSSQLDatabase) {
                 if (BigInteger.ZERO.equals(statement.getCacheSize())) {
                     if (database instanceof OracleDatabase) {
-                        queryStringBuilder.append(" NOCACHE ");
-                    } else if (database instanceof SybaseASADatabase) {
-                        queryStringBuilder.append(" NO CACHE ");
+                        queryStringBuilder.append(" NOCACHE");
+                    } else if (database instanceof SybaseASADatabase || database instanceof AbstractDb2Database || database instanceof MSSQLDatabase) {
+                        queryStringBuilder.append(" NO CACHE");
                     } else if (database instanceof MariaDBDatabase) {
                         queryStringBuilder.append(" CACHE 0");
+                    } else if (database instanceof PostgresDatabase) {
+                        queryStringBuilder.append(" CACHE 1");
                     }
                 } else {
                     queryStringBuilder.append(" CACHE ").append(statement.getCacheSize());
