@@ -69,7 +69,7 @@ public class InitCopyCommandStep extends AbstractHelperCommandStep {
     //
     // Use the internal ProjectCopier if available otherwise retrieve a new one
     //
-    private ProjectCopier determineProjectCopier(CommandScope commandScope, String targetDir) {
+    public static ProjectCopier determineProjectCopier(CommandScope commandScope, String targetDir) {
         ProjectCopier copier = commandScope.getConfiguredValue(INIT_COPY_PROJECT_COPIER_ARG).getValue();
         if (copier != null) {
             return copier;
