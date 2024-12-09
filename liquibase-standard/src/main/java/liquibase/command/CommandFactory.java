@@ -71,6 +71,7 @@ public class CommandFactory implements SingletonObject {
         Collection<CommandStep> allCommandStepInstances = findAllInstances();
         Map<Class<? extends CommandStep>, CommandStep> overrides = findAllOverrides(allCommandStepInstances);
         for (CommandStep step : allCommandStepInstances) {
+
             // order > 0 means is means that this CommandStep has been declared as part of this command
             if (step.getOrder(commandDefinition) > 0) {
                 Optional<CommandStep> overrideStep = getOverride(overrides, step);
@@ -160,7 +161,8 @@ public class CommandFactory implements SingletonObject {
      */
     public SortedSet<CommandDefinition> getCommands(boolean includeInternal) {
         Map<String, String[]> commandNames = new HashMap<>();
-        for (CommandStep step : findAllInstances()) {
+        Collection<CommandStep> allFoundInstances = findAllInstances();
+        for (CommandStep step : allFoundInstances) {
             String[][] names = step.defineCommandNames();
             if (names != null) {
                 for (String[] name : names) {
@@ -253,12 +255,36 @@ public class CommandFactory implements SingletonObject {
     private synchronized Collection<CommandStep> findAllInstances() {
         if (this.allInstances == null) {
             this.allInstances = new ArrayList<>();
-
             ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
             this.allInstances.addAll(serviceLocator.findInstances(CommandStep.class));
+            filterStubInstances();
         }
-
         return this.allInstances;
+    }
+
+    //
+    // Sort all command stubs to the bottom of the list so that any non-stubs
+    // will come first.  If a stub is found and the non-stub is present, the stub
+    // is removed from the list.
+    //
+    private void filterStubInstances() {
+        ((List<CommandStep>) this.allInstances).sort(Comparator.comparing(CommandStep::isStub));
+        Set<String> commandNames = new LinkedHashSet<>();
+        Collection<CommandStep> toRemove = new ArrayList<>();
+        for (CommandStep step : this.allInstances) {
+            String[][] names = step.defineCommandNames();
+            if (names != null) {
+                for (String[] name : names) {
+                    String key = StringUtil.join(name, " ").toLowerCase();
+                    if (step.isStub() && commandNames.contains(key)) {
+                        toRemove.add(step);
+                    } else {
+                        commandNames.add(key);
+                    }
+                }
+            }
+        }
+        this.allInstances.removeAll(toRemove);
     }
 
     /**
