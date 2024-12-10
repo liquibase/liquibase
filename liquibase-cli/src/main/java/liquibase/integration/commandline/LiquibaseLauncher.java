@@ -198,8 +198,11 @@ public class LiquibaseLauncher {
         }
 
         if (!removedJars.isEmpty()) {
-            String message = "WARNING: Deprecated stand-alone AWS extension(s) was found in conflict with the all-in-one Liquibase-AWS Extension:\n" +
-                    "["+ StringUtil.join(removedJars, ", ") +"]. The Liquibase-AWS Extension is used for operations with S3, Secrets Manager, and DynamoDb Pro capabilities. To suppress this message, remove stand-alone AWS extensions for S3, Secrets Manager, and DynamoDb Pro from the classpath. Learn more at https://docs.liquibase.com/pro-extensions";
+            String plural = removedJars.size() > 1 ? "s" : "";
+            String message = "WARNING: Deprecated stand-alone AWS extension(s) are ignored when Liquibase-AWS " +
+                    "extension is present. To suppress this message, remove the following stand-alone AWS extension" +
+                    plural + " from the classpath: " + StringUtil.join(removedJars, ", ")
+                    + ". Learn more at https://docs.liquibase.com/pro-extensions";
             System.out.println(message);
         }
 
