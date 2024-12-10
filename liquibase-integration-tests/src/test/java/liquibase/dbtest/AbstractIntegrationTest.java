@@ -695,13 +695,7 @@ public abstract class AbstractIntegrationTest {
                 compareControl.addSuppressedField(View.class, "name");
             }
 
-            DiffOutputControl diffOutputControl = new DiffOutputControl();
             File tempFile = tempDirectory.getRoot().createTempFile("liquibase-test", ".xml");
-
-            if (outputCsv) {
-                diffOutputControl.setDataDir(new File(tempFile.getParentFile(), "liquibase-data").getCanonicalPath().replaceFirst("\\w:",""));
-            }
-
             DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, null, compareControl);
 
 
