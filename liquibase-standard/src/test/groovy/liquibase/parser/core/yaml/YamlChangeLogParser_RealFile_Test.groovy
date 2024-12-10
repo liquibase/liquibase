@@ -30,6 +30,7 @@ import liquibase.change.custom.ExampleCustomSqlChange;
 import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog
+import liquibase.changelog.visitor.IncludeVisitor
 import liquibase.database.ObjectQuotingStrategy
 import liquibase.database.core.MockDatabase;
 import liquibase.exception.ChangeLogParseException
@@ -224,6 +225,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         when:
         DatabaseChangeLog changeLog = new YamlChangeLogParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor())
 
+        new IncludeVisitor().visit(changeLog)
         then:
         changeLog.getLogicalFilePath() == path
         changeLog.getPhysicalFilePath() == path
@@ -252,7 +254,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
     def "changeSets with two levels of includes parse correctly"() throws Exception {
         when:
         DatabaseChangeLog changeLog = new YamlChangeLogParser().parse(doubleNestedFileName, new ChangeLogParameters(), new JUnitResourceAccessor());
-
+        new IncludeVisitor().visit(changeLog)
         then:
         changeLog.getLogicalFilePath() == doubleNestedFileName
         changeLog.getPhysicalFilePath() == doubleNestedFileName
