@@ -12,7 +12,7 @@
         </preConditions>
     </include>
 
-    <include file="include.xml" relativeToChangelogFile="true" logicalFilePath="included">
+    <include file="included.xml" relativeToChangelogFile="true" logicalFilePath="included">
         <preConditions onFail="HALT">
             <changeLogPropertyDefined property="foo" value="bar"/>
         </preConditions>

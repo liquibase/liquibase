@@ -6,7 +6,7 @@
     <property name="foo" value="bar"/>
     <includeAll path="test_precondition" relativeToChangelogFile="true" logicalFilePath="test_precondition">
         <preConditions onFail="WARN">
-            <tableExists tableName="NOT_EXISTANT_TABLE" />
+            <tableExists tableName="NOT_EXISTENT_TABLE" />
         </preConditions>
     </includeAll>
 

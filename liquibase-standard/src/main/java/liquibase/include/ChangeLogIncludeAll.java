@@ -76,7 +76,7 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
     private ModifyChangeSets modifyChangeSets;
     private final Database database = Scope.getCurrentScope().getDatabase();
     private List<DatabaseChangeLog> nestedChangeLogs = new ArrayList<>(10);
-    private boolean markRun = false;
+    private boolean markRan = false;
 
     public ChangeLogIncludeAll(ParsedNode node, ResourceAccessor resourceAccessor,
                             DatabaseChangeLog parentChangeLog, ModifyChangeSets modifyChangeSets)
@@ -100,7 +100,6 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
         this.path = node.getChildValue(null, PATH, String.class);
         this.preconditions = ChangeLogIncludeUtils.getPreconditions(node, resourceAccessor);
         this.setNestedChangeLogs(node);
-        this.checkPreconditions();
     }
 
     @Override
@@ -118,7 +117,7 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
-    private void checkPreconditions() {
+    void checkPreconditions() {
         PreconditionContainer preconditionContainer = this.getPreconditions();
         if(preconditionContainer != null) {
 
@@ -133,7 +132,7 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
                     } else if (PreconditionContainer.FailOption.WARN.equals(preconditionContainer.getOnFail())) {
                         ChangeLogIncludeUtils.sendIncludePreconditionWarningMessage(warningMessage, e);
                     } else if (PreconditionContainer.FailOption.MARK_RAN.equals(preconditionContainer.getOnFail())) {
-                        this.setMarkRun(true);
+                        this.setMarkRan(true);
                     } else {
                         this.nestedChangeLogs.clear();
                     }
@@ -143,7 +142,7 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
                     } else if (PreconditionContainer.ErrorOption.WARN.equals(preconditionContainer.getOnError())) {
                         ChangeLogIncludeUtils.sendIncludePreconditionWarningMessage(warningMessage, e);
                     } else if (PreconditionContainer.ErrorOption.MARK_RAN.equals(preconditionContainer.getOnError())) {
-                        this.setMarkRun(true);
+                        this.setMarkRan(true);
                     }
                     else {
                         this.nestedChangeLogs.clear();

@@ -4,19 +4,19 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <property name="foo" value="bar"/>
-    <includeAll path="test_precondition" relativeToChangelogFile="true" logicalFilePath="test_precondition">
-        <preConditions onFail="HALT">
+    <include file="include-container.xml" relativeToChangelogFile="true" logicalFilePath="include-container">
+        <preConditions onFail="MARK_RAN">
             <tableExists tableName="NOT_EXISTENT_TABLE" />
         </preConditions>
-    </includeAll>
+    </include>
 
-    <includeAll path="include" relativeToChangelogFile="true" logicalFilePath="included">
+    <include file="included.xml" relativeToChangelogFile="true" logicalFilePath="included">
         <preConditions onFail="HALT">
             <changeLogPropertyDefined property="foo" value="bar"/>
         </preConditions>
-    </includeAll>
+    </include>
 
-    <changeSet  id="default"  author="cagliostro">
+    <changeSet id="default" author="cagliostro">
         <createTable tableName="DEFAULT_TABLE">
             <column name="ID" type="BIGINT"/>
         </createTable>

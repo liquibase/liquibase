@@ -76,10 +76,11 @@ class IncludePreconditionsTest extends Specification {
             updateCommand.execute()
         } as Scope.ScopedRunner)
         then:
-        def changeLogParseException = thrown(ChangeLogParseException)
-        def preconditionFailedException = changeLogParseException.getCause().getCause();
+        def runtimeException = thrown(RuntimeException)
+        def preconditionFailedException = runtimeException.getCause()
         preconditionFailedException.class == PreconditionFailedException.class
-        preconditionFailedException.getMessage().contains("Preconditions Failed")    }
+        preconditionFailedException.getMessage().contains("Preconditions Failed")
+    }
 
     def "run include with preconditions fail option CONTINUE"() {
         when:
@@ -154,6 +155,56 @@ class IncludePreconditionsTest extends Specification {
         includedTables.count("UNDER_PRECONDITION_TABLE") == 0
     }
 
+    def "run include with preconditions fail option MARK_RAN_RECURSIVE"() {
+        when:
+        String changelogFile = "changelogs/h2/include/master-mark_ran-recursive.xml"
+        def changelog =
+                DatabaseChangelogCommandStep.getDatabaseChangeLog(changelogFile, new ChangeLogParameters(), h2.getDatabaseFromFactory())
+        def resourceAccessor = new SearchPathResourceAccessor("target/test-classes")
+        def scopeSettings = [
+                (Scope.Attr.resourceAccessor.name()) : resourceAccessor
+        ]
+
+        Scope.child(scopeSettings, {
+            def updateCommand = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+            updateCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, h2.getDatabaseFromFactory())
+            updateCommand.addArgumentValue(UpdateCommandStep.CHANGELOG_ARG, changelog)
+            updateCommand.execute()
+        } as Scope.ScopedRunner)
+        def changelogResultSet = h2.getConnection().createStatement().executeQuery("select * from databasechangelog")
+        h2.getConnection().createStatement().executeQuery("select * from INCLUDED_TABLE")
+        h2.getConnection().createStatement().executeQuery("select * from DEFAULT_TABLE")
+        def tablesResultSet = h2.getConnection().createStatement().executeQuery("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES")
+        then:
+        noExceptionThrown()
+        List<String> includedFiles = new ArrayList<>(3)
+        List<String> includedTables = new ArrayList<>(40)
+        while (changelogResultSet.next()) {
+            def filename = changelogResultSet.getString("filename")
+            includedFiles.add(filename)
+        }
+        while (tablesResultSet.next()) {
+            def filename = tablesResultSet.getString("TABLE_NAME")
+            includedTables.add(filename)
+        }
+        includedFiles.size() == 7
+        includedFiles.count("included") == 1
+        includedFiles.count("included1") == 1
+        includedFiles.count("included2") == 1
+        includedFiles.count("included3") == 1
+        includedFiles.count("include-container") == 1
+        includedFiles.count("changelogs/h2/include/master-mark_ran-recursive.xml") == 1
+        includedFiles.count("includeAll") == 1
+
+        includedTables.count("DEFAULT_TABLE") == 1
+        includedTables.count("INCLUDED_TABLE") == 1
+        includedTables.count("INCLUDE_CONTAINER_TABLE") == 0
+        includedTables.count("INCLUDED_TABLE_1") == 0
+        includedTables.count("INCLUDED_TABLE_2") == 0
+        includedTables.count("INCLUDED_TABLE_3") == 0
+        includedTables.count("TEST_PRECONDITION_TABLE") == 0
+    }
+
     def "run include with preconditions error option WARN"() {
         when:
         String changelogFile = "changelogs/h2/include/master-err-warn.xml"
@@ -204,8 +255,8 @@ class IncludePreconditionsTest extends Specification {
             updateCommand.execute()
         } as Scope.ScopedRunner)
         then:
-        def changeLogParseException = thrown(ChangeLogParseException)
-        def preconditionErrorException = changeLogParseException.getCause().getCause();
+        def runtimeException = thrown(RuntimeException)
+        def preconditionErrorException = runtimeException.getCause();
         preconditionErrorException.class == PreconditionErrorException.class
         preconditionErrorException.getMessage().contains("Precondition Error")
     }

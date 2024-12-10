@@ -5,8 +5,13 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet  id="include"  author="cagliostro">
-        <createTable tableName="INCLUDED_TABLE">
+    <includeAll path="../includeAll/test_precondition" relativeToChangelogFile="true" logicalFilePath="includeAll"/>
+
+    <changeSet id="include3" author="cagliostro">
+        <preConditions>
+            <sqlCheck expectedResult="TRUE">WRONG SQL</sqlCheck>
+        </preConditions>
+        <createTable tableName="INCLUDED_TABLE_3">
             <column name="ID" type="BIGINT"/>
         </createTable>
     </changeSet>

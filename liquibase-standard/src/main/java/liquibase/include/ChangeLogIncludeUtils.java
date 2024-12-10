@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import liquibase.ContextExpression;
@@ -21,17 +24,19 @@ import static liquibase.changelog.DatabaseChangeLog.PRE_CONDITIONS;
 import static liquibase.changelog.DatabaseChangeLog.normalizePath;
 import liquibase.changelog.ModifyChangeSets;
 import liquibase.changelog.RanChangeSet;
+import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changeset.ChangeSetService;
 import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.database.Database;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.LiquibaseException;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.UnknownChangelogFormatException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.logging.Logger;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcObject;
@@ -136,16 +141,15 @@ public final class ChangeLogIncludeUtils {
 																						 SortedSet<ChangeSet> changeSetAccumulator,
 																						 SortedSet<ChangeSet> skippedChangeSetAccumulator) {
 
+	include.checkPreconditions();
 	DatabaseChangeLog changeLog = include.getNestedChangelog();
+	if(include.isMarkRan())
+	 propagateMarkRan(Collections.singletonList(changeLog), include.getPreconditions());
+
 	if(changeLog != null) {
 	 changeSetAccumulator.addAll(ChangeLogIncludeUtils.getNestedChangeSets(include));
 	 skippedChangeSetAccumulator.addAll(ChangeLogIncludeUtils.getNestedSkippedChangeSets(include));
-	 for(ChangeLogInclude i : changeLog.getIncludeList()) {
-		flatChangeLogChangeSets(i, changeSetAccumulator, skippedChangeSetAccumulator);
-	 }
-	 for(ChangeLogIncludeAll i : changeLog.getIncludeAllList()) {
-		flatChangeLogChangeSets(i, changeSetAccumulator, skippedChangeSetAccumulator);
-	 }
+	 flatChangeLogChangeSets(changeSetAccumulator, skippedChangeSetAccumulator, changeLog);
 	}
  }
 
@@ -153,30 +157,46 @@ public final class ChangeLogIncludeUtils {
 																						 SortedSet<ChangeSet> changeSetAccumulator,
 																						 SortedSet<ChangeSet> skippedChangeSetAccumulator) {
 
+	includeAll.checkPreconditions();
+	if(includeAll.isMarkRan())
+	 propagateMarkRan(includeAll.getNestedChangeLogs(), includeAll.getPreconditions());
+
 	if(!includeAll.getNestedChangeLogs().isEmpty()) {
 	 changeSetAccumulator.addAll(ChangeLogIncludeUtils.getNestedChangeSets(includeAll));
 	 skippedChangeSetAccumulator.addAll(ChangeLogIncludeUtils.getNestedSkippedChangeSets(includeAll));
-	 includeAll.getNestedChangeLogs().forEach(changeLog -> {
-		for(ChangeLogIncludeAll i : changeLog.getIncludeAllList()) {
-		 flatChangeLogChangeSets(i, changeSetAccumulator, skippedChangeSetAccumulator);
-		}
-		for(ChangeLogInclude i : changeLog.getIncludeList()) {
-		 flatChangeLogChangeSets(i, changeSetAccumulator, skippedChangeSetAccumulator);
-		}
-	 });
+	 includeAll.getNestedChangeLogs().forEach(changeLog ->
+			 flatChangeLogChangeSets(changeSetAccumulator, skippedChangeSetAccumulator, changeLog));
+	}
+ }
+
+ private static void propagateMarkRan(List<DatabaseChangeLog> changeLogs, PreconditionContainer preconditions) {
+	changeLogs.forEach(cl -> {
+	 cl.getIncludeList().forEach(i -> i.setPreconditions(getMarkRanPreconditions()));
+	 cl.getIncludeAllList().forEach(ia -> ia.setPreconditions(getMarkRanPreconditions()));
+	});
+ }
+
+ private static void flatChangeLogChangeSets(SortedSet<ChangeSet> changeSetAccumulator,
+																						 SortedSet<ChangeSet> skippedChangeSetAccumulator,
+																						 DatabaseChangeLog changeLog) {
+	for(ChangeLogInclude i : changeLog.getIncludeList()) {
+	 flatChangeLogChangeSets(i, changeSetAccumulator, skippedChangeSetAccumulator);
+	}
+	for(ChangeLogIncludeAll i : changeLog.getIncludeAllList()) {
+	 flatChangeLogChangeSets(i, changeSetAccumulator, skippedChangeSetAccumulator);
 	}
  }
 
  private static SortedSet<ChangeSet> getNestedChangeSets(ChangeLogInclude include) {
 	return getNestedChangeSets(include.getDatabase(), include.getLogicalFilePath(),
-			include.getNestedChangelog(), include.getModifyChangeSets(), include.getPreconditions(), include.isMarkRun());
+			include.getNestedChangelog(), include.getModifyChangeSets(), include.getPreconditions(), include.isMarkRan());
  }
 
  private static SortedSet<ChangeSet> getNestedChangeSets(ChangeLogIncludeAll includeAll) {
 	SortedSet<ChangeSet> result = new TreeSet<>();
 	includeAll.getNestedChangeLogs().forEach(changelog -> result.addAll(getNestedChangeSets(includeAll.getDatabase(), includeAll.getLogicalFilePath(),
 			changelog, includeAll.getModifyChangeSets(), includeAll.getPreconditions(),
-			includeAll.isMarkRun())));
+			includeAll.isMarkRan())));
 	return result;
  }
 
@@ -264,7 +284,7 @@ public final class ChangeLogIncludeUtils {
 
  private static SortedSet<ChangeSet> getNestedChangeSets(Database database, String logicalFilePath,
 																												 DatabaseChangeLog childChangeLog, ModifyChangeSets modifyChangeSets,
-																												 PreconditionContainer preconditions, boolean markRun) {
+																												 PreconditionContainer preconditions, boolean markRan) {
 	SortedSet<ChangeSet> result = new TreeSet<>();
 	List<RanChangeSet> ranChangeSets = new ArrayList<>(1);
 	if (database != null && logicalFilePath != null) {
@@ -290,8 +310,8 @@ public final class ChangeLogIncludeUtils {
 		 changeSet.setFilePath(logicalFilePath);
 		}
 	 }
-	 if(markRun)
-		changeSet.setPreconditions(preconditions);
+	 if(markRan)
+		changeSet.setPreconditions(getMarkRanPreconditions());
 
 	 result.add(changeSet);
 	}
@@ -313,9 +333,80 @@ public final class ChangeLogIncludeUtils {
 	return ranChangeSet.isPresent();
  }
 
- private static boolean isBlank(PreconditionContainer precondition) {
-	return precondition == null
-			|| precondition.getNestedPreconditions() == null
-			|| precondition.getNestedPreconditions().isEmpty();
+ private static PreconditionContainer getMarkRanPreconditions() {
+	PreconditionContainer result = new PreconditionContainer();
+	result.setOnFail(PreconditionContainer.FailOption.MARK_RAN);
+	result.addNestedPrecondition(getFailedPrecondition());
+	return result;
  }
+
+ private static Precondition getFailedPrecondition() {
+
+	return new Precondition() {
+	 @Override
+	 public String getName() {
+		return "";
+	 }
+
+	 @Override
+	 public Warnings warn(Database database) {
+		return null;
+	 }
+
+	 @Override
+	 public ValidationErrors validate(Database database) {
+		return null;
+	 }
+
+	 @Override
+	 public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet,
+										 ChangeExecListener changeExecListener)
+			 throws PreconditionFailedException, PreconditionErrorException {
+
+		throw new PreconditionFailedException(new ArrayList<>());
+	 }
+
+	 @Override
+	 public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor)
+			 throws ParsedNodeException {
+
+	 }
+
+	 @Override
+	 public String getSerializedObjectName() {
+		return "";
+	 }
+
+	 @Override
+	 public Set<String> getSerializableFields() {
+		return new HashSet<>();
+	 }
+
+	 @Override
+	 public Object getSerializableFieldValue(String field) {
+		return null;
+	 }
+
+	 @Override
+	 public SerializationType getSerializableFieldType(String field) {
+		return null;
+	 }
+
+	 @Override
+	 public String getSerializableFieldNamespace(String field) {
+		return "";
+	 }
+
+	 @Override
+	 public String getSerializedObjectNamespace() {
+		return "";
+	 }
+
+	 @Override
+	 public ParsedNode serialize() throws ParsedNodeException {
+		return null;
+	 }
+	};
+ }
+
 }

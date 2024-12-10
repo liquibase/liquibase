@@ -75,11 +75,10 @@ class IncludeAllPreconditionsTest extends Specification {
             updateCommand.execute()
         } as Scope.ScopedRunner)
         then:
-        def changeLogParseException = thrown(ChangeLogParseException)
-        def preconditionFailedException = changeLogParseException.getCause().getCause();
+        def runtimeException = thrown(RuntimeException)
+        def preconditionFailedException = runtimeException.getCause()
         preconditionFailedException.class == PreconditionFailedException.class
         preconditionFailedException.getMessage().contains("Preconditions Failed")
-
     }
 
     def "run include with preconditions fail option CONTINUE"() {
