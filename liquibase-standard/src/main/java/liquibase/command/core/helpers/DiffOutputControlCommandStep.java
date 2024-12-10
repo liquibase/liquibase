@@ -37,9 +37,9 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
                 .description("Include the tablespace attribute in the changelog. Defaults to false.").build();
 
         EXCLUDE_OBJECTS = builder.argument("excludeObjects", String.class).defaultValue(null)
-                .description("Objects to exclude from diff. Supports regular expressions. Defaults to null. Defaults to null.").build();
+                .description("Objects to exclude from diff. Supports regular expressions. Defaults to null.").build();
         INCLUDE_OBJECTS = builder.argument("includeObjects", String.class).defaultValue(null)
-                .description("Objects to include in diff. Supports regular expressions. Defaults to null. Defaults to null.").build();
+                .description("Objects to include in diff. Supports regular expressions. Defaults to null.").build();
 
         DIFF_OUTPUT_CONTROL = builder.result("diffOutputControl", DiffOutputControl.class).build();
     }
