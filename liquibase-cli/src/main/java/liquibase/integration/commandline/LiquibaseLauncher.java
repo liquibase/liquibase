@@ -65,6 +65,10 @@ public class LiquibaseLauncher {
 
     private static final String LIQUIBASE_CORE_JAR_PATTERN = ".*?/liquibase-core([-0-9.])*.jar";
     private static final String LIQUIBASE_COMMERCIAL_JAR_PATTERN = ".*?/liquibase-commercial([-0-9.])*.jar";
+    private static final String LIQUIBASE_S3_JAR_PATTERN = ".*?/liquibase-s3-extension([-0-9.])*.jar";
+    private static final String LIQUIBASE_DYNAMO_JAR_PATTERN = ".*?/liquibase-commercial-dynamodb([-0-9.])*.jar";
+    private static final String LIQUIBASE_SECRETS_JAR_PATTERN = ".*?/liquibase-aws-secrets-manager([-0-9.])*.jar";
+    private static final String LIQUIBASE_AWS_JAR_PATTERN = ".*?/liquibase-aws-extension([-0-9.])*(-RC[0-9])*.jar"; // This pattern is different to match the RC1 release on Maven central.
     private static final String LIQUIBASE_CORE_MESSAGE = "Liquibase Core";
     private static final String LIQUIBASE_COMMERCIAL_MESSAGE = "Liquibase Commercial";
     private static final String DEPENDENCY_JAR_VERSION_PATTERN = "(.*?)-?[0-9.]*.jar";
@@ -95,6 +99,7 @@ public class LiquibaseLauncher {
 
         List<URL> libUrls = getLibUrls(liquibaseHome);
         checkForDuplicatedJars(libUrls);
+        libUrls = removeIncompatibleAwsExtensions(libUrls);
 
         if (debug) {
             debug("Final Classpath:");
@@ -167,6 +172,45 @@ public class LiquibaseLauncher {
         } else {
             throw new RuntimeException("Unknown liquibase launcher parent classloader value: "+ parentLoaderSetting);
         }
+    }
+
+    /**
+     * The liquibase-aws-extension contains S3, dynamo and secrets, and thus, if the liquibase-aws-extension is on the
+     * classpath, the other three extensions will be ignored.
+     * @param libUrls the list of libs
+     * @return the list of libs, minus S3, dynamo and secrets, if necessary
+     */
+    private static List<URL> removeIncompatibleAwsExtensions(List<URL> libUrls) {
+        boolean awsJarExists = doesJarExist(libUrls, LIQUIBASE_AWS_JAR_PATTERN);
+        List<String> removedJars = new ArrayList<>();
+
+        if (awsJarExists) {
+            for (Iterator<URL> iterator = libUrls.iterator(); iterator.hasNext(); ) {
+                URL libUrl = iterator.next();
+                String file = libUrl.getFile();
+                if (file.matches(LIQUIBASE_SECRETS_JAR_PATTERN)
+                        || file.matches(LIQUIBASE_DYNAMO_JAR_PATTERN)
+                        || file.matches(LIQUIBASE_S3_JAR_PATTERN)) {
+                    removedJars.add(file);
+                    iterator.remove();
+                }
+            }
+        }
+
+        if (!removedJars.isEmpty()) {
+            String message = "WARNING: Deprecated stand-alone AWS extension(s) was found in conflict with the all-in-one Liquibase-AWS Extension:\n" +
+                    "["+ StringUtil.join(removedJars, ", ") +"]. The Liquibase-AWS Extension is used for operations with S3, Secrets Manager, and DynamoDb Pro capabilities. To suppress this message, remove stand-alone AWS extensions for S3, Secrets Manager, and DynamoDb Pro from the classpath. Learn more at https://docs.liquibase.com/pro-extensions";
+            System.out.println(message);
+        }
+
+        return libUrls;
+    }
+
+    private static boolean doesJarExist(List<URL> libUrls, String jarFilenamePattern) {
+        return libUrls
+                .stream()
+                .map(URL::getFile)
+                .anyMatch(file -> file.matches(jarFilenamePattern));
     }
 
     /**
