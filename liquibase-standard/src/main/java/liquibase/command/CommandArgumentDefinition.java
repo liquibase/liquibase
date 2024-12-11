@@ -275,20 +275,28 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
             newCommandArgument.forcePrintedAliases.add(alias);
             return this;
         }
-
         /**
          * Complete construction and register the definition with the rest of the system.
          *
          * @throws IllegalArgumentException is an invalid configuration was specified
          */
         public CommandArgumentDefinition<DataType> build() throws IllegalArgumentException {
+            return build(false);
+        }
+
+        /**
+         * Complete construction and register the definition with the rest of the system.
+         *
+         * @throws IllegalArgumentException is an invalid configuration was specified
+         */
+        public CommandArgumentDefinition<DataType> build(boolean allowDuplicates) throws IllegalArgumentException {
             if (!ALLOWED_ARGUMENT_PATTERN.matcher(newCommandArgument.name).matches()) {
                 throw new IllegalArgumentException("Invalid argument format: " + newCommandArgument.name);
             }
 
             for (String[] commandName : commandNames) {
                 try {
-                    Scope.getCurrentScope().getSingleton(CommandFactory.class).register(commandName, newCommandArgument);
+                    Scope.getCurrentScope().getSingleton(CommandFactory.class).register(commandName, newCommandArgument, allowDuplicates);
                 } catch (IllegalArgumentException iae) {
                     Scope.getCurrentScope().getLog(CommandArgumentDefinition.class).warning(
                             "Unable to register command '" + StringUtil.join(commandName, " ") + "' argument '" + newCommandArgument.getName() + "': " + iae.getMessage());

@@ -3,6 +3,7 @@ package liquibase.command;
 import liquibase.Scope;
 import liquibase.SingletonObject;
 import liquibase.servicelocator.ServiceLocator;
+import liquibase.util.CollectionUtil;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StringUtil;
 
@@ -161,12 +162,17 @@ public class CommandFactory implements SingletonObject {
      */
     public SortedSet<CommandDefinition> getCommands(boolean includeInternal) {
         Map<String, String[]> commandNames = new HashMap<>();
+        Set<String> keys = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         Collection<CommandStep> allFoundInstances = findAllInstances();
         for (CommandStep step : allFoundInstances) {
             String[][] names = step.defineCommandNames();
             if (names != null) {
                 for (String[] name : names) {
-                    commandNames.put(StringUtil.join(name, " "), name);
+                    String key = StringUtil.join(name, " ");
+                    if (! step.isStub() || ! keys.contains(key)) {
+                        commandNames.put(key, name);
+                        keys.add(key);
+                    }
                 }
             }
         }
@@ -186,19 +192,33 @@ public class CommandFactory implements SingletonObject {
         return Collections.unmodifiableSortedSet(commands);
 
     }
-
+    
     /**
      * Called by {@link CommandArgumentDefinition.Building#build()} to
      * register that a particular {@link CommandArgumentDefinition} is available for a command.
      */
     protected void register(String[] commandName, CommandArgumentDefinition<?> definition) {
+        register(commandName, definition, false);
+    }
+
+    /**
+     * Called by {@link CommandArgumentDefinition.Building#build()} to
+     * register that a particular {@link CommandArgumentDefinition} is available for a command.
+     * This method supports an additional argument which allows duplicate arguments to exist
+     * without throwing an exception.  This is used by stub commands implemented for Pro features
+     * that do not have their extension present.
+     */
+    protected void register(String[] commandName, CommandArgumentDefinition<?> definition, boolean allowDuplicates) {
         String commandNameKey = StringUtil.join(commandName, " ");
         if (!commandArgumentDefinitions.containsKey(commandNameKey)) {
             commandArgumentDefinitions.put(commandNameKey, new TreeSet<>());
         }
 
         if (commandArgumentDefinitions.get(commandNameKey).contains(definition)) {
-           throw new IllegalArgumentException("Duplicate argument '" + definition.getName() + "' found for command '" + commandNameKey + "'");
+            if (! allowDuplicates) {
+                throw new IllegalArgumentException("Duplicate argument '" + definition.getName() + "' found for command '" + commandNameKey + "'");
+            }
+            return;
         }
         if (definition.isRequired() && definition.getDefaultValue() != null) {
             throw new IllegalArgumentException("Argument '" + definition.getName() + "' for command '" + commandNameKey + "' has both a default value and the isRequired flag set to true. Arguments with default values cannot be marked as required.");
@@ -208,9 +228,9 @@ public class CommandFactory implements SingletonObject {
 
     /**
      * Unregisters all information about the given {@link CommandStep}.
-     * <bNOTE:</b> package-protected method used primarily for testing and may be removed or modified in the future.
+     * This is used to handle a situation where we have multiple command step instances
      */
-    protected void unregister(String[] commandName) {
+    public void unregister(String[] commandName) {
         commandArgumentDefinitions.remove(StringUtil.join(commandName, " "));
     }
 
