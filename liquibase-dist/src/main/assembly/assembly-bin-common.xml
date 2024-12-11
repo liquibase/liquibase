@@ -40,7 +40,7 @@
             </includes>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/../liquibase-standard/target/classes/liquibase/examples</directory>
+            <directory>${maven.multiModuleProjectDirectory}/liquibase-standard/src/main/resources/liquibase/examples</directory>
             <outputDirectory>examples</outputDirectory>
             <includes>
                 <include>**/*</include>
@@ -50,7 +50,7 @@
             </excludes>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/../liquibase-standard/target/classes/liquibase/examples</directory>
+            <directory>${maven.multiModuleProjectDirectory}/liquibase-standard/src/main/resources/liquibase/examples</directory>
             <outputDirectory>examples</outputDirectory>
             <includes>
                 <include>**/start-h2</include>
@@ -59,7 +59,7 @@
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/../liquibase-standard/target/classes/liquibase/examples</directory>
+            <directory>${maven.multiModuleProjectDirectory}/liquibase-standard/src/main/resources/liquibase/examples</directory>
             <outputDirectory>examples</outputDirectory>
             <includes>
                 <include>**/start-h2.bat</include>
@@ -105,7 +105,7 @@
                 <include>net.snowflake:snowflake-jdbc:</include>
                 <include>javax.resource:connector-api:</include>
                 <include>org.slf4j:slf4j-api:</include>
-                <include>org.slf4j:slf4j-simple:</include>
+                <include>org.slf4j:slf4j-nop:</include>
                 <!-- CANNOT SHIP FOR LICENSE REASONS -->
                 <!-- <include>mysql:mysql-connector-java:jar</include> -->
             </includes>
@@ -168,7 +168,7 @@
                 <exclude>net.snowflake:snowflake-jdbc:</exclude> <!-- from internal/lib -->
                 <exclude>javax.resource:connector-api:</exclude> <!-- from internal/lib -->
                 <exclude>org.slf4j:slf4j-api:</exclude> <!-- from internal/lib -->
-                <exclude>org.slf4j:slf4j-simple:</exclude> <!-- from internal/lib -->
+                <exclude>org.slf4j:slf4j-nop:</exclude> <!-- from internal/lib -->
                 <exclude>org.antlr:antlr4-runtime:jar:</exclude>  <!-- from connector-api -->
                 <exclude>org.checkerframework:checker-qual:jar:</exclude> <!-- from postgresql -->
                 <exclude>commons-beanutils:commons-beanutils:jar:</exclude> <!-- from opencsv -->

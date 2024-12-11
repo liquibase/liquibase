@@ -67,6 +67,13 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
 
                 for (URL url : urls) {
+                    //
+                    // Skip .pom files because they are not directories and they cause
+                    // an IllegalArgumentException when we call getProtocol()
+                    //
+                    if (url.toString().endsWith(".pom")) {
+                        continue;
+                    }
                     try {
                         if (url.getProtocol().equals("file")) {
                             additionalResourceAccessors.addResourceAccessor(pathHandlerFactory.getResourceAccessor(url.toExternalForm()));

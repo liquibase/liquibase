@@ -1,9 +1,10 @@
-package liquibase.integration.commandline;
+package liquibase.util;
 
 import liquibase.Scope;
 import liquibase.logging.mdc.customobjects.Version;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,8 +18,9 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
-import static liquibase.integration.commandline.LiquibaseLauncherSettings.LiquibaseLauncherSetting.LIQUIBASE_HOME;
-import static liquibase.integration.commandline.LiquibaseLauncherSettings.getSetting;
+import static liquibase.util.LiquibaseLauncherSettings.LiquibaseLauncherSetting.LIQUIBASE_HOME;
+import static liquibase.util.LiquibaseLauncherSettings.getSetting;
+
 
 public class VersionUtils {
     public static Path getLiquibaseHomePath(Path workingDirectory) throws IOException {
@@ -101,7 +103,7 @@ public class VersionUtils {
      */
     private static void handleCompilerJarEdgeCase(File pathEntryFile, JarFile jarFile, LibraryInfo libraryInfo) {
         try {
-            if (pathEntryFile.toString().endsWith("compiler.jar") && StringUtil.isEmpty(libraryInfo.version)) {
+            if (pathEntryFile.toString().endsWith("compiler.jar") && StringUtils.isEmpty(libraryInfo.version)) {
                 ZipEntry entry = jarFile.getEntry("META-INF/maven/com.github.spullara.mustache.java/compiler/pom.properties");
                 InputStream inputStream = jarFile.getInputStream(entry);
 
