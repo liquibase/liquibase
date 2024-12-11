@@ -1,14 +1,13 @@
 package liquibase.lockservice;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.Change;
-import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.exception.DatabaseException;
@@ -28,11 +27,16 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 
 import java.security.SecureRandom;
-import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.DateFormat;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.ResourceBundle.getBundle;
 
@@ -50,6 +54,10 @@ public class StandardLockService implements LockService {
     private boolean isDatabaseChangeLogLockTableInitialized;
     private ObjectQuotingStrategy quotingStrategy;
     private final SecureRandom random = new SecureRandom();
+
+    private final ScheduledExecutorService watchdogScheduler = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "liquibase-watchdog"));
+
+    private ScheduledFuture<?> watchdogFuture;
 
 
     public StandardLockService() {
@@ -284,8 +292,21 @@ public class StandardLockService implements LockService {
         try {
             database.rollback();
             this.init();
+            // Watch dog refresh lock by per 10s
+            // after 60s Force release lock
+            Timestamp now = Timestamp.from(Instant.now());
+            List<Timestamp> timestampList = (List<Timestamp>) executor.queryForList(new SelectFromDatabaseChangeLogLockStatement("LOCKGRANTED"), Timestamp.class);
+            for (Timestamp timestamp : timestampList) {
+                if(timestamp == null) {
+                    continue;
+                }
+                if(now.getTime() - timestamp.getTime() > 60_000) {
+                    Scope.getCurrentScope().getLog(getClass()).warning(String.format("Force release changelog lock, last lock time: %s.", timestamp));
+                    releaseLock();
+                }
+            }
 
-            Boolean locked = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForObject(
+            Boolean locked = executor.queryForObject(
                     new SelectFromDatabaseChangeLogLockStatement("LOCKED"), Boolean.class
             );
 
@@ -319,6 +340,7 @@ public class StandardLockService implements LockService {
                 }
                 database.commit();
                 Scope.getCurrentScope().getLog(getClass()).info(coreBundle.getString("successfully.acquired.change.log.lock"));
+                watch(executor);
 
                 hasChangeLogLock = true;
 
@@ -336,9 +358,31 @@ public class StandardLockService implements LockService {
 
     }
 
+    private void watch(Executor executor) {
+        // 定义要执行的任务
+        Runnable task = () -> {
+            try {
+                int update = executor.update(new RefreshLockDatabaseChangeLogStatement());
+                if(update <= 0) {
+                    Scope.getCurrentScope().getLog(getClass()).warning("Watch dog refresh changelog lock fail.");
+                    return;
+                }
+                Scope.getCurrentScope().getLog(getClass()).fine("Watch dog refresh changelog lock success.");
+            } catch (DatabaseException e) {
+                Scope.getCurrentScope().getLog(getClass()).severe("Watch dog refresh changelog lock error.", e);
+            }
+
+        };
+
+        // 每 10 秒执行一次任务
+        watchdogFuture = watchdogScheduler.scheduleAtFixedRate(task, 0, 10, TimeUnit.SECONDS);
+    }
+
     @Override
     public void releaseLock() throws LockException {
-
+        if(watchdogFuture != null && !watchdogFuture.isCancelled()) {
+            watchdogFuture.cancel(false);
+        }
         ObjectQuotingStrategy incomingQuotingStrategy = null;
         if (this.quotingStrategy != null) {
             incomingQuotingStrategy = database.getObjectQuotingStrategy();
