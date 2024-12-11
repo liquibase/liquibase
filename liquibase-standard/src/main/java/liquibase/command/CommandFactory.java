@@ -3,6 +3,7 @@ package liquibase.command;
 import liquibase.Scope;
 import liquibase.SingletonObject;
 import liquibase.servicelocator.ServiceLocator;
+import liquibase.util.CollectionUtil;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StringUtil;
 
@@ -71,6 +72,7 @@ public class CommandFactory implements SingletonObject {
         Collection<CommandStep> allCommandStepInstances = findAllInstances();
         Map<Class<? extends CommandStep>, CommandStep> overrides = findAllOverrides(allCommandStepInstances);
         for (CommandStep step : allCommandStepInstances) {
+
             // order > 0 means is means that this CommandStep has been declared as part of this command
             if (step.getOrder(commandDefinition) > 0) {
                 Optional<CommandStep> overrideStep = getOverride(overrides, step);
@@ -160,11 +162,17 @@ public class CommandFactory implements SingletonObject {
      */
     public SortedSet<CommandDefinition> getCommands(boolean includeInternal) {
         Map<String, String[]> commandNames = new HashMap<>();
-        for (CommandStep step : findAllInstances()) {
+        Set<String> keys = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        Collection<CommandStep> allFoundInstances = findAllInstances();
+        for (CommandStep step : allFoundInstances) {
             String[][] names = step.defineCommandNames();
             if (names != null) {
                 for (String[] name : names) {
-                    commandNames.put(StringUtil.join(name, " "), name);
+                    String key = StringUtil.join(name, " ");
+                    if (! step.isStub() || ! keys.contains(key)) {
+                        commandNames.put(key, name);
+                        keys.add(key);
+                    }
                 }
             }
         }
@@ -184,19 +192,33 @@ public class CommandFactory implements SingletonObject {
         return Collections.unmodifiableSortedSet(commands);
 
     }
-
+    
     /**
      * Called by {@link CommandArgumentDefinition.Building#build()} to
      * register that a particular {@link CommandArgumentDefinition} is available for a command.
      */
     protected void register(String[] commandName, CommandArgumentDefinition<?> definition) {
+        register(commandName, definition, false);
+    }
+
+    /**
+     * Called by {@link CommandArgumentDefinition.Building#build()} to
+     * register that a particular {@link CommandArgumentDefinition} is available for a command.
+     * This method supports an additional argument which allows duplicate arguments to exist
+     * without throwing an exception.  This is used by stub commands implemented for Pro features
+     * that do not have their extension present.
+     */
+    protected void register(String[] commandName, CommandArgumentDefinition<?> definition, boolean allowDuplicates) {
         String commandNameKey = StringUtil.join(commandName, " ");
         if (!commandArgumentDefinitions.containsKey(commandNameKey)) {
             commandArgumentDefinitions.put(commandNameKey, new TreeSet<>());
         }
 
         if (commandArgumentDefinitions.get(commandNameKey).contains(definition)) {
-           throw new IllegalArgumentException("Duplicate argument '" + definition.getName() + "' found for command '" + commandNameKey + "'");
+            if (! allowDuplicates) {
+                throw new IllegalArgumentException("Duplicate argument '" + definition.getName() + "' found for command '" + commandNameKey + "'");
+            }
+            return;
         }
         if (definition.isRequired() && definition.getDefaultValue() != null) {
             throw new IllegalArgumentException("Argument '" + definition.getName() + "' for command '" + commandNameKey + "' has both a default value and the isRequired flag set to true. Arguments with default values cannot be marked as required.");
@@ -206,9 +228,9 @@ public class CommandFactory implements SingletonObject {
 
     /**
      * Unregisters all information about the given {@link CommandStep}.
-     * <bNOTE:</b> package-protected method used primarily for testing and may be removed or modified in the future.
+     * This is used to handle a situation where we have multiple command step instances
      */
-    protected void unregister(String[] commandName) {
+    public void unregister(String[] commandName) {
         commandArgumentDefinitions.remove(StringUtil.join(commandName, " "));
     }
 
@@ -253,12 +275,36 @@ public class CommandFactory implements SingletonObject {
     private synchronized Collection<CommandStep> findAllInstances() {
         if (this.allInstances == null) {
             this.allInstances = new ArrayList<>();
-
             ServiceLocator serviceLocator = Scope.getCurrentScope().getServiceLocator();
             this.allInstances.addAll(serviceLocator.findInstances(CommandStep.class));
+            filterStubInstances();
         }
-
         return this.allInstances;
+    }
+
+    //
+    // Sort all command stubs to the bottom of the list so that any non-stubs
+    // will come first.  If a stub is found and the non-stub is present, the stub
+    // is removed from the list.
+    //
+    private void filterStubInstances() {
+        ((List<CommandStep>) this.allInstances).sort(Comparator.comparing(CommandStep::isStub));
+        Set<String> commandNames = new LinkedHashSet<>();
+        Collection<CommandStep> toRemove = new ArrayList<>();
+        for (CommandStep step : this.allInstances) {
+            String[][] names = step.defineCommandNames();
+            if (names != null) {
+                for (String[] name : names) {
+                    String key = StringUtil.join(name, " ").toLowerCase();
+                    if (step.isStub() && commandNames.contains(key)) {
+                        toRemove.add(step);
+                    } else {
+                        commandNames.add(key);
+                    }
+                }
+            }
+        }
+        this.allInstances.removeAll(toRemove);
     }
 
     /**
