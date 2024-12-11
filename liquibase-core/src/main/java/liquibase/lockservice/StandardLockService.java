@@ -47,6 +47,8 @@ public class StandardLockService implements LockService {
 
     protected boolean hasChangeLogLock;
 
+    protected Long changeLogLockTimeoutWithWatchdog;
+
     private Long changeLogLockPollRate;
     private Long changeLogLockRecheckTime;
 
@@ -76,6 +78,17 @@ public class StandardLockService implements LockService {
     @Override
     public void setDatabase(Database database) {
         this.database = database;
+    }
+
+    public Long getChangeLogLockTimeoutWithWatchdog() {
+        if(changeLogLockTimeoutWithWatchdog != null) {
+            return changeLogLockTimeoutWithWatchdog;
+        }
+        return GlobalConfiguration.CHANGELOGLOCK_TIMEOUT_WITH_WATCHDOG.getCurrentValue();
+    }
+
+    public void setChangeLogLockTimeoutWithWatchdog(Long changeLogLockTimeoutWithWatchdog) {
+        this.changeLogLockTimeoutWithWatchdog = changeLogLockTimeoutWithWatchdog;
     }
 
     public Long getChangeLogLockWaitTime() {
@@ -294,15 +307,17 @@ public class StandardLockService implements LockService {
             this.init();
             // Watch dog refresh lock by per 10s
             // after 60s Force release lock
-            Timestamp now = Timestamp.from(Instant.now());
-            List<Timestamp> timestampList = (List<Timestamp>) executor.queryForList(new SelectFromDatabaseChangeLogLockStatement("LOCKGRANTED"), Timestamp.class);
-            for (Timestamp timestamp : timestampList) {
-                if(timestamp == null) {
-                    continue;
-                }
-                if(now.getTime() - timestamp.getTime() > 60_000) {
-                    Scope.getCurrentScope().getLog(getClass()).warning(String.format("Force release changelog lock, last lock time: %s.", timestamp));
-                    releaseLock();
+            if(getChangeLogLockTimeoutWithWatchdog() > 0) {
+                Timestamp now = Timestamp.from(Instant.now());
+                List<Timestamp> timestampList = (List<Timestamp>) executor.queryForList(new SelectFromDatabaseChangeLogLockStatement("LOCKGRANTED"), Timestamp.class);
+                for (Timestamp timestamp : timestampList) {
+                    if (timestamp == null) {
+                        continue;
+                    }
+                    if (now.getTime() - timestamp.getTime() > getChangeLogLockTimeoutWithWatchdog() * 1000) {
+                        Scope.getCurrentScope().getLog(getClass()).warning(String.format("Force release changelog lock, last lock time: %s.", timestamp));
+                        releaseLock();
+                    }
                 }
             }
 
@@ -340,7 +355,7 @@ public class StandardLockService implements LockService {
                 }
                 database.commit();
                 Scope.getCurrentScope().getLog(getClass()).info(coreBundle.getString("successfully.acquired.change.log.lock"));
-                watch(executor);
+                watchdog(executor);
 
                 hasChangeLogLock = true;
 
@@ -358,7 +373,7 @@ public class StandardLockService implements LockService {
 
     }
 
-    private void watch(Executor executor) {
+    private void watchdog(Executor executor) {
         // 定义要执行的任务
         Runnable task = () -> {
             try {

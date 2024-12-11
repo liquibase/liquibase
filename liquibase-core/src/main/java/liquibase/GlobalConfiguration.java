@@ -19,6 +19,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<String> OUTPUT_LINE_SEPARATOR;
     public static final ConfigurationDefinition<String> OUTPUT_FILE_ENCODING;
     public static final ConfigurationDefinition<Charset> FILE_ENCODING;
+    public static final ConfigurationDefinition<Long> CHANGELOGLOCK_TIMEOUT_WITH_WATCHDOG;
     public static final ConfigurationDefinition<Long> CHANGELOGLOCK_WAIT_TIME;
     public static final ConfigurationDefinition<Long> CHANGELOGLOCK_POLL_RATE;
     public static final ConfigurationDefinition<Boolean> CONVERT_DATA_TYPES;
@@ -48,6 +49,12 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .addAliasKey("liquibase.databaseChangeLogLockTableName")
                 .setDescription("Name of table to use for tracking concurrent Liquibase usage")
                 .setDefaultValue("DATABASECHANGELOGLOCK")
+                .build();
+
+        CHANGELOGLOCK_TIMEOUT_WITH_WATCHDOG = builder.define("changelogLockTimeoutWithWatchdogInSeconds", Long.class)
+                .addAliasKey("liquibase.changelogLockTimeoutWithWatchdogInSeconds")
+                .setDescription("The maximum amount of time (in seconds) to wait before forcibly releasing a lock with watchdog.")
+                .setDefaultValue(60L)
                 .build();
 
         CHANGELOGLOCK_WAIT_TIME = builder.define("changelogLockWaitTimeInMinutes", Long.class)
