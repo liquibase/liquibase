@@ -297,13 +297,14 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
 
         postgres.executeSql("""
             create table TEST_WITH_NULL_STRINGS (
-                TYPE_ VARCHAR(4) NOT NULL
+                TYPE_ VARCHAR(4)
             );
 
             INSERT INTO TEST_WITH_NULL_STRINGS VALUES ('null');
             INSERT INTO TEST_WITH_NULL_STRINGS VALUES ('NULL');
             INSERT INTO TEST_WITH_NULL_STRINGS VALUES ('nuLL');
             INSERT INTO TEST_WITH_NULL_STRINGS VALUES ('NUll');
+            INSERT INTO TEST_WITH_NULL_STRINGS VALUES (null);
         """)
 
         when:
@@ -312,10 +313,13 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         def contents = FileUtil.getContents(outputFile)
 
         then:
-        contents.contains("INSERT INTO \"test_with_null_strings\" (\"type_\") VALUES ('null');")
-        contents.contains("INSERT INTO \"test_with_null_strings\" (\"type_\") VALUES ('NULL');")
-        contents.contains("INSERT INTO \"test_with_null_strings\" (\"type_\") VALUES ('nuLL');")
-        contents.contains("INSERT INTO \"test_with_null_strings\" (\"type_\") VALUES ('NUll');")
+        contents.contains(
+"""
+INSERT INTO "test_with_null_strings" ("type_") VALUES ('null');
+INSERT INTO "test_with_null_strings" ("type_") VALUES ('NULL');
+INSERT INTO "test_with_null_strings" ("type_") VALUES ('nuLL');
+INSERT INTO "test_with_null_strings" ("type_") VALUES ('NUll');
+INSERT INTO "test_with_null_strings" ("type_") VALUES (NULL);""")
 
         cleanup:
         outputFile.delete()
