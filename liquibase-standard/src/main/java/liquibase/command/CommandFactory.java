@@ -199,19 +199,32 @@ public class CommandFactory implements SingletonObject {
         }
         return null;
     }
-
     /**
      * Called by {@link CommandArgumentDefinition.Building#build()} to
      * register that a particular {@link CommandArgumentDefinition} is available for a command.
      */
     protected void register(String[] commandName, CommandArgumentDefinition<?> definition) {
+        register(commandName, definition, false);
+    }
+
+    /**
+     * Called by {@link CommandArgumentDefinition.Building#build()} to
+     * register that a particular {@link CommandArgumentDefinition} is available for a command.
+     * This method supports an additional argument which allows duplicate arguments to exist
+     * without throwing an exception.  This is used by stub commands implemented for Pro features
+     * that do not have their extension present.
+     */
+    protected void register(String[] commandName, CommandArgumentDefinition<?> definition, boolean allowDuplicates) {
         String commandNameKey = StringUtil.join(commandName, " ");
         if (!commandArgumentDefinitions.containsKey(commandNameKey)) {
             commandArgumentDefinitions.put(commandNameKey, new TreeSet<>());
         }
 
         if (commandArgumentDefinitions.get(commandNameKey).contains(definition)) {
-           throw new IllegalArgumentException("Duplicate argument '" + definition.getName() + "' found for command '" + commandNameKey + "'");
+            if (! allowDuplicates) {
+                throw new IllegalArgumentException("Duplicate argument '" + definition.getName() + "' found for command '" + commandNameKey + "'");
+            }
+            return;
         }
         if (definition.isRequired() && definition.getDefaultValue() != null) {
             throw new IllegalArgumentException("Argument '" + definition.getName() + "' for command '" + commandNameKey + "' has both a default value and the isRequired flag set to true. Arguments with default values cannot be marked as required.");
@@ -223,7 +236,7 @@ public class CommandFactory implements SingletonObject {
      * Unregisters all information about the given {@link CommandStep}.
      * <bNOTE:</b> package-protected method used primarily for testing and may be removed or modified in the future.
      */
-    protected void unregister(String[] commandName) {
+    public void unregister(String[] commandName) {
         commandArgumentDefinitions.remove(StringUtil.join(commandName, " "));
     }
 
