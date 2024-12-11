@@ -162,14 +162,16 @@ public class CommandFactory implements SingletonObject {
      */
     public SortedSet<CommandDefinition> getCommands(boolean includeInternal) {
         Map<String, String[]> commandNames = new HashMap<>();
+        Set<String> keys = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         Collection<CommandStep> allFoundInstances = findAllInstances();
         for (CommandStep step : allFoundInstances) {
             String[][] names = step.defineCommandNames();
             if (names != null) {
                 for (String[] name : names) {
                     String key = StringUtil.join(name, " ");
-                    if (! step.isStub() || findKeyInMapIgnoreCase(key, commandNames) == null) {
+                    if (! step.isStub() || ! keys.contains(key)) {
                         commandNames.put(key, name);
+                        keys.add(key);
                     }
                 }
             }
@@ -190,15 +192,7 @@ public class CommandFactory implements SingletonObject {
         return Collections.unmodifiableSortedSet(commands);
 
     }
-    private static String findKeyInMapIgnoreCase(String key, Map<String, String[]> map) {
-        for (Map.Entry<String, String[]> mapEntry : map.entrySet()) {
-            String actualKey = mapEntry.getKey();
-            if (actualKey.equalsIgnoreCase(key)) {
-                return actualKey;
-            }
-        }
-        return null;
-    }
+    
     /**
      * Called by {@link CommandArgumentDefinition.Building#build()} to
      * register that a particular {@link CommandArgumentDefinition} is available for a command.
@@ -234,7 +228,7 @@ public class CommandFactory implements SingletonObject {
 
     /**
      * Unregisters all information about the given {@link CommandStep}.
-     * <bNOTE:</b> package-protected method used primarily for testing and may be removed or modified in the future.
+     * This is used to handle a situation where we have multiple command step instances
      */
     public void unregister(String[] commandName) {
         commandArgumentDefinitions.remove(StringUtil.join(commandName, " "));
