@@ -17,6 +17,7 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.XMLUtil;
 import liquibase.util.xml.DefaultXmlWriter;
+
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -50,6 +51,8 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     private static final String XML_VERSION = "1.1";
     private final LiquibaseEntityResolver resolver = new LiquibaseEntityResolver();
 
+    private boolean preserveNullValues;
+
     public XMLChangeLogSerializer() {
         try {
             this.currentChangeLogFileDOM = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
@@ -63,6 +66,11 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         this.currentChangeLogFileDOM = currentChangeLogFileDOM;
     }
 
+    @Override
+    public void preserveNullValues(boolean preserveNullValues) {
+        this.preserveNullValues = preserveNullValues;
+    }
+
     public void setCurrentChangeLogFileDOM(Document currentChangeLogFileDOM) {
         this.currentChangeLogFileDOM = currentChangeLogFileDOM;
     }
@@ -71,7 +79,6 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     public String[] getValidFileExtensions() {
         return new String[]{"xml"};
     }
-
 
     public String serialize(DatabaseChangeLog databaseChangeLog) {
         return null; //todo
@@ -130,7 +137,6 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                 changeLogElement.setAttribute("xmlns:" + entry.getValue(), entry.getKey());
             }
         }
-
 
         StringBuilder schemaLocationAttribute = new StringBuilder();
         for (Map.Entry<String, String> entry : urlByNamespace.entrySet()) {
@@ -201,10 +207,20 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
     private void setValueOnNode(Element node, String objectNamespace, String objectName, Object value, LiquibaseSerializable.SerializationType serializationType, String parentNamespace) {
         if (value == null) {
+            node.setAttribute("value", "null");
             return;
         }
 
-        if (value instanceof Collection) {
+        if (value instanceof ColumnConfig) {
+            ColumnConfig columnConfig = (ColumnConfig) value;
+            ConstraintsConfig constraintsConfig = columnConfig.getConstraints();
+            boolean constraintsIsNullable = null != constraintsConfig && constraintsConfig.isNullable() != null && constraintsConfig.isNullable();
+            if (!preserveNullValues && constraintsIsNullable && columnConfig.isNull()) {
+                return;
+            }
+            node.appendChild(createNode((LiquibaseSerializable) value));
+        }
+        else if (value instanceof Collection) {
             for (Object child : (Collection) value) {
                 setValueOnNode(node, objectNamespace, objectName, child, serializationType, parentNamespace);
             }
@@ -308,7 +324,6 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             return objectName;
         }
     }
-
 
     // create a XML node with nodeName and simple text content
     public Element createNode(String nodeNamespace, String nodeName, String nodeContent) {
