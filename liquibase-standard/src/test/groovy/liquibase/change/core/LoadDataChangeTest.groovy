@@ -21,11 +21,7 @@ import liquibase.resource.ResourceAccessor
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
-import liquibase.statement.BatchDmlExecutablePreparedStatement
-import liquibase.statement.DatabaseFunction
-import liquibase.statement.ExecutablePreparedStatement
-import liquibase.statement.ExecutablePreparedStatementBase
-import liquibase.statement.SqlStatement
+import liquibase.statement.*
 import liquibase.statement.core.InsertSetStatement
 import liquibase.statement.core.InsertStatement
 import liquibase.structure.DatabaseObject
@@ -86,6 +82,11 @@ class LoadDataChangeTest extends StandardChangeTest {
         col3.setName("string")
         change.addColumn(col3)
 
+        LoadDataColumnConfig col4 = new LoadDataColumnConfig()
+        col4.setType(LoadDataChange.LOAD_DATA_TYPE.CLOB)
+        col4.setName("empty")
+        change.addColumn(col4)
+
         change.setSchemaName("SCHEMA_NAME")
         change.setTableName("TABLE_NAME")
         change.setRelativeToChangelogFile(Boolean.TRUE)
@@ -113,7 +114,7 @@ class LoadDataChangeTest extends StandardChangeTest {
         "change/core/SQLFileTestData.sql" == columns.get(0).getValueClobFile()
         "nothing.txt" == columns.get(1).getValue()
         "sample text" == columns.get(2).getValue()
-
+        null == columns.get(3).getValue()
     }
 
     def "loadDataEmpty database agnostic"() throws Exception {
@@ -1038,5 +1039,3 @@ class LoadDataChangeTest extends StandardChangeTest {
         }
     }
 }
-
-
