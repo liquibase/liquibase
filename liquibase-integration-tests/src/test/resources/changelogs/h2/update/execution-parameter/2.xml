@@ -7,6 +7,7 @@
 
     <changeSet author="jlyle" id="2.1">
         <insert tableName="parameter_value_tests">
+            <column name="deployment_id" value="${LIQUIBASE_EXECUTION_DEPLOYMENT_ID}" />
             <column name="changelog_file" value="${LIQUIBASE_EXECUTION_CHANGELOG_FILE}" />
             <column name="changeset_id" value="${LIQUIBASE_EXECUTION_CHANGESET_ID}" />
             <column name="changeset_author" value="${LIQUIBASE_EXECUTION_CHANGESET_AUTHOR}" />
@@ -15,6 +16,7 @@
 
     <changeSet author="not_jlyle" id="2.2">
         <insert tableName="parameter_value_tests">
+            <column name="deployment_id" value="${LIQUIBASE_EXECUTION_DEPLOYMENT_ID}" />
             <column name="changelog_file" value="${LIQUIBASE_EXECUTION_CHANGELOG_FILE}" />
             <column name="changeset_id" value="${LIQUIBASE_EXECUTION_CHANGESET_ID}" />
             <column name="changeset_author" value="${LIQUIBASE_EXECUTION_CHANGESET_AUTHOR}" />
@@ -23,6 +25,7 @@
 
     <changeSet author="jlyle" id="2.3">
         <insert tableName="parameter_value_tests">
+            <column name="deployment_id" value="${LIQUIBASE_EXECUTION_DEPLOYMENT_ID}" />
             <column name="changelog_file" value="${LIQUIBASE_EXECUTION_CHANGELOG_FILE}" />
             <column name="changeset_id" value="${LIQUIBASE_EXECUTION_CHANGESET_ID}" />
             <column name="changeset_author" value="${LIQUIBASE_EXECUTION_CHANGESET_AUTHOR}" />
