@@ -265,7 +265,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             newLine[Columns.CONTEXTS.ordinal()] = (changeSet.getContextFilter() == null) ? null : changeSet.getContextFilter().toString();
             newLine[Columns.LABELS.ordinal()] = (changeSet.getLabels() == null) ? null : changeSet.getLabels().toString();
 
-            newLine[Columns.DEPLOYMENT_ID.ordinal()] = getDeploymentId();
+            newLine[Columns.DEPLOYMENT_ID.ordinal()] = Scope.getCurrentScope().getDeploymentId();
 
             csvWriter.writeNext(newLine);
 

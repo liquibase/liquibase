@@ -1,5 +1,8 @@
 package liquibase
 
+import liquibase.changelog.OfflineChangeLogHistoryService
+import liquibase.changelog.ChangeLogHistoryServiceFactory
+import liquibase.database.core.HsqlDatabase
 import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.logging.mdc.CustomMdcObject
 import liquibase.logging.mdc.MdcManager
@@ -123,6 +126,39 @@ class ScopeTest extends Specification {
         then:
         def e = thrown(UnexpectedLiquibaseException)
         e.message == "Cannot pass a null parent to a new Scope. Use Scope.child to correctly create a nested scope"
+    }
+
+    def "scope generates deployment ID"() {
+        when:
+        def scope = Scope.getCurrentScope();
+        def deploymentId = scope.getDeploymentId();
+
+        then:
+        deploymentId != null && ! deploymentId.isBlank() && ! deploymentId.isEmpty();
+        scope.getDeploymentId() == deploymentId;
+    }
+
+    def "deprecated deployment id methods work correctly with scope deployment id"() {
+        when:
+        def database = new HsqlDatabase();
+        def scope = Scope.getCurrentScope();
+        def deploymentIdScope = scope.getDeploymentId();
+        def changeLogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
+        def deploymentIdService1;
+        def deploymentIdService2;
+
+        changeLogHistoryService.generateDeploymentId();
+        deploymentIdService1 = changeLogHistoryService.getDeploymentId();
+        changeLogHistoryService.resetDeploymentId();
+        changeLogHistoryService.generateDeploymentId();
+        deploymentIdService2 = changeLogHistoryService.getDeploymentId();
+
+        then:
+        deploymentIdScope != null && ! deploymentIdScope.isBlank() && ! deploymentIdScope.isEmpty();
+        deploymentIdService1 != null && ! deploymentIdService1.isBlank() && ! deploymentIdService1.isEmpty();
+        deploymentIdService2 != null && ! deploymentIdService2.isBlank() && ! deploymentIdService2.isEmpty();
+        deploymentIdScope == deploymentIdService1;
+        deploymentIdScope == deploymentIdService2;
     }
 
     private class TestMdcManager implements MdcManager {

@@ -32,7 +32,6 @@ public class TagCommandStep extends AbstractCommandStep {
         CommandScope commandScope = resultsBuilder.getCommandScope();
         Database database = (Database) commandScope.getDependency(Database.class);
         ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
-        changeLogService.generateDeploymentId();
         changeLogService.init();
         LockServiceFactory.getInstance().getLockService(database).init();
         changeLogService.tag(commandScope.getArgumentValue(TagCommandStep.TAG_ARG));
