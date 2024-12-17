@@ -102,3 +102,19 @@ jobs:
           ./mvnw -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # build and test pro master branch using current branch to ensure nothing is being broken by this PR
+  pro-build:
+    runs-on: ubuntu-latest
+    needs: [setup, build]
+    if: contains(github.event.pull_request.labels.*.name, 'build&TestPro') || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout liquibase-pro
+        with:
+          repository: liquibase/liquibase-pro
+          token: ${{ secrets.BOT_TOKEN }}
+
+      - name: Build
+        run: |
+          ./mvnw -B -N "-Dliquibase.version=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT" test package -P '!run-proguard'
