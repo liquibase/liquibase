@@ -130,11 +130,11 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
         ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
         RanChangeSet ranChangeSet = changeLogService.getRanChangeSet(changeSet);
 
-        sendMessages(resultsBuilder, changeSet.generateCheckSum(
-                             ranChangeSet != null && ranChangeSet.getLastCheckSum() != null ?
-                                     ChecksumVersion.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion()) : ChecksumVersion.latest()
-                     )
-        );
+        CheckSum checkSum = changeSet.generateCheckSum(
+                ranChangeSet != null && ranChangeSet.getLastCheckSum() != null ?
+                        ChecksumVersion.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion()) : ChecksumVersion.latest());
+        handleOutput(resultsBuilder, checkSum.toString() + System.lineSeparator());
+        resultsBuilder.addResult(CHECKSUM_RESULT, checkSum);
     }
 
     private void validateIdentifierParameters(CommandScope commandScope, String changeSetIdentifier) throws LiquibaseException {
@@ -192,11 +192,6 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
             );
         }
         return parts;
-    }
-
-    private static void sendMessages(CommandResultsBuilder resultsBuilder, CheckSum checkSum) {
-        resultsBuilder.addResult(CHECKSUM_RESULT, checkSum);
-        Scope.getCurrentScope().getUI().sendMessage(checkSum.toString());
     }
 
     @Override

@@ -48,6 +48,12 @@ public class ChangeLogParameters {
     private LabelExpression filterLabels;
 
     private enum LiquibaseExecutionParameter {
+        LIQUIBASE_EXECUTION_DEPLOYMENT_ID {
+            @Override
+            public String getValue(DatabaseChangeLog changeLog) {
+                return Scope.getCurrentScope().getDeploymentId();
+            }
+        },
         LIQUIBASE_EXECUTION_CHANGELOG_FILE {
             @Override
             public String getValue(DatabaseChangeLog changeLog) {
