@@ -1,0 +1,72 @@
+name: Build & Test Pro master branch
+
+on:
+  workflow_call:
+  pull_request:
+    types: [labeled]
+
+jobs:
+  check-should-build-pro:
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'build&TestPro') || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
+    steps:
+      - name: Check variables
+        run: |
+          echo "github.event_name: ${{ github.event_name }}"
+          echo "github.event.pull_request.labels.*.name: ${{ contains(github.event.pull_request.labels.*.name, 'build&TestPro') }}"
+          echo "github.event.after: ${{ github.event.after }}"
+          echo "github.base_ref: ${{ github.base_ref }}"
+          echo "github.event.pull_request.merged: ${{ github.event.pull_request.merged }}"
+          echo "github.event_name: ${{ github.event_name }}"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    needs: check-should-build-pro
+    outputs:
+      thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
+      latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
+      setupSuccessful: "true"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}}
+
+      - name: Get Latest Merge Commit SHA
+        id: get-sha
+        run: |
+          latest_merge_sha=`(git rev-parse HEAD)`
+          echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
+
+      - name: Get Current BranchName
+        id: get-branch-name
+        run: |
+          # this logic checks if the branch is from a forked repository PR or not. Where -n is the inverse of -z (not empty)
+          if [ -n "${GITHUB_HEAD_REF}" ];
+          then
+            branch_name=${GITHUB_HEAD_REF}
+          else
+            branch_name=${{ github.ref_name }}
+          fi 
+
+          modified_branch_name=`(echo $branch_name | tr '/' '_')`
+          echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT      
+
+  pro-build:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout liquibase-pro
+        with:
+          repository: liquibase/liquibase-pro
+          token: ${{ secrets.BOT_TOKEN }}
+
+      - name: Build
+        run: |
+          ./mvnw -B -N "-Dliquibase.version=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT" test package -P '!run-proguard'
