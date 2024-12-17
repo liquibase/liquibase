@@ -115,6 +115,8 @@ jobs:
           repository: liquibase/liquibase-pro
           token: ${{ secrets.BOT_TOKEN }}
 
-      - name: Build
+      - name: Build Pro
+        env:
+          LIQUIBASE_PRO_LICENSE_KEY: ${{ secrets.PRO_LICENSE_KEY }}
         run: |
-          ./mvnw -B -N "-Dliquibase.version=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT" test package -P '!run-proguard'
+          ./mvnw -B "-Dliquibase.version=${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT" test package -P '!run-proguard'
