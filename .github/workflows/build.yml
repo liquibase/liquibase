@@ -320,7 +320,7 @@ jobs:
 
   run-pro-build-and-test:
     needs: [ setup, build_publish_branch ]
-    uses: liquibase/liquibase/.github/workflows/run-pro-build-and-test.yml@master
+    uses: liquibase/liquibase/.github/workflows/run-pro-build-and-test.yml@DAT-19069
     secrets: inherit
     with:
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
