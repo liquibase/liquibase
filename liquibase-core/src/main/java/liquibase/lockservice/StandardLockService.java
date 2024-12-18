@@ -21,6 +21,7 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.sqlgenerator.core.LockDatabaseChangeLogGenerator;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.structure.DatabaseObject;
@@ -306,18 +307,21 @@ public class StandardLockService implements LockService {
             database.rollback();
             this.init();
             // Watch dog refresh lock by per 10s
-            // after 60s Force release lock
+            // after default 60s Force release lock
             if(getChangeLogLockTimeoutWithWatchdog() > 0) {
                 Timestamp now = Timestamp.from(Instant.now());
-                List<Timestamp> timestampList = (List<Timestamp>) executor.queryForList(new SelectFromDatabaseChangeLogLockStatement("LOCKGRANTED"), Timestamp.class);
-                for (Timestamp timestamp : timestampList) {
-                    if (timestamp == null) {
+                DatabaseChangeLogLock[] changeLogLocks = listLocks();
+                for (DatabaseChangeLogLock lock : changeLogLocks) {
+                    Date lockGranted = lock.getLockGranted();
+                    String lockedBy = lock.getLockedBy();
+                    if(!LockDatabaseChangeLogGenerator.isWatchdogFormat(lockedBy)) {
                         continue;
                     }
-                    if (now.getTime() - timestamp.getTime() > getChangeLogLockTimeoutWithWatchdog() * 1000) {
-                        Scope.getCurrentScope().getLog(getClass()).warning(String.format("Force release changelog lock, last lock time: %s.", timestamp));
+                    if (now.getTime() - lockGranted.getTime() > getChangeLogLockTimeoutWithWatchdog() * 1000) {
+                        Scope.getCurrentScope().getLog(getClass()).warning(String.format("Force release changelog lock, last lock time: %s.", lockGranted));
                         releaseLock();
                     }
+
                 }
             }
 

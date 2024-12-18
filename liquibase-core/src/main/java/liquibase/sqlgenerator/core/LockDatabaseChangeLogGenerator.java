@@ -13,7 +13,6 @@ import liquibase.statement.core.LockDatabaseChangeLogStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.util.NetUtil;
 
-import java.sql.Timestamp;
 import java.util.UUID;
 
 public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDatabaseChangeLogStatement> {
@@ -62,6 +61,10 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
     }
 
     public static String getLockedBy() {
-        return hostname + hostDescription + " (" + hostaddress + ")" + ":" + uid;
+        return hostname + hostDescription + " (" + hostaddress + ")" + ":" + uid + ":0";
+    }
+    
+    public static boolean isWatchdogFormat(String lockedBy) {
+        return lockedBy.endsWith(":0");
     }
 }
