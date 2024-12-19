@@ -19,7 +19,7 @@ on:
 
 jobs:
   # build and test pro master branch using current branch to ensure nothing is being broken by this PR
-  should-run-pro-build:
+  run-pro-build:
     name: Build & Test Pro
     runs-on: ubuntu-latest
     if: contains(github.event.pull_request.labels.*.name, 'build&TestPro') || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
@@ -40,7 +40,7 @@ jobs:
 
   run-pro-build-and-tests:
     runs-on: ubuntu-latest
-    needs: [ should-run-pro-build ]
+    needs: [run-pro-build ]
     name: Trigger Functional Tests
     steps:
       - uses: actions/checkout@v4
