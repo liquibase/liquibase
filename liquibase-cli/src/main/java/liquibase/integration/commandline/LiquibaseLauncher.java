@@ -99,7 +99,6 @@ public class LiquibaseLauncher {
 
         List<URL> libUrls = getLibUrls(liquibaseHome);
         checkForDuplicatedJars(libUrls);
-        libUrls = removeIncompatibleAwsExtensions(libUrls);
 
         if (debug) {
             debug("Final Classpath:");
@@ -151,6 +150,8 @@ public class LiquibaseLauncher {
             }
         }
 
+        removeIncompatibleAwsExtensions(urls);
+
         final ClassLoader classLoader;
         if (!"false".equals(getSetting(LIQUIBASE_INCLUDE_SYSTEM_CLASSPATH))) {
             classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), parentLoader));
@@ -180,7 +181,7 @@ public class LiquibaseLauncher {
      * @param libUrls the list of libs
      * @return the list of libs, minus S3, dynamo and secrets, if necessary
      */
-    private static List<URL> removeIncompatibleAwsExtensions(List<URL> libUrls) {
+    private static void removeIncompatibleAwsExtensions(List<URL> libUrls) {
         boolean awsJarExists = doesJarExist(libUrls, LIQUIBASE_AWS_JAR_PATTERN);
         List<String> removedJars = new ArrayList<>();
 
@@ -205,8 +206,6 @@ public class LiquibaseLauncher {
                     + ". Learn more at https://docs.liquibase.com/pro-extensions";
             System.out.println(message);
         }
-
-        return libUrls;
     }
 
     private static boolean doesJarExist(List<URL> libUrls, String jarFilenamePattern) {
