@@ -80,6 +80,7 @@ examples/yaml/liquibase.endstage.flow
 examples/yaml/liquibase.flowfile.yaml
 examples/yaml/liquibase.flowvariables.yaml
 examples/yaml/liquibase.properties
+internal/lib/caffeine.jar
 internal/lib/commons-collections4.jar
 internal/lib/commons-io.jar
 internal/lib/commons-lang3.jar
