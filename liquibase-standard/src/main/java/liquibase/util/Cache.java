@@ -7,11 +7,7 @@ import java.util.concurrent.Callable;
 /**
  * A wrapper around a method which is expected to be called multiple times. This class orchestrates ensuring that the
  * method is called once and storing the result value for subsequent executions.
- *
- * @deprecated rather than continue to maintain our custom implementation here, the Liquibase dev team has decided to
- * add caffeine as a library, and we recommend that any new caching use caffeine rather than this implementation.
  */
-@Deprecated
 public class Cache<T> {
     /**
      * The actual value, which will be cached.
