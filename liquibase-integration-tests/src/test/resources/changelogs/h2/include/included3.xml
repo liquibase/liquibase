@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <includeAll path="../includeAll/test_precondition" relativeToChangelogFile="true" logicalFilePath="includeAll"/>
+
+    <changeSet id="include3" author="cagliostro">
+        <preConditions>
+            <sqlCheck expectedResult="TRUE">WRONG SQL</sqlCheck>
+        </preConditions>
+        <createTable tableName="INCLUDED_TABLE_3">
+            <column name="ID" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
