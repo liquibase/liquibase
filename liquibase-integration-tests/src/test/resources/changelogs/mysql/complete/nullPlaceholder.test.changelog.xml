@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="nullPlaceHolderTest_CreateTable" author="mallod">
+        <createTable tableName="nullPlaceholderTable">
+            <column name="colKey" type="int"/>
+            <column name="col2" type="varchar(200)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="nullPlaceHolderTest" author="mallod">
+        <loadData tableName="nullPlaceholderTable" file="nullPlaceHolderTestData.csv" relativeToChangelogFile="true">
+            <column name="colKey" type="COMPUTED"/>
+            <column name="col2" type="varchar(100)" nullPlaceholder="testNullPlaceholder"/>
+        </loadData>
+    </changeSet>
+
+</databaseChangeLog>

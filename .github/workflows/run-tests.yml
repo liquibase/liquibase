@@ -1,4 +1,4 @@
-name: Run Tests
+name: Unit and Integration Tests
 
 on:
   workflow_call:
@@ -282,6 +282,15 @@ jobs:
           name: liquibase-modules
           path: |
             */target/*-0-SNAPSHOT.jar
+
+  fossa:
+    needs: build_tests
+    uses: liquibase/build-logic/.github/workflows/fossa_ai.yml@main
+    secrets: inherit
+    with:
+      check_snippets: true
+      check_ai_generated_code: true
+      generate_sbom: true
 
   integration-test:
     name: Integration Test

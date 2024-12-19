@@ -648,6 +648,7 @@
                         <xsd:attribute name="header" type="xsd:string"/>
                         <xsd:attribute name="name" type="xsd:string"/>
                         <xsd:attribute name="type" type="xsd:string"/>
+                        <xsd:attribute name="nullPlaceholder" type="xsd:string"/>
                         <xsd:attributeGroup ref="defaultValueAttributes"/>
                     </xsd:complexType>
                 </xsd:element>
