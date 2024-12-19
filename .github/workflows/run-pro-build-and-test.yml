@@ -77,8 +77,10 @@ jobs:
                 "liquibaseBranch": "${{ env.RUN_TESTS_BRANCH }}"
               }'
 
-      - name: Display run ID
-        run: echo ${{ steps.return_dispatch.outputs.run_id }}
+      - name: Display run ID and URL
+        run: |
+          echo ${{steps.return_dispatch.outputs.run_id}}
+          echo ${{steps.return_dispatch.outputs.run_url}}
 
       - name: Report PRO Build & Tests Run URL
         uses: actions/github-script@v7
