@@ -31,6 +31,7 @@ Apache 2.0 License
 - org.apache.commons:commons-text
 - org.apache.commons:commons-collections4
 - commons-io:commons-io
+- com.github.ben-manes.caffeine:caffeine
 
 BSD 2 Clause License
 - org.hsqldb:hsqldb
