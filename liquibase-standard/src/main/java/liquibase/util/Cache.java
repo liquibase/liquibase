@@ -7,12 +7,16 @@ import java.util.concurrent.Callable;
 /**
  * A wrapper around a method which is expected to be called multiple times. This class orchestrates ensuring that the
  * method is called once and storing the result value for subsequent executions, with support for time-to-live (TTL).
+ *
+ * Some of the logic in this class is borrowed from the Guava implementation of ExpiringMemoizingSupplier:
+ * https://github.com/google/guava/blob/cc2c5d3d6623fe66a969c29fcb422bf02fb57a1f/guava/src/com/google/common/base/Suppliers.java#L286-L346
  */
 public class Cache<T> {
+    private transient Object lock = new Object();
     /**
      * The actual value, which will be cached.
      */
-    private T value;
+    transient volatile private T value;
     /**
      * The function that will be called to generate the value and stored in the cache.
      */
@@ -35,7 +39,7 @@ public class Cache<T> {
     /**
      * The time (in milliseconds) after which the cached value will expire. If set to any value less than 1, cached values will never expire.
      */
-    private final long timeToLiveMillis;
+    transient volatile private long timeToLiveMillis;
 
     /**
      * The timestamp of the last successful cache generation, in milliseconds since epoch.
@@ -58,18 +62,20 @@ public class Cache<T> {
 
     public T get() throws Exception {
         if (!generated || isExpired()) {
-            try {
-                value = generator.call();
-                lastGeneratedTime = System.currentTimeMillis();
-                exception = null; // Reset exception if the call is successful
-            } catch (Exception e) {
-                if (exceptionIsPermitted) {
-                    exception = e;
-                    generated = true;
+            synchronized (lock) {
+                try {
+                    value = generator.call();
+                    lastGeneratedTime = System.currentTimeMillis();
+                    exception = null; // Reset exception if the call is successful
+                } catch (Exception e) {
+                    if (exceptionIsPermitted) {
+                        exception = e;
+                        generated = true;
+                    }
+                    throw e;
                 }
-                throw e;
+                generated = true;
             }
-            generated = true;
         }
         if (exception != null) {
             throw exception;
