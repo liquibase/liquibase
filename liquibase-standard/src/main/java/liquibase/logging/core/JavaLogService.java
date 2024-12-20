@@ -1,13 +1,20 @@
 package liquibase.logging.core;
 
+import liquibase.Liquibase;
+import liquibase.Scope;
+import liquibase.configuration.ConfiguredValue;
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.serializer.LiquibaseSerializable;
+import liquibase.util.StringUtil;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
+import java.util.logging.Level;
 
 public class JavaLogService extends AbstractLogService {
 
@@ -30,11 +37,30 @@ public class JavaLogService extends AbstractLogService {
                 utilLogger.setParent(parent);
             }
             logger = new JavaLogger(utilLogger);
+            setChannelLogLevel(getLogName(clazz), utilLogger);
 
             this.loggers.put(clazz, logger);
         }
 
         return logger;
+    }
+
+    private void setChannelLogLevel(String channelName, java.util.logging.Logger logger) {
+        final String configuredChannels = Scope.getCurrentScope().get("logChannels", String.class);
+        if (configuredChannels == null) {
+            return;
+        }
+        Level logLevel = Scope.getCurrentScope().get("logLevel", Level.class);
+        if (logLevel == Level.OFF) {
+            return;
+        }
+        List<String> channels;
+        if (! configuredChannels.equalsIgnoreCase("all")) {
+            channels = StringUtil.splitAndTrim(configuredChannels, ",");
+            if (channels.contains(channelName)) {
+                java.util.logging.Logger.getLogger(channelName).setLevel(logLevel);
+            }
+        }
     }
 
     /**
