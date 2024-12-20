@@ -132,6 +132,7 @@ class AnalyticsIntegrationTest extends Specification {
         scopeVars.put(AnalyticsArgs.CONFIG_ENDPOINT_URL.getKey(), "http://localhost:" + simpleWebserver.getListeningPort() + "/config-analytics.yaml")
         scopeVars.put(AnalyticsArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getKey(), TimeUnit.SECONDS.toMillis(60)) // to allow for debugging, otherwise the thread gets killed fast
         scopeVars.put(AnalyticsArgs.DEV_OVERRIDE.getKey(), true)
+        scopeVars.put(AnalyticsArgs.ENABLED.getKey(), true)
         Scope.child(scopeVars, scopedRunner)
     }
 }
