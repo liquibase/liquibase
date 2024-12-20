@@ -21,7 +21,7 @@ class TestAnalyticsWebserver extends NanoHTTPD {
         // Clear the cached analytics config info that was loaded when the drop all command step executed automatically during test setup
         AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
         LiquibaseRemoteAnalyticsConfiguration analyticsConfiguration = ((LiquibaseRemoteAnalyticsConfiguration) analyticsConfigurationFactory.getPlugin());
-        analyticsConfiguration.remoteAnalyticsConfiguration.invalidateAll()
+        analyticsConfiguration.remoteAnalyticsConfiguration.clearCache()
     }
 
     @Override

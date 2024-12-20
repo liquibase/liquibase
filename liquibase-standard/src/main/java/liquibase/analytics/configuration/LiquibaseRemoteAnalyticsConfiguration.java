@@ -1,16 +1,14 @@
 package liquibase.analytics.configuration;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import liquibase.Scope;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.logging.Logger;
+import liquibase.util.Cache;
 import lombok.Data;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,16 +19,11 @@ import java.util.logging.Level;
  * LiquibaseRemoteAnalyticsConfiguration is responsible for fetching and providing
  * remote analytics configurations used by Liquibase.
  *
- * This class uses a cache to store the remote analytics configuration, which is
+ * This class uses a {@link Cache} to store the remote analytics configuration, which is
  * loaded from a specified URL endpoint.
  */
 @Data
 public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfiguration {
-
-    /**
-     * We need some kind of key to lookup the cached results.
-     */
-    private final static String cacheKey = "liquibase-remote-analytics";
 
     /**
      * Cache holding the {@link RemoteAnalyticsConfiguration} object. It ensures the
@@ -38,10 +31,7 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
      *
      * The configuration is loaded from the URL specified by {@link AnalyticsArgs#CONFIG_ENDPOINT_URL}.
      */
-    private final static LoadingCache<String, RemoteAnalyticsConfiguration> remoteAnalyticsConfiguration = Caffeine.newBuilder()
-            .maximumSize(1)
-            .expireAfterWrite(Duration.ofMillis(AnalyticsArgs.CONFIG_CACHE_TIMEOUT_MILLIS.getCurrentValue()))
-            .build((key) -> {
+    private final static Cache<RemoteAnalyticsConfiguration> remoteAnalyticsConfiguration = new Cache<>(() -> {
         /**
          * It is important to obtain the URL here outside of the newly created thread. {@link Scope} stores its stuff
          * in a ThreadLocal, so if you tried to get the value inside the thread, the value could be different.
@@ -68,7 +58,7 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
             log.log(logLevel, "Timed out while attempting to load analytics configuration from " + url, null);
         }
         return remoteAnalyticsConfiguration.get();
-    });
+    }, false, AnalyticsArgs.CONFIG_CACHE_TIMEOUT_MILLIS.getCurrentValue());
 
     @Override
     public int getPriority() {
@@ -86,7 +76,7 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
         if (userTimeoutMillis.found()) {
             return userTimeoutMillis.getValue();
         } else {
-            return remoteAnalyticsConfiguration.get(cacheKey).getTimeoutMs();
+            return remoteAnalyticsConfiguration.get().getTimeoutMs();
         }
     }
 
@@ -97,7 +87,7 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
      * @throws Exception if there is an issue fetching the configuration
      */
     public String getDestinationUrl() throws Exception {
-        return remoteAnalyticsConfiguration.get(cacheKey).getEndpointData();
+        return remoteAnalyticsConfiguration.get().getEndpointData();
     }
 
     /**
@@ -108,7 +98,7 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
      */
     @Override
     public boolean isOssAnalyticsEnabled() throws Exception {
-        return remoteAnalyticsConfiguration.get(cacheKey).isSendOss();
+        return remoteAnalyticsConfiguration.get().isSendOss();
     }
 
     /**
@@ -119,7 +109,7 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
      */
     @Override
     public boolean isProAnalyticsEnabled() throws Exception {
-        return remoteAnalyticsConfiguration.get(cacheKey).isSendPro();
+        return remoteAnalyticsConfiguration.get().isSendPro();
     }
 
     /**
@@ -129,7 +119,7 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
      * @throws Exception if there is an issue fetching the configuration
      */
     public String getWriteKey() throws Exception {
-        return remoteAnalyticsConfiguration.get(cacheKey).getWriteKey();
+        return remoteAnalyticsConfiguration.get().getWriteKey();
     }
 
     /**
@@ -139,6 +129,6 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
      * @throws Exception if there is an issue fetching the configuration
      */
     public List<RemoteAnalyticsConfiguration.ExtensionName> getExtensionNames() throws Exception {
-        return remoteAnalyticsConfiguration.get(cacheKey).getExtensions();
+        return remoteAnalyticsConfiguration.get().getExtensions();
     }
 }
