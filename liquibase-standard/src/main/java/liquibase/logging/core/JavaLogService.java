@@ -45,6 +45,16 @@ public class JavaLogService extends AbstractLogService {
         return logger;
     }
 
+    /**
+     *
+     * Use the LIQUIBASE_LOG_CHANNELS property value to set the log levels.  Because of this code
+     * is called while the configuration classes are being initialized, the logChannels and logLevel
+     * values are passed in via the Scope, from LiquibaseCommandLine.execute()
+     *
+     * @param channelName    The name of the channel to set logging for
+     * @param logger         The logger used internally
+     *
+     */
     private void setChannelLogLevel(String channelName, java.util.logging.Logger logger) {
         final String configuredChannels = Scope.getCurrentScope().get("logChannels", String.class);
         if (configuredChannels == null) {
