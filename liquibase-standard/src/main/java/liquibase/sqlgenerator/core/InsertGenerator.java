@@ -1,6 +1,5 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.Null;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
@@ -69,7 +68,7 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
 
         for (String column : statement.getColumnValues().keySet()) {
             Object newValue = statement.getColumnValues().get(column);
-            if (newValue == null || newValue instanceof Null) {
+            if (newValue == null) {
                 sql.append("NULL");
             } else if (StringUtil.equalsWordNull(newValue.toString())) {
                 sql.append("'").append(newValue).append("'");
