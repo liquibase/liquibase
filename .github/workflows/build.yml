@@ -268,19 +268,19 @@ jobs:
           cp $commercialJarM2Location artifacts-named/liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}.jar
 
       - name: Archive Packages
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: liquibase-artifacts
           path: artifacts/*
 
       - name: Archive Convenience Zip
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: liquibase-zip-${{ needs.setup.outputs.thisBranchName }}
           path: branch-artifacts/*
 
       - name: Archive Convenience Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchName }}
           path: artifacts-named/*
@@ -313,6 +313,14 @@ jobs:
   run-tests-harness:
     needs: [ setup,build_publish_branch ]
     uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@master
+    secrets: inherit
+    with:
+      latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
+      thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
+
+  run-pro-build-and-test:
+    needs: [ setup, build_publish_branch ]
+    uses: liquibase/liquibase/.github/workflows/run-pro-build-and-test.yml@DAT-19069
     secrets: inherit
     with:
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
