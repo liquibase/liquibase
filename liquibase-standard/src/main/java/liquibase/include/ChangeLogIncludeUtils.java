@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -144,7 +143,7 @@ public final class ChangeLogIncludeUtils {
 	include.checkPreconditions();
 	DatabaseChangeLog changeLog = include.getNestedChangelog();
 	if(include.isMarkRan())
-	 propagateMarkRan(Collections.singletonList(changeLog), include.getPreconditions());
+	 propagateMarkRan(Collections.singletonList(changeLog));
 
 	if(changeLog != null) {
 	 changeSetAccumulator.addAll(ChangeLogIncludeUtils.getNestedChangeSets(include));
@@ -159,7 +158,7 @@ public final class ChangeLogIncludeUtils {
 
 	includeAll.checkPreconditions();
 	if(includeAll.isMarkRan())
-	 propagateMarkRan(includeAll.getNestedChangeLogs(), includeAll.getPreconditions());
+	 propagateMarkRan(includeAll.getNestedChangeLogs());
 
 	if(!includeAll.getNestedChangeLogs().isEmpty()) {
 	 changeSetAccumulator.addAll(ChangeLogIncludeUtils.getNestedChangeSets(includeAll));
@@ -169,7 +168,7 @@ public final class ChangeLogIncludeUtils {
 	}
  }
 
- private static void propagateMarkRan(List<DatabaseChangeLog> changeLogs, PreconditionContainer preconditions) {
+ private static void propagateMarkRan(List<DatabaseChangeLog> changeLogs) {
 	changeLogs.forEach(cl -> {
 	 cl.getIncludeList().forEach(i -> i.setPreconditions(getMarkRanPreconditions()));
 	 cl.getIncludeAllList().forEach(ia -> ia.setPreconditions(getMarkRanPreconditions()));
@@ -189,13 +188,13 @@ public final class ChangeLogIncludeUtils {
 
  private static SortedSet<ChangeSet> getNestedChangeSets(ChangeLogInclude include) {
 	return getNestedChangeSets(include.getDatabase(), include.getLogicalFilePath(),
-			include.getNestedChangelog(), include.getModifyChangeSets(), include.getPreconditions(), include.isMarkRan());
+			include.getNestedChangelog(), include.getModifyChangeSets(), include.isMarkRan());
  }
 
  private static SortedSet<ChangeSet> getNestedChangeSets(ChangeLogIncludeAll includeAll) {
 	SortedSet<ChangeSet> result = new TreeSet<>();
 	includeAll.getNestedChangeLogs().forEach(changelog -> result.addAll(getNestedChangeSets(includeAll.getDatabase(), includeAll.getLogicalFilePath(),
-			changelog, includeAll.getModifyChangeSets(), includeAll.getPreconditions(),
+			changelog, includeAll.getModifyChangeSets(),
 			includeAll.isMarkRan())));
 	return result;
  }
@@ -284,7 +283,7 @@ public final class ChangeLogIncludeUtils {
 
  private static SortedSet<ChangeSet> getNestedChangeSets(Database database, String logicalFilePath,
 																												 DatabaseChangeLog childChangeLog, ModifyChangeSets modifyChangeSets,
-																												 PreconditionContainer preconditions, boolean markRan) {
+																												 boolean markRan) {
 	SortedSet<ChangeSet> result = new TreeSet<>();
 	List<RanChangeSet> ranChangeSets = new ArrayList<>(1);
 	if (database != null && logicalFilePath != null) {
