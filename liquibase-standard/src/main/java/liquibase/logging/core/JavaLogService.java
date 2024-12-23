@@ -37,7 +37,7 @@ public class JavaLogService extends AbstractLogService {
                 utilLogger.setParent(parent);
             }
             logger = new JavaLogger(utilLogger);
-            setChannelLogLevel(getLogName(clazz), utilLogger);
+            setChannelLogLevel(getLogName(clazz));
 
             this.loggers.put(clazz, logger);
         }
@@ -52,10 +52,9 @@ public class JavaLogService extends AbstractLogService {
      * values are passed in via the Scope, from LiquibaseCommandLine.execute()
      *
      * @param channelName    The name of the channel to set logging for
-     * @param logger         The logger used internally
      *
      */
-    private void setChannelLogLevel(String channelName, java.util.logging.Logger logger) {
+    private void setChannelLogLevel(String channelName) {
         final String configuredChannels = Scope.getCurrentScope().get("logChannels", String.class);
         if (configuredChannels == null) {
             return;
@@ -66,8 +65,8 @@ public class JavaLogService extends AbstractLogService {
         }
         List<String> channels;
         if (! configuredChannels.equalsIgnoreCase("all")) {
-            channels = StringUtil.splitAndTrim(configuredChannels, ",");
-            if (channels.contains(channelName)) {
+            channels = StringUtil.splitAndTrim(configuredChannels.toLowerCase(), ",");
+            if (channels.contains(channelName.toLowerCase())) {
                 java.util.logging.Logger.getLogger(channelName).setLevel(logLevel);
             }
         }
