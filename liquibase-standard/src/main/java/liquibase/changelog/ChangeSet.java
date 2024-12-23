@@ -629,7 +629,8 @@ public class ChangeSet implements Conditional, ChangeLogChild, Comparable<Change
     protected Change toChange(ParsedNode value, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         Change change = getCurrentScope().getSingleton(ChangeFactory.class).create(value.getName());
         if (change == null) {
-            if (value.getChildren().size() > 0 && ChangeLogParserConfiguration.CHANGELOG_PARSE_MODE.getCurrentValue().equals(ChangeLogParserConfiguration.ChangelogParseMode.STRICT)) {
+            if (!value.getChildren().isEmpty() && ! ChangeFactory.isNoExceptionOnUnsupportedChangeType() &&
+                ChangeLogParserConfiguration.CHANGELOG_PARSE_MODE.getCurrentValue().equals(ChangeLogParserConfiguration.ChangelogParseMode.STRICT)) {
                 String message = "";
                 if (this.getChangeLog() != null && this.getChangeLog().getPhysicalFilePath() != null) {
                     message = "Error parsing " + this.getChangeLog().getPhysicalFilePath() + ": ";
