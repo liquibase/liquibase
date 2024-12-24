@@ -49,33 +49,29 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 
 @Getter(AccessLevel.PACKAGE)
-@Setter(AccessLevel.PACKAGE)
-public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implements Conditional, ChangeLogChild {
+public final class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implements Conditional, ChangeLogChild {
 
     private static final Logger LOG = Scope.getCurrentScope().getLog(ChangeLogIncludeAll.class);
-    private String path;
-    private Boolean errorIfMissingOrEmpty;
-    private Boolean relativeToChangelogFile;
-    private IncludeAllFilter resourceFilter;
-    private ContextExpression context;
-    private Integer minDepth;
-    private Integer maxDepth;
-    private String endsWithFilter;
-    private String logicalFilePath;
-    private Labels labels;
-    private Boolean ignore;
-    @Getter(AccessLevel.PUBLIC)
-    @Setter(AccessLevel.PUBLIC)
+    private final String path;
+    private final Boolean errorIfMissingOrEmpty;
+    private final Boolean relativeToChangelogFile;
+    private final IncludeAllFilter resourceFilter;
+    private final ContextExpression context;
+    private final Integer minDepth;
+    private final Integer maxDepth;
+    private final String endsWithFilter;
+    private final String logicalFilePath;
+    private final Labels labels;
+    private final Boolean ignore;
     private PreconditionContainer preconditions;
-    private ResourceAccessor resourceAccessor;
-    private DatabaseChangeLog parentChangeLog;
-    private ModifyChangeSets modifyChangeSets;
+    private final ResourceAccessor resourceAccessor;
+    private final DatabaseChangeLog parentChangeLog;
+    private final ModifyChangeSets modifyChangeSets;
     private final Database database = Scope.getCurrentScope().getDatabase();
-    private List<DatabaseChangeLog> nestedChangeLogs = new ArrayList<>(10);
+    private final List<DatabaseChangeLog> nestedChangeLogs = new ArrayList<>(10);
     private boolean markRan = false;
 
     public ChangeLogIncludeAll(ParsedNode node, ResourceAccessor resourceAccessor,
@@ -96,7 +92,7 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
         this.maxDepth = node.getChildValue(null, MAX_DEPTH, Integer.MAX_VALUE);
         this.endsWithFilter = node.getChildValue(null, ENDS_WITH_FILTER, "");
         this.context = ChangeLogIncludeUtils.getContextExpression(node);
-        this.setFilterDef(node);
+        this.resourceFilter = this.setFilterDef(node);
         this.path = node.getChildValue(null, PATH, String.class);
         this.preconditions = ChangeLogIncludeUtils.getPreconditions(node, resourceAccessor);
         this.setNestedChangeLogs(node);
@@ -132,7 +128,7 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
                     } else if (PreconditionContainer.FailOption.WARN.equals(preconditionContainer.getOnFail())) {
                         ChangeLogIncludeUtils.sendIncludePreconditionWarningMessage(warningMessage, e);
                     } else if (PreconditionContainer.FailOption.MARK_RAN.equals(preconditionContainer.getOnFail())) {
-                        this.setMarkRan(true);
+                        this.markRan = true;
                     } else {
                         this.nestedChangeLogs.clear();
                     }
@@ -142,7 +138,7 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
                     } else if (PreconditionContainer.ErrorOption.WARN.equals(preconditionContainer.getOnError())) {
                         ChangeLogIncludeUtils.sendIncludePreconditionWarningMessage(warningMessage, e);
                     } else if (PreconditionContainer.ErrorOption.MARK_RAN.equals(preconditionContainer.getOnError())) {
-                        this.setMarkRan(true);
+                        this.markRan = true;
                     }
                     else {
                         this.nestedChangeLogs.clear();
@@ -206,18 +202,19 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
         return path;
     }
 
-    private void setFilterDef(ParsedNode node) throws ParsedNodeException, SetupException {
+    private IncludeAllFilter setFilterDef(ParsedNode node) throws ParsedNodeException, SetupException {
         String resourceFilterDef = node.getChildValue(null, FILTER, String.class);
         if (resourceFilterDef == null) {
             resourceFilterDef = node.getChildValue(null, RESOURCE_FILTER, String.class);
         }
         if (resourceFilterDef != null) {
             try {
-                this.resourceFilter = (IncludeAllFilter) Class.forName(resourceFilterDef).getConstructor().newInstance();
+                return (IncludeAllFilter) Class.forName(resourceFilterDef).getConstructor().newInstance();
             } catch (ReflectiveOperationException e) {
                 throw new SetupException(e);
             }
         }
+        return null;
     }
 
     @SuppressWarnings({"unchecked"})
@@ -250,7 +247,7 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
             SortedSet<Resource> resources = new TreeSet<>((o1, o2) -> resourceComparator.compare(o1.getPath(), o2.getPath()));
             if (unsortedResources != null) {
                 for (Resource resourcePath : unsortedResources) {
-                    if ((this.resourceFilter == null) || this.resourceFilter.include(resourcePath.getPath())) {
+                    if (this.resourceFilter == null || this.resourceFilter.include(resourcePath.getPath())) {
                         resources.add(resourcePath);
                     }
                 }
@@ -303,6 +300,16 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
             }
         }
         return unsortedResources;
+    }
+
+    @Override
+    public void setPreconditions(PreconditionContainer precond) {
+        this.preconditions = precond;
+    }
+
+    @Override
+    public PreconditionContainer getPreconditions() {
+        return this.preconditions;
     }
 
 }

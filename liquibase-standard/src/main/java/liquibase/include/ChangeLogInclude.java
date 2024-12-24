@@ -30,30 +30,26 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter(AccessLevel.PACKAGE)
-@Setter(AccessLevel.PACKAGE)
-public class ChangeLogInclude extends AbstractLiquibaseSerializable implements Conditional, ChangeLogChild {
+public final class ChangeLogInclude extends AbstractLiquibaseSerializable implements Conditional, ChangeLogChild {
 
     private static final String CLASSPATH_PROTOCOL = "classpath:";
     private static final List<String> CHANGELOG_EXTENSION = Arrays.asList(".xml", ".yml", ".yaml", ".json");
     private final Database database = Scope.getCurrentScope().getDatabase();
 
-    private String file;
-    private Boolean relativeToChangelogFile;
-    private Boolean errorIfMissing;
-    private Boolean ignore;
-    private ContextExpression context;
-    @Getter(AccessLevel.PUBLIC)
-    @Setter(AccessLevel.PUBLIC)
+    private final String file;
+    private final Boolean relativeToChangelogFile;
+    private final Boolean errorIfMissing;
+    private final Boolean ignore;
+    private final ContextExpression context;
     private PreconditionContainer preconditions;
-    private Labels labels;
-    private String logicalFilePath;
+    private final Labels labels;
+    private final String logicalFilePath;
     private DatabaseChangeLog nestedChangelog;
-    private ResourceAccessor resourceAccessor;
-    private DatabaseChangeLog parentChangeLog;
-    private ModifyChangeSets modifyChangeSets;
+    private final ResourceAccessor resourceAccessor;
+    private final DatabaseChangeLog parentChangeLog;
+    private final ModifyChangeSets modifyChangeSets;
     private boolean markRan = false;
 
     public ChangeLogInclude(ParsedNode node, ResourceAccessor resourceAccessor,
@@ -106,9 +102,9 @@ public class ChangeLogInclude extends AbstractLiquibaseSerializable implements C
                     } else if (PreconditionContainer.FailOption.WARN.equals(preconditionContainer.getOnFail())) {
                         ChangeLogIncludeUtils.sendIncludePreconditionWarningMessage(warningMessage, e);
                     } else if (PreconditionContainer.FailOption.MARK_RAN.equals(preconditionContainer.getOnFail())) {
-                        this.setMarkRan(true);
+                        this.markRan = true;
                     } else {
-                        this.setNestedChangelog(null);
+                        this.nestedChangelog = null;
                     }
                 } catch (PreconditionErrorException e) {
                     if (PreconditionContainer.ErrorOption.HALT.equals(preconditionContainer.getOnError())) {
@@ -116,13 +112,23 @@ public class ChangeLogInclude extends AbstractLiquibaseSerializable implements C
                     } else if (PreconditionContainer.ErrorOption.WARN.equals(preconditionContainer.getOnError())) {
                         ChangeLogIncludeUtils.sendIncludePreconditionWarningMessage(warningMessage, e);
                     } else if (PreconditionContainer.ErrorOption.MARK_RAN.equals(preconditionContainer.getOnError())) {
-                        this.setMarkRan(true);
+                        this.markRan = true;
                     }
                     else {
-                        this.setNestedChangelog(null);
+                        this.nestedChangelog = null;
                     }
                 }
             }
         }
+    }
+
+    @Override
+    public void setPreconditions(PreconditionContainer precond) {
+        this.preconditions = precond;
+    }
+
+    @Override
+    public PreconditionContainer getPreconditions() {
+        return this.preconditions;
     }
 }
