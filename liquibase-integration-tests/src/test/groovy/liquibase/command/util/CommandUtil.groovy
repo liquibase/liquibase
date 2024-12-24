@@ -279,4 +279,12 @@ class CommandUtil {
             commandScope.execute()
         } as Scope.ScopedRunnerWithReturn<Void>)
     }
+
+    static void runClearCheckSum(DatabaseTestSystem db) {
+        CommandScope commandScope = new CommandScope(ClearChecksumsCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+        commandScope.execute()
+    }
 }
