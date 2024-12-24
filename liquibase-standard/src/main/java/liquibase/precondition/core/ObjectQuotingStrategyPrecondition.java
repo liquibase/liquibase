@@ -39,8 +39,10 @@ public class ObjectQuotingStrategyPrecondition extends AbstractPrecondition {
             throws PreconditionFailedException, PreconditionErrorException {
         try {
             if (changeLog.getObjectQuotingStrategy() != strategy) {
+                ObjectQuotingStrategy actual = (changeSet != null) ?
+                    changeSet.getObjectQuotingStrategy() : ObjectQuotingStrategy.LEGACY;
                 throw new PreconditionFailedException("Quoting strategy Precondition failed: expected "
-                        + strategy +", got "+changeSet.getObjectQuotingStrategy(), changeLog, this);
+                        + strategy + ", got " + actual, changeLog, this);
             }
         } catch (PreconditionFailedException e) {
             throw e;
