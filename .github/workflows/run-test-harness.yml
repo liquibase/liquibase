@@ -16,7 +16,7 @@ on:
   pull_request_target:
     types: [labeled]
 
-jobs:
+jobs: 
   test-harness-build:
     runs-on: ubuntu-latest
     if: contains(github.event.pull_request.labels.*.name, 'runFunctional&HarnessTests') || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')

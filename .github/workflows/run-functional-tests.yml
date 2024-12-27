@@ -16,7 +16,7 @@ on:
   pull_request_target:
     types: [ labeled ]
 
-jobs:
+jobs:  
   functional-tests-build:
     runs-on: ubuntu-latest
     if: contains(github.event.pull_request.labels.*.name, 'runFunctional&HarnessTests') || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
@@ -37,7 +37,7 @@ jobs:
 
   run-pro-tests:
     runs-on: ubuntu-latest
-    needs: [ functional-tests-build ]
+    needs: [functional-tests-build ]
     name: Trigger Functional Tests
     steps:
       - uses: actions/checkout@v4
