@@ -37,11 +37,14 @@ import java.nio.file.Files;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
@@ -192,7 +195,14 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         Element node = currentChangeLogFileDOM.createElementNS(namespace, nodeName);
 
         try {
-            for (String field : object.getSerializableFields()) {
+            Set<String> fields = object.getSerializableFields();
+            if (object instanceof ColumnConfig) {
+                ColumnConfig cc = (ColumnConfig) object;
+                if (cc.isNullWithDefaultValue()) {
+                    fields.remove("value");
+                }
+            }
+            for (String field : fields) {
                 setValueOnNode(node, object.getSerializableFieldNamespace(field), field, object.getSerializableFieldValue(field), object.getSerializableFieldType(field), namespace);
             }
         } catch (UnexpectedLiquibaseException e) {
@@ -206,8 +216,10 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     }
 
     private void setValueOnNode(Element node, String objectNamespace, String objectName, Object value, LiquibaseSerializable.SerializationType serializationType, String parentNamespace) {
-        if (value == null) {
-            node.setAttribute("value", "null");
+        if (null == value) {
+            if ("value".equals(objectName)) {
+                node.setAttribute("value", "null");
+            }
             return;
         }
 

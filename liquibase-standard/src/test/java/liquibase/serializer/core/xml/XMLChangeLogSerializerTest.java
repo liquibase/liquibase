@@ -1019,8 +1019,7 @@ public class XMLChangeLogSerializerTest {
         String actualOutput = new XMLChangeLogSerializer().serialize(change, true);
         assertEquals("<createTable catalogName=\"a\"\n" +
                 "        schemaName=\"b\"\n" +
-                "        tableName=\"c\"\n" +
-                "        value=\"null\">\n" +
+                "        tableName=\"c\">\n" +
                 "    <column name=\"x\" value=\"null\"/>\n" +
                 "    <column name=\"y\" value=\"null\"/>\n" +
                 "</createTable>", actualOutput);
