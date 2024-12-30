@@ -293,7 +293,7 @@
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
             <artifactId>ojdbc8</artifactId>
-            <version>19.24.0.0</version>
+            <version>19.25.0.0</version>
             <scope>test</scope>
         </dependency>
 
