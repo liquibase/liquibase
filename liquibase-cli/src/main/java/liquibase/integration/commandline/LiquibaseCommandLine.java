@@ -85,6 +85,20 @@ public class LiquibaseCommandLine {
     public static void main(String[] args) {
         //we don't ship jansi, so we know we can disable it without having to do the slow class checking
         System.setProperty("org.fusesource.jansi.Ansi.disable", "true");
+
+        //
+        // Do not allow any checks commands if the extension JAR is not present
+        //
+        if (args.length > 1 && args[0].equalsIgnoreCase("checks")) {
+            try {
+                Class.forName("com.datical.liquibase.ext.command.checks.ChecksRunCommandStep");
+            } catch (ClassNotFoundException ignored) {
+                System.out.println(Scope.CHECKS_MESSAGE);
+                Scope.getCurrentScope().getLog(LiquibaseCommandLine.class).severe(Scope.CHECKS_MESSAGE);
+                System.exit(1);
+            }
+        }
+
         final LiquibaseCommandLine cli = new LiquibaseCommandLine();
         int returnCode = cli.execute(args);
 

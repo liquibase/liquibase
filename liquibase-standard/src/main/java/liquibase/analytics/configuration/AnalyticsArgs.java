@@ -8,6 +8,7 @@ import liquibase.logging.Logger;
 import liquibase.util.LiquibaseUtil;
 import org.apache.commons.lang3.BooleanUtils;
 
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 public class AnalyticsArgs implements AutoloadedConfigurations {
@@ -23,6 +24,7 @@ public class AnalyticsArgs implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Level> LOG_LEVEL;
     public static final ConfigurationDefinition<Integer> LICENSE_KEY_CHARS;
     public static final ConfigurationDefinition<Integer> TIMEOUT_MILLIS;
+    public static final ConfigurationDefinition<Long> CONFIG_CACHE_TIMEOUT_MILLIS;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase.analytics");
@@ -70,6 +72,12 @@ public class AnalyticsArgs implements AutoloadedConfigurations {
                         return maxChars;
                     }
                 }))
+                .build();
+
+        CONFIG_CACHE_TIMEOUT_MILLIS = builder.define("configCacheTimeoutMillis", Long.class)
+                .setDefaultValue(TimeUnit.MINUTES.toMillis(60))
+                .setDescription("Liquibase caches the results from the config endpoint, and this value determines how long that cache should live for before being refreshed.")
+                .setHidden(true)
                 .build();
     }
 
