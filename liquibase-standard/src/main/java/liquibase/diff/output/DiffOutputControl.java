@@ -19,6 +19,7 @@ import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class DiffOutputControl {
 
@@ -94,6 +95,7 @@ public class DiffOutputControl {
     public DiffOutputControl setDataDir(String dataDir) {
 
         if (dataDir != null) {
+            ChangeGeneratorFactory.getInstance().unregister(MissingDataExternalFileChangeGenerator.class);
             ChangeGeneratorFactory.getInstance().register(new MissingDataExternalFileChangeGenerator(dataDir));
         }
         return this;
