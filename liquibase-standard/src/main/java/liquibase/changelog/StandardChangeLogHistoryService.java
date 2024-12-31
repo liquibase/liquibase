@@ -247,7 +247,10 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             else {
                 if (!(this.getDatabase() instanceof SQLiteDatabase)) {
                     DataType type = changeLogTable.getColumn("DEPLOYMENT_ID").getType();
-                    if (type.getTypeName().toLowerCase().startsWith("varchar") || type.getTypeName().toLowerCase().startsWith("character varying")) {
+                    if (type.getTypeName().toLowerCase().startsWith("varchar") ||
+                        type.getTypeName().toLowerCase().startsWith("nvarchar") ||
+                        type.getTypeName().toLowerCase().startsWith("character varying") ||
+                        type.getTypeName().toLowerCase().startsWith("string")) {
                         Integer columnSize = type.getColumnSize();
                         deploymentIdColumnNotRightSize = (columnSize != null) && (columnSize < 36);
                     } else {
