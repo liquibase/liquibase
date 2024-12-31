@@ -41,7 +41,7 @@ A clear and concise description of the change being made.
 - Describe how the code change addresses the problem
 - Ensure private information is redacted.
 - Add unit/integration tests (ask for support if not sure how to do it)
-- Make sure test execution succeed
+- Make sure tests all pass
 -->
 
 ## Things to be aware of
