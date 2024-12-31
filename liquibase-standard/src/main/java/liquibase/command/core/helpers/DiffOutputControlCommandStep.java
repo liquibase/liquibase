@@ -21,6 +21,8 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
     public static final CommandArgumentDefinition<Boolean> INCLUDE_SCHEMA_ARG;
     public static final CommandArgumentDefinition<Boolean> INCLUDE_TABLESPACE_ARG;
 
+    public static final CommandArgumentDefinition<String> DATA_DIR_ARG;
+
     public static final CommandResultDefinition<DiffOutputControl> DIFF_OUTPUT_CONTROL;
 
 
@@ -32,6 +34,8 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
                 .description("If true, the schema will be included in generated changeSets. Defaults to false.").build();
         INCLUDE_TABLESPACE_ARG = builder.argument("includeTablespace", Boolean.class).defaultValue(false)
                 .description("Include the tablespace attribute in the changelog. Defaults to false.").build();
+        DATA_DIR_ARG = builder.argument("dataDir", String.class)
+                .description("Directory where insert statement csv files will be kept when processing a LoadData change.").build();
 
         DIFF_OUTPUT_CONTROL = builder.result("diffOutputControl", DiffOutputControl.class).build();
     }
@@ -69,6 +73,7 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
         Boolean includeCatalog = commandScope.getArgumentValue(INCLUDE_CATALOG_ARG);
         Boolean includeSchema = commandScope.getArgumentValue(INCLUDE_SCHEMA_ARG);
         Boolean includeTablespace = commandScope.getArgumentValue(INCLUDE_TABLESPACE_ARG);
+        String dataDir = commandScope.getArgumentValue(DATA_DIR_ARG);
         addMdcProperties(includeCatalog, includeSchema, includeTablespace);
         DiffOutputControl diffOutputControl = new DiffOutputControl(
                 includeCatalog, includeSchema,
@@ -81,6 +86,7 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
         if (objectChangeFilter != null) {
             diffOutputControl.setObjectChangeFilter(objectChangeFilter);
         }
+        diffOutputControl.setDataDir(dataDir);
 
         return diffOutputControl;
     }

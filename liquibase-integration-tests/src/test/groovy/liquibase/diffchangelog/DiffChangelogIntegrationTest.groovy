@@ -8,6 +8,7 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.command.CommandScope
 import liquibase.command.core.DiffChangelogCommandStep
+import liquibase.command.core.GenerateChangelogCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.command.core.helpers.DiffOutputControlCommandStep
 import liquibase.command.core.helpers.PreCompareCommandStep
@@ -262,6 +263,37 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         refDatabase.close()
         targetDatabase.close()
         CommandUtil.runDropAll(postgres)
+        postgres.getConnection().close()
+    }
+
+    def "Ensure loadData csv file is processed from dataDir directory"() {
+        given:
+        CommandUtil.runUpdate(postgres, "changelogs/h2/complete/loadData.test.changelog.xml", null, null, null)
+        def outputFile = "output.diffChangelog.file.xml"
+        def dataDir = "testDataDir/"
+        Database refDatabase = DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl(), postgres.getUsername(), postgres.getPassword(), null, null)
+
+        Database targetDatabase =
+                DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl().replace("lbcat", "lbcat2"), postgres.getUsername(), postgres.getPassword(), null, null)
+
+        when:
+        CommandScope commandScope = new CommandScope(DiffChangelogCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, targetDatabase)
+        commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, outputFile)
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
+        commandScope.addArgumentValue(PreCompareCommandStep.DIFF_TYPES_ARG, "table,data")
+        commandScope.addArgumentValue(DiffOutputControlCommandStep.DATA_DIR_ARG, dataDir)
+        commandScope.execute()
+
+        then:
+        def changelogFile = new File(outputFile)
+        def changelogFileContent = FileUtil.getContents(changelogFile)
+        changelogFileContent.containsIgnoreCase("file=\"testDataDir/")
+
+        cleanup:
+        changelogFile.delete()
+        refDatabase.close()
+        targetDatabase.close()
         postgres.getConnection().close()
     }
 
