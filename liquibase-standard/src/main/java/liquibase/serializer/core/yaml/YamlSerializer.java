@@ -4,6 +4,7 @@ import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RollbackContainer;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.yaml.YamlParser;
