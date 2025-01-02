@@ -137,7 +137,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                     if (o instanceof LiquibaseSerializable) {
                         if (!preserveNullValues && o instanceof ColumnConfig) {
                             ColumnConfig columnConfig = (ColumnConfig) o;
-                            if (columnConfig.isNull()) {
+                            if (columnConfig.isValueNull() && !columnConfig.hasDefaultValue()) {
                                 continue;
                             }
                         }
