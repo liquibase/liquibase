@@ -18,6 +18,7 @@ release.properties
 **/liquibase.sdk.local.yml
 derby.log
 .idea
+.vscode
 *.iml
 .DS_Store
 /tmp
