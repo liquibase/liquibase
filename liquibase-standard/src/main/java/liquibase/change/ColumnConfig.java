@@ -173,7 +173,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     public ColumnConfig() {
     }
 
-    public boolean isValueNull() {
+    public boolean isNullValue() {
         return this.value == null &&
                 this.valueBlobFile == null &&
                 this.valueBoolean == null &&
@@ -183,9 +183,9 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
                 this.valueNumeric == null;
     }
 
-    public boolean isNullWithDefaultValue() {
+    public boolean isNullValueWithDefaultValue() {
         return this.hasDefaultValue() &&
-                this.isValueNull();
+                this.isNullValue();
     }
 
     public static ColumnConfig fromName(String name) {

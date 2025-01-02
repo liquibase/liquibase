@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class FormattedSqlChangeLogSerializer implements ChangeLogSerializer {
+public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
 
     private static final String SQL_FILE_NAME_REGEX = ".*\\.(\\w+)\\.sql";
     private static final Pattern SQL_FILE_NAME_PATTERN = Pattern.compile(SQL_FILE_NAME_REGEX);

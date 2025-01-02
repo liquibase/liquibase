@@ -85,8 +85,8 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                 for (int i = 0; i < columnNames.size(); i++) {
                     ColumnConfig column = new ColumnConfig();
                     column.setName(columnNames.get(i));
-                    Object value = JdbcUtil.getResultSetValue(rs, i + 1);
 
+                    Object value = JdbcUtil.getResultSetValue(rs, i + 1);
                     if (value == null) {
                         if (outputControl.getPreserveNullValues()) {
                             column.setValue(null);
@@ -107,6 +107,7 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                     }
 
                     change.addColumn(column);
+
                 }
 
                 // for each row, add a new change

@@ -80,6 +80,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         return new String[]{"xml"};
     }
 
+
     public String serialize(DatabaseChangeLog databaseChangeLog) {
         return null; //todo
     }
@@ -138,6 +139,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             }
         }
 
+
         StringBuilder schemaLocationAttribute = new StringBuilder();
         for (Map.Entry<String, String> entry : urlByNamespace.entrySet()) {
             if (StringUtils.isNotEmpty(entry.getValue())) {
@@ -193,12 +195,6 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
         try {
             Set<String> fields = object.getSerializableFields();
-            if (object instanceof ColumnConfig) {
-                ColumnConfig cc = (ColumnConfig) object;
-                if (cc.isNullWithDefaultValue()) {
-                    fields.remove("value");
-                }
-            }
             for (String field : fields) {
                 setValueOnNode(node, object.getSerializableFieldNamespace(field), field, object.getSerializableFieldValue(field), object.getSerializableFieldType(field), namespace);
             }
@@ -213,26 +209,22 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     }
 
     private void setValueOnNode(Element node, String objectNamespace, String objectName, Object value, LiquibaseSerializable.SerializationType serializationType, String parentNamespace) {
-        if (null == value) {
-            if ("value".equals(objectName)) {
-                node.setAttribute("value", "null");
-            }
+        if (value == null) {
             return;
         }
 
-        if (value instanceof ColumnConfig) {
-            ColumnConfig columnConfig = (ColumnConfig) value;
-            ConstraintsConfig constraintsConfig = columnConfig.getConstraints();
-            boolean constraintsIsNullable = null != constraintsConfig && constraintsConfig.isNullable() != null && constraintsConfig.isNullable();
-            if (!preserveNullValues && constraintsIsNullable && columnConfig.isValueNull() && !columnConfig.hasDefaultValue()) {
-                return;
-            }
-            node.appendChild(createNode((LiquibaseSerializable) value));
-        }
-        else if (value instanceof Collection) {
+        if (value instanceof Collection) {
             for (Object child : (Collection) value) {
                 setValueOnNode(node, objectNamespace, objectName, child, serializationType, parentNamespace);
             }
+        } else if (value instanceof ColumnConfig) {
+            ColumnConfig columnConfig = (ColumnConfig) value;
+            ConstraintsConfig constraintsConfig = columnConfig.getConstraints();
+            boolean constraintsIsNullable = null != constraintsConfig && constraintsConfig.isNullable() != null && constraintsConfig.isNullable();
+            if (!preserveNullValues && constraintsIsNullable && columnConfig.isNullValue() && !columnConfig.hasDefaultValue()) {
+                return;
+            }
+            node.appendChild(createNode((LiquibaseSerializable) value));
         } else if (value instanceof Map) {
             for (Map.Entry entry : (Set<Map.Entry>) ((Map) value).entrySet()) {
                 Element mapNode = currentChangeLogFileDOM.createElementNS(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE, qualifyName(objectName, objectNamespace, parentNamespace));
@@ -333,6 +325,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             return objectName;
         }
     }
+
 
     // create a XML node with nodeName and simple text content
     public Element createNode(String nodeNamespace, String nodeName, String nodeContent) {
