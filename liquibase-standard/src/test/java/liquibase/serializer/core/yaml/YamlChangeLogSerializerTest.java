@@ -5,6 +5,7 @@ import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.InsertDataChange;
 import liquibase.changelog.ChangeSet;
 
+import liquibase.changelog.DatabaseChangeLog;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -46,10 +47,10 @@ public class YamlChangeLogSerializerTest {
 
     @Test
     public void serialize__insertDataChange() {
-        ChangeSet changeSet = new ChangeSet("test1", "nvoxland", false, true, "/test/me.txt", null, null,false, null);
+        ChangeSet changeSet = new ChangeSet("test1", "nvoxland", false, true, "target/test/me.txt", null, null,false, null);
         InsertDataChange change = new InsertDataChange();
         change.setTableName("testTable");
-        change.addColumn(new ColumnConfig().setName("x").setValue(null));
+        change.addColumn(new ColumnConfig().setName("x"));
         change.addColumn(new ColumnConfig().setName("y").setValue(null));
         change.addColumn(new ColumnConfig().setName("z").setValue("Geronimo!"));
         changeSet.addChange(change);
@@ -75,21 +76,4 @@ public class YamlChangeLogSerializerTest {
         String actualOutput = new YamlChangeLogSerializer().serialize(changeSet, false);
         Assert.assertEquals(expectedOutput, actualOutput);
     }
-
-//    @Test
-//    public void serialize_changelog() {
-//        ChangeSet changeSet = new ChangeSet("test1", "nvoxland", false, true, "/test/me.txt", null, null);
-//        CreateTableChange change = new CreateTableChange();
-//        change.setTableName("testTable");
-//        change.addColumn(new ColumnConfig().setName("id").setType("int"));
-//        change.addColumn(new ColumnConfig().setName("name").setType("varchar(255)"));
-//        changeSet.addChange(change);
-//
-//        DatabaseChangeLog changeLog = new DatabaseChangeLog("physical/path.txt");
-//        changeLog.addChangeSet(changeSet);
-//
-//        String out = new YamlChangeLogSerializer().serialize(changeLog);
-//
-//        System.out.println(out);
-//    }
 }

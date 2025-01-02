@@ -1020,8 +1020,8 @@ public class XMLChangeLogSerializerTest {
         assertEquals("<createTable catalogName=\"a\"\n" +
                 "        schemaName=\"b\"\n" +
                 "        tableName=\"c\">\n" +
-                "    <column name=\"x\" value=\"null\"/>\n" +
-                "    <column name=\"y\" value=\"null\"/>\n" +
+                "    <column name=\"x\"/>\n" +
+                "    <column name=\"y\"/>\n" +
                 "</createTable>", actualOutput);
     }
 
