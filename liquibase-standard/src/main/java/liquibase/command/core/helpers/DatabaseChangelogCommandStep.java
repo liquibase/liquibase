@@ -138,7 +138,12 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         ChangeLogHistoryService changeLogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
         changeLogHistoryService.init();
         if (updateExistingNullChecksums) {
-            changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
+            try {
+                Scope.child(Collections.singletonMap(Scope.Attr.database.name(), database),
+                    () ->changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression));
+            } catch (Exception e) {
+                throw new LiquibaseException(e);
+            }
         }
         LockServiceFactory.getInstance().getLockService(database).init();
     }
