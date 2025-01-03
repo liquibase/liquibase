@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <include file="included3.xml" relativeToChangelogFile="true" logicalFilePath="included3">
+        <preConditions onFail="WARN">
+            <tableExists tableName="NOT_EXISTENT_TABLE" />
+        </preConditions>
+    </include>
+
+    <changeSet id="included2" author="cagliostro">
+        <createTable tableName="INCLUDED_TABLE_2">
+            <column name="ID" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

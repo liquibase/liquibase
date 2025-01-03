@@ -2,6 +2,7 @@ package liquibase.parser.core.json
 
 import liquibase.change.AbstractSQLChange
 import liquibase.changelog.ChangeLogParameters
+import liquibase.changelog.visitor.IncludeVisitor
 import liquibase.test.JUnitResourceAccessor
 import spock.lang.Specification
 
@@ -12,6 +13,7 @@ class JsonChangelogParserTest extends Specification {
         when:
         JsonChangeLogParser parser = new JsonChangeLogParser()
         def changeLog = parser.parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
+        new IncludeVisitor().visit(changeLog)
         def changeSet = changeLog.changeSets[0]
         def change = changeSet.changes[0]
 
