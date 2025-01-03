@@ -7,23 +7,17 @@ import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.util.FileUtil
-
 import spock.lang.Shared
 import spock.lang.Specification
 
-import java.nio.file.Files
-import java.nio.file.Path
-
 @LiquibaseIntegrationTest
-class GenerateChangeLogEmptyIntegrationTest extends Specification {
-
+class GenerateYamlChangeLogPostgresIntegrationTest extends Specification {
     @Shared
     private DatabaseTestSystem db = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("postgresql")
 
-    def "Should generate changelog file with empty table"() {
+    def "Should generate YAML changelog incl. NULL-values"() {
         given:
-        CommandUtil.runDropAll(db)
-        def changelogFileName = "target/test-classes/changelogs/update.changelog.sql"
+        def changelogFileName = "target/test-classes/changelogs/pgsql/update.changelog.xml"
         def resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
         def scopeSettings = [
                 (Scope.Attr.resourceAccessor.name()) : resourceAccessor
@@ -33,52 +27,67 @@ class GenerateChangeLogEmptyIntegrationTest extends Specification {
         } as Scope.ScopedRunner)
 
         when:
-        def outputFileName = 'test/test-classes/output.postgresql.sql'
-        CommandUtil.runGenerateChangelog(db, outputFileName, "tables")
+        def outputFileName = 'test/test-classes/output.postgresql.yaml'
+        CommandUtil.runGenerateChangelog(db, outputFileName, true)
         def outputFile = new File(outputFileName)
         def fileContent = FileUtil.getContents(outputFile)
 
         then:
-        fileContent.containsIgnoreCase("create table \"public\".\"generate_changelog_test_sql\"")
-        !fileContent.containsIgnoreCase("INSERT INTO \"public\".\"generate_changelog_test_sql\"")
+        fileContent.contains("""
+    changes:
+    - insert:
+        columns:
+        - column:
+            name: a
+            value: AA
+        - column:
+            name: b
+        - column:
+            name: c
+        schemaName: public
+        tableName: preservation_test
+""")
 
         cleanup:
         outputFile.delete()
     }
 
-    def "Should generate changelog file with non-empty table"() {
+    def "Should generate YAML changelog excl. NULL-values"() {
         given:
-        def changelogFileName = "target/test-classes/changelogs/update.changelog.sql"
+        def changelogFileName = "target/test-classes/changelogs/pgsql/update.changelog.xml"
         def resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
         def scopeSettings = [
                 (Scope.Attr.resourceAccessor.name()) : resourceAccessor
         ]
         Scope.child(scopeSettings, {
-            CommandUtil.runUpdate(db, changelogFileName, "both", null, null)
+            CommandUtil.runUpdate(db, changelogFileName, "generateChangelogWithEmptyTable", null, null)
         } as Scope.ScopedRunner)
 
         when:
-        def outputFileName = 'test/test-classes/output2.postgresql.sql'
-        CommandUtil.runGenerateChangelog(db, outputFileName, "tables, data")
+        def outputFileName = 'test/test-classes/output.postgresql.yaml'
+        CommandUtil.runGenerateChangelog(db, outputFileName, false)
         def outputFile = new File(outputFileName)
         def fileContent = FileUtil.getContents(outputFile)
 
         then:
-        fileContent.containsIgnoreCase("CREATE TABLE \"public\".\"generate_changelog_test_sql\"")
-        fileContent.containsIgnoreCase("INSERT INTO \"public\".\"generate_changelog_test_sql\"")
+        fileContent.contains("""
+    changes:
+    - insert:
+        columns:
+        - column:
+            name: a
+            value: AA
+        schemaName: public
+        tableName: preservation_test
+""")
+        !fileContent.contains("""
+        - column:
+            name: b
+        - column:
+            name: c
+""")
 
         cleanup:
         outputFile.delete()
-    }
-
-    def "Should NOT generate changelog file from an empty DB"() {
-        given:
-        def outputFileName = 'test/test-classes/emptyOutput.postgresql.sql'
-
-        when:
-        CommandUtil.runGenerateChangelog(db, outputFileName)
-
-        then:
-        !Files.exists(Path.of(outputFileName))
     }
 }

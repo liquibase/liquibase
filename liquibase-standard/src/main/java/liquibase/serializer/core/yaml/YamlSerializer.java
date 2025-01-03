@@ -1,8 +1,10 @@
 package liquibase.serializer.core.yaml;
 
 import liquibase.change.Change;
+import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RollbackContainer;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.yaml.YamlParser;
@@ -13,6 +15,7 @@ import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
+
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
@@ -31,9 +34,14 @@ import java.util.*;
 public abstract class YamlSerializer implements LiquibaseSerializer {
 
     protected Yaml yaml;
+    protected boolean preserveNullValues = true;
 
     public YamlSerializer() {
         yaml = createYaml();
+    }
+
+    public void preserveNullValues(boolean preserveNullValues) {
+        this.preserveNullValues = preserveNullValues;
     }
 
     protected DumperOptions createDumperOptions() {
@@ -124,13 +132,19 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                         continue;
                     }
                     for (int i = 0; i < valueAsList.size(); i++) {
-                        if (valueAsList.get(i) instanceof LiquibaseSerializable) {
+                        Object o = valueAsList.get(i);
+                        if (o instanceof LiquibaseSerializable) {
+                            if (!preserveNullValues && o instanceof  ColumnConfig) {
+                                ColumnConfig columnConfig = (ColumnConfig) o;
+                                if (columnConfig.isNullValue() && !columnConfig.hasDefaultValue()) {
+                                    continue;
+                                }
+                            }
                             Object m = convertToMap(valueAsList, i);
                             valueAsList.set(i, m);
                         }
                     }
                     value = valueAsList;
-
                 }
                 if (value instanceof Map) {
                     if  (((Map<?, ?>) value).isEmpty()) {

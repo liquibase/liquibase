@@ -88,7 +88,9 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
 
                     Object value = JdbcUtil.getResultSetValue(rs, i + 1);
                     if (value == null) {
-                        column.setValue(null);
+                        if (outputControl.getPreserveNullValues()) {
+                            column.setValue(null);
+                        }
                     } else if (value instanceof Number) {
                         column.setValueNumeric((Number) value);
                     } else if (value instanceof Boolean) {

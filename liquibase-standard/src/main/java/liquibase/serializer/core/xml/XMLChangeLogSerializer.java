@@ -17,6 +17,7 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.XMLUtil;
 import liquibase.util.xml.DefaultXmlWriter;
+
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -50,6 +51,8 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     private static final String XML_VERSION = "1.1";
     private final LiquibaseEntityResolver resolver = new LiquibaseEntityResolver();
 
+    private boolean preserveNullValues;
+
     public XMLChangeLogSerializer() {
         try {
             this.currentChangeLogFileDOM = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
@@ -61,6 +64,11 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
     protected XMLChangeLogSerializer(Document currentChangeLogFileDOM) {
         this.currentChangeLogFileDOM = currentChangeLogFileDOM;
+    }
+
+    @Override
+    public void preserveNullValues(boolean preserveNullValues) {
+        this.preserveNullValues = preserveNullValues;
     }
 
     public void setCurrentChangeLogFileDOM(Document currentChangeLogFileDOM) {
@@ -186,7 +194,8 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         Element node = currentChangeLogFileDOM.createElementNS(namespace, nodeName);
 
         try {
-            for (String field : object.getSerializableFields()) {
+            Set<String> fields = object.getSerializableFields();
+            for (String field : fields) {
                 setValueOnNode(node, object.getSerializableFieldNamespace(field), field, object.getSerializableFieldValue(field), object.getSerializableFieldType(field), namespace);
             }
         } catch (UnexpectedLiquibaseException e) {
@@ -208,6 +217,14 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             for (Object child : (Collection) value) {
                 setValueOnNode(node, objectNamespace, objectName, child, serializationType, parentNamespace);
             }
+        } else if (value instanceof ColumnConfig) {
+            ColumnConfig columnConfig = (ColumnConfig) value;
+            ConstraintsConfig constraintsConfig = columnConfig.getConstraints();
+            boolean constraintsIsNullable = null != constraintsConfig && constraintsConfig.isNullable() != null && constraintsConfig.isNullable();
+            if (!preserveNullValues && constraintsIsNullable && columnConfig.isNullValue() && !columnConfig.hasDefaultValue()) {
+                return;
+            }
+            node.appendChild(createNode((LiquibaseSerializable) value));
         } else if (value instanceof Map) {
             for (Map.Entry entry : (Set<Map.Entry>) ((Map) value).entrySet()) {
                 Element mapNode = currentChangeLogFileDOM.createElementNS(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE, qualifyName(objectName, objectNamespace, parentNamespace));
