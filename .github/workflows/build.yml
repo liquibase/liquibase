@@ -116,7 +116,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
       - name: Download Artifacts for build.yml
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: temp-artifact
 
@@ -320,7 +320,7 @@ jobs:
 
   run-pro-build-and-test:
     needs: [ setup, build_publish_branch ]
-    uses: liquibase/liquibase/.github/workflows/run-pro-build-and-test.yml@DAT-19069
+    uses: liquibase/liquibase/.github/workflows/run-pro-build-and-test.yml@master
     secrets: inherit
     with:
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
