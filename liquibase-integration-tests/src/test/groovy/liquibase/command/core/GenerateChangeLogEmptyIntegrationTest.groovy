@@ -22,6 +22,7 @@ class GenerateChangeLogEmptyIntegrationTest extends Specification {
 
     def "Should generate changelog file with empty table"() {
         given:
+        CommandUtil.runDropAll(db)
         def changelogFileName = "target/test-classes/changelogs/update.changelog.sql"
         def resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
         def scopeSettings = [
@@ -33,43 +34,42 @@ class GenerateChangeLogEmptyIntegrationTest extends Specification {
 
         when:
         def outputFileName = 'test/test-classes/output.postgresql.sql'
-        CommandUtil.runGenerateChangelog(db, outputFileName, "tables, data")
+        CommandUtil.runGenerateChangelog(db, outputFileName, "tables")
         def outputFile = new File(outputFileName)
         def fileContent = FileUtil.getContents(outputFile)
 
         then:
-        fileContent.containsIgnoreCase("create table \"generate_changelog_test_sql\"")
+        fileContent.containsIgnoreCase("create table \"public\".\"generate_changelog_test_sql\"")
+        !fileContent.containsIgnoreCase("INSERT INTO \"public\".\"generate_changelog_test_sql\"")
 
         cleanup:
         outputFile.delete()
     }
 
-    //TODO: uncomment this test once we can find the reason why DAT-18821 is happening. Same for above assertion
-    // and changeset from update.changelog.sql
-//    def "Should generate changelog file with non-empty table"() {
-//        given:
-//        def changelogFileName = "target/test-classes/changelogs/update.changelog.sql"
-//        def resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
-//        def scopeSettings = [
-//                (Scope.Attr.resourceAccessor.name()) : resourceAccessor
-//        ]
-//        Scope.child(scopeSettings, {
-//            CommandUtil.runUpdate(db, changelogFileName, "both", null, null)
-//        } as Scope.ScopedRunner)
-//
-//        when:
-//        def outputFileName = 'test/test-classes/output2.postgresql.sql'
-//        CommandUtil.runGenerateChangelog(db, outputFileName, "tables, data")
-//        def outputFile = new File(outputFileName)
-//        def fileContent = FileUtil.getContents(outputFile)
-//
-//        then:
-//        fileContent.containsIgnoreCase("CREATE TABLE \"generate_changelog_test_sql\"")
-//        fileContent.containsIgnoreCase("INSERT INTO \"generate_changelog_test_sql\"")
-//
-//        cleanup:
-//        outputFile.delete()
-//    }
+    def "Should generate changelog file with non-empty table"() {
+        given:
+        def changelogFileName = "target/test-classes/changelogs/update.changelog.sql"
+        def resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
+        def scopeSettings = [
+                (Scope.Attr.resourceAccessor.name()) : resourceAccessor
+        ]
+        Scope.child(scopeSettings, {
+            CommandUtil.runUpdate(db, changelogFileName, "both", null, null)
+        } as Scope.ScopedRunner)
+
+        when:
+        def outputFileName = 'test/test-classes/output2.postgresql.sql'
+        CommandUtil.runGenerateChangelog(db, outputFileName, "tables, data")
+        def outputFile = new File(outputFileName)
+        def fileContent = FileUtil.getContents(outputFile)
+
+        then:
+        fileContent.containsIgnoreCase("CREATE TABLE \"public\".\"generate_changelog_test_sql\"")
+        fileContent.containsIgnoreCase("INSERT INTO \"public\".\"generate_changelog_test_sql\"")
+
+        cleanup:
+        outputFile.delete()
+    }
 
     def "Should NOT generate changelog file from an empty DB"() {
         given:
