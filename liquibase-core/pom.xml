@@ -76,7 +76,7 @@
             <plugin>
                 <groupId>org.liquibase.ext</groupId>
                 <artifactId>liquibase-sdk-maven-plugin</artifactId>
-                <version>0.10.23</version>
+                <version>0.10.25</version>
             </plugin>
 
             <plugin>
