@@ -77,15 +77,21 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
         Labels labels = changeSet.getLabels();
         if (labels != null && ! labels.isEmpty()) {
             String outputLabels = labels.toString();
-            builder.append(" labels: \"");
+            builder.append(" labels:\"");
             builder.append(outputLabels);
             builder.append("\"");
         }
         ContextExpression contexts = changeSet.getContextFilter();
         if (contexts != null && ! contexts.isEmpty()) {
             String outputContexts = contexts.toString();
-            builder.append(" contextFilter: \"");
+            builder.append(" contextFilter:\"");
             builder.append(outputContexts);
+            builder.append("\"");
+        }
+        String logicalFilePath = changeSet.getLogicalFilePath();
+        if (logicalFilePath != null && ! logicalFilePath.isEmpty()) {
+            builder.append(" logicalFilePath:\"");
+            builder.append(logicalFilePath);
             builder.append("\"");
         }
         builder.append("\n");

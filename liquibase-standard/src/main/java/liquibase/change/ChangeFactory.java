@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ChangeFactory extends AbstractPluginFactory<Change>{
 
+    public static final String NO_EXCEPTION_ON_UNSUPPORTED_CHANGE_TYPE = "noExceptionOnUnsupportedChangeType";
     private final Map<String, ChangeMetaData> cachedMetadata = new ConcurrentHashMap<>();
 
     /**
@@ -122,7 +123,11 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
             if (database != null && performSupportsDatabaseValidation) {
                 plugins.removeIf(a -> !a.supports(database));
                 if (plugins.isEmpty()) {
-                    throw new UnexpectedLiquibaseException(String.format("No registered %s plugin found for %s database", name, database.getDisplayName()));
+                    if (! isNoExceptionOnUnsupportedChangeType()) {
+                        throw new UnexpectedLiquibaseException(String.format("No registered %s plugin found for %s database", name, database.getDisplayName()));
+                    } else {
+                        return null;
+                    }
                 }
             }
         }
@@ -132,6 +137,10 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
+    }
+
+    public static boolean isNoExceptionOnUnsupportedChangeType() {
+        return Scope.getCurrentScope().has(NO_EXCEPTION_ON_UNSUPPORTED_CHANGE_TYPE) && Scope.getCurrentScope().get(NO_EXCEPTION_ON_UNSUPPORTED_CHANGE_TYPE, Boolean.class);
     }
 
     /**
@@ -151,7 +160,7 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
             try {
                 // if the supports method is not implemented in the plugin show the warning according to the defined level
                 if (plugin.getClass().getMethod("supports", Database.class).getDeclaringClass().getPackage().getName().startsWith("liquibase.change")) {
-                    if (LiquibaseUtil.getBuildVersion().equals(LiquibaseUtil.DEV_VERSION)) {
+                    if (LiquibaseUtil.isDevVersion()) {
                         throw new UnexpectedLiquibaseException(String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, plugin.getClass().getName()));
                     }
                     switch (GlobalConfiguration.SUPPORTS_METHOD_VALIDATION_LEVEL.getCurrentValue()) {

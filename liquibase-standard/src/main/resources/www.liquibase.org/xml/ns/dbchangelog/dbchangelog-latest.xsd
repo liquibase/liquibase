@@ -243,6 +243,7 @@
                             <xsd:attribute name="runWith" type="xsd:string" />
                             <xsd:attribute name="runWithSpoolFile" type="xsd:string" />
                             <xsd:attribute name="endDelimiter" type="xsd:string" />
+                            <xsd:attribute name="stripComments" type="xsd:boolean" />
                         </xsd:complexType>
                     </xsd:element>
                 </xsd:choice>
@@ -647,6 +648,7 @@
                         <xsd:attribute name="header" type="xsd:string"/>
                         <xsd:attribute name="name" type="xsd:string"/>
                         <xsd:attribute name="type" type="xsd:string"/>
+                        <xsd:attribute name="nullPlaceholder" type="xsd:string"/>
                         <xsd:attributeGroup ref="defaultValueAttributes"/>
                     </xsd:complexType>
                 </xsd:element>

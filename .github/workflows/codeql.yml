@@ -83,7 +83,7 @@ jobs:
         outputDir: ./reports/
 
     - name: Upload Security Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: security-report
         path: ./reports/summary.pdf

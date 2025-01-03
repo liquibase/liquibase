@@ -2,10 +2,7 @@ package liquibase.integration.commandline;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.command.CommandArgumentDefinition;
-import liquibase.command.CommandDefinition;
-import liquibase.command.CommandFactory;
-import liquibase.command.CommandFailedException;
+import liquibase.command.*;
 import liquibase.command.core.*;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueProvider;
@@ -32,27 +29,23 @@ import liquibase.ui.LoggerUIService;
 import liquibase.ui.UIService;
 import liquibase.util.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemProperties;
 import picocli.CommandLine;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
-import static liquibase.integration.commandline.VersionUtils.*;
-import static liquibase.util.SystemUtil.isWindows;
+import static liquibase.util.VersionUtils.*;
 
 
 public class LiquibaseCommandLine {
@@ -92,8 +85,21 @@ public class LiquibaseCommandLine {
     public static void main(String[] args) {
         //we don't ship jansi, so we know we can disable it without having to do the slow class checking
         System.setProperty("org.fusesource.jansi.Ansi.disable", "true");
-        final LiquibaseCommandLine cli = new LiquibaseCommandLine();
 
+        //
+        // Do not allow any checks commands if the extension JAR is not present
+        //
+        if (args.length > 1 && args[0].equalsIgnoreCase("checks")) {
+            try {
+                Class.forName("com.datical.liquibase.ext.command.checks.ChecksRunCommandStep");
+            } catch (ClassNotFoundException ignored) {
+                System.out.println(Scope.CHECKS_MESSAGE);
+                Scope.getCurrentScope().getLog(LiquibaseCommandLine.class).severe(Scope.CHECKS_MESSAGE);
+                System.exit(1);
+            }
+        }
+
+        final LiquibaseCommandLine cli = new LiquibaseCommandLine();
         int returnCode = cli.execute(args);
 
         System.exit(returnCode);
@@ -246,7 +252,7 @@ public class LiquibaseCommandLine {
         //
         Level level = determineLogLevel(exception);
 
-        if (showExceptionInLog(exception)) {
+        if (ExceptionUtil.showExceptionInLog(exception)) {
             Scope.getCurrentScope().getLog(getClass()).log(level, uiMessage, exception);
         }
 
@@ -276,7 +282,8 @@ public class LiquibaseCommandLine {
                 if (Level.OFF.equals(this.configuredLogLevel)) {
                     System.err.println("For more information, please use the --log-level flag");
                 } else {
-                    if (LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentValue() == null) {
+                    if (LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentValue() == null &&
+                        ! CommandScope.isSuppressExceptionLogging()) {
                         exception.printStackTrace(System.err);
                     }
                 }
@@ -310,6 +317,9 @@ public class LiquibaseCommandLine {
     // Honor the expected flag on a CommandFailedException
     //
     private boolean showExceptionInLog(Throwable exception) {
+        if (CommandScope.isSuppressExceptionLogging()) {
+            return false;
+        }
         Throwable t = exception;
         while (t != null) {
             if (t instanceof CommandFailedException && ((CommandFailedException) t).isExpected()) {
@@ -420,8 +430,6 @@ public class LiquibaseCommandLine {
                                 Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + commandName + "' was executed successfully.");
                             }
                         }
-
-
                         return response;
                     });
                 } finally {
@@ -469,7 +477,7 @@ public class LiquibaseCommandLine {
     private void logMdcData() throws IOException {
         MdcManager mdcManager = Scope.getCurrentScope().getMdcManager();
         String localHostName = NetUtil.getLocalHostName();
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SYSTEM_USER, System.getProperty("user.name"), false);
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SYSTEM_USER, SystemProperties.getUserName(), false);
         try (MdcObject version = mdcManager.put(MdcKey.LIQUIBASE_VERSION, LiquibaseUtil.getBuildVersion());
              MdcObject systemName = mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_NAME, localHostName);
              // The host name here is purposefully the same as the system name. The system name is retained for backwards compatibility.
@@ -692,10 +700,8 @@ public class LiquibaseCommandLine {
         returnMap.put(COMMAND_ARGUMENTS, args);
 
         final IntegrationDetails integrationDetails = new IntegrationDetails();
-        integrationDetails.setName("cli");
-        returnMap.put("integrationDetails", integrationDetails);
-
-        final ClassLoader classLoader = configureClassLoader();
+        integrationDetails.setName(LiquibaseCommandLineConfiguration.INTEGRATION_NAME.getCurrentValue());
+        returnMap.put(Scope.Attr.integrationDetails.name(), integrationDetails);
 
         returnMap.putAll(configureLogging());
 
@@ -704,7 +710,7 @@ public class LiquibaseCommandLine {
         // any logging that might happen
         //
         Map<String, String> javaProperties = addJavaPropertiesToChangelogParameters();
-        Scope.child(new HashMap<>(javaProperties), () -> returnMap.putAll(configureResourceAccessor(classLoader)));
+        Scope.child(new HashMap<>(javaProperties), () -> returnMap.putAll(configureResourceAccessor(Thread.currentThread().getContextClassLoader())));
 
         UIService defaultUiService = getDefaultUiService();
 
@@ -726,7 +732,11 @@ public class LiquibaseCommandLine {
                 (LiquibaseCommandLineConfiguration.ArgumentConverter) argument -> "--" + StringUtil.toKabobCase(argument));
 
         returnMap.put(Scope.JAVA_PROPERTIES, javaProperties);
-
+        //
+        // Load this object for setting suppression of exception logging flag
+        // Methods in the CommandScope class are used to set and retrieve the flag
+        //
+        returnMap.put(CommandScope.SUPPRESS_SHOWING_EXCEPTION_IN_LOG, new AtomicBoolean());
         return returnMap;
     }
 
@@ -852,48 +862,6 @@ public class LiquibaseCommandLine {
                 new ClassLoaderResourceAccessor(classLoader)));
 
         return returnMap;
-    }
-
-    protected ClassLoader configureClassLoader() throws IllegalArgumentException {
-        final String classpath = LiquibaseCommandLineConfiguration.CLASSPATH.getCurrentValue();
-
-        final List<URL> urls = new ArrayList<>();
-        if (classpath != null) {
-            String[] classpathSoFar;
-            if (isWindows()) {
-                classpathSoFar = classpath.split(";");
-            } else {
-                classpathSoFar = classpath.split(":");
-            }
-
-            for (String classpathEntry : classpathSoFar) {
-                File classPathFile = new File(classpathEntry);
-                if (!classPathFile.exists()) {
-                    throw new IllegalArgumentException(classPathFile.getAbsolutePath() + " does not exist");
-                }
-
-                try {
-                    URL newUrl = new File(classpathEntry).toURI().toURL();
-                    Scope.getCurrentScope().getLog(getClass()).fine(newUrl.toExternalForm() + " added to class loader");
-                    urls.add(newUrl);
-                } catch (MalformedURLException e) {
-                    throw new IllegalArgumentException(e);
-                }
-            }
-        }
-
-        final ClassLoader classLoader;
-        if (LiquibaseCommandLineConfiguration.INCLUDE_SYSTEM_CLASSPATH.getCurrentValue()) {
-            classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), Thread.currentThread()
-                    .getContextClassLoader()));
-
-        } else {
-            classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), null));
-        }
-
-        Thread.currentThread().setContextClassLoader(classLoader);
-
-        return classLoader;
     }
 
     private void addSubcommand(CommandDefinition commandDefinition, CommandLine rootCommand) {

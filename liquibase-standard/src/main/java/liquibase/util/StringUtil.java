@@ -11,6 +11,7 @@ import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -943,6 +944,7 @@ public class StringUtil {
             return null;
         }
         String reversedString = StringUtils.reverse(sqlString);
+        int length = reversedString.length() - 1;
         int idxClosingLastChar = -1, idxOpeningFirstChar = -1;
         for (int i = 0; i < reversedString.length(); i++) {
             if (idxClosingLastChar < 0) {
@@ -950,9 +952,11 @@ public class StringUtil {
                 char c = reversedString.charAt(i);
                 if (c == '/') {
                     // check the second one
-                    char s = reversedString.charAt(i + 1);
-                    if (s == '*') {
-                        idxClosingLastChar = i;
+                    if (i + 1 < length) {
+                        char s = reversedString.charAt(i + 1);
+                        if (s == '*') {
+                            idxClosingLastChar = i;
+                        }
                     }
                 } else if (!Character.isWhitespace(c)) {
                     // does not look like it ends with block comment, return null
@@ -964,7 +968,11 @@ public class StringUtil {
                 if (c == '/') {
                     // check the previous one
                     char s = reversedString.charAt(i - 1);
-                    char e = reversedString.charAt(i + 1);
+                    char e = s;
+                    if (i + 1 < length) {
+                        e = reversedString.charAt(i + 1);
+                    }
+
                     // if it was not escaped
                     if (s == '*' && e != '\\') {
                         idxOpeningFirstChar = i;

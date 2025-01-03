@@ -3,8 +3,10 @@ package org.liquibase.maven.plugins;
 import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
+import liquibase.analytics.configuration.AnalyticsArgs;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
+import liquibase.command.CommandScope;
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
 import liquibase.configuration.ConfiguredValueModifierFactory;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -49,6 +51,7 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Handler;
 
 import static java.util.ResourceBundle.getBundle;
@@ -715,6 +718,13 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected Boolean databaseChangelogHistoryCaptureExtensions;
 
     /**
+     * Enable or disable sending product usage data and analytics to Liquibase.
+     *
+     * @parameter property="liquibase.analyticsEnabled"
+     */
+    @PropertyElement(key = "liquibase.analytics.enabled")
+    protected Boolean analyticsEnabled;
+    /**
      * Specifies the vault URL
      *
      * @parameter property="liquibase.vault.addr"
@@ -833,6 +843,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
 
         Map<String, Object> scopeAttrs = new HashMap<>();
+        //
+        // Add this to the Scope in order to trim down the exception stack trace
+        //
+        scopeAttrs.put(CommandScope.SUPPRESS_SHOWING_EXCEPTION_IN_LOG, new AtomicBoolean());
         if (!useScopeLogger) {
             // If the specified log format does not require the use of the standard Liquibase logger, just return the
             // Maven log service as is traditionally done.
@@ -899,6 +913,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 scopeValues.put(Scope.Attr.resourceAccessor.name(), getResourceAccessor(mavenClassLoader));
                 scopeValues.put(Scope.Attr.classLoader.name(), getClassLoaderIncludingProjectClasspath());
                 scopeValues.put(Scope.Attr.mavenConfigurationProperties.name(), getConfigurationProperties());
+                if (analyticsEnabled != null) {
+                    scopeValues.put(AnalyticsArgs.ENABLED.getKey(), analyticsEnabled);
+                }
                 handleVaultProperties(scopeValues);
 
                 IntegrationDetails integrationDetails = new IntegrationDetails();
@@ -936,7 +953,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 //
                 // Add properties to this top-level scope
                 //
-                scopeValues.put("integrationDetails", integrationDetails);
+                scopeValues.put(Scope.Attr.integrationDetails.name(), integrationDetails);
                 scopeValues.put("liquibase.licenseKey", getLicenseKey());
                 String key = GlobalConfiguration.PRESERVE_SCHEMA_CASE.getKey();
                 scopeValues.put(key, preserveSchemaCase);

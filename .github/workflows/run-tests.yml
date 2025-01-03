@@ -1,4 +1,4 @@
-name: Run Tests
+name: Unit and Integration Tests
 
 on:
   workflow_call:
@@ -116,7 +116,7 @@ jobs:
 
       - name: Built Code Cache
         if: ${{ matrix.java == 17}}
-        uses: actions/cache@v4.0.2
+        uses: actions/cache@v4.1.2
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -252,7 +252,7 @@ jobs:
 
       - name: Upload Artifacts for build.yml
         if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-20.04'}}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: temp-artifact
           path: |
@@ -260,7 +260,7 @@ jobs:
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: liquibase-test-results-jdk${{ matrix.java }}
           path: |
@@ -269,7 +269,7 @@ jobs:
 
       - name: Save Jacoco Report for Sonar
         if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-20.04'}}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: liquibase-jacoco-test-results
           path: |
@@ -277,11 +277,20 @@ jobs:
 
       - name: Archive Modules
         if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-20.04'}}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: liquibase-modules
           path: |
             */target/*-0-SNAPSHOT.jar
+
+  fossa:
+    needs: build_tests
+    uses: liquibase/build-logic/.github/workflows/fossa_ai.yml@main
+    secrets: inherit
+    with:
+      check_snippets: true
+      check_ai_generated_code: true
+      generate_sbom: true
 
   integration-test:
     name: Integration Test
@@ -346,14 +355,14 @@ jobs:
       # getting from build results page. If we remove 0-SNAPSHOT then we will need settings.xml
 
       - name: Restore Built Code Cache
-        uses: actions/cache@v4.0.2
+        uses: actions/cache@v4.1.2
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
 
       - name: Setup Python
         if: ${{ matrix.testSystem == 'snowflake' }}
-        uses: actions/setup-python@v5.2.0
+        uses: actions/setup-python@v5.3.0
         with:
           python-version: '3.12.1'
 
@@ -416,14 +425,14 @@ jobs:
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.prepare.outputs.testResultsArtifact }}
           path: |
             ./**/target/surefire-reports
 
       - name: Save Jacoco Report for Sonar
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: liquibase-integration-jacoco-test-results-${{ matrix.testSystem }}
           path: |
@@ -431,7 +440,7 @@ jobs:
 
   sonar:
     needs: [ build_tests, integration-test ]
-    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@v0.7.8
+    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@main
     with:
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
       thisSha: ${{ needs.setup.outputs.thisSha }}

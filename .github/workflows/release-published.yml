@@ -156,110 +156,28 @@ jobs:
           unzip -j liquibase-additional-*.zip
 
           ##extracts and sign poms
-          unzip -j liquibase-core-${version}.jar META-INF/maven/org.liquibase/liquibase-core/pom.xml
-          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml ## version didn't end up in pom. So using double quotes
-          mv pom.xml liquibase-core-${version}.pom
-          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-core-${version}.pom
-
-          unzip -j liquibase-maven-plugin-${version}.jar META-INF/maven/org.liquibase/liquibase-maven-plugin/pom.xml
-          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
-          mv pom.xml liquibase-maven-plugin-${version}.pom
-          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-maven-plugin-${version}.pom
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-cdi' 'liquibase-cdi-jakarta' 'liquibase-commercial'; do
+            unzip -j $i-${version}.jar META-INF/maven/org.liquibase/$i/pom.xml
+            sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
+            mv pom.xml $i-${version}.pom
+            if test 'liquibase-commercial' == $i; then
+              sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private<\/connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" $i-${version}.pom   ## scm info not in the pom
+            fi
           
-          unzip -j liquibase-cli-${version}.jar META-INF/maven/org.liquibase/liquibase-cli/pom.xml
-          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
-          mv pom.xml liquibase-cli-${version}.pom
-          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-cli-${version}.pom
-
-          unzip -j liquibase-cdi-${version}.jar META-INF/maven/org.liquibase/liquibase-cdi/pom.xml
-          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
-          mv pom.xml liquibase-cdi-${version}.pom
-          sed -i -e "s/<description>/<name>Liquibase CDI Plugin<\/name><description>/" liquibase-cdi-${version}.pom   ## name didn't end up in pom. Hack it in for now
-          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-cdi-${version}.pom
-
-          unzip -j liquibase-cdi-jakarta-${version}.jar META-INF/maven/org.liquibase/liquibase-cdi-jakarta/pom.xml
-          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
-          mv pom.xml liquibase-cdi-jakarta-${version}.pom
-          sed -i -e "s/<description>/<name>Liquibase cdi-jakarta Plugin<\/name><description>/" liquibase-cdi-jakarta-${version}.pom   ## name didn't end up in pom. Hack it in for now
-          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-cdi-jakarta-${version}.pom
-
-          unzip -j liquibase-commercial-${version}.jar META-INF/maven/org.liquibase/liquibase-commercial/pom.xml
-          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
-          mv pom.xml liquibase-commercial-${version}.pom
-          sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private<\/connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" liquibase-commercial-${version}.pom   ## scm info not in the pom          
-          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-commercial-${version}.pom
+            gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i-${version}.pom
           
-          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
-            -DrepositoryId=sonatype-nexus-staging \
-            -DpomFile=liquibase-core-${version}.pom \
-            -DgeneratePom=false \
-            -Dfile=liquibase-core-${version}.jar \
-            -Dsources=liquibase-core-${version}-sources.jar \
-            -Djavadoc=liquibase-core-${version}-javadoc.jar \
-            -Dfiles=liquibase-core-${version}.jar.asc,liquibase-core-${version}-sources.jar.asc,liquibase-core-${version}-javadoc.jar.asc,liquibase-core-${version}.pom.asc \
-            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
-            -Dclassifiers=,sources,javadoc,
-
-          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
-            -DrepositoryId=sonatype-nexus-staging \
-            -DpomFile=liquibase-commercial-${version}.pom \
-            -DgeneratePom=false \
-            -Dfile=liquibase-commercial-${version}.jar \
-            -Dsources=liquibase-commercial-${version}-sources.jar \
-            -Djavadoc=liquibase-commercial-${version}-javadoc.jar \
-            -Dfiles=liquibase-commercial-${version}.jar.asc,liquibase-commercial-${version}-sources.jar.asc,liquibase-commercial-${version}-javadoc.jar.asc,liquibase-commercial-${version}.pom.asc \
-            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
-            -Dclassifiers=,sources,javadoc,
-
-          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
-            -DrepositoryId=sonatype-nexus-staging \
-            -DpomFile=liquibase-maven-plugin-${version}.pom \
-            -DgeneratePom=false \
-            -Dfile=liquibase-maven-plugin-${version}.jar \
-            -Dsources=liquibase-maven-plugin-${version}-sources.jar \
-            -Djavadoc=liquibase-maven-plugin-${version}-javadoc.jar \
-            -Dfiles=liquibase-maven-plugin-${version}.jar.asc,liquibase-maven-plugin-${version}-sources.jar.asc,liquibase-maven-plugin-${version}-javadoc.jar.asc,liquibase-maven-plugin-${version}.pom.asc \
-            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
-            -Dclassifiers=,sources,javadoc,
-          
-          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
-            -DrepositoryId=sonatype-nexus-staging \
-            -DpomFile=liquibase-cli-${version}.pom \
-            -DgeneratePom=false \
-            -Dfile=liquibase-cli-${version}.jar \
-            -Dsources=liquibase-cli-${version}-sources.jar \
-            -Djavadoc=liquibase-cli-${version}-javadoc.jar \
-            -Dfiles=liquibase-cli-${version}.jar.asc,liquibase-cli-${version}-sources.jar.asc,liquibase-cli-${version}-javadoc.jar.asc,liquibase-cli-${version}.pom.asc \
-            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
-            -Dclassifiers=,sources,javadoc,
-
-          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
-            -DrepositoryId=sonatype-nexus-staging \
-            -DpomFile=liquibase-cdi-${version}.pom \
-            -DgeneratePom=false \
-            -Dfile=liquibase-cdi-${version}.jar \
-            -Dsources=liquibase-cdi-${version}-sources.jar \
-            -Djavadoc=liquibase-cdi-${version}-javadoc.jar \
-            -Dfiles=liquibase-cdi-${version}.jar.asc,liquibase-cdi-${version}-sources.jar.asc,liquibase-cdi-${version}-javadoc.jar.asc,liquibase-cdi-${version}.pom.asc \
-            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
-            -Dclassifiers=,sources,javadoc,
-
-          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
-            -DrepositoryId=sonatype-nexus-staging \
-            -DpomFile=liquibase-cdi-jakarta-${version}.pom \
-            -DgeneratePom=false \
-            -Dfile=liquibase-cdi-jakarta-${version}.jar \
-            -Dsources=liquibase-cdi-jakarta-${version}-sources.jar \
-            -Djavadoc=liquibase-cdi-jakarta-${version}-javadoc.jar \
-            -Dfiles=liquibase-cdi-jakarta-${version}.jar.asc,liquibase-cdi-jakarta-${version}-sources.jar.asc,liquibase-cdi-jakarta-${version}-javadoc.jar.asc,liquibase-cdi-jakarta-${version}.pom.asc \
-            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
-            -Dclassifiers=,sources,javadoc,
+            mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+              -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
+              -DrepositoryId=sonatype-nexus-staging \
+              -DpomFile=$i-${version}.pom \
+              -DgeneratePom=false \
+              -Dfile=$i-${version}.jar \
+              -Dsources=$i-${version}-sources.jar \
+              -Djavadoc=$i-${version}-javadoc.jar \
+              -Dfiles=$i-${version}.jar.asc,$i-${version}-sources.jar.asc,$i-${version}-javadoc.jar.asc,$i-${version}.pom.asc \
+              -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
+              -Dclassifiers=,sources,javadoc,
+          done
 
           ## Release repository
           ## Have to find the stagingRepositoryId that was auto-generated
@@ -420,7 +338,7 @@ jobs:
           fi
 
       - name: Liquibase xsds SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.2
+        uses: wangyucode/sftp-upload-action@v2.0.3
         with:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
           port: ${{ secrets.WPENGINE_SFTP_PORT }}
@@ -432,7 +350,7 @@ jobs:
           remoteDir: '/xml/ns/dbchangelog/'
 
       - name: Liquibase PRO xsds SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.2
+        uses: wangyucode/sftp-upload-action@v2.0.3
         with:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
           port: ${{ secrets.WPENGINE_SFTP_PORT }}
@@ -444,7 +362,7 @@ jobs:
           remoteDir: '/xml/ns/pro/'
 
       - name: Liquibase flow-file schema SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.2
+        uses: wangyucode/sftp-upload-action@v2.0.3
         with:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
           port: ${{ secrets.WPENGINE_SFTP_PORT }}
@@ -456,7 +374,7 @@ jobs:
           remoteDir: '/json/schema/'
 
       - name: Liquibase index.htm SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.2
+        uses: wangyucode/sftp-upload-action@v2.0.3
         with:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
           port: ${{ secrets.WPENGINE_SFTP_PORT }}
@@ -486,7 +404,7 @@ jobs:
                "event_type": "liquibase-release",
                "client_payload": {
                   "liquibaseVersion": "${{ needs.setup.outputs.version }}",
-                  "dryRun": "${{ inputs.dry_run }}"
+                  "dryRun": "${{ inputs.dry_run || false }}"
                 }
              });
 
@@ -539,8 +457,8 @@ jobs:
             git fetch --tags
             # Get the latest tag
             echo "latest_version=$(git describe --tags $(git rev-list --tags --max-count=1) | sed 's/^v//')" >> $GITHUB_OUTPUT
-            # Get the previous tag (second latest)
-            echo "previous_version=$(git describe --tags $(git rev-list --tags --max-count=2 | tail -n 1) | sed -E 's/^v//; s/-.*//')" >> $GITHUB_OUTPUT
+            # Get the previous released version tag
+            echo "previous_version=$(git describe --tags --abbrev=0 | sed 's/^v//')" >> $GITHUB_OUTPUT
 
 
       - name: Repository Dispatch
@@ -548,7 +466,7 @@ jobs:
         with:
           token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           repository: liquibase/liquibase-docs
-          event-type: oss-released-version       
+          event-type: oss-released-version
           client-payload: '{"latest_version": "${{ steps.get_latest_oss_version.outputs.latest_version }}", "previous_version": "${{ steps.get_latest_oss_version.outputs.previous_version }}"}'
 
       # dispatch an event to `liquibase-aws-license-service` repository to update pom.xml with latest OSS Release
@@ -557,7 +475,7 @@ jobs:
         with:
           token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           repository: liquibase/liquibase-aws-license-service
-          event-type: oss-released-version  
+          event-type: oss-released-version
 
   dry_run_deploy_maven:
     if: ${{ inputs.dry_run == true }}
@@ -597,108 +515,27 @@ jobs:
           unzip -j liquibase-additional-*.zip
 
           ##extracts and sign poms
-          unzip -j liquibase-core-${version}.jar META-INF/maven/org.liquibase/liquibase-core/pom.xml
-          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml ## version didn't end up in pom. So using double quotes
-          mv pom.xml liquibase-core-${version}.pom
-          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-core-${version}.pom
-
-          unzip -j liquibase-maven-plugin-${version}.jar META-INF/maven/org.liquibase/liquibase-maven-plugin/pom.xml
-          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
-          mv pom.xml liquibase-maven-plugin-${version}.pom
-          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-maven-plugin-${version}.pom
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-cdi' 'liquibase-cdi-jakarta' 'liquibase-commercial'; do
+            unzip -j $i-${version}.jar META-INF/maven/org.liquibase/$i/pom.xml
+            sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
+            mv pom.xml $i-${version}.pom
+            if test 'liquibase-commercial' == $i; then
+              sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private<\/connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" $i-${version}.pom   ## scm info not in the pom
+            fi
           
-          unzip -j liquibase-cli-${version}.jar META-INF/maven/org.liquibase/liquibase-cli/pom.xml
-          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
-          mv pom.xml liquibase-cli-${version}.pom
-          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-cli-${version}.pom
-
-          unzip -j liquibase-cdi-${version}.jar META-INF/maven/org.liquibase/liquibase-cdi/pom.xml
-          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
-          mv pom.xml liquibase-cdi-${version}.pom
-          sed -i -e "s/<description>/<name>Liquibase CDI Plugin<\/name><description>/" liquibase-cdi-${version}.pom   ## name didn't end up in pom. Hack it in for now
-          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-cdi-${version}.pom
-
-          unzip -j liquibase-cdi-jakarta-${version}.jar META-INF/maven/org.liquibase/liquibase-cdi-jakarta/pom.xml
-          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
-          mv pom.xml liquibase-cdi-jakarta-${version}.pom
-          sed -i -e "s/<description>/<name>Liquibase cdi-jakarta Plugin<\/name><description>/" liquibase-cdi-jakarta-${version}.pom   ## name didn't end up in pom. Hack it in for now
-          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-cdi-jakarta-${version}.pom
-
-          unzip -j liquibase-commercial-${version}.jar META-INF/maven/org.liquibase/liquibase-commercial/pom.xml
-          sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
-          mv pom.xml liquibase-commercial-${version}.pom
-          sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private<\/connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" liquibase-commercial-${version}.pom   ## scm info not in the pom          
-          gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab liquibase-commercial-${version}.pom
+            gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i-${version}.pom
           
-          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
-            -DrepositoryId=dry-run-sonatype-nexus-staging \
-            -DpomFile=liquibase-core-${version}.pom \
-            -DgeneratePom=false \
-            -Dfile=liquibase-core-${version}.jar \
-            -Dsources=liquibase-core-${version}-sources.jar \
-            -Djavadoc=liquibase-core-${version}-javadoc.jar \
-            -Dfiles=liquibase-core-${version}.jar.asc,liquibase-core-${version}-sources.jar.asc,liquibase-core-${version}-javadoc.jar.asc,liquibase-core-${version}.pom.asc \
-            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
-            -Dclassifiers=,sources,javadoc,
-
-          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
-            -DrepositoryId=dry-run-sonatype-nexus-staging \
-            -DpomFile=liquibase-commercial-${version}.pom \
-            -DgeneratePom=false \
-            -Dfile=liquibase-commercial-${version}.jar \
-            -Dsources=liquibase-commercial-${version}-sources.jar \
-            -Djavadoc=liquibase-commercial-${version}-javadoc.jar \
-            -Dfiles=liquibase-commercial-${version}.jar.asc,liquibase-commercial-${version}-sources.jar.asc,liquibase-commercial-${version}-javadoc.jar.asc,liquibase-commercial-${version}.pom.asc \
-            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
-            -Dclassifiers=,sources,javadoc,
-
-          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
-            -DrepositoryId=dry-run-sonatype-nexus-staging \
-            -DpomFile=liquibase-maven-plugin-${version}.pom \
-            -DgeneratePom=false \
-            -Dfile=liquibase-maven-plugin-${version}.jar \
-            -Dsources=liquibase-maven-plugin-${version}-sources.jar \
-            -Djavadoc=liquibase-maven-plugin-${version}-javadoc.jar \
-            -Dfiles=liquibase-maven-plugin-${version}.jar.asc,liquibase-maven-plugin-${version}-sources.jar.asc,liquibase-maven-plugin-${version}-javadoc.jar.asc,liquibase-maven-plugin-${version}.pom.asc \
-            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
-            -Dclassifiers=,sources,javadoc,
+            mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
+              -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
+              -DrepositoryId=dry-run-sonatype-nexus-staging \
+              -DpomFile=$i-${version}.pom \
+              -DgeneratePom=false \
+              -Dfile=$i-${version}.jar \
+              -Dsources=$i-${version}-sources.jar \
+              -Djavadoc=$i-${version}-javadoc.jar \
+              -Dfiles=$i-${version}.jar.asc,$i-${version}-sources.jar.asc,$i-${version}-javadoc.jar.asc,$i-${version}.pom.asc \
+              -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
+              -Dclassifiers=,sources,javadoc,
           
-          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
-            -DrepositoryId=dry-run-sonatype-nexus-staging \
-            -DpomFile=liquibase-cli-${version}.pom \
-            -DgeneratePom=false \
-            -Dfile=liquibase-cli-${version}.jar \
-            -Dsources=liquibase-cli-${version}-sources.jar \
-            -Djavadoc=liquibase-cli-${version}-javadoc.jar \
-            -Dfiles=liquibase-cli-${version}.jar.asc,liquibase-cli-${version}-sources.jar.asc,liquibase-cli-${version}-javadoc.jar.asc,liquibase-cli-${version}.pom.asc \
-            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
-            -Dclassifiers=,sources,javadoc,
-
-          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
-            -DrepositoryId=dry-run-sonatype-nexus-staging \
-            -DpomFile=liquibase-cdi-${version}.pom \
-            -DgeneratePom=false \
-            -Dfile=liquibase-cdi-${version}.jar \
-            -Dsources=liquibase-cdi-${version}-sources.jar \
-            -Djavadoc=liquibase-cdi-${version}-javadoc.jar \
-            -Dfiles=liquibase-cdi-${version}.jar.asc,liquibase-cdi-${version}-sources.jar.asc,liquibase-cdi-${version}-javadoc.jar.asc,liquibase-cdi-${version}.pom.asc \
-            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
-            -Dclassifiers=,sources,javadoc,
-
-          mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-            -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
-            -DrepositoryId=dry-run-sonatype-nexus-staging \
-            -DpomFile=liquibase-cdi-jakarta-${version}.pom \
-            -DgeneratePom=false \
-            -Dfile=liquibase-cdi-jakarta-${version}.jar \
-            -Dsources=liquibase-cdi-jakarta-${version}-sources.jar \
-            -Djavadoc=liquibase-cdi-jakarta-${version}-javadoc.jar \
-            -Dfiles=liquibase-cdi-jakarta-${version}.jar.asc,liquibase-cdi-jakarta-${version}-sources.jar.asc,liquibase-cdi-jakarta-${version}-javadoc.jar.asc,liquibase-cdi-jakarta-${version}.pom.asc \
-            -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
-            -Dclassifiers=,sources,javadoc,
+          done
             
