@@ -13,7 +13,7 @@ public class YamlChangeLogSerializerTest {
 
     @Test
     public void serialize__createTableChange() {
-        ChangeSet changeSet = new ChangeSet("test1", "nvoxland", false, true, "/test/me.txt", null, null,false, null);
+        ChangeSet changeSet = new ChangeSet("test1", "nvoxland", false, true, "target/test/me.txt", null, null,false, null);
         changeSet.setIgnore(true);
         changeSet.setRunOrder("last");
         CreateTableChange change = new CreateTableChange();
@@ -66,8 +66,10 @@ public class YamlChangeLogSerializerTest {
                 "      columns:\n" +
                 "      - column:\n" +
                 "          name: x\n" +
+                "          value: null\n" +
                 "      - column:\n" +
                 "          name: y\n" +
+                "          value: null\n" +
                 "      - column:\n" +
                 "          name: z\n" +
                 "          value: Geronimo!\n" +

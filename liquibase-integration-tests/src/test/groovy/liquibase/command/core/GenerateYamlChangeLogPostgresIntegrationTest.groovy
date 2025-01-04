@@ -27,12 +27,12 @@ class GenerateYamlChangeLogPostgresIntegrationTest extends Specification {
         } as Scope.ScopedRunner)
 
         when:
-        def outputFileName = 'test/test-classes/output.postgresql.yaml'
+        def outputFileName = 'target/test-classes/output.postgresql.yaml'
         CommandUtil.runGenerateChangelog(db, outputFileName, true)
-        def outputFile = new File(outputFileName)
-        def fileContent = FileUtil.getContents(outputFile)
 
         then:
+        def outputFile = new File(outputFileName)
+        def fileContent = FileUtil.getContents(outputFile)
         fileContent.contains("""
     changes:
     - insert:
@@ -42,8 +42,10 @@ class GenerateYamlChangeLogPostgresIntegrationTest extends Specification {
             value: AA
         - column:
             name: b
+            value: null
         - column:
             name: c
+            value: null
         schemaName: public
         tableName: preservation_test
 """)
@@ -64,12 +66,12 @@ class GenerateYamlChangeLogPostgresIntegrationTest extends Specification {
         } as Scope.ScopedRunner)
 
         when:
-        def outputFileName = 'test/test-classes/output.postgresql.yaml'
+        def outputFileName = 'target/test-classes/output.postgresql.yaml'
         CommandUtil.runGenerateChangelog(db, outputFileName, false)
-        def outputFile = new File(outputFileName)
-        def fileContent = FileUtil.getContents(outputFile)
 
         then:
+        def outputFile = new File(outputFileName)
+        def fileContent = FileUtil.getContents(outputFile)
         fileContent.contains("""
     changes:
     - insert:
@@ -77,14 +79,12 @@ class GenerateYamlChangeLogPostgresIntegrationTest extends Specification {
         - column:
             name: a
             value: AA
-        schemaName: public
-        tableName: preservation_test
-""")
-        !fileContent.contains("""
         - column:
             name: b
         - column:
             name: c
+        schemaName: public
+        tableName: preservation_test
 """)
 
         cleanup:
