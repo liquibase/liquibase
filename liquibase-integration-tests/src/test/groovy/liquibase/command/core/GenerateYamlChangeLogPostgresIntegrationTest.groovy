@@ -7,6 +7,7 @@ import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.util.FileUtil
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -79,10 +80,6 @@ class GenerateYamlChangeLogPostgresIntegrationTest extends Specification {
         - column:
             name: a
             value: AA
-        - column:
-            name: b
-        - column:
-            name: c
         schemaName: public
         tableName: preservation_test
 """)

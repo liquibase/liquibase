@@ -154,17 +154,25 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                     }
                 }
                 if (value instanceof Collection) {
-                    List valueAsList = new ArrayList((Collection) value);
+                    Collection valueAsList = (Collection) value;
                     if (valueAsList.isEmpty()) {
                         continue;
                     }
-                    for (int i = 0; i < valueAsList.size(); i++) {
-                        if (valueAsList.get(i) instanceof LiquibaseSerializable) {
-                            Object m = convertToMap(valueAsList, i);
-                            valueAsList.set(i, m);
+                    List list = new ArrayList();
+                    for (Object o : valueAsList) {
+                        if (o instanceof ColumnConfig) {
+                            ColumnConfig cc = (ColumnConfig) o;
+                            if (!this.preserveNullValues && cc.isNullValue() && !cc.hasDefaultValue()) {
+                                continue;
+                            }
+                        }
+                        if (o instanceof LiquibaseSerializable) {
+                            Object m = toMap((LiquibaseSerializable) o);
+                            list.add(m);
                         }
                     }
-                    value = valueAsList;
+
+                    value = list;
                 }
                 if (value instanceof Map) {
                     if  (((Map<?, ?>) value).isEmpty()) {

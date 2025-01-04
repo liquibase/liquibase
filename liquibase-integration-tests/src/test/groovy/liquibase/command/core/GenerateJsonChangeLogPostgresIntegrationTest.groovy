@@ -46,12 +46,14 @@ class GenerateJsonChangeLogPostgresIntegrationTest extends Specification {
               },
               {
                 "column": {
-                  "name": "b"
+                  "name": "b",
+                  "value": null
                 }
               },
               {
                 "column": {
-                  "name": "c"
+                  "name": "c",
+                  "value": null
                 }
               }
             ]
