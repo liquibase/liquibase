@@ -7,7 +7,7 @@ import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.util.FileUtil
-import spock.lang.Ignore
+
 import spock.lang.Shared
 import spock.lang.Specification
 
