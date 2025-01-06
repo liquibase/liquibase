@@ -40,7 +40,6 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.csv.CSVReader;
 import lombok.Setter;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -215,8 +214,8 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
      */
     protected String columnIdString(int index, LoadDataColumnConfig columnConfig) {
         return " / column[" + index + "]" +
-                (StringUtils.trimToNull(columnConfig.getName()) != null ?
-                        " (name:'" + columnConfig.getName() + "')" : "");
+               (StringUtils.trimToNull(columnConfig.getName()) != null ?
+                       " (name:'" + columnConfig.getName() + "')" : "");
     }
 
     /**
@@ -283,8 +282,8 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                 if (line.length != headers.length) {
                     throw new UnexpectedLiquibaseException(
                             "CSV file " + getFile() + " Line " + lineNumber + " has " + line.length +
-                                    " values defined, Header has " + headers.length +
-                                    ". Numbers MUST be equal (check for unquoted string with embedded commas)"
+                            " values defined, Header has " + headers.length +
+                            ". Numbers MUST be equal (check for unquoted string with embedded commas)"
                     );
                 }
 
@@ -338,8 +337,8 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                                 valueConfig.setValueNumeric(columnConfig.getDefaultValueNumeric());
                             }
                         } else if (columnConfig.getType().equalsIgnoreCase("date")
-                                || columnConfig.getType().equalsIgnoreCase("datetime")
-                                || columnConfig.getType().equalsIgnoreCase("time")) {
+                                   || columnConfig.getType().equalsIgnoreCase("datetime")
+                                   || columnConfig.getType().equalsIgnoreCase("time")) {
                             try {
                                 // Need the column type for handling 'NOW' or 'TODAY' type column value
                                 valueConfig.setType(columnConfig.getType());
@@ -349,8 +348,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                                 } else {
                                     valueConfig.setValueDate(value);
                                 }
-                            }
-                            catch (DateParseException e) {
+                            } catch (DateParseException e) {
                                 throw new UnexpectedLiquibaseException(e);
                             }
                         } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.STRING) {
@@ -393,21 +391,28 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             // To maintain backwards compatibility, we will first try to find the file.
                             // If found, we then load the entire file into the value when executing the statement.
                             // If not found, we load the value as a string.
-                            Resource r;
-                            if (getRelativeTo() != null) {
-                                r = Scope.getCurrentScope().getResourceAccessor().get(getRelativeTo()).resolveSibling(value);
-                            } else {
-                                r = Scope.getCurrentScope().getResourceAccessor().get(value);
+
+                            boolean resourceExists = false;
+                            // If the value is null we set the value directly to avoid Exceptions while loading
+                            // resources e.g. with SpringResourceAccessor.
+                            if (value != null) {
+                                Resource r;
+                                if (getRelativeTo() != null) {
+                                    r = Scope.getCurrentScope().getResourceAccessor().get(getRelativeTo()).resolveSibling(value);
+                                } else {
+                                    r = Scope.getCurrentScope().getResourceAccessor().get(value);
+                                }
+                                resourceExists = r.exists();
                             }
 
-                            if (r.exists()) {
+                            if (resourceExists) {
                                 valueConfig.setValueClobFile(value);
                             } else {
                                 LOG.fine(String.format("File %s not found. Inserting the value as a string. See https://docs.liquibase.com for more information.", value));
                                 valueConfig.setValue(value);
                             }
                             needsPreparedStatement = true;
-                        }  else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.UUID) {
+                        } else if (columnConfig.getTypeEnum() == LOAD_DATA_TYPE.UUID) {
                             valueConfig.setType(columnConfig.getType());
                             if (StringUtil.equalsWordNull(value)) {
                                 valueConfig.setValue(null);
@@ -474,7 +479,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
             if ((getChangeSet() != null) && (getChangeSet().getFailOnError() != null) && !getChangeSet()
                     .getFailOnError()) {
                 LOG.info("Changeset " + getChangeSet().toString(false) +
-                        " failed, but failOnError was false.  Error: " + ule.getMessage());
+                         " failed, but failOnError was false.  Error: " + ule.getMessage());
                 return SqlStatement.EMPTY_SQL_STATEMENT;
             } else {
                 throw ule;
@@ -510,7 +515,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         final ExecutorService executorService = Scope.getCurrentScope().getSingleton(ExecutorService.class);
 
         return executorService.executorExists("logging", database) &&
-                (executorService.getExecutor("logging", database) instanceof LoggingExecutor);
+               (executorService.getExecutor("logging", database) instanceof LoggingExecutor);
     }
 
     /**
@@ -677,10 +682,9 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         boolean shouldTrimHeader = GlobalConfiguration.TRIM_LOAD_DATA_FILE_HEADER.getCurrentValue();
         LoadDataColumnConfig loadDataColumnConfig;
         for (String columnNameFromHeader : headers) {
-            if(shouldTrimHeader) {
+            if (shouldTrimHeader) {
                 loadDataColumnConfig = columnConfigFromName(columnNameFromHeader.trim(), i);
-            }
-            else {
+            } else {
                 loadDataColumnConfig = columnConfigFromName(columnNameFromHeader, i);
             }
 
