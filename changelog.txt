@@ -1,9 +1,12 @@
 Liquibase Core Changelog
 ===========================================
 
-### Liquibase 4.30.0.1 is a patch release
+### Liquibase 4.30.0.1 is a minor patch release
 
-* DAT-19258 fixes an issue that PSQL doesn't connect when a username has an '@'
+> This release is not available in github/maven and the fixes will be included in the next release.
+
+* DAT-19258 fixes an issue that PSQL doesn't connect when a username has an '@' .
+
 
 ### Liquibase 4.30.0 is a major release
 
