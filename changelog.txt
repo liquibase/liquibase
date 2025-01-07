@@ -8,7 +8,7 @@ Liquibase Core Changelog
 * DAT-19258 fixes an issue that PSQL doesn't connect when a username has an '@' .
 
 
-### Liquibase 4.30.0 is a major release
+### Liquibase 4.30.0 (2024-11-05) is a major release
 
 > [!IMPORTANT]
 > Liquibase 4.30.0 contains new capabilities and notable enhancements for Liquibase OSS and Pro users including Anonymous Analytics and deprecation of the MacOS dmg installer.
