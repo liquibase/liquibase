@@ -1,8 +1,8 @@
 package liquibase.integration.ant;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.TestScopeManager;
-import liquibase.GlobalConfiguration;
 import org.junit.BeforeClass;
 
 import java.io.UnsupportedEncodingException;
@@ -10,6 +10,9 @@ import java.net.URLDecoder;
 
 public abstract class AbstractAntTaskTest {
 
+    /*
+    comment so that I can trigger a build
+     */
     @BeforeClass
     public static void setup() throws Exception {
         Scope.setScopeManager(new TestScopeManager(Scope.getCurrentScope()));
