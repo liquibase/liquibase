@@ -58,7 +58,7 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
             log.log(logLevel, "Timed out while attempting to load analytics configuration from " + url, null);
         }
         return remoteAnalyticsConfiguration.get();
-    });
+    }, false, AnalyticsArgs.CONFIG_CACHE_TIMEOUT_MILLIS.getCurrentValue());
 
     @Override
     public int getPriority() {

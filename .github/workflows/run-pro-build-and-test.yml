@@ -13,7 +13,7 @@ on:
         required: false
         default: ''
         type: string
-  pull_request:
+  pull_request_target:
     types: [labeled]
 
 
@@ -41,7 +41,7 @@ jobs:
   run-pro-build-and-tests:
     runs-on: ubuntu-latest
     needs: [run-pro-build ]
-    name: Trigger Functional Tests
+    name: Trigger Pro build
     steps:
       - uses: actions/checkout@v4
 
@@ -67,7 +67,7 @@ jobs:
         id: return_dispatch
         with:
           token: ${{ secrets.RUN_FUNCTIONAL_TEST_HARNESS_TESTS_TOKEN  }}
-          ref: "DAT-19069"
+          ref: "master"
           repo: liquibase-pro
           owner: liquibase
           workflow: build-and-test-from-oss.yml
@@ -77,8 +77,10 @@ jobs:
                 "liquibaseBranch": "${{ env.RUN_TESTS_BRANCH }}"
               }'
 
-      - name: Display run ID
-        run: echo ${{ steps.return_dispatch.outputs.run_id }}
+      - name: Display run ID and URL
+        run: |
+          echo ${{steps.return_dispatch.outputs.run_id}}
+          echo ${{steps.return_dispatch.outputs.run_url}}
 
       - name: Report PRO Build & Tests Run URL
         uses: actions/github-script@v7
