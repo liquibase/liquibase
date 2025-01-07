@@ -185,7 +185,7 @@ jobs:
 
       - name: Check Unit Test Count for Java 8, 11, 17, 21 Ubuntu
         id: check-test-counts-java-all-ubuntu
-        if: matrix.os == 'ubuntu-20.04'
+        if: ${{ matrix.os == 'ubuntu-20.04' && github.head_ref == 'master'}}
         run: |
           TEST_COUNT=$(find . -name '*.txt' | xargs grep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
           echo "Total Unit tests run: $TEST_COUNT"
@@ -213,7 +213,7 @@ jobs:
 
       - name: Check Unit Test Count for Java 8 macos-13
         id: check-test-counts-java-macos
-        if: matrix.os == 'macos-13'
+        if: ${{ matrix.os == 'macos-13' && github.head_ref == 'master'}}
         shell: bash
         run: |
           TEST_COUNT=$(grep -r -o -E 'Tests run: [0-9]+' . | awk -F: '{s+=$NF} END {print s}')
@@ -230,7 +230,7 @@ jobs:
 
       - name: Check Test Count for windows-2019
         id: check-test-counts-java-windows
-        if: matrix.os == 'windows-2019'
+        if: ${{ matrix.os == 'windows-2019' && github.head_ref == 'master'}}
         shell: pwsh
         run: |
           $TEST_COUNT = (Get-ChildItem -Recurse -Filter "*.txt" | Select-String -Pattern 'Tests run: (\d+)' | ForEach-Object { $_.Matches.Groups[1].Value } | Measure-Object -Sum).Sum
