@@ -188,6 +188,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
                 this.isNullValue();
     }
 
+    public boolean hasSortOrder() {
+        return null != this.descending;
+    }
+
     public static ColumnConfig fromName(String name) {
         name = name.trim();
         Boolean descending = null;

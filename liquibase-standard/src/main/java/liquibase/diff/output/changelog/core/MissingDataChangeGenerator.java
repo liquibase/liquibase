@@ -106,8 +106,9 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                         column.setValue(value.toString());
                     }
 
-                    change.addColumn(column);
-
+                    if (outputControl.getPreserveNullValues() || !column.isNullValue() || column.hasDefaultValue() || column.hasSortOrder() || null != column.getConstraints()) {
+                        change.addColumn(column);
+                    }
                 }
 
                 // for each row, add a new change

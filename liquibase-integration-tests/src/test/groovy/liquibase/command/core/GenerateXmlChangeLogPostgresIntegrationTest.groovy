@@ -7,6 +7,7 @@ import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.util.FileUtil
+
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -33,15 +34,11 @@ class GenerateXmlChangeLogPostgresIntegrationTest extends Specification {
         def fileContent = FileUtil.getContents(outputFile)
 
         then:
-//         EXPECTED:
-//            <column name="a" value="AA"/>
-//            <column name="b" value=null/>
-//            <column name="c" value=null/>
         fileContent.contains("""
         <insert schemaName="public" tableName="preservation_test">
             <column name="a" value="AA"/>
-            <column name="b"/>
-            <column name="c"/>
+            <column name="b" value="null"/>
+            <column name="c" value="null"/>
         </insert>
     </changeSet>
 """)
@@ -71,8 +68,6 @@ class GenerateXmlChangeLogPostgresIntegrationTest extends Specification {
         fileContent.contains("""
         <insert schemaName="public" tableName="preservation_test">
             <column name="a" value="AA"/>
-            <column name="b"/>
-            <column name="c"/>
         </insert>
     </changeSet>
 </databaseChangeLog>

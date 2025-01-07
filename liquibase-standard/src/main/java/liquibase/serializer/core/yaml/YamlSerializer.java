@@ -112,7 +112,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         if (object instanceof ColumnConfig) {
             ColumnConfig cc = (ColumnConfig) object;
 
-            if (this.preserveNullValues && cc.isNullValue() && !cc.hasDefaultValue()) {
+            if (this.preserveNullValues && cc.isNullValue() && !cc.hasDefaultValue() && !cc.hasSortOrder() && cc.getConstraints() == null) {
                 objectMap.put("name", object.getSerializableFieldValue("name"));
                 Object type = object.getSerializableFieldValue("type");
 
