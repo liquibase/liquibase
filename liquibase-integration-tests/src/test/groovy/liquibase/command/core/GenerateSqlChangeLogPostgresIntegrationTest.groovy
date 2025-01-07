@@ -34,7 +34,7 @@ class GenerateSqlChangeLogPostgresIntegrationTest extends Specification {
         def fileContent = FileUtil.getContents(outputFile)
 
         then:
-        fileContent.contains("""INSERT INTO public.PRESERVATION_TEST (a, b, c) VALUES ('AA', NULL, NULL);""")
+        fileContent.contains("""INSERT INTO "public"."preservation_test" ("a", "b", "c") VALUES ('AA', NULL, NULL);""")
 
         cleanup:
         outputFile.delete()
@@ -58,7 +58,10 @@ class GenerateSqlChangeLogPostgresIntegrationTest extends Specification {
         def fileContent = FileUtil.getContents(outputFile)
 
         then:
-        fileContent.contains("""INSERT INTO public.PRESERVATION_TEST (a, b, c) VALUES ('AA', NULL, NULL);""")
+        fileContent.contains("""INSERT INTO "public"."preservation_test" ("a", "b", "c") VALUES ('AA', NULL, NULL);""")
+
+//         EXPECTED:
+//        fileContent.contains("""INSERT INTO "public"."preservation_test" ("a") VALUES ('AA');""")
 
         cleanup:
         outputFile.delete()

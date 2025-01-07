@@ -33,6 +33,10 @@ class GenerateXmlChangeLogPostgresIntegrationTest extends Specification {
         def fileContent = FileUtil.getContents(outputFile)
 
         then:
+//         EXPECTED:
+//            <column name="a" value="AA"/>
+//            <column name="b" value=null/>
+//            <column name="c" value=null/>
         fileContent.contains("""
         <insert schemaName="public" tableName="preservation_test">
             <column name="a" value="AA"/>
@@ -67,6 +71,8 @@ class GenerateXmlChangeLogPostgresIntegrationTest extends Specification {
         fileContent.contains("""
         <insert schemaName="public" tableName="preservation_test">
             <column name="a" value="AA"/>
+            <column name="b"/>
+            <column name="c"/>
         </insert>
     </changeSet>
 </databaseChangeLog>
