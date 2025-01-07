@@ -95,7 +95,6 @@ public class DiffOutputControl {
     public DiffOutputControl setDataDir(String dataDir) {
 
         if (dataDir != null) {
-            ChangeGeneratorFactory.getInstance().unregister(MissingDataExternalFileChangeGenerator.class);
             ChangeGeneratorFactory.getInstance().register(new MissingDataExternalFileChangeGenerator(dataDir));
         }
         return this;
