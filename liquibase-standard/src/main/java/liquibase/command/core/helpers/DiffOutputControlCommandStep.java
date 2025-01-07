@@ -5,6 +5,8 @@ import liquibase.command.*;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.ObjectChangeFilter;
+import liquibase.diff.output.changelog.ChangeGeneratorFactory;
+import liquibase.diff.output.changelog.core.MissingDataExternalFileChangeGenerator;
 import liquibase.logging.mdc.MdcKey;
 
 import java.util.Collections;
@@ -14,7 +16,7 @@ import java.util.List;
  * Internal command step to be used on pipeline to instantiate a DiffOutputControl object that is mainly used
  * by diffChangeLog/generateChangeLog .
  */
-public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
+public class DiffOutputControlCommandStep extends AbstractHelperCommandStep implements CleanUpCommandStep{
 
     public static final String[] COMMAND_NAME = {"diffOutputControl"};
     public static final CommandArgumentDefinition<Boolean> INCLUDE_CATALOG_ARG;
@@ -105,4 +107,8 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
                    "and they may need to be manually updated before being deployed.");
     }
 
+    @Override
+    public void cleanUp(CommandResultsBuilder resultsBuilder) {
+        ChangeGeneratorFactory.getInstance().unregister(MissingDataExternalFileChangeGenerator.class);
+    }
 }
