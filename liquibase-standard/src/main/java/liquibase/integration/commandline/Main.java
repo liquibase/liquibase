@@ -865,7 +865,8 @@ public class Main {
                             && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.DIFF_TYPES.toLowerCase())
                             && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.FORMAT.toLowerCase())
                             && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.HELP.toLowerCase())
-                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT.toLowerCase())) {
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT.toLowerCase())
+                    ) {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                     }
                     if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command) && cmdParm.toLowerCase().startsWith("--" + OPTIONS.FORMAT.toLowerCase())) {
@@ -1749,6 +1750,8 @@ public class Main {
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_CATALOG_ARG, includeCatalog)
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, includeSchema)
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_TABLESPACE_ARG, includeTablespace)
+                .addArgumentValue(DiffOutputControlCommandStep.EXCLUDE_OBJECTS, excludeObjects)
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_OBJECTS, includeObjects)
                 .addArgumentValue(GenerateChangelogCommandStep.AUTHOR_ARG, StringUtil.trimToNull(changeSetAuthor))
                 .addArgumentValue(GenerateChangelogCommandStep.CONTEXT_ARG, StringUtil.trimToNull(changeSetContext))
                 .addArgumentValue(GenerateChangelogCommandStep.DATA_OUTPUT_DIR_ARG, StringUtil.trimToNull(dataOutputDirectory))
@@ -1765,6 +1768,8 @@ public class Main {
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_CATALOG_ARG, includeCatalog)
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, includeSchema)
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_TABLESPACE_ARG, includeTablespace)
+                .addArgumentValue(DiffOutputControlCommandStep.EXCLUDE_OBJECTS, excludeObjects)
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_OBJECTS, includeObjects)
                 .addArgumentValue(DiffChangelogCommandStep.AUTHOR_ARG, StringUtil.trimToNull(changeSetAuthor))
                 .setOutput(getOutputStream());
 

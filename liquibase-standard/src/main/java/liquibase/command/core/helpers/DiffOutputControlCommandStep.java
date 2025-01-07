@@ -24,6 +24,8 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep impl
     public static final CommandArgumentDefinition<Boolean> INCLUDE_TABLESPACE_ARG;
 
     public static final CommandArgumentDefinition<String> DATA_DIR_ARG;
+    public static final CommandArgumentDefinition<String> EXCLUDE_OBJECTS;
+    public static final CommandArgumentDefinition<String> INCLUDE_OBJECTS;
 
     public static final CommandResultDefinition<DiffOutputControl> DIFF_OUTPUT_CONTROL;
 
@@ -38,6 +40,11 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep impl
                 .description("Include the tablespace attribute in the changelog. Defaults to false.").build();
         DATA_DIR_ARG = builder.argument("dataDir", String.class)
                 .description("Directory where insert statement csv files will be kept when processing a LoadData change.").build();
+
+        EXCLUDE_OBJECTS = builder.argument("excludeObjects", String.class).defaultValue(null)
+                .description("Objects to exclude from diff. Supports regular expressions. Defaults to null.").build();
+        INCLUDE_OBJECTS = builder.argument("includeObjects", String.class).defaultValue(null)
+                .description("Objects to include in diff. Supports regular expressions. Defaults to null.").build();
 
         DIFF_OUTPUT_CONTROL = builder.result("diffOutputControl", DiffOutputControl.class).build();
     }
@@ -80,6 +87,8 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep impl
         DiffOutputControl diffOutputControl = new DiffOutputControl(
                 includeCatalog, includeSchema,
                 includeTablespace, compareControl.getSchemaComparisons());
+        diffOutputControl.setExcludeObjects(commandScope.getArgumentValue(EXCLUDE_OBJECTS));
+        diffOutputControl.setIncludeObjects(commandScope.getArgumentValue(INCLUDE_OBJECTS));
         for (CompareControl.SchemaComparison schema : compareControl.getSchemaComparisons()) {
             diffOutputControl.addIncludedSchema(schema.getReferenceSchema());
             diffOutputControl.addIncludedSchema(schema.getComparisonSchema());

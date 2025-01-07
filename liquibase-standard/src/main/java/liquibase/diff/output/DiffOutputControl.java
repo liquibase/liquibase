@@ -33,6 +33,13 @@ public class DiffOutputControl {
     @Setter
     private boolean isReplaceIfExistsSet = false;
 
+    @Getter
+    @Setter
+    private String excludeObjects;
+    @Getter
+    @Setter
+    private String includeObjects;
+
     private CompareControl.SchemaComparison[] schemaComparisons;
 
     private final DatabaseObjectCollection alreadyHandledMissing= new DatabaseObjectCollection(new DatabaseForHash());
