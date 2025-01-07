@@ -109,6 +109,6 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep impl
 
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
-        ChangeGeneratorFactory.getInstance().unregister(MissingDataExternalFileChangeGenerator.class);
+        ChangeGeneratorFactory.getInstance().unregisterAll(MissingDataExternalFileChangeGenerator.class);
     }
 }
