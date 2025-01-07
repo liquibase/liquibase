@@ -6,6 +6,7 @@ import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.command.core.helpers.DiffOutputControlCommandStep
 import liquibase.command.core.helpers.PreCompareCommandStep
 import liquibase.command.util.CommandUtil
+import liquibase.diff.output.changelog.ChangeGeneratorFactory
 import liquibase.diff.output.changelog.core.MissingDataExternalFileChangeGenerator
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
@@ -27,6 +28,7 @@ class GenerateChangeLogH2IntegrationTest extends Specification{
         when:
         def outputFile = "output.changelog.file.xml"
         def dataDir = "testDataDir/"
+        ChangeGeneratorFactory.getInstance().register(new MissingDataExternalFileChangeGenerator(dataDir))
         CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
