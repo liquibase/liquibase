@@ -217,13 +217,13 @@ jobs:
             $PWD/.github/util/sign-artifacts.sh ./target "${{ inputs.liquibase-version }}" "${{ inputs.branch }}"
             mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
             sed -i -e "s/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/<liquibase.version>${{ inputs.liquibase-version }}<\/liquibase.version>/g" pom.xml
-            mvn deploy:deploy-file \
-            -Dfile=./re-version/out/${dep}-${{ inputs.liquibase-version }}.jar \
-            -Dsources=./re-version/out/${dep}-${{ inputs.liquibase-version }}-sources.jar \
-            -Djavadoc=./re-version/out/${dep}-${{ inputs.liquibase-version }}-javadoc.jar \
-            -DrepositoryId=liquibase \
-            -Durl=https://maven.pkg.github.com/liquibase/$dep \
-            -DpomFile=pom.xml
+            # mvn deploy:deploy-file \
+            # -Dfile=./re-version/out/${dep}-${{ inputs.liquibase-version }}.jar \
+            # -Dsources=./re-version/out/${dep}-${{ inputs.liquibase-version }}-sources.jar \
+            # -Djavadoc=./re-version/out/${dep}-${{ inputs.liquibase-version }}-javadoc.jar \
+            # -DrepositoryId=liquibase \
+            # -Durl=https://maven.pkg.github.com/liquibase/$dep \
+            # -DpomFile=pom.xml
             cd ..
           done
 
@@ -262,12 +262,12 @@ jobs:
             $PWD/.github/util/sign-artifacts.sh ./target "${{ inputs.liquibase-version }}" "${{ inputs.branch }}"
             mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
             sed -i -e "s/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/<liquibase.version>${{ inputs.liquibase-version }}<\/liquibase.version>/g" pom.xml
-            mvn deploy:deploy-file \
-            -Dfile=./re-version/out/${ext}-${{ inputs.liquibase-version }}.jar \
-            -Dsources=./re-version/out/${ext}-${{ inputs.liquibase-version }}-sources.jar \
-            -Djavadoc=./re-version/out/${ext}-${{ inputs.liquibase-version }}-javadoc.jar \
-            -DrepositoryId=liquibase \
-            -Durl=https://maven.pkg.github.com/liquibase/$ext \
-            -DpomFile=pom.xml
+            # mvn deploy:deploy-file \
+            # -Dfile=./re-version/out/${ext}-${{ inputs.liquibase-version }}.jar \
+            # -Dsources=./re-version/out/${ext}-${{ inputs.liquibase-version }}-sources.jar \
+            # -Djavadoc=./re-version/out/${ext}-${{ inputs.liquibase-version }}-javadoc.jar \
+            # -DrepositoryId=liquibase \
+            # -Durl=https://maven.pkg.github.com/liquibase/$ext \
+            # -DpomFile=pom.xml
             cd ..
           done
