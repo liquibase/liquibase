@@ -57,7 +57,8 @@ on:
 
 env:
   DEPENDENCIES: "liquibase-bigquery"
-  EXTENSIONS: '[{"name":"liquibase-commercial-bigquery","combined_jars":"false"},{"name":"liquibase-checks","combined_jars":"true"}]'
+  EXTENSIONS: |
+    [{"name":"liquibase-commercial-bigquery","combined_jars":"false"},{"name":"liquibase-checks","combined_jars":"true"}]
 
 jobs:
   setup:
