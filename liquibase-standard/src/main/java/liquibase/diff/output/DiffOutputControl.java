@@ -34,6 +34,13 @@ public class DiffOutputControl {
 
     private boolean preserveNullValues = true;
 
+    @Getter
+    @Setter
+    private String excludeObjects;
+    @Getter
+    @Setter
+    private String includeObjects;
+
     private CompareControl.SchemaComparison[] schemaComparisons;
 
     private final DatabaseObjectCollection alreadyHandledMissing= new DatabaseObjectCollection(new DatabaseForHash());
