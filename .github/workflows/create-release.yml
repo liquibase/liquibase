@@ -101,7 +101,7 @@ jobs:
      dependencies: ${{ needs.setup.outputs.dependencies }}
      extensions: ${{ needs.setup.outputs.extensions }}
      branch: ${{ needs.setup.outputs.branch }}
-  #  secrets: inherit
+     secrets: inherit
 
   # reversion:
   #   needs: [ setup, build-extension-jars ]
