@@ -54,8 +54,9 @@ jobs:
           matrix_input: ${{ inputs.dependencies }}
       - id: parse_extensions_matrix
         run: |
-          echo "extensions=${{ inputs.extensions }}"
+          echo "${{ inputs.extensions }}"
           EXTENSIONS_LIST=$(echo "${{ inputs.extensions }}" | jq -r '.[].name' | tr '\n' ',' | sed 's/,$//')
+          echo "EXTENSIONS_LIST=$EXTENSIONS_LIST"
           echo "matrix_output=${EXTENSIONS_LIST}" >> $GITHUB_OUTPUT
       - id: setup_extensions_matrix
         uses: cschadewitz/dynamic-matrix-input@v1.0.0
