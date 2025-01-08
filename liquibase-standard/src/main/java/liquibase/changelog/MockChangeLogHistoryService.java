@@ -1,6 +1,9 @@
 package liquibase.changelog;
 
-import liquibase.*;
+import liquibase.ContextExpression;
+import liquibase.Contexts;
+import liquibase.LabelExpression;
+import liquibase.Labels;
 import liquibase.change.CheckSum;
 import liquibase.database.Database;
 import liquibase.database.core.MockDatabase;
@@ -116,29 +119,17 @@ public class MockChangeLogHistoryService implements ChangeLogHistoryService {
 
     }
 
-    /**
-     * @deprecated use {@link Scope#getDeploymentId()}
-     */
     @Override
-    @Deprecated
     public String getDeploymentId() {
         return null;
     }
 
-    /**
-     * @deprecated This is now handled automatically by the root scope
-     */
     @Override
-    @Deprecated
     public void resetDeploymentId() {
 
     }
 
-    /**
-     * @deprecated This is now handled automatically by the root scope
-     */
     @Override
-    @Deprecated
     public void generateDeploymentId() {
 
     }

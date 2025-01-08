@@ -2,7 +2,6 @@ package liquibase.changelog;
 
 import liquibase.Contexts;
 import liquibase.LabelExpression;
-import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
@@ -68,22 +67,10 @@ public interface ChangeLogHistoryService extends Plugin {
 
     void destroy() throws DatabaseException;
 
-    /**
-     * @deprecated use {@link Scope#getDeploymentId()}
-     */
-    @Deprecated
     String getDeploymentId();
 
-    /**
-     * @deprecated This is now handled automatically by the root scope
-     */
-    @Deprecated
     void resetDeploymentId();
 
-    /**
-     * @deprecated This is now handled automatically by the root scope
-     */
-    @Deprecated
     void generateDeploymentId();
 
     /**

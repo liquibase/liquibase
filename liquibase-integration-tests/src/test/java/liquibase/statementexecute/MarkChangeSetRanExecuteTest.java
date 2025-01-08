@@ -28,95 +28,94 @@ public class MarkChangeSetRanExecuteTest extends AbstractExecuteTest {
 
         this.statementUnderTest = new MarkChangeSetRanStatement(new ChangeSet("a", "b", false, false, "c", "e", "f",
                 null), ChangeSet.ExecType.EXECUTED);
-        String deploymentId = Scope.getCurrentScope().getDeploymentId();
         String version = StringUtil.limitSize(LiquibaseUtil.getBuildVersion()
                 .replaceAll("SNAPSHOT", "SNP")
                 .replaceAll("beta", "b")
                 .replaceAll("alpha", "a")
                 , 20);
-        assertCorrect(String.format("insert into [databasechangelog] ([id], [author], [filename], [dateexecuted], " +
+        assertCorrect("insert into [databasechangelog] ([id], [author], [filename], [dateexecuted], " +
                         "[orderexecuted], [md5sum], [description], [comments], [exectype], [contexts], [labels], " +
                         "[liquibase], [deployment_id]) values ('a', 'b', 'c', getdate(), 1, " +
                         "'9:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', 'executed', 'e', null, '" + version + "'," +
-                        " '%s')", deploymentId),
+                        " null)",
                 MSSQLDatabase.class);
-        assertCorrect(String.format("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
+        assertCorrect("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
                         "md5sum, description, comments, exectype, contexts, labels, liquibase, deployment_id) values " +
                         "('a', 'b', 'c', systimestamp, 1, '9:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', " +
-                        "'executed', 'e', null, '" + version + "', '%s')", deploymentId),
+                        "'executed', 'e', null, '" + version + "', null)",
                 OracleDatabase.class);
-        assertCorrect(String.format("insert into [databasechangelog] ([id], [author], [filename], [dateexecuted], " +
+        assertCorrect("insert into [databasechangelog] ([id], [author], [filename], [dateexecuted], " +
                         "[orderexecuted], [md5sum], [description], [comments], [exectype], [contexts], [labels], " +
                         "[liquibase], [deployment_id]) values ('a', 'b', 'c', getdate(), 1, " +
                         "'9:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', 'executed', 'e', null, '" + version + "'," +
-                        " '%s')", deploymentId),
+                        " null)",
                 SybaseDatabase.class);
-        assertCorrect(String.format("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
+        assertCorrect("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
                         "md5sum, description, comments, exectype, contexts, labels, liquibase, deployment_id) values " +
                         "('a', 'b', 'c', " +
                         "current year to fraction(5), 1, '9:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', " +
                         "'executed', " +
-                        "'e', null, '" + version + "', '%s')", deploymentId),
+                        "'e', null, '" + version + "', null)",
                 InformixDatabase.class);
-        assertCorrect(String.format("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
+        assertCorrect("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
                         "md5sum, description, comments, exectype, contexts, labels, liquibase, deployment_id) values " +
                         "('a', 'b', 'c', current timestamp, 1, " +
                         "'9:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', 'executed', 'e', null, '" + version + "'," +
-                        " '%s')", deploymentId),
+                        " null)",
                 DB2Database.class);
-        assertCorrect(String.format("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
+        assertCorrect("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
                         "md5sum, description, comments, exectype, contexts, labels, liquibase, deployment_id) values " +
                         "('a', 'b', 'c', current_timestamp, 1, " +
                         "'9:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', 'executed', 'e', null, '" + version + "'," +
-                        " '%s')", deploymentId),
+                        " null)",
                 FirebirdDatabase.class, DerbyDatabase.class);
-        assertCorrect(String.format("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
+        assertCorrect("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
                         "md5sum, description, comments, exectype, contexts, labels, liquibase, deployment_id) values " +
                         "('a', 'b', 'c', now, 1, " +
                         "'9:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', 'executed', 'e', null, '" + version + "'," +
-                        " '%s')", deploymentId),
+                        " null)",
                 HsqlDatabase.class);
-        assertCorrect(String.format("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
+        assertCorrect("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
                         "md5sum, description, comments, exectype, contexts, labels, liquibase, deployment_id) values " +
                         "('a', 'b', 'c', now(), 1, " +
                         "'9:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', 'executed', 'e', null, '" + version + "'," +
-                        " '%s')", deploymentId),
+                        " null)",
                 SybaseASADatabase.class);
-        assertCorrect(String.format("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
+        assertCorrect("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
                         "md5sum, `description`, comments, exectype, contexts, labels, liquibase, deployment_id) values " +
                         "('a', 'b', 'c', now(), 1, " +
                         "'9:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', 'executed', 'e', null, '" + version + "'," +
-                        " '%s')", deploymentId),
+                        " null)",
                 MySQLDatabase.class);
-        assertCorrect(String.format("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
+        assertCorrect("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
                         "md5sum, `description`, comments, exectype, contexts, labels, liquibase, deployment_id) values " +
                         "('a', 'b', 'c', now(), 1, " +
                         "'9:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', 'executed', 'e', null, '" + version + "'," +
-                        " '%s')", deploymentId),
+                        " null)",
                 MariaDBDatabase.class);
-        assertCorrect(String.format("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
+        assertCorrect("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
                         "md5sum, description, comments, exectype, contexts, labels, liquibase, deployment_id) values " +
                         "('a', 'b', 'c', now(), 1, " +
                         "'9:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', 'executed', 'e', null, '" + version + "'," +
-                        " '%s')", deploymentId),
+                        " null)",
                 PostgresDatabase.class, H2Database.class, CockroachDatabase.class, EnterpriseDBDatabase.class);
-        assertCorrect(String.format("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
+        assertCorrect("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
                         "md5sum, description, comments, exectype, contexts, labels, liquibase, deployment_id) values " +
                         "('a', 'b', 'c', date('now'), 1, " +
                         "'9:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', 'executed', 'e', null, '" + version + "'," +
-                        " '%s')", deploymentId),
+                        " null)",
                 Ingres9Database.class);
-        assertCorrect(String.format("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
+        assertCorrect("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
                         "md5sum, description, comments, exectype, contexts, labels, liquibase, deployment_id) values " +
                         "('a', 'b', 'c', current_timestamp::timestamp_ntz, 1," +
                         " '9:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', 'executed', 'e', null, " +
-                        "'" + version + "', '%s')", deploymentId),
+                        "'" + version + "', null)",
                 SnowflakeDatabase.class);
-        assertCorrectOnRest(String.format("insert into databasechangelog (id, author, filename, dateexecuted, " +
+        assertCorrectOnRest("insert into databasechangelog (id, author, filename, dateexecuted, " +
                 "orderexecuted, md5sum, description, comments, exectype, contexts, labels, liquibase, deployment_id) " +
                 "values ('a', 'b', 'c', " +
                 "current timestamp, 1, '9:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', 'executed', 'e', null, " +
-                "'" + version + "', '%s')", deploymentId));
+                "'" + version + "', null)");
     }
 
     @Test
@@ -125,42 +124,40 @@ public class MarkChangeSetRanExecuteTest extends AbstractExecuteTest {
 
         this.statementUnderTest = new MarkChangeSetRanStatement(new ChangeSet("a", "b", false, false, "c", "e", "f",
                 null), ChangeSet.ExecType.RERAN);
-
-        String deploymentId = Scope.getCurrentScope().getDeploymentId();
-
-        assertCorrect(String.format("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = getdate(), [deployment_id] = '%s', [description] = 'empty', [exectype] " +
+        assertCorrect("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = getdate(), [deployment_id] = null, [description] = 'empty', [exectype] " +
                         "= 'reran', [labels] = null, liquibase = 'dev', [md5sum] = '9:d41d8cd98f00b204e9800998ecf8427e', [orderexecuted] = 1 where [id] =" +
                         " 'a' and" +
-                        " [author] = 'b' and [filename] = 'c'", deploymentId),
+                        " [author] = 'b' and [filename] = 'c'",
                 MSSQLDatabase.class);
-        assertCorrect(String.format("update databasechangelog set comments = '', contexts = 'e', dateexecuted = systimestamp, deployment_id = '%s', [description] = 'empty', exectype = " +
+        assertCorrect("update databasechangelog set comments = '', contexts = 'e', dateexecuted = systimestamp, deployment_id = null, [description] = 'empty', exectype = " +
                         "'reran', labels = null, liquibase = 'dev', md5sum = '9:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where id = 'a' and" +
                         " author " +
-                        "= 'b' and filename = 'c'", deploymentId),
+                        "= 'b' and filename = 'c'",
                 OracleDatabase.class);
-        assertCorrect(String.format("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = getdate(), [deployment_id] = '%s', [description] = 'empty', [exectype] " +
+        assertCorrect("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = getdate(), [deployment_id] = null, [description] = 'empty', [exectype] " +
                 "= 'reran', [labels] = null, liquibase = 'dev', [md5sum] = '9:d41d8cd98f00b204e9800998ecf8427e', [orderexecuted] = 1 where [id] = 'a' and" +
-                " [author] = 'b' and [filename] = 'c'", deploymentId), SybaseDatabase.class);
-        assertCorrect(String.format("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = current year to fraction(5), deployment_id = '%s', [description] = 'empty', exectype = 'reran', [labels] = null, liquibase = 'dev', md5sum = '9:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where id " +
-                "= 'a' and author = 'b' and filename = 'c'", deploymentId), InformixDatabase.class);
-        assertCorrect(String.format("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = current timestamp, deployment_id = '%s', [description] = 'empty', " +
+                " [author] = 'b' and [filename] = 'c'", SybaseDatabase.class);
+        assertCorrect("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = current year to fraction(5), deployment_id = " +
+                "null, [description] = 'empty', exectype = 'reran', [labels] = null, liquibase = 'dev', md5sum = '9:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where id " +
+                "= 'a' and author = 'b' and filename = 'c'", InformixDatabase.class);
+        assertCorrect("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = current timestamp, deployment_id = null, [description] = 'empty', " +
                         "exectype = 'reran', [labels] = null, liquibase = 'dev', md5sum = '9:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where " +
-                        "id = 'a' and author = 'b' and filename = 'c'", deploymentId),
+                        "id = 'a' and author = 'b' and filename = 'c'",
                 DB2Database.class);
-        assertCorrect(String.format("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = current_timestamp, deployment_id = '%s', [description] = 'empty', " +
+        assertCorrect("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = current_timestamp, deployment_id = null, [description] = 'empty', " +
                         "exectype = 'reran', [labels] = null, liquibase = 'dev', md5sum = '9:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where " +
-                        "id = 'a' and author = 'b' and filename = 'c'", deploymentId),
+                        "id = 'a' and author = 'b' and filename = 'c'",
                 FirebirdDatabase.class,
                 DerbyDatabase.class);
-        assertCorrect(String.format("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = NOW(), deployment_id = '%s', [description] = 'empty', exectype = " +
+        assertCorrect("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = NOW(), deployment_id = null, [description] = 'empty', exectype = " +
                         "'reran', [labels] = null, liquibase = 'dev', md5sum = '9:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where id = 'a' and" +
-                        " author = 'b' and filename = 'c'", deploymentId),
+                        " author = 'b' and filename = 'c'",
                 SybaseASADatabase.class);
-        assertCorrect(String.format("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = NOW(), deployment_id = '%s', [description] = 'empty', exectype = " +
+        assertCorrect("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = NOW(), deployment_id = null, [description] = 'empty', exectype = " +
                         "'reran', [labels] = null, liquibase = 'dev', md5sum = '9:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where id = 'a' and" +
-                        " author = 'b' and filename = 'c'", deploymentId),
+                        " author = 'b' and filename = 'c'",
                 MySQLDatabase.class, MariaDBDatabase.class, HsqlDatabase.class, PostgresDatabase.class, H2Database.class, CockroachDatabase.class);
-        assertCorrectOnRest(String.format("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = NOW(), [deployment_id] = '%s', [description] = 'empty', [exectype] = 'reran', [labels] = null, liquibase = 'dev', [md5sum] = " +
-                "'9:d41d8cd98f00b204e9800998ecf8427e', [orderexecuted] = 1 where id = 'a' and author = 'b' and filename = 'c'", deploymentId));
+        assertCorrectOnRest("update [databasechangelog] set [comments] = '', [contexts] = 'e', [dateexecuted] = NOW(), [deployment_id] = null, [description] = 'empty', [exectype] = 'reran', [labels] = null, liquibase = 'dev', [md5sum] = " +
+                "'9:d41d8cd98f00b204e9800998ecf8427e', [orderexecuted] = 1 where id = 'a' and author = 'b' and filename = 'c'");
     }
 }

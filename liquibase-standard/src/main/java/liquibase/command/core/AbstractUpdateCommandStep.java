@@ -64,7 +64,6 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        Scope scope = Scope.getCurrentScope();
         UpdateReportParameters updateReportParameters = new UpdateReportParameters();
         updateReportParameters.setCommandTitle(getFormattedCommandName(getCommandName()));
         resultsBuilder.addResult("updateReport", updateReportParameters);
@@ -98,9 +97,12 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                 LockServiceFactory.getInstance().getLockService(database).waitForLock();
                 isDBLocked = true;
             }
+            // waitForLock resets the changelog history service, so we need to rebuild that and generate a final deploymentId.
+            ChangeLogHistoryService changelogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
+            changelogService.generateDeploymentId();
 
-            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, scope.getDeploymentId());
-            Scope.getCurrentScope().getLog(getClass()).info(String.format("Using deploymentId: %s", scope.getDeploymentId()));
+            Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, changelogService.getDeploymentId());
+            Scope.getCurrentScope().getLog(getClass()).info(String.format("Using deploymentId: %s", changelogService.getDeploymentId()));
 
             StatusVisitor statusVisitor = getStatusVisitor(commandScope, database, contexts, labelExpression, databaseChangeLog);
 
