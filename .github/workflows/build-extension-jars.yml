@@ -53,8 +53,9 @@ jobs:
         with:
           matrix_input: ${{ inputs.dependencies }}
       - id: parse_extensions_matrix
+        shell: bash
         run: |
-          echo "${{ inputs.extensions }}" > extensions.json
+          printf "%s\n" "${{ inputs.extensions }}" > extensions.json
           cat extensions.json
           EXTENSIONS_LIST=$(cat extensions.json | jq -r '.[].name' | tr '\n' ',' | sed 's/,$//')
           echo "EXTENSIONS_LIST=$EXTENSIONS_LIST"
