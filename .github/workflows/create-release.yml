@@ -95,7 +95,7 @@ jobs:
   
   build-extension-jars:
    needs: [ setup ]
-   uses: liquibase/liquibase/.github/workflows/build-extension-jars.yml@master
+   uses: liquibase/liquibase/.github/workflows/build-extension-jars.yml@DAT-18331
    with:
      liquibase-version: ${{ needs.setup.outputs.version }}
      dependencies: ${{ needs.setup.outputs.dependencies }}
