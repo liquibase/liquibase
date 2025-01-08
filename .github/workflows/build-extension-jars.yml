@@ -56,9 +56,7 @@ jobs:
         shell: bash
         run: |
           printf "%s\n" '[{"name":"liquibase-commercial-bigquery","combined_jars":"false"},{"name":"liquibase-checks","combined_jars":"true"}]' > extensions.json
-          cat extensions.json
           EXTENSIONS_LIST=$(cat extensions.json | jq -r '.[].name' | tr '\n' ',' | sed 's/,$//')
-          echo "EXTENSIONS_LIST=$EXTENSIONS_LIST"
           echo "matrix_output=${EXTENSIONS_LIST}" >> $GITHUB_OUTPUT
       - id: setup_extensions_matrix
         uses: cschadewitz/dynamic-matrix-input@v1.0.0
@@ -100,6 +98,8 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
+      matrix:
+        os: [ubuntu-latest,windows-latest,macos-latest]
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GIT_USERNAME: "liquibot"
@@ -275,3 +275,10 @@ jobs:
             # -DpomFile=pom.xml
             cd ..
           done
+
+      - name: Save Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: liquibase-checks-${{ matrix.os }}-${{ inputs.liquibase-version  }}-artifacts
+          path: |
+            ./re-version/out/liquibase-checks-${{ inputs.liquibase-version }}.jar
