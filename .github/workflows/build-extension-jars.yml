@@ -54,8 +54,8 @@ jobs:
           matrix_input: ${{ inputs.dependencies }}
       - id: parse_extensions_matrix
         run: |
-          echo "${{ inputs.extensions }}"
-          EXTENSIONS_LIST=$(echo "${{ inputs.extensions }}" | jq -r '.[].name' | tr '\n' ',' | sed 's/,$//')
+          echo "${{ inputs.extensions }}" > extensions.json
+          EXTENSIONS_LIST=$(cat extensions.json | jq -r '.[].name' | tr '\n' ',' | sed 's/,$//')
           echo "EXTENSIONS_LIST=$EXTENSIONS_LIST"
           echo "matrix_output=${EXTENSIONS_LIST}" >> $GITHUB_OUTPUT
       - id: setup_extensions_matrix
