@@ -93,7 +93,6 @@ jobs:
     with:
       repository: liquibase/liquibase-checks
       version: ${{ inputs.liquibase-version }}
-      source: liquibase
     secrets: inherit
 
   build-and-deploy-extensions:
