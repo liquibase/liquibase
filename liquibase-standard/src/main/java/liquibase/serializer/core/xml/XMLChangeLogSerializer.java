@@ -195,18 +195,16 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
         if (object instanceof ColumnConfig) {
             ColumnConfig cc = (ColumnConfig) object;
-            if (cc.isNullValue() && !cc.hasDefaultValue() && !cc.hasSortOrder() && cc.getConstraints() == null) {
-                node.setAttribute("name", (String) object.getSerializableFieldValue("name"));
 
-                Object type = object.getSerializableFieldValue("type");
+            if (this.preserveNullValues) {
+                ColumnConfig other = new ColumnConfig().setName(cc.getName());
 
-                if (null != type) {
-                    node.setAttribute("type", type.toString());
-                } else {
+                if (other.equals(cc)) {
+                    node.setAttribute("name", (String) object.getSerializableFieldValue("name"));
                     node.setAttribute("value", "null");
-                }
 
-                return node;
+                    return node;
+                }
             }
         }
 
@@ -236,9 +234,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             }
         } else if (value instanceof ColumnConfig) {
             ColumnConfig columnConfig = (ColumnConfig) value;
-            ConstraintsConfig constraintsConfig = columnConfig.getConstraints();
-            boolean constraintsIsNullable = null != constraintsConfig && constraintsConfig.isNullable() != null && constraintsConfig.isNullable();
-            if (!preserveNullValues && constraintsIsNullable && columnConfig.isNullValue() && !columnConfig.hasDefaultValue()) {
+            if (!columnConfig.isSerializable(preserveNullValues)) {
                 return;
             }
             node.appendChild(createNode((LiquibaseSerializable) value));

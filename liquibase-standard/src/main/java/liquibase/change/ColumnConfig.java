@@ -20,6 +20,8 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+
 import org.apache.commons.lang3.BooleanUtils;
 
 /**
@@ -173,23 +175,105 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     public ColumnConfig() {
     }
 
-    public boolean isNullValue() {
-        return this.value == null &&
-                this.valueBlobFile == null &&
-                this.valueBoolean == null &&
-                this.valueClobFile == null &&
-                this.valueComputed == null &&
-                this.valueDate == null &&
-                this.valueNumeric == null;
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ColumnConfig)) return false;
+        ColumnConfig that = (ColumnConfig) o;
+        return Objects.equals(name, that.name) &&
+                Objects.equals(computed, that.computed) &&
+                Objects.equals(type, that.type) &&
+                Objects.equals(value, that.value) &&
+                Objects.equals(valueNumeric, that.valueNumeric) &&
+                Objects.equals(valueDate, that.valueDate) &&
+                Objects.equals(valueBoolean, that.valueBoolean) &&
+                Objects.equals(valueBlobFile, that.valueBlobFile) &&
+                Objects.equals(valueClobFile, that.valueClobFile) &&
+                Objects.equals(encoding, that.encoding) &&
+                Objects.equals(valueComputed, that.valueComputed) &&
+                Objects.equals(valueSequenceNext, that.valueSequenceNext) &&
+                Objects.equals(valueSequenceCurrent, that.valueSequenceCurrent) &&
+                Objects.equals(defaultValue, that.defaultValue) &&
+                Objects.equals(defaultValueNumeric, that.defaultValueNumeric) &&
+                Objects.equals(defaultValueDate, that.defaultValueDate) &&
+                Objects.equals(defaultValueBoolean, that.defaultValueBoolean) &&
+                Objects.equals(defaultValueComputed, that.defaultValueComputed) &&
+                Objects.equals(defaultValueSequenceNext, that.defaultValueSequenceNext) &&
+                Objects.equals(defaultValueConstraintName, that.defaultValueConstraintName) &&
+                Objects.equals(constraints, that.constraints) &&
+                Objects.equals(autoIncrement, that.autoIncrement) &&
+                Objects.equals(generationType, that.generationType) &&
+                Objects.equals(defaultOnNull, that.defaultOnNull) &&
+                Objects.equals(startWith, that.startWith) &&
+                Objects.equals(incrementBy, that.incrementBy) &&
+                Objects.equals(remarks, that.remarks) &&
+                Objects.equals(descending, that.descending) &&
+                Objects.equals(included, that.included);
     }
 
-    public boolean isNullValueWithDefaultValue() {
-        return this.hasDefaultValue() &&
-                this.isNullValue();
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                name,
+                computed,
+                type,
+                value,
+                valueNumeric,
+                valueDate,
+                valueBoolean,
+                valueBlobFile,
+                valueClobFile,
+                encoding,
+                valueComputed,
+                valueSequenceNext,
+                valueSequenceCurrent,
+                defaultValue,
+                defaultValueNumeric,
+                defaultValueDate,
+                defaultValueBoolean,
+                defaultValueComputed,
+                defaultValueSequenceNext,
+                defaultValueConstraintName,
+                constraints,
+                autoIncrement,
+                generationType,
+                defaultOnNull,
+                startWith,
+                incrementBy,
+                remarks,
+                descending,
+                included
+        );
     }
 
-    public boolean hasSortOrder() {
-        return null != this.descending;
+    public boolean isSerializable (boolean mustPreserveNullValues) {
+        return mustPreserveNullValues ||
+                hasName() ||
+                isComputed() ||
+                hasType() ||
+                hasValueObject() ||
+                hasEncoding() ||
+                hasValueComputed() ||
+                hasValueSequenceNext() ||
+                hasValueSequenceCurrent() ||
+
+                hasDefaultValue() ||
+                hasDefaultValueComputed() ||
+                hasDefaultValueSequenceNext() ||
+                hasDefaultValueConstraintName() ||
+
+                hasConstraints() ||
+                hasAutoIncrement() ||
+                hasGenerationType() ||
+                hasDefaultOnNull() ||
+                hasStartWith() ||
+                hasIncrementBy() ||
+                hasRemarks() ||
+                hasDecending() ||
+                hasIncluded();
+    }
+
+    public boolean hasConstraints() {
+        return null != this.constraints;
     }
 
     public static ColumnConfig fromName(String name) {
@@ -236,6 +320,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return setName(name);
     }
 
+    public boolean hasName() {
+        return null != this.name;
+    }
+
     public Boolean getComputed() {
         return computed;
     }
@@ -243,6 +331,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     public ColumnConfig setComputed(Boolean computed) {
         this.computed = computed;
         return this;
+    }
+
+    public boolean isComputed() {
+        return this.computed != null && this.computed.booleanValue();
     }
 
     /**
@@ -256,6 +348,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     public ColumnConfig setType(String type) {
         this.type = type;
         return this;
+    }
+
+    public boolean hasType() {
+        return null != this.type;
     }
 
     /**
@@ -373,6 +469,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public boolean hasValueComputed () {
+        return null != this.valueComputed;
+    }
+
     public SequenceNextValueFunction getValueSequenceNext() {
         return valueSequenceNext;
     }
@@ -383,6 +483,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public boolean hasValueSequenceNext() {
+        return null != this.valueSequenceNext;
+    }
+
     public SequenceCurrentValueFunction getValueSequenceCurrent() {
         return valueSequenceCurrent;
     }
@@ -391,6 +495,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         this.valueSequenceCurrent = valueSequenceCurrent;
 
         return this;
+    }
+
+    public boolean hasValueSequenceCurrent() {
+        return null != this.valueSequenceCurrent;
     }
 
     /**
@@ -469,6 +577,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public boolean hasEncoding() {
+        return null != this.encoding;
+    }
+
     /**
      * Return the value from whatever setValue* function was called. Will return null if none were set.
      */
@@ -493,6 +605,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             return getValueSequenceCurrent();
         }
         return null;
+    }
+
+    public boolean hasValueObject() {
+        return null != getValueObject();
     }
 
     /**
@@ -645,6 +761,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public boolean hasDefaultValueComputed() {
+        return null != defaultValueComputed;
+    }
+
     /**
      * Return the value to set this column's default to according to the setDefaultValue* function that was called.
      * If none were called, this function returns null.
@@ -692,6 +812,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public boolean hasAutoIncrement() {
+        return null != this.autoIncrement;
+    }
+
     /**
      * Return the number to start auto incrementing with.
      */
@@ -703,6 +827,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         this.startWith = startWith;
 
         return this;
+    }
+
+    public boolean hasStartWith() {
+        return null != this.startWith;
     }
 
     /**
@@ -718,13 +846,20 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public boolean hasIncrementBy() {
+        return null != this.incrementBy;
+    }
+
     /**
      * Returns true if any of the setDefaultValue* functions have had a non-null value set
      */
     public boolean hasDefaultValue() {
-        return (this.getDefaultValue() != null) || (this.getDefaultValueBoolean() != null) || (this
-            .getDefaultValueDate() != null) || (this.getDefaultValueNumeric() != null) || (this
-            .getDefaultValueComputed() != null) || (this.getDefaultValueSequenceNext() != null);
+        return this.getDefaultValue() != null ||
+            this.getDefaultValueBoolean() != null ||
+            this.getDefaultValueDate() != null ||
+            this.getDefaultValueNumeric() != null ||
+            this.getDefaultValueComputed() != null ||
+            this.getDefaultValueSequenceNext() != null;
     }
 
     /**
@@ -739,12 +874,12 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-    public Boolean getDescending() {
-        return descending;
+    public boolean hasRemarks() {
+        return null != this.remarks;
     }
 
-    public Boolean getIncluded() {
-        return included;
+    public Boolean getDescending() {
+        return descending;
     }
 
     public ColumnConfig setDescending(Boolean descending) {
@@ -752,9 +887,21 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public boolean hasDecending() {
+        return null != this.descending;
+    }
+
+    public Boolean getIncluded() {
+        return included;
+    }
+
     public ColumnConfig setIncluded(Boolean included) {
         this.included = included;
         return this;
+    }
+
+    public boolean hasIncluded() {
+        return null != this.included;
     }
 
     public Boolean getDefaultOnNull() {
@@ -766,6 +913,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public boolean hasDefaultOnNull() {
+        return null != this.defaultOnNull;
+    }
+
     public String getGenerationType() {
         return generationType;
     }
@@ -773,6 +924,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     public ColumnConfig setGenerationType(String generationType) {
         this.generationType = generationType;
         return this;
+    }
+
+    public boolean hasGenerationType() {
+        return null != this.generationType;
     }
 
     @Override
@@ -790,12 +945,20 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public boolean hasDefaultValueSequenceNext() {
+        return null != this.defaultValueSequenceNext;
+    }
+
     public String getDefaultValueConstraintName() {
         return defaultValueConstraintName;
     }
 
     public void setDefaultValueConstraintName(String defaultValueConstraintName) {
         this.defaultValueConstraintName = defaultValueConstraintName;
+    }
+
+    public boolean hasDefaultValueConstraintName() {
+        return null != this.defaultValueConstraintName;
     }
 
     @Override

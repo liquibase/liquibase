@@ -35,7 +35,7 @@ class GenerateXmlChangeLogPostgresIntegrationTest extends Specification {
 
         then:
         fileContent.contains("""
-        <insert schemaName="public" tableName="preservation_test">
+        <insert preserveNullValues="true" schemaName="public" tableName="preservation_test">
             <column name="a" value="AA"/>
             <column name="b" value="null"/>
             <column name="c" value="null"/>
@@ -66,7 +66,7 @@ class GenerateXmlChangeLogPostgresIntegrationTest extends Specification {
 
         then:
         fileContent.contains("""
-        <insert schemaName="public" tableName="preservation_test">
+        <insert preserveNullValues="false" schemaName="public" tableName="preservation_test">
             <column name="a" value="AA"/>
         </insert>
     </changeSet>

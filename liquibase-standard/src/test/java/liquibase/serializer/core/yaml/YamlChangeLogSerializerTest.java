@@ -5,7 +5,6 @@ import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.InsertDataChange;
 import liquibase.changelog.ChangeSet;
 
-import liquibase.changelog.DatabaseChangeLog;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -39,6 +38,7 @@ public class YamlChangeLogSerializerTest {
                 "      - column:\n" +
                 "          name: name\n" +
                 "          type: varchar(255)\n" +
+                "      preserveNullValues: true\n" +
                 "      tableName: testTable\n";
 
         String actualOutput = new YamlChangeLogSerializer().serialize(changeSet, false);
@@ -46,7 +46,7 @@ public class YamlChangeLogSerializerTest {
     }
 
     @Test
-    public void serialize__insertDataChange() {
+    public void serialize__insertDataChange_preservingNullValues() {
         ChangeSet changeSet = new ChangeSet("test1", "nvoxland", false, true, "target/test/me.txt", null, null,false, null);
         InsertDataChange change = new InsertDataChange();
         change.setTableName("testTable");
@@ -73,9 +73,47 @@ public class YamlChangeLogSerializerTest {
                 "      - column:\n" +
                 "          name: z\n" +
                 "          value: Geronimo!\n" +
+                "      preserveNullValues: true\n" +
                 "      tableName: testTable\n";
 
-        String actualOutput = new YamlChangeLogSerializer().serialize(changeSet, false);
+        YamlChangeLogSerializer serializer = new YamlChangeLogSerializer();
+        serializer.preserveNullValues(true);
+        String actualOutput = serializer.serialize(changeSet, false);
+        Assert.assertEquals(expectedOutput, actualOutput);
+    }
+
+    @Test
+    public void serialize__insertDataChange_suppressingNullValues() {
+        ChangeSet changeSet = new ChangeSet("test1", "nvoxland", false, true, "target/test/me.txt", null, null,false, null);
+        InsertDataChange change = new InsertDataChange();
+        change.setTableName("testTable");
+        change.addColumn(new ColumnConfig().setName("x"));
+        change.addColumn(new ColumnConfig().setName("y").setValue(null));
+        change.addColumn(new ColumnConfig().setName("z").setValue("Geronimo!"));
+        changeSet.addChange(change);
+
+        String expectedOutput = "changeSet:\n" +
+                "  id: test1\n" +
+                "  author: nvoxland\n" +
+                "  objectQuotingStrategy: LEGACY\n" +
+                "  runInTransaction: false\n" +
+                "  runOnChange: true\n" +
+                "  changes:\n" +
+                "  - insert:\n" +
+                "      columns:\n" +
+                "      - column:\n" +
+                "          name: x\n" +
+                "      - column:\n" +
+                "          name: y\n" +
+                "      - column:\n" +
+                "          name: z\n" +
+                "          value: Geronimo!\n" +
+                "      preserveNullValues: true\n" +
+                "      tableName: testTable\n";
+
+        YamlChangeLogSerializer serializer = new YamlChangeLogSerializer();
+        serializer.preserveNullValues(false);
+        String actualOutput = serializer.serialize(changeSet, false);
         Assert.assertEquals(expectedOutput, actualOutput);
     }
 }

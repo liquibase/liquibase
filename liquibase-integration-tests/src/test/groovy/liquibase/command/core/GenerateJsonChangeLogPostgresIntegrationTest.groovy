@@ -58,6 +58,7 @@ class GenerateJsonChangeLogPostgresIntegrationTest extends Specification {
               }
             ]
             ,
+            "preserveNullValues": true,
             "schemaName": "public",
             "tableName": "preservation_test"
           }
@@ -84,10 +85,8 @@ class GenerateJsonChangeLogPostgresIntegrationTest extends Specification {
         def outputFileName = 'test/test-classes/output.postgresql.json'
         CommandUtil.runGenerateChangelog(db, outputFileName, false)
         def outputFile = new File(outputFileName)
-        def fileContent = FileUtil.getContents(outputFile)
-
-        then:
-        fileContent.contains("""
+        def actualContent = FileUtil.getContents(outputFile)
+        def expectedContent = """
       "changes": [
         {
           "insert": {
@@ -100,12 +99,16 @@ class GenerateJsonChangeLogPostgresIntegrationTest extends Specification {
               }
             ]
             ,
+            "preserveNullValues": false,
             "schemaName": "public",
             "tableName": "preservation_test"
           }
         }
       ]
-""")
+"""
+
+        then:
+        actualContent.contains(expectedContent)
 
         cleanup:
         outputFile.delete()

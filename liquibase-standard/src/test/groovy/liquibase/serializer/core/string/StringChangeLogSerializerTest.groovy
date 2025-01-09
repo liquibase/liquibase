@@ -3,6 +3,7 @@ package liquibase.serializer.core.string
 import liquibase.Scope
 import liquibase.changelog.ChangeSet
 import liquibase.util.ColumnParentType
+
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -26,7 +27,7 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction
 
-public class StringChangeLogSerializerTest extends Specification {
+class StringChangeLogSerializerTest extends Specification {
 
     def "serialized customChange"() throws Exception {
         when:
@@ -56,6 +57,7 @@ public class StringChangeLogSerializerTest extends Specification {
         then:
         new StringChangeLogSerializer().serialize(change, false) == "addColumn:[\n" +
                 "    columns=[]\n" +
+                "    preserveNullValues=\"true\"\n" +
                 "]"
 
         when:
@@ -63,6 +65,7 @@ public class StringChangeLogSerializerTest extends Specification {
         then:
         new StringChangeLogSerializer().serialize(change, false) == "addColumn:[\n" +
                 "    columns=[]\n" +
+                "    preserveNullValues=\"true\"\n" +
                 "    tableName=\"TABLE_NAME\"\n" +
                 "]"
 
@@ -71,6 +74,7 @@ public class StringChangeLogSerializerTest extends Specification {
         then:
         new StringChangeLogSerializer().serialize(change, false) == "addColumn:[\n" +
                 "    columns=[]\n" +
+                "    preserveNullValues=\"true\"\n" +
                 "    schemaName=\"SCHEMA_NAME\"\n" +
                 "    tableName=\"TABLE_NAME\"\n" +
                 "]"
@@ -86,6 +90,7 @@ public class StringChangeLogSerializerTest extends Specification {
                 "            name=\"COLUMN_NAME\"\n" +
                 "        ]\n" +
                 "    ]\n" +
+                "    preserveNullValues=\"true\"\n" +
                 "    schemaName=\"SCHEMA_NAME\"\n" +
                 "    tableName=\"TABLE_NAME\"\n" +
                 "]"
@@ -108,6 +113,7 @@ public class StringChangeLogSerializerTest extends Specification {
                 "            valueNumeric=\"52\"\n" +
                 "        ]\n" +
                 "    ]\n" +
+                "    preserveNullValues=\"true\"\n" +
                 "    schemaName=\"SCHEMA_NAME\"\n" +
                 "    tableName=\"TABLE_NAME\"\n" +
                 "]"
@@ -118,7 +124,8 @@ public class StringChangeLogSerializerTest extends Specification {
         def change = new AddForeignKeyConstraintChange();
 
         then:
-        new StringChangeLogSerializer().serialize(change, false) == "addForeignKeyConstraint:[]"
+        new StringChangeLogSerializer().serialize(change, false) == "addForeignKeyConstraint:[\n" +
+                "    preserveNullValues=\"true\"\n]"
 
         when:
         change.setBaseTableName("TABLE_NAME");
@@ -143,6 +150,7 @@ public class StringChangeLogSerializerTest extends Specification {
                 "    initiallyDeferred=\"true\"\n" +
                 "    onDelete=\"SET NULL\"\n" +
                 "    onUpdate=\"NO ACTION\"\n" +
+                "    preserveNullValues=\"true\"\n" +
                 "    referencedColumnNames=\"COLA, COLB\"\n" +
                 "    referencedTableName=\"REF_TABLE\"\n" +
                 "    referencedTableSchemaName=\"REF_SCHEM\"\n" +
@@ -155,7 +163,8 @@ public class StringChangeLogSerializerTest extends Specification {
         def change = new AddUniqueConstraintChange();
 
         then:
-        new StringChangeLogSerializer().serialize(change, false) == "addUniqueConstraint:[]"
+        new StringChangeLogSerializer().serialize(change, false) == "addUniqueConstraint:[\n" +
+                "    preserveNullValues=\"true\"\n]"
 
         when:
         change.setTableName("TABLE_NAME");
@@ -174,6 +183,7 @@ public class StringChangeLogSerializerTest extends Specification {
                 "    deferrable=\"true\"\n" +
                 "    disabled=\"true\"\n" +
                 "    initiallyDeferred=\"true\"\n" +
+                "    preserveNullValues=\"true\"\n" +
                 "    schemaName=\"BASE_SCHEM\"\n" +
                 "    tableName=\"TABLE_NAME\"\n" +
                 "    tablespace=\"TABLESPACE1\"\n" +
@@ -209,6 +219,7 @@ public class StringChangeLogSerializerTest extends Specification {
 
         then:
         new StringChangeLogSerializer().serialize(change, false) == "sqlFile:[\n" +
+                "    preserveNullValues=\"true\"\n" +
                 "    splitStatements=\"true\"\n" +
                 "    stripComments=\"false\"\n]"
 
@@ -218,6 +229,7 @@ public class StringChangeLogSerializerTest extends Specification {
         then:
         new StringChangeLogSerializer().serialize(change, false) == "sqlFile:[\n" +
                 "    path=\"PATH/TO/File.txt\"\n" +
+                "    preserveNullValues=\"true\"\n" +
                 "    splitStatements=\"true\"\n" +
                 "    stripComments=\"false\"\n" +
                 "]"
@@ -229,6 +241,7 @@ public class StringChangeLogSerializerTest extends Specification {
 
         then:
         new StringChangeLogSerializer().serialize(change, false) == "sql:[\n" +
+                "    preserveNullValues=\"true\"\n" +
                 "    splitStatements=\"true\"\n" +
                 "    stripComments=\"false\"\n]"
 
@@ -236,6 +249,7 @@ public class StringChangeLogSerializerTest extends Specification {
         change.setSql("some SQL Here");
         then:
         new StringChangeLogSerializer().serialize(change, false) == "sql:[\n" +
+                "    preserveNullValues=\"true\"\n" +
                 "    splitStatements=\"true\"\n" +
                 "    sql=\"some SQL Here\"\n" +
                 "    stripComments=\"false\"\n" +
@@ -464,6 +478,7 @@ public class StringChangeLogSerializerTest extends Specification {
                 "            valueNumeric=\"${expected}\"\n" +
                 "        ]\n" +
                 "    ]\n" +
+                "    preserveNullValues=\"true\"\n" +
                 "    tableName=\"NUMBER_TABLE\"\n" +
                 "]"
 

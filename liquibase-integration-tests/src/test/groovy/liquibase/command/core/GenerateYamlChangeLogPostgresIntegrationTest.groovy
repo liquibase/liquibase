@@ -47,6 +47,7 @@ class GenerateYamlChangeLogPostgresIntegrationTest extends Specification {
         - column:
             name: c
             value: null
+        preserveNullValues: true
         schemaName: public
         tableName: preservation_test
 """)
@@ -80,6 +81,7 @@ class GenerateYamlChangeLogPostgresIntegrationTest extends Specification {
         - column:
             name: a
             value: AA
+        preserveNullValues: false
         schemaName: public
         tableName: preservation_test
 """)

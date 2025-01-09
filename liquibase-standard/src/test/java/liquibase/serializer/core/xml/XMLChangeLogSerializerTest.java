@@ -11,6 +11,7 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.precondition.CustomPreconditionWrapper;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.statement.SequenceNextValueFunction;
+
 import org.junit.Test;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -49,6 +50,8 @@ public class XMLChangeLogSerializerTest {
                 assertEquals("COLUMN_NAME", attribute.getNodeValue());
             } else if ("columnDataType".equals(attribute.getNodeName())) {
                 assertEquals("DATATYPE(255)", attribute.getNodeValue());
+            } else if ("preserveNullValues".equals(attribute.getNodeName())) {
+                assertEquals("true", attribute.getNodeValue());
             } else {
                 fail("unexpected attribute " + attribute.getNodeName());
             }
@@ -922,6 +925,7 @@ public class XMLChangeLogSerializerTest {
 
         String out = new XMLChangeLogSerializer().serialize(change, true);
         assertEquals("<update catalogName=\"a\"\n" +
+                "        preserveNullValues=\"true\"\n" +
                 "        schemaName=\"b\"\n" +
                 "        tableName=\"c\">\n" +
                 "    <where>Some Text</where>\n" +
@@ -969,6 +973,7 @@ public class XMLChangeLogSerializerTest {
         String out = new XMLChangeLogSerializer().serialize(change, true);
         assertEquals("<createTable catalogName=\"a\"\n" +
                 "        ifNotExists=\"true\"\n" +
+                "        preserveNullValues=\"true\"\n" +
                 "        schemaName=\"b\"\n" +
                 "        tableName=\"c\">\n" +
                 "    <column defaultValue=\"x1\" name=\"x\"/>\n" +
@@ -987,6 +992,7 @@ public class XMLChangeLogSerializerTest {
 
         String out = new XMLChangeLogSerializer().serialize(change, true);
         assertEquals("<createTable catalogName=\"a\"\n" +
+                "        preserveNullValues=\"true\"\n" +
                 "        schemaName=\"b\"\n" +
                 "        tableName=\"c\">\n" +
                 "    <column defaultValue=\"x1\" name=\"x\"/>\n" +
@@ -1003,6 +1009,7 @@ public class XMLChangeLogSerializerTest {
 
         String out = new XMLChangeLogSerializer().serialize(change, true);
         assertEquals("<addAutoIncrement catalogName=\"a\"\n" +
+                "        preserveNullValues=\"true\"\n" +
                 "        schemaName=\"b\"\n" +
                 "        tableName=\"c\"/>", out);
     }
@@ -1016,12 +1023,38 @@ public class XMLChangeLogSerializerTest {
         change.addColumn(new ColumnConfig().setName("x").setValue(null));
         change.addColumn(new ColumnConfig().setName("y").setValue(null));
 
-        String actualOutput = new XMLChangeLogSerializer().serialize(change, true);
+        // with null-values preserved
+        XMLChangeLogSerializer serializer = new XMLChangeLogSerializer();
+        serializer.preserveNullValues(true);
+        String actualOutput = serializer.serialize(change, true);
         assertEquals("<createTable catalogName=\"a\"\n" +
+                "        preserveNullValues=\"true\"\n" +
                 "        schemaName=\"b\"\n" +
                 "        tableName=\"c\">\n" +
                 "    <column name=\"x\" value=\"null\"/>\n" +
                 "    <column name=\"y\" value=\"null\"/>\n" +
+                "</createTable>", actualOutput);
+    }
+
+    @Test
+    public void serialize_pretty_suppressNullValues() {
+        CreateTableChange change = new CreateTableChange();
+        change.setCatalogName("a");
+        change.setSchemaName("b");
+        change.setTableName("c");
+        change.addColumn(new ColumnConfig().setName("x").setValue(null));
+        change.addColumn(new ColumnConfig().setName("y").setValue(null));
+
+        // without null-values preserved
+        XMLChangeLogSerializer serializer = new XMLChangeLogSerializer();
+        serializer.preserveNullValues(false);
+        String actualOutput = serializer.serialize(change, true);
+        assertEquals("<createTable catalogName=\"a\"\n" +
+                "        preserveNullValues=\"true\"\n" +
+                "        schemaName=\"b\"\n" +
+                "        tableName=\"c\">\n" +
+                "    <column name=\"x\"/>\n" +
+                "    <column name=\"y\"/>\n" +
                 "</createTable>", actualOutput);
     }
 

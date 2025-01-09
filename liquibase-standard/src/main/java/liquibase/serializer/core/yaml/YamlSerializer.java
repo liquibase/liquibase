@@ -112,20 +112,17 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         if (object instanceof ColumnConfig) {
             ColumnConfig cc = (ColumnConfig) object;
 
-            if (this.preserveNullValues && cc.isNullValue() && !cc.hasDefaultValue() && !cc.hasSortOrder() && cc.getConstraints() == null) {
-                objectMap.put("name", object.getSerializableFieldValue("name"));
-                Object type = object.getSerializableFieldValue("type");
-
-                if (null != type) {
-                    objectMap.put("type", type.toString());
-                } else {
+            if (this.preserveNullValues) {
+                ColumnConfig other = new ColumnConfig().setName(cc.getName());
+                if (other.equals(cc)) {
+                    objectMap.put("name", object.getSerializableFieldValue("name"));
                     objectMap.put("value", null);
+
+                    Map<String, Object> containerMap = new HashMap<>();
+                    containerMap.put(object.getSerializedObjectName(), objectMap);
+
+                    return containerMap;
                 }
-
-                Map<String, Object> containerMap = new HashMap<>();
-                containerMap.put(object.getSerializedObjectName(), objectMap);
-
-                return containerMap;
             }
         }
 
@@ -162,7 +159,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                     for (Object o : valueAsList) {
                         if (o instanceof ColumnConfig) {
                             ColumnConfig cc = (ColumnConfig) o;
-                            if (!this.preserveNullValues && cc.isNullValue() && !cc.hasDefaultValue()) {
+                            if (!cc.isSerializable(this.preserveNullValues)) {
                                 continue;
                             }
                         }
@@ -208,10 +205,6 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         Map<String, Object> containerMap = new HashMap<>();
         containerMap.put(object.getSerializedObjectName(), objectMap);
         return containerMap;
-    }
-
-    protected Object convertToMap(List valueAsList, int index) {
-        return toMap((LiquibaseSerializable) valueAsList.get(index));
     }
 
     protected Comparator<String> getComparator(LiquibaseSerializable object) {

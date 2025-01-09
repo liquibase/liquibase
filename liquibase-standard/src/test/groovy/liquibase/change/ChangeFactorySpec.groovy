@@ -14,7 +14,7 @@ class ChangeFactorySpec extends Specification {
         change.schemaName = "schem"
 
         then:
-        Scope.currentScope.getSingleton(ChangeFactory).getParameters(change) == [tableName: "tab", schemaName: "schem"]
+        Scope.currentScope.getSingleton(ChangeFactory).getParameters(change) == [preserveNullValues: true, tableName: "tab", schemaName: "schem"]
     }
 
     def "getParameters with no parameters set"() {
@@ -22,6 +22,6 @@ class ChangeFactorySpec extends Specification {
         def change = new DropTableChange()
 
         then:
-        StringUtil.join(Scope.currentScope.getSingleton(ChangeFactory).getParameters(change), ",") == ""
+        StringUtil.join(Scope.currentScope.getSingleton(ChangeFactory).getParameters(change), ",") == "preserveNullValues=true"
     }
 }

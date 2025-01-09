@@ -19,6 +19,8 @@ addAutoIncrement: |
   incrementBy bigInteger 
     Description: Amount to increment by at each call
     Supported: asany,cockroachdb,db2,db2z,edb,h2,hsqldb,informix,ingres,postgresql,sybase
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -38,6 +40,8 @@ addColumn: |
     Description: Column constraint and foreign key information. Setting the "defaultValue" attribute specifies a default value for the column. Setting the "value" attribute sets all rows existing to the specified value without modifying the column default.
     Supported: all
     Required For: all
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -78,6 +82,8 @@ addDefaultValue: |
     Supported: all
   defaultValueSequenceNext sequenceNextValueFunction 
     Description: Sets value for a specified column by using the value of the existing sequence. With every new input, the next value of the sequence will be taken.
+    Supported: all
+  preserveNullValues boolean 
     Supported: all
   schemaName string 
     Description: Name of the database schema
@@ -120,6 +126,8 @@ addForeignKeyConstraint: |
     Supported: asany,cockroachdb,db2,db2z,derby,edb,firebird,h2,hsqldb,informix,ingres,mariadb,mssql,mysql,oracle,postgresql
   onUpdate string 
     Description: ON UPDATE functionality. Possible values: 'CASCADE', 'SET NULL', 'SET DEFAULT', 'RESTRICT', 'NO ACTION'
+    Supported: all
+  preserveNullValues boolean 
     Supported: all
   referencedColumnNames string 
     Description: Name of the column(s) the foreign key points to. Comma-separate if multiple
@@ -178,7 +186,8 @@ addLookupTable: |
   newTableSchemaName string 
     Description: Name of the database schema for the lookup table
     Supported: all
-
+  preserveNullValues boolean 
+    Supported: all
 
 addNotNullConstraint: |
   catalogName string (since 3.0)
@@ -198,6 +207,8 @@ addNotNullConstraint: |
   defaultNullValue string 
     Description: Value to set all currently null values to. If defaultNullValue is not set and null values exist, the change fails
     Supported: all
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -208,7 +219,6 @@ addNotNullConstraint: |
   validate boolean 
     Description: Defines whether to check if the NOT NULL constraint refers to a valid row. This is true if the constraint has 'ENABLE VALIDATE' set, or false if the constraint has 'ENABLE NOVALIDATE' set.
     Supported: all
-
 
 addPrimaryKey: |
   catalogName string (since 3.0)
@@ -233,6 +243,8 @@ addPrimaryKey: |
   forIndexSchemaName string 
     Description: Name of the database schema of the index to associate with the primary key
     Supported: all
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -246,7 +258,6 @@ addPrimaryKey: |
   validate boolean 
     Description: Defines whether to check if the primary key constraint refers to a valid row. This is true if the primary key has 'ENABLE VALIDATE' set, or false if the primary key has 'ENABLE NOVALIDATE' set.
     Supported: all
-
 
 addUniqueConstraint: |
   catalogName string (since 3.0)
@@ -280,6 +291,8 @@ addUniqueConstraint: |
   initiallyDeferred boolean 
     Description: Defines whether the constraint is initially deferred
     Supported: all
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -293,7 +306,6 @@ addUniqueConstraint: |
   validate boolean 
     Description: Defines whether to check if the unique constraint refers to a valid row. This is true if the constraint has 'ENABLE VALIDATE' set, or false if the constraint has 'ENABLE NOVALIDATE' set.
     Supported: all
-
 
 alterSequence: |
   cacheSize bigInteger 
@@ -320,6 +332,8 @@ alterSequence: |
   ordered boolean 
     Description: Whether the sequence is generated in the requested order
     Supported: asany,cockroachdb,db2z,derby,edb,firebird,h2,informix,mariadb,oracle,postgresql
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -346,6 +360,8 @@ createIndex: |
     Description: Name of the index to create
     Supported: all
     Required For: firebird,hsqldb
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -359,7 +375,6 @@ createIndex: |
   unique boolean (since 1.8)
     Description: Whether the index is unique (contains no duplicate values)
     Supported: all
-
 
 createProcedure: |
   catalogName string 
@@ -378,6 +393,8 @@ createProcedure: |
     Description: File containing the procedure text. You must either use this attribute or write inline SQL within the createProcedure definition.
     Supported: all
     Required For: all
+  preserveNullValues boolean 
+    Supported: all
   procedureName string 
     Description: Name of the stored procedure to create. Required if replaceIfExists=true
     Supported: all
@@ -394,7 +411,6 @@ createProcedure: |
   schemaName string 
     Description: Name of the database schema
     Supported: all
-
 
 createSequence: |
   cacheSize bigInteger 
@@ -421,6 +437,8 @@ createSequence: |
   ordered boolean 
     Description: Whether the sequence is generated in the requested order
     Supported: asany,db2,db2z,derby,firebird,h2,informix,mariadb,oracle
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -443,6 +461,8 @@ createTable: |
   ifNotExists boolean 
     Description: If true, creates the table only if it does not already exist. Appends IF NOT EXISTS syntax to SQL query
     Supported: all
+  preserveNullValues boolean 
+    Supported: all
   remarks string 
     Description: A brief descriptive comment to store in the table metadata
     Supported: all
@@ -463,7 +483,6 @@ createTable: |
     Description: Tablespace to create the table in. Corresponds to file group in mssql
     Supported: all
 
-
 createView: |
   catalogName string (since 3.0)
     Description: Name of the database catalog
@@ -476,6 +495,8 @@ createView: |
     Supported: all
   path string (since 3.6)
     Description: Path to the file containing the view definition. Specifying 'path' is an alternative to selectQuery.
+    Supported: all
+  preserveNullValues boolean 
     Supported: all
   relativeToChangelogFile boolean 
     Description: Specifies whether the file path is relative to the changelog file rather than looked up in the search path. Default: false.
@@ -498,12 +519,15 @@ createView: |
     Supported: all
     Required For: all
 
-
 customChange: |
+  preserveNullValues boolean 
+    Supported: all
 
 delete: |
   catalogName string 
     Description: Name of the database catalog
+    Supported: all
+  preserveNullValues boolean 
     Supported: all
   schemaName string 
     Description: Name of the database schema
@@ -516,7 +540,6 @@ delete: |
     Description: SQL WHERE condition string
     Supported: all
 
-
 dropAllForeignKeyConstraints: |
   baseTableCatalogName string (since 3.0)
     Description: Name of the database catalog of the base table
@@ -528,7 +551,8 @@ dropAllForeignKeyConstraints: |
   baseTableSchemaName string 
     Description: Name of the database schema of the base table
     Supported: all
-
+  preserveNullValues boolean 
+    Supported: all
 
 dropColumn: |
   catalogName string (since 3.0)
@@ -540,6 +564,8 @@ dropColumn: |
   columns list of columnConfig 
     Description: Columns to be dropped if dropping multiple columns. If this is populated, the columnName attribute is ignored.
     Supported: all
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -547,7 +573,6 @@ dropColumn: |
     Description: Name of the table containing the column to drop
     Supported: all
     Required For: all
-
 
 dropDefaultValue: |
   catalogName string (since 3.0)
@@ -561,6 +586,8 @@ dropDefaultValue: |
     Description: Name of the column to drop the default value from
     Supported: all
     Required For: all
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -568,7 +595,6 @@ dropDefaultValue: |
     Description: Name of the table containing the column
     Supported: all
     Required For: all
-
 
 dropForeignKeyConstraint: |
   baseTableCatalogName string (since 3.0)
@@ -585,6 +611,8 @@ dropForeignKeyConstraint: |
     Description: Name of the foreign key constraint to drop
     Supported: all
     Required For: all
+  preserveNullValues boolean 
+    Supported: all
 
 dropIndex: |
   catalogName string (since 3.0)
@@ -594,6 +622,8 @@ dropIndex: |
     Description: Name of the index to drop
     Supported: all
     Required For: all
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -601,7 +631,6 @@ dropIndex: |
     Description: Name of the indexed table
     Supported: all
     Required For: asany,mariadb,mssql,mysql,sybase
-
 
 dropNotNullConstraint: |
   catalogName string (since 3.0)
@@ -618,6 +647,8 @@ dropNotNullConstraint: |
   constraintName string 
     Description: Name of the constraint to drop (if database supports names for NOT NULL constraints)
     Supported: all
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -625,7 +656,6 @@ dropNotNullConstraint: |
     Description: Name of the table containing the column to drop the constraint from
     Supported: all
     Required For: all
-
 
 dropPrimaryKey: |
   catalogName string 
@@ -638,6 +668,8 @@ dropPrimaryKey: |
   dropIndex boolean 
     Description: Whether to drop the index associated with the primary key
     Supported: all
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -646,11 +678,12 @@ dropPrimaryKey: |
     Supported: all
     Required For: all
 
-
 dropProcedure: |
   catalogName string 
     Description: Name of the database catalog
     Supported: asany,cockroachdb,db2,db2z,derby,edb,firebird,h2,hsqldb,informix,ingres,mariadb,mysql,oracle,postgresql,sybase
+  preserveNullValues boolean 
+    Supported: all
   procedureName string 
     Description: Name of the stored procedure to drop
     Supported: all
@@ -663,6 +696,8 @@ dropSequence: |
   catalogName string (since 3.0)
     Description: Name of the database catalog
     Supported: all
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -671,13 +706,14 @@ dropSequence: |
     Supported: all
     Required For: all
 
-
 dropTable: |
   cascadeConstraints boolean 
     Description: Whether to add CASCADE CONSTRAINTS to the SQL statement
     Supported: all
   catalogName string (since 3.0)
     Description: Name of the database catalog
+    Supported: all
+  preserveNullValues boolean 
     Supported: all
   schemaName string 
     Description: Name of the database schema
@@ -695,6 +731,8 @@ dropUniqueConstraint: |
     Description: Name of the unique constraint to drop
     Supported: all
     Required For: all
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -713,6 +751,8 @@ dropView: |
   ifExists boolean (since 4.19.0)
     Description: Appends IF EXISTS to the DROP VIEW statement. If ifExists=true, the view is only dropped if it already exists, but the migration continues even if the view does not exist. If ifExists=false and the view does not exist, the database returns an error. Default: false.
     Supported: all
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -722,12 +762,16 @@ dropView: |
     Required For: all
 
 empty: |
+  preserveNullValues boolean 
+    Supported: all
 
 executeCommand: |
   executable string 
     Description: Name of the executable to run
     Supported: all
     Required For: all
+  preserveNullValues boolean 
+    Supported: all
   timeout string 
     Description: Timeout value for the executable to run
     Supported: all
@@ -743,6 +787,8 @@ insert: |
   dbms string (since 3.0)
     Description: Specifies which database type(s) a changeset is to be used for. See valid database type names on Supported Databases docs page. Separate multiple databases with commas. Specify that a changeset is not applicable to a particular database type by prefixing with !. The keywords 'all' and 'none' are also available.
     Supported: all
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -750,7 +796,6 @@ insert: |
     Description: Name of the table to insert data into
     Supported: all
     Required For: all
-
 
 loadData: |
   catalogName string (since 3.0)
@@ -773,6 +818,8 @@ loadData: |
     Description: CSV file to load
     Supported: all
     Required For: all
+  preserveNullValues boolean 
+    Supported: all
   quotchar string 
     Description: The quote character for string fields containing the separator character. Default: "
     Supported: all
@@ -792,7 +839,6 @@ loadData: |
   usePreparedStatements boolean 
     Description: Whether to use prepared statements instead of INSERT statement strings (if the database supports it)
     Supported: all
-
 
 loadUpdateData: |
   catalogName string (since 3.0)
@@ -817,6 +863,8 @@ loadUpdateData: |
     Required For: all
   onlyUpdate boolean (since 3.3)
     Description: If true, records with no matching database record should be ignored
+    Supported: all
+  preserveNullValues boolean 
     Supported: all
   primaryKey string 
     Description: Comma-delimited list of columns for the primary key
@@ -865,6 +913,8 @@ mergeColumns: |
   joinString string 
     Description: String to place between the values from column1 and column2 (may be empty)
     Supported: all
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -872,7 +922,6 @@ mergeColumns: |
     Description: Name of the table containing the columns to join
     Supported: all
     Required For: all
-
 
 modifyDataType: |
   catalogName string (since 3.0)
@@ -886,6 +935,8 @@ modifyDataType: |
     Description: Data type to convert the column to. Only modifies the data type itself and cannot define constraints
     Supported: all
     Required For: all
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -894,10 +945,11 @@ modifyDataType: |
     Supported: all
     Required For: all
 
-
 output: |
   message string 
     Description: Message to send to output
+    Supported: all
+  preserveNullValues boolean 
     Supported: all
   target string 
     Description: Target for message. Possible values: STDOUT, STDERR, FATAL, WARN, INFO, DEBUG. Default: STDERR
@@ -919,6 +971,8 @@ renameColumn: |
     Description: Name of the existing column to rename
     Supported: all
     Required For: all
+  preserveNullValues boolean 
+    Supported: all
   remarks string 
     Description: A brief descriptive comment written to the column metadata
     Supported: all
@@ -929,7 +983,6 @@ renameColumn: |
     Description: Name of the table containing the column to rename
     Supported: all
     Required For: all
-
 
 renameSequence: |
   catalogName string (since 3.0)
@@ -943,6 +996,8 @@ renameSequence: |
     Description: Name of the existing sequence to rename
     Supported: all
     Required For: all
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -959,10 +1014,11 @@ renameTable: |
     Description: Name of the existing table to rename
     Supported: all
     Required For: all
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
-
 
 renameView: |
   catalogName string (since 3.0)
@@ -976,6 +1032,8 @@ renameView: |
     Description: Name of the existing view to rename
     Supported: all
     Required For: all
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: cockroachdb,edb,ingres,mariadb,mssql,mysql,postgresql,sqlite,sybase
@@ -995,6 +1053,8 @@ setColumnRemarks: |
   columnParentType string 
     Description: Indicates the parent object type of the column we are setting remarks against. Valid values are VIEW and TABLE. Default: TABLE.
     Supported: all
+  preserveNullValues boolean 
+    Supported: all
   remarks string 
     Description: A brief descriptive comment written to the column metadata.
     Supported: all
@@ -1006,10 +1066,11 @@ setColumnRemarks: |
     Supported: all
     Required For: all
 
-
 setTableRemarks: |
   catalogName string 
     Description: Name of the database catalog
+    Supported: all
+  preserveNullValues boolean 
     Supported: all
   remarks string 
     Description: A brief descriptive comment stored in the table metadata
@@ -1021,7 +1082,6 @@ setTableRemarks: |
     Description: Name of the table to set remarks on
     Supported: all
     Required For: all
-
 
 sql: |
   comment string 
@@ -1035,6 +1095,8 @@ sql: |
     Supported: all
   ignoreOriginalSplitStatements boolean 
     Supported: all
+  preserveNullValues boolean 
+    Supported: all
   splitStatements boolean 
     Description: Set to false to not have liquibase split statements on ;'s and GO's. Defaults to true if not set
     Supported: all
@@ -1044,7 +1106,6 @@ sql: |
   stripComments boolean 
     Description: Set to true to remove any comments in the SQL before executing, otherwise false. Defaults to false if not set
     Supported: all
-
 
 sqlFile: |
   dbms string (since 3.0)
@@ -1062,6 +1123,8 @@ sqlFile: |
     Description: The file path of the SQL file to load
     Supported: all
     Required For: all
+  preserveNullValues boolean 
+    Supported: all
   relativeToChangelogFile boolean 
     Description: Specifies whether the file path is relative to the changelog file rather than looked up in the search path. Default: false.
     Supported: all
@@ -1076,8 +1139,12 @@ stop: |
   message string 
     Description: Message to send to output when execution stops
     Supported: all
+  preserveNullValues boolean 
+    Supported: all
 
 tagDatabase: |
+  preserveNullValues boolean 
+    Supported: all
   tag string 
     Description: Tag to apply
     Supported: all
@@ -1090,6 +1157,8 @@ update: |
     Description: Data to update
     Supported: all
     Required For: all
+  preserveNullValues boolean 
+    Supported: all
   schemaName string 
     Description: Name of the database schema
     Supported: all
@@ -1100,4 +1169,3 @@ update: |
   where string 
     Description: SQL WHERE condition string
     Supported: all
-

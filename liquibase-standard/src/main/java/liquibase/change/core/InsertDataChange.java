@@ -91,6 +91,10 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         InsertStatement statement = new InsertStatement(getCatalogName(), getSchemaName(), getTableName());
         for (ColumnConfig column : columns) {
             if (prepareColumn(database, column)) continue;
+            if (!isPreserveNullValues() && !column.hasValueObject()) {
+                continue;
+            }
+
             statement.addColumnValue(column.getName(), column.getValueObject());
         }
         return new SqlStatement[]{

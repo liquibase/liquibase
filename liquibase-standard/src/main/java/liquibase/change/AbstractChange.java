@@ -46,6 +46,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     private static final Pattern ALPHABET = Pattern.compile("([A-Z])");
 
     private ChangeSet changeSet;
+    private volatile boolean preserveNullValues = true;
 
     public AbstractChange() {
     }
@@ -55,7 +56,6 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
      */
     @Override
     public void finishInitialization() throws SetupException {
-
     }
 
     /**
@@ -389,7 +389,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
      * {@link liquibase.sqlgenerator.SqlGenerator#supports(liquibase.statement.SqlStatement, liquibase.database.Database)}
      * method on the {@link SqlStatement} objects returned by {@link #generateStatements}.
      * If no or null SqlStatements are returned by generateStatements then this method returns true.
-     * If {@link #generateStatementsVolatile(liquibase.database.Database)} returns true, we cannot call generateStatements and so assume true.
+     * If {@link #generateStatementsVolatile(Database)} returns true, we cannot call generateStatements and so assume true.
      */
     @Override
     public boolean supports(Database database) {
@@ -901,5 +901,13 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), changeSet);
+    }
+
+    public boolean isPreserveNullValues() {
+        return preserveNullValues;
+    }
+
+    public void setPreserveNullValues(boolean preserveNullValues) {
+        this.preserveNullValues = preserveNullValues;
     }
 }

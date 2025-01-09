@@ -9,7 +9,6 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.core.MockDatabase
 import liquibase.exception.SetupException
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.parser.core.ParsedNodeException
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
@@ -17,6 +16,7 @@ import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.View
 import liquibase.test.JUnitResourceAccessor
 import liquibase.util.StreamUtil
+
 import spock.lang.Unroll
 
 class CreateViewChangeTest extends StandardChangeTest {
@@ -124,9 +124,9 @@ class CreateViewChangeTest extends StandardChangeTest {
         viewCheckSumWithPath.toString() == updatedChecksum
 
         where:
-        version | originalChecksum | updatedChecksum
-        ChecksumVersion.V8 | "8:dcb086e83731ee5f3e04af0a7010dd69" | "8:93ebeea10f821f8f9582450fcfcfbe0f"
-        ChecksumVersion.latest() | "9:44c9d30cc310fbecd58e03d557fe85df" | "9:44c9d30cc310fbecd58e03d557fe85df"
+        version                  | originalChecksum                     | updatedChecksum
+        ChecksumVersion.V8       | "8:19e580c57d8e6c8b638c255dd4555fd5" | "8:2ef85f391e6cf6996a5795d730d4af4d"
+        ChecksumVersion.latest() | "9:d2614f3f24d8b212245aba3cb89dfe99" | "9:d2614f3f24d8b212245aba3cb89dfe99"
     }
 
     @Unroll
@@ -150,9 +150,9 @@ class CreateViewChangeTest extends StandardChangeTest {
         viewCheckSumWithEncoding.toString() == updatedChecksum
 
         where:
-        version | originalChecksum | updatedChecksum
-        ChecksumVersion.V8 | "8:dcb086e83731ee5f3e04af0a7010dd69" | "8:fe5f671b0280cca6fd47ba1cb0f6f521"
-        ChecksumVersion.latest() | "9:44c9d30cc310fbecd58e03d557fe85df" | "9:44c9d30cc310fbecd58e03d557fe85df"
+        version                  | originalChecksum                     | updatedChecksum
+        ChecksumVersion.V8       | "8:19e580c57d8e6c8b638c255dd4555fd5" | "8:6d47606e02671a961a31a48f8739cf54"
+        ChecksumVersion.latest() | "9:d2614f3f24d8b212245aba3cb89dfe99" | "9:d2614f3f24d8b212245aba3cb89dfe99"
     }
 
     @Unroll
@@ -174,9 +174,9 @@ class CreateViewChangeTest extends StandardChangeTest {
         viewTextModifiedCheckSum.toString() == updatedChecksum
 
         where:
-        version | originalChecksum | updatedChecksum
-        ChecksumVersion.V8 | "8:dcb086e83731ee5f3e04af0a7010dd69" | "8:39739d2b228cbfc3f8a4f4b44d0d168e"
-        ChecksumVersion.latest() | "9:44c9d30cc310fbecd58e03d557fe85df" | "9:44c9d30cc310fbecd58e03d557fe85df"
+        version                  | originalChecksum                     | updatedChecksum
+        ChecksumVersion.V8       | "8:19e580c57d8e6c8b638c255dd4555fd5" | "8:02b22847badc10d15e9cacb4e4edf775"
+        ChecksumVersion.latest() | "9:d2614f3f24d8b212245aba3cb89dfe99" | "9:d2614f3f24d8b212245aba3cb89dfe99"
     }
 
     @Unroll
@@ -200,9 +200,9 @@ class CreateViewChangeTest extends StandardChangeTest {
         viewTextUpdatedCheckSum.toString() == updatedChecksum
 
         where:
-        version | originalChecksum | updatedChecksum
-        ChecksumVersion.V8 | "8:dcb086e83731ee5f3e04af0a7010dd69" | "8:6ade9a5def82e9f15d2f353e97c41784"
-        ChecksumVersion.latest() | "9:44c9d30cc310fbecd58e03d557fe85df" | "9:43b9ff024ff5b5212a12e4ffc13f4790"
+        version                  | originalChecksum                     | updatedChecksum
+        ChecksumVersion.V8       | "8:19e580c57d8e6c8b638c255dd4555fd5" | "8:83489fed19b2a50e0bae541e4be8abf7"
+        ChecksumVersion.latest() | "9:d2614f3f24d8b212245aba3cb89dfe99" | "9:1fb192f209a2761a741abe655e6e4af7"
     }
 
     @Unroll
@@ -230,9 +230,9 @@ class CreateViewChangeTest extends StandardChangeTest {
         checkSumSecondReplacement.toString() == updatedChecksum
 
         where:
-        version | originalChecksum | updatedChecksum
-        ChecksumVersion.V8 | "8:09bbf3defde77019c8f8dc32f8f84908" | "8:c4a6c3c5a7d2b519d83d27351b7919e7"
-        ChecksumVersion.latest() | "9:e70628fe4f941c2d8822214dbd7cd28f" | "9:ed9a064736c8974be6ac35bb231032ff"
+        version                  | originalChecksum                     | updatedChecksum
+        ChecksumVersion.V8       | "8:50cd0b94ea36da7e33fd0ad5a20cf0f4" | "8:96b0957737a2d4ae418b28b01e4a3537"
+        ChecksumVersion.latest() | "9:61486c8c3c630ee048619555ec12aac0" | "9:cf223f541fd57a336ee1df7f630defc8"
     }
 
     @Unroll
@@ -256,8 +256,8 @@ class CreateViewChangeTest extends StandardChangeTest {
         changeWithRelativeToChangelogFileAttribSetCheckSum.toString() == updatedChecksum
 
         where:
-        version | originalChecksum | updatedChecksum
-        ChecksumVersion.V8 | "8:dcb086e83731ee5f3e04af0a7010dd69" | "8:5effbea4284f4277c1bdd81505787591"
-        ChecksumVersion.latest() | "9:44c9d30cc310fbecd58e03d557fe85df" | "9:44c9d30cc310fbecd58e03d557fe85df"
+        version                  | originalChecksum                     | updatedChecksum
+        ChecksumVersion.V8       | "8:19e580c57d8e6c8b638c255dd4555fd5" | "8:0526f22d0b4d1162af5d2ae2059cc6c4"
+        ChecksumVersion.latest() | "9:d2614f3f24d8b212245aba3cb89dfe99" | "9:d2614f3f24d8b212245aba3cb89dfe99"
     }
 }

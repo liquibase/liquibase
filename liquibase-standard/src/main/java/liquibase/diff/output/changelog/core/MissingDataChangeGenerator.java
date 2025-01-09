@@ -113,6 +113,8 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
 
             while (rs.next()) {
                 InsertDataChange change = new InsertDataChange();
+                change.setPreserveNullValues(outputControl.getPreserveNullValues());
+
                 if (outputControl.getIncludeCatalog()) {
                     change.setCatalogName(table.getSchema().getCatalogName());
                 }
@@ -146,7 +148,13 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                         column.setValue(value.toString());
                     }
 
-                    if (outputControl.getPreserveNullValues() || !column.isNullValue() || column.hasDefaultValue() || column.hasSortOrder() || null != column.getConstraints()) {
+                    if (!outputControl.getPreserveNullValues() && !column.hasValueObject()) {
+                        ColumnConfig other = new ColumnConfig().setName(column.getName());
+                        if (other.equals(column)) {
+                            continue;
+                        }
+                    }
+                    if (column.isSerializable(outputControl.getPreserveNullValues())) {
                         change.addColumn(column);
                     }
                 }
