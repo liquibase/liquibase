@@ -106,16 +106,16 @@ jobs:
       GIT_PASSWORD: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
     steps:
 
-      # - uses: actions/checkout@v4
-      #   name: Checkout liquibase
+      - uses: actions/checkout@v4
+        name: Checkout liquibase
 
-      # - uses: actions/checkout@v4
-      #   name: Checkout liquibase-pro
-      #   with:
-      #     repository: liquibase/liquibase-pro
-      #     ref: "${{ inputs.branch }}"
-      #     path: liquibase-pro
-      #     token: ${{ secrets.BOT_TOKEN }}
+      - uses: actions/checkout@v4
+        name: Checkout liquibase-pro
+        with:
+          repository: liquibase/liquibase-pro
+          ref: "${{ inputs.branch }}"
+          path: liquibase-pro
+          token: ${{ secrets.BOT_TOKEN }}
 
       # - name: Checkout Dependencies
       #   run: |
