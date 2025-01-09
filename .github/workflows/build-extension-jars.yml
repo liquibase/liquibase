@@ -47,6 +47,7 @@ jobs:
     outputs:
       dependencies_matrix: ${{ steps.setup_dependencies_matrix.outputs.matrix_output }}
       extensions_matrix: ${{ steps.setup_extensions_matrix.outputs.matrix_output }}
+      extensions_list: ${{ steps.parse_extensions_matrix.outputs.matrix_output }}
     steps:
       - id: setup_dependencies_matrix
         uses: cschadewitz/dynamic-matrix-input@v1.0.0
@@ -239,7 +240,7 @@ jobs:
           scripts_branch=${{ inputs.branch }}
           git config --global credential.helper store
           echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
-          IFS=',' read -ra EXT_ARRAY <<< "${{ needs.setup_matrix.outputs.extensions_matrix }}"
+          IFS=',' read -ra EXT_ARRAY <<< "${{ needs.setup_matrix.outputs.extensions_list }}"
           for ext in "${EXT_ARRAY[@]}"; do
             ext=$(echo $ext | xargs)  # Remove leading and trailing whitespaces
             echo "Checking out and building $ext"
