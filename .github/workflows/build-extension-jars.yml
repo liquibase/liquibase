@@ -4,42 +4,42 @@ on:
   workflow_call:
     inputs:
       liquibase-version:
-        description: 'liquibase version'
+        description: "liquibase version"
         required: true
         type: string
       dependencies:
-        description: 'Comma separated list of needed dependencies to release the extensions list'
+        description: "Comma separated list of needed dependencies to release the extensions list"
         required: false
         type: string
       extensions:
-        description: 'Comma separated list of extensions to release to GPM'
+        description: "Comma separated list of extensions to release to GPM"
         required: true
         type: string
       branch:
-        description: 'branch to check out'
+        description: "branch to check out"
         required: true
         type: string
   workflow_dispatch:
     inputs:
       liquibase-version:
-        description: 'liquibase version'
+        description: "liquibase version"
         required: true
         type: string
       dependencies:
-        description: 'Comma separated list of needed dependencies to release the extensions list'
+        description: "Comma separated list of needed dependencies to release the extensions list"
         required: false
         type: string
       extensions:
-        description: 'Comma separated list of extensions to release to GPM'
+        description: "Comma separated list of extensions to release to GPM"
         required: true
         type: string
       branch:
-        description: 'branch to check out'
+        description: "branch to check out"
         required: true
         type: string
 
 env:
-  MAVEN_VERSION: '3.9.2'
+  MAVEN_VERSION: "3.9.2"
 
 jobs:
   setup_matrix:
@@ -47,23 +47,15 @@ jobs:
     outputs:
       dependencies_matrix: ${{ steps.setup_dependencies_matrix.outputs.matrix_output }}
       extensions_matrix: ${{ steps.setup_extensions_matrix.outputs.matrix_output }}
-      extensions_list: ${{ steps.parse_extensions_matrix.outputs.matrix_output }}
     steps:
       - id: setup_dependencies_matrix
         uses: cschadewitz/dynamic-matrix-input@v1.0.0
         with:
           matrix_input: ${{ inputs.dependencies }}
-      - id: parse_extensions_matrix
-        shell: bash
-        run: |
-          printf "%s\n" ${{ inputs.extensions }} > extensions.json
-          EXTENSIONS_LIST=$(cat extensions.json | jq -r '.[].name' | tr '\n' ',' | sed 's/,$//')
-          echo "matrix_output=${EXTENSIONS_LIST}" >> $GITHUB_OUTPUT
-
       - id: setup_extensions_matrix
         uses: cschadewitz/dynamic-matrix-input@v1.0.0
         with:
-          matrix_input: ${{ steps.parse_extensions_matrix.outputs.matrix_output }}
+          matrix_input: ${{ inputs.extensions }}
 
   delete-dependency-packages:
     needs: setup_matrix
@@ -76,10 +68,10 @@ jobs:
       - uses: actions/delete-package-versions@v5
         with:
           package-name: org.liquibase.ext.${{ matrix.dependencies }}
-          package-type: 'maven'
+          package-type: "maven"
           token: ${{ secrets.BOT_TOKEN }}
-          ignore-versions: '^((?!${{ inputs.liquibase-version }}$).)*$'
-        
+          ignore-versions: "^((?!${{ inputs.liquibase-version }}$).)*$"
+
   delete-extension-packages:
     needs: setup_matrix
     runs-on: ubuntu-22.04
@@ -91,23 +83,27 @@ jobs:
       - uses: actions/delete-package-versions@v5
         with:
           package-name: org.liquibase.ext.${{ matrix.extensions }}
-          package-type: 'maven'
+          package-type: "maven"
           token: ${{ secrets.BOT_TOKEN }}
-          ignore-versions: '^((?!${{ inputs.liquibase-version }}$).)*$'
+          ignore-versions: "^((?!${{ inputs.liquibase-version }}$).)*$"
+
+  build-liquibase-checks:
+    needs: [ delete-extension-packages ]
+    uses: liquibase/liquibase-checks/.github/workflows/publish-main-snapshots.yml@DAT-18331
+    with:
+      version: ${{ inputs.liquibase-version }}
+    secrets: inherit
 
   build-and-deploy-extensions:
-    needs: [setup_matrix, delete-dependency-packages, delete-extension-packages]
+    needs: [delete-dependency-packages, delete-extension-packages]
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
-      matrix:
-        os: [ubuntu-latest,windows-latest,macos-latest]
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GIT_USERNAME: "liquibot"
       GIT_PASSWORD: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
     steps:
-
       - uses: actions/checkout@v4
         name: Checkout liquibase
 
@@ -119,27 +115,27 @@ jobs:
           path: liquibase-pro
           token: ${{ secrets.BOT_TOKEN }}
 
-      # - name: Checkout Dependencies
-      #   run: |
-      #       git config --global credential.helper store
-      #       echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
-      #       IFS=',' read -ra DEP_ARRAY <<< "${{ inputs.dependencies }}"
-      #       for dep in "${DEP_ARRAY[@]}"; do
-      #           dep=$(echo $dep | xargs)  # Remove leading and trailing whitespaces
-      #           echo "Checking out $dep"
-      #           git clone https://github.com/liquibase/$dep.git $dep
-      #       done
+      - name: Checkout Dependencies
+        run: |
+          git config --global credential.helper store
+          echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
+          IFS=',' read -ra DEP_ARRAY <<< "${{ inputs.dependencies }}"
+          for dep in "${DEP_ARRAY[@]}"; do
+              dep=$(echo $dep | xargs)  # Remove leading and trailing whitespaces
+              echo "Checking out $dep"
+              git clone https://github.com/liquibase/$dep.git $dep
+          done
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: 21
-          distribution: 'temurin'
-          cache: 'maven'
+          distribution: "temurin"
+          cache: "maven"
           gpg-private-key: ${{ secrets.GPG_SECRET }}
           gpg-passphrase: GPG_PASSPHRASE
         env:
-           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
 
       - name: Set up Maven
         uses: stCarolas/setup-maven@v5
@@ -197,41 +193,41 @@ jobs:
           mvn clean install -DskipTests -P '!run-proguard'
           cd ..
 
-      # - name: Re-version and build Dependencies
-      #   env:
-      #      GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
-      #   if: ${{ inputs.dependencies != '' }}
-      #   continue-on-error: true
-      #   run: |
-      #     scripts_branch=${{ inputs.branch }}
-      #     IFS=',' read -ra DEP_ARRAY <<< "${{ inputs.dependencies }}"
-      #     for dep in "${DEP_ARRAY[@]}"; do
-      #       dep=$(echo $dep | xargs)  # Remove leading and trailing whitespaces
-      #       echo "Re-versioning $dep"
-      #       cd $dep
-      #       sed -i "s/<liquibase.version>.*<\/liquibase.version>/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/" pom.xml
-      #       mvn versions:set -DnewVersion=0-SNAPSHOT
-      #       mvn clean install -DskipTests
-      #       mkdir -p $PWD/.github/util/
-      #       curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/re-version.sh
-      #       curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/sign-artifacts.sh
-      #       curl -o $PWD/.github/util/ManifestReversion.java https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/ManifestReversion.java
-      #       chmod +x $PWD/.github/util/re-version.sh
-      #       chmod +x $PWD/.github/util/sign-artifacts.sh
-      #       chmod +x $PWD/.github/util/ManifestReversion.java
-      #       $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ inputs.branch }}" ${dep}
-      #       $PWD/.github/util/sign-artifacts.sh ./target "${{ inputs.liquibase-version }}" "${{ inputs.branch }}"
-      #       mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
-      #       sed -i -e "s/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/<liquibase.version>${{ inputs.liquibase-version }}<\/liquibase.version>/g" pom.xml
-      #       # mvn deploy:deploy-file \
-      #       # -Dfile=./re-version/out/${dep}-${{ inputs.liquibase-version }}.jar \
-      #       # -Dsources=./re-version/out/${dep}-${{ inputs.liquibase-version }}-sources.jar \
-      #       # -Djavadoc=./re-version/out/${dep}-${{ inputs.liquibase-version }}-javadoc.jar \
-      #       # -DrepositoryId=liquibase \
-      #       # -Durl=https://maven.pkg.github.com/liquibase/$dep \
-      #       # -DpomFile=pom.xml
-      #       cd ..
-      #     done
+      - name: Re-version and build Dependencies
+        env:
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+        if: ${{ inputs.dependencies != '' }}
+        continue-on-error: true
+        run: |
+          scripts_branch=${{ inputs.branch }}
+          IFS=',' read -ra DEP_ARRAY <<< "${{ inputs.dependencies }}"
+          for dep in "${DEP_ARRAY[@]}"; do
+            dep=$(echo $dep | xargs)  # Remove leading and trailing whitespaces
+            echo "Re-versioning $dep"
+            cd $dep
+            sed -i "s/<liquibase.version>.*<\/liquibase.version>/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/" pom.xml
+            mvn versions:set -DnewVersion=0-SNAPSHOT
+            mvn clean install -DskipTests
+            mkdir -p $PWD/.github/util/
+            curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/re-version.sh
+            curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/sign-artifacts.sh
+            curl -o $PWD/.github/util/ManifestReversion.java https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/ManifestReversion.java
+            chmod +x $PWD/.github/util/re-version.sh
+            chmod +x $PWD/.github/util/sign-artifacts.sh
+            chmod +x $PWD/.github/util/ManifestReversion.java
+            $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ inputs.branch }}" ${dep}
+            $PWD/.github/util/sign-artifacts.sh ./target "${{ inputs.liquibase-version }}" "${{ inputs.branch }}"
+            mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
+            sed -i -e "s/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/<liquibase.version>${{ inputs.liquibase-version }}<\/liquibase.version>/g" pom.xml
+            # mvn deploy:deploy-file \
+            # -Dfile=./re-version/out/${dep}-${{ inputs.liquibase-version }}.jar \
+            # -Dsources=./re-version/out/${dep}-${{ inputs.liquibase-version }}-sources.jar \
+            # -Djavadoc=./re-version/out/${dep}-${{ inputs.liquibase-version }}-javadoc.jar \
+            # -DrepositoryId=liquibase \
+            # -Durl=https://maven.pkg.github.com/liquibase/$dep \
+            # -DpomFile=pom.xml
+            cd ..
+          done
 
       - name: Checkout and build Extensions
         env:
@@ -241,28 +237,14 @@ jobs:
           scripts_branch=${{ inputs.branch }}
           git config --global credential.helper store
           echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
-          IFS=',' read -ra EXT_ARRAY <<< "${{ needs.setup_matrix.outputs.extensions_list }}"
+          IFS=',' read -ra EXT_ARRAY <<< "${{ inputs.extensions }}"
           for ext in "${EXT_ARRAY[@]}"; do
             ext=$(echo $ext | xargs)  # Remove leading and trailing whitespaces
             echo "Checking out and building $ext"
-
             git clone https://github.com/liquibase/$ext.git $ext
             cd $ext
             sed -i "s/<liquibase.version>.*<\/liquibase.version>/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/" pom.xml
             mvn versions:set -DnewVersion=0-SNAPSHOT
-
-            artifact_path="."
-            printf "%s\n" ${{ inputs.extensions }} > extensions.json
-            cat extensions.json
-            EXT_ARTIFACT_PATH=$(cat extensions.json | jq -r --arg NAME "$ext" '.[] | select(.name==$NAME) | .artifact_path')
-            if [ -n "$EXT_ARTIFACT_PATH" ] && [ "$EXT_ARTIFACT_PATH" != "null" ]; then
-              artifact_path="$EXT_ARTIFACT_PATH"
-              cd $artifact_path
-              sed -i "s/<liquibase.version>.*<\/liquibase.version>/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/" pom.xml
-              mvn versions:set -DnewVersion=0-SNAPSHOT
-              cd ..
-            fi
-            echo "Using artifact_path=$artifact_path"
 
             for dep in "${DEP_ARRAY[@]}"; do
               dep=$(echo $dep | xargs)
@@ -278,8 +260,8 @@ jobs:
             chmod +x $PWD/.github/util/re-version.sh
             chmod +x $PWD/.github/util/sign-artifacts.sh
             chmod +x $PWD/.github/util/ManifestReversion.java
-            $PWD/.github/util/re-version.sh $artifact_path/target "${{ inputs.liquibase-version  }}" "${{ inputs.branch }}" ${ext}
-            $PWD/.github/util/sign-artifacts.sh $artifact_path/target "${{ inputs.liquibase-version }}" "${{ inputs.branch }}"
+            $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ inputs.branch }}" ${ext}
+            $PWD/.github/util/sign-artifacts.sh ./target "${{ inputs.liquibase-version }}" "${{ inputs.branch }}"
             mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
             sed -i -e "s/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/<liquibase.version>${{ inputs.liquibase-version }}<\/liquibase.version>/g" pom.xml
             # mvn deploy:deploy-file \
@@ -291,63 +273,3 @@ jobs:
             # -DpomFile=pom.xml
             cd ..
           done
-
-      - name: Save Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: liquibase-checks-${{ matrix.os }}-${{ inputs.liquibase-version  }}-artifacts
-          path: |
-            ./liquibase-checks/re-version/out/liquibase-checks-*.jar
-
-  combineJars:
-    needs: [ build-and-deploy-extensions ]
-    name: Combine Jars
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        extension: ${{ fromJson(inputs.extensions) }}
-    steps:
-
-      - name: Download Ubuntu Artifacts
-        if: ${{ matrix.extension.combined_jars == 'true' }}
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ matrix.extension.name }}-ubuntu-latest-${{ inputs.liquibase-version }}-artifacts
-          path: /tmp/ubuntu
-
-      - name: Download macOS Artifacts
-        if: ${{ matrix.extension.combined_jars == 'true' }}
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ matrix.extension.name }}-macos-latest-${{ inputs.liquibase-version }}-artifacts
-          path: /tmp/macos
-
-      - name: Download Windows Artifacts
-        if: ${{ matrix.extension.combined_jars == 'true' }}
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ matrix.extension.name }}-windows-latest-${{ inputs.liquibase-version }}-artifacts
-          path: /tmp/windows
-
-      - name: Create multiplatform jar
-        if: ${{ matrix.extension.combined_jars == 'true' }}
-        run: |
-          rm -rf /tmp/combined/ubuntu /tmp/combined/windows /tmp/combined/macos
-          mkdir -p /tmp/combined/ubuntu /tmp/combined/windows /tmp/combined/macos
-          unzip -d /tmp/combined/ubuntu /tmp/ubuntu/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}.jar
-          unzip -d /tmp/combined/windows /tmp/windows/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}.jar
-          unzip -d /tmp/combined/macos /tmp/macos/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}.jar
-          rm -r -f /tmp/combined/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}
-          mkdir /tmp/combined/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}
-          cp -a /tmp/combined/ubuntu/* /tmp/combined/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}/
-          cp -a /tmp/combined/windows/* /tmp/combined/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}/
-          cp -a /tmp/combined/macos/* /tmp/combined/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}/
-          rm /tmp/combined/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}/org.graalvm.python.vfs/fileslist.txt
-          cat /tmp/combined/ubuntu/org.graalvm.python.vfs/fileslist.txt /tmp/combined/windows/org.graalvm.python.vfs/fileslist.txt /tmp/combined/macos/org.graalvm.python.vfs/fileslist.txt > /tmp/combined/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}/org.graalvm.python.vfs/fileslist.txt
-          rm -f /tmp/combined/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}.jar
-          cd /tmp/combined/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}/
-          zip -r ../${{ matrix.extension.name }}-${{ inputs.liquibase-version }}.jar *
-          cd ..
-          cp /tmp/ubuntu/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}-sources.jar /tmp/combined/
-          cp /tmp/ubuntu/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}-javadoc.jar /tmp/combined/
-          cp /tmp/ubuntu/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}.pom /tmp/combined/

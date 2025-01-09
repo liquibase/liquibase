@@ -56,11 +56,8 @@ on:
         value: ${{ jobs.build-installers.outputs.dry_run_tar_gz_url }}
 
 env:
-  DEPENDENCIES: "liquibase-bigquery"
-  EXTENSIONS: >-
-    '[{"name":"liquibase-checks","combined_jars":"true","artifact_path":"liquibase-checks"}]'
-  # EXTENSIONS: >-
-  #   '[{"name":"liquibase-commercial-bigquery","combined_jars":"false"},{"name":"liquibase-checks","combined_jars":"true"}]'
+  DEPENDENCIES: "liquibase-bigquery" # Comma separated list of dependencies to release the extensions list
+  EXTENSIONS: "liquibase-commercial-bigquery,liquibase-checks" # Comma separated list of extensions to release to GPM
 
 jobs:
   setup:
