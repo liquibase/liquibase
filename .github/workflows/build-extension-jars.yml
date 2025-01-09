@@ -256,6 +256,14 @@ jobs:
 
             mvn clean install -DskipTests
 
+            artifact_path="."
+            # 'ext' here is the extension name we're currently building
+            EXT_ARTIFACT_PATH=$(echo "${{ inputs.extensions }}" | jq -r --arg NAME "$ext" '.[] | select(.name==$NAME) | .artifact_path')
+            if [ -n "$EXT_ARTIFACT_PATH" ] && [ "$EXT_ARTIFACT_PATH" != "null" ]; then
+              artifact_path="$EXT_ARTIFACT_PATH"
+            fi
+            echo "Using artifact_path=$artifact_path"
+
             mkdir -p $PWD/.github/util/
             curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/re-version.sh
             curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/sign-artifacts.sh
@@ -263,8 +271,8 @@ jobs:
             chmod +x $PWD/.github/util/re-version.sh
             chmod +x $PWD/.github/util/sign-artifacts.sh
             chmod +x $PWD/.github/util/ManifestReversion.java
-            $PWD/.github/util/re-version.sh ./target "${{ inputs.liquibase-version  }}" "${{ inputs.branch }}" ${ext}
-            $PWD/.github/util/sign-artifacts.sh ./target "${{ inputs.liquibase-version }}" "${{ inputs.branch }}"
+            $PWD/.github/util/re-version.sh $artifact_path/target "${{ inputs.liquibase-version  }}" "${{ inputs.branch }}" ${ext}
+            $PWD/.github/util/sign-artifacts.sh $artifact_path/target "${{ inputs.liquibase-version }}" "${{ inputs.branch }}"
             mvn versions:set -DnewVersion=${{ inputs.liquibase-version }}
             sed -i -e "s/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/<liquibase.version>${{ inputs.liquibase-version }}<\/liquibase.version>/g" pom.xml
             # mvn deploy:deploy-file \
@@ -283,3 +291,56 @@ jobs:
           name: liquibase-checks-${{ matrix.os }}-${{ inputs.liquibase-version  }}-artifacts
           path: |
             ./re-version/out/liquibase-checks-*.jar
+
+  combineJars:
+    needs: [ build-and-deploy-extensions ]
+    name: Combine Jars
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        extension: ${{ fromJson(inputs.extensions) }}
+    steps:
+
+      - name: Download Ubuntu Artifacts
+        if: ${{ matrix.extension.combined_jars == 'true' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.extension.name }}-ubuntu-latest-${{ inputs.liquibase-version }}-artifacts
+          path: /tmp/ubuntu
+
+      - name: Download macOS Artifacts
+        if: ${{ matrix.extension.combined_jars == 'true' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.extension.name }}-macos-latest-${{ inputs.liquibase-version }}-artifacts
+          path: /tmp/macos
+
+      - name: Download Windows Artifacts
+        if: ${{ matrix.extension.combined_jars == 'true' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.extension.name }}-windows-latest-${{ inputs.liquibase-version }}-artifacts
+          path: /tmp/windows
+
+      - name: Create multiplatform jar
+        if: ${{ matrix.extension.combined_jars == 'true' }}
+        run: |
+          rm -rf /tmp/combined/ubuntu /tmp/combined/windows /tmp/combined/macos
+          mkdir -p /tmp/combined/ubuntu /tmp/combined/windows /tmp/combined/macos
+          unzip -d /tmp/combined/ubuntu /tmp/ubuntu/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}.jar
+          unzip -d /tmp/combined/windows /tmp/windows/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}.jar
+          unzip -d /tmp/combined/macos /tmp/macos/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}.jar
+          rm -r -f /tmp/combined/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}
+          mkdir /tmp/combined/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}
+          cp -a /tmp/combined/ubuntu/* /tmp/combined/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}/
+          cp -a /tmp/combined/windows/* /tmp/combined/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}/
+          cp -a /tmp/combined/macos/* /tmp/combined/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}/
+          rm /tmp/combined/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}/org.graalvm.python.vfs/fileslist.txt
+          cat /tmp/combined/ubuntu/org.graalvm.python.vfs/fileslist.txt /tmp/combined/windows/org.graalvm.python.vfs/fileslist.txt /tmp/combined/macos/org.graalvm.python.vfs/fileslist.txt > /tmp/combined/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}/org.graalvm.python.vfs/fileslist.txt
+          rm -f /tmp/combined/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}.jar
+          cd /tmp/combined/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}/
+          zip -r ../${{ matrix.extension.name }}-${{ inputs.liquibase-version }}.jar *
+          cd ..
+          cp /tmp/ubuntu/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}-sources.jar /tmp/combined/
+          cp /tmp/ubuntu/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}-javadoc.jar /tmp/combined/
+          cp /tmp/ubuntu/${{ matrix.extension.name }}-${{ inputs.liquibase-version }}.pom /tmp/combined/

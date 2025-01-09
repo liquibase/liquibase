@@ -58,7 +58,7 @@ on:
 env:
   DEPENDENCIES: "liquibase-bigquery"
   EXTENSIONS: >-
-    '[{"name":"liquibase-checks","combined_jars":"true"}]'
+    '[{"name":"liquibase-checks","combined_jars":"true","artifact_path":"liquibase-checks"}]'
   # EXTENSIONS: >-
   #   '[{"name":"liquibase-commercial-bigquery","combined_jars":"false"},{"name":"liquibase-checks","combined_jars":"true"}]'
 
