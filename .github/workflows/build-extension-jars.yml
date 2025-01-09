@@ -89,8 +89,9 @@ jobs:
 
   build-liquibase-checks:
     needs: [ delete-extension-packages ]
-    uses: liquibase/liquibase-checks/.github/workflows/publish-main-snapshots.yml@DAT-18331
+    uses: liquibase/build-logic/.github/workflows/publish-main-snapshots.yml@DAT-18331
     with:
+      repository: liquibase/liquibase-checks
       version: ${{ inputs.liquibase-version }}
     secrets: inherit
 
