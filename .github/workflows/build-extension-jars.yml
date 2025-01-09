@@ -246,6 +246,11 @@ jobs:
             ext=$(echo $ext | xargs)  # Remove leading and trailing whitespaces
             echo "Checking out and building $ext"
 
+            git clone https://github.com/liquibase/$ext.git $ext
+            cd $ext
+            sed -i "s/<liquibase.version>.*<\/liquibase.version>/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/" pom.xml
+            mvn versions:set -DnewVersion=0-SNAPSHOT
+
             artifact_path="."
             printf "%s\n" ${{ inputs.extensions }} > extensions.json
             cat extensions.json
@@ -258,11 +263,6 @@ jobs:
               cd ..
             fi
             echo "Using artifact_path=$artifact_path"
-
-            git clone https://github.com/liquibase/$ext.git $ext
-            cd $ext
-            sed -i "s/<liquibase.version>.*<\/liquibase.version>/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/" pom.xml
-            mvn versions:set -DnewVersion=0-SNAPSHOT
 
             for dep in "${DEP_ARRAY[@]}"; do
               dep=$(echo $dep | xargs)
