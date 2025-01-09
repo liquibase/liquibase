@@ -252,6 +252,10 @@ jobs:
             EXT_ARTIFACT_PATH=$(cat extensions.json | jq -r --arg NAME "$ext" '.[] | select(.name==$NAME) | .artifact_path')
             if [ -n "$EXT_ARTIFACT_PATH" ] && [ "$EXT_ARTIFACT_PATH" != "null" ]; then
               artifact_path="$EXT_ARTIFACT_PATH"
+              cd $artifact_path
+              sed -i "s/<liquibase.version>.*<\/liquibase.version>/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/" pom.xml
+              mvn versions:set -DnewVersion=0-SNAPSHOT
+              cd ..
             fi
             echo "Using artifact_path=$artifact_path"
 
