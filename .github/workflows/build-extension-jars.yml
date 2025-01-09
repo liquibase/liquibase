@@ -297,7 +297,7 @@ jobs:
         with:
           name: liquibase-checks-${{ matrix.os }}-${{ inputs.liquibase-version  }}-artifacts
           path: |
-            ./re-version/out/liquibase-checks-*.jar
+            ./liquibase-checks/re-version/out/liquibase-checks-*.jar
 
   combineJars:
     needs: [ build-and-deploy-extensions ]
