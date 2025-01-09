@@ -56,7 +56,10 @@ public class CustomChangeWrapper extends AbstractChange {
      * Return the CustomChange instance created by the call to {@link #setClass(String)}.
      */
     @DatabaseChangeProperty(isChangeProperty = false)
-    public CustomChange getCustomChange() {
+    public CustomChange getCustomChange() throws CustomChangeException {
+        if (this.customChange == null) {
+            this.customChange = loadCustomChange(className);
+        }
         return customChange;
     }
 
@@ -68,26 +71,28 @@ public class CustomChangeWrapper extends AbstractChange {
             return this;
         }
         this.className = className;
+        return this;
+    }
+
+    private CustomChange loadCustomChange(String className) throws CustomChangeException {
         try {
             Boolean osgiPlatform = Scope.getCurrentScope().get(Scope.Attr.osgiPlatform, Boolean.class);
             if (Boolean.TRUE.equals(osgiPlatform)) {
-                customChange = (CustomChange) OsgiUtil.loadClass(className).getConstructor().newInstance();
+                return (CustomChange) OsgiUtil.loadClass(className).getConstructor().newInstance();
             } else {
                 try {
-                    customChange = (CustomChange) Class.forName(className, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
+                    return (CustomChange) Class.forName(className, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
                 } catch (ClassCastException e) { //fails in Ant in particular
                     try {
-                        customChange = (CustomChange) Thread.currentThread().getContextClassLoader().loadClass(className).getConstructor().newInstance();
+                        return (CustomChange) Thread.currentThread().getContextClassLoader().loadClass(className).getConstructor().newInstance();
                     } catch (ClassNotFoundException e1) {
-                        customChange = (CustomChange) Class.forName(className).getConstructor().newInstance();
+                        return (CustomChange) Class.forName(className).getConstructor().newInstance();
                     }
                 }
             }
         } catch (Exception e) {
             throw new CustomChangeException(e);
         }
-
-        return this;
     }
 
     /**
@@ -128,17 +133,28 @@ public class CustomChangeWrapper extends AbstractChange {
     @Override
     public ValidationErrors validate(Database database) {
         if (!configured) {
+            if (this.customChange == null) {
+                try {
+                    this.customChange = loadCustomChange(className);
+                } catch (CustomChangeException e) {
+                    // ignore
+                }
+            }
+        }
+
+        if (this.customChange != null) {
             try {
                 configureCustomChange();
             } catch (CustomChangeException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
-        }
-
-        try {
-            return customChange.validate(database);
-        } catch (Exception e) {
-            return new ValidationErrors().addError("Exception thrown calling " + getClassName() + ".validate():" + e.getMessage());
+            try {
+                return customChange.validate(database);
+            } catch (Exception e) {
+                return new ValidationErrors().addError("Exception thrown calling " + getClassName() + ".validate():" + e.getMessage());
+            }
+        } else {
+            return new ValidationErrors();
         }
     }
 
@@ -216,15 +232,19 @@ public class CustomChangeWrapper extends AbstractChange {
 
     @Override
     public CheckSum generateCheckSum() {
-        try {
-            configureCustomChange();
-            if (customChange instanceof CustomChangeChecksum) {
-                return ((CustomChangeChecksum) customChange).generateChecksum();
-            } else {
-                return super.generateCheckSum();
+        if (customChange != null) {
+            try {
+                configureCustomChange();
+                if (customChange instanceof CustomChangeChecksum) {
+                    return ((CustomChangeChecksum) customChange).generateChecksum();
+                } else {
+                    return super.generateCheckSum();
+                }
+            } catch (CustomChangeException e) {
+                throw new UnexpectedLiquibaseException(e);
             }
-        } catch (CustomChangeException e) {
-            throw new UnexpectedLiquibaseException(e);
+        } else {
+            return super.generateCheckSum();
         }
     }
 
@@ -255,6 +275,10 @@ public class CustomChangeWrapper extends AbstractChange {
     private void configureCustomChange() throws CustomChangeException {
         if (configured) {
             return;
+        }
+
+        if (this.customChange == null) {
+            this.customChange = loadCustomChange(className);
         }
 
         try {
@@ -339,21 +363,19 @@ public class CustomChangeWrapper extends AbstractChange {
             this.setParam(paramName, (String) value);
         }
 
-        CustomChange localCustomChange;
+        CustomChange localCustomChange = null;
         try {
-            Boolean osgiPlatform = Scope.getCurrentScope().get(Scope.Attr.osgiPlatform, Boolean.class);
-            if (Boolean.TRUE.equals(osgiPlatform)) {
-                localCustomChange = (CustomChange) OsgiUtil.loadClass(className).getConstructor().newInstance();
-            } else {
-                localCustomChange = (CustomChange) Class.forName(className, false, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
-            }
+            localCustomChange = loadCustomChange(className);
         } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
+//            throw new UnexpectedLiquibaseException(e);
         }
-        for (ParsedNode node : parsedNode.getChildren()) {
-            Object value = node.getValue();
-            if ((value != null) && ObjectUtil.hasProperty(localCustomChange, node.getName())) {
-                this.setParam(node.getName(), value.toString());
+
+        if (localCustomChange != null) {
+            for (ParsedNode node : parsedNode.getChildren()) {
+                Object value = node.getValue();
+                if ((value != null) && ObjectUtil.hasProperty(localCustomChange, node.getName())) {
+                    this.setParam(node.getName(), value.toString());
+                }
             }
         }
     }

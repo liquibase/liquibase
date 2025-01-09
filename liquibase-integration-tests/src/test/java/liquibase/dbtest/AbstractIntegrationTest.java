@@ -1370,6 +1370,18 @@ public abstract class AbstractIntegrationTest {
         }
     }
 
+    @Test
+    public void makeSureNoErrorIsReturnedWhenNonexistentCustomChangeIsRunWithFailOnErrorFalse() throws DatabaseException, CommandExecutionException {
+        clearDatabase();
+        runUpdate("changelogs/common/missingcustomchange/missing_custom_change_fail_on_error_false.changelog.xml");
+    }
+
+    @Test
+    public void makeSureNoErrorIsReturnedWhenNonexistentCustomChangeIsSkippedByPrecondition() throws DatabaseException, CommandExecutionException {
+        clearDatabase();
+        runUpdate("changelogs/common/missingcustomchange/missing_custom_change_precondition_failed.changelog.xml");
+    }
+
     private ProcessBuilder prepareExternalLiquibaseProcess() {
         String javaHome = System.getProperty("java.home");
         String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
