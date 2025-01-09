@@ -187,14 +187,14 @@ jobs:
               }
             ]
 
-      # - name: Install liquibase 0-SNAPSHOT
-      #   run: mvn clean install -DskipTests
+      - name: Install liquibase 0-SNAPSHOT
+        run: mvn clean install -DskipTests
 
-      # - name: Install liquibase-commercial 0-SNAPSHOT
-      #   run: |
-      #     cd liquibase-pro
-      #     mvn clean install -DskipTests -P '!run-proguard'
-      #     cd ..
+      - name: Install liquibase-commercial 0-SNAPSHOT
+        run: |
+          cd liquibase-pro
+          mvn clean install -DskipTests -P '!run-proguard'
+          cd ..
 
       # - name: Re-version and build Dependencies
       #   env:
@@ -282,4 +282,4 @@ jobs:
         with:
           name: liquibase-checks-${{ matrix.os }}-${{ inputs.liquibase-version  }}-artifacts
           path: |
-            ./re-version/out/liquibase-checks-${{ inputs.liquibase-version }}.jar
+            ./re-version/out/liquibase-checks-*.jar
