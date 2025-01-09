@@ -246,7 +246,7 @@ jobs:
             echo "Checking out and building $ext"
 
             artifact_path="."
-            printf "%s\n" "${{ inputs.extensions }}" > extensions.json
+            printf "%s\n" ${{ inputs.extensions }} > extensions.json
             cat extensions.json
             EXT_ARTIFACT_PATH=$(cat extensions.json | jq -r --arg NAME "$ext" '.[] | select(.name==$NAME) | .artifact_path')
             if [ -n "$EXT_ARTIFACT_PATH" ] && [ "$EXT_ARTIFACT_PATH" != "null" ]; then
