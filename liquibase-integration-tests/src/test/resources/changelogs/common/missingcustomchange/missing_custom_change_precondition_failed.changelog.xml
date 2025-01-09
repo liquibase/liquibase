@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <property name="RUN_CUSTOM_CHANGE" value="false"/>
+    <changeSet id="missing_custom_change_precondition_failed" author="relliot">
+        <preConditions onFail="MARK_RAN">
+            <changeLogPropertyDefined property="RUN_CUSTOM_CHANGE" value="true"/>
+        </preConditions>
+
+        <customChange class="foo.ClassThatDoesNotExist">
+            <param name="tableName" value="person"/>
+            <param name="columnName" value="employer_id"/>
+            <param name="newValue" value="3"/>
+        </customChange>
+    </changeSet>
+</databaseChangeLog>
