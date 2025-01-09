@@ -244,6 +244,16 @@ jobs:
           for ext in "${EXT_ARRAY[@]}"; do
             ext=$(echo $ext | xargs)  # Remove leading and trailing whitespaces
             echo "Checking out and building $ext"
+
+            artifact_path="."
+            printf "%s\n" "${{ inputs.extensions }}" > extensions.json
+            cat extensions.json
+            EXT_ARTIFACT_PATH=$(cat extensions.json | jq -r --arg NAME "$ext" '.[] | select(.name==$NAME) | .artifact_path')
+            if [ -n "$EXT_ARTIFACT_PATH" ] && [ "$EXT_ARTIFACT_PATH" != "null" ]; then
+              artifact_path="$EXT_ARTIFACT_PATH"
+            fi
+            echo "Using artifact_path=$artifact_path"
+
             git clone https://github.com/liquibase/$ext.git $ext
             cd $ext
             sed -i "s/<liquibase.version>.*<\/liquibase.version>/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/" pom.xml
@@ -255,14 +265,6 @@ jobs:
             done
 
             mvn clean install -DskipTests
-
-            artifact_path="."
-            printf "%s\n" "${{ inputs.extensions }}" > extensions.json
-            EXT_ARTIFACT_PATH=$(cat extensions.json | jq -r --arg NAME "$ext" '.[] | select(.name==$NAME) | .artifact_path')
-            if [ -n "$EXT_ARTIFACT_PATH" ] && [ "$EXT_ARTIFACT_PATH" != "null" ]; then
-              artifact_path="$EXT_ARTIFACT_PATH"
-            fi
-            echo "Using artifact_path=$artifact_path"
 
             mkdir -p $PWD/.github/util/
             curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/re-version.sh
