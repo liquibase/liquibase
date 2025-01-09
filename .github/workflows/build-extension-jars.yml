@@ -257,8 +257,8 @@ jobs:
             mvn clean install -DskipTests
 
             artifact_path="."
-            # 'ext' here is the extension name we're currently building
-            EXT_ARTIFACT_PATH=$(echo "${{ inputs.extensions }}" | jq -r --arg NAME "$ext" '.[] | select(.name==$NAME) | .artifact_path')
+            printf "%s\n" "${{ inputs.extensions }}" > extensions.json
+            EXT_ARTIFACT_PATH=$(cat extensions.json | jq -r --arg NAME "$ext" '.[] | select(.name==$NAME) | .artifact_path')
             if [ -n "$EXT_ARTIFACT_PATH" ] && [ "$EXT_ARTIFACT_PATH" != "null" ]; then
               artifact_path="$EXT_ARTIFACT_PATH"
             fi
