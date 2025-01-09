@@ -21,6 +21,9 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
     public static final CommandArgumentDefinition<Boolean> INCLUDE_SCHEMA_ARG;
     public static final CommandArgumentDefinition<Boolean> INCLUDE_TABLESPACE_ARG;
 
+    public static final CommandArgumentDefinition<String> EXCLUDE_OBJECTS;
+    public static final CommandArgumentDefinition<String> INCLUDE_OBJECTS;
+
     public static final CommandResultDefinition<DiffOutputControl> DIFF_OUTPUT_CONTROL;
 
 
@@ -32,6 +35,11 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
                 .description("If true, the schema will be included in generated changeSets. Defaults to false.").build();
         INCLUDE_TABLESPACE_ARG = builder.argument("includeTablespace", Boolean.class).defaultValue(false)
                 .description("Include the tablespace attribute in the changelog. Defaults to false.").build();
+
+        EXCLUDE_OBJECTS = builder.argument("excludeObjects", String.class).defaultValue(null)
+                .description("Objects to exclude from diff. Supports regular expressions. Defaults to null.").build();
+        INCLUDE_OBJECTS = builder.argument("includeObjects", String.class).defaultValue(null)
+                .description("Objects to include in diff. Supports regular expressions. Defaults to null.").build();
 
         DIFF_OUTPUT_CONTROL = builder.result("diffOutputControl", DiffOutputControl.class).build();
     }
@@ -73,6 +81,8 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
         DiffOutputControl diffOutputControl = new DiffOutputControl(
                 includeCatalog, includeSchema,
                 includeTablespace, compareControl.getSchemaComparisons());
+        diffOutputControl.setExcludeObjects(commandScope.getArgumentValue(EXCLUDE_OBJECTS));
+        diffOutputControl.setIncludeObjects(commandScope.getArgumentValue(INCLUDE_OBJECTS));
         for (CompareControl.SchemaComparison schema : compareControl.getSchemaComparisons()) {
             diffOutputControl.addIncludedSchema(schema.getReferenceSchema());
             diffOutputControl.addIncludedSchema(schema.getComparisonSchema());

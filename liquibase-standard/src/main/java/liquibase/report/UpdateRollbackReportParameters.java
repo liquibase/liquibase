@@ -16,4 +16,8 @@ public interface UpdateRollbackReportParameters {
     String getJdbcUrl();
 
     String getCommandTitle();
+
+    void suppressSql();
+
+    void suppressException();
 }

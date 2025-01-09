@@ -159,9 +159,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
 
     private void addAttributesForMdc(ChangeSet changeSet, ExecType execType) {
         changeSet.setAttribute("updateExecType", execType);
-        ChangeLogHistoryService changelogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
-        String deploymentId = changelogService.getDeploymentId();
-        changeSet.setAttribute("deploymentId", deploymentId);
+        changeSet.setAttribute("deploymentId", Scope.getCurrentScope().getDeploymentId());
     }
 }
 
