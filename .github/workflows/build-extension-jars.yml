@@ -94,7 +94,7 @@ jobs:
           ignore-versions: '^((?!${{ inputs.liquibase-version }}$).)*$'
 
   build-and-deploy-extensions:
-    needs: [delete-dependency-packages, delete-extension-packages]
+    needs: [setup_matrix, delete-dependency-packages, delete-extension-packages]
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -239,7 +239,7 @@ jobs:
           scripts_branch=${{ inputs.branch }}
           git config --global credential.helper store
           echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
-          IFS=',' read -ra EXT_ARRAY <<< "${{ inputs.extensions }}"
+          IFS=',' read -ra EXT_ARRAY <<< "${{ needs.setup_matrix.outputs.extensions_matrix }}"
           for ext in "${EXT_ARRAY[@]}"; do
             ext=$(echo $ext | xargs)  # Remove leading and trailing whitespaces
             echo "Checking out and building $ext"
