@@ -74,13 +74,4 @@ public interface CommandStep {
      * @return list with the provided classes types
      */
     List<Class<?>> providedDependencies();
-
-    /**
-     * Returns a boolean to indicate that this CommandStep is a stub
-     * If an extension overrides the CommandStep then the stub sill be ignored
-     * @return boolean
-     */
-    default boolean isStub() {
-        return false;
-    }
 }

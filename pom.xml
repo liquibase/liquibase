@@ -72,9 +72,9 @@
         <commons-lang3.version>3.17.0</commons-lang3.version>
         <commons-io.version>2.18.0</commons-io.version>
         <commons-collections4.version>4.4</commons-collections4.version>
-        <commons-text.version>1.12.0</commons-text.version>
+        <commons-text.version>1.13.0</commons-text.version>
         <ant.version>1.10.15</ant.version>
-        <junit-jupiter.version>5.11.3</junit-jupiter.version>
+        <junit-jupiter.version>5.11.4</junit-jupiter.version>
         <groovy.version>4.0.24</groovy.version>
         <spock.version>2.3-groovy-4.0</spock.version>
         <spring.version>5.3.39</spring.version>
@@ -192,7 +192,7 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.26.3</version>
+            <version>3.27.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -300,7 +300,7 @@
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.47.0.0</version>
+            <version>3.47.2.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -491,7 +491,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.11.1</version>
+                <version>3.11.2</version>
                 <configuration>
                     <attach>true</attach>
                     <author>false</author>
