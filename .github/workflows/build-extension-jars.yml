@@ -94,7 +94,7 @@ jobs:
   #         ignore-versions: '^((?!${{ inputs.liquibase-version }}$).)*$'
 
   build-and-deploy-extensions:
-    needs: [delete-dependency-packages, delete-extension-packages]
+    #needs: [delete-dependency-packages, delete-extension-packages]
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
