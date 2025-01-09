@@ -55,7 +55,7 @@ jobs:
       - id: parse_extensions_matrix
         shell: bash
         run: |
-          printf "%s\n" "${{ inputs.extensions }}" > extensions.json
+          printf "%s\n" ${{ inputs.extensions }} > extensions.json
           EXTENSIONS_LIST=$(cat extensions.json | jq -r '.[].name' | tr '\n' ',' | sed 's/,$//')
           echo "matrix_output=${EXTENSIONS_LIST}" >> $GITHUB_OUTPUT
       - id: setup_extensions_matrix
