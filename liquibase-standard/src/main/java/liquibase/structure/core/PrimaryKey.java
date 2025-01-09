@@ -61,7 +61,8 @@ public class PrimaryKey extends AbstractDatabaseObject {
     }
 
     public String getColumnNames() {
-        return StringUtil.join(getColumns(), ", ", obj -> ((Column) obj).getName());
+        List<Column> columns = getColumns();
+        return StringUtil.join(columns, ", ", obj -> obj instanceof Column ? ((Column) obj).getName() : "");
     }
 
     /**

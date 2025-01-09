@@ -1,6 +1,8 @@
 package liquibase.util;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.command.core.DiffCommandStep;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
@@ -185,7 +187,7 @@ public class ObjectUtil {
                 ));
         }
 
-        if (System.getenv("IGNORE_MISSING_OBJECTS") != null) {
+        if (GlobalConfiguration.IGNORE_MISSING_REFERENCES.getCurrentValue()) {
             Class<?>[] parameterTypes = method.getParameterTypes();
             if (propertyValue instanceof String && !parameterTypes[0].isAssignableFrom(String.class)) {
                 return;
