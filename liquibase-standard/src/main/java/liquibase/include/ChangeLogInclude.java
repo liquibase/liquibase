@@ -31,6 +31,11 @@ import liquibase.serializer.AbstractLiquibaseSerializable;
 import lombok.AccessLevel;
 import lombok.Getter;
 
+/**
+ * A final class representing the <a href="https://docs.liquibase.com/change-types/include.html">include</a> tag.
+ *
+ * @author <a href="https://github.com/cagliostro92">Edoardo Patti</a>
+ */
 @Getter(AccessLevel.PACKAGE)
 public final class ChangeLogInclude extends AbstractLiquibaseSerializable implements Conditional, ChangeLogChild {
 

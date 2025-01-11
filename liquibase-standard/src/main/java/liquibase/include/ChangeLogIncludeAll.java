@@ -51,6 +51,11 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * A final class representing the <a href="https://docs.liquibase.com/change-types/includeall.html">includeAll</a> tag.
+ *
+ * @author <a href="https://github.com/cagliostro92">Edoardo Patti</a>
+ */
 @Getter(AccessLevel.PACKAGE)
 public final class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implements Conditional, ChangeLogChild {
 

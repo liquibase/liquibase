@@ -52,6 +52,16 @@ import liquibase.ui.UIService;
 import liquibase.util.FileUtil;
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ <p>
+ * A final, non-instantiable utility class that assists the {@link liquibase.changelog.visitor.IncludeVisitor}
+ * during the {@link DatabaseChangeLog} flattening process.
+ </p>
+ *
+ * This class is responsible for various tasks, including propagating the {@code MARK_RUN} state
+ * to underlying {@link ChangeSet} instances when necessary.
+ * @author <a href="https://github.com/cagliostro92">Edoardo Patti</a>
+ */
 public final class ChangeLogIncludeUtils {
 
  private static final String CLASSPATH_PROTOCOL = "classpath:";
@@ -172,8 +182,8 @@ public final class ChangeLogIncludeUtils {
 
  private static void propagateMarkRan(List<DatabaseChangeLog> changeLogs) {
 	changeLogs.forEach(cl -> {
-	 cl.getIncludeList().forEach(i -> i.setPreconditions(getMarkRanPreconditions()));
-	 cl.getIncludeAllList().forEach(ia -> ia.setPreconditions(getMarkRanPreconditions()));
+	 cl.getIncludeList().forEach(i -> i.setPreconditions(getMarkRanPrecondition()));
+	 cl.getIncludeAllList().forEach(ia -> ia.setPreconditions(getMarkRanPrecondition()));
 	});
  }
 
@@ -314,7 +324,7 @@ public final class ChangeLogIncludeUtils {
 		}
 	 }
 	 if(markRan)
-		changeSet.setPreconditions(getMarkRanPreconditions());
+		changeSet.setPreconditions(getMarkRanPrecondition());
 
 	 result.add(changeSet);
 	}
@@ -336,7 +346,7 @@ public final class ChangeLogIncludeUtils {
 	return ranChangeSet.isPresent();
  }
 
- private static PreconditionContainer getMarkRanPreconditions() {
+ private static PreconditionContainer getMarkRanPrecondition() {
 	PreconditionContainer result = new PreconditionContainer();
 	result.setOnFail(PreconditionContainer.FailOption.MARK_RAN);
 	result.addNestedPrecondition(getFailedPrecondition());
