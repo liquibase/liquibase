@@ -2,17 +2,22 @@ package liquibase.command
 
 import liquibase.Scope
 import liquibase.changelog.ChangeLogParameters
+import liquibase.changelog.ChangeSet
+import liquibase.changelog.DatabaseChangeLog
+import liquibase.changelog.visitor.IncludeVisitor
 import liquibase.command.core.UpdateCommandStep
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
-import liquibase.exception.ChangeLogParseException
-import liquibase.exception.MigrationFailedException
+import liquibase.database.core.MockDatabase
 import liquibase.exception.PreconditionErrorException
 import liquibase.exception.PreconditionFailedException
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
+import liquibase.parser.ChangeLogParser
+import liquibase.parser.core.xml.XMLChangeLogSAXParser
 import liquibase.resource.SearchPathResourceAccessor
+import liquibase.test.JUnitResourceAccessor
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -162,7 +167,7 @@ class IncludePreconditionsTest extends Specification {
                 DatabaseChangelogCommandStep.getDatabaseChangeLog(changelogFile, new ChangeLogParameters(), h2.getDatabaseFromFactory())
         def resourceAccessor = new SearchPathResourceAccessor("target/test-classes")
         def scopeSettings = [
-                (Scope.Attr.resourceAccessor.name()) : resourceAccessor
+                (Scope.Attr.resourceAccessor.name()) : resourceAccessor,
         ]
 
         Scope.child(scopeSettings, {
@@ -203,6 +208,39 @@ class IncludePreconditionsTest extends Specification {
         includedTables.count("INCLUDED_TABLE_2") == 0
         includedTables.count("INCLUDED_TABLE_3") == 0
         includedTables.count("TEST_PRECONDITION_TABLE") == 0
+    }
+
+    def "assert changesets MARK_RUN state precondition fail case"() {
+        when:
+        def resourceAccessor = new JUnitResourceAccessor()
+
+        def scopeSettings = [
+                (Scope.Attr.database.name()) : h2.getDatabaseFromFactory(),
+        ]
+        Scope.enter(scopeSettings)
+
+        def changeLogFile = "changelogs/h2/include/master-mark_ran-recursive.xml"
+
+        ChangeLogParser parser = new XMLChangeLogSAXParser()
+
+        DatabaseChangeLog dbChangeLog = parser.parse(changeLogFile, new ChangeLogParameters(), resourceAccessor)
+
+        new IncludeVisitor().visit(dbChangeLog)
+        def changesets = dbChangeLog.getChangeSets()
+        def actual = new ArrayList(4)
+        then:
+        changesets.forEach {
+            c ->
+                def execType = c.execute(dbChangeLog, new MockDatabase())
+                if(execType == ChangeSet.ExecType.MARK_RAN)
+                    actual.add(c.getLogicalFilePath())
+        }
+        actual.size() == 5
+        actual.count("include-container") == 1
+        actual.count("included1") == 1
+        actual.count("included2") == 1
+        actual.count("included3") == 1
+        actual.count("includeAll") == 1
     }
 
     def "run include with preconditions error option WARN"() {
@@ -332,6 +370,35 @@ class IncludePreconditionsTest extends Specification {
         includedTables.count("DEFAULT_TABLE") == 1
         includedTables.count("INCLUDED_TABLE") == 1
         includedTables.count("UNDER_PRECONDITION_TABLE") == 0
+    }
+
+    def "assert changesets MARK_RUN state precondition error case"() {
+        when:
+        def resourceAccessor = new JUnitResourceAccessor()
+
+        def scopeSettings = [
+                (Scope.Attr.database.name()) : h2.getDatabaseFromFactory(),
+        ]
+        Scope.enter(scopeSettings)
+
+        def changeLogFile = "changelogs/h2/include/master-err-mark_ran.xml"
+
+        ChangeLogParser parser = new XMLChangeLogSAXParser()
+
+        DatabaseChangeLog dbChangeLog = parser.parse(changeLogFile, new ChangeLogParameters(), resourceAccessor)
+
+        new IncludeVisitor().visit(dbChangeLog)
+        def changesets = dbChangeLog.getChangeSets()
+        def actual = new ArrayList(4)
+        then:
+        changesets.forEach {
+            c ->
+                def execType = c.execute(dbChangeLog, new MockDatabase())
+                if(execType == ChangeSet.ExecType.MARK_RAN)
+                    actual.add(c.getLogicalFilePath())
+        }
+        actual.size() == 1
+        actual.count("under_precondition") == 1
     }
 
 }
