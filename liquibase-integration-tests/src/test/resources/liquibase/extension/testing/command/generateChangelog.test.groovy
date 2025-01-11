@@ -39,11 +39,11 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  excludeObjects (String) Objects to exclude from diff
+  excludeObjects (String) Objects to exclude from diff. Supports regular expressions. Defaults to null.
     Default: null
   includeCatalog (Boolean) If true, the catalog will be included in generated changeSets. Defaults to false.
     Default: false
-  includeObjects (String) Objects to include in diff
+  includeObjects (String) Objects to include in diff. Supports regular expressions. Defaults to null.
     Default: null
   includeSchema (Boolean) If true, the schema will be included in generated changeSets. Defaults to false.
     Default: false
