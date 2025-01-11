@@ -51,7 +51,7 @@ import static liquibase.Scope.getCurrentScope;
 /**
  * Encapsulates a changeSet and all its associated changes.
  */
-public class ChangeSet implements Conditional, ChangeLogChild, Comparable<ChangeSet> {
+public class ChangeSet implements Conditional, ChangeLogChild {
 
     protected CheckSum checkSum;
     /**
@@ -289,6 +289,7 @@ public class ChangeSet implements Conditional, ChangeLogChild, Comparable<Change
     @Setter
     private Date operationStopTime;
 
+    @Getter
     private final Integer order = DatabaseChangeLog.CHANGESET_ORDER.getAndIncrement();
 
     public boolean shouldAlwaysRun() {
@@ -335,10 +336,6 @@ public class ChangeSet implements Conditional, ChangeLogChild, Comparable<Change
         setDbms(dbmsList);
         this.runWith = runWith;
         this.runWithSpoolFile = runWithSpoolFile;
-    }
-    @Override
-    public int compareTo(ChangeSet o) {
-        return this.order - o.order;
     }
 
     protected void setDbms(String dbmsList) {

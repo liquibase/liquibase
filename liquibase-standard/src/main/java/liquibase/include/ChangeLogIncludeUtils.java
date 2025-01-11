@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -54,12 +55,13 @@ import org.apache.commons.lang3.StringUtils;
 public final class ChangeLogIncludeUtils {
 
  private static final String CLASSPATH_PROTOCOL = "classpath:";
+ private static final Comparator<ChangeSet> CHANGESET_COMPARATOR = Comparator.comparingInt(ChangeSet::getOrder);
 
  private ChangeLogIncludeUtils() {}
 
  public static void flatChangeLogChangeSets(DatabaseChangeLog changeLog) {
-	SortedSet<ChangeSet> changeSetAccumulator = new TreeSet<>();
-	SortedSet<ChangeSet> skippedChangeSetAccumulator = new TreeSet<>();
+	SortedSet<ChangeSet> changeSetAccumulator = new TreeSet<>(CHANGESET_COMPARATOR);
+	SortedSet<ChangeSet> skippedChangeSetAccumulator = new TreeSet<>(CHANGESET_COMPARATOR);
 	changeLog.getIncludeList().forEach(i -> flatChangeLogChangeSets(i, changeSetAccumulator, skippedChangeSetAccumulator));
 	changeLog.getIncludeAllList().forEach(i -> flatChangeLogChangeSets(i, changeSetAccumulator, skippedChangeSetAccumulator));
 	changeSetAccumulator.addAll(changeLog.getChangeSets());
@@ -192,7 +194,7 @@ public final class ChangeLogIncludeUtils {
  }
 
  private static SortedSet<ChangeSet> getNestedChangeSets(ChangeLogIncludeAll includeAll) {
-	SortedSet<ChangeSet> result = new TreeSet<>();
+	SortedSet<ChangeSet> result = new TreeSet<>(CHANGESET_COMPARATOR);
 	includeAll.getNestedChangeLogs().forEach(changelog -> result.addAll(getNestedChangeSets(includeAll.getDatabase(), includeAll.getLogicalFilePath(),
 			changelog, includeAll.getModifyChangeSets(),
 			includeAll.isMarkRan())));
@@ -200,11 +202,13 @@ public final class ChangeLogIncludeUtils {
  }
 
  private static SortedSet<ChangeSet> getNestedSkippedChangeSets(ChangeLogInclude include) {
-	return new TreeSet<>(include.getNestedChangelog().getSkippedChangeSets());
+	SortedSet<ChangeSet> result = new TreeSet<>(CHANGESET_COMPARATOR);
+	result.addAll(include.getNestedChangelog().getSkippedChangeSets());
+	return result;
  }
 
  private static SortedSet<ChangeSet> getNestedSkippedChangeSets(ChangeLogIncludeAll includeAll) {
-	SortedSet<ChangeSet> result = new TreeSet<>();
+	SortedSet<ChangeSet> result = new TreeSet<>(CHANGESET_COMPARATOR);
 	includeAll.getNestedChangeLogs().forEach(changelog -> result.addAll(changelog.getSkippedChangeSets()));
 	return result;
  }
@@ -284,7 +288,7 @@ public final class ChangeLogIncludeUtils {
  private static SortedSet<ChangeSet> getNestedChangeSets(Database database, String logicalFilePath,
 																												 DatabaseChangeLog childChangeLog, ModifyChangeSets modifyChangeSets,
 																												 boolean markRan) {
-	SortedSet<ChangeSet> result = new TreeSet<>();
+	SortedSet<ChangeSet> result = new TreeSet<>(CHANGESET_COMPARATOR);
 	List<RanChangeSet> ranChangeSets = new ArrayList<>(1);
 	if (database != null && logicalFilePath != null) {
 	 try {
