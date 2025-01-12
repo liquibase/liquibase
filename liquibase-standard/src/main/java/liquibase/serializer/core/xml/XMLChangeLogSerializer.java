@@ -17,7 +17,6 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.XMLUtil;
 import liquibase.util.xml.DefaultXmlWriter;
-
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

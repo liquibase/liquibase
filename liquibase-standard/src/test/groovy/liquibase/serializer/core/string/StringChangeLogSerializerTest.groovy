@@ -273,7 +273,7 @@ class StringChangeLogSerializerTest extends Specification {
         String string = new StringChangeLogSerializer().serialize(change, false);
 //            System.out.println(string);
 //            System.out.println("-------------");
-        assert string.indexOf("@") < 0: "@ in string.  Probably poorly serialized object reference." + string
+        assert string.indexOf("@") < 0: "@ in string.  Probably poorly serialized object reference." + string;
 
         where:
         change << Scope.getCurrentScope().getSingleton(ChangeFactory.class).findAllInstances()

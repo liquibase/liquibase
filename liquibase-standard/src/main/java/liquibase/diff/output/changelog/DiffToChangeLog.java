@@ -158,6 +158,8 @@ public class DiffToChangeLog {
             }
             newScopeObjects.put(EXTERNAL_FILE_DIR_SCOPE_KEY, objectsDir);
         }
+
+
         newScopeObjects.put(DIFF_OUTPUT_CONTROL_SCOPE_KEY, diffOutputControl);
 
         try {
@@ -276,6 +278,7 @@ public class DiffToChangeLog {
      */
     public void print(final PrintStream out, final ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
         List<ChangeSet> changeSets = generateChangeSets();
+
         changeLogSerializer.preserveNullValues(diffOutputControl.getPreserveNullValues());
         changeLogSerializer.write(changeSets, out);
 

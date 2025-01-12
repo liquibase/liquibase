@@ -8,6 +8,7 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.core.OracleDatabase
 import liquibase.database.core.PostgresDatabase
+import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.exception.ValidationErrors
 import liquibase.parser.core.ParsedNode
 import liquibase.database.core.MockDatabase
@@ -16,7 +17,6 @@ import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.test.JUnitResourceAccessor
 import liquibase.util.StreamUtil
-
 import spock.lang.Unroll
 
 class CreateProcedureChangeTest extends StandardChangeTest {
@@ -78,6 +78,7 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         "com/example/my-logic.sql" | "a/logical/path.xml" | false
         "my-logic.sql"             | null                 | true
         "my-logic.sql"             | "a/logical/path.xml" | true
+
     }
 
     @Unroll

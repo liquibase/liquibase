@@ -50,8 +50,6 @@ public class XMLChangeLogSerializerTest {
                 assertEquals("COLUMN_NAME", attribute.getNodeValue());
             } else if ("columnDataType".equals(attribute.getNodeName())) {
                 assertEquals("DATATYPE(255)", attribute.getNodeValue());
-            } else if ("preserveNullValues".equals(attribute.getNodeName())) {
-                assertEquals("true", attribute.getNodeValue());
             } else {
                 fail("unexpected attribute " + attribute.getNodeName());
             }
@@ -932,7 +930,7 @@ public class XMLChangeLogSerializerTest {
     }
 
     @Test
-    public void serialize_pretty_ChangeSetParameters() {
+    public void serialize_pretty_ChangeSetParameters() throws Exception {
     	ChangeSet changeSet = new ChangeSet("1", "tms", true, true, "path/to/file.json", "context", "mssql","runWith","runWithSpoolFile", false,ObjectQuotingStrategy.LEGACY, null);
     	changeSet.setCreated("created");
     	changeSet.setFailOnError(true);

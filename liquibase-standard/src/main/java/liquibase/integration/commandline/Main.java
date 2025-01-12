@@ -867,7 +867,8 @@ public class Main {
                             && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.FORMAT.toLowerCase())
                             && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.HELP.toLowerCase())
                             && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT.toLowerCase())
-                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.PRESERVE_NULL_VALUES.toLowerCase())) {
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.PRESERVE_NULL_VALUES.toLowerCase())
+                    ) {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                     }
                     if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command) && cmdParm.toLowerCase().startsWith("--" + OPTIONS.FORMAT.toLowerCase())) {

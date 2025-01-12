@@ -16,7 +16,7 @@ import java.util.List;
  * Internal command step to be used on pipeline to instantiate a DiffOutputControl object that is mainly used
  * by diffChangeLog/generateChangeLog .
  */
-public class DiffOutputControlCommandStep extends AbstractHelperCommandStep implements CleanUpCommandStep{
+public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
 
     public static final String[] COMMAND_NAME = {"diffOutputControl"};
     public static final CommandArgumentDefinition<Boolean> INCLUDE_CATALOG_ARG;
@@ -117,8 +117,4 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep impl
                    "and they may need to be manually updated before being deployed.");
     }
 
-    @Override
-    public void cleanUp(CommandResultsBuilder resultsBuilder) {
-        ChangeGeneratorFactory.getInstance().unregister(MissingDataExternalFileChangeGenerator.class);
-    }
 }

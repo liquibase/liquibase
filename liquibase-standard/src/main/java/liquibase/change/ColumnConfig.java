@@ -21,7 +21,6 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.NowAndTodayUtil;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
-
 import lombok.Getter;
 
 import java.math.BigInteger;
@@ -32,7 +31,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
-
 import org.apache.commons.lang3.BooleanUtils;
 
 /**
@@ -87,6 +85,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             setType(columnSnapshot.getType().toString());
         }
 
+
         if (columnSnapshot.getDefaultValue() != null) {
             Object defaultValue = columnSnapshot.getDefaultValue();
             if (defaultValue instanceof Boolean) {
@@ -113,6 +112,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             constraints.setValidateNullable(columnSnapshot.getValidateNullable());
             nonDefaultConstraints = true;
         }
+
 
         if ((columnSnapshot.getRelation() != null) && (columnSnapshot.getRelation() instanceof Table)) {
             Table table = (Table) columnSnapshot.getRelation();
@@ -793,12 +793,9 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * Returns true if any of the setDefaultValue* functions have had a non-null value set
      */
     public boolean hasDefaultValue() {
-        return this.getDefaultValue() != null ||
-            this.getDefaultValueBoolean() != null ||
-            this.getDefaultValueDate() != null ||
-            this.getDefaultValueNumeric() != null ||
-            this.getDefaultValueComputed() != null ||
-            this.getDefaultValueSequenceNext() != null;
+        return (this.getDefaultValue() != null) || (this.getDefaultValueBoolean() != null) || (this
+            .getDefaultValueDate() != null) || (this.getDefaultValueNumeric() != null) || (this
+            .getDefaultValueComputed() != null) || (this.getDefaultValueSequenceNext() != null);
     }
 
     /**
@@ -1100,9 +1097,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     @Override
     public Set<String> getSerializableFields() {
         Set<String> fields = new TreeSet<>(super.getSerializableFields());
-
-        //fields.remove("preserveNullValues");
-        //fields.remove("serializableFields");
 
         if (!hasValueObject()) {
             fields.removeIf(s -> s.startsWith("value"));

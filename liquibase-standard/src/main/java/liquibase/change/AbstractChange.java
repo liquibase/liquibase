@@ -57,6 +57,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
      */
     @Override
     public void finishInitialization() throws SetupException {
+
     }
 
     /**
@@ -501,6 +502,9 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         return new ChangeStatus().unknown("Not implemented");
     }
 
+    //
+    //
+
     /**
      *
      * Return if this change should execute
@@ -646,7 +650,6 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     public Set<String> getSerializableFields() {
         Set<String> fields = new TreeSet<>(Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getParameters().keySet());
         fields.remove("preserveNullValues");
-        fields.remove("serializableFields");
         return fields;
     }
 

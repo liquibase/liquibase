@@ -221,7 +221,6 @@ public class DiffOutputControl {
         this.considerCatalogsAsSchemas = considerCatalogsAsSchemas;
     }
 
-
     public boolean getPreserveNullValues() {
         return preserveNullValues;
     }

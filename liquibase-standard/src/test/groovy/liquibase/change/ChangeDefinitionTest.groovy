@@ -2,9 +2,7 @@ package liquibase.change
 
 import liquibase.Scope
 import liquibase.util.StringUtil
-
 import org.yaml.snakeyaml.Yaml
-
 import spock.lang.Specification
 import spock.lang.Unroll
 

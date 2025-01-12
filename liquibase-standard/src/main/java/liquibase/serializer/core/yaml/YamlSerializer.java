@@ -14,7 +14,6 @@ import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
-
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
@@ -166,8 +165,8 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                             list.add(m);
                         }
                     }
-
                     value = list;
+
                 }
                 if (value instanceof Map) {
                     if  (((Map<?, ?>) value).isEmpty()) {

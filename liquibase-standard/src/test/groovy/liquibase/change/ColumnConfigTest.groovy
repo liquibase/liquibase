@@ -447,7 +447,8 @@ class ColumnConfigTest extends Specification {
         assert column.getSerializableFieldValue(field).toString() == testValue.toString()
 
         where:
-        // ColumnConfig#
+        // ColumnConfig#getSerializableFields() returns a reduced Set of serialized fields, potentially empty
+        // Thus, we need to fetch the static definition cached in ReflectionSerializer
         field << ReflectionSerializer.getInstance().getFields(new ColumnConfig()).findAll({it != "constraints"})
     }
 
