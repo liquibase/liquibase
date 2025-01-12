@@ -1,8 +1,31 @@
 package liquibase.serializer.core.string
 
 import liquibase.Scope
+import liquibase.change.AddColumnConfig
+import liquibase.change.ChangeFactory
+import liquibase.change.ColumnConfig
+import liquibase.change.ConstraintsConfig
+import liquibase.change.DatabaseChangeProperty
+import liquibase.change.core.AddColumnChange
+import liquibase.change.core.AddForeignKeyConstraintChange
+import liquibase.change.core.AddUniqueConstraintChange
+import liquibase.change.core.CreateProcedureChange
+import liquibase.change.core.CreateViewChange
+import liquibase.change.core.InsertDataChange
+import liquibase.change.core.LoadDataChange
+import liquibase.change.core.LoadDataColumnConfig
+import liquibase.change.core.RawSQLChange
+import liquibase.change.core.SQLFileChange
+import liquibase.change.custom.CustomChangeWrapper;
+import liquibase.change.custom.CustomSqlChange;
+import liquibase.change.custom.ExampleCustomSqlChange;
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet
-import liquibase.util.ColumnParentType
+import liquibase.logging.Logger
+import liquibase.resource.ResourceAccessor;
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceCurrentValueFunction;
+import liquibase.statement.SequenceNextValueFunction
 
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -14,18 +37,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type
 
-import liquibase.change.*
-import liquibase.change.core.*;
-import liquibase.change.custom.CustomChangeWrapper;
-import liquibase.change.custom.CustomSqlChange;
-import liquibase.change.custom.ExampleCustomSqlChange;
-import liquibase.changelog.ChangeLogParameters;
-import liquibase.logging.Logger
-import liquibase.resource.ResourceAccessor;
-import liquibase.statement.DatabaseFunction;
-
-import liquibase.statement.SequenceCurrentValueFunction;
-import liquibase.statement.SequenceNextValueFunction
 
 class StringChangeLogSerializerTest extends Specification {
 
@@ -57,7 +68,6 @@ class StringChangeLogSerializerTest extends Specification {
         then:
         new StringChangeLogSerializer().serialize(change, false) == "addColumn:[\n" +
                 "    columns=[]\n" +
-                "    preserveNullValues=\"true\"\n" +
                 "]"
 
         when:
@@ -65,7 +75,6 @@ class StringChangeLogSerializerTest extends Specification {
         then:
         new StringChangeLogSerializer().serialize(change, false) == "addColumn:[\n" +
                 "    columns=[]\n" +
-                "    preserveNullValues=\"true\"\n" +
                 "    tableName=\"TABLE_NAME\"\n" +
                 "]"
 
@@ -74,7 +83,6 @@ class StringChangeLogSerializerTest extends Specification {
         then:
         new StringChangeLogSerializer().serialize(change, false) == "addColumn:[\n" +
                 "    columns=[]\n" +
-                "    preserveNullValues=\"true\"\n" +
                 "    schemaName=\"SCHEMA_NAME\"\n" +
                 "    tableName=\"TABLE_NAME\"\n" +
                 "]"
@@ -90,7 +98,6 @@ class StringChangeLogSerializerTest extends Specification {
                 "            name=\"COLUMN_NAME\"\n" +
                 "        ]\n" +
                 "    ]\n" +
-                "    preserveNullValues=\"true\"\n" +
                 "    schemaName=\"SCHEMA_NAME\"\n" +
                 "    tableName=\"TABLE_NAME\"\n" +
                 "]"
@@ -113,7 +120,6 @@ class StringChangeLogSerializerTest extends Specification {
                 "            valueNumeric=\"52\"\n" +
                 "        ]\n" +
                 "    ]\n" +
-                "    preserveNullValues=\"true\"\n" +
                 "    schemaName=\"SCHEMA_NAME\"\n" +
                 "    tableName=\"TABLE_NAME\"\n" +
                 "]"
@@ -124,8 +130,7 @@ class StringChangeLogSerializerTest extends Specification {
         def change = new AddForeignKeyConstraintChange();
 
         then:
-        new StringChangeLogSerializer().serialize(change, false) == "addForeignKeyConstraint:[\n" +
-                "    preserveNullValues=\"true\"\n]"
+        new StringChangeLogSerializer().serialize(change, false) == "addForeignKeyConstraint:[]"
 
         when:
         change.setBaseTableName("TABLE_NAME");
@@ -150,7 +155,6 @@ class StringChangeLogSerializerTest extends Specification {
                 "    initiallyDeferred=\"true\"\n" +
                 "    onDelete=\"SET NULL\"\n" +
                 "    onUpdate=\"NO ACTION\"\n" +
-                "    preserveNullValues=\"true\"\n" +
                 "    referencedColumnNames=\"COLA, COLB\"\n" +
                 "    referencedTableName=\"REF_TABLE\"\n" +
                 "    referencedTableSchemaName=\"REF_SCHEM\"\n" +
@@ -163,8 +167,7 @@ class StringChangeLogSerializerTest extends Specification {
         def change = new AddUniqueConstraintChange();
 
         then:
-        new StringChangeLogSerializer().serialize(change, false) == "addUniqueConstraint:[\n" +
-                "    preserveNullValues=\"true\"\n]"
+        new StringChangeLogSerializer().serialize(change, false) == "addUniqueConstraint:[]"
 
         when:
         change.setTableName("TABLE_NAME");
@@ -183,35 +186,35 @@ class StringChangeLogSerializerTest extends Specification {
                 "    deferrable=\"true\"\n" +
                 "    disabled=\"true\"\n" +
                 "    initiallyDeferred=\"true\"\n" +
-                "    preserveNullValues=\"true\"\n" +
                 "    schemaName=\"BASE_SCHEM\"\n" +
                 "    tableName=\"TABLE_NAME\"\n" +
                 "    tablespace=\"TABLESPACE1\"\n" +
                 "]"
 
     }
-//    @Test
-//    public void serialized_changeSet() {
-//        ChangeSet changeSet = new ChangeSet("1", "ted", true, false, "com/example/test.xml", "c:/com/exmple/test", "context1, context2", "mysql, oracle");
-//        AddColumnChange change = new AddColumnChange();
-//        changeSet.addChange(change);
-//
-//        assertEquals("changeSet:[\n" +
-//                "    alwaysRun=\"true\"\n" +
-//                "    author=\"ted\"\n" +
-//                "    contextList=\"context1,context2\"\n" +
-//                "    dbmsList=\"mysql,oracle\"\n" +
-//                "    filePath=\"com/example/test.xml\"\n" +
-//                "    id=\"1\"\n" +
-//                "    physicalFilePath=\"c:/com/example/test.xml\"\n" +
-//                "    runOnChange=\"false\"\n" +
-//                "    changes: [\n" +
-//                "        addColumn:[\n" +
-//                "            columns=[]\n" +
-//                "        ]\n" +
-//                "    ]\n" +
-//                "]", new StringChangeLogSerializer().serialize(changeSet));
-//    }
+
+    def serialized_changeSet() {
+        when:
+        ChangeSet changeSet = new ChangeSet("1", "ted", true, false, "com/example/test.xml", "context1,context2", "mysql, oracle", null);
+        AddColumnChange change = new AddColumnChange();
+        changeSet.addChange(change);
+        String actual = new StringChangeLogSerializer().serialize(changeSet, true)
+
+        then:
+        actual == "changeSet:[\n" +
+                "    author=\"ted\"\n" +
+                "    changes=[\n" +
+                "        [\n" +
+                "            columns=[]\n" +
+                "        ]\n" +
+                "    ]\n" +
+                "    contextFilter=\"context1,context2\"\n" +
+                "    dbms=\"oracle,mysql\"\n" +
+                "    id=\"1\"\n" +
+                "    objectQuotingStrategy=\"LEGACY\"\n" +
+                "    runAlways=\"true\"\n" +
+                "]"
+    }
 
     def "serialized SQLFileChange"() {
         when:
@@ -219,7 +222,6 @@ class StringChangeLogSerializerTest extends Specification {
 
         then:
         new StringChangeLogSerializer().serialize(change, false) == "sqlFile:[\n" +
-                "    preserveNullValues=\"true\"\n" +
                 "    splitStatements=\"true\"\n" +
                 "    stripComments=\"false\"\n]"
 
@@ -229,7 +231,6 @@ class StringChangeLogSerializerTest extends Specification {
         then:
         new StringChangeLogSerializer().serialize(change, false) == "sqlFile:[\n" +
                 "    path=\"PATH/TO/File.txt\"\n" +
-                "    preserveNullValues=\"true\"\n" +
                 "    splitStatements=\"true\"\n" +
                 "    stripComments=\"false\"\n" +
                 "]"
@@ -241,7 +242,6 @@ class StringChangeLogSerializerTest extends Specification {
 
         then:
         new StringChangeLogSerializer().serialize(change, false) == "sql:[\n" +
-                "    preserveNullValues=\"true\"\n" +
                 "    splitStatements=\"true\"\n" +
                 "    stripComments=\"false\"\n]"
 
@@ -249,7 +249,6 @@ class StringChangeLogSerializerTest extends Specification {
         change.setSql("some SQL Here");
         then:
         new StringChangeLogSerializer().serialize(change, false) == "sql:[\n" +
-                "    preserveNullValues=\"true\"\n" +
                 "    splitStatements=\"true\"\n" +
                 "    sql=\"some SQL Here\"\n" +
                 "    stripComments=\"false\"\n" +
@@ -274,7 +273,7 @@ class StringChangeLogSerializerTest extends Specification {
         String string = new StringChangeLogSerializer().serialize(change, false);
 //            System.out.println(string);
 //            System.out.println("-------------");
-        assert string.indexOf("@") < 0: "@ in string.  Probably poorly serialized object reference." + string;
+        assert string.indexOf("@") < 0: "@ in string.  Probably poorly serialized object reference." + string
 
         where:
         change << Scope.getCurrentScope().getSingleton(ChangeFactory.class).findAllInstances()
@@ -379,7 +378,6 @@ class StringChangeLogSerializerTest extends Specification {
                 fail("Unknown field type in " + clazz.getName() + ": " + field.getType().getName());
             }
         }
-
     }
 
     private LoadDataColumnConfig createLoadDataColumnConfig() throws Exception {
@@ -478,7 +476,6 @@ class StringChangeLogSerializerTest extends Specification {
                 "            valueNumeric=\"${expected}\"\n" +
                 "        ]\n" +
                 "    ]\n" +
-                "    preserveNullValues=\"true\"\n" +
                 "    tableName=\"NUMBER_TABLE\"\n" +
                 "]"
 

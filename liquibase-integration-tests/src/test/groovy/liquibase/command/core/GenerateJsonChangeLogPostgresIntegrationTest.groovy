@@ -58,7 +58,6 @@ class GenerateJsonChangeLogPostgresIntegrationTest extends Specification {
               }
             ]
             ,
-            "preserveNullValues": true,
             "schemaName": "public",
             "tableName": "preservation_test"
           }
@@ -99,7 +98,6 @@ class GenerateJsonChangeLogPostgresIntegrationTest extends Specification {
               }
             ]
             ,
-            "preserveNullValues": false,
             "schemaName": "public",
             "tableName": "preservation_test"
           }

@@ -10,8 +10,18 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.structure.core.*;
-import liquibase.util.*;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.ForeignKeyConstraintType;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.UniqueConstraint;
+import liquibase.util.BooleanUtil;
+import liquibase.util.ISODateFormat;
+import liquibase.util.NowAndTodayUtil;
+import liquibase.util.ObjectUtil;
+import liquibase.util.StringUtil;
+
 import lombok.Getter;
 
 import java.math.BigInteger;
@@ -20,7 +30,8 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.lang3.BooleanUtils;
 
@@ -76,7 +87,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             setType(columnSnapshot.getType().toString());
         }
 
-
         if (columnSnapshot.getDefaultValue() != null) {
             Object defaultValue = columnSnapshot.getDefaultValue();
             if (defaultValue instanceof Boolean) {
@@ -104,19 +114,18 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             nonDefaultConstraints = true;
         }
 
-
         if ((columnSnapshot.getRelation() != null) && (columnSnapshot.getRelation() instanceof Table)) {
             Table table = (Table) columnSnapshot.getRelation();
             List<NotNullConstraint> notNullConstraints = table.getNotNullConstraints();
             if (notNullConstraints != null) {
-                    for (NotNullConstraint constraint : notNullConstraints) {
-                            if (constraint.getColumnName().equals(getName())) {
-                                    constraints.setNullable(false);
-                                    constraints.setNotNullConstraintName(constraint.getConstraintName());
-                                    nonDefaultConstraints = true;
-                                }
-                        }
+                for (NotNullConstraint constraint : notNullConstraints) {
+                    if (constraint.getColumnName().equals(getName())) {
+                        constraints.setNullable(false);
+                        constraints.setNotNullConstraintName(constraint.getConstraintName());
+                        nonDefaultConstraints = true;
+                    }
                 }
+            }
 
             if (columnSnapshot.isAutoIncrement()) {
                 setAutoIncrement(true);
@@ -175,76 +184,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     public ColumnConfig() {
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof ColumnConfig)) return false;
-        ColumnConfig that = (ColumnConfig) o;
-        return Objects.equals(name, that.name) &&
-                Objects.equals(computed, that.computed) &&
-                Objects.equals(type, that.type) &&
-                Objects.equals(value, that.value) &&
-                Objects.equals(valueNumeric, that.valueNumeric) &&
-                Objects.equals(valueDate, that.valueDate) &&
-                Objects.equals(valueBoolean, that.valueBoolean) &&
-                Objects.equals(valueBlobFile, that.valueBlobFile) &&
-                Objects.equals(valueClobFile, that.valueClobFile) &&
-                Objects.equals(encoding, that.encoding) &&
-                Objects.equals(valueComputed, that.valueComputed) &&
-                Objects.equals(valueSequenceNext, that.valueSequenceNext) &&
-                Objects.equals(valueSequenceCurrent, that.valueSequenceCurrent) &&
-                Objects.equals(defaultValue, that.defaultValue) &&
-                Objects.equals(defaultValueNumeric, that.defaultValueNumeric) &&
-                Objects.equals(defaultValueDate, that.defaultValueDate) &&
-                Objects.equals(defaultValueBoolean, that.defaultValueBoolean) &&
-                Objects.equals(defaultValueComputed, that.defaultValueComputed) &&
-                Objects.equals(defaultValueSequenceNext, that.defaultValueSequenceNext) &&
-                Objects.equals(defaultValueConstraintName, that.defaultValueConstraintName) &&
-                Objects.equals(constraints, that.constraints) &&
-                Objects.equals(autoIncrement, that.autoIncrement) &&
-                Objects.equals(generationType, that.generationType) &&
-                Objects.equals(defaultOnNull, that.defaultOnNull) &&
-                Objects.equals(startWith, that.startWith) &&
-                Objects.equals(incrementBy, that.incrementBy) &&
-                Objects.equals(remarks, that.remarks) &&
-                Objects.equals(descending, that.descending) &&
-                Objects.equals(included, that.included);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(
-                name,
-                computed,
-                type,
-                value,
-                valueNumeric,
-                valueDate,
-                valueBoolean,
-                valueBlobFile,
-                valueClobFile,
-                encoding,
-                valueComputed,
-                valueSequenceNext,
-                valueSequenceCurrent,
-                defaultValue,
-                defaultValueNumeric,
-                defaultValueDate,
-                defaultValueBoolean,
-                defaultValueComputed,
-                defaultValueSequenceNext,
-                defaultValueConstraintName,
-                constraints,
-                autoIncrement,
-                generationType,
-                defaultOnNull,
-                startWith,
-                incrementBy,
-                remarks,
-                descending,
-                included
-        );
-    }
-
     public boolean isSerializable (boolean mustPreserveNullValues) {
         return mustPreserveNullValues ||
                 hasName() ||
@@ -268,7 +207,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
                 hasStartWith() ||
                 hasIncrementBy() ||
                 hasRemarks() ||
-                hasDecending() ||
+                hasDescending() ||
                 hasIncluded();
     }
 
@@ -887,7 +826,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-    public boolean hasDecending() {
+    public boolean hasDescending() {
         return null != this.descending;
     }
 
@@ -1149,5 +1088,82 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         } else {
             return o;
         }
+    }
+
+    /**
+     * The class type's set of serialized fields are cached in {@link ReflectionSerializer}.
+     * Alas, we MUST NOT modify them directly, because they affect all instances of the same class.
+     * Instead we calculate a set of fields dynamically, based on the statically cached ones.
+     *
+     * @return a reduced {@link  Set<String>} of serialized field names
+     */
+    @Override
+    public Set<String> getSerializableFields() {
+        Set<String> fields = new TreeSet<>(super.getSerializableFields());
+
+        //fields.remove("preserveNullValues");
+        //fields.remove("serializableFields");
+
+        if (!hasValueObject()) {
+            fields.removeIf(s -> s.startsWith("value"));
+        }
+
+        if (!hasDefaultValue()) {
+            fields.removeIf(s -> s.startsWith("defaultValue"));
+        }
+
+        if (!hasAutoIncrement()) {
+            fields.remove("autoIncrement");
+        }
+
+        if (!isComputed()) {
+            fields.remove("computed");
+        }
+
+        if (!hasConstraints()) {
+            fields.remove("constraints");
+        }
+
+        if (!hasDefaultOnNull()) {
+            fields.remove("defaultOnNull");
+        }
+
+        if (!hasDescending()) {
+            fields.remove("descending");
+        }
+
+        if (!hasEncoding()) {
+            fields.remove("encoding");
+        }
+
+        if (!hasGenerationType()) {
+            fields.remove("generationType");
+        }
+
+        if (!hasIncluded()) {
+            fields.remove("included");
+        }
+
+        if (!hasIncrementBy()) {
+            fields.remove("incrementBy");
+        }
+
+        if (!hasName()) {
+            fields.remove("name");
+        }
+
+        if (!hasRemarks()) {
+            fields.remove("remarks");
+        }
+
+        if (!hasStartWith()) {
+            fields.remove("startWith");
+        }
+
+        if (!hasType()) {
+            fields.remove("type");
+        }
+
+        return fields;
     }
 }

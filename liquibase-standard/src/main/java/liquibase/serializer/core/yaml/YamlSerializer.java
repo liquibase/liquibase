@@ -108,25 +108,23 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         Comparator<String> comparator;
         comparator = getComparator(object);
         Map<String, Object> objectMap = new TreeMap<>(comparator);
+        Set<String> fields = getSerializableObjectFields(object);
 
-        if (object instanceof ColumnConfig) {
-            ColumnConfig cc = (ColumnConfig) object;
+        if (this.preserveNullValues &&
+                object instanceof ColumnConfig &&
+                1 == fields.size() &&
+                fields.contains("name"))
+        {
+            objectMap.put("name", object.getSerializableFieldValue("name"));
+            objectMap.put("value", null);
 
-            if (this.preserveNullValues) {
-                ColumnConfig other = new ColumnConfig().setName(cc.getName());
-                if (other.equals(cc)) {
-                    objectMap.put("name", object.getSerializableFieldValue("name"));
-                    objectMap.put("value", null);
+            Map<String, Object> containerMap = new HashMap<>();
+            containerMap.put(object.getSerializedObjectName(), objectMap);
 
-                    Map<String, Object> containerMap = new HashMap<>();
-                    containerMap.put(object.getSerializedObjectName(), objectMap);
-
-                    return containerMap;
-                }
-            }
+            return containerMap;
         }
 
-        for (String field : getSerializableObjectFields(object)) {
+        for (String field : fields) {
             Object value = object.getSerializableFieldValue(field);
             if (value != null) {
                 if (value instanceof DataType) {

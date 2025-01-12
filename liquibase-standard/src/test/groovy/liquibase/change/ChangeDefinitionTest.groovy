@@ -2,7 +2,9 @@ package liquibase.change
 
 import liquibase.Scope
 import liquibase.util.StringUtil
+
 import org.yaml.snakeyaml.Yaml
+
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -26,6 +28,9 @@ class ChangeDefinitionTest extends Specification {
         def metaData = Scope.currentScope.getSingleton(ChangeFactory).getChangeMetaData(changeName)
 
         for (def entry : new TreeMap<>(metaData.getParameters()).entrySet()) {
+            // The entry "preserveNullValues" in an internal field, it is however included in the meta-data.
+            // In the context of testing, it is being excluded.
+            if (entry.key == "preserveNullValues") continue;
             def paramMetaData = entry.value
             def supported = new TreeSet<>(paramMetaData.supportedDatabases).join(",")
             def required = new TreeSet<>(paramMetaData.requiredForDatabase).join(",")

@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 
 public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializable {
 
-    private Set<String> serializableFields;
+    private transient Set<String> serializableFields;
 
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {

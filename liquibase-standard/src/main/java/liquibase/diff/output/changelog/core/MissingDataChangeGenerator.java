@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public class MissingDataChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
@@ -149,8 +150,8 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                     }
 
                     if (!outputControl.getPreserveNullValues() && !column.hasValueObject()) {
-                        ColumnConfig other = new ColumnConfig().setName(column.getName());
-                        if (other.equals(column)) {
+                        Set<String> fields = column.getSerializableFields();
+                        if (fields.size() == 1 && fields.contains("name")) {
                             continue;
                         }
                     }

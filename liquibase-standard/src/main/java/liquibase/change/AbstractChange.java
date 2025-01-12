@@ -14,6 +14,7 @@ import liquibase.parser.core.ParsedNodeException;
 import liquibase.plugin.AbstractPlugin;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
+import liquibase.serializer.ReflectionSerializer;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
@@ -46,7 +47,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     private static final Pattern ALPHABET = Pattern.compile("([A-Z])");
 
     private ChangeSet changeSet;
-    private volatile boolean preserveNullValues = true;
+    private boolean preserveNullValues = true;
 
     public AbstractChange() {
     }
@@ -500,9 +501,6 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         return new ChangeStatus().unknown("Not implemented");
     }
 
-    //
-    //
-
     /**
      *
      * Return if this change should execute
@@ -638,11 +636,18 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     }
 
     /**
-     * Returns the fields on this change that are serializable.
+     * The class type's set of serialized fields are cached in {@link ReflectionSerializer}.
+     * Alas, we MUST NOT modify them directly, because they affect all instances of the same class.
+     * Instead we calculate a set of fields dynamically, based on the statically cached ones.
+     *
+     * @return a reduced {@link  Set<String>} of serialized field names
      */
     @Override
     public Set<String> getSerializableFields() {
-        return Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getParameters().keySet();
+        Set<String> fields = new TreeSet<>(Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getParameters().keySet());
+        fields.remove("preserveNullValues");
+        fields.remove("serializableFields");
+        return fields;
     }
 
     @Override
@@ -834,7 +839,8 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
         for (ChangeParameterMetaData param : metaData.getSetParameters(this).values()) {
             Object currentValue = param.getCurrentValue(this);
             currentValue = serializeValue(currentValue);
-            if (currentValue != null) {
+            // The entry "preserveNullValues" in an internal field, it is however included in the meta-data.
+            if (currentValue != null && !"preserveNullValues".equals(param.getParameterName())) {
                 node.addChild(null, param.getParameterName(), currentValue);
             }
         }

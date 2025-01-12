@@ -192,24 +192,16 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             nodeName = details.getShortName(namespace) + ":" + nodeName;
         }
         Element node = currentChangeLogFileDOM.createElementNS(namespace, nodeName);
+        Set<String> fields = object.getSerializableFields();
 
-        if (object instanceof ColumnConfig) {
-            ColumnConfig cc = (ColumnConfig) object;
+        if (this.preserveNullValues && object instanceof ColumnConfig && fields.size() == 1 && fields.contains("name")) {
+            node.setAttribute("name", (String) object.getSerializableFieldValue("name"));
+            node.setAttribute("value", "null");
 
-            if (this.preserveNullValues) {
-                ColumnConfig other = new ColumnConfig().setName(cc.getName());
-
-                if (other.equals(cc)) {
-                    node.setAttribute("name", (String) object.getSerializableFieldValue("name"));
-                    node.setAttribute("value", "null");
-
-                    return node;
-                }
-            }
+            return node;
         }
 
         try {
-            Set<String> fields = object.getSerializableFields();
             for (String field : fields) {
                 setValueOnNode(node, object.getSerializableFieldNamespace(field), field, object.getSerializableFieldValue(field), object.getSerializableFieldType(field), namespace);
             }

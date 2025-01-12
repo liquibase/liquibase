@@ -38,7 +38,6 @@ public class YamlChangeLogSerializerTest {
                 "      - column:\n" +
                 "          name: name\n" +
                 "          type: varchar(255)\n" +
-                "      preserveNullValues: true\n" +
                 "      tableName: testTable\n";
 
         String actualOutput = new YamlChangeLogSerializer().serialize(changeSet, false);
@@ -73,7 +72,6 @@ public class YamlChangeLogSerializerTest {
                 "      - column:\n" +
                 "          name: z\n" +
                 "          value: Geronimo!\n" +
-                "      preserveNullValues: true\n" +
                 "      tableName: testTable\n";
 
         YamlChangeLogSerializer serializer = new YamlChangeLogSerializer();
@@ -108,7 +106,6 @@ public class YamlChangeLogSerializerTest {
                 "      - column:\n" +
                 "          name: z\n" +
                 "          value: Geronimo!\n" +
-                "      preserveNullValues: true\n" +
                 "      tableName: testTable\n";
 
         YamlChangeLogSerializer serializer = new YamlChangeLogSerializer();

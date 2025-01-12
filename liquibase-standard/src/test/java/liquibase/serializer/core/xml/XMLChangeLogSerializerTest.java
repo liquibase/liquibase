@@ -925,7 +925,6 @@ public class XMLChangeLogSerializerTest {
 
         String out = new XMLChangeLogSerializer().serialize(change, true);
         assertEquals("<update catalogName=\"a\"\n" +
-                "        preserveNullValues=\"true\"\n" +
                 "        schemaName=\"b\"\n" +
                 "        tableName=\"c\">\n" +
                 "    <where>Some Text</where>\n" +
@@ -933,7 +932,7 @@ public class XMLChangeLogSerializerTest {
     }
 
     @Test
-    public void serialize_pretty_ChangeSetParameters() throws Exception {
+    public void serialize_pretty_ChangeSetParameters() {
     	ChangeSet changeSet = new ChangeSet("1", "tms", true, true, "path/to/file.json", "context", "mssql","runWith","runWithSpoolFile", false,ObjectQuotingStrategy.LEGACY, null);
     	changeSet.setCreated("created");
     	changeSet.setFailOnError(true);
@@ -973,7 +972,6 @@ public class XMLChangeLogSerializerTest {
         String out = new XMLChangeLogSerializer().serialize(change, true);
         assertEquals("<createTable catalogName=\"a\"\n" +
                 "        ifNotExists=\"true\"\n" +
-                "        preserveNullValues=\"true\"\n" +
                 "        schemaName=\"b\"\n" +
                 "        tableName=\"c\">\n" +
                 "    <column defaultValue=\"x1\" name=\"x\"/>\n" +
@@ -992,7 +990,6 @@ public class XMLChangeLogSerializerTest {
 
         String out = new XMLChangeLogSerializer().serialize(change, true);
         assertEquals("<createTable catalogName=\"a\"\n" +
-                "        preserveNullValues=\"true\"\n" +
                 "        schemaName=\"b\"\n" +
                 "        tableName=\"c\">\n" +
                 "    <column defaultValue=\"x1\" name=\"x\"/>\n" +
@@ -1009,7 +1006,6 @@ public class XMLChangeLogSerializerTest {
 
         String out = new XMLChangeLogSerializer().serialize(change, true);
         assertEquals("<addAutoIncrement catalogName=\"a\"\n" +
-                "        preserveNullValues=\"true\"\n" +
                 "        schemaName=\"b\"\n" +
                 "        tableName=\"c\"/>", out);
     }
@@ -1028,7 +1024,6 @@ public class XMLChangeLogSerializerTest {
         serializer.preserveNullValues(true);
         String actualOutput = serializer.serialize(change, true);
         assertEquals("<createTable catalogName=\"a\"\n" +
-                "        preserveNullValues=\"true\"\n" +
                 "        schemaName=\"b\"\n" +
                 "        tableName=\"c\">\n" +
                 "    <column name=\"x\" value=\"null\"/>\n" +
@@ -1050,7 +1045,6 @@ public class XMLChangeLogSerializerTest {
         serializer.preserveNullValues(false);
         String actualOutput = serializer.serialize(change, true);
         assertEquals("<createTable catalogName=\"a\"\n" +
-                "        preserveNullValues=\"true\"\n" +
                 "        schemaName=\"b\"\n" +
                 "        tableName=\"c\">\n" +
                 "    <column name=\"x\"/>\n" +

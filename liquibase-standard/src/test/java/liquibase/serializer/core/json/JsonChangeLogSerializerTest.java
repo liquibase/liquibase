@@ -87,8 +87,7 @@ public class JsonChangeLogSerializerTest {
                 "              }\n" +
                 "            }\n" +
                 "          ]\n" +
-                "          ,\n" +
-                "          \"preserveNullValues\": true\n" +
+                "          \n" +
                 "        }\n" +
                 "      }\n" +
                 "    ]\n" +
@@ -167,8 +166,7 @@ public class JsonChangeLogSerializerTest {
                 "              }\n" +
                 "            }\n" +
                 "          ]\n" +
-                "          ,\n" +
-                "          \"preserveNullValues\": true\n" +
+                "          \n" +
                 "        }\n" +
                 "      }\n" +
                 "    ]\n" +
