@@ -87,7 +87,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
         ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo, compareControl, exclude);
 
         DataType type1 = ((Column) databaseObject1).getType();
-        DataType type2 = ((Column) databaseObject1).getType();
+        DataType type2 = ((Column) databaseObject2).getType();
 
         differences.compare("name", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
         compareTypes(databaseObject1, databaseObject2, accordingTo, type1, type2, differences);
