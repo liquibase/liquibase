@@ -22,12 +22,6 @@ jobs:
         package-name: ${{ matrix.packages_to_delete }}
         package-type: maven
 
-        # The number of latest versions to keep.
-        # This cannot be specified with `num-old-versions-to-delete`. By default, `num-old-versions-to-delete` takes precedence over `min-versions-to-keep`.
-        # When set to 0, all deletable versions will be deleted.
-        # When set greater than 0, all deletable package versions except the specified number will be deleted.
-        min-versions-to-keep: 0
-
         # The package versions to exclude from deletion.
         # Takes regex for the version name as input.
         # By default nothing is ignored.
