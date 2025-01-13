@@ -28,7 +28,6 @@ jobs:
 
   delete-dat-package:
     name: Delete DAT-SNAPSHOT Github Package for Branch
-    if: always()
     needs: extract-branch-info
     runs-on: ubuntu-22.04
 
@@ -55,7 +54,6 @@ jobs:
         
   delete-sha-package:
     name: Delete SHA-SNAPSHOT Github Package for Branch
-    if: always()
     needs: [ delete-dat-package, extract-branch-info ]
     runs-on: ubuntu-22.04
 
