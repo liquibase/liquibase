@@ -30,6 +30,7 @@ import lombok.Getter;
 
 import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -126,7 +127,7 @@ public class Scope {
 
             rootScope.values.put(Attr.serviceLocator.name(), serviceLocator);
             rootScope.values.put(Attr.osgiPlatform.name(), ContainerChecker.isOsgiPlatform());
-            rootScope.values.put(Attr.deploymentId.name(), UUID.randomUUID().toString());
+            rootScope.values.put(Attr.deploymentId.name(), generateDeploymentId());
         }
         return scopeManager.get().getCurrentScope();
     }
@@ -526,6 +527,14 @@ public class Scope {
      */
     public Event getAnalyticsEvent() {
         return Scope.getCurrentScope().get(Attr.analyticsEvent, Event.class);
+    }
+
+    private static String generateDeploymentId() {
+        long time = (new Date()).getTime();
+        String dateString = String.valueOf(time);
+        DecimalFormat decimalFormat = new DecimalFormat("0000000000");
+        return dateString.length() > 9 ? dateString.substring(dateString.length() - 10) :
+                decimalFormat.format(time);
     }
 
     @Override
