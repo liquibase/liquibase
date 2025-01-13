@@ -475,19 +475,19 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link org.liquibase.api.Column }
+     * Create an instance of {@link Column }
      * 
      */
-    public org.liquibase.api.Column createColumn() {
-        return new org.liquibase.api.Column();
+    public Column createColumn() {
+        return new Column();
     }
 
     /**
      * Create an instance of {@link org.liquibase.api.Param }
      * 
      */
-    public org.liquibase.api.Param createParam() {
-        return new org.liquibase.api.Param();
+    public Param createParam() {
+        return new Param();
     }
 
     /**

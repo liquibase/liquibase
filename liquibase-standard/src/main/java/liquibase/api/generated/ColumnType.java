@@ -52,7 +52,7 @@ import org.w3c.dom.Element;
     "content"
 })
 @XmlSeeAlso({
-    org.liquibase.api.AddColumn.Column.class
+   AddColumn.Column.class
 })
 public class ColumnType {
 
