@@ -263,8 +263,8 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDescription("If true 'classpath:' prefix will be preserved in normalized paths, allowing to resolve hierarchical resources under a classpath-based root.")
                 .setDefaultValue(false)
                 .build();
-        IGNORE_MISSING_REFERENCES = builder.define("ignoreMissingReferences", Boolean.class)
-                .setDescription("If true, diff will ignore references to objects not found in the snapshot")
+        IGNORE_MISSING_REFERENCES = builder.define("diff.ignoreMissingReferences", Boolean.class)
+                .setDescription("If true, diff operations will ignore referenced objects which are not found in the snapshot.")
                 .setDefaultValue(false)
                 .build();
     }
