@@ -51,8 +51,6 @@ jobs:
         
         # on branch id's deletion we only want to delete that particular branch version
         package-version-ids: "${{ steps.version.outputs.ids }}"
-        delete-only-pre-release-versions: false
-        delete-only-untagged-versions: false
         
   delete-sha-package:
     name: Delete SHA-SNAPSHOT Github Package for Branch
