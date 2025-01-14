@@ -105,9 +105,24 @@ jobs:
                 VERSION=$(grep '<version>' pom.xml | head -n 1 | sed 's/.*<version>\(.*\)-SNAPSHOT<\/version>.*/\1/')
                 echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+  delete-checks-packages:
+    needs: [ setup_matrix, get-liquibase-checks-version ]
+    runs-on: ubuntu-22.04
+    continue-on-error: true
+    strategy:
+      matrix:
+        extensions: ${{ fromJson(needs.setup_matrix.outputs.extensions_matrix) }}
+    steps:
+      - uses: actions/delete-package-versions@v5
+        with:
+          package-name: org.liquibase.ext.liquibase-checks
+          package-type: "maven"
+          token: ${{ secrets.BOT_TOKEN }}
+          ignore-versions: "^((?!${{ needs.get-liquibase-checks-version.outputs.version }}$).)*$"
+
   build-liquibase-checks:
       if: ${{ contains(inputs.extensions, 'liquibase-checks') }}
-      needs: [ delete-extension-packages, get-liquibase-checks-version ]
+      needs: [ delete-extension-packages, get-liquibase-checks-version, delete-checks-packages ]
       uses: liquibase/build-logic/.github/workflows/publish-for-liquibase.yml@main
       with:
           repository: liquibase/liquibase-checks
@@ -115,7 +130,7 @@ jobs:
       secrets: inherit
 
   build-and-deploy-extensions:
-    needs: [delete-dependency-packages, delete-extension-packages]
+    needs: [delete-dependency-packages, delete-extension-packages, delete-checks-packages]
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
