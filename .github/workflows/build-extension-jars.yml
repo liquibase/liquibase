@@ -111,7 +111,7 @@ jobs:
       uses: liquibase/build-logic/.github/workflows/publish-for-liquibase.yml@main
       with:
           repository: liquibase/liquibase-checks
-          version: ${{ inputs.liquibase-version }}
+          version: ${{ needs.get-liquibase-checks-version.outputs.version }}
       secrets: inherit
 
   build-and-deploy-extensions:
