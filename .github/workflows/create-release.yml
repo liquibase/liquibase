@@ -195,6 +195,17 @@ jobs:
               }
             ]
 
+      - name: Get extensions artifacts
+        run: |
+          IFS=',' read -ra ADDR <<< "${{ needs.setup.outputs.extensions }}"
+          for extension in "${ADDR[@]}"; do
+            if [ "$extension" != "liquibase-checks" ]; then
+              mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=$extension -Dversion=${{ needs.setup.outputs.version }} -Dtransitive=false || echo "Failed to download $extension artifact"
+            else
+              mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=$extension -Dversion=${{ needs.get-liquibase-checks-version.outputs.version }} -Dtransitive=false || echo "Failed to download $extension artifact"
+            fi
+          done
+
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
