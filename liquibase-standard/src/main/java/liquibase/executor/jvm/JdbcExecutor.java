@@ -481,7 +481,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
                 Level sqlLogLevel = SqlConfiguration.SHOW_AT_LOG_LEVEL.getCurrentValue();
 
-                log.log(sqlLogLevel, statement, null);
+                log.log(sqlLogLevel, System.lineSeparator() + statement, null);
                 if (statement.contains("?")) {
                     stmt.setEscapeProcessing(false);
                 }
