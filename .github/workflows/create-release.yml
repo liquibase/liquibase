@@ -153,41 +153,47 @@ jobs:
           name: liquibase-pro-azure-artifacts
           path: liquibase-pro/liquibase-azure-deps
 
-      - name: Generate repositories and servers JSON
-        id: generate-json
-        run: |
-          IFS=',' read -ra EXT <<< "${{ needs.setup.outputs.extensions }}"
-          repositories=""
-          servers=""
-          for i in "${EXT[@]}"; do
-            repositories+="{\"id\": \"$i\",\"url\": \"https://maven.pkg.github.com/liquibase/$i\",\"releases\": {\"enabled\": \"true\"},\"snapshots\": {\"enabled\": \"true\",\"updatePolicy\": \"always\"}},"
-            servers+="{\"id\": \"$i\",\"username\": \"liquibot\",\"password\": \"${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}\"},"
-          done
-          # Remove trailing comma and wrap with brackets
-          repositories="["${repositories::-1}"]"
-          servers="["${servers::-1}"]"
-          echo "REPOSITORIES_JSON=$repositories" >> $GITHUB_ENV
-          echo "SERVERS_JSON=$servers" >> $GITHUB_ENV
-
       - name: maven-settings-xml-action
         uses: whelk-io/maven-settings-xml-action@v22
         with:
-          repositories: ${{ env.REPOSITORIES_JSON }}
-          servers: ${{ env.SERVERS_JSON }}
-
-      - name: Get extensions artifacts
-        run: |
-          IFS=',' read -ra ADDR <<< "${{ needs.setup.outputs.extensions }}"
-          for extension in "${ADDR[@]}"; do
-            if [ "$extension" != "liquibase-checks" ]; then
-              mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=$extension -Dversion=${{ needs.setup.outputs.version }} -Dtransitive=false || echo "Failed to download $extension artifact"
-              ls -ltr ~/.m2/repository/org/liquibase/ext/$extension/
-              ls -ltr ~/.m2/repository/org/liquibase/ext/$extension/${{ needs.setup.outputs.version }}
-              rm -rf ~/.m2/repository/org/liquibase/ext/$extension/${{ needs.setup.outputs.version }}/$extension-${{ needs.setup.outputs.version }}.jar
-            else
-              mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=$extension -Dversion=${{ needs.get-liquibase-checks-version.outputs.version }} -Dtransitive=false || echo "Failed to download $extension artifact"
-            fi
-          done
+          repositories: |
+            [
+              {
+                "id": "liquibase",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase",
+                "releases": {
+                  "enabled": "true"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              },
+              {
+                "id": "liquibase-pro",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
+                "releases": {
+                  "enabled": "true"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              }
+            ]
+          servers: |
+            [
+              {
+                "id": "liquibase",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}"
+              },
+              {
+                "id": "liquibase-pro",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}"
+              }
+            ]
 
       - name: Set up JDK
         uses: actions/setup-java@v4
