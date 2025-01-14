@@ -181,6 +181,9 @@ jobs:
           for extension in "${ADDR[@]}"; do
             if [ "$extension" != "liquibase-checks" ]; then
               mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=$extension -Dversion=${{ needs.setup.outputs.version }} -Dtransitive=false || echo "Failed to download $extension artifact"
+              ls -ltr ~/.m2/repository/org/liquibase/ext/$extension/
+              ls -ltr ~/.m2/repository/org/liquibase/ext/$extension/${{ needs.setup.outputs.version }}
+              rm -rf ~/.m2/repository/org/liquibase/ext/$extension/${{ needs.setup.outputs.version }}/$extension-${{ needs.setup.outputs.version }}.jar
             else
               mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=$extension -Dversion=${{ needs.get-liquibase-checks-version.outputs.version }} -Dtransitive=false || echo "Failed to download $extension artifact"
             fi
