@@ -57,6 +57,8 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
         commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, getDiffOutputControl().getIncludeSchema());
         commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_CATALOG_ARG, getDiffOutputControl().getIncludeCatalog());
         commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_TABLESPACE_ARG, getDiffOutputControl().getIncludeTablespace());
+        commandScope.addArgumentValue(DiffOutputControlCommandStep.EXCLUDE_OBJECTS, getDiffOutputControl().getExcludeObjects());
+        commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_OBJECTS, getDiffOutputControl().getIncludeObjects());
 
         commandScope.addArgumentValue(GenerateChangelogCommandStep.AUTHOR_ARG, getAuthor());
         commandScope.addArgumentValue(GenerateChangelogCommandStep.CONTEXT_ARG, getContext());
