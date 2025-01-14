@@ -236,7 +236,11 @@ jobs:
           rm -rf re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz
           mkdir -p re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions
           for I in "${EXT[@]}"; do
-            cp ~/.m2/repository/org/liquibase/ext/$I/${{ needs.setup.outputs.version }}/$I-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$I.jar || echo "Failed to move $I artifact"
+            if [ "I" != "liquibase-checks" ]; then
+              cp ~/.m2/repository/org/liquibase/ext/$I/${{ needs.setup.outputs.version }}/$I-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$I.jar || echo "Failed to move $I artifact"
+            else
+              cp ~/.m2/repository/org/liquibase/ext/$I/${{ needs.get-liquibase-checks-version.outputs.version }}/$I-${{ needs.get-liquibase-checks-version.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$I.jar || echo "Failed to move $I artifact"
+            fi
           done
           (cd re-version/out/liquibase-${{ needs.setup.outputs.version }} && tar -czvf ../liquibase-${{ needs.setup.outputs.version }}.tar.gz * && cd .. && rm -rf liquibase-${{ needs.setup.outputs.version }})
 
