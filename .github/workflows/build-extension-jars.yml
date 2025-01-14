@@ -102,8 +102,8 @@ jobs:
             name: Extract version from pom.xml
             shell: bash
             run: |
-              VERSION=$(grep -A1 '<artifactId>liquibase-checks</artifactId>' pom.xml | grep '<version>' | sed 's/.*<version>\(.*\)-SNAPSHOT<\/version>.*/\1/')
-              echo "version=$VERSION" >> $GITHUB_OUTPUT
+                VERSION=$(grep '<version>' pom.xml | head -n 1 | sed 's/.*<version>\(.*\)-SNAPSHOT<\/version>.*/\1/')
+                echo "version=$VERSION" >> $GITHUB_OUTPUT
 
   build-liquibase-checks:
       if: ${{ contains(inputs.extensions, 'liquibase-checks') }}
