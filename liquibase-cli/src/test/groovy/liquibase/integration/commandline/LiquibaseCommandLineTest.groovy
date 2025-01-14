@@ -149,6 +149,14 @@ Global Options
                                environment variable:
                                'LIQUIBASE_DIFF_COLUMN_ORDER')
 
+      --diff-ignore-missing-references=PARAM
+                             If true, diff operations will ignore referenced
+                               objects which are not found in the snapshot.
+                             DEFAULT: false
+                             (defaults file: 'liquibase.diff.
+                               ignoreMissingReferences', environment variable:
+                               'LIQUIBASE_DIFF_IGNORE_MISSING_REFERENCES')
+
       --driver=PARAM         Database driver class
                              (defaults file: 'liquibase.driver', environment
                                variable: 'LIQUIBASE_DRIVER')

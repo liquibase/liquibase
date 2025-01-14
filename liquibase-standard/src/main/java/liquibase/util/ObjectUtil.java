@@ -1,10 +1,14 @@
 package liquibase.util;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.command.core.DiffCommandStep;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.DataType;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -158,8 +162,9 @@ public class ObjectUtil {
             throw new UnexpectedLiquibaseException(e);
         } catch (IllegalArgumentException e) {
             if (finalValue != null) {
-                throw new UnexpectedLiquibaseException("Cannot call " + method
-                        + " with value of type " + finalValue.getClass().getName(), e);
+                String message = "Cannot call " + method
+                        + " with value of type " + finalValue.getClass().getName();
+                throw new UnexpectedLiquibaseException(message, e);
             } else {
                 throw new UnexpectedLiquibaseException("Cannot call " + method + " with a null argument", e);
             }
@@ -182,6 +187,12 @@ public class ObjectUtil {
                 ));
         }
 
+        if (GlobalConfiguration.IGNORE_MISSING_REFERENCES.getCurrentValue()) {
+            Class<?>[] parameterTypes = method.getParameterTypes();
+            if (propertyValue instanceof String && !parameterTypes[0].isAssignableFrom(String.class)) {
+                return;
+            }
+        }
         try {
             if (propertyValue == null) {
                 setProperty(object, propertyName, null);
