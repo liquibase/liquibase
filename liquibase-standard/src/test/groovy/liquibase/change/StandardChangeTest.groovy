@@ -10,7 +10,7 @@ import spock.lang.Specification
 /**
  * Base test class for changes
  */
-public abstract class StandardChangeTest extends Specification {
+abstract class StandardChangeTest extends Specification {
 
 //    @Shared changeSupplier = new ChangeSupplierFactory()
     @Shared resourceSupplier = new ResourceSupplier()

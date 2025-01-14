@@ -682,7 +682,7 @@ class ChangeSetTest extends Specification {
         then:
         def outputFile = new File("changelog-with-rollback.yaml")
         def contents = FileUtil.getContents(outputFile).replace("\n","").replace("\r","").trim()
-        def expectKeys = "rollback:      empty: {}".trim()
+        def expectKeys = "rollback:      empty: ".trim()
         contents.contains(expectKeys)
 
         cleanup:
@@ -704,7 +704,7 @@ class ChangeSetTest extends Specification {
         then:
         def outputFile = new File("changelog-with-rollback.xml")
         def contents = FileUtil.getContents(outputFile).replace("\n","").replace("\r","").trim()
-        def expectedKeys = "<rollback>            <empty/>        </rollback>".trim()
+        def expectedKeys = "objectQuotingStrategy=\"LEGACY\">        <rollback>            <empty/>        </rollback>    </changeSet></databaseChangeLog>".trim()
         contents.contains(expectedKeys)
 
         cleanup:
@@ -730,7 +730,7 @@ class ChangeSetTest extends Specification {
         then:
         def outputFile = new File("changelog-with-rollback.yaml")
         def contents = FileUtil.getContents(outputFile).replace("\n","").replace("\r","").trim()
-        def expectedKeys = "rollback:      sqlFile:        path: test/rollbackFile.sql        splitStatements: true        stripComments: false".trim()
+        def expectedKeys = "changeSet:    id: '1'    author: nvoxland    objectQuotingStrategy: LEGACY    rollback:      sqlFile:        path: test/rollbackFile.sql        splitStatements: true        stripComments: false".trim()
         contents.contains(expectedKeys)
 
         cleanup:

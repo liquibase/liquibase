@@ -4,9 +4,11 @@ import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.serializer.LiquibaseSerializable
+import liquibase.serializer.ReflectionSerializer
 import liquibase.statement.DatabaseFunction
 import liquibase.statement.SequenceNextValueFunction
 import liquibase.structure.core.*
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -445,7 +447,9 @@ class ColumnConfigTest extends Specification {
         assert column.getSerializableFieldValue(field).toString() == testValue.toString()
 
         where:
-        field << new ColumnConfig().getSerializableFields().findAll({ !it.equals("constraints") })
+        // ColumnConfig#getSerializableFields() returns a reduced Set of serialized fields, potentially empty
+        // Thus, we need to fetch the static definition cached in ReflectionSerializer
+        field << ReflectionSerializer.getInstance().getFields(new ColumnConfig()).findAll({it != "constraints"})
     }
 
     @Unroll("#featureName: #field")
@@ -511,4 +515,28 @@ class ColumnConfigTest extends Specification {
         new ColumnConfig().setAutoIncrement(true).setName("my_col").setConstraints(new ConstraintsConfig().setNullable(true)) | "column[autoIncrement=true,constraints[nullable=true],name=my_col]"
     }
 
+    def "instance with 1 non-null property"() {
+        when:
+        ColumnConfig column = new ColumnConfig().setName("columnName")
+        Set<String> fields = column.getSerializableFields()
+
+        then:
+        fields.size() == 1
+        fields.first() == "name"
+    }
+
+    def "instance with 3 non-null properties"() {
+        when:
+        ColumnConfig column = new ColumnConfig()
+                .setName("columnName")
+                .setComputed(Boolean.valueOf(true))
+                .setEncoding("utf-8")
+        Set<String> fields = column.getSerializableFields()
+
+        then:
+        fields.size() == 3
+        fields.contains("name")
+        fields.contains("computed")
+        fields.contains("encoding")
+    }
 }

@@ -17,32 +17,93 @@ import static org.junit.Assert.assertEquals;
 
 public class JsonChangeLogSerializerTest {
 
-    private String origTimeZone =  System.getProperty("user.timezone");
+    @Test
+    public void serialize_changeSet_preservingNullValues() {
+        //given
+        ChangeSet changeSet = generateChangeSet();
+        //when
+        JsonChangeLogSerializer serializer = new JsonChangeLogSerializer();
+        serializer.preserveNullValues(true);
+        String serializedJson = serializer.serialize(changeSet, true);
+        //then
+        assertEquals("{\n" +
+                "  \"changeSet\": {\n" +
+                "    \"id\": \"1\",\n" +
+                "    \"author\": \"nvoxland\",\n" +
+                "    \"ignore\": true,\n" +
+                "    \"objectQuotingStrategy\": \"LEGACY\",\n" +
+                "    \"preconditions\": {\n" +
+                "      \"preConditions\": {\n" +
+                "        \"nestedPreconditions\": [\n" +
+                "          {\n" +
+                "            \"preConditions\": {\n" +
+                "              \"onError\": \"WARN\",\n" +
+                "              \"onFail\": \"CONTINUE\",\n" +
+                "              \"onSqlOutput\": \"TEST\"\n" +
+                "            }\n" +
+                "          }\n" +
+                "        ]\n" +
+                "        ,\n" +
+                "        \"onError\": \"CONTINUE\",\n" +
+                "        \"onFail\": \"MARK_RAN\",\n" +
+                "        \"onSqlOutput\": \"FAIL\"\n" +
+                "      }\n" +
+                "    },\n" +
+                "    \"runInTransaction\": false,\n" +
+                "    \"runOrder\": \"last\",\n" +
+                "    \"changes\": [\n" +
+                "      {\n" +
+                "        \"addColumn\": {\n" +
+                "          \"catalogName\": \"cat\",\n" +
+                "          \"columns\": [\n" +
+                "            {\n" +
+                "              \"column\": {\n" +
+                "                \"defaultValueNumeric\": 3,\n" +
+                "                \"name\": \"col1\"\n" +
+                "              }\n" +
+                "            },\n" +
+                "            {\n" +
+                "              \"column\": {\n" +
+                "                \"defaultValueComputed\": \"NOW()\",\n" +
+                "                \"name\": \"col2\"\n" +
+                "              }\n" +
+                "            },\n" +
+                "            {\n" +
+                "              \"column\": {\n" +
+                "                \"defaultValueBoolean\": true,\n" +
+                "                \"name\": \"col3\"\n" +
+                "              }\n" +
+                "            },\n" +
+                "            {\n" +
+                "              \"column\": {\n" +
+                "                \"defaultValueDate\": \"1970-01-01T00:00:00\",\n" +
+                "                \"name\": \"col2\"\n" +
+                "              }\n" +
+                "            },\n" +
+                "            {\n" +
+                "              \"column\": {\n" +
+                "                \"defaultValueSequenceNext\": \"seq_me\",\n" +
+                "                \"name\": \"col2\"\n" +
+                "              }\n" +
+                "            }\n" +
+                "          ]\n" +
+                "          \n" +
+                "        }\n" +
+                "      }\n" +
+                "    ]\n" +
+                "    \n" +
+                "  }\n" +
+                "}\n", serializedJson);
+    }
 
     @Test
-    public void serialize_changeSet() {
+    public void serialize_changeSet_notPreservingNullValues() {
         //given
-        AddColumnChange addColumnChange = new AddColumnChange();
-        addColumnChange.setCatalogName("cat");
-        addColumnChange.addColumn((AddColumnConfig) new AddColumnConfig().setName("col1").setDefaultValueNumeric(3));
-        addColumnChange.addColumn((AddColumnConfig) new AddColumnConfig().setName("col2").setDefaultValueComputed(new DatabaseFunction("NOW()")));
-        addColumnChange.addColumn((AddColumnConfig) new AddColumnConfig().setName("col3").setDefaultValueBoolean(true));
-
-        // Get the Date object for 1970-01-01T00:00:00 in the current time zone.
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(0);
-        cal.set(1970, 0, 1, 0, 0, 0);
-
-        addColumnChange.addColumn((AddColumnConfig) new AddColumnConfig().setName("col2").setDefaultValueDate(
-                cal.getTime()));
-        addColumnChange.addColumn((AddColumnConfig) new AddColumnConfig().setName("col2").setDefaultValueSequenceNext(new SequenceNextValueFunction("seq_me")));
-        ChangeSet changeSet = new ChangeSet("1", "nvoxland", false, false, "path/to/file.json", null, null,false, null);
-        changeSet.setPreconditions(newSamplePreconditions());
-        changeSet.setRunOrder("last");
-        changeSet.setIgnore(true);
-        changeSet.addChange(addColumnChange);
+        ChangeSet changeSet = generateChangeSet();
         //when
-        String serializedJson = new JsonChangeLogSerializer().serialize(changeSet, true);
+        JsonChangeLogSerializer serializer = new JsonChangeLogSerializer();
+        serializer.preserveNullValues(false);
+        String serializedJson = serializer.serialize(changeSet, true);
         //then
         assertEquals("{\n" +
                 "  \"changeSet\": {\n" +
@@ -125,5 +186,29 @@ public class JsonChangeLogSerializerTest {
         nestedPrecondition.setOnSqlOutput(OnSqlOutputOption.TEST);
         precondition.addNestedPrecondition(nestedPrecondition);
         return precondition;
+    }
+
+    private ChangeSet generateChangeSet() {
+        AddColumnChange addColumnChange = new AddColumnChange();
+        addColumnChange.setCatalogName("cat");
+        addColumnChange.addColumn((AddColumnConfig) new AddColumnConfig().setName("col1").setDefaultValueNumeric(3));
+        addColumnChange.addColumn((AddColumnConfig) new AddColumnConfig().setName("col2").setDefaultValueComputed(new DatabaseFunction("NOW()")));
+        addColumnChange.addColumn((AddColumnConfig) new AddColumnConfig().setName("col3").setDefaultValueBoolean(true));
+
+        // Get the Date object for 1970-01-01T00:00:00 in the current time zone.
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(0);
+        cal.set(1970, 0, 1, 0, 0, 0);
+
+        addColumnChange.addColumn((AddColumnConfig) new AddColumnConfig().setName("col2").setDefaultValueDate(cal.getTime()));
+        addColumnChange.addColumn((AddColumnConfig) new AddColumnConfig().setName("col2").setDefaultValueSequenceNext(new SequenceNextValueFunction("seq_me")));
+
+        ChangeSet changeSet = new ChangeSet("1", "nvoxland", false, false, "path/to/file.json", null, null,false, null);
+        changeSet.setPreconditions(newSamplePreconditions());
+        changeSet.setRunOrder("last");
+        changeSet.setIgnore(true);
+        changeSet.addChange(addColumnChange);
+
+        return changeSet;
     }
 }

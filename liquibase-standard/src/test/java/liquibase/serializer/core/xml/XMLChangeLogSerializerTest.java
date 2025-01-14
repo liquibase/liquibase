@@ -11,6 +11,7 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.precondition.CustomPreconditionWrapper;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.statement.SequenceNextValueFunction;
+
 import org.junit.Test;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -1005,6 +1006,48 @@ public class XMLChangeLogSerializerTest {
         assertEquals("<addAutoIncrement catalogName=\"a\"\n" +
                 "        schemaName=\"b\"\n" +
                 "        tableName=\"c\"/>", out);
+    }
+
+    @Test
+    public void serialize_pretty_showNullValues() {
+        CreateTableChange change = new CreateTableChange();
+        change.setCatalogName("a");
+        change.setSchemaName("b");
+        change.setTableName("c");
+        change.addColumn(new ColumnConfig().setName("x").setValue(null));
+        change.addColumn(new ColumnConfig().setName("y").setValue(null));
+
+        // with null-values preserved
+        XMLChangeLogSerializer serializer = new XMLChangeLogSerializer();
+        serializer.preserveNullValues(true);
+        String actualOutput = serializer.serialize(change, true);
+        assertEquals("<createTable catalogName=\"a\"\n" +
+                "        schemaName=\"b\"\n" +
+                "        tableName=\"c\">\n" +
+                "    <column name=\"x\" value=\"null\"/>\n" +
+                "    <column name=\"y\" value=\"null\"/>\n" +
+                "</createTable>", actualOutput);
+    }
+
+    @Test
+    public void serialize_pretty_suppressNullValues() {
+        CreateTableChange change = new CreateTableChange();
+        change.setCatalogName("a");
+        change.setSchemaName("b");
+        change.setTableName("c");
+        change.addColumn(new ColumnConfig().setName("x").setValue(null));
+        change.addColumn(new ColumnConfig().setName("y").setValue(null));
+
+        // without null-values preserved
+        XMLChangeLogSerializer serializer = new XMLChangeLogSerializer();
+        serializer.preserveNullValues(false);
+        String actualOutput = serializer.serialize(change, true);
+        assertEquals("<createTable catalogName=\"a\"\n" +
+                "        schemaName=\"b\"\n" +
+                "        tableName=\"c\">\n" +
+                "    <column name=\"x\"/>\n" +
+                "    <column name=\"y\"/>\n" +
+                "</createTable>", actualOutput);
     }
 
     private static Map<String, String> attsMap(String... values) {

@@ -5,6 +5,8 @@ import liquibase.command.*;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.ObjectChangeFilter;
+import liquibase.diff.output.changelog.ChangeGeneratorFactory;
+import liquibase.diff.output.changelog.core.MissingDataExternalFileChangeGenerator;
 import liquibase.logging.mdc.MdcKey;
 
 import java.util.Collections;
@@ -26,6 +28,7 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
 
     public static final CommandResultDefinition<DiffOutputControl> DIFF_OUTPUT_CONTROL;
 
+    public static final CommandArgumentDefinition<Boolean> PRESERVE_NULL_VALUES;
 
     static {
         final CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -42,6 +45,9 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
                 .description("Objects to include in diff. Supports regular expressions. Defaults to null.").build();
 
         DIFF_OUTPUT_CONTROL = builder.result("diffOutputControl", DiffOutputControl.class).build();
+
+        PRESERVE_NULL_VALUES = builder.argument("preserveNullValues", Boolean.class).defaultValue(true)
+                .description("If true, preserves NULL values in columns. Defaults to true.").build();
     }
 
     @Override
@@ -91,6 +97,8 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
         if (objectChangeFilter != null) {
             diffOutputControl.setObjectChangeFilter(objectChangeFilter);
         }
+
+        diffOutputControl.setPreserveNullValues(commandScope.getArgumentValue(PRESERVE_NULL_VALUES));
 
         return diffOutputControl;
     }
