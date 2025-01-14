@@ -87,14 +87,32 @@ jobs:
           token: ${{ secrets.BOT_TOKEN }}
           ignore-versions: "^((?!${{ inputs.liquibase-version }}$).)*$"
 
+  get-liquibase-checks-version:
+      if: ${{ contains(inputs.extensions, 'liquibase-checks') }}
+      runs-on: ubuntu-latest
+      outputs:
+          version: ${{ steps.extract-version.outputs.version }}
+      steps:
+          - uses: actions/checkout@v4
+            with:
+              repository: liquibase/liquibase-checks
+              token: ${{ secrets.BOT_TOKEN }}
+
+          - id: extract-version
+            name: Extract version from pom.xml
+            shell: bash
+            run: |
+              VERSION=$(grep -A1 '<artifactId>liquibase-checks</artifactId>' pom.xml | grep '<version>' | sed 's/.*<version>\(.*\)-SNAPSHOT<\/version>.*/\1/')
+              echo "version=$VERSION" >> $GITHUB_OUTPUT
+
   build-liquibase-checks:
-    if: ${{ contains(inputs.extensions, 'liquibase-checks') }}
-    needs: [ delete-extension-packages ]
-    uses: liquibase/build-logic/.github/workflows/publish-for-liquibase.yml@main
-    with:
-      repository: liquibase/liquibase-checks
-      version: ${{ inputs.liquibase-version }}
-    secrets: inherit
+      if: ${{ contains(inputs.extensions, 'liquibase-checks') }}
+      needs: [ delete-extension-packages, get-liquibase-checks-version ]
+      uses: liquibase/build-logic/.github/workflows/publish-for-liquibase.yml@main
+      with:
+          repository: liquibase/liquibase-checks
+          version: ${{ inputs.liquibase-version }}
+      secrets: inherit
 
   build-and-deploy-extensions:
     needs: [delete-dependency-packages, delete-extension-packages]
