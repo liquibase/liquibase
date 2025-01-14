@@ -289,6 +289,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     @Setter
     private Date operationStopTime;
 
+    @Getter
+    private final Integer order = DatabaseChangeLog.CHANGESET_ORDER.getAndIncrement();
+
     public boolean shouldAlwaysRun() {
         return alwaysRun;
     }

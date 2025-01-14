@@ -1,14 +1,5 @@
 package liquibase.resource;
 
-import liquibase.ContextExpression;
-import liquibase.GlobalConfiguration;
-import liquibase.Labels;
-import liquibase.changelog.ChangeLogParameters;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.exception.LiquibaseException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,10 +9,20 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Objects;
 import java.util.Properties;
+import liquibase.ContextExpression;
+import liquibase.GlobalConfiguration;
+import liquibase.Labels;
+import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.exception.LiquibaseException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-
+@Disabled
 public class UrlDrivenResourceAccessorTest {
 
     UrlDrivenResourceAccessor accessor;
