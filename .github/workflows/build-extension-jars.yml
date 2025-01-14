@@ -106,12 +106,9 @@ jobs:
                 echo "version=$VERSION" >> $GITHUB_OUTPUT
 
   delete-checks-packages:
-    needs: [ setup_matrix, get-liquibase-checks-version ]
+    needs: [ get-liquibase-checks-version ]
     runs-on: ubuntu-22.04
     continue-on-error: true
-    strategy:
-      matrix:
-        extensions: ${{ fromJson(needs.setup_matrix.outputs.extensions_matrix) }}
     steps:
       - uses: actions/delete-package-versions@v5
         with:
