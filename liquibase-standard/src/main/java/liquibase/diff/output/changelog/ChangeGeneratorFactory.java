@@ -61,6 +61,14 @@ public class ChangeGeneratorFactory {
         unregister(toRemove);
     }
 
+    public void unregisterAll(Class generatorClass) {
+        for (ChangeGenerator existingGenerator : generators) {
+            if (existingGenerator.getClass().equals(generatorClass)) {
+                unregister(generatorClass);
+            }
+        }
+    }
+
     protected SortedSet<ChangeGenerator> getGenerators(Class<? extends ChangeGenerator> generatorType, Class<? extends DatabaseObject> objectType, Database database) {
         SortedSet<ChangeGenerator> validGenerators = new TreeSet<>(new ChangeGeneratorComparator(objectType, database));
 

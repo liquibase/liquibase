@@ -27,6 +27,8 @@ Optional Args:
     Default: null
   contextFilter (String) Changeset contexts to generate
     Default: null
+  dataDir (String) Directory where insert statement csv files will be kept when processing a LoadData change.
+    Default: null
   dataOutputDirectory (String) Directory to write table data to
     Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
