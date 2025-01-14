@@ -2,6 +2,7 @@ package liquibase.change.core
 
 import liquibase.ChecksumVersion
 import liquibase.GlobalConfiguration
+import liquibase.Null
 import liquibase.Scope
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
@@ -336,14 +337,11 @@ class LoadDataChangeTest extends StandardChangeTest {
         sqlStatements.length == 2
         assert sqlStatements[0] instanceof InsertStatement
         assert sqlStatements[1] instanceof InsertStatement
-        println sqlStatements[0]
-        println sqlStatements[1]
+        assert ((InsertStatement) sqlStatements[0]).getColumnValue("parent_id") instanceof Null // Equivalent to NULL in SQL
 
         "SCHEMA_NAME" == ((InsertStatement) sqlStatements[0]).getSchemaName()
         "TABLE_NAME" == ((InsertStatement) sqlStatements[0]).getTableName()
         "c7ac2480-bc96-11e2-a300-64315073a768" == ((InsertStatement) sqlStatements[0]).getColumnValue("id")
-        "NULL" == ((InsertStatement) sqlStatements[0]).getColumnValue("parent_id")
-
         "SCHEMA_NAME" == ((InsertStatement) sqlStatements[1]).getSchemaName()
         "TABLE_NAME" == ((InsertStatement) sqlStatements[1]).getTableName()
         "c801be90-bc96-11e2-a300-64315073a768" == ((InsertStatement) sqlStatements[1]).getColumnValue("id")
@@ -737,11 +735,11 @@ class LoadDataChangeTest extends StandardChangeTest {
         then:
         // All other NULL or empty fields are null
         [Col.name, Col.num, Col.date, Col.bool].each {
-            assert columnValue(sqlStatements[0], it) == "NULL"
+            assert columnValue (sqlStatements[0], it) instanceof Null // Equivalent to NULL in SQL
         }
         columnValue(sqlStatements[1], Col.name) == ""
         [Col.num, Col.num, Col.bool].each {
-            assert columnValue(sqlStatements[1], it) == "NULL"
+            assert columnValue(sqlStatements[1], it) instanceof Null // Equivalent to NULL in SQL
         }
         columnValue(sqlStatements[2], Col.name) == "'NULL'"
         [Col.num, Col.date].each {
@@ -807,20 +805,20 @@ class LoadDataChangeTest extends StandardChangeTest {
         columnValue(sqlStatements[0], WorkerCol.surname) == "Flintstone"
         columnValue(sqlStatements[0], WorkerCol.job) == "Crane operator"
         //null,null,null,null
-        columnValue(sqlStatements[1], WorkerCol.name) == "NULL" // NULL sql ref
+        columnValue(sqlStatements[1], WorkerCol.name) instanceof Null // Equivalent to NULL in SQL
         columnValue(sqlStatements[1], WorkerCol.middlename) == "null"
         columnValue(sqlStatements[1], WorkerCol.surname) == "null"
         columnValue(sqlStatements[1], WorkerCol.job) == "null"
         //,,,
         columnValue(sqlStatements[2], WorkerCol.name) == ""
-        columnValue(sqlStatements[2], WorkerCol.middlename) == "NULL" // NULL sql ref
-        columnValue(sqlStatements[2], WorkerCol.surname) == "NULL" // NULL sql ref
+        columnValue(sqlStatements[2], WorkerCol.middlename) instanceof Null // Equivalent to NULL in SQL
+        columnValue(sqlStatements[2], WorkerCol.surname) instanceof Null // Equivalent to NULL in SQL
         columnValue(sqlStatements[2], WorkerCol.job) == ""
         //NONE,NONE,NONE,NONE
         columnValue(sqlStatements[3], WorkerCol.name) == "NONE"
         columnValue(sqlStatements[3], WorkerCol.middlename) == "NONE"
         columnValue(sqlStatements[3], WorkerCol.surname) == "NONE"
-        columnValue(sqlStatements[3], WorkerCol.job) == "NULL" // NULL sql ref
+        columnValue(sqlStatements[3], WorkerCol.job) instanceof Null // Equivalent to NULL in SQL
     }
 
     def "temporal values work for DATE, DATETIME and TIME column configs"() {
@@ -848,9 +846,9 @@ class LoadDataChangeTest extends StandardChangeTest {
         then:
         //NULLS
         columnValue(sqlStatements[0], Col.id) == 1
-        columnValue(sqlStatements[0], Col.date) == "NULL"
-        columnValue(sqlStatements[0], Col.datetime) == "NULL"
-        columnValue(sqlStatements[0], Col.time) == "NULL"
+        columnValue(sqlStatements[0], Col.date) instanceof Null // Equivalent to NULL in SQL
+        columnValue(sqlStatements[0], Col.datetime) instanceof Null // Equivalent to NULL in SQL
+        columnValue(sqlStatements[0], Col.time) instanceof Null // Equivalent to NULL in SQL
 
         //NOWANDTODAYUTIL used
         columnValue(sqlStatements[1], Col.id) == 2
