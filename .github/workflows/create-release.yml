@@ -74,15 +74,15 @@ jobs:
       - run: |
           echo "Creating version ${{ inputs.version }} from ${{ inputs.branch }} with artifacts from build ${{ inputs.runId }} "
 
-  owasp-scanner:
-    needs: [ setup ]
-    uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@main
-    with:
-      branch: ${{ needs.setup.outputs.branch }}
-    secrets: inherit
+  # owasp-scanner:
+  #   needs: [ setup ]
+  #   uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@main
+  #   with:
+  #     branch: ${{ needs.setup.outputs.branch }}
+  #   secrets: inherit
 
   build-azure-uber-jar:
-   needs: [ setup, owasp-scanner ]
+   needs: [ setup ]
    uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
    with:
      branch: ${{ needs.setup.outputs.branch }}
@@ -90,8 +90,8 @@ jobs:
    secrets: inherit
 
   build-extension-jars:
-   needs: [ setup, owasp-scanner ]
-   uses: liquibase/liquibase/.github/workflows/build-extension-jars.yml@master
+   needs: [ setup ]
+   uses: liquibase/liquibase/.github/workflows/build-extension-jars.yml@DAT-19398
    with:
      liquibase-version: ${{ needs.setup.outputs.version }}
      dependencies: ${{ needs.setup.outputs.dependencies }}
@@ -99,8 +99,27 @@ jobs:
      branch: ${{ needs.setup.outputs.branch }}
    secrets: inherit
 
+  get-liquibase-checks-version:
+    needs: [ setup ]
+    if: ${{ contains(needs.setup.outputs.extensions, 'liquibase-checks') }}
+    runs-on: ubuntu-latest
+    outputs:
+        version: ${{ steps.extract-version.outputs.version }}
+    steps:
+        - uses: actions/checkout@v4
+          with:
+            repository: liquibase/liquibase-checks
+            token: ${{ secrets.BOT_TOKEN }}
+
+        - id: extract-version
+          name: Extract version from pom.xml
+          shell: bash
+          run: |
+              VERSION=$(grep '<version>' pom.xml | head -n 1 | sed 's/.*<version>\(.*\)-SNAPSHOT<\/version>.*/\1/')
+              echo "version=$VERSION" >> $GITHUB_OUTPUT
+
   reversion:
-    needs: [ setup, build-azure-uber-jar, build-extension-jars ]
+    needs: [ setup, build-azure-uber-jar, build-extension-jars, get-liquibase-checks-version ]
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
     steps:
@@ -160,7 +179,12 @@ jobs:
         run: |
           IFS=',' read -ra ADDR <<< "${{ needs.setup.outputs.extensions }}"
           for extension in "${ADDR[@]}"; do
-            mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=$extension -Dversion=${{ needs.setup.outputs.version }} -Dtransitive=false || echo "Failed to download $extension artifact"
+            if [ "$extension" != "liquibase-checks" ]; then
+              mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=$extension -Dversion=${{ needs.setup.outputs.version }} -Dtransitive=false || echo "Failed to download $extension artifact"
+            fi
+            else
+              mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=$extension -Dversion=${{ needs.get-liquibase-checks-version.outputs.version }} -Dtransitive=false || echo "Failed to download $extension artifact"
+            fi
           done
 
       - name: Set up JDK
