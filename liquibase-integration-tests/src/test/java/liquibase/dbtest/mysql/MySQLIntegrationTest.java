@@ -129,12 +129,15 @@ public class MySQLIntegrationTest extends AbstractIntegrationTest {
         List<Map<String, ?>> queryResult = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                 .queryForList(new RawParameterizedSqlStatement(String.format("select * from %s", uuidTable.getName())));
 
-        Resource fileOpener = new JUnitResourceAccessor().get(uuidLoadDataCSV);
-        BufferedReader br = new BufferedReader(new FileReader(fileOpener.getUri().getPath()));
-        br.readLine();
-        String expected = br.readLine();
-        String actual = (String) queryResult.get(0).get("uuid");
-        assertEquals(expected, actual);
+        try (JUnitResourceAccessor jra = new JUnitResourceAccessor()) {
+            Resource fileOpener = jra.get(uuidLoadDataCSV);
+            try (BufferedReader br = new BufferedReader(new FileReader(fileOpener.getUri().getPath()))) {
+                br.readLine();
+                String expected = br.readLine();
+                String actual = (String) queryResult.get(0).get("uuid");
+                assertEquals(expected, actual);
+            }
+        }
     }
 
 }
