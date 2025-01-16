@@ -137,24 +137,20 @@ public class CustomChangeWrapper extends AbstractChange {
                 try {
                     this.customChange = loadCustomChange(className);
                 } catch (CustomChangeException e) {
-                    // ignore
+                    return new ValidationErrors().addWarning("Exception thrown loading " + getClassName() + ": " + e.getMessage());
                 }
             }
         }
 
-        if (this.customChange != null) {
-            try {
-                configureCustomChange();
-            } catch (CustomChangeException e) {
-                throw new UnexpectedLiquibaseException(e);
-            }
-            try {
-                return customChange.validate(database);
-            } catch (Exception e) {
-                return new ValidationErrors().addError("Exception thrown calling " + getClassName() + ".validate():" + e.getMessage());
-            }
-        } else {
-            return new ValidationErrors();
+        try {
+            configureCustomChange();
+        } catch (CustomChangeException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+        try {
+            return customChange.validate(database);
+        } catch (Exception e) {
+            return new ValidationErrors().addError("Exception thrown calling " + getClassName() + ".validate():" + e.getMessage());
         }
     }
 
@@ -232,6 +228,13 @@ public class CustomChangeWrapper extends AbstractChange {
 
     @Override
     public CheckSum generateCheckSum() {
+        if (this.customChange == null) {
+            try {
+                this.customChange = loadCustomChange(className);
+            } catch (CustomChangeException e) {
+                // ignore
+            }
+        }
         if (customChange != null) {
             try {
                 configureCustomChange();
