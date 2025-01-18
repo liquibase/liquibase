@@ -15,13 +15,4 @@
     <!-- remove all org.liquibase sub-module dependencies except liquibase-core -->
     <xsl:template match="maven:dependencies/maven:dependency[maven:groupId = 'org.liquibase'  and maven:artifactId != 'liquibase-core']"/>
 
-    <!--
-    Set module <name> as "Liquibase".
-    We do not set it in the original pom.xml since it makes build output more confusing - nice to keep the capitalization consistent
-    -->
-    <xsl:template match="maven:project/maven:description">
-        <name xmlns="http://maven.apache.org/POM/4.0.0">Liquibase CDI Plugin</name>
-        <xsl:copy-of select="."/>
-    </xsl:template>
-
 </xsl:stylesheet>
