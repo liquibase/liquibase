@@ -21,11 +21,9 @@ import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.nio.ByteBuffer;
 import java.sql.SQLSyntaxErrorException;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -118,7 +116,7 @@ public class MySQLIntegrationTest extends AbstractIntegrationTest {
         assertNotNull(uuidTable);
         assertEquals(1, uuidTable.getColumns().size());
 
-        // assert created column is named uuid, and is of type BINARY(16) for MySQL UUID.
+        // assert created column is named uuid, and is of type char(36) for MySQL UUID.
         Column uuidColumn = uuidTable.getColumns().get(0);
         assertEquals("uuid", uuidColumn.getName());
         assertEquals(
