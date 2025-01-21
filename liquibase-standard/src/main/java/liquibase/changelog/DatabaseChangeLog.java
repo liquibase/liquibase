@@ -1122,22 +1122,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             ranChangeSets = database.getRanChangeSetList();
         }
 
-        DatabaseChangeLog currentChangeLog = changeLog;
-        String actualLogicalFilePath = null;
-        do {
-            if (StringUtils.isNotBlank(currentChangeLog.getRawLogicalFilePath())) {
-                actualLogicalFilePath = currentChangeLog.getRawLogicalFilePath();
-                break;
-            }
-        } while ((currentChangeLog = currentChangeLog.getParentChangeLog()) != null);
-
-        if (actualLogicalFilePath == null) {
-            if (StringUtils.isNotBlank(this.getRawLogicalFilePath())) {
-            actualLogicalFilePath = this.getRawLogicalFilePath();
-            } else {
-                actualLogicalFilePath = logicalFilePath;
-            }
-        }
+        String actualLogicalFilePath = getActualLogicalFilePath(logicalFilePath, changeLog);
 
         for (ChangeSet changeSet : changeLog.getChangeSets()) {
             if (modifyChangeSets != null) {
@@ -1162,6 +1147,23 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         skippedChangeSets.addAll(changeLog.getSkippedChangeSets());
 
         return true;
+    }
+
+    /**
+     * Search for the closest logicalfilePath for this changelog
+     */
+    private String getActualLogicalFilePath(String logicalFilePath, DatabaseChangeLog changeLog) {
+        DatabaseChangeLog currentChangeLog = changeLog;
+        do {
+            if (StringUtils.isNotBlank(currentChangeLog.getRawLogicalFilePath())) {
+                return currentChangeLog.getRawLogicalFilePath();
+            }
+        } while ((currentChangeLog = currentChangeLog.getParentChangeLog()) != null);
+
+        if (StringUtils.isNotBlank(this.getRawLogicalFilePath())) {
+            return this.getRawLogicalFilePath();
+        }
+        return logicalFilePath;
     }
 
     /**
