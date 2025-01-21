@@ -1131,10 +1131,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
         } while ((currentChangeLog = currentChangeLog.getParentChangeLog()) != null);
 
-        if (actualLogicalFilePath == null && StringUtils.isNotBlank(this.getRawLogicalFilePath())) {
+        if (actualLogicalFilePath == null) {
+            if (StringUtils.isNotBlank(this.getRawLogicalFilePath())) {
             actualLogicalFilePath = this.getRawLogicalFilePath();
-        } else {
-            actualLogicalFilePath = logicalFilePath;
+            } else {
+                actualLogicalFilePath = logicalFilePath;
+            }
         }
 
         for (ChangeSet changeSet : changeLog.getChangeSets()) {
