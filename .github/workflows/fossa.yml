@@ -3,14 +3,19 @@ name: Fossa Report Generation
 on:
   workflow_dispatch:
     inputs:
+      # The distinct_id is required for Datical/liquibase to know if the job was completed successfully. https://github.com/Codex-/return-dispatch/blob/main/README.md?plain=1#L36
       distinct_id:
+      version_number_for_report_generation:
+        description: "Version number for report generation"
+        required: true
+        type: string
 
 jobs:
   fossa-scan:
-    uses: liquibase/build-logic/.github/workflows/fossa.yml@main
+    uses: liquibase/build-logic/.github/workflows/generate-upload-fossa-report.yml@main
     secrets: inherit
     with:
-      org: Datical
+      version_number_for_report_generation: "${{ github.event.inputs.version_number_for_report_generation }}"
 
   # https://github.com/Codex-/return-dispatch/blob/main/README.md?plain=1#L35
   display-distinct-id:
