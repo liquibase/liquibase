@@ -176,6 +176,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         this.physicalFilePath = physicalFilePath;
     }
 
+    public String getRawLogicalFilePath() {
+        return logicalFilePath;
+    }
+
     public String getLogicalFilePath() {
         String returnPath = logicalFilePath;
         if (logicalFilePath == null) {
@@ -1117,10 +1121,22 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).init();
             ranChangeSets = database.getRanChangeSetList();
         }
-        String changelogLogicalFilePath = this.logicalFilePath;
-        if (changelogLogicalFilePath != null) {
-            logicalFilePath = changelogLogicalFilePath;
+
+        DatabaseChangeLog currentChangeLog = changeLog;
+        String actualLogicalFilePath = null;
+        do {
+            if (StringUtils.isNotBlank(currentChangeLog.getRawLogicalFilePath())) {
+                actualLogicalFilePath = currentChangeLog.getRawLogicalFilePath();
+                break;
+            }
+        } while ((currentChangeLog = currentChangeLog.getParentChangeLog()) != null);
+
+        if (actualLogicalFilePath == null && StringUtils.isNotBlank(this.getLogicalFilePath())) {
+            actualLogicalFilePath = this.getLogicalFilePath();
+        } else {
+            actualLogicalFilePath = logicalFilePath;
         }
+
         for (ChangeSet changeSet : changeLog.getChangeSets()) {
             if (modifyChangeSets != null) {
                 modifyChangeSets(modifyChangeSets, changeSet);
@@ -1132,11 +1148,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             // of another DBCL entry.  Also, skip setting the logical file
             // path for raw SQL change sets
             //
-            if (logicalFilePath != null && changeSet.getLogicalFilePath() == null &&
+            if (actualLogicalFilePath != null && changeSet.getLogicalFilePath() == null &&
                 ! (parser instanceof SqlChangeLogParser) && ! ranChangeSetExists(changeSet, ranChangeSets)) {
-                changeSet.setLogicalFilePath(logicalFilePath);
-                if (StringUtils.isNotEmpty(logicalFilePath)) {
-                    changeSet.setFilePath(logicalFilePath);
+                changeSet.setLogicalFilePath(actualLogicalFilePath);
+                if (StringUtils.isNotEmpty(actualLogicalFilePath)) {
+                    changeSet.setFilePath(actualLogicalFilePath);
                 }
             }
             addChangeSet(changeSet);
