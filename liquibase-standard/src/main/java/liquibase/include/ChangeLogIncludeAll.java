@@ -1,15 +1,5 @@
 package liquibase.include;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import liquibase.ContextExpression;
-import liquibase.Labels;
-import liquibase.Scope;
-import liquibase.changelog.ChangeLogChild;
-import liquibase.changelog.DatabaseChangeLog;
 import static liquibase.changelog.DatabaseChangeLog.ENDS_WITH_FILTER;
 import static liquibase.changelog.DatabaseChangeLog.ERROR_IF_MISSING_OR_EMPTY;
 import static liquibase.changelog.DatabaseChangeLog.IGNORE;
@@ -21,6 +11,16 @@ import static liquibase.changelog.DatabaseChangeLog.MIN_DEPTH;
 import static liquibase.changelog.DatabaseChangeLog.PATH;
 import static liquibase.changelog.DatabaseChangeLog.RELATIVE_TO_CHANGELOG_FILE;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import liquibase.ContextExpression;
+import liquibase.Labels;
+import liquibase.Scope;
+import liquibase.changelog.ChangeLogChild;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.IncludeAllFilter;
 import liquibase.changelog.ModifyChangeSets;
 import liquibase.database.Database;
@@ -76,8 +76,8 @@ public final class ChangeLogIncludeAll extends AbstractLiquibaseSerializable imp
     private final String serializedObjectNamespace = STANDARD_CHANGELOG_NAMESPACE;
 
     public ChangeLogIncludeAll(ParsedNode node, ResourceAccessor resourceAccessor,
-                            DatabaseChangeLog parentChangeLog, ModifyChangeSets modifyChangeSets)
-				throws ParsedNodeException, SetupException {
+                               DatabaseChangeLog parentChangeLog, ModifyChangeSets modifyChangeSets)
+        throws ParsedNodeException, SetupException {
 
         this.resourceAccessor = resourceAccessor;
         this.parentChangeLog = parentChangeLog;
@@ -92,11 +92,11 @@ public final class ChangeLogIncludeAll extends AbstractLiquibaseSerializable imp
         this.minDepth = node.getChildValue(null, MIN_DEPTH, 0);
         this.maxDepth = node.getChildValue(null, MAX_DEPTH, Integer.MAX_VALUE);
         this.endsWithFilter = node.getChildValue(null, ENDS_WITH_FILTER, "");
-        this.context = ChangeLogIncludeUtils.getContextExpression(node);
-        this.resourceFilter = ChangeLogIncludeUtils.getFilterDef(node);
+        this.context = ChangeLogIncludeHelper.getContextExpression(node);
+        this.resourceFilter = ChangeLogIncludeAllUtils.getFilterDef(node);
         this.path = node.getChildValue(null, PATH, String.class);
-        this.preconditions = ChangeLogIncludeUtils.getPreconditions(node, resourceAccessor);
-        ChangeLogIncludeUtils.setNestedChangeLogs(node, this);
+        this.preconditions = ChangeLogIncludeHelper.getPreconditions(node, resourceAccessor);
+        ChangeLogIncludeAllUtils.setNestedChangeLogs(node, this);
     }
 
     void checkPreconditions() {
@@ -112,7 +112,7 @@ public final class ChangeLogIncludeAll extends AbstractLiquibaseSerializable imp
                     if (PreconditionContainer.FailOption.HALT.equals(preconditionContainer.getOnFail())) {
                         throw new RuntimeException(e);
                     } else if (PreconditionContainer.FailOption.WARN.equals(preconditionContainer.getOnFail())) {
-                        ChangeLogIncludeUtils.sendIncludePreconditionWarningMessage(warningMessage, e);
+                        ChangeLogIncludeHelper.sendIncludePreconditionWarningMessage(warningMessage, e);
                     } else if (PreconditionContainer.FailOption.MARK_RAN.equals(preconditionContainer.getOnFail())) {
                         this.markRan = true;
                     } else {
@@ -122,7 +122,7 @@ public final class ChangeLogIncludeAll extends AbstractLiquibaseSerializable imp
                     if (PreconditionContainer.ErrorOption.HALT.equals(preconditionContainer.getOnError())) {
                         throw new RuntimeException(e);
                     } else if (PreconditionContainer.ErrorOption.WARN.equals(preconditionContainer.getOnError())) {
-                        ChangeLogIncludeUtils.sendIncludePreconditionWarningMessage(warningMessage, e);
+                        ChangeLogIncludeHelper.sendIncludePreconditionWarningMessage(warningMessage, e);
                     } else if (PreconditionContainer.ErrorOption.MARK_RAN.equals(preconditionContainer.getOnError())) {
                         this.markRan = true;
                     }
