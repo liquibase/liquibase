@@ -24,10 +24,32 @@ final class ChangeLogIncludeUtils {
 
 	private ChangeLogIncludeUtils() { }
 
+	static void flatChangeLogChangeSets(ChangeLogInclude include,
+																																					SortedSet<ChangeSet> changeSetAccumulator,
+																																					SortedSet<ChangeSet> skippedChangeSetAccumulator) {
+
+		include.checkPreconditions();
+		DatabaseChangeLog changeLog = include.getNestedChangelog();
+		if(include.isMarkRan())
+			ChangeLogIncludeHelper.propagateMarkRan(Collections.singletonList(changeLog));
+
+		if(changeLog != null) {
+			changeSetAccumulator.addAll(getNestedChangeSets(include));
+			skippedChangeSetAccumulator.addAll(getNestedSkippedChangeSets(include));
+			ChangeLogIncludeHelper.flatChangeLogChangeSets(changeSetAccumulator, skippedChangeSetAccumulator, changeLog);
+		}
+	}
+
 	static DatabaseChangeLog getChangeLog(ChangeLogInclude include) throws SetupException {
 		String normalizedFilePath = normalizeFilePath(include.getFile(), include.getParentChangeLog().getPhysicalFilePath(), include.getRelativeToChangelogFile(), include.getResourceAccessor());
 		return ChangeLogIncludeHelper.getChangeLog(normalizedFilePath, include.getResourceAccessor(), include.getErrorIfMissing(),
 				include.getModifyChangeSets(), include.getParentChangeLog(), include.getContext(), include.getLabels(), include.getIgnore(), DatabaseChangeLog.OnUnknownFileFormat.FAIL);
+	}
+
+	static SortedSet<ChangeSet> getNestedSkippedChangeSets(ChangeLogInclude include) {
+		SortedSet<ChangeSet> result = new TreeSet<>(CHANGESET_COMPARATOR);
+		result.addAll(include.getNestedChangelog().getSkippedChangeSets());
+		return result;
 	}
 
 	private static String normalizeFilePath(String file, String parentChangelogPhysicalFilePath, boolean isRelative, ResourceAccessor resourceAccessor) {
@@ -56,28 +78,6 @@ final class ChangeLogIncludeUtils {
 				: Paths.get(filePath);
 
 		return classpathUrl ? CLASSPATH_PROTOCOL + path : path.toString();
-	}
-
-	static void flatChangeLogChangeSets(ChangeLogInclude include,
-																																					SortedSet<ChangeSet> changeSetAccumulator,
-																																					SortedSet<ChangeSet> skippedChangeSetAccumulator) {
-
-		include.checkPreconditions();
-		DatabaseChangeLog changeLog = include.getNestedChangelog();
-		if(include.isMarkRan())
-			ChangeLogIncludeHelper.propagateMarkRan(Collections.singletonList(changeLog));
-
-		if(changeLog != null) {
-			changeSetAccumulator.addAll(getNestedChangeSets(include));
-			skippedChangeSetAccumulator.addAll(getNestedSkippedChangeSets(include));
-			ChangeLogIncludeHelper.flatChangeLogChangeSets(changeSetAccumulator, skippedChangeSetAccumulator, changeLog);
-		}
-	}
-
-	static SortedSet<ChangeSet> getNestedSkippedChangeSets(ChangeLogInclude include) {
-		SortedSet<ChangeSet> result = new TreeSet<>(CHANGESET_COMPARATOR);
-		result.addAll(include.getNestedChangelog().getSkippedChangeSets());
-		return result;
 	}
 
 	private static SortedSet<ChangeSet> getNestedChangeSets(ChangeLogInclude include) {

@@ -1,8 +1,11 @@
 package liquibase.include;
 
+import static liquibase.changelog.DatabaseChangeLog.CONTEXT;
+import static liquibase.changelog.DatabaseChangeLog.CONTEXT_FILTER;
+import static liquibase.changelog.DatabaseChangeLog.MODIFY_CHANGE_SETS;
+import static liquibase.changelog.DatabaseChangeLog.PRE_CONDITIONS;
+
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,17 +20,6 @@ import liquibase.Labels;
 import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
-import static liquibase.changelog.DatabaseChangeLog.CONTEXT;
-import static liquibase.changelog.DatabaseChangeLog.CONTEXT_FILTER;
-import static liquibase.changelog.DatabaseChangeLog.FILTER;
-import static liquibase.changelog.DatabaseChangeLog.MODIFY_CHANGE_SETS;
-import static liquibase.changelog.DatabaseChangeLog.PRE_CONDITIONS;
-import static liquibase.changelog.DatabaseChangeLog.RESOURCE_COMPARATOR;
-import static liquibase.changelog.DatabaseChangeLog.RESOURCE_FILTER;
-import static liquibase.changelog.DatabaseChangeLog.SEEN_CHANGELOGS_PATHS_SCOPE_KEY;
-import static liquibase.changelog.DatabaseChangeLog.normalizePath;
-
-import liquibase.changelog.IncludeAllFilter;
 import liquibase.changelog.ModifyChangeSets;
 import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.visitor.ChangeExecListener;
@@ -38,7 +30,6 @@ import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.SetupException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.UnknownChangelogFormatException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
@@ -52,7 +43,6 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.Precondition;
 import liquibase.precondition.core.PreconditionContainer;
-import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.ui.UIService;
 import liquibase.util.FileUtil;
@@ -187,23 +177,6 @@ public final class ChangeLogIncludeHelper {
 		}
 	}
 
-	private static void prepareParentChangeLogs(DatabaseChangeLog childChangelog,
-																																													DatabaseChangeLog parentChangeLog,
-																																													ContextExpression contextExpression,
-																																													Labels labels,
-																																													Boolean ignore) {
-		childChangelog.setIncludeContextFilter(contextExpression);
-		childChangelog.setIncludeLabels(labels);
-		childChangelog.setIncludeIgnore(ignore != null && ignore);
-		PreconditionContainer preconditions = childChangelog.getPreconditions();
-		if (preconditions != null) {
-			if (null == parentChangeLog.getPreconditions()) {
-				parentChangeLog.setPreconditions(new PreconditionContainer());
-			}
-			parentChangeLog.getPreconditions().addNestedPrecondition(preconditions);
-		}
-	}
-
 	static SortedSet<ChangeSet> getNestedChangeSets(Database database, String logicalFilePath,
 																																																	DatabaseChangeLog childChangeLog, ModifyChangeSets modifyChangeSets,
 																																																	boolean markRan) {
@@ -238,6 +211,23 @@ public final class ChangeLogIncludeHelper {
 			result.add(changeSet);
 		}
 		return result;
+	}
+
+	private static void prepareParentChangeLogs(DatabaseChangeLog childChangelog,
+																																													DatabaseChangeLog parentChangeLog,
+																																													ContextExpression contextExpression,
+																																													Labels labels,
+																																													Boolean ignore) {
+		childChangelog.setIncludeContextFilter(contextExpression);
+		childChangelog.setIncludeLabels(labels);
+		childChangelog.setIncludeIgnore(ignore != null && ignore);
+		PreconditionContainer preconditions = childChangelog.getPreconditions();
+		if (preconditions != null) {
+			if (null == parentChangeLog.getPreconditions()) {
+				parentChangeLog.setPreconditions(new PreconditionContainer());
+			}
+			parentChangeLog.getPreconditions().addNestedPrecondition(preconditions);
+		}
 	}
 
 	private static void modifyChangeSets(ChangeSet changeSet, ModifyChangeSets modifyChangeSets) {

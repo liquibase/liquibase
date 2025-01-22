@@ -33,9 +33,25 @@ import org.apache.commons.lang3.StringUtils;
 	*/
 final class ChangeLogIncludeAllUtils {
 
-	private static final Logger LOG = Scope.getCurrentScope().getLog(ChangeLogIncludeHelper.class);
+	private static final Logger LOG = Scope.getCurrentScope().getLog(ChangeLogIncludeAllUtils.class);
 
 	private ChangeLogIncludeAllUtils() { }
+
+	static void flatChangeLogChangeSets(ChangeLogIncludeAll includeAll,
+																																					SortedSet<ChangeSet> changeSetAccumulator,
+																																					SortedSet<ChangeSet> skippedChangeSetAccumulator) {
+
+		includeAll.checkPreconditions();
+		if(includeAll.isMarkRan())
+			ChangeLogIncludeHelper.propagateMarkRan(includeAll.getNestedChangeLogs());
+
+		if(!includeAll.getNestedChangeLogs().isEmpty()) {
+			changeSetAccumulator.addAll(getNestedChangeSets(includeAll));
+			skippedChangeSetAccumulator.addAll(getNestedSkippedChangeSets(includeAll));
+			includeAll.getNestedChangeLogs().forEach(changeLog ->
+					ChangeLogIncludeHelper.flatChangeLogChangeSets(changeSetAccumulator, skippedChangeSetAccumulator, changeLog));
+		}
+	}
 
 	static void setNestedChangeLogs(ParsedNode node, ChangeLogIncludeAll includeAll) throws ParsedNodeException, SetupException {
 		Comparator<String> comparator = determineResourceComparator(node);
@@ -94,7 +110,7 @@ final class ChangeLogIncludeAllUtils {
 			try {
 				resourceComparator = (Comparator<String>) Class.forName(resourceComparatorDef).getConstructor().newInstance();
 			} catch (ReflectiveOperationException e) {
-				Scope.getCurrentScope().getLog(ChangeLogIncludeAll.class).info("no resourceComparator defined - taking default " +
+				LOG.info("no resourceComparator defined - taking default " +
 						"implementation", e);
 				resourceComparator = defaultComparator;
 			}
@@ -200,22 +216,6 @@ final class ChangeLogIncludeAllUtils {
 		}
 
 		return path;
-	}
-
-	static void flatChangeLogChangeSets(ChangeLogIncludeAll includeAll,
-																																					SortedSet<ChangeSet> changeSetAccumulator,
-																																					SortedSet<ChangeSet> skippedChangeSetAccumulator) {
-
-		includeAll.checkPreconditions();
-		if(includeAll.isMarkRan())
-			ChangeLogIncludeHelper.propagateMarkRan(includeAll.getNestedChangeLogs());
-
-		if(!includeAll.getNestedChangeLogs().isEmpty()) {
-			changeSetAccumulator.addAll(getNestedChangeSets(includeAll));
-			skippedChangeSetAccumulator.addAll(getNestedSkippedChangeSets(includeAll));
-			includeAll.getNestedChangeLogs().forEach(changeLog ->
-					ChangeLogIncludeHelper.flatChangeLogChangeSets(changeSetAccumulator, skippedChangeSetAccumulator, changeLog));
-		}
 	}
 
 	private static SortedSet<ChangeSet> getNestedChangeSets(ChangeLogIncludeAll includeAll) {
