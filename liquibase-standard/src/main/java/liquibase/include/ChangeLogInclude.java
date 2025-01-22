@@ -30,6 +30,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * A final class representing the <a href="https://docs.liquibase.com/change-types/include.html">include</a> tag.
@@ -39,8 +40,6 @@ import lombok.Getter;
 @Getter(AccessLevel.PACKAGE)
 public final class ChangeLogInclude extends AbstractLiquibaseSerializable implements Conditional, ChangeLogChild {
 
-    private static final String CLASSPATH_PROTOCOL = "classpath:";
-    private static final List<String> CHANGELOG_EXTENSION = Arrays.asList(".xml", ".yml", ".yaml", ".json");
     private final Database database = Scope.getCurrentScope().getDatabase();
 
     private final String file;
@@ -48,7 +47,6 @@ public final class ChangeLogInclude extends AbstractLiquibaseSerializable implem
     private final Boolean errorIfMissing;
     private final Boolean ignore;
     private final ContextExpression context;
-    private PreconditionContainer preconditions;
     private final Labels labels;
     private final String logicalFilePath;
     private DatabaseChangeLog nestedChangelog;
@@ -56,6 +54,17 @@ public final class ChangeLogInclude extends AbstractLiquibaseSerializable implem
     private final DatabaseChangeLog parentChangeLog;
     private final ModifyChangeSets modifyChangeSets;
     private boolean markRan = false;
+
+    @Getter(AccessLevel.PUBLIC)
+    @Setter(AccessLevel.PUBLIC)
+    private PreconditionContainer preconditions;
+    @Getter(AccessLevel.PUBLIC)
+    private final String serializedObjectName = INCLUDE_CHANGELOG;
+    @Getter(AccessLevel.PUBLIC)
+    private final Set<String> serializableFields = new LinkedHashSet<>(Arrays
+        .asList("file", "relativeToChangelogFile", "errorIfMissing", "context"));
+    @Getter(AccessLevel.PUBLIC)
+    private final String serializedObjectNamespace = STANDARD_CHANGELOG_NAMESPACE;
 
     public ChangeLogInclude(ParsedNode node, ResourceAccessor resourceAccessor,
                             DatabaseChangeLog parentChangeLog, ModifyChangeSets modifyChangeSets)
@@ -75,21 +84,6 @@ public final class ChangeLogInclude extends AbstractLiquibaseSerializable implem
         this.context = ChangeLogIncludeUtils.getContextExpression(node);
         this.preconditions = ChangeLogIncludeUtils.getPreconditions(node, resourceAccessor);
         this.nestedChangelog = ChangeLogIncludeUtils.getChangeLog(this);
-    }
-
-    @Override
-    public Set<String> getSerializableFields() {
-        return new LinkedHashSet<>(Arrays.asList("file", "relativeToChangelogFile", "errorIfMissing", "context"));
-    }
-
-    @Override
-    public String getSerializedObjectName() {
-        return INCLUDE_CHANGELOG;
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
     }
 
     void checkPreconditions() {
@@ -125,15 +119,5 @@ public final class ChangeLogInclude extends AbstractLiquibaseSerializable implem
                 }
             }
         }
-    }
-
-    @Override
-    public void setPreconditions(PreconditionContainer precond) {
-        this.preconditions = precond;
-    }
-
-    @Override
-    public PreconditionContainer getPreconditions() {
-        return this.preconditions;
     }
 }

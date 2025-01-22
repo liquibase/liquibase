@@ -21,6 +21,7 @@ import static liquibase.changelog.DatabaseChangeLog.ERROR_IF_MISSING_OR_EMPTY;
 import static liquibase.changelog.DatabaseChangeLog.FILTER;
 import static liquibase.changelog.DatabaseChangeLog.IGNORE;
 import static liquibase.changelog.DatabaseChangeLog.INCLUDE_ALL_CHANGELOGS;
+import static liquibase.changelog.DatabaseChangeLog.INCLUDE_CHANGELOG;
 import static liquibase.changelog.DatabaseChangeLog.LABELS;
 import static liquibase.changelog.DatabaseChangeLog.LOGICAL_FILE_PATH;
 import static liquibase.changelog.DatabaseChangeLog.MAX_DEPTH;
@@ -49,6 +50,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -71,13 +73,23 @@ public final class ChangeLogIncludeAll extends AbstractLiquibaseSerializable imp
     private final String logicalFilePath;
     private final Labels labels;
     private final Boolean ignore;
-    private PreconditionContainer preconditions;
     private final ResourceAccessor resourceAccessor;
     private final DatabaseChangeLog parentChangeLog;
     private final ModifyChangeSets modifyChangeSets;
     private final Database database = Scope.getCurrentScope().getDatabase();
     private final List<DatabaseChangeLog> nestedChangeLogs = new ArrayList<>(10);
     private boolean markRan = false;
+
+    @Getter(AccessLevel.PUBLIC)
+    @Setter(AccessLevel.PUBLIC)
+    private PreconditionContainer preconditions;
+    @Getter(AccessLevel.PUBLIC)
+    private final String serializedObjectName = INCLUDE_ALL_CHANGELOGS;
+    @Getter(AccessLevel.PUBLIC)
+    private final Set<String> serializableFields = new LinkedHashSet<>(Arrays
+        .asList("path", "errorIfMissingOrEmpty", "relativeToChangelogFile", "resourceFilter", "context", "minDepth", "maxDepth", "endsWithFilter","logicalFilePath"));
+    @Getter(AccessLevel.PUBLIC)
+    private final String serializedObjectNamespace = STANDARD_CHANGELOG_NAMESPACE;
 
     public ChangeLogIncludeAll(ParsedNode node, ResourceAccessor resourceAccessor,
                             DatabaseChangeLog parentChangeLog, ModifyChangeSets modifyChangeSets)
@@ -101,21 +113,6 @@ public final class ChangeLogIncludeAll extends AbstractLiquibaseSerializable imp
         this.path = node.getChildValue(null, PATH, String.class);
         this.preconditions = ChangeLogIncludeUtils.getPreconditions(node, resourceAccessor);
         this.setNestedChangeLogs(node);
-    }
-
-    @Override
-    public Set<String> getSerializableFields() {
-        return new LinkedHashSet<>(Arrays.asList("path", "errorIfMissingOrEmpty", "relativeToChangelogFile", "resourceFilter", "context", "minDepth", "maxDepth", "endsWithFilter","logicalFilePath"));
-    }
-
-    @Override
-    public String getSerializedObjectName() {
-        return INCLUDE_ALL_CHANGELOGS;
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
     }
 
     void checkPreconditions() {
@@ -241,7 +238,7 @@ public final class ChangeLogIncludeAll extends AbstractLiquibaseSerializable imp
         return resourceComparator;
     }
 
-    public SortedSet<Resource> findResources(Comparator<String> resourceComparator) throws SetupException {
+    private SortedSet<Resource> findResources(Comparator<String> resourceComparator) throws SetupException {
         try {
 
             ResourceAccessor.SearchOptions searchOptions = initializeAndSetMinAndMaxDepth();
@@ -305,16 +302,6 @@ public final class ChangeLogIncludeAll extends AbstractLiquibaseSerializable imp
             }
         }
         return unsortedResources;
-    }
-
-    @Override
-    public void setPreconditions(PreconditionContainer precond) {
-        this.preconditions = precond;
-    }
-
-    @Override
-    public PreconditionContainer getPreconditions() {
-        return this.preconditions;
     }
 
 }
