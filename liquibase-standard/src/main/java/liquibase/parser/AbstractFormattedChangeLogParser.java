@@ -5,6 +5,7 @@ import liquibase.Scope;
 import liquibase.change.AbstractSQLChange;
 import liquibase.change.Change;
 import liquibase.change.core.EmptyChange;
+import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -383,6 +384,9 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                         }
 
                         setChangeSequence(change, finalCurrentSequence);
+                        if (change instanceof RawSQLChange) {
+                            ((RawSQLChange) change).setSqlEndLine(count-1);
+                        }
 
                         handleRollbackSequence(physicalChangeLogLocation, changeLogParameters, changeLog, currentRollbackSequence, changeSet, rollbackSplitStatementsPatternMatcher, rollbackSplitStatements, rollbackEndDelimiter);
                     }
@@ -472,6 +476,9 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     changeLog.addChangeSet(changeSet);
 
                     change = getChange();
+                    if (change instanceof RawSQLChange) {
+                        ((RawSQLChange) change).setSqlStartLine(count+1);
+                    }
                     setChangeSequence(change, finalCurrentSequence);
 
                     handleSplitStatements(line, changeSet, change);
