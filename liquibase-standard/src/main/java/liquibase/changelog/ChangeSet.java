@@ -41,6 +41,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 
+import java.lang.reflect.Method;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -1644,22 +1645,43 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         // If the change is for this Database
         // add a Boolean flag to Scope to indicate that the Change should not be executed when adding MDC context
         //
-        if (! change.supports(database)) {
+        if (!change.supports(database)) {
             return null;
         }
         AtomicReference<SqlStatement[]> statementsReference = new AtomicReference<>();
         Map<String, Object> scopeValues = new HashMap<>();
         scopeValues.put(Change.SHOULD_EXECUTE, Boolean.FALSE);
         StringBuilder sqlStatementsMdc = new StringBuilder();
-        Scope.child(scopeValues, () -> {
-            statementsReference.set(generateRollbackStatements ?
-                    change.generateRollbackStatements(database) : change.generateStatements(database));
-            sqlStatementsMdc.append(Arrays.stream(statementsReference.get())
-                    .map(statement -> SqlUtil.getSqlString(statement, SqlGeneratorFactory.getInstance(), database))
-                    .collect(Collectors.joining("\n")));
-        });
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SQL, sqlStatementsMdc.toString());
 
+        Scope.child(scopeValues, () -> {
+            try {
+                SqlStatement[] statements = generateRollbackStatements ?
+                        change.generateRollbackStatements(database) : change.generateStatements(database);
+                statementsReference.set(statements);
+
+                // Use reflection to check if the statement has a toJs() method
+                for (SqlStatement statement : statements) {
+                    try {
+                        Method toJsMethod = statement.getClass().getMethod("toJs");
+                        Object result = toJsMethod.invoke(statement);
+                        if (result != null) {
+                            sqlStatementsMdc.append(result).append("\n");
+                            continue;
+                        }
+                    } catch (NoSuchMethodException e) {
+                        // toJs method does not exist, use default behavior
+                    }
+
+                    // Default behavior for statements that do not have toJs()
+                    sqlStatementsMdc.append(SqlUtil.getSqlString(statement, SqlGeneratorFactory.getInstance(), database)).append("\n");
+                }
+            } catch (Exception e) {
+                // Log error but don't throw to maintain existing behavior
+                Scope.getCurrentScope().getLog(ChangeSet.class).warning("Error generating SQL for MDC", e);
+            }
+        });
+
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SQL, sqlStatementsMdc.toString());
         return sqlStatementsMdc.toString();
     }
 
