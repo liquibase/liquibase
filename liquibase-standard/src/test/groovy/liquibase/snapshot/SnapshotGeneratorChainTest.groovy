@@ -16,8 +16,9 @@ class SnapshotGeneratorChainTest extends Specification {
     }
     private def object = new Table()
     private def visitingGenerator = new VisitedSnapshotGenerator(object.class)
-    private def badGenerator = new BadSnapshotGenerator(object.class)
-    private def replacementForBadGenerator = new ReplacingSnapshotGenerator(object.class, badGenerator.class)
+    private def otherVisitingGenerator = new OtherVisitedSnapshotGenerator(object.class)
+    private def differentObjectReturnedGenerator = new DifferentObjectReturnedGenerator(object.class)
+    private def replacementForDifferentObjectReturnedGenerator = new ReplacingSnapshotGenerator(object.class, differentObjectReturnedGenerator.class)
 
 
     def "snapshotting null yields null"() {
@@ -92,7 +93,7 @@ class SnapshotGeneratorChainTest extends Specification {
 
     def "snapshotting works even if first generator returns a different instance"() {
         given:
-        def chain = new SnapshotGeneratorChain(sortedSetOf(badGenerator))
+        def chain = new SnapshotGeneratorChain(sortedSetOf(differentObjectReturnedGenerator))
         def object = new Table()
         database.isSystemObject(object) >> false
         snapshotControl.shouldInclude(object.class) >> true
@@ -109,7 +110,7 @@ class SnapshotGeneratorChainTest extends Specification {
 
     def "snapshotting works if bad generator is replaced in the chain"() {
         given:
-        def chain = new SnapshotGeneratorChain(sortedSetOf(visitingGenerator, badGenerator, replacementForBadGenerator))
+        def chain = new SnapshotGeneratorChain(sortedSetOf(visitingGenerator, differentObjectReturnedGenerator, replacementForDifferentObjectReturnedGenerator))
         def object = new Table()
         database.isSystemObject(object) >> false
         snapshotControl.shouldInclude(object.class) >> true
@@ -122,8 +123,29 @@ class SnapshotGeneratorChainTest extends Specification {
         def snapshot = chain.snapshot(object, snapshotContext)
 
         then:
+        object === snapshot
         snapshot.getAttribute("visited", Boolean.class) == expectedTable.getAttribute("visited", Boolean.class)
         snapshot.getAttribute("replacement", String.class) == expectedTable.getAttribute("replacement", String.class)
+    }
+
+    def "snapshotting for all generators even after a object replacement"() {
+        given:
+        def chain = new SnapshotGeneratorChain(sortedSetOf(visitingGenerator, differentObjectReturnedGenerator, otherVisitingGenerator))
+        def object = new Table()
+        database.isSystemObject(object) >> false
+        snapshotControl.shouldInclude(object.class) >> true
+        def expectedTable = new Table()
+        expectedTable.setAttribute("visited", true)
+        expectedTable.setAttribute("otherVisited", true)
+
+
+        when:
+        def snapshot = chain.snapshot(object, snapshotContext)
+
+        then:
+        object !== snapshot
+        snapshot.getAttribute("visited", Boolean.class) == expectedTable.getAttribute("visited", Boolean.class)
+        snapshot.getAttribute("otherVisited", Boolean.class) == expectedTable.getAttribute("otherVisited", Boolean.class)
     }
 
     private static SortedSet<SnapshotGenerator> sortedSetOf(SnapshotGenerator... generators) {
@@ -174,6 +196,19 @@ class VisitedSnapshotGenerator implements SnapshotGenerator, Comparable<Snapshot
     }
 }
 
+class OtherVisitedSnapshotGenerator extends VisitedSnapshotGenerator {
+
+    OtherVisitedSnapshotGenerator(Class<? extends DatabaseObject> acceptedType) {
+        super(acceptedType)
+    }
+
+    @Override
+    <T extends DatabaseObject> T snapshot(T example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
+        example.setAttribute("otherVisited", true)
+        return example
+    }
+}
+
 class ReplacingSnapshotGenerator implements SnapshotGenerator, Comparable<SnapshotGenerator> {
 
     private final Class<? extends SnapshotGenerator> replacedGenerator
@@ -219,11 +254,11 @@ class ReplacingSnapshotGenerator implements SnapshotGenerator, Comparable<Snapsh
     }
 }
 
-class BadSnapshotGenerator implements SnapshotGenerator, Comparable<SnapshotGenerator> {
+class DifferentObjectReturnedGenerator implements SnapshotGenerator, Comparable<SnapshotGenerator> {
 
     private final Class<? extends DatabaseObject> acceptedType
 
-    BadSnapshotGenerator(Class<? extends DatabaseObject> acceptedType) {
+    DifferentObjectReturnedGenerator(Class<? extends DatabaseObject> acceptedType) {
         this.acceptedType = acceptedType
     }
 
@@ -237,9 +272,9 @@ class BadSnapshotGenerator implements SnapshotGenerator, Comparable<SnapshotGene
 
     @Override
     <T extends DatabaseObject> T snapshot(T example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
-        // generators are expected to add nested attributes, ... to the provided example or delegate if the example type does not match
-        // they are NOT expected to create new instances of the same type
-        return acceptedType.getDeclaredConstructor().newInstance() as T
+        T object2 = acceptedType.getDeclaredConstructor().newInstance() as T
+        example.getAttributes().forEach { it -> object2.setAttribute(it, example.getAttribute(it, Boolean.class))}
+        return object2
     }
 
     @Override
