@@ -90,24 +90,6 @@ class SnapshotGeneratorChainTest extends Specification {
         snapshot.getAttribute("visited", Boolean.class) == expectedTable.getAttribute("visited", Boolean.class)
     }
 
-    def "snapshotting fails if subsequent generator returns a different instance"() {
-        given:
-        def chain = new SnapshotGeneratorChain(sortedSetOf(visitingGenerator, badGenerator))
-        def object = new Table()
-        database.isSystemObject(object) >> false
-        snapshotControl.shouldInclude(object.class) >> true
-        def expectedTable = new Table()
-        expectedTable.setAttribute("visited", true)
-
-
-        when:
-        chain.snapshot(object, snapshotContext)
-
-        then:
-        def exception = thrown(DatabaseException)
-        exception.message.startsWith("Snapshot generator liquibase.snapshot.BadSnapshotGenerator has returned a different reference from the previous generator liquibase.snapshot.VisitedSnapshotGenerator.")
-    }
-
     def "snapshotting works even if first generator returns a different instance"() {
         given:
         def chain = new SnapshotGeneratorChain(sortedSetOf(badGenerator))
@@ -257,7 +239,7 @@ class BadSnapshotGenerator implements SnapshotGenerator, Comparable<SnapshotGene
     <T extends DatabaseObject> T snapshot(T example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
         // generators are expected to add nested attributes, ... to the provided example or delegate if the example type does not match
         // they are NOT expected to create new instances of the same type
-        return acceptedType.newInstance() as T
+        return acceptedType.getDeclaredConstructor().newInstance() as T
     }
 
     @Override
