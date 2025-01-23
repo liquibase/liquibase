@@ -408,6 +408,33 @@ jobs:
                 }
              });
 
+      - name: Write workflow summary
+        if: success()
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.BOT_TOKEN }}
+          script: |
+            const core = require('@actions/core');
+
+            // Wait for workflow to start
+            await new Promise(r => setTimeout(r, 5000));
+            
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner: 'liquibase',
+              repo: 'docker',
+              event: 'repository_dispatch'
+            });
+            
+            if (runs.data.workflow_runs.length > 0) {
+              const runUrl = runs.data.workflow_runs[0].html_url;
+              const summary = `### 🐳 Docker Release Workflow\n` +
+                              `[View triggered workflow](${runUrl})\n`;
+              await core.summary.addRaw(summary).write();
+            } else {
+              console.log('No workflow runs found.');
+            }
+
 
   generate-PRO-tag:
     if: ${{ inputs.dry_run == false }}
