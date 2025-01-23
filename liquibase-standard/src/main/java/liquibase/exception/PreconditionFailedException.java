@@ -24,10 +24,6 @@ public class PreconditionFailedException extends Exception {
         this(new FailedPrecondition(message, changeLog, precondition), cause);
     }
 
-    /**
-     * @deprecated Use {@link #PreconditionFailedException(FailedPrecondition, Throwable)} instead
-     */
-    @Deprecated
     public PreconditionFailedException(FailedPrecondition failedPrecondition) {
         super("Preconditions Failed");
         this.failedPreconditions = new ArrayList<>();
