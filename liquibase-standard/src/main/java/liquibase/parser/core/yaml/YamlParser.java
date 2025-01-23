@@ -3,18 +3,14 @@ package liquibase.parser.core.yaml;
 import liquibase.Scope;
 import liquibase.logging.Logger;
 import liquibase.parser.LiquibaseParser;
+import liquibase.parser.core.ParserSupportedFileExtension;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.SnakeYamlUtil;
 import org.yaml.snakeyaml.LoaderOptions;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 public abstract class YamlParser implements LiquibaseParser {
 
     protected Logger log = Scope.getCurrentScope().getLog(getClass());
-    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<>(Arrays.asList("yaml", "yml"));
 
     public static LoaderOptions createLoaderOptions() {
         LoaderOptions options = new LoaderOptions();
@@ -36,7 +32,7 @@ public abstract class YamlParser implements LiquibaseParser {
     }
 
     protected String[] getSupportedFileExtensions() {
-        return SUPPORTED_EXTENSIONS.toArray(new String[0]);
+        return ParserSupportedFileExtension.YAML_SUPPORTED_EXTENSIONS.toArray(new String[0]);
     }
 
     @Override

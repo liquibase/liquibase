@@ -40,8 +40,11 @@ public class DatabaseUtils {
                 String searchPath = executor.queryForObject(new RawParameterizedSqlStatement("SHOW SEARCH_PATH"), String.class);
 
                 if (!searchPath.equals(defaultCatalogName) && !searchPath.equals(defaultSchemaName) && !searchPath.equals("\"" + defaultSchemaName + "\"") && !searchPath.startsWith(defaultSchemaName + ",") && !searchPath.startsWith("\"" + defaultSchemaName + "\",")) {
+                    //
+                    // Escape the default schema name if preserve schema case is set or if the schema name contains an @ symbol
+                    //
                     String finalSearchPath;
-                    if (GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue()) {
+                    if (Boolean.TRUE.equals(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue()) || defaultSchemaName.contains("@")) {
                         finalSearchPath = ((PostgresDatabase) database).quoteObject(defaultSchemaName, Schema.class);
                     } else {
                         finalSearchPath = defaultSchemaName;
