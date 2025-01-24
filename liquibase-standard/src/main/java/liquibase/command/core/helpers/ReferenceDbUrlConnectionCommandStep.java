@@ -90,7 +90,7 @@ public class ReferenceDbUrlConnectionCommandStep extends AbstractDatabaseConnect
             String driverPropertiesFile = commandScope.getArgumentValue(REFERENCE_DRIVER_PROPERTIES_FILE_ARG);
             logMdc(url, username, defaultSchemaName, defaultCatalogName);
             Map<String, Object> scopeValues = new HashMap<>();
-            scopeValues.put(Database.IGNORE_MISSING_REFERENCES_KEY, commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.IGNORE_MISSING_REFERENCES));
+            scopeValues.put(Database.IGNORE_MISSING_REFERENCES_KEY, commandScope.getArgumentValue(DiffArgumentsCommandStep.IGNORE_MISSING_REFERENCES));
             AtomicReference<Database> database = new AtomicReference<>();
             try {
                 Scope.child(scopeValues, () -> {

@@ -3,6 +3,7 @@ package liquibase.command.core;
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.command.*;
+import liquibase.command.core.helpers.DiffArgumentsCommandStep;
 import liquibase.command.core.helpers.PreCompareCommandStep;
 import liquibase.command.providers.ReferenceDatabase;
 import liquibase.database.Database;
@@ -50,7 +51,7 @@ public class DiffCommandStep extends AbstractCommandStep {
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        return Arrays.asList(CompareControl.class, ReferenceDatabase.class);
+        return Arrays.asList(CompareControl.class, ReferenceDatabase.class, DiffArgumentsCommandStep.class);
     }
 
     @Override

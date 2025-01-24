@@ -107,7 +107,7 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
         String url = commandScope.getArgumentValue(URL_ARG);
         if (database.get() == null) {
             Map<String, Object> scopedValues = new HashMap<>();
-            scopedValues.put(Database.IGNORE_MISSING_REFERENCES_KEY, commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.IGNORE_MISSING_REFERENCES));
+            scopedValues.put(Database.IGNORE_MISSING_REFERENCES_KEY, commandScope.getArgumentValue(DiffArgumentsCommandStep.IGNORE_MISSING_REFERENCES));
             try {
                 Scope.child(scopedValues, () -> {
                     database.set(createDatabaseObject(

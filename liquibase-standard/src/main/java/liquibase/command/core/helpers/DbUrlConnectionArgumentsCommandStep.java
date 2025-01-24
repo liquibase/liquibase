@@ -26,7 +26,6 @@ public class DbUrlConnectionArgumentsCommandStep extends AbstractHelperCommandSt
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_ARG;
     public static final CommandArgumentDefinition<String> DRIVER_PROPERTIES_FILE_ARG;
-    public static final CommandArgumentDefinition<Boolean> IGNORE_MISSING_REFERENCES;
 
 
     /**
@@ -59,10 +58,6 @@ public class DbUrlConnectionArgumentsCommandStep extends AbstractHelperCommandSt
         DATABASE_ARG.setSupersededBy(URL_ARG);
 
         SKIP_DATABASE_STEP_ARG = builder.argument("skipDatabaseStep", Boolean.class).hidden().defaultValue(false).build();
-        IGNORE_MISSING_REFERENCES = builder.argument("ignoreMissingReferences", Boolean.class)
-                .description("If true, diff operations will ignore referenced objects which are not found in the snapshot.")
-                .defaultValue(false)
-                .build();
     }
 
 
