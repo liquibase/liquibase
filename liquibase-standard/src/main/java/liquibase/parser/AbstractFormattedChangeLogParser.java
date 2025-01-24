@@ -514,6 +514,9 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
             if (currentSequence.length() > 0) {
                 handleChangeSet(physicalChangeLogLocation, changeLogParameters, changeSet, currentSequence, change, changeLog, currentRollbackSequence, rollbackSplitStatementsPatternMatcher, rollbackSplitStatements, rollbackEndDelimiter);
+                if (change instanceof RawSQLChange) {
+                    ((RawSQLChange)change).setSqlEndLine(count);
+                }
             }
 
         } catch (IOException e) {

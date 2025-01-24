@@ -1,11 +1,16 @@
 package liquibase.util;
 
+import liquibase.Scope;
+import liquibase.change.Change;
+import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.LiquibaseSqlParser;
 import liquibase.util.grammar.*;
 
 import java.io.StringReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class StandardSqlParser implements LiquibaseSqlParser {
 
@@ -51,7 +56,26 @@ public class StandardSqlParser implements LiquibaseSqlParser {
 
         } catch (Throwable e) {
             if (changeSet != null) {
-                throw new UnexpectedLiquibaseException(changeSet.toString(), e);
+                Change change = Scope.getCurrentScope().get(ChangeSet.CHANGE_KEY, Change.class);
+                String message = changeSet.toString();
+                if (change instanceof RawSQLChange) {
+                    String exceptionMessage = e.getMessage();
+                    Pattern p = Pattern.compile("(?i).* line ([\\d]+).*");
+                    Matcher m = p.matcher(exceptionMessage);
+                    String atLine = "";
+                    if (m.matches()) {
+                        atLine = m.group(1);
+                    }
+                    int startLine = ((RawSQLChange)(change)).getSqlStartLine();
+                    int endLine = ((RawSQLChange)(change)).getSqlEndLine();
+                    if (StringUtil.isEmpty(atLine)) {
+                        message = String.format("%s (lines %d-%d)", changeSet, startLine, endLine);
+                    } else {
+                        int actualAtLine = Integer.parseInt(atLine) + startLine - 1;
+                        message = String.format("%s (issue at line %d of lines %d-%d)", changeSet, actualAtLine, startLine, endLine);
+                    }
+                }
+                throw new UnexpectedLiquibaseException(message, e);
             } else {
                 throw new UnexpectedLiquibaseException(e);
             }
