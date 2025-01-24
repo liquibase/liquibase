@@ -76,7 +76,7 @@ do
   find $workdir/META-INF -name pom.xml -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/g" {} \;
   find $workdir/META-INF -name pom.xml -exec sed -i -e "s/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/<liquibase.version>$version<\/liquibase.version>/g" {} \;
   find $workdir/META-INF -name pom.xml -exec sed -i -e "s/<version>$MODIFIED_BRANCH_NAME-SNAPSHOT<\/version>/<version>$version<\/version>/g" {} \;
-  find $workdir/META-INF -name pom.properties -exec sed -i -e "s/0-SNAPSHOT/$version/g" {} \;
+  find $workdir/META-INF -name pom.properties -exec sed -i -e "s/\(0\|master\|release\)-SNAPSHOT/$version/g" {} \;
   find $workdir/META-INF -name plugin*.xml -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/g" {} \;
   (cd $workdir && jar -uMf $jar META-INF)
   rm -rf $workdir/META-INF
