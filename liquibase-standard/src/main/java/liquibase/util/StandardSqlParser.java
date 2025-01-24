@@ -53,34 +53,50 @@ public class StandardSqlParser implements LiquibaseSqlParser {
                 }
                 token = t.getNextToken();
             }
-
         } catch (Throwable e) {
             if (changeSet != null) {
                 Change change = Scope.getCurrentScope().get(ChangeSet.CHANGE_KEY, Change.class);
-                String message = changeSet.toString();
-                if (change instanceof RawSQLChange) {
-                    String exceptionMessage = e.getMessage();
-                    Pattern p = Pattern.compile("(?i).* line ([\\d]+).*");
-                    Matcher m = p.matcher(exceptionMessage);
-                    String atLine = "";
-                    if (m.matches()) {
-                        atLine = m.group(1);
-                    }
-                    int startLine = ((RawSQLChange)(change)).getSqlStartLine();
-                    int endLine = ((RawSQLChange)(change)).getSqlEndLine();
-                    if (StringUtil.isEmpty(atLine)) {
-                        message = String.format("%s (lines %d-%d)", changeSet, startLine, endLine);
-                    } else {
-                        int actualAtLine = Integer.parseInt(atLine) + startLine - 1;
-                        message = String.format("%s (issue at line %d of lines %d-%d)", changeSet, actualAtLine, startLine, endLine);
-                    }
-                }
+                String message = enhanceExceptionMessage(changeSet, change, e);
                 throw new UnexpectedLiquibaseException(message, e);
             } else {
                 throw new UnexpectedLiquibaseException(e);
             }
         }
         return clauses;
+    }
+
+    /**
+     *
+     * If this is a RawSQLChange, then add information about the real position of the SQL in the
+     * formatted SQL changelog
+     *
+     * @param  changeSet     The current change set
+     * @param  change        The change that generated the SQL
+     * @param  e             The thrown exception
+     * @return String        The message to display
+     *
+     */
+    private static String enhanceExceptionMessage(ChangeSet changeSet, Change change, Throwable e) {
+        if (! (change instanceof RawSQLChange)) {
+            return changeSet.toString();
+        }
+        String exceptionMessage = e.getMessage();
+        Pattern p = Pattern.compile("(?i).* line ([\\d]+).*");
+        Matcher m = p.matcher(exceptionMessage);
+        String atLine = "";
+        if (m.matches()) {
+            atLine = m.group(1);
+        }
+        String message;
+        int startLine = ((RawSQLChange) change).getSqlStartLine();
+        int endLine = ((RawSQLChange) change).getSqlEndLine();
+        if (StringUtil.isEmpty(atLine)) {
+            message = String.format("%s (lines %d-%d)", changeSet, startLine, endLine);
+        } else {
+            int actualAtLine = Integer.parseInt(atLine) + startLine - 1;
+            message = String.format("%s (issue at line %d of lines %d-%d)", changeSet, actualAtLine, startLine, endLine);
+        }
+        return message;
     }
 
     @Override
