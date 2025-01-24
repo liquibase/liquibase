@@ -291,10 +291,14 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         changelogFileContent.containsIgnoreCase("file=\"testDataDir/")
 
         cleanup:
-        changelogFile.delete()
+        try {
+            changelogFile.delete()
+        } catch (Exception ignored) {
+
+        }
+        postgres.getConnection().close()
         refDatabase.close()
         targetDatabase.close()
-        postgres.getConnection().close()
     }
 
     static void runDiffToChangelogWithUseOrReplaceCommandArgument(Database targetDatabase, Database referenceDatabase,

@@ -13,7 +13,7 @@ import java.util.*;
 public class ChangeGeneratorFactory {
     private static ChangeGeneratorFactory instance;
 
-    private final List<ChangeGenerator> generators = new ArrayList<>();
+    private final List<ChangeGenerator> generators = Collections.synchronizedList(new ArrayList<>());
 
     private ChangeGeneratorFactory() {
         try {
@@ -62,10 +62,8 @@ public class ChangeGeneratorFactory {
     }
 
     public void unregisterAll(Class generatorClass) {
-        for (ChangeGenerator existingGenerator : generators) {
-            if (existingGenerator.getClass().equals(generatorClass)) {
-                unregister(generatorClass);
-            }
+        synchronized(generators) {
+            generators.removeIf(existingGenerator -> existingGenerator.getClass().equals(generatorClass));
         }
     }
 
