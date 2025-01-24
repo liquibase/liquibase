@@ -3,6 +3,7 @@ package liquibase.util;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.core.DiffCommandStep;
+import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
@@ -187,7 +188,7 @@ public class ObjectUtil {
                 ));
         }
 
-        if (GlobalConfiguration.IGNORE_MISSING_REFERENCES.getCurrentValue()) {
+        if (Boolean.TRUE.equals(Scope.getCurrentScope().get(Database.IGNORE_MISSING_REFERENCES_KEY, Boolean.class))) {
             Class<?>[] parameterTypes = method.getParameterTypes();
             if (propertyValue instanceof String && !parameterTypes[0].isAssignableFrom(String.class)) {
                 return;

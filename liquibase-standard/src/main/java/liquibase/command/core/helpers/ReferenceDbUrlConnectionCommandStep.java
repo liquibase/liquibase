@@ -11,7 +11,10 @@ import liquibase.logging.mdc.MdcKey;
 import liquibase.util.StringUtil;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Internal command step to be used on pipeline to manage the database connection  to the reference database.
@@ -86,9 +89,19 @@ public class ReferenceDbUrlConnectionCommandStep extends AbstractDatabaseConnect
             String driver = commandScope.getArgumentValue(REFERENCE_DRIVER_ARG);
             String driverPropertiesFile = commandScope.getArgumentValue(REFERENCE_DRIVER_PROPERTIES_FILE_ARG);
             logMdc(url, username, defaultSchemaName, defaultCatalogName);
-            return createDatabaseObject(url, username, password, defaultSchemaName, defaultCatalogName, driver, driverPropertiesFile,
-                    StringUtil.trimToNull(commandScope.getArgumentValue(REFERENCE_LIQUIBASE_CATALOG_NAME_ARG)),
-                    StringUtil.trimToNull(commandScope.getArgumentValue(REFERENCE_LIQUIBASE_SCHEMA_NAME_ARG)));
+            Map<String, Object> scopeValues = new HashMap<>();
+            scopeValues.put(Database.IGNORE_MISSING_REFERENCES_KEY, commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.IGNORE_MISSING_REFERENCES));
+            AtomicReference<Database> database = new AtomicReference<>();
+            try {
+                Scope.child(scopeValues, () -> {
+                    database.set(createDatabaseObject(url, username, password, defaultSchemaName, defaultCatalogName, driver, driverPropertiesFile,
+                            StringUtil.trimToNull(commandScope.getArgumentValue(REFERENCE_LIQUIBASE_CATALOG_NAME_ARG)),
+                            StringUtil.trimToNull(commandScope.getArgumentValue(REFERENCE_LIQUIBASE_SCHEMA_NAME_ARG))));
+                });
+            } catch (Exception e) {
+                throw new DatabaseException(e);
+            }
+            return database.get();
         } else {
             return commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);
         }

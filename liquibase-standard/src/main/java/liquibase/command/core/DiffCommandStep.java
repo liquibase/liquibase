@@ -45,6 +45,7 @@ public class DiffCommandStep extends AbstractCommandStep {
         TARGET_SNAPSHOT_CONTROL_ARG = builder.argument("targetSnapshotControl", SnapshotControl.class).hidden().build();
         FORMAT_ARG = builder.argument("format", String.class).description("Output format. Default: TXT").hidden().build();
         DIFF_RESULT = builder.result("diffResult", DiffResult.class).description("Databases diff result").build();
+
     }
 
     @Override

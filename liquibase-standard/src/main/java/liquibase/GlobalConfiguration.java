@@ -57,7 +57,6 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<SupportsMethodValidationLevelsEnum> SUPPORTS_METHOD_VALIDATION_LEVEL;
 
     public static final ConfigurationDefinition<Boolean> PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS;
-    public static final ConfigurationDefinition<Boolean> IGNORE_MISSING_REFERENCES;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -261,10 +260,6 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
         PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS = builder.define("preserveClasspathPrefixInNormalizedPaths", Boolean.class)
                 .setDescription("If true 'classpath:' prefix will be preserved in normalized paths, allowing to resolve hierarchical resources under a classpath-based root.")
-                .setDefaultValue(false)
-                .build();
-        IGNORE_MISSING_REFERENCES = builder.define("diff.ignoreMissingReferences", Boolean.class)
-                .setDescription("If true, diff operations will ignore referenced objects which are not found in the snapshot.")
                 .setDefaultValue(false)
                 .build();
     }
