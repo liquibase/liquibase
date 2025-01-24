@@ -31,7 +31,15 @@ public class SnapshotGeneratorChain {
     }
 
     /**
-     * This calls all the non-replaced {@link SnapshotGenerator} in the chain, by comparison order
+     * This calls all the non-replaced {@link SnapshotGenerator} in the chain, by comparison order.
+     * <p>
+     * During the chain processing, the snapshot method returns an object that will be passed to the next generator in the chain.
+     * The object can be the same object that was passed to the generator, or a new object, given that:
+     * - the generator copies the attributes of the provided object to a new object and returns the new object (liquibase-hibernate extension does this in https://github.com/liquibase/liquibase-hibernate/blob/main/src/main/java/liquibase/ext/hibernate/snapshot/IndexSnapshotGenerator.java#L31 )
+     * - the generator returns the existing instance (they can e.g. set new attributes to it)
+     * <p>
+     * Snapshot generators that do not abide by the previous rules must be the first to be called for a given object type and there are not more than one of these per object type.
+     * Note that this can get tricky as extensions can bring their own snapshot generators to the mix breaking core generators.
      *
      * @return snapshot object
      * @see SnapshotGenerator#replaces() to skip generators that do not comply to the above requireemnts
