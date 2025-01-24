@@ -36,7 +36,6 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  * A final class representing the <a href="https://docs.liquibase.com/change-types/includeall.html">includeAll</a> tag.
@@ -63,19 +62,9 @@ public final class ChangeLogIncludeAll extends AbstractLiquibaseSerializable imp
     private final Database database = Scope.getCurrentScope().getDatabase();
     private final List<DatabaseChangeLog> nestedChangeLogs = new ArrayList<>(10);
     private boolean markRan = false;
-
-    @Getter(AccessLevel.PUBLIC)
-    @Setter(AccessLevel.PUBLIC)
     private PreconditionContainer preconditions;
-    @Getter(AccessLevel.PUBLIC)
-    private final String serializedObjectName = INCLUDE_ALL_CHANGELOGS;
-    @Getter(AccessLevel.PUBLIC)
-    private final Set<String> serializableFields = new LinkedHashSet<>(Arrays
-        .asList("path", "errorIfMissingOrEmpty", "relativeToChangelogFile", "resourceFilter", "context", "minDepth", "maxDepth", "endsWithFilter","logicalFilePath"));
-    @Getter(AccessLevel.PUBLIC)
-    private final String serializedObjectNamespace = STANDARD_CHANGELOG_NAMESPACE;
 
-    public ChangeLogIncludeAll(ParsedNode node, ResourceAccessor resourceAccessor,
+  public ChangeLogIncludeAll(ParsedNode node, ResourceAccessor resourceAccessor,
                                DatabaseChangeLog parentChangeLog, ModifyChangeSets modifyChangeSets)
         throws ParsedNodeException, SetupException {
 
@@ -96,7 +85,34 @@ public final class ChangeLogIncludeAll extends AbstractLiquibaseSerializable imp
         this.resourceFilter = ChangeLogIncludeAllUtils.getFilterDef(node);
         this.path = node.getChildValue(null, PATH, String.class);
         this.preconditions = ChangeLogIncludeHelper.getPreconditions(node, resourceAccessor);
-        ChangeLogIncludeAllUtils.setNestedChangeLogs(node, this);
+        this.nestedChangeLogs.addAll(ChangeLogIncludeAllUtils.getNestedChangeLogs(node, this));
+    }
+
+    @Override
+    public PreconditionContainer getPreconditions() {
+        return preconditions;
+    }
+
+    @Override
+    public void setPreconditions(PreconditionContainer preconditions) {
+        this.preconditions = preconditions;
+    }
+
+    @Override
+    public String getSerializedObjectName() {
+      return INCLUDE_ALL_CHANGELOGS;
+    }
+
+    @Override
+    public Set<String> getSerializableFields() {
+        return new LinkedHashSet<>(Arrays
+            .asList("path", "errorIfMissingOrEmpty", "relativeToChangelogFile", "resourceFilter",
+                "context", "minDepth", "maxDepth", "endsWithFilter","logicalFilePath"));
+    }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+      return STANDARD_CHANGELOG_NAMESPACE;
     }
 
     void checkPreconditions() {
