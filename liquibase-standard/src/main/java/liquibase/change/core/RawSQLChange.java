@@ -27,11 +27,11 @@ public class RawSQLChange extends AbstractSQLChange {
 
     @Getter
     @Setter
-    private int sqlStartLine;
+    private Integer sqlStartLine;
 
     @Getter
     @Setter
-    private int sqlEndLine;
+    private Integer sqlEndLine;
 
     public RawSQLChange() {
     }
