@@ -392,49 +392,22 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Release liquibase/docker v${{ needs.setup.outputs.version }}
-        uses: actions/github-script@v7
+        uses: codex-/return-dispatch@v2
+        id: docker_dispatch
         with:
-          github-token: ${{ secrets.BOT_TOKEN }}
-          script: |
-            console.log("Sending liquibase-release event to liquibase/docker");
+          token: ${{ secrets.BOT_TOKEN }}
+          ref: main
+          repo: docker
+          owner: liquibase
+          workflow: create-release.yml
+          workflow_inputs: '{ "liquibaseVersion": "${{ needs.setup.outputs.version }}", "dryRun": "${{ inputs.dry_run || false }}" }'
+          workflow_timeout_seconds: 300
+          workflow_job_steps_retry_seconds: 10
 
-            await github.rest.repos.createDispatchEvent({
-               "owner": "liquibase",
-               "repo": "docker",
-               "event_type": "liquibase-release",
-               "client_payload": {
-                  "liquibaseVersion": "${{ needs.setup.outputs.version }}",
-                  "dryRun": "${{ inputs.dry_run || false }}"
-                }
-             });
-
-      - name: Write workflow summary
+      - name: Adding Docker run to job summary
         if: success()
         continue-on-error: true
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.BOT_TOKEN }}
-          script: |
-            const core = require('@actions/core');
-
-            // Wait for workflow to start
-            await new Promise(r => setTimeout(r, 5000));
-            
-            const runs = await github.rest.actions.listWorkflowRuns({
-              owner: 'liquibase',
-              repo: 'docker',
-              event: 'repository_dispatch'
-            });
-            
-            if (runs.data.workflow_runs.length > 0) {
-              const runUrl = runs.data.workflow_runs[0].html_url;
-              const summary = `### 🐳 Docker Release Workflow\n` +
-                              `[View triggered workflow](${runUrl})\n`;
-              await core.summary.addRaw(summary).write();
-            } else {
-              console.log('No workflow runs found.');
-            }
-
+        run: echo '### 🐳 Docker Release Job -> ${{steps.docker_dispatch.outputs.run_url}}' >> $GITHUB_STEP_SUMMARY
 
   generate-PRO-tag:
     if: ${{ inputs.dry_run == false }}
