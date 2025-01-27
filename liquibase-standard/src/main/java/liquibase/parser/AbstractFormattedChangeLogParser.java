@@ -476,9 +476,6 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     changeLog.addChangeSet(changeSet);
 
                     change = getChange();
-                    if (change instanceof RawSQLChange) {
-                        ((RawSQLChange) change).setSqlStartLine(count+1);
-                    }
                     setChangeSequence(change, finalCurrentSequence);
 
                     handleSplitStatements(line, changeSet, change);
