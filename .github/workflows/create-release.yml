@@ -363,12 +363,13 @@ jobs:
         # Check if the tag already exists in OSS repository, if it does, exit with error. This is to prevent the artifacts from being attached to the already released tag.
       - name: Check OSS release tag existence, if tag exists, exit with error
         run: |
-          tag=v${{ needs.setup.outputs.version }}
-          if git rev-parse $tag >/dev/null 2>&1
+          tag="v${{ needs.setup.outputs.version }}"
+          if git show-ref --tags --quiet --verify -- "refs/tags/$tag"
           then
-            echo "Tag $tag already exists"
-            exit 1
+              echo "Tag $tag already exists"
+              exit 1
           fi
+
 
       - name: Attach Files to Draft Release
         if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
