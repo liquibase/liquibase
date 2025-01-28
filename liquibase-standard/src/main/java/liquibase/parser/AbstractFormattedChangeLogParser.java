@@ -705,6 +705,9 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         } else {
             currentSequence.append(line).append(System.lineSeparator());
         }
+        if (change instanceof RawSQLChange && ((RawSQLChange)change).getSqlStartLine() == null && currentSequence.length() > 1) {
+            ((RawSQLChange) change).setSqlStartLine(count);
+        }
         changeSetFinished.set(false);
     }
 

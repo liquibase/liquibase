@@ -95,7 +95,7 @@ public class StandardSqlParser implements LiquibaseSqlParser {
             if (StringUtils.isEmpty(atLine)) {
                 message = String.format("%s (lines %d-%d)", changeSet, startLine, endLine);
             } else {
-                int actualAtLine = Integer.parseInt(atLine) + startLine;
+                int actualAtLine = Integer.parseInt(atLine) + startLine - 1;
                 message = String.format("%s (issue at line %d of lines %d-%d)", changeSet, actualAtLine, startLine, endLine);
             }
         } catch (Exception ignored) {
