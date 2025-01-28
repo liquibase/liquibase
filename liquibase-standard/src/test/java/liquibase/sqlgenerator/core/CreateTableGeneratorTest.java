@@ -1268,4 +1268,17 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
             }
         }
     }
+
+    @Test
+    public void testInvalidColumnDataType() {
+        Database database = new PostgresDatabase();
+        CreateTableStatement statement = new CreateTableStatement("cat", "schema", "some_table");
+        // Bad data type
+        statement.addColumn("col1", DataTypeFactory.getInstance().fromDescription("CHAR(2", database));
+        // Good data type
+        statement.addColumn("col2", DataTypeFactory.getInstance().fromDescription("CHAR(2)", database));
+        Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
+        // This sql is intended to be invalid
+        assertEquals("CREATE TABLE schema.some_table (col1 CHAR(2, col2 CHAR(2))", generatedSql[0].toSql());
+    }
 }
