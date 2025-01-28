@@ -129,7 +129,7 @@ jobs:
         with:
           repository: "liquibase/liquibase"
           tag: "${{ needs.setup.outputs.tag }}"
-          filename: "*"
+          fileName: "*"
           out-file-path: "."
 
       - name: Set up Java for publishing to Maven Central Repository
@@ -229,7 +229,7 @@ jobs:
         with:
           repository: "liquibase/liquibase"
           tag: "${{ needs.setup.outputs.tag }}"
-          filename: "liquibase-additional*.zip"
+          fileName: "liquibase-additional*.zip"
           out-file-path: "."
 
       - name: Unpack javadoc files and upload to s3
@@ -488,7 +488,7 @@ jobs:
         with:
           repository: "liquibase/liquibase"
           releaseId: "${{ inputs.dry_run_release_id }}"
-          filename: "*"
+          fileName: "*"
           out-file-path: "."
 
       - name: Set up Java for publishing to Maven Central Repository
@@ -539,3 +539,35 @@ jobs:
           
           done
             
+  publish_assets_to_internal_nexus:
+    if: ${{ inputs.dry_run == false }}
+    name: Publish OSS released assets to repo.liquibase.net
+    needs: [ setup ]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download released assets
+        uses: robinraju/release-downloader@v1.11
+        with:
+          repository: "liquibase/liquibase"
+          latest: true          
+          fileName: "*"
+          out-file-path: "./${{ needs.setup.outputs.version }}-released-assets"
+
+      - name: Publish to internal Nexus (repo.liquibase.net)
+        env:
+          MAVEN_USERNAME: ${{ secrets.INTERNAL_NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.INTERNAL_NEXUS_PASSWORD }}
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          version=${{ needs.setup.outputs.version }}
+          for file in ./${{ needs.setup.outputs.version }}-released-assets/*; do
+            mvn deploy:deploy-file \
+              -DrepositoryId=${version}-release-assets \
+              -Durl=https://repo.liquibase.net/repository/oss-release-assets \
+              -Dfile="$file" \
+              -DgroupId=org.liquibase \
+              -DartifactId=$(basename "$file" | rev | cut -d'.' -f2- | rev) \ 
+              -Dversion=${version} \
+              -Dpackaging=$(basename "$file" | cut -d'.' -f2-)
+          done
+          
