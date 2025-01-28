@@ -8,6 +8,7 @@ import static liquibase.changelog.DatabaseChangeLog.normalizePath;
 import static liquibase.include.ChangeLogIncludeHelper.CHANGESET_COMPARATOR;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -53,7 +54,8 @@ final class ChangeLogIncludeAllUtils {
 		}
 	}
 
-	static void setNestedChangeLogs(ParsedNode node, ChangeLogIncludeAll includeAll) throws ParsedNodeException, SetupException {
+	static List<DatabaseChangeLog> getNestedChangeLogs(ParsedNode node, ChangeLogIncludeAll includeAll) throws ParsedNodeException, SetupException {
+		List<DatabaseChangeLog> result = new ArrayList<>();
 		Comparator<String> comparator = determineResourceComparator(node);
 		SortedSet<Resource> resources = findResources(comparator, includeAll);
 		if (resources.isEmpty() && includeAll.getErrorIfMissingOrEmpty()) {
@@ -68,10 +70,11 @@ final class ChangeLogIncludeAllUtils {
 					DatabaseChangeLog changeLog =
 							getChangeLog(includeAll, resource.getPath());
 					if(changeLog != null)
-						includeAll.getNestedChangeLogs().add(changeLog);
+						result.add(changeLog);
 					LOG.info("Reading resource: " + resource);
 				}
 			});
+			return result;
 		} catch (Exception e) {
 			throw new SetupException(e);
 		}

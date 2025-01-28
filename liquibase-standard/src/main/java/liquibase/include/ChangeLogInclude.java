@@ -54,19 +54,9 @@ public final class ChangeLogInclude extends AbstractLiquibaseSerializable implem
     private final DatabaseChangeLog parentChangeLog;
     private final ModifyChangeSets modifyChangeSets;
     private boolean markRan = false;
-
-    @Getter(AccessLevel.PUBLIC)
-    @Setter(AccessLevel.PUBLIC)
     private PreconditionContainer preconditions;
-    @Getter(AccessLevel.PUBLIC)
-    private final String serializedObjectName = INCLUDE_CHANGELOG;
-    @Getter(AccessLevel.PUBLIC)
-    private final Set<String> serializableFields = new LinkedHashSet<>(Arrays
-        .asList("file", "relativeToChangelogFile", "errorIfMissing", "context"));
-    @Getter(AccessLevel.PUBLIC)
-    private final String serializedObjectNamespace = STANDARD_CHANGELOG_NAMESPACE;
 
-    public ChangeLogInclude(ParsedNode node, ResourceAccessor resourceAccessor,
+  public ChangeLogInclude(ParsedNode node, ResourceAccessor resourceAccessor,
                             DatabaseChangeLog parentChangeLog, ModifyChangeSets modifyChangeSets)
         throws ParsedNodeException, SetupException {
 
@@ -84,6 +74,32 @@ public final class ChangeLogInclude extends AbstractLiquibaseSerializable implem
         this.context = ChangeLogIncludeHelper.getContextExpression(node);
         this.preconditions = ChangeLogIncludeHelper.getPreconditions(node, resourceAccessor);
         this.nestedChangelog = ChangeLogIncludeUtils.getChangeLog(this);
+    }
+
+    @Override
+    public PreconditionContainer getPreconditions() {
+        return preconditions;
+    }
+
+    @Override
+    public void setPreconditions(PreconditionContainer preconditions) {
+        this.preconditions = preconditions;
+    }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+      return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @Override
+    public Set<String> getSerializableFields() {
+        return new LinkedHashSet<>(Arrays.asList("file", "relativeToChangelogFile",
+            "errorIfMissing", "context"));
+    }
+
+    @Override
+    public String getSerializedObjectName() {
+      return INCLUDE_CHANGELOG;
     }
 
     void checkPreconditions() {
