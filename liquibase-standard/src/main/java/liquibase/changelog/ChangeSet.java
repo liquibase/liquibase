@@ -1658,12 +1658,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
             statementsReference.set(statements);
 
-            String formattedCommands = Arrays.stream(statementsReference.get())
-                    .map(database::formatCommandForMdc)
+            String formattedStatements = Arrays.stream(statementsReference.get())
+                    .map(database::formatStatementForMdc)
                     .filter(Objects::nonNull)
                     .collect(Collectors.joining("\n"));
-
-            commandsMdc.append(formattedCommands);
+            commandsMdc.append(formattedStatements);
         });
 
         String result = commandsMdc.toString();
