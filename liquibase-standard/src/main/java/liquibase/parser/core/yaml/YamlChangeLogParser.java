@@ -5,6 +5,7 @@ import liquibase.Labels;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.visitor.IncludeVisitor;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -18,10 +19,8 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.nodes.Tag;
 
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
@@ -90,7 +89,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
             databaseChangeLogNode.setValue(rootList);
 
             changeLog.load(databaseChangeLogNode, resourceAccessor);
-
+            new IncludeVisitor().visit(changeLog);
             return changeLog;
         } catch (ChangeLogParseException e) {
             throw e;
