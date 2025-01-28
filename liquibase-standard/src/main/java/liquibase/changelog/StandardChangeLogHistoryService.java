@@ -234,33 +234,14 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     getLabelsSize() + ")", null));
             }
 
-            boolean deploymentIdColumnNotRightSize = false;
             if (!hasDeploymentIdColumn) {
                 executor.comment("Adding missing databasechangelog.deployment_id column");
                 statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
-                    getDatabaseChangeLogTableName(), "DEPLOYMENT_ID", charTypeName + "(36)", null));
+                    getDatabaseChangeLogTableName(), "DEPLOYMENT_ID", charTypeName + "(10)", null));
                 if (database instanceof DB2Database) {
                     statementsToExecute.add(new ReorganizeTableStatement(getLiquibaseCatalogName(),
                         getLiquibaseSchemaName(), getDatabaseChangeLogTableName()));
                 }
-            }
-            else {
-                if (!(this.getDatabase() instanceof SQLiteDatabase)) {
-                    DataType type = changeLogTable.getColumn("DEPLOYMENT_ID").getType();
-                    if (type.getTypeName().toLowerCase().startsWith("varchar") || type.getTypeName().toLowerCase().startsWith("character varying")) {
-                        Integer columnSize = type.getColumnSize();
-                        deploymentIdColumnNotRightSize = (columnSize != null) && (columnSize < 36);
-                    } else {
-                        deploymentIdColumnNotRightSize = false;
-                    }
-                }
-            }
-
-            if (deploymentIdColumnNotRightSize) {
-                executor.comment("Modifying size of databasechangelog.deployment_id column");
-
-                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
-                        getDatabaseChangeLogTableName(), "DEPLOYMENT_ID", charTypeName + "(36)"));
             }
 
             SqlStatement databaseChangeLogStatement = new SelectFromDatabaseChangeLogStatement(
@@ -337,19 +318,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     String description = (rs.get("DESCRIPTION") == null) ? null : rs.get("DESCRIPTION").toString();
                     String comments = (rs.get("COMMENTS") == null) ? null : rs.get("COMMENTS").toString();
                     Object tmpDateExecuted = rs.get("DATEEXECUTED");
-                    Date dateExecuted = null;
-                    if (tmpDateExecuted instanceof Date) {
-                        dateExecuted = (Date) tmpDateExecuted;
-                    } else if (tmpDateExecuted instanceof LocalDateTime) {
-                        dateExecuted = Date.from(((LocalDateTime) tmpDateExecuted).atZone(ZoneId.systemDefault()).toInstant());
-                    } else {
-                        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                        try {
-                            dateExecuted = df.parse((String) tmpDateExecuted);
-                        } catch (ParseException e) {
-                            // Ignore ParseException and assume dateExecuted == null instead of aborting.
-                        }
-                    }
+                    Date dateExecuted = convertDate(tmpDateExecuted);
                     String tmpOrderExecuted = rs.get("ORDEREXECUTED").toString();
                     Integer orderExecuted = ((tmpOrderExecuted == null) ? null : Integer.valueOf(tmpOrderExecuted));
                     String tag = (rs.get("TAG") == null) ? null : rs.get("TAG").toString();
@@ -377,6 +346,23 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             this.ranChangeSetList = ranChangeSets;
         }
         return Collections.unmodifiableList(ranChangeSetList);
+    }
+
+    public static Date convertDate(Object tmpDateExecuted) {
+        Date dateExecuted = null;
+        if (tmpDateExecuted instanceof Date) {
+            dateExecuted = (Date) tmpDateExecuted;
+        } else if (tmpDateExecuted instanceof LocalDateTime) {
+            dateExecuted = Date.from(((LocalDateTime) tmpDateExecuted).atZone(ZoneId.systemDefault()).toInstant());
+        } else {
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            try {
+                dateExecuted = df.parse((String) tmpDateExecuted);
+            } catch (ParseException e) {
+                // Ignore ParseException and assume dateExecuted == null instead of aborting.
+            }
+        }
+        return dateExecuted;
     }
 
     public List<Map<String, ?>> queryDatabaseChangeLogTable(Database database) throws DatabaseException {
