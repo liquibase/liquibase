@@ -23,5 +23,13 @@ public interface SqlStatement {
 
     boolean continueOnError();
 
-
+    /**
+     * Returns a formatted statement string for MDC logging purposes.
+     * Default implementation returns toString().
+     *
+     * @return the formatted statement string
+     */
+    default String getFormattedStatement() {
+        return toString();
+    }
 }
