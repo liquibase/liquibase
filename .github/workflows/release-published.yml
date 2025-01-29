@@ -544,7 +544,27 @@ jobs:
     name: Publish OSS released assets to repo.liquibase.net
     needs: [ setup ]
     runs-on: ubuntu-22.04
+    env:
+      MAVEN_USERNAME: ${{ secrets.INTERNAL_NEXUS_USERNAME }}
+      MAVEN_PASSWORD: ${{ secrets.INTERNAL_NEXUS_PASSWORD }}
+      GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
     steps:
+      # Check in nexus if the folder with the version already exists, if exists exit with error code
+      - name: Check if the version already exists in nexus
+        id: check_version
+        run: |
+          version=${{ needs.setup.outputs.version }}
+          response=$(curl -u "$MAVEN_USERNAME:$MAVEN_PASSWORD" -s -o /dev/null -w "%{http_code}" \
+            "https://repo.liquibase.net/repository/oss-release-assets/${version}-release-assets/")
+          
+          if [ "$response" -eq 200 ]; then
+            echo "folder_exists=true" >> $GITHUB_ENV
+            echo "Error: Release assets for version ${version} already exist in Nexus."
+            exit 1
+          else
+            echo "folder_exists=false" >> $GITHUB_ENV
+          fi
+
       - name: Download released assets
         uses: robinraju/release-downloader@v1.11
         with:
@@ -554,10 +574,7 @@ jobs:
           out-file-path: "./${{ needs.setup.outputs.version }}-released-assets"
 
       - name: Publish to internal Nexus (repo.liquibase.net)
-        env:
-          MAVEN_USERNAME: ${{ secrets.INTERNAL_NEXUS_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.INTERNAL_NEXUS_PASSWORD }}
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+        if: env.folder_exists == 'false'
         run: |
           version=${{ needs.setup.outputs.version }}
           for file in ./${{ needs.setup.outputs.version }}-released-assets/*; do
