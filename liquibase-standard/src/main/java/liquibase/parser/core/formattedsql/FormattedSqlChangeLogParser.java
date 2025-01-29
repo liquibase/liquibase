@@ -33,7 +33,11 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
     public static final String VIEW_EXISTS = "view-exists";
 
     protected static boolean isFirstSqlLine(StringBuilder currentSequence, AbstractSQLChange change) {
-        return change instanceof RawSQLChange && ((RawSQLChange) change).getSqlStartLine() == null && currentSequence.length() > 1;
+        String currentSequenceString = currentSequence.toString();
+        if (! currentSequenceString.isEmpty()) {
+            currentSequenceString = currentSequenceString.trim();
+        }
+        return change instanceof RawSQLChange && ((RawSQLChange) change).getSqlStartLine() == null && ! currentSequenceString.isEmpty();
     }
 
 
