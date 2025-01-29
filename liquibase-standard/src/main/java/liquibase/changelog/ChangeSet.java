@@ -1657,7 +1657,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             statementsReference.set(statements);
 
             String formattedStatements = Arrays.stream(statementsReference.get())
-                    .map(database::formatStatementForMdc)
+                    .map(SqlStatement::getFormattedStatement)
                     .filter(Objects::nonNull)
                     .collect(Collectors.joining("\n"));
             commandsMdc.append(formattedStatements);

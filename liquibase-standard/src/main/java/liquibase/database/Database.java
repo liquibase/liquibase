@@ -686,14 +686,5 @@ public interface Database extends PrioritizedService, AutoCloseable {
         return null;
     }
 
-    /**
-     * Formats a SQL statement for MDC logging purposes.
-     *
-     * @param statement the SQL statement to be formatted
-     * @return the formatted SQL statement as a string
-     */
-    default String formatStatementForMdc(SqlStatement statement) {
-        return SqlUtil.getSqlString(statement, SqlGeneratorFactory.getInstance(), this);
-    }
 }
 
