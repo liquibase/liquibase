@@ -348,6 +348,57 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         return Collections.unmodifiableList(ranChangeSetList);
     }
 
+    /**
+     * Returns the unique ChangeSets that have been run against the current getDatabase().
+     */
+    public List<RanChangeSet> getUniqueRanChangeSets() throws DatabaseException { // TODO: create another method getUniqueRanChangeSets()
+        if (this.ranChangeSetList == null) {
+            Database database = getDatabase();
+            String databaseChangeLogTableName = getDatabase().escapeTableName(getLiquibaseCatalogName(),
+                getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
+            List<RanChangeSet> ranChangeSets = new ArrayList<>();
+            if (hasDatabaseChangeLogTable()) {
+                Scope.getCurrentScope().getLog(getClass()).info("Reading from " + databaseChangeLogTableName);
+                List<Map<String, ?>> results = queryDatabaseChangeLogTableUnique(database);
+                for (Map rs : results) {
+                    String storedFileName = rs.get("FILENAME").toString();
+                    String fileName = DatabaseChangeLog.normalizePath(storedFileName);
+                    String author = rs.get("AUTHOR").toString();
+                    String id = rs.get("ID").toString();
+                    String md5sum = null;
+                    String description = null;
+                    String comments = null;
+                    Object tmpDateExecuted = null;
+                    Date dateExecuted = null;
+                    String tmpOrderExecuted = null;
+                    Integer orderExecuted = null;
+                    String tag = null;
+                    String execType = (rs.get("EXECTYPE") == null) ? null : rs.get("EXECTYPE").toString();
+                    ContextExpression contexts = null;
+                    Labels labels = null;
+                    String deploymentId = null;
+                    String liquibaseVersion =  null;
+
+                    try {
+                        RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum),
+                            dateExecuted, tag, ChangeSet.ExecType.valueOf(execType), description, comments, contexts,
+                            labels, deploymentId, storedFileName);
+                        ranChangeSet.setOrderExecuted(orderExecuted);
+                        ranChangeSet.setLiquibaseVersion(liquibaseVersion);
+                        ranChangeSets.add(ranChangeSet);
+                    } catch (IllegalArgumentException e) {
+                        Scope.getCurrentScope().getLog(getClass()).severe("Unknown EXECTYPE from database: " +
+                            execType);
+                        throw e;
+                    }
+                }
+            }
+
+            this.ranChangeSetList = ranChangeSets;
+        }
+        return Collections.unmodifiableList(ranChangeSetList);
+    }
+
     public static Date convertDate(Object tmpDateExecuted) {
         Date dateExecuted = null;
         if (tmpDateExecuted instanceof Date) {
@@ -367,7 +418,17 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
     public List<Map<String, ?>> queryDatabaseChangeLogTable(Database database) throws DatabaseException {
         SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement(new ColumnConfig()
-            .setName("DISTINCT *").setComputed(true)).setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
+                .setName("*").setComputed(true)).setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
+        return ChangelogJdbcMdcListener.query(getDatabase(), executor -> executor.queryForList(select));
+    }
+
+    public List<Map<String, ?>> queryDatabaseChangeLogTableUnique(Database database) throws DatabaseException {
+        SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement(
+                new SelectFromDatabaseChangeLogStatement.GroupByIdAuthorFilename(),
+                new ColumnConfig().setName("ID"),
+                new ColumnConfig().setName("AUTHOR"), new ColumnConfig().setName("FILENAME"),
+                new ColumnConfig().setName("AUTHOR"), new ColumnConfig().setName("EXECTYPE"));
+        select.setOrderBy("FILENAME ASC, AUTHOR ASC", "ID ASC");
         return ChangelogJdbcMdcListener.query(getDatabase(), executor -> executor.queryForList(select));
     }
 

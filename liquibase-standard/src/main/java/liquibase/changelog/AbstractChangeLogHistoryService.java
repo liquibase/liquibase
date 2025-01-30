@@ -65,7 +65,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
     @Override
     public void upgradeChecksums(final DatabaseChangeLog databaseChangeLog, final Contexts contexts,
                                  LabelExpression labels) throws DatabaseException {
-        for (RanChangeSet ranChangeSet : this.getRanChangeSets()) {
+        for (RanChangeSet ranChangeSet : this.getUniqueRanChangeSets()) {
             if (ranChangeSet.getLastCheckSum() == null) {
                 List<ChangeSet> changeSets = databaseChangeLog.getChangeSets(ranChangeSet);
                 for (ChangeSet changeSet : changeSets) {

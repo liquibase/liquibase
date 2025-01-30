@@ -62,6 +62,12 @@ public class MockChangeLogHistoryService implements ChangeLogHistoryService {
     }
 
     @Override
+    public List<RanChangeSet> getUniqueRanChangeSets() throws DatabaseException
+    {
+        return ranChangeSets;
+    }
+
+    @Override
     public List<RanChangeSet> getRanChangeSets(boolean a) throws DatabaseException {
         return ranChangeSets;
     }

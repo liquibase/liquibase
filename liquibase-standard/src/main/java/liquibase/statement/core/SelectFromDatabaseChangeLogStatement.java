@@ -98,4 +98,16 @@ public class SelectFromDatabaseChangeLogStatement extends AbstractSqlStatement {
         }
     }
 
+    @Data
+    public static class GroupByIdAuthorFilename implements WhereClause {
+        @Override
+        public String generateSql(Database database) {
+            final String md5SUMColumnName = database.escapeColumnName(null, null, null, "MD5SUM");
+            final String idColumnName = database.escapeColumnName(null, null, null, "ID");
+            final String authorColumnName = database.escapeColumnName(null, null, null, "AUTHOR");
+            final String fileNameColumnName = database.escapeColumnName(null, null, null, "FILENAME");
+            final String exectype = database.escapeColumnName(null, null, null, "EXECTYPE");
+            return String.format(" WHERE %s is null GROUP BY %s, %s, %s, %s", md5SUMColumnName, idColumnName, authorColumnName, fileNameColumnName, exectype);
+        }
+    }
 }
