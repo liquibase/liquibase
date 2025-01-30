@@ -29,7 +29,7 @@ jobs:
 
   dry-run-create-release:
     needs: [ setup ]
-    uses: liquibase/liquibase/.github/workflows/create-release.yml@master
+    uses: ./.github/workflows/create-release.yml
     with:
       version: "dry-run-${{ github.run_id }}"
       runId: ${{ needs.setup.outputs.dry_run_id }}
@@ -62,7 +62,7 @@ jobs:
 
   dry-run-release-published:
     needs: [ setup, dry-run-create-release, dry-run-get-draft-release ]
-    uses: liquibase/liquibase/.github/workflows/release-published.yml@master
+    uses: ./.github/workflows/release-published.yml
     with:
       tag: "vdry-run-${{ github.run_id }}"
       dry_run_release_id: ${{ needs.dry-run-get-draft-release.outputs.dry_run_release_id }}
