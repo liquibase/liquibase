@@ -1,17 +1,14 @@
 package liquibase.parser.core.sql;
 
-import liquibase.ChecksumVersion;
 import liquibase.Scope;
-import liquibase.change.Change;
-import liquibase.change.CheckSum;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.*;
+import liquibase.changelog.visitor.IncludeVisitor;
 import liquibase.changeset.ChangeSetService;
 import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.ChangeLogParser;
@@ -23,7 +20,6 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.util.ExceptionUtil;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -89,6 +85,8 @@ public class SqlChangeLogParser implements ChangeLogParser {
             Scope.getCurrentScope().getAnalyticsEvent().incrementSqlChangelogCount();
         });
 
+
+        new IncludeVisitor().visit(changeLog);
         return changeLog;
     }
 
