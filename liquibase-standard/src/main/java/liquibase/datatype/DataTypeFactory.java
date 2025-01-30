@@ -213,7 +213,7 @@ public class DataTypeFactory {
 
         // Does the type string have the form "some_data_type(additional,info,separated,by,commas)"?
         // If so, process these as additional data type parameters.
-        if (dataTypeDefinition.matches(".+\\s*\\(.*")) {
+        if (dataTypeDefinition.matches(".+\\s*\\(.*\\).*")) {
             // Cut out the part between the first ()
             String paramStrings = dataTypeDefinition.replaceFirst(".*?\\(", "").replaceFirst("\\).*", "");
             String[] params = paramStrings.split(",");
