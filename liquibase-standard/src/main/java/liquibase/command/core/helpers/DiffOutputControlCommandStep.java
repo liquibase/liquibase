@@ -39,7 +39,7 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep impl
         INCLUDE_TABLESPACE_ARG = builder.argument("includeTablespace", Boolean.class).defaultValue(false)
                 .description("Include the tablespace attribute in the changelog. Defaults to false.").build();
         DATA_OUTPUT_DIR_ARG = builder.argument("dataOutputDirectory", String.class)
-                .description("Directory where insert statement csv files will be kept when processing a LoadData change.").build();
+                .description("Specifies a directory to send the loadData output of a diff-changelog/generate-changelog command as a CSV file.").build();
 
         EXCLUDE_OBJECTS = builder.argument("excludeObjects", String.class).defaultValue(null)
                 .description("Objects to exclude from diff. Supports regular expressions. Defaults to null.").build();

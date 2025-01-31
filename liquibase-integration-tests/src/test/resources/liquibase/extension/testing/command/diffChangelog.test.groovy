@@ -26,7 +26,7 @@ Optional Args:
     Default: null
   contextFilter (String) Changeset contexts to generate
     Default: null
-  dataOutputDirectory (String) Directory where insert statement csv files will be kept when processing a LoadData change.
+  dataOutputDirectory (String) Specifies a directory to send the loadData output of a diff-changelog/generate-changelog command as a CSV file.
     Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
