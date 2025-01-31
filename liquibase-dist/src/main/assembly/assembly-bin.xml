@@ -6,6 +6,7 @@
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
     <componentDescriptors>
-        <componentDescriptor>src/main/assembly/assembly-bin-common.xml</componentDescriptor>
+        <componentDescriptor>src/main/assembly/component-minimal-deps.xml</componentDescriptor>
+        <componentDescriptor>src/main/assembly/component-additional-deps.xml</componentDescriptor>
     </componentDescriptors>
 </assembly>

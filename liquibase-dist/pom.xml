@@ -417,6 +417,14 @@
         </profile>
 
         <profile>
+            <id>liquibase-minimal</id>
+
+            <properties>
+                <assemblyConfigFile>src/main/assembly/assembly-bin-pro-minimal.xml</assemblyConfigFile>
+            </properties>
+        </profile>
+
+        <profile>
             <id>remote-repositories</id>
             <activation>
                 <property>
