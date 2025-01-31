@@ -282,7 +282,7 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, outputFile)
         commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
         commandScope.addArgumentValue(PreCompareCommandStep.DIFF_TYPES_ARG, "table,data")
-        commandScope.addArgumentValue(DiffOutputControlCommandStep.DATA_DIR_ARG, dataDir)
+        commandScope.addArgumentValue(DiffOutputControlCommandStep.DATA_OUTPUT_DIR_ARG, dataDir)
         commandScope.execute()
 
         then:

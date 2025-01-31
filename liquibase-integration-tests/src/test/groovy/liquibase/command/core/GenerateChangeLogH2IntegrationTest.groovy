@@ -36,7 +36,7 @@ class GenerateChangeLogH2IntegrationTest extends Specification{
         commandScope.addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, true)
         commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, outputFile)
         commandScope.addArgumentValue(PreCompareCommandStep.DIFF_TYPES_ARG, "table,data")
-        commandScope.addArgumentValue(DiffOutputControlCommandStep.DATA_DIR_ARG, dataDir)
+        commandScope.addArgumentValue(DiffOutputControlCommandStep.DATA_OUTPUT_DIR_ARG, dataDir)
         commandScope.execute()
 
         then:

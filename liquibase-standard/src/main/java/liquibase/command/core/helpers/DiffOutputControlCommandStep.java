@@ -23,7 +23,7 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep impl
     public static final CommandArgumentDefinition<Boolean> INCLUDE_SCHEMA_ARG;
     public static final CommandArgumentDefinition<Boolean> INCLUDE_TABLESPACE_ARG;
 
-    public static final CommandArgumentDefinition<String> DATA_DIR_ARG;
+    public static final CommandArgumentDefinition<String> DATA_OUTPUT_DIR_ARG;
     public static final CommandArgumentDefinition<String> EXCLUDE_OBJECTS;
     public static final CommandArgumentDefinition<String> INCLUDE_OBJECTS;
 
@@ -38,7 +38,7 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep impl
                 .description("If true, the schema will be included in generated changeSets. Defaults to false.").build();
         INCLUDE_TABLESPACE_ARG = builder.argument("includeTablespace", Boolean.class).defaultValue(false)
                 .description("Include the tablespace attribute in the changelog. Defaults to false.").build();
-        DATA_DIR_ARG = builder.argument("dataDir", String.class)
+        DATA_OUTPUT_DIR_ARG = builder.argument("dataOutputDirectory", String.class)
                 .description("Directory where insert statement csv files will be kept when processing a LoadData change.").build();
 
         EXCLUDE_OBJECTS = builder.argument("excludeObjects", String.class).defaultValue(null)
@@ -82,7 +82,7 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep impl
         Boolean includeCatalog = commandScope.getArgumentValue(INCLUDE_CATALOG_ARG);
         Boolean includeSchema = commandScope.getArgumentValue(INCLUDE_SCHEMA_ARG);
         Boolean includeTablespace = commandScope.getArgumentValue(INCLUDE_TABLESPACE_ARG);
-        String dataDir = commandScope.getArgumentValue(DATA_DIR_ARG);
+        String dataDir = commandScope.getArgumentValue(DATA_OUTPUT_DIR_ARG);
         addMdcProperties(includeCatalog, includeSchema, includeTablespace);
         DiffOutputControl diffOutputControl = new DiffOutputControl(
                 includeCatalog, includeSchema,

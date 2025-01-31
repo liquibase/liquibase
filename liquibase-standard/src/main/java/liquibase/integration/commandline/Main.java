@@ -866,6 +866,7 @@ public class Main {
                             && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.FORMAT.toLowerCase())
                             && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.HELP.toLowerCase())
                             && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.DATA_OUTPUT_DIRECTORY.toLowerCase())
                     ) {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                     }
@@ -1754,7 +1755,7 @@ public class Main {
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_OBJECTS, includeObjects)
                 .addArgumentValue(GenerateChangelogCommandStep.AUTHOR_ARG, StringUtil.trimToNull(changeSetAuthor))
                 .addArgumentValue(GenerateChangelogCommandStep.CONTEXT_ARG, StringUtil.trimToNull(changeSetContext))
-                .addArgumentValue(GenerateChangelogCommandStep.DATA_OUTPUT_DIR_ARG, StringUtil.trimToNull(dataOutputDirectory))
+                .addArgumentValue(DiffOutputControlCommandStep.DATA_OUTPUT_DIR_ARG, StringUtil.trimToNull(dataOutputDirectory))
                 .addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, shouldOverwriteOutputFile)
                 .setOutput(System.out);
 
@@ -1770,6 +1771,7 @@ public class Main {
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_TABLESPACE_ARG, includeTablespace)
                 .addArgumentValue(DiffOutputControlCommandStep.EXCLUDE_OBJECTS, excludeObjects)
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_OBJECTS, includeObjects)
+                .addArgumentValue(DiffOutputControlCommandStep.DATA_OUTPUT_DIR_ARG, StringUtil.trimToNull(dataOutputDirectory))
                 .addArgumentValue(DiffChangelogCommandStep.AUTHOR_ARG, StringUtil.trimToNull(changeSetAuthor))
                 .setOutput(getOutputStream());
 
