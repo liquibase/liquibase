@@ -302,6 +302,8 @@
                                 </xsd:documentation>
                             </xsd:annotation>
                         </xsd:attribute>
+                        <xsd:attributeGroup ref="relativeToChangelogFile"/>
+                        <xsd:attribute name="errorIfMissing" type="booleanExp" default="true"/>
                         <xsd:attribute name="name" type="propertyName">
                             <xsd:annotation>
                                 <xsd:documentation>Name of the property. Required if the @file attribute is not set.
