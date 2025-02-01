@@ -6,6 +6,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+
 on:
   workflow_dispatch:
 
@@ -19,6 +20,8 @@ on:
   push:
     branches:
       - github-action-**
+      - '*'
+
     paths-ignore:
       - '**.md'
 
@@ -29,6 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: true
+
 
   setup:
     name: Setup
