@@ -26,6 +26,7 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
+import liquibase.util.SqlUtil;
 import liquibase.util.StringUtil;
 
 import java.io.IOException;
@@ -684,5 +685,6 @@ public interface Database extends PrioritizedService, AutoCloseable {
     default String generateConnectCommandSuccessMessage() {
         return null;
     }
+
 }
 
