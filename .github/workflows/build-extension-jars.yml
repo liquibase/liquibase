@@ -87,17 +87,47 @@ jobs:
           token: ${{ secrets.BOT_TOKEN }}
           ignore-versions: "^((?!${{ inputs.liquibase-version }}$).)*$"
 
+  get-liquibase-checks-version:
+      if: ${{ contains(inputs.extensions, 'liquibase-checks') }}
+      runs-on: ubuntu-latest
+      outputs:
+          version: ${{ steps.extract-version.outputs.version }}
+      steps:
+          - uses: actions/checkout@v4
+            with:
+              repository: liquibase/liquibase-checks
+              token: ${{ secrets.BOT_TOKEN }}
+
+          - id: extract-version
+            name: Extract version from pom.xml
+            shell: bash
+            run: |
+                VERSION=$(grep '<version>' pom.xml | head -n 1 | sed 's/.*<version>\(.*\)-SNAPSHOT<\/version>.*/\1/')
+                echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+  delete-checks-packages:
+    needs: [ get-liquibase-checks-version ]
+    runs-on: ubuntu-22.04
+    continue-on-error: true
+    steps:
+      - uses: actions/delete-package-versions@v5
+        with:
+          package-name: org.liquibase.ext.liquibase-checks
+          package-type: "maven"
+          token: ${{ secrets.BOT_TOKEN }}
+          ignore-versions: "^((?!${{ needs.get-liquibase-checks-version.outputs.version }}$).)*$"
+
   build-liquibase-checks:
-    if: ${{ contains(inputs.extensions, 'liquibase-checks') }}
-    needs: [ delete-extension-packages ]
-    uses: liquibase/build-logic/.github/workflows/publish-for-liquibase.yml@main
-    with:
-      repository: liquibase/liquibase-checks
-      version: ${{ inputs.liquibase-version }}
-    secrets: inherit
+      if: ${{ contains(inputs.extensions, 'liquibase-checks') }}
+      needs: [ delete-extension-packages, get-liquibase-checks-version, delete-checks-packages ]
+      uses: liquibase/build-logic/.github/workflows/publish-for-liquibase.yml@main
+      with:
+          repository: liquibase/liquibase-checks
+          version: ${{ needs.get-liquibase-checks-version.outputs.version }}
+      secrets: inherit
 
   build-and-deploy-extensions:
-    needs: [delete-dependency-packages, delete-extension-packages]
+    needs: [delete-dependency-packages, delete-extension-packages, delete-checks-packages]
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
