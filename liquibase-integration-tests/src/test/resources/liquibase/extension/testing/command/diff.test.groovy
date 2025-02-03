@@ -32,6 +32,8 @@ Optional Args:
     Default: null
   excludeObjects (String) Objects to exclude from diff
     Default: null
+  ignoreMissingReferences (Boolean) If true, diff operations will ignore referenced objects which are not found in a snapshot.
+    Default: false
   includeObjects (String) Objects to include in diff
     Default: null
   outputSchemas (String) Output schemas names. This is a CSV list.

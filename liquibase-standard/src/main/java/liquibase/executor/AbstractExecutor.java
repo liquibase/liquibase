@@ -3,6 +3,7 @@ package liquibase.executor;
 import liquibase.Scope;
 import liquibase.change.AbstractSQLChange;
 import liquibase.change.Change;
+import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
@@ -136,7 +137,13 @@ public abstract class AbstractExecutor implements Executor {
                 if (statement.skipOnUnsupported() && !SqlGeneratorFactory.getInstance().supports(statement, database)) {
                     continue;
                 }
-                Scope.getCurrentScope().getLog(getClass()).fine("Executing Statement: " + statement);
+                if (change instanceof RawSQLChange) {
+                    Scope.getCurrentScope().getLog(getClass()).fine("Executing Statement: " +
+                            System.lineSeparator() + ((RawSQLChange)change).getSql());
+                } else {
+                    Scope.getCurrentScope().getLog(getClass()).fine("Executing Statement: " +
+                            System.lineSeparator() + statement);
+                }
                 try {
                     execute(statement, sqlVisitors);
                 } catch (DatabaseException e) {
