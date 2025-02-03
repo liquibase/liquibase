@@ -14,7 +14,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.util.ExceptionUtil;
-import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -118,8 +118,8 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
                             commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.DEFAULT_CATALOG_NAME_ARG),
                             getDriver(commandScope),
                             commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.DRIVER_PROPERTIES_FILE_ARG),
-                            StringUtil.trimToNull(GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValue()),
-                            StringUtil.trimToNull(GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentValue())
+                            StringUtils.trimToNull(GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValue()),
+                            StringUtils.trimToNull(GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentValue())
                     ));
                 });
             } catch (Exception e) {

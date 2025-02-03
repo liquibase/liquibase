@@ -8,7 +8,7 @@ import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.mdc.MdcKey;
-import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -95,8 +95,8 @@ public class ReferenceDbUrlConnectionCommandStep extends AbstractDatabaseConnect
             try {
                 Scope.child(scopeValues, () -> {
                     database.set(createDatabaseObject(url, username, password, defaultSchemaName, defaultCatalogName, driver, driverPropertiesFile,
-                            StringUtil.trimToNull(commandScope.getArgumentValue(REFERENCE_LIQUIBASE_CATALOG_NAME_ARG)),
-                            StringUtil.trimToNull(commandScope.getArgumentValue(REFERENCE_LIQUIBASE_SCHEMA_NAME_ARG))));
+                            StringUtils.trimToNull(commandScope.getArgumentValue(REFERENCE_LIQUIBASE_CATALOG_NAME_ARG)),
+                            StringUtils.trimToNull(commandScope.getArgumentValue(REFERENCE_LIQUIBASE_SCHEMA_NAME_ARG))));
                 });
             } catch (Exception e) {
                 throw new DatabaseException(e);
