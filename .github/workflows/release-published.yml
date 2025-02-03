@@ -583,7 +583,7 @@ jobs:
               -Durl=https://repo.liquibase.net/repository/oss-release-assets \
               -Dfile="$file" \
               -DgroupId=org.liquibase \
-              -DartifactId=$(basename "$file" | rev | cut -d'.' -f2- | rev) \ 
+              -DartifactId=liquibase \ 
               -Dversion=${version} \
               -Dpackaging=$(basename "$file" | cut -d'.' -f2-)
           done
