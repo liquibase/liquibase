@@ -1041,6 +1041,10 @@ sql: |
   sql string 
     Supported: all
     Required For: all
+  sqlEndLine integer 
+    Supported: all
+  sqlStartLine integer 
+    Supported: all
   stripComments boolean 
     Description: Set to true to remove any comments in the SQL before executing, otherwise false. Defaults to false if not set
     Supported: all
