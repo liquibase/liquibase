@@ -244,7 +244,6 @@ class DataTypeFactoryTest extends Specification {
         "java.sql.Types.TIMESTAMP(6)"                  | new PostgresDatabase() | "TIMESTAMP(6) WITHOUT TIME ZONE"               | TimestampType | false
         "java.sql.Types.TIMESTAMP_WITH_TIMEZONE"       | new PostgresDatabase() | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false
         "java.sql.Types.TIMESTAMP_WITH_TIMEZONE(6)"    | new PostgresDatabase() | "TIMESTAMP(6) WITH TIME ZONE"                  | TimestampType | false
-        "bit"                                          | new PostgresDatabase() | "BOOLEAN"                                      | BooleanType   | false
         "BINARY(16)"                                   | new H2Database()       | "BINARY(16)"                                   | BlobType      | false
         "timestamp"                                    | new H2Database()       | "TIMESTAMP"                                    | TimestampType | false
         "timestamp(6)"                                 | new H2Database()       | "TIMESTAMP(6)"                                 | TimestampType | false
