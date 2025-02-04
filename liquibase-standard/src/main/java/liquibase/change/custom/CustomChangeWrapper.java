@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.*;
+import liquibase.logging.Logger;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -232,7 +233,8 @@ public class CustomChangeWrapper extends AbstractChange {
             try {
                 this.customChange = loadCustomChange(className);
             } catch (CustomChangeException e) {
-                // ignore
+                final Logger log = Scope.getCurrentScope().getLog(getClass());
+                log.warning("Exception thrown loading " + getClassName() + ", not using its generateChecksum", e);
             }
         }
         if (customChange != null) {
@@ -370,7 +372,8 @@ public class CustomChangeWrapper extends AbstractChange {
         try {
             localCustomChange = loadCustomChange(className);
         } catch (Exception e) {
-//            throw new UnexpectedLiquibaseException(e);
+            final Logger log = Scope.getCurrentScope().getLog(getClass());
+            log.warning("Exception thrown loading " + getClassName(), e);
         }
 
         if (localCustomChange != null) {
