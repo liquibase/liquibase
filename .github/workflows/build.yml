@@ -220,6 +220,11 @@ jobs:
           "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT" \
           "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
 
+          # Move liquibase-minimal tarball to avoid overwriting the commercial one
+          mv liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz
+          mv liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip
+
+
           # Build liquibase-minimal version
           ./mvnw -B -pl liquibase-dist -P liquibase-minimal source:jar package failsafe:integration-test failsafe:verify \
           "-Dliquibase.checks=true" \
@@ -231,7 +236,7 @@ jobs:
           "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT" \
           "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
 
-          # Move liquibase-minimal tarball to avoid overwriting the commercial one
+          # Rename liquibase-minimal tarball to avoid overwriting the commercial one
           mv liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-minimal-SNAPSHOT.tar.gz
           mv liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-minimal-SNAPSHOT.zip
 
