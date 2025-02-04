@@ -115,10 +115,10 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
-      - name: Download Artifacts for build.yml
-        uses: actions/download-artifact@v4
-        with:
-          name: temp-artifact
+      # - name: Download Artifacts for build.yml
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: temp-artifact
 
       ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
       - name: Install4j Cache
@@ -234,6 +234,8 @@ jobs:
           # Move liquibase-minimal tarball to avoid overwriting the commercial one
           mv liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-minimal-SNAPSHOT.tar.gz
           mv liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-minimal-SNAPSHOT.zip
+
+          ls -lah liquibase-dist/target/
 
           # Extract the tarball to allow us to upload the liquibase installation files to our
           # github actions workflow so that we don't double zip the archive
