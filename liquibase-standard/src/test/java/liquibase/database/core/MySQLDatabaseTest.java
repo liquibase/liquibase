@@ -99,10 +99,10 @@ public class MySQLDatabaseTest extends AbstractJdbcDatabaseTest {
     }
 
     /**
-     * Tests whether reserved key words are added for MySQL 8.0.
+     * Tests whether reserved keywords are added for MySQL 8.0.
      */
     @Test
-    public void getVersionSpecificMySQLReservedWords() {
+    public void verifyMySQL8ReservedWordsAreNotPresent() {
         Database database = getDatabase();
         MockDatabaseConnection connection = new MockDatabaseConnection();
         connection.setDatabaseMajorVersion(5);
@@ -118,11 +118,18 @@ public class MySQLDatabaseTest extends AbstractJdbcDatabaseTest {
             String message = String.format("Expected %s to be non-reserved in MySQL < 8", reservedWord);
             assertFalse(database.isReservedWord(reservedWord), message);
         }
+    }
 
+    @Test
+    public void verifyMySQL8ReservedWordsArePresent() {
+        MySQLDatabase database = new MySQLDatabase();
+        MockDatabaseConnection connection = new MockDatabaseConnection();
         connection.setDatabaseMajorVersion(8);
         connection.setDatabaseMinorVersion(0);
+        database.setConnection(connection);
         database.addReservedWords(Arrays.asList());
 
+        List<String> reservedForMySQL8 = Arrays.asList("FUNCTION", "ROW", "ROWS");
         // starting with 8.0, they should be reserved
         for (String reservedWord : reservedForMySQL8) {
             String message = String.format("Expected %s to be reserved in MySQL >= 8", reservedWord);
