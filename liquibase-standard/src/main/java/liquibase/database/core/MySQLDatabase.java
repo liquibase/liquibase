@@ -705,14 +705,27 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void addReservedWords(Collection<String> words) {
-        addMySQLReservedWordIfApplicable("MANUAL");
+        addMySQLVersionedReservedWords();
         super.addReservedWords(words);
     }
 
-    private void addMySQLReservedWordIfApplicable(String... reservedWord) {
+    /**
+     * Adds reserved words that were introduced for a specific version of MySQL. For an overview of 
+     * changes to 8.0, please see: <a href="https://dev.mysql.com/doc/refman/8.0/en/keywords.html">
+     * Keywords and Reserved Words</a>.
+     */
+    private void addMySQLVersionedReservedWords() {
         try {
+            // words that became reserved in 8.4
             if(getDatabaseMajorVersion() >= 9 || (getDatabaseMajorVersion() == 8 && getDatabaseMinorVersion() >= 4)) {
-                RESERVED_WORDS.addAll(Arrays.asList(reservedWord));
+                RESERVED_WORDS.add("MANUAL");
+            }
+            
+            // words that became reserved in 8.0
+            if(getDatabaseMajorVersion() >= 8){
+                RESERVED_WORDS.add("FUNCTION");
+                RESERVED_WORDS.add("ROW");
+                RESERVED_WORDS.add("ROWS");
             }
         } catch (DatabaseException e) {
             throw new RuntimeException(e);
