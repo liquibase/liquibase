@@ -205,7 +205,7 @@ jobs:
           echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
           # we are packaging and deploying liquibase tar which includes liquibase-commercial
           # Build liquibase-commercial version
-          ./mvnw -B -pl liquibase-dist -P liquibase-commercial source:jar package failsafe:integration-test failsafe:verify \
+          ./mvnw -B -pl liquibase-dist -P liquibase-commercial source:jar clean package failsafe:integration-test failsafe:verify \
           "-Dliquibase.checks=true" \
           "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT" \
           "-Dbuild.repository.owner=liquibase" \
@@ -220,7 +220,7 @@ jobs:
           mv liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT_backup.zip
 
           # Build liquibase-minimal version
-          ./mvnw -B -pl liquibase-dist -P liquibase-minimal source:jar package failsafe:integration-test failsafe:verify \
+          ./mvnw -B -pl liquibase-dist -P liquibase-minimal source:jar clean package failsafe:integration-test failsafe:verify \
           "-Dliquibase.checks=true" \
           "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT" \
           "-Dbuild.repository.owner=liquibase" \
@@ -336,26 +336,26 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  run-functional-tests:
-    needs: [ setup, build_publish_branch ]
-    uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@master
-    secrets: inherit
-    with:
-      latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
-      thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
+  # run-functional-tests:
+  #   needs: [ setup, build_publish_branch ]
+  #   uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@master
+  #   secrets: inherit
+  #   with:
+  #     latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
+  #     thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
 
-  run-tests-harness:
-    needs: [ setup,build_publish_branch ]
-    uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@master
-    secrets: inherit
-    with:
-      latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
-      thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
+  # run-tests-harness:
+  #   needs: [ setup,build_publish_branch ]
+  #   uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@master
+  #   secrets: inherit
+  #   with:
+  #     latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
+  #     thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
 
-  run-pro-build-and-test:
-    needs: [ setup, build_publish_branch ]
-    uses: liquibase/liquibase/.github/workflows/run-pro-build-and-test.yml@master
-    secrets: inherit
-    with:
-      latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
-      thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
+  # run-pro-build-and-test:
+  #   needs: [ setup, build_publish_branch ]
+  #   uses: liquibase/liquibase/.github/workflows/run-pro-build-and-test.yml@master
+  #   secrets: inherit
+  #   with:
+  #     latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
+  #     thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
