@@ -216,8 +216,9 @@ jobs:
           "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
 
           # backup commercial tarball to prevent it from being overwritten
-          mv liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT_backup.tar.gz
-          mv liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT_backup.zip
+          mkdir -p liquibase-dist/backup
+          mv liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz liquibase-dist/backup/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz
+          mv liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip liquibase-dist/backup/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip
 
           # Build liquibase-minimal version
           ./mvnw -B -pl liquibase-dist -P liquibase-minimal source:jar clean package failsafe:integration-test failsafe:verify \
@@ -234,9 +235,9 @@ jobs:
           mv liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz liquibase-dist/target/liquibase-minimal-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz
           mv liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip liquibase-dist/target/liquibase-minimal-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip
 
-          #restore commercial tarballs
-          mv liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT_backup.tar.gz liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz
-          mv liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT_backup.zip liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip
+          # Restore commercial tarballs from backup into target dir
+          mv liquibase-dist/backup/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz
+          mv liquibase-dist/backup/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip
 
           # Extract the tarball to allow us to upload the liquibase installation files to our
           # github actions workflow so that we don't double zip the archive
