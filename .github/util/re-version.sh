@@ -175,9 +175,10 @@ if [ -z "$extension_name" ]; then
   cp $outdir/liquibase-commercial-$version.jar $workdir/internal/lib/liquibase-commercial.jar ##save versioned jar as unversioned to include in zip/tar
 
   ## Extract tar.gz and rebuild it back into the tar.gz and zip
-  mkdir $workdir/tgz-repackage $workdir/tgz-repackage-minimal
-
+  mkdir $workdir/tgz-repackage 
   tar -xzf $workdir/liquibase-$MODIFIED_BRANCH_NAME-SNAPSHOT.tar.gz -C $workdir/tgz-repackage
+
+  mkdir $workdir/tgz-repackage-minimal
   tar -xzf $workdir/liquibase-minimal-$MODIFIED_BRANCH_NAME-SNAPSHOT.tar.gz -C $workdir/tgz-repackage-minimal
 
   cp $workdir/internal/lib/liquibase-core.jar $workdir/tgz-repackage/internal/lib/liquibase-core.jar
