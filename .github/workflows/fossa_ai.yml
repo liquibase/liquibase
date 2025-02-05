@@ -12,3 +12,4 @@ jobs:
       check_snippets: true
       generate_sbom: true
       latest_version: ${{ github.event.client_payload.latest_version }}
+      repo_name: ${{ github.repository }}
