@@ -337,26 +337,26 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # run-functional-tests:
-  #   needs: [ setup, build_publish_branch ]
-  #   uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@master
-  #   secrets: inherit
-  #   with:
-  #     latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
-  #     thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
+  run-functional-tests:
+    needs: [ setup, build_publish_branch ]
+    uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@master
+    secrets: inherit
+    with:
+      latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
+      thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
 
-  # run-tests-harness:
-  #   needs: [ setup,build_publish_branch ]
-  #   uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@master
-  #   secrets: inherit
-  #   with:
-  #     latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
-  #     thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
+  run-tests-harness:
+    needs: [ setup,build_publish_branch ]
+    uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@master
+    secrets: inherit
+    with:
+      latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
+      thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
 
-  # run-pro-build-and-test:
-  #   needs: [ setup, build_publish_branch ]
-  #   uses: liquibase/liquibase/.github/workflows/run-pro-build-and-test.yml@master
-  #   secrets: inherit
-  #   with:
-  #     latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
-  #     thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
+  run-pro-build-and-test:
+    needs: [ setup, build_publish_branch ]
+    uses: liquibase/liquibase/.github/workflows/run-pro-build-and-test.yml@master
+    secrets: inherit
+    with:
+      latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
+      thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
