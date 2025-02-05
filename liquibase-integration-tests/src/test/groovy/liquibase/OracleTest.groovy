@@ -54,7 +54,7 @@ class OracleTest extends Specification {
         when:
         BufferedLogService bufferLog = new BufferedLogService()
 
-        Scope.child(CommandUtil.TEST_BUFFERED_LOG_SERVICE_KEY, bufferLog, () -> {
+        Scope.child(Scope.Attr.logService.name(), bufferLog, () -> {
             CommandUtil.runUpdate(oracle, "src/test/resources/changelogs/common/invalid-clob-data-load.xml")
         })
 
@@ -104,6 +104,8 @@ END;
 
         then:
         String logAsString = bufferLog.getLogAsString(Level.FINE)
+        assert logAsString.contains("0 row(s) affected")
         assert logAsString.contains("1 row(s) affected")
+        assert ! logAsString.contains("-1 row(s) affected")
     }
 }
