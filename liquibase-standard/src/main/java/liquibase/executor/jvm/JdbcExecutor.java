@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Class to simplify execution of SqlStatements.  Based heavily on <a href="http://static.springframework.org/spring/docs/2.0.x/reference/jdbc.html">Spring's JdbcTemplate</a>.
@@ -464,6 +466,22 @@ public class JdbcExecutor extends AbstractExecutor {
             this.sqlVisitors = sqlVisitors;
         }
 
+        private void addUpdateCountToScope(int updateCount) {
+            if (updateCount > -1) {
+                AtomicInteger scopeRowsAffected = Scope.getCurrentScope().get(ROWS_AFFECTED_SCOPE_KEY, AtomicInteger.class);
+                Boolean shouldUpdateRowsAffected = Scope.getCurrentScope().get(SHOULD_UPDATE_ROWS_AFFECTED_SCOPE_KEY, true);
+                if (scopeRowsAffected != null && Boolean.TRUE.equals(shouldUpdateRowsAffected)) {
+                    scopeRowsAffected.addAndGet(updateCount);
+                }
+            }
+        }
+
+        private boolean isDML(String statement) {
+            Pattern dmlPattern = Pattern.compile("^\\s*?(SELECT |INSERT |UPDATE |DELETE |MERGE )(.*)");
+            Matcher m = dmlPattern.matcher(statement);
+            return m.matches();
+        }
+
         @Override
         public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
             Logger log = Scope.getCurrentScope().getLog(getClass());
@@ -491,7 +509,9 @@ public class JdbcExecutor extends AbstractExecutor {
                     if (!stmt.execute(statement)) {
                         int updateCount = stmt.getUpdateCount();
                         addUpdateCountToScope(updateCount);
-                        log.log(sqlLogLevel, updateCount + " row(s) affected", null);
+                        if (isDML(statement)) {
+                            log.log(sqlLogLevel, updateCount + " row(s) affected", null);
+                        }
                     }
                 } catch (Throwable e) {
                     throw new DatabaseException(e.getMessage() + " [Failed SQL: " + getErrorCode(e) + statement + "]", e);
@@ -521,15 +541,6 @@ public class JdbcExecutor extends AbstractExecutor {
         }
     }
 
-    private void addUpdateCountToScope(int updateCount) {
-        if (updateCount > -1) {
-            AtomicInteger scopeRowsAffected = Scope.getCurrentScope().get(ROWS_AFFECTED_SCOPE_KEY, AtomicInteger.class);
-            Boolean shouldUpdateRowsAffected = Scope.getCurrentScope().get(SHOULD_UPDATE_ROWS_AFFECTED_SCOPE_KEY, true);
-            if (scopeRowsAffected != null && Boolean.TRUE.equals(shouldUpdateRowsAffected)) {
-                scopeRowsAffected.addAndGet(updateCount);
-            }
-        }
-    }
 
     private class QueryStatementCallback implements StatementCallback {
 

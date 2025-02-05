@@ -1,16 +1,17 @@
 package liquibase
 
 import liquibase.command.util.CommandUtil
-import liquibase.exception.CommandExecutionException
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
+import liquibase.logging.core.BufferedLogService
 import liquibase.resource.SearchPathResourceAccessor
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Timeout
 
 import java.sql.ResultSet
+import java.util.logging.Level
 
 @LiquibaseIntegrationTest
 class OracleTest extends Specification {
@@ -51,11 +52,15 @@ class OracleTest extends Specification {
 
     def "Use loadData with invalid clob"() {
         when:
-        CommandUtil.runUpdate(oracle, "src/test/resources/changelogs/common/invalid-clob-data-load.xml")
+        BufferedLogService bufferLog = new BufferedLogService()
+
+        Scope.child(CommandUtil.TEST_BUFFERED_LOG_SERVICE_KEY, bufferLog, () -> {
+            CommandUtil.runUpdate(oracle, "src/test/resources/changelogs/common/invalid-clob-data-load.xml")
+        })
 
         then:
-        def exception = thrown(CommandExecutionException)
-        exception.cause.message.contains("Could not find clob file: this is not a valid file path so this will error if loaded into a clob/blob type column via load data! Make sure the value of the clob is a valid path to a file containing the clob's actual value to be loaded.")
+        String logAsString = bufferLog.getLogAsString(Level.FINE)
+        assert logAsString.contains("not found. Inserting the value as a string. See https://docs.liquibase.com for more information.")
     }
 
     @Timeout(value = 25)
@@ -87,5 +92,18 @@ END;
 
         then:
         noExceptionThrown()
+    }
+
+    def showRowsAffectedForDMLOnly() {
+        when:
+        BufferedLogService bufferLog = new BufferedLogService()
+
+        Scope.child(Scope.Attr.logService.name(), bufferLog, () -> {
+            CommandUtil.runUpdate(oracle, "src/test/resources/changelogs/common/rows-affected.xml")
+        })
+
+        then:
+        String logAsString = bufferLog.getLogAsString(Level.FINE)
+        assert logAsString.contains("1 row(s) affected")
     }
 }

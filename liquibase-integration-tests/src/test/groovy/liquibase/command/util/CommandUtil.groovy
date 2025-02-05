@@ -14,6 +14,7 @@ import liquibase.diff.compare.CompareControl
 import liquibase.exception.CommandExecutionException
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.lockservice.LockServiceFactory
+import liquibase.logging.core.BufferedLogServiceTest
 import liquibase.resource.ResourceAccessor
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
@@ -43,6 +44,7 @@ class CommandUtil {
             "</changeSet>\n" +
             "\n" +
             "</databaseChangeLog>"
+    public static final String TEST_BUFFERED_LOG_SERVICE_KEY = "testBufferedLogService"
 
     static void runUpdateWithTestChangelog(DatabaseTestSystem db, String changelogFile) throws Exception {
         SearchPathResourceAccessor resourceAccessor = new SearchPathResourceAccessor(new MockResourceAccessor([(changelogFile): testChangelog]))
@@ -251,9 +253,11 @@ class CommandUtil {
     }
 
     private static void execUpdateCommandInScope(SearchPathResourceAccessor resourceAccessor, DatabaseTestSystem db, String changelogFile) {
-        def scopeSettings = [
-                (Scope.Attr.resourceAccessor.name()): resourceAccessor
-        ]
+        def scopeSettings = new LinkedHashMap<String, Object>()
+        scopeSettings.put(Scope.Attr.resourceAccessor.name(), resourceAccessor)
+        if (Scope.getCurrentScope().has(TEST_BUFFERED_LOG_SERVICE_KEY)) {
+            scopeSettings.put(Scope.Attr.logService.name(), Scope.getCurrentScope().get(TEST_BUFFERED_LOG_SERVICE_KEY, BufferedLogServiceTest.class))
+        }
         Scope.child(scopeSettings, {
             CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
             commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())

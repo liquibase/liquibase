@@ -1,0 +1,27 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="wesley (generated)" id="1692462595665-1">
+      <createTable tableName="table1" ifNotExists="true">
+            <column name="name" type="CHAR(20)"/>
+            <column name="id" type="CHAR(20)"/>
+            <column name="role" type="CHAR(20)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="wesley (generated)" id="1692462595665-2">
+      <createTable tableName="table2">
+            <column name="name" type="CHAR(20)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="wesley (generated)" id="1692462595665-3">
+      <createTable tableName="table3">
+            <column name="name" type="CHAR(20)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="10" author="jbennett" labels="release-1.5.0">
+      <sql endDelimiter="/">
+BEGIN
+DBMS_UTILITY.COMPILE_SCHEMA(schema=>'LBUSER',compile_all=>FALSE);
+END; /
+      </sql>
+    </changeSet>
+</databaseChangeLog>
