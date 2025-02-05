@@ -1,11 +1,14 @@
 package liquibase.changelog.visitor;
 
 import liquibase.Scope;
+import liquibase.change.Change;
+import liquibase.change.core.ExecuteShellCommandChange;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.filter.NotInChangeLogChangeSetFilter;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import org.apache.tools.ant.taskdefs.Execute;
 
 import java.util.*;
 

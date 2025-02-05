@@ -6,6 +6,7 @@ import liquibase.Labels;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.change.core.EmptyChange;
+import liquibase.change.core.ExecuteShellCommandChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.change.core.SQLFileChange;
 import liquibase.change.visitor.ChangeVisitor;
@@ -776,8 +777,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 }
 
                 log.fine("Reading ChangeSet: " + this);
-                for (Change change : getChanges()) {
-                    if ((!(change instanceof DbmsTargetedChange)) || DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
+                for (Change change : changes) {
+                    execType = isChangeToSkip(change, database, log);
+                    if (execType != ExecType.SKIPPED) {
                         if (listener != null) {
                             listener.willRun(change, this, changeLog, database);
                         }
@@ -793,8 +795,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                         if (listener != null) {
                             listener.ran(change, this, changeLog, database);
                         }
-                    } else {
-                        log.fine("Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
                     }
                 }
 
@@ -808,7 +808,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 setStopTime();
                 getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, stopInstant.toString());
                 getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, execType.value.toLowerCase());
-                log.info("ChangeSet " + toString(false) + " ran successfully in " + getExecutionMilliseconds() + "ms");
+                if (execType != ExecType.SKIPPED) {
+                    log.info("ChangeSet " + toString(false) + " ran successfully in " + getExecutionMilliseconds() + "ms");
+                } else {
+                    log.fine("Skipping ChangeSet: " + this);
+                }
             } else {
                 log.fine("Skipping ChangeSet: " + this);
             }
@@ -854,6 +858,23 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
         return execType;
+    }
+
+    private ExecType isChangeToSkip(Change change, Database database, Logger log) {
+        boolean skipChangeForDbms =
+           ! (change instanceof DbmsTargetedChange) || ! DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true);
+        boolean skipExecChange = change instanceof ExecuteShellCommandChange && ! ((ExecuteShellCommandChange)change).isShouldRun();
+        if (skipChangeForDbms) {
+            log.fine("Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
+        }
+        if (skipExecChange) {
+            log.fine("Change " + change.getSerializedObjectName() + " not included for os " + ((ExecuteShellCommandChange)change).getOs());
+            change.getChangeSet().getChangeLog().getSkippedBecauseOfOsMismatchChangeSets().add(change.getChangeSet());
+        }
+        if (skipChangeForDbms || skipExecChange) {
+            return ExecType.SKIPPED;
+        }
+        return null;
     }
 
     private void setStopTime() {

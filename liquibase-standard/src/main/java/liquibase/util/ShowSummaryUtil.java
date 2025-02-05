@@ -120,6 +120,7 @@ public class ShowSummaryUtil {
         List<ChangeSetStatus> denied = statusVisitor.getChangeSetsToSkip();
         List<ChangeSet> skippedChangeSets = changeLog.getSkippedChangeSets();
         List<ChangeSet> skippedBecauseOfLicenseChangeSets = changeLog.getSkippedBecauseOfLicenseChangeSets();
+        List<ChangeSet> skippedBecauseOfOsChangeSets = changeLog.getSkippedBecauseOfOsMismatchChangeSets();
 
         //
         // Filter the skipped list to remove changes which were:
@@ -140,7 +141,8 @@ public class ShowSummaryUtil {
         //
         // Only show the summary
         //
-        UpdateSummaryDetails summaryDetails = showSummary(changeLog, statusVisitor, skippedChangeSets, skippedBecauseOfLicenseChangeSets, filterDenied, outputStream, showSummaryOutput, runChangeLogIterator, changeExecListener);
+        UpdateSummaryDetails summaryDetails =
+           showSummary(changeLog, statusVisitor, skippedChangeSets, skippedBecauseOfLicenseChangeSets, skippedBecauseOfOsChangeSets, filterDenied, outputStream, showSummaryOutput, runChangeLogIterator, changeExecListener);
         summaryDetails.getSummary().setValue(showSummary.toString());
         boolean shouldPrintDetailTable = showSummary != UpdateSummaryEnum.SUMMARY && (!skippedChangeSets.isEmpty() || !denied.isEmpty() || !additionalChangeSetStatus.isEmpty());
 
@@ -325,6 +327,7 @@ public class ShowSummaryUtil {
                                                     StatusVisitor statusVisitor,
                                                     List<ChangeSet> skippedChangeSets,
                                                     List<ChangeSet> skippedBecauseOfLicenseChangeSets,
+                                                    List<ChangeSet> skippedBecauseOfOsChangeSets,
                                                     List<ChangeSetStatus> filterDenied,
                                                     OutputStream outputStream,
                                                     UpdateSummaryOutputEnum showSummaryOutput,
@@ -334,8 +337,9 @@ public class ShowSummaryUtil {
         builder.append(System.lineSeparator());
         int skipped = skippedChangeSets.size();
         int skippedBecauseOfLicense = skippedBecauseOfLicenseChangeSets.size();
+        int skippedBecauseOfOs = skippedBecauseOfOsChangeSets.size();
         int filtered = filterDenied.size();
-        int totalAccepted = calculateAccepted(statusVisitor, changeExecListener, runChangeLogIterator);
+        int totalAccepted = calculateAccepted(statusVisitor, changeExecListener, runChangeLogIterator, skippedBecauseOfOs);
         int totalPreviouslyRun = calculatePreviouslyRun(statusVisitor);
         int totalInChangelog = CollectionUtil.createIfNull(changeLog.getChangeSets()).size() + CollectionUtil.createIfNull(changeLog.getSkippedChangeSets()).size();
         UpdateSummary updateSummaryMdc = new UpdateSummary(null, totalAccepted, totalPreviouslyRun, null, totalInChangelog);
@@ -352,7 +356,7 @@ public class ShowSummaryUtil {
         builder.append(message);
         builder.append(System.lineSeparator());
 
-        message = String.format("Filtered out:            %6d", filtered + skipped + skippedBecauseOfLicense);
+        message = String.format("Filtered out:            %6d", filtered + skipped + skippedBecauseOfLicense + skippedBecauseOfOs);
         builder.append(message);
         builder.append(System.lineSeparator());
 
@@ -416,11 +420,12 @@ public class ShowSummaryUtil {
      * executed changesets. We retain this code despite its inaccuracy for backwards compatibility, in case
      * a change exec listener is not provided.
      */
-    private static int calculateAccepted(StatusVisitor statusVisitor, ChangeExecListener changeExecListener, ChangeLogIterator runChangeLogIterator) {
+    private static int calculateAccepted(StatusVisitor statusVisitor, ChangeExecListener changeExecListener, ChangeLogIterator runChangeLogIterator, int skippedBecauseOfOsMismatch) {
         int ran = statusVisitor.getChangeSetsToRun().size();
         if (changeExecListener instanceof DefaultChangeExecListener) {
             ran = ((DefaultChangeExecListener) changeExecListener).getDeployedChangeSets().size();
             ran -= (int) runChangeLogIterator.getExceptionChangeSets().stream().filter(changeSet -> BooleanUtils.isFalse(changeSet.getFailOnError())).count();
+            ran -= skippedBecauseOfOsMismatch;
         }
         return ran;
     }
