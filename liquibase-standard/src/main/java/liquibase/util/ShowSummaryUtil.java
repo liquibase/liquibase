@@ -4,6 +4,7 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.UpdateSummaryEnum;
 import liquibase.UpdateSummaryOutputEnum;
+import liquibase.change.Change;
 import liquibase.changelog.ChangeLogIterator;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.ChangeSetStatus;
@@ -121,6 +122,7 @@ public class ShowSummaryUtil {
         List<ChangeSet> skippedChangeSets = changeLog.getSkippedChangeSets();
         List<ChangeSet> skippedBecauseOfLicenseChangeSets = changeLog.getSkippedBecauseOfLicenseChangeSets();
         List<ChangeSet> skippedBecauseOfOsMismatchChangeSets = changeLog.getSkippedBecauseOfOsMismatchChangeSets();
+        List<ChangeSet> skippedBecauseOfPreconditionsChangeSets = changeLog.getSkippedBecauseOfPreconditionsChangeSets();
 
         //
         // Filter the skipped list to remove changes which were:
@@ -142,12 +144,20 @@ public class ShowSummaryUtil {
         // Only show the summary
         //
         UpdateSummaryDetails summaryDetails =
-           showSummary(changeLog, statusVisitor, skippedChangeSets, skippedBecauseOfLicenseChangeSets, skippedBecauseOfOsMismatchChangeSets, filterDenied, outputStream, showSummaryOutput, runChangeLogIterator, changeExecListener);
+           showSummary(changeLog, statusVisitor, skippedChangeSets,
+                       skippedBecauseOfLicenseChangeSets, skippedBecauseOfOsMismatchChangeSets, skippedBecauseOfPreconditionsChangeSets,
+                       filterDenied, outputStream, showSummaryOutput, runChangeLogIterator, changeExecListener);
         summaryDetails.getSummary().setValue(showSummary.toString());
-        boolean shouldPrintDetailTable = showSummary != UpdateSummaryEnum.SUMMARY && (!skippedChangeSets.isEmpty() || !denied.isEmpty() || !additionalChangeSetStatus.isEmpty());
+        boolean shouldPrintDetailTable =
+           showSummary != UpdateSummaryEnum.SUMMARY &&
+           (!skippedChangeSets.isEmpty() ||
+            !skippedBecauseOfLicenseChangeSets.isEmpty() || !skippedBecauseOfOsMismatchChangeSets.isEmpty() || !skippedBecauseOfPreconditionsChangeSets.isEmpty() ||
+            !denied.isEmpty() || !additionalChangeSetStatus.isEmpty());
 
         // Show the details too
-        FilteredChanges filteredChanges = showDetailTable(skippedChangeSets, skippedBecauseOfLicenseChangeSets, skippedBecauseOfOsMismatchChangeSets, filterDenied, outputStream, shouldPrintDetailTable, showSummaryOutput, additionalChangeSetStatus, runChangeLogIterator);
+        FilteredChanges filteredChanges =
+            showDetailTable(skippedChangeSets, skippedBecauseOfLicenseChangeSets, skippedBecauseOfOsMismatchChangeSets, skippedBecauseOfPreconditionsChangeSets,
+                    filterDenied, outputStream, shouldPrintDetailTable, showSummaryOutput, additionalChangeSetStatus, runChangeLogIterator);
         summaryDetails.getSummary().setSkipped(filteredChanges.getMdcSkipCounts());
         summaryDetails.setSkipped(filteredChanges.getSkippedChangesetsMessage());
         try (MdcObject updateSummaryMdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_SUMMARY, summaryDetails.getSummary())) {
@@ -162,6 +172,7 @@ public class ShowSummaryUtil {
     private static FilteredChanges showDetailTable(List<ChangeSet> skippedChangeSets,
                                                    List<ChangeSet> skippedBecauseOfLicenseChangeSets,
                                                    List<ChangeSet> skippedBecauseOfOsMismatchChangeSets,
+                                                   List<ChangeSet> skippedBecauseOfPreconditionsChangeSets,
                                                    List<ChangeSetStatus> filterDenied,
                                                    OutputStream outputStream,
                                                    boolean shouldPrintDetailTable,
@@ -184,7 +195,7 @@ public class ShowSummaryUtil {
         SortedMap<String, Integer> mdcSkipCounts = new TreeMap<>();
         mdcSkipCounts.put(totalSkippedMdcKey, skippedChangeSets.size() + filterDenied.size());
 
-        List<ChangeSetStatus> finalList = createFinalStatusList(skippedChangeSets, skippedBecauseOfLicenseChangeSets, skippedBecauseOfOsMismatchChangeSets, filterDenied);
+        List<ChangeSetStatus> finalList = createFinalStatusList(skippedChangeSets, skippedBecauseOfLicenseChangeSets, skippedBecauseOfOsMismatchChangeSets, skippedBecauseOfPreconditionsChangeSets, filterDenied);
         ShowSummaryGeneratorFactory showSummaryGeneratorFactory = Scope.getCurrentScope().getSingleton(ShowSummaryGeneratorFactory.class);
         ShowSummaryGenerator showSummaryGenerator = showSummaryGeneratorFactory.getShowSummaryGenerator();
         finalList.addAll(showSummaryGenerator.getAllAdditionalChangeSetStatus(runChangeLogIterator));
@@ -297,6 +308,26 @@ public class ShowSummaryUtil {
         }
     }
 
+    private static class SkippedBecauseOfPreconditionsFilter implements ChangeSetFilter {
+        public static final String MDC_NAME = "skippedBecauseOfPreconditions";
+        public static final String DISPLAY_NAME = "Preconditions";
+
+        @Override
+        public ChangeSetFilterResult accepts(ChangeSet changeSet) {
+            return null;
+        }
+
+        @Override
+        public String getMdcName() {
+            return ChangeSetFilter.super.getMdcName();
+        }
+
+        @Override
+        public String getDisplayName() {
+            return ChangeSetFilter.super.getDisplayName();
+        }
+    }
+
     private static void printDetailTable(List<List<String>> table, OutputStream outputStream) throws IOException, LiquibaseException {
         List<Integer> widths = new ArrayList<>();
         widths.add(60);
@@ -311,6 +342,7 @@ public class ShowSummaryUtil {
     private static List<ChangeSetStatus> createFinalStatusList(List<ChangeSet> skippedChangeSets,
                                                                List<ChangeSet> skippedBecauseOfLicenseChangeSets,
                                                                List<ChangeSet> skippedBecauseOfOsMismatchChangeSets,
+                                                               List<ChangeSet> skippedBecauseOfPreconditionsChangeSets,
                                                                List<ChangeSetStatus> filterDenied) {
         //
         // Add skipped during changelog parsing to the final list
@@ -340,6 +372,14 @@ public class ShowSummaryUtil {
             changeSetStatus.setFilterResults(Collections.singleton(filterResult));
             finalList.add(changeSetStatus);
         });
+        skippedBecauseOfPreconditionsChangeSets.forEach(skippedChangeSet -> {
+            String mismatchMessage = "skipped because of preconditions";
+            ChangeSetStatus changeSetStatus = new ChangeSetStatus(skippedChangeSet);
+            ChangeSetFilterResult filterResult =
+                new ChangeSetFilterResult(false, mismatchMessage, SkippedBecauseOfPreconditionsFilter.class, SkippedBecauseOfPreconditionsFilter.MDC_NAME, SkippedBecauseOfPreconditionsFilter.DISPLAY_NAME);
+            changeSetStatus.setFilterResults(Collections.singleton(filterResult));
+            finalList.add(changeSetStatus);
+        });
         return finalList;
     }
 
@@ -366,6 +406,7 @@ public class ShowSummaryUtil {
                                                     List<ChangeSet> skippedChangeSets,
                                                     List<ChangeSet> skippedBecauseOfLicenseChangeSets,
                                                     List<ChangeSet> skippedBecauseOfOsMismatchChangeSets,
+                                                    List<ChangeSet> skippedBecauseOfPreconditionsChangeSets,
                                                     List<ChangeSetStatus> filterDenied,
                                                     OutputStream outputStream,
                                                     UpdateSummaryOutputEnum showSummaryOutput,
@@ -376,6 +417,7 @@ public class ShowSummaryUtil {
         int skipped = skippedChangeSets.size();
         int skippedBecauseOfLicense = skippedBecauseOfLicenseChangeSets.size();
         int skippedBecauseOfOs = skippedBecauseOfOsMismatchChangeSets.size();
+        int skippedBecauseOfPreconditions = skippedBecauseOfPreconditionsChangeSets.size();
         int filtered = filterDenied.size();
         int totalAccepted = calculateAccepted(statusVisitor, changeExecListener, runChangeLogIterator, skippedBecauseOfOs);
         int totalPreviouslyRun = calculatePreviouslyRun(statusVisitor);
@@ -394,7 +436,7 @@ public class ShowSummaryUtil {
         builder.append(message);
         builder.append(System.lineSeparator());
 
-        message = String.format("Filtered out:            %6d", filtered + skipped + skippedBecauseOfLicense + skippedBecauseOfOs);
+        message = String.format("Filtered out:            %6d", filtered + skipped + skippedBecauseOfLicense + skippedBecauseOfOs + skippedBecauseOfPreconditions);
         builder.append(message);
         builder.append(System.lineSeparator());
 
@@ -412,7 +454,7 @@ public class ShowSummaryUtil {
         builder.append(System.lineSeparator());
 
         final Map<String, Integer> filterSummaryMap = new LinkedHashMap<>();
-        List<ChangeSetStatus> finalList = createFinalStatusList(skippedChangeSets, skippedBecauseOfLicenseChangeSets, skippedBecauseOfOsMismatchChangeSets, filterDenied);
+        List<ChangeSetStatus> finalList = createFinalStatusList(skippedChangeSets, skippedBecauseOfLicenseChangeSets, skippedBecauseOfOsMismatchChangeSets, skippedBecauseOfPreconditionsChangeSets, filterDenied);
         finalList.forEach(status -> {
             status.getFilterResults().forEach(result -> {
                 if (!result.isAccepted()) {

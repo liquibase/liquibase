@@ -6,7 +6,6 @@ import liquibase.Labels;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.change.core.EmptyChange;
-import liquibase.change.core.ExecuteShellCommandChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.change.core.SQLFileChange;
 import liquibase.change.visitor.ChangeVisitor;
@@ -723,6 +722,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     execType = ExecType.SKIPPED;
 
                     getCurrentScope().getLog(getClass()).info("Continuing past: " + this + " despite precondition failure due to onFail='CONTINUE': " + message);
+                    this.getChangeLog().getSkippedBecauseOfPreconditionsChangeSets().add(this);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.MARK_RAN)) {
                     execType = ExecType.MARK_RAN;
                     skipChange = true;
@@ -750,7 +750,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.CONTINUE)) {
                     skipChange = true;
                     execType = ExecType.SKIPPED;
-
+                    this.getChangeLog().getSkippedBecauseOfPreconditionsChangeSets().add(this);
                 } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.MARK_RAN)) {
                     execType = ExecType.MARK_RAN;
                     skipChange = true;
