@@ -3,6 +3,7 @@ package liquibase.command.core;
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.command.*;
+import liquibase.command.core.helpers.DiffArgumentsCommandStep;
 import liquibase.command.core.helpers.PreCompareCommandStep;
 import liquibase.command.providers.ReferenceDatabase;
 import liquibase.database.Database;
@@ -45,11 +46,12 @@ public class DiffCommandStep extends AbstractCommandStep {
         TARGET_SNAPSHOT_CONTROL_ARG = builder.argument("targetSnapshotControl", SnapshotControl.class).hidden().build();
         FORMAT_ARG = builder.argument("format", String.class).description("Output format. Default: TXT").hidden().build();
         DIFF_RESULT = builder.result("diffResult", DiffResult.class).description("Databases diff result").build();
+
     }
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        return Arrays.asList(CompareControl.class, ReferenceDatabase.class);
+        return Arrays.asList(CompareControl.class, ReferenceDatabase.class, DiffArgumentsCommandStep.class);
     }
 
     @Override
