@@ -52,12 +52,13 @@ public class ExecuteShellCommandChange extends AbstractChange {
     private static final Long MIN_IN_MILLIS = SECS_IN_MILLIS * 60;
     private static final Long HOUR_IN_MILLIS = MIN_IN_MILLIS * 60;
 
-    private boolean shouldRun=true;
+    private boolean shouldRunOnOs=true;
 
     protected Integer maxStreamGobblerOutput = null;
 
-    public boolean isShouldRun() {
-        return shouldRun;
+    @Override
+    public boolean shouldRunOnOs() {
+        return shouldRunOnOs;
     }
 
     @Override
@@ -115,11 +116,11 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
     @Override
     public void finishInitialization() throws SetupException {
-        shouldRun = true;
+        shouldRunOnOs = true;
         if ((os != null) && (!os.isEmpty())) {
             String currentOS = System.getProperty("os.name");
             if (!os.contains(currentOS)) {
-                shouldRun = false;
+                shouldRunOnOs = false;
                 Scope.getCurrentScope().getLog(getClass()).info("Not executing on os " + currentOS + " when " + os + " was " +
                         "specified");
             }
@@ -139,7 +140,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
         this.finalCommandArray = createFinalCommandArray(database);
 
-        if (shouldRun && shouldExecuteChange) {
+        if (shouldRunOnOs && shouldExecuteChange) {
 
             return new SqlStatement[]{new RuntimeStatement() {
 
@@ -332,10 +333,10 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
     @Override
     public String getConfirmationMessage() {
-        if (shouldRun) {
+        if (shouldRunOnOs) {
             return "Shell command '" + getCommandString() + "' executed";
         }
-        return "Shell command '" + getCommandString() + "' did not execute";
+        return "Shell command '" + getCommandString() + "' did not execute.  Required OS must be " + os.toString();
     }
 
     protected String getCommandString() {

@@ -152,4 +152,16 @@ public interface Change extends LiquibaseSerializable, Plugin, ExtensibleObject 
      * @throws liquibase.parser.core.ParsedNodeException if there is an error processing ChangeVisitor
      */
     void modify(ChangeVisitor changeVisitor) throws ParsedNodeException;
+
+    /**
+     *
+     * Default implementation always returns true.  Any implementation can override.
+     * Currently only ExecuteShellCommandChange overrides
+     *
+     * @return boolean
+     *
+     */
+    default boolean shouldRunOnOs() {
+        return true;
+    }
 }

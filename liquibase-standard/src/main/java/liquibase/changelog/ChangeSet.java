@@ -862,13 +862,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     private ExecType isChangeToSkip(Change change, Database database, Logger log) {
         boolean skipChangeForDbms =
-           ! (change instanceof DbmsTargetedChange) || ! DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true);
-        boolean skipExecChange = change instanceof ExecuteShellCommandChange && ! ((ExecuteShellCommandChange)change).isShouldRun();
+           (change instanceof DbmsTargetedChange &&
+              ! DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true));
+        boolean skipExecChange = ! change.shouldRunOnOs();
         if (skipChangeForDbms) {
             log.fine("Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
         }
         if (skipExecChange) {
-            log.fine("Change " + change.getSerializedObjectName() + " not included for os " + ((ExecuteShellCommandChange)change).getOs());
+            log.fine("Change " + change.getSerializedObjectName() + " not included: " + change.getConfirmationMessage());
             change.getChangeSet().getChangeLog().getSkippedBecauseOfOsMismatchChangeSets().add(change.getChangeSet());
         }
         if (skipChangeForDbms || skipExecChange) {
