@@ -4,7 +4,6 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.UpdateSummaryEnum;
 import liquibase.UpdateSummaryOutputEnum;
-import liquibase.change.Change;
 import liquibase.changelog.ChangeLogIterator;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.ChangeSetStatus;
@@ -419,7 +418,7 @@ public class ShowSummaryUtil {
         int skippedBecauseOfOs = skippedBecauseOfOsMismatchChangeSets.size();
         int skippedBecauseOfPreconditions = skippedBecauseOfPreconditionsChangeSets.size();
         int filtered = filterDenied.size();
-        int totalAccepted = calculateAccepted(statusVisitor, changeExecListener, runChangeLogIterator, skippedBecauseOfOs);
+        int totalAccepted = calculateAccepted(statusVisitor, changeExecListener, runChangeLogIterator);
         int totalPreviouslyRun = calculatePreviouslyRun(statusVisitor);
         int totalInChangelog = CollectionUtil.createIfNull(changeLog.getChangeSets()).size() + CollectionUtil.createIfNull(changeLog.getSkippedChangeSets()).size();
         UpdateSummary updateSummaryMdc = new UpdateSummary(null, totalAccepted, totalPreviouslyRun, null, totalInChangelog);
@@ -500,7 +499,7 @@ public class ShowSummaryUtil {
      * executed changesets. We retain this code despite its inaccuracy for backwards compatibility, in case
      * a change exec listener is not provided.
      */
-    private static int calculateAccepted(StatusVisitor statusVisitor, ChangeExecListener changeExecListener, ChangeLogIterator runChangeLogIterator, int skippedBecauseOfOsMismatch) {
+    private static int calculateAccepted(StatusVisitor statusVisitor, ChangeExecListener changeExecListener, ChangeLogIterator runChangeLogIterator) {
         int ran = statusVisitor.getChangeSetsToRun().size();
         if (changeExecListener instanceof DefaultChangeExecListener) {
             ran = ((DefaultChangeExecListener) changeExecListener).getDeployedChangeSets().size();
