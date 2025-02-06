@@ -184,7 +184,7 @@ public class ShowSummaryUtil {
         SortedMap<String, Integer> mdcSkipCounts = new TreeMap<>();
         mdcSkipCounts.put(totalSkippedMdcKey, skippedChangeSets.size() + filterDenied.size());
 
-        List<ChangeSetStatus> finalList = createFinalStatusList(skippedChangeSets, skippedBecauseOfLicenseChangeSets, skippedBecauseOfOsMismatchChangeSets, filterDenied, mdcSkipCounts);
+        List<ChangeSetStatus> finalList = createFinalStatusList(skippedChangeSets, skippedBecauseOfLicenseChangeSets, skippedBecauseOfOsMismatchChangeSets, filterDenied);
         ShowSummaryGeneratorFactory showSummaryGeneratorFactory = Scope.getCurrentScope().getSingleton(ShowSummaryGeneratorFactory.class);
         ShowSummaryGenerator showSummaryGenerator = showSummaryGeneratorFactory.getShowSummaryGenerator();
         finalList.addAll(showSummaryGenerator.getAllAdditionalChangeSetStatus(runChangeLogIterator));
@@ -412,7 +412,7 @@ public class ShowSummaryUtil {
         builder.append(System.lineSeparator());
 
         final Map<String, Integer> filterSummaryMap = new LinkedHashMap<>();
-        List<ChangeSetStatus> finalList = createFinalStatusList(skippedChangeSets, skippedBecauseOfLicenseChangeSets, skippedBecauseOfOsMismatchChangeSets, filterDenied, null);
+        List<ChangeSetStatus> finalList = createFinalStatusList(skippedChangeSets, skippedBecauseOfLicenseChangeSets, skippedBecauseOfOsMismatchChangeSets, filterDenied);
         finalList.forEach(status -> {
             status.getFilterResults().forEach(result -> {
                 if (!result.isAccepted()) {
