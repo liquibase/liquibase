@@ -12,6 +12,17 @@
             <column name="name" type="CHAR(20)"/>
         </createTable>
     </changeSet>
+    <changeSet author="wesley (generated)" id="1692462595665-22">
+      <sql>
+      INSERT
+      INTO TABLE1 (name, id) VALUES ('erzsebet', '1');
+      </sql>
+    </changeSet>
+    <changeSet author="wesley (generated)" id="1692462595665-23">
+      <sql>
+      INSERT INTO TABLE1 (name, id) VALUES ('carmean', '2');
+      </sql>
+    </changeSet>
     <changeSet author="wesley (generated)" id="1692462595665-3">
       <createTable tableName="table3">
             <column name="name" type="CHAR(20)"/>
