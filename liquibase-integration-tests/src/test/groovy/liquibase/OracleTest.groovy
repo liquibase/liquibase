@@ -6,6 +6,7 @@ import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.logging.core.BufferedLogService
 import liquibase.resource.SearchPathResourceAccessor
+import org.apache.commons.lang3.StringUtils
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Timeout
@@ -107,5 +108,6 @@ END;
         assert logAsString.contains("0 row(s) affected")
         assert logAsString.contains("1 row(s) affected")
         assert ! logAsString.contains("-1 row(s) affected")
+        assert StringUtils.countMatches(logAsString, "row(s) affected") == 10
     }
 }
