@@ -311,8 +311,7 @@ public class ShowSummaryUtil {
     private static List<ChangeSetStatus> createFinalStatusList(List<ChangeSet> skippedChangeSets,
                                                                List<ChangeSet> skippedBecauseOfLicenseChangeSets,
                                                                List<ChangeSet> skippedBecauseOfOsMismatchChangeSets,
-                                                               List<ChangeSetStatus> filterDenied,
-                                                               SortedMap<String, Integer> mdcSkipCounts) {
+                                                               List<ChangeSetStatus> filterDenied) {
         //
         // Add skipped during changelog parsing to the final list
         //
