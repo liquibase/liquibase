@@ -255,7 +255,7 @@ jobs:
   trigger-sbom-generation-lb-lbpo:
     if: ${{ inputs.dry_run == false }}
     name: Generate SBOMS for liquibase and liquibase-pro
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     needs: [ setup ]
     strategy:
       matrix:
