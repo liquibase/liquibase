@@ -101,4 +101,11 @@ public interface ChangeLogHistoryService extends Plugin {
      */
     default void replaceChecksum(ChangeSet changeSet) throws DatabaseException {
     }
+
+    /**
+     * By default does nothing to keep compatibility with older versions, but subclasses may like to implement
+     * this method to support eventual minor file path fixes.
+     */
+    default void replaceFilePath(ChangeSet changeSet, String oldPath) throws DatabaseException {
+    }
 }

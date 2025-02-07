@@ -4,9 +4,7 @@ import liquibase.ChecksumVersion;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.Change;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.RanChangeSet;
+import liquibase.changelog.*;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
@@ -92,7 +90,31 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
     private RanChangeSet findChangeSet(ChangeSet changeSet) {
         String key = changeSet.toNormalizedString();
-        return ranIndex.get(key);
+        RanChangeSet ranChangeSet =  ranIndex.get(key);
+        if (ranChangeSet == null && changeSet.getChangeLog().getLogicalFilePath() != null) {
+            String incorrectPath = DatabaseChangeLog.normalizePath(changeSet.getChangeLog().getParentChangeLog().getLogicalFilePath());
+            String incorrectKey = DatabaseChangeLog.normalizePath(incorrectPath) + "::" + changeSet.getId() + "::" + changeSet.getAuthor();
+            ranChangeSet = ranIndex.get(incorrectKey);
+            if (ranChangeSet != null) {
+                if (!ValidatingVisitorUtil.checkLiquibaseVersionIs(ranChangeSet.getLiquibaseVersion(), 4, 31)) {
+                    return null;
+                } else {
+                    ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
+                    try {
+                        changeLogService.replaceFilePath(changeSet, ranChangeSet.getChangeLog());
+                    } catch (DatabaseException e) {
+                        throw new RuntimeException(e);
+                    }
+                    ranChangeSet.setChangeLog(changeSet.getStoredFilePath());
+                    ranIndex.remove(incorrectKey);
+                    ranIndex.put(key, ranChangeSet);
+
+
+                }
+            }
+
+        }
+        return ranChangeSet;
     }
 
     @Override
