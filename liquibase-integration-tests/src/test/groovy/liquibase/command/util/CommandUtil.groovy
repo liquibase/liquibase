@@ -6,6 +6,8 @@ import liquibase.TagVersionEnum
 import liquibase.UpdateSummaryEnum
 import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory
+import liquibase.changelog.ChangeLogParameters
+import liquibase.command.CommandResults
 import liquibase.command.CommandScope
 import liquibase.command.core.*
 import liquibase.command.core.helpers.*
@@ -50,7 +52,7 @@ class CommandUtil {
     }
 
     static void runUpdate(DatabaseTestSystem db, String changelogFile) throws Exception {
-        SearchPathResourceAccessor resourceAccessor = new SearchPathResourceAccessor(".")
+        SearchPathResourceAccessor resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
         execUpdateCommandInScope(resourceAccessor, db, changelogFile)
     }
 
@@ -286,5 +288,31 @@ class CommandUtil {
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
         commandScope.execute()
+    }
+
+    static CommandResults runStatus(DatabaseTestSystem db, String changelog) {
+        CommandScope commandScope = new CommandScope(StatusCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changelog)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+        return commandScope.execute()
+    }
+
+    static void runUpdateWithParameters(DatabaseTestSystem db, String changelog, ChangeLogParameters changeLogParameters) {
+        SearchPathResourceAccessor resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
+        def scopeSettings = [
+                (Scope.Attr.resourceAccessor.name()): resourceAccessor
+        ]
+        Scope.child(scopeSettings, {
+            CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+            commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changelog)
+            commandScope.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY, UpdateSummaryEnum.SUMMARY)
+            commandScope.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, changeLogParameters)
+            commandScope.execute()
+        } as Scope.ScopedRunnerWithReturn<Void>)
     }
 }
