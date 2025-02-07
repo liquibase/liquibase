@@ -124,6 +124,7 @@ jobs:
       with:
           repository: liquibase/liquibase-checks
           version: ${{ needs.get-liquibase-checks-version.outputs.version }}
+          branch: "${{ inputs.branch }}"
       secrets: inherit
 
   build-and-deploy-extensions:
@@ -156,6 +157,7 @@ jobs:
               dep=$(echo $dep | xargs)  # Remove leading and trailing whitespaces
               echo "Checking out $dep"
               git clone https://github.com/liquibase/$dep.git $dep
+              git checkout ${{ inputs.branch }} 
           done
 
       - name: Set up JDK 21
@@ -275,6 +277,7 @@ jobs:
             if [ "$ext" != "liquibase-checks" ]; then
               echo "Checking out and building $ext"
               git clone https://github.com/liquibase/$ext.git $ext
+              git checkout $scripts_branch
               cd $ext
               sed -i "s/<liquibase.version>.*<\/liquibase.version>/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/" pom.xml
               mvn versions:set -DnewVersion=0-SNAPSHOT
