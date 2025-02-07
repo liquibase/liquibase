@@ -250,7 +250,7 @@ public class ValidatingVisitorUtil {
      * FIXME As 4.31.0 has been out for just 3 weeks and then it was patched, we should consider removing this fix around Liquibase 4.34.0 ,and document that if a user faces this issue he first needs to upgrade to 4.31.1 -> 4.34.0 and then up.
      */
     public static RanChangeSet fixChangesetFilenameForLogicalfilepathBugIn4300(ChangeSet changeSet, RanChangeSet ranChangeSet, String key, Map<String, RanChangeSet> ranIndex, Database database) throws LiquibaseException {
-        if (ranChangeSet == null && changeSet.getChangeLog().getRawLogicalFilePath() != null && changeSet.getChangeLog().getParentChangeLog() != null) {
+        if (ranChangeSet == null && changeSet.getChangeLog() != null && changeSet.getChangeLog().getRawLogicalFilePath() != null && changeSet.getChangeLog().getParentChangeLog() != null) {
             String incorrectPath = DatabaseChangeLog.normalizePath(changeSet.getChangeLog().getParentChangeLog().getRawLogicalFilePath());
             String incorrectKey = DatabaseChangeLog.normalizePath(incorrectPath) + "::" + changeSet.getId() + "::" + changeSet.getAuthor();
             ranChangeSet = ranIndex.get(incorrectKey);
