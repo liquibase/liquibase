@@ -9,6 +9,8 @@ internal/lib/commons-io.jar
 internal/lib/commons-lang3.jar
 internal/lib/commons-text.jar
 internal/lib/jaxb-api.jar
+internal/lib/jaxb-core.jar
+internal/lib/jaxb-runtime.jar
 internal/lib/liquibase-commercial.jar
 internal/lib/liquibase-core.jar
 internal/lib/opencsv.jar
