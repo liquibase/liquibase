@@ -55,7 +55,7 @@ class ChangeLogIncludeTest extends Specification {
         logContent.contains("ChangeSet app-changelog::myown::dev")
     }
 
-    def "upgrading from 4.30.0 to 4.31.0 using logicalFilePath in includes works and fixes dbcl"() {
+    def "upgrading from 4.31.1 to 4.31.1+ using logicalFilePath in includes works and fixes dbcl"() {
 
         given:
         // create dbcl table
