@@ -120,7 +120,7 @@ jobs:
   build-liquibase-checks:
       if: ${{ contains(inputs.extensions, 'liquibase-checks') }}
       needs: [ delete-extension-packages, get-liquibase-checks-version, delete-checks-packages ]
-      uses: liquibase/build-logic/.github/workflows/publish-for-liquibase.yml@DAT-19574
+      uses: liquibase/build-logic/.github/workflows/publish-for-liquibase.yml@main
       with:
           repository: liquibase/liquibase-checks
           version: ${{ needs.get-liquibase-checks-version.outputs.version }}
