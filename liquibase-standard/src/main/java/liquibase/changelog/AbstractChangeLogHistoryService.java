@@ -127,6 +127,9 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
 
     @Override
     public void replaceFilePath(ChangeSet changeSet, String oldPath) throws DatabaseException {
+        String idBeingReplaced = DatabaseChangeLog.normalizePath(oldPath) + "::" + changeSet.getId() + "::" + changeSet.getAuthor();
+         Scope.getCurrentScope().getLog(AbstractChangeLogHistoryService.class)
+                 .warning("Replacing path in databasechangelog table for changeset [" + idBeingReplaced + "] by [" + changeSet.getFilePath()+ "]");
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new UpdateChangeSetFilenameStatement
                 (changeSet, oldPath));
         getDatabase().commit();

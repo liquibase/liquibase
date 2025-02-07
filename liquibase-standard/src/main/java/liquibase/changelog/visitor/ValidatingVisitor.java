@@ -88,7 +88,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
-    private RanChangeSet findChangeSet(ChangeSet changeSet) {
+    private RanChangeSet findChangeSet(ChangeSet changeSet) throws LiquibaseException {
         String key = changeSet.toNormalizedString();
         RanChangeSet ranChangeSet =  ranIndex.get(key);
         return ValidatingVisitorUtil.fixChangesetFilenameForLogicalfilepathBugIn4300(changeSet, ranChangeSet, key, ranIndex, database);

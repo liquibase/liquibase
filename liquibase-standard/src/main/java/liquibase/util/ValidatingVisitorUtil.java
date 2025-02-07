@@ -13,6 +13,7 @@ import liquibase.changelog.*;
 import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import org.apache.commons.lang3.StringUtils;
 
@@ -248,9 +249,9 @@ public class ValidatingVisitorUtil {
      * This method checks if the filename was incorrectly calculated and fixes it.
      * FIXME As 4.31.0 has been out for just 3 weeks and then it was patched, we should consider removing this fix around Liquibase 4.34.0 ,and document that if a user faces this issue he first needs to upgrade to 4.31.1 -> 4.34.0 and then up.
      */
-    public static RanChangeSet fixChangesetFilenameForLogicalfilepathBugIn4300(ChangeSet changeSet, RanChangeSet ranChangeSet, String key, Map<String, RanChangeSet> ranIndex, Database database) {
-        if (ranChangeSet == null && changeSet.getChangeLog().getLogicalFilePath() != null) {
-            String incorrectPath = DatabaseChangeLog.normalizePath(changeSet.getChangeLog().getParentChangeLog().getLogicalFilePath());
+    public static RanChangeSet fixChangesetFilenameForLogicalfilepathBugIn4300(ChangeSet changeSet, RanChangeSet ranChangeSet, String key, Map<String, RanChangeSet> ranIndex, Database database) throws LiquibaseException {
+        if (ranChangeSet == null && changeSet.getChangeLog().getRawLogicalFilePath() != null && changeSet.getChangeLog().getParentChangeLog() != null) {
+            String incorrectPath = DatabaseChangeLog.normalizePath(changeSet.getChangeLog().getParentChangeLog().getRawLogicalFilePath());
             String incorrectKey = DatabaseChangeLog.normalizePath(incorrectPath) + "::" + changeSet.getId() + "::" + changeSet.getAuthor();
             ranChangeSet = ranIndex.get(incorrectKey);
             if (ranChangeSet != null) {
@@ -261,7 +262,8 @@ public class ValidatingVisitorUtil {
                     try {
                         changeLogService.replaceFilePath(changeSet, ranChangeSet.getChangeLog());
                     } catch (DatabaseException e) {
-                        throw new RuntimeException(e);
+                        throw new LiquibaseException("Error while replacing path in databasechangelog table for broken changeset with id ["
+                                + incorrectKey + "] generated in Liquibase 4.31.0. The new path should be " + changeSet.getFilePath() + ".", e);
                     }
                     ranChangeSet.setChangeLog(changeSet.getStoredFilePath());
                     ranIndex.remove(incorrectKey);
