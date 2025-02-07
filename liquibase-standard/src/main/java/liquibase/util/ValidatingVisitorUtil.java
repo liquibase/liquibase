@@ -256,6 +256,7 @@ public class ValidatingVisitorUtil {
             ranChangeSet = ranIndex.get(incorrectKey);
             if (ranChangeSet != null) {
                 if (!checkLiquibaseVersionIs(ranChangeSet.getLiquibaseVersion(), 4, 31)) {
+                    // if the changeset was generated in a version different from 4.31.0 then it's not a bug
                     return null;
                 } else {
                     ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
