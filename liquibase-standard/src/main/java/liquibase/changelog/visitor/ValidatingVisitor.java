@@ -91,30 +91,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     private RanChangeSet findChangeSet(ChangeSet changeSet) {
         String key = changeSet.toNormalizedString();
         RanChangeSet ranChangeSet =  ranIndex.get(key);
-        if (ranChangeSet == null && changeSet.getChangeLog().getLogicalFilePath() != null) {
-            String incorrectPath = DatabaseChangeLog.normalizePath(changeSet.getChangeLog().getParentChangeLog().getLogicalFilePath());
-            String incorrectKey = DatabaseChangeLog.normalizePath(incorrectPath) + "::" + changeSet.getId() + "::" + changeSet.getAuthor();
-            ranChangeSet = ranIndex.get(incorrectKey);
-            if (ranChangeSet != null) {
-                if (!ValidatingVisitorUtil.checkLiquibaseVersionIs(ranChangeSet.getLiquibaseVersion(), 4, 31)) {
-                    return null;
-                } else {
-                    ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
-                    try {
-                        changeLogService.replaceFilePath(changeSet, ranChangeSet.getChangeLog());
-                    } catch (DatabaseException e) {
-                        throw new RuntimeException(e);
-                    }
-                    ranChangeSet.setChangeLog(changeSet.getStoredFilePath());
-                    ranIndex.remove(incorrectKey);
-                    ranIndex.put(key, ranChangeSet);
-
-
-                }
-            }
-
-        }
-        return ranChangeSet;
+        return ValidatingVisitorUtil.fixChangesetFilenameForLogicalfilepathBugIn4300(changeSet, ranChangeSet, key, ranIndex, database);
     }
 
     @Override

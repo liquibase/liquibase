@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -91,7 +92,7 @@ public class ValidatingVisitorUtil {
         return false;
     }
 
-    public static boolean checkLiquibaseVersionIs(String version, int major, int minor) {
+    private static boolean checkLiquibaseVersionIs(String version, int major, int minor) {
         String[] liquibaseVersion = version.split("\\.");
         try {
             return (liquibaseVersion.length == 3 && Integer.parseInt(liquibaseVersion[0]) == major && Integer.parseInt(liquibaseVersion[1]) == minor);
@@ -240,5 +241,37 @@ public class ValidatingVisitorUtil {
                 throw new UnexpectedLiquibaseException(e);
             }
         }
+    }
+
+    /**
+     * During version 4.31.0 the filename could be incorrectly calculated for changesets that were included in a parent using logicalFilePath database changelog parameter.
+     * This method checks if the filename was incorrectly calculated and fixes it.
+     * FIXME As 4.31.0 has been out for just 3 weeks and then it was patched, we should consider removing this fix around Liquibase 4.34.0 ,and document that if a user faces this issue he first needs to upgrade to 4.31.1 -> 4.34.0 and then up.
+     */
+    public static RanChangeSet fixChangesetFilenameForLogicalfilepathBugIn4300(ChangeSet changeSet, RanChangeSet ranChangeSet, String key, Map<String, RanChangeSet> ranIndex, Database database) {
+        if (ranChangeSet == null && changeSet.getChangeLog().getLogicalFilePath() != null) {
+            String incorrectPath = DatabaseChangeLog.normalizePath(changeSet.getChangeLog().getParentChangeLog().getLogicalFilePath());
+            String incorrectKey = DatabaseChangeLog.normalizePath(incorrectPath) + "::" + changeSet.getId() + "::" + changeSet.getAuthor();
+            ranChangeSet = ranIndex.get(incorrectKey);
+            if (ranChangeSet != null) {
+                if (!checkLiquibaseVersionIs(ranChangeSet.getLiquibaseVersion(), 4, 31)) {
+                    return null;
+                } else {
+                    ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
+                    try {
+                        changeLogService.replaceFilePath(changeSet, ranChangeSet.getChangeLog());
+                    } catch (DatabaseException e) {
+                        throw new RuntimeException(e);
+                    }
+                    ranChangeSet.setChangeLog(changeSet.getStoredFilePath());
+                    ranIndex.remove(incorrectKey);
+                    ranIndex.put(key, ranChangeSet);
+
+
+                }
+            }
+
+        }
+        return ranChangeSet;
     }
 }
