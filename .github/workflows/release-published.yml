@@ -251,6 +251,27 @@ jobs:
           rm -rf *.jar *.zip
           aws s3 sync . s3://javadocsliquibasecom-origin --only-show-errors
 
+  trigger-sbom-generation-lb-lbpo:
+    if: ${{ inputs.dry_run == false }}
+    name: Generate SBOMS for liquibase and liquibase-pro
+    runs-on: ubuntu-latest
+    needs: [ setup ]
+    strategy:
+      matrix:
+        repo: [ 'liquibase/liquibase', 'liquibase/liquibase-pro' ]
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          repository: ${{ matrix.repo }}
+          event-type: oss-released-version
+          client-payload: '{"latest_version": "${{ steps.get_latest_oss_version.outputs.latest_version }}"'
+
   publish_to_github_packages:
     if: ${{ inputs.dry_run == false }}
     name: Publish artifacts to Github Packages
@@ -539,3 +560,29 @@ jobs:
           
           done
             
+  publish_released_assets_to_s3_bucket:
+    if: ${{ inputs.dry_run == false }}
+    name: Publish OSS released assets to s3 bucket liquibaseorg-origin
+    needs: [ setup ]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download released assets
+        uses: robinraju/release-downloader@v1.11
+        with:
+          repository: "liquibase/liquibase"
+          latest: true          
+          fileName: "*"
+          out-file-path: "./${{ needs.setup.outputs.version }}-released-assets"
+
+      - name: Get current timestamp
+        id: timestamp
+        run: echo "timestamp=$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
+      
+      - name: Publish released assets to s3 bucket
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.LIQUIBASEORIGIN_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          aws s3 sync "./${{ needs.setup.outputs.version }}-released-assets" s3://liquibaseorg-origin/oss-released-assets/${{ needs.setup.outputs.version }}-released-assets-${{ env.timestamp }}/ --only-show-errors
+                    

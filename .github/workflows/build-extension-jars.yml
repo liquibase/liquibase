@@ -87,17 +87,46 @@ jobs:
           token: ${{ secrets.BOT_TOKEN }}
           ignore-versions: "^((?!${{ inputs.liquibase-version }}$).)*$"
 
+  matching-branch-logic-extensions:
+    runs-on: ubuntu-latest
+    outputs:
+      extensions_branch: ${{ steps.get-extensions-branch.outputs.extensions_branch }}
+    steps:
+      - id: get-extensions-branch
+        name: Get Extensions branch to use
+        run: |
+          if [ "${{ inputs.branch }}" == "master" ]; then
+              echo "extensions_branch=main" >> "$GITHUB_OUTPUT"
+            else
+              echo "extensions_branch=${{ inputs.branch }}" >> "$GITHUB_OUTPUT"
+          fi
+
+  matching-branch-logic-pro:
+    runs-on: ubuntu-latest
+    outputs:
+      pro_branch: ${{ steps.get-pro-branch.outputs.pro_branch }}
+    steps:
+      - id: get-pro-branch
+        name: Get Pro branch to use
+        run: |
+          if [ "${{ inputs.branch }}" == "master" ]; then
+            echo "pro_branch=master" >> "$GITHUB_OUTPUT"
+          else
+            echo "pro_branch=${{ inputs.branch }}" >> "$GITHUB_OUTPUT"
+          fi 
+
   build-liquibase-checks:
     if: ${{ contains(inputs.extensions, 'liquibase-checks') }}
-    needs: [ delete-extension-packages ]
+    needs: [ delete-extension-packages, matching-branch-logic-extensions ]
     uses: liquibase/build-logic/.github/workflows/publish-for-liquibase.yml@main
     with:
       repository: liquibase/liquibase-checks
       version: ${{ inputs.liquibase-version }}
+      branch: ${{ needs.matching-branch-logic-extensions.outputs.extensions_branch }}
     secrets: inherit
 
   build-and-deploy-extensions:
-    needs: [delete-dependency-packages, delete-extension-packages]
+    needs: [delete-dependency-packages, delete-extension-packages, matching-branch-logic-extensions, matching-branch-logic-pro]
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -113,7 +142,7 @@ jobs:
         name: Checkout liquibase-pro
         with:
           repository: liquibase/liquibase-pro
-          ref: "${{ inputs.branch }}"
+          ref: ${{ needs.matching-branch-logic-pro.outputs.pro_branch }}
           path: liquibase-pro
           token: ${{ secrets.BOT_TOKEN }}
 
