@@ -110,7 +110,8 @@ jobs:
           with:
             repository: liquibase/liquibase-checks
             token: ${{ secrets.BOT_TOKEN }}
-
+            ref: release
+            
         - id: extract-version
           name: Extract version from pom.xml
           shell: bash
