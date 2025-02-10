@@ -20,6 +20,7 @@ public class JsonChangeLogSerializer extends YamlChangeLogSerializer {
         int i = 0;
         for (T child : children) {
             String serialized = serialize(child, true);
+            serialized = serialized.replaceAll(": \"null\"", ": null");
             if (++i < children.size()) {
                 serialized = serialized.replaceFirst("}\\s*$", "},\n");
             }
