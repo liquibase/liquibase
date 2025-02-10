@@ -95,11 +95,12 @@ jobs:
       - id: get-extensions-branch
         name: Get Extensions branch to use
         run: |
-          if inputs.branch == 'master'; then
-            echo "extensions_branch=main" >> $GITHUB_OUTPUT
-          else
-            echo "extensions_branch=${{ inputs.branch }}" >> $GITHUB_OUTPUT
-          fi
+          run: |
+            if [ "${{ inputs.branch }}" == "master" ]; then
+              echo "extensions_branch=main" >> "$GITHUB_OUTPUT"
+            else
+              echo "extensions_branch=${{ inputs.branch }}" >> "$GITHUB_OUTPUT"
+            fi
 
   get-liquibase-checks-version:
       if: ${{ contains(inputs.extensions, 'liquibase-checks') }}
