@@ -87,7 +87,7 @@ jobs:
           token: ${{ secrets.BOT_TOKEN }}
           ignore-versions: "^((?!${{ inputs.liquibase-version }}$).)*$"
 
-  matching-branch-logic:
+  matching-branch-logic-extensions:
     runs-on: ubuntu-latest
     outputs:
       extensions_branch: ${{ steps.get-extensions-branch.outputs.extensions_branch }}
@@ -101,6 +101,20 @@ jobs:
             else
               echo "extensions_branch=${{ inputs.branch }}" >> "$GITHUB_OUTPUT"
             fi
+
+  matching-branch-logic-pro:
+    runs-on: ubuntu-latest
+    outputs:
+      pro_branch: ${{ steps.get-pro-branch.outputs.pro_branch }}
+    steps:
+      - id: get-pro-branch
+        name: Get Pro branch to use
+        run: |
+          if [ "${{ inputs.branch }}" == "master" ]; then
+            echo "pro_branch=master" >> "$GITHUB_OUTPUT"
+          else
+            echo "pro_branch=${{ inputs.branch }}" >> "$GITHUB_OUTPUT"
+          fi          
 
   get-liquibase-checks-version:
       if: ${{ contains(inputs.extensions, 'liquibase-checks') }}
@@ -134,16 +148,16 @@ jobs:
 
   build-liquibase-checks:
       if: ${{ contains(inputs.extensions, 'liquibase-checks') }}
-      needs: [ delete-extension-packages, get-liquibase-checks-version, delete-checks-packages, matching-branch-logic ]
+      needs: [ delete-extension-packages, get-liquibase-checks-version, delete-checks-packages, matching-branch-logic-extensions ]
       uses: liquibase/build-logic/.github/workflows/publish-for-liquibase.yml@main
       with:
           repository: liquibase/liquibase-checks
           version: ${{ needs.get-liquibase-checks-version.outputs.version }}
-          branch: ${{ needs.matching-branch-logic.outputs.extensions_branch }}
+          branch: ${{ needs.matching-branch-logic-extensions.outputs.extensions_branch }}
       secrets: inherit
 
   build-and-deploy-extensions:
-    needs: [delete-dependency-packages, delete-extension-packages, delete-checks-packages, matching-branch-logic]
+    needs: [delete-dependency-packages, delete-extension-packages, delete-checks-packages, matching-branch-logic-extensions]
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -159,7 +173,7 @@ jobs:
         name: Checkout liquibase-pro
         with:
           repository: liquibase/liquibase-pro
-          ref: ${{ needs.matching-branch-logic.outputs.extensions_branch }}
+          ref: ${{ needs.matching-branch-logic-pro.outputs.pro_branch }}
           path: liquibase-pro
           token: ${{ secrets.BOT_TOKEN }}
 
@@ -283,7 +297,7 @@ jobs:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         continue-on-error: true
         run: |
-          scripts_branch= ${{ needs.matching-branch-logic.outputs.extensions_branch }}
+          scripts_branch= ${{ needs.matching-branch-logic-extensions.outputs.extensions_branch }}
           git config --global credential.helper store
           echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
           IFS=',' read -ra EXT_ARRAY <<< "${{ inputs.extensions }}"
