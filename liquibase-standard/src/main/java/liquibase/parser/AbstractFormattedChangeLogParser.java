@@ -9,6 +9,7 @@ import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.visitor.IncludeVisitor;
 import liquibase.changeset.ChangeSetService;
 import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.exception.ChangeLogParseException;
@@ -519,7 +520,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         } catch (IOException e) {
             throw new ChangeLogParseException(e);
         }
-
+        new IncludeVisitor().visit(changeLog);
         return changeLog;
     }
 

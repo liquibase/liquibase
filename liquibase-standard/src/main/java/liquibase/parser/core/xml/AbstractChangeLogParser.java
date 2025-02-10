@@ -2,6 +2,7 @@ package liquibase.parser.core.xml;
 
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.visitor.IncludeVisitor;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.core.ParsedNode;
@@ -24,7 +25,7 @@ public abstract class AbstractChangeLogParser implements ChangeLogParser {
         } catch (Exception e) {
             throw new ChangeLogParseException(e);
         }
-
+        new IncludeVisitor().visit(changeLog);
         return changeLog;
     }
 
