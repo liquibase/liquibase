@@ -33,6 +33,8 @@ public interface ChangeLogHistoryService extends Plugin {
 
     List<RanChangeSet> getRanChangeSets() throws DatabaseException;
 
+    List<RanChangeSet> getUniqueRanChangeSets() throws DatabaseException;
+
     /**
      * This method was created to clear out MD5sum for upgrade purpose but after some refactoring the logic was moved to Update commands and it should have been removed
      * as everywhere it is called only with boolean false, so for core it is the same as getRanChangeSets().
