@@ -119,7 +119,8 @@ public class MavenUtils {
 
     /**
      * Recursively searches for the field specified by the fieldName in the class and all
-     * the super classes until it either finds it, or runs out of parents.
+     * the super classes until it either finds it, or runs out of parents.  We also
+     * search for a key by prepending "liquibase," in front of the input key
      *
      * @param clazz           The Class to start searching from.
      * @param keyPropertyName The name of the field to retrieve.
@@ -130,6 +131,9 @@ public class MavenUtils {
     public static Field getDeclaredField(Class<?> clazz, String keyPropertyName)
             throws NoSuchFieldException {
         Field f = getField(clazz, keyPropertyName);
+        if (f == null && ! keyPropertyName.startsWith("liquibase.")) {
+            f = getField(clazz, "liquibase." + keyPropertyName);
+        }
         if (f == null) {
             // Try the parent class
             Class<?> parent = clazz.getSuperclass();
