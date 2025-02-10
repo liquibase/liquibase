@@ -58,7 +58,7 @@ jobs:
         id: wait_and_get_outputs
         run: |
           # Wait for workflow to complete and get run ID
-          for i in {1..30}; do
+          for i in {1..60}; do
             sleep 30
             response=$(curl -s \
               -H "Authorization: token ${{ secrets.BOT_TOKEN }}" \
@@ -83,7 +83,7 @@ jobs:
               fi
             fi
           done
-          echo "Failed to get workflow outputs after 15 minutes"
+          echo "Failed to get workflow outputs after 30 minutes"
           exit 1
   
   dry-run-get-draft-release:
