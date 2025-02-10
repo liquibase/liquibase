@@ -157,7 +157,7 @@ jobs:
       secrets: inherit
 
   build-and-deploy-extensions:
-    needs: [delete-dependency-packages, delete-extension-packages, delete-checks-packages, matching-branch-logic-extensions]
+    needs: [delete-dependency-packages, delete-extension-packages, delete-checks-packages, matching-branch-logic-extensions, matching-branch-logic-pro]
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
