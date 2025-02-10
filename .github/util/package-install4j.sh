@@ -35,9 +35,9 @@ else
   # sudo apt install -y $INSTALL4J_CACHE/install4j_linux-x64_10_0_7.deb
 
   # installer automation for macos-latest; macos needed for apple notarizing
-  wget -nv --directory-prefix=$INSTALL4J_CACHE -nc https://download.ej-technologies.com/install4j/install4j_macos_10_0_7.dmg
+  wget -nv --directory-prefix=$INSTALL4J_CACHE -nc https://download.ej-technologies.com/install4j/install4j_macos_10_0_9.dmg
   sleep 5
-  hdiutil attach /Users/runner/.install4j10/install4j_macos_10_0_7.dmg
+  hdiutil attach /Users/runner/.install4j10/install4j_macos_10_0_9.dmg
   sleep 5
   cp -rf /Volumes/install4j/install4j.app /Applications
   sleep 5
