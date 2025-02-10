@@ -1398,7 +1398,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         void sendErrorMessage(String message, Throwable exception) {
             errorOutput.println(message)
             if (exception != null) {
-                exception.printStackTrace(errorOutput)
+                exception.printStackTrace(new PrintWriter(errorOutput))
             }
         }
 
