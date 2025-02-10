@@ -106,7 +106,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     @Getter
     private final List<ChangeSet> skippedChangeSets = new ArrayList<>();
     @Getter
+    private final List<ChangeSet> skippedBecauseOfOsMismatchChangeSets = new ArrayList<>();
+    @Getter
     private final List<ChangeSet> skippedBecauseOfLicenseChangeSets = new ArrayList<>();
+    @Getter
+    private final List<ChangeSet> skippedBecauseOfPreconditionsChangeSets = new ArrayList<>();
 
     @Getter
     private ChangeLogParameters changeLogParameters;
