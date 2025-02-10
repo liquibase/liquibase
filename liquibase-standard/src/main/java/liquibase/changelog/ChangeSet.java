@@ -53,6 +53,7 @@ import static liquibase.Scope.getCurrentScope;
  */
 public class ChangeSet implements Conditional, ChangeLogChild {
 
+    public static final String CHANGE_KEY = "change";
     protected CheckSum checkSum;
     /**
      * storedChecksum is used to make the checksum of a changeset that has already been run
@@ -1650,6 +1651,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         AtomicReference<SqlStatement[]> statementsReference = new AtomicReference<>();
         Map<String, Object> scopeValues = new HashMap<>();
         scopeValues.put(Change.SHOULD_EXECUTE, Boolean.FALSE);
+        scopeValues.put(CHANGE_KEY, change);
         StringBuilder sqlStatementsMdc = new StringBuilder();
         Scope.child(scopeValues, () -> {
             statementsReference.set(generateRollbackStatements ?

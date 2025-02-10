@@ -300,14 +300,14 @@
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.47.2.0</version>
+            <version>3.48.0.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.20.0</version>
+            <version>3.22.0</version>
             <scope>test</scope>
         </dependency>
 
