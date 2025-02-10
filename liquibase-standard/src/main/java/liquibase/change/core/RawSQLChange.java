@@ -8,6 +8,7 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 import lombok.Setter;
 
 /**
@@ -23,7 +24,15 @@ public class RawSQLChange extends AbstractSQLChange {
     private String comment;
 
     private Boolean rerunnable;
-    
+
+    @Getter
+    @Setter
+    private Integer sqlStartLine;
+
+    @Getter
+    @Setter
+    private Integer sqlEndLine;
+
     public RawSQLChange() {
     }
 

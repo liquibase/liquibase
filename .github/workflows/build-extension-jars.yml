@@ -113,20 +113,51 @@ jobs:
             echo "pro_branch=master" >> "$GITHUB_OUTPUT"
           else
             echo "pro_branch=${{ inputs.branch }}" >> "$GITHUB_OUTPUT"
-          fi 
+          fi          
+
+  get-liquibase-checks-version:
+      if: ${{ contains(inputs.extensions, 'liquibase-checks') }}
+      runs-on: ubuntu-latest
+      outputs:
+          version: ${{ steps.extract-version.outputs.version }}
+      steps:
+          - uses: actions/checkout@v4
+            with:
+              repository: liquibase/liquibase-checks
+              token: ${{ secrets.BOT_TOKEN }}
+
+          - id: extract-version
+            name: Extract version from pom.xml
+            shell: bash
+            run: |
+                VERSION=$(grep '<version>' pom.xml | head -n 1 | sed 's/.*<version>\(.*\)-SNAPSHOT<\/version>.*/\1/')
+                echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+  delete-checks-packages:
+    needs: [ get-liquibase-checks-version ]
+    runs-on: ubuntu-22.04
+    continue-on-error: true
+    steps:
+      - uses: actions/delete-package-versions@v5
+        with:
+          package-name: org.liquibase.ext.liquibase-checks
+          package-type: "maven"
+          token: ${{ secrets.BOT_TOKEN }}
+          ignore-versions: "^((?!${{ needs.get-liquibase-checks-version.outputs.version }}$).)*$"
 
   build-liquibase-checks:
-    if: ${{ contains(inputs.extensions, 'liquibase-checks') }}
-    needs: [ delete-extension-packages, matching-branch-logic-extensions ]
-    uses: liquibase/build-logic/.github/workflows/publish-for-liquibase.yml@main
-    with:
-      repository: liquibase/liquibase-checks
-      version: ${{ inputs.liquibase-version }}
-      branch: ${{ needs.matching-branch-logic-extensions.outputs.extensions_branch }}
-    secrets: inherit
+      if: ${{ contains(inputs.extensions, 'liquibase-checks') }}
+      needs: [ delete-extension-packages, get-liquibase-checks-version, delete-checks-packages, matching-branch-logic-extensions ]
+      uses: liquibase/build-logic/.github/workflows/publish-for-liquibase.yml@main
+      with:
+          repository: liquibase/liquibase-checks
+          version: ${{ needs.get-liquibase-checks-version.outputs.version }}
+          branch: ${{ needs.matching-branch-logic-extensions.outputs.extensions_branch }}
+      secrets: inherit
 
   build-and-deploy-extensions:
-    needs: [delete-dependency-packages, delete-extension-packages, matching-branch-logic-extensions, matching-branch-logic-pro]
+    needs: [delete-dependency-packages, delete-extension-packages, delete-checks-packages, matching-branch-logic-extensions, matching-branch-logic-pro]
+
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -155,6 +186,7 @@ jobs:
               dep=$(echo $dep | xargs)  # Remove leading and trailing whitespaces
               echo "Checking out $dep"
               git clone https://github.com/liquibase/$dep.git $dep
+              git checkout ${{ inputs.branch }} 
           done
 
       - name: Set up JDK 21
@@ -265,7 +297,7 @@ jobs:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         continue-on-error: true
         run: |
-          scripts_branch=${{ inputs.branch }}
+          scripts_branch= ${{ needs.matching-branch-logic-extensions.outputs.extensions_branch }}
           git config --global credential.helper store
           echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
           IFS=',' read -ra EXT_ARRAY <<< "${{ inputs.extensions }}"
@@ -274,6 +306,7 @@ jobs:
             if [ "$ext" != "liquibase-checks" ]; then
               echo "Checking out and building $ext"
               git clone https://github.com/liquibase/$ext.git $ext
+              git checkout $scripts_branch
               cd $ext
               sed -i "s/<liquibase.version>.*<\/liquibase.version>/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/" pom.xml
               mvn versions:set -DnewVersion=0-SNAPSHOT
