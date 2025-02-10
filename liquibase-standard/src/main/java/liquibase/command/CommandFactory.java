@@ -318,9 +318,7 @@ public class CommandFactory implements SingletonObject {
         if (overrideStep != null) {
             if (overrideStep.getClass() != step.getClass()) {
                 Scope.getCurrentScope().getLog(getClass()).fine(String.format("Found %s override for %s! Using %s in pipeline.", overrideStep.getClass().getSimpleName(), step.getClass().getSimpleName(), overrideStep.getClass().getSimpleName()));
-                // Recursively check for overrides of the overrideStep
-                Optional<CommandStep> recursiveOverride = getOverride(overrides, overrideStep);
-                return recursiveOverride.isPresent() ? recursiveOverride : Optional.of(overrideStep);
+                return Optional.of(overrideStep);
             }
         }
         return Optional.empty();
