@@ -58,32 +58,45 @@ jobs:
         id: wait_and_get_outputs
         run: |
           # Wait for workflow to complete and get run ID
-          for i in {1..60}; do
-            sleep 30
-            response=$(curl -s \
+          for i in {1..70}; do
+          echo "Attempt $i of 70..."
+          sleep 30
+          response=$(curl -s \
+            -H "Authorization: token ${{ secrets.BOT_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/create-release.yml/runs?event=workflow_dispatch&status=completed&per_page=1")
+        
+          echo "API Response:"
+          echo "$response" | jq '.'
+          
+          run_id=$(echo "$response" | jq -r '.workflow_runs[0].id')
+          echo "Found run_id: $run_id"
+          
+          if [ ! -z "$run_id" ]; then
+            echo "Getting outputs for run_id: $run_id"
+            # Get workflow outputs
+            outputs=$(curl -s \
               -H "Authorization: token ${{ secrets.BOT_TOKEN }}" \
               -H "Accept: application/vnd.github.v3+json" \
-              "https://api.github.com/repos/${{ github.repository }}/actions/workflows/create-release.yml/runs?event=workflow_dispatch&status=completed&per_page=1")
+              "https://api.github.com/repos/${{ github.repository }}/actions/runs/${run_id}/jobs")
             
-            run_id=$(echo "$response" | jq -r '.workflow_runs[0].id')
-            if [ ! -z "$run_id" ]; then
-              # Get workflow outputs
-              outputs=$(curl -s \
-                -H "Authorization: token ${{ secrets.BOT_TOKEN }}" \
-                -H "Accept: application/vnd.github.v3+json" \
-                "https://api.github.com/repos/${{ github.repository }}/actions/runs/${run_id}/jobs")
-              
-              zip_url=$(echo "$outputs" | jq -r '.jobs[] | select(.name=="build-installers") | .outputs.dry_run_zip_url')
-              tar_gz_url=$(echo "$outputs" | jq -r '.jobs[] | select(.name=="build-installers") | .outputs.dry_run_tar_gz_url')
-              
-              if [ ! -z "$zip_url" ] && [ ! -z "$tar_gz_url" ]; then
-                echo "zip_url=$zip_url" >> $GITHUB_OUTPUT
-                echo "tar_gz_url=$tar_gz_url" >> $GITHUB_OUTPUT
-                exit 0
-              fi
+            echo "Jobs output:"
+            echo "$outputs" | jq '.'
+            
+            zip_url=$(echo "$outputs" | jq -r '.jobs[] | select(.name=="build-installers") | .outputs.dry_run_zip_url')
+            tar_gz_url=$(echo "$outputs" | jq -r '.jobs[] | select(.name=="build-installers") | .outputs.dry_run_tar_gz_url')
+            
+            echo "Found zip_url: $zip_url"
+            echo "Found tar_gz_url: $tar_gz_url"
+            
+            if [ ! -z "$zip_url" ] && [ ! -z "$tar_gz_url" ]; then
+              echo "zip_url=$zip_url" >> $GITHUB_OUTPUT
+              echo "tar_gz_url=$tar_gz_url" >> $GITHUB_OUTPUT
+              exit 0
             fi
+          fi
           done
-          echo "Failed to get workflow outputs after 30 minutes"
+          echo "Failed to get workflow outputs after 35 minutes"
           exit 1
   
   dry-run-get-draft-release:
