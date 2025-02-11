@@ -296,7 +296,7 @@ jobs:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         continue-on-error: true
         run: |
-          scripts_branch= ${{ needs.matching-branch-logic-extensions.outputs.extensions_branch }}
+          scripts_branch=${{ needs.matching-branch-logic-extensions.outputs.extensions_branch }}
           git config --global credential.helper store
           echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
           IFS=',' read -ra EXT_ARRAY <<< "${{ inputs.extensions }}"
