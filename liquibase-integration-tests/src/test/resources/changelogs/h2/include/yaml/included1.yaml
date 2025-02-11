@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - includeAll:
+      path: ../../includeAll/test_precondition/
+      relativeToChangelogFile: true
+      logicalFilePath: includeAll
+      preConditions:
+          - not:
+              - tableExists:
+                  tableName: TEST_NEW_TABLE
+  - changeSet:
+      id: includeAll-TestTable
+      author: mallod
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+            tableName: IncludeAllPreconditionTest

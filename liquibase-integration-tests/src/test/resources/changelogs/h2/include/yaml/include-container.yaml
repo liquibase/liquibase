@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - property:
+      name: bar
+      value: foo
+  - include:
+      file: included1.yaml
+      relativeToChangelogFile: true
+      logicalFilePath: included1
+      preConditions:
+        - changeLogPropertyDefined:
+            property: bar
+            value: foo
+  - changeSet:
+      id: include-container
+      author: mallod
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+            tableName: IncludePreconditionTest

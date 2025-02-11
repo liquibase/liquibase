@@ -401,4 +401,70 @@ class IncludePreconditionsTest extends Specification {
         actual.count("under_precondition") == 1
     }
 
+    def "run include with preconditions using a YAML changelog format"() {
+        when:
+        String changelogFile = "changelogs/h2/include/yaml/include-container.yaml"
+        def changelog =
+                DatabaseChangelogCommandStep.getDatabaseChangeLog(changelogFile, new ChangeLogParameters(), h2.getDatabaseFromFactory())
+        def resourceAccessor = new SearchPathResourceAccessor("target/test-classes")
+        def scopeSettings = [
+                (Scope.Attr.resourceAccessor.name()) : resourceAccessor
+        ]
+
+        Scope.child(scopeSettings, {
+            def updateCommand = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+            updateCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, h2.getDatabaseFromFactory())
+            updateCommand.addArgumentValue(UpdateCommandStep.CHANGELOG_ARG, changelog)
+            updateCommand.execute()
+        } as Scope.ScopedRunner)
+        def changelogResultSet = h2.getConnection().createStatement().executeQuery("select * from databasechangelog")
+        h2.getConnection().createStatement().executeQuery("select * from INCLUDEPRECONDITIONTEST")
+        h2.getConnection().createStatement().executeQuery("select * from INCLUDEALLPRECONDITIONTEST")
+        h2.getConnection().createStatement().executeQuery("select * from TEST_PRECONDITION_TABLE")
+        then:
+        noExceptionThrown()
+        List<String> includedFiles = new ArrayList<>(3)
+        while (changelogResultSet.next()) {
+            def filename = changelogResultSet.getString("filename")
+            includedFiles.add(filename)
+        }
+        includedFiles.size() == 3
+        includedFiles.count("included1") == 1
+        includedFiles.count("includeAll") == 1
+        includedFiles.count("changelogs/h2/include/yaml/include-container.yaml") == 1
+    }
+
+    def "run include with preconditions using a JSON changelog format"() {
+        when:
+        String changelogFile = "changelogs/h2/include/json/include-container.json"
+        def changelog =
+                DatabaseChangelogCommandStep.getDatabaseChangeLog(changelogFile, new ChangeLogParameters(), h2.getDatabaseFromFactory())
+        def resourceAccessor = new SearchPathResourceAccessor("target/test-classes")
+        def scopeSettings = [
+                (Scope.Attr.resourceAccessor.name()) : resourceAccessor
+        ]
+
+        Scope.child(scopeSettings, {
+            def updateCommand = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+            updateCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, h2.getDatabaseFromFactory())
+            updateCommand.addArgumentValue(UpdateCommandStep.CHANGELOG_ARG, changelog)
+            updateCommand.execute()
+        } as Scope.ScopedRunner)
+        def changelogResultSet = h2.getConnection().createStatement().executeQuery("select * from databasechangelog")
+        h2.getConnection().createStatement().executeQuery("select * from INCLUDEPRECONDITIONTEST")
+        h2.getConnection().createStatement().executeQuery("select * from INCLUDEALLPRECONDITIONTEST")
+        h2.getConnection().createStatement().executeQuery("select * from TEST_PRECONDITION_TABLE")
+        then:
+        noExceptionThrown()
+        List<String> includedFiles = new ArrayList<>(3)
+        while (changelogResultSet.next()) {
+            def filename = changelogResultSet.getString("filename")
+            includedFiles.add(filename)
+        }
+        includedFiles.size() == 3
+        includedFiles.count("included1") == 1
+        includedFiles.count("includeAll") == 1
+        includedFiles.count("changelogs/h2/include/json/include-container.json") == 1
+    }
+
 }

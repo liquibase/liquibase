@@ -1,0 +1,45 @@
+{
+  "databaseChangeLog": [
+    {
+      "includeAll": {
+        "path": "../../includeAll/test_precondition/",
+        "relativeToChangelogFile": "true",
+        "logicalFilePath": "includeAll",
+        "preConditions": [
+          {
+            "not": [
+              {
+                "tableExists":
+                {
+                  "tableName": "JSON_TEST_TABLE"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "changeSet": {
+        "id": "includeAll-TestTable",
+        "author": "mallod",
+        "changes": [
+          {
+            "createTable": {
+              "tableName": "IncludeAllPreconditionTest",
+              "columns": [
+                {
+                  "column": {
+                    "name": "ID",
+                    "type": "BIGINT"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+
