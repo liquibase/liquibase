@@ -1,10 +1,6 @@
 name: Build Test Installers
 
-# Job will run nightly at 03:05 EDT / 02:05 CDT
-# Time below is UTC
 on:
-  schedule:
-    - cron: "5 7 * * *"
   workflow_dispatch:
   push:
     branches:
@@ -14,7 +10,7 @@ on:
 jobs:
   build-installers:
     name: Build Installers
-    runs-on: macos-latest #needs macos for apple notarization
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
