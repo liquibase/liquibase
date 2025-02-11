@@ -44,7 +44,7 @@ jobs:
           ref: fix-dry-run-builds
           wait-for-completion: true
 
-      - name: Wait and Get Outputs
+      - name: Get Create Release Outputs
         id: wait_and_get_outputs
         run: |
           echo "Triggered workflow URL: ${{ steps.trigger-step.outputs.workflow-url }}"
