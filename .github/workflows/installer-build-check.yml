@@ -43,7 +43,7 @@ jobs:
 
       - name: Re-version Installers
         env:
-          # INSTALL4J_10_LICENSE: ${{ secrets.INSTALL4J_10_LICENSE }}
+          INSTALL4J_LICENSE:KEY: ${{ secrets.INSTALL4J_10_LICENSE }}
           # INSTALL4J_APPLE_KEY: ${{ secrets.INSTALL4J_APPLE_KEY }}
           # INSTALL4J_APPLE_KEY_PASSWORD: ${{ secrets.INSTALL4J_APPLE_KEY_PASSWORD }}
           # INSTALL4J_APPLE_ID: ${{ secrets.INSTALL4J_APPLE_ID }}
