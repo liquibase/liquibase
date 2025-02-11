@@ -67,10 +67,6 @@ jobs:
         if: always()
         id: wait_and_get_outputs
         run: |
-          if [[ "${{ steps.trigger-step.outputs.workflow-conclusion }}" == "success" ]]; then
-          # Extract the workflow run ID from the response
-          run_id=$(echo '${{ steps.trigger-step.outputs.workflow-id }}')
-
           zip_url="${{ steps.trigger-step.outputs.dry_run_zip_url }}"
           tar_gz_url="${{ steps.trigger-step.outputs.dry_run_tar_gz_url }}"
           echo "zip_url is $zip_url"
