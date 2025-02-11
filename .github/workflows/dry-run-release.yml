@@ -49,7 +49,9 @@ jobs:
         if: always()
         id: wait_and_get_outputs
         run: |
+          echo "trigger-step outputs are ${{ steps.trigger-step.outputs.workflow-logs }}"
           workflow_outputs='${{ fromJSON(steps.trigger-step.outputs.workflow-logs).build-installers }}'
+          echo "workflow_outputs are $workflow_outputs"
           zip_url=$(echo "$workflow_outputs" | jq -r '.dry_run_zip_url')
           tar_gz_url=$(echo "$workflow_outputs" | jq -r '.dry_run_tar_gz_url')
           echo "zip_url=$zip_url" >> $GITHUB_OUTPUT
