@@ -54,11 +54,13 @@ jobs:
           response=$(curl -s \
           -H "Authorization: token ${{ secrets.BOT_TOKEN }}" \
           -H "Accept: application/vnd.github.v3+json" \
-          "https://api.github.com/repos/liquibase/liquibase/actions/runs/${workflow_run_id}/artifacts")
+          "https://api.github.com/repos/liquibase/liquibase/actions/runs/${workflow_run_id}/jobs")
           
-          # Extract URLs from artifacts
-          tar_gz_url=$(echo "$response" | jq -r '.artifacts[] | select(.name | contains("tar.gz")).archive_download_url')
-          zip_url=$(echo "$response" | jq -r '.artifacts[] | select(.name | contains(".zip")).archive_download_url')
+          # Extract the outputs from the job
+          outputs=$(echo "$response" | jq -r '.jobs[] | select(.name == "create-release") | .steps[] | select(.name == "Extract dry-run release URL") | .outputs')
+          
+          tar_gz_url=$(echo "$outputs" | jq -r '.dry_run_tar_gz_url')
+          zip_url=$(echo "$outputs" | jq -r '.dry_run_zip_url')
           
           echo "tar_gz_url=$tar_gz_url" >> $GITHUB_OUTPUT
           echo "zip_url=$zip_url" >> $GITHUB_OUTPUT
