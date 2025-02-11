@@ -29,6 +29,35 @@ jobs:
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
 
+      # TODO: Add install4j caching if possible
+      # - name: Cache Install4j
+      #   id: cache-install4j
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: /usr/local/bin/install4jc
+      #     key: install4j-${{ runner.os }}-10_0_9
+
+      # - name: Install Install4j (if not cached)
+      #   if: steps.cache-install4j.outputs.cache-hit != 'true'
+      #   run: |
+      #     wget -nv -O install4j.deb "https://download.ej-technologies.com/install4j/install4j_linux-x64_10_0_9.deb"
+      #     sudo apt install -y ./install4j.deb
+      #     rm install4j.deb
+
+      - name: Decode Client Authentication Certificate
+        run: |
+          echo "${{ secrets.SM_CLIENT_CERT_FILE_B64 }}" | base64 --decode > /tmp/client-auth.p12
+
+      - name: Set Environment Variables for Signing
+        run: |
+          echo "SM_HOST=${{ secrets.SM_HOST }}" >> "$GITHUB_ENV"
+          echo "SM_API_KEY=${{ secrets.SM_API_KEY }}" >> "$GITHUB_ENV"
+          echo "SM_CLIENT_CERT_FILE=/tmp/client-auth.p12" >> "$GITHUB_ENV"
+          echo "SM_CLIENT_CERT_PASSWORD=${{ secrets.SM_CLIENT_CERT_PASSWORD }}" >> "$GITHUB_ENV"
+
+      - name: Install DigiCert KeyLocker Client Tools
+        uses: digicert/ssm-code-signing@v1.0.0
+
       - name: Download liquibase-artifacts
         uses: liquibase/action-download-artifact@v2-liquibase
         with:
@@ -41,25 +70,11 @@ jobs:
       - name: Set branch variable
         run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
 
-      - name: Re-version Installers
+
+      - name: Build Unsigned Windows Installer
         env:
-          INSTALL4J_LICENSE:KEY: ${{ secrets.INSTALL4J_10_LICENSE }}
-          # INSTALL4J_APPLE_KEY: ${{ secrets.INSTALL4J_APPLE_KEY }}
-          # INSTALL4J_APPLE_KEY_PASSWORD: ${{ secrets.INSTALL4J_APPLE_KEY_PASSWORD }}
-          # INSTALL4J_APPLE_ID: ${{ secrets.INSTALL4J_APPLE_ID }}
-          # INSTALL4J_APPLE_ID_PASSWORD: ${{ secrets.INSTALL4J_APPLE_ID_PASSWORD }}
-          # INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
-          # INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
-          BRANCH: ${{ github.ref_name || github.head_ref }}
+          INSTALL4J_LICENSE_KEY: ${{ secrets.INSTALL4J_10_LICENSE }}
         run: |
-          # mkdir -p liquibase-dist/target/keys
-          # echo "Saving apple key"
-          # echo "$INSTALL4J_APPLE_KEY" | base64 -d > liquibase-dist/target/keys/datical_apple.p12
-          # echo "Saving windows key"
-          # echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
-          
-          ##### Rebuild installers
           tarFile=$(pwd)/re-version/final/liquibase-${BRANCH}-SNAPSHOT.tar.gz
           scriptDir=$(pwd)/.github/util/
           
@@ -68,9 +83,39 @@ jobs:
           (cd liquibase-dist && $scriptDir/package-install4j.sh 0-SNAPSHOT)
           mv liquibase-dist/target/liquibase-*-installer-* re-version/final
 
-          ##Sign Files
+      - name: Find Unsigned Windows Installer
+        id: find-installer
+        run: |
+          INSTALLER_PATH=$(find re-version/final -name "liquibase-*-installer-*" | head -n 1)
+          if [ -z "$INSTALLER_PATH" ]; then
+            echo "Error: No installer file found!"
+            exit 1
+          fi
+          echo "Found installer: $INSTALLER_PATH"
+          echo "INSTALLER_PATH=$INSTALLER_PATH" >> $GITHUB_ENV
+
+      - name: Sign Windows Installer using KeyLocker
+        run: |
+          smctl sign --api-key "$SM_API_KEY" \
+            --host "$SM_HOST" \
+            --cert-sha1 "$SM_CODE_SIGNING_CERT_SHA1_HASH" \
+            --client-cert "$SM_CLIENT_CERT_FILE" \
+            --client-cert-password "$SM_CLIENT_CERT_PASSWORD" \
+            --timestamp-server http://timestamp.digicert.com \
+            --input "$INSTALLER_PATH"
+
+      - name: Verify Signed Installer
+        run: |
+          smctl verify --input "$INSTALLER_PATH"
+
+      - name: GPG Sign Artifacts (After Code Signing the Windows Installer)
+        env:
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
           .github/util/sign-artifacts.sh re-version/final
-          
+
+      - name: Re-version Installers
+        run: |
           (cd re-version/final && zip liquibase-additional-0-SNAPSHOT.zip *.asc *.md5 *.sha1)
           rm re-version/final/*.asc
           rm re-version/final/*.md5
