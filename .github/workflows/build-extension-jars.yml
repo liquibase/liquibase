@@ -95,12 +95,11 @@ jobs:
       - id: get-extensions-branch
         name: Get Extensions branch to use
         run: |
-          run: |
-            if [ "${{ inputs.branch }}" == "master" ]; then
-              echo "extensions_branch=main" >> "$GITHUB_OUTPUT"
-            else
-              echo "extensions_branch=${{ inputs.branch }}" >> "$GITHUB_OUTPUT"
-            fi
+          if [ "${{ inputs.branch }}" == "master" ]; then
+            echo "extensions_branch=main" >> "$GITHUB_OUTPUT"
+          else
+            echo "extensions_branch=${{ inputs.branch }}" >> "$GITHUB_OUTPUT"
+          fi
 
   matching-branch-logic-pro:
     runs-on: ubuntu-latest
@@ -297,7 +296,7 @@ jobs:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         continue-on-error: true
         run: |
-          scripts_branch= ${{ needs.matching-branch-logic-extensions.outputs.extensions_branch }}
+          scripts_branch=${{ needs.matching-branch-logic-extensions.outputs.extensions_branch }}
           git config --global credential.helper store
           echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
           IFS=',' read -ra EXT_ARRAY <<< "${{ inputs.extensions }}"

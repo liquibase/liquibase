@@ -146,4 +146,22 @@ class AddUniqueConstraintGeneratorAllVariantsTest extends Specification {
             new InformixDatabase()     | ["forIndexName is not allowed on informix"]
     }
 
+    @Unroll
+    def  "test unique constraint using tablespace y deferrable for #database"() {
+        when:
+        SqlGenerator<AddUniqueConstraintStatement> generatorUnderTest = new AddUniqueConstraintGenerator()
+        AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(null, null, TABLE_NAME, [new ColumnConfig().setName(COLUMN_NAME), new ColumnConfig().setName(COLUMN_NAME2)] as ColumnConfig[], CONSTRAINT_NAME)
+        statement.setTablespace("TEST_TABLESPACE")
+        statement.setDeferrable(true)
+        statement.setForIndexName(INDEX_NAME)
+
+        then:
+        expectedSql ==  generatorUnderTest.generateSql(statement, database, null)[0].toSql()
+
+        where:
+        database                   | expectedSql
+        new OracleDatabase()       | "ALTER TABLE AddUQTest ADD CONSTRAINT UQ_TEST UNIQUE (colToMakeUQ, colToMakeUQ2) DEFERRABLE USING INDEX uqIndex"
+        new PostgresDatabase()     | "ALTER TABLE \"AddUQTest\" ADD CONSTRAINT UQ_TEST UNIQUE (\"colToMakeUQ\", \"colToMakeUQ2\") USING INDEX \"uqIndex\" TABLESPACE TEST_TABLESPACE DEFERRABLE"
+    }
+
 }
