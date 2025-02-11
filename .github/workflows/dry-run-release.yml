@@ -7,14 +7,13 @@ on:
     - cron: "0 6 * * 3"
 
 jobs:
-
   setup:
     runs-on: ubuntu-latest
     outputs:
       dry_run_id: ${{ steps.get_run_id.outputs.dry_run_id }}
       dry_run_branch_name: ${{ steps.get_run_id.dry_run_branch_name }}
     steps:
-      - name: Get run-tests.yml runId 
+      - name: Get run-tests.yml runId
         id: get_run_id
         run: |
           # Fetch the list of workflow runs
@@ -28,7 +27,7 @@ jobs:
           echo "dry_run_branch_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
 
   dry-run-create-release:
-    needs: [ setup ]
+    needs: [setup]
     runs-on: ubuntu-latest
     outputs:
       dry_run_zip_url: ${{ steps.wait_and_get_outputs.outputs.zip_url }}
@@ -54,38 +53,42 @@ jobs:
               }
             }'
 
-      - name: Wait for Workflow Action
-        id: wait_and_get_outputs
-        uses: kamilchodola/wait-for-workflow-action@1.1.0
+      - name: Invoke workflow and handle result
+        id: trigger-step
+        uses: the-actions-org/workflow-dispatch@v4
         with:
-          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
-          workflow_id: 'create-release.yml'
-          run_id: '${{ github.run_id }}'
-          org_name: 'liquibase'
-          repo_name: 'liquibase'
-          ref: 'fix-dry-run-builds'
+          workflow: create-release.yml
+          token: ${{ secrets.BOT_TOKEN }}
+          inputs: '{"version": "dry-run-${{ github.run_id }}", "runId": "${{ needs.setup.outputs.dry_run_id }}", "standalone_zip": "false", "dry_run": "true"}'
+          ref: fix-dry-run-builds
+          wait-for-completion: true
 
-      - name: Get Workflow Outputs
-        id: get_outputs
+      - name: Wait and Get Outputs
+        if: always()
+        id: wait_and_get_outputs
         run: |
-          outputs=$(curl -s \
-          -H "Authorization: token ${{ secrets.BOT_TOKEN }}" \
-          -H "Accept: application/vnd.github.v3+json" \
-          "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs")
-            
-            zip_url=$(echo "$outputs" | jq -r '.jobs[] | select(.name=="build-installers") | .outputs.dry_run_zip_url')
-            tar_gz_url=$(echo "$outputs" | jq -r '.jobs[] | select(.name=="build-installers") | .outputs.dry_run_tar_gz_url')
-            
-            echo "zip_url=$zip_url" >> $GITHUB_OUTPUT
-            echo "tar_gz_url=$tar_gz_url" >> $GITHUB_OUTPUT
-  
+          if [[ "${{ steps.trigger-step.outputs.workflow-conclusion }}" == "success" ]]; then
+          # Extract the workflow run ID from the response
+          run_id=$(echo '${{ steps.trigger-step.outputs.workflow-id }}')
+
+          zip_url="${{ steps.trigger-step.outputs.dry_run_zip_url }}"
+          tar_gz_url="${{ steps.trigger-step.outputs.dry_run_tar_gz_url }}"
+          echo "zip_url is $zip_url"
+          echo "tar_gz_url is $tar_gz_url"
+          echo "zip_url=$zip_url" >> $GITHUB_OUTPUT
+          echo "tar_gz_url=$tar_gz_url" >> $GITHUB_OUTPUT
+            else
+          echo "Previous workflow failed with status: ${{ steps.trigger-step.outputs.workflow-conclusion }}"
+          exit 1
+          fi
+
   dry-run-get-draft-release:
-    needs: [ setup, dry-run-create-release ]
+    needs: [setup, dry-run-create-release]
     runs-on: ubuntu-latest
     outputs:
       dry_run_release_id: ${{ steps.get_draft_release_id.outputs.release_id }}
     steps:
-      - name: Get Draft Release ID 
+      - name: Get Draft Release ID
         id: get_draft_release_id
         run: |
           release_name="vdry-run-${{ github.run_id }}"
@@ -103,7 +106,7 @@ jobs:
           fi
 
   dry-run-release-published:
-    needs: [ setup, dry-run-create-release, dry-run-get-draft-release ]
+    needs: [setup, dry-run-create-release, dry-run-get-draft-release]
     runs-on: ubuntu-latest
     steps:
       - name: Trigger release-published workflow
@@ -129,7 +132,7 @@ jobs:
   cleanup:
     runs-on: ubuntu-latest
     if: always()
-    needs: [ setup, dry-run-get-draft-release, dry-run-release-published ]
+    needs: [setup, dry-run-get-draft-release, dry-run-release-published]
     steps:
       - name: Checkout liquibase
         uses: actions/checkout@v4
@@ -151,11 +154,18 @@ jobs:
           curl -X DELETE -H "Authorization: token ${{ secrets.BOT_TOKEN }}" \
                 -H "Accept: application/vnd.github.v3+json" \
                 "https://api.github.com/repos/${{ github.repository }}/releases/${{ needs.dry-run-get-draft-release.outputs.dry_run_release_id }}"
-                
+
   notify:
     if: failure()
     runs-on: ubuntu-latest
-    needs: [ setup, dry-run-create-release, dry-run-get-draft-release, dry-run-release-published, cleanup ]
+    needs:
+      [
+        setup,
+        dry-run-create-release,
+        dry-run-get-draft-release,
+        dry-run-release-published,
+        cleanup,
+      ]
     steps:
       - name: Notify Slack on Build Failure
         uses: rtCamp/action-slack-notify@v2
