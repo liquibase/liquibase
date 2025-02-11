@@ -34,7 +34,6 @@ jobs:
       dry_run_tar_gz_url: ${{ steps.wait_and_get_outputs.outputs.tar_gz_url }}
       dry_run_branch_name: ${{ needs.setup.outputs.dry_run_branch_name }}
     steps:
-
       - name: Invoke Create Release
         id: trigger-step
         uses: the-actions-org/workflow-dispatch@v4
@@ -44,15 +43,15 @@ jobs:
           inputs: '{"version": "dry-run-${{ github.run_id }}", "runId": "${{ needs.setup.outputs.dry_run_id }}", "standalone_zip": "false", "dry_run": "true"}'
           ref: fix-dry-run-builds
           wait-for-completion: true
+          workflow-logs: json-output
 
       - name: Create Release Outputs
         if: always()
         id: wait_and_get_outputs
         run: |
-          zip_url="${{ steps.trigger-step.outputs.dry_run_zip_url }}"
-          tar_gz_url="${{ steps.trigger-step.outputs.dry_run_tar_gz_url }}"
-          echo "zip_url is $zip_url"
-          echo "tar_gz_url is $tar_gz_url"
+          workflow_outputs='${{ fromJSON(steps.trigger-step.outputs.workflow-logs).build-installers }}'
+          zip_url=$(echo "$workflow_outputs" | jq -r '.dry_run_zip_url')
+          tar_gz_url=$(echo "$workflow_outputs" | jq -r '.dry_run_tar_gz_url')
           echo "zip_url=$zip_url" >> $GITHUB_OUTPUT
           echo "tar_gz_url=$tar_gz_url" >> $GITHUB_OUTPUT
 
@@ -79,76 +78,66 @@ jobs:
             echo "release_id=$release_id" >> $GITHUB_OUTPUT
           fi
 
-  dry-run-release-published:
-    needs: [setup, dry-run-create-release, dry-run-get-draft-release]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger release-published workflow
-        run: |
-          curl -L \
-            -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.BOT_TOKEN }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/${{ github.repository }}/actions/workflows/release-published.yml/dispatches \
-            -d '{
-              "ref": "fix-dry-run-builds",
-              "inputs": {
-                "tag": "vdry-run-${{ github.run_id }}",
-                "dry_run_release_id": "${{ needs.dry-run-get-draft-release.outputs.dry_run_release_id }}",
-                "dry_run_zip_url": "${{ needs.dry-run-create-release.outputs.dry_run_zip_url }}",
-                "dry_run_tar_gz_url": "${{ needs.dry-run-create-release.outputs.dry_run_tar_gz_url }}",
-                "dry_run": "true",
-                "dry_run_branch_name": "${{ needs.dry-run-create-release.outputs.dry_run_branch_name }}"
-              }
-            }'
+  # dry-run-release-published:
+  #   needs: [setup, dry-run-create-release, dry-run-get-draft-release]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Trigger release-published workflow
+  #       uses: the-actions-org/workflow-dispatch@v4
+  #       with:
+  #         workflow: release-published.yml
+  #         token: ${{ secrets.BOT_TOKEN }}
+  #         inputs: '{"tag": "vdry-run-${{ github.run_id }}", "dry_run_release_id": "${{ needs.dry-run-get-draft-release.outputs.dry_run_release_id }}", "dry_run_zip_url": "${{ needs.dry-run-create-release.outputs.dry_run_zip_url }}", "dry_run_tar_gz_url": "${{ needs.dry-run-create-release.outputs.dry_run_tar_gz_url }}", "dry_run": "true", "dry_run_branch_name": "${{ needs.dry-run-create-release.outputs.dry_run_branch_name }}"}'
+  #         ref: fix-dry-run-builds
+  #         wait-for-completion: true
+  #         workflow-logs: json-output
 
-  cleanup:
-    runs-on: ubuntu-latest
-    if: always()
-    needs: [setup, dry-run-get-draft-release, dry-run-release-published]
-    steps:
-      - name: Checkout liquibase
-        uses: actions/checkout@v4
+  # cleanup:
+  #   runs-on: ubuntu-latest
+  #   if: always()
+  #   needs: [setup, dry-run-get-draft-release, dry-run-release-published]
+  #   steps:
+  #     - name: Checkout liquibase
+  #       uses: actions/checkout@v4
 
-      - name: Set up Git
-        run: |
-          git config user.name "liquibot"
-          git config user.email "liquibot@liquibase.org"
+  #     - name: Set up Git
+  #       run: |
+  #         git config user.name "liquibot"
+  #         git config user.email "liquibot@liquibase.org"
 
-      - name: Delete liquibase dry-run tag
-        if: always()
-        run: |
-          git push origin --delete refs/tags/vdry-run-${{ github.run_id }}
-          echo "Remote tag vdry-run-${{ github.run_id }} deleted"
+  #     - name: Delete liquibase dry-run tag
+  #       if: always()
+  #       run: |
+  #         git push origin --delete refs/tags/vdry-run-${{ github.run_id }}
+  #         echo "Remote tag vdry-run-${{ github.run_id }} deleted"
 
-      - name: Delete the dry-run draft release
-        if: always()
-        run: |
-          curl -X DELETE -H "Authorization: token ${{ secrets.BOT_TOKEN }}" \
-                -H "Accept: application/vnd.github.v3+json" \
-                "https://api.github.com/repos/${{ github.repository }}/releases/${{ needs.dry-run-get-draft-release.outputs.dry_run_release_id }}"
+  #     - name: Delete the dry-run draft release
+  #       if: always()
+  #       run: |
+  #         curl -X DELETE -H "Authorization: token ${{ secrets.BOT_TOKEN }}" \
+  #               -H "Accept: application/vnd.github.v3+json" \
+  #               "https://api.github.com/repos/${{ github.repository }}/releases/${{ needs.dry-run-get-draft-release.outputs.dry_run_release_id }}"
 
-  notify:
-    if: failure()
-    runs-on: ubuntu-latest
-    needs:
-      [
-        setup,
-        dry-run-create-release,
-        dry-run-get-draft-release,
-        dry-run-release-published,
-        cleanup,
-      ]
-    steps:
-      - name: Notify Slack on Build Failure
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_COLOR: failure
-          SLACK_MESSAGE: "View details on GitHub Actions: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} <@U040C8J8143> <@U04P39MS2SW> <@UHHJ6UAEQ> <@U042HRTL4DT>" # Jandro, Sailee, Jake, Filipe
-          SLACK_TITLE: "❌ ${{ github.repository }} ❌ Build failed on branch ${{ github.ref }} for commit ${{ github.sha }} in repository ${{github.repository}}"
-          SLACK_USERNAME: liquibot
-          SLACK_WEBHOOK: ${{ secrets.DRY_RUN_RELEASE_SLACK_WEBHOOK }}
-          SLACK_ICON_EMOJI: ":robot_face:"
-          SLACK_FOOTER: "${{ github.repository }}"
-          SLACK_LINK_NAMES: true
+  # notify:
+  #   if: failure()
+  #   runs-on: ubuntu-latest
+  #   needs:
+  #     [
+  #       setup,
+  #       dry-run-create-release,
+  #       dry-run-get-draft-release,
+  #       dry-run-release-published,
+  #       cleanup,
+  #     ]
+  #   steps:
+  #     - name: Notify Slack on Build Failure
+  #       uses: rtCamp/action-slack-notify@v2
+  #       env:
+  #         SLACK_COLOR: failure
+  #         SLACK_MESSAGE: "View details on GitHub Actions: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} <@U040C8J8143> <@U04P39MS2SW> <@UHHJ6UAEQ> <@U042HRTL4DT>" # Jandro, Sailee, Jake, Filipe
+  #         SLACK_TITLE: "❌ ${{ github.repository }} ❌ Build failed on branch ${{ github.ref }} for commit ${{ github.sha }} in repository ${{github.repository}}"
+  #         SLACK_USERNAME: liquibot
+  #         SLACK_WEBHOOK: ${{ secrets.DRY_RUN_RELEASE_SLACK_WEBHOOK }}
+  #         SLACK_ICON_EMOJI: ":robot_face:"
+  #         SLACK_FOOTER: "${{ github.repository }}"
+  #         SLACK_LINK_NAMES: true
