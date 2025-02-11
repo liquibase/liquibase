@@ -43,13 +43,13 @@ jobs:
 
       - name: Re-version Installers
         env:
-          INSTALL4J_10_LICENSE: ${{ secrets.INSTALL4J_10_LICENSE }}
-          INSTALL4J_APPLE_KEY: ${{ secrets.INSTALL4J_APPLE_KEY }}
-          INSTALL4J_APPLE_KEY_PASSWORD: ${{ secrets.INSTALL4J_APPLE_KEY_PASSWORD }}
-          INSTALL4J_APPLE_ID: ${{ secrets.INSTALL4J_APPLE_ID }}
-          INSTALL4J_APPLE_ID_PASSWORD: ${{ secrets.INSTALL4J_APPLE_ID_PASSWORD }}
-          INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
-          INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
+          # INSTALL4J_10_LICENSE: ${{ secrets.INSTALL4J_10_LICENSE }}
+          # INSTALL4J_APPLE_KEY: ${{ secrets.INSTALL4J_APPLE_KEY }}
+          # INSTALL4J_APPLE_KEY_PASSWORD: ${{ secrets.INSTALL4J_APPLE_KEY_PASSWORD }}
+          # INSTALL4J_APPLE_ID: ${{ secrets.INSTALL4J_APPLE_ID }}
+          # INSTALL4J_APPLE_ID_PASSWORD: ${{ secrets.INSTALL4J_APPLE_ID_PASSWORD }}
+          # INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
+          # INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
           BRANCH: ${{ github.ref_name || github.head_ref }}
         run: |
