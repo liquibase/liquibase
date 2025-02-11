@@ -25,7 +25,7 @@ jobs:
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
 
-      # TODO: Add install4j caching if possible
+      # TODO: Add install4j and DigiCert KeyLocker Client Tools caching if possible
       # - name: Cache Install4j
       #   id: cache-install4j
       #   uses: actions/cache@v4
@@ -55,13 +55,23 @@ jobs:
         uses: digicert/ssm-code-signing@v1.0.0
 
       - name: Download liquibase-artifacts
-        uses: liquibase/action-download-artifact@v2-liquibase
+        uses: dawidd6/action-download-artifact@v8
         with:
           workflow: run-tests.yml
+          #run_id: ${{ needs.setup.outputs.runId }}
           workflow_conclusion: success
           branch: ${{ github.head_ref }}
           name: liquibase-artifacts
-          path: re-version/final
+          path: download/liquibase-artifacts
+
+      # - name: Download liquibase-artifacts
+      #   uses: liquibase/action-download-artifact@v2-liquibase
+      #   with:
+      #     workflow: run-tests.yml
+      #     workflow_conclusion: success
+      #     branch: ${{ github.head_ref }}
+      #     name: liquibase-artifacts
+      #     path: re-version/final
       
       - name: Set branch variable
         run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
