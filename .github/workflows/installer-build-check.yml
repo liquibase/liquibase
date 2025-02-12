@@ -107,7 +107,7 @@ jobs:
       - name: Sign Windows Installer using KeyLocker
         run: |
           jsign --help
-          smctl sign -v --fingerprint "$SM_CODE_SIGNING_CERT_SHA1_HASH" --certificate "$SM_CLIENT_CERT_FILE" --config-file "$(pwd)/.github/util/pkcs11properties.cfg" --input "$(pwd)/re-version/final/liquibase-windows-x64-installer-0-SNAPSHOT.exe" --tool jsign
+          smctl sign -v --fingerprint "$SM_CODE_SIGNING_CERT_SHA1_HASH" --keypair-alias key_1195145204 --certificate "$SM_CLIENT_CERT_FILE" --config-file "$(pwd)/.github/util/pkcs11properties.cfg" --input "$(pwd)/re-version/final/liquibase-windows-x64-installer-0-SNAPSHOT.exe" --tool jsign
 
       - name: Verify Signed Installer
         run: |
