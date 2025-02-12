@@ -303,7 +303,7 @@ jobs:
       contents: write # for softprops/action-gh-release to create GitHub release
     needs: [setup, reversion]
     name: Build Installers
-    runs-on: windows-latest
+    runs-on: ubuntu-22.04
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     outputs:
@@ -327,52 +327,26 @@ jobs:
           gpg-passphrase: GPG_PASSPHRASE
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
-          
-      - name: Install Node.js, NPM and Yarn 
-        uses: actions/setup-node@v2 
-        with:  
-          node-version: 14 
-      
-      - name: NuGet Install 
-        uses: NuGet/setup-nuget@v1.0.5 
-        with: 
-          nuget-version: latest 
 
-      - name: Setup Certificate
+      - name: Decode Client Authentication Certificate
         run: |
-            echo "${{ secrets.SM_CLIENT_CERT_FILE_B64 }}" | base64 --decode > /d/Certificate_pkcs12.p12
-            cat  /d/Certificate_pkcs12.p12
-        shell: bash  
-        
-      - name: Set variables
-        id: variables
+          echo "${{ secrets.SM_CLIENT_CERT_FILE_B64 }}" | base64 --decode > /tmp/client-auth.p12
+
+      - name: Set Environment Variables for Signing
         run: |
-          dir
-          echo "::set-output name=version::${GITHUB_REF#refs/tags/v}"
-          echo "::set-output name=KEYPAIR_NAME::gt-standard-keypair"
-          echo "::set-output name=CERTIFICATE_NAME::gt-certificate"
           echo "SM_HOST=${{ secrets.SM_HOST }}" >> "$GITHUB_ENV"
           echo "SM_API_KEY=${{ secrets.SM_API_KEY }}" >> "$GITHUB_ENV"
-          echo "SM_CLIENT_CERT_FILE=D:\\Certificate_pkcs12.p12" >> "$GITHUB_ENV"
+          echo "SM_CLIENT_CERT_FILE=/tmp/client-auth.p12" >> "$GITHUB_ENV"
           echo "SM_CLIENT_CERT_PASSWORD=${{ secrets.SM_CLIENT_CERT_PASSWORD }}" >> "$GITHUB_ENV"
-          echo "C:\Program Files (x86)\Windows Kits\10\App Certification Kit" >> $GITHUB_PATH
-          echo "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools" >> $GITHUB_PATH
-          echo "C:\Program Files\DigiCert\DigiCert Keylocker Tools" >> $GITHUB_PATH
-        shell: bash
+          echo "SM_CODE_SIGNING_CERT_SHA1_HASH=${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}" >> "$GITHUB_ENV"
 
-      - name: Setup Keylocker KSP on windows 
-        run: | 
-          curl -X GET  https://one.digicert.com/signingmanager/api-ui/v1/releases/Keylockertools-windows-x64.msi/download -H "x-api-key:%SM_API_KEY%" -o Keylockertools-windows-x64.msi 
-          msiexec /i Keylockertools-windows-x64.msi /quiet /qn
-          smksp_registrar.exe list 
-          smctl.exe keypair ls 
-          C:\Windows\System32\certutil.exe -csp "DigiCert Signing Manager KSP" -key -user
-        shell: cmd 
-        
-      - name: Certificates Sync       
+      - name: Install jsign
         run: |
-            smctl windows certsync
-        shell: cmd
+          curl -fSslL https://github.com/ebourg/jsign/releases/download/3.1/jsign_3.1_all.deb -o jsign_3.1_all.deb 
+          sudo dpkg --install jsign_3.1_all.deb
+
+      - name: Install DigiCert KeyLocker Client Tools
+        uses: digicert/ssm-code-signing@v1.0.0
 
       - name: Build Unsigned Windows Installer
         env:
@@ -386,7 +360,6 @@ jobs:
           (cd liquibase-dist/target/liquibase-$version && tar xfz $tarFile)
           (cd liquibase-dist && $scriptDir/package-install4j.sh $version)
           mv liquibase-dist/target/liquibase-*-installer-* re-version/final
-        shell: bash
 
       - name: Find Unsigned Windows Installer
         id: find-installer
@@ -398,12 +371,15 @@ jobs:
           fi
           echo "Found installer: $INSTALLER_PATH"
           echo "INSTALLER_PATH=$INSTALLER_PATH" >> $GITHUB_ENV
-        shell: bash
-          
-      - name: Signing using Signtool
+
+      - name: Sign Windows Installer using KeyLocker
         run: |
-          signtool.exe sign /sha1 ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }} /tr http://timestamp.digicert.com /td SHA256 /fd SHA256 "$INSTALLER_PATH"
-          signtool.exe verify /v /pa "$INSTALLER_PATH"
+          smctl healthcheck --all
+          smctl sign -v --fingerprint "$SM_CODE_SIGNING_CERT_SHA1_HASH" --input "$INSTALLER_PATH"
+
+      - name: Verify Signed Installer
+        run: |
+          smctl sign verify --input "$INSTALLER_PATH"
 
       - name: Re-version Installers
         env:
