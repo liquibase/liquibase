@@ -56,6 +56,8 @@ jobs:
           -H "Accept: application/vnd.github.v3+json" \
           "https://api.github.com/repos/liquibase/liquibase/actions/runs/${workflow_run_id}/jobs")
           
+          echo "reposnse: $response"
+          
           # Extract the outputs from the job
           outputs=$(echo "$response" | jq -r '.jobs[] | select(.name == "create-release") | .steps[] | select(.name == "Extract dry-run release URL") | .outputs')
           
