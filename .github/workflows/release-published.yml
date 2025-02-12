@@ -251,7 +251,6 @@ jobs:
           rm -rf *.jar *.zip
           aws s3 sync . s3://javadocsliquibasecom-origin --only-show-errors
 
-
   trigger-sbom-generation-lb-lbpo:
     if: ${{ inputs.dry_run == false }}
     name: Generate SBOMS for liquibase and liquibase-pro
@@ -561,7 +560,7 @@ jobs:
           
           done
             
-  publish_assets_to_s3_bucket:
+  publish_released_assets_to_s3_bucket:
     if: ${{ inputs.dry_run == false }}
     name: Publish OSS released assets to s3 bucket liquibaseorg-origin
     needs: [ setup ]
@@ -586,4 +585,3 @@ jobs:
           AWS_DEFAULT_REGION: us-east-1
         run: |
           aws s3 sync "./${{ needs.setup.outputs.version }}-released-assets" s3://liquibaseorg-origin/oss-released-assets/${{ needs.setup.outputs.version }}-released-assets-${{ env.timestamp }}/ --only-show-errors
-          

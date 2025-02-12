@@ -96,9 +96,9 @@ jobs:
         name: Get Extensions branch to use
         run: |
           if [ "${{ inputs.branch }}" == "master" ]; then
-            echo "extensions_branch=main" >> "$GITHUB_OUTPUT"
-          else
-            echo "extensions_branch=${{ inputs.branch }}" >> "$GITHUB_OUTPUT"
+              echo "extensions_branch=main" >> "$GITHUB_OUTPUT"
+            else
+              echo "extensions_branch=${{ inputs.branch }}" >> "$GITHUB_OUTPUT"
           fi
 
   matching-branch-logic-pro:
@@ -157,6 +157,7 @@ jobs:
 
   build-and-deploy-extensions:
     needs: [delete-dependency-packages, delete-extension-packages, delete-checks-packages, matching-branch-logic-extensions, matching-branch-logic-pro]
+
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
