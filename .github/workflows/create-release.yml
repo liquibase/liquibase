@@ -367,14 +367,7 @@ jobs:
           echo "INSTALLER_PATH=$INSTALLER_PATH" >> $GITHUB_ENV
 
       - name: Sign Windows Installer using KeyLocker
-        run: |
-          smctl sign --api-key "$SM_API_KEY" \
-            --host "$SM_HOST" \
-            --cert-sha1 "$SM_CODE_SIGNING_CERT_SHA1_HASH" \
-            --client-cert "$SM_CLIENT_CERT_FILE" \
-            --client-cert-password "$SM_CLIENT_CERT_PASSWORD" \
-            --timestamp-server http://timestamp.digicert.com \
-            --input "$INSTALLER_PATH"
+        run: smctl sign --timestamp-server http://timestamp.digicert.com --input "$INSTALLER_PATH"
 
       - name: Verify Signed Installer
         run: |
