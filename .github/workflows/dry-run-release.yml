@@ -33,7 +33,7 @@ jobs:
       dry_run_zip_url: ${{ steps.wait_and_get_outputs.outputs.dry_run_zip_url }}
       dry_run_tar_gz_url: ${{ steps.wait_and_get_outputs.outputs.dry_run_tar_gz_url }}
       dry_run_branch_name: ${{ needs.setup.outputs.dry_run_branch_name }}
-      dry_run_release_id: ${{ steps.wait_and_get_outputs.outputs.release_id }}
+      dry_run_release_id: ${{ steps.wait_and_get_outputs.outputs.dry_run_release_id }}
     steps:
       - name: Invoke Create Release
         id: trigger-step
@@ -65,7 +65,7 @@ jobs:
                              "$assets_url")
 
           # Get URLs for zip and tar.gz files - getting browser_download_url instead of url
-          dry_run_zip_url=$(echo "$assets_response" | jq -r '.[] | select(.name | endswith(".zip")) | .browser_download_url')
+          dry_run_zip_url=$(echo "$assets_response" | jq -r '.[] | select(.name | endswith(".zip") and (.name | contains("additional") | not)) | .browser_download_url')
           dry_run_tar_gz_url=$(echo "$assets_response" | jq -r '.[] | select(.name | endswith(".tar.gz")) | .browser_download_url')
 
           # Remove any newlines or spaces from URLs before setting outputs
