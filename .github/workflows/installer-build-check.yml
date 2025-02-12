@@ -71,6 +71,7 @@ jobs:
       
       - name: Set branch variable
         run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+        shell: bash
         
       - name: Setup Certificate
         run: |
