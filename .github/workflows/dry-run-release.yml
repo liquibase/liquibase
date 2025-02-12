@@ -62,11 +62,15 @@ jobs:
                              -H "Accept: application/vnd.github.v3+json" \
                              "$assets_url")
 
-          # Get URLs for zip and tar.gz files
-          zip_url=$(echo "$assets_response" | jq -r '.[] | select(.name | endswith(".zip")) | .url')
-          tar_gz_url=$(echo "$assets_response" | jq -r '.[] | select(.name | endswith(".tar.gz")) | .url')
+          # Get URLs for zip and tar.gz files - getting browser_download_url instead of url
+          zip_url=$(echo "$assets_response" | jq -r '.[] | select(.name | endswith(".zip")) | .browser_download_url')
+          tar_gz_url=$(echo "$assets_response" | jq -r '.[] | select(.name | endswith(".tar.gz")) | .browser_download_url')
 
           echo "Found assets: zip_url=$zip_url, tar_gz_url=$tar_gz_url"
+
+          # Remove any newlines or spaces from URLs before setting outputs
+          zip_url=$(echo "$zip_url" | tr -d '[:space:]')
+          tar_gz_url=$(echo "$tar_gz_url" | tr -d '[:space:]')
 
           echo "tar_gz_url=$tar_gz_url" >> $GITHUB_OUTPUT
           echo "zip_url=$zip_url" >> $GITHUB_OUTPUT
@@ -108,31 +112,32 @@ jobs:
   #         wait-for-completion: true
   #         workflow-logs: json-output
 
-  # cleanup:
-  #   runs-on: ubuntu-latest
-  #   if: always()
-  #   needs: [setup, dry-run-get-draft-release, dry-run-release-published]
-  #   steps:
-  #     - name: Checkout liquibase
-  #       uses: actions/checkout@v4
+  cleanup:
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [setup, dry-run-get-draft-release]
+    #needs: [setup, dry-run-get-draft-release, dry-run-release-published]
+    steps:
+      - name: Checkout liquibase
+        uses: actions/checkout@v4
 
-  #     - name: Set up Git
-  #       run: |
-  #         git config user.name "liquibot"
-  #         git config user.email "liquibot@liquibase.org"
+      - name: Set up Git
+        run: |
+          git config user.name "liquibot"
+          git config user.email "liquibot@liquibase.org"
 
-  #     - name: Delete liquibase dry-run tag
-  #       if: always()
-  #       run: |
-  #         git push origin --delete refs/tags/vdry-run-${{ github.run_id }}
-  #         echo "Remote tag vdry-run-${{ github.run_id }} deleted"
+      - name: Delete liquibase dry-run tag
+        if: always()
+        run: |
+          git push origin --delete refs/tags/vdry-run-${{ github.run_id }}
+          echo "Remote tag vdry-run-${{ github.run_id }} deleted"
 
-  #     - name: Delete the dry-run draft release
-  #       if: always()
-  #       run: |
-  #         curl -X DELETE -H "Authorization: token ${{ secrets.BOT_TOKEN }}" \
-  #               -H "Accept: application/vnd.github.v3+json" \
-  #               "https://api.github.com/repos/${{ github.repository }}/releases/${{ needs.dry-run-get-draft-release.outputs.dry_run_release_id }}"
+      - name: Delete the dry-run draft release
+        if: always()
+        run: |
+          curl -X DELETE -H "Authorization: token ${{ secrets.BOT_TOKEN }}" \
+                -H "Accept: application/vnd.github.v3+json" \
+                "https://api.github.com/repos/${{ github.repository }}/releases/${{ needs.dry-run-get-draft-release.outputs.dry_run_release_id }}"
 
   # notify:
   #   if: failure()
