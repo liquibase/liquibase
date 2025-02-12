@@ -51,6 +51,8 @@ jobs:
           echo "SM_CLIENT_CERT_FILE=/tmp/client-auth.p12" >> "$GITHUB_ENV"
           echo "SM_CLIENT_CERT_PASSWORD=${{ secrets.SM_CLIENT_CERT_PASSWORD }}" >> "$GITHUB_ENV"
           echo "SM_CODE_SIGNING_CERT_SHA1_HASH=${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}" >> "$GITHUB_ENV"
+          echo "SM_KEY_PAIR_ALIAS=${{ secrets.SM_KEY_PAIR_ALIAS }}" >> "$GITHUB_ENV"
+
 
       - name: Install jsign
         run: |
@@ -106,12 +108,16 @@ jobs:
 
       - name: Sign Windows Installer using KeyLocker
         run: |
-          jsign --help
-          smctl sign -v --fingerprint "$SM_CODE_SIGNING_CERT_SHA1_HASH" --keypair-alias key_1195145204 --certificate "$SM_CLIENT_CERT_FILE" --config-file "$(pwd)/.github/util/pkcs11properties.cfg" --input "$(pwd)/re-version/final/liquibase-windows-x64-installer-0-SNAPSHOT.exe" --tool jsign
-
+          smctl sign -v --fingerprint "$SM_CODE_SIGNING_CERT_SHA1_HASH" \
+          --keypair-alias $SM_KEY_PAIR_ALIAS \
+          --certificate "$SM_CLIENT_CERT_FILE" \
+          --config-file "$(pwd)/.github/util/pkcs11properties.cfg" \
+          --input "$INSTALLER_PATH" --tool jsign
+          
       - name: Verify Signed Installer
         run: |
-          smctl sign verify --input "$INSTALLER_PATH"
+          jsign verify --help
+          jsign verify --input "$INSTALLER_PATH"
 
       - name: GPG Sign Artifacts (After Code Signing the Windows Installer)
         env:
