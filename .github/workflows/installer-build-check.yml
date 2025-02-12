@@ -119,6 +119,7 @@ jobs:
           (cd liquibase-dist/target/liquibase-0-SNAPSHOT && tar xfz $tarFile)
           (cd liquibase-dist && $scriptDir/package-install4j.sh 0-SNAPSHOT)
           mv liquibase-dist/target/liquibase-*-installer-* re-version/final
+        shell: bash
 
       - name: Find Unsigned Windows Installer
         id: find-installer
@@ -130,6 +131,7 @@ jobs:
           fi
           echo "Found installer: $INSTALLER_PATH"
           echo "INSTALLER_PATH=$INSTALLER_PATH" >> $GITHUB_ENV
+        shell: bash
 
       - name: Signing using Signtool
         run: |
