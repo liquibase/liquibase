@@ -116,8 +116,7 @@ jobs:
           
       - name: Verify Signed Installer
         run: |
-          jsign verify --help
-          jsign verify --input "$INSTALLER_PATH"
+          jsign verify "$INSTALLER_PATH"
 
       - name: GPG Sign Artifacts (After Code Signing the Windows Installer)
         env:
