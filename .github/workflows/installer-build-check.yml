@@ -6,7 +6,6 @@ on:
     branches:
       - gha-scheduled-*
 
-
 jobs:
   build-installers:
     name: Build Installers
@@ -17,8 +16,8 @@ jobs:
       - name: Set up JDK for GPG
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: "17"
+          distribution: "temurin"
           gpg-private-key: ${{ secrets.GPG_SECRET }}
           gpg-passphrase: GPG_PASSPHRASE
           overwrite-settings: false
@@ -53,12 +52,12 @@ jobs:
           echo "SM_CODE_SIGNING_CERT_SHA1_HASH=${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}" >> "$GITHUB_ENV"
           echo "SM_KEY_PAIR_ALIAS=${{ secrets.SM_KEY_PAIR_ALIAS }}" >> "$GITHUB_ENV"
 
-
-      - name: Install jsign
+      - name: Install jsign and osslsigncode
         run: |
-          curl -fSslL https://github.com/ebourg/jsign/releases/download/3.1/jsign_3.1_all.deb -o jsign_3.1_all.deb 
+          curl -fSslL https://github.com/ebourg/jsign/releases/download/3.1/jsign_3.1_all.deb -o jsign_3.1_all.deb
           sudo dpkg --install jsign_3.1_all.deb
-          
+          sudo apt install osslsigncode
+
       - name: Create pkcs11properties.cfg
         run: |
           cat << EOF > pkcs11properties.cfg
@@ -79,7 +78,7 @@ jobs:
           branch: ${{ github.head_ref }}
           name: liquibase-artifacts
           path: re-version/final
-      
+
       - name: Set branch variable
         run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
 
@@ -89,7 +88,7 @@ jobs:
         run: |
           tarFile=$(pwd)/re-version/final/liquibase-${BRANCH}-SNAPSHOT.tar.gz
           scriptDir=$(pwd)/.github/util/
-          
+
           mkdir -p liquibase-dist/target/liquibase-0-SNAPSHOT
           (cd liquibase-dist/target/liquibase-0-SNAPSHOT && tar xfz $tarFile)
           (cd liquibase-dist && $scriptDir/package-install4j.sh 0-SNAPSHOT)
@@ -113,10 +112,9 @@ jobs:
           --certificate "$SM_CLIENT_CERT_FILE" \
           --config-file "$(pwd)/.github/util/pkcs11properties.cfg" \
           --input "$INSTALLER_PATH" --tool jsign
-          
+
       - name: Verify Signed Installer
-        run: |
-          jsign verify "$INSTALLER_PATH"
+        run: osslsigncode verify -in "$INSTALLER_PATH"
 
       - name: GPG Sign Artifacts (After Code Signing the Windows Installer)
         env:
@@ -136,4 +134,3 @@ jobs:
         with:
           name: liquibase-test-packages
           path: re-version/final/*
-
