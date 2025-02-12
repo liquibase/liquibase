@@ -71,7 +71,7 @@ jobs:
           # Remove any newlines or spaces from URLs before setting outputs
           zip_url=$(echo "$zip_url" | tr -d '[:space:]')
           tar_gz_url=$(echo "$tar_gz_url" | tr -d '[:space:]')
-          
+
           echo "Release Id is $release_id"
 
           echo "tar_gz_url=$tar_gz_url" >> $GITHUB_OUTPUT
@@ -79,7 +79,7 @@ jobs:
           echo "release_id=$release_id" >> $GITHUB_OUTPUT
 
   dry-run-release-published:
-    needs: [setup, dry-run-create-release, dry-run-get-draft-release]
+    needs: [setup, dry-run-create-release]
     runs-on: ubuntu-latest
     steps:
       - name: Trigger release-published workflow
