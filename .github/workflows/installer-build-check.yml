@@ -113,7 +113,7 @@ jobs:
         env:
           INSTALL4J_LICENSE_KEY: ${{ secrets.INSTALL4J_10_LICENSE }}
         run: |
-          tarFile=$(pwd)/re-version/final/liquibase-${BRANCH}-SNAPSHOT.tar.gz
+          tarFile=$(pwd)/download/liquibase-artifacts/liquibase-${BRANCH}-SNAPSHOT.tar.gz
           scriptDir=$(pwd)/.github/util/
           
           mkdir -p liquibase-dist/target/liquibase-0-SNAPSHOT
