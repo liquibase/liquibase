@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
  */
 public class MySQLDatabase extends AbstractJdbcDatabase {
     private static final String PRODUCT_NAME = "MySQL";
-    private static final Set<String> RESERVED_WORDS = createReservedWords();
+    private final Set<String> reservedWords = createReservedWords();
 
     /** Pattern used to extract function precision like 3 in CURRENT_TIMESTAMP(3) */
     private static final String  PRECISION_REGEX = "\\(\\d+\\)";
@@ -248,7 +248,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean isReservedWord(String string) {
-        if (RESERVED_WORDS.contains(string.toUpperCase())) {
+        if (reservedWords.contains(string.toUpperCase())) {
             return true;
         }
         return super.isReservedWord(string);
@@ -705,14 +705,27 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void addReservedWords(Collection<String> words) {
-        addMySQLReservedWordIfApplicable("MANUAL");
+        addMySQLVersionedReservedWords();
         super.addReservedWords(words);
     }
 
-    private void addMySQLReservedWordIfApplicable(String... reservedWord) {
+    /**
+     * Adds reserved words that were introduced for a specific version of MySQL. For an overview of 
+     * changes to 8.0, please see: <a href="https://dev.mysql.com/doc/refman/8.0/en/keywords.html">
+     * Keywords and Reserved Words</a>.
+     */
+    private void addMySQLVersionedReservedWords() {
         try {
+            // words that became reserved in 8.4
             if(getDatabaseMajorVersion() >= 9 || (getDatabaseMajorVersion() == 8 && getDatabaseMinorVersion() >= 4)) {
-                RESERVED_WORDS.addAll(Arrays.asList(reservedWord));
+                reservedWords.add("MANUAL");
+            }
+            
+            // words that became reserved in 8.0
+            if(getDatabaseMajorVersion() >= 8){
+                reservedWords.add("FUNCTION");
+                reservedWords.add("ROW");
+                reservedWords.add("ROWS");
             }
         } catch (DatabaseException e) {
             throw new RuntimeException(e);

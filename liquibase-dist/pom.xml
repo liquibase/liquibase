@@ -23,7 +23,7 @@
         <mysql.version>8.0.21</mysql.version>
         <mariadb.version>3.4.1</mariadb.version>
         <oracle.version>19.24.0.0</oracle.version>
-        <sqlite.version>3.47.2.0</sqlite.version>
+        <sqlite.version>3.48.0.0</sqlite.version>
         <db2.version>11.5.9.0</db2.version>
         <firebird.version>5.0.6.java8</firebird.version>
         <slf4j.version>2.0.16</slf4j.version>
@@ -62,7 +62,7 @@
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.9</version>
+            <version>5.10</version>
             <scope>compile</scope>
             <exclusions>
                 <!-- not used by liquibase code -->
@@ -105,7 +105,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.20.0</version>
+            <version>3.22.0</version>
         </dependency>
 
         <!--        CANNOT INCLUDE MYSQL FOR LICENSING REASONS -->
