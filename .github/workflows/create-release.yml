@@ -303,7 +303,7 @@ jobs:
       contents: write # for softprops/action-gh-release to create GitHub release
     needs: [setup, reversion]
     name: Build Installers
-    runs-on: macos-13 #needs macos for apple notarization
+    runs-on: ubuntu-22.04
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     outputs:
@@ -321,7 +321,7 @@ jobs:
       - name: Set up JDK for GPG
         uses: actions/setup-java@v4
         with:
-          java-version: "11"
+          java-version: "8"
           distribution: "adopt"
           gpg-private-key: ${{ secrets.GPG_SECRET }}
           gpg-passphrase: GPG_PASSPHRASE
