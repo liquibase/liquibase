@@ -1,6 +1,38 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.31.1 (2025.02.13)
+
+### Liquibase 4.31.1 is a patch release
+
+> [!IMPORTANT]
+> Liquibase 4.31.1 patches vulnerability found in Snowlake driver (CVE-2025-24789) and resolves issue with include and logicalfilepath reported in 4.31.0 (see 4.31.0 Release Notes)
+
+> [!NOTE]
+> See the [Liquibase 4.31.1 Release Notes](https://docs.liquibase.com/start/release-notes/liquibase-release-notes/liquibase-4.31.1.html) for the complete set of release information.
+
+## Notable Changes
+### [OSS]
+
+#### logicalfilepath bug: in 4.31.0, the parent logicalfilepath value will be used in DBCL/DBCLH as the changelogfilepath value, as a result the changesets from the included changelogs that were deployed with the changelog level logicalFilePath in version 4.31.0 will be considered new and will be redeployed in the latest versions. 4.31.1 fixes this behavior and deployed changesets will not be redeployed.
+
+### [PRO] Changelog
+
+## [PRO] Bug Fixes
+* DAT-19579: The changesets from the included changelogs that were deployed with the changelog level logicalFilePath in version 4.31.0 will be considered new and will be redeployed in the latest versions https://github.com/liquibase/liquibase/pull/6716 @filipelautert
+
+### [OSS] Changelog
+
+## [OSS] Bug Fixes
+* (#6664) Don't ignore logicalFilePath when including changelogs @filipelautert
+* (#6716) fix filename in dbcl incorrectly generated during 4.31.0 (#6712) @filipelautert
+
+## [OSS] Security, Driver and Other Updates
+
+#### Snowflake vulnerability update CVE-2025-24789
+* Snowflake discovered and remediated a vulnerability in the Snowflake JDBC Driver. Liquibase now includes a version with the fixed issue 3.22.0.
+
+
 Changes in version 4.31.0 (2025.01.16)
 
 ### Liquibase 4.31.0 is a major release
