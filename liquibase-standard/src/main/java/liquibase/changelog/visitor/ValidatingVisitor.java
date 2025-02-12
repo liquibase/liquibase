@@ -4,9 +4,7 @@ import liquibase.ChecksumVersion;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.Change;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.RanChangeSet;
+import liquibase.changelog.*;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
@@ -90,9 +88,10 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
-    private RanChangeSet findChangeSet(ChangeSet changeSet) {
+    private RanChangeSet findChangeSet(ChangeSet changeSet) throws LiquibaseException {
         String key = changeSet.toNormalizedString();
-        return ranIndex.get(key);
+        RanChangeSet ranChangeSet =  ranIndex.get(key);
+        return ValidatingVisitorUtil.fixChangesetFilenameForLogicalfilepathBugIn4300(changeSet, ranChangeSet, key, ranIndex, database);
     }
 
     @Override
