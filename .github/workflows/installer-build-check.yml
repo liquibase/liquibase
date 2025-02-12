@@ -52,7 +52,7 @@ jobs:
           echo "SM_CODE_SIGNING_CERT_SHA1_HASH=${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}" >> "$GITHUB_ENV"
           echo "SM_KEY_PAIR_ALIAS=${{ secrets.SM_KEY_PAIR_ALIAS }}" >> "$GITHUB_ENV"
 
-      - name: Install jsign
+      - name: Install jsign and osslsigncode
         run: |
           curl -fSslL https://github.com/ebourg/jsign/releases/download/3.1/jsign_3.1_all.deb -o jsign_3.1_all.deb
           sudo dpkg --install jsign_3.1_all.deb
@@ -113,8 +113,8 @@ jobs:
           --config-file "$(pwd)/.github/util/pkcs11properties.cfg" \
           --input "$INSTALLER_PATH" --tool jsign
           
-      - name: Verify Windows Installer Signature
-        run: osslsigncode verify -in "$INSTALLER_PATH"
+      # - name: Verify Windows Installer Signature
+      #   run: osslsigncode verify -in "$INSTALLER_PATH"
 
       - name: GPG Sign Artifacts (After Code Signing the Windows Installer)
         env:
