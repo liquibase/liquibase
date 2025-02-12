@@ -83,7 +83,7 @@ jobs:
 
   build-azure-uber-jar:
    needs: [ setup, owasp-scanner ]
-   uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
+   uses: ./.github/workflows/build-azure-uber-jar.yml
    with:
      branch: ${{ needs.setup.outputs.branch }}
      liquibase-version: ${{ needs.setup.outputs.version }}
@@ -91,7 +91,7 @@ jobs:
 
   build-extension-jars:
    needs: [ setup, owasp-scanner ]
-   uses: liquibase/liquibase/.github/workflows/build-extension-jars.yml@master
+   uses: ./.github/workflows/build-extension-jars.yml
    with:
      liquibase-version: ${{ needs.setup.outputs.version }}
      dependencies: ${{ needs.setup.outputs.dependencies }}
@@ -135,7 +135,7 @@ jobs:
           token: ${{ secrets.BOT_TOKEN }}
 
       - name: Download liquibase-artifacts
-        uses: dawidd6/action-download-artifact@v7
+        uses: dawidd6/action-download-artifact@v8
         with:
           workflow: run-tests.yml
           run_id: ${{ needs.setup.outputs.runId }}
@@ -282,7 +282,7 @@ jobs:
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
 
       - name: Cache Completed Artifacts
-        uses: actions/cache@v4.1.2
+        uses: actions/cache@v4.2.0
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
@@ -300,7 +300,7 @@ jobs:
       contents: write  # for softprops/action-gh-release to create GitHub release
     needs: [ setup, reversion ]
     name: Build Installers
-    runs-on: macos-13 #needs macos for apple notarization
+    runs-on: ubuntu-22.04
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     outputs:
@@ -310,7 +310,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Restore Completed Artifacts
-        uses: actions/cache@v4.1.2
+        uses: actions/cache@v4.2.0
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
@@ -325,26 +325,42 @@ jobs:
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
 
-
-      - name: Re-version Installers
-        env:
-          INSTALL4J_10_LICENSE: ${{ secrets.INSTALL4J_10_LICENSE }}
-          INSTALL4J_APPLE_KEY: ${{ secrets.INSTALL4J_APPLE_KEY }}
-          INSTALL4J_APPLE_KEY_PASSWORD: ${{ secrets.INSTALL4J_APPLE_KEY_PASSWORD }}
-          INSTALL4J_APPLE_ID: ${{ secrets.INSTALL4J_APPLE_ID }}
-          INSTALL4J_APPLE_ID_PASSWORD: ${{ secrets.INSTALL4J_APPLE_ID_PASSWORD }}
-          INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
-          INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+      - name: Decode Client Authentication Certificate
         run: |
-          mkdir -p liquibase-dist/target/keys
-          echo "Saving apple key"
-          echo "$INSTALL4J_APPLE_KEY" | base64 -d > liquibase-dist/target/keys/datical_apple.p12
-          echo "Saving windows key"
-          echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
-          version="${{ needs.setup.outputs.version }}"
+          echo "${{ secrets.SM_CLIENT_CERT_FILE_B64 }}" | base64 --decode > /tmp/client-auth.p12
 
-          ##### Rebuild installers
+      - name: Set Environment Variables for Signing
+        run: |
+          echo "SM_HOST=${{ secrets.SM_HOST }}" >> "$GITHUB_ENV"
+          echo "SM_API_KEY=${{ secrets.SM_API_KEY }}" >> "$GITHUB_ENV"
+          echo "SM_CLIENT_CERT_FILE=/tmp/client-auth.p12" >> "$GITHUB_ENV"
+          echo "SM_CLIENT_CERT_PASSWORD=${{ secrets.SM_CLIENT_CERT_PASSWORD }}" >> "$GITHUB_ENV"
+          echo "SM_CODE_SIGNING_CERT_SHA1_HASH=${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}" >> "$GITHUB_ENV"
+          echo "SM_KEY_PAIR_ALIAS=${{ secrets.SM_KEY_PAIR_ALIAS }}" >> "$GITHUB_ENV"
+
+      - name: Install jsign and osslsigncode
+        run: |
+          curl -fSslL https://github.com/ebourg/jsign/releases/download/3.1/jsign_3.1_all.deb -o jsign_3.1_all.deb
+          sudo dpkg --install jsign_3.1_all.deb
+          sudo apt-get install osslsigncode
+
+      - name: Create pkcs11properties.cfg
+        run: |
+          cat << EOF > pkcs11properties.cfg
+          name=signingmanager
+          library="$(pwd)/.github/util/smpkcs11.so"
+          slotListIndex=0
+          EOF
+          mv pkcs11properties.cfg $(pwd)/.github/util/
+
+      - name: Install DigiCert KeyLocker Client Tools
+        uses: digicert/ssm-code-signing@v1.0.0
+
+      - name: Build Unsigned Windows Installer
+        env:
+          INSTALL4J_LICENSE_KEY: ${{ secrets.INSTALL4J_10_LICENSE }}
+        run: |
+          version="${{ needs.setup.outputs.version }}"
           tarFile=$(pwd)/re-version/final/liquibase-$version.tar.gz
           scriptDir=$(pwd)/.github/util/
 
@@ -353,6 +369,34 @@ jobs:
           (cd liquibase-dist && $scriptDir/package-install4j.sh $version)
           mv liquibase-dist/target/liquibase-*-installer-* re-version/final
 
+      - name: Find Unsigned Windows Installer
+        id: find-installer
+        run: |
+          INSTALLER_PATH=$(find re-version/final -name "liquibase-*-installer-*" | head -n 1)
+          if [ -z "$INSTALLER_PATH" ]; then
+            echo "Error: No installer file found!"
+            exit 1
+          fi
+          echo "Found installer: $INSTALLER_PATH"
+          echo "INSTALLER_PATH=$INSTALLER_PATH" >> $GITHUB_ENV
+
+      - name: Sign Windows Installer using KeyLocker
+        run: |
+          smctl sign -v --fingerprint "$SM_CODE_SIGNING_CERT_SHA1_HASH" \
+          --keypair-alias $SM_KEY_PAIR_ALIAS \
+          --certificate "$SM_CLIENT_CERT_FILE" \
+          --config-file "$(pwd)/.github/util/pkcs11properties.cfg" \
+          --input "$INSTALLER_PATH" --tool jsign
+
+      # - name: Verify Windows Installer Signature
+      #   run: osslsigncode verify -in "$INSTALLER_PATH"
+
+      - name: Re-version Installers
+        env:
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          version="${{ needs.setup.outputs.version }}"
+
           ##Sign Files
           $PWD/.github/util/sign-artifacts.sh re-version/final
 
@@ -360,6 +404,16 @@ jobs:
           rm re-version/final/*.asc
           rm re-version/final/*.md5
           rm re-version/final/*.sha1
+
+        # Check if the tag already exists in OSS repository, if it does, exit with error. This is to prevent the artifacts from being attached to the already released tag.
+      - name: Check OSS release tag existence, if tag exists, exit with error
+        run: |
+          tag="v${{ needs.setup.outputs.version }}"
+          if git show-ref --tags --quiet --verify -- "refs/tags/$tag"
+          then
+              echo "Tag $tag already exists"
+              exit 1
+          fi
 
       - name: Attach Files to Draft Release
         if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
