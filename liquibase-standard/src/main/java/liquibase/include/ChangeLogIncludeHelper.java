@@ -60,6 +60,7 @@ import org.apache.commons.lang3.StringUtils;
 	*/
 public final class ChangeLogIncludeHelper {
 
+	private static final ThreadLocal<DatabaseChangeLog> ROOT = new ThreadLocal<>();
 	static final Comparator<ChangeSet> CHANGESET_COMPARATOR = Comparator.comparingInt(ChangeSet::getOrder);
 
 	private ChangeLogIncludeHelper() {}
@@ -127,6 +128,9 @@ public final class ChangeLogIncludeHelper {
 																																							ContextExpression contextExpression, Labels labels, Boolean ignore,
 																																							DatabaseChangeLog.OnUnknownFileFormat onUnknownFileFormat)
 			throws SetupException {
+		if(ROOT.get() == null)
+			ROOT.set(parentChangeLog);
+		parentChangeLog.setRootChangeLog(ROOT.get());
 		if (".svn".equalsIgnoreCase(file) || "cvs".equalsIgnoreCase(file)) {
 			return null;
 		}
@@ -157,6 +161,8 @@ public final class ChangeLogIncludeHelper {
 						resourceAccessor);
 			}
 			prepareParentChangeLogs(childChangeLog, parentChangeLog, contextExpression, labels, ignore);
+			childChangeLog.setParentChangeLog(parentChangeLog);
+			childChangeLog.setRootChangeLog(ROOT.get());
 			return childChangeLog;
 		}
 		catch (UnknownChangelogFormatException e) {
@@ -198,11 +204,13 @@ public final class ChangeLogIncludeHelper {
 			boolean isRawSql = childChangeLog.getPhysicalFilePath() != null
 					&& childChangeLog.getPhysicalFilePath().endsWith(".sql");
 
-			if (logicalFilePath != null && changeSetLogicalFilePath == null
+			if (changeSetLogicalFilePath == null
 					&&!isRawSql && !ranChangeSetExists(changeSet, ranChangeSets)) {
-				changeSet.setLogicalFilePath(logicalFilePath);
-				if (StringUtils.isNotEmpty(logicalFilePath)) {
-					changeSet.setFilePath(logicalFilePath);
+				String finalLogicalFilePath = (logicalFilePath != null)
+						? logicalFilePath : getActualLogicalFilePath(changeSet.getChangeLog());
+				changeSet.setLogicalFilePath(finalLogicalFilePath);
+				if (StringUtils.isNotEmpty(finalLogicalFilePath)) {
+					changeSet.setFilePath(finalLogicalFilePath);
 				}
 			}
 			if(markRan)
@@ -211,6 +219,19 @@ public final class ChangeLogIncludeHelper {
 			result.add(changeSet);
 		}
 		return result;
+	}
+
+	/**
+		* Search for the closest logicalfilePath for this changelog
+		*/
+	private static String getActualLogicalFilePath(DatabaseChangeLog changeLog) {
+		DatabaseChangeLog currentChangeLog = changeLog;
+		do {
+			if (StringUtils.isNotBlank(currentChangeLog.getRawLogicalFilePath())) {
+				return currentChangeLog.getRawLogicalFilePath();
+			}
+		} while ((currentChangeLog = currentChangeLog.getParentChangeLog()) != null);
+		return null;
 	}
 
 	private static void prepareParentChangeLogs(DatabaseChangeLog childChangelog,
