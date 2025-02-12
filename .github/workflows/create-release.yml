@@ -338,6 +338,7 @@ jobs:
           echo "SM_API_KEY=${{ secrets.SM_API_KEY }}" >> "$GITHUB_ENV"
           echo "SM_CLIENT_CERT_FILE=/tmp/client-auth.p12" >> "$GITHUB_ENV"
           echo "SM_CLIENT_CERT_PASSWORD=${{ secrets.SM_CLIENT_CERT_PASSWORD }}" >> "$GITHUB_ENV"
+          echo "SM_CODE_SIGNING_CERT_SHA1_HASH=${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}" >> "$GITHUB_ENV"
 
       - name: Install DigiCert KeyLocker Client Tools
         uses: digicert/ssm-code-signing@v1.0.0
@@ -369,11 +370,7 @@ jobs:
       - name: Sign Windows Installer using KeyLocker
         run: |
           smctl sign -h
-          smctl sign --host "$SM_HOST" \
-            --cert-sha1 "$SM_CODE_SIGNING_CERT_SHA1_HASH" \
-            --client-cert "$SM_CLIENT_CERT_FILE" \
-            --client-cert-password "$SM_CLIENT_CERT_PASSWORD" \
-            --input "$INSTALLER_PATH"
+          smctl sign --fingerprint "$SM_CODE_SIGNING_CERT_SHA1_HASH" --input "$INSTALLER_PATH"
 
       - name: Verify Signed Installer
         run: |
