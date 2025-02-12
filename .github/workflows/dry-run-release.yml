@@ -33,6 +33,7 @@ jobs:
       dry_run_zip_url: ${{ steps.wait_and_get_outputs.outputs.zip_url }}
       dry_run_tar_gz_url: ${{ steps.wait_and_get_outputs.outputs.tar_gz_url }}
       dry_run_branch_name: ${{ needs.setup.outputs.dry_run_branch_name }}
+      release_id: ${{ steps.wait_and_get_outputs.outputs.release_id }}
     steps:
       - name: Invoke Create Release
         id: trigger-step
@@ -44,7 +45,7 @@ jobs:
           ref: fix-dry-run-builds
           wait-for-completion: true
 
-      - name: Get Create Release Outputs
+      - name: Get Release Outputs
         id: wait_and_get_outputs
         run: |
           # Get release info based on draft name
@@ -56,6 +57,7 @@ jobs:
           # Find the draft release and get its assets
           draft_release=$(echo "$response" | jq -r --arg name "$release_name" '.[] | select(.name == $name and .draft == true)')
           assets_url=$(echo "$draft_release" | jq -r '.assets_url')
+          release_id=$(echo "$draft_release" | jq -r '.id')
 
           # Get the assets
           assets_response=$(curl -s -H "Authorization: token ${{ secrets.BOT_TOKEN }}" \
@@ -69,32 +71,12 @@ jobs:
           # Remove any newlines or spaces from URLs before setting outputs
           zip_url=$(echo "$zip_url" | tr -d '[:space:]')
           tar_gz_url=$(echo "$tar_gz_url" | tr -d '[:space:]')
+          
+          echo "Release Id is $release_id"
 
           echo "tar_gz_url=$tar_gz_url" >> $GITHUB_OUTPUT
           echo "zip_url=$zip_url" >> $GITHUB_OUTPUT
-
-  dry-run-get-draft-release:
-    needs: [setup, dry-run-create-release]
-    runs-on: ubuntu-latest
-    outputs:
-      dry_run_release_id: ${{ steps.get_draft_release_id.outputs.release_id }}
-    steps:
-      - name: Get Draft Release ID
-        id: get_draft_release_id
-        run: |
-          release_name="vdry-run-${{ github.run_id }}"
-          response=$(curl -s -H "Authorization: token ${{ secrets.BOT_TOKEN }}" \
-                          -H "Accept: application/vnd.github.v3+json" \
-                          "https://api.github.com/repos/liquibase/liquibase/releases")
-          draft_release=$(echo "$response" | jq -r --arg name "$release_name" '.[] | select(.name == $name and .draft == true)')
-          if [ -z "$draft_release" ]; then
-            echo "No draft release found with the name '$release_name'"
-            exit 1
-          else
-            echo "$draft_release" | jq .
-            release_id=$(echo "$draft_release" | jq -r '.id')
-            echo "release_id=$release_id" >> $GITHUB_OUTPUT
-          fi
+          echo "release_id=$release_id" >> $GITHUB_OUTPUT
 
   dry-run-release-published:
     needs: [setup, dry-run-create-release, dry-run-get-draft-release]
@@ -105,7 +87,7 @@ jobs:
         with:
           workflow: release-published.yml
           token: ${{ secrets.BOT_TOKEN }}
-          inputs: '{"tag": "vdry-run-${{ github.run_id }}", "dry_run_release_id": "${{ needs.dry-run-get-draft-release.outputs.dry_run_release_id }}", "dry_run_zip_url": "${{ needs.dry-run-create-release.outputs.dry_run_zip_url }}", "dry_run_tar_gz_url": "${{ needs.dry-run-create-release.outputs.dry_run_tar_gz_url }}", "dry_run": "true", "dry_run_branch_name": "${{ needs.dry-run-create-release.outputs.dry_run_branch_name }}"}'
+          inputs: '{"tag": "vdry-run-${{ github.run_id }}", "dry_run_release_id": "${{ needs.dry-run-create-release.outputs.dry_run_release_id }}", "dry_run_zip_url": "${{ needs.dry-run-create-release.outputs.dry_run_zip_url }}", "dry_run_tar_gz_url": "${{ needs.dry-run-create-release.outputs.dry_run_tar_gz_url }}", "dry_run": "true", "dry_run_branch_name": "${{ needs.dry-run-create-release.outputs.dry_run_branch_name }}"}'
           ref: fix-dry-run-builds
           wait-for-completion: true
           workflow-logs: json-output
