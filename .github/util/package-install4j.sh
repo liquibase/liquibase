@@ -32,12 +32,6 @@ if [ -f "$install4jc" ]; then
     echo "Install4j is already installed at $install4jc"
 else
     echo "Installing Install4j..."
-    # Check if Java is installed
-    if ! command -v java >/dev/null 2>&1; then
-        echo "Error: Java is required but not installed"
-        echo "Please visit http://www.java.com for information on installing Java"
-        exit 1
-    fi
     INSTALL4J_URL="https://download.ej-technologies.com/install4j/install4j_linux-x64_${INSTALL4J_VERSION}.deb"
     wget -nv --directory-prefix="$INSTALL4J_CACHE" -nc "$INSTALL4J_URL"
     sudo apt install -y "$INSTALL4J_CACHE/install4j_linux-x64_${INSTALL4J_VERSION}.deb"
@@ -45,5 +39,5 @@ else
 fi
 
 # Configure and run Install4j
-INSTALL4J_ARGS="--release=$version -D liquibaseVersion=$version -D install4j.logToStderr=true --disable-signing"
+INSTALL4J_ARGS="-L $INSTALL4J_LICENSE_KEY --release=$version -D liquibaseVersion=$version -D install4j.logToStderr=true --disable-signing"
 "$install4jc" $INSTALL4J_ARGS src/main/install4j/liquibase.install4j
