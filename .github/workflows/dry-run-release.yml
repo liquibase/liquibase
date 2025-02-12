@@ -66,8 +66,6 @@ jobs:
           zip_url=$(echo "$assets_response" | jq -r '.[] | select(.name | endswith(".zip")) | .browser_download_url')
           tar_gz_url=$(echo "$assets_response" | jq -r '.[] | select(.name | endswith(".tar.gz")) | .browser_download_url')
 
-          echo "Found assets: zip_url=$zip_url, tar_gz_url=$tar_gz_url"
-
           # Remove any newlines or spaces from URLs before setting outputs
           zip_url=$(echo "$zip_url" | tr -d '[:space:]')
           tar_gz_url=$(echo "$tar_gz_url" | tr -d '[:space:]')
@@ -98,25 +96,24 @@ jobs:
             echo "release_id=$release_id" >> $GITHUB_OUTPUT
           fi
 
-  # dry-run-release-published:
-  #   needs: [setup, dry-run-create-release, dry-run-get-draft-release]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Trigger release-published workflow
-  #       uses: the-actions-org/workflow-dispatch@v4
-  #       with:
-  #         workflow: release-published.yml
-  #         token: ${{ secrets.BOT_TOKEN }}
-  #         inputs: '{"tag": "vdry-run-${{ github.run_id }}", "dry_run_release_id": "${{ needs.dry-run-get-draft-release.outputs.dry_run_release_id }}", "dry_run_zip_url": "${{ needs.dry-run-create-release.outputs.dry_run_zip_url }}", "dry_run_tar_gz_url": "${{ needs.dry-run-create-release.outputs.dry_run_tar_gz_url }}", "dry_run": "true", "dry_run_branch_name": "${{ needs.dry-run-create-release.outputs.dry_run_branch_name }}"}'
-  #         ref: fix-dry-run-builds
-  #         wait-for-completion: true
-  #         workflow-logs: json-output
+  dry-run-release-published:
+    needs: [setup, dry-run-create-release, dry-run-get-draft-release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger release-published workflow
+        uses: the-actions-org/workflow-dispatch@v4
+        with:
+          workflow: release-published.yml
+          token: ${{ secrets.BOT_TOKEN }}
+          inputs: '{"tag": "vdry-run-${{ github.run_id }}", "dry_run_release_id": "${{ needs.dry-run-get-draft-release.outputs.dry_run_release_id }}", "dry_run_zip_url": "${{ needs.dry-run-create-release.outputs.dry_run_zip_url }}", "dry_run_tar_gz_url": "${{ needs.dry-run-create-release.outputs.dry_run_tar_gz_url }}", "dry_run": "true", "dry_run_branch_name": "${{ needs.dry-run-create-release.outputs.dry_run_branch_name }}"}'
+          ref: fix-dry-run-builds
+          wait-for-completion: true
+          workflow-logs: json-output
 
   cleanup:
     runs-on: ubuntu-latest
     if: always()
-    needs: [setup, dry-run-get-draft-release]
-    #needs: [setup, dry-run-get-draft-release, dry-run-release-published]
+    needs: [setup, dry-run-get-draft-release, dry-run-release-published]
     steps:
       - name: Checkout liquibase
         uses: actions/checkout@v4
