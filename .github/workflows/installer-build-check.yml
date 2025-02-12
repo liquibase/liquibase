@@ -56,6 +56,15 @@ jobs:
         run: |
           curl -fSslL https://github.com/ebourg/jsign/releases/download/3.1/jsign_3.1_all.deb -o jsign_3.1_all.deb 
           sudo dpkg --install jsign_3.1_all.deb
+          
+      - name: Create pkcs11properties.cfg
+        run: |
+          cat << EOF > pkcs11properties.cfg
+          name=signingmanager
+          library="$(pwd)/.github/util/smpkcs11.so"
+          slotListIndex=0
+          EOF
+          mv pkcs11properties.cfg $(pwd)/.github/util/
 
       - name: Install DigiCert KeyLocker Client Tools
         uses: digicert/ssm-code-signing@v1.0.0
@@ -64,20 +73,10 @@ jobs:
         uses: dawidd6/action-download-artifact@v8
         with:
           workflow: run-tests.yml
-          #run_id: ${{ needs.setup.outputs.runId }}
           workflow_conclusion: success
           branch: ${{ github.head_ref }}
           name: liquibase-artifacts
           path: re-version/final
-
-      # - name: Download liquibase-artifacts
-      #   uses: liquibase/action-download-artifact@v2-liquibase
-      #   with:
-      #     workflow: run-tests.yml
-      #     workflow_conclusion: success
-      #     branch: ${{ github.head_ref }}
-      #     name: liquibase-artifacts
-      #     path: re-version/final
       
       - name: Set branch variable
         run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
@@ -107,8 +106,7 @@ jobs:
 
       - name: Sign Windows Installer using KeyLocker
         run: |
-          smctl healthcheck --all
-          smctl sign -v --fingerprint "$SM_CODE_SIGNING_CERT_SHA1_HASH" --input "$INSTALLER_PATH"
+          smctl sign -v --fingerprint "$SM_CODE_SIGNING_CERT_SHA1_HASH" --config-file $(pwd)/.github/util/pkcs11properties.cfg --input "$INSTALLER_PATH"
 
       - name: Verify Signed Installer
         run: |
