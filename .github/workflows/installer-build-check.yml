@@ -17,7 +17,7 @@ jobs:
       - name: Set up JDK for GPG
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '11'
           distribution: 'temurin'
           gpg-private-key: ${{ secrets.GPG_SECRET }}
           gpg-passphrase: GPG_PASSPHRASE
@@ -106,7 +106,9 @@ jobs:
 
       - name: Sign Windows Installer using KeyLocker
         run: |
-          smctl sign -v --fingerprint "$SM_CODE_SIGNING_CERT_SHA1_HASH" --config-file $(pwd)/.github/util/pkcs11properties.cfg --input "$INSTALLER_PATH"
+          ls /home/runner/work/liquibase/liquibase/.github/util/
+          cat /home/runner/work/liquibase/liquibase/.github/util/pkcs11properties.cfg
+          smctl sign -v --fingerprint "$SM_CODE_SIGNING_CERT_SHA1_HASH" --certificate "$SM_CLIENT_CERT_FILE" --config-file $(pwd)/.github/util/pkcs11properties.cfg --input "$INSTALLER_PATH"
 
       - name: Verify Signed Installer
         run: |
