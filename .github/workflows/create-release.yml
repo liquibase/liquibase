@@ -346,6 +346,7 @@ jobs:
         env:
           INSTALL4J_LICENSE_KEY: ${{ secrets.INSTALL4J_10_LICENSE }}
         run: |
+          version="${{ needs.setup.outputs.version }}"
           tarFile=$(pwd)/re-version/final/liquibase-$version.tar.gz
           scriptDir=$(pwd)/.github/util/
 
