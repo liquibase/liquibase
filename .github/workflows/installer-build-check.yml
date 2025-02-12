@@ -108,7 +108,10 @@ jobs:
         run: |
           ls /home/runner/work/liquibase/liquibase/.github/util/
           cat /home/runner/work/liquibase/liquibase/.github/util/pkcs11properties.cfg
-          smctl sign -v --fingerprint "$SM_CODE_SIGNING_CERT_SHA1_HASH" --certificate "$SM_CLIENT_CERT_FILE" --config-file $(pwd)/.github/util/pkcs11properties.cfg --input "$INSTALLER_PATH"
+          jsign --help
+          
+          ls re-version/final/liquibase-windows-x64-installer-0-SNAPSHOT.exe
+          smctl sign -v --fingerprint "$SM_CODE_SIGNING_CERT_SHA1_HASH" --config-file $(pwd)/.github/util/pkcs11properties.cfg --input "$(pwd)/re-version/final/liquibase-windows-x64-installer-0-SNAPSHOT.exe"
 
       - name: Verify Signed Installer
         run: |
