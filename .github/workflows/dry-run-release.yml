@@ -47,25 +47,27 @@ jobs:
       - name: Get Create Release Outputs
         id: wait_and_get_outputs
         run: |
-          echo "Triggered workflow URL: ${{ steps.trigger-step.outputs.workflow-url }}"
-          workflow_run_id=$(echo "${{ steps.trigger-step.outputs.workflow-url }}" | grep -o '[0-9]*$')
-          
-          # Wait for workflow to complete and get outputs
-          response=$(curl -s \
-          -H "Authorization: token ${{ secrets.BOT_TOKEN }}" \
-          -H "Accept: application/vnd.github.v3+json" \
-          "https://api.github.com/repos/liquibase/liquibase/actions/runs/${workflow_run_id}/jobs")
-          
-          echo "reposnse: $response"
-          
-          # Extract the outputs from the job
-          outputs=$(echo "$response" | jq -r '.jobs[] | select(.name == "create-release") | .steps[] | select(.name == "Extract dry-run release URL") | .outputs')
-          
-          tar_gz_url=$(echo "$outputs" | jq -r '.dry_run_tar_gz_url')
-          zip_url=$(echo "$outputs" | jq -r '.dry_run_zip_url')
-          
-          echo "Urls configs: tar_gz_url=$tar_gz_url, zip_url=$zip_url"
-          
+          # Get release info based on draft name
+          release_name="vdry-run-${{ github.run_id }}"
+          response=$(curl -s -H "Authorization: token ${{ secrets.BOT_TOKEN }}" \
+                        -H "Accept: application/vnd.github.v3+json" \
+                        "https://api.github.com/repos/liquibase/liquibase/releases")
+
+          # Find the draft release and get its assets
+          draft_release=$(echo "$response" | jq -r --arg name "$release_name" '.[] | select(.name == $name and .draft == true)')
+          assets_url=$(echo "$draft_release" | jq -r '.assets_url')
+
+          # Get the assets
+          assets_response=$(curl -s -H "Authorization: token ${{ secrets.BOT_TOKEN }}" \
+                             -H "Accept: application/vnd.github.v3+json" \
+                             "$assets_url")
+
+          # Get URLs for zip and tar.gz files
+          zip_url=$(echo "$assets_response" | jq -r '.[] | select(.name | endswith(".zip")) | .url')
+          tar_gz_url=$(echo "$assets_response" | jq -r '.[] | select(.name | endswith(".tar.gz")) | .url')
+
+          echo "Found assets: zip_url=$zip_url, tar_gz_url=$tar_gz_url"
+
           echo "tar_gz_url=$tar_gz_url" >> $GITHUB_OUTPUT
           echo "zip_url=$zip_url" >> $GITHUB_OUTPUT
 
