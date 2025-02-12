@@ -62,6 +62,8 @@ jobs:
           tar_gz_url=$(echo "$outputs" | jq -r '.dry_run_tar_gz_url')
           zip_url=$(echo "$outputs" | jq -r '.dry_run_zip_url')
           
+          echo "Urls configs: tar_gz_url=$tar_gz_url, zip_url=$zip_url"
+          
           echo "tar_gz_url=$tar_gz_url" >> $GITHUB_OUTPUT
           echo "zip_url=$zip_url" >> $GITHUB_OUTPUT
 
