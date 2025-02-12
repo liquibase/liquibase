@@ -368,8 +368,12 @@ jobs:
 
       - name: Sign Windows Installer using KeyLocker
         run: |
-          smctl help
-          smctl sign --input "$INSTALLER_PATH"
+          smctl sign -h
+          smctl sign --host "$SM_HOST" \
+            --cert-sha1 "$SM_CODE_SIGNING_CERT_SHA1_HASH" \
+            --client-cert "$SM_CLIENT_CERT_FILE" \
+            --client-cert-password "$SM_CLIENT_CERT_PASSWORD" \
+            --input "$INSTALLER_PATH"
 
       - name: Verify Signed Installer
         run: |
