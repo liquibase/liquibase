@@ -367,7 +367,9 @@ jobs:
           echo "INSTALLER_PATH=$INSTALLER_PATH" >> $GITHUB_ENV
 
       - name: Sign Windows Installer using KeyLocker
-        run: smctl sign --timestamp-server http://timestamp.digicert.com --input "$INSTALLER_PATH"
+        run: |
+          smctl help
+          smctl sign --input "$INSTALLER_PATH"
 
       - name: Verify Signed Installer
         run: |
