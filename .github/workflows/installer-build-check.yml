@@ -56,6 +56,7 @@ jobs:
         run: |
           curl -fSslL https://github.com/ebourg/jsign/releases/download/3.1/jsign_3.1_all.deb -o jsign_3.1_all.deb
           sudo dpkg --install jsign_3.1_all.deb
+          sudo apt-get install osslsigncode
 
       - name: Create pkcs11properties.cfg
         run: |
@@ -111,6 +112,9 @@ jobs:
           --certificate "$SM_CLIENT_CERT_FILE" \
           --config-file "$(pwd)/.github/util/pkcs11properties.cfg" \
           --input "$INSTALLER_PATH" --tool jsign
+          
+      - name: Verify Windows Installer Signature
+        run: osslsigncode verify -in "$INSTALLER_PATH"
 
       - name: GPG Sign Artifacts (After Code Signing the Windows Installer)
         env:
