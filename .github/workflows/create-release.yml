@@ -368,9 +368,7 @@ jobs:
           echo "INSTALLER_PATH=$INSTALLER_PATH" >> $GITHUB_ENV
 
       - name: Sign Windows Installer using KeyLocker
-        run: |
-          smctl sign -h
-          smctl sign --fingerprint "$SM_CODE_SIGNING_CERT_SHA1_HASH" --input "$INSTALLER_PATH"
+        run: smctl sign -v --fingerprint "$SM_CODE_SIGNING_CERT_SHA1_HASH" --input "$INSTALLER_PATH"
 
       - name: Verify Signed Installer
         run: |
