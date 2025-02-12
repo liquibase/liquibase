@@ -321,7 +321,7 @@ jobs:
       - name: Set up JDK for GPG
         uses: actions/setup-java@v4
         with:
-          java-version: "8"
+          java-version: "11"
           distribution: "adopt"
           gpg-private-key: ${{ secrets.GPG_SECRET }}
           gpg-passphrase: GPG_PASSPHRASE
