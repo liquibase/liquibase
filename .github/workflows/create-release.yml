@@ -387,8 +387,8 @@ jobs:
           --config-file "$(pwd)/.github/util/pkcs11properties.cfg" \
           --input "$INSTALLER_PATH" --tool jsign
 
-      # - name: Verify Windows Installer Signature
-      #   run: osslsigncode verify -in "$INSTALLER_PATH"
+      - name: Verify Windows Installer Signature
+        run: osslsigncode verify -CAfile /etc/ssl/certs/ca-certificates.crt -in "$INSTALLER_PATH"
         
       - name: Re-version Installers
         env:

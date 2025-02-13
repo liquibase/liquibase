@@ -114,8 +114,7 @@ jobs:
           --input "$INSTALLER_PATH" --tool jsign
           
       - name: Verify Windows Installer Signature
-        run: |
-          osslsigncode verify -CAfile /etc/ssl/certs/ca-certificates.crt -in "$INSTALLER_PATH"
+        run: osslsigncode verify -CAfile /etc/ssl/certs/ca-certificates.crt -in "$INSTALLER_PATH"
 
       - name: GPG Sign Artifacts (After Code Signing the Windows Installer)
         env:
