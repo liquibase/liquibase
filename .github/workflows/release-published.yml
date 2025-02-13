@@ -428,7 +428,7 @@ jobs:
       - name: Adding Docker run to job summary
         if: success()
         continue-on-error: true
-        run: echo '### 🐳 Docker Release Job -> ${{steps.docker_dispatch.outputs.run_url}}' >> $GITHUB_STEP_SUMMARY
+        run: echo '### 🐳 Docker Release Job -> ${{steps.docker_dispatch.outputs.workflow-url}}' >> $GITHUB_STEP_SUMMARY
 
   generate-PRO-tag:
     if: ${{ inputs.dry_run == false }}
