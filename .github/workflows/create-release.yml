@@ -75,7 +75,7 @@ jobs:
     secrets: inherit
 
   build-azure-uber-jar:
-   needs: [ setup]
+   needs: [ setup, owasp-scanner ]
    uses: ./.github/workflows/build-azure-uber-jar.yml
    with:
      branch: ${{ needs.setup.outputs.branch }}
@@ -83,7 +83,7 @@ jobs:
    secrets: inherit
 
   build-extension-jars:
-   needs: [ setup ]
+   needs: [ setup, owasp-scanner ]
    uses: ./.github/workflows/build-extension-jars.yml
    with:
      liquibase-version: ${{ needs.setup.outputs.version }}
@@ -112,7 +112,7 @@ jobs:
               echo "version=$VERSION" >> $GITHUB_OUTPUT
 
   reversion:
-    needs: [ setup, build-azure-uber-jar ]
+    needs: [ setup, build-azure-uber-jar, build-extension-jars, get-liquibase-checks-version ]
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
     steps:

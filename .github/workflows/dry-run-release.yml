@@ -41,7 +41,7 @@ jobs:
           workflow: create-release.yml
           token: ${{ secrets.BOT_TOKEN }}
           inputs: '{"version": "dry-run-${{ github.run_id }}", "runId": "${{ needs.setup.outputs.dry_run_id }}", "standalone_zip": "false", "dry_run": "true"}'
-          ref: fix-dry-run-builds
+          ref: master
           wait-for-completion: true
 
       - name: Get Release Outputs
@@ -89,7 +89,7 @@ jobs:
           workflow: release-published.yml
           token: ${{ secrets.BOT_TOKEN }}
           inputs: '{"tag": "vdry-run-${{ github.run_id }}", "dry_run_release_id": "${{ needs.dry-run-create-release.outputs.dry_run_release_id }}", "dry_run_zip_url": "${{ needs.dry-run-create-release.outputs.dry_run_zip_url }}", "dry_run_tar_gz_url": "${{ needs.dry-run-create-release.outputs.dry_run_tar_gz_url }}", "dry_run": "true", "dry_run_branch_name": "${{ needs.setup.outputs.dry_run_branch_name }}"}'
-          ref: fix-dry-run-builds
+          ref: master
           wait-for-completion: true
           workflow-logs: json-output
 
