@@ -58,6 +58,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private static final Pattern SLASH_PATTERN = Pattern.compile("^/");
     private static final Pattern DOUBLE_BACK_SLASH_PATTERN = Pattern.compile("\\\\");
     private static final Pattern NO_LETTER_PATTERN = Pattern.compile("^[a-zA-Z]:");
+    private static final Pattern HIDDEN_FILENAME_PATTERN = Pattern.compile("\\.\\w+$");
     private static final String CLASSPATH_PROTOCOL = "classpath:";
     public static final String SEEN_CHANGELOGS_PATHS_SCOPE_KEY = "SEEN_CHANGELOG_PATHS";
     public static final String FILE = "file";
@@ -1036,7 +1037,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            OnUnknownFileFormat onUnknownFileFormat,
                            ModifyChangeSets modifyChangeSets)
             throws LiquibaseException {
-        if (".svn".equalsIgnoreCase(fileName) || "cvs".equalsIgnoreCase(fileName)) {
+        String filenameWithoutPath = Paths.get(fileName).getFileName().toString();
+        boolean matchesHiddenFilename = HIDDEN_FILENAME_PATTERN.matcher(filenameWithoutPath).matches();
+        if ("cvs".equalsIgnoreCase(filenameWithoutPath) || matchesHiddenFilename) {
             return false;
         }
 
@@ -1096,11 +1099,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             if (onUnknownFileFormat == OnUnknownFileFormat.FAIL) {
                 throw e;
             }
-            // This matches only an extension, but filename can be a full path, too. Is it right?
-            boolean matchesFileExtension = StringUtil.trimToEmpty(normalizedFilePath).matches("\\.\\w+$");
-            if (matchesFileExtension || onUnknownFileFormat == OnUnknownFileFormat.WARN) {
+            if (onUnknownFileFormat == OnUnknownFileFormat.WARN) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
-                        "included file " + normalizedFilePath + "/" + normalizedFilePath + " is not a recognized file type", e
+                        "included file " + normalizedFilePath + " is not a recognized file type", e
                 );
             }
             return false;
@@ -1232,7 +1233,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         if (normalized == null) {
             normalized = normalizePathViaPaths(filePath, true);
         }
-        
+
         if (normalized == null) {
             return null;
         }
