@@ -102,14 +102,13 @@ jobs:
           echo "Found installer: $INSTALLER_PATH"
           echo "INSTALLER_PATH=$INSTALLER_PATH" >> $GITHUB_ENV
 
-      - name: Sign Windows Installer using jsign
+      - name: Sign Windows Installer using KeyLocker
         run: |
-          jsign --keystore "$SM_CLIENT_CERT_FILE" \
-          --storepass "$SM_CLIENT_CERT_PASSWORD" \
-          --alias "$SM_KEY_PAIR_ALIAS" \
-          --tsaurl "http://timestamp.digicert.com" \
-          --certfile "$(pwd)/.github/util/pkcs11properties.cfg" \
-          "$INSTALLER_PATH" \
+          smctl sign -v --fingerprint "$SM_CODE_SIGNING_CERT_SHA1_HASH" \
+          --keypair-alias $SM_KEY_PAIR_ALIAS \
+          --certificate "$SM_CLIENT_CERT_FILE" \
+          --config-file "$(pwd)/.github/util/pkcs11properties.cfg" \
+          --input "$INSTALLER_PATH" --tool jsign
           
       - name: Verify Windows Installer Signature
         run: osslsigncode verify -in "$INSTALLER_PATH"
