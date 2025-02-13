@@ -1,5 +1,6 @@
 package liquibase;
 
+import liquibase.command.core.DiffCommandStep;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.ui.UIServiceEnum;
