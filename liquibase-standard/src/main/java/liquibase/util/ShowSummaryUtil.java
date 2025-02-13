@@ -150,8 +150,11 @@ public class ShowSummaryUtil {
         boolean shouldPrintDetailTable =
            showSummary != UpdateSummaryEnum.SUMMARY &&
            (!skippedChangeSets.isEmpty() ||
-            !skippedBecauseOfLicenseChangeSets.isEmpty() || !skippedBecauseOfOsMismatchChangeSets.isEmpty() || !skippedBecauseOfPreconditionsChangeSets.isEmpty() ||
-            !denied.isEmpty() || !additionalChangeSetStatus.isEmpty());
+            !skippedBecauseOfLicenseChangeSets.isEmpty() ||
+            !skippedBecauseOfOsMismatchChangeSets.isEmpty() ||
+            !skippedBecauseOfPreconditionsChangeSets.isEmpty() ||
+            !denied.isEmpty() ||
+            !additionalChangeSetStatus.isEmpty());
 
         // Show the details too
         FilteredChanges filteredChanges =
@@ -179,11 +182,15 @@ public class ShowSummaryUtil {
                                                    List<ChangeSetStatus> additionalChangesets,
                                                    ChangeLogIterator runChangeLogIterator)
             throws IOException, LiquibaseException {
-        String totalSkippedMdcKey = "totalSkipped";
         //
         // Nothing to do
         //
-        if (filterDenied.isEmpty() && skippedChangeSets.isEmpty() && additionalChangesets.isEmpty()) {
+        String totalSkippedMdcKey = "totalSkipped";
+        if (filterDenied.isEmpty() &&
+            skippedChangeSets.isEmpty() &&
+            skippedBecauseOfOsMismatchChangeSets.isEmpty() &&
+            skippedBecauseOfPreconditionsChangeSets.isEmpty() &&
+            additionalChangesets.isEmpty()) {
             return new FilteredChanges(new TreeMap<>(Collections.singletonMap(totalSkippedMdcKey, 0)), new LinkedHashMap<>());
         }
         List<String> columnHeaders = new ArrayList<>();
