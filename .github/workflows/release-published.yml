@@ -454,6 +454,7 @@ jobs:
       dry_run: ${{ inputs.dry_run || false}}
       dry_run_zip_url: ${{ inputs.dry_run_zip_url || '' }}
       dry_run_tar_gz_url: ${{ inputs.dry_run_tar_gz_url || '' }}
+      dry_run_release_id: ${{ inputs.dry_run_release_id || '' }}
 
   update-docs-oss-pro-version:
     if: ${{ inputs.dry_run == false }}
