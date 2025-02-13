@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       dry_run_id: ${{ steps.get_run_id.outputs.dry_run_id }}
-      dry_run_branch_name: ${{ steps.get_run_id.dry_run_branch_name }}
+      dry_run_branch_name: ${{ steps.get_run_id.outputs.dry_run_branch_name }}
     steps:
       - name: Get run-tests.yml runId
         id: get_run_id
@@ -32,7 +32,6 @@ jobs:
     outputs:
       dry_run_zip_url: ${{ steps.wait_and_get_outputs.outputs.dry_run_zip_url }}
       dry_run_tar_gz_url: ${{ steps.wait_and_get_outputs.outputs.dry_run_tar_gz_url }}
-      dry_run_branch_name: ${{ needs.setup.outputs.dry_run_branch_name }}
       dry_run_release_id: ${{ steps.wait_and_get_outputs.outputs.dry_run_release_id }}
     steps:
       - name: Invoke Create Release
@@ -65,8 +64,8 @@ jobs:
                              "$assets_url")
 
           # Get URLs for zip and tar.gz files - getting browser_download_url instead of url
-          dry_run_zip_url=$(echo "$assets_response" | jq -r '.[] | select(.name | endswith(".zip") and (contains("additional") | not)) | .browser_download_url')
-          dry_run_tar_gz_url=$(echo "$assets_response" | jq -r '.[] | select(.name | endswith(".tar.gz")) | .browser_download_url')
+          dry_run_zip_url=$(echo "$assets_response" | jq -r '.[] | select(.name | test("^liquibase-dry-run-.*\\.zip$")) | .browser_download_url')
+          dry_run_tar_gz_url=$(echo "$assets_response" | jq -r '.[] | select(.name | test("^liquibase-dry-run-.*\\.tar\\.gz$")) | .browser_download_url')
 
           # Remove any newlines or spaces from URLs before setting outputs
           dry_run_zip_url=$(echo "$dry_run_zip_url" | tr -d '[:space:]')
@@ -89,7 +88,7 @@ jobs:
         with:
           workflow: release-published.yml
           token: ${{ secrets.BOT_TOKEN }}
-          inputs: '{"tag": "vdry-run-${{ github.run_id }}", "dry_run_release_id": "${{ needs.dry-run-create-release.outputs.dry_run_release_id }}", "dry_run_zip_url": "${{ needs.dry-run-create-release.outputs.dry_run_zip_url }}", "dry_run_tar_gz_url": "${{ needs.dry-run-create-release.outputs.dry_run_tar_gz_url }}", "dry_run": "true", "dry_run_branch_name": "${{ needs.dry-run-create-release.outputs.dry_run_branch_name }}"}'
+          inputs: '{"tag": "vdry-run-${{ github.run_id }}", "dry_run_release_id": "${{ needs.dry-run-create-release.outputs.dry_run_release_id }}", "dry_run_zip_url": "${{ needs.dry-run-create-release.outputs.dry_run_zip_url }}", "dry_run_tar_gz_url": "${{ needs.dry-run-create-release.outputs.dry_run_tar_gz_url }}", "dry_run": "true", "dry_run_branch_name": "${{ needs.setup.outputs.dry_run_branch_name }}"}'
           ref: fix-dry-run-builds
           wait-for-completion: true
           workflow-logs: json-output
