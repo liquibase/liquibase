@@ -67,18 +67,17 @@ jobs:
           EOF
           mv pkcs11properties.cfg $(pwd)/.github/util/
 
+      - name: Set branch variable
+        run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
 
       - name: Download liquibase-artifacts
         uses: dawidd6/action-download-artifact@v8
         with:
           workflow: run-tests.yml
           workflow_conclusion: success
-          branch: ${{ github.head_ref }}
+          branch: ${{ env.BRANCH }}
           name: liquibase-artifacts
           path: re-version/final
-
-      - name: Set branch variable
-        run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
 
       - name: Build Unsigned Windows Installer
         env:
