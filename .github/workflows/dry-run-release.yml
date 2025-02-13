@@ -65,8 +65,8 @@ jobs:
                              "$assets_url")
 
           # Get URLs for zip and tar.gz files - getting browser_download_url instead of url
-          dry_run_zip_url=$(echo "$assets_response" | jq -r '.[] | select(.name | endswith("liquibase-dry-run-${{ needs.setup.outputs.dry_run_id }}.zip")) | .browser_download_url')
-          dry_run_tar_gz_url=$(echo "$assets_response" | jq -r '.[] | select(.name | endswith("liquibase-dry-run-${{ needs.setup.outputs.dry_run_id }}.tar.gz")) | .browser_download_url')
+          dry_run_zip_url=$(echo "$assets_response" | jq -r '.[] | select(.name | endswith(".zip") and (contains("additional") | not)) | .browser_download_url')
+          dry_run_tar_gz_url=$(echo "$assets_response" | jq -r '.[] | select(.name | endswith(".tar.gz")) | .browser_download_url')
 
           # Remove any newlines or spaces from URLs before setting outputs
           dry_run_zip_url=$(echo "$dry_run_zip_url" | tr -d '[:space:]')
