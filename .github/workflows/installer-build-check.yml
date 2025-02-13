@@ -67,8 +67,6 @@ jobs:
           EOF
           mv pkcs11properties.cfg $(pwd)/.github/util/
 
-      - name: Install DigiCert KeyLocker Client Tools
-        uses: digicert/ssm-code-signing@v1.0.0
 
       - name: Download liquibase-artifacts
         uses: dawidd6/action-download-artifact@v8
@@ -113,8 +111,8 @@ jobs:
           --config-file "$(pwd)/.github/util/pkcs11properties.cfg" \
           --input "$INSTALLER_PATH" --tool jsign
           
-      # - name: Verify Windows Installer Signature
-      #   run: osslsigncode verify -in "$INSTALLER_PATH"
+      - name: Verify Windows Installer Signature
+        run: osslsigncode verify -in "$INSTALLER_PATH"
 
       - name: GPG Sign Artifacts (After Code Signing the Windows Installer)
         env:
