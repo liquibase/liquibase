@@ -173,13 +173,13 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
     public void setConnection(DatabaseConnection conn) {
         super.setConnection(conn);
 
-        configureSession();
+//        configureSession();
     }
 
     @Override
     public void rollback() throws DatabaseException {
         super.rollback();
-        configureSession();
+//        configureSession();
     }
 
     protected void configureSession() {
