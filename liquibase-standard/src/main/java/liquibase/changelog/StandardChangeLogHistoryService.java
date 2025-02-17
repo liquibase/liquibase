@@ -354,14 +354,13 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     @Override
     public List<RanChangeSet> getUniqueRanChangeSets() throws DatabaseException {
         if (this.ranChangeSetList == null) {
-            Database database = getDatabase();
             String databaseChangeLogTableName = getDatabase().escapeTableName(getLiquibaseCatalogName(),
                 getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
             List<RanChangeSet> ranChangeSets = new ArrayList<>();
             if (hasDatabaseChangeLogTable()) {
                 Scope.getCurrentScope().getLog(getClass()).info("Reading from " + databaseChangeLogTableName);
-                List<Map<String, ?>> results = queryDatabaseChangeLogTableUnique(database);
-                for (Map rs : results) {
+                List<Map<String, ?>> results = queryDatabaseChangeLogTableUnique();
+                for (Map<String, ?> rs : results) {
                     String storedFileName = rs.get("FILENAME").toString();
                     String fileName = DatabaseChangeLog.normalizePath(storedFileName);
                     String author = rs.get("AUTHOR").toString();
@@ -415,7 +414,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         return ChangelogJdbcMdcListener.query(getDatabase(), executor -> executor.queryForList(select));
     }
 
-    public List<Map<String, ?>> queryDatabaseChangeLogTableUnique(Database database) throws DatabaseException {
+    public List<Map<String, ?>> queryDatabaseChangeLogTableUnique() throws DatabaseException {
         SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement(
                 new SelectFromDatabaseChangeLogStatement.GroupByIdAuthorFilename(),
                 new ColumnConfig().setName("ID"), new ColumnConfig().setName("AUTHOR"), new ColumnConfig().setName("FILENAME"),
