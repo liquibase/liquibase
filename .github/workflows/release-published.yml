@@ -498,7 +498,7 @@ jobs:
           token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           repository: liquibase/build-logic
           event-type: oss-released-version
-          client-payload: '{"latest_version": "${{ needs.update-docs-oss-pro-version.outputs.latest_version }}", "repo_name": "${{ matrix.repo }}" }'
+          client-payload: '{"latest_version": "${{ needs.update-docs-oss-pro-version.outputs.latest_version }}", "repo_name": "${{ matrix.repo }}", "branch_name": "${{ github.ref }}" }'
 
   dry_run_deploy_maven:
     if: ${{ inputs.dry_run == true }}
