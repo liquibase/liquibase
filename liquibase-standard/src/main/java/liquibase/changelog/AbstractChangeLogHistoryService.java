@@ -1,18 +1,19 @@
 package liquibase.changelog;
 
-import liquibase.*;
+import liquibase.ChecksumVersion;
+import liquibase.Contexts;
+import liquibase.LabelExpression;
+import liquibase.Scope;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.executor.ExecutorService;
-import liquibase.resource.ResourceAccessor;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
+import liquibase.statement.core.UpdateChangeSetFilenameStatement;
 import lombok.Getter;
 
-import java.text.DecimalFormat;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -120,6 +121,17 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
     public void replaceChecksum(ChangeSet changeSet) throws DatabaseException {
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new UpdateChangeSetChecksumStatement
                 (changeSet));
+        getDatabase().commit();
+        reset();
+    }
+
+    @Override
+    public void replaceFilePath(ChangeSet changeSet, String oldPath) throws DatabaseException {
+        String idBeingReplaced = DatabaseChangeLog.normalizePath(oldPath) + "::" + changeSet.getId() + "::" + changeSet.getAuthor();
+         Scope.getCurrentScope().getLog(AbstractChangeLogHistoryService.class)
+                 .warning("Replacing path in databasechangelog table for changeset [" + idBeingReplaced + "] by [" + changeSet.getFilePath()+ "]");
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new UpdateChangeSetFilenameStatement
+                (changeSet, oldPath));
         getDatabase().commit();
         reset();
     }

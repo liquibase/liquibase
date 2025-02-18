@@ -287,4 +287,13 @@ class CommandUtil {
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
         commandScope.execute()
     }
+
+    static void runStatus(DatabaseTestSystem db, String changelog) {
+        CommandScope commandScope = new CommandScope(StatusCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+        commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changelog)
+        commandScope.execute()
+    }
 }
