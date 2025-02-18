@@ -7,8 +7,10 @@ import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.servicelocator.PrioritizedService;
+import liquibase.statement.DatabaseFunction;
+import org.apache.commons.lang3.StringUtils;
 
-@DataTypeInfo(name = "timestamp_ntz", aliases = {"java.sql.Types.DATETIME", "datetime"}, minParameters = 0, maxParameters = 0, priority = PrioritizedService.PRIORITY_DATABASE)
+@DataTypeInfo(name = "timestamp_ntz", aliases = {"java.sql.Types.DATETIME", "datetime", "timestampntz"}, minParameters = 0, maxParameters = 0, priority = PrioritizedService.PRIORITY_DATABASE)
 public class TimestampNTZTypeSnowflake extends LiquibaseDataType {
 
     @Override
@@ -36,5 +38,19 @@ public class TimestampNTZTypeSnowflake extends LiquibaseDataType {
         return PRIORITY_DATABASE;
     }
 
+    @Override
+    public String objectToSql(Object value, Database database) {
+        if (value instanceof java.sql.Timestamp) {
+            return String.format("TO_TIMESTAMP_NTZ(%s)", database.getDateLiteral(((java.sql.Timestamp) value)));
+        }
+        return super.objectToSql(value, database);
+    }
 
+    @Override
+    public Object sqlToObject(String value, Database database) {
+        if (StringUtils.containsIgnoreCase(value, "cast")) {
+            return new DatabaseFunction(value);
+        }
+        return super.sqlToObject(value, database);
+    }
 }
