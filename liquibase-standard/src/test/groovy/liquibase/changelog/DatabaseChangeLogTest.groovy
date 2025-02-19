@@ -7,6 +7,7 @@ import liquibase.Scope
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.RawSQLChange
 import liquibase.change.visitor.ChangeVisitor
+import liquibase.changelog.visitor.IncludeVisitor
 import liquibase.database.Database
 import liquibase.database.core.MockDatabase
 import liquibase.exception.SetupException
@@ -215,7 +216,7 @@ create view sql_view as select * from sql_table;'''
                 .addChildren([include: [file: "com/example/test1.xml"]])
                 .addChildren([include: [file: "com/example/test2.xml"]])
                 , resourceAccessor)
-
+        new IncludeVisitor().visit(rootChangeLog)
 
         then:
         rootChangeLog.preconditions.nestedPreconditions.size() == 3
@@ -258,7 +259,7 @@ create view sql_view as select * from sql_table;'''
         topLevel.addChild(modifyNode)
         rootChangeLog.load(topLevel, resourceAccessor)
 
-
+        new IncludeVisitor().visit(rootChangeLog)
         then:
 
         rootChangeLog.changeSets.size() == 3
@@ -284,6 +285,8 @@ create view sql_view as select * from sql_table;'''
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
                 .addChildren([includeAll: [path: "com/example", resourceComparator: "liquibase.changelog.ReversedChangeLogNamesComparator"]])
                 , resourceAccessor)
+
+        new IncludeVisitor().visit(rootChangeLog)
 
         then:
         rootChangeLog.preconditions.nestedPreconditions.size() == 4
@@ -330,7 +333,7 @@ create view sql_view as select * from sql_table;'''
                 .addChildren([includeAll: [path: "com/example", resourceComparator: "liquibase.changelog.ReversedChangeLogNamesComparator"]])
         topLevel.addChild(modifyNode)
         rootChangeLog.load(topLevel, resourceAccessor)
-
+        new IncludeVisitor().visit(rootChangeLog)
         then:
 
         rootChangeLog.changeSets.size() == 4
@@ -360,6 +363,8 @@ create view sql_view as select * from sql_table;'''
                 .addChildren([include: [file: "com/example/test1.xml", context: "context1", labels: "label1"]])
                 .addChildren([include: [file: "com/example/test2.xml", context: "context2", labels: "label2", ignore: true]])
                 , resourceAccessor)
+
+        new IncludeVisitor().visit(rootChangeLog)
 
         def test1ChangeLog = rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").getChangeLog()
         def test2ChangeLog = rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").getChangeLog()
@@ -552,7 +557,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
                 .addChildren([include: [file: "com/example/test1.invalid"]])
                 , resourceAccessor)
 
-
+        new IncludeVisitor().visit(rootChangeLog)
         then:
         def e = thrown(SetupException)
         e.message == "Cannot find parser that supports com/example/test1.invalid"
@@ -805,6 +810,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChildren([includeAll: [path: includedAllChangeLogPath, minDepth: minDepth, maxDepth: maxDepth, errorIfMissingOrEmpty: false]]), resourceAccessor)
 
+        new IncludeVisitor().visit(rootChangeLog)
         then:
         rootChangeLog.getChangeSets().size() == expectedIncludeAllChangesetsToDeploy
 
@@ -853,7 +859,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         def s1DatabaseChangeLog = new DatabaseChangeLog(s1RootChangelog)
         s1DatabaseChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChildren([includeAll: [relativeToChangelogFile: false, path: s1ChangelogPath, minDepth: minDepth, maxDepth: maxDepth, errorIfMissingOrEmpty: false]]), s1ResourceAccessor)
-
+        new IncludeVisitor().visit(s1DatabaseChangeLog)
 
         // Scenario 2: includeAll in root changelog, relativeToChangelogFile false, path from child
         def s2RootPath = "com/example"
@@ -874,7 +880,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         def s2DatabaseChangeLog = new DatabaseChangeLog(s2RootChangelog)
         s2DatabaseChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChildren([includeAll: [relativeToChangelogFile: false, path: s2ChangelogPath, minDepth: minDepth, maxDepth: maxDepth, errorIfMissingOrEmpty: false]]), s2ResourceAccessor)
-
+        new IncludeVisitor().visit(s2DatabaseChangeLog)
         // Scenario 3: includeAll in root changelog, relativeToChangelogFile true, path single child
         def s3RootPath = "com/example"
         def s3RootChangelog = s3RootPath + "/s3.xml"
@@ -899,7 +905,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
                                            maxDepth: maxDepth,
                                            errorIfMissingOrEmpty: false,
                                            modifyChangeSets: new ModifyChangeSets(null, null, true)]]), s3ResourceAccessor)
-
+        new IncludeVisitor().visit(s3DatabaseChangeLog)
 
         // Scenario 4: includeAll in root changelog, relativeToChangelogFile true, path multi child
         def s4RootPath = "com/example"
@@ -920,7 +926,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         def s4DatabaseChangeLog = new DatabaseChangeLog(s4RootChangelog)
         s4DatabaseChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChildren([includeAll: [relativeToChangelogFile: true, path: s4ChangelogPathRelative, minDepth: minDepth, maxDepth: maxDepth, errorIfMissingOrEmpty: false]]), s4ResourceAccessor)
-
+        new IncludeVisitor().visit(s4DatabaseChangeLog)
         // Scenario 5: includeAll in child changelog, relativeToChangelogFile false, path from root
         def s5RootPath = "com/example"
         def s5RootChangelog = s5RootPath + "/s5.xml"
@@ -943,7 +949,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         def s5DatabaseChangeLog = new DatabaseChangeLog(s5RootChangelog)
         s5DatabaseChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChildren([include: [relativeToChangelogFile: false, file: s5ChildChangelog]]), s5ResourceAccessor)
-
+        new IncludeVisitor().visit(s5DatabaseChangeLog)
         // Scenario 6: includeAll in child changelog, relativeToChangelogFile false, path from child
         def s6RootPath = "com/example"
         def s6RootChangelog = s6RootPath + "/s6.xml"
@@ -966,7 +972,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         def s6DatabaseChangeLog = new DatabaseChangeLog(s6RootChangelog)
         s6DatabaseChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChildren([include: [relativeToChangelogFile: false, file: s6ChildChangelog]]), s6ResourceAccessor)
-
+        new IncludeVisitor().visit(s6DatabaseChangeLog)
         // Scenario 7: includeAll in child changelog, relativeToChangelogFile true, path single child
         def s7RootPath = "com/example"
         def s7RootChangelog = s7RootPath + "/s7.xml"
@@ -989,7 +995,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         def s7DatabaseChangeLog = new DatabaseChangeLog(s7RootChangelog)
         s7DatabaseChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChildren([include: [relativeToChangelogFile: false, file: s7ChildChangelog]]), s7ResourceAccessor)
-
+        new IncludeVisitor().visit(s7DatabaseChangeLog)
         // Scenario 8: includeAll in child changelog, relativeToChangelogFile true, path multi child
         def s8RootPath = "com/example"
         def s8RootChangelog = s8RootPath + "/s8.xml"
@@ -1012,7 +1018,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         def s8DatabaseChangeLog = new DatabaseChangeLog(s8RootChangelog)
         s8DatabaseChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChildren([include: [relativeToChangelogFile: false, file: s8ChildChangelog]]), s8ResourceAccessor)
-
+        new IncludeVisitor().visit(s8DatabaseChangeLog)
         then:
         s1DatabaseChangeLog.getChangeSets().size() == expectedIncludeAllChangesetsToDeploy
         s2DatabaseChangeLog.getChangeSets().size() == expectedIncludeAllChangesetsToDeploy
@@ -1063,7 +1069,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         def rootChangeLog = new DatabaseChangeLog(rootChangeLogPath)
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChildren([includeAll: [path: includedAllChangeLogPath, endsWithFilter:endsWithFilter, errorIfMissingOrEmpty:false]]), resourceAccessor)
-
+        new IncludeVisitor().visit(rootChangeLog)
         then:
         rootChangeLog.getChangeSets().size() == expectedIncludeAllChangesetsToDeploy
 
