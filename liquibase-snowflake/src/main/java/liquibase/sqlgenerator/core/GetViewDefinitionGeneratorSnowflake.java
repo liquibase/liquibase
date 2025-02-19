@@ -7,6 +7,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.structure.core.View;
 
 /**
  * Snowflake-specific view definition generator.
@@ -30,9 +31,9 @@ public class GetViewDefinitionGeneratorSnowflake extends GetViewDefinitionGenera
         // We can use non quoted schema/catalog/view names here.
         // SELECT GET_DDL('VIEW', 'TEST.BAD$SCHEMA_NAME.BAD$%^VIEW_NAME', TRUE) - works fine.
         // "TRUE" means that the returned result will be in the full representation
+        String fullViewName = database.escapeObjectName(schema.getCatalogName(), schema.getSchemaName(), statement.getViewName(), View.class);
         return new Sql[] {
-            new UnparsedSql( "SELECT GET_DDL('VIEW', '"
-                + schema.getCatalogName() + "." + schema.getSchemaName() + "." + statement.getViewName() + "', TRUE)"
+            new UnparsedSql( "SELECT GET_DDL('VIEW', '" + fullViewName + "', TRUE)"
             )
         };
     }
