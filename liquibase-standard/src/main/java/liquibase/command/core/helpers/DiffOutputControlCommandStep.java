@@ -5,6 +5,8 @@ import liquibase.command.*;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.ObjectChangeFilter;
+import liquibase.diff.output.changelog.ChangeGeneratorFactory;
+import liquibase.diff.output.changelog.core.MissingDataExternalFileChangeGenerator;
 import liquibase.logging.mdc.MdcKey;
 
 import java.util.Collections;
@@ -14,13 +16,14 @@ import java.util.List;
  * Internal command step to be used on pipeline to instantiate a DiffOutputControl object that is mainly used
  * by diffChangeLog/generateChangeLog .
  */
-public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
+public class DiffOutputControlCommandStep extends AbstractHelperCommandStep implements CleanUpCommandStep{
 
     public static final String[] COMMAND_NAME = {"diffOutputControl"};
     public static final CommandArgumentDefinition<Boolean> INCLUDE_CATALOG_ARG;
     public static final CommandArgumentDefinition<Boolean> INCLUDE_SCHEMA_ARG;
     public static final CommandArgumentDefinition<Boolean> INCLUDE_TABLESPACE_ARG;
 
+    public static final CommandArgumentDefinition<String> DATA_OUTPUT_DIR_ARG;
     public static final CommandArgumentDefinition<String> EXCLUDE_OBJECTS;
     public static final CommandArgumentDefinition<String> INCLUDE_OBJECTS;
 
@@ -35,6 +38,8 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
                 .description("If true, the schema will be included in generated changeSets. Defaults to false.").build();
         INCLUDE_TABLESPACE_ARG = builder.argument("includeTablespace", Boolean.class).defaultValue(false)
                 .description("Include the tablespace attribute in the changelog. Defaults to false.").build();
+        DATA_OUTPUT_DIR_ARG = builder.argument("dataOutputDirectory", String.class)
+                .description("Specifies a directory to send the loadData output of a diff-changelog/generate-changelog command as a CSV file.").build();
 
         EXCLUDE_OBJECTS = builder.argument("excludeObjects", String.class).defaultValue(null)
                 .description("Objects to exclude from diff. Supports regular expressions. Defaults to null.").build();
@@ -77,6 +82,7 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
         Boolean includeCatalog = commandScope.getArgumentValue(INCLUDE_CATALOG_ARG);
         Boolean includeSchema = commandScope.getArgumentValue(INCLUDE_SCHEMA_ARG);
         Boolean includeTablespace = commandScope.getArgumentValue(INCLUDE_TABLESPACE_ARG);
+        String dataDir = commandScope.getArgumentValue(DATA_OUTPUT_DIR_ARG);
         addMdcProperties(includeCatalog, includeSchema, includeTablespace);
         DiffOutputControl diffOutputControl = new DiffOutputControl(
                 includeCatalog, includeSchema,
@@ -91,6 +97,7 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
         if (objectChangeFilter != null) {
             diffOutputControl.setObjectChangeFilter(objectChangeFilter);
         }
+        diffOutputControl.setDataDir(dataDir);
 
         return diffOutputControl;
     }
@@ -109,4 +116,8 @@ public class DiffOutputControlCommandStep extends AbstractHelperCommandStep {
                    "and they may need to be manually updated before being deployed.");
     }
 
+    @Override
+    public void cleanUp(CommandResultsBuilder resultsBuilder) {
+        ChangeGeneratorFactory.getInstance().unregisterAll(MissingDataExternalFileChangeGenerator.class);
+    }
 }

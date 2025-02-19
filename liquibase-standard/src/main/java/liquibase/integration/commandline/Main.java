@@ -33,9 +33,9 @@ import liquibase.ui.LoggerUIService;
 import liquibase.ui.UIService;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
-import liquibase.util.StringUtil;
 import liquibase.util.SystemUtil;
 import org.apache.commons.io.output.WriterOutputStream;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -799,11 +799,11 @@ public class Main {
         } else if (!isCommand(command)) {
             messages.add(String.format(coreBundle.getString("command.unknown"), command));
         } else {
-            if (StringUtil.trimToNull(url) == null && StringUtil.trimToNull(referenceUrl) == null) {
+            if (StringUtils.trimToNull(url) == null && StringUtils.trimToNull(referenceUrl) == null) {
                 messages.add(String.format(coreBundle.getString("option.required"), "--" + OPTIONS.URL));
             }
 
-            if (isChangeLogRequired(command) && (StringUtil.trimToNull(changeLogFile) == null)) {
+            if (isChangeLogRequired(command) && (StringUtils.trimToNull(changeLogFile) == null)) {
                 messages.add(String.format(coreBundle.getString("option.required"), "--" + OPTIONS.CHANGELOG_FILE));
             }
 
@@ -866,6 +866,7 @@ public class Main {
                             && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.FORMAT.toLowerCase())
                             && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.HELP.toLowerCase())
                             && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT.toLowerCase())
+                            && !caseInsensitiveCommandParam.startsWith("--" + OPTIONS.DATA_OUTPUT_DIRECTORY.toLowerCase())
                     ) {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                     }
@@ -1224,7 +1225,7 @@ public class Main {
         String attributeName = splitArg[0];
         String value = splitArg[1];
 
-        if (PROMPT_FOR_VALUE.equalsIgnoreCase(StringUtil.trimToEmpty(value))) {
+        if (PROMPT_FOR_VALUE.equalsIgnoreCase(StringUtils.trimToEmpty(value))) {
             Console c = System.console();
             if (c == null) {
                 throw new CommandLineParsingException(
@@ -1752,9 +1753,9 @@ public class Main {
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_TABLESPACE_ARG, includeTablespace)
                 .addArgumentValue(DiffOutputControlCommandStep.EXCLUDE_OBJECTS, excludeObjects)
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_OBJECTS, includeObjects)
-                .addArgumentValue(GenerateChangelogCommandStep.AUTHOR_ARG, StringUtil.trimToNull(changeSetAuthor))
-                .addArgumentValue(GenerateChangelogCommandStep.CONTEXT_ARG, StringUtil.trimToNull(changeSetContext))
-                .addArgumentValue(GenerateChangelogCommandStep.DATA_OUTPUT_DIR_ARG, StringUtil.trimToNull(dataOutputDirectory))
+                .addArgumentValue(GenerateChangelogCommandStep.AUTHOR_ARG, StringUtils.trimToNull(changeSetAuthor))
+                .addArgumentValue(GenerateChangelogCommandStep.CONTEXT_ARG, StringUtils.trimToNull(changeSetContext))
+                .addArgumentValue(DiffOutputControlCommandStep.DATA_OUTPUT_DIR_ARG, StringUtils.trimToNull(dataOutputDirectory))
                 .addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, shouldOverwriteOutputFile)
                 .setOutput(System.out);
 
@@ -1770,7 +1771,8 @@ public class Main {
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_TABLESPACE_ARG, includeTablespace)
                 .addArgumentValue(DiffOutputControlCommandStep.EXCLUDE_OBJECTS, excludeObjects)
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_OBJECTS, includeObjects)
-                .addArgumentValue(DiffChangelogCommandStep.AUTHOR_ARG, StringUtil.trimToNull(changeSetAuthor))
+                .addArgumentValue(DiffOutputControlCommandStep.DATA_OUTPUT_DIR_ARG, StringUtils.trimToNull(dataOutputDirectory))
+                .addArgumentValue(DiffChangelogCommandStep.AUTHOR_ARG, StringUtils.trimToNull(changeSetAuthor))
                 .setOutput(getOutputStream());
 
         this.setPreCompareArgumentsToCommand(diffChangelogCommand);
