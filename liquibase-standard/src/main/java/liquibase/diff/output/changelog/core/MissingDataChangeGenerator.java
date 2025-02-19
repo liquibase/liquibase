@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public class MissingDataChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
@@ -113,6 +114,8 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
 
             while (rs.next()) {
                 InsertDataChange change = new InsertDataChange();
+                change.setPreserveNullValues(outputControl.getPreserveNullValues());
+
                 if (outputControl.getIncludeCatalog()) {
                     change.setCatalogName(table.getSchema().getCatalogName());
                 }
@@ -125,9 +128,12 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                 for (int i = 0; i < columnNames.size(); i++) {
                     ColumnConfig column = new ColumnConfig();
                     column.setName(columnNames.get(i));
+
                     Object value = JdbcUtil.getResultSetValue(rs, i + 1);
                     if (value == null) {
-                        column.setValue(null);
+                        if (outputControl.getPreserveNullValues()) {
+                            column.setValue(null);
+                        }
                     } else if (value instanceof Number) {
                         column.setValueNumeric((Number) value);
                     } else if (value instanceof Boolean) {
@@ -143,7 +149,15 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                         column.setValue(value.toString());
                     }
 
-                    change.addColumn(column);
+                    if (!outputControl.getPreserveNullValues() && !column.hasValueObject()) {
+                        Set<String> fields = column.getSerializableFields();
+                        if (fields.size() == 1 && fields.contains("name")) {
+                            continue;
+                        }
+                    }
+                    if (column.isSerializable(outputControl.getPreserveNullValues())) {
+                        change.addColumn(column);
+                    }
                 }
 
                 // for each row, add a new change

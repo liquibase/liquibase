@@ -87,13 +87,14 @@ class AbstractChangeTest extends Specification {
         changeMetaData.getPriority() == 1
         changeMetaData.getAppliesTo() == null
 
-        parameters.size() == 3
+        parameters.size() == 4
         ChangeParameterMetaData dbmsMetaData = parameters.get("dbms")
         ChangeParameterMetaData paramOneMetaData = parameters.get("paramOne")
         ChangeParameterMetaData paramTwoMetaData = parameters.get("paramTwo")
         ChangeParameterMetaData paramNoMetaData = parameters.get("paramNoMetadata")
         ChangeParameterMetaData paramNotIncludedMetaData = parameters.get("paramNotIncluded")
         ChangeParameterMetaData paramNoWriteMethodMetaData = parameters.get("paramNoWriteMethod")
+        ChangeParameterMetaData preserveNullValues = parameters.get("preserveNullValues")
 
         dbmsMetaData == null
         paramOneMetaData != null
@@ -112,6 +113,12 @@ class AbstractChangeTest extends Specification {
         assertTrue(paramTwoMetaData.getRequiredForDatabase().contains("mysql"))
         assertTrue(paramTwoMetaData.getRequiredForDatabase().contains("mssql"))
 
+        preserveNullValues.getParameterName() == "preserveNullValues"
+        preserveNullValues.getDisplayName() == "Preserve Null Values"
+        preserveNullValues.getDataType() == "boolean"
+        preserveNullValues.getMustEqualExisting() == null
+        preserveNullValues.getRequiredForDatabase().isEmpty()
+
         paramNoMetaData != null
         paramNotIncludedMetaData == null
         assert paramNoWriteMethodMetaData == null : "Properties with no write method should not be included"
@@ -124,7 +131,15 @@ class AbstractChangeTest extends Specification {
         Map<String, ChangeParameterMetaData> parameters = changeMetaData.getParameters()
 
         then:
-        parameters.size() == 0
+        parameters.size() == 1
+
+        ChangeParameterMetaData preserveNullValues = parameters.get("preserveNullValues")
+
+        preserveNullValues.getParameterName() == "preserveNullValues"
+        preserveNullValues.getDisplayName() == "Preserve Null Values"
+        preserveNullValues.getDataType() == "boolean"
+        preserveNullValues.getMustEqualExisting() == null
+        preserveNullValues.getRequiredForDatabase().isEmpty()
     }
 
     def createChangeParameterMetadata_invalidParamNameEmptyParams() throws Exception {
