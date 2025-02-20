@@ -75,7 +75,7 @@ public class JdbcExecutor extends AbstractExecutor {
                 throw new DatabaseException("Cannot execute commands against an offline database");
             }
             stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement();
-            if (Boolean.TRUE.equals(SqlConfiguration.ALWAYS_SET_FETCH_SIZE.getCurrentValue())) {
+            if (database instanceof OracleDatabase && Boolean.TRUE.equals(SqlConfiguration.ALWAYS_SET_FETCH_SIZE.getCurrentValue())) {
                 stmt.setFetchSize(database.getFetchSize());
             }
             Statement stmtToUse = stmt;
@@ -238,7 +238,9 @@ public class JdbcExecutor extends AbstractExecutor {
 
             try (PreparedStatement pstmt = factory.create(finalSql)) {
                 setParameters(pstmt, (RawParameterizedSqlStatement) sql);
-                return rse.extractData(pstmt.executeQuery());
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    return rse.extractData(rs);
+                }
             } catch (SQLException e) {
                 throw new DatabaseException(e);
             }
@@ -481,7 +483,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
                 Level sqlLogLevel = SqlConfiguration.SHOW_AT_LOG_LEVEL.getCurrentValue();
 
-                log.log(sqlLogLevel, statement, null);
+                log.log(sqlLogLevel, System.lineSeparator() + statement, null);
                 if (statement.contains("?")) {
                     stmt.setEscapeProcessing(false);
                 }

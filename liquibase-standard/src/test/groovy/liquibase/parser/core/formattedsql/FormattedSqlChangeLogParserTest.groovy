@@ -2,7 +2,9 @@ package liquibase.parser.core.formattedsql
 
 import liquibase.Contexts
 import liquibase.LabelExpression
+import liquibase.Scope
 import liquibase.change.AbstractSQLChange
+import liquibase.change.Change
 import liquibase.change.core.EmptyChange
 import liquibase.change.core.RawSQLChange
 import liquibase.changelog.ChangeLogParameters
@@ -10,6 +12,8 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.core.MockDatabase
 import liquibase.exception.ChangeLogParseException
+import liquibase.exception.MigrationFailedException
+import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.SqlPrecondition
 import liquibase.resource.ResourceAccessor
@@ -409,6 +413,26 @@ create table table1 (
 );
 """.trim()
 
+    private static final String INVALID_CHANGELOG_WITH_LEXICAL_ERROR =
+"""-- liquibase formatted sql
+
+-- changeset postgres:1
+CREATE TABLE public.PersonsMe (
+    PersonID int,
+    LastName varchar(255),
+    FirstName varchar(255),
+    Address varchar(255),
+    City varchar(255)
+);
+
+-- changeset postgres:2
+CREATE TABLE public.Persons (
+    PersonID int�
+    LastName varchar(255),
+    FirstName varchar(255),
+    Address varchar(255),
+    City varchar(255)
+);"""
     def supports() throws Exception {
         expect:
         assert new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).supports("asdf.sql", new JUnitResourceAccessor())
@@ -440,6 +464,24 @@ create table table1 (
         assert e instanceof ChangeLogParseException
         assert e.getMessage().toLowerCase().contains("--precondition-sql-check")
         assert e.getMessage().contains("Unexpected formatting in formatted changelog 'asdf.sql' at line 4.")
+    }
+
+    def invalidWithLexicalError() throws Exception {
+        when:
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_WITH_LEXICAL_ERROR).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        def change = changeLog.getChangeSets().get(1).getChanges().get(0)
+        Map<String, Object> scopeValues = new HashMap<>();
+        scopeValues.put(ChangeSet.CHANGE_KEY, change);
+        Scope.child(scopeValues, new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                change.generateStatements(new MockDatabase())
+            }
+        })
+
+        then:
+        def e = thrown(UnexpectedLiquibaseException.class)
+        assert e.getMessage().contains("asdf.sql::2::postgres (issue at line 14 of lines 13-19)")
     }
 
     def parse() throws Exception {
