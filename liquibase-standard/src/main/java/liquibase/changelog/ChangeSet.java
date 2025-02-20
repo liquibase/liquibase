@@ -32,7 +32,9 @@ import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sql.visitor.SqlVisitorFactory;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
+import liquibase.util.SqlUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
@@ -1680,7 +1682,17 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             statementsReference.set(statements);
 
             String formattedStatements = Arrays.stream(statementsReference.get())
-                    .map(SqlStatement::getFormattedStatement)
+                    .map(statement -> {
+
+                        // If it returns the toString() (like "liquibase.statement.core.DropTableStatement@57927f4f"),
+                        // then fall back to the old behavior for SQL statements
+                        String formatted = statement.getFormattedStatement();
+                        if (formatted != null && formatted.contains("@") && formatted.startsWith("liquibase.statement.")) {
+                            return SqlUtil.getSqlString(statement, SqlGeneratorFactory.getInstance(), database);
+                        }
+
+                        return formatted;
+                    })
                     .filter(Objects::nonNull)
                     .collect(Collectors.joining("\n"));
             commandsMdc.append(formattedStatements);
