@@ -238,7 +238,9 @@ public class JdbcExecutor extends AbstractExecutor {
 
             try (PreparedStatement pstmt = factory.create(finalSql)) {
                 setParameters(pstmt, (RawParameterizedSqlStatement) sql);
-                return rse.extractData(pstmt.executeQuery());
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    return rse.extractData(rs);
+                }
             } catch (SQLException e) {
                 throw new DatabaseException(e);
             }
