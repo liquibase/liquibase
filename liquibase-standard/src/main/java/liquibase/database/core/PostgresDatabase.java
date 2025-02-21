@@ -340,7 +340,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected SqlStatement getConnectionSchemaNameCallStatement() {
-        return new RawCallStatement("select current_schema()");
+        return new RawCallStatement("select lower(current_schema())");
     }
 
     /**
