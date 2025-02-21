@@ -24,6 +24,7 @@
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-standard</artifactId>
             <version>${project.version}</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
