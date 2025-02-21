@@ -42,7 +42,6 @@ public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
     public static final CommandArgumentDefinition<String> CONTEXT_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
     public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
-    public static final CommandArgumentDefinition<String> DATA_OUTPUT_DIR_ARG;
     public static final CommandArgumentDefinition<Boolean> OVERWRITE_OUTPUT_FILE_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_URL_ARG;
@@ -75,8 +74,6 @@ public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
                 .addAlias("contexts")
                 .description("Changeset contexts to generate")
                 .build();
-        DATA_OUTPUT_DIR_ARG = builder.argument("dataOutputDirectory", String.class)
-                .description("Directory to write table data to").build();
         OVERWRITE_OUTPUT_FILE_ARG = builder.argument("overwriteOutputFile", Boolean.class)
                 .defaultValue(false).description("Flag to allow overwriting of output changelog file. Default: false").build();
 
@@ -129,7 +126,6 @@ public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
         final Database referenceDatabase = (Database) commandScope.getDependency(ReferenceDatabase.class);
         DbUrlConnectionCommandStep.logMdc(referenceDatabase.getConnection().getURL(), referenceDatabase);
         DiffOutputControl diffOutputControl = (DiffOutputControl) resultsBuilder.getResult(DiffOutputControlCommandStep.DIFF_OUTPUT_CONTROL.getName());
-        diffOutputControl.setDataDir(commandScope.getArgumentValue(DATA_OUTPUT_DIR_ARG));
         referenceDatabase.setOutputDefaultSchema(diffOutputControl.getIncludeSchema());
 
         if (commandScope.getArgumentValue(GenerateChangelogCommandStep.USE_OR_REPLACE_OPTION)) {
