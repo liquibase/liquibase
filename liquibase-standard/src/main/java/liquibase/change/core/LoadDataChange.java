@@ -403,7 +403,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                                         r = Scope.getCurrentScope().getResourceAccessor().get(value);
                                     }
                                 } catch (InvalidPathException e) {
-                                    LOG.fine(String.format("Could not find file [%s] in [%s]: %s", value, getRelativeTo(), e.getMessage()));
+                                    Scope.getCurrentScope().getLog(LoadDataChange.class).fine(String.format("Could not find file [%s] in [%s]: %s", value, getRelativeTo(), e.getMessage()));
                                 }
                                 resourceExists = r != null && r.exists();
                             }
