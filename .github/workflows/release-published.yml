@@ -252,27 +252,7 @@ jobs:
           aws s3 sync . s3://javadocsliquibasecom-origin --only-show-errors
 
 
-  trigger-sbom-generation-lb-lbpo:
-    if: ${{ inputs.dry_run == false }}
-    name: Generate SBOMS for liquibase and liquibase-pro
-    runs-on: ubuntu-latest
-    needs: [ setup ]
-    strategy:
-      matrix:
-        repo: [ 'liquibase/liquibase', 'liquibase/liquibase-pro' ]
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
-          repository: ${{ matrix.repo }}
-          event-type: oss-released-version
-          client-payload: '{"latest_version": "${{ steps.get_latest_oss_version.outputs.latest_version }}"'
-
+  
   publish_to_github_packages:
     if: ${{ inputs.dry_run == false }}
     name: Publish artifacts to Github Packages
@@ -414,22 +394,21 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Release liquibase/docker v${{ needs.setup.outputs.version }}
-        uses: codex-/return-dispatch@v2
+        uses: the-actions-org/workflow-dispatch@v4
         id: docker_dispatch
         with:
-          token: ${{ secrets.BOT_TOKEN }}
-          ref: main
-          repo: docker
-          owner: liquibase
           workflow: create-release.yml
-          workflow_inputs: '{ "liquibaseVersion": "${{ needs.setup.outputs.version }}", "dryRun": "${{ inputs.dry_run || false }}" }'
-          workflow_timeout_seconds: 300
-          workflow_job_steps_retry_seconds: 10
+          token: ${{ secrets.BOT_TOKEN }}
+          inputs: '{ "liquibaseVersion": "${{ needs.setup.outputs.version }}", "dryRun": "${{ inputs.dry_run || false }}" }'
+          ref: main
+          repo: liquibase/docker
+          wait-for-completion: true
+          workflow-logs: json-output
 
       - name: Adding Docker run to job summary
         if: success()
         continue-on-error: true
-        run: echo '### 🐳 Docker Release Job -> ${{steps.docker_dispatch.outputs.run_url}}' >> $GITHUB_STEP_SUMMARY
+        run: echo '### 🐳 Docker Release Job -> ${{steps.docker_dispatch.outputs.workflow-url}}' >> $GITHUB_STEP_SUMMARY
 
   generate-PRO-tag:
     if: ${{ inputs.dry_run == false }}
@@ -455,6 +434,7 @@ jobs:
       dry_run: ${{ inputs.dry_run || false}}
       dry_run_zip_url: ${{ inputs.dry_run_zip_url || '' }}
       dry_run_tar_gz_url: ${{ inputs.dry_run_tar_gz_url || '' }}
+      dry_run_release_id: ${{ inputs.dry_run_release_id || '' }}
 
   update-docs-oss-pro-version:
     if: ${{ inputs.dry_run == false }}
@@ -498,6 +478,27 @@ jobs:
           token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           repository: liquibase/liquibase-aws-license-service
           event-type: oss-released-version
+
+  trigger-sbom-generation-lb-lbpo:
+    if: ${{ inputs.dry_run == false }}
+    name: Generate SBOMS for liquibase and liquibase-pro
+    runs-on: ubuntu-latest
+    needs: [ setup, update-docs-oss-pro-version ]
+    strategy:
+      matrix:
+        repo: [ 'liquibase/liquibase', 'liquibase/liquibase-pro' ]
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          repository: liquibase/build-logic
+          event-type: oss-released-version
+          client-payload: '{"latest_version": "${{ needs.update-docs-oss-pro-version.outputs.latest_version }}", "repo_name": "${{ matrix.repo }}", "branch_name": "${{ github.ref }}" }'
 
   dry_run_deploy_maven:
     if: ${{ inputs.dry_run == true }}
