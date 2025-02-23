@@ -53,6 +53,7 @@ import static liquibase.Scope.getCurrentScope;
  */
 public class ChangeSet implements Conditional, ChangeLogChild {
 
+    public static final String CHANGE_KEY = "change";
     protected CheckSum checkSum;
     /**
      * storedChecksum is used to make the checksum of a changeset that has already been run
@@ -721,6 +722,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     execType = ExecType.SKIPPED;
 
                     getCurrentScope().getLog(getClass()).info("Continuing past: " + this + " despite precondition failure due to onFail='CONTINUE': " + message);
+                    this.getChangeLog().getSkippedBecauseOfPreconditionsChangeSets().add(this);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.MARK_RAN)) {
                     execType = ExecType.MARK_RAN;
                     skipChange = true;
@@ -748,7 +750,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.CONTINUE)) {
                     skipChange = true;
                     execType = ExecType.SKIPPED;
-
+                    this.getChangeLog().getSkippedBecauseOfPreconditionsChangeSets().add(this);
                 } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.MARK_RAN)) {
                     execType = ExecType.MARK_RAN;
                     skipChange = true;
@@ -775,8 +777,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 }
 
                 log.fine("Reading ChangeSet: " + this);
-                for (Change change : getChanges()) {
-                    if ((!(change instanceof DbmsTargetedChange)) || DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
+                for (Change change : changes) {
+                    execType = isChangeToSkip(change, database, log);
+                    if (execType != ExecType.SKIPPED) {
                         if (listener != null) {
                             listener.willRun(change, this, changeLog, database);
                         }
@@ -792,8 +795,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                         if (listener != null) {
                             listener.ran(change, this, changeLog, database);
                         }
-                    } else {
-                        log.fine("Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
                     }
                 }
 
@@ -807,7 +808,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 setStopTime();
                 getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, stopInstant.toString());
                 getCurrentScope().addMdcValue(MdcKey.CHANGESET_OUTCOME, execType.value.toLowerCase());
-                log.info("ChangeSet " + toString(false) + " ran successfully in " + getExecutionMilliseconds() + "ms");
+                if (execType != ExecType.SKIPPED) {
+                    log.info("ChangeSet " + toString(false) + " ran successfully in " + getExecutionMilliseconds() + "ms");
+                } else {
+                    log.fine("Skipping ChangeSet: " + this);
+                }
             } else {
                 log.fine("Skipping ChangeSet: " + this);
             }
@@ -853,6 +858,24 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
         return execType;
+    }
+
+    private ExecType isChangeToSkip(Change change, Database database, Logger log) {
+        boolean skipChangeForDbms =
+           (change instanceof DbmsTargetedChange &&
+              ! DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true));
+        boolean skipExecChange = ! change.shouldRunOnOs();
+        if (skipChangeForDbms) {
+            log.fine("Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
+        }
+        if (skipExecChange) {
+            log.fine("Change " + change.getSerializedObjectName() + " not included: " + change.getConfirmationMessage());
+            change.getChangeSet().getChangeLog().getSkippedBecauseOfOsMismatchChangeSets().add(change.getChangeSet());
+        }
+        if (skipChangeForDbms || skipExecChange) {
+            return ExecType.SKIPPED;
+        }
+        return null;
     }
 
     private void setStopTime() {
@@ -1650,6 +1673,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         AtomicReference<SqlStatement[]> statementsReference = new AtomicReference<>();
         Map<String, Object> scopeValues = new HashMap<>();
         scopeValues.put(Change.SHOULD_EXECUTE, Boolean.FALSE);
+        scopeValues.put(CHANGE_KEY, change);
         StringBuilder sqlStatementsMdc = new StringBuilder();
         Scope.child(scopeValues, () -> {
             statementsReference.set(generateRollbackStatements ?
