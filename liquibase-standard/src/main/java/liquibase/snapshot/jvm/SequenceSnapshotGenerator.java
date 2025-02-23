@@ -190,20 +190,14 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
             if (catalogName == null || catalogName.isEmpty()) {
                 catalogName = database.getDefaultCatalogName();
             }
-            StringBuilder sql = new StringBuilder("SELECT sequence_name, \n")
-                    .append("CASE WHEN increment_by > 0 \n")
-                    .append("     THEN CASE WHEN min_value=1 THEN NULL ELSE min_value END\n")
-                    .append("     ELSE CASE WHEN min_value=(-999999999999999999999999999) THEN NULL else min_value END\n")
-                    .append("END AS min_value, \n")
-                    .append("CASE WHEN increment_by > 0 \n")
-                    .append("     THEN CASE WHEN max_value=999999999999999999999999999 THEN NULL ELSE max_value END\n")
-                    .append("     ELSE CASE WHEN max_value=last_number THEN NULL else max_value END \n")
-                    .append("END  AS max_value, \n")
-                    .append("CASE WHEN increment_by = 1 THEN NULL ELSE increment_by END AS increment_by, \n")
-                    .append("CASE WHEN cycle_flag = 'N' THEN NULL ELSE cycle_flag END AS will_cycle, \n")
-                    .append("CASE WHEN order_flag = 'N' THEN NULL ELSE order_flag END AS is_ordered, \n")
+            StringBuilder sql = new StringBuilder("SELECT SEQUENCE_NAME, \n")
+                    .append("MIN_VALUE, \n")
+                    .append("MAX_VALUE, \n")
+                    .append("INCREMENT_BY, \n")
+                    .append("CYCLE_FLAG AS WILL_CYCLE, \n")
+                    .append("ORDER_FLAG AS IS_ORDERED, \n")
                     .append("LAST_NUMBER as START_VALUE, \n")
-                    .append("CASE WHEN cache_size = 20 THEN NULL ELSE cache_size END AS cache_size \n")
+                    .append("CACHE_SIZE \n")
                     .append(String.format("FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '%s'", catalogName));
             return new RawParameterizedSqlStatement(sql.toString());
         } else if (database instanceof PostgresDatabase) {

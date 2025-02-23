@@ -25,10 +25,8 @@ import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
-import liquibase.parser.core.json.JsonChangeLogParser;
+import liquibase.parser.core.ParserSupportedFileExtension;
 import liquibase.parser.core.sql.SqlChangeLogParser;
-import liquibase.parser.core.xml.XMLChangeLogSAXParser;
-import liquibase.parser.core.yaml.YamlParser;
 import liquibase.precondition.Conditional;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.Resource;
@@ -108,7 +106,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     @Getter
     private final List<ChangeSet> skippedChangeSets = new ArrayList<>();
     @Getter
+    private final List<ChangeSet> skippedBecauseOfOsMismatchChangeSets = new ArrayList<>();
+    @Getter
     private final List<ChangeSet> skippedBecauseOfLicenseChangeSets = new ArrayList<>();
+    @Getter
+    private final List<ChangeSet> skippedBecauseOfPreconditionsChangeSets = new ArrayList<>();
 
     @Getter
     private ChangeLogParameters changeLogParameters;
@@ -176,6 +178,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     public void setPhysicalFilePath(String physicalFilePath) {
         this.physicalFilePath = physicalFilePath;
+    }
+
+    public String getRawLogicalFilePath() {
+        return logicalFilePath;
     }
 
     public String getLogicalFilePath() {
@@ -398,11 +404,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         ExceptionUtil.doSilently(() -> {
             String physicalFilePathLowerCase = this.physicalFilePath.toLowerCase();
-            if (JsonChangeLogParser.SUPPORTED_EXTENSIONS.stream().anyMatch(ext -> physicalFilePathLowerCase.endsWith(ext))) {
+            if (ParserSupportedFileExtension.JSON_SUPPORTED_EXTENSIONS.stream().anyMatch(physicalFilePathLowerCase::endsWith)) {
                 Scope.getCurrentScope().getAnalyticsEvent().incrementJsonChangelogCount();
-            } else if (XMLChangeLogSAXParser.SUPPORTED_EXTENSIONS.stream().anyMatch(ext -> physicalFilePathLowerCase.endsWith(ext))) {
+            } else if (ParserSupportedFileExtension.XML_SUPPORTED_EXTENSIONS.stream().anyMatch(physicalFilePathLowerCase::endsWith)) {
                 Scope.getCurrentScope().getAnalyticsEvent().incrementXmlChangelogCount();
-            } else if (YamlParser.SUPPORTED_EXTENSIONS.stream().anyMatch(ext -> physicalFilePathLowerCase.endsWith(ext))) {
+            } else if (ParserSupportedFileExtension.YAML_SUPPORTED_EXTENSIONS.stream().anyMatch(physicalFilePathLowerCase::endsWith)) {
                 Scope.getCurrentScope().getAnalyticsEvent().incrementYamlChangelogCount();
             }
         });
@@ -1119,10 +1125,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).init();
             ranChangeSets = database.getRanChangeSetList();
         }
-        String changelogLogicalFilePath = this.logicalFilePath;
-        if (changelogLogicalFilePath != null) {
-            logicalFilePath = changelogLogicalFilePath;
-        }
+
+        String actualLogicalFilePath = getActualLogicalFilePath(logicalFilePath, changeLog);
+
         for (ChangeSet changeSet : changeLog.getChangeSets()) {
             if (modifyChangeSets != null) {
                 modifyChangeSets(modifyChangeSets, changeSet);
@@ -1134,11 +1139,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             // of another DBCL entry.  Also, skip setting the logical file
             // path for raw SQL change sets
             //
-            if (logicalFilePath != null && changeSet.getLogicalFilePath() == null &&
+            if (actualLogicalFilePath != null && changeSet.getLogicalFilePath() == null &&
                 ! (parser instanceof SqlChangeLogParser) && ! ranChangeSetExists(changeSet, ranChangeSets)) {
-                changeSet.setLogicalFilePath(logicalFilePath);
-                if (StringUtils.isNotEmpty(logicalFilePath)) {
-                    changeSet.setFilePath(logicalFilePath);
+                changeSet.setLogicalFilePath(actualLogicalFilePath);
+                if (StringUtils.isNotEmpty(actualLogicalFilePath)) {
+                    changeSet.setFilePath(actualLogicalFilePath);
                 }
             }
             addChangeSet(changeSet);
@@ -1146,6 +1151,23 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         skippedChangeSets.addAll(changeLog.getSkippedChangeSets());
 
         return true;
+    }
+
+    /**
+     * Search for the closest logicalfilePath for this changelog
+     */
+    private String getActualLogicalFilePath(String logicalFilePath, DatabaseChangeLog changeLog) {
+        DatabaseChangeLog currentChangeLog = changeLog;
+        do {
+            if (StringUtils.isNotBlank(currentChangeLog.getRawLogicalFilePath())) {
+                return currentChangeLog.getRawLogicalFilePath();
+            }
+        } while ((currentChangeLog = currentChangeLog.getParentChangeLog()) != null);
+
+        if (StringUtils.isNotBlank(this.getRawLogicalFilePath())) {
+            return this.getRawLogicalFilePath();
+        }
+        return logicalFilePath;
     }
 
     /**

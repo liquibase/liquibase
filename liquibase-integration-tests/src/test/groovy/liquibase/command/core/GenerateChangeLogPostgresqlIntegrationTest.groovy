@@ -24,6 +24,10 @@ class GenerateChangeLogPostgresqlIntegrationTest extends Specification {
             .getSingleton(TestSystemFactory.class)
             .getTestSystem("postgresql")
 
+    def cleanupSpec() {
+        CommandUtil.runDropAll(db)
+    }
+
     private void callGenerateChangeLog(
             String outputFileName,
             String excludeObjects,
@@ -43,21 +47,19 @@ class GenerateChangeLogPostgresqlIntegrationTest extends Specification {
         if (null != includeObjects) {
             commandScope.addArgumentValue(DiffOutputControlCommandStep.INCLUDE_OBJECTS, includeObjects)
         }
-        OutputStream outputStream = new ByteArrayOutputStream()
-        commandScope.setOutput(outputStream)
         commandScope.execute()
     }
 
     def "Should export full database table TEST when neither excludeObjects nor includeObjects are used"() {
         given:
         db.executeSql("""
-CREATE TABLE "TEST" (
+CREATE TABLE "public"."TEST" (
     AFOO VARCHAR(4),
     BFOO VARCHAR(4),
     FOO  VARCHAR(4),
     FOOL VARCHAR(4)
 );
-INSERT INTO "TEST" (AFOO, BFOO, FOO, FOOL) VALUES ('AFOO', 'BFOO', 'FOO', 'FOOL');
+INSERT INTO "public"."TEST" (AFOO, BFOO, FOO, FOOL) VALUES ('AFOO', 'BFOO', 'FOO', 'FOOL');
 COMMIT;
 """)
 
@@ -67,6 +69,7 @@ COMMIT;
 
         then:
         def outputFile = new File(outputFileName)
+        outputFile.exists()
         def contents = FileUtil.getContents(outputFile)
         contents.contains("""
 INSERT INTO "public"."TEST" ("afoo", "bfoo", "foo", "fool") VALUES ('AFOO', 'BFOO', 'FOO', 'FOOL');
@@ -80,20 +83,19 @@ INSERT INTO "public"."TEST" ("afoo", "bfoo", "foo", "fool") VALUES ('AFOO', 'BFO
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(db)
         outputFile.delete()
     }
 
     def "Should export database table TEST by applying includeObjects filter"() {
         given:
         db.executeSql("""
-CREATE TABLE "TEST" (
+CREATE TABLE "public"."TEST" (
     AFOO VARCHAR(4),
     BFOO VARCHAR(4),
     FOO  VARCHAR(4),
     FOOL VARCHAR(4)
 );
-INSERT INTO "TEST" (AFOO, BFOO, FOO, FOOL) VALUES ('AFOO', 'BFOO', 'FOO', 'FOOL');
+INSERT INTO "public"."TEST" (AFOO, BFOO, FOO, FOOL) VALUES ('AFOO', 'BFOO', 'FOO', 'FOOL');
 COMMIT;
 """)
 
@@ -116,19 +118,19 @@ INSERT INTO "public"."TEST" ("afoo", "bfoo", "fool") VALUES ('AFOO', 'BFOO', 'FO
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(db)
+        outputFile.delete()
     }
 
     def "Should export database table TEST by applying excludeObjects filter out some columns"() {
         given:
         db.executeSql("""
-CREATE TABLE "TEST" (
+CREATE TABLE "public"."TEST" (
     AFOO VARCHAR(4),
     BFOO VARCHAR(4),
     FOO  VARCHAR(4),
     FOOL VARCHAR(4)
 );
-INSERT INTO "TEST" (AFOO, BFOO, FOO, FOOL) VALUES ('AFOO', 'BFOO', 'FOO', 'FOOL');
+INSERT INTO "public"."TEST" (AFOO, BFOO, FOO, FOOL) VALUES ('AFOO', 'BFOO', 'FOO', 'FOOL');
 COMMIT;
 """)
 
@@ -151,20 +153,19 @@ INSERT INTO "public"."TEST" ("foo", "fool") VALUES ('FOO', 'FOOL');
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(db)
         outputFile.delete()
     }
 
     def "Should export table TEST when excludeObjects filters case-insensitively"() {
         given:
         db.executeSql("""
-CREATE TABLE "TEST" (
+CREATE TABLE "public"."TEST" (
     AFOO VARCHAR(4),
     BFOO VARCHAR(4),
     FOO  VARCHAR(4),
     FOOL VARCHAR(4)
 );
-INSERT INTO "TEST" (AFOO, BFOO, FOO, FOOL) VALUES ('AFOO', 'BFOO', 'FOO', 'FOOL');
+INSERT INTO "public"."TEST" (AFOO, BFOO, FOO, FOOL) VALUES ('AFOO', 'BFOO', 'FOO', 'FOOL');
 COMMIT;
 """)
 
@@ -187,7 +188,6 @@ INSERT INTO "public"."TEST" ("foo", "fool") VALUES ('FOO', 'FOOL');
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(db)
         outputFile.delete()
     }
 
@@ -195,13 +195,13 @@ INSERT INTO "public"."TEST" ("foo", "fool") VALUES ('FOO', 'FOOL');
         // Quoted columns is a form of case-sensitive columns.
         given:
         db.executeSql("""
-CREATE TABLE "TEST" (
+CREATE TABLE "public"."TEST" (
     "AFOO" VARCHAR(4),
     "BFOO" VARCHAR(4),
     "FOO"  VARCHAR(4),
     "FOOL" VARCHAR(4)
 );
-INSERT INTO "TEST" ("AFOO", "BFOO", "FOO", "FOOL") VALUES ('AFOO', 'BFOO', 'FOO', 'FOOL');
+INSERT INTO "public"."TEST" ("AFOO", "BFOO", "FOO", "FOOL") VALUES ('AFOO', 'BFOO', 'FOO', 'FOOL');
 COMMIT;
 """)
 
@@ -224,20 +224,19 @@ INSERT INTO "public"."TEST" ("FOO", "FOOL") VALUES ('FOO', 'FOOL');
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(db)
-        //outputFile.delete()
+        outputFile.delete()
     }
 
     def "Should throw an Exception when excludeObjects filter produces NO columns"() {
         given:
         db.executeSql("""
-CREATE TABLE "TEST" (
+CREATE TABLE "public"."TEST" (
     AFOO VARCHAR(4),
     BFOO VARCHAR(4),
     FOO  VARCHAR(4),
     FOOL VARCHAR(4)
 );
-INSERT INTO "TEST" (AFOO, BFOO, FOO, FOOL) VALUES ('AFOO', 'BFOO', 'FOO', 'FOOL');
+INSERT INTO "public"."TEST" (AFOO, BFOO, FOO, FOOL) VALUES ('AFOO', 'BFOO', 'FOO', 'FOOL');
 COMMIT;
 """)
 
@@ -255,21 +254,19 @@ COMMIT;
         then:
         noExceptionThrown()
 
-        cleanup:
-        CommandUtil.runDropAll(db)
     }
 
     def "Should export table TEST w/ neither excludeObjects nor includeObjects"() {
         // Quoted columns is a form of case-sensitive columns.
         given:
         db.executeSql("""
-CREATE TABLE "TEST" (
+CREATE TABLE "public"."TEST" (
     "AFOO" VARCHAR(4),
     "BFOO" VARCHAR(4),
     "FOO"  VARCHAR(4),
     "FOOL" VARCHAR(4)
 );
-INSERT INTO "TEST" ("AFOO", "BFOO", "FOO", "FOOL") VALUES ('AFOO', 'BFOO', 'FOO', 'FOOL');
+INSERT INTO "public"."TEST" ("AFOO", "BFOO", "FOO", "FOOL") VALUES ('AFOO', 'BFOO', 'FOO', 'FOOL');
 COMMIT;
 """)
 
@@ -292,7 +289,7 @@ INSERT INTO "public"."TEST" ("AFOO", "BFOO", "FOO", "FOOL") VALUES ('AFOO', 'BFO
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(db)
+        outputFile.delete()
     }
 
     def "Should NOT include ID columns of table PERSON"() {
@@ -319,7 +316,6 @@ INSERT INTO "public"."PERSON" ("FIRSTNAME", "LASTNAME", "STATE") VALUES ('Jacque
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(db)
         outputFile.delete()
     }
 
@@ -347,7 +343,6 @@ INSERT INTO "public"."PERSON" ("ID") VALUES (2);
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(db)
         outputFile.delete()
     }
 
@@ -375,7 +370,6 @@ INSERT INTO "public"."SECONDARY" ("ADDRESS", "COUNTRY", "REGION") VALUES ('280 M
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(db)
         outputFile.delete()
     }
 
@@ -405,7 +399,6 @@ INSERT INTO "public"."SECONDARY" ("ID", "ADDRESS", "COUNTRY", "REGION") VALUES (
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(db)
         outputFile.delete()
     }
 
@@ -440,7 +433,6 @@ INSERT INTO "public"."SECONDARY" ("ID") VALUES (2);
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(db)
         outputFile.delete()
     }
 
@@ -473,7 +465,6 @@ INSERT INTO "public"."SECONDARY" ("ADDRESS", "COUNTRY", "REGION") VALUES ('280 M
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(db)
         outputFile.delete()
     }
 }

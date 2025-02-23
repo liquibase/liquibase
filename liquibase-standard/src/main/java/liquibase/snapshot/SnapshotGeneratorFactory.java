@@ -198,7 +198,7 @@ public class SnapshotGeneratorFactory {
         SnapshotControl replacedSnapshotControl = new SnapshotControl(database, false, example.getClass());
         replacedSnapshotControl.setWarnIfObjectNotFound(false);
         replacedSnapshotControl.setSearchNestedObjects(snapshotControl.shouldSearchNestedObjects());
-        DatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database, snapshotControl);
+        DatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database, replacedSnapshotControl);
         for (DatabaseObject obj : snapshot.get(example.getClass())) {
             if (DatabaseObjectComparatorFactory.getInstance().isSameObject(example, obj, null, database)) {
                 return true;

@@ -22,14 +22,11 @@ import liquibase.resource.ResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.util.FileUtil
-import org.mockito.Mock
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import java.nio.file.Paths
 import java.util.logging.Level
-import java.util.stream.Stream
 
 class DatabaseChangeLogTest extends Specification {
 
