@@ -1687,8 +1687,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                         // If it returns the toString() (like "liquibase.statement.core.DropTableStatement@57927f4f"),
                         // then fall back to the old behavior for SQL statements
                         String formatted = statement.getFormattedStatement();
-                        if (formatted != null && formatted.contains("@") && formatted.startsWith("liquibase.statement.")) {
-                            return SqlUtil.getSqlString(statement, SqlGeneratorFactory.getInstance(), database);
+                        if (formatted != null && formatted.contains("@")) {
+                            return SqlUtil.getSqlString(statement, SqlGeneratorFactory.getInstance(), database).replaceFirst(";$", "");
                         }
 
                         return formatted;
