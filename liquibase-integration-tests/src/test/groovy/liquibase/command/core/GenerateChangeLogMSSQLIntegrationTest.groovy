@@ -146,4 +146,16 @@ CREATE VIEW employees_view AS SELECT FirstName FROM [dbo].Employees;
             mssql.getConnection().close()
         }
     }
+
+    def "Should not add size to user defined types"() {
+        when:
+        CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/user.defined.types.sql')
+        CommandUtil.runGenerateChangelog(mssql, 'test.mssql.sql')
+        then:
+        def outputFile = new File('test.mssql.sql')
+        FileUtil.getContents(outputFile).contains("CREATE TABLE test (flag Flag NOT NULL)")
+        cleanup:
+        CommandUtil.runDropAll(mssql)
+        outputFile.delete()
+    }
 }
