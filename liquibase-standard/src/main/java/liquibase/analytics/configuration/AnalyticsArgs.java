@@ -114,7 +114,7 @@ public class AnalyticsArgs implements AutoloadedConfigurations {
         boolean proLicenseValid = LicenseServiceUtils.isProLicenseValid();
         AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
         if (proLicenseValid) {
-            Boolean enabled = BooleanUtils.and(new Boolean[]{analyticsConfigurationFactory.getPlugin().isProAnalyticsEnabled(), userSuppliedEnabled});
+            Boolean enabled = BooleanUtils.and(new Boolean[]{userSuppliedEnabled, analyticsConfigurationFactory.getPlugin().isProAnalyticsEnabled()});
             if (Boolean.FALSE.equals(enabled)) {
                 log.log(LOG_LEVEL.getCurrentValue(), "Analytics is disabled, because a pro license was detected and analytics was not enabled by the user or because it was turned off by Liquibase.", null);
             }
