@@ -1,5 +1,9 @@
 package liquibase.statement;
 
+import liquibase.database.Database;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.util.SqlUtil;
+
 /**
  * The SqlStatement classes correspond to (roughly) a single SQL statement.  SqlStatement instances are created by Change classes,
  * and by Liquibase itself as the primary database-independent abstraction of statements to execute against a database.
@@ -23,13 +27,17 @@ public interface SqlStatement {
 
     boolean continueOnError();
 
-    /**
-     * Returns a formatted statement string for MDC logging purposes.
-     * Default implementation returns toString().
-     *
-     * @return the formatted statement string
-     */
-    default String getFormattedStatement() {
+    default String getFormattedStatement(Database database) {
+//        try {
+
+        if (database != null) {
+            return SqlUtil.getSqlString(this, SqlGeneratorFactory.getInstance(), database)
+                    .replaceFirst(";$", "");
+        }
+//        } catch (Exception e) {
+//            Scope.getCurrentScope().getLog(this.getClass()).info("It was not possible to format the SQL command: " + e.getMessage());
+//        }
+
         return toString();
     }
 }

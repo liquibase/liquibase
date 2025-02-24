@@ -1682,17 +1682,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             statementsReference.set(statements);
 
             String formattedStatements = Arrays.stream(statementsReference.get())
-                    .map(statement -> {
-
-                        // If it returns the toString() (like "liquibase.statement.core.DropTableStatement@57927f4f"),
-                        // then fall back to the old behavior for SQL statements
-                        String formatted = statement.getFormattedStatement();
-                        if (formatted != null && formatted.contains("@")) {
-                            return SqlUtil.getSqlString(statement, SqlGeneratorFactory.getInstance(), database).replaceFirst(";$", "");
-                        }
-
-                        return formatted;
-                    })
+                    .map(sqlStatement -> sqlStatement.getFormattedStatement(database))
                     .filter(Objects::nonNull)
                     .collect(Collectors.joining("\n"));
             commandsMdc.append(formattedStatements);
