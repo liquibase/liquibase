@@ -155,7 +155,6 @@ CREATE VIEW employees_view AS SELECT FirstName FROM [dbo].Employees;
         def outputFile = new File('test.mssql.sql')
         FileUtil.getContents(outputFile).contains("CREATE TABLE udt_test (flag Flag NOT NULL)")
         cleanup:
-        CommandUtil.runDropAll(mssql)
         outputFile.delete()
     }
 }
