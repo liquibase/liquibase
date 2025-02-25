@@ -27,16 +27,20 @@ public interface SqlStatement {
 
     boolean continueOnError();
 
+    /**
+     * Returns a formatted SQL string representation of this statement for the specified database.
+     * <p>
+     * This method uses the SqlGeneratorFactory to generate the appropriate SQL
+     * based on the provided database. If the database parameter is null, it falls back to
+     * using the toString() method of this statement.
+     *
+     * @param database The target database for which to format the SQL statement
+     * @return A string containing the formatted SQL statement for the specified database
+     */
     default String getFormattedStatement(Database database) {
-//        try {
-
         if (database != null) {
-            return SqlUtil.getSqlString(this, SqlGeneratorFactory.getInstance(), database)
-                    .replaceFirst(";$", "");
+            return SqlUtil.getSqlString(this, SqlGeneratorFactory.getInstance(), database);
         }
-//        } catch (Exception e) {
-//            Scope.getCurrentScope().getLog(this.getClass()).info("It was not possible to format the SQL command: " + e.getMessage());
-//        }
 
         return toString();
     }
