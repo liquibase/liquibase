@@ -755,7 +755,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     for (CachedRow row : rows) {
                         String typeName = row.getString("TYPE_NAME");
                         // UDT types in MSSQL don't take parameters
-                        if (!userDefinedTypes.isEmpty() && userDefinedTypes.contains(typeName.toLowerCase())) {
+                        if (userDefinedTypes.contains(typeName.toLowerCase())) {
                             row.set("COLUMN_SIZE", null);
                             row.set("DECIMAL_DIGITS ", null);
                             continue;
