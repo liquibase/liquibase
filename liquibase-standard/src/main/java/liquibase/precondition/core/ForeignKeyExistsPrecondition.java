@@ -4,12 +4,14 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
+import liquibase.database.core.OracleDatabase;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.precondition.AbstractPrecondition;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
@@ -49,13 +51,12 @@ public class ForeignKeyExistsPrecondition extends AbstractPrecondition {
             if (StringUtils.trimToNull(getForeignKeyTableName()) != null) {
                 example.getForeignKeyTable().setName(getForeignKeyTableName());
             }
-            String catalogName = getCatalogName() != null ? getCatalogName() : database.getDefaultCatalogName();
-            String localCatalogName = getCatalogName();
-            if (database.supports(Schema.class) && localCatalogName == null) {
-                localCatalogName = database.getDefaultCatalogName();
+            String catalogName = getCatalogName();
+            if(!(database instanceof OracleDatabase) && getCatalogName() == null) {
+                catalogName = database.getDefaultCatalogName();
             }
             String schemaName = getSchemaName() != null ? getSchemaName() : database.getDefaultSchemaName();
-            example.getForeignKeyTable().setSchema(new Schema(localCatalogName, schemaName));
+            example.getForeignKeyTable().setSchema(new Schema(catalogName, schemaName));
 
             if (!SnapshotGeneratorFactory.getInstance().hasIgnoreNested(example, database)) {
                 throw new PreconditionFailedException("Foreign Key " +
