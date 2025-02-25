@@ -149,6 +149,7 @@ CREATE VIEW employees_view AS SELECT FirstName FROM [dbo].Employees;
 
     def "Should not add size to user defined types"() {
         when:
+        CommandUtil.runDropAll(mssql)
         CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/user.defined.types.sql')
         CommandUtil.runGenerateChangelog(mssql, 'test.mssql.sql')
         then:
