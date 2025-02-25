@@ -3,6 +3,6 @@
 CREATE TYPE dbo.Flag FROM bit NOT NULL;
 
 --changeset user:use-type
-CREATE TABLE dbo.test(
+CREATE TABLE dbo.udt_test(
     flag Flag not null
 );
