@@ -72,7 +72,9 @@ public class SnapshotGeneratorChain {
             if ((object != null) && (object.getSnapshotId() == null)) {
                 object.setSnapshotId(snapshotIdService.generateId());
             }
-            objectToSnapshot = object;
+            if (object != null) {
+                objectToSnapshot = object;
+            }
         }
         return objectToSnapshot;
     }
