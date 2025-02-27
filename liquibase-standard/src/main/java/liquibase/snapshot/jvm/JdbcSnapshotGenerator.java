@@ -61,7 +61,7 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
 
     @Override
     public DatabaseObject snapshot(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
-        if ((defaultFor != null) && defaultFor.isAssignableFrom(example.getClass())) {
+        if (defaultFor != null && example != null && defaultFor.isAssignableFrom(example.getClass())) {
             return snapshotObject(example, snapshot);
         }
 
