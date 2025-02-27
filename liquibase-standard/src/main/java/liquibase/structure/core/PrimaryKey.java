@@ -148,6 +148,8 @@ public class PrimaryKey extends AbstractDatabaseObject {
     }
 
     public List<Column> getColumns() {
+        return getAttribute("columns", List.class);
+        /*
         List<Object> cols = getAttribute("columns", List.class);
         List<Column> columns = new ArrayList<>();
         cols.forEach(c -> {
@@ -156,6 +158,7 @@ public class PrimaryKey extends AbstractDatabaseObject {
             }
         });
         return columns;
+         */
     }
 
     public List<String> getColumnNamesAsList() {
