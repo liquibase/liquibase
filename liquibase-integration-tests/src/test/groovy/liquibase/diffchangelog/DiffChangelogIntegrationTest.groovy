@@ -8,7 +8,6 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.command.CommandScope
 import liquibase.command.core.DiffChangelogCommandStep
-import liquibase.command.core.GenerateChangelogCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.command.core.helpers.DiffOutputControlCommandStep
 import liquibase.command.core.helpers.PreCompareCommandStep
@@ -27,6 +26,7 @@ import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.Sequence
 import liquibase.util.FileUtil
 import liquibase.util.StringUtil
+import org.apache.commons.io.FileUtils
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -296,6 +296,7 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         } catch (Exception ignored) {
 
         }
+        FileUtils.deleteDirectory(dataDir as File)
         postgres.getConnection().close()
         refDatabase.close()
         targetDatabase.close()

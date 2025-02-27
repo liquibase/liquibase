@@ -12,6 +12,7 @@ import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.util.FileUtil
+import org.apache.commons.io.FileUtils
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -46,5 +47,7 @@ class GenerateChangeLogH2IntegrationTest extends Specification{
 
         cleanup:
         changelogFile.delete()
+        FileUtils.deleteDirectory(dataDir as File)
+
     }
 }
