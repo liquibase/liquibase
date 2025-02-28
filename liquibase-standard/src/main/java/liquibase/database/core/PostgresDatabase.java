@@ -15,6 +15,7 @@ import liquibase.logging.Logger;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtil;
@@ -307,6 +308,10 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             return objectName;
         }
 
+        if(objectType.equals(Catalog.class) && !StringUtil.hasLowerCase(objectName)) {
+            return objectName;
+        }
+
         if (objectName.contains("-")
                 || hasMixedCase(objectName)
                 || startsWithNumeric(objectName)
@@ -342,6 +347,18 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     protected SqlStatement getConnectionSchemaNameCallStatement() {
         return new RawCallStatement("select lower(current_schema())");
     }
+
+//    @Override
+//    public String getJdbcCatalogName(CatalogAndSchema schema) {
+//        try {
+//            SqlStatement currentCatalogStatement = new RawCallStatement("select lower(current_database())");
+//            return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).
+//                    queryForObject(currentCatalogStatement, String.class);
+//        } catch (Exception e) {
+//            Scope.getCurrentScope().getLog(getClass()).info("Error getting default schema", e);
+//        }
+//        return null;
+//    }
 
     /**
      * Generates PK following {@code PostgreSQL} conventions:
