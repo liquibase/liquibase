@@ -47,13 +47,6 @@ on:
         required: true
         type: boolean
         default: false
-    outputs:
-      dry_run_zip_url:
-        description: 'The URL of the created zip file'
-        value: ${{ jobs.build-installers.outputs.dry_run_zip_url }}
-      dry_run_tar_gz_url:
-        description: 'The URL of the created tar.gz file'
-        value: ${{ jobs.build-installers.outputs.dry_run_tar_gz_url }}
 
 env:
   DEPENDENCIES: "liquibase-bigquery" # Comma separated list of dependencies to release the extensions list
@@ -83,7 +76,7 @@ jobs:
 
   build-azure-uber-jar:
    needs: [ setup, owasp-scanner ]
-   uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
+   uses: ./.github/workflows/build-azure-uber-jar.yml
    with:
      branch: ${{ needs.setup.outputs.branch }}
      liquibase-version: ${{ needs.setup.outputs.version }}
@@ -91,7 +84,7 @@ jobs:
 
   build-extension-jars:
    needs: [ setup, owasp-scanner ]
-   uses: liquibase/liquibase/.github/workflows/build-extension-jars.yml@master
+   uses: ./.github/workflows/build-extension-jars.yml
    with:
      liquibase-version: ${{ needs.setup.outputs.version }}
      dependencies: ${{ needs.setup.outputs.dependencies }}
@@ -134,7 +127,7 @@ jobs:
           token: ${{ secrets.BOT_TOKEN }}
 
       - name: Download liquibase-artifacts
-        uses: dawidd6/action-download-artifact@v7
+        uses: dawidd6/action-download-artifact@v8
         with:
           workflow: run-tests.yml
           run_id: ${{ needs.setup.outputs.runId }}
@@ -281,7 +274,7 @@ jobs:
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
 
       - name: Cache Completed Artifacts
-        uses: actions/cache@v4.1.2
+        uses: actions/cache@v4.2.0
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
@@ -302,14 +295,11 @@ jobs:
     runs-on: macos-13 #needs macos for apple notarization
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    outputs:
-      dry_run_zip_url: ${{ steps.extract-dry-run-url.outputs.dry_run_zip_url }}
-      dry_run_tar_gz_url: ${{ steps.extract-dry-run-url.outputs.dry_run_tar_gz_url }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Restore Completed Artifacts
-        uses: actions/cache@v4.1.2
+        uses: actions/cache@v4.2.0
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
@@ -360,6 +350,17 @@ jobs:
           rm re-version/final/*.md5
           rm re-version/final/*.sha1
 
+        # Check if the tag already exists in OSS repository, if it does, exit with error. This is to prevent the artifacts from being attached to the already released tag.
+      - name: Check OSS release tag existence, if tag exists, exit with error
+        run: |
+          tag="v${{ needs.setup.outputs.version }}"
+          if git show-ref --tags --quiet --verify -- "refs/tags/$tag"
+          then
+              echo "Tag $tag already exists"
+              exit 1
+          fi
+
+
       - name: Attach Files to Draft Release
         if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
         uses: softprops/action-gh-release@v2
@@ -387,18 +388,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract dry-run release URL
-        if: ${{ inputs.standalone_zip == false && inputs.dry_run == true }}
-        id: extract-dry-run-url
-        shell: bash
-        run: |
-          assets_json=$(echo '${{ toJson(steps.attach-files-dry-run.outputs) }}' | jq -r '.assets | fromjson')
-          tar_gz_url=$(echo "$assets_json" | jq -r '.[] | select(.name | test("^liquibase-dry-run-.*\\.tar\\.gz$")) | .url')
-          zip_url=$(echo "$assets_json" | jq -r '.[] | select(.name | test("^liquibase-dry-run-.*\\.zip$")) | .url')
-          echo $tar_gz_url
-          echo $zip_url
-          echo "dry_run_tar_gz_url=$tar_gz_url" >> $GITHUB_OUTPUT
-          echo "dry_run_zip_url=$zip_url" >> $GITHUB_OUTPUT
 
       - name: Attach standalone zip to Build
         if: ${{ inputs.standalone_zip == true && inputs.dry_run == false }}

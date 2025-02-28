@@ -66,7 +66,8 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
             if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
                 String errorMessage = "Unable to resolve xml entity " + systemId + ". " +
                         GlobalConfiguration.SECURE_PARSING.getKey() + " is set to 'true' which does not allow remote lookups. " +
-                        "Check for spelling or capitalization errors and missing extensions such as liquibase-commercial in your XSD definition. Or, set it to 'false' to allow remote lookups of xsd files.";
+                        "Check for spelling or capitalization errors and missing extensions such as liquibase-commercial in your XSD definition. Or, set it to 'false' to allow remote lookups of xsd files. " +
+                        "If you are using a changelog with custom change types, ensure you have the appropriate database extension on the classpath.";
                 throw new XSDLookUpException(errorMessage);
             } else {
                 log.fine("Unable to resolve XML entity locally. Will load from network.");

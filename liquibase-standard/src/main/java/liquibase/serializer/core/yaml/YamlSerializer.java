@@ -182,7 +182,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         // Handle both negative and positive numbers
         json = json.replaceAll("!!int \"(-?\\d+)\"", "$1");
         json = json.replaceAll("!!bool \"(\\w+)\"", "$1");
-        json = json.replaceAll("!!timestamp \"([^\"]*)\"", "$1");
+        json = json.replaceAll("!!timestamp \"([^\"]*)\"", "\"$1\"");
         json = json.replaceAll("!!float \"([^\"]*)\"", "$1");
         json = json.replaceAll("!!liquibase.[^\\s]+ (\"\\w+\")", "$1");
         json = json.replace("!!null \"null\"", "\"null\"");

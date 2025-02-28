@@ -5,6 +5,7 @@ import liquibase.Scope;
 import liquibase.change.AbstractSQLChange;
 import liquibase.change.Change;
 import liquibase.change.core.EmptyChange;
+import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -383,6 +384,9 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                         }
 
                         setChangeSequence(change, finalCurrentSequence);
+                        if (change instanceof RawSQLChange) {
+                            ((RawSQLChange) change).setSqlEndLine(count-1);
+                        }
 
                         handleRollbackSequence(physicalChangeLogLocation, changeLogParameters, changeLog, currentRollbackSequence, changeSet, rollbackSplitStatementsPatternMatcher, rollbackSplitStatements, rollbackEndDelimiter);
                     }
@@ -507,6 +511,9 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
             if (currentSequence.length() > 0) {
                 handleChangeSet(physicalChangeLogLocation, changeLogParameters, changeSet, currentSequence, change, changeLog, currentRollbackSequence, rollbackSplitStatementsPatternMatcher, rollbackSplitStatements, rollbackEndDelimiter);
+                if (change instanceof RawSQLChange) {
+                    ((RawSQLChange)change).setSqlEndLine(count);
+                }
             }
 
         } catch (IOException e) {
@@ -697,6 +704,9 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
             handleInvalidEmptyPreconditionCase(changeLogParameters, changeSet, invalidEmptyPreconditionMatcher);
         } else {
             currentSequence.append(line).append(System.lineSeparator());
+        }
+        if (change instanceof RawSQLChange && ((RawSQLChange)change).getSqlStartLine() == null && currentSequence.length() > 1) {
+            ((RawSQLChange) change).setSqlStartLine(count);
         }
         changeSetFinished.set(false);
     }
