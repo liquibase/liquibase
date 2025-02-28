@@ -296,7 +296,10 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         } catch (Exception ignored) {
 
         }
-        FileUtils.deleteDirectory(dataDir as File)
+        File testDir = new File(dataDir)
+        if (testDir.exists()) {
+            FileUtils.deleteDirectory(testDir)
+        }
         postgres.getConnection().close()
         refDatabase.close()
         targetDatabase.close()

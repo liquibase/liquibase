@@ -47,7 +47,10 @@ class GenerateChangeLogH2IntegrationTest extends Specification{
 
         cleanup:
         changelogFile.delete()
-        FileUtils.deleteDirectory(dataDir as File)
+        File testDir = new File(dataDir)
+        if (testDir.exists()) {
+            FileUtils.deleteDirectory(testDir)
+        }
 
     }
 }
