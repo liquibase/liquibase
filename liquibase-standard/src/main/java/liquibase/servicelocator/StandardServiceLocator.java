@@ -23,6 +23,8 @@ public class StandardServiceLocator implements ServiceLocator {
         ClassLoader classLoader = Scope.getCurrentScope().getClassLoader(true);
         findInstances(interfaceType, allInstances, log, classLoader, classNameSet);
 
+        // in some classloader setups, the classloader that loaded the interface may not be the same as the one from current scope
+        // ie: a classloader from a child module may load the interface, but the service implementations are in the parent module
         if (!classLoader.equals(interfaceType.getClassLoader())) {
             findInstances(interfaceType, allInstances, log, interfaceType.getClassLoader(), classNameSet);
         }
@@ -41,7 +43,7 @@ public class StandardServiceLocator implements ServiceLocator {
                 String className = service.getClass().getName();
 
                 if (!classNameSet.contains(className)) {
-                    log.fine("Loaded "+ interfaceType.getName()+" instance "+ className);
+                    log.fine(String.format("Loaded %s instance %s", interfaceType.getName(), className));
                     classNameSet.add(className);
                     allInstances.add(service);
                 }
@@ -55,7 +57,7 @@ public class StandardServiceLocator implements ServiceLocator {
     }
 
     /**
-     * Exception handler for when a service cannot be loaded. Created as an inner class so logs can be suppressed if desired.
+     * Exception handler used when a service cannot be loaded. Created as an inner class so logs can be suppressed if desired.
      */
     static class ServiceLoadExceptionHandler {
         void handleException(Throwable e) {
