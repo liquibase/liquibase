@@ -1,6 +1,5 @@
 package liquibase.parser;
 
-import java.util.regex.MatchResult;
 import liquibase.Labels;
 import liquibase.Scope;
 import liquibase.change.AbstractSQLChange;
@@ -13,8 +12,6 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changeset.ChangeSetService;
 import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.include.ChangeLogInclude;
-import liquibase.include.FormattedSqlIncludeUtils;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.ExceptionUtil;
 import liquibase.util.StreamUtil;
@@ -510,14 +507,6 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                         }
                     }
                 }
-
-                //TODO: Pro team will take care of it
-//                Matcher includeMatcher = INCLUDE_PATTERN.matcher(line);
-//                if(includeMatcher.find()) {
-//                    ChangeLogInclude
-//                        include = handleInclude(line, resourceAccessor, changeLog, includeMatcher.toMatchResult());
-//                    changeLog.getIncludeList().add(include);
-//                }
             }
 
             if (currentSequence.length() > 0) {
@@ -584,12 +573,6 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         if (splitStatementsPatternMatcher.matches()) {
             change.setSplitStatements(splitStatements);
         }
-    }
-
-    protected ChangeLogInclude handleInclude(String line, ResourceAccessor resourceAccessor,
-                                             DatabaseChangeLog parent, MatchResult matchResult)
-        throws ChangeLogParseException {
-        return FormattedSqlIncludeUtils.handleInclude(line, resourceAccessor, parent, matchResult);
     }
 
     /**

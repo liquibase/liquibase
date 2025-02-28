@@ -58,7 +58,7 @@ final class ChangeLogIncludeAllUtils {
 		List<DatabaseChangeLog> result = new ArrayList<>();
 		Comparator<String> comparator = determineResourceComparator(node);
 		SortedSet<Resource> resources = findResources(comparator, includeAll);
-		if (resources.isEmpty() && includeAll.getErrorIfMissingOrEmpty()) {
+		if (resources.isEmpty() && Boolean.TRUE.equals(includeAll.getErrorIfMissingOrEmpty())) {
 			throw new SetupException(
 					"Could not find directory or directory was empty for includeAll '" + includeAll.getPath() + "'");
 		}
@@ -141,7 +141,7 @@ final class ChangeLogIncludeAllUtils {
 				}
 			}
 
-			if (resources.isEmpty() && includeAll.getErrorIfMissingOrEmpty()) {
+			if (resources.isEmpty() && Boolean.TRUE.equals(includeAll.getErrorIfMissingOrEmpty())) {
 				throw new SetupException(
 						"Could not find directory, directory was empty, or no changelogs matched the provided search criteria for includeAll '" + includeAll.getPath() + "'");
 			}
@@ -173,10 +173,8 @@ final class ChangeLogIncludeAllUtils {
 			throw new SetupException("No path attribute for includeAll");
 		String absolutePath = getAbsolutePath(includeAll);
 		try {
-			if (Boolean.TRUE.equals(ChangeLogParserConfiguration.ERROR_ON_CIRCULAR_INCLUDE_ALL.getCurrentValue())) {
-				if (seenChangelogPaths.contains(absolutePath)) {
-					throw new SetupException("Circular reference detected in '" + absolutePath + "'. Set " + ChangeLogParserConfiguration.ERROR_ON_CIRCULAR_INCLUDE_ALL.getKey() + " if you'd like to ignore this error.");
-				}
+			if (Boolean.TRUE.equals(ChangeLogParserConfiguration.ERROR_ON_CIRCULAR_INCLUDE_ALL.getCurrentValue()) && seenChangelogPaths.contains(absolutePath)) {
+				throw new SetupException("Circular reference detected in '" + absolutePath + "'. Set " + ChangeLogParserConfiguration.ERROR_ON_CIRCULAR_INCLUDE_ALL.getKey() + " if you'd like to ignore this error.");
 			}
 			seenChangelogPaths.add(absolutePath);
 			LOG.fine("includeAll for " + absolutePath);
@@ -184,7 +182,7 @@ final class ChangeLogIncludeAllUtils {
 
 			unsortedResources = includeAll.getResourceAccessor().search(absolutePath, searchOptions);
 		} catch (IOException e) {
-			if (includeAll.getErrorIfMissingOrEmpty()) {
+			if (Boolean.TRUE.equals(includeAll.getErrorIfMissingOrEmpty())) {
 				throw new IOException(String.format("Could not find/read changelogs from %s directory", absolutePath), e);
 			}
 		}
@@ -197,7 +195,7 @@ final class ChangeLogIncludeAllUtils {
 			throw new SetupException("No path attribute for includeAll");
 		}
 		String relativeTo = null;
-		if (includeAll.getRelativeToChangelogFile()) {
+		if (Boolean.TRUE.equals(includeAll.getRelativeToChangelogFile())) {
 			relativeTo = includeAll.getParentChangeLog().getPhysicalFilePath();
 		}
 		if (relativeTo != null) {

@@ -138,7 +138,7 @@ public final class ChangeLogIncludeHelper {
 			if (!resourceAccessor.get(file).exists()) {
 				if (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getCurrentValue()
 						.equals(ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN)
-						|| !errorIfMissing) {
+						|| Boolean.FALSE.equals(errorIfMissing)) {
 					Scope.getCurrentScope().getLog(ChangeLogIncludeHelper.class).warning(FileUtil.getFileNotFoundMessage(file));
 					return null;
 				} else {

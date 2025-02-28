@@ -66,10 +66,8 @@ public final class ChangeLogInclude extends AbstractLiquibaseSerializable implem
         this.ignore = node.getChildValue(null, IGNORE, Boolean.class);
         this.labels = new Labels(node.getChildValue(null, LABELS, String.class));
         this.logicalFilePath = node.getChildValue(null, LOGICAL_FILE_PATH, String.class);
-        Boolean nodeRelativeToChangelogFile = node.getChildValue(null, RELATIVE_TO_CHANGELOG_FILE, Boolean.class);
-        this.relativeToChangelogFile = (nodeRelativeToChangelogFile != null) ? nodeRelativeToChangelogFile : false;
-        Boolean nodeErrorIfMissing = node.getChildValue(null, ERROR_IF_MISSING, Boolean.class);
-        this.errorIfMissing = (nodeErrorIfMissing != null) ? nodeErrorIfMissing : true;
+        this.relativeToChangelogFile = node.getChildValue(null, RELATIVE_TO_CHANGELOG_FILE, false);
+        this.errorIfMissing = node.getChildValue(null, ERROR_IF_MISSING, true);
         this.file = node.getChildValue(null, FILE, String.class);
         this.context = ChangeLogIncludeHelper.getContextExpression(node);
         this.preconditions = ChangeLogIncludeHelper.getPreconditions(node, resourceAccessor);

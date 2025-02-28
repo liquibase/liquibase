@@ -613,14 +613,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         this.includeList.add(service.createChangelogInclude(node, resourceAccessor, this, nodeScratch));
     }
 
-    private static ContextExpression determineContextExpression(ParsedNode node) throws ParsedNodeException {
-        ContextExpression includeNodeContextFilter = new ContextExpression(node.getChildValue(null, CONTEXT_FILTER, String.class));
-        if (includeNodeContextFilter.isEmpty()) {
-            includeNodeContextFilter = new ContextExpression(node.getChildValue(null, CONTEXT, String.class));
-        }
-        return includeNodeContextFilter;
-    }
-
     private void handleModifyChangeSets(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         Map<String, Object> nodeScratch;
         ModifyChangeSets modifyChangeSets = createModifyChangeSets(node);
