@@ -27,6 +27,7 @@ import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.Sequence
 import liquibase.util.FileUtil
 import liquibase.util.StringUtil
+import org.apache.commons.io.FileUtils
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -295,6 +296,10 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
             changelogFile.delete()
         } catch (Exception ignored) {
 
+        }
+        File testDir = new File(dataDir)
+        if (testDir.exists()) {
+            FileUtils.deleteDirectory(testDir)
         }
         postgres.getConnection().close()
         refDatabase.close()
