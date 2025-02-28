@@ -348,18 +348,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         return new RawCallStatement("select current_schema()");
     }
 
-//    @Override
-//    public String getJdbcCatalogName(CatalogAndSchema schema) {
-//        try {
-//            SqlStatement currentCatalogStatement = new RawCallStatement("select lower(current_database())");
-//            return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).
-//                    queryForObject(currentCatalogStatement, String.class);
-//        } catch (Exception e) {
-//            Scope.getCurrentScope().getLog(getClass()).info("Error getting default schema", e);
-//        }
-//        return null;
-//    }
-
     /**
      * Generates PK following {@code PostgreSQL} conventions:
      * <li>Postgres PK size is limited with 63 bytes.
