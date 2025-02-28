@@ -5,31 +5,140 @@ on:
   delete:
     branches:
       - '**DAT-**'
+      - 'github-action-**'
+      - 'dependabot-**'
+      - 'feat/**'
+
 jobs:
-  delete-package:
-    name: Delete Github Package for Branch
-    runs-on: ubuntu-20.04
+
+  extract-branch-info:
+      name: Extract Branch Info
+      runs-on: ubuntu-22.04
+      outputs:
+        branch_name: ${{ steps.get-branch-name.outputs.branch_name }}
+      steps:
+    
+      - name: Extract branch name
+        id: get-branch-name
+        run: |
+          branch_name=${{ github.event.ref }}
+          branch_name=${branch_name#refs/heads/}
+          echo "Branch name is $branch_name"
+          echo "branch_name=$branch_name" >> $GITHUB_OUTPUT
+
+  delete-dat-package:
+    name: Delete DAT-SNAPSHOT Github Package for Branch
+    needs: extract-branch-info
+    runs-on: ubuntu-22.04
+
     steps:
+
       # Get version id(s) based on version name
-    - uses: castlabs/get-package-version-id-action@v2.1
+    - uses: castlabs/get-package-version-id-action@v2.2
       id: version
       with:
-        version: "${{ github.event.ref }}-SNAPSHOT"
+        version: "${{ needs.extract-branch-info.outputs.branch_name }}-SNAPSHOT"
 
-    - uses: actions/delete-package-versions@v3
+      # show versions to delete
+    - run: |
+        echo "Version to delete ${{ steps.version.outputs.ids }} for ${{ needs.extract-branch-info.outputs.branch_name }}-SNAPSHOT"
+    
+    - uses: actions/delete-package-versions@v5
       if: ${{ steps.version.outputs.ids != '' }}
       with:
-        # Name of the package.
-        # Defaults to an empty string.
-        # Required if `package-version-ids` input is not given.
-        package-name: org.liquibase.liquibase-core
-
-        # The number of latest versions to keep.
-        # This cannot be specified with `num-old-versions-to-delete`. By default, `num-old-versions-to-delete` takes precedence over `min-versions-to-keep`.
-        # When set to 0, all deletable versions will be deleted.
-        # When set greater than 0, all deletable package versions except the specified number will be deleted.
-        min-versions-to-keep: 0
-
-        # Can be a single package version id, or a comma separated list of package version ids.
-        # Defaults to an empty string.
+        # Delete all deletable versions
+        package-type: maven
+        
+        # on branch id's deletion we only want to delete that particular branch version
         package-version-ids: "${{ steps.version.outputs.ids }}"
+        
+  delete-sha-package:
+    name: Delete SHA-SNAPSHOT Github Package for Branch
+    needs: [ delete-dat-package, extract-branch-info ]
+    runs-on: ubuntu-22.04
+
+    strategy:
+      matrix:
+        packages_to_delete: [org.liquibase.liquibase-core, org.liquibase.liquibase-extension-testing, org.liquibase.liquibase-integration-tests, org.liquibase.liquibase-maven-plugin, org.liquibase.liquibase-cdi-jakarta, org.liquibase.liquibase-cdi, org.liquibase.liquibase]
+
+    steps:
+
+    - name: Fetch commits between branch and master via GitHub API
+      id: fetch-commits
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        BRANCH_NAME=${{ needs.extract-branch-info.outputs.branch_name }}
+        echo "Fetching commits for branch: $BRANCH_NAME"
+
+        # Fetch commits between branch and master
+        MASTER_COMMITS_RESPONSE=$(gh api -H "Accept: application/vnd.github.v3+json" /repos/${{ github.repository }}/compare/master...$BRANCH_NAME || echo "error")
+        if [[ "$MASTER_COMMITS_RESPONSE" == "error" || "$MASTER_COMMITS_RESPONSE" == "null" ]]; then
+          echo "No differences found between branch $BRANCH_NAME and master."
+          MASTER_COMMITS=""
+        else
+          MASTER_COMMITS=$(echo "$MASTER_COMMITS_RESPONSE" | jq -r '.commits[].sha' | tr '\n' ',' | sed 's/,$//')
+        fi
+
+        # Fetch commits between branch and release
+        RELEASE_COMMITS_RESPONSE=$(gh api -H "Accept: application/vnd.github.v3+json" /repos/${{ github.repository }}/compare/release...$BRANCH_NAME || echo "error")
+        if [[ "$RELEASE_COMMITS_RESPONSE" == "error" || "$RELEASE_COMMITS_RESPONSE" == "null" ]]; then
+          echo "No differences found between branch $BRANCH_NAME and release."
+          RELEASE_COMMITS=""
+        else
+          RELEASE_COMMITS=$(echo "$RELEASE_COMMITS_RESPONSE" | jq -r '.commits[].sha' | tr '\n' ',' | sed 's/,$//')
+        fi
+
+        echo "MASTER_COMMITS=$MASTER_COMMITS" >> $GITHUB_ENV
+        echo "RELEASE_COMMITS=$RELEASE_COMMITS" >> $GITHUB_ENV
+
+    - name: Prepare list of package versions to delete
+      id: prepare-packages
+      run: |
+        MASTER_COMMITS="${{ env.MASTER_COMMITS }}"
+        RELEASE_COMMITS="${{ env.env.RELEASE_COMMITS }}"
+        PACKAGE_VERSIONS=""
+
+        for COMMIT in $(echo "$MASTER_COMMITS,$RELEASE_COMMITS" | tr ',' '\n'); do
+          if [ -n "$COMMIT" ]; then
+            PACKAGE_VERSIONS="${PACKAGE_VERSIONS}${COMMIT}-SNAPSHOT,"
+          fi
+        done
+
+        # Remove trailing comma
+        PACKAGE_VERSIONS="${PACKAGE_VERSIONS%,}"
+        echo "PACKAGE_VERSIONS=$PACKAGE_VERSIONS" >> $GITHUB_ENV
+        echo "Package versions to query: $PACKAGE_VERSIONS"
+
+    - name: Get package version IDs
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        PACKAGE_IDS=""
+        ORG="liquibase"
+        PACKAGE_TYPE="maven"
+
+        for VERSION in $(echo "${{ env.PACKAGE_VERSIONS }}" | tr ',' '\n'); do
+          echo "Processing version: $VERSION"
+
+          ID=$(gh api "orgs/$ORG/packages/$PACKAGE_TYPE/${{ matrix.packages_to_delete }}/versions" | jq -r --arg VERSION "$VERSION" '.[] | select(.name == $VERSION) | .id')
+
+          if [ -n "$ID" ]; then
+            echo "Found ID: $ID for version $VERSION"
+            PACKAGE_IDS="${PACKAGE_IDS}${ID},"
+          else
+            echo "No ID found for version $VERSION"
+          fi
+        done
+        echo "PACKAGE_IDS=$PACKAGE_IDS" >> $GITHUB_ENV
+        echo "Package ID versions to delete: $PACKAGE_IDS"
+    
+    - name: Delete package versions
+      if: env.PACKAGE_VERSIONS != ''
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        for ID in $(echo "${{ env.PACKAGE_IDS }}" | tr ',' '\n'); do
+          echo "Deleting package version with ID: $ID"
+          gh api -X DELETE "orgs/liquibase/packages/maven/${{ matrix.packages_to_delete }}/versions/$ID"
+        done

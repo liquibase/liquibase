@@ -13,8 +13,6 @@ Required Args:
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
-  changelogFile (String) The root changelog
-    Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
   defaultSchemaName (String) The default schema name to use for the database connection
@@ -28,6 +26,10 @@ Optional Args:
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
+  showTags (Boolean) Include only tagged changesets
+    Default: false
+  tagFilter (String) Receives a list of comma separated tags to filter the changesets
+    Default: null
   username (String) Username to use to connect to the database
     Default: null
 """
@@ -67,10 +69,37 @@ Optional Args:
 Liquibase History for jdbc:h2:mem:lbcat
 """,
 ~/[-+]+/,
-"| db/changelog/db.changelog-master.xml | nvoxland | 1 |",
-"| db/changelog/sql/create_test2.sql | includeAll | raw |",
-"| db/changelog/sql/create_test3.sql | includeAll | raw |",
-"| db/changelog/changelog-x.xml | nathan (generated) | 1571079854679-2 |"]
+"| db/changelog/db.changelog-master.xml | nvoxland | 1 | |",
+"| db/changelog/sql/create_test2.sql | includeAll | raw | |",
+"| db/changelog/sql/create_test3.sql | includeAll | raw | |",
+"| db/changelog/changelog-x.xml | nathan (generated) | 1571079854679-2 | |"]
+
+        expectedResults = [
+                deployments: "1 past deployments",
+                statusCode : 0
+        ]
+    }
+
+    run "Happy path with tag", {
+        arguments = [
+                url : { it.url },
+                username: { it.username },
+                password: { it.password }
+        ]
+        setup {
+            runChangelog "changelogs/h2/complete/rollback.tag.changelog.xml"
+        }
+
+        expectedOutput = [
+                """
+Liquibase History for jdbc:h2:mem:lbcat
+""",
+~/[-+]+/,
+"| changelogs/h2/complete/rollback.tag.changelog.xml | nvoxland         | 1            |             |",
+"| changelogs/h2/complete/rollback.tag.changelog.xml | nvoxland         | 1.1          |             |",
+"| changelogs/h2/complete/rollback.tag.changelog.xml | nvoxland         | 2            |             |",
+"| changelogs/h2/complete/rollback.tag.changelog.xml | testuser         | 13.1         | version_2.0 |",
+"| changelogs/h2/complete/rollback.tag.changelog.xml | nvoxland         | 14           |             |"]
 
         expectedResults = [
                 deployments: "1 past deployments",
@@ -121,10 +150,10 @@ Liquibase History for jdbc:h2:mem:lbcat
 Liquibase History for jdbc:h2:mem:lbcat
 """,
 ~/[-+]+/,
-"| db/changelog/db.changelog-master.xml | nvoxland | 1 |",
-"| db/changelog/sql/create_test2.sql | includeAll | raw |",
-"| db/changelog/sql/create_test3.sql | includeAll | raw |",
-"| db/changelog/changelog-x.xml | nathan (generated) | 1571079854679-2 |" ]
+"| db/changelog/db.changelog-master.xml | nvoxland | 1 | |",
+"| db/changelog/sql/create_test2.sql | includeAll | raw | |",
+"| db/changelog/sql/create_test3.sql | includeAll | raw | |",
+"| db/changelog/changelog-x.xml | nathan (generated) | 1571079854679-2 | |" ]
         ]
 
         expectedResults = [

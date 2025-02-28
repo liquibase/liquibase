@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:unused="http://liquibase.example.com/unused"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+            http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd
+            http://liquibase.example.com/unused unused.xsd"
+        unused:unusedAttribute="changeLogScope">
+
+    <changeSet id="1" author="nvoxland" unused:unusedAttribute="changeSetScope">
+        <comment>Some comments go here</comment>
+        <unused:unusedElement unused:oneUnused="1" unused:twoUnused="2">This changeSet level tag should not be used</unused:unusedElement>
+        <unused:unusedText>Some text here</unused:unusedText>
+        <createTable tableName="person">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="firstname" type="varchar(50)"/>
+            <column name="lastname" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <unused:unusedElement unused:oneUnused="A" unused:twoUnused="B">This change-level tag should not be used</unused:unusedElement>
+            <unused:unusedText>Some createTable text here</unused:unusedText>
+        </createTable>
+    </changeSet>
+
+    <unused:unusedElement unused:oneUnused="X" unused:twoUnused="Y">This changeLog level tag should not be used</unused:unusedElement>
+    <unused:unusedText>Some changelog text here</unused:unusedText>
+</databaseChangeLog>

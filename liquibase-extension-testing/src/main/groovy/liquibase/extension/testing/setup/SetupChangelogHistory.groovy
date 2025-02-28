@@ -1,5 +1,6 @@
 package liquibase.extension.testing.setup
 
+import liquibase.Scope
 import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.changelog.ChangeSet
@@ -20,9 +21,8 @@ class SetupChangelogHistory extends TestSetup {
     void setup(TestSetupEnvironment testSetupEnvironment) throws Exception {
         Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(testSetupEnvironment.connection))
 
-        final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database)
+        final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database)
         changeLogService.init()
-        changeLogService.generateDeploymentId()
 
         List<RanChangeSet> toRemoveList = new ArrayList<>()
         for (RanChangeSet ranChangeSet : changeLogService.getRanChangeSets()) {

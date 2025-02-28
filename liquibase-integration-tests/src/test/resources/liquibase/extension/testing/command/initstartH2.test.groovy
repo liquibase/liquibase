@@ -14,6 +14,8 @@ Optional Args:
     Default: 127.0.0.1
   dbPort (Integer) Port to run h2 database on
     Default: 9090
+  detached (Boolean) When set to true, Liquibase initiates the H2 database in a new thread without blocking, allowing use within the flow command. Regardless of the parameter setting, data stored in the H2 database is cleared when the JVM exits, such as at the end of the flow command.
+    Default: false
   launchBrowser (Boolean) Whether to open a browser to the database's web interface
     Default: true
   password (String) Password to use for created h2 user

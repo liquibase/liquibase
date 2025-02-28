@@ -34,10 +34,11 @@ public abstract class TestSystem implements TestRule, Plugin {
     private static final SortedSet<TestSystem.Definition> testSystems = new TreeSet<>();
     private static final String configuredTestSystems;
     private static final String skippedTestSystems;
+    private static final Pattern COMPILE = Pattern.compile("(\\$\\{.+?})");
 
     private final Definition definition;
 
-    private final SortedSet<String> configurationKeys = new TreeSet<>(Arrays.asList(
+    private final SortedSet<String> configurationKeys = new TreeSet<>(Collections.singletonList(
             "keepRunning"
     ));
 
@@ -201,7 +202,7 @@ public abstract class TestSystem implements TestRule, Plugin {
     public <T> T getConfiguredValue(String propertyName, ConfigurationValueConverter<T> converter, boolean required) {
         ConfigurationValueConverter<T> finalConverter = value -> {
             if (value instanceof String && ((String) value).contains("${")) {
-                final Matcher matcher = Pattern.compile("(\\$\\{.+?})").matcher((String) value);
+                final Matcher matcher = COMPILE.matcher((String) value);
                 while (matcher.find()) {
                     final String config = matcher.group(1).replace("${", "").replace("}", "").trim();
                     value = ((String) value).replace(matcher.group(1), getConfiguredValue(config, String.class));

@@ -1,0 +1,16 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        targetNamespace="http://liquibase.example.com/unused"
+	elementFormDefault="qualified" attributeFormDefault="qualified">
+
+	<attribute name="unusedAttribute" type="string" />
+
+    <element name="unusedElement">
+        <xsd:complexType mixed="true">
+            <xsd:attribute name="oneUnused" type="xsd:string"/>
+            <xsd:attribute name="twoUnused" type="xsd:string"/>
+        </xsd:complexType>
+    </element>
+    <element name="unusedText"/>
+
+</schema>

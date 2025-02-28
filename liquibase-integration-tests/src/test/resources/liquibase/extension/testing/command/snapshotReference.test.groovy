@@ -14,20 +14,24 @@ Required Args:
   referenceUrl (String) The JDBC reference database connection URL
     OBFUSCATED
 Optional Args:
-  driver (String) The JDBC driver class
+  referenceDefaultCatalogName (String) The default catalog name to use for the reference database connection
     Default: null
-  driverPropertiesFile (String) The JDBC driver properties file
+  referenceDefaultSchemaName (String) The default schema name to use for the reference database connection
     Default: null
-  referenceDefaultCatalogName (String) The default catalog name to use for the database connection
+  referenceDriver (String) The JDBC driver class for the reference database
     Default: null
-  referenceDefaultSchemaName (String) The default schema name to use for the database connection
+  referenceDriverPropertiesFile (String) The JDBC driver properties file for the reference database
     Default: null
-  referencePassword (String) Reference password to use to connect to the database
+  referenceLiquibaseCatalogName (String) Reference catalog to use for Liquibase objects
+    Default: null
+  referenceLiquibaseSchemaName (String) Reference schema to use for Liquibase objects
+    Default: null
+  referencePassword (String) The reference database password
     Default: null
     OBFUSCATED
-  referenceUsername (String) Reference username to use to connect to the database
+  referenceUsername (String) The reference database username
     Default: null
-  snapshotFormat (String) Output format to use (JSON or YAML
+  snapshotFormat (String) Output format to use (JSON or YAML)
     Default: null
 """
 
@@ -66,10 +70,6 @@ Optional Args:
                     ),
             ]
         }
-
-        expectedResults = [
-                statusCode   : 0
-        ]
     }
 
     run "Happy path with an output file", {
@@ -115,10 +115,6 @@ Optional Args:
                 // Find the " -- Release Database Lock" line
                 //
                 "target/test-classes/snapshotReference.txt" : [CommandTests.assertContains("Database snapshot for")]
-        ]
-
-        expectedResults = [
-                statusCode   : 0
         ]
     }
 

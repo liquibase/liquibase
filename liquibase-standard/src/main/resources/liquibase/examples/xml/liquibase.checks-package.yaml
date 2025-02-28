@@ -1,0 +1,50 @@
+## This is a Liquibase checks packages formatted yaml file.
+## It contains just one or more 'checksPackages' objects
+## with one or more named checks-settings-files.
+
+## These checks-settings-files listed in a package are processed sequentially
+## during 'liquibase checks run' or 'liquibase checks show' commands
+## which specify this file as the checks-settings-file property.
+
+## Learn more at https://docs.liquibase.com/policy-checks
+
+#### This checks package file "liquibase.checks-package.yaml"
+#### contains 5 different packages, detailed below.
+
+## Example: run ALL packages: 
+####  liquibase checks run --checks-settings-file=liquibase.checks-packages.yaml
+
+## Example: run a specific package: 
+#### liquibase checks run --check-settings-file=liquibase.checks-package.yaml --checks-packages=data-protections.pkg
+## or
+#### liquibase checks run --check-settings-file=liquibase.checks-package.yaml --checks-packages=changeset-standards.pkg
+## or
+#### liquibase checks run --check-settings-file=liquibase.checks-package.yaml --checks-packages=all-standards.pkg
+
+#### The list of checksPackages
+
+
+checksPackages:
+- name: access-control.pkg
+  files:
+  - checks-packages/liquibase.checks.access-control.yaml
+- name: data-protection.pkg
+  files:
+  - checks-packages/liquibase.checks.data-protection.yaml
+- name: schema-protection.pkg
+  files:
+  - checks-packages/liquibase.checks.schema-protection.yaml
+- name: changeset-standards.pkg
+  files:
+  - checks-packages/liquibase.checks.changeset-standards.yaml
+- name: coding-standards.pkg
+  files:
+  - checks-packages/liquibase.checks.coding-standards.yaml
+- name: all-standards.pkg
+  files:
+  - checks-packages/liquibase.checks.coding-standards.yaml
+  - checks-packages/liquibase.checks.changeset-standards.yaml
+- name: all-protections.pkg
+  files:
+  - checks-packages/liquibase.checks.schema-protection.yaml
+  - checks-packages/liquibase.checks.data-protection.yaml

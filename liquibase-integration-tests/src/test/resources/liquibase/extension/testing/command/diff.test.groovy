@@ -16,6 +16,7 @@ Short Description: Outputs a description of differences.  If you have a Liquibas
 Long Description: NOT SET
 Required Args:
   referenceUrl (String) The JDBC reference database connection URL
+    OBFUSCATED
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
@@ -31,6 +32,8 @@ Optional Args:
     Default: null
   excludeObjects (String) Objects to exclude from diff
     Default: null
+  ignoreMissingReferences (Boolean) If true, diff operations will ignore referenced objects which are not found in a snapshot.
+    Default: false
   includeObjects (String) Objects to include in diff
     Default: null
   outputSchemas (String) Output schemas names. This is a CSV list.
@@ -45,6 +48,10 @@ Optional Args:
   referenceDriver (String) The JDBC driver class for the reference database
     Default: null
   referenceDriverPropertiesFile (String) The JDBC driver properties file for the reference database
+    Default: null
+  referenceLiquibaseCatalogName (String) Reference catalog to use for Liquibase objects
+    Default: null
+  referenceLiquibaseSchemaName (String) Reference schema to use for Liquibase objects
     Default: null
   referencePassword (String) The reference database password
     Default: null

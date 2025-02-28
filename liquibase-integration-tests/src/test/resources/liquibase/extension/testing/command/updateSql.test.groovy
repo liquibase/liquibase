@@ -1,6 +1,7 @@
 package liquibase.extension.testing.command
 
 import liquibase.exception.CommandValidationException
+import liquibase.extension.testing.setup.SetupEnvironmentVariableProvider
 
 import java.util.regex.Pattern
 
@@ -18,7 +19,7 @@ Optional Args:
     Default: null
   changeExecListenerPropertiesFile (String) Path to a properties file for the ChangeExecListenerClass
     Default: null
-  contexts (String) Changeset contexts to match
+  contextFilter (String) Changeset contexts to match
     Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
@@ -50,7 +51,9 @@ Optional Args:
         ]
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
     }
     
@@ -72,11 +75,43 @@ Optional Args:
                 //
                 // Find the " -- Release Database Lock" line
                 //
-                "target/test-classes/update.sql" : [CommandTests.assertContains("-- Release Database Lock")]
+                "target/test-classes/update.sql" : [CommandTests.assertContains("-- Release Database Lock"),
+                                                    CommandTests.assertContains("SET LOCKED = FALSE"),
+                                                    CommandTests.assertContains("CREATE TABLE PUBLIC.DATABASECHANGELOG")]
         ]
 
         expectedResults = [
-                statusCode   : 0
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
+        ]
+    }
+
+    run "Happy path with output file and suppressed Liquibase SQL", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                changelogFile: "changelogs/h2/complete/simple.changelog.xml"
+        ]
+
+        setup {
+            def add = [LIQUIBASE_SUPPRESS_LIQUIBASE_SQL: "true"]
+            String[] remove = [:]
+            run(new SetupEnvironmentVariableProvider(add, remove))
+            cleanResources("target/test-classes/update.sql")
+        }
+
+        outputFile = new File("target/test-classes/update.sql")
+
+        expectedFileContent = [
+                "target/test-classes/update.sql" : [CommandTests.assertNotContains("CREATE TABLE PUBLIC.DATABASECHANGELOG")]
+        ]
+
+        expectedResults = [
+                statusCode   : 0,
+                defaultChangeExecListener: 'not_null',
+                updateReport: 'not_null'
         ]
     }
 

@@ -1,0 +1,137 @@
+name: Weekly Integration Tests
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 1 * * 0'
+
+jobs:
+
+  deploy-ephemeral-cloud-infra:
+    uses: liquibase/build-logic/.github/workflows/ephemeral-cloud-infra.yml@main
+    secrets: inherit
+    with:
+        deploy: true
+        snowflake_oss: true
+
+  snowflake-its:
+    name: Run Snowflake Cloud integration tests
+    needs: deploy-ephemeral-cloud-infra
+    timeout-minutes: 240
+    runs-on: ubuntu-latest
+    permissions: 
+      contents: read
+      id-token: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Set up Maven settings.xml
+        uses: whelk-io/maven-settings-xml-action@v22
+        with:
+          repositories: |
+            [
+              {
+                "id": "liquibase",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase",
+                "releases": {
+                  "enabled": "false"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              },
+              {
+                "id": "liquibase-pro",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
+                "releases": {
+                  "enabled": "false"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              }
+            ]
+          servers: |
+            [
+              {
+                "id": "liquibase-pro",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              },
+              {
+                "id": "liquibase",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT }}"
+              }
+            ]
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+            role-to-assume: ${{ secrets.AWS_DEV_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
+            aws-region: us-east-1
+
+      - name: Get LIQUIBASEOSS secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            LIQUIBASEOSS_USERNAME, liquibaseoss_usrname
+            LIQUIBASEOSS_PASSWORD, liquibaseoss_pwd
+
+      - name: Run tests
+        run: |
+          ./mvnw -B "-DtrimStackTrace=false" \
+            "-Dliquibase.sdk.testSystem.test=snowflake" \
+            "-Dliquibase.sdk.testSystem.snowflake.url=jdbc:${{ secrets.LIQUIBASEOSS_URL }}&schema=PUBLIC&db=LIQUIBASEOSS" \
+            "-Dliquibase.sdk.testSystem.snowflake.username=${{ env.LIQUIBASEOSS_USERNAME }}" \
+            "-Dliquibase.sdk.testSystem.snowflake.password=${{ env.LIQUIBASEOSS_PASSWORD }}" \
+            "-Dtest=*IntegrationTest,*ExecutorTest" \
+            "-DfailIfNoTests=false" \
+            "-Dsurefire.failIfNoSpecifiedTests=false" \
+            "-Dsurefire.failIfNoTests=false" \
+            clean verify
+
+      - name: Archive Test Results
+        if: ${{ inputs.archive_test_results == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: liquibase-test-results-snowflake
+          path: |
+            ./**/target/surefire-reports
+            ./**/target/site
+
+  destroy-ephemeral-cloud-infra:
+    if: always()
+    needs: [ deploy-ephemeral-cloud-infra, snowflake-its ]
+    uses: liquibase/build-logic/.github/workflows/ephemeral-cloud-infra.yml@main
+    secrets: inherit
+    with:
+        destroy: true
+        stack_id: ${{ needs.deploy-ephemeral-cloud-infra.outputs.stack_id }}
+        snowflake_oss: true
+
+  run-slack-notification:
+    runs-on: ubuntu-latest
+    if: failure()
+    needs: [ snowflake-its ]
+    steps:
+      - name: Dispatch event to build-logic repository
+        id: weekly-integration-tests
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          repository: liquibase/build-logic
+          event-type: test-failure       
+          client-payload: '{"repository": "${{ github.repository }}", "branch": "${{ github.ref }}", "sha": "${{ github.sha }}", "server_url": "${{ github.server_url }}", "run_id": "${{ github.run_id }}", "workflow_name": "${{ github.action }}"}'
+

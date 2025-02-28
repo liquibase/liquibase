@@ -1,0 +1,3 @@
+config_state_id, code, name, description
+1,REGISTERED,Registered,Registered configuration
+2,APPLIED,Successfully applied,The last successfully applied configuration

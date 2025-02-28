@@ -1,0 +1,85 @@
+name: Run Test Harness Tests
+
+on:
+  workflow_call:
+    inputs:
+      latestMergeSha:
+        description: 'Latest Merge sha of OSS PR'
+        required: false
+        default: ''
+        type: string
+      thisBranchName:
+        description: 'Branch Name of OSS PR'
+        required: false
+        default: ''
+        type: string
+  pull_request_target:
+    types: [labeled]
+
+jobs:
+  test-harness-build:
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'runFunctional&HarnessTests') || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
+    steps:
+      
+      - name: Check variables
+        run: |
+          echo "github.event_name: ${{ github.event_name }}"
+          echo "github.event.pull_request.labels.*.name: ${{ contains(github.event.pull_request.labels.*.name, 'runFunctionalTests') }}"
+          echo "github.event.after: ${{ github.event.after }}"
+          echo "github.base_ref: ${{ github.base_ref }}"
+          echo "github.event.pull_request.merged: ${{ github.event.pull_request.merged }}"
+          echo "github.event_name: ${{ github.event_name }}"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
+
+  run-test-harness-tests:
+    runs-on: ubuntu-latest
+    needs: [ test-harness-build ]
+    name: Trigger Test Harness Tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set environment variables for PR branch and SHA
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_call" ]; then
+            echo "RUN_TESTS_BRANCH=${{ inputs.thisBranchName }}" >> $GITHUB_ENV
+            echo "RUN_TESTS_SHA=${{ inputs.latestMergeSha }}" >> $GITHUB_ENV
+          else
+            echo "RUN_TESTS_BRANCH=${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
+            echo "RUN_TESTS_SHA=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+          fi
+
+      - name: Get OSS Workflow Run URL
+        id: get-workflow-url
+        run: |
+          repo_url="https://github.com/${{ github.repository }}"
+          ossWorkflowUrl="${repo_url}/actions/runs/${{ github.run_id }}"
+          echo "ossWorkflowUrl=${ossWorkflowUrl}" >> $GITHUB_ENV
+
+      - name: Dispatch an action and get the run ID
+        uses: codex-/return-dispatch@v2
+        id: return_dispatch
+        with:
+          token: ${{ secrets.RUN_FUNCTIONAL_TEST_HARNESS_TESTS_TOKEN  }}
+          ref: "develop"
+          repo: liquibase-test-harness
+          owner: liquibase
+          workflow: main.yml
+          workflow_inputs:
+            '{"liquibaseCommit": "${{ env.RUN_TESTS_SHA }}",
+              "runDescription": "${{ env.ossWorkflowUrl }}",
+              "liquibaseBranch": "${{ env.RUN_TESTS_BRANCH }}"
+            }'
+
+      - name: Display run ID
+        run: echo ${{ steps.return_dispatch.outputs.run_id }}
+
+      - name: Report TestHarness Run URL
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const targetURL = "https://github.com/liquibase/liquibase-test-harness/actions/runs/${{ steps.return_dispatch.outputs.run_id }}"
+            core.notice("TestHarness-Tests Run URL: " + targetURL);

@@ -26,7 +26,8 @@ import java.util.*;
 import java.util.concurrent.Callable;
 
 /**
- * @author Nikita Lipatov (https://github.com/islonik)
+ * @author <a href="https://github.com/islonik)">Nikita Lipatov</a>
+ *
  * @since 27/5/17.
  */
 @Singleton
@@ -67,12 +68,7 @@ public class SchemesCDIConfigBuilder {
 
         final InputStream is = SchemesCDIConfigBuilder.class.getResourceAsStream(SCHEMA_NAME);
         try {
-            return jvmLocked(id, new Callable<CDILiquibaseConfig>() {
-                @Override
-                public CDILiquibaseConfig call() throws Exception {
-                    return createCDILiquibaseConfig(id, is);
-                }
-            });
+            return jvmLocked(id, () -> createCDILiquibaseConfig(id, is));
         } catch (Exception ex) {
             log.warning(String.format("[id = %s] Unable to initialize liquibase where '%s'.", id, ex.getMessage()), ex);
             return null;

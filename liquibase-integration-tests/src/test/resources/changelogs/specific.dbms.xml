@@ -1,0 +1,85 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <changeSet id="10" author="test" dbms="postgresql,oracle,mssql,hsqldb,h2">
+        <createTable tableName="department">
+            <column name="id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="dept" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="emp_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="20" author="test" dbms="postgresql,oracle,mssql,hsqldb,h2">
+        <preConditions onFail="HALT">
+            <tableExists tableName="department"/>
+        </preConditions>
+        <comment>Table exists</comment>
+    </changeSet>
+    <changeSet id="30" author="test">
+        <createProcedure dbms="oracle">
+            CREATE OR REPLACE PROCEDURE test_hello
+            IS
+            BEGIN
+                DBMS_OUTPUT.PUT_LINE('Hello From The Database!');
+            END;
+        </createProcedure>
+        <createProcedure dbms="mssql">
+            CREATE OR ALTER PROCEDURE test_hello
+            AS
+            BEGIN
+              PRINT 'Hello From The Database!';
+            END;
+        </createProcedure>
+        <createProcedure dbms="postgresql">
+            CREATE OR REPLACE FUNCTION test_hello()
+            RETURNS VOID AS $$
+            BEGIN
+              RAISE NOTICE 'Hello From The Database!';
+            END;
+            $$ LANGUAGE plpgsql;
+        </createProcedure>
+        <createProcedure dbms="hsqldb">
+            create function test_hello ()
+               returns integer
+               SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Hello from the database';
+        </createProcedure>
+    </changeSet>
+    <changeSet id="40" author="test" dbms="hsqldb,postgresql">
+        <preConditions onFail="HALT">
+            <sqlCheck expectedResult="1">
+                select count(*)
+                from information_schema.routines
+                where lower(routine_schema) = 'public'
+                and lower(routine_name) = 'test_hello'
+            </sqlCheck>
+        </preConditions>
+        <comment>Procedure exists</comment>
+    </changeSet>
+    <changeSet id="40" author="test" dbms="oracle">
+        <preConditions onFail="HALT">
+            <sqlCheck expectedResult="1">
+                select count(*)
+                from sys.all_procedures
+                where object_type = 'PROCEDURE'
+                and object_name = 'TEST_HELLO'
+            </sqlCheck>
+        </preConditions>
+        <comment>Procedure exists</comment>
+    </changeSet>
+    <changeSet id="40" author="test" dbms="mssql">
+        <preConditions onFail="HALT">
+            <sqlCheck expectedResult="1">
+                select count(*)
+                from information_schema.routines
+                where routine_schema = 'dbo'
+                and routine_name = 'test_hello'
+            </sqlCheck>
+        </preConditions>
+        <comment>Procedure exists</comment>
+    </changeSet>
+</databaseChangeLog>

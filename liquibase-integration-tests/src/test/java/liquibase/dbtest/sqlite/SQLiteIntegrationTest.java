@@ -6,6 +6,8 @@ import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.exception.ValidationFailedException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.core.DatabaseObjectFactory;
 import org.junit.Test;
 
 import java.io.File;
@@ -31,7 +33,17 @@ public class SQLiteIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Override
-    public void testTableExistsPreconditionTableNameMatch() throws Exception {
+    public void testTableExistsPreconditionTableNameMatch() {
+        //does not work for sqlite
+    }
+
+    @Override
+    public void testTableIsEmptyPrecondition() {
+        //does not work for sqlite
+    }
+
+    @Override
+    public void testRowCountPrecondition() {
         //does not work for sqlite
     }
 

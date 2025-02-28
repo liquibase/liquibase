@@ -1,17 +1,31 @@
 package liquibase.dbtest.oracle;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.command.CommandResults;
+import liquibase.command.CommandScope;
+import liquibase.command.core.GenerateChangelogCommandStep;
+import liquibase.command.core.SnapshotCommandStep;
+import liquibase.command.core.UpdateCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationFailedException;
+import liquibase.executor.ExecutorService;
+import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.sql.visitor.AbstractSqlVisitor;
+import liquibase.statement.core.RawParameterizedSqlStatement;
+import liquibase.structure.core.Index;
+import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Date;
@@ -27,14 +41,16 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
     String indexOnSchemaChangeLog;
     String viewOnSchemaChangeLog;
     String customExecutorChangeLog;
-    String hubTestChangelog;
+    String indexWithAssociatedWithChangeLog;
+    String strictChangelog;
 
     public OracleIntegrationTest() throws Exception {
         super("oracle", DatabaseFactory.getInstance().getDatabase("oracle"));
-         indexOnSchemaChangeLog = "changelogs/oracle/complete/indexOnSchema.xml";
-         viewOnSchemaChangeLog = "changelogs/oracle/complete/viewOnSchema.xml";
-         customExecutorChangeLog = "changelogs/oracle/complete/sqlplusExecutor.xml";
-         hubTestChangelog = "changelogs/oracle/complete/HubTestChangelog.xml";
+        indexOnSchemaChangeLog = "changelogs/oracle/complete/indexOnSchema.xml";
+        viewOnSchemaChangeLog = "changelogs/oracle/complete/viewOnSchema.xml";
+        customExecutorChangeLog = "changelogs/oracle/complete/sqlplusExecutor.xml";
+        indexWithAssociatedWithChangeLog = "changelogs/common/index.with.associatedwith.changelog.xml";
+        strictChangelog = "changelogs/oracle/complete/strict.changelog.xml";
         // Respect a user-defined location for sqlnet.ora, tnsnames.ora etc. stored in the environment
         // variable TNS_ADMIN. This allowes the use of TNSNAMES.
         if (System.getenv("TNS_ADMIN") != null)
@@ -112,24 +128,6 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
             e.printDescriptiveError(System.out);
             throw e;
         }
-
-
-
-
-    }
-    @Test
-    public void testHubChangelog() throws Exception {
-        assumeNotNull(this.getDatabase());
-
-        Liquibase liquibase = createLiquibase(this.hubTestChangelog);
-        clearDatabase();
-
-        try {
-            liquibase.update(this.contexts);
-        } catch (ValidationFailedException e) {
-            e.printDescriptiveError(System.out);
-            throw e;
-        }
     }
 
     @Test
@@ -192,5 +190,64 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void testDiffExternalForeignKeys() throws Exception {
         //cross-schema security for oracle is a bother, ignoring test for now
+    }
+
+    @Test
+    public void verifyIndexIsCreatedWhenAssociatedWithPropertyIsSetAsForeignKey() throws DatabaseException {
+        clearDatabase();
+        try {
+            Database database = getDatabase();
+            CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME);
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
+            commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, indexWithAssociatedWithChangeLog);
+            commandScope.execute();
+
+            final CommandScope snapshotScope = new CommandScope("snapshot");
+            snapshotScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
+            snapshotScope.addArgumentValue(SnapshotCommandStep.SNAPSHOT_FORMAT_ARG, "json");
+            CommandResults results = snapshotScope.execute();
+            DatabaseSnapshot snapshot = (DatabaseSnapshot) results.getResult("snapshot");
+            Index index = snapshot.get(new Index("idx_test_oracle"));
+            Assert.assertNotNull(index);
+        } catch (Exception e) {
+            Assert.fail("Should not fail. Reason: " + e.getMessage());
+        } finally {
+            clearDatabase();
+        }
+    }
+
+    @Test
+    public void testChangeLogGenerationForTableWithGeneratedColumn() throws Exception {
+        assumeNotNull(getDatabase());
+        clearDatabase();
+        String textToTest = "GENERATED ALWAYS AS (QTY*PRICE)";
+
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new RawParameterizedSqlStatement(
+            String.format("CREATE TABLE GENERATED_COLUMN_TEST(QTY INT, PRICE INT, TOTALVALUE INT %s)", textToTest)));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
+            .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase())
+            .setOutput(baos)
+            .execute();
+
+        String generatedChangeLog = baos.toString();
+        assertTrue("Text '" + textToTest + "' not found in generated change log: " + generatedChangeLog, generatedChangeLog.contains(textToTest));
+    }
+
+    @Test
+    public void verifySlashReplacementOnStrictMode() throws DatabaseException {
+        assumeNotNull(getDatabase());
+        try {
+            Scope.child(GlobalConfiguration.STRICT.getKey(), true, () -> {
+                Database database = getDatabase();
+                CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME);
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database);
+                commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, strictChangelog);
+                commandScope.execute();
+            });
+        } catch (Exception e) {
+            Assert.fail("Should not fail. Reason: " + e.getMessage());
+        }
     }
 }

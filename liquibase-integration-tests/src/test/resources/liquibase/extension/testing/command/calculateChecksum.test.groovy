@@ -11,10 +11,17 @@ Short Description: Calculates and prints a checksum for the changeset
 Long Description: Calculates and prints a checksum for the changeset with the given id in the format filepath::id::author
 Required Args:
   changelogFile (String) The root changelog file
-  changesetIdentifier (String) Changeset ID identifier of form filepath::id::author
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
+  changesetAuthor (String) ChangeSet Author attribute
+    Default: null
+  changesetId (String) ChangeSet ID attribute
+    Default: null
+  changesetIdentifier (String) ChangeSet identifier of form filepath::id::author
+    Default: null
+  changesetPath (String) Changelog path in which the changeSet is included
+    Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
   defaultSchemaName (String) The default schema name to use for the database connection
@@ -30,7 +37,7 @@ Optional Args:
     Default: null
 """
 
-    run "Happy path", {
+    run "Happy path using changeSetIdentifier", {
         arguments = [
                 url              : { it.altUrl },
                 username         : { it.altUsername },
@@ -40,7 +47,23 @@ Optional Args:
         ]
 
         expectedResults = [
-                checksumResult   : "8:b6084e5d5f46b534bbbe18a0d35d34e0"
+                checksumResult   : "9:10de8cd690aed1d88d837cbe555d1684"
+        ]
+    }
+
+    run "Happy path using changeSetPath, ChangeSetId and ChangeSetPath", {
+        arguments = [
+                url              : { it.altUrl },
+                username         : { it.altUsername },
+                password         : { it.altPassword },
+                changesetPath    : "changelogs/h2/complete/rollback.tag.changelog.xml",
+                changesetId      : "1",
+                changesetAuthor  : "nvoxland",
+                changelogFile    : "changelogs/h2/complete/rollback.tag.changelog.xml"
+        ]
+
+        expectedResults = [
+                checksumResult   : "9:10de8cd690aed1d88d837cbe555d1684"
         ]
     }
 
@@ -51,15 +74,6 @@ Optional Args:
 
         expectedException = CommandValidationException.class
         expectedExceptionMessage = 'Invalid argument \'changelogFile\': missing required argument'
-    }
-
-    run "Run without changesetIdentifier should throw an exception",  {
-        arguments = [
-                changelogFile    : "changelogs/h2/complete/rollback.tag.changelog.xml"
-        ]
-
-        expectedException = CommandValidationException.class
-        expectedExceptionMessage = "Invalid argument \'changesetIdentifier\': missing required argument"
     }
 
     run "Run without URL should throw an exception",  {

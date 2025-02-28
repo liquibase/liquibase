@@ -1,5 +1,6 @@
 package liquibase.dbtest.pgsql;
 
+import liquibase.CatalogAndSchema;
 import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.Scope;
@@ -8,54 +9,108 @@ import liquibase.change.core.AddPrimaryKeyChange;
 import liquibase.change.core.CreateIndexChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.changelog.ChangeSet;
+import liquibase.command.CommandResults;
+import liquibase.command.CommandScope;
+import liquibase.command.core.GenerateChangelogCommandStep;
+import liquibase.command.core.StatusCommandStep;
+import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
+import liquibase.exception.CommandExecutionException;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.executor.ExecutorService;
+import liquibase.extension.testing.testsystem.DatabaseTestSystem;
+import liquibase.logging.mdc.customobjects.SimpleStatus;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.core.Sequence;
 import liquibase.structure.core.Table;
+import liquibase.test.JUnitResourceAccessor;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.io.ByteArrayOutputStream;
+import java.sql.*;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeNotNull;
+import static org.junit.Assume.assumeTrue;
 
 public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
 
-    private String dependenciesChangeLog = null;
-    private String blobChangeLog = null;
+    private String dependenciesChangeLog;
+    private String blobChangeLog;
+    private String sleepChangelog;
+    private static DatabaseTestSystem localTestSystem;
 
     public PostgreSQLIntegrationTest() throws Exception {
         super("pgsql", DatabaseFactory.getInstance().getDatabase("postgresql"));
         dependenciesChangeLog = "changelogs/pgsql/complete/testFkPkDependencies.xml";
         blobChangeLog = "changelogs/pgsql/complete/testBlob.changelog.xml";
+        sleepChangelog = "changelogs/pgsql/pg_sleep.sql";
+        localTestSystem = testSystem;
     }
 
-    /**
-     * Postgresql caches info including enum oid mappings in the connection. When we do a lot of dropping/re-creating in the tests it gets confused.
-     * Closing the connection
-     */
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-        if (getDatabase() != null && getDatabase().getConnection() != null) {
-            getDatabase().getConnection().close();
-        }
+    @Test
+    public void testStatusRunDuringUpdate() throws Exception {
+        assumeNotNull(this.getDatabase());
+
+        clearDatabase();
+        Liquibase liquibase = createLiquibase(sleepChangelog);
+
+        CommandScope commandScope = getStatusCommandScope(this.sleepChangelog);
+        CommandResults statusCheckBefore = commandScope.execute();
+
+        CompletableFuture<Boolean> updateFuture =
+                CompletableFuture.supplyAsync(() -> {
+                    try {
+                        liquibase.update(new Contexts());
+                        return true;
+                    } catch (LiquibaseException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+
+        Thread.sleep(3000); // wait for update to start running
+        CommandResults statusCheckDuring = commandScope.execute();
+
+        assertTrue(updateFuture.get());
+
+        CommandResults statusCheckAfter = commandScope.execute();
+
+        assertTrue(updateFuture.isDone());
+
+        assertEquals("undeployed", ((SimpleStatus)statusCheckBefore.getResult("status")).getMessage());
+        assertEquals(1, ((SimpleStatus)statusCheckBefore.getResult("status")).getChangesetCount());
+        assertEquals("undeployed", ((SimpleStatus)statusCheckDuring.getResult("status")).getMessage());
+        assertEquals(1, ((SimpleStatus)statusCheckDuring.getResult("status")).getChangesetCount());
+        assertEquals("up-to-date", ((SimpleStatus)statusCheckAfter.getResult("status")).getMessage());
+        assertEquals(0, ((SimpleStatus)statusCheckAfter.getResult("status")).getChangesetCount());
+
+
+    }
+
+    private CommandScope getStatusCommandScope(String changelogFile) throws CommandExecutionException {
+        CommandScope commandScope = new CommandScope(StatusCommandStep.COMMAND_NAME);
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, testSystem.getConnectionUrl());
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, testSystem.getUsername());
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, testSystem.getPassword());
+        commandScope.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changelogFile);
+        return commandScope;
     }
 
     @Test
@@ -94,7 +149,7 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
             liquibase.update();
             List<Map<String, ?>>  data = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                     .queryForList(
-                            new RawSqlStatement("SELECT pg_column_size(content_bytea) as BYTEASIZE, pg_column_size(lo_get(content_oid)) as OIDSIZE FROM  public.blobtest"));
+                            new RawParameterizedSqlStatement("SELECT pg_column_size(content_bytea) as BYTEASIZE, pg_column_size(lo_get(content_oid)) as OIDSIZE FROM  public.blobtest"));
             Assert.assertNotNull(data.get(0));
             Assert.assertTrue(((Integer)data.get(0).get("BYTEASIZE")) > 0);
             Assert.assertEquals(data.get(0).get("BYTEASIZE"), data.get(0).get("OIDSIZE"));
@@ -108,38 +163,38 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
     public void testMissingDataGenerator() throws Exception {
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
-                          new RawSqlStatement("CREATE TABLE \"FIRST_TABLE\" (\"ID\" INT, \"NAME\" VARCHAR(20), \"LAST_NAME\" VARCHAR(20) DEFAULT 'Snow', " +
+                          new RawParameterizedSqlStatement("CREATE TABLE \"FIRST_TABLE\" (\"ID\" INT, \"NAME\" VARCHAR(20), \"LAST_NAME\" VARCHAR(20) DEFAULT 'Snow', " +
                                                     "\"AGE\" INT DEFAULT 25, \"REGISTRATION_DATE\" date DEFAULT TO_DATE('2014-08-11', 'YYYY-MM-DD'), " +
                                                     "\"COMPVALCOL\" INT DEFAULT 1*22)"));
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
-                          new RawSqlStatement("CREATE TABLE \"SECOND_TABLE\" (\"ID\" INT, \"NAME\" VARCHAR(20))"));
+                          new RawParameterizedSqlStatement("CREATE TABLE \"SECOND_TABLE\" (\"ID\" INT, \"NAME\" VARCHAR(20))"));
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
-                          new RawSqlStatement("ALTER TABLE \"FIRST_TABLE\" ADD CONSTRAINT \"FIRST_TABLE_PK\" PRIMARY KEY (\"ID\")"));
+                          new RawParameterizedSqlStatement("ALTER TABLE \"FIRST_TABLE\" ADD CONSTRAINT \"FIRST_TABLE_PK\" PRIMARY KEY (\"ID\")"));
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
-                          new RawSqlStatement("ALTER TABLE \"SECOND_TABLE\" ADD CONSTRAINT \"FIRST_TABLE_FK\" FOREIGN KEY (\"ID\") REFERENCES \"FIRST_TABLE\"(\"ID\")"));
+                          new RawParameterizedSqlStatement("ALTER TABLE \"SECOND_TABLE\" ADD CONSTRAINT \"FIRST_TABLE_FK\" FOREIGN KEY (\"ID\") REFERENCES \"FIRST_TABLE\"(\"ID\")"));
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
-                          new RawSqlStatement("CREATE INDEX \"IDX_FIRST_TABLE\" ON \"FIRST_TABLE\"(\"NAME\")"));
+                          new RawParameterizedSqlStatement("CREATE INDEX \"IDX_FIRST_TABLE\" ON \"FIRST_TABLE\"(\"NAME\")"));
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
-                          new RawSqlStatement("INSERT INTO \"FIRST_TABLE\"(\"ID\", \"NAME\") VALUES (1, 'JOHN')"));
+                          new RawParameterizedSqlStatement("INSERT INTO \"FIRST_TABLE\"(\"ID\", \"NAME\") VALUES (1, 'JOHN')"));
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
-                          new RawSqlStatement("INSERT INTO \"FIRST_TABLE\"(\"ID\", \"NAME\", \"LAST_NAME\", \"AGE\", \"REGISTRATION_DATE\", \"COMPVALCOL\") VALUES (2, 'JEREMY', 'IRONS', 71, TO_DATE('2020-04-01', 'YYYY-MM-DD'), 2*11 )"));
+                          new RawParameterizedSqlStatement("INSERT INTO \"FIRST_TABLE\"(\"ID\", \"NAME\", \"LAST_NAME\", \"AGE\", \"REGISTRATION_DATE\", \"COMPVALCOL\") VALUES (2, 'JEREMY', 'IRONS', 71, TO_DATE('2020-04-01', 'YYYY-MM-DD'), 2*11 )"));
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
-                          new RawSqlStatement("INSERT INTO \"SECOND_TABLE\"(\"ID\", \"NAME\") VALUES (1, 'JOHN')"));
+                          new RawParameterizedSqlStatement("INSERT INTO \"SECOND_TABLE\"(\"ID\", \"NAME\") VALUES (1, 'JOHN')"));
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
-                          new RawSqlStatement("INSERT INTO \"SECOND_TABLE\"(\"ID\", \"NAME\") VALUES (2, 'JEREMY')"));
+                          new RawParameterizedSqlStatement("INSERT INTO \"SECOND_TABLE\"(\"ID\", \"NAME\") VALUES (2, 'JEREMY')"));
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(getDatabase(), null, new CompareControl());
 
         DiffToChangeLog changeLogWriter =
@@ -170,11 +225,11 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
         String function = "UPPER";
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                 .execute(
-                        new RawSqlStatement("CREATE TABLE INDEX_TEST (ID INT, NAME VARCHAR(20))"));
+                        new RawParameterizedSqlStatement("CREATE TABLE INDEX_TEST (ID INT, NAME VARCHAR(20))"));
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                 .execute(
-                        new RawSqlStatement("CREATE INDEX INDEX_TEST_IDX ON INDEX_TEST(ID, " + function +"(NAME)) WHERE ID > 0"));
+                        new RawParameterizedSqlStatement(String.format("CREATE INDEX INDEX_TEST_IDX ON INDEX_TEST(ID, %s(NAME)) WHERE ID > 0", function)));
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(getDatabase(), null, new CompareControl());
 
         DiffToChangeLog changeLogWriter =
@@ -207,27 +262,27 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)
                 .execute(
-                        new RawSqlStatement("CREATE TABLE serial_table (id serial)"));
+                        new RawParameterizedSqlStatement("CREATE TABLE serial_table (id serial)"));
 
 
         if (supportsIdentity) {
             Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)
                     .execute(
-                            new RawSqlStatement("CREATE TABLE autoinc_table (id int generated by default as identity)"));
+                            new RawParameterizedSqlStatement("CREATE TABLE autoinc_table (id int generated by default as identity)"));
         }
 
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)
                 .execute(
-                        new RawSqlStatement("CREATE TABLE owned_by_table (id int)"));
+                        new RawParameterizedSqlStatement("CREATE TABLE owned_by_table (id int)"));
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)
                 .execute(
-                        new RawSqlStatement("create sequence seq_owned owned by owned_by_table.id"));
+                        new RawParameterizedSqlStatement("create sequence seq_owned owned by owned_by_table.id"));
 
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database)
                 .execute(
-                        new RawSqlStatement("create sequence seq_unowned"));
+                        new RawParameterizedSqlStatement("create sequence seq_unowned"));
 
 
         SnapshotGeneratorFactory.resetAll();
@@ -249,4 +304,144 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
         assert !snapshot.get(new Table(null, null, "owned_by_table")).getColumn("id").isAutoIncrement();
 
     }
+
+    @Test
+    public void testGeneratedColumn() throws Exception {
+        assumeNotNull(getDatabase());
+        assumeTrue(getDatabase().getDatabaseMajorVersion() >= 12);
+        clearDatabase();
+        String textToTest = "GENERATED ALWAYS AS (height_cm / 2.54) STORED";
+
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                .execute(
+                        new RawParameterizedSqlStatement(String.format("CREATE TABLE generated_test (height_cm numeric, height_stored numeric %s)", textToTest)));
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
+                    .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase())
+                    .setOutput(baos)
+                    .execute();
+
+            assertTrue(baos.toString().contains(textToTest));
+
+    }
+
+    @Test
+    public void testGeneratedClobColumn() throws Exception {
+        assumeNotNull(getDatabase());
+        assumeTrue(getDatabase().getDatabaseMajorVersion() >= 12);
+        clearDatabase();
+        String textToTest = "GENERATED ALWAYS AS ((surname || ', '::text) || forename) STORED";
+
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+            .execute(new RawParameterizedSqlStatement(String.format(
+                    "CREATE TABLE generated_text_test (fullname text %s, surname text, forename text)",
+                    textToTest)));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
+            .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase())
+            .setOutput(baos)
+            .execute();
+
+        assertTrue(baos.toString().contains(textToTest));
+    }
+
+    @Test
+    public void validateUserCanOnlyAccessTablesFromSchemasAllowedToRead() throws Exception {
+        assumeNotNull(this.getDatabase());
+
+        //Set up changelog to be deployed to have some tables in the public schema
+        Liquibase liquibase = createLiquibase(completeChangeLog);
+        clearDatabase();
+        liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
+        liquibase.update(this.contexts);
+
+        //Create a new table with a serial type field on a new schema for a new user to test it can only get access to the created table
+        ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
+                "DROP SCHEMA IF EXISTS TEST_SCHEMA CASCADE;" +
+                        "DROP USER IF EXISTS TEST_USER;" +
+                        "CREATE SCHEMA TEST_SCHEMA;" +
+                        "CREATE USER TEST_USER WITH PASSWORD '1234';" +
+                        "CREATE TABLE TEST_SCHEMA.permissionDeniedTable(id serial, name varchar(50));" +
+                        "GRANT ALL ON ALL TABLES IN SCHEMA public TO TEST_USER"
+        );
+        getDatabase().commit();
+
+        String url = getDatabase().getConnection().getURL();
+        Database newDatabase = DatabaseFactory.getInstance().openDatabase(url, "test_user", "1234", null, new JUnitResourceAccessor());
+        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new CatalogAndSchema(null, "test_schema"), newDatabase, new SnapshotControl(newDatabase));
+
+        Set<Table> tableList = snapshot.get(Table.class);
+
+        assertEquals(1, tableList.size());
+        assertEquals("permissiondeniedtable", tableList.iterator().next().getName());
+    }
+
+    @Test
+    public void runYamlChangelog() throws Exception {
+        if (getDatabase() == null) {
+            return;
+        }
+
+        createLiquibase(completeChangeLog);
+        clearDatabase();
+
+        //run again to test changelog testing logic
+        Liquibase liquibase = createLiquibase("changelogs/yaml/create.procedure.back.compatibility.changelog.yaml");
+        liquibase.setChangeLogParameter("loginuser", testSystem.getUsername());
+
+        try {
+            liquibase.update(this.contexts);
+        } catch (ValidationFailedException e) {
+            e.printDescriptiveError(System.out);
+            throw e;
+        }
+
+
+    }
+
+    @Test
+    public void verifyCacheIsRestartedAfterChangesHaveBeenDeployed() throws Exception {
+        assumeNotNull(this.getDatabase());
+        Liquibase liquibase = createLiquibase("changelogs/fast.check.changelog.test.xml");
+
+        liquibase.update();
+        // FastCheck will set flag to true in next execution
+        liquibase.update();
+        // All fine as expected...
+        assertTableExists("DATABASECHANGELOG");
+        assertTableExists("DATABASECHANGELOGLOCK");
+        assertTableExists("DUMMY_TABLE");
+
+        //external database cleanup
+        dropTablesOutsidefastCheck();
+
+        // FastCheck should have been reset so it will be able to detect the missing tables
+        liquibase.update();
+
+        assertTableExists("DATABASECHANGELOG");
+        assertTableExists("DATABASECHANGELOGLOCK");
+        assertTableExists("DUMMY_TABLE");
+    }
+
+    private void assertTableExists(String tableName) throws SQLException {
+        Connection connection = testSystem.getConnection();
+        DatabaseMetaData dbm = connection.getMetaData();
+        String catalog = connection.getCatalog();
+        try (ResultSet tables = dbm.getTables(catalog.toLowerCase(), null, tableName.toLowerCase(), null)) {
+            assertTrue("Table " + tableName + " not found, but should be.", tables.isBeforeFirst());
+        }
+    }
+
+    private void dropTablesOutsidefastCheck() throws SQLException {
+        Connection connection = testSystem.getConnection();
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("DROP TABLE IF EXISTS public.DATABASECHANGELOG");
+            statement.execute("DROP TABLE IF EXISTS public.DATABASECHANGELOGLOCK");
+            statement.execute("DROP TABLE IF EXISTS public.DUMMY_TABLE");
+        }
+    }
+
+
 }

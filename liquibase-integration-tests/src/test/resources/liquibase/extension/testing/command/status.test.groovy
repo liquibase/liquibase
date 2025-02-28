@@ -8,11 +8,11 @@ CommandTests.define {
 Short Description: Generate a list of pending changesets
 Long Description: NOT SET
 Required Args:
-  changelogFile (String) The root changelog
+  changelogFile (String) The root changelog file
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
-  contexts (String) Changeset contexts to match
+  contextFilter (String) Context string to use for filtering
     Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
@@ -22,7 +22,7 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  labelFilter (String) Changeset labels to match
+  labelFilter (String) Label expression to use for filtering
     Default: null
   password (String) Password to use to connect to the database
     Default: null
@@ -30,7 +30,7 @@ Optional Args:
   username (String) Username to use to connect to the database
     Default: null
   verbose (Boolean) Verbose flag with optional values of 'True' or 'False'. The default is 'True'.
-    Default: null
+    Default: true
 """
 
     run "Happy path", {
@@ -46,9 +46,10 @@ Optional Args:
             runChangelog "changelogs/h2/complete/rollback.tag.plus.changelog.xml", "init"
         }
 
-        expectedResults = [
-                statusCode   : 0
-        ]
+        expectedOutput = """
+1 changeset has not been applied to LBUSER@jdbc:h2:mem:lbcat
+     changelogs/h2/complete/rollback.tag.plus.changelog.xml::1.111::nvoxland
+"""
     }
 
     run "Run without a changeLogFile should throw an exception",  {

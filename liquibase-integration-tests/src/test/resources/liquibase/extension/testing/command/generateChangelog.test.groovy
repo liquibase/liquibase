@@ -1,5 +1,7 @@
 package liquibase.extension.testing.command
 
+import static java.util.ResourceBundle.getBundle
+
 import liquibase.change.ColumnConfig
 import liquibase.change.ConstraintsConfig
 import liquibase.change.core.AddForeignKeyConstraintChange
@@ -19,9 +21,13 @@ Required Args:
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
+  author (String) Specifies the author for changesets in the generated changelog
+    Default: null
   changelogFile (String) Changelog file to write results
     Default: null
-  dataOutputDirectory (String) Directory to write table data to
+  contextFilter (String) Changeset contexts to generate
+    Default: null
+  dataOutputDirectory (String) Specifies a directory to send the loadData output of a diff-changelog/generate-changelog command as a CSV file.
     Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
@@ -33,16 +39,20 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  excludeObjects (String) Objects to exclude from diff
+  excludeObjects (String) Objects to exclude from diff. Supports regular expressions. Defaults to null.
     Default: null
+  ignoreMissingReferences (Boolean) If true, diff operations will ignore referenced objects which are not found in a snapshot.
+    Default: false
   includeCatalog (Boolean) If true, the catalog will be included in generated changeSets. Defaults to false.
     Default: false
-  includeObjects (String) Objects to include in diff
+  includeObjects (String) Objects to include in diff. Supports regular expressions. Defaults to null.
     Default: null
   includeSchema (Boolean) If true, the schema will be included in generated changeSets. Defaults to false.
     Default: false
   includeTablespace (Boolean) Include the tablespace attribute in the changelog. Defaults to false.
     Default: false
+  labelFilter (String) Changeset labels to generate
+    Default: null
   outputSchemas (String) Output schemas names. This is a CSV list.
     Default: null
   overwriteOutputFile (Boolean) Flag to allow overwriting of output changelog file. Default: false
@@ -50,8 +60,16 @@ Optional Args:
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
+  replaceIfExistsTypes (String) Sets replaceIfExists="true" for changes of these types (supported types: createProcedure, createView)
+    Default: none
+  runOnChangeTypes (String) Sets runOnChange="true" for changesets containing solely changes of these types (e. g. createView, createProcedure, ...).
+    Default: none
   schemas (String) Schemas to include in diff
     Default: null
+  skipObjectSorting (Boolean) When true will skip object sorting. This can be useful on databases that have a lot of packages/procedures that are linked to each other
+    Default: false
+  useOrReplaceOption (Boolean) If true, will add 'OR REPLACE' option to the create view change object
+    Default: false
   username (String) Username to use to connect to the database
     Default: null
 """
@@ -64,7 +82,7 @@ Optional Args:
             changelogFile: "target/test-classes/changelog-test.xml"
         ]
         setup {
-            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "changelog-test.xml")
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_BOTH, "changelog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "FirstTable",
@@ -152,7 +170,7 @@ Optional Args:
             cleanResources("changelog-test.xml")
         }
         expectedException = CommandValidationException.class
-        expectedExceptionMessage = "Output ChangeLogFile 'target/test-classes/changelog-test.xml' already exists!"
+        expectedExceptionMessage = getBundle("liquibase/i18n/liquibase-core").getString("changelogfile.already.exists").replace("%s", "target/test-classes/changelog-test.xml")
     }
 
     run "Filtering with includeObjects", {
@@ -164,7 +182,7 @@ Optional Args:
             includeObjects: "table:FIRSTTABLE"
         ]
         setup {
-            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "changelog-test.xml")
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_BOTH, "changelog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "FirstTable",
@@ -221,7 +239,7 @@ Optional Args:
         ]
 
         setup {
-            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "generateChangelog-test.xml")
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_BOTH, "generateChangelog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "person",

@@ -1,8 +1,8 @@
 package liquibase.extension.testing.command
 
-import liquibase.exception.CommandValidationException
 
-import java.util.regex.Pattern
+import liquibase.exception.CommandValidationException
+import liquibase.util.TestUtil
 
 CommandTests.define {
     command = ["updateTestingRollback"]
@@ -10,7 +10,7 @@ CommandTests.define {
 Short Description: Updates database, then rolls back changes before updating again. Useful for testing rollback support
 Long Description: NOT SET
 Required Args:
-  changelogFile (String) The root changelog
+  changelogFile (String) The root changelog file
   url (String) The JDBC database connection URL
     OBFUSCATED
 Optional Args:
@@ -18,7 +18,7 @@ Optional Args:
     Default: null
   changeExecListenerPropertiesFile (String) Path to a properties file for the ChangeExecListenerClass
     Default: null
-  contexts (String) Changeset contexts to match
+  contextFilter (String) Context string to use for filtering
     Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
@@ -28,11 +28,13 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  labelFilter (String) Changeset labels to match
+  labelFilter (String) Label expression to use for filtering
     Default: null
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
+  tag (String) The tag to update to
+    Default: null
   username (String) Username to use to connect to the database
     Default: null
 """
@@ -49,9 +51,10 @@ Optional Args:
             runChangelog "changelogs/h2/complete/rollback.changelog.xml"
             rollback 5, "changelogs/h2/complete/rollback.changelog.xml"
         }
-        expectedResults = [
-                statusCode   : 0
-        ]
+
+        expectations = {
+            TestUtil.assertAllDeploymentIdsNonNull()
+        }
     }
 
     run "Run without a URL throws an exception", {

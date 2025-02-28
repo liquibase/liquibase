@@ -10,31 +10,36 @@ on:
     branches:
       - gha-scheduled-*
 
+
 jobs:
   build-installers:
     name: Build Installers
     runs-on: macos-latest #needs macos for apple notarization
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Download liquibase-artifacts
-        uses: liquibase/action-download-artifact@v2-liquibase
-        with:
-          workflow: build.yml
-          workflow_conclusion: success
-          branch: master
-          name: liquibase-artifacts
-          path: re-version/final
+      - uses: actions/checkout@v4
 
       - name: Set up JDK for GPG
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           gpg-private-key: ${{ secrets.GPG_SECRET }}
           gpg-passphrase: GPG_PASSPHRASE
+          overwrite-settings: false
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Download liquibase-artifacts
+        uses: liquibase/action-download-artifact@v2-liquibase
+        with:
+          workflow: run-tests.yml
+          workflow_conclusion: success
+          branch: ${{ github.head_ref }}
+          name: liquibase-artifacts
+          path: re-version/final
+      
+      - name: Set branch variable
+        run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
 
       - name: Re-version Installers
         env:
@@ -46,23 +51,23 @@ jobs:
           INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
           INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+          BRANCH: ${{ github.ref_name || github.head_ref }}
         run: |
           mkdir -p liquibase-dist/target/keys
           echo "Saving apple key"
           echo "$INSTALL4J_APPLE_KEY" | base64 -d > liquibase-dist/target/keys/datical_apple.p12
           echo "Saving windows key"
           echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
-          version="${{ needs.setup.outputs.version }}"
           
           ##### Rebuild installers
-          tarFile=$(pwd)/re-version/final/liquibase-0-SNAPSHOT.tar.gz
+          tarFile=$(pwd)/re-version/final/liquibase-${BRANCH}-SNAPSHOT.tar.gz
           scriptDir=$(pwd)/.github/util/
           
           mkdir -p liquibase-dist/target/liquibase-0-SNAPSHOT
           (cd liquibase-dist/target/liquibase-0-SNAPSHOT && tar xfz $tarFile)
           (cd liquibase-dist && $scriptDir/package-install4j.sh 0-SNAPSHOT)
           mv liquibase-dist/target/liquibase-*-installer-* re-version/final
-          
+
           ##Sign Files
           .github/util/sign-artifacts.sh re-version/final
           
@@ -72,7 +77,7 @@ jobs:
           rm re-version/final/*.sha1
 
       - name: Archive Packages
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: liquibase-test-packages
           path: re-version/final/*

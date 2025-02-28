@@ -1,0 +1,33 @@
+databaseChangeLog:
+  -  property:
+       name:  data_file
+       context: test1
+       value:  data-context1
+  -  property:
+       name:  data_file
+       context: test2
+       value:  data-context2
+
+  - changeSet:
+      id: 0 - Bug with file missing for non active context
+      author: Me
+      changes:
+        - createTable:
+            tableName: TEST
+            columns:
+              - column:
+                  name: ID
+                  type: int
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+  - changeSet:
+      id: 1 - Bug, without this context file should not have to exist
+      author: Me
+      context: "invalidcontext"
+      changes:
+        - loadData:
+            encoding: UTF-8
+            file: "changelog/yaml/data/${data_file}.csv"
+            separator: ","
+            tableName: TEST

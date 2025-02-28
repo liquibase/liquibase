@@ -1,49 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.liquibase</groupId>
-  <artifactId>liquibase-maven-plugin</artifactId>
-  <version>0-SNAPSHOT</version>
-  <packaging>maven-plugin</packaging>
-  <name>Liquibase Maven Plugin</name>
-  <description>A Maven plugin wraps up some of the functionality of Liquibase</description>
-  <url>http://www.liquibase.org/liquibase-maven-plugin</url>
-  <licenses>
-    <license>
-      <name>Apache License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-    </license>
-  </licenses>
-  <developers>
-    <developer>
-      <id>nvoxland</id>
-      <name>Nathan Voxland</name>
-      <email>nathan.voxland@liquibase.org</email>
-      <roles>
-        <role>architect</role>
-        <role>developer</role>
-      </roles>
-      <timezone>-6</timezone>
-    </developer>
-  </developers>
-  <scm>
-    <connection>scm:git:git@github.com:liquibase/liquibase.git/liquibase-maven-plugin</connection>
-    <developerConnection>scm:git:git@github.com:liquibase/liquibase.git/liquibase-maven-plugin</developerConnection>
-    <url>scm:git:git@github.com:liquibase/liquibase.git/liquibase-maven-plugin</url>
-  </scm>
-  <dependencies>
-    <dependency>
-      <groupId>org.liquibase</groupId>
-      <artifactId>liquibase-core</artifactId>
-      <version>0-SNAPSHOT</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.liquibase</groupId>
-      <artifactId>liquibase-commercial</artifactId>
-      <version>0-SNAPSHOT</version>
-      <scope>runtime</scope>
-    </dependency>
-  </dependencies>
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.liquibase</groupId>
+    <artifactId>liquibase-maven-plugin</artifactId>
+    <version>0-SNAPSHOT</version>
+    <packaging>maven-plugin</packaging>
+    <name>Liquibase Maven Plugin</name>
+    <description>A Maven plugin wraps up some of the functionality of Liquibase</description>
+    <url>http://www.liquibase.org/liquibase-maven-plugin</url>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <id>nvoxland</id>
+            <name>Nathan Voxland</name>
+            <email>nathan.voxland@liquibase.org</email>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+            </roles>
+            <timezone>-6</timezone>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:git@github.com:liquibase/liquibase.git/liquibase-maven-plugin</connection>
+        <developerConnection>scm:git:git@github.com:liquibase/liquibase.git/liquibase-maven-plugin</developerConnection>
+        <url>scm:git:git@github.com:liquibase/liquibase.git/liquibase-maven-plugin</url>
+    </scm>
+    <dependencies>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>0-SNAPSHOT</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-commercial</artifactId>
+            <version>0-SNAPSHOT</version>
+            <scope>runtime</scope>
+        </dependency>
+    </dependencies>
 </project>
