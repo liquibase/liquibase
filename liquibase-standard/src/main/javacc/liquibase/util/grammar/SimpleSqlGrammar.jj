@@ -487,6 +487,7 @@ Built list from http://stackoverflow.com/a/37668315/45756
     "\uFB40",
     "\uFB41",
     "\uFB43",
+    "\u0650", // Kasra character in Arabic: https://www.compart.com/en/unicode/U+0650
     "\uFB44",
     "\uFB46"-"\uFBB1",
     "\uFBD3"-"\uFD3D",
