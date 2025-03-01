@@ -144,6 +144,12 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     }
 
     @Override
+    public List<RanChangeSet> getUniqueRanChangeSets() throws DatabaseException
+    {
+        return getRanChangeSets();
+    }
+
+    @Override
     public List<RanChangeSet> getRanChangeSets() throws DatabaseException {
         try (
                 Reader reader = new InputStreamReader(Files.newInputStream(this.changeLogFile.toPath()), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())
