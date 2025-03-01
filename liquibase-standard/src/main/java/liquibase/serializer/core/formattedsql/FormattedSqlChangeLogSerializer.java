@@ -25,6 +25,12 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
     private static final String SQL_FILE_NAME_REGEX = ".*\\.(\\w+)\\.sql";
     private static final Pattern SQL_FILE_NAME_PATTERN = Pattern.compile(SQL_FILE_NAME_REGEX);
 
+    private boolean preserveNullValues = true;
+
+    @Override
+    public void preserveNullValues(boolean preserveNullValues) {
+        this.preserveNullValues = preserveNullValues;
+    }
 
     @Override
     public String[] getValidFileExtensions() {
