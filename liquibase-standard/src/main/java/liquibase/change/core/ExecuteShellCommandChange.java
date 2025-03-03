@@ -7,6 +7,7 @@ import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
+import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
@@ -51,7 +52,14 @@ public class ExecuteShellCommandChange extends AbstractChange {
     private static final Long MIN_IN_MILLIS = SECS_IN_MILLIS * 60;
     private static final Long HOUR_IN_MILLIS = MIN_IN_MILLIS * 60;
 
+    private boolean shouldRunOnOs=true;
+
     protected Integer maxStreamGobblerOutput = null;
+
+    @Override
+    public boolean shouldRunOnOs() {
+        return shouldRunOnOs;
+    }
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
@@ -106,6 +114,18 @@ public class ExecuteShellCommandChange extends AbstractChange {
         return validationErrors;
     }
 
+    @Override
+    public void finishInitialization() throws SetupException {
+        shouldRunOnOs = true;
+        if ((os != null) && (!os.isEmpty())) {
+            String currentOS = System.getProperty("os.name");
+            if (!os.contains(currentOS)) {
+                shouldRunOnOs = false;
+                Scope.getCurrentScope().getLog(getClass()).info("Not executing on os " + currentOS + " when " + os + " was " +
+                        "specified");
+            }
+        }
+    }
 
     @Override
     public Warnings warn(Database database) {
@@ -114,22 +134,13 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
     @Override
     public SqlStatement[] generateStatements(final Database database) {
-        boolean shouldRun = true;
-        if ((os != null) && (!os.isEmpty())) {
-            String currentOS = System.getProperty("os.name");
-            if (!os.contains(currentOS)) {
-                shouldRun = false;
-                Scope.getCurrentScope().getLog(getClass()).info("Not executing on os " + currentOS + " when " + os + " was " +
-                        "specified");
-            }
-        }
 
         // Do not run if just logging output or generating statements
         boolean shouldExecuteChange = shouldExecuteChange(database);
 
         this.finalCommandArray = createFinalCommandArray(database);
 
-        if (shouldRun && shouldExecuteChange) {
+        if (shouldRunOnOs && shouldExecuteChange) {
 
             return new SqlStatement[]{new RuntimeStatement() {
 
@@ -322,7 +333,10 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
     @Override
     public String getConfirmationMessage() {
-        return "Shell command '" + getCommandString() + "' executed";
+        if (shouldRunOnOs) {
+            return "Shell command '" + getCommandString() + "' executed";
+        }
+        return "Shell command '" + getCommandString() + "' did not execute.  Required OS must be " + os.toString();
     }
 
     protected String getCommandString() {

@@ -1,5 +1,6 @@
 package liquibase.changelog;
 
+import liquibase.Beta;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Scope;
@@ -100,5 +101,16 @@ public interface ChangeLogHistoryService extends Plugin {
      * this method to support checksum upgrades.
      */
     default void replaceChecksum(ChangeSet changeSet) throws DatabaseException {
+    }
+
+    /**
+     * By default does nothing to keep compatibility with older versions, but subclasses may like to implement
+     * this method to support eventual minor file path fixes.
+     *
+     * @Deprecated to be removed around Liquibase 4.34.0 - DO NOT USE
+     */
+    @Beta
+    @Deprecated
+    default void replaceFilePath(ChangeSet changeSet, String oldPath) throws DatabaseException {
     }
 }

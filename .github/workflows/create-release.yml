@@ -47,13 +47,6 @@ on:
         required: true
         type: boolean
         default: false
-    outputs:
-      dry_run_zip_url:
-        description: 'The URL of the created zip file'
-        value: ${{ jobs.build-installers.outputs.dry_run_zip_url }}
-      dry_run_tar_gz_url:
-        description: 'The URL of the created tar.gz file'
-        value: ${{ jobs.build-installers.outputs.dry_run_tar_gz_url }}
 
 env:
   DEPENDENCIES: "liquibase-bigquery" # Comma separated list of dependencies to release the extensions list
@@ -302,9 +295,6 @@ jobs:
     runs-on: macos-13 #needs macos for apple notarization
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    outputs:
-      dry_run_zip_url: ${{ steps.extract-dry-run-url.outputs.dry_run_zip_url }}
-      dry_run_tar_gz_url: ${{ steps.extract-dry-run-url.outputs.dry_run_tar_gz_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -398,18 +388,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract dry-run release URL
-        if: ${{ inputs.standalone_zip == false && inputs.dry_run == true }}
-        id: extract-dry-run-url
-        shell: bash
-        run: |
-          assets_json=$(echo '${{ toJson(steps.attach-files-dry-run.outputs) }}' | jq -r '.assets | fromjson')
-          tar_gz_url=$(echo "$assets_json" | jq -r '.[] | select(.name | test("^liquibase-dry-run-.*\\.tar\\.gz$")) | .url')
-          zip_url=$(echo "$assets_json" | jq -r '.[] | select(.name | test("^liquibase-dry-run-.*\\.zip$")) | .url')
-          echo $tar_gz_url
-          echo $zip_url
-          echo "dry_run_tar_gz_url=$tar_gz_url" >> $GITHUB_OUTPUT
-          echo "dry_run_zip_url=$zip_url" >> $GITHUB_OUTPUT
 
       - name: Attach standalone zip to Build
         if: ${{ inputs.standalone_zip == true && inputs.dry_run == false }}
