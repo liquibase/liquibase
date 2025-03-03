@@ -1,3 +1,4 @@
+
 package liquibase.integration.commandline;
 
 import liquibase.configuration.AbstractMapConfigurationValueProvider;
