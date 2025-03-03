@@ -5,6 +5,7 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.SupportsMethodValidationLevelsEnum;
 import liquibase.database.*;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MariaDBDatabase;
 import liquibase.database.core.MockDatabase;
 import liquibase.database.core.PostgresDatabase;
@@ -14,6 +15,9 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.UniqueConstraint;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.LiquibaseUtil;
@@ -290,12 +294,30 @@ public class SnapshotGeneratorFactory {
         for (int i = 0; i< schemas.length; i++) {
             examples[i] = examples[i].customize(database);
             schemas[i] = new Schema(examples[i].getCatalogName(), examples[i].getSchemaName());
-
-
         }
 
         Scope.getCurrentScope().getLog(SnapshotGeneratorFactory.class).info("Creating snapshot");
-        return createSnapshot(schemas, database, snapshotControl);
+        DatabaseSnapshot snapshot = createSnapshot(schemas, database, snapshotControl);
+
+        //
+        // For SQL Server, try to set the backing index for primary key and
+        // unique constraints to the index that is created
+        //
+        if (database instanceof MSSQLDatabase) {
+            Set<PrimaryKey> primaryKeys = snapshot.get(PrimaryKey.class);
+            primaryKeys.forEach(pk -> {
+                if (pk != null) {
+                    syncBackingIndex(pk, snapshot);
+                }
+            });
+            Set<UniqueConstraint> uniqueConstraints = snapshot.get(UniqueConstraint.class);
+            uniqueConstraints.forEach(uc -> {
+                if (uc != null) {
+                    syncBackingIndex(uc, snapshot);
+                }
+            });
+        }
+        return snapshot;
     }
 
     /**
@@ -446,5 +468,36 @@ public class SnapshotGeneratorFactory {
             }
         }
 
+    }
+
+    private void syncBackingIndex(PrimaryKey pk, DatabaseSnapshot snapshot) {
+        if (pk.getBackingIndex() == null) {
+            return;
+        }
+        Set<Index> indices = snapshot.get(Index.class);
+        indices.forEach(index -> {
+            if (pk.getBackingIndex().getName().equals(index.getName()) && index != pk.getBackingIndex()) {
+                pk.setBackingIndex(index);
+                pk.getColumns().clear();
+                index.getColumns().forEach(col -> {
+                    pk.getColumns().add(col);
+                });
+            }
+        });
+    }
+    private void syncBackingIndex(UniqueConstraint uc, DatabaseSnapshot snapshot) {
+        if (uc.getBackingIndex() == null) {
+            return;
+        }
+        Set<Index> indices = snapshot.get(Index.class);
+        indices.forEach(index -> {
+            if (uc.getBackingIndex().getName().equals(index.getName()) && index != uc.getBackingIndex()) {
+                uc.setBackingIndex(index);
+                uc.getColumns().clear();
+                index.getColumns().forEach(col -> {
+                    uc.getColumns().add(col);
+                });
+            }
+        });
     }
 }

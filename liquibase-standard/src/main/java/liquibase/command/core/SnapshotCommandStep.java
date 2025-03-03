@@ -78,12 +78,6 @@ public class SnapshotCommandStep extends AbstractCommandStep {
         try {
             DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, database, snapshotControl);
 
-            Set<PrimaryKey> primaryKeys = snapshot.get(PrimaryKey.class);
-            primaryKeys.forEach(pk -> {
-                if (pk != null) {
-                    syncBackingIndex(pk, snapshot);
-                }
-            });
             snapshot.setMetadata(this.getSnapshotMetadata());
 
             resultsBuilder.addResult("snapshot", snapshot);
@@ -102,23 +96,6 @@ public class SnapshotCommandStep extends AbstractCommandStep {
             //
             database.setObjectQuotingStrategy(originalQuotingStrategy);
         }
-    }
-
-    private void syncBackingIndex(PrimaryKey pk, DatabaseSnapshot snapshot) {
-        if (pk.getBackingIndex() == null) {
-            return;
-        }
-        Set<Index> indices = snapshot.get(Index.class);
-        indices.forEach(index -> {
-            if (pk.getBackingIndex().getName().equals(index.getName()) && index != pk.getBackingIndex()) {
-                pk.setBackingIndex(index);
-                pk.getColumns().clear();
-                index.getColumns().forEach(col -> {
-                    pk.getColumns().add(col);
-                });
-            }
-        });
-
     }
 
     protected SnapshotControl createSnapshotControl(CommandScope commandScope, Database database) {
