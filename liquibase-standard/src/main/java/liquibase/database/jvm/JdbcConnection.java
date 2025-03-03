@@ -7,7 +7,10 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 
 import java.sql.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -545,6 +548,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public Connection getUnderlyingConnection() {
         return con;
     }
