@@ -251,6 +251,19 @@ Global Options
                                includeSystemClasspath', environment variable:
                                'LIQUIBASE_INCLUDE_SYSTEM_CLASSPATH')
 
+      --license-utility-enabled=PARAM
+                             Enable or disable sending license usage data.
+                             DEFAULT: false
+                             (defaults file: 'liquibase.license.utility.
+                               enabled', environment variable:
+                               'LIQUIBASE_LICENSE_UTILITY_ENABLED')
+
+      --license-utility-url=PARAM
+                             DEFAULT: http://localhost:8080
+                             (defaults file: 'liquibase.license.utility.url',
+                               environment variable:
+                               'LIQUIBASE_LICENSE_UTILITY_URL')
+
       --liquibase-catalog-name=PARAM
                              Catalog to use for Liquibase objects
                              (defaults file: 'liquibase.liquibaseCatalogName',
