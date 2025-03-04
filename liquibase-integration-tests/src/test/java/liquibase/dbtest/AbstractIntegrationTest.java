@@ -546,6 +546,7 @@ public abstract class AbstractIntegrationTest {
         liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         liquibase.update(this.contexts);
         liquibase.update(this.contexts);
+
     }
 
     @Test
@@ -646,6 +647,8 @@ public abstract class AbstractIntegrationTest {
 
         liquibase.tag("Test Tag");
         assertTrue(liquibase.tagExists("Test Tag"));
+
+        clearDatabase();
     }
 
     @Test
@@ -943,6 +946,8 @@ public abstract class AbstractIntegrationTest {
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         liquibase.generateDocumentation(outputDir.toAbsolutePath().toString(), this.contexts);
+
+        clearDatabase();
     }
 
     /**
@@ -1085,6 +1090,7 @@ public abstract class AbstractIntegrationTest {
         List<ChangeSet> changeSets = changeLogWriter.generateChangeSets();
         assertEquals("generating two change logs without any changes in between should result in an empty generated " +
                 "differential changeset.", 0, changeSets.size());
+        clearDatabase();
     }
 
     @Test
