@@ -9,13 +9,20 @@ import liquibase.command.CommandResultsBuilder;
 import liquibase.command.CommandScope;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
+import liquibase.license.LicenseTrack;
+import liquibase.license.LicenseTrackingArgs;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.util.ExceptionUtil;
 import org.apache.commons.lang3.StringUtils;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -126,7 +133,9 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
                 throw new DatabaseException(e);
             }
         }
-        logMdc(url == null ? database.get().getConnection().getURL() : url, database.get());
+        String urlForLogging = url == null ? database.get().getConnection().getURL() : url;
+        logMdc(urlForLogging, database.get());
+        logLicenseUsage(urlForLogging, database.get());
         return database.get();
     }
 
@@ -155,6 +164,25 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
         ExceptionUtil.doSilently(() -> {
             Scope.getCurrentScope().getAnalyticsEvent().setDatabaseVersion(database.getDatabaseProductVersion());
         });
+    }
+
+    private void logLicenseUsage(String url, Database database) {
+        if (Boolean.TRUE.equals(LicenseTrackingArgs.ENABLED.getCurrentValue())) {
+            try {
+                DatabaseConnection connection = database.getConnection();
+                Connection underlyingConnection = connection.getUnderlyingConnection();
+                Scope.getCurrentScope().getLicenseTrackList().getLicenseTracks().add(new LicenseTrack(removeQueryParameters(JdbcConnection.sanitizeUrl(url)), underlyingConnection.getSchema(), underlyingConnection.getCatalog()));
+            } catch (SQLException | URISyntaxException e) {
+                // todo do something here
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private String removeQueryParameters(String jdbcUrl) throws URISyntaxException {
+        URI uri = new URI(jdbcUrl.substring(5)); // remove "jdbc:" prefix
+        URI cleanedUri = new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), null, uri.getFragment());
+        return "jdbc:" + cleanedUri.toString();
     }
 
     @Override
