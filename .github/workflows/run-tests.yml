@@ -286,6 +286,7 @@ jobs:
   fossa:
     needs: build_tests
     uses: liquibase/build-logic/.github/workflows/fossa_ai.yml@main
+    if: github.event_name != 'workflow_dispatch'
     secrets: inherit
     with:
       check_snippets: true
