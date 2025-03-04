@@ -301,7 +301,7 @@ public class SnapshotGeneratorFactory {
 
         //
         // For SQL Server, try to set the backing index for primary key and
-        // unique constraints to the index that is created
+        // unique constraints to the index that is created automatically
         //
         if (database instanceof MSSQLDatabase) {
             Set<PrimaryKey> primaryKeys = snapshot.get(PrimaryKey.class);
