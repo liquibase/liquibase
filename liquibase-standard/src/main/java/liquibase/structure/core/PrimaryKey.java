@@ -149,16 +149,6 @@ public class PrimaryKey extends AbstractDatabaseObject {
 
     public List<Column> getColumns() {
         return getAttribute("columns", List.class);
-        /*
-        List<Object> cols = getAttribute("columns", List.class);
-        List<Column> columns = new ArrayList<>();
-        cols.forEach(c -> {
-            if (c instanceof Column) {
-                columns.add((Column)c);
-            }
-        });
-        return columns;
-         */
     }
 
     public List<String> getColumnNamesAsList() {
