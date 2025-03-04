@@ -127,7 +127,7 @@ jobs:
           token: ${{ secrets.BOT_TOKEN }}
 
       - name: Download liquibase-artifacts
-        uses: dawidd6/action-download-artifact@v8
+        uses: dawidd6/action-download-artifact@v9
         with:
           workflow: run-tests.yml
           run_id: ${{ needs.setup.outputs.runId }}
