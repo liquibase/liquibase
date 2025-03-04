@@ -15,11 +15,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Index;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.UniqueConstraint;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
+import liquibase.structure.core.*;
 import liquibase.util.LiquibaseUtil;
 
 import java.util.*;
@@ -307,13 +303,13 @@ public class SnapshotGeneratorFactory {
             Set<PrimaryKey> primaryKeys = snapshot.get(PrimaryKey.class);
             primaryKeys.forEach(pk -> {
                 if (pk != null) {
-                    syncBackingIndex(pk, snapshot);
+                    syncBackingIndex(pk, Index.class, snapshot);
                 }
             });
             Set<UniqueConstraint> uniqueConstraints = snapshot.get(UniqueConstraint.class);
             uniqueConstraints.forEach(uc -> {
                 if (uc != null) {
-                    syncBackingIndex(uc, snapshot);
+                    syncBackingIndex(uc, Index.class, snapshot);
                 }
             });
         }
@@ -470,33 +466,18 @@ public class SnapshotGeneratorFactory {
 
     }
 
-    private void syncBackingIndex(PrimaryKey pk, DatabaseSnapshot snapshot) {
-        if (pk.getBackingIndex() == null) {
+    private void syncBackingIndex(DatabaseObject databaseObject, Class<? extends DatabaseObject> clazz, DatabaseSnapshot snapshot) {
+        if (!(databaseObject instanceof PrimaryKey) && !(databaseObject instanceof UniqueConstraint)) {
             return;
         }
-        Set<Index> indices = snapshot.get(Index.class);
+        Set<Index> indices = (Set<Index>)snapshot.get(clazz);
         indices.forEach(index -> {
-            if (pk.getBackingIndex().getName().equals(index.getName()) && index != pk.getBackingIndex()) {
-                pk.setBackingIndex(index);
-                pk.getColumns().clear();
-                index.getColumns().forEach(col -> {
-                    pk.getColumns().add(col);
-                });
-            }
-        });
-    }
-    private void syncBackingIndex(UniqueConstraint uc, DatabaseSnapshot snapshot) {
-        if (uc.getBackingIndex() == null) {
-            return;
-        }
-        Set<Index> indices = snapshot.get(Index.class);
-        indices.forEach(index -> {
-            if (uc.getBackingIndex().getName().equals(index.getName()) && index != uc.getBackingIndex()) {
-                uc.setBackingIndex(index);
-                uc.getColumns().clear();
-                index.getColumns().forEach(col -> {
-                    uc.getColumns().add(col);
-                });
+            final Index backingIndex = databaseObject.getAttribute("backingIndex", Index.class);
+            if (backingIndex.getName().equals(index.getName()) && index != backingIndex) {
+                databaseObject.setAttribute("backingIndex", index);
+                List<Column> columns = (List<Column>)databaseObject.getAttribute("columns", List.class);
+                columns.clear();
+                columns.addAll(index.getColumns());
             }
         });
     }
