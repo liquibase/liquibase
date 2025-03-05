@@ -51,6 +51,5 @@ class GenerateChangeLogH2IntegrationTest extends Specification{
         if (testDir.exists()) {
             FileUtils.deleteDirectory(testDir)
         }
-
     }
 }

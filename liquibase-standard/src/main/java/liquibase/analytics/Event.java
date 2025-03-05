@@ -206,7 +206,7 @@ public class Event {
                 getChildEvents().add(event);
             }
         } catch (Exception analyticsEnabledException) {
-            Scope.getCurrentScope().getLog(getClass()).fine("Failed to add child event: could not determine analytics status", analyticsEnabledException);
+            Scope.getCurrentScope().getLog(getClass()).log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Failed to add child event: could not determine analytics status", analyticsEnabledException);
         }
     }
 }
