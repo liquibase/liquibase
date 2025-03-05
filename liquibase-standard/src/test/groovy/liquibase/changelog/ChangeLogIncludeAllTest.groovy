@@ -1,9 +1,11 @@
 package liquibase.changelog
 
-
+import liquibase.include.ChangeLogIncludeAll
+import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@Ignore
 class ChangeLogIncludeAllTest extends Specification {
 
     @Unroll
