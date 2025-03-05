@@ -705,6 +705,8 @@ public class LiquibaseCommandLine {
         returnMap.put(Scope.Attr.integrationDetails.name(), integrationDetails);
 
         returnMap.putAll(configureLogging());
+        final String configuredChannels = LiquibaseCommandLineConfiguration.LOG_CHANNELS.getCurrentValue();
+        returnMap.put("logChannels", configuredChannels);
 
         //
         // Pass any -D properties in the scope so that they will be available to
@@ -769,6 +771,7 @@ public class LiquibaseCommandLine {
         }
 
         configureLogging(logLevel, logFile, currentConfiguredValue.wasDefaultValueUsed());
+        returnMap.put("logLevel", logLevel);
 
         return returnMap;
     }

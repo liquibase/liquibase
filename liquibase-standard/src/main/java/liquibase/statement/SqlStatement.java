@@ -1,5 +1,9 @@
 package liquibase.statement;
 
+import liquibase.database.Database;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.util.SqlUtil;
+
 /**
  * The SqlStatement classes correspond to (roughly) a single SQL statement.  SqlStatement instances are created by Change classes,
  * and by Liquibase itself as the primary database-independent abstraction of statements to execute against a database.
@@ -23,5 +27,21 @@ public interface SqlStatement {
 
     boolean continueOnError();
 
+    /**
+     * Returns a formatted SQL string representation of this statement for the specified database.
+     * <p>
+     * This method uses the SqlGeneratorFactory to generate the appropriate SQL
+     * based on the provided database. If the database parameter is null, it falls back to
+     * using the toString() method of this statement.
+     *
+     * @param database The target database for which to format the SQL statement
+     * @return A string containing the formatted SQL statement for the specified database
+     */
+    default String getFormattedStatement(Database database) {
+        if (database != null) {
+            return SqlUtil.getSqlString(this, SqlGeneratorFactory.getInstance(), database);
+        }
 
+        return toString();
+    }
 }
