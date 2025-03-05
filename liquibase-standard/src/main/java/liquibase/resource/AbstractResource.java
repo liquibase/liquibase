@@ -7,9 +7,12 @@ import java.net.URI;
 public abstract class AbstractResource implements Resource {
 
     private final String path;
+
+    private final String originalPath;
     private final URI uri;
 
     public AbstractResource(String path, URI uri) {
+        this.originalPath = path;
         this.path = path
                 .replace("\\", "/")
                 .replaceFirst("^classpath\\*?:", "")
@@ -25,6 +28,10 @@ public abstract class AbstractResource implements Resource {
     @Override
     public String getPath() {
         return path;
+    }
+
+    public String getOriginalPath() {
+        return originalPath;
     }
 
     @Override

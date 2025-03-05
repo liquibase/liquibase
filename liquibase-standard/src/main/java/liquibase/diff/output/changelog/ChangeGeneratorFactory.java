@@ -13,7 +13,7 @@ import java.util.*;
 public class ChangeGeneratorFactory {
     private static ChangeGeneratorFactory instance;
 
-    private final List<ChangeGenerator> generators = new ArrayList<>();
+    private final List<ChangeGenerator> generators = Collections.synchronizedList(new ArrayList<>());
 
     private ChangeGeneratorFactory() {
         try {
@@ -59,6 +59,12 @@ public class ChangeGeneratorFactory {
         }
 
         unregister(toRemove);
+    }
+
+    public void unregisterAll(Class generatorClass) {
+        synchronized(generators) {
+            generators.removeIf(existingGenerator -> existingGenerator.getClass().equals(generatorClass));
+        }
     }
 
     protected SortedSet<ChangeGenerator> getGenerators(Class<? extends ChangeGenerator> generatorType, Class<? extends DatabaseObject> objectType, Database database) {

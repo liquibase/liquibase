@@ -14,6 +14,7 @@ import liquibase.diff.compare.CompareControl
 import liquibase.exception.CommandExecutionException
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.lockservice.LockServiceFactory
+import liquibase.logging.core.BufferedLogServiceTest
 import liquibase.resource.ResourceAccessor
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
@@ -251,9 +252,9 @@ class CommandUtil {
     }
 
     private static void execUpdateCommandInScope(SearchPathResourceAccessor resourceAccessor, DatabaseTestSystem db, String changelogFile) {
-        def scopeSettings = [
-                (Scope.Attr.resourceAccessor.name()): resourceAccessor
-        ]
+        def scopeSettings = new LinkedHashMap<String, Object>()
+        scopeSettings.put(Scope.Attr.resourceAccessor.name(), resourceAccessor)
+
         Scope.child(scopeSettings, {
             CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
             commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
@@ -285,6 +286,15 @@ class CommandUtil {
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+        commandScope.execute()
+    }
+
+    static void runStatus(DatabaseTestSystem db, String changelog) {
+        CommandScope commandScope = new CommandScope(StatusCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+        commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changelog)
         commandScope.execute()
     }
 }

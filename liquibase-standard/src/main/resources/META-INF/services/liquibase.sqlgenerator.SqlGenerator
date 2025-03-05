@@ -102,5 +102,6 @@ liquibase.sqlgenerator.core.TableRowCountGenerator
 liquibase.sqlgenerator.core.TagDatabaseGenerator
 liquibase.sqlgenerator.core.UnlockDatabaseChangeLogGenerator
 liquibase.sqlgenerator.core.UpdateChangeSetChecksumGenerator
+liquibase.sqlgenerator.core.UpdateChangeSetFilenameGenerator
 liquibase.sqlgenerator.core.UpdateDataChangeGenerator
 liquibase.sqlgenerator.core.UpdateGenerator
