@@ -277,7 +277,9 @@ Global Options
                              (defaults file: 'liquibase.logChannels',
                                environment variable: 'LIQUIBASE_LOG_CHANNELS')
 
-      --log-file=PARAM       (defaults file: 'liquibase.logFile', environment
+      --log-file=PARAM       Users can use .gz file extension to enable log
+                               files compression.
+                             (defaults file: 'liquibase.logFile', environment
                                variable: 'LIQUIBASE_LOG_FILE')
 
       --log-format=PARAM     Sets the format of log output to console or log
