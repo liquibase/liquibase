@@ -745,33 +745,28 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     sql = sql.replace("{REMARKS_COLUMN_PLACEHOLDER}", "");
                     sql = sql.replace("{REMARKS_JOIN_PLACEHOLDER}", "");
                 }
-
-                List<CachedRow> rows = this.executeAndExtract(sql, database);
-
-                for (CachedRow row : rows) {
-                    String typeName = row.getString("TYPE_NAME");
-                    if ("nvarchar".equals(typeName) || "nchar".equals(typeName)) {
-                        Integer size = row.getInt("COLUMN_SIZE");
-                        if (size > 0) {
-                            row.set("COLUMN_SIZE", size / 2);
-                        }
-                    } else if ((row.getInt("DATA_PRECISION") != null) && (row.getInt("DATA_PRECISION") > 0)) {
-                        row.set("COLUMN_SIZE", row.getInt("DATA_PRECISION"));
-                    }
-                }
-
-                return rows;
+                return this.executeAndExtract(sql, database);
             }
 
             @Override
             protected List<CachedRow> extract(ResultSet resultSet, boolean informixIndexTrimHint) throws SQLException {
                 List<CachedRow> rows = super.extract(resultSet, informixIndexTrimHint);
-                if ((database instanceof MSSQLDatabase) && !userDefinedTypes.isEmpty()) { //UDT types in MSSQL don't take parameters
+                if (database instanceof MSSQLDatabase) {
                     for (CachedRow row : rows) {
-                        String dataType = (String) row.get("TYPE_NAME");
-                        if (userDefinedTypes.contains(dataType.toLowerCase())) {
+                        String typeName = row.getString("TYPE_NAME");
+                        // UDT types in MSSQL don't take parameters
+                        if (userDefinedTypes.contains(typeName.toLowerCase())) {
                             row.set("COLUMN_SIZE", null);
                             row.set("DECIMAL_DIGITS ", null);
+                            continue;
+                        }
+                        if ("nvarchar".equals(typeName) || "nchar".equals(typeName)) {
+                            Integer size = row.getInt("COLUMN_SIZE");
+                            if (size > 0) {
+                                row.set("COLUMN_SIZE", size / 2);
+                            }
+                        } else if ((row.getInt("DATA_PRECISION") != null) && (row.getInt("DATA_PRECISION") > 0)) {
+                            row.set("COLUMN_SIZE", row.getInt("DATA_PRECISION"));
                         }
                     }
                 }

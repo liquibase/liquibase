@@ -110,7 +110,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     @Getter
     private final List<ChangeSet> skippedChangeSets = new ArrayList<>();
     @Getter
+    private final List<ChangeSet> skippedBecauseOfOsMismatchChangeSets = new ArrayList<>();
+    @Getter
     private final List<ChangeSet> skippedBecauseOfLicenseChangeSets = new ArrayList<>();
+    @Getter
+    private final List<ChangeSet> skippedBecauseOfPreconditionsChangeSets = new ArrayList<>();
 
     @Getter
     private ChangeLogParameters changeLogParameters;
@@ -611,14 +615,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         IncludeServiceFactory factory = Scope.getCurrentScope().getSingleton(IncludeServiceFactory.class);
         IncludeService service = factory.getIncludeService();
         this.includeList.add(service.createChangelogInclude(node, resourceAccessor, this, nodeScratch));
-    }
-
-    private static ContextExpression determineContextExpression(ParsedNode node) throws ParsedNodeException {
-        ContextExpression includeNodeContextFilter = new ContextExpression(node.getChildValue(null, CONTEXT_FILTER, String.class));
-        if (includeNodeContextFilter.isEmpty()) {
-            includeNodeContextFilter = new ContextExpression(node.getChildValue(null, CONTEXT, String.class));
-        }
-        return includeNodeContextFilter;
     }
 
     private void handleModifyChangeSets(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {

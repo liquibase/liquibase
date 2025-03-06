@@ -98,7 +98,6 @@ public class LiquibaseLauncher {
         File liquibaseHome = new File(liquibaseHomeEnv);
 
         List<URL> libUrls = getLibUrls(liquibaseHome);
-        checkForDuplicatedJars(libUrls);
 
         if (debug) {
             debug("Final Classpath:");
@@ -149,7 +148,7 @@ public class LiquibaseLauncher {
                 }
             }
         }
-
+        checkForDuplicatedJars(urls);
         removeIncompatibleAwsExtensions(urls);
 
         final ClassLoader classLoader;

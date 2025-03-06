@@ -128,58 +128,66 @@ public final class ChangeLogIncludeHelper {
 																																							ContextExpression contextExpression, Labels labels, Boolean ignore,
 																																							DatabaseChangeLog.OnUnknownFileFormat onUnknownFileFormat)
 			throws SetupException {
-		if(ROOT.get() == null)
-			ROOT.set(parentChangeLog);
-		parentChangeLog.setRootChangeLog(ROOT.get());
-		if (".svn".equalsIgnoreCase(file) || "cvs".equalsIgnoreCase(file)) {
-			return null;
-		}
+		DatabaseChangeLog root = null;
 		try {
-			if (!resourceAccessor.get(file).exists()) {
-				if (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getCurrentValue()
-						.equals(ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN)
-						|| !errorIfMissing) {
-					Scope.getCurrentScope().getLog(ChangeLogIncludeHelper.class).warning(FileUtil.getFileNotFoundMessage(file));
-					return null;
-				} else {
-					throw new ChangeLogParseException(FileUtil.getFileNotFoundMessage(file));
+			root = ROOT.get();
+			if(root == null)
+				ROOT.set(parentChangeLog);
+
+			parentChangeLog.setRootChangeLog(root);
+			if (".svn".equalsIgnoreCase(file) || "cvs".equalsIgnoreCase(file)) {
+				return null;
+			}
+			try {
+				if (!resourceAccessor.get(file).exists()) {
+					if (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getCurrentValue()
+							.equals(ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN)
+							|| Boolean.FALSE.equals(errorIfMissing)) {
+						Scope.getCurrentScope().getLog(ChangeLogIncludeHelper.class).warning(FileUtil.getFileNotFoundMessage(file));
+						return null;
+					} else {
+						throw new ChangeLogParseException(FileUtil.getFileNotFoundMessage(file));
+					}
 				}
-			}
-		} catch (IOException | ChangeLogParseException e) {
-			throw new SetupException(e);
-		}
-		try (MdcObject mdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, file)) {
-			DatabaseChangeLog childChangeLog;
-			ChangeLogParser parser =
-					ChangeLogParserFactory.getInstance().getParser(file, resourceAccessor);
-			if (modifyChangeSets != null) {
-				childChangeLog = Scope.child(Collections.singletonMap(MODIFY_CHANGE_SETS, true),
-						() -> parser.parse(file, parentChangeLog.getChangeLogParameters(),
-								resourceAccessor));
-			} else {
-				childChangeLog = parser.parse(file, parentChangeLog.getChangeLogParameters(),
-						resourceAccessor);
-			}
-			prepareParentChangeLogs(childChangeLog, parentChangeLog, contextExpression, labels, ignore);
-			childChangeLog.setParentChangeLog(parentChangeLog);
-			childChangeLog.setRootChangeLog(ROOT.get());
-			return childChangeLog;
-		}
-		catch (UnknownChangelogFormatException e) {
-			if (onUnknownFileFormat == DatabaseChangeLog.OnUnknownFileFormat.FAIL) {
+			} catch (IOException | ChangeLogParseException e) {
 				throw new SetupException(e);
 			}
-			boolean matchesFileExtension = StringUtils.trimToEmpty(file).matches("\\.\\w+$");
-			if (matchesFileExtension || onUnknownFileFormat == DatabaseChangeLog.OnUnknownFileFormat.WARN) {
-				Scope.getCurrentScope().getLog(ChangeLogIncludeHelper.class).warning(
-						"included file " + file + "/" + file + " is not a recognized file type", e
-				);
+			try (MdcObject mdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, file)) {
+				DatabaseChangeLog childChangeLog;
+				ChangeLogParser parser =
+						ChangeLogParserFactory.getInstance().getParser(file, resourceAccessor);
+				if (modifyChangeSets != null) {
+					childChangeLog = Scope.child(Collections.singletonMap(MODIFY_CHANGE_SETS, true),
+							() -> parser.parse(file, parentChangeLog.getChangeLogParameters(),
+									resourceAccessor));
+				} else {
+					childChangeLog = parser.parse(file, parentChangeLog.getChangeLogParameters(),
+							resourceAccessor);
+				}
+				prepareParentChangeLogs(childChangeLog, parentChangeLog, contextExpression, labels, ignore);
+				childChangeLog.setParentChangeLog(parentChangeLog);
+				childChangeLog.setRootChangeLog(ROOT.get());
+				return childChangeLog;
 			}
-			return null;
-		}
+			catch (UnknownChangelogFormatException e) {
+				if (onUnknownFileFormat == DatabaseChangeLog.OnUnknownFileFormat.FAIL) {
+					throw new SetupException(e);
+				}
+				boolean matchesFileExtension = StringUtils.trimToEmpty(file).matches("\\.\\w+$");
+				if (matchesFileExtension || onUnknownFileFormat == DatabaseChangeLog.OnUnknownFileFormat.WARN) {
+					Scope.getCurrentScope().getLog(ChangeLogIncludeHelper.class).warning(
+							"included file " + file + "/" + file + " is not a recognized file type", e
+					);
+				}
+				return null;
+			}
 
-		catch (Exception e) {
-			throw new SetupException(e);
+			catch (Exception e) {
+				throw new SetupException(e);
+			}
+		} finally {
+				if (root == null)
+					ROOT.remove();
 		}
 	}
 
