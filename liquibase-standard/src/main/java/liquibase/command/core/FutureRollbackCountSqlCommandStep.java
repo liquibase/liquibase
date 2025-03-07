@@ -1,6 +1,9 @@
 package liquibase.command.core;
 
 import liquibase.command.*;
+import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
+import liquibase.database.Database;
+import liquibase.util.LoggingExecutorTextUtil;
 
 public class FutureRollbackCountSqlCommandStep extends AbstractFutureRollbackCommandStep {
 
@@ -37,5 +40,14 @@ public class FutureRollbackCountSqlCommandStep extends AbstractFutureRollbackCom
     @Override
     public Integer getCount(CommandScope commandScope) {
         return commandScope.getArgumentValue(COUNT_ARG);
+    }
+
+    @Override
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        final CommandScope commandScope = resultsBuilder.getCommandScope();
+        final Database database = (Database) commandScope.getDependency(Database.class);
+        final String changelogFile = commandScope.getArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG);
+        LoggingExecutorTextUtil.outputHeader("SQL to roll back " + getCount(commandScope) + " currently unexecuted changes", database, changelogFile);
+        super.run(resultsBuilder);
     }
 }

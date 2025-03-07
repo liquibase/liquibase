@@ -1,7 +1,10 @@
 package liquibase.command.core;
 
 import liquibase.*;
-import liquibase.changelog.*;
+import liquibase.changelog.ChangeLogIterator;
+import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.ListVisitor;
@@ -35,7 +38,7 @@ public abstract class AbstractFutureRollbackCommandStep extends AbstractCommandS
     }
 
     @Override
-    public final void run(CommandResultsBuilder resultsBuilder) throws Exception {
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
         DatabaseChangeLog changeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
         Database database = (Database) commandScope.getDependency(Database.class);
