@@ -21,7 +21,7 @@
         <postgresql.version>42.7.4</postgresql.version>
         <mssql.version>12.8.1.jre8</mssql.version>
         <mysql.version>9.2.0</mysql.version>
-        <mariadb.version>3.4.1</mariadb.version>
+        <mariadb.version>3.5.2</mariadb.version>
         <oracle.version>19.25.0.0</oracle.version>
         <sqlite.version>3.48.0.0</sqlite.version>
         <db2.version>11.5.9.0</db2.version>
