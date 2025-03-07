@@ -1,6 +1,8 @@
 package liquibase.structure.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.GlobalConfiguration;
+import liquibase.Scope;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtil;
@@ -107,14 +109,14 @@ public class Schema extends AbstractDatabaseObject {
 
     public CatalogAndSchema toCatalogAndSchema() {
         String catalogName;
-        if ((getCatalog() != null) && getCatalog().isDefault()) {
+        if (getCatalog() != null && getCatalog().isDefault() && Boolean.FALSE.equals(GlobalConfiguration.INCLUDE_CATALOG_NAME_FOR_DEFAULT.getCurrentValue())) {
             catalogName = null;
         } else {
             catalogName = getCatalogName();
         }
 
         String schemaName;
-        if (isDefault()) {
+        if (isDefault() && Boolean.FALSE.equals(GlobalConfiguration.INCLUDE_SCHEMA_NAME_FOR_DEFAULT.getCurrentValue())) {
             schemaName = null;
         } else {
             schemaName = getName();
