@@ -10,4 +10,4 @@ jobs:
     secrets: inherit
     with:
       latest_version: ${{ github.event.client_payload.latest_version }}
-      repo_name: "liquibase"
+      repo_name: "liquibase/liquibase"
