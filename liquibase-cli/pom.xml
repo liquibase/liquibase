@@ -24,6 +24,7 @@
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-standard</artifactId>
             <version>${project.version}</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -31,6 +32,12 @@
             <artifactId>picocli</artifactId>
             <version>4.7.6</version>
             <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
         </dependency>
     </dependencies>
 
