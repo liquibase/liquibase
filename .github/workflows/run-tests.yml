@@ -38,7 +38,7 @@ jobs:
   setup:
     name: setup
     needs: authorize
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       timestamp: ${{ steps.get-date.outputs.date }}
       latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
@@ -89,7 +89,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-20.04, macos-13, windows-2019 ]
+        os: [ ubuntu-22.04, macos-13, windows-2019 ]
         java: [ 8, 11, 17, 21 ]
         exclude:
           # exclude non-java 8 on macos and windows builds
@@ -185,7 +185,7 @@ jobs:
 
       - name: Check Unit Test Count for Java 8, 11, 17, 21 Ubuntu
         id: check-test-counts-java-all-ubuntu
-        if: matrix.os == 'ubuntu-20.04'
+        if: matrix.os == 'ubuntu-22.04'
         run: |
           TEST_COUNT=$(find . -name '*.txt' | xargs grep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
           echo "Total Unit tests run: $TEST_COUNT"
@@ -251,7 +251,7 @@ jobs:
           find . -name original-*.jar -exec rm {} \;
 
       - name: Upload Artifacts for build.yml
-        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-20.04'}}
+        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-22.04'}}
         uses: actions/upload-artifact@v4
         with:
           name: temp-artifact
@@ -268,7 +268,7 @@ jobs:
             ./**/target/site
 
       - name: Save Jacoco Report for Sonar
-        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-20.04'}}
+        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-22.04'}}
         uses: actions/upload-artifact@v4
         with:
           name: liquibase-jacoco-test-results
@@ -276,7 +276,7 @@ jobs:
             ./liquibase-standard/target/jacoco.exec
 
       - name: Archive Modules
-        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-20.04'}}
+        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-22.04'}}
         uses: actions/upload-artifact@v4
         with:
           name: liquibase-modules
@@ -286,6 +286,7 @@ jobs:
   fossa:
     needs: build_tests
     uses: liquibase/build-logic/.github/workflows/fossa_ai.yml@main
+    if: github.event_name != 'workflow_dispatch'
     secrets: inherit
     with:
       check_snippets: true
@@ -294,7 +295,7 @@ jobs:
 
   integration-test:
     name: Integration Test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       test_count_integration_db2: ${{ steps.check-test-count-integration.outputs.test_count_integration_db2 }}
       test_count_integration_h2: ${{ steps.check-test-count-integration.outputs.test_count_integration_h2 }}

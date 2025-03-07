@@ -100,7 +100,7 @@ public class IndexExistsPrecondition extends AbstractPrecondition {
                     example.addColumn(new Column(database.correctObjectName(column, Column.class)));
                 }
             }
-            if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
+            if (!SnapshotGeneratorFactory.getInstance().hasIgnoreNested(example, database)) {
                 String name = "";
 
                 if (getIndexName() != null) {
