@@ -109,7 +109,7 @@ public class Schema extends AbstractDatabaseObject {
 
     public CatalogAndSchema toCatalogAndSchema() {
         String catalogName;
-        if (getCatalog() != null && getCatalog().isDefault() && Boolean.FALSE.equals(GlobalConfiguration.INCLUDE_CATALOG_NAME_FOR_DEFAULT.getCurrentValue())) {
+        if (getCatalog() != null && getCatalog().isDefault()) {
             catalogName = null;
         } else {
             catalogName = getCatalogName();

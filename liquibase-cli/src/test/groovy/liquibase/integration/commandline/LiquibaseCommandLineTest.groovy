@@ -232,15 +232,6 @@ Global Options
                                variable:
                                'LIQUIBASE_INCLUDE_CATALOG_IN_SPECIFICATION')
 
-      --include-catalog-name-for-default=PARAM
-                             If true, the catalog name is included for the
-                               default catalog
-                             DEFAULT: false
-                             (defaults file: 'liquibase.
-                               includeCatalogNameForDefault', environment
-                               variable:
-                               'LIQUIBASE_INCLUDE_CATALOG_NAME_FOR_DEFAULT')
-
       --include-relations-for-computed-columns=PARAM
                              If true, the parent relationship for computed
                                columns is preserved in snapshot-dependent
@@ -254,7 +245,7 @@ Global Options
 
       --include-schema-name-for-default=PARAM
                              If true, the schema name is included for the
-                               default schema
+                               default schema when loading a snapshot
                              DEFAULT: false
                              (defaults file: 'liquibase.
                                includeSchemaNameForDefault', environment
