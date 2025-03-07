@@ -185,7 +185,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         INCLUDE_CATALOG_NAME_FOR_DEFAULT = builder.define("includeCatalogNameForDefault", Boolean.class)
-                .setDescription("If true, the catalog name is included for the default schema")
+                .setDescription("If true, the catalog name is included for the default catalog")
                 .setDefaultValue(false)
                 .build();
 
