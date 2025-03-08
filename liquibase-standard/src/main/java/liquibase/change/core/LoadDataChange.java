@@ -44,6 +44,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.nio.file.InvalidPathException;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -394,13 +395,17 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             // If the value is null we set the value directly to avoid Exceptions while loading
                             // resources e.g. with SpringResourceAccessor.
                             if (value != null) {
-                                Resource r;
-                                if (getRelativeTo() != null) {
-                                    r = Scope.getCurrentScope().getResourceAccessor().get(getRelativeTo()).resolveSibling(value);
-                                } else {
-                                    r = Scope.getCurrentScope().getResourceAccessor().get(value);
+                                Resource r = null;
+                                try {
+                                    if (getRelativeTo() != null) {
+                                            r = Scope.getCurrentScope().getResourceAccessor().get(getRelativeTo()).resolveSibling(value);
+                                    } else {
+                                        r = Scope.getCurrentScope().getResourceAccessor().get(value);
+                                    }
+                                } catch (InvalidPathException e) {
+                                    Scope.getCurrentScope().getLog(LoadDataChange.class).fine(String.format("Could not find file [%s] in [%s]: %s", value, getRelativeTo(), e.getMessage()));
                                 }
-                                resourceExists = r.exists();
+                                resourceExists = r != null && r.exists();
                             }
 
                             if (resourceExists) {

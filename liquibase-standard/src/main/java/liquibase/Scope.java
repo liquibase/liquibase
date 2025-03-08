@@ -84,7 +84,14 @@ public class Scope {
 
     public static final String JAVA_PROPERTIES = "javaProperties";
 
-    private static final InheritableThreadLocal<ScopeManager> scopeManager = new InheritableThreadLocal<>();
+    private static final InheritableThreadLocal<ScopeManager> scopeManager = new InheritableThreadLocal<ScopeManager>() {
+        @Override
+        protected ScopeManager childValue(ScopeManager parentValue) {
+            ScopeManager sm = new SingletonScopeManager();
+            sm.setCurrentScope(parentValue.getCurrentScope());
+            return sm;
+        }
+    };
 
     private final Scope parent;
     private final SmartMap values = new SmartMap();

@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
@@ -98,7 +99,9 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
      */
     @Override
     public boolean isOssAnalyticsEnabled() throws Exception {
-        return remoteAnalyticsConfiguration.get().isSendOss();
+        return Optional.ofNullable(remoteAnalyticsConfiguration.get())
+                .map(RemoteAnalyticsConfiguration::isSendOss)
+                .orElse(false);
     }
 
     /**
@@ -109,7 +112,9 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
      */
     @Override
     public boolean isProAnalyticsEnabled() throws Exception {
-        return remoteAnalyticsConfiguration.get().isSendPro();
+        return Optional.ofNullable(remoteAnalyticsConfiguration.get())
+                .map(RemoteAnalyticsConfiguration::isSendPro)
+                .orElse(false);
     }
 
     /**

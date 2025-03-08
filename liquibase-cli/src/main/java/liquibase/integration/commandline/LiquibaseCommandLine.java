@@ -42,6 +42,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.GZIPOutputStream;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
@@ -704,6 +705,8 @@ public class LiquibaseCommandLine {
         returnMap.put(Scope.Attr.integrationDetails.name(), integrationDetails);
 
         returnMap.putAll(configureLogging());
+        final String configuredChannels = LiquibaseCommandLineConfiguration.LOG_CHANNELS.getCurrentValue();
+        returnMap.put("logChannels", configuredChannels);
 
         //
         // Pass any -D properties in the scope so that they will be available to
@@ -768,6 +771,7 @@ public class LiquibaseCommandLine {
         }
 
         configureLogging(logLevel, logFile, currentConfiguredValue.wasDefaultValueUsed());
+        returnMap.put("logLevel", logLevel);
 
         return returnMap;
     }
@@ -800,6 +804,9 @@ public class LiquibaseCommandLine {
             if (fileHandler == null) {
                 final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
                 OutputStream outputStream = pathHandlerFactory.openResourceOutputStream(logFile, new OpenOptions().setAppend(true));
+                if (StringUtils.endsWithIgnoreCase(logFile, ".gz")) {
+                    outputStream = new GZIPOutputStream(outputStream);
+                }
                 fileHandler = new StreamHandler(outputStream, new SimpleFormatter());
 
                 JavaLogService.setFormatterOnHandler(logService, fileHandler);
