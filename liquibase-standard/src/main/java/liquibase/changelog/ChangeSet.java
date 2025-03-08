@@ -1667,24 +1667,31 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         // If the change is for this Database
         // add a Boolean flag to Scope to indicate that the Change should not be executed when adding MDC context
         //
-        if (! change.supports(database)) {
+        if (!change.supports(database)) {
             return null;
         }
+
         AtomicReference<SqlStatement[]> statementsReference = new AtomicReference<>();
         Map<String, Object> scopeValues = new HashMap<>();
         scopeValues.put(Change.SHOULD_EXECUTE, Boolean.FALSE);
         scopeValues.put(CHANGE_KEY, change);
-        StringBuilder sqlStatementsMdc = new StringBuilder();
+        StringBuilder commandsMdc = new StringBuilder();
         Scope.child(scopeValues, () -> {
-            statementsReference.set(generateRollbackStatements ?
-                    change.generateRollbackStatements(database) : change.generateStatements(database));
-            sqlStatementsMdc.append(Arrays.stream(statementsReference.get())
-                    .map(statement -> SqlUtil.getSqlString(statement, SqlGeneratorFactory.getInstance(), database))
-                    .collect(Collectors.joining("\n")));
-        });
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SQL, sqlStatementsMdc.toString());
+            SqlStatement[] statements = generateRollbackStatements ? change.generateRollbackStatements(database) : change.generateStatements(database);
 
-        return sqlStatementsMdc.toString();
+            statementsReference.set(statements);
+
+            String formattedStatements = Arrays.stream(statementsReference.get())
+                    .map(sqlStatement -> sqlStatement.getFormattedStatement(database))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.joining("\n"));
+            commandsMdc.append(formattedStatements);
+        });
+
+        String result = commandsMdc.toString();
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SQL, result);
+
+        return result;
     }
 
     private List<ChangeVisitor> getChangeVisitors(){

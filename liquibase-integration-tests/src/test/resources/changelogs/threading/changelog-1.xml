@@ -1,0 +1,132 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.8.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+	<changeSet author="system" id="step1" labels="1.0">
+		<createTable tableName="table1">
+			<column name="col1" type="VARCHAR(255)">
+				<constraints primaryKey="true"
+					primaryKeyName="table1_pk" />
+			</column>
+			<column name="col2" type="VARCHAR(255)" />
+			<column name="col3" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+
+
+	<changeSet author="system" id="step2" labels="1.0">
+		<createIndex indexName="ix_table1"
+					 tableName="table1">
+			<column name="col1" />
+			<column name="col2" />
+		</createIndex>
+	</changeSet>
+
+	<changeSet author="system" id="step3" labels="1.0">
+		<insert tableName="table1">
+			<column name="col1" value="a" />
+			<column name="col2" value="Some a" />
+			<column name="col3" value="Describe a" />
+		</insert>
+	</changeSet>
+
+	<changeSet author="system" id="step4" labels="1.0">
+		<insert tableName="table1">
+			<column name="col1" value="b" />
+			<column name="col2" value="Some b" />
+			<column name="col3" value="Describe b" />
+		</insert>
+	</changeSet>
+
+	<changeSet author="system" id="step5" labels="1.0">
+		<createTable tableName="table2">
+			<column name="col1" type="VARCHAR(255)">
+				<constraints primaryKey="true"
+							 primaryKeyName="table2_pk" />
+			</column>
+			<column name="col2" type="VARCHAR(255)" />
+			<column name="col3" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="system" id="step6" labels="1.0">
+		<insert tableName="table2">
+			<column name="col1" value="x" />
+			<column name="col2" value="Some x" />
+			<column name="col3" value="Describe x" />
+		</insert>
+	</changeSet>
+
+	<changeSet author="system" id="step7" labels="1.0">
+		<createIndex indexName="ix_table2"
+					 tableName="table2">
+			<column name="col1" />
+			<column name="col2" />
+		</createIndex>
+	</changeSet>
+
+	<changeSet author="system" id="step8" labels="1.0">
+		<insert tableName="table2">
+			<column name="col1" value="y" />
+			<column name="col2" value="Some y" />
+			<column name="col3" value="Describe y" />
+		</insert>
+	</changeSet>
+
+	<changeSet author="system" id="step9" labels="1.0">
+		<createTable tableName="xnode">
+			<column autoIncrement="true" name="node"
+					type="INTEGER" startWith="1" incrementBy="1">
+				<constraints primaryKey="true"
+							 primaryKeyName="xnode_pk" />
+			</column>
+			<column name="parent" type="INTEGER">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<insert tableName="xnode">
+			<column name="parent" valueNumeric="0" />
+		</insert>
+	</changeSet>
+
+	<changeSet author="system" id="step10" labels="1.0">
+		<createTable tableName="xnode_localization">
+			<column name="node" type="INTEGER">
+				<constraints primaryKey="true"
+							 primaryKeyName="xnode_localization_pk" />
+			</column>
+			<column name="locale" type="VARCHAR(20)">
+				<constraints primaryKey="true"
+							 primaryKeyName="xnode_localization_pk" />
+			</column>
+			<column name="fieldname" type="VARCHAR(255)">
+				<constraints primaryKey="true"
+							 primaryKeyName="xnode_localization_pk" />
+			</column>
+			<column name="fieldtext" type="VARCHAR(500)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addForeignKeyConstraint
+				baseColumnNames="node" baseTableName="xnode_localization"
+				constraintName="fk_xnode_localization_xnode" deferrable="false"
+				initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+				referencedColumnNames="node" referencedTableName="xnode"
+				validate="true" />
+
+		<insert tableName="xnode_localization">
+			<column name="node" valueNumeric="1" />
+			<column name="locale" value="en" />
+			<column name="fieldname" value="name" />
+			<column name="fieldtext" value="Standard" />
+		</insert>
+	</changeSet>
+
+
+</databaseChangeLog>
