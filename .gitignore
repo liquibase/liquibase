@@ -32,6 +32,7 @@ _issues
 /liquibase-integration-tests/liquibase.trace.db
 /liquibase-integration-tests/liquibase.mv.db
 /liquibase-integration-tests/diffToChangeLog_h2.log
+/liquibase-integration-tests/testDataDir/
 jacoco.exec
 **/original-pom.xml
 original-pom.xml

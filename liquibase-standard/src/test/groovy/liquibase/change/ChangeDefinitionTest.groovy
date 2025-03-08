@@ -24,8 +24,11 @@ class ChangeDefinitionTest extends Specification {
         when:
         def definition = ""
         def metaData = Scope.currentScope.getSingleton(ChangeFactory).getChangeMetaData(changeName)
-        for (def entry : new TreeMap<>(metaData.getParameters()).entrySet()) {
 
+        for (def entry : new TreeMap<>(metaData.getParameters()).entrySet()) {
+            // The entry "preserveNullValues" in an internal field, it is however included in the meta-data.
+            // In the context of testing, it is being excluded.
+            if (entry.key == "preserveNullValues") continue;
             def paramMetaData = entry.value
             def supported = new TreeSet<>(paramMetaData.supportedDatabases).join(",")
             def required = new TreeSet<>(paramMetaData.requiredForDatabase).join(",")
@@ -36,7 +39,6 @@ class ChangeDefinitionTest extends Specification {
             definition += "  Supported: $supported\n"
             if (required) {
                 definition += "  Required For: $required\n"
-
             }
         }
 
