@@ -125,7 +125,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Download release assets
-        uses: robinraju/release-downloader@v1.11
+        uses: robinraju/release-downloader@v1.12
         with:
           repository: "liquibase/liquibase"
           tag: "${{ needs.setup.outputs.tag }}"
@@ -225,7 +225,7 @@ jobs:
       contents: read
     steps:
       - name: Download release javadocs
-        uses: robinraju/release-downloader@v1.11
+        uses: robinraju/release-downloader@v1.12
         with:
           repository: "liquibase/liquibase"
           tag: "${{ needs.setup.outputs.tag }}"
@@ -507,7 +507,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Download dry-run release assets
-        uses: robinraju/release-downloader@v1.11
+        uses: robinraju/release-downloader@v1.12
         with:
           repository: "liquibase/liquibase"
           releaseId: "${{ inputs.dry_run_release_id }}"
@@ -569,7 +569,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Download released assets
-        uses: robinraju/release-downloader@v1.11
+        uses: robinraju/release-downloader@v1.12
         with:
           repository: "liquibase/liquibase"
           latest: true          
