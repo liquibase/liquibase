@@ -20,6 +20,8 @@ import org.yaml.snakeyaml.nodes.Tag;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
@@ -39,6 +41,9 @@ import java.util.logging.Level;
  */
 public class LiquibaseAnalyticsListener implements AnalyticsListener {
 
+    private final List<Event> cachedEvents = new ArrayList<>();
+    private final AtomicBoolean addedShutdownHook = new AtomicBoolean(false);
+
     @Override
     public int getPriority() {
         boolean analyticsEnabled = false;
@@ -56,6 +61,38 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
 
     @Override
     public void handleEvent(Event event) throws Exception {
+        addSendEventsOnShutdownHook();
+        cachedEvents.add(event);
+        Integer maxCacheSize = Scope.getCurrentScope().get(Scope.Attr.maxAnalyticsCacheSize, getDefaultMaxAnalyticsCacheSize(event));
+        if (cachedEvents.size() >= maxCacheSize) {
+            flush();
+        } else {
+            Scope.getCurrentScope().getLog(getClass()).log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Caching analytics event to send later. Cache contains " + cachedEvents.size() + " event(s).", null);
+        }
+    }
+
+    private void addSendEventsOnShutdownHook() {
+        if (!addedShutdownHook.getAndSet(true)) {
+            Thread haltedHook = new Thread(() -> {
+                Scope.getCurrentScope().getLog(getClass()).fine("Sending " + cachedEvents.size() + " cached analytics events during shutdown hook");
+                try {
+                    flush();
+                } catch (Exception e) {
+                    Scope.getCurrentScope().getLog(getClass()).warning("Failed to send analytics events during shutdown hook.", e);
+                }
+            });
+            Runtime.getRuntime().addShutdownHook(haltedHook);
+        }
+    }
+
+    private int getDefaultMaxAnalyticsCacheSize(Event event) {
+        if (event != null && StringUtils.equals(event.getLiquibaseInterface(), Event.JAVA_API_INTEGRATION_NAME)) {
+            return 10;
+        }
+        return 1;
+    }
+
+    private void flush() throws Exception {
         AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
         LiquibaseRemoteAnalyticsConfiguration analyticsConfiguration = ((LiquibaseRemoteAnalyticsConfiguration) analyticsConfigurationFactory.getPlugin());
         int timeoutMillis = analyticsConfiguration.getTimeoutMillis();
@@ -94,7 +131,7 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
                 Yaml yaml = new Yaml(dumperOptions);
                 yaml.setBeanAccess(BeanAccess.FIELD);
 
-                AnalyticsBatch analyticsBatch = AnalyticsBatch.fromLiquibaseEvent(event, userId);
+                AnalyticsBatch analyticsBatch = AnalyticsBatch.fromLiquibaseEvent(cachedEvents, userId);
                 String jsonInputString = YamlSerializer.removeClassTypeMarksFromSerializedJson(yaml.dumpAs(analyticsBatch, Tag.MAP, DumperOptions.FlowStyle.FLOW));
                 logger.log(logLevel, "Sending anonymous data to Liquibase analytics endpoint. " + System.lineSeparator() + jsonInputString, null);
 
@@ -110,6 +147,7 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
                 throw new RuntimeException(e);
             }
             timedOut.set(false);
+            cachedEvents.clear();
         });
         eventThread.start();
         try {
