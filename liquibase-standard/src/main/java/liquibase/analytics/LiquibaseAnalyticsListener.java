@@ -92,7 +92,7 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
         return 1;
     }
 
-    private void flush() throws Exception {
+    private synchronized void flush() throws Exception {
         AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
         LiquibaseRemoteAnalyticsConfiguration analyticsConfiguration = ((LiquibaseRemoteAnalyticsConfiguration) analyticsConfigurationFactory.getPlugin());
         int timeoutMillis = analyticsConfiguration.getTimeoutMillis();
