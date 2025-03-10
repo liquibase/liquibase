@@ -156,6 +156,7 @@ public class Event {
     public Map<String, ?> getPropertiesAsMap() {
         Map<String, Object> properties = new LinkedHashMap<>();
         // Exclude the childEvents field because it should be handled separately
+        // Exclude the timestamp field because it is POSTed in the AnalyticsTrackEvent object
         for (Fields field : Arrays.stream(Fields.values()).filter(f -> !Arrays.asList(Fields.childEvents, Fields.timestamp).contains(f)).collect(Collectors.toList())) {
             try {
                 Field refField = this.getClass().getDeclaredField(field.toString());
