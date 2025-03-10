@@ -100,10 +100,32 @@ public class LiquibaseCommandLine {
             }
         }
 
+        //
+        // Check for arguments which contain azure-storage and get out
+        //
+        if (args.length > 1 && azureArgumentIsPresent(args)) {
+            try {
+                Class.forName("liquibase.resource.azure.AzurePathHandler");
+            } catch (ClassNotFoundException ignored) {
+                System.out.println(Scope.AZURE_MESSAGE);
+                Scope.getCurrentScope().getLog(LiquibaseCommandLine.class).severe(Scope.AZURE_MESSAGE);
+                System.exit(1);
+            }
+        }
+
         final LiquibaseCommandLine cli = new LiquibaseCommandLine();
         int returnCode = cli.execute(args);
 
         System.exit(returnCode);
+    }
+
+    private static boolean azureArgumentIsPresent(String[] args) {
+        for (String arg : args) {
+            if (arg.replace("-","").toLowerCase().contains("azurestorage")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void cleanup() {
