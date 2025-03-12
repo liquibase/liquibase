@@ -28,8 +28,7 @@ public class LicenseTrackingFactory extends AbstractPluginFactory<LicenseTrackin
                 }
             }
         } catch (Exception e) {
-            Scope.getCurrentScope().getLog(getClass()).log(LicenseTrackingArgs.LOG_LEVEL.getCurrentValue(), "Failed to handle license tracking event", e);
+            Scope.getCurrentScope().getLog(getClass()).severe("Failed to handle license tracking event", e);
         }
     }
-
 }
