@@ -1,10 +1,7 @@
 package liquibase.command.core;
 
 import liquibase.*;
-import liquibase.changelog.ChangeLogIterator;
-import liquibase.changelog.ChangeLogParameters;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.RanChangeSet;
+import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.ListVisitor;
