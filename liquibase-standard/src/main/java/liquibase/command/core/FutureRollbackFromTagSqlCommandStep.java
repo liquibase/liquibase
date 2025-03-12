@@ -1,9 +1,9 @@
 package liquibase.command.core;
 
-import liquibase.command.*;
-import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
-import liquibase.database.Database;
-import liquibase.util.LoggingExecutorTextUtil;
+import liquibase.command.CommandArgumentDefinition;
+import liquibase.command.CommandBuilder;
+import liquibase.command.CommandDefinition;
+import liquibase.command.CommandScope;
 
 public class FutureRollbackFromTagSqlCommandStep extends AbstractFutureRollbackCommandStep {
 
@@ -40,14 +40,5 @@ public class FutureRollbackFromTagSqlCommandStep extends AbstractFutureRollbackC
     @Override
     public String getTag(CommandScope commandScope) {
         return commandScope.getArgumentValue(TAG_ARG);
-    }
-
-    @Override
-    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        final CommandScope commandScope = resultsBuilder.getCommandScope();
-        final Database database = (Database) commandScope.getDependency(Database.class);
-        final String changelogFile = commandScope.getArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG);
-        LoggingExecutorTextUtil.outputHeader("SQL to roll back currently unexecuted changes up to tag '" + getTag(commandScope) + "'", database, changelogFile);
-        super.run(resultsBuilder);
     }
 }

@@ -1,9 +1,8 @@
 package liquibase.command.core;
 
-import liquibase.command.*;
-import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
-import liquibase.database.Database;
-import liquibase.util.LoggingExecutorTextUtil;
+import liquibase.command.CommandArgumentDefinition;
+import liquibase.command.CommandBuilder;
+import liquibase.command.CommandDefinition;
 
 public class FutureRollbackSqlCommandStep extends AbstractFutureRollbackCommandStep {
 
@@ -32,14 +31,5 @@ public class FutureRollbackSqlCommandStep extends AbstractFutureRollbackCommandS
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         commandDefinition.setShortDescription("Generate the raw SQL needed to rollback undeployed changes");
-    }
-
-    @Override
-    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        final CommandScope commandScope = resultsBuilder.getCommandScope();
-        final Database database = (Database) commandScope.getDependency(Database.class);
-        final String changelogFile = commandScope.getArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG);
-        LoggingExecutorTextUtil.outputHeader("SQL to roll back currently unexecuted changes", database, changelogFile);
-        super.run(resultsBuilder);
     }
 }

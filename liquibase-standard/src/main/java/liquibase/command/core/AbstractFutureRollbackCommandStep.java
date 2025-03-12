@@ -38,7 +38,7 @@ public abstract class AbstractFutureRollbackCommandStep extends AbstractCommandS
     }
 
     @Override
-    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+    public final void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
         DatabaseChangeLog changeLog = (DatabaseChangeLog) commandScope.getDependency(DatabaseChangeLog.class);
         Database database = (Database) commandScope.getDependency(Database.class);
