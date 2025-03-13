@@ -14,10 +14,14 @@ public class ISODateFormat {
 
     private final SimpleDateFormat dateTimeFormat = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
     private final SimpleDateFormat dateTimeFormatWithSpace = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_SPACE);
+    private final SimpleDateFormat dateTimeFormatWithTimeZone = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_TIMEZONE);
+    private final SimpleDateFormat dateTimeFormatWithTimeZone2 = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_TIMEZONE2);
     private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss";
     private static final String DATE_TIME_FORMAT_STRING_WITH_SPACE = "yyyy-MM-dd HH:mm:ss";
+    private static final String DATE_TIME_FORMAT_STRING_WITH_TIMEZONE = "yyyy-MM-dd'T'HH:mm:ssXXX";
+    private static final String DATE_TIME_FORMAT_STRING_WITH_TIMEZONE2 = "EEE MMM dd HH:mm:ss z yyyy";
 
 
     public String format(java.sql.Date date) {
@@ -78,7 +82,11 @@ public class ISODateFormat {
             } else {
                 return new java.sql.Timestamp(dateTimeFormat.parse(dateAsString).getTime());
             }
-        default:
+        case 25:
+            return new java.sql.Timestamp(dateTimeFormatWithTimeZone.parse(dateAsString).getTime());
+        case 28:
+            return new java.sql.Timestamp(dateTimeFormatWithTimeZone2.parse(dateAsString).getTime());
+            default:
             if (dateAsString.contains(":") && !dateAsString.contains("-")) {
                 if (dateAsString.contains(".")) {
                     //cannot handle milliseconds/nanoseconds in java.sql.Time, so throw exception so it's handled as a function
