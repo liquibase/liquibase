@@ -6,6 +6,7 @@ import spock.lang.Unroll
 
 import java.sql.Time
 import java.sql.Timestamp
+import java.text.SimpleDateFormat
 
 class ISODateFormatTest extends Specification {
 
@@ -27,7 +28,6 @@ class ISODateFormatTest extends Specification {
         "2011-04-21T10:13:40.084004-05:00" | "2011-04-21T10:13:40.084004" //est timezone
         "2011-04-21T10:13:40.01234567"     | "2011-04-21T10:13:40.01234567" //leading nano fractions
         "10:13:40"                         | "10:13:40"
-        "2024-10-14T00:00:00+02:00"        | "2024-10-13T15:00:00"
     }
 
     @Unroll
@@ -44,5 +44,23 @@ class ISODateFormatTest extends Specification {
         new Timestamp(111, 6, 8, 3, 5, 7, 9) | "2011-07-08T03:05:07.000000009"
         new Date(111, 3, 5)                  | "2011-04-05T00:00:00"
         new Date(111, 3, 5, 1, 7, 9)         | "2011-04-05T01:07:09"
+    }
+
+    @Unroll
+    def "parse and reformat datetime with timezone"() {
+
+        given:
+        Date parsedDate = dateFormat.parse(input)
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String utcDate = sdf.format(parsedDate);
+
+        expect:
+        utcDate == expectedUTC
+
+        where:
+        input                              | expectedUTC
+        "2011-04-21T10:13:40.084004-05:00" | "2011-04-21T13:13:40Z"
+        "2024-10-14T00:00:00+02:00"        | "2024-10-13T22:00:00Z"
     }
 }
