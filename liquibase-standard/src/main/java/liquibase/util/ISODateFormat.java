@@ -127,12 +127,15 @@ public class ISODateFormat {
             if (dateAsString.contains(" ")) {
                 dateAsString = dateAsString.replaceAll(" ", "T");
             }
-            nanos = Integer.parseInt(dateAsString.substring(20));
-            for (; length < 29; length++) {
-                nanos *= 10;
+            try {
+                nanos = Integer.parseInt(dateAsString.substring(20));
+                for (; length < 29; length++) {
+                    nanos *= 10;
+                }
+            } catch (NumberFormatException e) {
+                throw new ParseException(String.format("Invalid number format in date string: %s.", dateAsString), 0);
             }
         }
-
 
         /*
         */
