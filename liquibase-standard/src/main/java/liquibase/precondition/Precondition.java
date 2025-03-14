@@ -14,7 +14,8 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
 
 /**
- * Marker interface for preconditions.  May become an annotation in the future.
+ * Base interface for preconditions
+ * @see AbstractPrecondition
  */
 public interface Precondition extends LiquibaseSerializable {
     String getName();
@@ -22,6 +23,11 @@ public interface Precondition extends LiquibaseSerializable {
     Warnings warn(Database database);
 
     ValidationErrors validate(Database database);
+
+    default void check(Database database, DatabaseChangeLog changeLog)
+        throws PreconditionFailedException, PreconditionErrorException {
+        check(database, changeLog, null, null);
+    }
 
     void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
             throws PreconditionFailedException, PreconditionErrorException;
