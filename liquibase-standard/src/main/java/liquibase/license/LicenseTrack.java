@@ -2,7 +2,11 @@ package liquibase.license;
 
 import liquibase.Scope;
 import liquibase.configuration.ConfiguredValue;
+import liquibase.util.NetUtil;
 import lombok.Data;
+
+import java.util.Collections;
+import java.util.List;
 
 @Data
 public class LicenseTrack {
@@ -10,6 +14,7 @@ public class LicenseTrack {
     private String jdbcUrl;
     private String schema;
     private String catalog;
+    private List<User> users;
 
     public LicenseTrack(String jdbcUrl, String schema, String catalog) {
         LicenseServiceFactory licenseServiceFactory = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class);
@@ -25,5 +30,11 @@ public class LicenseTrack {
         this.jdbcUrl = jdbcUrl;
         this.schema = schema;
         this.catalog = catalog;
+        ConfiguredValue<String> userCurrentConfiguredValue = LicenseTrackingArgs.USER.getCurrentConfiguredValue();
+        if (userCurrentConfiguredValue.found()) {
+            this.users = Collections.singletonList(new User(userCurrentConfiguredValue.getValue()));
+        } else {
+            this.users = Collections.singletonList(new User(NetUtil.getLocalHostName()));
+        }
     }
 }

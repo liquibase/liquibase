@@ -258,11 +258,24 @@ Global Options
                                enabled', environment variable:
                                'LIQUIBASE_LICENSE_UTILITY_ENABLED')
 
+      --license-utility-log-level=PARAM
+                             DEFAULT: INFO
+                             (defaults file: 'liquibase.license.utility.
+                               logLevel', environment variable:
+                               'LIQUIBASE_LICENSE_UTILITY_LOG_LEVEL')
+
       --license-utility-url=PARAM
                              DEFAULT: http://localhost:8080
                              (defaults file: 'liquibase.license.utility.url',
                                environment variable:
                                'LIQUIBASE_LICENSE_UTILITY_URL')
+
+      --license-utility-user=PARAM
+                             Identify the group or system that is using
+                               Liquibase, defaults to hostname if not specified
+                             (defaults file: 'liquibase.license.utility.user',
+                               environment variable:
+                               'LIQUIBASE_LICENSE_UTILITY_USER')
 
       --liquibase-catalog-name=PARAM
                              Catalog to use for Liquibase objects
