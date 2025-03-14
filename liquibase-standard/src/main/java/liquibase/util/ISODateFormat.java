@@ -83,52 +83,64 @@ public class ISODateFormat {
                 return new java.sql.Timestamp(dateTimeFormat.parse(dateAsString).getTime());
             }
         case 25:
-            return new java.sql.Timestamp(dateTimeFormatWithTimeZone.parse(dateAsString).getTime());
-        case 28:
-            return new java.sql.Timestamp(dateTimeFormatWithTimeZone2.parse(dateAsString).getTime());
-            default:
-            if (dateAsString.contains(":") && !dateAsString.contains("-")) {
-                if (dateAsString.contains(".")) {
-                    //cannot handle milliseconds/nanoseconds in java.sql.Time, so throw exception so it's handled as a function
-                    throw new ParseException(String.format("Unknown date format to parse: %s.", dateAsString), 0);
-                } else {
-                    return new java.sql.Time(timeFormat.parse(dateAsString).getTime());
-                }
-            }
-
-            if ((length < 19) || (dateAsString.charAt(19) != '.')) {
-                throw new ParseException(String.format("Unknown date format to parse: %s.", dateAsString), 0);
-            }
-            long time = 0;
-            if (dateAsString.contains(" ")) {
-                time = dateTimeFormatWithSpace.parse(dateAsString.substring(0, 19)).getTime();
+            if (dateTimeFormatWithTimeZone.toLocalizedPattern().equals(DATE_TIME_FORMAT_STRING_WITH_TIMEZONE)) {
+                return new java.sql.Timestamp(dateTimeFormatWithTimeZone.parse(dateAsString).getTime());
             } else {
-                time = dateTimeFormat.parse(dateAsString.substring(0,19)).getTime();
+                return parseGenericDate(dateAsString, length);
             }
-
-            ZonedDateTime zonedDateTime;
-            int nanos;
-            try {
-                OffsetDateTime odt = OffsetDateTime.parse(dateAsString);
-                zonedDateTime = odt.toZonedDateTime();
-                nanos = zonedDateTime.getNano();
+        case 28:
+            if (dateTimeFormatWithTimeZone.toLocalizedPattern().equals(DATE_TIME_FORMAT_STRING_WITH_TIMEZONE2)) {
+                return new java.sql.Timestamp(dateTimeFormatWithTimeZone2.parse(dateAsString).getTime());
+            } else {
+                return parseGenericDate(dateAsString, length);
             }
-            catch (DateTimeParseException dtpe) {
-                if (dateAsString.contains(" ")) {
-                    dateAsString = dateAsString.replaceAll(" ", "T");
-                }
-                nanos = Integer.parseInt(dateAsString.substring(20));
-                for (; length < 29; length++) {
-                    nanos *= 10;
-                }
-            }
-
-
-            /*
-            */
-            java.sql.Timestamp timestamp = new java.sql.Timestamp(time);
-            timestamp.setNanos(nanos);
-            return timestamp;
+            default:
+                return parseGenericDate(dateAsString, length);
         }
+    }
+
+    private Date parseGenericDate(String dateAsString, int length) throws ParseException {
+        if (dateAsString.contains(":") && !dateAsString.contains("-")) {
+            if (dateAsString.contains(".")) {
+                //cannot handle milliseconds/nanoseconds in java.sql.Time, so throw exception so it's handled as a function
+                throw new ParseException(String.format("Unknown date format to parse: %s.", dateAsString), 0);
+            } else {
+                return new Time(timeFormat.parse(dateAsString).getTime());
+            }
+        }
+
+        if ((length < 19) || (dateAsString.charAt(19) != '.')) {
+            throw new ParseException(String.format("Unknown date format to parse: %s.", dateAsString), 0);
+        }
+        long time = 0;
+        if (dateAsString.contains(" ")) {
+            time = dateTimeFormatWithSpace.parse(dateAsString.substring(0, 19)).getTime();
+        } else {
+            time = dateTimeFormat.parse(dateAsString.substring(0,19)).getTime();
+        }
+
+        ZonedDateTime zonedDateTime;
+        int nanos;
+        try {
+            OffsetDateTime odt = OffsetDateTime.parse(dateAsString);
+            zonedDateTime = odt.toZonedDateTime();
+            nanos = zonedDateTime.getNano();
+        }
+        catch (DateTimeParseException dtpe) {
+            if (dateAsString.contains(" ")) {
+                dateAsString = dateAsString.replaceAll(" ", "T");
+            }
+            nanos = Integer.parseInt(dateAsString.substring(20));
+            for (; length < 29; length++) {
+                nanos *= 10;
+            }
+        }
+
+
+        /*
+        */
+        java.sql.Timestamp timestamp = new java.sql.Timestamp(time);
+        timestamp.setNanos(nanos);
+        return timestamp;
     }
 }
