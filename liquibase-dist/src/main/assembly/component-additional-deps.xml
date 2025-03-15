@@ -2,37 +2,6 @@
 <component>
     <fileSets>
         <fileSet>
-            <directory>${project.build.directory}/archive</directory>
-            <outputDirectory>${file.separator}</outputDirectory>
-            <lineEnding>unix</lineEnding>
-            <includes>
-                <include>liquibase</include>
-            </includes>
-            <fileMode>0755</fileMode>
-        </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}/archive</directory>
-            <!--
-                <outputDirectory>${file.separator}</outputDirectory> is there because maven-assembly-plugin would
-                complain on Windows otherwise:
-                "OS=Windows and the assembly descriptor contains a *nix-specific root-relative-reference (starting with slash) /"
-            -->
-            <outputDirectory>${file.separator}</outputDirectory>
-            <lineEnding>dos</lineEnding>
-            <includes>
-                <include>*.bat</include>
-            </includes>
-        </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}/archive</directory>
-            <outputDirectory>${file.separator}</outputDirectory>
-            <lineEnding>unix</lineEnding>
-            <excludes>
-                <exclude>liquibase</exclude>
-                <exclude>*.bat</exclude>
-            </excludes>
-        </fileSet>
-        <fileSet>
             <directory>${project.build.directory}/site/apidocs</directory>
             <outputDirectory>javadoc</outputDirectory>
             <includes>
@@ -67,17 +36,6 @@
             <lineEnding>dos</lineEnding>
         </fileSet>
     </fileSets>
-    <files>
-        <!-- specifying the outputDirectory as file.separator puts it in the root -->
-        <file>
-            <source>../ABOUT.txt</source>
-            <outputDirectory>${file.separator}</outputDirectory>
-        </file>
-        <file>
-            <source>../changelog.txt</source>
-            <outputDirectory>${file.separator}</outputDirectory>
-        </file>
-    </files>
     <dependencySets>
         <dependencySet>
             <outputFileNameMapping>${artifact.artifactId}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
@@ -85,14 +43,6 @@
             <useTransitiveFiltering>true</useTransitiveFiltering>
             <scope>runtime</scope>
             <includes>
-                <include>org.liquibase:liquibase-core:</include>
-                <include>org.liquibase:liquibase-commercial:</include>
-                <include>com.opencsv:opencsv:</include>
-                <include>org.yaml:snakeyaml:jar:</include>
-                <include>javax.xml.bind:jaxb-api:jar:</include>
-                <include>org.glassfish.jaxb:jaxb-runtime:jar:</include>
-                <include>org.glassfish.jaxb:jaxb-core:jar:</include>
-                <include>info.picocli:picocli:jar:</include>
                 <include>com.h2database:h2:jar:</include>
                 <include>org.hsqldb:hsqldb:jar:</include>
                 <include>org.postgresql:postgresql:jar</include>
