@@ -262,6 +262,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             if (this.analyticsEnabled != null) {
                 scopeVars.put(AnalyticsArgs.ENABLED.getKey(), this.analyticsEnabled);
             }
+            scopeVars.put(Scope.Attr.maxAnalyticsCacheSize.name(), 10);
 
             if (this.licenseKey != null) {
                 log.fine("Using PRO licenseKey.");
