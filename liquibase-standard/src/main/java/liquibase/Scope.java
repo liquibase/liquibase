@@ -7,6 +7,7 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.license.LicenseTrackList;
 import liquibase.listener.LiquibaseListener;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
@@ -79,7 +80,8 @@ public class Scope {
          */
         mavenConfigurationProperties,
         analyticsEvent,
-        integrationDetails
+        integrationDetails,
+        licenseTrackList
     }
 
     public static final String JAVA_PROPERTIES = "javaProperties";
@@ -527,6 +529,10 @@ public class Scope {
      */
     public Event getAnalyticsEvent() {
         return Scope.getCurrentScope().get(Attr.analyticsEvent, Event.class);
+    }
+
+    public LicenseTrackList getLicenseTrackList() {
+        return Scope.getCurrentScope().get(Attr.licenseTrackList, LicenseTrackList.class);
     }
 
     private static String generateDeploymentId() {
