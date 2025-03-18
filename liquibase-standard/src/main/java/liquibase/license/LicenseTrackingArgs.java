@@ -32,7 +32,7 @@ public class LicenseTrackingArgs implements AutoloadedConfigurations {
                 .setDefaultValue(Level.INFO)
                 .build();
 
-        ID = builder.define("ID", String.class)
+        ID = builder.define("id", String.class)
                 .setDescription("Specifies an identifier (e.g., team name, pipeline ID, or environment) to track and analyze Liquibase license usage. If not provided, the hostname and user is used for identification.")
                 .build();
     }
