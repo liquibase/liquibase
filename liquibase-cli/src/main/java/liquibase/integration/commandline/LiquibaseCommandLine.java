@@ -42,6 +42,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.GZIPOutputStream;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
@@ -122,11 +123,11 @@ public class LiquibaseCommandLine {
         this.legacyPositionalArguments.put("tag", TagCommandStep.TAG_ARG.getName());
         this.legacyPositionalArguments.put("tagexists", TagExistsCommandStep.TAG_ARG.getName());
         this.legacyPositionalArguments.put("rollback", RollbackCommandStep.TAG_ARG.getName());
-        this.legacyPositionalArguments.put("rollbacksql", RollbackSqlCommandStep.TAG_ARG.getName());
+        this.legacyPositionalArguments.put("rollbacksql", RollbackCommandStep.TAG_ARG.getName());
         this.legacyPositionalArguments.put("rollbacktodate", RollbackToDateCommandStep.DATE_ARG.getName());
-        this.legacyPositionalArguments.put("rollbacktodatesql", RollbackToDateSqlCommandStep.DATE_ARG.getName());
+        this.legacyPositionalArguments.put("rollbacktodatesql", RollbackToDateCommandStep.DATE_ARG.getName());
         this.legacyPositionalArguments.put("rollbackcount", RollbackCountCommandStep.COUNT_ARG.getName());
-        this.legacyPositionalArguments.put("rollbackcountsql", RollbackCountSqlCommandStep.COUNT_ARG.getName());
+        this.legacyPositionalArguments.put("rollbackcountsql", RollbackCountCommandStep.COUNT_ARG.getName());
         this.legacyPositionalArguments.put("updatecount", UpdateCountCommandStep.COUNT_ARG.getName());
         this.legacyPositionalArguments.put("updatecountsql", UpdateCountSqlCommandStep.COUNT_ARG.getName());
         this.legacyPositionalArguments.put("updatetotag", UpdateToTagCommandStep.TAG_ARG.getName());
@@ -207,36 +208,36 @@ public class LiquibaseCommandLine {
         ;
 
 
-        CommandLine commandLine = new CommandLine(rootCommandSpec, defaultFactory)
+        CommandLine cmdLine = new CommandLine(rootCommandSpec, defaultFactory)
                 .setCaseInsensitiveEnumValuesAllowed(true)
                 .setOptionsCaseInsensitive(true)
                 .setUsageHelpAutoWidth(true);
 
-        addGlobalArguments(commandLine);
+        addGlobalArguments(cmdLine);
 
         for (CommandDefinition commandDefinition : getCommands()) {
-            addSubcommand(commandDefinition, commandLine);
+            addSubcommand(commandDefinition, cmdLine);
         }
 
-        commandLine.setExecutionExceptionHandler((ex, commandLine1, parseResult) -> LiquibaseCommandLine.this.handleException(ex));
+        cmdLine.setExecutionExceptionHandler((ex, commandLine1, parseResult) -> LiquibaseCommandLine.this.handleException(ex));
 
-        commandLine.setUsageHelpAutoWidth(true);
+        cmdLine.setUsageHelpAutoWidth(true);
 
-        return commandLine;
+        return cmdLine;
     }
 
     protected int handleException(Throwable exception) {
         Throwable cause = exception;
 
-        String uiMessage = "";
+        StringBuilder uiMessage = new StringBuilder();
         while (cause != null) {
-            String newMessage = StringUtil.trimToNull(cleanExceptionMessage(cause.getMessage()));
+            String newMessage = StringUtils.trimToNull(cleanExceptionMessage(cause.getMessage()));
             if (newMessage != null) {
-                if (!uiMessage.contains(newMessage)) {
-                    if (!uiMessage.equals("")) {
-                        uiMessage += System.lineSeparator() + "  - Caused by: ";
+                if (!String.valueOf(uiMessage).contains(newMessage)) {
+                    if (!String.valueOf(uiMessage).isEmpty()) {
+                        uiMessage.append(System.lineSeparator()).append("  - Caused by: ");
                     }
-                    uiMessage += newMessage;
+                    uiMessage.append(newMessage);
                 }
             }
 
@@ -244,7 +245,7 @@ public class LiquibaseCommandLine {
         }
 
         if (StringUtils.isEmpty(uiMessage)) {
-            uiMessage = exception.getClass().getName();
+            uiMessage = new StringBuilder(exception.getClass().getName());
         }
 
         //
@@ -253,7 +254,7 @@ public class LiquibaseCommandLine {
         Level level = determineLogLevel(exception);
 
         if (ExceptionUtil.showExceptionInLog(exception)) {
-            Scope.getCurrentScope().getLog(getClass()).log(level, uiMessage, exception);
+            Scope.getCurrentScope().getLog(getClass()).log(level, String.valueOf(uiMessage), exception);
         }
 
         boolean printUsage = false;
@@ -314,23 +315,6 @@ public class LiquibaseCommandLine {
     }
 
     //
-    // Honor the expected flag on a CommandFailedException
-    //
-    private boolean showExceptionInLog(Throwable exception) {
-        if (CommandScope.isSuppressExceptionLogging()) {
-            return false;
-        }
-        Throwable t = exception;
-        while (t != null) {
-            if (t instanceof CommandFailedException && ((CommandFailedException) t).isExpected()) {
-                return false;
-            }
-            t = t.getCause();
-        }
-        return true;
-    }
-
-    //
     // Look for a logLevel setting on any LiquibaseException
     // and use that for the Level to pass to the logger.
     // The lowest level of the exception stack will be used.
@@ -375,7 +359,7 @@ public class LiquibaseCommandLine {
 
             configureLogging(Level.OFF, null);
 
-            Main.runningFromNewCli = true;
+            Main.setRunningFromNewCli(true);
 
             final List<ConfigurationValueProvider> valueProviders = registerValueProviders(finalArgs);
             LogService newLogService = Scope.child(Collections.singletonMap(REGISTERED_VALUE_PROVIDERS_KEY, true), () -> {
@@ -387,8 +371,8 @@ public class LiquibaseCommandLine {
                 addEmptyMdcValues();
                 try {
                     return Scope.child(configureScope(args), () -> {
-
-                        if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
+                        Boolean shouldExecuteCmd = LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue();
+                        if (!Boolean.TRUE.equals(shouldExecuteCmd)) {
                             Scope.getCurrentScope().getUI().sendErrorMessage((
                                     String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
                                             LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentConfiguredValue().getProvidedValue().getActualKey())));
@@ -451,7 +435,8 @@ public class LiquibaseCommandLine {
     }
 
     private void addEmptyMdcValues() {
-        if (LiquibaseCommandLineConfiguration.ADD_EMPTY_MDC_VALUES.getCurrentValue()) {
+        Boolean addEmptyMdcValues = LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue();
+        if (Boolean.TRUE.equals(addEmptyMdcValues)) {
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, "");
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, "NOOP");
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, "0");
@@ -474,7 +459,7 @@ public class LiquibaseCommandLine {
     /**
      * Log MDC data related to Liquibase system information.
      */
-    private void logMdcData() throws IOException {
+    private void logMdcData() {
         MdcManager mdcManager = Scope.getCurrentScope().getMdcManager();
         String localHostName = NetUtil.getLocalHostName();
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SYSTEM_USER, SystemProperties.getUserName(), false);
@@ -559,7 +544,7 @@ public class LiquibaseCommandLine {
 
         Map<String, String> changelogParameters = subcommandParseResult.matchedOptionValue("-D", new HashMap<>());
         if (changelogParameters.size() != 0) {
-            Main.newCliChangelogParameters = changelogParameters;
+            Main.setNewCliChangelogParameters(changelogParameters);
         }
         return changelogParameters;
     }
@@ -659,7 +644,8 @@ public class LiquibaseCommandLine {
                 Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFileConfigValue);
                 if (!defaultsFileConfig.wasDefaultValueUsed()) {
                             //can't use UI since it's not configured correctly yet
-                    if (GlobalConfiguration.STRICT.getCurrentValue()) {
+                    Boolean strict = GlobalConfiguration.STRICT.getCurrentValue();
+                    if (Boolean.TRUE.equals(strict)) {
                         throw new UnexpectedLiquibaseException("ERROR: The file '"+defaultsFileConfigValue+"' was not found. The global argument 'strict' is enabled, which validates the existence of files specified in liquibase files, such as changelogs, flowfiles, checks packages files, and more. To prevent this message, check your configurations, or disable the 'strict' setting.");
                     } else {
                         System.err.println("Could not find defaults file " + defaultsFileConfigValue);
@@ -704,6 +690,8 @@ public class LiquibaseCommandLine {
         returnMap.put(Scope.Attr.integrationDetails.name(), integrationDetails);
 
         returnMap.putAll(configureLogging());
+        final String configuredChannels = LiquibaseCommandLineConfiguration.LOG_CHANNELS.getCurrentValue();
+        returnMap.put("logChannels", configuredChannels);
 
         //
         // Pass any -D properties in the scope so that they will be available to
@@ -768,6 +756,7 @@ public class LiquibaseCommandLine {
         }
 
         configureLogging(logLevel, logFile, currentConfiguredValue.wasDefaultValueUsed());
+        returnMap.put("logLevel", logLevel);
 
         return returnMap;
     }
@@ -800,6 +789,9 @@ public class LiquibaseCommandLine {
             if (fileHandler == null) {
                 final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
                 OutputStream outputStream = pathHandlerFactory.openResourceOutputStream(logFile, new OpenOptions().setAppend(true));
+                if (StringUtils.endsWithIgnoreCase(logFile, ".gz")) {
+                    outputStream = new GZIPOutputStream(outputStream);
+                }
                 fileHandler = new StreamHandler(outputStream, new SimpleFormatter());
 
                 JavaLogService.setFormatterOnHandler(logService, fileHandler);

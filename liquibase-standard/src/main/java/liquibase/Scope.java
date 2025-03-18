@@ -81,12 +81,23 @@ public class Scope {
         mavenConfigurationProperties,
         analyticsEvent,
         integrationDetails,
+        /**
+         * The maximum number of analytics events that should be cached in memory before sent in a batch.
+         */
+        maxAnalyticsCacheSize,
         licenseTrackList
     }
 
     public static final String JAVA_PROPERTIES = "javaProperties";
 
-    private static final InheritableThreadLocal<ScopeManager> scopeManager = new InheritableThreadLocal<>();
+    private static final InheritableThreadLocal<ScopeManager> scopeManager = new InheritableThreadLocal<ScopeManager>() {
+        @Override
+        protected ScopeManager childValue(ScopeManager parentValue) {
+            ScopeManager sm = new SingletonScopeManager();
+            sm.setCurrentScope(parentValue.getCurrentScope());
+            return sm;
+        }
+    };
 
     private final Scope parent;
     private final SmartMap values = new SmartMap();
