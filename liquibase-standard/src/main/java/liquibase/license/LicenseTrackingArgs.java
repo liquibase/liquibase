@@ -14,7 +14,7 @@ public class LicenseTrackingArgs implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> ENABLED;
     public static final ConfigurationDefinition<String> URL;
     public static final ConfigurationDefinition<Level> LOG_LEVEL;
-    public static final ConfigurationDefinition<String> USER;
+    public static final ConfigurationDefinition<String> ID;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase.license.utility");
@@ -32,8 +32,8 @@ public class LicenseTrackingArgs implements AutoloadedConfigurations {
                 .setDefaultValue(Level.INFO)
                 .build();
 
-        USER = builder.define("user", String.class)
-                .setDescription("Identify the group or system that is using Liquibase, defaults to hostname if not specified")
+        ID = builder.define("ID", String.class)
+                .setDescription("Specifies an identifier (e.g., team name, pipeline ID, or environment) to track and analyze Liquibase license usage. If not provided, the hostname and user is used for identification.")
                 .build();
     }
 }

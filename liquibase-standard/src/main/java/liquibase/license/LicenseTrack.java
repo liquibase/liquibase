@@ -4,6 +4,8 @@ import liquibase.Scope;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.util.NetUtil;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemProperties;
 
 import java.util.Collections;
 import java.util.List;
@@ -30,11 +32,11 @@ public class LicenseTrack {
         this.jdbcUrl = jdbcUrl;
         this.schema = schema;
         this.catalog = catalog;
-        ConfiguredValue<String> userCurrentConfiguredValue = LicenseTrackingArgs.USER.getCurrentConfiguredValue();
+        ConfiguredValue<String> userCurrentConfiguredValue = LicenseTrackingArgs.ID.getCurrentConfiguredValue();
         if (userCurrentConfiguredValue.found()) {
             this.users = Collections.singletonList(new User(userCurrentConfiguredValue.getValue()));
         } else {
-            this.users = Collections.singletonList(new User(NetUtil.getLocalHostName()));
+            this.users = Collections.singletonList(new User(StringUtils.joinWith("@", SystemProperties.getUserName(), NetUtil.getLocalHostName())));
         }
     }
 }
