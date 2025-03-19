@@ -305,7 +305,7 @@ class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 
         then:
         def e = thrown(ChangeLogParseException)
-        assert e.message.contains("unknownTag")
+        assert e.message.contains("\"databaseChangeLog\" expected as root element")
     }
 
     def "ChangeLogParseException is thrown if validation is enabled and changelog has invalid tags"() throws Exception {

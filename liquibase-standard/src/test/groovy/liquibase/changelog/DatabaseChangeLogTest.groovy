@@ -1,6 +1,7 @@
 package liquibase.changelog
 
 import liquibase.ContextExpression
+import liquibase.GlobalConfiguration
 import liquibase.LabelExpression
 import liquibase.Labels
 import liquibase.Scope
@@ -9,11 +10,14 @@ import liquibase.change.core.RawSQLChange
 import liquibase.change.visitor.ChangeVisitor
 import liquibase.database.Database
 import liquibase.database.core.MockDatabase
+import liquibase.exception.ChangeLogParseException
 import liquibase.exception.SetupException
 import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.logging.core.BufferedLogService
+import liquibase.parser.ChangeLogParser
 import liquibase.parser.ChangeLogParserConfiguration
 import liquibase.parser.core.ParsedNode
+import liquibase.parser.core.xml.XMLChangeLogSAXParser
 import liquibase.precondition.core.OrPrecondition
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.RunningAsPrecondition
@@ -1078,6 +1082,66 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         "3.xml"         | 1
         "4.xml"         | 2
         "5.xml"         | 0
+    }
+
+    @Unroll
+    def "#tag as root element"(String tag) {
+        when:
+        String content = """<$tag xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+                                    www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"/>
+        """
+        String rootChangeLogPath = "root.xml"
+        def resourceAccessor = new MockResourceAccessor([(rootChangeLogPath): content])
+        DatabaseChangeLog changeLog =
+                Scope.child([(GlobalConfiguration.SECURE_PARSING.key): Boolean.FALSE], {
+                    // Create a new parser instead of using the parserFactory to make sure SECURE_PARSING is used
+                    new XMLChangeLogSAXParser().parse(rootChangeLogPath, new ChangeLogParameters(), resourceAccessor)
+                } as Scope.ScopedRunnerWithReturn<DatabaseChangeLog>)
+        then:
+        ChangeLogParseException e = thrown()
+        e.message.contains("\"$ChangeLogParser.DATABASE_CHANGE_LOG\" expected as root element")
+        where:
+        tag << [
+                'addAutoIncrement', 'addColumn',
+                'addDefaultValue',  'addForeignKeyConstraint',
+                'addLookupTable',   'addNotNullConstraint',
+                'addPrimaryKey',    'addUniqueConstraint',
+                'alterSequence',    'and',
+                'changeLogPropertyDefined',
+                'changeSetExecuted','column',
+                'columnExists',     'comment',
+                'constraints',      'createIndex',
+                'createProcedure',  'createSequence',
+                'createTable',      'createView',
+                'customChange',     'customPrecondition',
+                'dbms',             'delete',
+                'dropAllForeignKeyConstraints','dropColumn',
+                'dropDefaultValue', 'dropForeignKeyConstraint',
+                'dropIndex',        'dropNotNullConstraint',
+                'dropPrimaryKey',   'dropProcedure',
+                'dropSequence'  ,   'dropTable',
+                'dropUniqueConstraint','dropView',
+                'empty',            'executeCommand',
+                'expectedQuotingStrategy','foreignKeyConstraintExists',
+                'include',          'includeAll',
+                'insert',           'loadData',
+                'loadUpdateData',   'mergeColumns',
+                'modifyDataType',   'not',
+                'or',   'output',   'param',
+                'primaryKeyExists', 'preConditions',
+                'renameSequence',   'renameTable',
+                'renameView',       'rollback',
+                'rowCount',         'runningAs',
+                'sequenceExists',   'setColumnRemarks',
+                'setTableRemarks',  'sql',
+                'sqlCheck',         'sqlFile',
+                'stop',             'tableExists',
+                'tableIsEmpty',     'tagDatabase',
+                'uniqueConstraintExists', 'update',
+                'viewExists',       'whereParams'
+        ]
     }
 
 }
