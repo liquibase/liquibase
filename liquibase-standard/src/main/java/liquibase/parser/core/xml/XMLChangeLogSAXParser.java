@@ -128,7 +128,12 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
         } catch (IOException e) {
             throw new ChangeLogParseException("Error Reading Changelog File: " + e.getMessage(), e);
         } catch (SAXParseException e) {
-            throw new ChangeLogParseException("Error parsing line " + e.getLineNumber() + " column " + e.getColumnNumber() + " of " + physicalChangeLogLocation + ": " + e.getMessage(), e);
+            String errMsg =  e.getMessage();
+            if(e.getMessage().startsWith("cvc-")) {
+                errMsg = '"' + DATABASE_CHANGE_LOG + "\" expected as root element";
+            }
+            throw new ChangeLogParseException("Error parsing line " + e.getLineNumber() + " column "
+                    + e.getColumnNumber() + " of " + physicalChangeLogLocation + ": " + errMsg, e);
         } catch (SAXException e) {
             Throwable parentCause = e.getException();
             while (parentCause != null) {
