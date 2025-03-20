@@ -88,7 +88,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 nodeStack.peek().addChild(node);
             }
             if (nodeStack.isEmpty()) {
-                if(!node.getName().equals("databaseChangeLog")) {
+                if(!node.getName().equals(ChangeLogParser.DATABASE_CHANGE_LOG)) {
                     throw new SAXParseException(String.format("\"%s\" expected as root element", ChangeLogParser.DATABASE_CHANGE_LOG), null);
                 }
                 databaseChangeLogTree = node;
