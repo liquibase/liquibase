@@ -1066,7 +1066,13 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            OnUnknownFileFormat onUnknownFileFormat,
                            ModifyChangeSets modifyChangeSets)
             throws LiquibaseException {
-        String filenameWithoutPath = Paths.get(fileName).getFileName().toString();
+        String filenameWithoutPath = "";
+        if(fileName.startsWith("classpath:") && !GlobalConfiguration.PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS.getCurrentValue()) {
+            filenameWithoutPath = Paths.get(normalizePath(fileName)).getFileName().toString();
+        } else {
+            filenameWithoutPath = fileName;
+        }
+
         boolean matchesHiddenFilename = HIDDEN_FILENAME_PATTERN.matcher(filenameWithoutPath).matches();
         if ("cvs".equalsIgnoreCase(filenameWithoutPath) || matchesHiddenFilename) {
             return false;
