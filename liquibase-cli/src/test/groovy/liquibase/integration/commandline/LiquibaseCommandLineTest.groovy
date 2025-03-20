@@ -258,20 +258,20 @@ Global Options
                                enabled', environment variable:
                                'LIQUIBASE_LICENSE_UTILITY_ENABLED')
 
-      --license-utility-id=PARAM
-                             Specifies an identifier (e.g., team name, pipeline
-                               ID, or environment) to track and analyze
-                               Liquibase license usage. If not provided, the
-                               hostname and user is used for identification.
-                             (defaults file: 'liquibase.license.utility.id',
-                               environment variable:
-                               'LIQUIBASE_LICENSE_UTILITY_ID')
-
       --license-utility-log-level=PARAM
                              DEFAULT: INFO
                              (defaults file: 'liquibase.license.utility.
                                logLevel', environment variable:
                                'LIQUIBASE_LICENSE_UTILITY_LOG_LEVEL')
+
+      --license-utility-tracking-id=PARAM
+                             Specifies an identifier (e.g., team name, pipeline
+                               ID, or environment) to track and analyze
+                               Liquibase license usage. If not provided, the
+                               hostname and user is used for identification.
+                             (defaults file: 'liquibase.license.utility.
+                               trackingId', environment variable:
+                               'LIQUIBASE_LICENSE_UTILITY_TRACKING_ID')
 
       --license-utility-url=PARAM
                              DEFAULT: http://localhost:8080
