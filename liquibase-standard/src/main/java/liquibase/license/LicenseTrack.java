@@ -32,7 +32,7 @@ public class LicenseTrack {
         this.jdbcUrl = jdbcUrl;
         this.schema = schema;
         this.catalog = catalog;
-        ConfiguredValue<String> userCurrentConfiguredValue = LicenseTrackingArgs.ID.getCurrentConfiguredValue();
+        ConfiguredValue<String> userCurrentConfiguredValue = LicenseTrackingArgs.TRACKING_ID.getCurrentConfiguredValue();
         if (userCurrentConfiguredValue.found()) {
             this.users = Collections.singletonList(new User(userCurrentConfiguredValue.getValue()));
         } else {
