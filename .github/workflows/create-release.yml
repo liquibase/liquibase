@@ -274,7 +274,7 @@ jobs:
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
 
       - name: Cache Completed Artifacts
-        uses: actions/cache@v4.2.0
+        uses: actions/cache@v4.2.3
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
@@ -299,7 +299,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Restore Completed Artifacts
-        uses: actions/cache@v4.2.0
+        uses: actions/cache@v4.2.3
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
