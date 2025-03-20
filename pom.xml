@@ -112,6 +112,7 @@
         <module>liquibase-dist</module>
         <module>liquibase-extension-testing</module>
         <module>liquibase-snowflake</module>
+        <module>liquibase-spring</module>
     </modules>
 
     <dependencyManagement>
@@ -272,7 +273,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.4</version>
+            <version>42.7.5</version>
             <scope>test</scope>
         </dependency>
 
