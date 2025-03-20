@@ -23,14 +23,11 @@ import liquibase.resource.ResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.util.FileUtil
-import org.mockito.Mock
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import java.nio.file.Paths
 import java.util.logging.Level
-import java.util.stream.Stream
 
 class DatabaseChangeLogTest extends Specification {
 
@@ -252,7 +249,7 @@ create view sql_view as select * from sql_table;'''
                 new ParsedNode(null, "databaseChangeLog")
                         .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
         def modifyNode =
-                new ParsedNode(null, "modifyChangeSets").addChildren([runWith: "psql"])
+                new ParsedNode(null, "modifyChangeSets").addChildren([runWith: "psql", stripComments: true])
         modifyNode
                 .addChildren([include: [file: "com/example/test1.xml"]])
                 .addChildren([include: [file: "com/example/test2.xml"]])
@@ -326,7 +323,7 @@ create view sql_view as select * from sql_table;'''
                 new ParsedNode(null, "databaseChangeLog")
                         .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
         def modifyNode =
-                new ParsedNode(null, "modifyChangeSets").addChildren([runWith: "psql"])
+                new ParsedNode(null, "modifyChangeSets").addChildren([runWith: "psql", stripComments: true])
         modifyNode
                 .addChildren([includeAll: [path: "com/example", resourceComparator: "liquibase.changelog.ReversedChangeLogNamesComparator"]])
         topLevel.addChild(modifyNode)
@@ -341,6 +338,7 @@ create view sql_view as select * from sql_table;'''
         rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").getRunWith() == "psql"
         rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").getRunWith() == "psql"
         ((RawSQLChange) rootChangeLog.getChangeSet("com/example/test.sql", "includeAll", "raw").changes[0]).sql == testSql
+        ((RawSQLChange) rootChangeLog.getChangeSets().get(3).changes[0]).isStripComments()
 
         // assert reversed order
         ((CreateTableChange) rootChangeLog.getChangeSets().get(0).changes[0]).tableName == "test_table"
@@ -973,7 +971,12 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         def s3DatabaseChangeLog = new DatabaseChangeLog(s3RootChangelog)
         s3DatabaseChangeLog.load(new ParsedNode(null, "databaseChangeLog")
-                .addChildren([includeAll: [relativeToChangelogFile: true, path: s3ChangelogPathRelative, minDepth: minDepth, maxDepth: maxDepth, errorIfMissingOrEmpty: false]]), s3ResourceAccessor)
+                .addChildren([includeAll: [relativeToChangelogFile: true,
+                                           path: s3ChangelogPathRelative,
+                                           minDepth: minDepth,
+                                           maxDepth: maxDepth,
+                                           errorIfMissingOrEmpty: false,
+                                           modifyChangeSets: new ModifyChangeSets(null, null, true)]]), s3ResourceAccessor)
 
 
         // Scenario 4: includeAll in root changelog, relativeToChangelogFile true, path multi child

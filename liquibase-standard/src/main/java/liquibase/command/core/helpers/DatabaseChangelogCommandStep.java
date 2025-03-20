@@ -9,9 +9,7 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.*;
-import liquibase.configuration.ConfigurationValueProvider;
-import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.configuration.core.DefaultsFileValueProvider;
+import liquibase.configuration.ConfigurationDefinition;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.lockservice.LockServiceFactory;
@@ -24,7 +22,6 @@ import liquibase.util.StringUtil;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -140,7 +137,12 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         ChangeLogHistoryService changeLogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
         changeLogHistoryService.init();
         if (updateExistingNullChecksums) {
-            changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
+            try {
+                Scope.child(Collections.singletonMap(Scope.Attr.database.name(), database),
+                    () ->changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression));
+            } catch (Exception e) {
+                throw new LiquibaseException(e);
+            }
         }
         LockServiceFactory.getInstance().getLockService(database).init();
     }

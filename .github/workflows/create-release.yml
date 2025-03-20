@@ -17,7 +17,7 @@ on:
         required: false
         type: boolean
         default: false
-      dry_run: 
+      dry_run:
         description: 'Flag to indicate if the workflow is triggered to create a dry-run release'
         required: false
         type: boolean
@@ -42,22 +42,15 @@ on:
         required: true
         type: boolean
         default: false
-      dry_run: 
+      dry_run:
         description: 'Flag to indicate if the workflow is triggered to create a dry-run release'
         required: true
         type: boolean
         default: false
-    outputs:
-      dry_run_zip_url:
-        description: 'The URL of the created zip file'
-        value: ${{ jobs.build-installers.outputs.dry_run_zip_url }}
-      dry_run_tar_gz_url:
-        description: 'The URL of the created tar.gz file'
-        value: ${{ jobs.build-installers.outputs.dry_run_tar_gz_url }}
 
 env:
   DEPENDENCIES: "liquibase-bigquery" # Comma separated list of dependencies to release the extensions list
-  EXTENSIONS: "liquibase-commercial-bigquery" # Comma separated list of extensions to release to GPM
+  EXTENSIONS: "liquibase-commercial-bigquery,liquibase-checks" # Comma separated list of extensions to release to GPM
 
 jobs:
   setup:
@@ -73,7 +66,7 @@ jobs:
     steps:
       - run: |
           echo "Creating version ${{ inputs.version }} from ${{ inputs.branch }} with artifacts from build ${{ inputs.runId }} "
-          
+
   owasp-scanner:
     needs: [ setup ]
     uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@main
@@ -83,15 +76,15 @@ jobs:
 
   build-azure-uber-jar:
    needs: [ setup, owasp-scanner ]
-   uses: liquibase/liquibase/.github/workflows/build-azure-uber-jar.yml@master
+   uses: ./.github/workflows/build-azure-uber-jar.yml
    with:
      branch: ${{ needs.setup.outputs.branch }}
      liquibase-version: ${{ needs.setup.outputs.version }}
    secrets: inherit
-  
+
   build-extension-jars:
    needs: [ setup, owasp-scanner ]
-   uses: liquibase/liquibase/.github/workflows/build-extension-jars.yml@master
+   uses: ./.github/workflows/build-extension-jars.yml
    with:
      liquibase-version: ${{ needs.setup.outputs.version }}
      dependencies: ${{ needs.setup.outputs.dependencies }}
@@ -99,8 +92,27 @@ jobs:
      branch: ${{ needs.setup.outputs.branch }}
    secrets: inherit
 
+  get-liquibase-checks-version:
+    needs: [ setup ]
+    if: ${{ contains(needs.setup.outputs.extensions, 'liquibase-checks') }}
+    runs-on: ubuntu-latest
+    outputs:
+        version: ${{ steps.extract-version.outputs.version }}
+    steps:
+        - uses: actions/checkout@v4
+          with:
+            repository: liquibase/liquibase-checks
+            token: ${{ secrets.BOT_TOKEN }}
+
+        - id: extract-version
+          name: Extract version from pom.xml
+          shell: bash
+          run: |
+              VERSION=$(grep '<version>' pom.xml | head -n 1 | sed 's/.*<version>\(.*\)-SNAPSHOT<\/version>.*/\1/')
+              echo "version=$VERSION" >> $GITHUB_OUTPUT
+
   reversion:
-    needs: [ setup, build-azure-uber-jar, build-extension-jars ]
+    needs: [ setup, build-azure-uber-jar, build-extension-jars, get-liquibase-checks-version ]
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
     steps:
@@ -115,7 +127,7 @@ jobs:
           token: ${{ secrets.BOT_TOKEN }}
 
       - name: Download liquibase-artifacts
-        uses: liquibase/action-download-artifact@v2-liquibase
+        uses: dawidd6/action-download-artifact@v8
         with:
           workflow: run-tests.yml
           run_id: ${{ needs.setup.outputs.runId }}
@@ -130,37 +142,61 @@ jobs:
 
       - name: Download liquibase-pro-azure-artifacts
         uses: actions/download-artifact@v4
-        with: 
+        with:
           name: liquibase-pro-azure-artifacts
           path: liquibase-pro/liquibase-azure-deps
-
-      - name: Generate repositories and servers JSON
-        id: generate-json
-        run: |
-          IFS=',' read -ra EXT <<< "${{ needs.setup.outputs.extensions }}"
-          repositories=""
-          servers=""
-          for i in "${EXT[@]}"; do
-            repositories+="{\"id\": \"$i\",\"url\": \"https://maven.pkg.github.com/liquibase/$i\",\"releases\": {\"enabled\": \"true\"},\"snapshots\": {\"enabled\": \"true\",\"updatePolicy\": \"always\"}},"
-            servers+="{\"id\": \"$i\",\"username\": \"liquibot\",\"password\": \"${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}\"},"
-          done
-          # Remove trailing comma and wrap with brackets
-          repositories="["${repositories::-1}"]"
-          servers="["${servers::-1}"]"
-          echo "REPOSITORIES_JSON=$repositories" >> $GITHUB_ENV
-          echo "SERVERS_JSON=$servers" >> $GITHUB_ENV
 
       - name: maven-settings-xml-action
         uses: whelk-io/maven-settings-xml-action@v22
         with:
-          repositories: ${{ env.REPOSITORIES_JSON }}
-          servers: ${{ env.SERVERS_JSON }}
-              
+          repositories: |
+            [
+              {
+                "id": "liquibase",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase",
+                "releases": {
+                  "enabled": "true"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              },
+              {
+                "id": "liquibase-pro",
+                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
+                "releases": {
+                  "enabled": "true"
+                },
+                "snapshots": {
+                  "enabled": "true",
+                  "updatePolicy": "always"
+                }
+              }
+            ]
+          servers: |
+            [
+              {
+                "id": "liquibase",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}"
+              },
+              {
+                "id": "liquibase-pro",
+                "username": "liquibot",
+                "password": "${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}"
+              }
+            ]
+
       - name: Get extensions artifacts
         run: |
           IFS=',' read -ra ADDR <<< "${{ needs.setup.outputs.extensions }}"
           for extension in "${ADDR[@]}"; do
-            mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=$extension -Dversion=${{ needs.setup.outputs.version }} -Dtransitive=false || echo "Failed to download $extension artifact"
+            if [ "$extension" != "liquibase-checks" ]; then
+              mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=$extension -Dversion=${{ needs.setup.outputs.version }} -Dtransitive=false || echo "Failed to download $extension artifact"
+            else
+              mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=$extension -Dversion=${{ needs.get-liquibase-checks-version.outputs.version }} -Dtransitive=false || echo "Failed to download $extension artifact"
+            fi
           done
 
       - name: Set up JDK
@@ -181,7 +217,7 @@ jobs:
           mkdir -p $PWD/.github/util/
           # Download a script (re-version.sh) from a URL and save it to the specified directory
           curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/re-version.sh
-          
+
           # Download another script (sign-artifacts.sh) from a URL and save it to the specified directory
           curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/sign-artifacts.sh
           curl -o $PWD/.github/util/ManifestReversion.java https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/ManifestReversion.java
@@ -192,33 +228,41 @@ jobs:
 
           # Execute the sign-artifacts.sh script with specific arguments
           $PWD/.github/util/sign-artifacts.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}" "${{ needs.setup.outputs.branch }}"
-          
+
           ## Sign Files
           ## liquibase-azure-deps and liquibase extensions are already on its correct version. Check reusable workflow: build-azure-uber-jar.yml and build-extension-jars.yml
           mv liquibase-pro/liquibase-azure-deps/* re-version/out
-          
+
           # Modify the zip file
           unzip re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip -d re-version/out/liquibase-${{ needs.setup.outputs.version }}
           mkdir -p re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions
           rm -rf re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip
           IFS=',' read -ra EXT <<< "${{ needs.setup.outputs.extensions }}"
           for i in "${EXT[@]}"; do
-            cp ~/.m2/repository/org/liquibase/ext/$i/${{ needs.setup.outputs.version }}/$i-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$i.jar || echo "Failed to move $i artifact"
+            if [ "$i" != "liquibase-checks" ]; then
+              cp ~/.m2/repository/org/liquibase/ext/$i/${{ needs.setup.outputs.version }}/$i-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$i.jar || echo "Failed to move $i artifact"
+            else
+              cp ~/.m2/repository/org/liquibase/ext/$i/${{ needs.get-liquibase-checks-version.outputs.version }}/$i-${{ needs.get-liquibase-checks-version.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$i.jar || echo "Failed to move $i artifact"
+            fi
           done
           (cd re-version/out/liquibase-${{ needs.setup.outputs.version }} && zip -r ../liquibase-${{ needs.setup.outputs.version }}.zip . && cd .. && rm -rf liquibase-${{ needs.setup.outputs.version }})
-          
+
           # Modify the tar.gz file
           mkdir -p re-version/out/liquibase-${{ needs.setup.outputs.version }}
           tar -xzvf re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz -C re-version/out/liquibase-${{ needs.setup.outputs.version }}
           rm -rf re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz
           mkdir -p re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions
           for I in "${EXT[@]}"; do
-            cp ~/.m2/repository/org/liquibase/ext/$I/${{ needs.setup.outputs.version }}/$I-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$I.jar || echo "Failed to move $I artifact"
+            if [ "$I" != "liquibase-checks" ]; then
+              cp ~/.m2/repository/org/liquibase/ext/$I/${{ needs.setup.outputs.version }}/$I-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$I.jar || echo "Failed to move $I artifact"
+            else
+              cp ~/.m2/repository/org/liquibase/ext/$I/${{ needs.get-liquibase-checks-version.outputs.version }}/$I-${{ needs.get-liquibase-checks-version.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$I.jar || echo "Failed to move $I artifact"
+            fi
           done
           (cd re-version/out/liquibase-${{ needs.setup.outputs.version }} && tar -czvf ../liquibase-${{ needs.setup.outputs.version }}.tar.gz * && cd .. && rm -rf liquibase-${{ needs.setup.outputs.version }})
 
           $PWD/.github/util/sign-artifacts.sh re-version/out
-   
+
           # Move files to a specific directory
           mkdir re-version/final
           mv re-version/out/liquibase-core-${{ needs.setup.outputs.version }}.jar re-version/final
@@ -230,7 +274,7 @@ jobs:
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
 
       - name: Cache Completed Artifacts
-        uses: actions/cache@v4.0.2
+        uses: actions/cache@v4.2.0
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
@@ -251,14 +295,11 @@ jobs:
     runs-on: macos-13 #needs macos for apple notarization
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    outputs:
-      dry_run_zip_url: ${{ steps.extract-dry-run-url.outputs.dry_run_zip_url }}
-      dry_run_tar_gz_url: ${{ steps.extract-dry-run-url.outputs.dry_run_tar_gz_url }} 
     steps:
       - uses: actions/checkout@v4
 
       - name: Restore Completed Artifacts
-        uses: actions/cache@v4.0.2
+        uses: actions/cache@v4.2.0
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
@@ -291,23 +332,34 @@ jobs:
           echo "Saving windows key"
           echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
           version="${{ needs.setup.outputs.version }}"
-          
+
           ##### Rebuild installers
           tarFile=$(pwd)/re-version/final/liquibase-$version.tar.gz
           scriptDir=$(pwd)/.github/util/
-          
+
           mkdir -p liquibase-dist/target/liquibase-$version
           (cd liquibase-dist/target/liquibase-$version && tar xfz $tarFile)
           (cd liquibase-dist && $scriptDir/package-install4j.sh $version)
           mv liquibase-dist/target/liquibase-*-installer-* re-version/final
-          
+
           ##Sign Files
           $PWD/.github/util/sign-artifacts.sh re-version/final
-          
+
           (cd re-version/final && zip liquibase-additional-$version.zip *.asc *.md5 *.sha1)
           rm re-version/final/*.asc
           rm re-version/final/*.md5
           rm re-version/final/*.sha1
+
+        # Check if the tag already exists in OSS repository, if it does, exit with error. This is to prevent the artifacts from being attached to the already released tag.
+      - name: Check OSS release tag existence, if tag exists, exit with error
+        run: |
+          tag="v${{ needs.setup.outputs.version }}"
+          if git show-ref --tags --quiet --verify -- "refs/tags/$tag"
+          then
+              echo "Tag $tag already exists"
+              exit 1
+          fi
+
 
       - name: Attach Files to Draft Release
         if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
@@ -336,23 +388,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract dry-run release URL
-        if: ${{ inputs.standalone_zip == false && inputs.dry_run == true }}
-        id: extract-dry-run-url
-        shell: bash
-        run: |
-          assets_json=$(echo '${{ toJson(steps.attach-files-dry-run.outputs) }}' | jq -r '.assets | fromjson')
-          tar_gz_url=$(echo "$assets_json" | jq -r '.[] | select(.name | test("^liquibase-dry-run-.*\\.tar\\.gz$")) | .url')
-          zip_url=$(echo "$assets_json" | jq -r '.[] | select(.name | test("^liquibase-dry-run-.*\\.zip$")) | .url')
-          echo $tar_gz_url
-          echo $zip_url
-          echo "dry_run_tar_gz_url=$tar_gz_url" >> $GITHUB_OUTPUT
-          echo "dry_run_zip_url=$zip_url" >> $GITHUB_OUTPUT
-        
+
       - name: Attach standalone zip to Build
         if: ${{ inputs.standalone_zip == true && inputs.dry_run == false }}
         uses: actions/upload-artifact@v4
         with:
             name: liquibase-installers-${{ needs.setup.outputs.version }}
             path: re-version/final/*
-    

@@ -121,7 +121,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="defaultValueTest-2" author="nvoxland" dbms="!snowflake">
+    <changeSet id="defaultValueTest-2" author="nvoxland">
         <createTable tableName="defaultValueTest2">
             <column name="id" type="int" />
             <column name="intA" type="int" defaultValueNumeric="1"/>
@@ -1356,6 +1356,12 @@
         <preConditions onFail="WARN">
             <uniqueConstraintExists tableName="createTableNamedUqConst" constraintName="uq_uqtest1"/>
         </preConditions>
+    </changeSet>
+
+    <changeSet id="createProcedureWithOnlyBlockCommentAsBody" author="mallod" dbms="postgresql, h2, mssql, mysql, sqlite">
+        <createProcedure>
+            /*CREATE PROC... */
+        </createProcedure>
     </changeSet>
 
 </databaseChangeLog>

@@ -5,6 +5,7 @@ import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParserSupportedFileExtension;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.BomAwareInputStream;
@@ -53,7 +54,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
     @Override
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
-        return changeLogFile.toLowerCase().endsWith("xml");
+        return ParserSupportedFileExtension.XML_SUPPORTED_EXTENSIONS.stream().anyMatch(ext -> changeLogFile.toLowerCase().endsWith(ext));
     }
 
     protected SAXParserFactory getSaxParserFactory() {

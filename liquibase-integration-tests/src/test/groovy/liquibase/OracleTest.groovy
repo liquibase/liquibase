@@ -1,14 +1,22 @@
 package liquibase
 
+import liquibase.command.CommandScope
+import liquibase.command.core.UpdateCommandStep
+import liquibase.command.core.UpdateCountCommandStep
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.command.util.CommandUtil
-import liquibase.exception.CommandExecutionException
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
+import liquibase.logging.core.BufferedLogService
+import liquibase.resource.SearchPathResourceAccessor
+import org.apache.commons.lang3.StringUtils
 import spock.lang.Shared
 import spock.lang.Specification
+import spock.lang.Timeout
 
 import java.sql.ResultSet
+import java.util.logging.Level
 
 @LiquibaseIntegrationTest
 class OracleTest extends Specification {
@@ -49,10 +57,80 @@ class OracleTest extends Specification {
 
     def "Use loadData with invalid clob"() {
         when:
-        CommandUtil.runUpdate(oracle, "src/test/resources/changelogs/common/invalid-clob-data-load.xml")
+        BufferedLogService bufferLog = new BufferedLogService()
+
+        Scope.child(Scope.Attr.logService.name(), bufferLog, () -> {
+            CommandUtil.runUpdate(oracle, "src/test/resources/changelogs/common/invalid-clob-data-load.xml")
+        })
 
         then:
-        def exception = thrown(CommandExecutionException)
-        exception.cause.message.contains("Could not find clob file: this is not a valid file path so this will error if loaded into a clob/blob type column via load data! Make sure the value of the clob is a valid path to a file containing the clob's actual value to be loaded.")
+        String logAsString = bufferLog.getLogAsString(Level.FINE)
+        assert logAsString.contains("not found. Inserting the value as a string. See https://docs.liquibase.com for more information.")
+    }
+
+    @Timeout(value = 25)
+    def "performance test"() {
+        def changelogfile = "src/test/resources/changelogs/common/example-changelog.xml"
+        when:
+        CommandUtil.runUpdateCount(oracle, changelogfile, 1)
+
+        oracle.executeSql("""
+DECLARE
+   v_counter NUMBER := 1;
+BEGIN
+   FOR i IN 1..40000 LOOP
+      INSERT INTO DATABASECHANGELOG(ID, AUTHOR, FILENAME, DATEEXECUTED, ORDEREXECUTED, EXECTYPE, MD5SUM, DESCRIPTION, COMMENTS, TAG, LIQUIBASE, CONTEXTS, LABELS, DEPLOYMENT_ID) 
+      VALUES (TO_CHAR(v_counter), 'your.name', 'big.sql', TIMESTAMP '2024-04-24 16:12:31.507774', 100, 'EXECUTED', '9:22921d38f361c5f294e6a5092bb1b654', 'sql', 'example comment', NULL, 'DEV', 'example-context', 'example-label', '3975120367');
+      v_counter := v_counter + 1;
+   END LOOP;
+END;
+""")
+        CommandUtil.runTag(oracle, "tag")
+
+        CommandUtil.runUpdateCount(oracle, changelogfile, 1)
+
+        CommandUtil.runReleaseLocks(oracle)
+
+        CommandUtil.runHistory(oracle)
+
+        CommandUtil.runRollback(new SearchPathResourceAccessor(".,target/test-classes"), oracle, changelogfile, "tag")
+
+        then:
+        noExceptionThrown()
+    }
+
+    def "verify foreignKeyExists constraint is not created again when precondition fails because it already exists"() {
+        when:
+        def changeLogFile = "changelogs/common/fkep.test.changelog.xml"
+        def scopeSettings = [
+                (Scope.Attr.resourceAccessor.name()): new SearchPathResourceAccessor(".,target/test-classes")
+        ]
+        Scope.child(scopeSettings, {
+            CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, oracle.getConnectionUrl())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, oracle.getUsername())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, oracle.getPassword())
+            commandScope.addArgumentValue(UpdateCountCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+            commandScope.execute()
+        } as Scope.ScopedRunnerWithReturn<Void>)
+
+        then:
+        noExceptionThrown()
+    }
+
+    def showRowsAffectedForDMLOnly() {
+        when:
+        BufferedLogService bufferLog = new BufferedLogService()
+
+        Scope.child(Scope.Attr.logService.name(), bufferLog, () -> {
+            CommandUtil.runUpdate(oracle, "src/test/resources/changelogs/common/rows-affected.xml")
+        })
+
+        then:
+        String logAsString = bufferLog.getLogAsString(Level.FINE)
+        assert logAsString.contains("0 row(s) affected")
+        assert logAsString.contains("1 row(s) affected")
+        assert ! logAsString.contains("-1 row(s) affected")
+        assert StringUtils.countMatches(logAsString, "row(s) affected") == 10
     }
 }

@@ -106,6 +106,10 @@ public class LiquibaseConfiguration implements SingletonObject {
         return Collections.unmodifiableSortedSet(this.configurationValueProviders);
     }
 
+    public ConfigurationValueProvider getProvider(ConfigurationValueProvider provider) {
+        return this.configurationValueProviders.stream().filter(cvp -> cvp.getClass() == provider.getClass()).findFirst().orElse(null);
+    }
+
     /**
      * Convenience method for {@link #getCurrentConfiguredValue(ConfigurationValueConverter, ConfigurationValueObfuscator, ConfigurationValueProvider[], String...)}
      * with no additional value providers.

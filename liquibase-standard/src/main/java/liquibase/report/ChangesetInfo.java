@@ -114,4 +114,11 @@ public class ChangesetInfo {
             });
         }
     }
+
+    public void suppressSql() {
+        for (IndividualChangesetInfo individualChangesetInfo : this.changesetInfoList) {
+            individualChangesetInfo.getGeneratedSql().clear();
+            individualChangesetInfo.getGeneratedSql().add("SQL Suppressed");
+        }
+    }
 }

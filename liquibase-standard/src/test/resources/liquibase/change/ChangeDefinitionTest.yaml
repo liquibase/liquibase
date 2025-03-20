@@ -408,7 +408,7 @@ createSequence: |
     Supported: all
   dataType string 
     Description: Data type of the sequence
-    Supported: asany,cockroachdb,db2,db2z,derby,edb,h2,informix,postgresql
+    Supported: asany,cockroachdb,db2,db2z,derby,edb,h2,hsqldb,informix,mssql,postgresql
   incrementBy bigInteger 
     Description: Interval between sequence numbers
     Supported: asany,cockroachdb,db2,db2z,derby,edb,h2,hsqldb,informix,mariadb,mssql,oracle,postgresql
@@ -1041,6 +1041,10 @@ sql: |
   sql string 
     Supported: all
     Required For: all
+  sqlEndLine integer 
+    Supported: all
+  sqlStartLine integer 
+    Supported: all
   stripComments boolean 
     Description: Set to true to remove any comments in the SQL before executing, otherwise false. Defaults to false if not set
     Supported: all

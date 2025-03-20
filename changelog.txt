@@ -1,6 +1,351 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.31.0 (2025.01.16)
+
+### Liquibase 4.31.0 is a major release
+
+> [!NOTE]
+> See the [Liquibase 4.31.0 Release Notes](https://docs.liquibase.com/start/release-notes/liquibase-release-notes/liquibase-4.31.0.html) for the complete set of release information.
+
+
+### [PRO] Changelog
+
+## New Features
+* DAT-19388 [DevOps] Fix terraform executable in GH in https://github.com/liquibase/liquibase-pro/pull/2109 by @jandroav
+* DAT-18519: Reverting cloneTable generic changeType in https://github.com/liquibase/liquibase-pro/pull/2068 by @SvampX
+* DAT-19302: combined dependabot PRs in https://github.com/liquibase/liquibase-pro/pull/2093 by @StevenMassaro
+* feat: light build script to be triggered by liquibase oss builds in https://github.com/liquibase/liquibase-pro/pull/2082 by @filipelautert
+* DAT-19268 Remove stubs and test associated test files in https://github.com/liquibase/liquibase-pro/pull/2083 by @wwillard7800
+* DAT-19242: Update error messaging for stub checks commands in https://github.com/liquibase/liquibase-pro/pull/2081 by @abrackx
+* DAT-19049 Complete work to move all checks-related code to a new extension in https://github.com/liquibase/liquibase-pro/pull/2066 by @wwillard7800
+* DAT-19000: added 'cloneTable' changetype with no supported databases in https://github.com/liquibase/liquibase-pro/pull/2064 by @SvampX
+* DAT-17940: optionally suppress SQL in reports in https://github.com/liquibase/liquibase-pro/pull/2036 by @StevenMassaro
+* add PRO_LICENSE_KEY to liquibase-aws-extension in https://github.com/liquibase/liquibase-pro/pull/2058 by @sayaliM0412
+* DAT-18892: create checks show files without prompting in https://github.com/liquibase/liquibase-pro/pull/2050 by @StevenMassaro
+* DAT-18129: update checks run output for checks that are disabled but requested to be run in https://github.com/liquibase/liquibase-pro/pull/2049 by @StevenMassaro
+* DAT-18777 Add a snippet of the matching SQL to the console output in https://github.com/liquibase/liquibase-pro/pull/2020 by @wwillard7800
+* DAT-18868: Include successful checks in checks run report "Details by Check" section in https://github.com/liquibase/liquibase-pro/pull/2048 by @abrackx
+* DAT-17901 Pass the database instance in the scope for changelog parsing in https://github.com/liquibase/liquibase-pro/pull/2042 by @wwillard7800
+* DAT-18780: Add messaging for scripts that cannot execute when using MaxAffected checks in https://github.com/liquibase/liquibase-pro/pull/2039 by @abrackx
+* DAT-18793: replace slf4j-simple with slf4j-nop in https://github.com/liquibase/liquibase-pro/pull/2038 by @StevenMassaro
+* [PRO license rotation] Fixed typo for yugabyte repo in https://github.com/liquibase/liquibase-pro/pull/2047 by @jandroav
+* DAT-18836 - CPC: database scope checks should not ask "requires snapshot" in https://github.com/liquibase/liquibase-pro/pull/2041 by @filipelautert
+* DAT-15504: Migrate init project to core in https://github.com/liquibase/liquibase-pro/pull/2004 by @abrackx
+* DAT-18328 Update to match core for stripComments in modifyChangeSets in https://github.com/liquibase/liquibase-pro/pull/1981 by @wwillard7800
+* DAT-18841 Do not prompt for script type with CPC in https://github.com/liquibase/liquibase-pro/pull/2027 by @wwillard7800
+* DAT-10610 Added a flag to help trim down exception logging in https://github.com/liquibase/liquibase-pro/pull/1997 by @wwillard7800
+
+
+## Bug Fixes
+* DAT-19045: fix string wrapping when it contains newlines in https://github.com/liquibase/liquibase-pro/pull/2104 by @StevenMassaro
+* DAT-19241 Help fixes for the stubs in https://github.com/liquibase/liquibase-pro/pull/2077 by @wwillard7800
+* DAT-18842 Fix issue where we were passing the wrong argument to the executor in https://github.com/liquibase/liquibase-pro/pull/2006 by @wwillard7800
+
+
+## Security, Driver and Other Updates
+* Bump actions/setup-python from 5.1.0 to 5.3.0 in https://github.com/liquibase/liquibase-pro/pull/2008 by @dependabot bot
+* Bump com.github.jsqlparser:jsqlparser from 4.9 to 5.0 in https://github.com/liquibase/liquibase-pro/pull/1866 by @dependabot bot
+* Revert "Bump com.github.jsqlparser:jsqlparser from 4.9 to 5.0" in https://github.com/liquibase/liquibase-pro/pull/2044 by @StevenMassaro
+
+
+### [OSS] Changelog
+
+## New Features
+
+- (#6371) Implement logic to selectively include/exclude columns in generate-changelog "data" export (Issue #3371, #6310) @catull
+- (#6498) Change automated release file version to `main` by @tati-qalified
+- (#6415) Add flag to top-level `Scope` to suppress logging of exceptions in certain cases by @wwillard7800
+- (#6472) Fail validation for blank changeset IDs (DAT-18773) by @abrackx
+- (#6381) Add `stripComments` attribute to `modifyChangeSets` (DAT-18328) by @wwillard7800
+- (#6451) Migrate `init project` command to core (DAT-15504) by @abrackx
+- (#6515) Recognize `isIO` environment variable for analytics (DAT-18906) by @StevenMassaro
+- (#6509) Replace `slf4j-simple` with `slf4j-nop` (DAT-18793) by @StevenMassaro
+- (#6373) Report which `codePoint` is illegal for XML data export by @catull
+- (#6512) Liquibase API: Add missing `changeLogParameters` argument by @MalloD12
+- (#6436) Check if the next character is out of string length by @fntz
+- (#6494) Make changelog and changeset logical file path settings override `includeAll` setting (Issue #6493) by @wwillard7800
+- (#6511) SQLFile: Add DBMS validation check by @MalloD12
+- (#6528) Revert refactoring that broke structured logging by @StevenMassaro
+- (#6516) Add new properties to Spring configuration (analytics enabled and pro license) by @filipelautert
+- (#6553) Add `liquibase-checks` property by @wwillard7800
+- (#6529) Do not propagate logical file path to included changesets from raw SQL changelogs (DAT-19040) by @wwillard7800
+- (#6499) Optionally suppress SQL in reports (DAT-17940) by @StevenMassaro
+- (#6557) Avoid retrieving ran changesets without a database connection (DAT-19095) by @wwillard7800
+- (#6378) Ensure `GenerateChangelogCommandStep` only reports writing a changelog file if it actually did by @catull
+- (#6555) Generate zip file via Maven, add zip and tar integration tests (DAT-18855) by @abrackx
+- (#6254) Output calculated checksum to `stdout` by @Ishad-M-I-M
+- (#6556) Enhance history command to filter changesets by tags (DAT-19013) by @filipelautert
+- (#6565) Update changeset execution time to follow better practices by @jasonlyle88
+- (#6536) Implement `copy` method in `FilesystemProjectCopier` (DAT-18890) by @abrackx
+- (#6328) Add `stub` attribute to `CommandStep` interface to recognize stub commands by @wwillard7800
+- (#6558) Handle duplicates in sub-commands with stub method (DAT-19049) by @wwillard7800
+- (#6575) Add flag to turn off compatibility check for `liquibase-checks` in `dropAll` by @wwillard7800
+- (#5653) Deployment ID enhancements and execution property by @jasonlyle88
+- (#6570) Recognize flag to prevent exceptions for unsupported change types (DAT-19074) by @wwillard7800
+- (#6591) Remove stubs; now trap checks command in `Main` (DAT-19268) by @wwillard7800
+- (#6572) Ignore individual AWS extension jars if combined jar is present (DAT-19091) by @StevenMassaro
+- (#6593) Expire analytics cache after 60 minutes (DAT-19278) by @StevenMassaro
+- (#6597) Handle absence or older version of `checks` JAR (DAT-19289) by @wwillard7800
+- (#6371) Selectively include/exclude columns in `generate-changelog` data export (Issue #3371, #6310) by @catull
+- (#6630) Handle @ symbol when executing PostgreSQL SET SEARCH_PATH @wwillard7800
+
+
+## Bug Fixes
+- (#6628) liquibase-maven-plugin: Allow null arguments to ConfiguredValueModifierFactory.override(String) @facboy
+- (#6540) Fix null value handling when loading resources @sapo-di
+- (#6621) DAT-19082: Fix issue with losing changed datatype attributes when one datatype is an int and the other is not @abrackx
+- (#6540) Fix null value handling when loading resources @sapo-di
+- (#6439) Fix issue with fail on error changeset accounting by @wwillard7800
+- (#6535) Fix only set Spring analytics scope parameter if it's defined by @filipelautert
+- (#6542) Fix always set column properties before calculating checksum by @filipelautert
+- (#6523) Fix Sequence generator - cache size, data type - for various DBs by @Alienmario
+- (#6469) Fix README workflow status by @abrackx
+- (#6571) Fix breaking changes introduced in #6565 by @StevenMassaro
+- (#6524) Fix NetUtilTest when dealing with IPv4/IPv6 addresses by @MalloD12
+- (#6495) Fix Maven issue that produces an exception when it finds a .pom file. by @wwillard7800
+- (#6453) Fix FormattedSqlChangeLogSerializer so it includes logicalFilePath in change-set info comments by @benjamin-bader
+- (#6405) Fix ignore int sizes when diffing MSSQL by @filipelautert
+- (#6492) Fix (DAT-18813): classloader configuration in LiquibaseCommandLine by @filipelautert
+- (#6343) Fix #6342 - Liquibase Output changeset executes twice by @jasonlyle88
+- (#6519) Fix the XSD adding the nullPlaceholder attribute for loadData column by @davidecavestro
+- (#6578) Fix fossa ai execution for contributed PRs by @filipelautert
+- (#6590) Fix Checksum for SQL changes containing dbms attributes can get different values if md5sum column is null by @filipelautert
+- (#6540) Fix null value handling when loading resources by @sapo-di
+- (#6621) Fix issue with losing changed datatype attributes when one datatype is an int and the other is not (DAT-19082) by @abrackx
+
+
+## Security, Driver and Other Updates
+
+- (#6626) DAT-18331 PRO: integrate checks extension into tarball/zip, not mac os dmg installer @jandroav
+- (#6582) Bump org.junit.platform:junit-platform-suite from 1.11.3 to 1.11.4 @dependabot
+- (#6433) Bump org.firebirdsql.jdbc:jaybird from 5.0.5.java8 to 5.0.6.java8 by @dependabot
+- (#6477) Bump org.apache.maven.plugins:maven-javadoc-plugin from 3.10.1 to 3.11.1 by @dependabot
+- (#6468) Bump wangyucode/sftp-upload-action from 2.0.2 to 2.0.3 by @dependabot
+- (#6467) Bump org.apache.maven.plugins:maven-plugin-plugin from 3.15.0 to 3.15.1 by @dependabot
+- (#6460) Bump actions/setup-python from 5.2.0 to 5.3.0 by @dependabot
+- (#6455) Bump org.nanohttpd:nanohttpd from 2.2.0 to 2.3.1 by @dependabot
+- (#6448) Bump org.testcontainers:testcontainers-bom from 1.20.2 to 1.20.3 by @dependabot
+- (#6449) Bump actions/cache from 4.1.1 to 4.1.2 by @dependabot
+- (#6479) Bump org.apache.maven.plugins:maven-failsafe-plugin from 3.5.1 to 3.5.2 by @dependabot
+- (#6478) Bump org.apache.maven.plugins:maven-surefire-plugin from 3.5.1 to 3.5.2 by @dependabot
+- (#6500) Bump groovy.version from 4.0.23 to 4.0.24 by @dependabot
+- (#6454) Bump org.xerial:sqlite-jdbc from 3.46.1.3 to 3.47.0.0 by @dependabot
+- (#6480) Bump org.hsqldb:hsqldb from 2.7.3 to 2.7.4 by @dependabot
+- (#6475) Bump net.snowflake:snowflake-jdbc from 3.16.1 to 3.20.0 by @dependabot
+- (#6496) Bump org.sonarsource.scanner.maven:sonar-maven-plugin from 4.0.0.4121 to 5.0.0.4389 by @dependabot
+- (#6522) Bump org.projectlombok:lombok from 1.18.34 to 1.18.36 by @dependabot
+- (#6531) Bump org.testcontainers:testcontainers-bom from 1.20.3 to 1.20.4 by @dependabot
+- (#6527) Bump commons-io:commons-io from 2.17.0 to 2.18.0 by @dependabot
+- (#6603) Bump org.liquibase.ext:liquibase-sdk-maven-plugin from 0.10.23 to 0.10.25 by @dependabot
+- (#6594) Bump org.assertj:assertj-core from 3.26.3 to 3.27.0 by @dependabot
+- (#6584) Bump org.junit.jupiter:junit-jupiter from 5.11.3 to 5.11.4 by @dependabot
+- (#6581) Bump junit-jupiter.version from 5.11.3 to 5.11.4 by @dependabot
+- (#6577) Bump org.apache.commons:commons-text from 1.12.0 to 1.13.0 by @dependabot
+- (#6568) Bump org.apache.maven.plugins:maven-javadoc-plugin from 3.11.1 to 3.11.2 by @dependabot
+- (#6561) Bump org.apache.commons:commons-compress from 1.26.2 to 1.27.1 by @dependabot
+- (#6614) Bump org.xerial:sqlite-jdbc from 3.47.0.0 to 3.47.2.0 by @dependabot
+- (#6582) Bump org.junit.platform:junit-platform-suite from 1.11.3 to 1.11.4 by @dependabot
+
+## New Contributors
+* @fntz made their first contribution in https://github.com/liquibase/liquibase/pull/6436
+* @benjamin-bader made their first contribution in https://github.com/liquibase/liquibase/pull/6453
+* @Ishad-M-I-M made their first contribution in https://github.com/liquibase/liquibase/pull/6254
+* @Alienmario made their first contribution in https://github.com/liquibase/liquibase/pull/6523
+* @sapo-di made their first contribution in https://github.com/liquibase/liquibase/pull/6540
+
+**Full Changelog**: https://github.com/liquibase/liquibase/compare/v4.30.0...v4.31.0
+
+
+Changes in version 4.30.0 (2024.11.05)
+
+### Liquibase 4.30.0 is a major release
+
+> [!IMPORTANT]
+> Liquibase 4.30.0 contains new capabilities and notable enhancements for Liquibase OSS and Pro users including Anonymous Analytics and deprecation of the MacOS dmg installer.
+> [!NOTE]
+> See the [Liquibase 4.30.0 Release Notes](https://docs.liquibase.com/start/release-notes/liquibase-release-notes/liquibase-4.30.0.html) for the complete set of release information.
+
+## Notable Changes
+### [PRO]
+
+#### Anonymous Analytics:
+* Liquibase can now gather anonymous usage analytics when commands are run. No user-specific data will be gathered.
+
+For Liquibase OSS users, this functionality is enabled by default, but can be opted-out of before any data is sent. For Liquibase Pro users, this is disabled by default with the ability to opt-in.
+
+Gathering anonymous usage analytics allows us to better understand how Liquibase is actually being used by a very wide, diverse set of millions of users.
+
+* Learn more https://docs.liquibase.com/analytics
+
+
+#### Flow Enhancements: Detect pending changesets, and variable-variables
+* There are two exciting Flow enhancements: the ability to condition action on presence of pending changesets, and the ability to use a global variable inside other global or stage variables, enabling variable-variables within flows.
+* Learn more https://docs.liquibase.com/flow
+
+
+### [OSS]
+
+#### Deprecated: MacOS .dmg installer
+* The MacOS dmg installer no longer ships with release artifacts. Please use the tar.gz or .zip release artifacts, or install via homebrew by running brew install liquibase
+
+
+
+### [PRO] Changelog
+
+## New Features
+
+* DAT-18202 Implement wildcard check name argument for enable/disable in https://github.com/liquibase/liquibase-pro/pull/2000 by @wwillard7800
+* DAT-17058: Add analytics in https://github.com/liquibase/liquibase-pro/pull/1995 by @liquibot
+* DAT-17568 Added exit command action in https://github.com/liquibase/liquibase-pro/pull/1689 by @wwillard7800
+* DAT-18689: Add extra information to failed changesets summary in https://github.com/liquibase/liquibase-pro/pull/1996 by @filipelautert
+* DAT-18114 Added more logging for formatted SQL parsing in https://github.com/liquibase/liquibase-pro/pull/1994 by @wwillard7800
+* DAT-18455 Add SQL file path to policy checks output in https://github.com/liquibase/liquibase-pro/pull/1944 by @wwillard7800
+
+
+## Changes
+
+* DAT-17581 Exit with a non-zero if the changelog did not validate in https://github.com/liquibase/liquibase-pro/pull/1870 by @wwillard7800
+* DAT-18540 Create new ReportWriter.open(String path) method that default to no-op in https://github.com/liquibase/liquibase-pro/pull/1962 by @wwillard7800
+* DAT-18092: Use xdg-open to open reports in browser on linux operating systems in https://github.com/liquibase/liquibase-pro/pull/1948 by @abrackx
+* DAT-18531 Clear out DBCL fast check cache before each Flow action in https://github.com/liquibase/liquibase-pro/pull/1933 by @wwillard7800
+* DAT-18362 Handle comments when parsing include/includeAll statements in https://github.com/liquibase/liquibase-pro/pull/1959 by @wwillard7800
+* DAT-18463 Implement a class to be used to capture the start/end positions of a regex check for line number output in https://github.com/liquibase/liquibase-pro/pull/1979 by @wwillard7800
+* DAT-18869: Obfuscate IO arguments in https://github.com/liquibase/liquibase-pro/pull/1999 by @abrackx
+
+
+
+## [PRO] Bug Fixes
+
+* DAT-18819: Fix dropall behavior with snowflake in https://github.com/liquibase/liquibase-pro/pull/1987 by @abrackx
+* DAT-18517 Handle expansion of variables when default values are involved in https://github.com/liquibase/liquibase-pro/pull/1969 by @wwillard7800
+* DAT-18327: improve startup performance in https://github.com/liquibase/liquibase-pro/pull/1972 by @StevenMassaro
+* Fix tests to use new CommandFactory.reset() method in https://github.com/liquibase/liquibase-pro/pull/1952 by @wwillard7800
+
+
+
+## [PRO] Security, Driver and Other Updates
+
+(#1973) Bump com.fasterxml.jackson.module:jackson-module-jaxb-annotations from 2.17.2 to 2.18.0 by dependabot
+(#1974) Bump com.fasterxml.jackson.core:jackson-annotations from 2.17.2 to 2.18.0 by dependabot
+(#1976) Bump com.fasterxml.jackson.core:jackson-databind from 2.17.2 to 2.18.0 by dependabot
+(#1975) Bump com.fasterxml.jackson.core:jackson-core from 2.17.2 to 2.18.0 by dependabot
+(#1988) Bump org.apache.maven.plugins:maven-failsafe-plugin from 2.22.2 to 3.5.1 by dependabot
+(#1991) Bump org.apache.maven.plugins:maven-surefire-plugin from 2.22.2 to 3.5.1 by dependabot
+(#2003) Bump org.junit.vintage:junit-vintage-engine from 5.10.3 to 5.11.3 by dependabot
+(#2002) Bump org.junit:junit-bom from 5.10.3 to 5.11.3 by dependabot
+(#1963) Bump com.networknt:json-schema-validator from 1.5.0 to 1.5.2 by dependabot
+(#1947) Bump org.yaml:snakeyaml from 2.2 to 2.3 by dependabot
+(#1984) Bump org.codehaus.gmavenplus:gmavenplus-plugin from 1.13.1 to 4.0.1 by dependabot
+(#2005) Bump org.nanohttpd:nanohttpd from 2.2.0 to 2.3.1 by dependabot
+
+
+### [OSS] Changelog
+
+
+## New Features
+
+- (#6414) When using `failOnError=false`, changesets that failed will now show up in the default output. Thanks, @filipelautert
+- (#6413)  Ensure all failed changesets show in the exceptionChangesets. Previously, output summaries did not include changesets that failed when running `failOnError=false` (DAT-18689). Thanks, @filipelautert
+- (#6169) When using STRICT mode, `update-to-tag` will now throw an error when there is no tag specified or the tag specified does not exist. Thanks, @MalloD12
+- (#6410) Modified `clob` handling in `loadData` by checking the string passed to a CLOB type column. Thanks, @tati-qalified
+- (#6067) Added additional modes for `duplicateFileMode`. Thanks, @k4pran
+- (#6432) Added a `Customizer` that allows discovery of changesets that are not known to an application. This can be used to prevent an application's startup when discovering new, unexpected changesets before an update is made. Thanks, @raphw
+- (#6288) Avoid ignoring caught exceptions, and instead return the exception and append the reason for better debugging. Thanks, @asolntsev
+- (#6265) Enhanced `include` and `includeAll` to support `logicalFilePath` (DAT-18350). Thanks, @wwillard7800
+- (#6300) Added method to reset command definitions cache in CommandFactory for testing. Thanks, @wwillard7800
+- (#6280) Undeprecated StringUtil class (DAT-18538). Thanks, @MalloD12
+- (#5223) Improved empty check style by using `isEmpty` String method. Thanks, @MalloD12
+- (#6294) Suppress UnsupportedClassVersionErrors for Bigquery at info level (DAT-18534). Thanks, @filipelautert
+- (#6263) Fix generated column value for Databricks (DAT-18148). Thanks, @filipelautert
+- (#6129) Support Hashicorp Vault settings in the Maven Plugin POM. Thanks, @wwillard7800
+- (#6138) Added support for `include` columns in indexes. Thanks, @stephenatwell
+- (#6402) Added `pg_stat_statements` and `pg_stat_statements_info` views to the list of system tables and views to prevent them from being dropped. Thank you, @rozenshteyn
+- (#6211) Updated PostgreSQL database major and minor versions. Thanks, @MalloD12
+
+
+## Bug Fixes
+
+
+- (#6266) Fix CustomTaskRollback rollback bug where it was being called twice. Thanks, @momosetkn
+- (#6205) Removed usage of the deprecated isEmpty() method. Thanks, @anton-erofeev
+- (#6366) Improve startup performance (DAT-18327). Thanks, @StevenMassaro
+- (#6407)  Added filterable flag to ChangeLogParameter class (DAT-18811). Thanks, @abrackx
+- (#6416) When determining the schema name make sure a value was found (DAT-18673). Thanks, @abrackx
+- (#6418) Fix issue where context filters with `@` symbols were not being executed properly (DAT-18843). Thanks, @abrackx
+- (#6406) Test assertion code modification. (DAT-17568). Thanks, @wwillard7800
+- (#6429) Check that getPriority method is correct for snapshot generators (DAT-18730). Thanks, @StevenMassaro
+- (#6417) Revert "Remove unneeded inclusion of commons-io in liquibase-core pom.xml". Thanks, @catull
+- (#6385) Do not check for nested database objects when using foreignKeyConstraintExists precondition (DAT-18624). Thanks, @abrackx
+- (#5894) Do not strip "classpath:" when normalizing the path. Thanks, @andrus
+- (#6359) Fix issue where change set with blank ID was allowed to run (DAT-18687). Thanks, @wwillard7800
+- (#6109) Fix classpath loading and incorrect configuration for addForeignKeyConstraint (DAT-18191 and DAT-18192). Thanks, @filipelautert
+- (#6287) Fix NPE when default value is null. Thanks, @asolntsev
+- (#6330) Unhide tag parameter for UpdateTestingRollback command (DAT-18563). Thanks, @MalloD12
+- (#6375) Initialize member variable in method to fix tests. Thanks, @wwillard7800
+- (#6358) Make global argument definitions static so that they are visible across all threads. Thanks, @StevenMassaro
+- (#6309) Fix Locale test. Thanks, @filipelautert
+- (#6463) Fix flakey test (DAT-18921). Thanks, @abrackx
+- (#6165) fix splitting SQL statements containing @begin or #begin. Thanks, @chrstnbrn
+- (#4668) Expanded variables in the `--sql` argument to `executeSql` so that variables can be substituted in `execute-sql --sql-file` command. Thanks, @wwillard7800
+- (#6222) Fix: Handle command arguments static behavior. Thanks, @filipelautert
+- (#6286) Append the cause of the problem to thrown exception for better debugging. Thanks, @asolntsev
+- (#6187) Update JdbcDatabaseSnapshot.java. Thanks, @bmoers
+- (#6409) Added more logging (DAT-18114). Thanks, @wwillard7800
+- (#6241) Verify existence of the lock table to remove 'table does not exist' error messages. Thanks, @wwillard7800
+- (#6339) Added filter to the command scope so include/excludeObjects parameters get properly applied. Thanks, @Evan-Christensen!
+- (#6332) Updated project variables used in Maven configuration to reduce build warnings. Thanks, @catull!
+- (#6128) 'MANUAL' MySQL reserved word added. Thanks, @MalloD12
+- (#6305) Allow generateChangelog to run against Oracle databases with blank schema names (DAT-18199). Thanks, @wwillard7800
+- (#6350) allow replaceIfExists in Postgres procedures (DAT-18495). Thanks, @StevenMassaro
+- (#6341) Fix sqlite hsqldb and environment variable tests (DAT-18646). Thanks, @abrackx
+- (#6391) Handle Snowflake add NOT NULL constraint (DAT-18798). Thanks, @wwillard7800
+- (#6308) Handle offline connection for Snowflake during diff (DAT-18652). Thanks, @wwillard7800
+- (#6345) When using default schema for MultiTenantSpringLiquibase the log level is now info instead of warning. Thanks, @deblockt
+- (#6261) Fix: do not throw an unchecked exception for SpringBoot. Thanks,  @filipelautert
+
+
+## Security, Driver and Other Updates
+
+
+- (#6457) Update jreBundle to latest in install4j @abrackx
+- (#6377) Bump org.testcontainers:testcontainers-bom from 1.20.1 to 1.20.2 @dependabot
+- (#6443) Bump org.junit.platform:junit-platform-suite from 1.11.0 to 1.11.3 @dependabot
+- (#6384) Bump org.apache.maven.plugins:maven-javadoc-plugin from 3.10.0 to 3.10.1 @dependabot
+- (#6387) Bump org.codehaus.gmavenplus:gmavenplus-plugin from 3.0.2 to 4.0.1 @dependabot
+- (#6400) Bump org.apache.maven.plugins:maven-surefire-plugin from 3.5.0 to 3.5.1 @dependabot
+- (#6445) Bump org.junit.jupiter:junit-jupiter from 5.11.0 to 5.11.3 @dependabot
+- (#6408) Bump actions/cache from 4.0.2 to 4.1.1 @dependabot
+- (#6444) Bump junit-jupiter.version from 5.11.0 to 5.11.3 @dependabot
+- (#6401) Bump org.apache.maven.plugins:maven-failsafe-plugin from 3.5.0 to 3.5.1 @dependabot
+- (#6399) Bump codex-/return-dispatch from 1 to 2 @dependabot
+- (#6368) Bump org.xerial:sqlite-jdbc from 3.46.1.0 to 3.46.1.3 @dependabot
+- (#6319) Bump groovy.version from 4.0.22 to 4.0.23 @dependabot
+- (#6337) Bump commons-io:commons-io from 2.16.1 to 2.17.0 @dependabot
+- (#6290) Bump org.yaml:snakeyaml from 2.2 to 2.3 @dependabot
+- (#6274) Bump org.jboss.weld.se:weld-se-core from 5.1.2.Final to 5.1.3.Final @dependabot
+- (#6276) Bump org.apache.maven.plugins:maven-surefire-plugin from 3.3.1 to 3.5.0 @dependabot
+- (#6275) Bump org.apache.maven.plugins:maven-failsafe-plugin from 3.3.1 to 3.5.0 @dependabot
+- (#6273) Bump org.apache.maven.plugins:maven-plugin-plugin from 3.13.1 to 3.15.0 @dependabot
+- (#6284) Bump actions/setup-python from 5.1.1 to 5.2.0 @dependabot
+- (#6282) Bump ant.version from 1.10.14 to 1.10.15 @dependabot
+- (#6283) Bump org.apache.commons:commons-lang3 from 3.16.0 to 3.17.0 @dependabot
+- (#6272) Bump org.apache.maven.plugins:maven-javadoc-plugin from 3.8.0 to 3.10.0 @dependabot
+- (#6247) Bump com.microsoft.sqlserver:mssql-jdbc from 12.6.1.jre8 to 12.8.1.jre8 @dependabot
+- (#6246) Bump org.postgresql:postgresql from 42.7.3 to 42.7.4 @dependabot
+- (#6221) Bump org.xerial:sqlite-jdbc from 3.46.0.0 to 3.46.1.0 @dependabot
+- (#6220) Bump org.apache.maven.plugins:maven-install-plugin from 3.1.2 to 3.1.3 @dependabot
+- (#6219) Bump org.apache.maven.plugins:maven-deploy-plugin from 3.1.2 to 3.1.3 @dependabot
+- (#6213) Bump targetMavenVersion from 3.9.8 to 3.9.9 @dependabot
+- (#6202) Bump org.junit.jupiter:junit-jupiter from 5.10.3 to 5.11.0 @dependabot
+- (#6201) Bump org.junit.platform:junit-platform-suite from 1.10.3 to 1.11.0 @dependabot
+- (#6200) Bump spring.version from 5.3.37 to 5.3.39 @dependabot
+- (#6245) Bump actions/delete-package-versions from 3 to 5 @dependabot
+- (#6199) Bump junit-jupiter.version from 5.10.3 to 5.11.0 @dependabot
+
+**Full Changelog**: https://github.com/liquibase/liquibase/compare/v4.29.2...v4.30.0
+
+
 Changes in version 4.29.2 (2024.09.03)
 
 ### Liquibase 4.29.2 is a patch release

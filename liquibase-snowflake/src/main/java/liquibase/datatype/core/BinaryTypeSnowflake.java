@@ -6,11 +6,12 @@ import liquibase.database.core.SnowflakeDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.servicelocator.PrioritizedService;
 import liquibase.util.StringUtil;
 
 import java.util.Locale;
 
-@DataTypeInfo(name = "binary", aliases = {"longblob", "longvarbinary", "java.sql.Types.BLOB", "java.sql.Types.LONGBLOB", "java.sql.Types.LONGVARBINARY", "java.sql.Types.VARBINARY", "java.sql.Types.BINARY", "varbinary", "binary", "image", "tinyblob", "mediumblob"}, minParameters = 0, maxParameters = 12, priority = LiquibaseDataType.PRIORITY_DATABASE)
+@DataTypeInfo(name = "binary", aliases = {"longblob", "longvarbinary", "java.sql.Types.BLOB", "java.sql.Types.LONGBLOB", "java.sql.Types.LONGVARBINARY", "java.sql.Types.VARBINARY", "java.sql.Types.BINARY", "varbinary", "binary", "image", "tinyblob", "mediumblob"}, minParameters = 0, maxParameters = 12, priority = PrioritizedService.PRIORITY_DATABASE)
 public class BinaryTypeSnowflake extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {

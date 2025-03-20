@@ -1,17 +1,13 @@
 name: FOSSA License Compliance and Security Check
 
 on:
-  pull_request:
-    types:
-      - opened
-      - reopened
-      - synchronize
+  repository_dispatch:
+    types: [ oss-released-version ]
 
 jobs:
   fossa:
     uses: liquibase/build-logic/.github/workflows/fossa_ai.yml@main
     secrets: inherit
     with:
-      check_snippets: true
-      check_ai_generated_code: true
-      generate_sbom: true
+      latest_version: ${{ github.event.client_payload.latest_version }}
+      repo_name: "liquibase/liquibase"

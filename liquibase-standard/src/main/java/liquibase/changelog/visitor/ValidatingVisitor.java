@@ -4,9 +4,7 @@ import liquibase.ChecksumVersion;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.Change;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.RanChangeSet;
+import liquibase.changelog.*;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
@@ -48,7 +46,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
     public ValidatingVisitor(List<RanChangeSet> ranChangeSets) {
         ranIndex = new HashMap<>();
-        for(RanChangeSet changeSet: ranChangeSets) {
+        for (RanChangeSet changeSet : ranChangeSets) {
             ranIndex.put(changeSet.toString(), changeSet);
         }
     }
@@ -67,11 +65,11 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                 preconditions.check(database, changeLog, null, null);
             }
         } catch (PreconditionFailedException e) {
-            Scope.getCurrentScope().getLog(getClass()).warning("Precondition Failed: "+e.getMessage(), e);
+            Scope.getCurrentScope().getLog(getClass()).warning("Precondition Failed: " + e.getMessage(), e);
             failedPreconditionsMessage = e.getMessage();
             failedPreconditions.addAll(e.getFailedPreconditions());
         } catch (PreconditionErrorException e) {
-            Scope.getCurrentScope().getLog(getClass()).severe("Precondition Error: "+e.getMessage(), e);
+            Scope.getCurrentScope().getLog(getClass()).severe("Precondition Error: " + e.getMessage(), e);
             errorPreconditionsMessage = e.getMessage();
             errorPreconditions.addAll(e.getErrorPreconditions());
         } finally {
@@ -90,11 +88,12 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
-    private RanChangeSet findChangeSet(ChangeSet changeSet) {
+    private RanChangeSet findChangeSet(ChangeSet changeSet) throws LiquibaseException {
         String key = changeSet.toNormalizedString();
-        return ranIndex.get(key);
+        RanChangeSet ranChangeSet =  ranIndex.get(key);
+        return ValidatingVisitorUtil.fixChangesetFilenameForLogicalfilepathBugIn4300(changeSet, ranChangeSet, key, ranIndex, database);
     }
-        
+
     @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
         if (changeSet.isIgnore()) {
@@ -104,14 +103,14 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         RanChangeSet ranChangeSet = findChangeSet(changeSet);
         boolean ran = ranChangeSet != null;
         Set<String> dbmsSet = changeSet.getDbmsSet();
-        if(dbmsSet != null) {
+        if (dbmsSet != null) {
             DatabaseList.validateDefinitions(changeSet.getDbmsSet(), validationErrors);
         }
-        changeSet.setStoredCheckSum(ran?ranChangeSet.getLastCheckSum():null);
-        changeSet.setStoredFilePath(ran?ranChangeSet.getStoredChangeLog():null);
+        changeSet.setStoredCheckSum(ran ? ranChangeSet.getLastCheckSum() : null);
+        changeSet.setStoredFilePath(ran ? ranChangeSet.getStoredChangeLog() : null);
         boolean shouldValidate = !ran || changeSet.shouldRunOnChange() || changeSet.shouldAlwaysRun();
 
-        if (!areChangeSetAttributesValid(changeSet)) {
+        if (shouldValidate && !areChangeSetAttributesValid(changeSet)) {
             changeSet.setValidationFailed(true);
             shouldValidate = false;
         }
@@ -122,13 +121,13 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
         additionalValidations(changeSet, database, shouldValidate, ran);
 
-        if(ranChangeSet != null) {
+        if (ranChangeSet != null) {
             if (!changeSet.isCheckSumValid(ranChangeSet.getLastCheckSum()) &&
-                !ValidatingVisitorUtil.isChecksumIssue(changeSet, ranChangeSet, databaseChangeLog, database) &&
-                !changeSet.shouldRunOnChange() &&
-                !changeSet.shouldAlwaysRun()) {
-                    invalidMD5Sums.add(changeSet.toString(false)+" was: "+ranChangeSet.getLastCheckSum().toString()
-                            +" but is now: "+changeSet.generateCheckSum(ChecksumVersion.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion())).toString());
+                    !ValidatingVisitorUtil.isChecksumIssue(changeSet, ranChangeSet, databaseChangeLog, database) &&
+                    !changeSet.shouldRunOnChange() &&
+                    !changeSet.shouldAlwaysRun()) {
+                invalidMD5Sums.add(changeSet.toString(false) + " was: " + ranChangeSet.getLastCheckSum().toString()
+                        + " but is now: " + changeSet.generateCheckSum(ChecksumVersion.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion())).toString());
             }
         }
 
@@ -156,7 +155,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         }
 
 
-        if(shouldValidate){
+        if (shouldValidate) {
             warnings.addAll(change.warn(database));
 
             try {
@@ -182,9 +181,15 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         }
     }
 
+    /**
+     * Check changesets for required attributes id and author
+     *
+     * @param changeSet the changeset to check
+     * @return true if the changeset attributes are valid, false otherwise
+     */
     private boolean areChangeSetAttributesValid(ChangeSet changeSet) {
         boolean authorEmpty = StringUtils.isEmpty(changeSet.getAuthor());
-        boolean idEmpty = StringUtils.isEmpty(changeSet.getId());
+        boolean idEmpty = StringUtils.isBlank(changeSet.getId());
         boolean strictCurrentValue = GlobalConfiguration.STRICT.getCurrentValue();
 
         boolean valid = false;
@@ -202,7 +207,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
     public boolean validationPassed() {
         return invalidMD5Sums.isEmpty() && failedPreconditions.isEmpty() && errorPreconditions.isEmpty() &&
-            duplicateChangeSets.isEmpty() && changeValidationExceptions.isEmpty() && setupExceptions.isEmpty() &&
-            !validationErrors.hasErrors();
+                duplicateChangeSets.isEmpty() && changeValidationExceptions.isEmpty() && setupExceptions.isEmpty() &&
+                !validationErrors.hasErrors();
     }
 }

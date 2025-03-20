@@ -6,6 +6,7 @@ import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.database.Database;
+import liquibase.database.DatabaseList;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -118,6 +119,9 @@ public class SQLFileChange extends AbstractSQLChange {
     @Override
     public ValidationErrors validate(Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
+        if(getDbms() != null) {
+            DatabaseList.validateDefinitions(getDbms(), validationErrors);
+        }
         if (StringUtil.trimToNull(getPath()) == null) {
             validationErrors.addError("'path' is required");
         } else {

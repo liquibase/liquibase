@@ -48,7 +48,7 @@ public class ChangeSetStatus {
             this.comments = null;
         }
         else {
-            throw new LiquibaseException(String.format("ChangeSetStatus for ChangeSet %s cannot generated", changeSet.toString()));
+            throw new LiquibaseException(String.format("ChangeSetStatus for ChangeSet %s cannot be generated", changeSet.toString()));
         }
     }
 

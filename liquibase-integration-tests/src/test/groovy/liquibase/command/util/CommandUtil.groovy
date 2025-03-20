@@ -14,6 +14,7 @@ import liquibase.diff.compare.CompareControl
 import liquibase.exception.CommandExecutionException
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.lockservice.LockServiceFactory
+import liquibase.logging.core.BufferedLogServiceTest
 import liquibase.resource.ResourceAccessor
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
@@ -64,6 +65,22 @@ class CommandUtil {
         execUpdateCountCommandInScope(resourceAccessor, db, changelogFile, count)
     }
 
+    static void runReleaseLocks(DatabaseTestSystem db) {
+        CommandScope commandScope = new CommandScope(ReleaseLocksCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+        commandScope.execute()
+    }
+
+    static void runHistory(DatabaseTestSystem db) {
+        CommandScope commandScope = new CommandScope(HistoryCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+        commandScope.execute()
+    }
+
     static void runGenerateChangelog(DatabaseTestSystem db, String outputFile) throws CommandExecutionException {
         CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
@@ -71,6 +88,19 @@ class CommandUtil {
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
         commandScope.addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, true)
         commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, outputFile)
+        OutputStream outputStream = new ByteArrayOutputStream()
+        commandScope.setOutput(outputStream)
+        commandScope.execute()
+    }
+
+    static void runGenerateChangelog (DatabaseTestSystem db, String outputFile, String diffType) {
+        CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, true)
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, outputFile)
+        commandScope.addArgumentValue(PreCompareCommandStep.DIFF_TYPES_ARG, diffType)
         OutputStream outputStream = new ByteArrayOutputStream()
         commandScope.setOutput(outputStream)
         commandScope.execute()
@@ -222,9 +252,9 @@ class CommandUtil {
     }
 
     private static void execUpdateCommandInScope(SearchPathResourceAccessor resourceAccessor, DatabaseTestSystem db, String changelogFile) {
-        def scopeSettings = [
-                (Scope.Attr.resourceAccessor.name()): resourceAccessor
-        ]
+        def scopeSettings = new LinkedHashMap<String, Object>()
+        scopeSettings.put(Scope.Attr.resourceAccessor.name(), resourceAccessor)
+
         Scope.child(scopeSettings, {
             CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
             commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
@@ -249,5 +279,22 @@ class CommandUtil {
             commandScope.addArgumentValue(UpdateCountCommandStep.COUNT_ARG, count)
             commandScope.execute()
         } as Scope.ScopedRunnerWithReturn<Void>)
+    }
+
+    static void runClearCheckSum(DatabaseTestSystem db) {
+        CommandScope commandScope = new CommandScope(ClearChecksumsCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+        commandScope.execute()
+    }
+
+    static void runStatus(DatabaseTestSystem db, String changelog) {
+        CommandScope commandScope = new CommandScope(StatusCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+        commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changelog)
+        commandScope.execute()
     }
 }

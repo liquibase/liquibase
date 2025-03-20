@@ -1,6 +1,7 @@
 package liquibase.integration.spring;
 
 import liquibase.*;
+import liquibase.analytics.configuration.AnalyticsArgs;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -10,7 +11,7 @@ import liquibase.database.core.DerbyDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.integration.IntegrationDetails;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
@@ -30,6 +31,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -111,6 +113,14 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     @Getter
     @Setter
     protected boolean clearCheckSums;
+
+    @Getter
+    @Setter
+    protected String licenseKey = null;
+
+    @Getter
+    @Setter
+    protected Boolean analyticsEnabled = null;
 
     @Setter
     protected boolean shouldRun = true;
@@ -246,8 +256,20 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         }
 
         try {
+            Map<String, Object> scopeVars = new HashMap<>();
+            scopeVars.put(Scope.Attr.ui.name(), this.uiService.getUiServiceClass().getDeclaredConstructor().newInstance());
+            scopeVars.put(Scope.Attr.integrationDetails.name(), new IntegrationDetails("spring"));
+            if (this.analyticsEnabled != null) {
+                scopeVars.put(AnalyticsArgs.ENABLED.getKey(), this.analyticsEnabled);
+            }
+            scopeVars.put(Scope.Attr.maxAnalyticsCacheSize.name(), 10);
 
-            Scope.child(Scope.Attr.ui.name(), this.uiService.getUiServiceClass().getDeclaredConstructor().newInstance(),
+            if (this.licenseKey != null) {
+                log.fine("Using PRO licenseKey.");
+                scopeVars.put("liquibase.licenseKey", licenseKey);
+            }
+
+            Scope.child(scopeVars,
                     () -> {
                         Liquibase liquibase = null;
                         try {

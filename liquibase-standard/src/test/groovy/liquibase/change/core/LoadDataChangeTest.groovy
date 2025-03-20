@@ -21,10 +21,7 @@ import liquibase.resource.ResourceAccessor
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
-import liquibase.statement.DatabaseFunction
-import liquibase.statement.ExecutablePreparedStatement
-import liquibase.statement.ExecutablePreparedStatementBase
-import liquibase.statement.SqlStatement
+import liquibase.statement.*
 import liquibase.statement.core.InsertSetStatement
 import liquibase.statement.core.InsertStatement
 import liquibase.structure.DatabaseObject
@@ -60,6 +57,71 @@ class LoadDataChangeTest extends StandardChangeTest {
         mockDb.setConnection((DatabaseConnection) null)
     }
 
+
+
+    def "column with clob datatype is path or string"(){
+        when:
+        def changelog = new DatabaseChangeLog("liquibase/changelog.xml")
+        ChangeSet changeSet = new ChangeSet(null, null, true, false,
+                "logical or physical file name",
+                null, null, false, null, changelog)
+
+        LoadDataChange change = new LoadDataChange()
+        LoadDataColumnConfig col1 = new LoadDataColumnConfig()
+        col1.setType(LoadDataChange.LOAD_DATA_TYPE.CLOB)
+        col1.setName("exists")
+        change.addColumn(col1)
+
+        LoadDataColumnConfig col2 = new LoadDataColumnConfig()
+        col2.setType(LoadDataChange.LOAD_DATA_TYPE.CLOB)
+        col2.setName("doesnt")
+        change.addColumn(col2)
+
+        LoadDataColumnConfig col3 = new LoadDataColumnConfig()
+        col3.setType(LoadDataChange.LOAD_DATA_TYPE.CLOB)
+        col3.setName("string")
+        change.addColumn(col3)
+
+        LoadDataColumnConfig col4 = new LoadDataColumnConfig()
+        col4.setType(LoadDataChange.LOAD_DATA_TYPE.CLOB)
+        col4.setName("invalid")
+        change.addColumn(col4)
+
+        LoadDataColumnConfig col5 = new LoadDataColumnConfig()
+        col5.setType(LoadDataChange.LOAD_DATA_TYPE.CLOB)
+        col5.setName("empty")
+        change.addColumn(col5)
+
+        change.setSchemaName("SCHEMA_NAME")
+        change.setTableName("TABLE_NAME")
+        change.setRelativeToChangelogFile(Boolean.TRUE)
+        change.setChangeSet(changeSet)
+        change.setFile("../liquibase/change/core/sample.data.for.clob.types.csv")
+
+        def mockDBCsv = new MockDatabase() {
+            @Override
+            boolean supportsBatchUpdates() {
+                return true
+            }
+        }
+
+        SqlStatement[] stmt = change.generateStatements(mockDBCsv)
+
+        then:
+        stmt.length == 1
+        assert stmt[0] instanceof BatchDmlExecutablePreparedStatement
+
+        List<ExecutablePreparedStatementBase> insSt = ((BatchDmlExecutablePreparedStatement) stmt[0]).getIndividualStatements()
+        List<LoadDataColumnConfig> columns = insSt.get(0).getColumns()
+
+        "SCHEMA_NAME" == insSt.get(0).getSchemaName()
+        "TABLE_NAME" == insSt.get(0).getTableName()
+        "change/core/SQLFileTestData.sql" == columns.get(0).getValueClobFile()
+        "nothing.txt" == columns.get(1).getValue()
+        "sample text" == columns.get(2).getValue()
+        "/dev/null/foo:a" == columns.get(3).getValue()
+        null == columns.get(4).getValue()
+    }
 
     def "loadDataEmpty database agnostic"() throws Exception {
         when:
@@ -983,5 +1045,3 @@ class LoadDataChangeTest extends StandardChangeTest {
         }
     }
 }
-
-

@@ -202,6 +202,10 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         return splitStatementsSet;
     }
 
+    public boolean isStripCommentsUsedDefaultValue() {
+        return stripCommentsUsedDefaultValue;
+    }
+
     /**
      * Return the raw SQL managed by this Change
      */

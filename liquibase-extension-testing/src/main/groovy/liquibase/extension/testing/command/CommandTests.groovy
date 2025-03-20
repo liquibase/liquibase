@@ -205,7 +205,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     @Unroll("Run {db:#permutation.databaseName,command:#permutation.definition.commandTestDefinition.joinedCommand} #permutation.definition.description")
     def "run"() {
         setup:
-        Main.runningFromNewCli = true
+        Main.setRunningFromNewCli(true)
         Assumptions.assumeTrue(permutation.testSetupEnvironment.connection != null, "Skipping test: " + permutation.testSetupEnvironment.errorMessage)
 
         def testDef = permutation.definition
@@ -395,6 +395,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 if (!testDef.expectedResults.isEmpty()) {
                     for (def returnedResult : results.getResults().entrySet()) {
                         def expectedResult = testDef.expectedResults.get(returnedResult.getKey())
+                        if (expectedResult == null) {
+                            // No expected result in the map so just skip this one
+                            continue
+                        }
                         def expectedValue = expectedResult instanceof Closure ? expectedResult.call() : String.valueOf(expectedResult)
                         def seenValue = String.valueOf(returnedResult.getValue())
 
@@ -1394,7 +1398,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         void sendErrorMessage(String message, Throwable exception) {
             errorOutput.println(message)
             if (exception != null) {
-                exception.printStackTrace(errorOutput)
+                exception.printStackTrace(new PrintWriter(errorOutput))
             }
         }
 

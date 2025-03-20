@@ -50,6 +50,15 @@ Global Options
                                variable:
                                'LIQUIBASE_ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA')
 
+      --analytics-enabled=PARAM
+                             Enable or disable sending product usage data and
+                               analytics to Liquibase. Learn more at https:
+                               //docs.liquibase.com/analytics. DEFAULT: true
+                               for OSS users | false for PRO users
+                             (defaults file: 'liquibase.analytics.enabled',
+                               environment variable:
+                               'LIQUIBASE_ANALYTICS_ENABLED')
+
       --auto-reorg=PARAM     Should Liquibase automatically include REORG TABLE
                                commands when needed?
                              DEFAULT: true
@@ -268,7 +277,9 @@ Global Options
                              (defaults file: 'liquibase.logChannels',
                                environment variable: 'LIQUIBASE_LOG_CHANNELS')
 
-      --log-file=PARAM       (defaults file: 'liquibase.logFile', environment
+      --log-file=PARAM       Users can use .gz file extension to enable log
+                               files compression.
+                             (defaults file: 'liquibase.logFile', environment
                                variable: 'LIQUIBASE_LOG_FILE')
 
       --log-format=PARAM     Sets the format of log output to console or log

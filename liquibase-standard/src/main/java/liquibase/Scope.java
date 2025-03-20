@@ -1,5 +1,6 @@
 package liquibase;
 
+import liquibase.analytics.Event;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -29,6 +30,7 @@ import lombok.Getter;
 
 import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,6 +42,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * Values with the same key in different scopes "mask" each other with the value furthest down the scope chain being returned.
  */
 public class Scope {
+
+    public static final String CHECKS_MESSAGE =
+            "The Liquibase Checks Extension 2.0.0 or higher is required to execute checks commands. " +
+                    "Visit https://docs.liquibase.com/pro-extensions to acquire the Checks Extension.";
 
     /**
      * Enumeration containing standard attributes. Normally use methods like convenience {@link #getResourceAccessor()} or {@link #getDatabase()}
@@ -56,6 +62,7 @@ public class Scope {
         executeMode,
         lineSeparator,
         serviceLocator,
+        deploymentId,
 
         /**
          * @deprecated use {@link GlobalConfiguration#FILE_ENCODING}
@@ -70,12 +77,25 @@ public class Scope {
         /**
          * A <code>Map<String, String></code> of arguments/configuration properties used in the maven invocation of Liquibase.
          */
-        mavenConfigurationProperties
+        mavenConfigurationProperties,
+        analyticsEvent,
+        integrationDetails,
+        /**
+         * The maximum number of analytics events that should be cached in memory before sent in a batch.
+         */
+        maxAnalyticsCacheSize
     }
 
     public static final String JAVA_PROPERTIES = "javaProperties";
 
-    private static final ThreadLocal<ScopeManager> scopeManager = new ThreadLocal<>();
+    private static final InheritableThreadLocal<ScopeManager> scopeManager = new InheritableThreadLocal<ScopeManager>() {
+        @Override
+        protected ScopeManager childValue(ScopeManager parentValue) {
+            ScopeManager sm = new SingletonScopeManager();
+            sm.setCurrentScope(parentValue.getCurrentScope());
+            return sm;
+        }
+    };
 
     private final Scope parent;
     private final SmartMap values = new SmartMap();
@@ -118,6 +138,7 @@ public class Scope {
 
             rootScope.values.put(Attr.serviceLocator.name(), serviceLocator);
             rootScope.values.put(Attr.osgiPlatform.name(), ContainerChecker.isOsgiPlatform());
+            rootScope.values.put(Attr.deploymentId.name(), generateDeploymentId());
         }
         return scopeManager.get().getCurrentScope();
     }
@@ -365,6 +386,8 @@ public class Scope {
         return get(Attr.database, Database.class);
     }
 
+    public String getDeploymentId() { return get(Attr.deploymentId, String.class); }
+
     public ClassLoader getClassLoader() {
         return get(Attr.classLoader, Thread.currentThread().getContextClassLoader());
     }
@@ -507,6 +530,22 @@ public class Scope {
         }
 
         return returnList;
+    }
+
+    /**
+     * Get the current analytics event. This can return null if analytics is not enabled.
+     * @return
+     */
+    public Event getAnalyticsEvent() {
+        return Scope.getCurrentScope().get(Attr.analyticsEvent, Event.class);
+    }
+
+    private static String generateDeploymentId() {
+        long time = (new Date()).getTime();
+        String dateString = String.valueOf(time);
+        DecimalFormat decimalFormat = new DecimalFormat("0000000000");
+        return dateString.length() > 9 ? dateString.substring(dateString.length() - 10) :
+                decimalFormat.format(time);
     }
 
     @Override

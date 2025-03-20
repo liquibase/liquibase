@@ -13,10 +13,14 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.logging.mdc.MdcKey;
-import liquibase.util.StringUtil;
+import liquibase.util.ExceptionUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Internal command step to be used on CommandStep pipeline to manage the database connection.
@@ -99,29 +103,38 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
      * @throws DatabaseException Thrown when there is a connection error
      */
     public Database obtainDatabase(CommandScope commandScope) throws DatabaseException {
-        if (commandScope.getArgumentValue(DATABASE_ARG) == null) {
-            String url = commandScope.getArgumentValue(URL_ARG);
-            String username = commandScope.getArgumentValue(USERNAME_ARG);
-            String password = commandScope.getArgumentValue(PASSWORD_ARG);
-            String defaultSchemaName = commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.DEFAULT_SCHEMA_NAME_ARG);
-            String defaultCatalogName = commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.DEFAULT_CATALOG_NAME_ARG);
-            String driver = getDriver(commandScope);
-            String driverPropertiesFile = commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.DRIVER_PROPERTIES_FILE_ARG);
-            Database database = createDatabaseObject(url, username, password, defaultSchemaName, defaultCatalogName, driver, driverPropertiesFile,
-                    StringUtil.trimToNull(GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValue()),
-                    StringUtil.trimToNull(GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentValue()));
-            logMdc(url, database);
-            return database;
-        } else {
-            return commandScope.getArgumentValue(DATABASE_ARG);
+        AtomicReference<Database> database = new AtomicReference<>(commandScope.getArgumentValue(DATABASE_ARG));
+        String url = commandScope.getArgumentValue(URL_ARG);
+        if (database.get() == null) {
+            Map<String, Object> scopedValues = new HashMap<>();
+            scopedValues.put(Database.IGNORE_MISSING_REFERENCES_KEY, commandScope.getArgumentValue(DiffArgumentsCommandStep.IGNORE_MISSING_REFERENCES));
+            try {
+                Scope.child(scopedValues, () -> {
+                    database.set(createDatabaseObject(
+                            url,
+                            commandScope.getArgumentValue(USERNAME_ARG),
+                            commandScope.getArgumentValue(PASSWORD_ARG),
+                            commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.DEFAULT_SCHEMA_NAME_ARG),
+                            commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.DEFAULT_CATALOG_NAME_ARG),
+                            getDriver(commandScope),
+                            commandScope.getArgumentValue(DbUrlConnectionArgumentsCommandStep.DRIVER_PROPERTIES_FILE_ARG),
+                            StringUtils.trimToNull(GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValue()),
+                            StringUtils.trimToNull(GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentValue())
+                    ));
+                });
+            } catch (Exception e) {
+                throw new DatabaseException(e);
+            }
         }
+        logMdc(url == null ? database.get().getConnection().getURL() : url, database.get());
+        return database.get();
     }
 
     private static String getDriver(CommandScope commandScope) {
         ConfiguredValue<String> globalConfig = LiquibaseCommandLineConfiguration.DRIVER.getCurrentConfiguredValue();
         ConfiguredValue<String> commandConfig = commandScope.getConfiguredValue(DbUrlConnectionArgumentsCommandStep.DRIVER_ARG);
         if (globalConfig.found() && commandConfig.found()) {
-            Scope.getCurrentScope().getLog(DbUrlConnectionCommandStep.class).warning("Ignoring the global " + LiquibaseCommandLineConfiguration.DRIVER.getKey() + " value in favor of the command value.");
+            Scope.getCurrentScope().getLog(DbUrlConnectionCommandStep.class).fine("Ignoring the global " + LiquibaseCommandLineConfiguration.DRIVER.getKey() + " value in favor of the command value.");
         }
         if (commandConfig.found()) {
             return commandConfig.getValue();
@@ -136,6 +149,12 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_TARGET_URL, JdbcConnection.sanitizeUrl(url));
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_CATALOG_NAME, database.getLiquibaseCatalogName());
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SCHEMA_NAME, database.getLiquibaseSchemaName());
+        ExceptionUtil.doSilently(() -> {
+            Scope.getCurrentScope().getAnalyticsEvent().setDatabasePlatform(database.getDatabaseProductName());
+        });
+        ExceptionUtil.doSilently(() -> {
+            Scope.getCurrentScope().getAnalyticsEvent().setDatabaseVersion(database.getDatabaseProductVersion());
+        });
     }
 
     @Override

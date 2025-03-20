@@ -3,6 +3,7 @@ package liquibase.parser.core.yaml;
 import liquibase.Scope;
 import liquibase.logging.Logger;
 import liquibase.parser.LiquibaseParser;
+import liquibase.parser.core.ParserSupportedFileExtension;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.SnakeYamlUtil;
 import org.yaml.snakeyaml.LoaderOptions;
@@ -31,7 +32,7 @@ public abstract class YamlParser implements LiquibaseParser {
     }
 
     protected String[] getSupportedFileExtensions() {
-        return new String[] {"yaml", "yml"};
+        return ParserSupportedFileExtension.YAML_SUPPORTED_EXTENSIONS.toArray(new String[0]);
     }
 
     @Override

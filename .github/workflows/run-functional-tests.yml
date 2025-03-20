@@ -13,7 +13,7 @@ on:
         required: false
         default: ''
         type: string
-  pull_request:
+  pull_request_target:
     types: [ labeled ]
 
 jobs:
@@ -60,7 +60,7 @@ jobs:
           echo "ossWorkflowUrl=${ossWorkflowUrl}" >> $GITHUB_ENV
 
       - name: Dispatch an action and get the run ID
-        uses: codex-/return-dispatch@v1
+        uses: codex-/return-dispatch@v2
         id: return_dispatch
         with:
           token: ${{ secrets.RUN_FUNCTIONAL_TEST_HARNESS_TESTS_TOKEN  }}

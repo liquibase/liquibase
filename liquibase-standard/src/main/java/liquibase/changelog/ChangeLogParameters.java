@@ -27,14 +27,20 @@ import java.util.stream.Collectors;
  * <p>
  * In determining which property value is actually "first set", context, label, and dbms filtering is taken into account.
  * <p>
- * Properties can be defined as "global" or "local". Global properties span all change logs.
- * A global setting configured in an included changelog is still available to all changesets
- * Local properties are  only available in the change log that they are defined in -- not even in changelogs "included" by the file that defines the property.
+ * Properties can be defined as "system", "global" or "local". Global and system properties span all change logs.
+ * A global setting configured in an included changelog is still available to all changesets.
+ * System properties such as environment variables are set up to not be filterable.
+ * This implies that they will ignore any label, context or dbms filters that are requested on the given execution.
+ * This is different from globals set up <b>inside</b> a changelog which can and will be filtered if they have a label, context
+ * or dbms associated with the property.
+ * <p>
+ * Local properties are only available in the change log that they are defined in -- not even in changelogs "included" by the file that defines the property.
  */
 public class ChangeLogParameters {
 
     private final List<ChangeLogParameter> globalParameters = new ArrayList<>();
     private final Map<String, List<ChangeLogParameter>> localParameters = new HashMap<>();
+    private final List<ChangeLogParameter> systemParameters = new ArrayList<>();
 
     private final ExpressionExpander expressionExpander;
     private String filterDatabase;
@@ -42,6 +48,12 @@ public class ChangeLogParameters {
     private LabelExpression filterLabels;
 
     private enum LiquibaseExecutionParameter {
+        LIQUIBASE_EXECUTION_DEPLOYMENT_ID {
+            @Override
+            public String getValue(DatabaseChangeLog changeLog) {
+                return Scope.getCurrentScope().getDeploymentId();
+            }
+        },
         LIQUIBASE_EXECUTION_CHANGELOG_FILE {
             @Override
             public String getValue(DatabaseChangeLog changeLog) {
@@ -113,8 +125,8 @@ public class ChangeLogParameters {
      * The passed database is used as a default value for {@link #getDatabase()}
      */
     public ChangeLogParameters(Database database) {
-        globalParameters.addAll(System.getenv().entrySet().stream().map(e -> new ChangeLogParameter(e.getKey(), e.getValue())).collect(Collectors.toList()));
-        globalParameters.addAll(System.getProperties().entrySet().stream().map(e -> new ChangeLogParameter(String.valueOf(e.getKey()), e.getValue())).collect(Collectors.toList()));
+        systemParameters.addAll(System.getenv().entrySet().stream().map(e -> new ChangeLogParameter(e.getKey(), e.getValue(), false)).collect(Collectors.toList()));
+        systemParameters.addAll(System.getProperties().entrySet().stream().map(e -> new ChangeLogParameter(String.valueOf(e.getKey()), e.getValue(), false)).collect(Collectors.toList()));
 
         if (database != null) {
             this.set("database.autoIncrementClause", database.getAutoIncrementClause(null, null, null, null));
@@ -207,7 +219,7 @@ public class ChangeLogParameters {
      * Just because you call this with a particular key, does not mean it will override the existing value. See the class description for more details on how values act as if they are immutable.
      */
     public void set(String key, Object value, ContextExpression contexts, Labels labels, String... databases) {
-        globalParameters.add(new ChangeLogParameter(key, value, contexts, labels, databases));
+        globalParameters.add(new ChangeLogParameter(key, value, contexts, labels, databases, true));
     }
 
     /**
@@ -228,7 +240,7 @@ public class ChangeLogParameters {
             localParams = new ArrayList<>();
             this.localParameters.put(changelogKey, localParams);
         }
-        localParams.add(new ChangeLogParameter(key, value, contexts, labels, databases));
+        localParams.add(new ChangeLogParameter(key, value, contexts, labels, databases, true));
     }
 
     /**
@@ -321,7 +333,7 @@ public class ChangeLogParameters {
             }
         }
 
-        for (List<ChangeLogParameter> paramList : Arrays.asList(globalParameters, localList)) {
+        for (List<ChangeLogParameter> paramList : Arrays.asList(systemParameters, globalParameters, localList)) {
             if (paramList == null) {
                 continue;
             }
@@ -358,16 +370,23 @@ public class ChangeLogParameters {
         private final Labels validLabels;
         @Getter
         private final List<String> validDatabases;
+        @Getter
+        private final boolean filterable;
 
         public ChangeLogParameter(String key, Object value) {
-            this(key, value, null, null, null);
+            this(key, value, null, null, null, true);
         }
 
-        public ChangeLogParameter(String key, Object value, ContextExpression validContexts, Labels labels, String[] validDatabases) {
+        public ChangeLogParameter(String key, Object value, boolean filterable) {
+            this(key, value, null, null, null, filterable);
+        }
+
+        public ChangeLogParameter(String key, Object value, ContextExpression validContexts, Labels labels, String[] validDatabases, boolean filterable) {
             this.key = key;
             this.value = value;
             this.validContexts = validContexts == null ? new ContextExpression() : validContexts;
             this.validLabels = labels == null ? new Labels() : labels;
+            this.filterable = filterable;
 
             if (validDatabases == null) {
                 this.validDatabases = null;
@@ -398,10 +417,38 @@ public class ChangeLogParameters {
         }
 
         public boolean matches(ChangeLogParameter parameter) {
-            return (labels == null || labels.matches(parameter.getLabels()))
-                    && (contexts == null || parameter.getValidContexts().matches(contexts))
-                    && (database == null || DatabaseList.definitionMatches(parameter.getValidDatabases(), database, true))
-                    ;
+            // When we are checking whether a parameter matches the filter, we validate that the parameter is filterable.
+            // If it is not filterable, we still want to check if it has any associated filterable attributes
+            // because while system properties are set up by default to NOT be filterable, global properties
+            // still can have filterable attributes which we want to respect if they are set up in the changelog itself.
+            if (parameter.isFilterable() || hasFilterableProperties(parameter)) {
+                return (labels == null || labels.matches(parameter.getLabels()))
+                        && (contexts == null || parameter.getValidContexts().matches(contexts))
+                        && (database == null || DatabaseList.definitionMatches(parameter.getValidDatabases(), database, true));
+            }
+            return true;
+        }
+
+        /**
+         * Check if the provided ChangeLogParameter has any filterable attributes.
+         *
+         * @param parameter the parameter to check
+         * @return true if there is a label, context or dbms associated with the parameter, false otherwise
+         */
+        private boolean hasFilterableProperties(ChangeLogParameter parameter) {
+            boolean hasContext = false;
+            boolean hasLabel = false;
+            boolean hasDbms = false;
+            if (parameter.getValidContexts() != null) {
+                hasContext = !parameter.getValidContexts().isEmpty();
+            }
+            if (parameter.getLabels() != null) {
+                hasLabel = !parameter.getLabels().isEmpty();
+            }
+            if (parameter.getValidDatabases() != null) {
+                hasDbms = !parameter.getValidDatabases().isEmpty();
+            }
+            return hasContext || hasLabel || hasDbms;
         }
     }
 
