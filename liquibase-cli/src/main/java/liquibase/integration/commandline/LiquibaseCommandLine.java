@@ -457,7 +457,7 @@ public class LiquibaseCommandLine {
     }
 
     private void addEmptyMdcValues() {
-        Boolean addEmptyMdcValues = LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue();
+        Boolean addEmptyMdcValues = LiquibaseCommandLineConfiguration.ADD_EMPTY_MDC_VALUES.getCurrentValue();
         if (Boolean.TRUE.equals(addEmptyMdcValues)) {
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, "");
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, "NOOP");
