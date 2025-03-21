@@ -76,7 +76,9 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                 .setDefaultValue("liquibase", "Controls which log channels have their level set by the liquibase.logLevel setting. Comma separate multiple values. To set the level of all channels, use 'all'. Example: liquibase,org.mariadb.jdbc")
                 .build();
 
-        LOG_FILE = builder.define("logFile", String.class).build();
+        LOG_FILE = builder.define("logFile", String.class)
+                .setDescription("Users can use .gz file extension to enable log files compression.")
+                .build();
         MIRROR_CONSOLE_MESSAGES_TO_LOG = builder.define("mirrorConsoleMessagesToLog", Boolean.class)
                 .setDefaultValue(Boolean.TRUE)
                 .setDescription("When set to true, the console messages are mirrored to the logs as [liquibase.ui] to provide a more complete picture of liquibase operations to log analysis tools. Set to false to change this behavior.")

@@ -81,7 +81,11 @@ public class Scope {
          */
         mavenConfigurationProperties,
         analyticsEvent,
-        integrationDetails
+        integrationDetails,
+        /**
+         * The maximum number of analytics events that should be cached in memory before sent in a batch.
+         */
+        maxAnalyticsCacheSize
     }
 
     public static final String JAVA_PROPERTIES = "javaProperties";
