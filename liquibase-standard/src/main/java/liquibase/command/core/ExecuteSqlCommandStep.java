@@ -70,7 +70,7 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
         ChangeLogParameters changeLogParameters = new ChangeLogParameters(database);
         for (String sqlString : sqlStrings) {
             sqlString = changeLogParameters.expandExpressions(sqlString, null);
-            if (sqlString.toLowerCase().matches("\\s*select .*")) {
+            if (sqlString.toLowerCase().matches("(?s)\\s*select\\s+.*")) {
                 out.append(handleSelect(sqlString, executor));
             } else {
                 executor.execute(new RawParameterizedSqlStatement(sqlString));

@@ -1,5 +1,9 @@
 package liquibase
 
+import liquibase.command.CommandScope
+import liquibase.command.core.UpdateCommandStep
+import liquibase.command.core.UpdateCountCommandStep
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
@@ -90,6 +94,25 @@ END;
         CommandUtil.runHistory(oracle)
 
         CommandUtil.runRollback(new SearchPathResourceAccessor(".,target/test-classes"), oracle, changelogfile, "tag")
+
+        then:
+        noExceptionThrown()
+    }
+
+    def "verify foreignKeyExists constraint is not created again when precondition fails because it already exists"() {
+        when:
+        def changeLogFile = "changelogs/common/fkep.test.changelog.xml"
+        def scopeSettings = [
+                (Scope.Attr.resourceAccessor.name()): new SearchPathResourceAccessor(".,target/test-classes")
+        ]
+        Scope.child(scopeSettings, {
+            CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, oracle.getConnectionUrl())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, oracle.getUsername())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, oracle.getPassword())
+            commandScope.addArgumentValue(UpdateCountCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+            commandScope.execute()
+        } as Scope.ScopedRunnerWithReturn<Void>)
 
         then:
         noExceptionThrown()
