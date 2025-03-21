@@ -4,6 +4,7 @@ import liquibase.*;
 import liquibase.change.Change;
 import liquibase.change.CheckSum;
 import liquibase.change.ColumnConfig;
+import liquibase.command.core.TagCommandStep;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.MSSQLDatabase;
@@ -424,9 +425,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         SqlStatement totalRowsStatement = new SelectFromDatabaseChangeLogStatement(new ColumnConfig().setName("COUNT(*)", true));
         int totalRows = ChangelogJdbcMdcListener.query(getDatabase(), executor -> executor.queryForInt(totalRowsStatement));
         if (totalRows == 0) {
-            ChangeSet emptyChangeSet = new ChangeSet(String.valueOf(new Date().getTime()), "liquibase",
-                false,false, "liquibase-internal", null, null,
-                getDatabase().getObjectQuotingStrategy(), null);
+            ChangeSet emptyChangeSet = TagCommandStep.getEmptyTagChangeSet(getDatabase());
             this.setExecType(emptyChangeSet, ChangeSet.ExecType.EXECUTED);
         }
         SqlStatement tagStatement = new TagDatabaseStatement(tagString);
