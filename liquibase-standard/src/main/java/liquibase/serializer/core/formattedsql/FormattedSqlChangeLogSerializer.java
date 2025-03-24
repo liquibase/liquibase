@@ -94,6 +94,7 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
             builder.append(logicalFilePath);
             builder.append("\"");
         }
+        builder.append(" splitStatements:false");
         builder.append("\n");
     }
 
