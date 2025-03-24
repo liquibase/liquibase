@@ -1066,13 +1066,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            OnUnknownFileFormat onUnknownFileFormat,
                            ModifyChangeSets modifyChangeSets)
             throws LiquibaseException {
-        String filenameWithoutPath = "";
-        if(fileName.startsWith("classpath:") && !GlobalConfiguration.PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS.getCurrentValue()) {
-            filenameWithoutPath = Paths.get(normalizePath(fileName)).getFileName().toString();
-        } else {
-            filenameWithoutPath = fileName;
-        }
 
+        String filenameWithoutPath = getFileNameWithoutPathNormalizedIfNeeded(fileName);
         boolean matchesHiddenFilename = HIDDEN_FILENAME_PATTERN.matcher(filenameWithoutPath).matches();
         if ("cvs".equalsIgnoreCase(filenameWithoutPath) || matchesHiddenFilename) {
             return false;
@@ -1183,6 +1178,20 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         skippedChangeSets.addAll(changeLog.getSkippedChangeSets());
 
         return true;
+    }
+
+    private static String getFileNameWithoutPathNormalizedIfNeeded(String fileName) {
+        String filenameWithoutPath;
+        if(fileName.startsWith("classpath:")) {
+          if(!GlobalConfiguration.PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS.getCurrentValue()) {
+              filenameWithoutPath = Paths.get(normalizePath(fileName)).getFileName().toString();
+          } else {
+              filenameWithoutPath = fileName;
+          }
+        } else {
+            filenameWithoutPath = Paths.get(fileName).getFileName().toString();
+        }
+        return filenameWithoutPath;
     }
 
     /**
