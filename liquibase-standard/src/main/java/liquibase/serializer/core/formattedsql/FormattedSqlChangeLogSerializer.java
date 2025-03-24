@@ -50,6 +50,9 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
             for (Change change : changeSet.getChanges()) {
                 Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change.generateStatements(database), database);
                 if (sqls != null) {
+                    if (sqls.length > 1) {
+                        builder = new StringBuilder(builder.toString().replace(" splitStatements:true", ""));
+                    }
                     for (Sql sql : sqls) {
                         builder.append(sql.toSql().endsWith(sql.getEndDelimiter()) ? sql.toSql() : sql.toSql() + sql.getEndDelimiter()).append("\n");
                     }
@@ -99,15 +102,7 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
     }
 
     protected Database getTargetDatabase(ChangeSet changeSet) {
-        String filePath = changeSet.getFilePath();
-        if (filePath == null) {
-            throw new UnexpectedLiquibaseException("You must specify the changelog file name as filename.DB_TYPE.sql. Example: changelog.mysql.sql");
-        }
-        Matcher matcher = SQL_FILE_NAME_PATTERN.matcher(filePath);
-        if (!matcher.matches()) {
-            throw new UnexpectedLiquibaseException("Serializing changelog as sql requires a file name in the format *.databaseType.sql. Example: changelog.h2.sql. Passed: "+filePath);
-        }
-        String shortName = matcher.replaceFirst("$1");
+        final String shortName = getShortName(changeSet);
 
         Database database = DatabaseFactory.getInstance().getDatabase(shortName);
 
@@ -122,6 +117,18 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
         }
 
         return database;
+    }
+
+    private static String getShortName(ChangeSet changeSet) {
+        String filePath = changeSet.getFilePath();
+        if (filePath == null) {
+            throw new UnexpectedLiquibaseException("You must specify the changelog file name as filename.DB_TYPE.sql. Example: changelog.mysql.sql");
+        }
+        Matcher matcher = SQL_FILE_NAME_PATTERN.matcher(filePath);
+        if (!matcher.matches()) {
+            throw new UnexpectedLiquibaseException("Serializing changelog as sql requires a file name in the format *.databaseType.sql. Example: changelog.h2.sql. Passed: "+filePath);
+        }
+        return matcher.replaceFirst("$1");
     }
 
     @Override
