@@ -51,7 +51,7 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
                 Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change.generateStatements(database), database);
                 if (sqls != null) {
                     if (sqls.length > 1) {
-                        builder = new StringBuilder(builder.toString().replace(" splitStatements:true", ""));
+                        builder = new StringBuilder(builder.toString().replace(" splitStatements:false", "splitStatements:true"));
                     }
                     for (Sql sql : sqls) {
                         builder.append(sql.toSql().endsWith(sql.getEndDelimiter()) ? sql.toSql() : sql.toSql() + sql.getEndDelimiter()).append("\n");
