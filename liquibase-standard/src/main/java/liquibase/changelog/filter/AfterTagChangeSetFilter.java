@@ -62,7 +62,7 @@ public class AfterTagChangeSetFilter implements ChangeSetFilter {
         //
         for (RanChangeSet ranChangeSet : reversedRanChangeSets) {
             if (tag.equalsIgnoreCase(ranChangeSet.getTag())) {
-                if ("tagDatabase".equals(StringUtils.trimToEmpty(ranChangeSet.getDescription())) && shouldRemoveTag(ranChangeSet)) {
+                if ("tagDatabase".equals(StringUtils.trimToEmpty(ranChangeSet.getDescription())) && shouldKeepTag(ranChangeSet)) {
                         changeLogsAfterTag.add(ranChangeSet.toString());
                 }
                 break;
@@ -90,7 +90,7 @@ public class AfterTagChangeSetFilter implements ChangeSetFilter {
             //changeSet is just tagging the database. Also remove it.
             if (tag.equalsIgnoreCase(ranChangeSet.getTag()) &&
                 ("tagDatabase".equals(StringUtils.trimToEmpty(ranChangeSet.getDescription()))) &&
-                    shouldRemoveTag(ranChangeSet)) {
+                    shouldKeepTag(ranChangeSet)) {
                     changeLogsAfterTag.add(ranChangeSet.toString());
                 }
 
@@ -105,7 +105,7 @@ public class AfterTagChangeSetFilter implements ChangeSetFilter {
     /**
      * Check if the tag should be removed on rollback
      */
-    private boolean shouldRemoveTag(RanChangeSet ranChangeSet) {
+    private boolean shouldKeepTag(RanChangeSet ranChangeSet) {
         if (databaseChangeLog != null) {
             ChangeSet changeSet = databaseChangeLog.getChangeSet(ranChangeSet);
             if (changeSet != null) {
