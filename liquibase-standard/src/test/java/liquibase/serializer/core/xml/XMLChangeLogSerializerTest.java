@@ -310,7 +310,7 @@ public class XMLChangeLogSerializerTest {
     public void createNode_CreateProcedureChange() throws Exception {
         CreateProcedureChange refactoring = new CreateProcedureChange();
         refactoring.setProcedureText("CREATE PROC PROCBODY HERE");
-        refactoring.setComments("Comments go here");
+        refactoring.setComment("Comments go here");
 
         Element element = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
         assertEquals("createProcedure", element.getTagName());
