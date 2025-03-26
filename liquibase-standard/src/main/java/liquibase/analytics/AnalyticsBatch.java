@@ -8,6 +8,7 @@ import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +34,11 @@ public class AnalyticsBatch {
      */
     private final Map<String, ?> context;
 
+    @Deprecated
+    public static AnalyticsBatch fromLiquibaseEvent(Event event, String userId) throws Exception {
+        return fromLiquibaseEvent(Collections.singletonList(event), userId);
+    }
+
     /**
      * Converts a Liquibase-specific event into an {@link AnalyticsBatch} that is expected by Segment.
      * <p>
@@ -47,7 +53,7 @@ public class AnalyticsBatch {
      * @return an {@link AnalyticsBatch} object containing the converted event and any child events
      * @throws Exception if there is an error during event processing or configuration retrieval
      */
-    public static AnalyticsBatch fromLiquibaseEvent(Event event, String userId) throws Exception {
+    public static AnalyticsBatch fromLiquibaseEvent(List<Event> events, String userId) throws Exception {
         AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
         AnalyticsConfiguration analyticsConfiguration = analyticsConfigurationFactory.getPlugin();
         String writeKey = null;
@@ -55,7 +61,9 @@ public class AnalyticsBatch {
             writeKey = ((LiquibaseRemoteAnalyticsConfiguration) analyticsConfiguration).getWriteKey();
         }
         AnalyticsBatch analyticsBatch = new AnalyticsBatch(writeKey, null);
-        addEventsToBatch(event, analyticsBatch, userId);
+        for (Event event : events) {
+            addEventsToBatch(event, analyticsBatch, userId);
+        }
         return analyticsBatch;
     }
 

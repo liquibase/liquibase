@@ -38,13 +38,19 @@ public class AnalyticsTrackEvent {
      */
     private final Map<String, ?> context;
     private final String messageId = UUID.randomUUID().toString();
+    /**
+     * The original time (in UTC) that this event occurred.
+     * see https://segment.com/docs/connections/spec/common/#timestamps for more info
+     */
+    private final String timestamp;
 
     public static AnalyticsTrackEvent fromLiquibaseEvent(Event event, String userId) {
         AnalyticsTrackEvent analyticsTrackEvent = new AnalyticsTrackEvent(
                 userId,
                 new AnonymousSeed().generateId(),
                 event.getPropertiesAsMap(),
-                null
+                null,
+                event.getTimestamp()
         );
         return analyticsTrackEvent;
     }
