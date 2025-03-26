@@ -118,4 +118,25 @@ class RollbackIntegrationTest extends Specification {
         cleanup:
         CommandUtil.runDropAll(h2)
     }
+
+    def "Make sure rollback does not remove tagged changeset"() {
+        given:
+        def changelogFile = 'target/test-classes/changelogs/common/test.tag.not.removed.by.rollback.xml'
+        CommandUtil.runUpdate(h2, changelogFile)
+        ConsoleUIService console = Scope.getCurrentScope().getUI() as ConsoleUIService
+        def outputStream = new ByteArrayOutputStream()
+        console.setOutputStream(new PrintStream(outputStream))
+
+        when:
+        outputStream = new ByteArrayOutputStream()
+        console.setOutputStream(new PrintStream(outputStream))
+        CommandUtil.runRollback(new SearchPathResourceAccessor("."), h2, changelogFile, "tagTest", TagVersionEnum.OLDEST)
+        String outputString = outputStream.toString()
+
+        then:
+        noExceptionThrown()
+        assert !outputString.contains("Rolling Back Changeset: target/test-classes/changelogs/common/test.tag.not.removed.by.rollback.xml::1::mallod")
+        assert !outputString.contains("Rolling Back Changeset: target/test-classes/changelogs/common/test.tag.not.removed.by.rollback.xml::tagTest::mallod")
+        assert outputString.contains("Rolling Back Changeset: target/test-classes/changelogs/common/test.tag.not.removed.by.rollback.xml::2::mallod")
+    }
 }
