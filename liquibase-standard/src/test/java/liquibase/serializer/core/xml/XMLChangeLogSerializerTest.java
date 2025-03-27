@@ -9,6 +9,7 @@ import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.precondition.CustomPreconditionWrapper;
+import liquibase.precondition.core.SequenceExistsPrecondition;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.statement.SequenceNextValueFunction;
 import org.junit.Test;
@@ -911,6 +912,23 @@ public class XMLChangeLogSerializerTest {
 
     }
 
+    @Test
+    public void createNode_SequenceExistsPrecondition() throws Exception {
+        SequenceExistsPrecondition prec = new SequenceExistsPrecondition();
+        prec.setCatalogName("catalog1");
+        prec.setSchemaName("schema2");
+        prec.setSequenceName("seq3");
+
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(prec);
+
+        assertEquals("element name", "sequenceExists", node.getTagName());
+        assertEquals("sequenceExistsPrecondition attributes",
+                attsMap("catalogName", "catalog1", "schemaName", "schema2", "sequenceName", "seq3"),
+                attsMap(node));
+
+        NodeList params = node.getChildNodes();
+        assertEquals("params count", 0, params.getLength());
+    }
 
     @Test
     public void serialize_pretty() {
