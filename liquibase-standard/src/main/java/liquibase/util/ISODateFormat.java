@@ -11,19 +11,15 @@ import java.util.Date;
 public class ISODateFormat {
 
     private final SimpleDateFormat dateTimeFormat = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
-    private final SimpleDateFormat dateTimeFormat2 = new SimpleDateFormat(DATE_TIME_FORMAT_STRING2);
     private final SimpleDateFormat dateTimeFormatWithSpace = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_SPACE);
     private final SimpleDateFormat dateTimeFormatWithTimeZone = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_TIMEZONE);
     private final SimpleDateFormat dateTimeFormatWithTimeZone2 = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_TIMEZONE2);
     private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss";
-    private static final String DATE_TIME_FORMAT_STRING2 = "yyyy-MM-dd'T'HH:mm:ss";
     private static final String DATE_TIME_FORMAT_STRING_WITH_SPACE = "yyyy-MM-dd HH:mm:ss";
-    //"yyyy-MM-dd HH:mm:ss.SSSSS"
     private static final String DATE_TIME_FORMAT_STRING_WITH_TIMEZONE = "yyyy-MM-dd'T'HH:mm:ssXXX";
     private static final String DATE_TIME_FORMAT_STRING_WITH_TIMEZONE2 = "EEE MMM dd HH:mm:ss z yyyy";
-//2024-10-14T00:00:00+02:00
 
 
     public String format(java.sql.Date date) {
