@@ -28,7 +28,7 @@ public class LicenseTrackingFactory extends AbstractPluginFactory<LicenseTrackin
                 }
             }
         } catch (Exception e) {
-            Scope.getCurrentScope().getLog(getClass()).severe("Failed to handle license tracking event", e);
+            Scope.getCurrentScope().getLog(getClass()).severe("Liquibase was unable to transmit license tracking information to the Liquibase License Utility (LLU) server. Please verify that LLU is running, Liquibase is configured with the correct LLU server address, and that the LLU server is accessible from the machine where Liquibase is executing.", e);
         }
     }
 }
