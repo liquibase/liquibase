@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.core.SnowflakeDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.snapshot.SnapshotGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.JdbcUtil;
 
@@ -34,5 +35,10 @@ public class SchemaSnapshotGeneratorSnowflake extends SchemaSnapshotGenerator {
         }
 
         return returnList.toArray(new String[0]);
+    }
+
+    @Override
+    public Class<? extends SnapshotGenerator>[] replaces() {
+        return new Class[]{ SchemaSnapshotGenerator.class };
     }
 }
