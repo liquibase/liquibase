@@ -6,7 +6,6 @@ import spock.lang.Unroll
 
 import java.sql.Time
 import java.sql.Timestamp
-import java.text.SimpleDateFormat
 
 class ISODateFormatTest extends Specification {
 
