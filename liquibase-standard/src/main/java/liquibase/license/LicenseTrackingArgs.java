@@ -25,7 +25,7 @@ public class LicenseTrackingArgs implements AutoloadedConfigurations {
                 .build();
 
         URL = builder.define("url", String.class)
-                .setDefaultValue("http://localhost:8080")
+                .setDefaultValue("http://liquibase-tracking.local")
                 .build();
 
         LOG_LEVEL = builder.define("logLevel", Level.class)
