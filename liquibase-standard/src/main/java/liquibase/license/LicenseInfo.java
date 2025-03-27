@@ -14,6 +14,7 @@ public class LicenseInfo {
     private String issuedTo;
     private Date expirationDate;
     private String info;
+    private Date issuedDate;
 
     public String formatExpirationDate() {
         if (expirationDate != null) {
