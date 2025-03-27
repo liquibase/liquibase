@@ -4,6 +4,7 @@ import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
 
@@ -80,19 +81,27 @@ public class ISODateFormat {
                 return new java.sql.Timestamp(dateTimeFormat.parse(dateAsString).getTime());
             }
         case 25:
-            if (dateTimeFormatWithTimeZone.toLocalizedPattern().equals(DATE_TIME_FORMAT_STRING_WITH_TIMEZONE)) {
+            if(isDateFormatValid(dateAsString, DATE_TIME_FORMAT_STRING_WITH_TIMEZONE)) {
                 return new java.sql.Timestamp(dateTimeFormatWithTimeZone.parse(dateAsString).getTime());
-            } else {
-                return parseGenericDate(dateAsString, length);
             }
+            return parseGenericDate(dateAsString, length);
         case 28:
-            if (dateTimeFormatWithTimeZone.toLocalizedPattern().equals(DATE_TIME_FORMAT_STRING_WITH_TIMEZONE2)) {
+            if(isDateFormatValid(dateAsString, DATE_TIME_FORMAT_STRING_WITH_TIMEZONE2)) {
                 return new java.sql.Timestamp(dateTimeFormatWithTimeZone2.parse(dateAsString).getTime());
-            } else {
-                return parseGenericDate(dateAsString, length);
             }
-            default:
-                return parseGenericDate(dateAsString, length);
+            return parseGenericDate(dateAsString, length);
+        default:
+            return parseGenericDate(dateAsString, length);
+        }
+    }
+
+    private static boolean isDateFormatValid(String dateAsString, String dateFormat) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormat);
+        try {
+            OffsetDateTime.parse(dateAsString, formatter);
+            return true;
+        } catch (DateTimeParseException e) {
+            return false;
         }
     }
 
