@@ -621,6 +621,15 @@ public interface Database extends PrioritizedService, AutoCloseable {
 
     String unescapeDataTypeString(String dataTypeString);
 
+    default String escapeForLike(String string) {
+        if (string == null) {
+            return null;
+        }
+        return string
+                .replace("%", "\\%")
+                .replace("_", "\\_");
+    }
+
     ValidationErrors validate();
 
     default boolean failOnDefferable() {
