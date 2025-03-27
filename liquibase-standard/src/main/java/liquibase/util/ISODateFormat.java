@@ -4,21 +4,26 @@ import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
 
 public class ISODateFormat {
 
     private final SimpleDateFormat dateTimeFormat = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
+    private final SimpleDateFormat dateTimeFormat2 = new SimpleDateFormat(DATE_TIME_FORMAT_STRING2);
     private final SimpleDateFormat dateTimeFormatWithSpace = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_SPACE);
     private final SimpleDateFormat dateTimeFormatWithTimeZone = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_TIMEZONE);
     private final SimpleDateFormat dateTimeFormatWithTimeZone2 = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_TIMEZONE2);
     private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss";
+    private static final String DATE_TIME_FORMAT_STRING2 = "yyyy-MM-dd'T'HH:mm:ss";
     private static final String DATE_TIME_FORMAT_STRING_WITH_SPACE = "yyyy-MM-dd HH:mm:ss";
+    //"yyyy-MM-dd HH:mm:ss.SSSSS"
     private static final String DATE_TIME_FORMAT_STRING_WITH_TIMEZONE = "yyyy-MM-dd'T'HH:mm:ssXXX";
     private static final String DATE_TIME_FORMAT_STRING_WITH_TIMEZONE2 = "EEE MMM dd HH:mm:ss z yyyy";
+//2024-10-14T00:00:00+02:00
 
 
     public String format(java.sql.Date date) {
@@ -80,19 +85,27 @@ public class ISODateFormat {
                 return new java.sql.Timestamp(dateTimeFormat.parse(dateAsString).getTime());
             }
         case 25:
-            if (dateTimeFormatWithTimeZone.toLocalizedPattern().equals(DATE_TIME_FORMAT_STRING_WITH_TIMEZONE)) {
+            if(isDateFormatValid(dateAsString, DATE_TIME_FORMAT_STRING_WITH_TIMEZONE)) {
                 return new java.sql.Timestamp(dateTimeFormatWithTimeZone.parse(dateAsString).getTime());
-            } else {
-                return parseGenericDate(dateAsString, length);
             }
+            return parseGenericDate(dateAsString, length);
         case 28:
-            if (dateTimeFormatWithTimeZone.toLocalizedPattern().equals(DATE_TIME_FORMAT_STRING_WITH_TIMEZONE2)) {
+            if(isDateFormatValid(dateAsString, DATE_TIME_FORMAT_STRING_WITH_TIMEZONE2)) {
                 return new java.sql.Timestamp(dateTimeFormatWithTimeZone2.parse(dateAsString).getTime());
-            } else {
-                return parseGenericDate(dateAsString, length);
             }
-            default:
-                return parseGenericDate(dateAsString, length);
+            return parseGenericDate(dateAsString, length);
+        default:
+            return parseGenericDate(dateAsString, length);
+        }
+    }
+
+    private static boolean isDateFormatValid(String dateAsString, String dateFormat) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormat);
+        try {
+            OffsetDateTime.parse(dateAsString, formatter);
+            return true;
+        } catch (DateTimeParseException e) {
+            return false;
         }
     }
 
