@@ -209,11 +209,7 @@ public final class ChangeLogIncludeHelper {
 			}
 			String changeSetLogicalFilePath = changeSet.getLogicalFilePath();
 
-			boolean isRawSql = childChangeLog.getPhysicalFilePath() != null
-					&& childChangeLog.getPhysicalFilePath().endsWith(".sql");
-
-			if (changeSetLogicalFilePath == null
-					&&!isRawSql && !ranChangeSetExists(changeSet, ranChangeSets)) {
+			if (changeSetLogicalFilePath == null && !ranChangeSetExists(changeSet, ranChangeSets)) {
 				String finalLogicalFilePath = (logicalFilePath != null)
 						? logicalFilePath : getActualLogicalFilePath(changeSet.getChangeLog());
 				changeSet.setLogicalFilePath(finalLogicalFilePath);
