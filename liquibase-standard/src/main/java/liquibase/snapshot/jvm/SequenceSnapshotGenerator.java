@@ -225,10 +225,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                 return new RawParameterizedSqlStatement(sql.toString());
             }
         } else if (database instanceof MSSQLDatabase) {
-            StringBuilder sql = new StringBuilder("SELECT SEQUENCE_NAME, cast(START_VALUE AS BIGINT) AS START_VALUE, cast(MINIMUM_VALUE AS BIGINT) AS MIN_VALUE, ")
-                    .append("cast(MAXIMUM_VALUE AS BIGINT) AS MAX_VALUE, CAST(INCREMENT AS BIGINT) AS INCREMENT_BY, CYCLE_OPTION AS WILL_CYCLE ")
-                    .append("FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = ?");
-            return new RawParameterizedSqlStatement( sql.toString(), schema.getName());
+            return getMSSQLQuery(schema);
         } else if (database instanceof MariaDBDatabase) {
             StringJoiner j = new StringJoiner(" \n UNION\n");
             try {
@@ -265,5 +262,17 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         } else {
             throw new UnexpectedLiquibaseException("Don't know how to query for sequences on " + database);
         }
+    }
+
+    private static RawParameterizedSqlStatement getMSSQLQuery(Schema schema) {
+        String sql = "SELECT SEQUENCE_NAME, START_VALUE, MINIMUM_VALUE AS MIN_VALUE, " +
+                "MAXIMUM_VALUE AS MAX_VALUE, INCREMENT AS INCREMENT_BY, CYCLE_OPTION AS WILL_CYCLE, " +
+                // If we have a decimal sequence we want to include the precision with the data type.
+                // This is not necessary with types like bigint. Previously we did not include the data type
+                // in our query which would create the sequence with data type bigint. So we normalize all other
+                // non-decimal seq_type values to null.
+                "IIF(DATA_TYPE = 'decimal', DATA_TYPE + '(' + CAST(NUMERIC_PRECISION AS VARCHAR) + ')', NULL) AS SEQ_TYPE " +
+                "FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = ?";
+        return new RawParameterizedSqlStatement(sql, schema.getName());
     }
 }

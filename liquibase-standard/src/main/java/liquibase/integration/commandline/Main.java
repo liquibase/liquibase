@@ -34,6 +34,8 @@ import liquibase.ui.UIService;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.SystemUtil;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.io.output.WriterOutputStream;
 import org.apache.commons.lang3.StringUtils;
 
@@ -63,9 +65,13 @@ import static java.util.ResourceBundle.getBundle;
 public class Main {
 
     //set by new CLI to signify it is handling some of the configuration
+    @Getter
+    @Setter
     public static boolean runningFromNewCli;
 
     //temporary work-around to pass -D changelog parameters from new CLI to here
+    @Getter
+    @Setter
     public static Map<String, String> newCliChangelogParameters;
 
     private static PrintStream outputStream = System.out;
@@ -210,7 +216,7 @@ public class Main {
 
         scopeObjects.put(Scope.Attr.integrationDetails.name(), integrationDetails);
 
-        if (!Main.runningFromNewCli) {
+        if (!isRunningFromNewCli()) {
             List<UIService> uiOutputServices = new ArrayList<>();
             ConsoleUIService console = new ConsoleUIService();
             console.setAllowPrompt(true);
@@ -289,7 +295,7 @@ public class Main {
                             throw e;
                         }
 
-                        if (!Main.runningFromNewCli) {
+                        if (!isRunningFromNewCli()) {
                             final UIService ui = Scope.getCurrentScope().getUI();
                             System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] %4$s [%2$s] %5$s%6$s%n");
 
@@ -343,7 +349,7 @@ public class Main {
                         LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
                         if (licenseService != null) {
                             if (main.liquibaseProLicenseKey == null) {
-                                if (!Main.runningFromNewCli) {
+                                if (!isRunningFromNewCli()) {
                                     Scope.getCurrentScope().getLog(getClass()).info("No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
                                 }
                             } else {
@@ -351,18 +357,18 @@ public class Main {
                                 LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
                                 if (result.code != 0) {
                                     String allMessages = String.join("\n", result.messages);
-                                    if (!Main.runningFromNewCli) {
+                                    if (!isRunningFromNewCli()) {
                                         Scope.getCurrentScope().getUI().sendMessage(allMessages);
                                     }
                                 }
                             }
 
-                            if (!Main.runningFromNewCli) {
+                            if (!isRunningFromNewCli()) {
                                 Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
                             }
                         }
 
-                        if (!Main.runningFromNewCli) {
+                        if (!isRunningFromNewCli()) {
                             Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
                         }
 
@@ -384,7 +390,7 @@ public class Main {
                         main.applyDefaults();
                         Map<String, Object> innerScopeObjects = new HashMap<>();
                         innerScopeObjects.put("defaultsFile", LiquibaseCommandLineConfiguration.DEFAULTS_FILE.getCurrentValue());
-                        if (!Main.runningFromNewCli) {
+                        if (!isRunningFromNewCli()) {
                             innerScopeObjects.put(Scope.Attr.resourceAccessor.name(), new CompositeResourceAccessor(
                                     new DirectoryResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
                                     new ClassLoaderResourceAccessor(main.configureClassLoader())
@@ -393,7 +399,7 @@ public class Main {
 
                         Scope.child(innerScopeObjects, () -> {
                             main.doMigration();
-                            if (!Main.runningFromNewCli) {
+                            if (!isRunningFromNewCli()) {
                                 if (COMMANDS.UPDATE.equals(main.command)) {
                                     Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
                                 } else if (main.command.startsWith(COMMANDS.ROLLBACK)) {
@@ -418,7 +424,7 @@ public class Main {
                             if (e.getCause() instanceof ValidationFailedException) {
                                 ((ValidationFailedException) e.getCause()).printDescriptiveError(outputStream);
                             } else {
-                                if (!Main.runningFromNewCli) {
+                                if (!isRunningFromNewCli()) {
                                     if (main.outputsLogMessages) {
                                         Scope.getCurrentScope().getUI().sendErrorMessage((String.format(coreBundle.getString("unexpected.error"), message)), e);
                                     } else {
@@ -431,13 +437,13 @@ public class Main {
                                 }
                             }
                         } catch (IllegalFormatException e1) {
-                            if (Main.runningFromNewCli) {
+                            if (isRunningFromNewCli()) {
                                 throw e1;
                             }
 
                             e1.printStackTrace();
                         }
-                        if (runningFromNewCli) {
+                        if (isRunningFromNewCli()) {
                             throw e;
                         } else {
                             throw new LiquibaseException(String.format(coreBundle.getString("unexpected.error"), message), e);
@@ -459,7 +465,7 @@ public class Main {
     }
 
     protected static void setLogLevel(LogService logService, java.util.logging.Logger rootLogger, java.util.logging.Logger liquibaseLogger, Level level) {
-        if (Main.runningFromNewCli) {
+        if (isRunningFromNewCli()) {
             //new CLI configures logging
             return;
         }
@@ -997,7 +1003,7 @@ public class Main {
         Properties props = new Properties();
         props.load(propertiesInputStream);
 
-        if (Main.runningFromNewCli) {
+        if (isRunningFromNewCli()) {
             parsePropertiesFileForNewCli(props);
             return;
         }
@@ -1441,8 +1447,8 @@ public class Main {
             }
 
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
-            if (Main.newCliChangelogParameters != null) {
-                for (Map.Entry<String, String> param : Main.newCliChangelogParameters.entrySet()) {
+            if (Main.getNewCliChangelogParameters() != null) {
+                for (Map.Entry<String, String> param : Main.getNewCliChangelogParameters().entrySet()) {
                     liquibase.setChangeLogParameter(param.getKey(), param.getValue());
                 }
             }
@@ -1954,7 +1960,7 @@ public class Main {
      */
     private ResourceAccessor getFileOpenerResourceAccessor() throws FileNotFoundException {
         ResourceAccessor fileOpener;
-        if (Main.runningFromNewCli) {
+        if (isRunningFromNewCli()) {
             fileOpener = Scope.getCurrentScope().getResourceAccessor();
         } else {
             fileOpener = new CompositeResourceAccessor(
