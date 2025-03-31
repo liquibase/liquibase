@@ -15,6 +15,7 @@ public class LicenseTrackingArgs implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<String> URL;
     public static final ConfigurationDefinition<Level> LOG_LEVEL;
     public static final ConfigurationDefinition<String> TRACKING_ID;
+    public static final ConfigurationDefinition<Integer> TIMEOUT;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase.license.utility");
@@ -34,6 +35,12 @@ public class LicenseTrackingArgs implements AutoloadedConfigurations {
 
         TRACKING_ID = builder.define("trackingId", String.class)
                 .setDescription("Specifies an identifier (e.g., team name, pipeline ID, or environment) to track and analyze Liquibase license usage. If not provided, the hostname and user is used for identification.")
+                .build();
+
+        TIMEOUT = builder.define("timeout", Integer.class)
+                .setDescription("Time, in milliseconds, to wait for HTTP request to complete")
+                .setDefaultValue(1500)
+                .setHidden(true)
                 .build();
     }
 }

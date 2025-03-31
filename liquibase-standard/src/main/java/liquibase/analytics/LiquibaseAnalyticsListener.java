@@ -123,7 +123,9 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
                         logger,
                         logLevel,
                         "Sending anonymous data to Liquibase analytics endpoint. ",
-                        "Response from Liquibase analytics endpoint: ");
+                        "Response from Liquibase analytics endpoint: ",
+                        0,
+                        0);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -141,13 +143,15 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
         }
     }
 
-    public static void sendEvent(Object requestBody, URL url, Logger logger, Level logLevel, String sendingLogMessage, String responseLogMessage) throws Exception {
+    public static void sendEvent(Object requestBody, URL url, Logger logger, Level logLevel, String sendingLogMessage, String responseLogMessage, int connectTimeout, int readTimeout) throws Exception {
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", "application/json; utf-8");
         conn.setRequestProperty("Accept", "application/json");
         // Enable input and output streams
         conn.setDoOutput(true);
+        conn.setConnectTimeout(connectTimeout);
+        conn.setReadTimeout(readTimeout);
 
         DumperOptions dumperOptions = new DumperOptions();
         dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
