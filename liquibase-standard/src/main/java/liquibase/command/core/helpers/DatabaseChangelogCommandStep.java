@@ -10,7 +10,6 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.IncludeVisitor;
 import liquibase.command.*;
-import liquibase.configuration.ConfigurationDefinition;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.lockservice.LockServiceFactory;
@@ -19,7 +18,7 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -100,14 +99,30 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
             changeLogParameters.addJavaProperties();
             changeLogParameters.addDefaultFileProperties();
         }
+        extractContextAndLabels(commandScope, changeLogParameters);
+        return changeLogParameters;
+    }
+
+    /**
+     * Extracts contexts and labels from the command scope and if present sets them in the changeLogParameters.
+     * Contexts and labels from dedicated parameters have priority over the values from the changeLogParameters.
+     */
+    private void extractContextAndLabels(CommandScope commandScope, ChangeLogParameters changeLogParameters) {
         Contexts contexts = new Contexts(commandScope.getArgumentValue(CONTEXTS_ARG));
-        changeLogParameters.setContexts(contexts);
+        if (contexts.isEmpty()) {
+            contexts = changeLogParameters.getContexts();
+        } else {
+            changeLogParameters.setContexts(contexts);
+        }
         commandScope.provideDependency(Contexts.class, contexts);
         LabelExpression labels = new LabelExpression(commandScope.getArgumentValue(LABEL_FILTER_ARG));
-        changeLogParameters.setLabels(labels);
+        if (labels.isEmpty()) {
+            labels = changeLogParameters.getLabels();
+        } else {
+            changeLogParameters.setLabels(labels);
+        }
         commandScope.provideDependency(LabelExpression.class, labels);
         addCommandFiltersMdc(labels, contexts);
-        return changeLogParameters;
     }
 
     public static void addCommandFiltersMdc(LabelExpression labelExpression, Contexts contexts) {
@@ -125,7 +140,7 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         }
         DatabaseChangeLog changelog = Scope.child(Collections.singletonMap(Scope.Attr.database.name(), database),
                 () -> parser.parse(changeLogFile, changeLogParameters, resourceAccessor));
-        if (StringUtil.isNotEmpty(changelog.getLogicalFilePath())) {
+        if (StringUtils.isNotEmpty(changelog.getLogicalFilePath())) {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changelog.getLogicalFilePath());
         } else {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changeLogFile);
