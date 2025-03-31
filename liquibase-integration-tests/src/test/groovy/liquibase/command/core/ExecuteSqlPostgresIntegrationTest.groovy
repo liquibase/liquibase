@@ -32,9 +32,6 @@ class ExecuteSqlPostgresIntegrationTest extends Specification {
         CommandResults results = executeSql.execute()
         String output = results.getResult("output") as String
         output.contains("Output of select * from databasechangelog")
-
-        cleanup:
-        CommandUtil.runDropAll(postgres)
     }
 
     def "validate executeSql output display columns in the same order they were specified in the select"() {
@@ -54,8 +51,30 @@ class ExecuteSqlPostgresIntegrationTest extends Specification {
         String output = results.getResult("output") as String
         output.contains("Output of select filename, author, exectype, comments, description from databasechangelog order by filename,exectype:")
         output.contains("FILENAME | AUTHOR | EXECTYPE | COMMENTS | DESCRIPTION |")
+    }
 
-        cleanup:
-        CommandUtil.runDropAll(postgres)
+    def "Can run multiline SQL"() {
+        given:
+        CommandUtil.runUpdate(postgres,"src/test/resources/changelogs/pgsql/update/showSummaryWithLabels.xml")
+        String sql = """
+SELECT LABELS AS CHANGE_REQUEST, 'RAW' AS LAYER, AUTHOR, FILENAME, COMMENTS FROM DATABASECHANGELOG WHERE COMMENTS='this doesnt exist'
+UNION ALL
+SELECT LABELS AS CHANGE_REQUEST, 'RAW' AS LAYER, AUTHOR, FILENAME, COMMENTS FROM DATABASECHANGELOG WHERE COMMENTS='this doesnt exist'
+UNION ALL
+SELECT LABELS AS CHANGE_REQUEST, 'RAW' AS LAYER, AUTHOR, FILENAME, COMMENTS FROM DATABASECHANGELOG WHERE COMMENTS='this doesnt exist'
+ORDER BY CHANGE_REQUEST,LAYER
+"""
+
+        when:
+        CommandScope executeSql = new CommandScope(ExecuteSqlCommandStep.COMMAND_NAME[0])
+        executeSql.addArgumentValue(ExecuteSqlCommandStep.SQL_ARG, sql)
+        executeSql.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, postgres.getConnectionUrl())
+        executeSql.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, postgres.getUsername())
+        executeSql.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, postgres.getPassword())
+
+        then:
+        CommandResults results = executeSql.execute()
+        String output = results.getResult("output") as String
+        output.contains("-- Empty Resultset --")
     }
 }
