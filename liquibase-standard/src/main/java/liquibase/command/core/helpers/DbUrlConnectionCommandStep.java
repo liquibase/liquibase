@@ -187,8 +187,6 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
             // This the more robust (IMO) way of stripping parameters, but doesn't work for all path formats.
             cleanedUri = new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), null, uri.getFragment()).toString();
         } catch (Exception e) {
-            // This doesn't strip any parameters, it just parses the URI.
-            cleanedUri = new URI(uri.getScheme(), uri.getSchemeSpecificPart(), uri.getFragment()).toString();
             // Remove the query parameters manually.
             cleanedUri = cleanedUri.split("\\?")[0];
         }
