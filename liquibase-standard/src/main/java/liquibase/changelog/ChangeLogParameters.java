@@ -256,6 +256,25 @@ public class ChangeLogParameters {
     }
 
     /**
+     * Try to get local property from given ChangeSet.
+     */
+    public Object getLocalValue(String key, ChangeSet changeSet) {
+        List<ChangeLogParameter> localList = localParameters.get(changeSet.getFilePath());
+
+        if (null != localList) {
+            localList = new ArrayList<>(localList);
+
+            for (ChangeLogParameter parameter : localList) {
+                if (parameter.getKey().equalsIgnoreCase(key)) {
+                    return parameter;
+                }
+            }
+        }
+
+        return (null);
+    }
+
+    /**
      * Return whether the given parameters is defined, taking into account parameters local to the given changelog file
      * as well as contexts, labels, and database configured on this instance
      */
