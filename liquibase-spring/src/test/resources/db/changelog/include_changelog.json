@@ -1,0 +1,10 @@
+{
+    "databaseChangeLog": [
+        {
+            "includeAll": {
+                "path": "auxFiles",
+                "relativeToChangelogFile": true
+            }
+        }
+    ]
+}

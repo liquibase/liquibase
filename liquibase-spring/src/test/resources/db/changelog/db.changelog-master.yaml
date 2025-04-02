@@ -1,1 +1,3 @@
 databaseChangeLog:
+- include:
+    file: include_changelog.json
