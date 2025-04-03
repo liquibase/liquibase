@@ -1,8 +1,11 @@
 package liquibase.resource;
 
+import liquibase.Scope;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 public abstract class AbstractResource implements Resource {
 
@@ -13,16 +16,51 @@ public abstract class AbstractResource implements Resource {
 
     public AbstractResource(String path, URI uri) {
         this.originalPath = path;
-        this.path = path
-                .replace("\\", "/")
-                .replaceFirst("^classpath\\*?:", "")
-                .replaceFirst("^/", "");
-
         if (uri != null) {
-            this.uri = uri.normalize();
+            this.uri = handleUriSyntax(uri);
         } else {
             this.uri = null;
         }
+
+        String pathL = path
+                .replace("\\", "/")
+                .replaceFirst("^classpath\\*?:", "");
+
+        if (uri != null && uri.toString().contains("!")) {
+            this.path = handlePathForJarfile(pathL);
+        } else {
+            this.path = pathL.replaceFirst("^/", "");
+        }
+    }
+
+    /**
+     * Handle the path for jar file resources as URI does not work as expected when you have an exclamation mark in the path.
+     */
+    private String handlePathForJarfile(String pathL) {
+        String relative = this.uri.toString().replaceFirst(".*!", "");
+        try {
+            if (!pathL.startsWith("..")) {
+                pathL = "/" + pathL;
+            }
+            return new URI(relative).resolve(new URI(pathL).normalize()).toString().replaceFirst("^/", "");
+        } catch (URISyntaxException e) {
+            Scope.getCurrentScope().getLog(AbstractResource.class).warning("Error handling URI syntax for file inside jar. Defaulting to previous behavior.", e);
+            return pathL.replaceFirst("^/", "");
+        }
+    }
+
+    private static URI handleUriSyntax(URI uri) {
+        // when we have a file inside a zip/jar file (denoted by the exclamation mark)
+        // URI doesn't work as expected. So we need some manual handling
+        if (uri.toString().contains(("!"))) {
+            String[] uriSplit = uri.toString().split(("!"));
+            try {
+                return new URI(uriSplit[0] + "!" + new URI(uriSplit[1]).normalize());
+            } catch (URISyntaxException e) {
+                return uri.normalize();
+            }
+        }
+        return uri.normalize();
     }
 
     @Override
