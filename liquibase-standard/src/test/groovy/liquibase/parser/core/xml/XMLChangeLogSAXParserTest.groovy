@@ -142,7 +142,7 @@ class XMLChangeLogSAXParserTest extends Specification {
         then:
         def e = thrown(ChangeLogParseException)
         e.message.contains("Error parsing line")
-        e.message.contains("\"databaseChangeLog\" expected as root element")
+        e.message.contains("iDontKnowWhatImDoing")
 
     }
 
