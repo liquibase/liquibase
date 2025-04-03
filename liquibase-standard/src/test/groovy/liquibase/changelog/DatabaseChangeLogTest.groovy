@@ -576,7 +576,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         then:
         def e = thrown(SetupException)
-        e.getMessage().contains("Premature end of file.")
+        e.getMessage().contains("Unable to parse empty file")
     }
 
     def "include fails if SQL file is empty"() {
