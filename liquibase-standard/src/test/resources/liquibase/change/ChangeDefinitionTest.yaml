@@ -1083,7 +1083,7 @@ stop: |
 
 tagDatabase: |
   keepTagOnRollback boolean 
-    Description: Tag should not be removed during a rollback Default: false.
+    Description: Tag should not be removed during a rollback. Default: false.
     Supported: all
   tag string 
     Description: Tag to apply

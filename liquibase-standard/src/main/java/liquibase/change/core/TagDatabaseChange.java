@@ -26,7 +26,7 @@ public class TagDatabaseChange extends AbstractChange {
         return tag;
     }
 
-    @DatabaseChangeProperty(description = "Tag should not be removed during a rollback Default: false.")
+    @DatabaseChangeProperty(description = "Tag should not be removed during a rollback. Default: false.")
     public Boolean isKeepTagOnRollback() {
         return keepTagOnRollback;
     }
