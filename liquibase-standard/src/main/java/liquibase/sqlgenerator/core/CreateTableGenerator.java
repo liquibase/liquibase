@@ -2,16 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.Scope;
 import liquibase.database.Database;
-import liquibase.database.core.AbstractDb2Database;
-import liquibase.database.core.Db2zDatabase;
-import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
-import liquibase.database.core.SQLiteDatabase;
-import liquibase.database.core.SybaseASADatabase;
-import liquibase.database.core.SybaseDatabase;
+import liquibase.database.core.*;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
@@ -136,7 +127,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     }
                     buffer.append(" CONSTRAINT ").append(database.escapeObjectName(constraintName, ForeignKey.class));
                 }
-                if (((database instanceof OracleDatabase) || (database instanceof PostgresDatabase) || database.getShortName().equalsIgnoreCase("databricks"))
+                if (((database instanceof HsqlDatabase) || (database instanceof OracleDatabase) || (database instanceof PostgresDatabase) || database.getShortName().equalsIgnoreCase("databricks"))
                         && statement.getDefaultValue(column).toString().startsWith("GENERATED ALWAYS ")) {
                     buffer.append(" ");
                 } else if (database instanceof Db2zDatabase && statement.getDefaultValue(column).toString().contains("CURRENT TIMESTAMP")
