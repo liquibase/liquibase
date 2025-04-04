@@ -114,7 +114,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                     finalRunChangeLogIterator.run(new UpdateVisitor(database, changeExecListener, new ShouldRunChangeSetFilter(database)),
                             new RuntimeEnvironment(database, contexts, labelExpression));
                 } finally {
-                    UpdateSummaryDetails details = ShowSummaryUtil.buildSummaryDetails(databaseChangeLog, getShowSummary(commandScope), getShowSummaryOutput(commandScope), statusVisitor, resultsBuilder.getOutputStream(), finalRunChangeLogIterator, changeExecListener);
+                    UpdateSummaryDetails details = ShowSummaryUtil.buildSummaryDetails(databaseChangeLog, getShowSummary(commandScope), getShowSummaryOutput(commandScope), statusVisitor, resultsBuilder.getOutputStream(), finalRunChangeLogIterator, changeExecListener, finalRunChangeLogIterator.getChangeSetFilters());
                     if (details != null) {
                         updateReportParameters.getOperationInfo().setUpdateSummaryMsg(details.getOutput());
                         updateReportParameters.getChangesetInfo().addAllToPendingChangesetInfoList(details.getSkipped());
@@ -298,7 +298,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             StatusVisitor statusVisitor = getStatusVisitor(commandScope, database, contexts, labelExpression, databaseChangeLog);
             UpdateSummaryEnum showSummary = getShowSummary(commandScope);
             UpdateSummaryOutputEnum showSummaryOutput = getShowSummaryOutput(commandScope);
-            ShowSummaryUtil.showUpdateSummary(databaseChangeLog, showSummary, showSummaryOutput, statusVisitor, outputStream, null);
+            ShowSummaryUtil.showUpdateSummary(databaseChangeLog, showSummary, showSummaryOutput, statusVisitor, outputStream, null, filters);
             return true;
         }
         return false;

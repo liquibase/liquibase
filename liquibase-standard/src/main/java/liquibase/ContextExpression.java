@@ -19,6 +19,9 @@ public class ContextExpression {
     @Getter
     private String originalString;
 
+    private final Set<String> matchedLabels = new LinkedHashSet<>();
+    private final Set<String> unMatchedLabels = new LinkedHashSet<>();
+
     public ContextExpression(String... contexts) {
         if (contexts.length == 1) {
             parseContextString(contexts[0]);
@@ -89,12 +92,16 @@ public class ContextExpression {
             return true;
         }
 
+        boolean matches = false;
         for (String expression : this.contexts) {
             if (matches(expression, runtimeContexts)) {
-                return true;
+                matchedLabels.add(expression);
+                matches = true;
+            } else {
+                unMatchedLabels.add(expression);
             }
         }
-        return false;
+        return matches;
     }
 
     private boolean matches(String expression, Contexts runtimeContexts) {
@@ -119,6 +126,11 @@ public class ContextExpression {
             }
         }
         return true;
+    }
+
+    public Set<String> getUnMatchedLabels() {
+        unMatchedLabels.removeAll(matchedLabels);
+        return unMatchedLabels;
     }
 
 }

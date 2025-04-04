@@ -21,6 +21,9 @@ public class LabelExpression {
     private final HashSet<String> labels = new LinkedHashSet<>();
     private String originalString;
 
+    private final Set<String> matchedLabels = new LinkedHashSet<>();
+    private final Set<String> unMatchedLabels = new LinkedHashSet<>();
+
     public LabelExpression() {
     }
 
@@ -92,12 +95,21 @@ public class LabelExpression {
             return true;
         }
 
+        boolean matches = false;
         for (String expression : this.labels) {
             if (matches(expression, runtimeLabels)) {
-                return true;
+                matchedLabels.add(expression);
+                matches = true;
+            } else {
+                unMatchedLabels.add(expression);
             }
         }
-        return false;
+        return matches;
+    }
+
+    public Set<String> getUnMatchedLabels() {
+        unMatchedLabels.removeAll(matchedLabels);
+        return unMatchedLabels;
     }
 
     /**

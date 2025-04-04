@@ -1,15 +1,15 @@
     package liquibase.changelog.filter;
 
-import liquibase.LabelExpression;
-import liquibase.Labels;
-import liquibase.changelog.ChangeSet;
-import liquibase.sql.visitor.SqlVisitor;
+    import liquibase.LabelExpression;
+    import liquibase.Labels;
+    import liquibase.changelog.ChangeSet;
+    import liquibase.sql.visitor.SqlVisitor;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+    import java.util.ArrayList;
+    import java.util.List;
+    import java.util.Set;
 
-public class LabelChangeSetFilter implements ChangeSetFilter {
+    public class LabelChangeSetFilter implements ChangeSetFilter {
     private LabelExpression labelExpression;
 
     public LabelChangeSetFilter() {
@@ -51,5 +51,9 @@ public class LabelChangeSetFilter implements ChangeSetFilter {
     @Override
     public String getDisplayName() {
         return "Label mismatch";
+    }
+
+    public Set<String> getUnMatchedLabels() {
+        return labelExpression.getUnMatchedLabels();
     }
 }

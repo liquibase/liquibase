@@ -8,10 +8,7 @@ import liquibase.changelog.ChangeLogIterator;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.ChangeSetStatus;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.filter.ChangeSetFilter;
-import liquibase.changelog.filter.ChangeSetFilterResult;
-import liquibase.changelog.filter.DbmsChangeSetFilter;
-import liquibase.changelog.filter.ShouldRunChangeSetFilter;
+import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.changelog.visitor.StatusVisitor;
@@ -53,7 +50,7 @@ public class ShowSummaryUtil {
     @Deprecated
     public static void showUpdateSummary(DatabaseChangeLog changeLog, UpdateSummaryEnum showSummary, UpdateSummaryOutputEnum showSummaryOutput, StatusVisitor statusVisitor, OutputStream outputStream)
             throws LiquibaseException, IOException {
-        showUpdateSummary(changeLog, showSummary, showSummaryOutput, statusVisitor, outputStream, null);
+        showUpdateSummary(changeLog, showSummary, showSummaryOutput, statusVisitor, outputStream, null, null);
     }
 
     /**
@@ -67,9 +64,8 @@ public class ShowSummaryUtil {
      * @throws LiquibaseException Thrown by this method
      * @throws IOException        Thrown by this method
      */
-    public static void showUpdateSummary(DatabaseChangeLog changeLog, UpdateSummaryEnum showSummary, UpdateSummaryOutputEnum showSummaryOutput, StatusVisitor statusVisitor, OutputStream outputStream, ChangeLogIterator runChangeLogIterator)
-            throws LiquibaseException, IOException {
-        buildSummaryDetails(changeLog, showSummary, showSummaryOutput, statusVisitor, outputStream, runChangeLogIterator, null);
+    public static void showUpdateSummary(DatabaseChangeLog changeLog, UpdateSummaryEnum showSummary, UpdateSummaryOutputEnum showSummaryOutput, StatusVisitor statusVisitor, OutputStream outputStream, ChangeLogIterator runChangeLogIterator, List<ChangeSetFilter> filters)  throws LiquibaseException, IOException {
+        buildSummaryDetails(changeLog, showSummary, showSummaryOutput, statusVisitor, outputStream, runChangeLogIterator, null, filters);
     }
 
     /**
@@ -83,11 +79,11 @@ public class ShowSummaryUtil {
      * @return the details of the update summary
      * @throws LiquibaseException Thrown by this method
      * @throws IOException        Thrown by this method
-     * @deprecated use {@link ShowSummaryUtil#buildSummaryDetails(DatabaseChangeLog, UpdateSummaryEnum, UpdateSummaryOutputEnum, StatusVisitor, OutputStream, ChangeLogIterator, ChangeExecListener)} instead.
+     * @deprecated use {@link ShowSummaryUtil#buildSummaryDetails(DatabaseChangeLog, UpdateSummaryEnum, UpdateSummaryOutputEnum, StatusVisitor, OutputStream, ChangeLogIterator, ChangeExecListener, List)} instead.
      */
     @Deprecated
     public static UpdateSummaryDetails buildSummaryDetails(DatabaseChangeLog changeLog, UpdateSummaryEnum showSummary, UpdateSummaryOutputEnum showSummaryOutput, StatusVisitor statusVisitor, OutputStream outputStream, ChangeLogIterator runChangeLogIterator) throws LiquibaseException, IOException {
-        return buildSummaryDetails(changeLog, showSummary, showSummaryOutput, statusVisitor,outputStream, runChangeLogIterator, null);
+        return buildSummaryDetails(changeLog, showSummary, showSummaryOutput, statusVisitor,outputStream, runChangeLogIterator, null, null);
     }
 
     /**
@@ -103,7 +99,7 @@ public class ShowSummaryUtil {
      * @throws LiquibaseException Thrown by this method
      * @throws IOException        Thrown by this method
      */
-    public static UpdateSummaryDetails buildSummaryDetails(DatabaseChangeLog changeLog, UpdateSummaryEnum showSummary, UpdateSummaryOutputEnum showSummaryOutput, StatusVisitor statusVisitor, OutputStream outputStream, ChangeLogIterator runChangeLogIterator, ChangeExecListener changeExecListener)
+    public static UpdateSummaryDetails buildSummaryDetails(DatabaseChangeLog changeLog, UpdateSummaryEnum showSummary, UpdateSummaryOutputEnum showSummaryOutput, StatusVisitor statusVisitor, OutputStream outputStream, ChangeLogIterator runChangeLogIterator, ChangeExecListener changeExecListener, List<ChangeSetFilter> filters)
             throws LiquibaseException, IOException {
         //
         // Check the global flag to turn the summary off
@@ -164,6 +160,15 @@ public class ShowSummaryUtil {
         summaryDetails.setSkipped(filteredChanges.getSkippedChangesetsMessage());
         try (MdcObject updateSummaryMdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_SUMMARY, summaryDetails.getSummary())) {
             Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info("Update summary generated");
+        }
+        for (ChangeSetFilter filter : filters) {
+            if (filter instanceof LabelChangeSetFilter) {
+                System.out.println("Unmatched labels: " + ((LabelChangeSetFilter) filter).getUnMatchedLabels());
+            }
+
+            if (filter instanceof ContextChangeSetFilter) {
+                System.out.println("Unmatched contexts: " + ((ContextChangeSetFilter) filter).getUnMatchedContexts());
+            }
         }
         return summaryDetails;
     }
