@@ -19,6 +19,7 @@ import liquibase.integration.IntegrationDetails;
 import liquibase.integration.commandline.ChangeExecListenerUtils;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
+import liquibase.license.LicenseTrackingArgs;
 import liquibase.logging.LogFormat;
 import liquibase.logging.LogService;
 import liquibase.logging.core.JavaLogService;
@@ -724,6 +725,15 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement(key = "liquibase.analytics.enabled")
     protected Boolean analyticsEnabled;
+
+    /**
+     * Enable or disable sending license usage data.
+     *
+     * @parameter property="liquibase.licenseUtilityEnabled"
+     */
+    @PropertyElement(key = "liquibase.licenseUtility.enabled")
+    protected Boolean licenseUtilityEnabled;
+
     /**
      * Specifies the vault URL
      *
@@ -915,6 +925,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 scopeValues.put(Scope.Attr.mavenConfigurationProperties.name(), getConfigurationProperties());
                 if (analyticsEnabled != null) {
                     scopeValues.put(AnalyticsArgs.ENABLED.getKey(), analyticsEnabled);
+                }
+                if (licenseUtilityEnabled != null) {
+                    scopeValues.put(LicenseTrackingArgs.ENABLED.getKey(), licenseUtilityEnabled);
                 }
                 handleVaultProperties(scopeValues);
 
