@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
-import static liquibase.analytics.configuration.AnalyticsArgs.TIMEOUT_MILLIS;
-
 @NoArgsConstructor
 /**
  * This class implements the {@link AnalyticsListener} interface and is responsible for handling
@@ -123,8 +121,8 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json; utf-8");
             conn.setRequestProperty("Accept", "application/json");
-            conn.setConnectTimeout(TIMEOUT_MILLIS.getCurrentValue());
-            conn.setReadTimeout(TIMEOUT_MILLIS.getCurrentValue());
+            conn.setConnectTimeout(analyticsConfiguration.getTimeoutMillis());
+            conn.setReadTimeout(analyticsConfiguration.getTimeoutMillis());
             // Enable input and output streams
             conn.setDoOutput(true);
 
