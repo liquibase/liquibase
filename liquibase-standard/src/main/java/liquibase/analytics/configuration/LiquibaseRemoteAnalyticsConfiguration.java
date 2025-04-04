@@ -5,7 +5,9 @@ import liquibase.configuration.ConfiguredValue;
 import liquibase.logging.Logger;
 import liquibase.util.Cache;
 import lombok.Data;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.io.InputStream;
 import java.net.SocketTimeoutException;
@@ -47,8 +49,8 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
             urlConnection.setConnectTimeout(AnalyticsArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getCurrentValue());
             urlConnection.setReadTimeout(AnalyticsArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getCurrentValue());
             InputStream input = urlConnection.getInputStream();
-            Yaml yaml = new Yaml();
-            Map<String, Object> loaded = yaml.loadAs(input, Map.class);
+            Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
+            Map<String, Object> loaded = yaml.load(input);
             remoteAnalyticsConfiguration.set(RemoteAnalyticsConfiguration.fromYaml(loaded));
         } catch (SocketTimeoutException e) {
             log.log(logLevel, "Timed out while attempting to load analytics configuration from " + url, null);
