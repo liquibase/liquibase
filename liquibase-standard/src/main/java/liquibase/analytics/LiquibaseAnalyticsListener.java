@@ -113,7 +113,6 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
             }
             return issuedTo;
         });
-        AtomicBoolean timedOut = new AtomicBoolean(true);
 
         try {
             URL url = new URL(analyticsConfiguration.getDestinationUrl());
@@ -145,7 +144,6 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
             });
             logger.log(logLevel, "Response from Liquibase analytics endpoint: " + responseCode + " " + responseBody, null);
             conn.disconnect();
-            timedOut.set(false);
             cachedEvents.clear();
         } catch (Exception e) {
             if (e instanceof SocketTimeoutException) {
