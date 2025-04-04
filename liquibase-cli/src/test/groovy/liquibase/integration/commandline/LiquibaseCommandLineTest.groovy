@@ -274,7 +274,7 @@ Global Options
                                'LIQUIBASE_LICENSE_UTILITY_TRACKING_ID')
 
       --license-utility-url=PARAM
-                             DEFAULT: http://localhost:8080
+                             DEFAULT: http://liquibase-tracking.local
                              (defaults file: 'liquibase.license.utility.url',
                                environment variable:
                                'LIQUIBASE_LICENSE_UTILITY_URL')
