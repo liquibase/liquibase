@@ -141,7 +141,7 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
 
             int responseCode = conn.getResponseCode();
             String responseBody = ExceptionUtil.doSilently(() -> {
-                return IOUtils.toString(conn.getInputStream());
+                return IOUtils.toString(conn.getInputStream(), StandardCharsets.UTF_8);
             });
             logger.log(logLevel, "Response from Liquibase analytics endpoint: " + responseCode + " " + responseBody, null);
             conn.disconnect();
