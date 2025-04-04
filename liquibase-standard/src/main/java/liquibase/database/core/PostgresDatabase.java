@@ -301,9 +301,14 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         if ((objectName == null) || (quotingStrategy != ObjectQuotingStrategy.LEGACY)) {
             return super.correctObjectName(objectName, objectType);
         }
+
+        if (objectType.equals(Catalog.class) && !StringUtil.hasLowerCase(objectName)) {
+            return objectName;
+        }
         //
         // Check preserve case flag for schema
         //
+
         if (objectType.equals(Schema.class) && Boolean.TRUE.equals(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue())) {
             return objectName;
         }

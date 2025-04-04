@@ -1,0 +1,106 @@
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+                        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+
+    <changeSet id="createTable-simple" author="tfernandez">
+        <createTable tableName="city">
+            <column name="name" type="varchar(255)" />
+            <column name="zipCode" type="varchar(10)" />
+            <column name="country" type="varchar(70)" />
+        </createTable>
+    </changeSet>
+
+    <changeSet id="addPrimaryKey" author="tfernandez">
+        <addPrimaryKey tableName="city" columnNames="zipCode" constraintName="pk_city_zipCode" />
+    </changeSet>
+
+    <changeSet id="addNotNull-no-data-type" author="tfernandez">
+        <preConditions>
+            <not>
+                <or>
+                    <dbms type="informix" />
+                    <dbms type="mariadb" />
+                    <dbms type="mssql" />
+                    <dbms type="mysql" />
+                </or>
+            </not>
+        </preConditions>
+        <addNotNullConstraint tableName="city" columnName="name" constraintName="not_null_city_name" />
+    </changeSet>
+
+    <changeSet id="addNotNull-with-data-type" author="tfernandez">
+        <preConditions>
+            <or>
+                <dbms type="informix" />
+                <dbms type="mariadb" />
+                <dbms type="mssql" />
+                <dbms type="mysql" />
+            </or>
+        </preConditions>
+        <addNotNullConstraint tableName="city" columnName="name" constraintName="not_null_city_name"
+            columnDataType="text" />
+    </changeSet>
+
+    <changeSet id="creatTable-simple-foreign-key" author="tfernandez">
+        <createTable tableName="person">
+            <column name="id" type="int">
+                <constraints nullable="false" notNullConstraintName="person-id-not-null"
+                    primaryKey="true" primaryKeyName="pk-person-id" />
+            </column>
+            <column name="name" type="varchar(100)" />
+            <column name="city" type="varchar(10)">
+                <constraints referencedColumnNames="zipCode" referencedTableName="city" foreignKeyName="fk-person-city" />
+            </column>
+            <column name="isLeftHanded" type="bool" />
+        </createTable>
+    </changeSet>
+
+    <changeSet id="addColumn" author="tfernandez">
+        <addColumn tableName="person">
+            <column name="lastName" type="varchar(100)" />
+            <column name="dob" type="date" defaultValueDate="2000-01-01" />
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="addAutoIncrement" author="tfernandez">
+        <addAutoIncrement tableName="person" columnName="id" />
+    </changeSet>
+
+    <changeSet id="addDefaultValue" author="tfernandez">
+        <addDefaultValue tableName="person" columnName="isLeftHanded" defaultValueBoolean="false" />
+    </changeSet>
+
+    <changeSet id="createTable-for-index" author="tfernandez">
+        <createTable tableName="department">
+            <column name="col_1" type="integer" />
+            <column name="col_2" type="integer" />
+            <column name="col_3" type="integer" />
+        </createTable>
+    </changeSet>
+
+    <changeSet id="createIndex-1" author="tfernandez">
+        <createIndex indexName="index_one" tableName="department" unique="true">
+            <column name="col_1" />
+            <column name="col_2" />
+            <column name="col_3" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="createIndex-2" author="tfernandez">
+        <createIndex indexName="index_two" tableName="department">
+            <column name="col_3" descending="true" />
+            <column name="col_2" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="addUniqueConstraint" author="tfernandez">
+        <addUniqueConstraint tableName="department" columnNames="col_1,col_2" constraintName="department-unique" />
+    </changeSet>
+
+
+</databaseChangeLog>
