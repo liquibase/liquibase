@@ -15,6 +15,15 @@ class CommandFactoryTest extends Specification {
         command.arguments.keySet().contains("changelogFile")
     }
 
+    def "getCommand for an existing command from cache"() {
+        when:
+        def command1 = Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition("update")
+        def command2 = Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition("update")
+
+        then:
+        command1 == command2
+    }
+
     def "getCommand for an invalid command"() {
         when:
         Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition("invalid")
