@@ -725,6 +725,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     this.getChangeLog().getSkippedBecauseOfPreconditionsChangeSets().add(this);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.MARK_RAN)) {
                     execType = ExecType.MARK_RAN;
+                    if (this.alwaysRun && databaseChangeLog.getChangeSet(this.getStoredFilePath(), this.author, this.id) != null) {
+                        execType = ExecType.SKIPPED;
+                    }
                     skipChange = true;
 
                     log.info("Marking ChangeSet: \"" + this + "\" as ran despite precondition failure due to onFail='MARK_RAN': " + message);
@@ -753,6 +756,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     this.getChangeLog().getSkippedBecauseOfPreconditionsChangeSets().add(this);
                 } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.MARK_RAN)) {
                     execType = ExecType.MARK_RAN;
+
                     skipChange = true;
 
                     log.info("Marking ChangeSet: " + this + " ran despite precondition error: " + message);
