@@ -149,7 +149,7 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
             if (e instanceof SocketTimeoutException) {
                 logger.log(logLevel, "Timed out while waiting for analytics event processing.", null);
             }
-            throw new RuntimeException(e);
+            throw e;
         }
     }
 }
