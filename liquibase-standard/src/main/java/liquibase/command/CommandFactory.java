@@ -19,7 +19,7 @@ public class CommandFactory implements SingletonObject {
     /**
      * A cache of all found command names and their corresponding command definition.
      */
-    private static final Map<String[], CommandDefinition> COMMAND_DEFINITIONS = new ConcurrentHashMap<>();
+    private static final Map<List<String>, CommandDefinition> COMMAND_DEFINITIONS = new ConcurrentHashMap<>();
     /**
      * A cache of all found CommandStep classes and their corresponding override CommandStep.
      */
@@ -44,13 +44,14 @@ public class CommandFactory implements SingletonObject {
      * @throws IllegalArgumentException if the commandName is not known
      */
     public CommandDefinition getCommandDefinition(String... commandName) throws IllegalArgumentException{
-        CommandDefinition commandDefinition = COMMAND_DEFINITIONS.get(commandName);
+        List<String> commandNameList = Arrays.asList(commandName);
+        CommandDefinition commandDefinition = COMMAND_DEFINITIONS.get(commandNameList);
         if (commandDefinition == null) { //Check if we have already computed arguments, dependencies, pipeline and adjusted definition
             commandDefinition = new CommandDefinition(commandName);
             computePipelineForCommandDefinition(commandDefinition);
             consolidateCommandArgumentsForCommand(commandDefinition);
             adjustCommandDefinitionForSteps(commandDefinition);
-            COMMAND_DEFINITIONS.put(commandName, commandDefinition);
+            COMMAND_DEFINITIONS.put(commandNameList, commandDefinition);
         }
         return commandDefinition;
     }
