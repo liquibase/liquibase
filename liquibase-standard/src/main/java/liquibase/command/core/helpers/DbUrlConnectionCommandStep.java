@@ -171,17 +171,38 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
             try {
                 DatabaseConnection connection = database.getConnection();
                 Connection underlyingConnection = connection.getUnderlyingConnection();
-                Scope.getCurrentScope().getLicenseTrackList().getLicenseTracks().add(new LicenseTrack(removeQueryParameters(JdbcConnection.sanitizeUrl(url)), underlyingConnection.getSchema(), underlyingConnection.getCatalog()));
+                String schema = underlyingConnection == null ? null : underlyingConnection.getSchema();
+                String catalog = underlyingConnection == null ? null : underlyingConnection.getCatalog();
+                Scope.getCurrentScope().getLicenseTrackList().getLicenseTracks().add(new LicenseTrack(removeQueryParameters(JdbcConnection.sanitizeUrl(url)), schema, catalog));
             } catch (SQLException | URISyntaxException e) {
                 Scope.getCurrentScope().getLog(getClass()).severe("Failed to handle license tracking event", e);
             }
         }
     }
 
-    private String removeQueryParameters(String jdbcUrl) throws URISyntaxException {
-        URI uri = new URI(jdbcUrl.substring(5)); // remove "jdbc:" prefix
-        URI cleanedUri = new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), null, uri.getFragment());
-        return "jdbc:" + cleanedUri.toString();
+    private static String removeQueryParameters(String jdbcUrl) throws URISyntaxException {
+        String jdbcPrefix = "jdbc:";
+        boolean startsWithJdbc = jdbcUrl.startsWith(jdbcPrefix);
+        URI uri = new URI(jdbcUrl.replaceFirst(jdbcPrefix, StringUtils.EMPTY));
+        String cleanedUri = uri.toString();
+        try {
+            // This the more robust (IMO) way of stripping parameters, but doesn't work for all path formats.
+            cleanedUri = new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), null, uri.getFragment()).toString();
+        } catch (Exception e) {
+            // Remove the query parameters manually.
+            cleanedUri = cleanedUri.split("\\?")[0];
+        }
+        // Neither of the methods for cleansing the parameters handle SQL Server type parameters, so these must be handled manually.
+        cleanedUri = cleanedUri.split("\\;")[0];
+
+        if (startsWithJdbc) {
+            cleanedUri = jdbcPrefix + cleanedUri;
+        }
+        // Remove trailing slash
+        if (cleanedUri.endsWith("/")) {
+            cleanedUri = cleanedUri.substring(0, cleanedUri.length() - 1);
+        }
+        return cleanedUri;
     }
 
     @Override
