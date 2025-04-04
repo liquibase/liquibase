@@ -6,6 +6,7 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.AddDefaultValueStatement;
 
 public class AddDefaultValueGeneratorHsqldb extends AddDefaultValueGenerator {
@@ -21,6 +22,10 @@ public class AddDefaultValueGeneratorHsqldb extends AddDefaultValueGenerator {
 
     @Override
     public Sql[] generateSql(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+
+        if (!(statement.getDefaultValue() instanceof SequenceNextValueFunction)) {
+            return super.generateSql(statement, database, sqlGeneratorChain);
+        }
         Object defaultValue = statement.getDefaultValue();
         String sql = String.format("ALTER TABLE %s ALTER COLUMN %s %s",
                 database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()),
