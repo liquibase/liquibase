@@ -22,6 +22,9 @@ import java.util.logging.Level;
  *
  * This class uses a {@link Cache} to store the remote analytics configuration, which is
  * loaded from a specified URL endpoint.
+ *
+ *
+ * hello
  */
 @Data
 public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfiguration {
