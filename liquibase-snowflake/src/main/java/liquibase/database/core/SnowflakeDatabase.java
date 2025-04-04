@@ -5,6 +5,7 @@ import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.database.jvm.SnowflakeOAuthConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawParameterizedSqlStatement;
@@ -171,6 +172,18 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void setConnection(DatabaseConnection conn) {
+        // If using JDBC connection and OAuth authenticator, wrap it with our OAuth-aware connection
+        if (conn instanceof JdbcConnection) {
+            JdbcConnection jdbcConnection = (JdbcConnection) conn;
+            String url = jdbcConnection.getURL();
+            
+            if (url != null && url.contains("authenticator=oauth")) {
+                if (!(jdbcConnection instanceof SnowflakeOAuthConnection)) {
+                    conn = new SnowflakeOAuthConnection(jdbcConnection.getUnderlyingConnection());
+                }
+            }
+        }
+        
         super.setConnection(conn);
 
         configureSession();
