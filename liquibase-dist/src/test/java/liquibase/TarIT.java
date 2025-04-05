@@ -29,7 +29,7 @@ public class TarIT {
             }
             currentEntry = tarInput.getNextEntry();
         }
-        String expected = FileUtil.getContents(new File("expected-distribution-contents.txt"));
+        String expected = FileUtil.getContents(new File(System.getProperty("expected.distribution.contents.filename", "expected-distribution-contents.txt")));
         assertNotNull(expected);
         assertEquals(ArchiveUtils.getSortedLines(expected), ArchiveUtils.getSortedLines(tarContents.toString()), "Generated tar does not match expected tar contents. Did you add a new dependency?");
     }
