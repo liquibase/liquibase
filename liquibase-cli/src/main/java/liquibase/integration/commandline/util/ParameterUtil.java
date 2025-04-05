@@ -19,6 +19,10 @@ import static liquibase.util.LiquibaseLauncherSettings.getSetting;
  */
 public class ParameterUtil {
 
+    private ParameterUtil() {
+        // prevent instantiation
+    }
+
     /**
      * Get parameter from system properties, command line arguments and properties file.
      * @param param parameter to get
@@ -36,12 +40,15 @@ public class ParameterUtil {
         }
 
         //read it from command line args
-        for (String arg : args) {
+        for (int i = 0; i < args.length; i++) {
+            String arg = args[i];
             if (arg.matches("--.*" + cmd + "=.*")) {
                 String[] cp = arg.split("=");
                 if (cp.length == 2) {
                     return cp[1];
                 }
+            } else if (arg.matches("--.*" + cmd) && (i + 1 < args.length) && !args[i + 1].startsWith("--")) {
+            return args[i + 1];
             }
         }
 

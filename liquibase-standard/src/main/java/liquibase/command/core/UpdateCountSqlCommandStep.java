@@ -2,7 +2,9 @@ package liquibase.command.core;
 
 import liquibase.UpdateSummaryEnum;
 import liquibase.command.*;
+import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
 import liquibase.database.Database;
+import liquibase.util.LoggingExecutorTextUtil;
 
 import java.io.Writer;
 import java.util.ArrayList;
@@ -66,5 +68,15 @@ public class UpdateCountSqlCommandStep extends UpdateCountCommandStep {
         dependencies.addAll(super.requiredDependencies());
         dependencies.remove(UpdateSummaryEnum.class); // no update summary for this command, despite the class it is extending having an update summary option
         return dependencies;
+    }
+
+    @Override
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        final CommandScope commandScope = resultsBuilder.getCommandScope();
+        final Database database = (Database) commandScope.getDependency(Database.class);
+        final String changelogFile = commandScope.getArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG);
+        Integer count = commandScope.getArgumentValue(COUNT_ARG);
+        LoggingExecutorTextUtil.outputHeader("Update " + count + " Changesets Database Script", database, changelogFile);
+        super.run(resultsBuilder);
     }
 }
