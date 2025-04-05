@@ -118,6 +118,34 @@ jobs:
           additional-approved-words: 'lgtm,✅,👍,proceed,shipit,:shipit:'
           additional-denied-words: 'stop,error,failed,fail,broken,:x:,👎'
 
+  deploy_minimal_artifact_s3:
+    if: ${{ inputs.dry_run == false }}
+    name: Deploy minimal artifact to lbio s3 bucket
+    needs: [ setup ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download released assets
+        uses: robinraju/release-downloader@v1.12
+        with:
+          latest: true
+          extract: false          
+          fileName: "liquibase-minimal-${{ needs.setup.outputs.version }}.zip"
+          out-file-path: "./s3-assets"
+          
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_IO_DEV_GITHUB_OIDC_ROLE_ARN_LIQUIBASE }}
+          aws-region: us-east-2
+
+      - name: Publish released assets to s3 bucket
+        run: |
+          aws s3 sync "./s3-assets" s3://${{ secrets.LBIO_DOWNLOADS_S3_BUCKET }}/downloads/liquibase-minimal/v${{ needs.setup.outputs.version }}/ --only-show-errors
+  
+      - name: Delete minimal release assets
+        run: |
+          gh release delete-asset ${{ needs.setup.outputs.tag }} liquibase-minimal-${{ needs.setup.outputs.version }}.zip -y
+          
   deploy_maven:
     if: ${{ inputs.dry_run == false }}
     name: Deploy to Maven
