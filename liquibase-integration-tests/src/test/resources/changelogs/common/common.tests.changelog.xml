@@ -121,7 +121,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="defaultValueTest-2" author="nvoxland" dbms="!snowflake">
+    <changeSet id="defaultValueTest-2" author="nvoxland">
         <createTable tableName="defaultValueTest2">
             <column name="id" type="int" />
             <column name="intA" type="int" defaultValueNumeric="1"/>

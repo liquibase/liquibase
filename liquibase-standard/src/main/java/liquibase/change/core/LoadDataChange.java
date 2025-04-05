@@ -44,6 +44,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.nio.file.InvalidPathException;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -62,7 +63,6 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
      */
     public static final String DEFAULT_COMMENT_PATTERN = "#";
     public static final Pattern BASE64_PATTERN = Pattern.compile("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$");
-    private static final Logger LOG = Scope.getCurrentScope().getLog(LoadDataChange.class);
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     @Setter
     private String file;
@@ -395,19 +395,24 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             // If the value is null we set the value directly to avoid Exceptions while loading
                             // resources e.g. with SpringResourceAccessor.
                             if (value != null) {
-                                Resource r;
-                                if (getRelativeTo() != null) {
-                                    r = Scope.getCurrentScope().getResourceAccessor().get(getRelativeTo()).resolveSibling(value);
-                                } else {
-                                    r = Scope.getCurrentScope().getResourceAccessor().get(value);
+                                Resource r = null;
+                                try {
+                                    if (getRelativeTo() != null) {
+                                            r = Scope.getCurrentScope().getResourceAccessor().get(getRelativeTo()).resolveSibling(value);
+                                    } else {
+                                        r = Scope.getCurrentScope().getResourceAccessor().get(value);
+                                    }
+                                } catch (InvalidPathException e) {
+                                    Scope.getCurrentScope().getLog(LoadDataChange.class).fine(String.format("Could not find file [%s] in [%s]: %s", value, getRelativeTo(), e.getMessage()));
                                 }
-                                resourceExists = r.exists();
+                                resourceExists = r != null && r.exists();
                             }
 
                             if (resourceExists) {
                                 valueConfig.setValueClobFile(value);
                             } else {
-                                LOG.fine(String.format("File %s not found. Inserting the value as a string. See https://docs.liquibase.com for more information.", value));
+                                Logger log = Scope.getCurrentScope().getLog(LoadDataChange.class);
+                                log.fine(String.format("File %s not found. Inserting the value as a string. See https://docs.liquibase.com for more information.", value));
                                 valueConfig.setValue(value);
                             }
                             needsPreparedStatement = true;
@@ -477,7 +482,8 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         } catch (UnexpectedLiquibaseException ule) {
             if ((getChangeSet() != null) && (getChangeSet().getFailOnError() != null) && !getChangeSet()
                     .getFailOnError()) {
-                LOG.info("Changeset " + getChangeSet().toString(false) +
+                Logger log = Scope.getCurrentScope().getLog(LoadDataChange.class);
+                log.info("Changeset " + getChangeSet().toString(false) +
                          " failed, but failOnError was false.  Error: " + ule.getMessage());
                 return SqlStatement.EMPTY_SQL_STATEMENT;
             } else {
@@ -545,7 +551,8 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
             throw new DatabaseException(e);
         }
         if (snapshotOfTable == null) {
-            LOG.warning(String.format(
+            Logger log = Scope.getCurrentScope().getLog(LoadDataChange.class);
+            log.warning(String.format(
                     coreBundle.getString("could.not.snapshot.table.to.get.the.missing.column.type.information"),
                     database.escapeTableName(
                             targetTable.getSchema().getCatalogName(),
@@ -587,12 +594,14 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
             LoadDataColumnConfig columnConfig = entry.getValue();
             Column c = tableColumns.get(entry.getKey());
             if (null == c) {
-                LOG.severe(String.format(coreBundle.getString("unable.to.find.column.in.table"),
+                Logger log = Scope.getCurrentScope().getLog(LoadDataChange.class);
+                log.severe(String.format(coreBundle.getString("unable.to.find.column.in.table"),
                         columnConfig.getName(), snapshotOfTable));
             } else {
                 DataType dataType = c.getType();
                 if (dataType == null) {
-                    LOG.warning(String.format(coreBundle.getString("unable.to.find.load.data.type"),
+                    Logger log = Scope.getCurrentScope().getLog(LoadDataChange.class);
+                    log.warning(String.format(coreBundle.getString("unable.to.find.load.data.type"),
                             columnConfig.toString(), snapshotOfTable));
                     columnConfig.setType(LOAD_DATA_TYPE.STRING);
                 } else {
@@ -601,7 +610,8 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                     if (liquibaseDataType != null) {
                         columnConfig.setType(liquibaseDataType.getLoadTypeName());
                     } else {
-                        LOG.warning(String.format(coreBundle.getString("unable.to.convert.load.data.type"),
+                        Logger log = Scope.getCurrentScope().getLog(LoadDataChange.class);
+                        log.warning(String.format(coreBundle.getString("unable.to.convert.load.data.type"),
                                 columnConfig.toString(), snapshotOfTable, dataType));
                     }
                 }
@@ -615,7 +625,8 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                     LoadDataColumnConfig columnConfig = entry.getValue();
                     DataType dataType = tableColumns.get(entry.getKey()).getType();
                     if (dataType == null) {
-                        LOG.warning(String.format(coreBundle.getString("unable.to.find.load.data.type"),
+                        Logger log = Scope.getCurrentScope().getLog(LoadDataChange.class);
+                        log.warning(String.format(coreBundle.getString("unable.to.find.load.data.type"),
                                 columnConfig.toString(), snapshotOfTable.toString() ));
                         columnConfig.setType(LOAD_DATA_TYPE.STRING.toString());
                     } else {
@@ -624,7 +635,8 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                         if (liquibaseDataType != null) {
                             columnConfig.setType(liquibaseDataType.getLoadTypeName().toString());
                         } else {
-                            LOG.warning(String.format(coreBundle.getString("unable.to.convert.load.data.type"),
+                            Logger log = Scope.getCurrentScope().getLog(LoadDataChange.class);
+                            log.warning(String.format(coreBundle.getString("unable.to.convert.load.data.type"),
                                     columnConfig.toString(), snapshotOfTable.toString(), liquibaseDataType.toString()));
                         }
                     }

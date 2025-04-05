@@ -46,7 +46,9 @@ public class Scope {
     public static final String CHECKS_MESSAGE =
             "The Liquibase Checks Extension 2.0.0 or higher is required to execute checks commands. " +
                     "Visit https://docs.liquibase.com/pro-extensions to acquire the Checks Extension.";
-
+    public static final String AZURE_MESSAGE =
+            "The Liquibase Azure Extension 1.0.0 or higher is required to use Azure Storage. " +
+                    "Visit https://docs.liquibase.com/pro-extensions to acquire the Azure Extension.";
     /**
      * Enumeration containing standard attributes. Normally use methods like convenience {@link #getResourceAccessor()} or {@link #getDatabase()}
      */
@@ -79,12 +81,23 @@ public class Scope {
          */
         mavenConfigurationProperties,
         analyticsEvent,
-        integrationDetails
+        integrationDetails,
+        /**
+         * The maximum number of analytics events that should be cached in memory before sent in a batch.
+         */
+        maxAnalyticsCacheSize
     }
 
     public static final String JAVA_PROPERTIES = "javaProperties";
 
-    private static final InheritableThreadLocal<ScopeManager> scopeManager = new InheritableThreadLocal<>();
+    private static final InheritableThreadLocal<ScopeManager> scopeManager = new InheritableThreadLocal<ScopeManager>() {
+        @Override
+        protected ScopeManager childValue(ScopeManager parentValue) {
+            ScopeManager sm = new SingletonScopeManager();
+            sm.setCurrentScope(parentValue.getCurrentScope());
+            return sm;
+        }
+    };
 
     private final Scope parent;
     private final SmartMap values = new SmartMap();
