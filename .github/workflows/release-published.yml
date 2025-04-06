@@ -132,6 +132,10 @@ jobs:
           fileName: "liquibase-minimal-${{ needs.setup.outputs.version }}.zip"
           out-file-path: "./s3-assets"
           
+      - name: Delete minimal release assets
+        run: |
+          gh release delete-asset ${{ needs.setup.outputs.tag }} liquibase-minimal-${{ needs.setup.outputs.version }}.zip -y
+        
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -142,10 +146,6 @@ jobs:
         run: |
           aws s3 sync "./s3-assets" s3://${{ secrets.LBIO_DOWNLOADS_S3_BUCKET }}/downloads/liquibase-minimal/v${{ needs.setup.outputs.version }}/ --only-show-errors
   
-      - name: Delete minimal release assets
-        run: |
-          gh release delete-asset ${{ needs.setup.outputs.tag }} liquibase-minimal-${{ needs.setup.outputs.version }}.zip -y
-          
   deploy_maven:
     if: ${{ inputs.dry_run == false }}
     name: Deploy to Maven
