@@ -97,6 +97,6 @@ class CommandArgumentDefinitionTest extends Specification {
         e2.message == "Argument 'arg3' for command 'mock' has both a default value and the isRequired flag set to true. Arguments with default values cannot be marked as required."
 
         then:
-        StringUtil.join(Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition("mock").getArguments(), ", ") == "arg1=arg1, arg2=arg2"
+        StringUtil.join(Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition("mock").getArguments(), ", ") == "arg1=arg1, arg2=arg2, value1=value1"
     }
 }
