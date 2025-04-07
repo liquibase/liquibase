@@ -141,7 +141,7 @@ public class ShowSummaryUtil {
         UpdateSummaryDetails summaryDetails =
            showSummary(changeLog, statusVisitor, skippedChangeSets,
                        skippedBecauseOfLicenseChangeSets, skippedBecauseOfOsMismatchChangeSets, skippedBecauseOfPreconditionsChangeSets,
-                       filterDenied, outputStream, showSummaryOutput, runChangeLogIterator, changeExecListener);
+                       filterDenied, outputStream, showSummaryOutput, runChangeLogIterator, changeExecListener, filters);
         summaryDetails.getSummary().setValue(showSummary.toString());
         boolean shouldPrintDetailTable =
            showSummary != UpdateSummaryEnum.SUMMARY &&
@@ -161,16 +161,20 @@ public class ShowSummaryUtil {
         try (MdcObject updateSummaryMdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.UPDATE_SUMMARY, summaryDetails.getSummary())) {
             Scope.getCurrentScope().getLog(ShowSummaryUtil.class).info("Update summary generated");
         }
+        generateMatchingProblemsReport(filters, summaryDetails.getSummary());
+        return summaryDetails;
+    }
+
+    private static void generateMatchingProblemsReport(List<ChangeSetFilter> filters, UpdateSummary summaryDetails) {
         for (ChangeSetFilter filter : filters) {
-            if (filter instanceof LabelChangeSetFilter) {
-                System.out.println("Unmatched labels: " + ((LabelChangeSetFilter) filter).getUnMatchedLabels());
+            if (filter instanceof LabelChangeSetFilter && !((LabelChangeSetFilter) filter).getUnMatchedLabels().isEmpty()) {
+                summaryDetails.getMatchingProblems().put("label-filter", ((LabelChangeSetFilter) filter).getUnMatchedLabels());
             }
 
-            if (filter instanceof ContextChangeSetFilter) {
-                System.out.println("Unmatched contexts: " + ((ContextChangeSetFilter) filter).getUnMatchedContexts());
+            if (filter instanceof ContextChangeSetFilter && !((ContextChangeSetFilter) filter).getUnMatchedContexts().isEmpty()) {
+                summaryDetails.getMatchingProblems().put("context-filter", ((ContextChangeSetFilter) filter).getUnMatchedContexts());
             }
         }
-        return summaryDetails;
     }
 
     //
@@ -422,7 +426,8 @@ public class ShowSummaryUtil {
                                                     OutputStream outputStream,
                                                     UpdateSummaryOutputEnum showSummaryOutput,
                                                     ChangeLogIterator runChangeLogIterator,
-                                                    ChangeExecListener changeExecListener) throws LiquibaseException {
+                                                    ChangeExecListener changeExecListener,
+                                                    List<ChangeSetFilter> filters) throws LiquibaseException {
         StringBuilder builder = new StringBuilder();
         builder.append(System.lineSeparator());
         int skipped = skippedChangeSets.size();
@@ -434,6 +439,7 @@ public class ShowSummaryUtil {
         int totalPreviouslyRun = calculatePreviouslyRun(statusVisitor);
         int totalInChangelog = CollectionUtil.createIfNull(changeLog.getChangeSets()).size() + CollectionUtil.createIfNull(changeLog.getSkippedChangeSets()).size();
         UpdateSummary updateSummaryMdc = new UpdateSummary(null, totalAccepted, totalPreviouslyRun, null, totalInChangelog);
+        generateMatchingProblemsReport(filters, updateSummaryMdc);
 
         String message = "UPDATE SUMMARY";
         builder.append(message);
@@ -483,6 +489,19 @@ public class ShowSummaryUtil {
             filterSummaryMap.forEach((filterDisplayName, count) -> {
                 String filterSummaryDetailMessage = String.format("%-18s       %6d",
                         filterDisplayName + ":", count);
+                builder.append(filterSummaryDetailMessage);
+                builder.append(System.lineSeparator());
+            });
+            builder.append(System.lineSeparator());
+        }
+
+        if (!updateSummaryMdc.getMatchingProblems().isEmpty()) {
+            builder.append(System.lineSeparator()).
+                    append("FILTERING PROBLEMS")
+                    .append(System.lineSeparator());
+            updateSummaryMdc.getMatchingProblems().forEach((filterDisplayName, problems) -> {
+                String filterSummaryDetailMessage = String.format("No changesets found matching specified %-15s %s",
+                        filterDisplayName + ":", StringUtils.join(problems, ", "));
                 builder.append(filterSummaryDetailMessage);
                 builder.append(System.lineSeparator());
             });
