@@ -3,47 +3,47 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version (example: 4.8.2)'
+        description: "Version (example: 4.8.2)"
         required: true
       branch:
-        description: 'Branch to release (Defaults to master)'
+        description: "Branch to release (Defaults to master)"
         required: false
-        default: 'master'
+        default: "master"
       runId:
-        description: 'RunId of liquibase/liquibase artifacts to attach'
+        description: "RunId of liquibase/liquibase artifacts to attach"
         required: true
       standalone_zip:
-        description: 'Flag to indicate if the workflow is triggered to create a standalone zip'
+        description: "Flag to indicate if the workflow is triggered to create a standalone zip"
         required: false
         type: boolean
         default: false
       dry_run:
-        description: 'Flag to indicate if the workflow is triggered to create a dry-run release'
+        description: "Flag to indicate if the workflow is triggered to create a dry-run release"
         required: false
         type: boolean
         default: false
   workflow_call:
     inputs:
       version:
-        description: 'Version (example: 4.8.2)'
+        description: "Version (example: 4.8.2)"
         required: true
         type: string
       branch:
-        description: 'Branch to release (Defaults to master)'
+        description: "Branch to release (Defaults to master)"
         required: false
-        default: 'master'
+        default: "master"
         type: string
       runId:
-        description: 'RunId of liquibase/liquibase artifacts to attach'
+        description: "RunId of liquibase/liquibase artifacts to attach"
         required: true
         type: string
       standalone_zip:
-        description: 'Flag to indicate if the workflow is triggered to create a standalone zip'
+        description: "Flag to indicate if the workflow is triggered to create a standalone zip"
         required: true
         type: boolean
         default: false
       dry_run:
-        description: 'Flag to indicate if the workflow is triggered to create a dry-run release'
+        description: "Flag to indicate if the workflow is triggered to create a dry-run release"
         required: true
         type: boolean
         default: false
@@ -68,51 +68,57 @@ jobs:
           echo "Creating version ${{ inputs.version }} from ${{ inputs.branch }} with artifacts from build ${{ inputs.runId }} "
 
   owasp-scanner:
-    needs: [ setup ]
+    needs: [setup]
     uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@main
     with:
       branch: ${{ needs.setup.outputs.branch }}
     secrets: inherit
 
   build-azure-uber-jar:
-   needs: [ setup, owasp-scanner ]
-   uses: ./.github/workflows/build-azure-uber-jar.yml
-   with:
-     branch: ${{ needs.setup.outputs.branch }}
-     liquibase-version: ${{ needs.setup.outputs.version }}
-   secrets: inherit
+    needs: [setup, owasp-scanner]
+    uses: ./.github/workflows/build-azure-uber-jar.yml
+    with:
+      branch: ${{ needs.setup.outputs.branch }}
+      liquibase-version: ${{ needs.setup.outputs.version }}
+    secrets: inherit
 
   build-extension-jars:
-   needs: [ setup, owasp-scanner ]
-   uses: ./.github/workflows/build-extension-jars.yml
-   with:
-     liquibase-version: ${{ needs.setup.outputs.version }}
-     dependencies: ${{ needs.setup.outputs.dependencies }}
-     extensions: ${{ needs.setup.outputs.extensions }}
-     branch: ${{ needs.setup.outputs.branch }}
-   secrets: inherit
+    needs: [setup, owasp-scanner]
+    uses: ./.github/workflows/build-extension-jars.yml
+    with:
+      liquibase-version: ${{ needs.setup.outputs.version }}
+      dependencies: ${{ needs.setup.outputs.dependencies }}
+      extensions: ${{ needs.setup.outputs.extensions }}
+      branch: ${{ needs.setup.outputs.branch }}
+    secrets: inherit
 
   get-liquibase-checks-version:
-    needs: [ setup ]
+    needs: [setup]
     if: ${{ contains(needs.setup.outputs.extensions, 'liquibase-checks') }}
     runs-on: ubuntu-latest
     outputs:
-        version: ${{ steps.extract-version.outputs.version }}
+      version: ${{ steps.extract-version.outputs.version }}
     steps:
-        - uses: actions/checkout@v4
-          with:
-            repository: liquibase/liquibase-checks
-            token: ${{ secrets.BOT_TOKEN }}
+      - uses: actions/checkout@v4
+        with:
+          repository: liquibase/liquibase-checks
+          token: ${{ secrets.BOT_TOKEN }}
 
-        - id: extract-version
-          name: Extract version from pom.xml
-          shell: bash
-          run: |
-              VERSION=$(grep '<version>' pom.xml | head -n 1 | sed 's/.*<version>\(.*\)-SNAPSHOT<\/version>.*/\1/')
-              echo "version=$VERSION" >> $GITHUB_OUTPUT
+      - id: extract-version
+        name: Extract version from pom.xml
+        shell: bash
+        run: |
+          VERSION=$(grep '<version>' pom.xml | head -n 1 | sed 's/.*<version>\(.*\)-SNAPSHOT<\/version>.*/\1/')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
   reversion:
-    needs: [ setup, build-azure-uber-jar, build-extension-jars, get-liquibase-checks-version ]
+    needs:
+      [
+        setup,
+        build-azure-uber-jar,
+        build-extension-jars,
+        get-liquibase-checks-version,
+      ]
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
     steps:
@@ -202,8 +208,8 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '8'
-          distribution: 'adopt'
+          java-version: "8"
+          distribution: "adopt"
           gpg-private-key: ${{ secrets.GPG_SECRET }}
           gpg-passphrase: GPG_PASSPHRASE
         env:
@@ -264,12 +270,11 @@ jobs:
           $PWD/.github/util/sign-artifacts.sh re-version/out
 
           # Move files to a specific directory
-          mkdir re-version/final
+          mkdir re-version/final re-version/s3-minimal
           mv re-version/out/liquibase-core-${{ needs.setup.outputs.version }}.jar re-version/final
           mv re-version/out/liquibase-commercial-${{ needs.setup.outputs.version }}.jar re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
-          mv re-version/out/liquibase-minimal-${{ needs.setup.outputs.version }}.tar.gz re-version/s3-minimal
           mv re-version/out/liquibase-minimal-${{ needs.setup.outputs.version }}.zip re-version/s3-minimal
           mv re-version/out/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/final/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar
           (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
@@ -280,7 +285,7 @@ jobs:
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
-          
+
       - name: Cache Minimal Completed Artifacts
         uses: actions/cache@v4.2.0
         with:
@@ -297,8 +302,8 @@ jobs:
 
   build-installers:
     permissions:
-      contents: write  # for softprops/action-gh-release to create GitHub release
-    needs: [ setup, reversion ]
+      contents: write # for softprops/action-gh-release to create GitHub release
+    needs: [setup, reversion]
     name: Build Installers
     runs-on: macos-13 #needs macos for apple notarization
     env:
@@ -315,13 +320,12 @@ jobs:
       - name: Set up JDK for GPG
         uses: actions/setup-java@v4
         with:
-          java-version: '8'
-          distribution: 'adopt'
+          java-version: "8"
+          distribution: "adopt"
           gpg-private-key: ${{ secrets.GPG_SECRET }}
           gpg-passphrase: GPG_PASSPHRASE
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
-
 
       - name: Re-version Installers
         env:
@@ -368,7 +372,6 @@ jobs:
               exit 1
           fi
 
-
       - name: Attach Files to Draft Release
         if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
         uses: softprops/action-gh-release@v2
@@ -396,27 +399,25 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
       - name: Attach standalone zip to Build
         if: ${{ inputs.standalone_zip == true && inputs.dry_run == false }}
         uses: actions/upload-artifact@v4
         with:
-            name: liquibase-installers-${{ needs.setup.outputs.version }}
-            path: re-version/final/*
+          name: liquibase-installers-${{ needs.setup.outputs.version }}
+          path: re-version/final/*
 
   deploy_minimal_artifact_s3:
     if: ${{ inputs.dry_run == false }}
     name: Deploy minimal artifacts to lbio s3 bucket
-    needs: [ reversion ]
+    needs: [reversion]
     runs-on: ubuntu-latest
     steps:
-      
       - name: Restore Minimal Completed Artifacts
         uses: actions/cache@v4.2.0
         with:
           key: minimal-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./s3-minimal
-          
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -426,4 +427,3 @@ jobs:
       - name: Publish minimal assets to s3 bucket
         run: |
           aws s3 sync "./s3-minimal" s3://${{ secrets.LBIO_DOWNLOADS_S3_BUCKET }}/downloads/liquibase-minimal/v${{ needs.setup.outputs.version }}/ --only-show-errors
-  
