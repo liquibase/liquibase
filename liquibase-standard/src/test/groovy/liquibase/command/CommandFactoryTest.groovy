@@ -21,7 +21,7 @@ class CommandFactoryTest extends Specification {
         def command2 = Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition("update")
 
         then:
-        command1 == command2
+        System.identityHashCode(command1) == System.identityHashCode(command2)
     }
 
     def "getCommand for an invalid command"() {
