@@ -416,7 +416,7 @@ jobs:
         uses: actions/cache@v4.2.0
         with:
           key: minimal-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
-          path: ./s3-minimal
+          path: re-version/s3-minimal
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -426,4 +426,4 @@ jobs:
 
       - name: Publish minimal assets to s3 bucket
         run: |
-          aws s3 sync "./s3-minimal" s3://${{ secrets.LBIO_DOWNLOADS_S3_BUCKET }}/downloads/liquibase-minimal/v${{ needs.setup.outputs.version }}/ --only-show-errors
+          aws s3 sync "re-version/s3-minimal" s3://${{ secrets.LBIO_DOWNLOADS_S3_BUCKET }}/downloads/liquibase-minimal/v${{ needs.setup.outputs.version }}/ --only-show-errors
