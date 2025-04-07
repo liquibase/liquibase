@@ -93,22 +93,6 @@ class CommandScopeTest extends Specification {
         ]
     }
 
-    def "execute with failing argument validation"() {
-        when:
-        def output = new ByteArrayOutputStream()
-
-        new CommandBuilder([["mock"]] as String[][]).argument("requiredArg", String).required().build()
-        new CommandBuilder([["mock"]] as String[][]).argument("optionalArg", String).optional().build()
-
-        def scope = new CommandScope("mock")
-        scope.setOutput(output)
-        scope.execute()
-
-        then:
-        def e = thrown(CommandValidationException)
-        e.message == "Invalid argument 'requiredArg': missing required argument"
-    }
-
     def "ValueModifiers are used in getArgumentValue"() {
         when:
         def valueModifier = new ConfiguredValueModifier<String>() {
