@@ -409,7 +409,7 @@ jobs:
   deploy_minimal_artifact_s3:
     if: ${{ inputs.dry_run == false }}
     name: Deploy minimal artifacts to lbio s3 bucket
-    needs: [reversion]
+    needs: [setup, reversion]
     permissions:
       id-token: write
       contents: read
