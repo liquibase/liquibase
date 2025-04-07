@@ -410,6 +410,9 @@ jobs:
     if: ${{ inputs.dry_run == false }}
     name: Deploy minimal artifacts to lbio s3 bucket
     needs: [reversion]
+    permissions:
+      id-token: write
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Restore Minimal Completed Artifacts
