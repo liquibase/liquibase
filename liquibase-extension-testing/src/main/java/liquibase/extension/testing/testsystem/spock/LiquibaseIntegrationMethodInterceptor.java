@@ -144,12 +144,12 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
                     if (testSystem == startedTestSystem) {
                         runDropAll(((DatabaseTestSystem) startedTestSystem));
                         runDropAll(((DatabaseTestSystem) startedTestSystem), ((DatabaseTestSystem) startedTestSystem).getAltSchema());
-                    }
-                    // Some tests make changes to the connection which persist across different tests. One example
-                    // could be something like setting the search path on Postgres. Closing the connection forces that
-                    // change to be reset.
-                    if (testSystem instanceof DatabaseTestSystem) {
-                        ((DatabaseTestSystem) testSystem).getConnection().close();
+                        // Some tests make changes to the connection which persist across different tests. One example
+                        // could be something like setting the search path on Postgres. Closing the connection forces that
+                        // change to be reset.
+                        if (testSystem instanceof DatabaseTestSystem) {
+                            ((DatabaseTestSystem) testSystem).getConnection().close();
+                        }
                     }
                 }
             }
