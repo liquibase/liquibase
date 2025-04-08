@@ -211,6 +211,7 @@ public class CommandFactory implements SingletonObject {
      */
     protected void unregister(String[] commandName) {
         commandArgumentDefinitions.remove(StringUtil.join(commandName, " "));
+        COMMAND_DEFINITIONS.remove(Arrays.asList(commandName));
     }
 
     /**
