@@ -76,15 +76,9 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         generatedChangelogContents.contains(" contextFilter:\"newContexts\"")
 
         cleanup:
-        try {
-            generatedChangelog.delete()
-        } catch (Exception ignored) {
-
-        }
-        postgres.getConnection().close()
+        FileUtils.deleteQuietly(generatedChangelog)
         refDatabase.close()
         targetDatabase.close()
-        CommandUtil.runDropAll(postgres)
     }
 
     def "FKs which are different but have same name" () {
@@ -116,12 +110,7 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         dropFK.getConstraintName() == addFK.getConstraintName()
 
         cleanup:
-        try {
-            generatedChangelog.delete()
-        } catch (Exception ignored) {
-
-        }
-        postgres.getConnection().close()
+        FileUtils.deleteQuietly(generatedChangelog)
         refDatabase.close()
         targetDatabase.close()
     }
@@ -163,15 +152,9 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         generatedChangelogContents.contains(columnComment)
 
         cleanup:
-        try {
-            generatedChangelog.delete()
-        } catch (Exception ignored) {
-
-        }
-        postgres.getConnection().close()
+        FileUtils.deleteQuietly(generatedChangelog)
         refDatabase.close()
         targetDatabase.close()
-        CommandUtil.runDropAll(postgres)
     }
 
     def "Ensure diff-changelog set runOnChange and replaceIfExists properties correctly for a created view changeset"() {
@@ -203,8 +186,6 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         outputFile.delete()
         refDatabase.close()
         targetDatabase.close()
-        CommandUtil.runDropAll(postgres)
-        postgres.getConnection().close()
     }
 
     def "Ensure diff-changelog with SQL output format contains 'OR REPLACE' instruction for a view when USE_OR_REPLACE_OPTION is set as true"() {
@@ -232,8 +213,6 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         outputFile.delete()
         refDatabase.close()
         targetDatabase.close()
-        CommandUtil.runDropAll(postgres)
-        postgres.getConnection().close()
     }
 
     def "Ensure diff-changelog with SQL output format does NOT contain 'OR REPLACE' instruction for a view when USE_OR_REPLACE_OPTION is set as false"() {
@@ -262,8 +241,6 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         outputFile.delete()
         refDatabase.close()
         targetDatabase.close()
-        CommandUtil.runDropAll(postgres)
-        postgres.getConnection().close()
     }
 
     def "Ensure loadData csv file is processed from dataDir directory"() {
@@ -291,16 +268,8 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         changelogFileContent.containsIgnoreCase("file=\"testDataDir/")
 
         cleanup:
-        try {
-            changelogFile.delete()
-        } catch (Exception ignored) {
-
-        }
-        File testDir = new File(dataDir)
-        if (testDir.exists()) {
-            FileUtils.deleteDirectory(testDir)
-        }
-        postgres.getConnection().close()
+        FileUtils.deleteQuietly(changelogFile)
+        FileUtils.deleteQuietly(new File(dataDir))
         refDatabase.close()
         targetDatabase.close()
     }

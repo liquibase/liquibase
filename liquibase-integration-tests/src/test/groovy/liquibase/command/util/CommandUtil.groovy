@@ -14,7 +14,6 @@ import liquibase.diff.compare.CompareControl
 import liquibase.exception.CommandExecutionException
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.lockservice.LockServiceFactory
-import liquibase.logging.core.BufferedLogServiceTest
 import liquibase.resource.ResourceAccessor
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
@@ -181,6 +180,13 @@ class CommandUtil {
         commandScope.execute()
     }
 
+    /**
+     * @deprecated the integration test framework automatically runs drop all when running tests; see
+     * {@link liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationMethodInterceptor#dropAllDatabases(org.spockframework.runtime.extension.IMethodInvocation)}
+     * Individual tests should not need to run drop all themselves, and it is not recommended to do so for performance
+     * reasons.
+     */
+    @Deprecated
     static void runDropAll(DatabaseTestSystem db) throws Exception {
         if (! db.shouldTest()) {
             return;
