@@ -222,6 +222,6 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
         createIndexChange.getColumns().get(2).getDescending()
 
         cleanup:
-        FileUtils.deleteQuietly(changelogFile)
+        FileUtils.deleteQuietly(new File(changelogFile))
     }
 }
