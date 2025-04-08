@@ -77,6 +77,7 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
 
         cleanup:
         FileUtils.deleteQuietly(generatedChangelog)
+        postgres.getConnection().close()
         refDatabase.close()
         targetDatabase.close()
     }
@@ -111,6 +112,7 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
 
         cleanup:
         FileUtils.deleteQuietly(generatedChangelog)
+        postgres.getConnection().close()
         refDatabase.close()
         targetDatabase.close()
     }
@@ -153,6 +155,7 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
 
         cleanup:
         FileUtils.deleteQuietly(generatedChangelog)
+        postgres.getConnection().close()
         refDatabase.close()
         targetDatabase.close()
     }
@@ -186,6 +189,7 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         outputFile.delete()
         refDatabase.close()
         targetDatabase.close()
+        postgres.getConnection().close()
     }
 
     def "Ensure diff-changelog with SQL output format contains 'OR REPLACE' instruction for a view when USE_OR_REPLACE_OPTION is set as true"() {
@@ -213,6 +217,7 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         outputFile.delete()
         refDatabase.close()
         targetDatabase.close()
+        postgres.getConnection().close()
     }
 
     def "Ensure diff-changelog with SQL output format does NOT contain 'OR REPLACE' instruction for a view when USE_OR_REPLACE_OPTION is set as false"() {
@@ -241,6 +246,7 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         outputFile.delete()
         refDatabase.close()
         targetDatabase.close()
+        postgres.getConnection().close()
     }
 
     def "Ensure loadData csv file is processed from dataDir directory"() {
@@ -270,6 +276,7 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         cleanup:
         FileUtils.deleteQuietly(changelogFile)
         FileUtils.deleteQuietly(new File(dataDir))
+        postgres.getConnection().close()
         refDatabase.close()
         targetDatabase.close()
     }
