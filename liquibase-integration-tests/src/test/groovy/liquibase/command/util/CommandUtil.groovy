@@ -191,22 +191,15 @@ class CommandUtil {
         if (! db.shouldTest()) {
             return;
         }
-        Database databaseFromFactory = db.getDatabaseFromFactory();
-        def lockService = LockServiceFactory.getInstance().getLockService(databaseFromFactory);
+        def lockService = LockServiceFactory.getInstance().getLockService(db.getDatabaseFromFactory());
         lockService.releaseLock()
         CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME)
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
-        String defaultCatalogName = databaseFromFactory.getDefaultCatalogName();
-        String defaultSchemaName = databaseFromFactory.getDefaultSchemaName();
-        String altSchema = db.getAltSchema();
-        String altCatalog = db.getAltCatalog();
         commandScope.addArgumentValue(DropAllCommandStep.CATALOG_AND_SCHEMAS_ARG, new CatalogAndSchema[]{
-                new CatalogAndSchema(defaultCatalogName, defaultSchemaName),
-                new CatalogAndSchema(defaultCatalogName, altSchema),
-                new CatalogAndSchema(altCatalog, defaultSchemaName),
-                new CatalogAndSchema(altCatalog, altSchema)
+                new CatalogAndSchema(db.getDatabaseFromFactory().getDefaultCatalogName(), db.getDatabaseFromFactory().getDefaultSchemaName()),
+                new CatalogAndSchema(db.getAltCatalog(), db.getAltSchema())
         }
         );
         commandScope.setOutput(new ByteArrayOutputStream())
