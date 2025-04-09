@@ -1,6 +1,7 @@
 package liquibase.integration.servlet;
 
 import liquibase.Scope;
+import org.apache.commons.text.StringEscapeUtils;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -91,7 +92,7 @@ class GenericStatusServlet {
         if (currentLevel.equals(level)) {
             return level.getName();
         } else {
-            return "<a href=" + request.getRequestURI() + "?logLevel=" + level.getName() + ">" + level.getName() + "</a>";
+            return "<a href=" + StringEscapeUtils.escapeHtml4(request.getRequestURI()) + "?logLevel=" + level.getName() + ">" + level.getName() + "</a>";
         }
     }
 }
