@@ -1,6 +1,5 @@
 package liquibase.extension.testing.testsystem.spock;
 
-import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.command.CommandScope;
 import liquibase.command.core.DropAllCommandStep;
@@ -13,6 +12,7 @@ import liquibase.extension.testing.testsystem.TestSystem;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.structure.core.DatabaseObjectFactory;
+import liquibase.util.StringUtil;
 import org.junit.jupiter.api.Assumptions;
 import org.spockframework.runtime.extension.AbstractMethodInterceptor;
 import org.spockframework.runtime.extension.IMethodInvocation;
@@ -170,11 +170,7 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
             commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword());
             // this is a pro only argument, but is added here because there is no mechanism for adding the argument from the pro tests
             commandScope.addArgumentValue("dropDbclhistory", true);
-            commandScope.addArgumentValue(DropAllCommandStep.CATALOG_AND_SCHEMAS_ARG, new CatalogAndSchema[]{
-                            new CatalogAndSchema(db.getDatabaseFromFactory().getDefaultCatalogName(), db.getDatabaseFromFactory().getDefaultSchemaName()),
-                            new CatalogAndSchema(db.getAltCatalog(), db.getAltSchema())
-                    }
-            );
+            commandScope.addArgumentValue(DropAllCommandStep.SCHEMAS_ARG, StringUtil.join(Arrays.asList(db.getDatabaseFromFactory().getDefaultSchemaName(), db.getAltSchema()), ","));
             commandScope.setOutput(new ByteArrayOutputStream());
             commandScope.execute();
         });

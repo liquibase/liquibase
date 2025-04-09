@@ -18,6 +18,7 @@ import liquibase.resource.ResourceAccessor
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.snapshot.DatabaseSnapshot
+import liquibase.util.StringUtil
 
 class CommandUtil {
 
@@ -197,11 +198,7 @@ class CommandUtil {
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
-        commandScope.addArgumentValue(DropAllCommandStep.CATALOG_AND_SCHEMAS_ARG, new CatalogAndSchema[]{
-                new CatalogAndSchema(db.getDatabaseFromFactory().getDefaultCatalogName(), db.getDatabaseFromFactory().getDefaultSchemaName()),
-                new CatalogAndSchema(db.getAltCatalog(), db.getAltSchema())
-        }
-        );
+        commandScope.addArgumentValue(DropAllCommandStep.SCHEMAS_ARG, StringUtil.join(Arrays.asList(db.getDatabaseFromFactory().getDefaultSchemaName(), db.getAltSchema()), ","))
         commandScope.setOutput(new ByteArrayOutputStream())
         commandScope.execute()
     }
