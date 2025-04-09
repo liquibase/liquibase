@@ -20,7 +20,7 @@
     </changeSet>
 
     <changeSet id="addNotNull-no-data-type" author="tfernandez">
-        <preConditions>
+        <preConditions onFail="CONTINUE">
             <not>
                 <or>
                     <dbms type="informix" />
@@ -30,11 +30,11 @@
                 </or>
             </not>
         </preConditions>
-        <addNotNullConstraint tableName="city" columnName="name" constraintName="not_null_city_name" />
+        <addNotNullConstraint tableName="city" columnName="name" constraintName="not_null_city_name_should_exist" />
     </changeSet>
 
     <changeSet id="addNotNull-with-data-type" author="tfernandez">
-        <preConditions>
+        <preConditions onFail="CONTINUE">
             <or>
                 <dbms type="informix" />
                 <dbms type="mariadb" />
@@ -42,7 +42,7 @@
                 <dbms type="mysql" />
             </or>
         </preConditions>
-        <addNotNullConstraint tableName="city" columnName="name" constraintName="not_null_city_name"
+        <addNotNullConstraint tableName="city" columnName="name" constraintName="not_null_city_name_should_not_exist"
             columnDataType="text" />
     </changeSet>
 
