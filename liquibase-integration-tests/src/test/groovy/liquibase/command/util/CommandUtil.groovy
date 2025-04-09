@@ -194,11 +194,18 @@ class CommandUtil {
         }
         def lockService = LockServiceFactory.getInstance().getLockService(db.getDatabaseFromFactory());
         lockService.releaseLock()
+        internalRunDropAll(db, null)
+        internalRunDropAll(db, db.getAltSchema())
+    }
+
+    private static void internalRunDropAll(DatabaseTestSystem db, String... schemas) {
         CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME)
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
-        commandScope.addArgumentValue(DropAllCommandStep.SCHEMAS_ARG, StringUtil.join(Arrays.asList(db.getDatabaseFromFactory().getDefaultSchemaName(), db.getAltSchema()), ","))
+        if (schemas != null) {
+            commandScope.addArgumentValue(DropAllCommandStep.SCHEMAS_ARG, StringUtil.join(schemas, ","))
+        }
         commandScope.setOutput(new ByteArrayOutputStream())
         commandScope.execute()
     }
