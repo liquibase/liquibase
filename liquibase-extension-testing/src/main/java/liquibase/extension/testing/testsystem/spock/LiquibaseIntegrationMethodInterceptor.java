@@ -7,6 +7,7 @@ import liquibase.command.core.DropAllCommandStep;
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.configuration.ConfigurationValueConverter;
 import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.extension.testing.testsystem.TestSystem;
@@ -162,7 +163,8 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
         Map<String, Object> scopeValues = new HashMap<>();
         scopeValues.put("liquibase.compatibility.check.enableCompatibilityCheck", false);
         Scope.child(scopeValues, () -> {
-            LockService lockService = LockServiceFactory.getInstance().getLockService(db.getDatabaseFromFactory());
+            Database databaseFromFactory = db.getDatabaseFromFactory();
+            LockService lockService = LockServiceFactory.getInstance().getLockService(databaseFromFactory);
             lockService.releaseLock();
             CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME);
             commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl());
@@ -170,9 +172,15 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
             commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword());
             // this is a pro only argument, but is added here because there is no mechanism for adding the argument from the pro tests
             commandScope.addArgumentValue("dropDbclhistory", true);
+            String defaultCatalogName = databaseFromFactory.getDefaultCatalogName();
+            String defaultSchemaName = databaseFromFactory.getDefaultSchemaName();
+            String altSchema = db.getAltSchema();
+            String altCatalog = db.getAltCatalog();
             commandScope.addArgumentValue(DropAllCommandStep.CATALOG_AND_SCHEMAS_ARG, new CatalogAndSchema[]{
-                            new CatalogAndSchema(db.getDatabaseFromFactory().getDefaultCatalogName(), db.getDatabaseFromFactory().getDefaultSchemaName()),
-                            new CatalogAndSchema(db.getAltCatalog(), db.getAltSchema())
+                            new CatalogAndSchema(defaultCatalogName, defaultSchemaName),
+                            new CatalogAndSchema(defaultCatalogName, altSchema),
+                            new CatalogAndSchema(altCatalog, defaultSchemaName),
+                            new CatalogAndSchema(altCatalog, altSchema)
                     }
             );
             commandScope.setOutput(new ByteArrayOutputStream());
