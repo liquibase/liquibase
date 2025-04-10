@@ -14,38 +14,38 @@ public abstract class AbstractResource implements Resource {
     private final String originalPath;
     private final URI uri;
 
-    public AbstractResource(String path, URI uri) {
-        this.originalPath = path;
+    public AbstractResource(String originalPathParam, URI uri) {
+        this.originalPath = originalPathParam;
         if (uri != null) {
             this.uri = handleUriSyntax(uri);
         } else {
             this.uri = null;
         }
 
-        String pathL = path
+        String calculatedPath = originalPathParam
                 .replace("\\", "/")
                 .replaceFirst("^classpath\\*?:", "");
 
         if (uri != null && uri.toString().contains("!")) {
-            this.path = handlePathForJarfile(pathL);
+            this.path = handlePathForJarfile(calculatedPath);
         } else {
-            this.path = pathL.replaceFirst("^/", "");
+            this.path = calculatedPath.replaceFirst("^/", "");
         }
     }
 
     /**
      * Handle the path for jar file resources as URI does not work as expected when you have an exclamation mark in the path.
      */
-    private String handlePathForJarfile(String pathL) {
+    private String handlePathForJarfile(String path) {
         String relative = this.uri.toString().replaceFirst(".*!", "");
         try {
-            if (!pathL.startsWith("..")) {
-                pathL = "/" + pathL;
+            if (!path.startsWith("..")) {
+                path = "/" + path;
             }
-            return new URI(relative).resolve(new URI(pathL).normalize()).toString().replaceFirst("^/", "");
+            return new URI(relative).resolve(new URI(path).normalize()).toString().replaceFirst("^/", "");
         } catch (URISyntaxException e) {
             Scope.getCurrentScope().getLog(AbstractResource.class).warning("Error handling URI syntax for file inside jar. Defaulting to previous behavior.", e);
-            return pathL.replaceFirst("^/", "");
+            return path.replaceFirst("^/", "");
         }
     }
 
