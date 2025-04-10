@@ -83,6 +83,7 @@ jobs:
       test_count_unit_test_java_11_ubuntu: ${{ steps.check-test-counts-java-all-ubuntu.outputs.test_count_unit_test_java_11_ubuntu }}
       test_count_unit_test_java_17_ubuntu: ${{ steps.check-test-counts-java-all-ubuntu.outputs.test_count_unit_test_java_17_ubuntu }}
       test_count_unit_test_java_21_ubuntu: ${{ steps.check-test-counts-java-all-ubuntu.outputs.test_count_unit_test_java_21_ubuntu }}
+      test_count_unit_test_java_24_ubuntu: ${{ steps.check-test-counts-java-all-ubuntu.outputs.test_count_unit_test_java_24_ubuntu }}
       test_count_unit_test_java_macos: ${{ steps.check-test-counts-java-macos.outputs.test_count_unit_test_java_macos }}
       test_count_unit_test_java_windows: ${{ steps.check-test-counts-java-windows.outputs.test_count_unit_test_java_windows }}
 
@@ -90,7 +91,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-22.04, macos-13, windows-2019 ]
-        java: [ 8, 11, 17, 21 ]
+        java: [ 8, 11, 17, 21, 24 ]
         exclude:
           # exclude non-java 8 on macos and windows builds
           - os: macos-13
@@ -105,6 +106,10 @@ jobs:
             java: 21
           - os: windows-2019
             java: 21
+          - os: macos-13
+            java: 24
+          - os: windows-2019
+            java: 24
     runs-on: ${{ matrix.os }}
     env:
       OS_TYPE: ${{ matrix.os }}
@@ -115,7 +120,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Built Code Cache
-        if: ${{ matrix.java == 17}}
+        if: ${{ matrix.java == 21}}
         uses: actions/cache@v4.2.0
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
@@ -183,7 +188,7 @@ jobs:
         run: |
           ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
 
-      - name: Check Unit Test Count for Java 8, 11, 17, 21 Ubuntu
+      - name: Check Unit Test Count for Java 8, 11, 17, 21, 24 Ubuntu
         id: check-test-counts-java-all-ubuntu
         if: matrix.os == 'ubuntu-22.04'
         run: |
@@ -202,6 +207,8 @@ jobs:
             EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_JAVA_17_UBUNTU }}
           elif [[ ${{ matrix.java }} == 21 ]]; then
             EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_JAVA_21_UBUNTU }}
+          elif [[ ${{ matrix.java }} == 24 ]]; then
+            EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_JAVA_24_UBUNTU }}
           fi
 
           if [[ ($TEST_COUNT -lt $(($EXPECTED_TEST_COUNT - ($EXPECTED_TEST_COUNT / 100))) ) ]]; then
@@ -453,6 +460,7 @@ jobs:
           gh variable set TEST_COUNT_JAVA_11_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_11_ubuntu }}"
           gh variable set TEST_COUNT_JAVA_17_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_17_ubuntu }}"
           gh variable set TEST_COUNT_JAVA_21_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_21_ubuntu }}"
+          gh variable set TEST_COUNT_JAVA_24_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_24_ubuntu }}"
           gh variable set TEST_COUNT_JAVA_8_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_8_ubuntu }}"
           gh variable set TEST_COUNT_JAVA_MACOS --body "${{ needs.build_tests.outputs.test_count_unit_test_java_macos }}"
           gh variable set TEST_COUNT_JAVA_WINDOWS --body "${{ needs.build_tests.outputs.test_count_unit_test_java_windows}}"
