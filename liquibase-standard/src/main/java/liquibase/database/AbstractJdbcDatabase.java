@@ -830,7 +830,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         boolean closed = false;
         try {
             closed = getConnection().isClosed();
-        } catch (DatabaseException ignored) {
+        } catch (Exception ignored) {
 
         }
 
