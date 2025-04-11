@@ -175,11 +175,28 @@ if [ -z "$extension_name" ]; then
   cp $outdir/liquibase-commercial-$version.jar $workdir/internal/lib/liquibase-commercial.jar ##save versioned jar as unversioned to include in zip/tar
 
   ## Extract tar.gz and rebuild it back into the tar.gz and zip
-  mkdir $workdir/tgz-repackage
+  mkdir $workdir/tgz-repackage 
   tar -xzf $workdir/liquibase-$MODIFIED_BRANCH_NAME-SNAPSHOT.tar.gz -C $workdir/tgz-repackage
+
+  mkdir $workdir/tgz-repackage-minimal
+  tar -xzf $workdir/liquibase-minimal-$MODIFIED_BRANCH_NAME-SNAPSHOT.tar.gz -C $workdir/tgz-repackage-minimal
+
   cp $workdir/internal/lib/liquibase-core.jar $workdir/tgz-repackage/internal/lib/liquibase-core.jar
   cp $workdir/internal/lib/liquibase-commercial.jar $workdir/tgz-repackage/internal/lib/liquibase-commercial.jar
+
+  # copy core and commercial jars to minimal
+  cp $workdir/internal/lib/liquibase-core.jar $workdir/tgz-repackage-minimal/internal/lib/liquibase-core.jar
+  cp $workdir/internal/lib/liquibase-commercial.jar $workdir/tgz-repackage-minimal/internal/lib/liquibase-commercial.jar
+
+  # replace the versions in all the text files
   find $workdir/tgz-repackage -name "*.txt" -exec sed -i -e "s/\(0\|release\|master\)-SNAPSHOT/$version/" {} \;
+
   (cd $workdir/tgz-repackage && tar -czf $outdir/liquibase-$version.tar.gz *)
   (cd $workdir/tgz-repackage && zip -qr $outdir/liquibase-$version.zip *)
+
+  # replace the versions in all the text files in minimal
+  find $workdir/tgz-repackage-minimal -name "*.txt" -exec sed -i -e "s/\(0\|release\|master\)-SNAPSHOT/$version/" {} \;
+
+  (cd $workdir/tgz-repackage-minimal && tar -czf $outdir/liquibase-minimal-$version.tar.gz *)
+  (cd $workdir/tgz-repackage-minimal && zip -qr $outdir/liquibase-minimal-$version.zip *)
 fi
