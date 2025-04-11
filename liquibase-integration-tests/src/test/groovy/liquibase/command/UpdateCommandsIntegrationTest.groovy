@@ -12,7 +12,6 @@ import liquibase.command.core.UpdateSqlCommandStep
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.command.core.helpers.ShowSummaryArgument
-import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
@@ -32,7 +31,6 @@ class UpdateCommandsIntegrationTest extends Specification {
 
     def "run UpdateSql from CommandStep"() {
         when:
-        CommandUtil.runDropAll(h2)
         def updateSqlCommand = new CommandScope(UpdateSqlCommandStep.COMMAND_NAME)
         updateSqlCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, h2.getDatabaseFromFactory())
         updateSqlCommand.addArgumentValue(UpdateSqlCommandStep.CHANGELOG_FILE_ARG, "liquibase/update-tests.yml")
@@ -48,9 +46,6 @@ class UpdateCommandsIntegrationTest extends Specification {
         then:
         final JdbcSQLSyntaxErrorException exception = thrown()
         exception.message.contains("Table \"DATABASECHANGELOG\" not found")
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     @Unroll
@@ -87,9 +82,6 @@ class UpdateCommandsIntegrationTest extends Specification {
         rsTableExist.next()
         rsTableExist.getInt(1) == 0
 
-        cleanup:
-        CommandUtil.runDropAll(h2)
-
         where:
         changelog                                                                                                                               | _
         "liquibase/update-tests.yml"                                                                                                            | _
@@ -109,9 +101,6 @@ class UpdateCommandsIntegrationTest extends Specification {
         def rsTableExist = h2.getConnection().createStatement().executeQuery("select count(1) from example_table")
         rsTableExist.next()
         rsTableExist.getInt(1) == 0
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     def "run Update from Liquibase class using print writer"() {

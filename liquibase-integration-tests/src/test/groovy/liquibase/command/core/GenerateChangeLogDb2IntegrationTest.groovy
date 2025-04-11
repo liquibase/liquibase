@@ -29,14 +29,12 @@ class GenerateChangeLogDb2IntegrationTest extends Specification {
         contents.contains("COMMENT ON TABLE SOME_VIEW IS 'THIS IS A COMMENT ON SOME_VIEW VIEW. THIS VIEW COMMENT SHOULD BE CAPTURED BY GenerateChangeLog.'")
 
         when:
-        CommandUtil.runDropAll(db2)
         CommandUtil.runUpdate(db2,'output.mssql.sql')
 
         then:
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(db2)
         outputFile.delete()
     }
 }
