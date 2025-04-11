@@ -1007,7 +1007,7 @@
   </changeSet>
 
   <!-- should work for all databases but only tested on h2 and psotgres for now, oracle actually does not support sequences as default values -->
-  <changeSet id="AddSequenceNextValueAsDefault" author="dbiggs" dbms="postgresql, h2">
+  <changeSet id="AddSequenceNextValueAsDefault" author="dbiggs" dbms="postgresql, h2, hsqldb">
     <createSequence sequenceName="tableDefault_seq" />
     <createTable tableName="insertWithDefaultSeq">
       <column name="id" type="int" defaultValueSequenceNext="tableDefault_seq">
