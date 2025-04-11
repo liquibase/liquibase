@@ -33,6 +33,8 @@ public class DiffOutputControl {
     @Setter
     private boolean isReplaceIfExistsSet = false;
 
+    private boolean preserveNullValues = true;
+
     @Getter
     @Setter
     private String excludeObjects;
@@ -218,5 +220,13 @@ public class DiffOutputControl {
 
     public void setConsiderCatalogsAsSchemas(boolean considerCatalogsAsSchemas) {
         this.considerCatalogsAsSchemas = considerCatalogsAsSchemas;
+    }
+
+    public boolean getPreserveNullValues() {
+        return preserveNullValues;
+    }
+
+    public void setPreserveNullValues(boolean preserveNullValues) {
+        this.preserveNullValues = preserveNullValues;
     }
 }

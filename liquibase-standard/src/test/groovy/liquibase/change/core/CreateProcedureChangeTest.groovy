@@ -8,8 +8,8 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.core.OracleDatabase
 import liquibase.database.core.PostgresDatabase
-import liquibase.exception.ValidationErrors
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
+import liquibase.exception.ValidationErrors
 import liquibase.parser.core.ParsedNode
 import liquibase.database.core.MockDatabase
 import liquibase.sdk.resource.MockResourceAccessor
@@ -122,8 +122,8 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         procedureCheckSumWithDbms.toString() == updatedChecksum
 
         where:
-        version | originalChecksum | updatedChecksum
-        ChecksumVersion.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:63f00c8a5e353ec6d400b0c5a5f7b013"
+        version                  | originalChecksum                     | updatedChecksum
+        ChecksumVersion.V8       | "8:977441683eb54d6ee1b2de400adb5eed" | "8:63f00c8a5e353ec6d400b0c5a5f7b013"
         ChecksumVersion.latest() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
 
     }
@@ -158,8 +158,8 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         procedureCheckSumWithPath.toString() == updatedChecksum
 
         where:
-        version | originalChecksum | updatedChecksum
-        ChecksumVersion.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:39bcca9579db76270fcbedf41ef2e61a"
+        version                  | originalChecksum                     | updatedChecksum
+        ChecksumVersion.V8       | "8:977441683eb54d6ee1b2de400adb5eed" | "8:39bcca9579db76270fcbedf41ef2e61a"
         ChecksumVersion.latest() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
     }
 
@@ -184,8 +184,8 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         procedureCheckSumWithComments.toString() == updatedChecksum
 
         where:
-        version | originalChecksum | updatedChecksum
-        ChecksumVersion.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:f834f1891f07c1a2242c346499e16b22"
+        version                  | originalChecksum                     | updatedChecksum
+        ChecksumVersion.V8       | "8:977441683eb54d6ee1b2de400adb5eed" | "8:f834f1891f07c1a2242c346499e16b22"
         ChecksumVersion.latest() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
     }
 
@@ -210,8 +210,8 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         procedureCheckSumWithEncoding.toString() == updatedChecksum
 
         where:
-        version | originalChecksum | updatedChecksum
-        ChecksumVersion.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:a5244728b4370b3e7e642523539b10a1"
+        version                  | originalChecksum                     | updatedChecksum
+        ChecksumVersion.V8       | "8:977441683eb54d6ee1b2de400adb5eed" | "8:a5244728b4370b3e7e642523539b10a1"
         ChecksumVersion.latest() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
     }
 
@@ -235,8 +235,8 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         procedureTextModifiedCheckSum.toString() == updatedChecksum
 
         where:
-        version | originalChecksum | updatedChecksum
-        ChecksumVersion.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:08289655a87e3a5ef12e2a62e3168105"
+        version                  | originalChecksum                     | updatedChecksum
+        ChecksumVersion.V8       | "8:977441683eb54d6ee1b2de400adb5eed" | "8:08289655a87e3a5ef12e2a62e3168105"
         ChecksumVersion.latest() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
     }
 
@@ -261,8 +261,8 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         procedureTextUpdatedCheckSum.toString() == updatedChecksum
 
         where:
-        version | originalChecksum | updatedChecksum
-        ChecksumVersion.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:55058b1ccfdae7d3e486a53b6f3357e5"
+        version                  | originalChecksum                     | updatedChecksum
+        ChecksumVersion.V8       | "8:977441683eb54d6ee1b2de400adb5eed" | "8:55058b1ccfdae7d3e486a53b6f3357e5"
         ChecksumVersion.latest() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:36f93561a3ca75d53c84639669d74b51"
     }
 
@@ -297,8 +297,8 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         checkSumSecondReplacement == updatedChecksum
 
         where:
-        version | originalChecksum | updatedChecksum
-        ChecksumVersion.V8 | "8:633d7b88ffefdea580a8c5671b284cc9" | "8:b7d57ddf12ba7f8a12d342b0f833c11d"
+        version                  | originalChecksum                     | updatedChecksum
+        ChecksumVersion.V8       | "8:633d7b88ffefdea580a8c5671b284cc9" | "8:b7d57ddf12ba7f8a12d342b0f833c11d"
         ChecksumVersion.latest() | "9:eec1dde2b2197528f030a2917d2602c3" | "9:06085ea7538bfe94b70b7196d520cc2f"
     }
 
@@ -323,8 +323,8 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         changeWithRelativeToChangelogFileAttribSetCheckSum.toString() == updatedChecksum
 
         where:
-        version | originalChecksum | updatedChecksum
-        ChecksumVersion.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:20536e4edf2d1dfa3d892063830f38ae"
+        version                  | originalChecksum                     | updatedChecksum
+        ChecksumVersion.V8       | "8:977441683eb54d6ee1b2de400adb5eed" | "8:20536e4edf2d1dfa3d892063830f38ae"
         ChecksumVersion.latest() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
     }
 

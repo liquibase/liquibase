@@ -10,8 +10,17 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.structure.core.*;
-import liquibase.util.*;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.ForeignKeyConstraintType;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.UniqueConstraint;
+import liquibase.util.BooleanUtil;
+import liquibase.util.ISODateFormat;
+import liquibase.util.NowAndTodayUtil;
+import liquibase.util.ObjectUtil;
+import liquibase.util.StringUtil;
 import lombok.Getter;
 
 import java.math.BigInteger;
@@ -20,6 +29,8 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.TreeSet;
 import org.apache.commons.lang3.BooleanUtils;
 
 /**
@@ -107,14 +118,14 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             Table table = (Table) columnSnapshot.getRelation();
             List<NotNullConstraint> notNullConstraints = table.getNotNullConstraints();
             if (notNullConstraints != null) {
-                    for (NotNullConstraint constraint : notNullConstraints) {
-                            if (constraint.getColumnName().equals(getName())) {
-                                    constraints.setNullable(false);
-                                    constraints.setNotNullConstraintName(constraint.getConstraintName());
-                                    nonDefaultConstraints = true;
-                                }
-                        }
+                for (NotNullConstraint constraint : notNullConstraints) {
+                    if (constraint.getColumnName().equals(getName())) {
+                        constraints.setNullable(false);
+                        constraints.setNotNullConstraintName(constraint.getConstraintName());
+                        nonDefaultConstraints = true;
+                    }
                 }
+            }
 
             if (columnSnapshot.isAutoIncrement()) {
                 setAutoIncrement(true);
@@ -173,6 +184,37 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     public ColumnConfig() {
     }
 
+    public boolean isSerializable (boolean mustPreserveNullValues) {
+        return mustPreserveNullValues ||
+                hasName() ||
+                isComputed() ||
+                hasType() ||
+                hasValueObject() ||
+                hasEncoding() ||
+                hasValueComputed() ||
+                hasValueSequenceNext() ||
+                hasValueSequenceCurrent() ||
+
+                hasDefaultValue() ||
+                hasDefaultValueComputed() ||
+                hasDefaultValueSequenceNext() ||
+                hasDefaultValueConstraintName() ||
+
+                hasConstraints() ||
+                hasAutoIncrement() ||
+                hasGenerationType() ||
+                hasDefaultOnNull() ||
+                hasStartWith() ||
+                hasIncrementBy() ||
+                hasRemarks() ||
+                hasDescending() ||
+                hasIncluded();
+    }
+
+    public boolean hasConstraints() {
+        return null != this.constraints;
+    }
+
     public static ColumnConfig fromName(String name) {
         name = name.trim();
         Boolean descending = null;
@@ -217,6 +259,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return setName(name);
     }
 
+    public boolean hasName() {
+        return null != this.name;
+    }
+
     public Boolean getComputed() {
         return computed;
     }
@@ -224,6 +270,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     public ColumnConfig setComputed(Boolean computed) {
         this.computed = computed;
         return this;
+    }
+
+    public boolean isComputed() {
+        return this.computed != null && this.computed.booleanValue();
     }
 
     /**
@@ -237,6 +287,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     public ColumnConfig setType(String type) {
         this.type = type;
         return this;
+    }
+
+    public boolean hasType() {
+        return null != this.type;
     }
 
     /**
@@ -354,6 +408,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public boolean hasValueComputed () {
+        return null != this.valueComputed;
+    }
+
     public SequenceNextValueFunction getValueSequenceNext() {
         return valueSequenceNext;
     }
@@ -364,6 +422,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public boolean hasValueSequenceNext() {
+        return null != this.valueSequenceNext;
+    }
+
     public SequenceCurrentValueFunction getValueSequenceCurrent() {
         return valueSequenceCurrent;
     }
@@ -372,6 +434,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         this.valueSequenceCurrent = valueSequenceCurrent;
 
         return this;
+    }
+
+    public boolean hasValueSequenceCurrent() {
+        return null != this.valueSequenceCurrent;
     }
 
     /**
@@ -450,6 +516,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public boolean hasEncoding() {
+        return null != this.encoding;
+    }
+
     /**
      * Return the value from whatever setValue* function was called. Will return null if none were set.
      */
@@ -474,6 +544,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             return getValueSequenceCurrent();
         }
         return null;
+    }
+
+    public boolean hasValueObject() {
+        return null != getValueObject();
     }
 
     /**
@@ -626,6 +700,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public boolean hasDefaultValueComputed() {
+        return null != defaultValueComputed;
+    }
+
     /**
      * Return the value to set this column's default to according to the setDefaultValue* function that was called.
      * If none were called, this function returns null.
@@ -673,6 +751,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public boolean hasAutoIncrement() {
+        return null != this.autoIncrement;
+    }
+
     /**
      * Return the number to start auto incrementing with.
      */
@@ -686,6 +768,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public boolean hasStartWith() {
+        return null != this.startWith;
+    }
+
     /**
      * Return the amount to auto increment by.
      */
@@ -697,6 +783,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         this.incrementBy = incrementBy;
 
         return this;
+    }
+
+    public boolean hasIncrementBy() {
+        return null != this.incrementBy;
     }
 
     /**
@@ -720,12 +810,12 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-    public Boolean getDescending() {
-        return descending;
+    public boolean hasRemarks() {
+        return null != this.remarks;
     }
 
-    public Boolean getIncluded() {
-        return included;
+    public Boolean getDescending() {
+        return descending;
     }
 
     public ColumnConfig setDescending(Boolean descending) {
@@ -733,9 +823,21 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public boolean hasDescending() {
+        return null != this.descending;
+    }
+
+    public Boolean getIncluded() {
+        return included;
+    }
+
     public ColumnConfig setIncluded(Boolean included) {
         this.included = included;
         return this;
+    }
+
+    public boolean hasIncluded() {
+        return null != this.included;
     }
 
     public Boolean getDefaultOnNull() {
@@ -747,6 +849,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public boolean hasDefaultOnNull() {
+        return null != this.defaultOnNull;
+    }
+
     public String getGenerationType() {
         return generationType;
     }
@@ -754,6 +860,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     public ColumnConfig setGenerationType(String generationType) {
         this.generationType = generationType;
         return this;
+    }
+
+    public boolean hasGenerationType() {
+        return null != this.generationType;
     }
 
     @Override
@@ -771,12 +881,20 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public boolean hasDefaultValueSequenceNext() {
+        return null != this.defaultValueSequenceNext;
+    }
+
     public String getDefaultValueConstraintName() {
         return defaultValueConstraintName;
     }
 
     public void setDefaultValueConstraintName(String defaultValueConstraintName) {
         this.defaultValueConstraintName = defaultValueConstraintName;
+    }
+
+    public boolean hasDefaultValueConstraintName() {
+        return null != this.defaultValueConstraintName;
     }
 
     @Override
@@ -967,5 +1085,79 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         } else {
             return o;
         }
+    }
+
+    /**
+     * The class type's set of serialized fields are cached in {@link ReflectionSerializer}.
+     * Alas, we MUST NOT modify them directly, because they affect all instances of the same class.
+     * Instead we calculate a set of fields dynamically, based on the statically cached ones.
+     *
+     * @return a reduced {@link  Set<String>} of serialized field names
+     */
+    @Override
+    public Set<String> getSerializableFields() {
+        Set<String> fields = new TreeSet<>(super.getSerializableFields());
+
+        if (!hasValueObject()) {
+            fields.removeIf(s -> s.startsWith("value"));
+        }
+
+        if (!hasDefaultValue()) {
+            fields.removeIf(s -> s.startsWith("defaultValue"));
+        }
+
+        if (!hasAutoIncrement()) {
+            fields.remove("autoIncrement");
+        }
+
+        if (!isComputed()) {
+            fields.remove("computed");
+        }
+
+        if (!hasConstraints()) {
+            fields.remove("constraints");
+        }
+
+        if (!hasDefaultOnNull()) {
+            fields.remove("defaultOnNull");
+        }
+
+        if (!hasDescending()) {
+            fields.remove("descending");
+        }
+
+        if (!hasEncoding()) {
+            fields.remove("encoding");
+        }
+
+        if (!hasGenerationType()) {
+            fields.remove("generationType");
+        }
+
+        if (!hasIncluded()) {
+            fields.remove("included");
+        }
+
+        if (!hasIncrementBy()) {
+            fields.remove("incrementBy");
+        }
+
+        if (!hasName()) {
+            fields.remove("name");
+        }
+
+        if (!hasRemarks()) {
+            fields.remove("remarks");
+        }
+
+        if (!hasStartWith()) {
+            fields.remove("startWith");
+        }
+
+        if (!hasType()) {
+            fields.remove("type");
+        }
+
+        return fields;
     }
 }

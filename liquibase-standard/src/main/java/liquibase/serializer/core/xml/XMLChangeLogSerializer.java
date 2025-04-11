@@ -50,6 +50,8 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     private static final String XML_VERSION = "1.1";
     private final LiquibaseEntityResolver resolver = new LiquibaseEntityResolver();
 
+    private boolean preserveNullValues;
+
     public XMLChangeLogSerializer() {
         try {
             this.currentChangeLogFileDOM = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
@@ -61,6 +63,11 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
     protected XMLChangeLogSerializer(Document currentChangeLogFileDOM) {
         this.currentChangeLogFileDOM = currentChangeLogFileDOM;
+    }
+
+    @Override
+    public void preserveNullValues(boolean preserveNullValues) {
+        this.preserveNullValues = preserveNullValues;
     }
 
     public void setCurrentChangeLogFileDOM(Document currentChangeLogFileDOM) {
@@ -184,9 +191,17 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             nodeName = details.getShortName(namespace) + ":" + nodeName;
         }
         Element node = currentChangeLogFileDOM.createElementNS(namespace, nodeName);
+        Set<String> fields = object.getSerializableFields();
+
+        if (this.preserveNullValues && object instanceof ColumnConfig && fields.size() == 1 && fields.contains("name")) {
+            node.setAttribute("name", (String) object.getSerializableFieldValue("name"));
+            node.setAttribute("value", "null");
+
+            return node;
+        }
 
         try {
-            for (String field : object.getSerializableFields()) {
+            for (String field : fields) {
                 setValueOnNode(node, object.getSerializableFieldNamespace(field), field, object.getSerializableFieldValue(field), object.getSerializableFieldType(field), namespace);
             }
         } catch (UnexpectedLiquibaseException e) {
@@ -208,6 +223,12 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             for (Object child : (Collection) value) {
                 setValueOnNode(node, objectNamespace, objectName, child, serializationType, parentNamespace);
             }
+        } else if (value instanceof ColumnConfig) {
+            ColumnConfig columnConfig = (ColumnConfig) value;
+            if (!columnConfig.isSerializable(preserveNullValues)) {
+                return;
+            }
+            node.appendChild(createNode((LiquibaseSerializable) value));
         } else if (value instanceof Map) {
             for (Map.Entry entry : (Set<Map.Entry>) ((Map) value).entrySet()) {
                 Element mapNode = currentChangeLogFileDOM.createElementNS(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE, qualifyName(objectName, objectNamespace, parentNamespace));
