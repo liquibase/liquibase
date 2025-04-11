@@ -23,18 +23,22 @@ public class LicenseTrackingArgs implements AutoloadedConfigurations {
         ENABLED = builder.define("enabled", Boolean.class)
                 .setDescription("Enable or disable sending license usage data.")
                 .setDefaultValue(false)
+                .setHidden(true)
                 .build();
 
         URL = builder.define("url", String.class)
                 .setDefaultValue("http://liquibase-tracking.local")
+                .setHidden(true)
                 .build();
 
         LOG_LEVEL = builder.define("logLevel", Level.class)
                 .setDefaultValue(Level.INFO)
+                .setHidden(true)
                 .build();
 
         TRACKING_ID = builder.define("trackingId", String.class)
                 .setDescription("Specifies an identifier (e.g., team name, pipeline ID, or environment) to track and analyze Liquibase license usage. If not provided, the hostname and user is used for identification.")
+                .setHidden(true)
                 .build();
 
         TIMEOUT = builder.define("timeout", Integer.class)

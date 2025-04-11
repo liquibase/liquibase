@@ -251,34 +251,6 @@ Global Options
                                includeSystemClasspath', environment variable:
                                'LIQUIBASE_INCLUDE_SYSTEM_CLASSPATH')
 
-      --license-utility-enabled=PARAM
-                             Enable or disable sending license usage data.
-                             DEFAULT: false
-                             (defaults file: 'liquibase.license.utility.
-                               enabled', environment variable:
-                               'LIQUIBASE_LICENSE_UTILITY_ENABLED')
-
-      --license-utility-log-level=PARAM
-                             DEFAULT: INFO
-                             (defaults file: 'liquibase.license.utility.
-                               logLevel', environment variable:
-                               'LIQUIBASE_LICENSE_UTILITY_LOG_LEVEL')
-
-      --license-utility-tracking-id=PARAM
-                             Specifies an identifier (e.g., team name, pipeline
-                               ID, or environment) to track and analyze
-                               Liquibase license usage. If not provided, the
-                               hostname and user is used for identification.
-                             (defaults file: 'liquibase.license.utility.
-                               trackingId', environment variable:
-                               'LIQUIBASE_LICENSE_UTILITY_TRACKING_ID')
-
-      --license-utility-url=PARAM
-                             DEFAULT: http://liquibase-tracking.local
-                             (defaults file: 'liquibase.license.utility.url',
-                               environment variable:
-                               'LIQUIBASE_LICENSE_UTILITY_URL')
-
       --liquibase-catalog-name=PARAM
                              Catalog to use for Liquibase objects
                              (defaults file: 'liquibase.liquibaseCatalogName',
