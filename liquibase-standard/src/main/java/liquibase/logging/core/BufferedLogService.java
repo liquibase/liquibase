@@ -7,10 +7,9 @@ import lombok.Getter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 
 @Getter
@@ -20,7 +19,7 @@ public class BufferedLogService extends AbstractLogService {
     // Truncate the return value at 10MB = 10,000,000 bytes
     //
     public static final int MAX_LOG_LENGTH = 10000000;
-    private final List<BufferedLogMessage> log = Collections.synchronizedList(new ArrayList<>());
+    private final List<BufferedLogMessage> log = new CopyOnWriteArrayList<>();
 
 
     @Override
