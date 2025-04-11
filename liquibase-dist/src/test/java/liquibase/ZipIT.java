@@ -26,7 +26,7 @@ public class ZipIT {
                         zipContents.append("\n");
                     });
         }
-        String expected = FileUtil.getContents(new File("expected-distribution-contents.txt"));
+        String expected = FileUtil.getContents(new File(System.getProperty("expected.distribution.contents.filename", "expected-distribution-contents.txt")));
         assertNotNull(expected);
         assertEquals(ArchiveUtils.getSortedLines(expected), ArchiveUtils.getSortedLines(zipContents.toString()), "Generated zip does not match expected zip contents. Did you add a new dependency?");
     }
