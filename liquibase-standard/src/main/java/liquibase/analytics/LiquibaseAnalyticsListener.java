@@ -114,33 +114,24 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
             return issuedTo;
         });
 
-        Thread eventThread = new Thread(() -> {
-            try {
-                AnalyticsBatch analyticsBatch = AnalyticsBatch.fromLiquibaseEvent(cachedEvents, userId);
-                sendEvent(
-                        analyticsBatch,
-                        new URL(analyticsConfiguration.getDestinationUrl()),
-                        logger,
-                        logLevel,
-                        "Sending anonymous data to Liquibase analytics endpoint. ",
-                        "Response from Liquibase analytics endpoint: ",
-                        analyticsConfiguration.getTimeoutMillis(),
-                        analyticsConfiguration.getTimeoutMillis());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            timedOut.set(false);
-            cachedEvents.clear();
-        });
-        eventThread.start();
         try {
-            eventThread.join(timeoutMillis);
-        } catch (InterruptedException e) {
-            logger.log(logLevel, "Interrupted while waiting for analytics event processing.", e);
+            AnalyticsBatch analyticsBatch = AnalyticsBatch.fromLiquibaseEvent(cachedEvents, userId);
+            sendEvent(
+                    analyticsBatch,
+                    new URL(analyticsConfiguration.getDestinationUrl()),
+                    logger,
+                    logLevel,
+                    "Sending anonymous data to Liquibase analytics endpoint. ",
+                    "Response from Liquibase analytics endpoint: ",
+                    analyticsConfiguration.getTimeoutMillis(),
+                    analyticsConfiguration.getTimeoutMillis());
+        } catch (Exception e) {
+            if (e instanceof SocketTimeoutException) {
+                logger.log(logLevel, "Timed out while waiting for analytics event processing.", null);
+            }
+            throw e;
         }
-        if (timedOut.get()) {
-            logger.log(logLevel, "Timed out while waiting for analytics event processing.", null);
-        }
+        cachedEvents.clear();
     }
 
     public static void sendEvent(Object requestBody, URL url, Logger logger, Level logLevel, String sendingLogMessage, String responseLogMessage, int connectTimeout, int readTimeout) throws Exception {
