@@ -18,6 +18,7 @@ import org.yaml.snakeyaml.introspector.BeanAccess;
 import org.yaml.snakeyaml.nodes.Tag;
 
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -112,7 +113,6 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
             }
             return issuedTo;
         });
-        AtomicBoolean timedOut = new AtomicBoolean(true);
 
         Thread eventThread = new Thread(() -> {
             try {
@@ -124,8 +124,8 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
                         logLevel,
                         "Sending anonymous data to Liquibase analytics endpoint. ",
                         "Response from Liquibase analytics endpoint: ",
-                        0,
-                        0);
+                        analyticsConfiguration.getTimeoutMillis(),
+                        analyticsConfiguration.getTimeoutMillis());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
