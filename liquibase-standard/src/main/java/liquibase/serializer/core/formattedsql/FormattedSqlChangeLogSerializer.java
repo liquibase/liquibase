@@ -1,6 +1,9 @@
 package liquibase.serializer.core.formattedsql;
 
-import liquibase.*;
+import liquibase.ContextExpression;
+import liquibase.GlobalConfiguration;
+import liquibase.Labels;
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.ChangeSet;
@@ -97,8 +100,12 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
             builder.append(logicalFilePath);
             builder.append("\"");
         }
-        builder.append(" splitStatements:false");
+        builder.append(" splitStatements:" + getSplitStatementsValue(changeSet));
         builder.append("\n");
+    }
+
+    public boolean getSplitStatementsValue(ChangeSet changeSet) {
+        return false;
     }
 
     protected Database getTargetDatabase(ChangeSet changeSet) {

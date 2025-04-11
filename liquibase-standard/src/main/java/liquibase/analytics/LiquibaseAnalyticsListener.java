@@ -18,6 +18,7 @@ import org.yaml.snakeyaml.introspector.BeanAccess;
 import org.yaml.snakeyaml.nodes.Tag;
 
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -112,35 +113,25 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
             }
             return issuedTo;
         });
-        AtomicBoolean timedOut = new AtomicBoolean(true);
 
-        Thread eventThread = new Thread(() -> {
-            try {
-                AnalyticsBatch analyticsBatch = AnalyticsBatch.fromLiquibaseEvent(cachedEvents, userId);
-                sendEvent(
-                        analyticsBatch,
-                        new URL(analyticsConfiguration.getDestinationUrl()),
-                        logger,
-                        logLevel,
-                        "Sending anonymous data to Liquibase analytics endpoint. ",
-                        "Response from Liquibase analytics endpoint: ",
-                        0,
-                        0);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            timedOut.set(false);
-            cachedEvents.clear();
-        });
-        eventThread.start();
         try {
-            eventThread.join(timeoutMillis);
-        } catch (InterruptedException e) {
-            logger.log(logLevel, "Interrupted while waiting for analytics event processing.", e);
+            AnalyticsBatch analyticsBatch = AnalyticsBatch.fromLiquibaseEvent(cachedEvents, userId);
+            sendEvent(
+                    analyticsBatch,
+                    new URL(analyticsConfiguration.getDestinationUrl()),
+                    logger,
+                    logLevel,
+                    "Sending anonymous data to Liquibase analytics endpoint. ",
+                    "Response from Liquibase analytics endpoint: ",
+                    analyticsConfiguration.getTimeoutMillis(),
+                    analyticsConfiguration.getTimeoutMillis());
+        } catch (Exception e) {
+            if (e instanceof SocketTimeoutException) {
+                logger.log(logLevel, "Timed out while waiting for analytics event processing.", null);
+            }
+            throw e;
         }
-        if (timedOut.get()) {
-            logger.log(logLevel, "Timed out while waiting for analytics event processing.", null);
-        }
+        cachedEvents.clear();
     }
 
     public static void sendEvent(Object requestBody, URL url, Logger logger, Level logLevel, String sendingLogMessage, String responseLogMessage, int connectTimeout, int readTimeout) throws Exception {
