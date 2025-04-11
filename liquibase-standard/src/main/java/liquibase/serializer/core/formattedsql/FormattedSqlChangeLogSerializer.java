@@ -65,7 +65,7 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
                         // Handle Oracle differently because setting splitStatements:true on a statement
                         // that has an endDelimiter will cause invalid syntax
                         //
-                        builder = new StringBuilder(builder.toString().replace(" splitStatements:false", " "));
+                        builder = new StringBuilder(builder.toString().replace(" splitStatements:false", ""));
                     }
                     for (Sql sql : sqls) {
                         builder.append(sql.toSql().endsWith(sql.getEndDelimiter()) ? sql.toSql() : sql.toSql() + sql.getEndDelimiter()).append("\n");
