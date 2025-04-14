@@ -81,4 +81,9 @@ public class ShowSummaryArgument extends AbstractCommandStep {
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         HelpUtil.hideCommandNameInHelpView(commandDefinition);
     }
+
+    @Override
+    public boolean isInternal() {
+        return true;
+    }
 }

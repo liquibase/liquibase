@@ -15,4 +15,9 @@ public abstract class AbstractArgumentCommandStep extends AbstractCommandStep {
 
     @Override
     public abstract List<Class<?>> providedDependencies();
+
+    @Override
+    public boolean isInternal() {
+        return true;
+    }
 }
