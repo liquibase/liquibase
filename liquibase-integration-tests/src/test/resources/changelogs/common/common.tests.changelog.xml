@@ -1364,4 +1364,20 @@
         </createProcedure>
     </changeSet>
 
+    <changeSet id="shouldHandleComputedAndNonComputedColumnValues" author="marchof">
+        <createTable tableName="COMPUTED_AND_NON_COMPUTED">
+            <column name="DATE" type="DATE"/>
+            <column name="NAME" type="VARCHAR2(32)"/>
+        </createTable>
+        <loadData tableName="COMPUTED_AND_NON_COMPUTED" file="changelogs/sample.data4.csv">
+            <column name="DATE"/>
+            <column name="NAME"/>
+        </loadData>
+    </changeSet>
+    <changeSet id="verifyShouldHandleComputedAndNonComputedColumnValues" author="marchof">
+        <preConditions>
+            <sqlCheck expectedResult="2">select count(*) from COMPUTED_AND_NON_COMPUTED;</sqlCheck>
+        </preConditions>
+    </changeSet>
+
 </databaseChangeLog>
