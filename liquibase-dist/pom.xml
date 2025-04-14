@@ -23,7 +23,7 @@
         <mysql.version>9.2.0</mysql.version>
         <mariadb.version>3.4.1</mariadb.version>
         <oracle.version>19.25.0.0</oracle.version>
-        <sqlite.version>3.48.0.0</sqlite.version>
+        <sqlite.version>3.49.1.0</sqlite.version>
         <db2.version>11.5.9.0</db2.version>
         <firebird.version>5.0.6.java8</firebird.version>
         <slf4j.version>2.0.16</slf4j.version>
