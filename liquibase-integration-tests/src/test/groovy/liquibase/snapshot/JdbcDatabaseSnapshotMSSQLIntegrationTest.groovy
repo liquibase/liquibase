@@ -34,9 +34,6 @@ class JdbcDatabaseSnapshotMSSQLIntegrationTest extends Specification {
 
         then:
         noExceptionThrown()
-
-        cleanup:
-        CommandUtil.runDropAll(mssql)
     }
 
     def "snapshot int column must by int and not int size 10"() {
@@ -48,8 +45,5 @@ class JdbcDatabaseSnapshotMSSQLIntegrationTest extends Specification {
 
         then:
         contents.toString().contains("(id1 int)")
-
-        cleanup:
-        CommandUtil.runDropAll(mssql)
     }
 }

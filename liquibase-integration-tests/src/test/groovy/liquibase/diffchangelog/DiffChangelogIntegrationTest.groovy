@@ -76,15 +76,10 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         generatedChangelogContents.contains(" contextFilter:\"newContexts\"")
 
         cleanup:
-        try {
-            generatedChangelog.delete()
-        } catch (Exception ignored) {
-
-        }
+        FileUtils.deleteQuietly(generatedChangelog)
         postgres.getConnection().close()
         refDatabase.close()
         targetDatabase.close()
-        CommandUtil.runDropAll(postgres)
     }
 
     def "FKs which are different but have same name" () {
@@ -116,11 +111,7 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         dropFK.getConstraintName() == addFK.getConstraintName()
 
         cleanup:
-        try {
-            generatedChangelog.delete()
-        } catch (Exception ignored) {
-
-        }
+        FileUtils.deleteQuietly(generatedChangelog)
         postgres.getConnection().close()
         refDatabase.close()
         targetDatabase.close()
@@ -163,15 +154,10 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         generatedChangelogContents.contains(columnComment)
 
         cleanup:
-        try {
-            generatedChangelog.delete()
-        } catch (Exception ignored) {
-
-        }
+        FileUtils.deleteQuietly(generatedChangelog)
         postgres.getConnection().close()
         refDatabase.close()
         targetDatabase.close()
-        CommandUtil.runDropAll(postgres)
     }
 
     def "Ensure diff-changelog set runOnChange and replaceIfExists properties correctly for a created view changeset"() {
@@ -203,7 +189,6 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         outputFile.delete()
         refDatabase.close()
         targetDatabase.close()
-        CommandUtil.runDropAll(postgres)
         postgres.getConnection().close()
     }
 
@@ -232,7 +217,6 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         outputFile.delete()
         refDatabase.close()
         targetDatabase.close()
-        CommandUtil.runDropAll(postgres)
         postgres.getConnection().close()
     }
 
@@ -262,7 +246,6 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         outputFile.delete()
         refDatabase.close()
         targetDatabase.close()
-        CommandUtil.runDropAll(postgres)
         postgres.getConnection().close()
     }
 
@@ -291,15 +274,8 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         changelogFileContent.containsIgnoreCase("file=\"testDataDir/")
 
         cleanup:
-        try {
-            changelogFile.delete()
-        } catch (Exception ignored) {
-
-        }
-        File testDir = new File(dataDir)
-        if (testDir.exists()) {
-            FileUtils.deleteDirectory(testDir)
-        }
+        FileUtils.deleteQuietly(changelogFile)
+        FileUtils.deleteQuietly(new File(dataDir))
         postgres.getConnection().close()
         refDatabase.close()
         targetDatabase.close()
