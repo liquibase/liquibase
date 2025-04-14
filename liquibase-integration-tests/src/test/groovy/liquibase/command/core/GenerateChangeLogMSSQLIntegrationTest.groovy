@@ -146,4 +146,28 @@ CREATE VIEW employees_view AS SELECT FirstName FROM [dbo].Employees;
             mssql.getConnection().close()
         }
     }
+
+    def "Should not add size to user defined types"() {
+        when:
+        CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/user.defined.types.sql')
+        CommandUtil.runGenerateChangelog(mssql, 'test.mssql.sql')
+        then:
+        def outputFile = new File('test.mssql.sql')
+        FileUtil.getContents(outputFile).contains("CREATE TABLE udt_test (flag Flag NOT NULL)")
+        cleanup:
+        outputFile.delete()
+    }
+
+    def "Should generate decimal sequence without overflow"() {
+        when:
+        CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/decimal.sequence.sql')
+        CommandUtil.runGenerateChangelog(mssql, 'sequence.mssql.sql')
+        then:
+        def outputFile = new File('sequence.mssql.sql')
+        FileUtil.getContents(outputFile).contains("CREATE SEQUENCE big AS decimal(19) START WITH 100000000000 INCREMENT BY 1 MINVALUE -9999999999999999999 MAXVALUE 9999999999999999999;")
+        FileUtil.getContents(outputFile).contains("CREATE SEQUENCE small START WITH 1 INCREMENT BY 1 MINVALUE 0 MAXVALUE 20")
+
+        cleanup:
+        outputFile.delete()
+    }
 }

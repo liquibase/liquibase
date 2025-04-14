@@ -18,8 +18,11 @@ import org.yaml.snakeyaml.introspector.BeanAccess;
 import org.yaml.snakeyaml.nodes.Tag;
 
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
@@ -39,6 +42,9 @@ import java.util.logging.Level;
  */
 public class LiquibaseAnalyticsListener implements AnalyticsListener {
 
+    private final List<Event> cachedEvents = new ArrayList<>();
+    private final AtomicBoolean addedShutdownHook = new AtomicBoolean(false);
+
     @Override
     public int getPriority() {
         boolean analyticsEnabled = false;
@@ -56,6 +62,38 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
 
     @Override
     public void handleEvent(Event event) throws Exception {
+        addSendEventsOnShutdownHook();
+        cachedEvents.add(event);
+        Integer maxCacheSize = Scope.getCurrentScope().get(Scope.Attr.maxAnalyticsCacheSize, getDefaultMaxAnalyticsCacheSize(event));
+        if (cachedEvents.size() >= maxCacheSize) {
+            flush();
+        } else {
+            Scope.getCurrentScope().getLog(getClass()).log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Caching analytics event to send later. Cache contains " + cachedEvents.size() + " event(s).", null);
+        }
+    }
+
+    private void addSendEventsOnShutdownHook() {
+        if (!addedShutdownHook.getAndSet(true)) {
+            Thread haltedHook = new Thread(() -> {
+                Scope.getCurrentScope().getLog(getClass()).fine("Sending " + cachedEvents.size() + " cached analytics events during shutdown hook");
+                try {
+                    flush();
+                } catch (Exception e) {
+                    Scope.getCurrentScope().getLog(getClass()).warning("Failed to send analytics events during shutdown hook.", e);
+                }
+            });
+            Runtime.getRuntime().addShutdownHook(haltedHook);
+        }
+    }
+
+    private int getDefaultMaxAnalyticsCacheSize(Event event) {
+        if (event != null && StringUtils.equals(event.getLiquibaseInterface(), Event.JAVA_API_INTEGRATION_NAME)) {
+            return 10;
+        }
+        return 1;
+    }
+
+    private synchronized void flush() throws Exception {
         AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
         LiquibaseRemoteAnalyticsConfiguration analyticsConfiguration = ((LiquibaseRemoteAnalyticsConfiguration) analyticsConfigurationFactory.getPlugin());
         int timeoutMillis = analyticsConfiguration.getTimeoutMillis();
@@ -75,50 +113,43 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
             }
             return issuedTo;
         });
-        AtomicBoolean timedOut = new AtomicBoolean(true);
 
-        Thread eventThread = new Thread(() -> {
-            try {
-                URL url = new URL(analyticsConfiguration.getDestinationUrl());
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json; utf-8");
-                conn.setRequestProperty("Accept", "application/json");
-                // Enable input and output streams
-                conn.setDoOutput(true);
-
-                DumperOptions dumperOptions = new DumperOptions();
-                dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
-                dumperOptions.setWidth(Integer.MAX_VALUE);
-                dumperOptions.setPrettyFlow(true);
-                Yaml yaml = new Yaml(dumperOptions);
-                yaml.setBeanAccess(BeanAccess.FIELD);
-
-                AnalyticsBatch analyticsBatch = AnalyticsBatch.fromLiquibaseEvent(event, userId);
-                String jsonInputString = YamlSerializer.removeClassTypeMarksFromSerializedJson(yaml.dumpAs(analyticsBatch, Tag.MAP, DumperOptions.FlowStyle.FLOW));
-                logger.log(logLevel, "Sending anonymous data to Liquibase analytics endpoint. " + System.lineSeparator() + jsonInputString, null);
-
-                IOUtils.write(jsonInputString, conn.getOutputStream(), StandardCharsets.UTF_8);
-
-                int responseCode = conn.getResponseCode();
-                String responseBody = ExceptionUtil.doSilently(() -> {
-                    return IOUtils.toString(conn.getInputStream());
-                });
-                logger.log(logLevel, "Response from Liquibase analytics endpoint: " + responseCode + " " + responseBody, null);
-                conn.disconnect();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            timedOut.set(false);
-        });
-        eventThread.start();
         try {
-            eventThread.join(timeoutMillis);
-        } catch (InterruptedException e) {
-            logger.log(logLevel, "Interrupted while waiting for analytics event processing.", e);
-        }
-        if (timedOut.get()) {
-            logger.log(logLevel, "Timed out while waiting for analytics event processing.", null);
+            URL url = new URL(analyticsConfiguration.getDestinationUrl());
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json; utf-8");
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setConnectTimeout(analyticsConfiguration.getTimeoutMillis());
+            conn.setReadTimeout(analyticsConfiguration.getTimeoutMillis());
+            // Enable input and output streams
+            conn.setDoOutput(true);
+
+            DumperOptions dumperOptions = new DumperOptions();
+            dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
+            dumperOptions.setWidth(Integer.MAX_VALUE);
+            dumperOptions.setPrettyFlow(true);
+            Yaml yaml = new Yaml(dumperOptions);
+            yaml.setBeanAccess(BeanAccess.FIELD);
+
+            AnalyticsBatch analyticsBatch = AnalyticsBatch.fromLiquibaseEvent(cachedEvents, userId);
+            String jsonInputString = YamlSerializer.removeClassTypeMarksFromSerializedJson(yaml.dumpAs(analyticsBatch, Tag.MAP, DumperOptions.FlowStyle.FLOW));
+            logger.log(logLevel, "Sending anonymous data to Liquibase analytics endpoint. " + System.lineSeparator() + jsonInputString, null);
+
+            IOUtils.write(jsonInputString, conn.getOutputStream(), StandardCharsets.UTF_8);
+
+            int responseCode = conn.getResponseCode();
+            String responseBody = ExceptionUtil.doSilently(() -> {
+                return IOUtils.toString(conn.getInputStream(), StandardCharsets.UTF_8);
+            });
+            logger.log(logLevel, "Response from Liquibase analytics endpoint: " + responseCode + " " + responseBody, null);
+            conn.disconnect();
+            cachedEvents.clear();
+        } catch (Exception e) {
+            if (e instanceof SocketTimeoutException) {
+                logger.log(logLevel, "Timed out while waiting for analytics event processing.", null);
+            }
+            throw e;
         }
     }
 }

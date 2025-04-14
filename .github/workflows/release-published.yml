@@ -5,58 +5,58 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release Tag'
+        description: "Release Tag"
         required: true
-      dry_run: 
-        description: 'Flag to indicate if the workflow is triggered to create a dry-run release'
+      dry_run:
+        description: "Flag to indicate if the workflow is triggered to create a dry-run release"
         required: false
         type: boolean
         default: false
       dry_run_release_id:
-        description: 'The release id of the dry-run release'
+        description: "The release id of the dry-run release"
         required: false
         type: string
-      dry_run_zip_url: 
-        description: 'URL of the dry-run zip release'
+      dry_run_zip_url:
+        description: "URL of the dry-run zip release"
         required: false
         type: string
-      dry_run_tar_gz_url: 
-        description: 'URL of the dry-run tar.gz release'
+      dry_run_tar_gz_url:
+        description: "URL of the dry-run tar.gz release"
         required: false
         type: string
       dry_run_branch_name:
-        description: 'The branch name of the dry-run'
+        description: "The branch name of the dry-run"
         required: false
         type: string
   workflow_call:
     inputs:
       tag:
-        description: 'Release Tag'
+        description: "Release Tag"
         required: true
         type: string
-      dry_run: 
-        description: 'Flag to indicate if the workflow is triggered to create a dry-run release'
+      dry_run:
+        description: "Flag to indicate if the workflow is triggered to create a dry-run release"
         required: true
         type: boolean
         default: false
       dry_run_release_id:
-        description: 'The release id of the dry-run release'
+        description: "The release id of the dry-run release"
         required: false
         type: string
-      dry_run_zip_url: 
-        description: 'URL of the dry-run zip release'
+      dry_run_zip_url:
+        description: "URL of the dry-run zip release"
         required: false
         type: string
-      dry_run_tar_gz_url: 
-        description: 'URL of the dry-run tar.gz release'
+      dry_run_tar_gz_url:
+        description: "URL of the dry-run tar.gz release"
         required: false
         type: string
       dry_run_branch_name:
-        description: 'The branch name of the dry-run'
+        description: "The branch name of the dry-run"
         required: false
         type: string
 env:
-  MAVEN_VERSION: '3.9.2'
+  MAVEN_VERSION: "3.9.2"
 jobs:
   setup:
     name: Setup
@@ -104,7 +104,7 @@ jobs:
   manual_trigger_deployment:
     if: ${{ inputs.dry_run == false }}
     name: Manually trigger deployment
-    needs: [ setup ]
+    needs: [setup]
     runs-on: ubuntu-22.04
     steps:
       - name: Get Version to deploy
@@ -115,13 +115,21 @@ jobs:
           minimum-approvals: 2
           issue-title: "Deploying ${{ needs.setup.outputs.version }} to sonatype"
           issue-body: "Please approve or deny the deployment of version ${{ needs.setup.outputs.version }}"
-          additional-approved-words: 'lgtm,✅,👍,proceed,shipit,:shipit:'
-          additional-denied-words: 'stop,error,failed,fail,broken,:x:,👎'
+          additional-approved-words: "lgtm,✅,👍,proceed,shipit,:shipit:"
+          additional-denied-words: "stop,error,failed,fail,broken,:x:,👎"
 
   deploy_maven:
     if: ${{ inputs.dry_run == false }}
     name: Deploy to Maven
-    needs: [ setup, manual_trigger_deployment, deploy_javadocs, publish_to_github_packages, deploy_xsd, release-docker ]
+    needs:
+      [
+        setup,
+        manual_trigger_deployment,
+        deploy_javadocs,
+        publish_to_github_packages,
+        deploy_xsd,
+        release-docker,
+      ]
     runs-on: ubuntu-22.04
     steps:
       - name: Download release assets
@@ -135,8 +143,8 @@ jobs:
       - name: Set up Java for publishing to Maven Central Repository
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
-          distribution: 'adopt'
+          java-version: "11"
+          distribution: "adopt"
           server-id: sonatype-nexus-staging
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
@@ -163,9 +171,9 @@ jobs:
             if test 'liquibase-commercial' == $i; then
               sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private<\/connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" $i-${version}.pom   ## scm info not in the pom
             fi
-          
+
             gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i-${version}.pom
-          
+
             mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
               -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
               -DrepositoryId=sonatype-nexus-staging \
@@ -217,7 +225,7 @@ jobs:
   deploy_javadocs:
     if: ${{ inputs.dry_run == false }}
     name: Upload Javadocs
-    needs: [ setup, manual_trigger_deployment ]
+    needs: [setup, manual_trigger_deployment]
     runs-on: ubuntu-22.04
     # These permissions are needed to interact with GitHub's OIDC Token endpoint.
     permissions:
@@ -239,45 +247,23 @@ jobs:
           AWS_DEFAULT_REGION: us-east-1
         # unzip archives, create directory for each jar, and extract jar contents to directory.  Then delete the jar and zip files.  Then upload to s3.
         run: |
-          unzip -j '*.zip' '*javadoc*.jar' 
-          
+          unzip -j '*.zip' '*javadoc*.jar'
+
           for jar in *liquibase*.jar; do
             dir_name=$(basename "$jar" .jar)
             dir_name=$(echo "$dir_name" | sed -E 's/(-[0-9]+(\.[0-9]+)*(-javadoc)?)//')
             mkdir -p "$dir_name"
             unzip -o "$jar" -d "$dir_name"
           done
-          
+
           rm -rf *.jar *.zip
           aws s3 sync . s3://javadocsliquibasecom-origin --only-show-errors
-
-
-  trigger-sbom-generation-lb-lbpo:
-    if: ${{ inputs.dry_run == false }}
-    name: Generate SBOMS for liquibase and liquibase-pro
-    runs-on: ubuntu-latest
-    needs: [ setup ]
-    strategy:
-      matrix:
-        repo: [ 'liquibase/liquibase', 'liquibase/liquibase-pro' ]
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
-          repository: ${{ matrix.repo }}
-          event-type: oss-released-version
-          client-payload: '{"latest_version": "${{ steps.get_latest_oss_version.outputs.latest_version }}"'
 
   publish_to_github_packages:
     if: ${{ inputs.dry_run == false }}
     name: Publish artifacts to Github Packages
     runs-on: ubuntu-22.04
-    needs: [ setup, manual_trigger_deployment ]
+    needs: [setup, manual_trigger_deployment]
     permissions:
       contents: read
       packages: write
@@ -287,9 +273,9 @@ jobs:
       - name: Set up Java for publishing to GitHub Repository
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: 'maven'
+          java-version: "17"
+          distribution: "temurin"
+          cache: "maven"
           server-id: liquibase
       - name: Set up Maven
         uses: stCarolas/setup-maven@v5
@@ -309,7 +295,7 @@ jobs:
   deploy_xsd:
     if: ${{ inputs.dry_run == false }}
     name: Upload xsds
-    needs: [ setup, manual_trigger_deployment]
+    needs: [setup, manual_trigger_deployment]
     runs-on: ubuntu-22.04
     outputs:
       tag: ${{ steps.collect-data.outputs.tag }}
@@ -368,8 +354,8 @@ jobs:
           password: ${{ secrets.WPENGINE_SFTP_PASSWORD }}
           compress: true
           forceUpload: true
-          localDir: 'liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/'
-          remoteDir: '/xml/ns/dbchangelog/'
+          localDir: "liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/"
+          remoteDir: "/xml/ns/dbchangelog/"
 
       - name: Liquibase PRO xsds SFTP upload
         uses: wangyucode/sftp-upload-action@v2.0.4
@@ -380,8 +366,8 @@ jobs:
           password: ${{ secrets.WPENGINE_SFTP_PASSWORD }}
           compress: false
           forceUpload: true
-          localDir: 'liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/'
-          remoteDir: '/xml/ns/pro/'
+          localDir: "liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/"
+          remoteDir: "/xml/ns/pro/"
 
       - name: Liquibase flow-file schema SFTP upload
         uses: wangyucode/sftp-upload-action@v2.0.4
@@ -392,8 +378,8 @@ jobs:
           password: ${{ secrets.WPENGINE_SFTP_PASSWORD }}
           compress: false
           forceUpload: true
-          localDir: 'liquibase-pro-repo/pro/src/main/resources/schemas/'
-          remoteDir: '/json/schema/'
+          localDir: "liquibase-pro-repo/pro/src/main/resources/schemas/"
+          remoteDir: "/json/schema/"
 
       - name: Liquibase index.htm SFTP upload
         uses: wangyucode/sftp-upload-action@v2.0.4
@@ -401,40 +387,57 @@ jobs:
           host: ${{ secrets.WPENGINE_SFTP_HOST }}
           port: ${{ secrets.WPENGINE_SFTP_PORT }}
           username: ${{ secrets.WPENGINE_SFTP_USER }}
-          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }} 
+          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }}
           compress: false
           forceUpload: true
-          localDir: 'index-file/'
-          remoteDir: '/xml/ns/dbchangelog/'
+          localDir: "index-file/"
+          remoteDir: "/xml/ns/dbchangelog/"
 
   release-docker:
     if: always()
     name: Release docker images
-    needs: [ setup, manual_trigger_deployment ]
+    needs: [setup, manual_trigger_deployment]
     runs-on: ubuntu-22.04
     steps:
       - name: Release liquibase/docker v${{ needs.setup.outputs.version }}
-        uses: codex-/return-dispatch@v2
+        uses: the-actions-org/workflow-dispatch@v4
         id: docker_dispatch
         with:
-          token: ${{ secrets.BOT_TOKEN }}
-          ref: main
-          repo: docker
-          owner: liquibase
           workflow: create-release.yml
-          workflow_inputs: '{ "liquibaseVersion": "${{ needs.setup.outputs.version }}", "dryRun": "${{ inputs.dry_run || false }}" }'
-          workflow_timeout_seconds: 300
-          workflow_job_steps_retry_seconds: 10
+          token: ${{ secrets.BOT_TOKEN }}
+          inputs: '{ "liquibaseVersion": "${{ needs.setup.outputs.version }}", "dryRun": "${{ inputs.dry_run || false }}" }'
+          ref: main
+          repo: liquibase/docker
+          wait-for-completion: true
+          workflow-logs: json-output
 
       - name: Adding Docker run to job summary
         if: success()
         continue-on-error: true
-        run: echo '### 🐳 Docker Release Job -> ${{steps.docker_dispatch.outputs.run_url}}' >> $GITHUB_STEP_SUMMARY
+        run: echo '### 🐳 Docker Release Job -> ${{steps.docker_dispatch.outputs.workflow-url}}' >> $GITHUB_STEP_SUMMARY
+
+  release-minimal-docker:
+    if: ${{ inputs.dry_run == false }}
+    name: Release Minimal docker image
+    needs: [setup, manual_trigger_deployment]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Release liquibase/liquibase-infrastructure v${{ needs.setup.outputs.version }}
+        uses: the-actions-org/workflow-dispatch@v4
+        id: docker_dispatch
+        with:
+          workflow: build-liquibase-minimal.yml
+          token: ${{ secrets.BOT_TOKEN }}
+          inputs: '{ "liquibaseVersion": "${{ needs.setup.outputs.version }}" }'
+          ref: master
+          repo: liquibase/liquibase-infrastructure
+          wait-for-completion: true
+          workflow-logs: json-output
 
   generate-PRO-tag:
     if: ${{ inputs.dry_run == false }}
     name: Generate PRO tags based on OSS release
-    needs: [ setup ]
+    needs: [setup]
     runs-on: ubuntu-22.04
     steps:
       - name: Repository Dispatch
@@ -446,20 +449,21 @@ jobs:
 
   package:
     uses: liquibase/build-logic/.github/workflows/package.yml@main
-    needs: [ setup ]
+    needs: [setup]
     secrets: inherit
     with:
-      groupId: 'org.liquibase'
-      artifactId: 'liquibase'
+      groupId: "org.liquibase"
+      artifactId: "liquibase"
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run || false}}
       dry_run_zip_url: ${{ inputs.dry_run_zip_url || '' }}
       dry_run_tar_gz_url: ${{ inputs.dry_run_tar_gz_url || '' }}
+      dry_run_release_id: ${{ inputs.dry_run_release_id || '' }}
 
   update-docs-oss-pro-version:
     if: ${{ inputs.dry_run == false }}
     name: Update OSS and PRO tags based on OSS release
-    needs: [ setup ]
+    needs: [setup]
     runs-on: ubuntu-latest
     outputs:
       latest_version: ${{ steps.get_latest_oss_version.outputs.latest_version }}
@@ -475,13 +479,12 @@ jobs:
       - name: Get the oss release version
         id: get_latest_oss_version
         run: |
-            # Fetch all tags from the remote
-            git fetch --tags
-            # Get the latest tag
-            echo "latest_version=$(git describe --tags $(git rev-list --tags --max-count=1) | sed 's/^v//')" >> $GITHUB_OUTPUT
-            # Get the previous released version tag
-            echo "previous_version=$(git for-each-ref --sort=creatordate --format '%(tag)' refs/tags|tail -2|head -1| sed 's/^v//')" >> $GITHUB_OUTPUT
-
+          # Fetch all tags from the remote
+          git fetch --tags
+          # Get the latest tag
+          echo "latest_version=$(git describe --tags $(git rev-list --tags --max-count=1) | sed 's/^v//')" >> $GITHUB_OUTPUT
+          # Get the previous released version tag
+          echo "previous_version=$(git for-each-ref --sort=creatordate --format '%(refname:short)' refs/tags |sed 's/^v//')" >> $GITHUB_OUTPUT
 
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v3
@@ -499,10 +502,31 @@ jobs:
           repository: liquibase/liquibase-aws-license-service
           event-type: oss-released-version
 
+  trigger-sbom-generation-lb-lbpo:
+    if: ${{ inputs.dry_run == false }}
+    name: Generate SBOMS for liquibase and liquibase-pro
+    runs-on: ubuntu-latest
+    needs: [setup, update-docs-oss-pro-version]
+    strategy:
+      matrix:
+        repo: ["liquibase/liquibase", "liquibase/liquibase-pro"]
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          repository: liquibase/build-logic
+          event-type: oss-released-version
+          client-payload: '{"latest_version": "${{ needs.update-docs-oss-pro-version.outputs.latest_version }}", "repo_name": "${{ matrix.repo }}", "branch_name": "${{ github.ref }}" }'
+
   dry_run_deploy_maven:
     if: ${{ inputs.dry_run == true }}
     name: Deploy to repo.liquibase.net
-    needs: [ setup ]
+    needs: [setup]
     runs-on: ubuntu-22.04
     steps:
       - name: Download dry-run release assets
@@ -516,8 +540,8 @@ jobs:
       - name: Set up Java for publishing to Maven Central Repository
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
-          distribution: 'adopt'
+          java-version: "11"
+          distribution: "adopt"
           server-id: dry-run-sonatype-nexus-staging
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
@@ -544,9 +568,9 @@ jobs:
             if test 'liquibase-commercial' == $i; then
               sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private<\/connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" $i-${version}.pom   ## scm info not in the pom
             fi
-          
+
             gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i-${version}.pom
-          
+
             mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
               -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
               -DrepositoryId=dry-run-sonatype-nexus-staging \
@@ -558,27 +582,27 @@ jobs:
               -Dfiles=$i-${version}.jar.asc,$i-${version}-sources.jar.asc,$i-${version}-javadoc.jar.asc,$i-${version}.pom.asc \
               -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
               -Dclassifiers=,sources,javadoc,
-          
+
           done
-            
+
   publish_assets_to_s3_bucket:
     if: ${{ inputs.dry_run == false }}
     name: Publish OSS released assets to s3 bucket liquibaseorg-origin
-    needs: [ setup ]
+    needs: [setup]
     runs-on: ubuntu-22.04
     steps:
       - name: Download released assets
         uses: robinraju/release-downloader@v1.11
         with:
           repository: "liquibase/liquibase"
-          latest: true          
+          latest: true
           fileName: "*"
           out-file-path: "./${{ needs.setup.outputs.version }}-released-assets"
 
       - name: Get current timestamp
         id: timestamp
         run: echo "timestamp=$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
-      
+
       - name: Publish released assets to s3 bucket
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.LIQUIBASEORIGIN_ACCESS_KEY_ID }}
@@ -586,4 +610,3 @@ jobs:
           AWS_DEFAULT_REGION: us-east-1
         run: |
           aws s3 sync "./${{ needs.setup.outputs.version }}-released-assets" s3://liquibaseorg-origin/oss-released-assets/${{ needs.setup.outputs.version }}-released-assets-${{ env.timestamp }}/ --only-show-errors
-          

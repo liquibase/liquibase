@@ -75,7 +75,7 @@ jobs:
           echo "Creating version ${{ inputs.version }} from ${{ inputs.branch }} with artifacts from build ${{ inputs.runId }} "
 
   owasp-scanner:
-    needs: [ setup ]
+    needs: [setup]
     uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@main
     with:
       branch: ${{ needs.setup.outputs.branch }}
@@ -271,11 +271,12 @@ jobs:
           $PWD/.github/util/sign-artifacts.sh re-version/out
 
           # Move files to a specific directory
-          mkdir re-version/final
+          mkdir re-version/final re-version/s3-minimal
           mv re-version/out/liquibase-core-${{ needs.setup.outputs.version }}.jar re-version/final
           mv re-version/out/liquibase-commercial-${{ needs.setup.outputs.version }}.jar re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
+          mv re-version/out/liquibase-minimal-${{ needs.setup.outputs.version }}.zip re-version/s3-minimal
           mv re-version/out/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/final/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar
           (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
@@ -285,6 +286,12 @@ jobs:
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
+
+      - name: Cache Minimal Completed Artifacts
+        uses: actions/cache@v4.2.0
+        with:
+          key: minimal-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
+          path: re-version/s3-minimal
 
       - name: Set repository tags
         if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
@@ -302,9 +309,6 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    outputs:
-      dry_run_zip_url: ${{ steps.extract-dry-run-url.outputs.dry_run_zip_url }}
-      dry_run_tar_gz_url: ${{ steps.extract-dry-run-url.outputs.dry_run_tar_gz_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -441,22 +445,34 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract dry-run release URL
-        if: ${{ inputs.standalone_zip == false && inputs.dry_run == true }}
-        id: extract-dry-run-url
-        shell: bash
-        run: |
-          assets_json=$(echo '${{ toJson(steps.attach-files-dry-run.outputs) }}' | jq -r '.assets | fromjson')
-          tar_gz_url=$(echo "$assets_json" | jq -r '.[] | select(.name | test("^liquibase-dry-run-.*\\.tar\\.gz$")) | .url')
-          zip_url=$(echo "$assets_json" | jq -r '.[] | select(.name | test("^liquibase-dry-run-.*\\.zip$")) | .url')
-          echo $tar_gz_url
-          echo $zip_url
-          echo "dry_run_tar_gz_url=$tar_gz_url" >> $GITHUB_OUTPUT
-          echo "dry_run_zip_url=$zip_url" >> $GITHUB_OUTPUT
-
       - name: Attach standalone zip to Build
         if: ${{ inputs.standalone_zip == true && inputs.dry_run == false }}
         uses: actions/upload-artifact@v4
         with:
           name: liquibase-installers-${{ needs.setup.outputs.version }}
           path: re-version/final/*
+
+  deploy_minimal_artifact_s3:
+    if: ${{ inputs.dry_run == false }}
+    name: Deploy minimal artifacts to lbio s3 bucket
+    needs: [setup, reversion]
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Restore Minimal Completed Artifacts
+        uses: actions/cache@v4.2.0
+        with:
+          key: minimal-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
+          path: re-version/s3-minimal
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_IO_DEV_GITHUB_OIDC_ROLE_ARN_LIQUIBASE }}
+          aws-region: us-east-2
+
+      - name: Publish minimal assets to s3 bucket
+        run: |
+          aws s3 sync "re-version/s3-minimal" s3://${{ secrets.LBIO_DOWNLOADS_S3_BUCKET }}/downloads/liquibase-minimal/v${{ needs.setup.outputs.version }}/ --only-show-errors

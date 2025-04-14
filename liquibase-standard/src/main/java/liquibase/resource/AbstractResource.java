@@ -1,30 +1,75 @@
 package liquibase.resource;
 
+import liquibase.Scope;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 public abstract class AbstractResource implements Resource {
 
     private final String path;
+
+    private final String originalPath;
     private final URI uri;
 
-    public AbstractResource(String path, URI uri) {
-        this.path = path
-                .replace("\\", "/")
-                .replaceFirst("^classpath\\*?:", "")
-                .replaceFirst("^/", "");
-
+    public AbstractResource(String originalPathParam, URI uri) {
+        this.originalPath = originalPathParam;
         if (uri != null) {
-            this.uri = uri.normalize();
+            this.uri = handleUriSyntax(uri);
         } else {
             this.uri = null;
         }
+
+        String calculatedPath = originalPathParam
+                .replace("\\", "/")
+                .replaceFirst("^classpath\\*?:", "");
+
+        if (uri != null && uri.toString().contains("!")) {
+            this.path = handlePathForJarfile(calculatedPath);
+        } else {
+            this.path = calculatedPath.replaceFirst("^/", "");
+        }
+    }
+
+    /**
+     * Handle the path for jar file resources as URI does not work as expected when you have an exclamation mark in the path.
+     */
+    private String handlePathForJarfile(String path) {
+        String relative = this.uri.toString().replaceFirst(".*!", "");
+        try {
+            if (!path.startsWith("..")) {
+                path = "/" + path;
+            }
+            return new URI(relative).resolve(new URI(path).normalize()).toString().replaceFirst("^/", "");
+        } catch (URISyntaxException e) {
+            Scope.getCurrentScope().getLog(AbstractResource.class).warning("Error handling URI syntax for file inside jar. Defaulting to previous behavior.", e);
+            return path.replaceFirst("^/", "");
+        }
+    }
+
+    private static URI handleUriSyntax(URI uri) {
+        // when we have a file inside a zip/jar file (denoted by the exclamation mark)
+        // URI doesn't work as expected. So we need some manual handling
+        if (uri.toString().contains(("!"))) {
+            String[] uriSplit = uri.toString().split(("!"));
+            try {
+                return new URI(uriSplit[0] + "!" + new URI(uriSplit[1]).normalize());
+            } catch (URISyntaxException e) {
+                return uri.normalize();
+            }
+        }
+        return uri.normalize();
     }
 
     @Override
     public String getPath() {
         return path;
+    }
+
+    public String getOriginalPath() {
+        return originalPath;
     }
 
     @Override

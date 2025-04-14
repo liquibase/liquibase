@@ -2,6 +2,7 @@ package liquibase.changelog.visitor;
 
 import liquibase.ChecksumVersion;
 import liquibase.Scope;
+import liquibase.change.Change;
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
@@ -114,7 +115,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
     private void executeAcceptedChange(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database)
             throws DatabaseException, DatabaseHistoryException, MigrationFailedException {
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-        if (!(executor instanceof LoggingExecutor)) {
+        if (!(executor instanceof LoggingExecutor) && allChangeSetsShouldRun(changeSet)) {
             Scope.getCurrentScope().getUI().sendMessage("Running Changeset: " + changeSet);
         }
         RunStatus runStatus = this.database.getRunStatus(changeSet);
@@ -129,14 +130,21 @@ public class UpdateVisitor implements ChangeSetVisitor {
             fireRunFailed(changeSet, databaseChangeLog, database, e);
             throw e;
         }
-        if (!Objects.equals(runStatus, RunStatus.NOT_RAN) && Objects.equals(execType, ExecType.EXECUTED)) {
+        if (!Objects.equals(runStatus, RunStatus.NOT_RAN)
+                && (Objects.equals(execType, ExecType.EXECUTED) || Objects.equals(execType, ExecType.MARK_RAN))) {
             execType = ExecType.RERAN;
         }
         addAttributesForMdc(changeSet, execType);
         // reset object quoting strategy after running changeset
         this.database.setObjectQuotingStrategy(previousStr);
-        this.database.markChangeSetExecStatus(changeSet, execType);
-        fireRan(changeSet, databaseChangeLog, database, execType);
+        if (execType != ExecType.SKIPPED) {
+            this.database.markChangeSetExecStatus(changeSet, execType);
+            fireRan(changeSet, databaseChangeLog, database, execType);
+        }
+    }
+
+    private boolean allChangeSetsShouldRun(ChangeSet changeSet) {
+        return changeSet.getChanges().stream().allMatch(Change::shouldRunOnOs);
     }
 
     protected void fireRunFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, MigrationFailedException e) {
