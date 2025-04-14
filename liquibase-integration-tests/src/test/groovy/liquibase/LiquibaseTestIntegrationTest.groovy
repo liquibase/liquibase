@@ -2,7 +2,6 @@ package liquibase
 
 import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.changelog.RanChangeSet
-import liquibase.command.util.CommandUtil
 import liquibase.database.Database
 import liquibase.exception.DatabaseException
 import liquibase.exception.LiquibaseException
@@ -27,10 +26,6 @@ class LiquibaseTestIntegrationTest extends Specification {
     @Shared
     private DatabaseTestSystem h2 = Scope.currentScope.getSingleton(TestSystemFactory).getTestSystem("h2") as DatabaseTestSystem
 
-    def setupSpec() {
-        CommandUtil.runDropAll(h2)
-    }
-
     def syncChangeLogForUnmanagedDatabase() throws Exception {
         when:
         Liquibase liquibase = createUnmanagedDatabase(h2);
@@ -41,9 +36,6 @@ class LiquibaseTestIntegrationTest extends Specification {
         then:
         assert hasDatabaseChangeLogTable(liquibase);
         assertTags(liquibase, "1.0", "1.1", "2.0");
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     def syncChangeLogToTagForUnmanagedDatabase() throws Exception {
@@ -59,9 +51,6 @@ class LiquibaseTestIntegrationTest extends Specification {
         then:
         assert hasDatabaseChangeLogTable(liquibase);
         assertTags(liquibase, "1.0", "1.1");
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     def syncChangeLogForManagedDatabase() throws Exception {
@@ -76,9 +65,6 @@ class LiquibaseTestIntegrationTest extends Specification {
 
         then:
         assertTags(liquibase, "1.0", "1.1", "2.0");
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     def syncChangeLogToTagForManagedDatabase() throws Exception {
@@ -92,9 +78,6 @@ class LiquibaseTestIntegrationTest extends Specification {
 
         then:
         assertTags(liquibase, "1.0", "1.1");
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     def syncChangeLogSqlForUnmanagedDatabase() throws Exception {
@@ -112,9 +95,6 @@ class LiquibaseTestIntegrationTest extends Specification {
         then:
         assert !hasDatabaseChangeLogTable(liquibase);
         assertSqlOutputAppliesTags(writer.toString(), "1.0", "1.1", "2.0");
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     def syncChangeLogToTagSqlForUnmanagedDatabase() throws Exception {
@@ -132,9 +112,6 @@ class LiquibaseTestIntegrationTest extends Specification {
         then:
         !hasDatabaseChangeLogTable(liquibase);
         assertSqlOutputAppliesTags(writer.toString(), "1.0", "1.1");
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     def syncChangeLogSqlForManagedDatabase() throws Exception {
@@ -151,9 +128,6 @@ class LiquibaseTestIntegrationTest extends Specification {
 
         then:
         assertSqlOutputAppliesTags(writer.toString(), "1.1", "2.0");
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     def syncChangeLogToTagSqlForManagedDatabase() throws Exception {
@@ -170,9 +144,6 @@ class LiquibaseTestIntegrationTest extends Specification {
 
         then:
         assertSqlOutputAppliesTags(writer.toString(), "1.1");
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     def "validate checksums from ran changesets have all been reset"() {
@@ -185,9 +156,6 @@ class LiquibaseTestIntegrationTest extends Specification {
         then:
         List<RanChangeSet> ranChangeSets = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(liquibase.getDatabase()).getRanChangeSets()
         assert ranChangeSets.get(0).getLastCheckSum() == null
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     private Liquibase createUnmanagedDatabase(DatabaseTestSystem database) throws SQLException, LiquibaseException {
