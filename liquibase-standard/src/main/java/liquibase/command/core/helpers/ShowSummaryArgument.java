@@ -3,7 +3,6 @@ package liquibase.command.core.helpers;
 import liquibase.UpdateSummaryEnum;
 import liquibase.UpdateSummaryOutputEnum;
 import liquibase.command.*;
-import liquibase.util.HelpUtil;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -75,11 +74,6 @@ public class ShowSummaryArgument extends AbstractCommandStep {
         UpdateSummaryOutputEnum showSummaryOutputArgument = commandScope.getArgumentValue(SHOW_SUMMARY_OUTPUT);
         commandScope.provideDependency(UpdateSummaryEnum.class, showSummaryArgument);
         commandScope.provideDependency(UpdateSummaryOutputEnum.class, showSummaryOutputArgument);
-    }
-
-    @Override
-    public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        HelpUtil.hideCommandNameInHelpView(commandDefinition);
     }
 
     @Override
