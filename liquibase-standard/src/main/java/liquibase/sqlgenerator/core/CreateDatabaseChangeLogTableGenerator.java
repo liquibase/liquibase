@@ -39,6 +39,11 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
         }
     }
 
+    /**
+     * This method should stay with at least protected access level to make possible to override its behavior in
+     * Liquibase Pro and/or extensions if any DBCL table structural changes needed.
+     * @return Database specific DBCL CreateTableStatement
+     * */
     protected CreateTableStatement getCreateTableStatement(Database database) {
         String charTypeName = getCharTypeName(database);
         String dateTimeTypeString = getDateTimeTypeString(database);
