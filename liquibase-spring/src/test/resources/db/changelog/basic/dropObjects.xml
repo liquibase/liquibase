@@ -1,0 +1,39 @@
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+                        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+
+    <changeSet id="dropIndex" author="tfernandez">
+        <dropIndex tableName="department" indexName="index_one" />
+    </changeSet>
+
+    <changeSet id="dropUnique" author="tfernandez">
+        <dropUniqueConstraint tableName="department" constraintName="department-unique" />
+    </changeSet>
+
+    <changeSet id="dropDefaultValue" author="tfernandez">
+        <dropDefaultValue tableName="person" columnName="isLeftHanded" />
+        <rollback>
+            <addDefaultValue tableName="person" columnName="isLeftHanded" defaultValueBoolean="true" />
+        </rollback>
+    </changeSet>
+
+    <changeSet id="dropNotNull" author="tfernandez">
+        <dropNotNullConstraint tableName="city" columnName="name" />
+    </changeSet>
+
+    <changeSet id="dropFK" author="tfernandez">
+        <dropForeignKeyConstraint baseTableName="person" constraintName="fk-person-city" />
+    </changeSet>
+
+    <changeSet id="dropColumn" author="tfernandez">
+        <dropColumn tableName="department">
+            <column name="col_1" />
+        </dropColumn>
+    </changeSet>
+
+</databaseChangeLog>
