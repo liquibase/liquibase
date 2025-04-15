@@ -171,7 +171,7 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
         }
 
         Boolean userSuppliedEnabled = didUserEnableAnalytics(log);
-        if (userSuppliedEnabled == null) {
+        if (Boolean.FALSE.equals(userSuppliedEnabled)) {
             return false;
         }
 
@@ -182,7 +182,7 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
         Boolean userSuppliedEnabled = AnalyticsArgs.ENABLED.getCurrentValue();
         if (Boolean.FALSE.equals(userSuppliedEnabled)) {
             log.log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "User has disabled analytics.", null);
-            return null;
+            return false;
         }
         return userSuppliedEnabled;
     }
