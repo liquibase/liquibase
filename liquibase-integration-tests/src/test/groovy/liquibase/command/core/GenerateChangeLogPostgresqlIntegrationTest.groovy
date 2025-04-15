@@ -11,7 +11,6 @@ import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.util.FileUtil
-
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -23,10 +22,6 @@ class GenerateChangeLogPostgresqlIntegrationTest extends Specification {
     private DatabaseTestSystem db = (DatabaseTestSystem) Scope.getCurrentScope()
             .getSingleton(TestSystemFactory.class)
             .getTestSystem("postgresql")
-
-    def cleanupSpec() {
-        CommandUtil.runDropAll(db)
-    }
 
     private void callGenerateChangeLog(
             String outputFileName,
@@ -76,12 +71,6 @@ INSERT INTO "public"."TEST" ("afoo", "bfoo", "foo", "fool") VALUES ('AFOO', 'BFO
 """
         )
 
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
-
         cleanup:
         outputFile.delete()
     }
@@ -110,12 +99,6 @@ COMMIT;
 INSERT INTO "public"."TEST" ("afoo", "bfoo", "fool") VALUES ('AFOO', 'BFOO', 'FOOL');
 """
         )
-
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
 
         cleanup:
         outputFile.delete()
@@ -146,12 +129,6 @@ INSERT INTO "public"."TEST" ("foo", "fool") VALUES ('FOO', 'FOOL');
 """
         )
 
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
-
         cleanup:
         outputFile.delete()
     }
@@ -180,12 +157,6 @@ COMMIT;
 INSERT INTO "public"."TEST" ("foo", "fool") VALUES ('FOO', 'FOOL');
 """
         )
-
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
 
         cleanup:
         outputFile.delete()
@@ -217,12 +188,6 @@ INSERT INTO "public"."TEST" ("FOO", "FOOL") VALUES ('FOO', 'FOOL');
 """
         )
 
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
-
         cleanup:
         outputFile.delete()
     }
@@ -247,13 +212,6 @@ COMMIT;
         then:
         def e = thrown(CommandExecutionException)
         e.message.contains("No columns matched with excludeObjects 'column:^.*' / includeObjects 'null'")
-
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
-
     }
 
     def "Should export table TEST w/ neither excludeObjects nor includeObjects"() {
@@ -282,12 +240,6 @@ INSERT INTO "public"."TEST" ("AFOO", "BFOO", "FOO", "FOOL") VALUES ('AFOO', 'BFO
 """
         )
 
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
-
         cleanup:
         outputFile.delete()
     }
@@ -308,12 +260,6 @@ INSERT INTO "public"."PERSON" ("FIRSTNAME", "LASTNAME", "STATE") VALUES ('John',
 INSERT INTO "public"."PERSON" ("FIRSTNAME", "LASTNAME", "STATE") VALUES ('Jacqueline', 'Kennedy', 'DC');
 """
         )
-
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
 
         cleanup:
         outputFile.delete()
@@ -336,12 +282,6 @@ INSERT INTO "public"."PERSON" ("ID") VALUES (2);
 """
         )
 
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
-
         cleanup:
         outputFile.delete()
     }
@@ -362,12 +302,6 @@ INSERT INTO "public"."SECONDARY" ("ADDRESS", "COUNTRY", "REGION") VALUES ('1600 
 INSERT INTO "public"."SECONDARY" ("ADDRESS", "COUNTRY", "REGION") VALUES ('280 Mulberry Street', 'United States', 'NA');
 """
         )
-
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
 
         cleanup:
         outputFile.delete()
@@ -391,12 +325,6 @@ INSERT INTO "public"."SECONDARY" ("ID", "ADDRESS", "COUNTRY", "REGION") VALUES (
 INSERT INTO "public"."SECONDARY" ("ID", "ADDRESS", "COUNTRY", "REGION") VALUES (2, '280 Mulberry Street', 'United States', 'NA');
 """
         )
-
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
 
         cleanup:
         outputFile.delete()
@@ -426,12 +354,6 @@ INSERT INTO "public"."SECONDARY" ("ID") VALUES (2);
 """
         )
 
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
-
         cleanup:
         outputFile.delete()
     }
@@ -457,12 +379,6 @@ INSERT INTO "public"."SECONDARY" ("ADDRESS", "COUNTRY", "REGION") VALUES ('1600 
 INSERT INTO "public"."SECONDARY" ("ADDRESS", "COUNTRY", "REGION") VALUES ('280 Mulberry Street', 'United States', 'NA');
 """
         )
-
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
 
         cleanup:
         outputFile.delete()
