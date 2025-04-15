@@ -44,6 +44,8 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     private String associatedWith;
     @Setter
     private Boolean clustered;
+    @Setter
+    private String using;
 
 
     public CreateIndexChange() {
@@ -107,6 +109,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
                         getTableName(),
                         this.isUnique(),
                         getAssociatedWith(),
+                        getUsing(),
                         getColumns().toArray(new AddColumnConfig[0]))
                         .setTablespace(getTablespace())
                         .setClustered(getClustered())
@@ -177,6 +180,11 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     @DatabaseChangeProperty(description = "Whether to create a clustered index")
     public Boolean getClustered() {
         return clustered;
+    }
+
+    @DatabaseChangeProperty(description = "The index type to use. For example, 'btree' or 'gin'")
+    public String getUsing() {
+        return using;
     }
 
     @Override

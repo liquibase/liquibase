@@ -276,7 +276,44 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         }
                     }
 
+                    enrichPostgresqlResult(catalogAndSchema, returnList);
+
                     return returnList;
+                }
+
+                private void enrichPostgresqlResult(CatalogAndSchema catalogAndSchema, List<CachedRow> returnList) throws DatabaseException, SQLException {
+                    if (database instanceof PostgresDatabase) {
+                        StringBuilder sql = new StringBuilder("SELECT ns.nspname as TABLE_SCHEMA, tab.relname as TABLE_NAME, " +
+                                "cls.relname as INDEX_NAME, am.amname as INDEX_TYPE " +
+                                " FROM pg_index idx " +
+                                "         JOIN pg_class cls ON cls.oid=idx.indexrelid " +
+                                "         JOIN pg_class tab ON tab.oid=idx.indrelid " +
+                                "         JOIN pg_am am ON am.oid=cls.relam " +
+                                "         JOIN pg_namespace ns ON ns.oid=cls.relnamespace " +
+                                "WHERE ns.nspname = '").append(database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class)).append("'");
+
+                        if (!isBulkFetchMode && tableName != null) {
+                            sql.append(" AND tab.relname = '").append(database.escapeStringForDatabase(tableName)).append("'");
+                        }
+
+                        if (!isBulkFetchMode && indexName != null) {
+                            sql.append(" AND cls.relname='").append(database.escapeStringForDatabase(indexName)).append("'");
+                        }
+
+                        List<CachedRow> usingTypeInformation = executeAndExtract(sql.toString(), database);
+
+                        for (CachedRow row : usingTypeInformation) {
+                            // Postgres returns the index type for the using field, so we need to set it to "INDEX_TYPE" in the matching entries from the returnList
+                            for (CachedRow returnRow : returnList) {
+                                if (returnRow.getString("INDEX_NAME").equalsIgnoreCase(row.getString("INDEX_NAME"))
+                                    && returnRow.getString("TABLE_NAME").equalsIgnoreCase(row.getString("TABLE_NAME"))
+                                    && returnRow.getString("TABLE_SCHEM").equalsIgnoreCase(row.getString("TABLE_SCHEMA"))) {
+                                    returnRow.set("INDEX_TYPE", row.getString("INDEX_TYPE"));
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
 
                 private List<CachedRow> setIndexExpressions(List<CachedRow> c) throws DatabaseException, SQLException {
