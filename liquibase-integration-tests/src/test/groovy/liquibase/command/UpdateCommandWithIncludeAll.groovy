@@ -1,26 +1,17 @@
 package liquibase.command
 
-import liquibase.Contexts
-import liquibase.Liquibase
+
 import liquibase.Scope
 import liquibase.changelog.ChangeLogParameters
-import liquibase.changelog.DatabaseChangeLog
-import liquibase.changelog.visitor.DefaultChangeExecListener
-import liquibase.command.CommandScope
 import liquibase.command.core.UpdateCommandStep
-import liquibase.command.core.UpdateSqlCommandStep
 import liquibase.command.core.helpers.DatabaseChangelogCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
-import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
-import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.resource.SearchPathResourceAccessor
-import org.h2.jdbc.JdbcSQLSyntaxErrorException
 import spock.lang.Shared
 import spock.lang.Specification
-import spock.lang.Unroll
 
 @LiquibaseIntegrationTest
 class UpdateCommandWithIncludeAll extends Specification {
@@ -57,8 +48,5 @@ class UpdateCommandWithIncludeAll extends Specification {
                 resultSet.getString("id") == "raw_execution-parameter_test.sql"
             }
         }
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 }
