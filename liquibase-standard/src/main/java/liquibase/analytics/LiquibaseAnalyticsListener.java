@@ -170,7 +170,7 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
             return false;
         }
 
-        Boolean userSuppliedEnabled = getUserToggle(log);
+        Boolean userSuppliedEnabled = didUserEnableAnalytics(log);
         if (userSuppliedEnabled == null) {
             return false;
         }
@@ -178,7 +178,7 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
         return isAnalyticsEnabledBasedOnLicense(log, userSuppliedEnabled);
     }
 
-    protected static Boolean getUserToggle(Logger log) {
+    protected Boolean didUserEnableAnalytics(Logger log) {
         Boolean userSuppliedEnabled = AnalyticsArgs.ENABLED.getCurrentValue();
         if (Boolean.FALSE.equals(userSuppliedEnabled)) {
             log.log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "User has disabled analytics.", null);
