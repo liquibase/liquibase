@@ -2,6 +2,7 @@ package liquibase.command;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.analytics.AnalyticsListener;
 import liquibase.analytics.Event;
 import liquibase.analytics.AnalyticsFactory;
 import liquibase.configuration.*;
@@ -311,11 +312,11 @@ public class CommandScope {
                         Scope.getCurrentScope().getLog(getClass()).warning("Error flushing command output stream: " + e.getMessage(), e);
                     }
                     ExceptionUtil.doSilently(() -> {
+                        AnalyticsFactory analyticsFactory = Scope.getCurrentScope().getSingleton(AnalyticsFactory.class);
                         if (parentAnalyticsEvent == null) {
-                            AnalyticsFactory analyticsFactory = Scope.getCurrentScope().getSingleton(AnalyticsFactory.class);
                             analyticsFactory.handleEvent(analyticsEvent);
-                        } else {
-                            parentAnalyticsEvent.addChildEvent(analyticsEvent);
+                        } else if (analyticsFactory.getListener().isEnabled()) {
+                            parentAnalyticsEvent.getChildEvents().add(analyticsEvent);
                         }
                     });
                 }

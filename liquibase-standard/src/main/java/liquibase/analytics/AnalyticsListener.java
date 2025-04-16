@@ -18,4 +18,6 @@ public interface AnalyticsListener extends Plugin {
      * @param event the event to be handled.
      */
     void handleEvent(Event event) throws Exception;
+
+    boolean isEnabled();
 }
