@@ -230,7 +230,8 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     @Override
     public String[] getExcludedFieldFilters(ChecksumVersion version) {
         return new String[]{
-                "associatedWith"
+                "associatedWith",
+                "using"
         };
     }
 }
