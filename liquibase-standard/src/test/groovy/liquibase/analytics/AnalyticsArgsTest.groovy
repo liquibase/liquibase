@@ -32,6 +32,16 @@ class AnalyticsArgsTest extends Specification {
             }
         }
         analyticsConfigurationFactory.register(mockConfig)
+        def analyticsFactory = Scope.getCurrentScope().getSingleton(AnalyticsFactory.class)
+        def oldListener = analyticsFactory.getListener()
+        analyticsFactory.removeInstance(oldListener)
+        def listener = new LiquibaseAnalyticsListener() {
+            @Override
+            int getPriority() {
+                return PRIORITY_SPECIALIZED + 100
+            }
+        }
+        analyticsFactory.register(listener)
 
         when:
         Map<String, ?> scopeKeys = new HashMap<>()
@@ -39,7 +49,7 @@ class AnalyticsArgsTest extends Specification {
         scopeKeys.put(AnalyticsArgs.DEV_OVERRIDE.getKey(), true)
         scopeKeys.put(AnalyticsArgs.CONFIG_ENDPOINT_URL.getKey(), "some other value")
         Boolean actuallyEnabled = Scope.child(scopeKeys, () -> {
-            return AnalyticsArgs.isAnalyticsEnabled()
+            return listener.isEnabled()
         } as Scope.ScopedRunnerWithReturn)
 
         then:
@@ -48,6 +58,8 @@ class AnalyticsArgsTest extends Specification {
         cleanup:
         analyticsConfigurationFactory.removeInstance(mockConfig)
         analyticsConfigurationFactory.register(existingConfig)
+        analyticsFactory.removeInstance(listener)
+        analyticsFactory.register(oldListener)
 
         where:
         userCliOption | remoteOssEnabled | isEnabled
