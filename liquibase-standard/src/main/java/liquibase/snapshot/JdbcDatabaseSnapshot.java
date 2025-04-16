@@ -1933,17 +1933,6 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
     }
 
     private String escapeForLike(String string, Database database) {
-        if (string == null) {
-            return null;
-        }
-
-        if (database instanceof SQLiteDatabase) {
-            //sqlite jdbc's queries does not support escaped patterns.
-            return string;
-        }
-
-        return string
-                .replace("%", "\\%")
-                .replace("_", "\\_");
+        return database.escapeForLike(string);
     }
 }
