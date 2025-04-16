@@ -101,7 +101,7 @@ END;
 
     def "verify foreignKeyExists constraint is not created again when precondition fails because it already exists"() {
         when:
-        def changeLogFile = "changelogs/common/fkep.test.changelog.xml"
+        def changeLogFile = "changelogs/oracle/complete/fkep.test.changelog.xml"
         def scopeSettings = [
                 (Scope.Attr.resourceAccessor.name()): new SearchPathResourceAccessor(".,target/test-classes")
         ]

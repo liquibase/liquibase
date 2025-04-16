@@ -18,7 +18,7 @@
         <deploy.url>https://maven.pkg.github.com/liquibase/liquibase</deploy.url>
         <h2.version>2.2.224</h2.version>
         <hsqldb.version>2.7.4</hsqldb.version>
-        <postgresql.version>42.7.4</postgresql.version>
+        <postgresql.version>42.7.5</postgresql.version>
         <mssql.version>12.8.1.jre8</mssql.version>
         <mysql.version>9.2.0</mysql.version>
         <mariadb.version>3.4.1</mariadb.version>
@@ -34,6 +34,7 @@
         <maven.install.skip>true</maven.install.skip>
         <artifact.version>${project.version}</artifact.version>
         <sonar.coverage.jacoco.xmlReportPaths>../target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <expected-distribution-contents-filename>expected-distribution-contents.txt</expected-distribution-contents-filename>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -419,9 +420,23 @@
                                 </goals>
                             </execution>
                         </executions>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <expected.distribution.contents.filename>${expected-distribution-contents-filename}</expected.distribution.contents.filename>
+                            </systemPropertyVariables>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <profile>
+            <id>liquibase-minimal</id>
+
+            <properties>
+                <assemblyConfigFile>src/main/assembly/assembly-bin-pro-minimal.xml</assemblyConfigFile>
+                <expected-distribution-contents-filename>expected-distribution-contents-minimal.txt</expected-distribution-contents-filename>
+            </properties>
         </profile>
 
         <profile>

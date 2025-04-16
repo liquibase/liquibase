@@ -185,7 +185,7 @@ jobs:
               dep=$(echo $dep | xargs)  # Remove leading and trailing whitespaces
               echo "Checking out $dep"
               git clone https://github.com/liquibase/$dep.git $dep
-              git checkout ${{ inputs.branch }} 
+              git checkout ${{ inputs.branch }} || echo "Branch ${{ inputs.branch }} not found, staying on default branch"
           done
 
       - name: Set up JDK 21

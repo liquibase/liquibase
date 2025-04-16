@@ -4,15 +4,19 @@ import liquibase.Contexts
 import liquibase.LabelExpression
 import liquibase.Liquibase
 import liquibase.Scope
+import liquibase.changelog.ChangeSet
 import liquibase.changelog.FastCheckService
 import liquibase.command.core.UpdateCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
+import liquibase.command.util.CommandUtil
+import liquibase.executor.ExecutorService
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.report.UpdateReportParameters
 import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.resource.SearchPathResourceAccessor
+import liquibase.statement.core.RawParameterizedSqlStatement
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -68,5 +72,28 @@ class UpdateCommandStepIntegrationTest extends Specification {
         outputStream.toString().contains("Run:                          1")
         outputStream.toString().contains("Filtered out:                 1")
         ((UpdateReportParameters) commandResults.getResult("updateReport")).getSuccess()
+    }
+
+    def "Make sure there are not duplicated entries in DBCL for a given changeSet"() {
+        when:
+        def changeLogFile = "src/test/resources/changelogs/runAlways.set.on.changeset.and.onFail.precondition.xml"
+        def resourceAccessor = new SearchPathResourceAccessor(".,target/test-classes")
+        def scopeSettings = [
+                (Scope.Attr.resourceAccessor.name()) : resourceAccessor
+        ]
+        Scope.child(scopeSettings, {
+            CommandUtil.runUpdate(h2, changeLogFile)
+            CommandUtil.runUpdate(h2, changeLogFile)
+        } as Scope.ScopedRunner)
+
+
+        def dbclEntriesCountQuery = "SELECT COUNT(*) FROM DATABASECHANGELOG WHERE ID = ? AND AUTHOR = ? AND FILENAME = ?;"
+        def entriesFound = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", h2.getDatabaseFromFactory()).queryForInt(new RawParameterizedSqlStatement(dbclEntriesCountQuery, "DBCLDuplicatedEntriesTest", "mallod", changeLogFile))
+        def dbclExecTypeQuery = "SELECT exectype FROM DATABASECHANGELOG WHERE ID = ? AND AUTHOR = ? AND FILENAME = ?;"
+        def changeSetExecType= Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", h2.getDatabaseFromFactory()).queryForObject(new RawParameterizedSqlStatement(dbclExecTypeQuery, "DBCLDuplicatedEntriesTest", "mallod", changeLogFile), String.class)
+
+        then:
+        entriesFound == 1
+        changeSetExecType.equals(ChangeSet.ExecType.RERAN.value)
     }
 }
