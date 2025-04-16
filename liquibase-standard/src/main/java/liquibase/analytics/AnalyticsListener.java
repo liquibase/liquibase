@@ -19,7 +19,5 @@ public interface AnalyticsListener extends Plugin {
      */
     void handleEvent(Event event) throws Exception;
 
-    default boolean isEnabled() {
-        return true;
-    }
+    boolean isEnabled();
 }
