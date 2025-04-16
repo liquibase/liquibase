@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
+import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DataTypeFactory;
@@ -17,7 +18,7 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
 
     @Override
     public boolean supports(CreateDatabaseChangeLogTableStatement statement, Database database) {
-        return !(database instanceof SybaseDatabase);
+        return !(database instanceof SybaseDatabase) && !(database instanceof Db2zDatabase);
     }
 
     @Override
