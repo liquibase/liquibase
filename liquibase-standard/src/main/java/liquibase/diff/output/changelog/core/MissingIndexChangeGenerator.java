@@ -61,6 +61,7 @@ public class MissingIndexChangeGenerator extends AbstractChangeGenerator impleme
         change.setIndexName(index.getName());
         change.setUnique(((index.isUnique() != null) && index.isUnique()) ? Boolean.TRUE : null);
         change.setClustered(((index.getClustered() != null) && index.getClustered()) ? Boolean.TRUE : null);
+        change.setUsing(index.getUsing());
 
         if (referenceDatabase.createsIndexesForForeignKeys()) {
             change.setAssociatedWith(index.getAssociatedWithAsString());

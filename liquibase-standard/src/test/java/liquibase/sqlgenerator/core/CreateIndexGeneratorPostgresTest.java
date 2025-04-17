@@ -20,6 +20,18 @@ public class CreateIndexGeneratorPostgresTest {
         Assert.assertEquals("CREATE INDEX INDEX1 ON SCHEMA1.TABLE1(COL1, COL2 DESC)", result[0].toSql());
     }
 
+    @Test
+    public void testGenerateSqlUsingFunction() {
+        // Given
+        CreateIndexStatement statement = new CreateIndexStatement("INDEX1", "CATALOG1", "SCHEMA1", "TABLE1", false, "", "BTREE", newAddColumnConfig("COL1", false));
+
+        // When
+        Sql[] result = generateSql(statement);
+
+        // Then
+        Assert.assertEquals("CREATE INDEX INDEX1 ON SCHEMA1.TABLE1 USING BTREE(COL1)", result[0].toSql());
+    }
+
     private static CreateIndexStatement newStatement(String indexName, String catalogName, String schemaName, String tableName, AddColumnConfig... columns) {
         return new CreateIndexStatement(indexName, catalogName, schemaName, tableName, false, "" , columns);
     }
