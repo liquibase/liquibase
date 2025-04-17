@@ -132,4 +132,8 @@ public class InternalSnapshotCommandStep extends AbstractCommandStep {
         }
     }
 
+    @Override
+    public boolean isInternal() {
+        return true;
+    }
 }
