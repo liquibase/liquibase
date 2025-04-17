@@ -39,14 +39,18 @@ public class CreateDatabaseChangelogTableGeneratorZOS extends AbstractSqlGenerat
     public Sql[] generateSql(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
         database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
-        
         try {
-            // Get the table name
-            String tableName = database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
+            String catalog   = database.getLiquibaseCatalogName();
+            String schema  = database.getLiquibaseSchemaName();
+            String tableName = database.escapeTableName(catalog, schema, database.getDatabaseChangeLogTableName());
             
-            // Build the SQL for creating the table
-            StringBuilder sql = new StringBuilder();
-            sql.append("CREATE TABLE ").append(tableName).append(" (")
+            String dbName = Db2zConfiguration.DATABASECHANGELOG_DATABASE.getCurrentValue();
+            String tsName = Db2zConfiguration.DATABASECHANGELOG_TABLESPACE.getCurrentValue();
+            boolean hasDb = StringUtils.isNotEmpty(dbName);
+            boolean hasTs = StringUtils.isNotEmpty(tsName);
+
+            StringBuilder createTable = new StringBuilder()
+               .append("CREATE TABLE ").append(tableName).append(" (")
                .append("ID VARCHAR(255) NOT NULL, ")
                .append("AUTHOR VARCHAR(255) NOT NULL, ")
                .append("FILENAME VARCHAR(255) NOT NULL, ")
@@ -62,31 +66,35 @@ public class CreateDatabaseChangelogTableGeneratorZOS extends AbstractSqlGenerat
                .append("LABELS VARCHAR(255), ")
                .append("DEPLOYMENT_ID VARCHAR(10), ")
                .append("PRIMARY KEY(ID, AUTHOR, FILENAME))");
-            
-            // Add DATABASE parameter if specified
-            String databaseParam = Db2zConfiguration.DATABASECHANGELOG_DATABASE.getCurrentValue();
-            if (StringUtils.isNotEmpty(databaseParam)) {
-                sql.append(" IN ").append(database.escapeObjectName(databaseParam, Catalog.class));
+
+            if (hasDb && hasTs) {
+                createTable.append(" IN ").append(dbName).append(".").append(tsName);
+            } else if (hasTs) {
+                createTable.append(" IN ").append(tsName);
+            } else if (hasDb) {
+                createTable.append(" IN ").append(dbName);
             }
             
-            // Add TABLESPACE parameter if specified
-            String tablespaceParam = Db2zConfiguration.DATABASECHANGELOG_TABLESPACE.getCurrentValue();
-            if (StringUtils.isNotEmpty(tablespaceParam)) {
-                sql.append(" TABLESPACE ").append(database.escapeObjectName(tablespaceParam, Table.class));
+            Sql createTableSql = new UnparsedSql(createTable.toString(), getAffectedTable(database));
+
+            String idxName = Db2zConfiguration.DATABASECHANGELOG_INDEX.getCurrentValue();
+            if (StringUtils.isEmpty(idxName)) {
+                idxName = database.getDatabaseChangeLogTableName() + "_PK";
             }
-            
-            Sql createTableSql = new UnparsedSql(sql.toString(), getAffectedTable(database));
-            
-            // Create index if specified
-            String indexName = Db2zConfiguration.DATABASECHANGELOG_INDEX.getCurrentValue();
-            if (StringUtils.isNotEmpty(indexName)) {
-                String createIndexSql = "CREATE INDEX " + database.escapeObjectName(indexName, Table.class) + 
-                                       " ON " + tableName + "(ID, AUTHOR, FILENAME)";
-                
-                return new Sql[] { createTableSql, new UnparsedSql(createIndexSql, getAffectedTable(database)) };
-            }
-            
-            return new Sql[] { createTableSql };
+            String qualifiedIdxName = database.escapeObjectName(idxName, Table.class);
+
+                StringBuilder createIndex = new StringBuilder()
+                        .append("CREATE UNIQUE INDEX ").append(qualifiedIdxName)
+                        .append(" ON ")
+                        .append(schema)
+                        .append(".")
+                        .append(database.getDatabaseChangeLogTableName())
+                        .append(" (ID, AUTHOR, FILENAME)");
+
+                Sql createIndexSql = new UnparsedSql(createIndex.toString(), getAffectedTable(database));
+
+                return new Sql[] { createTableSql, createIndexSql };
+
         } finally {
             database.setObjectQuotingStrategy(currentStrategy);
         }

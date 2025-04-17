@@ -35,49 +35,57 @@ public class CreateDatabaseChangeLogLockTableGeneratorZOS extends AbstractSqlGen
     public ValidationErrors validate(CreateDatabaseChangeLogLockTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();
     }
-    
+
     @Override
     public Sql[] generateSql(CreateDatabaseChangeLogLockTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
         database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
-        
         try {
-            // Get the table name
-            String tableName = database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName());
-            
-            // Build the SQL for creating the table
-            StringBuilder sql = new StringBuilder();
-            sql.append("CREATE TABLE ").append(tableName).append(" (")
-               .append("ID INT NOT NULL, ")
-               .append("LOCKED SMALLINT NOT NULL, ")
-               .append("LOCKGRANTED TIMESTAMP, ")
-               .append("LOCKEDBY VARCHAR(255), ")
-               .append("PRIMARY KEY (ID))");
-            
-            // Add DATABASE parameter if specified
-            String databaseParam = Db2zConfiguration.DATABASECHANGELOGLOCK_DATABASE.getCurrentValue();
-            if (StringUtils.isNotEmpty(databaseParam)) {
-                sql.append(" IN ").append(database.escapeObjectName(databaseParam, Catalog.class));
+            String catalog = database.getLiquibaseCatalogName();
+            String schema = database.getLiquibaseSchemaName();
+            String tableName = database.escapeTableName(catalog, schema, database.getDatabaseChangeLogLockTableName());
+
+            String dbName = Db2zConfiguration.DATABASECHANGELOGLOCK_DATABASE.getCurrentValue();
+            String tsName = Db2zConfiguration.DATABASECHANGELOGLOCK_TABLESPACE.getCurrentValue();
+            boolean hasDb = StringUtils.isNotEmpty(dbName);
+            boolean hasTs = StringUtils.isNotEmpty(tsName);
+
+            StringBuilder createTable = new StringBuilder()
+                    .append("CREATE TABLE ").append(tableName).append(" (")
+                    .append("ID INT NOT NULL, ")
+                    .append("LOCKED SMALLINT NOT NULL, ")
+                    .append("LOCKGRANTED TIMESTAMP, ")
+                    .append("LOCKEDBY VARCHAR(255), ")
+                    .append("PRIMARY KEY (ID))");
+
+            if (hasDb && hasTs) {
+                createTable.append(" IN ").append(dbName).append(".").append(tsName);
+            } else if (hasTs) {
+                createTable.append(" IN ").append(tsName);
+            } else if (hasDb) {
+                createTable.append(" IN ").append(dbName);
             }
-            
-            // Add TABLESPACE parameter if specified
-            String tablespaceParam = Db2zConfiguration.DATABASECHANGELOGLOCK_TABLESPACE.getCurrentValue();
-            if (StringUtils.isNotEmpty(tablespaceParam)) {
-                sql.append(" TABLESPACE ").append(database.escapeObjectName(tablespaceParam, Table.class));
+
+            Sql createTableSql = new UnparsedSql(createTable.toString(), getAffectedTable(database));
+
+            String idxName = Db2zConfiguration.DATABASECHANGELOGLOCK_INDEX.getCurrentValue();
+            if (StringUtils.isEmpty(idxName)) {
+                idxName = database.getDatabaseChangeLogLockTableName() + "_PK";
             }
-            
-            Sql createTableSql = new UnparsedSql(sql.toString(), getAffectedTable(database));
-            
-            // Create index if specified
-            String indexName = Db2zConfiguration.DATABASECHANGELOGLOCK_INDEX.getCurrentValue();
-            if (StringUtils.isNotEmpty(indexName)) {
-                String createIndexSql = "CREATE INDEX " + database.escapeObjectName(indexName, Table.class) + 
-                                       " ON " + tableName + "(ID)";
-                
-                return new Sql[] { createTableSql, new UnparsedSql(createIndexSql, getAffectedTable(database)) };
-            }
-            
-            return new Sql[] { createTableSql };
+            String qualifiedIdxName = database.escapeObjectName(idxName, Table.class);
+
+            StringBuilder createIndex = new StringBuilder()
+                    .append("CREATE UNIQUE INDEX ").append(qualifiedIdxName)
+                    .append(" ON ")
+                    .append(schema)
+                    .append(".")
+                    .append(database.getDatabaseChangeLogLockTableName())
+                    .append(" (ID)");
+
+            Sql createIndexSql = new UnparsedSql(createIndex.toString(), getAffectedTable(database));
+
+            return new Sql[]{createTableSql, createIndexSql};
+
         } finally {
             database.setObjectQuotingStrategy(currentStrategy);
         }
