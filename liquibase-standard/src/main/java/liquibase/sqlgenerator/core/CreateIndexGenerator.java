@@ -50,8 +50,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
                 warnings.addWarning("Creating clustered index not supported with "+database);
             }
         }
-        if (!(database instanceof PostgresDatabase && createIndexStatement.getUsing() != null)) {
-            warnings.addWarning("USING clause not supported with " + database);
+        if (!(database instanceof PostgresDatabase) && createIndexStatement.getUsing() != null) {
         }
 
         return warnings;
