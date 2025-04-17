@@ -307,7 +307,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             for (CachedRow returnRow : returnList) {
                                 if (returnRow.getString("INDEX_NAME").equalsIgnoreCase(row.getString("INDEX_NAME"))
                                     && returnRow.getString("TABLE_NAME").equalsIgnoreCase(row.getString("TABLE_NAME"))
-                                    && returnRow.getString("TABLE_SCHEM").equalsIgnoreCase(row.getString("TABLE_SCHEM "))) {
+                                    && returnRow.getString("TABLE_SCHEM").equalsIgnoreCase(row.getString("TABLE_SCHEM"))) {
                                     returnRow.set("INDEX_TYPE", row.getString("INDEX_TYPE"));
                                     break;
                                 }
