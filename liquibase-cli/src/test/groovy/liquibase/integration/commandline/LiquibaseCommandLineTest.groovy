@@ -53,8 +53,7 @@ Global Options
       --analytics-enabled=PARAM
                              Enable or disable sending product usage data and
                                analytics to Liquibase. Learn more at https:
-                               //docs.liquibase.com/analytics. DEFAULT: true
-                               for OSS users | false for PRO users
+                               //docs.liquibase.com/analytics.
                              (defaults file: 'liquibase.analytics.enabled',
                                environment variable:
                                'LIQUIBASE_ANALYTICS_ENABLED')

@@ -204,20 +204,4 @@ public class Event {
             return libraries.get(extensionName).version;
         });
     }
-
-    /**
-     * Add the child event only if analytics is enabled.
-     * If unable to determine analytics enabled status no event will be added.
-     *
-     * @param event the event to add
-     */
-    public void addChildEvent(Event event) {
-        try {
-            if (AnalyticsArgs.isAnalyticsEnabled()) {
-                getChildEvents().add(event);
-            }
-        } catch (Exception analyticsEnabledException) {
-            Scope.getCurrentScope().getLog(getClass()).log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Failed to add child event: could not determine analytics status", analyticsEnabledException);
-        }
-    }
 }

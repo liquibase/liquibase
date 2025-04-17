@@ -21,11 +21,13 @@ public class AnalyticsFactory extends AbstractPluginFactory<AnalyticsListener> {
 
     public void handleEvent(Event event) {
         try {
-            if (AnalyticsArgs.isAnalyticsEnabled()) {
-                getPlugin().handleEvent(event);
-            }
+            getPlugin().handleEvent(event);
         } catch (Exception e) {
             Scope.getCurrentScope().getLog(getClass()).log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Failed to handle analytics event", e);
         }
+    }
+
+    public AnalyticsListener getListener() {
+        return getPlugin();
     }
 }
