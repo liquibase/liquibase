@@ -51,6 +51,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
             }
         }
         if (!(database instanceof PostgresDatabase) && createIndexStatement.getUsing() != null) {
+            warnings.addWarning("USING clause not supported with " + database);
         }
 
         return warnings;
