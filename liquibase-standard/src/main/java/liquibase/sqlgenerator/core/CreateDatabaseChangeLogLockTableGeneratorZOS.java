@@ -52,7 +52,7 @@ public class CreateDatabaseChangeLogLockTableGeneratorZOS extends AbstractSqlGen
 
             StringBuilder createTable = new StringBuilder()
                     .append("CREATE TABLE ").append(tableName).append(" (")
-                    .append("ID INT NOT NULL, ")
+                    .append("ID INTEGER NOT NULL, ")
                     .append("LOCKED SMALLINT NOT NULL, ")
                     .append("LOCKGRANTED TIMESTAMP, ")
                     .append("LOCKEDBY VARCHAR(255), ")
@@ -76,10 +76,13 @@ public class CreateDatabaseChangeLogLockTableGeneratorZOS extends AbstractSqlGen
 
             StringBuilder createIndex = new StringBuilder()
                     .append("CREATE UNIQUE INDEX ").append(qualifiedIdxName)
-                    .append(" ON ")
-                    .append(schema)
-                    .append(".")
-                    .append(database.getDatabaseChangeLogLockTableName())
+                    .append(" ON ");
+                    
+            if (schema != null && !schema.isEmpty()) {
+                createIndex.append(schema).append(".");
+            }
+            
+            createIndex.append(database.getDatabaseChangeLogLockTableName())
                     .append(" (ID)");
 
             Sql createIndexSql = new UnparsedSql(createIndex.toString(), getAffectedTable(database));

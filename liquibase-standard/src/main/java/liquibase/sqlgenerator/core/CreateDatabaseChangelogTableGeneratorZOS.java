@@ -55,7 +55,7 @@ public class CreateDatabaseChangelogTableGeneratorZOS extends AbstractSqlGenerat
                .append("AUTHOR VARCHAR(255) NOT NULL, ")
                .append("FILENAME VARCHAR(255) NOT NULL, ")
                .append("DATEEXECUTED TIMESTAMP NOT NULL, ")
-               .append("ORDEREXECUTED INT NOT NULL, ")
+               .append("ORDEREXECUTED INTEGER NOT NULL, ")
                .append("EXECTYPE VARCHAR(10) NOT NULL, ")
                .append("MD5SUM VARCHAR(35), ")
                .append("DESCRIPTION VARCHAR(255), ")
@@ -85,10 +85,13 @@ public class CreateDatabaseChangelogTableGeneratorZOS extends AbstractSqlGenerat
 
                 StringBuilder createIndex = new StringBuilder()
                         .append("CREATE UNIQUE INDEX ").append(qualifiedIdxName)
-                        .append(" ON ")
-                        .append(schema)
-                        .append(".")
-                        .append(database.getDatabaseChangeLogTableName())
+                        .append(" ON ");
+                        
+                if (schema != null && !schema.isEmpty()) {
+                    createIndex.append(schema).append(".");
+                }
+                
+                createIndex.append(database.getDatabaseChangeLogTableName())
                         .append(" (ID, AUTHOR, FILENAME)");
 
                 Sql createIndexSql = new UnparsedSql(createIndex.toString(), getAffectedTable(database));
