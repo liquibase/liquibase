@@ -44,7 +44,7 @@ public class LiquibaseUpdateSQL extends AbstractLiquibaseUpdateMojo {
 		} else if (StringUtil.isNotEmpty(toTag)) {
 			liquibase.updateToTagSql(toTag, new Contexts(contexts), new LabelExpression(getLabelFilter()), outputWriter);
 		} else {
-			liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()), outputWriter);
+			liquibase.updateSql(new Contexts(contexts), new LabelExpression(getLabelFilter()), outputWriter);
 		}
 	}
 
