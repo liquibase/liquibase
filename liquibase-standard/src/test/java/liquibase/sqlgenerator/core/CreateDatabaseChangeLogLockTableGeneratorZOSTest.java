@@ -5,10 +5,10 @@ import liquibase.database.core.Db2zDatabase;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
 
-public class CreateDatabaseChangeLogLockTableGeneratorTest extends AbstractSqlGeneratorTest<CreateDatabaseChangeLogLockTableStatement> {
+public class CreateDatabaseChangeLogLockTableGeneratorZOSTest extends AbstractSqlGeneratorTest<CreateDatabaseChangeLogLockTableStatement> {
 
-    public CreateDatabaseChangeLogLockTableGeneratorTest() throws Exception {
-        super(new CreateDatabaseChangeLogLockTableGenerator());
+    public CreateDatabaseChangeLogLockTableGeneratorZOSTest() throws Exception {
+        super(new CreateDatabaseChangeLogLockTableGeneratorZOS());
     }
 
     @Override
@@ -18,6 +18,6 @@ public class CreateDatabaseChangeLogLockTableGeneratorTest extends AbstractSqlGe
     
     @Override
     protected boolean shouldBeImplementation(Database database) {
-        return !(database instanceof Db2zDatabase);
+        return database instanceof Db2zDatabase;
     }
 }
