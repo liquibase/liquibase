@@ -1,6 +1,7 @@
 package liquibase.serializer.core.yaml;
 
 import liquibase.change.Change;
+import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RollbackContainer;
@@ -26,14 +27,27 @@ import org.yaml.snakeyaml.resolver.Resolver;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 public abstract class YamlSerializer implements LiquibaseSerializer {
 
     protected Yaml yaml;
+    protected boolean preserveNullValues = true;
 
     public YamlSerializer() {
         yaml = createYaml();
+    }
+
+    public void preserveNullValues(boolean preserveNullValues) {
+        this.preserveNullValues = preserveNullValues;
     }
 
     protected DumperOptions createDumperOptions() {
@@ -93,8 +107,23 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         Comparator<String> comparator;
         comparator = getComparator(object);
         Map<String, Object> objectMap = new TreeMap<>(comparator);
+        Set<String> fields = getSerializableObjectFields(object);
 
-        for (String field : getSerializableObjectFields(object)) {
+        if (this.preserveNullValues &&
+                object instanceof ColumnConfig &&
+                1 == fields.size() &&
+                fields.contains("name"))
+        {
+            objectMap.put("name", object.getSerializableFieldValue("name"));
+            objectMap.put("value", null);
+
+            Map<String, Object> containerMap = new HashMap<>();
+            containerMap.put(object.getSerializedObjectName(), objectMap);
+
+            return containerMap;
+        }
+
+        for (String field : fields) {
             Object value = object.getSerializableFieldValue(field);
             if (value != null) {
                 if (value instanceof DataType) {
@@ -107,9 +136,9 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                     value = ((Map) toMap((ConstraintsConfig) value)).values().iterator().next();
                 }
                 if (value instanceof LiquibaseSerializable) {
-                    if(value instanceof RollbackContainer) {
+                    if (value instanceof RollbackContainer) {
                         List<Change> changesToRollback = ((RollbackContainer) value).getChanges();
-                        if(changesToRollback.size() == 1) {
+                        if (changesToRollback.size() == 1) {
                             value = toMap(changesToRollback.get(0));
                         } else {
                             value = toMap((LiquibaseSerializable) value);
@@ -119,17 +148,24 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                     }
                 }
                 if (value instanceof Collection) {
-                    List valueAsList = new ArrayList((Collection) value);
+                    Collection valueAsList = (Collection) value;
                     if (valueAsList.isEmpty()) {
                         continue;
                     }
-                    for (int i = 0; i < valueAsList.size(); i++) {
-                        if (valueAsList.get(i) instanceof LiquibaseSerializable) {
-                            Object m = convertToMap(valueAsList, i);
-                            valueAsList.set(i, m);
+                    List list = new ArrayList();
+                    for (Object o : valueAsList) {
+                        if (o instanceof ColumnConfig) {
+                            ColumnConfig cc = (ColumnConfig) o;
+                            if (!cc.isSerializable(this.preserveNullValues)) {
+                                continue;
+                            }
+                        }
+                        if (o instanceof LiquibaseSerializable) {
+                            Object m = toMap((LiquibaseSerializable) o);
+                            list.add(m);
                         }
                     }
-                    value = valueAsList;
+                    value = list;
 
                 }
                 if (value instanceof Map) {
@@ -158,8 +194,6 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                             ((Map) value).put(key, valueAsList);
                         }
                     }
-
-
                 }
                 objectMap.put(field, value);
             }
@@ -168,10 +202,6 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         Map<String, Object> containerMap = new HashMap<>();
         containerMap.put(object.getSerializedObjectName(), objectMap);
         return containerMap;
-    }
-
-    protected Object convertToMap(List valueAsList, int index) {
-        return toMap((LiquibaseSerializable) valueAsList.get(index));
     }
 
     protected Comparator<String> getComparator(LiquibaseSerializable object) {

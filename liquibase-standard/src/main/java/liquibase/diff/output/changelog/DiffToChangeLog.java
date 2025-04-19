@@ -137,6 +137,7 @@ public class DiffToChangeLog {
 
     public void print(String changeLogFile, ChangeLogSerializer changeLogSerializer, Boolean overwriteOutputFile) throws ParserConfigurationException, IOException, DatabaseException {
         this.changeSetPath = changeLogFile;
+        changeLogSerializer.preserveNullValues(diffOutputControl.getPreserveNullValues());
         final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
         Resource file = pathHandlerFactory.getResource(changeLogFile);
 
@@ -278,6 +279,7 @@ public class DiffToChangeLog {
     public void print(final PrintStream out, final ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
         List<ChangeSet> changeSets = generateChangeSets();
 
+        changeLogSerializer.preserveNullValues(diffOutputControl.getPreserveNullValues());
         changeLogSerializer.write(changeSets, out);
 
         out.flush();

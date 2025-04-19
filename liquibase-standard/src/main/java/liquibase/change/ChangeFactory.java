@@ -184,8 +184,10 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
         ChangeMetaData changeMetaData = getChangeMetaData(change);
         for (ChangeParameterMetaData param : changeMetaData.getParameters().values()) {
             Object currentValue = param.getCurrentValue(change);
-            if (currentValue != null) {
-                returnMap.put(param.getParameterName(), currentValue);
+            String parameterName = param.getParameterName();
+            // "preserveNullValues" is an internal field
+            if (currentValue != null && !"preserveNullValues".equals(parameterName)) {
+                returnMap.put(parameterName, currentValue);
             }
         }
 
