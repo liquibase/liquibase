@@ -121,26 +121,16 @@ public class TimestampType extends DateTimeType {
                 );
                 fractionalDigits = maxFractionalDigits;
             }
-            type =  new DatabaseDataType("TIMESTAMP", fractionalDigits);
+            type = new DatabaseDataType("TIMESTAMP", fractionalDigits);
         } else {
             type = new DatabaseDataType("TIMESTAMP");
         }
 
-        if (originalDefinition.startsWith("java.sql.Types.TIMESTAMP_WITH_TIMEZONE")
-            && (database instanceof PostgresDatabase
-            || database instanceof OracleDatabase
-            || database instanceof H2Database
-            || database instanceof HsqlDatabase
-            || database instanceof SybaseASADatabase)) {
-
-            if (database instanceof PostgresDatabase
-            || database instanceof H2Database
-            || database instanceof SybaseASADatabase) {
-                type.addAdditionalInformation("WITH TIME ZONE");
-            } else {
-                type.addAdditionalInformation("WITH TIMEZONE");
+        if (originalDefinition.startsWith("java.sql.Types.TIMESTAMP_WITH_TIMEZONE")){
+            String additionalInformation = getTimeZoneAdditionInformation(database);
+            if (additionalInformation != null) {
+                type.addAdditionalInformation(additionalInformation);
             }
-
             return type;
         }
 
@@ -187,5 +177,26 @@ public class TimestampType extends DateTimeType {
         return LoadDataChange.LOAD_DATA_TYPE.DATE;
     }
 
+    /**
+     * Returns the time zone additional information for the specified database.
+     * @param database the database
+     * @return the time zone additional information
+     */
+    public static String getTimeZoneAdditionInformation(Database database) {
+        if (database instanceof PostgresDatabase
+            || database instanceof OracleDatabase
+            || database instanceof H2Database
+            || database instanceof HsqlDatabase
+            || database instanceof SybaseASADatabase) {
 
+            if (database instanceof PostgresDatabase
+                || database instanceof H2Database
+                || database instanceof SybaseASADatabase) {
+                return "WITH TIME ZONE";
+            } else {
+                return "WITH TIMEZONE";
+            }
+        }
+        return null;
+    }
 }

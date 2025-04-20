@@ -4,10 +4,7 @@ import liquibase.Scope;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
-import liquibase.datatype.core.BigIntType;
-import liquibase.datatype.core.CharType;
-import liquibase.datatype.core.IntType;
-import liquibase.datatype.core.UnknownType;
+import liquibase.datatype.core.*;
 import liquibase.exception.ServiceNotFoundException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.core.DataType;
@@ -179,11 +176,14 @@ public class DataTypeFactory {
                 additionalInfo = splitTypeName[1];
             }
         }
+        if (dataTypeName.toLowerCase(Locale.US).equals("timestamptz")) {
+            additionalInfo = TimestampType.getTimeZoneAdditionInformation(database);
+        }
 
         // try to find matching classes for the data type name in our registry
         Collection<Class<? extends LiquibaseDataType>> classes = registry.get(dataTypeName.toLowerCase(Locale.US));
 
-        LiquibaseDataType liquibaseDataType = null;
+        LiquibaseDataType liquibaseDataType;
         if (classes == null) {
             // Map (date/time) INTERVAL types to the UnknownType
             if (dataTypeName.toUpperCase(Locale.US).startsWith("INTERVAL")) {
