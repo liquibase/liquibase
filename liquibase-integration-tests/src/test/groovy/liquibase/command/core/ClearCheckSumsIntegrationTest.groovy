@@ -3,19 +3,12 @@ package liquibase.command.core
 import liquibase.Scope
 import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory
-import liquibase.changelog.ChangeLogParameters
-import liquibase.changelog.ChangeSet
-import liquibase.changelog.DatabaseChangeLog
 import liquibase.command.CommandScope
-import liquibase.command.core.helpers.DatabaseChangelogCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
-import liquibase.parser.core.ParsedNode
-import liquibase.resource.SearchPathResourceAccessor
-import liquibase.util.StringUtil
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -28,9 +21,6 @@ class ClearCheckSumsIntegrationTest extends Specification {
     private DatabaseTestSystem h2 = (DatabaseTestSystem) Scope.currentScope.getSingleton(TestSystemFactory.class).getTestSystem("h2")
 
     def "clearing checksums in an empty database does not throw an exception"() {
-        given:
-        CommandUtil.runDropAll(h2)
-
         when:
         def h2Database = h2.getDatabaseFromFactory()
         def commandResults = new CommandScope("clearChecksums")
@@ -40,9 +30,6 @@ class ClearCheckSumsIntegrationTest extends Specification {
 
         then:
         commandResults.results.size() == 0
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     def "validate checksums are cleared"() {
@@ -63,9 +50,6 @@ class ClearCheckSumsIntegrationTest extends Specification {
 
         then:
         changeLogService.getRanChangeSets().stream().allMatch({ ranChangeSet -> ranChangeSet.getLastCheckSum() == null })
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     def "validate generated CheckSum doesn't change after perform a clearCheckSum command and then a new update command"() {
