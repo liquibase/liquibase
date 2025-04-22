@@ -1,5 +1,6 @@
 package liquibase.command;
 
+import liquibase.Beta;
 import liquibase.exception.CommandValidationException;
 
 import java.util.List;
@@ -74,4 +75,13 @@ public interface CommandStep {
      * @return list with the provided classes types
      */
     List<Class<?>> providedDependencies();
+
+    /**
+     * Informational method to determine if this step is internal to Liquibase and should not be disclosed to end users
+     * @return true if this step is internal to Liquibase and should not be shown in the help output
+     */
+    @Beta
+    default boolean isInternal() {
+        return false;
+    }
 }

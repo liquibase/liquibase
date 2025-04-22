@@ -562,6 +562,27 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         }
     }
 
+    static OutputCheck assertEquals(String substring) {
+        return new OutputCheck() {
+            String actualContents
+            @Override
+            def check(String actual) throws AssertionError {
+                actualContents = actual
+                assert actual == substring
+            }
+
+            @Override
+            String getExpected() {
+                return substring
+            }
+
+            @Override
+            String getCheckedOutput() {
+                return this.actualContents
+            }
+        }
+    }
+
     static void checkDatabaseContent(Map<String, ?> expectedDatabaseContent, Database database, String outputDescription) {
         if (expectedDatabaseContent.size() == 0) {
             return
