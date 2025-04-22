@@ -438,7 +438,7 @@ public abstract class AbstractIntegrationTest {
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter("loginuser", testSystem.getUsername());
-        liquibase.update(this.contexts, output);
+        liquibase.updateSql(new Contexts(this.contexts), null, output);
 
         String outputResult = output.getBuffer().toString();
         assertNotNull("generated output change log must not be empty", outputResult);
@@ -963,7 +963,7 @@ public abstract class AbstractIntegrationTest {
         Liquibase liquibase = createLiquibase(encodingChangeLog);
 
         StringWriter writer=new StringWriter();
-        liquibase.update(this.contexts,writer);
+        liquibase.updateSql(new Contexts(this.contexts), null, writer);
         assertTrue("Update to SQL preserves encoding",
             new RegexMatcher(writer.toString(), new String[] {
                 //For the UTF-8 encoded cvs
@@ -1066,7 +1066,7 @@ public abstract class AbstractIntegrationTest {
         clearDatabase();
 
         liquibase = createLiquibase(includedChangeLog);
-        liquibase.update(contexts, output);
+        liquibase.updateSql(new Contexts(contexts), null, output);
 
         String outputResult = output.getBuffer().toString();
         assertNotNull("generated SQL may not be empty", outputResult);
