@@ -45,8 +45,8 @@ public class CreateDatabaseChangeLogLockTableGeneratorZOS extends AbstractSqlGen
             String schema = database.getLiquibaseSchemaName();
             String tableName = database.escapeTableName(catalog, schema, database.getDatabaseChangeLogLockTableName());
 
-            String dbName = Db2zConfiguration.DATABASECHANGELOGLOCK_DATABASE.getCurrentValue();
-            String tsName = Db2zConfiguration.DATABASECHANGELOGLOCK_TABLESPACE.getCurrentValue();
+            String dbName = getDatabaseChangeLogLockDatabase();
+            String tsName = getDatabaseChangeLogLockTablespace();
             boolean hasDb = StringUtils.isNotEmpty(dbName);
             boolean hasTs = StringUtils.isNotEmpty(tsName);
 
@@ -68,7 +68,7 @@ public class CreateDatabaseChangeLogLockTableGeneratorZOS extends AbstractSqlGen
 
             Sql createTableSql = new UnparsedSql(createTable.toString(), getAffectedTable(database));
 
-            String idxName = Db2zConfiguration.DATABASECHANGELOGLOCK_INDEX.getCurrentValue();
+            String idxName = getDatabaseChangeLogLockIndex();
             if (StringUtils.isEmpty(idxName)) {
                 idxName = database.getDatabaseChangeLogLockTableName() + "_PK";
             }
@@ -97,5 +97,18 @@ public class CreateDatabaseChangeLogLockTableGeneratorZOS extends AbstractSqlGen
     protected Relation getAffectedTable(Database database) {
         return new Table().setName(database.getDatabaseChangeLogLockTableName())
                          .setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName());
+    }
+    
+    // Methods extracted for easier testing via override
+    protected String getDatabaseChangeLogLockDatabase() {
+        return Db2zConfiguration.DATABASECHANGELOGLOCK_DATABASE.getCurrentValue();
+    }
+    
+    protected String getDatabaseChangeLogLockTablespace() {
+        return Db2zConfiguration.DATABASECHANGELOGLOCK_TABLESPACE.getCurrentValue();
+    }
+    
+    protected String getDatabaseChangeLogLockIndex() {
+        return Db2zConfiguration.DATABASECHANGELOGLOCK_INDEX.getCurrentValue();
     }
 }
