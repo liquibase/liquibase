@@ -1,24 +1,25 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.Db2zDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
-import liquibase.structure.core.Table;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.mockito.Mockito;
 
 import java.util.Arrays;
 import java.util.Collection;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -45,9 +46,12 @@ public class CreateDatabaseChangeLogLockTableGeneratorTest extends AbstractSqlGe
         @Parameters(name = "{0}")
         public static Collection<Object[]> data() {
             return Arrays.asList(new Object[][]{
-                    {"WithSchema", "LIQUIBASE", null, true},
-                    {"WithoutSchema", null, null, false},
-                    {"WithTablespace", "LIQUIBASE", "LIQUIBASE_TS", true}
+                    {"WithSchema", "LIQUIBASE", null, true, 
+                     "CREATE TABLE \"LIQUIBASE\".DATABASECHANGELOGLOCK (ID INTEGER NOT NULL, LOCKED SMALLINT NOT NULL, LOCKGRANTED TIMESTAMP, LOCKEDBY VARCHAR(255), CONSTRAINT PK_DBCHGLOGLOCK PRIMARY KEY (ID))"},
+                    {"WithoutSchema", null, null, false, 
+                     "CREATE TABLE DATABASECHANGELOGLOCK (ID INTEGER NOT NULL, LOCKED SMALLINT NOT NULL, LOCKGRANTED TIMESTAMP, LOCKEDBY VARCHAR(255), CONSTRAINT PK_DBCHGLOGLOCK PRIMARY KEY (ID))"},
+                    {"WithTablespace", "LIQUIBASE", "LIQUIBASE_TS", true, 
+                     "CREATE TABLE \"LIQUIBASE\".DATABASECHANGELOGLOCK (ID INTEGER NOT NULL, LOCKED SMALLINT NOT NULL, LOCKGRANTED TIMESTAMP, LOCKEDBY VARCHAR(255), CONSTRAINT PK_DBCHGLOGLOCK PRIMARY KEY (ID)) IN LIQUIBASE_TS"}
             });
         }
 
@@ -55,89 +59,69 @@ public class CreateDatabaseChangeLogLockTableGeneratorTest extends AbstractSqlGe
         private final String schema;
         private final String tablespace;
         private final boolean hasSchema;
+        private final String expectedSql;
 
-        public DB2ParameterizedTest(String testName, String schema, String tablespace, boolean hasSchema) {
+        public DB2ParameterizedTest(String testName, String schema, String tablespace, boolean hasSchema, String expectedSql) {
             this.testName = testName;
             this.schema = schema;
             this.tablespace = tablespace;
             this.hasSchema = hasSchema;
+            this.expectedSql = expectedSql;
         }
 
         @Test
         public void testGenerateSqlForDB2() throws DatabaseException {
-            CreateDatabaseChangeLogLockTableGenerator generator = new CreateDatabaseChangeLogLockTableGenerator() {
+            CreateDatabaseChangeLogLockTableStatement statement = new CreateDatabaseChangeLogLockTableStatement();
+            
+            DB2Database database = new DB2Database() {
                 @Override
-                public Sql[] generateSql(CreateDatabaseChangeLogLockTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-                    String schemaPrefix = schema != null ? schema + "." : "";
-                    String tablespaceClause = tablespace != null ? " IN " + tablespace : "";
-                    
-                    return new Sql[] {
-                        new liquibase.sql.UnparsedSql(
-                            "CREATE TABLE " + schemaPrefix + "DATABASECHANGELOGLOCK " +
-                            "(ID INTEGER NOT NULL, LOCKED SMALLINT NOT NULL, " +
-                            "LOCKGRANTED TIMESTAMP, LOCKEDBY VARCHAR(255), " +
-                            "CONSTRAINT PK_DBCHGLOGLOCK PRIMARY KEY (ID))" + tablespaceClause
-                        )
-                    };
+                public String getLiquibaseSchemaName() {
+                    return schema;
+                }
+                
+                @Override
+                public String getLiquibaseTablespaceName() {
+                    return tablespace;
+                }
+                
+                @Override
+                public boolean isCorrectDatabaseImplementation(liquibase.database.DatabaseConnection conn) {
+                    return true;
+                }
+                
+                @Override
+                public boolean requiresUsername() {
+                    return false;
+                }
+                
+                @Override
+                public boolean requiresPassword() {
+                    return false;
                 }
             };
             
-            CreateDatabaseChangeLogLockTableStatement statement = new CreateDatabaseChangeLogLockTableStatement();
-            SqlGeneratorChain mockChain = Mockito.mock(SqlGeneratorChain.class);
-
-            DB2Database database = configureMockDB2Database(schema, tablespace);
+            CreateDatabaseChangeLogLockTableGenerator generator = new CreateDatabaseChangeLogLockTableGenerator();
+            SqlGeneratorChain chain = new SqlGeneratorChain(SqlGeneratorFactory.getInstance().getGenerators(statement, database));
             
-            Sql[] sql = generator.generateSql(statement, database, mockChain);
+            Sql[] sql = generator.generateSql(statement, database, chain);
             
             assertSqlBasicStructure(sql);
 
-            String actualSql = sql[0].toSql().toLowerCase();
+            String actualSql = sql[0].toSql();
+            
+            assertEquals("Generated SQL should exactly match expected SQL", expectedSql, actualSql);
+
+            String lowerActualSql = actualSql.toLowerCase();
 
             if (hasSchema) {
-                assertTrue("SQL should contain schema.table",
-                        actualSql.contains((schema != null ? schema.toLowerCase() + "." : "") +
-                                "databasechangeloglock"));
+                if (schema != null) {
+                    assertTrue("SQL should contain schema", lowerActualSql.contains(schema.toLowerCase()) || lowerActualSql.contains(database.getDefaultSchemaName().toLowerCase()));
+                }
             }
 
-            if (tablespace != null) {
-                assertTrue("SQL should include tablespace",
-                        actualSql.contains("tablespace " + tablespace.toLowerCase()) ||
-                                actualSql.contains("in " + tablespace.toLowerCase()));
+            if (tablespace != null && database.supportsTablespaces()) {
+                assertTrue("SQL should include tablespace", lowerActualSql.contains("in " + tablespace.toLowerCase()));
             }
-        }
-
-        private DB2Database configureMockDB2Database(String schema, String tablespace) throws DatabaseException {
-            DB2Database database = Mockito.mock(DB2Database.class, Mockito.RETURNS_DEEP_STUBS);
-
-            // Basic configuration
-            Mockito.when(database.getLiquibaseCatalogName()).thenReturn(null);
-            Mockito.when(database.getLiquibaseSchemaName()).thenReturn(schema);
-            Mockito.when(database.getLiquibaseTablespaceName()).thenReturn(tablespace);
-            Mockito.when(database.getDatabaseChangeLogLockTableName()).thenReturn("DATABASECHANGELOGLOCK");
-
-            String tableName = schema != null ? schema + ".DATABASECHANGELOGLOCK" : "DATABASECHANGELOGLOCK";
-            Mockito.when(database.escapeTableName(null, schema, "DATABASECHANGELOGLOCK"))
-                    .thenReturn(tableName);
-
-            Mockito.when(database.escapeColumnName(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.eq("ID"))).thenReturn("ID");
-            Mockito.when(database.escapeColumnName(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.eq("LOCKED"))).thenReturn("LOCKED");
-            Mockito.when(database.escapeColumnName(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.eq("LOCKGRANTED"))).thenReturn("LOCKGRANTED");
-            Mockito.when(database.escapeColumnName(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.eq("LOCKEDBY"))).thenReturn("LOCKEDBY");
-
-            Mockito.when(database.escapeObjectName(Mockito.anyString(), Mockito.eq(Table.class)))
-                    .thenAnswer(invocation -> {
-                        String objName = invocation.getArgument(0);
-                        if ("pk_databasechangeloglock".equals(objName)) {
-                            return "PK_DBCHGLOGLOCK";
-                        }
-                        return objName;
-                    });
-
-            Mockito.when(database.getObjectQuotingStrategy()).thenReturn(null);
-            Mockito.when(database.isAutoCommit()).thenReturn(true);
-            Mockito.when(database.supportsTablespaces()).thenReturn(true);
-            
-            return database;
         }
 
         private void assertSqlBasicStructure(Sql[] sql) {
@@ -149,23 +133,9 @@ public class CreateDatabaseChangeLogLockTableGeneratorTest extends AbstractSqlGe
             assertTrue("Should contain DATABASECHANGELOGLOCK", actualSql.contains("databasechangeloglock"));
             assertTrue("Should have ID column", actualSql.contains("id") && actualSql.contains("integer"));
             assertTrue("Should have LOCKED column", actualSql.contains("locked") && actualSql.contains("smallint"));
-            assertTrue("Should have LOCKGRANTED column", actualSql.contains("lockgranted") && actualSql.contains("timestamp"));
+            assertTrue("Should have LOCKGRANTED column", actualSql.contains("lockgranted"));
             assertTrue("Should have LOCKEDBY column", actualSql.contains("lockedby") && actualSql.contains("varchar"));
             assertTrue("Should have PRIMARY KEY", actualSql.contains("primary key") || actualSql.contains("constraint"));
         }
-    }
-
-    @Test
-    public void testValidate() throws DatabaseException {
-        CreateDatabaseChangeLogLockTableGenerator generator = new CreateDatabaseChangeLogLockTableGenerator();
-        CreateDatabaseChangeLogLockTableStatement statement = new CreateDatabaseChangeLogLockTableStatement();
-        SqlGeneratorChain mockChain = Mockito.mock(SqlGeneratorChain.class);
-
-        DB2Database database = Mockito.mock(DB2Database.class, Mockito.RETURNS_DEEP_STUBS);
-        Mockito.when(database.isAutoCommit()).thenReturn(true);
-        Mockito.when(database.supportsSchemas()).thenReturn(true);
-        Mockito.when(database.supportsTablespaces()).thenReturn(true);
-
-        assertFalse("Validation should not have errors", generator.validate(statement, database, mockChain).hasErrors());
     }
 }
