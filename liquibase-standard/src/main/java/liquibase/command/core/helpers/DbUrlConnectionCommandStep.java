@@ -173,7 +173,7 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
                 Connection underlyingConnection = connection.getUnderlyingConnection();
                 String schema = underlyingConnection == null ? null : underlyingConnection.getSchema();
                 String catalog = underlyingConnection == null ? null : underlyingConnection.getCatalog();
-                Scope.getCurrentScope().getLicenseTrackList().getLicenseTracks().add(new LicenseTrack(removeQueryParameters(JdbcConnection.sanitizeUrl(url)), schema, catalog));
+                Scope.getCurrentScope().getLicenseTrackList().getLicenseTracks().add(new LicenseTrack(removeQueryParameters(JdbcConnection.sanitizeUrl(url, true)), schema, catalog));
             } catch (SQLException | URISyntaxException e) {
                 Scope.getCurrentScope().getLog(getClass()).severe("Failed to handle license tracking event", e);
             }
