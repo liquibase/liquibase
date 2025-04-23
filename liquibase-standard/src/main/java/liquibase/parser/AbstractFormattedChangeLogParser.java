@@ -505,7 +505,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                                     String.format("Unexpected formatting at line %d. Formatted %s changelogs do not allow comment lines outside of changesets. Learn all the options at %s", count, getSequenceName(), getDocumentationLink());
                             throw new ChangeLogParseException("\n" + message);
                         } else {
-                            handleAdditionalLines(changeLog, resourceAccessor, line);
+                            handleAdditionalLines(changeLog, resourceAccessor, line, currentSequence);
                         }
                     }
                 }
@@ -761,7 +761,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         currentRollbackSequence.setLength(0);
     }
 
-    protected boolean handleAdditionalLines(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, String line)
+    protected boolean handleAdditionalLines(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, String line, StringBuilder currentSequence)
         throws ChangeLogParseException {
         return false;
     }
