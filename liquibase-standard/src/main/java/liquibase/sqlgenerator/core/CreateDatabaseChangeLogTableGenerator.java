@@ -27,9 +27,27 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
 
     @Override
     public Sql[] generateSql(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        CreateTableStatement createTableStatement = getCreateTableStatement(database);
+
+        // use LEGACY quoting since we're dealing with system objects
+        ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
+        try {
+            return SqlGeneratorFactory.getInstance().generateSql(createTableStatement, database);
+        } finally {
+            database.setObjectQuotingStrategy(currentStrategy);
+        }
+    }
+
+    /**
+     * This method should stay with at least protected access level to make possible to override its behavior in
+     * Liquibase Pro and/or extensions if any DBCL table structural changes needed.
+     * @return Database specific DBCL CreateTableStatement
+     * */
+    protected CreateTableStatement getCreateTableStatement(Database database) {
         String charTypeName = getCharTypeName(database);
         String dateTimeTypeString = getDateTimeTypeString(database);
-        CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+        return new CreateTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                 .setTablespace(database.getLiquibaseTablespaceName())
                 .addColumn("ID", DataTypeFactory.getInstance().fromDescription(charTypeName + "(" + getIdColumnSize() + ")", database), null, null, new NotNullConstraint())
                 .addColumn("AUTHOR", DataTypeFactory.getInstance().fromDescription(charTypeName + "(" + getAuthorColumnSize() + ")", database), null, null, new NotNullConstraint())
@@ -45,15 +63,6 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
                 .addColumn("CONTEXTS", DataTypeFactory.getInstance().fromDescription(charTypeName + "("+getContextsSize()+")", database))
                 .addColumn("LABELS", DataTypeFactory.getInstance().fromDescription(charTypeName + "("+getLabelsSize()+")", database))
                 .addColumn("DEPLOYMENT_ID", DataTypeFactory.getInstance().fromDescription(charTypeName+"(10)", database));
-
-        // use LEGACY quoting since we're dealing with system objects
-        ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
-        database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
-        try {
-            return SqlGeneratorFactory.getInstance().generateSql(createTableStatement, database);
-        } finally {
-            database.setObjectQuotingStrategy(currentStrategy);
-        }
     }
 
     protected String getCharTypeName(Database database) {

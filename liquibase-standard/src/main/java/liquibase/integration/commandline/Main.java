@@ -1594,7 +1594,7 @@ public class Main {
                     liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression
                             (getLabelFilter()), getOutputWriter());
                 } else if (COMMANDS.UPDATE_SQL.equalsIgnoreCase(command)) {
-                    liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()), getOutputWriter());
+                    liquibase.updateSql(new Contexts(contexts), new LabelExpression(getLabelFilter()), getOutputWriter());
                 } else if (COMMANDS.ROLLBACK_TO_DATE.equalsIgnoreCase(command)) {
                     if (getCommandArgument() == null) {
                         throw new CommandLineParsingException(

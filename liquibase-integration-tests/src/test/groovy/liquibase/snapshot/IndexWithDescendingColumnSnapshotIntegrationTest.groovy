@@ -12,7 +12,6 @@ import liquibase.command.core.SnapshotCommandStep
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.command.core.helpers.PreCompareCommandStep
 import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep
-import liquibase.command.util.CommandUtil
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
 import liquibase.database.jvm.JdbcConnection
@@ -32,6 +31,7 @@ import liquibase.structure.DatabaseObjectCollection
 import liquibase.structure.core.Column
 import liquibase.structure.core.Index
 import liquibase.util.StringUtil
+import org.apache.commons.io.FileUtils
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -222,12 +222,6 @@ class IndexWithDescendingColumnSnapshotIntegrationTest extends Specification {
         createIndexChange.getColumns().get(2).getDescending()
 
         cleanup:
-        File f = new File(changelogFile)
-        if (f.exists()) {
-            f.delete()
-        }
-
-        CommandUtil.runDropAll(mssqlDb)
-        mssqlDb.getConnection().close()
+        FileUtils.deleteQuietly(new File(changelogFile))
     }
 }

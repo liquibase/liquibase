@@ -19,7 +19,7 @@ public class CommandFactory implements SingletonObject {
     /**
      * A cache of all found command names and their corresponding command definition.
      */
-    private static final Map<String[], CommandDefinition> COMMAND_DEFINITIONS = new ConcurrentHashMap<>();
+    private static final Map<String, CommandDefinition> COMMAND_DEFINITIONS = new ConcurrentHashMap<>();
     /**
      * A cache of all found CommandStep classes and their corresponding override CommandStep.
      */
@@ -44,13 +44,14 @@ public class CommandFactory implements SingletonObject {
      * @throws IllegalArgumentException if the commandName is not known
      */
     public CommandDefinition getCommandDefinition(String... commandName) throws IllegalArgumentException{
-        CommandDefinition commandDefinition = COMMAND_DEFINITIONS.get(commandName);
+        String commandNameKey = StringUtil.join(commandName, " ");
+        CommandDefinition commandDefinition = COMMAND_DEFINITIONS.get(commandNameKey);
         if (commandDefinition == null) { //Check if we have already computed arguments, dependencies, pipeline and adjusted definition
             commandDefinition = new CommandDefinition(commandName);
             computePipelineForCommandDefinition(commandDefinition);
             consolidateCommandArgumentsForCommand(commandDefinition);
             adjustCommandDefinitionForSteps(commandDefinition);
-            COMMAND_DEFINITIONS.put(commandName, commandDefinition);
+            COMMAND_DEFINITIONS.put(commandNameKey, commandDefinition);
         }
         return commandDefinition;
     }
@@ -148,9 +149,12 @@ public class CommandFactory implements SingletonObject {
     }
 
     private void adjustCommandDefinitionForSteps(CommandDefinition commandDefinition) {
+        boolean allInternal = true;
         for (CommandStep step : commandDefinition.getPipeline()) {
             step.adjustCommandDefinition(commandDefinition);
+            allInternal = step.isInternal() && allInternal;
         }
+        commandDefinition.setInternal(allInternal);
     }
 
     /**
@@ -202,6 +206,10 @@ public class CommandFactory implements SingletonObject {
             throw new IllegalArgumentException("Argument '" + definition.getName() + "' for command '" + commandNameKey + "' has both a default value and the isRequired flag set to true. Arguments with default values cannot be marked as required.");
         }
         this.commandArgumentDefinitions.get(commandNameKey).add(definition);
+        CommandDefinition commandDefinition = COMMAND_DEFINITIONS.get(commandNameKey);
+        if (commandDefinition != null){
+            commandDefinition.add(definition);
+        }
     }
 
     /**
@@ -209,7 +217,9 @@ public class CommandFactory implements SingletonObject {
      * <bNOTE:</b> package-protected method used primarily for testing and may be removed or modified in the future.
      */
     protected void unregister(String[] commandName) {
-        commandArgumentDefinitions.remove(StringUtil.join(commandName, " "));
+        String commandNameKey = StringUtil.join(commandName, " ");
+        commandArgumentDefinitions.remove(commandNameKey);
+        COMMAND_DEFINITIONS.remove(commandNameKey);
     }
 
     /**

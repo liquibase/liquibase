@@ -1197,6 +1197,7 @@
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attribute name="tag" type="xsd:string" use="required"/>
+            <xsd:attribute name="keepTagOnRollback" type="booleanExp" />
             <xsd:anyAttribute namespace="##other"  processContents="lax"/>
         </xsd:complexType>
     </xsd:element>
