@@ -29,6 +29,8 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
     private final String FIRST_VALID_TAG_REGEX = "^\\s*<databaseChangeLog\\s?.*";
     private final Pattern FIRST_VALID_TAG_PATTERN = Pattern.compile(FIRST_VALID_TAG_REGEX, Pattern.CASE_INSENSITIVE);
+    private final String IGNORE_FIRST_LINE_COMMENTS_AND_XML_TAG_REGEX = "^\\s*(<!--|<!|<!DOCTYPE|]>|\\?xml).*|^\\s*$";
+    private final Pattern IGNORE_FIRST_LINE_COMMENTS_AND_XML_TAG_PATTERN = Pattern.compile(IGNORE_FIRST_LINE_COMMENTS_AND_XML_TAG_REGEX, Pattern.CASE_INSENSITIVE);
 
     static {
         LIQUIBASE_SCHEMA_VERSION = computeSchemaVersion(LiquibaseUtil.getBuildVersion());
@@ -207,8 +209,8 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
         BufferedReader reader = null;
         try {
                 InputStream fileStream = openChangeLogFile(changeLogFile, resourceAccessor);
-                if (fileStream == null) {
-                    return false;
+                if(fileStream.read() == -1) {
+                    throw new ChangeLogParseException("Unable to parse empty file");
                 }
                 reader = new BufferedReader(StreamUtil.readStreamWithReader(fileStream, null));
 
@@ -216,9 +218,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
             boolean keepSearchingFirstValidTag = true;
             while (keepSearchingFirstValidTag) {
-                if(firstLine!= null && (firstLine.trim().isEmpty() || firstLine.trim().startsWith("<!--") || firstLine.trim().startsWith("<!")
-                        || firstLine.trim().startsWith("<!DOCTYPE")
-                        || firstLine.trim().startsWith("]>") || firstLine.trim().startsWith("<?xml")) && reader.ready()) {
+                if(IGNORE_FIRST_LINE_COMMENTS_AND_XML_TAG_PATTERN.matcher(firstLine).matches() && reader.ready()) {
                     firstLine = reader.readLine();
                 } else {
                     keepSearchingFirstValidTag = false;
