@@ -738,7 +738,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @parameter property="liquibase.licenseUtilityUrl"
      */
     @PropertyElement(key = "liquibase.licenseUtility.url")
-    protected Boolean licenseUtilityUrl;
+    protected String licenseUtilityUrl;
 
     /**
      * Specifies an identifier (e.g., team name, pipeline ID, or environment) to track and analyze Liquibase license
@@ -747,7 +747,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @parameter property="liquibase.licenseUtilityTrackingId"
      */
     @PropertyElement(key = "liquibase.licenseUtility.trackingId")
-    protected Boolean licenseUtilityTrackingId;
+    protected String licenseUtilityTrackingId;
 
     /**
      * Specifies the vault URL
