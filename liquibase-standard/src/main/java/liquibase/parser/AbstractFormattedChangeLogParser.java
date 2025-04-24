@@ -937,7 +937,11 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                 booleanMatch = Boolean.parseBoolean(matcher.group(1));
                 logMatch(description, String.valueOf(booleanMatch), getClass());
             } catch (Exception e) {
-                throw new ChangeLogParseException("Cannot parse " + changeSet + " " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
+                if (changeSet != null) {
+                    throw new ChangeLogParseException("Cannot parse " + changeSet + " " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
+                } else {
+                    throw new ChangeLogParseException("Cannot parse pattern " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
+                }
             }
         }
         return booleanMatch;
