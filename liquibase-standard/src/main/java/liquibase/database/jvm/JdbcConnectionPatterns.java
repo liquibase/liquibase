@@ -29,7 +29,7 @@ public class JdbcConnectionPatterns extends ConnectionPatterns {
     private static final String FILTER_CREDS_MYSQL_TO_OBFUSCATE = "(?i).+://(.*?)([:])(.*?)((?=@))";
     private static final String FILTER_CREDS_ORACLE_TO_OBFUSCATE = "(?i)jdbc:oracle:thin:(.*?)([/])(.*?)((?=@))";
 
-    private static final String FILTER_CREDS_ORACLE_TO_OBFUSCATE_EMPTY = "(?i)jdbc:oracle:thin:(.*?)([/])(.*?@)";
+    private static final String FILTER_CREDS_ORACLE_TO_OBFUSCATE_EMPTY = "(?i)jdbc:oracle:thin:(.*?)([/])(.*?)((?=@))";
     private static final String FILTER_CREDS_MYSQL_TO_OBFUSCATE_EMPTY = "(?i).+://(.*?)([:])(.*?@)";
     private static final String FILTER_CREDS_MARIADB_TO_OBFUSCATE_EMPTY = "(?i).+://(.*?)([:])(.*?@)";
 
