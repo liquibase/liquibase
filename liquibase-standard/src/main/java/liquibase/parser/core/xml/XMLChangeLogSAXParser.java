@@ -29,7 +29,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
     private final String FIRST_VALID_TAG_REGEX = "^\\s*<databaseChangeLog\\s?.*";
     private final Pattern FIRST_VALID_TAG_PATTERN = Pattern.compile(FIRST_VALID_TAG_REGEX, Pattern.CASE_INSENSITIVE);
-    private final String IGNORE_FIRST_LINE_COMMENTS_AND_XML_TAG_REGEX = "^\\s*(<!--|<!|<!DOCTYPE|]>|\\?xml).*|^\\s*$";
+    private final String IGNORE_FIRST_LINE_COMMENTS_AND_XML_TAG_REGEX = "^\\s*(<!--|<!|<!DOCTYPE|]>|<\\?xml).*|^\\s*$";
     private final Pattern IGNORE_FIRST_LINE_COMMENTS_AND_XML_TAG_PATTERN = Pattern.compile(IGNORE_FIRST_LINE_COMMENTS_AND_XML_TAG_REGEX, Pattern.CASE_INSENSITIVE);
 
     static {
@@ -209,10 +209,13 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
         BufferedReader reader = null;
         try {
                 InputStream fileStream = openChangeLogFile(changeLogFile, resourceAccessor);
-                if(fileStream.read() == -1) {
-                    throw new ChangeLogParseException("Unable to parse empty file");
+                if (fileStream == null) {
+                    return false;
                 }
                 reader = new BufferedReader(StreamUtil.readStreamWithReader(fileStream, null));
+                if(!reader.ready()) {
+                    throw new ChangeLogParseException("Unable to parse empty file");
+                }
 
                 String firstLine = reader.readLine();
 
