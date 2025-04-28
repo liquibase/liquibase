@@ -735,6 +735,21 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected Boolean licenseUtilityEnabled;
 
     /**
+     * @parameter property="liquibase.licenseUtilityUrl"
+     */
+    @PropertyElement(key = "liquibase.licenseUtility.url")
+    protected String licenseUtilityUrl;
+
+    /**
+     * Specifies an identifier (e.g., team name, pipeline ID, or environment) to track and analyze Liquibase license
+     * usage. If not provided, the hostname and user is used for identification.
+     *
+     * @parameter property="liquibase.licenseUtilityTrackingId"
+     */
+    @PropertyElement(key = "liquibase.licenseUtility.trackingId")
+    protected String licenseUtilityTrackingId;
+
+    /**
      * Specifies the vault URL
      *
      * @parameter property="liquibase.vault.addr"
@@ -928,6 +943,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 }
                 if (licenseUtilityEnabled != null) {
                     scopeValues.put(LicenseTrackingArgs.ENABLED.getKey(), licenseUtilityEnabled);
+                }
+                if (licenseUtilityUrl != null) {
+                    scopeValues.put(LicenseTrackingArgs.URL.getKey(), licenseUtilityUrl);
+                }
+                if (licenseUtilityTrackingId != null) {
+                    scopeValues.put(LicenseTrackingArgs.TRACKING_ID.getKey(), licenseUtilityTrackingId);
                 }
                 handleVaultProperties(scopeValues);
 
