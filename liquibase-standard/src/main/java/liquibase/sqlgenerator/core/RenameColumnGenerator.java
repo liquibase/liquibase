@@ -14,7 +14,6 @@ import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 
 public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStatement> {
-
     @Override
     public boolean supports(RenameColumnStatement statement, Database database) {
         if(database instanceof  SQLiteDatabase) {
@@ -51,7 +50,8 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
         	// do no escape the new column name. Otherwise it produce "exec sp_rename '[dbo].[person].[usernae]', '[username]'"
             sql = "exec sp_rename '" + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + "." + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + "', '" + statement.getNewColumnName() + "', 'COLUMN'";
         } else if (database instanceof MySQLDatabase) {
-            sql ="ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " CHANGE " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database);
+            // works for MariaDB too
+            sql= generateMysqlStatement((MySQLDatabase) database, statement);
         } else if (database instanceof SybaseDatabase) {
             sql = "exec sp_rename '" + statement.getTableName() + "." + statement.getOldColumnName() + "', '" + statement.getNewColumnName() + "'";
         } else if ((database instanceof HsqlDatabase) || (database instanceof H2Database)) {
@@ -78,6 +78,24 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
         return new Sql[] {
                 new UnparsedSql(sql, getAffectedOldColumn(statement), getAffectedNewColumn(statement))
         };
+    }
+
+    private String generateMysqlStatement(MySQLDatabase database, RenameColumnStatement statement) {
+        String sql;
+        try {
+            boolean isMariaDB = database instanceof MariaDBDatabase;
+            boolean isRenameKeywordSupported = isMariaDB
+                    // https://mariadb.com/kb/en/alter-table/#rename-column
+                    ? (database.getDatabaseMajorVersion() == 10 && database.getDatabaseMinorVersion() >= 5) // RENAME
+                    || database.getDatabaseMajorVersion() >= 11
+                    : database.getDatabaseMajorVersion() >= 8; // https://dev.mysql.com/worklog/task/?id=10761 RENAME COLUMN introduced in v8
+            sql = isRenameKeywordSupported
+                    ? "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " RENAME COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " TO " + statement.getNewColumnName()
+                    : "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " CHANGE " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database);
+        } catch (DatabaseException ignored) {
+            sql ="ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " CHANGE " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database);
+        }
+        return sql;
     }
 
     protected Column getAffectedOldColumn(RenameColumnStatement statement) {
