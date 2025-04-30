@@ -81,4 +81,9 @@ public class InitCopyCommandStep extends AbstractHelperCommandStep {
         }
         return copier;
     }
+
+    @Override
+    public boolean isInternal() {
+        return false;
+    }
 }
