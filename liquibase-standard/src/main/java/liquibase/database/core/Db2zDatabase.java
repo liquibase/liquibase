@@ -7,6 +7,8 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.util.StringUtil;
 
+import java.util.Locale;
+
 public class Db2zDatabase extends AbstractDb2Database {
 
     @Override
@@ -35,4 +37,15 @@ public class Db2zDatabase extends AbstractDb2Database {
     protected String getDefaultDatabaseProductName() {
         return "DB2/z";
     }
+
+    @Override
+    public String getDatabaseChangeLogTableName() {
+        return super.getDatabaseChangeLogTableName().toUpperCase(Locale.US);
+    }
+
+    @Override
+    public String getDatabaseChangeLogLockTableName() {
+        return super.getDatabaseChangeLogLockTableName().toUpperCase(Locale.US);
+    }
+
 }
