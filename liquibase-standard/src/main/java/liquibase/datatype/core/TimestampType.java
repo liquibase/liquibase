@@ -126,19 +126,17 @@ public class TimestampType extends DateTimeType {
             type = new DatabaseDataType("TIMESTAMP");
         }
 
-        if (originalDefinition.startsWith("java.sql.Types.TIMESTAMP_WITH_TIMEZONE")
+        if (originalDefinition.toUpperCase().startsWith("JAVA.SQL.TYPES.TIMESTAMP_WITH_TIMEZONE")
             && (database instanceof PostgresDatabase
             || database instanceof OracleDatabase
             || database instanceof H2Database
             || database instanceof HsqlDatabase
             || database instanceof SybaseASADatabase)) {
 
-            if (database instanceof PostgresDatabase
-            || database instanceof H2Database
-            || database instanceof SybaseASADatabase) {
-                type.addAdditionalInformation("WITH TIME ZONE");
-            } else {
+            if (database instanceof HsqlDatabase) {
                 type.addAdditionalInformation("WITH TIMEZONE");
+            } else {
+                type.addAdditionalInformation("WITH TIME ZONE");
             }
 
             return type;
