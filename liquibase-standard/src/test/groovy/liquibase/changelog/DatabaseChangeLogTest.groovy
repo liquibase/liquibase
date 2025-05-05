@@ -435,6 +435,88 @@ create view sql_view as select * from sql_table;'''
         bufferLog.getLogAsString(Level.WARNING) == ""
     }
 
+    def "start with classpath: and hidden"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "classpath:com/example/.hiddenfile": test1Xml,
+        ])
+
+        // TODO: Not use deprecated
+        BufferedLogService bufferLog = new BufferedLogService()
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+
+        Scope.child([
+                (Scope.Attr.logService.name())                                                     : bufferLog,
+                (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getKey())               : ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN,
+        ], new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                rootChangeLog.include("classpath:com/example/.hiddenfile", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+            }
+        })
+
+        def changeSets= rootChangeLog.changeSets
+
+        then:
+        changeSets.isEmpty() == true
+        bufferLog.getLogAsString(Level.WARNING) == ""
+    }
+
+    def "start with classpath: and cvs"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "classpath:com/example/cvs": test1Xml,
+        ])
+
+        // TODO: Not use deprecated
+        BufferedLogService bufferLog = new BufferedLogService()
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+
+        Scope.child([
+                (Scope.Attr.logService.name())                                                     : bufferLog,
+                (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getKey())               : ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN,
+        ], new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                rootChangeLog.include("classpath:com/example/cvs", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+            }
+        })
+
+        def changeSets= rootChangeLog.changeSets
+
+        then:
+        changeSets.isEmpty() == true
+        bufferLog.getLogAsString(Level.WARNING) == ""
+    }
+
+    def "start with classpath: and hidden filename and PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS is true"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "classpath:com/example/.hiddenfile": test1Xml,
+        ])
+
+        // TODO: Not use deprecated
+        BufferedLogService bufferLog = new BufferedLogService()
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+
+        Scope.child([
+                (Scope.Attr.logService.name())                                                     : bufferLog,
+                (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getKey())               : ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN,
+                (GlobalConfiguration.PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS.getKey())       : true,
+        ], new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                rootChangeLog.include("classpath:com/example/.hiddenfile", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+            }
+        })
+
+        def changeSets= rootChangeLog.changeSets
+
+        then:
+        changeSets.isEmpty() == true
+        bufferLog.getLogAsString(Level.WARNING).contains("included file classpath:com/example/.hiddenfile is not a recognized file type")
+    }
+
     def "include ignore if version control system files"() {
         when:
         def resourceAccessor = new MockResourceAccessor([
