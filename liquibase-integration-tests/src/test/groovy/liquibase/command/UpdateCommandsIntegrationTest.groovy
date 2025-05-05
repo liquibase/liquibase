@@ -143,6 +143,7 @@ class UpdateCommandsIntegrationTest extends Specification {
         outputFileContent.containsIgnoreCase("INSERT INTO public.nullPlaceholderTable (colKey, col2) VALUES (5, 'there');")
 
         cleanup:
+        outputStream.close()
         outputFile.delete()
     }
 }
