@@ -62,7 +62,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private static final Pattern SLASH_PATTERN = Pattern.compile("^/");
     private static final Pattern DOUBLE_BACK_SLASH_PATTERN = Pattern.compile("\\\\");
     private static final Pattern NO_LETTER_PATTERN = Pattern.compile("^[a-zA-Z]:");
-    private static final Pattern HIDDEN_FILENAME_PATTERN = Pattern.compile("\\.\\w+$");
+    private static final Pattern HIDDEN_FILENAME_PATTERN = Pattern.compile("^\\.\\w+$");
     private static final String CLASSPATH_PROTOCOL = "classpath:";
     public static final String SEEN_CHANGELOGS_PATHS_SCOPE_KEY = "SEEN_CHANGELOG_PATHS";
     public static final String FILE = "file";
