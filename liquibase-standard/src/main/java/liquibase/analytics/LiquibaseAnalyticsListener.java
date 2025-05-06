@@ -49,28 +49,20 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
 
     @Override
     public int getPriority() {
-        boolean analyticsEnabled = false;
-        try {
-            analyticsEnabled = isEnabled();
-        } catch (Exception e) {
-            Scope.getCurrentScope().getLog(AnalyticsListener.class).log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Failed to determine if analytics is enabled", e);
-        }
-        if (analyticsEnabled) {
-            return PRIORITY_SPECIALIZED;
-        } else {
-            return PRIORITY_NOT_APPLICABLE;
-        }
+        return PRIORITY_SPECIALIZED;
     }
 
     @Override
     public void handleEvent(Event event) throws Exception {
-        addSendEventsOnShutdownHook();
-        cachedEvents.add(event);
-        Integer maxCacheSize = Scope.getCurrentScope().get(Scope.Attr.maxAnalyticsCacheSize, getDefaultMaxAnalyticsCacheSize(event));
-        if (cachedEvents.size() >= maxCacheSize) {
-            flush();
-        } else {
-            Scope.getCurrentScope().getLog(getClass()).log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Caching analytics event to send later. Cache contains " + cachedEvents.size() + " event(s).", null);
+        if (isEnabled()) {
+            addSendEventsOnShutdownHook();
+            cachedEvents.add(event);
+            Integer maxCacheSize = Scope.getCurrentScope().get(Scope.Attr.maxAnalyticsCacheSize, getDefaultMaxAnalyticsCacheSize(event));
+            if (cachedEvents.size() >= maxCacheSize) {
+                flush();
+            } else {
+                Scope.getCurrentScope().getLog(getClass()).log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Caching analytics event to send later. Cache contains " + cachedEvents.size() + " event(s).", null);
+            }
         }
     }
 
