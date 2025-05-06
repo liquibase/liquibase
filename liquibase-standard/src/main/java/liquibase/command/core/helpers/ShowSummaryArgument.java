@@ -14,7 +14,7 @@ import java.util.List;
  * See {@link liquibase.util.ShowSummaryUtil} for implementation.
  */
 public class ShowSummaryArgument extends AbstractCommandStep {
-    protected static final String[] COMMAND_NAME = {"showSummary"};
+    public static final String[] COMMAND_NAME = {"showSummary"};
 
     public static final CommandArgumentDefinition<UpdateSummaryEnum> SHOW_SUMMARY;
     public static final CommandArgumentDefinition<UpdateSummaryOutputEnum> SHOW_SUMMARY_OUTPUT;
