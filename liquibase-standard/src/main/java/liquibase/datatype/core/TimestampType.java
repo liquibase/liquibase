@@ -163,6 +163,8 @@ public class TimestampType extends DateTimeType {
             return type;
         }
 
+
+
         if (getAdditionalInformation() != null
                 && (database instanceof PostgresDatabase
                 || database instanceof OracleDatabase)
