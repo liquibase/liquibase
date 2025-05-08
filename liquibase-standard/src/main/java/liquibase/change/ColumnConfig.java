@@ -36,6 +36,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     private Number valueNumeric;
     private Date valueDate;
     private Boolean valueBoolean;
+    private Integer valueBit;
     private String valueBlobFile;
     private String valueClobFile;
     private String encoding;
@@ -344,6 +345,23 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
     public ColumnConfig setValueBoolean(Boolean valueBoolean) {
         this.valueBoolean = valueBoolean;
+
+        return this;
+    }
+
+    public ColumnConfig setValueBit(Integer valueBit) {
+        if (valueBit == null) {
+            this.valueBit = null;
+        } else {
+            if (1 == valueBit) {
+                this.valueBit = 1;
+            } else if (0 == valueBit) {
+                this.valueBit = 0;
+            } else {
+                this.valueComputed = new DatabaseFunction(String.valueOf(valueBit));
+            }
+
+        }
 
         return this;
     }

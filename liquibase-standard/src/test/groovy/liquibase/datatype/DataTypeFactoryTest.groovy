@@ -43,8 +43,8 @@ class DataTypeFactoryTest extends Specification {
         "[binary]"                                     | new MSSQLDatabase()    | "binary(1)"                                    | BlobType      | false
         "binary(8000)"                                 | new MSSQLDatabase()    | "binary(8000)"                                 | BlobType      | false
         "[binary](8000)"                               | new MSSQLDatabase()    | "binary(8000)"                                 | BlobType      | false
-        "bit"                                          | new MSSQLDatabase()    | "bit"                                          | BooleanType   | false
-        "[bit]"                                        | new MSSQLDatabase()    | "bit"                                          | BooleanType   | false
+        "bit"                                          | new MSSQLDatabase()    | "bit"                                          | BitType       | false
+        "[bit]"                                        | new MSSQLDatabase()    | "bit"                                          | BitType       | false
         "blob"                                         | new MSSQLDatabase()    | "varbinary(MAX)"                               | BlobType      | false
         "boolean"                                      | new MSSQLDatabase()    | "bit"                                          | BooleanType   | false
         "char"                                         | new MSSQLDatabase()    | "char(1)"                                      | CharType      | false
