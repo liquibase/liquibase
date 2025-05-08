@@ -422,6 +422,8 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             } else {
                                 valueConfig.setValue(value);
                             }
+                        } else if(columnConfig.getTypeEnum() == LOAD_DATA_TYPE.BIT) {
+                            valueConfig.setValueBit(Integer.valueOf(value));
                         } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.OTHER.toString())) {
                             valueConfig.setType(columnConfig.getType());
                             if (StringUtil.equalsWordNull(value)) {
@@ -933,7 +935,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
 
     @SuppressWarnings("HardCodedStringLiteral")
     public enum LOAD_DATA_TYPE {
-        BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE, BLOB, CLOB, SKIP, UUID, OTHER, UNKNOWN
+        BIT, BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE, BLOB, CLOB, SKIP, UUID, OTHER, UNKNOWN
     }
 
     protected static class LoadDataRowConfig {
