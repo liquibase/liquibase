@@ -133,14 +133,19 @@ public class TimestampType extends DateTimeType {
             || database instanceof HsqlDatabase
             || database instanceof SybaseASADatabase)) {
 
-            if (database instanceof HsqlDatabase) {
-                type.addAdditionalInformation("WITH TIMEZONE");
-            } else {
+            if (database instanceof PostgresDatabase
+                    || database instanceof H2Database
+                    || database instanceof SybaseASADatabase
+                    || database instanceof OracleDatabase) {
                 type.addAdditionalInformation("WITH TIME ZONE");
+            } else {
+                type.addAdditionalInformation("WITH TIMEZONE");
             }
 
             return type;
         }
+
+
 
         if (getAdditionalInformation() != null
                 && (database instanceof PostgresDatabase
