@@ -1,4 +1,10 @@
 name: Release Published
+
+permissions:
+  contents: write
+  packages: write
+  actions: read
+
 on:
   release:
     types: [published]
@@ -227,10 +233,6 @@ jobs:
     name: Upload Javadocs
     needs: [setup, manual_trigger_deployment]
     runs-on: ubuntu-22.04
-    # These permissions are needed to interact with GitHub's OIDC Token endpoint.
-    permissions:
-      id-token: write
-      contents: read
     steps:
       - name: Download release javadocs
         uses: robinraju/release-downloader@v1.11
@@ -264,9 +266,6 @@ jobs:
     name: Publish artifacts to Github Packages
     runs-on: ubuntu-22.04
     needs: [setup, manual_trigger_deployment]
-    permissions:
-      contents: read
-      packages: write
 
     steps:
       - uses: actions/checkout@v4
@@ -312,7 +311,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: "${{ needs.setup.outputs.ref_branch }}"
-          token: ${{ secrets.BOT_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           # Relative path under $GITHUB_WORKSPACE to place the repository
           path: liquibase-pro-repo
           repository: "liquibase/liquibase-pro"
@@ -404,7 +403,7 @@ jobs:
         id: docker_dispatch
         with:
           workflow: create-release.yml
-          token: ${{ secrets.BOT_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           inputs: '{ "liquibaseVersion": "${{ needs.setup.outputs.version }}", "dryRun": "${{ inputs.dry_run || false }}" }'
           ref: main
           repo: liquibase/docker
@@ -427,7 +426,7 @@ jobs:
         id: docker_dispatch
         with:
           workflow: build-liquibase-minimal.yml
-          token: ${{ secrets.BOT_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           inputs: '{ "liquibaseVersion": "${{ needs.setup.outputs.version }}" }'
           ref: master
           repo: liquibase/liquibase-infrastructure
@@ -443,7 +442,7 @@ jobs:
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           repository: liquibase/liquibase-pro
           event-type: oss-released-tag
 
@@ -489,7 +488,7 @@ jobs:
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           repository: liquibase/liquibase-docs
           event-type: oss-released-version
           client-payload: '{"latest_version": "${{ steps.get_latest_oss_version.outputs.latest_version }}", "previous_version": "${{ steps.get_latest_oss_version.outputs.previous_version }}"}'
@@ -498,7 +497,7 @@ jobs:
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           repository: liquibase/liquibase-aws-license-service
           event-type: oss-released-version
 
@@ -510,15 +509,12 @@ jobs:
     strategy:
       matrix:
         repo: ["liquibase/liquibase", "liquibase/liquibase-pro"]
-    permissions:
-      contents: read
-      packages: write
 
     steps:
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           repository: liquibase/build-logic
           event-type: oss-released-version
           client-payload: '{"latest_version": "${{ needs.update-docs-oss-pro-version.outputs.latest_version }}", "repo_name": "${{ matrix.repo }}", "branch_name": "${{ github.ref }}" }'

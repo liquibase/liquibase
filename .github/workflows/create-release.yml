@@ -1,4 +1,11 @@
 name: Attach Artifacts To Draft Release
+
+permissions:
+  contents: write
+  actions: read
+  packages: write
+  id-token: write
+
 on:
   workflow_dispatch:
     inputs:
@@ -109,7 +116,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: liquibase/liquibase-checks
-          token: ${{ secrets.BOT_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - id: extract-version
         name: Extract version from pom.xml
@@ -131,7 +138,7 @@ jobs:
           repository: liquibase/liquibase-pro
           ref: "${{ needs.setup.outputs.branch }}"
           path: download/repo/liquibase-pro
-          token: ${{ secrets.BOT_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download liquibase-artifacts
         uses: dawidd6/action-download-artifact@v8
@@ -186,12 +193,12 @@ jobs:
               {
                 "id": "liquibase",
                 "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}"
+                "password": "${{ secrets.GITHUB_TOKEN }}"
               },
               {
                 "id": "liquibase-pro",
                 "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}"
+                "password": "${{ secrets.GITHUB_TOKEN }}"
               }
             ]
 
@@ -302,8 +309,6 @@ jobs:
           (cd download/repo/liquibase-pro && git push -f origin v${{ needs.setup.outputs.version }})
 
   build-installers:
-    permissions:
-      contents: write # for softprops/action-gh-release to create GitHub release
     needs: [setup, reversion]
     name: Build Installers
     runs-on: ubuntu-22.04
@@ -456,9 +461,6 @@ jobs:
     if: ${{ inputs.dry_run == false }}
     name: Deploy minimal artifacts to lbio s3 bucket
     needs: [setup, reversion]
-    permissions:
-      id-token: write
-      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Restore Minimal Completed Artifacts

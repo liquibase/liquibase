@@ -1,5 +1,11 @@
 name: Weekly Integration Tests
 
+permissions:
+  contents: read
+  id-token: write
+  packages: write
+  actions: read
+
 on:
   workflow_dispatch:
   schedule:
@@ -19,9 +25,6 @@ jobs:
     needs: deploy-ephemeral-cloud-infra
     timeout-minutes: 240
     runs-on: ubuntu-latest
-    permissions: 
-      contents: read
-      id-token: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -130,7 +133,7 @@ jobs:
         id: weekly-integration-tests
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           repository: liquibase/build-logic
           event-type: test-failure       
           client-payload: '{"repository": "${{ github.repository }}", "branch": "${{ github.ref }}", "sha": "${{ github.sha }}", "server_url": "${{ github.server_url }}", "run_id": "${{ github.run_id }}", "workflow_name": "${{ github.action }}"}'

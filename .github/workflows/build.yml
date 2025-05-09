@@ -1,5 +1,10 @@
 name: Build and Publish
 
+permissions:
+  contents: write
+  packages: write
+  actions: read
+
 # The concurrency check will cancel in-progress runs on non-master branches and pull requests on forked repositories regardless of the target branch.
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref == 'master' && 'master' || github.run_id }}
@@ -14,11 +19,9 @@ jobs:
   setup:
     name: Setup
     runs-on: ubuntu-22.04
-    permissions:
-      contents: write  # Ensures the workflow can read/write branches
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # authenticate GitHub Actions to the GitHub API.
-      github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }} # accessing a private repository
+      github-token: ${{ secrets.GITHUB_TOKEN }} # accessing a private repository
     outputs:
       branchExistsInBoth: ${{ steps.check-branch.outputs.branchExistsInBoth }}
       thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
@@ -76,7 +79,7 @@ jobs:
         id: check-branch
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const currentBranch = "${{ steps.get-branch-name.outputs.unmodifiedBranchName }}" 
             console.log(currentBranch)
@@ -103,9 +106,6 @@ jobs:
     name: Artifacts - Build & Package
     runs-on: macos-latest
     needs: [ setup ]
-    permissions:
-      contents: read
-      packages: write
     steps:
       - uses: actions/checkout@v4
         with:

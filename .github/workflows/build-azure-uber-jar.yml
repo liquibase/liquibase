@@ -1,5 +1,10 @@
 name: Build Azure Uber jar
 
+permissions:
+  contents: read
+  packages: write
+  actions: read
+
 on:
   workflow_call:
     inputs:
@@ -37,7 +42,7 @@ jobs:
         with:
           repository: liquibase/liquibase-pro
           ref: ${{ inputs.branch }}
-          token: ${{ secrets.BOT_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           path: liquibase-pro
 
       - name: Set up JDK 17

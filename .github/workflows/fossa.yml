@@ -1,6 +1,11 @@
 # Name of the GitHub Action workflow
 name: FOSSA License Compliance and Security Check
 
+# Permissions needed for this workflow
+permissions:
+  contents: read
+  id-token: write
+
 # Event triggers for the workflow
 on:
   workflow_dispatch:  # Run this action manually from the GitHub Actions tab
@@ -124,7 +129,7 @@ jobs:
       - name: Dispatch event to PRO repository
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           repository: liquibase/liquibase-pro
           event-type: FOSSA_Scan_PRO
           client-payload: '{"repository": "${{ github.repository }}", "branch": "${{ github.ref }}", "sha": "${{ github.sha }}", "server_url": "${{ github.server_url }}", "run_id": "${{ github.run_id }}"}'
