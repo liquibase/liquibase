@@ -13,7 +13,7 @@ import java.util.List;
 
 public class TagExistsCommandStep  extends AbstractCommandStep {
 
-    protected static final String[] COMMAND_NAME = {"tagExists"};
+    public static final String[] COMMAND_NAME = {"tagExists"};
 
     public static final CommandArgumentDefinition<String> TAG_ARG;
     public static final CommandResultDefinition<Boolean> TAG_EXISTS_RESULT;

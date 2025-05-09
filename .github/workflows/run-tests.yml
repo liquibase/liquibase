@@ -13,7 +13,7 @@ on:
     branches:
       - master
       - '*.*.*'
-      
+
   pull_request_target:
     types:
       - opened
@@ -22,7 +22,7 @@ on:
 
     paths-ignore:
       - '**.md'
-  
+
 jobs:
   authorize:
     #concurrent runs for pull requests from forked repositories will be canceled, while runs for pull requests from the master repository won't be affected.
@@ -69,10 +69,10 @@ jobs:
             branch_name=${GITHUB_HEAD_REF}
           else
             branch_name=${{ github.ref_name }}
-          fi 
+          fi
 
           modified_branch_name=`(echo $branch_name | tr '/_' '-')`
-          echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT          
+          echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT
           echo $modified_branch_name
 
   build_tests:
@@ -108,7 +108,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       OS_TYPE: ${{ matrix.os }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -116,7 +116,7 @@ jobs:
 
       - name: Built Code Cache
         if: ${{ matrix.java == 17}}
-        uses: actions/cache@v4.2.0
+        uses: actions/cache@v4.2.3
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -221,7 +221,7 @@ jobs:
           if [ -z "$TEST_COUNT" ] || [ "$TEST_COUNT" -eq 0 ]; then
             echo "No test result files found or test count is zero."
             exit 1
-          fi  
+          fi
           if [[ $TEST_COUNT -lt $((${{ vars.TEST_COUNT_JAVA_MACOS }} - (${{ vars.TEST_COUNT_JAVA_MACOS }} / 100))) ]] ; then
             echo "MacOS Unit Test count is below the acceptable range of - 1% of the expected count. Expected ${{ vars.TEST_COUNT_JAVA_MACOS }}. Actual $TEST_COUNT."
             exit 1
@@ -356,32 +356,10 @@ jobs:
       # getting from build results page. If we remove 0-SNAPSHOT then we will need settings.xml
 
       - name: Restore Built Code Cache
-        uses: actions/cache@v4.2.0
+        uses: actions/cache@v4.2.3
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
-
-      - name: Setup Python
-        if: ${{ matrix.testSystem == 'snowflake' }}
-        uses: actions/setup-python@v5.4.0
-        with:
-          python-version: '3.12.1'
-
-      - name: Start & Configure LocalStack
-        if: ${{ matrix.testSystem == 'snowflake' }}
-        env:
-          LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
-        run: |
-          pip install localstack awscli-local
-          DEBUG=1 DOCKER_FLAGS='-e SF_LOG=trace' IMAGE_NAME=localstack/snowflake localstack start -d
-          echo "Waiting for LocalStack startup..."
-          localstack wait -t 30
-          echo "Startup complete"
-          echo "TH_DB_ADMIN=test" >> $GITHUB_ENV  
-          echo "TH_DB_PASSWD=test" >> $GITHUB_ENV
-          echo "TH_DB=snowflake" >> $GITHUB_ENV
-          echo "TH_SNOW_URL=jdbc:snowflake://http://snowflake.localhost.localstack.cloud:4566" >> $GITHUB_ENV
 
       - name: Run Tests
         run: ./mvnw -B clean verify -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.snowflake.url=${{ env.TH_SNOW_URL }} -Dliquibase.sdk.testSystem.snowflake.username=${{ env.TH_DB_ADMIN }} -Dliquibase.sdk.testSystem.snowflake.password=${{ env.TH_DB_PASSWD }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false -Dsurefire.failIfNoTests=false
@@ -415,7 +393,7 @@ jobs:
             elif [[ ${{ matrix.testSystem }} == 'sqlite'  ]]; then
               EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_SQLITE }}
             elif [[ ${{ matrix.testSystem }} == 'firebird'  ]]; then
-              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_FIREBIRD }} 
+              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_FIREBIRD }}
             fi
 
             if [[ $TEST_COUNT -lt $(($EXPECTED_TEST_COUNT - ($EXPECTED_TEST_COUNT / 100))) ]] ; then
@@ -455,7 +433,7 @@ jobs:
 
   run-build-publish-file:
     needs: [ build_tests,integration-test ]
-    uses: liquibase/liquibase/.github/workflows/build.yml@master
+    uses: ./.github/workflows/build.yml
     secrets: inherit
 
 

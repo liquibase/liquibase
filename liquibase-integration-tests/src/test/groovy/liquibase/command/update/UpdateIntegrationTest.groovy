@@ -14,6 +14,7 @@ import liquibase.logging.core.BufferedLogService
 import liquibase.resource.SearchPathResourceAccessor
 import spock.lang.Shared
 import spock.lang.Specification
+
 import java.util.logging.Level
 
 @LiquibaseIntegrationTest
@@ -23,7 +24,6 @@ class UpdateIntegrationTest extends Specification {
 
     def "check execution parameters are correctly replaced" () {
         given:
-        CommandUtil.runDropAll(testDatabase)
         CommandUtil.runUpdate(testDatabase,"src/test/resources/changelogs/h2/update/execution-parameter.xml")
         String expectedDeploymentId = Scope.getCurrentScope().getDeploymentId();
         String sql = "select * from parameter_value_tests order by id"
@@ -49,15 +49,10 @@ ID | DEPLOYMENT_ID | CHANGELOG_FILE | CHANGESET_ID | CHANGESET_AUTHOR |
 6 | """ + expectedDeploymentId + """ | src/test/resources/changelogs/h2/update/execution-parameter/2.xml | 2.3 | jlyle | 
 
 """
-
-        cleanup:
-        testDatabase.getConnection().close()
-        CommandUtil.runDropAll(testDatabase)
     }
 
     def "check logical file path setting hierarchy" () {
         given:
-        CommandUtil.runDropAll(testDatabase)
         CommandUtil.runUpdate(testDatabase,"src/test/resources/changelogs/h2/update/master.xml")
 
         when:
@@ -76,9 +71,6 @@ ID | DEPLOYMENT_ID | CHANGELOG_FILE | CHANGESET_ID | CHANGESET_AUTHOR |
         assert outputBuffer.contains("src/test/resources/changelogs/h2/update/master.xml | jlyle            | 1")
         assert outputBuffer.contains("myLogical                                          | jlyle            | 2")
         assert outputBuffer.contains("changeSetLogical                                   | jlyle            | 3")
-
-        cleanup:
-        testDatabase.getConnection().close()
     }
 
     def "output change type only outputs single time to console" () {
@@ -109,9 +101,6 @@ ID | DEPLOYMENT_ID | CHANGELOG_FILE | CHANGESET_ID | CHANGESET_AUTHOR |
 
         //Ensure output exits in log at most once
         firstIndex == lastIndex
-
-        cleanup:
-        testDatabase.getConnection().close()
     }
 
 
