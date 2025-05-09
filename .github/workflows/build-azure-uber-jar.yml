@@ -45,8 +45,6 @@ jobs:
           app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
           private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-          repositories: liquibase-pro
-          permission-contents: read
           
       - name: Checkout liquibase-pro
         uses: actions/checkout@v4
