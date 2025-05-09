@@ -28,7 +28,7 @@ import java.util.List;
  * object used to instantiate it.
  */
 public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep implements CleanUpCommandStep {
-    protected static final String[] COMMAND_NAME = {"changelogCommandStep"};
+    public static final String[] COMMAND_NAME = {"changelogCommandStep"};
 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<DatabaseChangeLog> CHANGELOG_ARG;

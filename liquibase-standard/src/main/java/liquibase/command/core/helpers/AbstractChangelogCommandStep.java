@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 
 public abstract class AbstractChangelogCommandStep extends AbstractCommandStep {
 
-    protected static final String[] COMMAND_NAME = {"abstractChangelogCommandStep"};
+    public static final String[] COMMAND_NAME = {"abstractChangelogCommandStep"};
     public static final CommandArgumentDefinition<String> RUN_ON_CHANGE_TYPES_ARG;
     public static final CommandArgumentDefinition<String> REPLACE_IF_EXISTS_TYPES_ARG;
     public static final CommandArgumentDefinition<Boolean> SKIP_OBJECT_SORTING;

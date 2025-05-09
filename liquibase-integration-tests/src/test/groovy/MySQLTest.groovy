@@ -13,9 +13,8 @@ import spock.lang.Specification
 @LiquibaseIntegrationTest
 class MySQLTest extends Specification {
 
-
     @Shared
-    private DatabaseTestSystem postgres = Scope.getCurrentScope().getSingleton(TestSystemFactory).getTestSystem("mysql") as DatabaseTestSystem
+    private DatabaseTestSystem mysql = Scope.getCurrentScope().getSingleton(TestSystemFactory).getTestSystem("mysql") as DatabaseTestSystem
 
     def "verify foreignKeyExists constraint is not created again when precondition fails because it already exists"() {
         when:
@@ -25,9 +24,9 @@ class MySQLTest extends Specification {
         ]
         Scope.child(scopeSettings, {
             CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, postgres.getConnectionUrl())
-            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, postgres.getUsername())
-            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, postgres.getPassword())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, mysql.getConnectionUrl())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, mysql.getUsername())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, mysql.getPassword())
             commandScope.addArgumentValue(UpdateCountCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
             commandScope.execute()
         } as Scope.ScopedRunnerWithReturn<Void>)
