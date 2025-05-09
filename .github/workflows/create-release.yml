@@ -113,10 +113,21 @@ jobs:
     outputs:
       version: ${{ steps.extract-version.outputs.version }}
     steps:
+      
+      - name: Get GitHub App token
+        id: get-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: liquibase-checks
+          permission-contents: read
+          
       - uses: actions/checkout@v4
         with:
           repository: liquibase/liquibase-checks
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.get-token.outputs.token }}
 
       - id: extract-version
         name: Extract version from pom.xml
