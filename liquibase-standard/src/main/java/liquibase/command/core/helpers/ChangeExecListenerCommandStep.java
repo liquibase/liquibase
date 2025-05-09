@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class ChangeExecListenerCommandStep extends AbstractHelperCommandStep {
 
-    protected static final String[] COMMAND_NAME = {"changeExecListener"};
+    public static final String[] COMMAND_NAME = {"changeExecListener"};
 
     public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_CLASS_ARG;
     public static final CommandArgumentDefinition<String> CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG;

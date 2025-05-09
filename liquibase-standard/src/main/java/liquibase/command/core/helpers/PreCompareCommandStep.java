@@ -20,7 +20,7 @@ import java.util.List;
  */
 public class PreCompareCommandStep extends AbstractHelperCommandStep {
 
-    protected static final String[] COMMAND_NAME = {"preCompareCommandStep"};
+    public static final String[] COMMAND_NAME = {"preCompareCommandStep"};
     public static final CommandArgumentDefinition<String> EXCLUDE_OBJECTS_ARG;
     public static final CommandArgumentDefinition<String> INCLUDE_OBJECTS_ARG;
     public static final CommandArgumentDefinition<String> SCHEMAS_ARG;
