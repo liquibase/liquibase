@@ -1,5 +1,10 @@
 name: Build and Publish
 
+permissions:
+  contents: write
+  packages: write
+  actions: read
+
 # The concurrency check will cancel in-progress runs on non-master branches and pull requests on forked repositories regardless of the target branch.
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref == 'master' && 'master' || github.run_id }}
@@ -14,11 +19,9 @@ jobs:
   setup:
     name: Setup
     runs-on: ubuntu-22.04
-    permissions:
-      contents: write  # Ensures the workflow can read/write branches
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # authenticate GitHub Actions to the GitHub API.
-      github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }} # accessing a private repository
+      github-token: ${{ secrets.GITHUB_TOKEN }} # accessing a private repository
     outputs:
       branchExistsInBoth: ${{ steps.check-branch.outputs.branchExistsInBoth }}
       thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
@@ -76,7 +79,7 @@ jobs:
         id: check-branch
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const currentBranch = "${{ steps.get-branch-name.outputs.unmodifiedBranchName }}" 
             console.log(currentBranch)
@@ -103,9 +106,6 @@ jobs:
     name: Artifacts - Build & Package
     runs-on: macos-latest
     needs: [ setup ]
-    permissions:
-      contents: read
-      packages: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -169,12 +169,12 @@ jobs:
               {
                 "id": "liquibase-pro",
                 "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
+                "password": "${{ secrets.GITHUB_TOKEN }}"
               },
               {
                 "id": "liquibase",
                 "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
+                "password": "${{ secrets.GITHUB_TOKEN }}"
               }
             ]
 
@@ -339,7 +339,7 @@ jobs:
 
   run-functional-tests:
     needs: [ setup, build_publish_branch ]
-    uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@master
+    uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@DAT-20180
     secrets: inherit
     with:
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
@@ -347,7 +347,7 @@ jobs:
 
   run-tests-harness:
     needs: [ setup,build_publish_branch ]
-    uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@master
+    uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@DAT-20180
     secrets: inherit
     with:
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
@@ -355,7 +355,7 @@ jobs:
 
   run-pro-build-and-test:
     needs: [ setup, build_publish_branch ]
-    uses: liquibase/liquibase/.github/workflows/run-pro-build-and-test.yml@master
+    uses: liquibase/liquibase/.github/workflows/run-pro-build-and-test.yml@DAT-20180
     secrets: inherit
     with:
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}

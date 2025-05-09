@@ -6,7 +6,7 @@ on:
 
 jobs:
   fossa:
-    uses: liquibase/build-logic/.github/workflows/fossa_ai.yml@main
+    uses: liquibase/build-logic/.github/workflows/fossa_ai.yml@DAT-20127
     secrets: inherit
     with:
       latest_version: ${{ github.event.client_payload.latest_version }}

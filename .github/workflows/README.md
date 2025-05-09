@@ -43,7 +43,7 @@ You can check the `dry-run-release.yml` workflow, which is essentially composed 
 
   dry-run-create-release:
     needs: [ setup ]
-    uses: liquibase/liquibase/.github/workflows/create-release.yml@master
+    uses: liquibase/liquibase/.github/workflows/create-release.yml@DAT-20180
     with:
       version: "dry-run-${{ github.run_id }}"
       runId: ${{ needs.setup.outputs.dry_run_id }}
@@ -55,7 +55,7 @@ You can check the `dry-run-release.yml` workflow, which is essentially composed 
 
   dry-run-release-published:
     needs: [ setup, dry-run-create-release, dry-run-get-draft-release ]
-    uses: liquibase/liquibase/.github/workflows/release-published.yml@master
+    uses: liquibase/liquibase/.github/workflows/release-published.yml@DAT-20180
     with:
       tag: "vdry-run-${{ github.run_id }}"
       dry_run_release_id: ${{ needs.dry-run-get-draft-release.outputs.dry_run_release_id }}

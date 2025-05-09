@@ -1,5 +1,11 @@
 name: Weekly Integration Tests
 
+permissions:
+  contents: read
+  id-token: write
+  packages: write
+  actions: read
+
 on:
   workflow_dispatch:
   schedule:
@@ -8,7 +14,7 @@ on:
 jobs:
 
   deploy-ephemeral-cloud-infra:
-    uses: liquibase/build-logic/.github/workflows/ephemeral-cloud-infra.yml@main
+    uses: liquibase/build-logic/.github/workflows/ephemeral-cloud-infra.yml@DAT-20127
     secrets: inherit
     with:
         deploy: true
@@ -19,9 +25,6 @@ jobs:
     needs: deploy-ephemeral-cloud-infra
     timeout-minutes: 240
     runs-on: ubuntu-latest
-    permissions: 
-      contents: read
-      id-token: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -67,12 +70,12 @@ jobs:
               {
                 "id": "liquibase-pro",
                 "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
+                "password": "${{ secrets.GITHUB_TOKEN }}"
               },
               {
                 "id": "liquibase",
                 "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
+                "password": "${{ secrets.GITHUB_TOKEN }}"
               }
             ]
 
@@ -114,7 +117,7 @@ jobs:
   destroy-ephemeral-cloud-infra:
     if: always()
     needs: [ deploy-ephemeral-cloud-infra, snowflake-its ]
-    uses: liquibase/build-logic/.github/workflows/ephemeral-cloud-infra.yml@main
+    uses: liquibase/build-logic/.github/workflows/ephemeral-cloud-infra.yml@DAT-20127
     secrets: inherit
     with:
         destroy: true
@@ -130,7 +133,7 @@ jobs:
         id: weekly-integration-tests
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           repository: liquibase/build-logic
           event-type: test-failure       
           client-payload: '{"repository": "${{ github.repository }}", "branch": "${{ github.ref }}", "sha": "${{ github.sha }}", "server_url": "${{ github.server_url }}", "run_id": "${{ github.run_id }}", "workflow_name": "${{ github.action }}"}'
