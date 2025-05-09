@@ -233,6 +233,14 @@ public class Index extends AbstractDatabaseObject {
         return (Index) setAttribute("clustered", clustered);
     }
 
+    public String getUsing() {
+        return getAttribute("using", String.class);
+    }
+
+    public Index setUsing(String using) {
+        return (Index) setAttribute("using", using);
+    }
+
     @Override
     public int compareTo(Object other) {
         Index o = (Index) other;
