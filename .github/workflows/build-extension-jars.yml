@@ -75,7 +75,7 @@ jobs:
         with:
           package-name: org.liquibase.ext.${{ matrix.dependencies }}
           package-type: "maven"
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PUBLISH_TO_GPM_TOKEN }}
           ignore-versions: "^((?!${{ inputs.liquibase-version }}$).)*$"
 
   delete-extension-packages:
@@ -90,7 +90,7 @@ jobs:
         with:
           package-name: org.liquibase.ext.${{ matrix.extensions }}
           package-type: "maven"
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PUBLISH_TO_GPM_TOKEN }}
           ignore-versions: "^((?!${{ inputs.liquibase-version }}$).)*$"
 
   matching-branch-logic-extensions:
