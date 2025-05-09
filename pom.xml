@@ -79,7 +79,7 @@
         <spock.version>2.3-groovy-4.0</spock.version>
         <spring.version>5.3.39</spring.version>
         <maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>
-        <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
         <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
         <sonar.projectName>Liquibase</sonar.projectName>
         <sonar.projectDescription>Liquibase</sonar.projectDescription>
