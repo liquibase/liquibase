@@ -1,7 +1,7 @@
 name: Build & Deploy extensions
 
 permissions:
-  contents: read
+  contents: write
   packages: write
   actions: read
 
