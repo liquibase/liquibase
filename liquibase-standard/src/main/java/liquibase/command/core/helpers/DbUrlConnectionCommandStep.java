@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionCommandStep implements CleanUpCommandStep {
 
-    protected static final String[] COMMAND_NAME = {"dbUrlConnectionCommandStep"};
+    public static final String[] COMMAND_NAME = {"dbUrlConnectionCommandStep"};
 
     /**
      * @deprecated This field is retained for backwards compatibility. Use the fields in {@link DbUrlConnectionArgumentsCommandStep} instead.
