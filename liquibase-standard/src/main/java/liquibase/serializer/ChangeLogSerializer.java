@@ -13,4 +13,6 @@ public interface ChangeLogSerializer extends LiquibaseSerializer, PrioritizedSer
     <T extends ChangeLogChild> void write(List<T> children, OutputStream out) throws IOException;
 
     void append(ChangeSet changeSet, File changeLogFile) throws IOException;
+
+    void preserveNullValues(boolean doPreserveNullValues);
 }
