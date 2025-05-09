@@ -154,11 +154,22 @@ jobs:
     runs-on: ubuntu-22.04
     continue-on-error: true
     steps:
+      
+      - name: Get GitHub App token
+        id: get-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: liquibase-checks
+          permission-packages: write
+                
       - uses: actions/delete-package-versions@v5
         with:
           package-name: org.liquibase.ext.liquibase-checks
           package-type: "maven"
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.get-token.outputs.token }}
           ignore-versions: "^((?!${{ needs.get-liquibase-checks-version.outputs.version }}$).)*$"
 
   build-liquibase-checks:
@@ -197,13 +208,23 @@ jobs:
       - uses: actions/checkout@v4
         name: Checkout liquibase
 
+      - name: Get GitHub App token
+        id: get-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: liquibase-checks
+          permission-contents: read
+          
       - uses: actions/checkout@v4
         name: Checkout liquibase-pro
         with:
           repository: liquibase/liquibase-pro
           ref: ${{ needs.matching-branch-logic-pro.outputs.pro_branch }}
           path: liquibase-pro
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.get-token.outputs.token }}
 
       - name: Checkout Dependencies
         run: |

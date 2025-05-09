@@ -37,12 +37,23 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      
+      - name: Get GitHub App token
+        id: get-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: liquibase-pro
+          permission-contents: read
+          
       - name: Checkout liquibase-pro
         uses: actions/checkout@v4
         with:
           repository: liquibase/liquibase-pro
           ref: ${{ inputs.branch }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.get-token.outputs.token }}
           path: liquibase-pro
 
       - name: Set up JDK 17
