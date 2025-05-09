@@ -83,7 +83,7 @@ jobs:
 
   owasp-scanner:
     needs: [setup]
-    uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@main
+    uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@DAT-20127
     with:
       branch: ${{ needs.setup.outputs.branch }}
     secrets: inherit
