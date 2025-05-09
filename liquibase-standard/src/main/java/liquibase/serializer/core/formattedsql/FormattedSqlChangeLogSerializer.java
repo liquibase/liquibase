@@ -1,17 +1,25 @@
 package liquibase.serializer.core.formattedsql;
 
 import liquibase.*;
+import liquibase.change.AbstractChange;
+import liquibase.change.AbstractSQLChange;
+import liquibase.ContextExpression;
+import liquibase.GlobalConfiguration;
+import liquibase.Labels;
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.core.OracleDatabase;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
+import org.apache.tools.ant.taskdefs.condition.Or;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,6 +58,15 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
             for (Change change : changeSet.getChanges()) {
                 Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change.generateStatements(database), database);
                 if (sqls != null) {
+                    if (sqls.length > 1) {
+                        builder = new StringBuilder(builder.toString().replace(" splitStatements:false", " splitStatements:true"));
+                    } else if (database instanceof OracleDatabase) {
+                        //
+                        // Handle Oracle differently because setting splitStatements:true on a statement
+                        // that has an endDelimiter will cause invalid syntax
+                        //
+                        builder = new StringBuilder(builder.toString().replace(" splitStatements:false", ""));
+                    }
                     for (Sql sql : sqls) {
                         builder.append(sql.toSql().endsWith(sql.getEndDelimiter()) ? sql.toSql() : sql.toSql() + sql.getEndDelimiter()).append("\n");
                     }
@@ -94,19 +111,16 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
             builder.append(logicalFilePath);
             builder.append("\"");
         }
+        builder.append(" splitStatements:" + getSplitStatementsValue(changeSet));
         builder.append("\n");
     }
 
+    public boolean getSplitStatementsValue(ChangeSet changeSet) {
+        return false;
+    }
+
     protected Database getTargetDatabase(ChangeSet changeSet) {
-        String filePath = changeSet.getFilePath();
-        if (filePath == null) {
-            throw new UnexpectedLiquibaseException("You must specify the changelog file name as filename.DB_TYPE.sql. Example: changelog.mysql.sql");
-        }
-        Matcher matcher = SQL_FILE_NAME_PATTERN.matcher(filePath);
-        if (!matcher.matches()) {
-            throw new UnexpectedLiquibaseException("Serializing changelog as sql requires a file name in the format *.databaseType.sql. Example: changelog.h2.sql. Passed: "+filePath);
-        }
-        String shortName = matcher.replaceFirst("$1");
+        final String shortName = getShortName(changeSet);
 
         Database database = DatabaseFactory.getInstance().getDatabase(shortName);
 
@@ -121,6 +135,18 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
         }
 
         return database;
+    }
+
+    private static String getShortName(ChangeSet changeSet) {
+        String filePath = changeSet.getFilePath();
+        if (filePath == null) {
+            throw new UnexpectedLiquibaseException("You must specify the changelog file name as filename.DB_TYPE.sql. Example: changelog.mysql.sql");
+        }
+        Matcher matcher = SQL_FILE_NAME_PATTERN.matcher(filePath);
+        if (!matcher.matches()) {
+            throw new UnexpectedLiquibaseException("Serializing changelog as sql requires a file name in the format *.databaseType.sql. Example: changelog.h2.sql. Passed: "+filePath);
+        }
+        return matcher.replaceFirst("$1");
     }
 
     @Override

@@ -34,6 +34,7 @@
         <maven.install.skip>true</maven.install.skip>
         <artifact.version>${project.version}</artifact.version>
         <sonar.coverage.jacoco.xmlReportPaths>../target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <expected-distribution-contents-filename>expected-distribution-contents.txt</expected-distribution-contents-filename>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -62,7 +63,7 @@
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.10</version>
+            <version>5.11</version>
             <scope>compile</scope>
             <exclusions>
                 <!-- not used by liquibase code -->
@@ -419,9 +420,23 @@
                                 </goals>
                             </execution>
                         </executions>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <expected.distribution.contents.filename>${expected-distribution-contents-filename}</expected.distribution.contents.filename>
+                            </systemPropertyVariables>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <profile>
+            <id>liquibase-minimal</id>
+
+            <properties>
+                <assemblyConfigFile>src/main/assembly/assembly-bin-pro-minimal.xml</assemblyConfigFile>
+                <expected-distribution-contents-filename>expected-distribution-contents-minimal.txt</expected-distribution-contents-filename>
+            </properties>
         </profile>
 
         <profile>
