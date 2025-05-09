@@ -5,6 +5,7 @@ name: FOSSA License Compliance and Security Check
 permissions:
   contents: read
   id-token: write
+  packages: read
 
 # Event triggers for the workflow
 on:
@@ -64,12 +65,12 @@ jobs:
             {
               "id": "liquibase-pro",
               "username": "liquibot",
-              "password": "${{ secrets.LIQUIBOT_PAT }}"
+              "password": "${{ secrets.GITHUB_TOKEN }}"
             },
             {
               "id": "liquibase",
               "username": "liquibot",
-              "password": "${{ secrets.LIQUIBOT_PAT }}"
+              "password": "${{ secrets.GITHUB_TOKEN }}"
             }
           ]
 

@@ -1,5 +1,11 @@
 name: Unit and Integration Tests
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  checks: write
+
 on:
   workflow_call:
 
@@ -162,12 +168,12 @@ jobs:
               {
                 "id": "liquibase-pro",
                 "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
+                "password": "${{ secrets.GITHUB_TOKEN }}"
               },
               {
                 "id": "liquibase",
                 "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
+                "password": "${{ secrets.GITHUB_TOKEN }}"
               }
             ]
 
