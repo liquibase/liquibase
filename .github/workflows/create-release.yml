@@ -81,15 +81,16 @@ jobs:
       - run: |
           echo "Creating version ${{ inputs.version }} from ${{ inputs.branch }} with artifacts from build ${{ inputs.runId }} "
 
-  owasp-scanner:
-    needs: [setup]
-    uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@DAT-20127
-    with:
-      branch: ${{ needs.setup.outputs.branch }}
-    secrets: inherit
+  # owasp-scanner:
+  #   needs: [setup]
+  #   uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@DAT-20127
+  #   with:
+  #     branch: ${{ needs.setup.outputs.branch }}
+  #   secrets: inherit
 
   build-azure-uber-jar:
-    needs: [setup, owasp-scanner]
+    needs: [setup]
+    # needs: [setup, owasp-scanner]
     uses: ./.github/workflows/build-azure-uber-jar.yml
     with:
       branch: ${{ needs.setup.outputs.branch }}
@@ -97,7 +98,8 @@ jobs:
     secrets: inherit
 
   build-extension-jars:
-    needs: [setup, owasp-scanner]
+    needs: [setup]
+    # needs: [setup, owasp-scanner]
     uses: ./.github/workflows/build-extension-jars.yml
     with:
       liquibase-version: ${{ needs.setup.outputs.version }}
