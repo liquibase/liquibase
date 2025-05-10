@@ -485,14 +485,21 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private void handleProperty(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         try {
 
+            ContextExpression includeContextFilterExpression = null;
+
+            Object parentIncludedContextFilterParam = changeLogParameters.getValue(ChangeLogParameters.PARENT_INCLUDE_CONTEXT_FILTER, this);
+            if (parentIncludedContextFilterParam instanceof ContextExpression) {
+                includeContextFilterExpression = (ContextExpression) parentIncludedContextFilterParam;
+            }
+
             String propertyContextFilter = node.getChildValue(null, CONTEXT_FILTER, String.class);
             if (StringUtils.isEmpty(propertyContextFilter)) {
                 propertyContextFilter = node.getChildValue(null, CONTEXT, String.class);
             }
 
-            //apply the context filter from the include node if it is not set on the property node
-            if (StringUtils.isEmpty(propertyContextFilter) && getIncludeContextFilter() != null) {
-                propertyContextFilter = getIncludeContextFilter().getOriginalString();
+            //apply the context filter from the include tag of the parent if present, if it is not set on the property node
+            if (StringUtils.isEmpty(propertyContextFilter) && includeContextFilterExpression != null) {
+                propertyContextFilter = includeContextFilterExpression.getOriginalString();
             }
 
             String dbms = node.getChildValue(null, DBMS, String.class);
@@ -1028,7 +1035,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         final String normalizedFilePath = fileName;
 
         ChangeLogParser parser = null;
-        DatabaseChangeLog changeLog;
+        DatabaseChangeLog changeLog = new DatabaseChangeLog();
         try {
             DatabaseChangeLog rootChangeLogInstance = ROOT_CHANGE_LOG.get();
             if (rootChangeLogInstance == null) {
@@ -1052,9 +1059,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     // Some parser need to know it's not a top level changelog, in modifyChangeSets flow 'runWith' attributes are added later on
                     ChangeLogParser finalParser = parser;
                     changeLog = Scope.child(Collections.singletonMap(MODIFY_CHANGE_SETS, true),
-                            () -> finalParser.parse(normalizedFilePath, changeLogParameters, resourceAccessor));
+                            () -> finalParser.parse(normalizedFilePath, changeLogParameters, resourceAccessor, includeContextFilter));
                 } else {
-                    changeLog = parser.parse(normalizedFilePath, changeLogParameters, resourceAccessor);
+                    changeLog = parser.parse(normalizedFilePath, changeLogParameters, resourceAccessor, includeContextFilter);
                 }
                 changeLog.setIncludeContextFilter(includeContextFilter);
                 changeLog.setIncludeLabels(labels);

@@ -665,25 +665,26 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         rootChangeLog.getChangeLogParameters().getValue("context", rootChangeLog) == "test"
     }
 
-    def "properties values should not be retrieved when contexts not matches include contextFilter"() {
+    def "properties values should not be retrieved when contexts not matches parent include contextFilter"() {
         when:
         def propertiesResourceAccessor = new MockResourceAccessor(["com/example/file.properties": testProperties])
 
-        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-        rootChangeLog.setIncludeContextFilter(new ContextExpression("dev"))
-        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
+        def includedChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters()
+        changeLogParameters.setLocal(ChangeLogParameters.PARENT_INCLUDE_CONTEXT_FILTER, new ContextExpression("dev"), includedChangeLog)
+        includedChangeLog.setChangeLogParameters(changeLogParameters)
 
         //simulate that the context is not dev
-        rootChangeLog.getChangeLogParameters().setContexts(new Contexts("prod"))
+        includedChangeLog.getChangeLogParameters().setContexts(new Contexts("prod"))
 
-        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+        includedChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
                 .addChildren([property: [file: "file.properties", relativeToChangelogFile: "true", errorIfMissing: "true"]]),
                 propertiesResourceAccessor)
 
         then:
-        !rootChangeLog.getChangeLogParameters().hasValue("context", rootChangeLog)
-        rootChangeLog.getChangeLogParameters().getValue("context", rootChangeLog) == null
+        !includedChangeLog.getChangeLogParameters().hasValue("context", includedChangeLog)
+        includedChangeLog.getChangeLogParameters().getValue("context", includedChangeLog) == null
     }
 
     def "properties values are not loaded and stored when file it's not relative to changelog"() {

@@ -1,5 +1,6 @@
 package liquibase.parser;
 
+import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.Scope;
 import liquibase.change.AbstractSQLChange;
@@ -299,9 +300,12 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     }
 
     @Override
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, ContextExpression includeContextFilter) throws ChangeLogParseException {
 
         DatabaseChangeLog changeLog = new DatabaseChangeLog();
+        if (changeLogParameters != null) {
+            changeLogParameters.setLocal(ChangeLogParameters.PARENT_INCLUDE_CONTEXT_FILTER, includeContextFilter, changeLog);
+        }
         changeLog.setChangeLogParameters(changeLogParameters);
 
         changeLog.setPhysicalFilePath(physicalChangeLogLocation);
@@ -948,5 +952,10 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
             return;
         }
         Scope.getCurrentScope().getLog(clazz).fine("Matched attribute '" + attribute + "' = '" + value + "'");
+    }
+
+    @Override
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
+        return parse(physicalChangeLogLocation, changeLogParameters, resourceAccessor, null);
     }
 }

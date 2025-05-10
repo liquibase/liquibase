@@ -1,9 +1,7 @@
 package liquibase.parser.core.sql;
 
-import liquibase.ChecksumVersion;
+import liquibase.ContextExpression;
 import liquibase.Scope;
-import liquibase.change.Change;
-import liquibase.change.CheckSum;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.*;
 import liquibase.changeset.ChangeSetService;
@@ -11,7 +9,6 @@ import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.ChangeLogParser;
@@ -23,7 +20,6 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.util.ExceptionUtil;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -43,9 +39,14 @@ public class SqlChangeLogParser implements ChangeLogParser {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
-    
+
     @Override
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
+        return parse(physicalChangeLogLocation, changeLogParameters, resourceAccessor, null);
+    }
+
+    @Override
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, ContextExpression includeContextFilter) throws ChangeLogParseException {
 
         DatabaseChangeLog changeLog = new DatabaseChangeLog();
         changeLog.setPhysicalFilePath(physicalChangeLogLocation);
