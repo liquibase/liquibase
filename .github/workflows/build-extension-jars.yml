@@ -224,9 +224,6 @@ jobs:
       GIT_USERNAME: "liquibot"
       GIT_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
-        name: Checkout liquibase
-
       - name: Get GitHub App token
         id: get-token
         uses: actions/create-github-app-token@v1
@@ -234,8 +231,13 @@ jobs:
           app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
           private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-          repositories: liquibase-checks
           permission-contents: read
+          permission-packages: write
+
+      - uses: actions/checkout@v4
+        name: Checkout liquibase
+        with:
+          token: ${{ steps.get-token.outputs.token }}
 
       - uses: actions/checkout@v4
         name: Checkout liquibase-pro
