@@ -22,7 +22,7 @@ import static java.util.ResourceBundle.getBundle;
  */
 public abstract class AbstractDatabaseConnectionCommandStep extends AbstractHelperCommandStep implements CleanUpCommandStep {
 
-    protected static final String[] COMMAND_NAME = {"abstractDatabaseConnectionCommandStep"};
+    public static final String[] COMMAND_NAME = {"abstractDatabaseConnectionCommandStep"};
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     private Database database;
