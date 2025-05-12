@@ -222,8 +222,8 @@ class DataTypeFactoryTest extends Specification {
         "TIMESTAMP(6) WITH TIMEZONE"                   | new OracleDatabase()   | "TIMESTAMP(6) WITH TIMEZONE"                   | TimestampType | false                 | "WITH TIMEZONE"
         "timestamp without timezone"                   | new OracleDatabase()   | "TIMESTAMP"                                    | TimestampType | false                 | "without timezone"
         "timestamp(6) without timezone"                | new OracleDatabase()   | "TIMESTAMP(6)"                                 | TimestampType | false                 | "without timezone"
-        "timestamptz"                                  | new OracleDatabase()   | "TIMESTAMP WITH TIMEZONE"                      | TimestampType | false                 | "WITH TIMEZONE"
-        "timestamptz(6)"                               | new OracleDatabase()   | "TIMESTAMP(6) WITH TIMEZONE"                   | TimestampType | false                 | "WITH TIMEZONE"
+        "timestamptz"                                  | new OracleDatabase()   | "TIMESTAMP"                                    | TimestampType | false                 | null
+        "timestamptz(6)"                               | new OracleDatabase()   | "TIMESTAMP(6)"                                 | TimestampType | false                 | null
         "java.sql.Timestamp"                           | new OracleDatabase()   | "TIMESTAMP"                                    | TimestampType | false                 | null
         "java.sql.Timestamp(6)"                        | new OracleDatabase()   | "TIMESTAMP(6)"                                 | TimestampType | false                 | null
         "java.sql.Types.TIMESTAMP"                     | new OracleDatabase()   | "TIMESTAMP"                                    | TimestampType | false                 | null
@@ -252,8 +252,8 @@ class DataTypeFactoryTest extends Specification {
         "TIMESTAMP(6) WITH TIMEZONE"                   | new H2Database()       | "TIMESTAMP(6) WITH TIME ZONE"                  | TimestampType | false                 | "WITH TIMEZONE"
         "timestamp without timezone"                   | new H2Database()       | "TIMESTAMP"                                    | TimestampType | false                 | "without timezone"
         "timestamp(6) without timezone"                | new H2Database()       | "TIMESTAMP(6)"                                 | TimestampType | false                 | "without timezone"
-        "timestamptz"                                  | new H2Database()       | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false                 | "WITH TIME ZONE"
-        "timestamptz(6)"                               | new H2Database()       | "TIMESTAMP(6) WITH TIME ZONE"                  | TimestampType | false                 | "WITH TIME ZONE"
+        "timestamptz"                                  | new H2Database()       | "TIMESTAMP"                                    | TimestampType | false                 | null
+        "timestamptz(6)"                               | new H2Database()       | "TIMESTAMP(6)"                                 | TimestampType | false                 | null
         "java.sql.Timestamp"                           | new H2Database()       | "TIMESTAMP"                                    | TimestampType | false                 | null
         "java.sql.Timestamp(6)"                        | new H2Database()       | "TIMESTAMP(6)"                                 | TimestampType | false                 | null
         "java.sql.Types.TIMESTAMP"                     | new H2Database()       | "TIMESTAMP"                                    | TimestampType | false                 | null
