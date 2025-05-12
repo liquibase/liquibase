@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.datatype.core.*;
 import liquibase.exception.ServiceNotFoundException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -176,7 +177,7 @@ public class DataTypeFactory {
                 additionalInfo = splitTypeName[1];
             }
         }
-        if (dataTypeName.toLowerCase(Locale.US).equals("timestamptz")) {
+        if (database instanceof PostgresDatabase && dataTypeName.toLowerCase(Locale.US).equals("timestamptz")) {
             additionalInfo = TimestampType.getTimeZoneAdditionInformation(database);
         }
 
