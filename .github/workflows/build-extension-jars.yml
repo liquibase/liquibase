@@ -71,11 +71,21 @@ jobs:
       matrix:
         dependencies: ${{ fromJson(needs.setup_matrix.outputs.dependencies_matrix) }}
     steps:
+      - name: Get GitHub App token
+        id: get-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          permission-packages: write
+          permission-contents: read
+
       - uses: actions/delete-package-versions@v5
         with:
           package-name: org.liquibase.ext.${{ matrix.dependencies }}
           package-type: "maven"
-          token: ${{ secrets.PUBLISH_TO_GPM_TOKEN }}
+          token: ${{ steps.get-token.outputs.token }}
           ignore-versions: "^((?!${{ inputs.liquibase-version }}$).)*$"
 
   delete-extension-packages:
@@ -86,11 +96,21 @@ jobs:
       matrix:
         extensions: ${{ fromJson(needs.setup_matrix.outputs.extensions_matrix) }}
     steps:
+      - name: Get GitHub App token
+        id: get-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          permission-packages: write
+          permission-contents: read
+
       - uses: actions/delete-package-versions@v5
         with:
           package-name: org.liquibase.ext.${{ matrix.extensions }}
           package-type: "maven"
-          token: ${{ secrets.PUBLISH_TO_GPM_TOKEN }}
+          token: ${{ steps.get-token.outputs.token }}
           ignore-versions: "^((?!${{ inputs.liquibase-version }}$).)*$"
 
   matching-branch-logic-extensions:
@@ -154,7 +174,6 @@ jobs:
     runs-on: ubuntu-22.04
     continue-on-error: true
     steps:
-                
       - uses: actions/delete-package-versions@v5
         with:
           package-name: org.liquibase.ext.liquibase-checks
@@ -207,7 +226,7 @@ jobs:
           owner: ${{ github.repository_owner }}
           repositories: liquibase-checks
           permission-contents: read
-          
+
       - uses: actions/checkout@v4
         name: Checkout liquibase-pro
         with:
