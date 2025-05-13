@@ -291,7 +291,7 @@ jobs:
     with:
       check_snippets: true
       check_ai_generated_code: true
-      generate_sbom: true
+      generate_fossa_3p_license_report: true
 
   integration-test:
     name: Integration Test
