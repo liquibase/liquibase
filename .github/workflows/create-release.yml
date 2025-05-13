@@ -143,6 +143,17 @@ jobs:
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
     steps:
+
+      - name: Get GitHub App token
+        id: get-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: liquibase-pro
+          permission-contents: read
+
       - uses: actions/checkout@v4
 
       - uses: actions/checkout@v4
@@ -151,7 +162,7 @@ jobs:
           repository: liquibase/liquibase-pro
           ref: "${{ needs.setup.outputs.branch }}"
           path: download/repo/liquibase-pro
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.get-token.outputs.token }}
 
       - name: Download liquibase-artifacts
         uses: dawidd6/action-download-artifact@v8
@@ -206,12 +217,12 @@ jobs:
               {
                 "id": "liquibase",
                 "username": "liquibot",
-                "password": "${{ secrets.GITHUB_TOKEN }}"
+                "password": "${{ steps.get-token.outputs.token }}"
               },
               {
                 "id": "liquibase-pro",
                 "username": "liquibot",
-                "password": "${{ secrets.GITHUB_TOKEN }}"
+                "password": "${{ steps.get-token.outputs.token }}"
               }
             ]
 
