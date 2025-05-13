@@ -4,6 +4,8 @@ permissions:
   contents: write
   packages: write
   actions: read
+  id-token: write
+  pull-requests: write
 
 on:
   release:
