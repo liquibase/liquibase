@@ -1,7 +1,7 @@
 name: Dry run release
 
 permissions:
-  actions: read
+  actions: write
   contents: write
   packages: write
 
@@ -39,6 +39,7 @@ jobs:
       dry_run_tar_gz_url: ${{ steps.wait_and_get_outputs.outputs.dry_run_tar_gz_url }}
       dry_run_release_id: ${{ steps.wait_and_get_outputs.outputs.dry_run_release_id }}
     steps:
+      
       - name: Invoke Create Release
         id: trigger-step
         uses: the-actions-org/workflow-dispatch@v4
