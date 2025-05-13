@@ -221,8 +221,7 @@ jobs:
       fail-fast: false
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      GIT_USERNAME: "liquibot"
-      GIT_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - name: Get GitHub App token
         id: get-token
@@ -233,6 +232,11 @@ jobs:
           owner: ${{ github.repository_owner }}
           permission-contents: read
           permission-packages: write
+
+      - name: Set up git password environment
+        run: |
+          echo "GIT_USERNAME=liquibot" >> $GITHUB_ENV
+          echo "GIT_PASSWORD=${{ steps.get-token.outputs.token }}" >> $GITHUB_ENV
 
       - uses: actions/checkout@v4
         name: Checkout liquibase
