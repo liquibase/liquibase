@@ -1,7 +1,7 @@
 name: Unit and Integration Tests
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
   issues: write
   checks: write
