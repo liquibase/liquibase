@@ -168,12 +168,10 @@ jobs:
             [
               {
                 "id": "liquibase-pro",
-                "username": "liquibot",
                 "password": "${{ secrets.GITHUB_TOKEN }}"
               },
               {
                 "id": "liquibase",
-                "username": "liquibot",
                 "password": "${{ secrets.GITHUB_TOKEN }}"
               }
             ]
