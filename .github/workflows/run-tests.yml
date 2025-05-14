@@ -6,6 +6,8 @@ permissions:
   issues: write
   checks: write
   id-token: write
+  actions: read
+  packages: write
 
 on:
   workflow_call:
