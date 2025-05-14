@@ -291,7 +291,7 @@ jobs:
 
   fossa:
     needs: build_tests
-    uses: liquibase/build-logic/.github/workflows/fossa_ai.yml@DAT-20127
+    uses: liquibase/build-logic/.github/workflows/fossa_ai.yml@main
     if: github.event_name != 'workflow_dispatch'
     secrets: inherit
     with:
@@ -425,7 +425,7 @@ jobs:
 
   sonar:
     needs: [ build_tests, integration-test ]
-    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@DAT-20127
+    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@main
     with:
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
       thisSha: ${{ needs.setup.outputs.thisSha }}

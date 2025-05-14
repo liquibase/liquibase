@@ -200,7 +200,7 @@ jobs:
         delete-checks-packages,
         matching-branch-logic-extensions,
       ]
-    uses: liquibase/build-logic/.github/workflows/publish-for-liquibase.yml@DAT-20127
+    uses: liquibase/build-logic/.github/workflows/publish-for-liquibase.yml@main
     with:
       repository: liquibase/liquibase-checks
       version: ${{ needs.get-liquibase-checks-version.outputs.version }}
@@ -225,7 +225,7 @@ jobs:
     steps:
       - name: Get GitHub App token
         id: get-token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v2
         with:
           app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
           private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}

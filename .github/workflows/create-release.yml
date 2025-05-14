@@ -83,7 +83,7 @@ jobs:
 
   # owasp-scanner:
   #   needs: [setup]
-  #   uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@DAT-20127
+  #   uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@main
   #   with:
   #     branch: ${{ needs.setup.outputs.branch }}
   #   secrets: inherit
@@ -118,7 +118,7 @@ jobs:
       
       - name: Get GitHub App token
         id: get-token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v2
         with:
           app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
           private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
@@ -146,7 +146,7 @@ jobs:
 
       - name: Get GitHub App token
         id: get-token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v2
         with:
           app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
           private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}

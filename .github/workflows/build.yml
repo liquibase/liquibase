@@ -15,7 +15,6 @@ on:
   workflow_dispatch:
 
 jobs:
-
   setup:
     name: Setup
     runs-on: ubuntu-22.04
@@ -31,7 +30,6 @@ jobs:
       unmodifiedBranchName: ${{ steps.get-branch-name.outputs.unmodifiedBranchName }}
 
     steps:
-
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
@@ -56,12 +54,12 @@ jobs:
             branch_name=${GITHUB_HEAD_REF}
           else
             branch_name=${{ github.ref_name }}
-          fi 
+          fi
           modified_branch_name=`(echo $branch_name | tr '/' '_')`
-          echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT 
+          echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT
 
           #this is to check if the same branch name exists in PRO, we need it in check-branch step
-          echo "unmodifiedBranchName=$branch_name" >> $GITHUB_OUTPUT 
+          echo "unmodifiedBranchName=$branch_name" >> $GITHUB_OUTPUT
           echo "Modified Branch Name:" $modified_branch_name
           echo "Original Branch Name thisBranchName:" $branch_name
 
@@ -81,7 +79,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const currentBranch = "${{ steps.get-branch-name.outputs.unmodifiedBranchName }}" 
+            const currentBranch = "${{ steps.get-branch-name.outputs.unmodifiedBranchName }}"
             console.log(currentBranch)
             let branchExistsInBoth;
             try {
@@ -100,12 +98,11 @@ jobs:
             core.setOutput("proBranchNamePrefix", liquibaseProVersionPrefix)
             console.log(liquibaseProVersionPrefix)
 
-
   ### MATCHING BRANCH RUN THIS LOGIC
   build_publish_branch:
     name: Artifacts - Build & Package
     runs-on: macos-latest
-    needs: [ setup ]
+    needs: [setup]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -126,11 +123,11 @@ jobs:
       - name: Set up JDK 11
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
-          distribution: 'temurin'
+          java-version: "11"
+          distribution: "temurin"
           gpg-private-key: ${{ secrets.GPG_SECRET }}
           gpg-passphrase: GPG_PASSPHRASE
-          cache: 'maven'
+          cache: "maven"
           overwrite-settings: false
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
@@ -338,24 +335,24 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   run-functional-tests:
-    needs: [ setup, build_publish_branch ]
-    uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@DAT-20180
+    needs: [setup, build_publish_branch]
+    uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@master
     secrets: inherit
     with:
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
       thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
 
   run-tests-harness:
-    needs: [ setup,build_publish_branch ]
-    uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@DAT-20180
+    needs: [setup, build_publish_branch]
+    uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@master
     secrets: inherit
     with:
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
       thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
 
   run-pro-build-and-test:
-    needs: [ setup, build_publish_branch ]
-    uses: liquibase/liquibase/.github/workflows/run-pro-build-and-test.yml@DAT-20180
+    needs: [setup, build_publish_branch]
+    uses: liquibase/liquibase/.github/workflows/run-pro-build-and-test.yml@master
     secrets: inherit
     with:
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
