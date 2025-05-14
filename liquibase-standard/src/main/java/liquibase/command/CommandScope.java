@@ -2,8 +2,6 @@ package liquibase.command;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.analytics.AnalyticsListener;
-import liquibase.analytics.Event;
 import liquibase.analytics.AnalyticsFactory;
 import liquibase.analytics.Event;
 import liquibase.configuration.*;
