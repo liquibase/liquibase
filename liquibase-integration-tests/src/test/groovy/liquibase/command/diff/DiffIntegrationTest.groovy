@@ -18,6 +18,7 @@ import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.resource.SearchPathResourceAccessor
+import org.apache.commons.io.FileUtils
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -30,7 +31,6 @@ class DiffIntegrationTest extends Specification {
 
     def "Diff with excludes that reference objects on target should work" () {
         when:
-        CommandUtil.runDropAll(h2)
         CommandUtil.runSnapshot(h2, "target/test-classes/snapshot.json")
         CommandUtil.runTag(h2, "1.0.0")
         def diffFile = "target/test-classes/diff.json"
@@ -67,13 +67,7 @@ class DiffIntegrationTest extends Specification {
         assert ! outputText.contains("databasechangeloglock")
 
         cleanup:
-        try {
-            diffOutput.delete()
-        } catch (Exception ignored) {
-
-        }
-        CommandUtil.runDropAll(h2)
-        h2.getConnection().close()
+        FileUtils.deleteQuietly(diffOutput)
         refDatabase.close()
         targetDatabase.close()
     }

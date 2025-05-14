@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 public class JdbcConnection implements DatabaseConnection {
     private java.sql.Connection con;
     private static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
+    private String originalUrl; // Store the original URL for OAuth validation
 
     private static final List<ConnectionPatterns> JDBC_CONNECTION_PATTERNS = Scope.getCurrentScope().getServiceLocator().findInstances(ConnectionPatterns.class);
 
@@ -42,6 +43,8 @@ public class JdbcConnection implements DatabaseConnection {
         String driverClassName = driverObject.getClass().getName();
         String errorMessage = "Connection could not be created to " + sanitizeUrl(url) + " with driver " + driverClassName;
         try {
+            this.originalUrl = url;
+            
             this.con = driverObject.connect(url, driverProperties);
             if (this.con == null) {
                 throw new DatabaseException(errorMessage + ".  Possibly the wrong driver for the given database URL");
@@ -236,7 +239,14 @@ public class JdbcConnection implements DatabaseConnection {
     @Override
     public String getConnectionUserName() {
         try {
-            return con.getMetaData().getUserName();
+            String username = con.getMetaData().getUserName();
+            // Handle Snowflake OAuth authentication with null username
+            // TODO: Move this to Snowflake extension later when appropriate
+            if (username == null && originalUrl != null && originalUrl.startsWith("jdbc:snowflake:") 
+                && originalUrl.contains("authenticator=oauth")) {
+                return "oauth-authenticated-user";
+            }
+            return username;
         } catch (SQLException e) {
             throw new UnexpectedLiquibaseException(e);
         }

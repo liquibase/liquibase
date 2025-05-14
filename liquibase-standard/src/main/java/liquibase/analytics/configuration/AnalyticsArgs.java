@@ -1,11 +1,8 @@
 package liquibase.analytics.configuration;
 
-import liquibase.Scope;
+import liquibase.analytics.AnalyticsListener;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
-import liquibase.license.LicenseServiceUtils;
-import liquibase.logging.Logger;
-import liquibase.util.LiquibaseUtil;
 
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -14,11 +11,11 @@ public class AnalyticsArgs implements AutoloadedConfigurations {
 
     /**
      * Do not access this value directly to check whether analytics are enabled.
-     * Instead, use the method {@link AnalyticsArgs#isAnalyticsEnabled}
+     * Instead, use the method {@link AnalyticsListener#isEnabled()}
      */
     public static final ConfigurationDefinition<Boolean> ENABLED;
     public static final ConfigurationDefinition<String> CONFIG_ENDPOINT_URL;
-    private static final ConfigurationDefinition<Boolean> DEV_OVERRIDE;
+    public static final ConfigurationDefinition<Boolean> DEV_OVERRIDE;
     public static final ConfigurationDefinition<Integer> CONFIG_ENDPOINT_TIMEOUT_MILLIS;
     public static final ConfigurationDefinition<Level> LOG_LEVEL;
     public static final ConfigurationDefinition<Integer> LICENSE_KEY_CHARS;
@@ -29,7 +26,7 @@ public class AnalyticsArgs implements AutoloadedConfigurations {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase.analytics");
 
         ENABLED = builder.define("enabled", Boolean.class)
-                .setDescription("Enable or disable sending product usage data and analytics to Liquibase. Learn more at https://docs.liquibase.com/analytics. DEFAULT: true for OSS users | false for PRO users")
+                .setDescription("Enable or disable sending product usage data and analytics to Liquibase. Learn more at https://docs.liquibase.com/analytics.")
                 .build();
 
         CONFIG_ENDPOINT_URL = builder.define("configEndpointUrl", String.class)
@@ -79,55 +76,4 @@ public class AnalyticsArgs implements AutoloadedConfigurations {
                 .setHidden(true)
                 .build();
     }
-
-    /**
-     * Check whether analytics are enabled. This method handles all the various ways that
-     * analytics can be enabled or disabled and should be the primary way to validate
-     * whether analytics are turned on. You should not use the argument {@link AnalyticsArgs#ENABLED}.
-     * @return true if analytics are enabled, false otherwise.
-     * @throws Exception if there was a problem determining the enabled status of analytics
-     */
-    public static boolean isAnalyticsEnabled() throws Exception {
-        Boolean devOverride = DEV_OVERRIDE.getCurrentValue();
-        Logger log = Scope.getCurrentScope().getLog(AnalyticsArgs.class);
-        if (LiquibaseUtil.isDevVersion() && Boolean.FALSE.equals(devOverride)) {
-            log.severe("Analytics is disabled because this is not a release build and the user has not provided a value for the "+DEV_OVERRIDE.getKey()+" option.");
-            return false;
-        }
-        String configEndpointUrl = CONFIG_ENDPOINT_URL.getCurrentValue();
-        if (Boolean.TRUE.equals(devOverride) && CONFIG_ENDPOINT_URL.getDefaultValue().equals(configEndpointUrl)) {
-            log.severe("Analytics is disabled because " + DEV_OVERRIDE.getKey() + " was set to true, but the default " +
-                    "value was used for the " + CONFIG_ENDPOINT_URL.getKey() + " property. This is not permitted, because " +
-                    "dev versions of Liquibase should not be pushing analytics towards the prod analytics stack. To resolve " +
-                    "this, provide a value for " + CONFIG_ENDPOINT_URL.getKey() + " that is not the default value.");
-            return false;
-        }
-
-        // if the user set enabled to false, that overrides all
-        Boolean userSuppliedEnabled = ENABLED.getCurrentValue();
-        if (Boolean.FALSE.equals(userSuppliedEnabled)) {
-            log.log(LOG_LEVEL.getCurrentValue(), "User has disabled analytics.", null);
-            return false;
-        }
-
-        boolean proLicenseValid = LicenseServiceUtils.isProLicenseValid();
-        AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
-        if (proLicenseValid) {
-            if (Boolean.TRUE.equals(userSuppliedEnabled)) {
-                Boolean enabled = analyticsConfigurationFactory.getPlugin().isProAnalyticsEnabled();
-                if (Boolean.FALSE.equals(enabled)) {
-                    log.log(LOG_LEVEL.getCurrentValue(), "Analytics is disabled, because a pro license was detected and analytics was not enabled by the user or because it was turned off by Liquibase.", null);
-                }
-                return enabled;
-            }
-            return false;
-        } else {
-            boolean enabled = analyticsConfigurationFactory.getPlugin().isOssAnalyticsEnabled();
-            if (Boolean.FALSE.equals(enabled)) {
-                log.log(LOG_LEVEL.getCurrentValue(), "Analytics is disabled, because it was turned off by Liquibase.", null);
-            }
-            return enabled;
-        }
-    }
-
 }

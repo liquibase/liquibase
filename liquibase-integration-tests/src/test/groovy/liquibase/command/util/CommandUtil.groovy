@@ -14,11 +14,11 @@ import liquibase.diff.compare.CompareControl
 import liquibase.exception.CommandExecutionException
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.lockservice.LockServiceFactory
-import liquibase.logging.core.BufferedLogServiceTest
 import liquibase.resource.ResourceAccessor
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.snapshot.DatabaseSnapshot
+import liquibase.util.StringUtil
 
 class CommandUtil {
 
@@ -181,16 +181,31 @@ class CommandUtil {
         commandScope.execute()
     }
 
+    /**
+     * @deprecated the integration test framework automatically runs drop all when running tests; see
+     * {@link liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationMethodInterceptor#dropAllDatabases(org.spockframework.runtime.extension.IMethodInvocation)}
+     * Individual tests should not need to run drop all themselves, and it is not recommended to do so for performance
+     * reasons.
+     */
+    @Deprecated
     static void runDropAll(DatabaseTestSystem db) throws Exception {
         if (! db.shouldTest()) {
             return;
         }
         def lockService = LockServiceFactory.getInstance().getLockService(db.getDatabaseFromFactory());
         lockService.releaseLock()
+        internalRunDropAll(db, null)
+        internalRunDropAll(db, db.getAltSchema())
+    }
+
+    private static void internalRunDropAll(DatabaseTestSystem db, String... schemas) {
         CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME)
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+        if (schemas != null) {
+            commandScope.addArgumentValue(DropAllCommandStep.SCHEMAS_ARG, StringUtil.join(schemas, ","))
+        }
         commandScope.setOutput(new ByteArrayOutputStream())
         commandScope.execute()
     }

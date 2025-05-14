@@ -59,9 +59,6 @@ class RollbackIntegrationTest extends Specification {
         def e = thrown(CommandExecutionException)
         assert e.getCause() instanceof RollbackFailedException
         assert e.getMessage() == "liquibase.exception.RollbackFailedException: Could not find tag 'version_2.0' in the database"
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     def "Should rollback correctly with duplicate tags to oldest copy of identical tag"() {
@@ -82,9 +79,6 @@ class RollbackIntegrationTest extends Specification {
         noExceptionThrown()
         assert outputString.contains("Rolling Back Changeset: target/test-classes/changelogs/common/example-changelog.xml::3::other.dev")
         assert outputString.contains("Rolling Back Changeset: target/test-classes/changelogs/common/example-changelog.xml::2::your.name")
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     private void manuallyDuplicateTags(String changelogFile) {
@@ -114,9 +108,6 @@ class RollbackIntegrationTest extends Specification {
         noExceptionThrown()
         assert !outputString.contains("Rolling Back Changeset: target/test-classes/changelogs/common/example-changelog.xml::3::other.dev")
         assert outputString.contains("Rolling Back Changeset: target/test-classes/changelogs/common/example-changelog.xml::2::your.name")
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     def "Make sure rollback does not remove tagged changeset"() {

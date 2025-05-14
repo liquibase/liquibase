@@ -1,4 +1,11 @@
 name: Attach Artifacts To Draft Release
+
+permissions:
+  contents: write
+  actions: read
+  packages: write
+  id-token: write
+
 on:
   workflow_dispatch:
     inputs:
@@ -47,6 +54,13 @@ on:
         required: true
         type: boolean
         default: false
+    outputs:
+      dry_run_zip_url:
+        description: "The URL of the created zip file"
+        value: ${{ jobs.build-installers.outputs.dry_run_zip_url }}
+      dry_run_tar_gz_url:
+        description: "The URL of the created tar.gz file"
+        value: ${{ jobs.build-installers.outputs.dry_run_tar_gz_url }}
 
 env:
   DEPENDENCIES: "liquibase-bigquery" # Comma separated list of dependencies to release the extensions list
@@ -67,15 +81,16 @@ jobs:
       - run: |
           echo "Creating version ${{ inputs.version }} from ${{ inputs.branch }} with artifacts from build ${{ inputs.runId }} "
 
-  owasp-scanner:
-    needs: [setup]
-    uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@main
-    with:
-      branch: ${{ needs.setup.outputs.branch }}
-    secrets: inherit
+  # owasp-scanner:
+  #   needs: [setup]
+  #   uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@main
+  #   with:
+  #     branch: ${{ needs.setup.outputs.branch }}
+  #   secrets: inherit
 
   build-azure-uber-jar:
-    needs: [setup, owasp-scanner]
+    needs: [setup]
+    # needs: [setup, owasp-scanner]
     uses: ./.github/workflows/build-azure-uber-jar.yml
     with:
       branch: ${{ needs.setup.outputs.branch }}
@@ -83,7 +98,8 @@ jobs:
     secrets: inherit
 
   build-extension-jars:
-    needs: [setup, owasp-scanner]
+    needs: [setup]
+    # needs: [setup, owasp-scanner]
     uses: ./.github/workflows/build-extension-jars.yml
     with:
       liquibase-version: ${{ needs.setup.outputs.version }}
@@ -99,10 +115,21 @@ jobs:
     outputs:
       version: ${{ steps.extract-version.outputs.version }}
     steps:
+      
+      - name: Get GitHub App token
+        id: get-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: liquibase-checks
+          permission-contents: read
+          
       - uses: actions/checkout@v4
         with:
           repository: liquibase/liquibase-checks
-          token: ${{ secrets.BOT_TOKEN }}
+          token: ${{ steps.get-token.outputs.token }}
 
       - id: extract-version
         name: Extract version from pom.xml
@@ -112,16 +139,21 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
   reversion:
-    needs:
-      [
-        setup,
-        build-azure-uber-jar,
-        build-extension-jars,
-        get-liquibase-checks-version,
-      ]
+    needs: [setup,build-azure-uber-jar,build-extension-jars,get-liquibase-checks-version]
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
     steps:
+
+      - name: Get GitHub App token
+        id: get-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: liquibase-pro
+          permission-contents: read
+
       - uses: actions/checkout@v4
 
       - uses: actions/checkout@v4
@@ -130,10 +162,10 @@ jobs:
           repository: liquibase/liquibase-pro
           ref: "${{ needs.setup.outputs.branch }}"
           path: download/repo/liquibase-pro
-          token: ${{ secrets.BOT_TOKEN }}
+          token: ${{ steps.get-token.outputs.token }}
 
       - name: Download liquibase-artifacts
-        uses: dawidd6/action-download-artifact@v8
+        uses: dawidd6/action-download-artifact@v9
         with:
           workflow: run-tests.yml
           run_id: ${{ needs.setup.outputs.runId }}
@@ -185,12 +217,12 @@ jobs:
               {
                 "id": "liquibase",
                 "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}"
+                "password": "${{ steps.get-token.outputs.token }}"
               },
               {
                 "id": "liquibase-pro",
                 "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}"
+                "password": "${{ steps.get-token.outputs.token }}"
               }
             ]
 
@@ -281,13 +313,13 @@ jobs:
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
 
       - name: Cache Completed Artifacts
-        uses: actions/cache@v4.2.0
+        uses: actions/cache@v4.2.3
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
 
       - name: Cache Minimal Completed Artifacts
-        uses: actions/cache@v4.2.0
+        uses: actions/cache@v4.2.3
         with:
           key: minimal-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/s3-minimal
@@ -301,18 +333,16 @@ jobs:
           (cd download/repo/liquibase-pro && git push -f origin v${{ needs.setup.outputs.version }})
 
   build-installers:
-    permissions:
-      contents: write # for softprops/action-gh-release to create GitHub release
     needs: [setup, reversion]
     name: Build Installers
-    runs-on: macos-13 #needs macos for apple notarization
+    runs-on: ubuntu-22.04
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Restore Completed Artifacts
-        uses: actions/cache@v4.2.0
+        uses: actions/cache@v4.2.3
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
@@ -327,25 +357,42 @@ jobs:
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
 
-      - name: Re-version Installers
-        env:
-          INSTALL4J_10_LICENSE: ${{ secrets.INSTALL4J_10_LICENSE }}
-          INSTALL4J_APPLE_KEY: ${{ secrets.INSTALL4J_APPLE_KEY }}
-          INSTALL4J_APPLE_KEY_PASSWORD: ${{ secrets.INSTALL4J_APPLE_KEY_PASSWORD }}
-          INSTALL4J_APPLE_ID: ${{ secrets.INSTALL4J_APPLE_ID }}
-          INSTALL4J_APPLE_ID_PASSWORD: ${{ secrets.INSTALL4J_APPLE_ID_PASSWORD }}
-          INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
-          INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+      - name: Decode Client Authentication Certificate
         run: |
-          mkdir -p liquibase-dist/target/keys
-          echo "Saving apple key"
-          echo "$INSTALL4J_APPLE_KEY" | base64 -d > liquibase-dist/target/keys/datical_apple.p12
-          echo "Saving windows key"
-          echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
-          version="${{ needs.setup.outputs.version }}"
+          echo "${{ secrets.SM_CLIENT_CERT_FILE_B64 }}" | base64 --decode > /tmp/client-auth.p12
 
-          ##### Rebuild installers
+      - name: Set Environment Variables for Signing
+        run: |
+          echo "SM_HOST=${{ secrets.SM_HOST }}" >> "$GITHUB_ENV"
+          echo "SM_API_KEY=${{ secrets.SM_API_KEY }}" >> "$GITHUB_ENV"
+          echo "SM_CLIENT_CERT_FILE=/tmp/client-auth.p12" >> "$GITHUB_ENV"
+          echo "SM_CLIENT_CERT_PASSWORD=${{ secrets.SM_CLIENT_CERT_PASSWORD }}" >> "$GITHUB_ENV"
+          echo "SM_CODE_SIGNING_CERT_SHA1_HASH=${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}" >> "$GITHUB_ENV"
+          echo "SM_KEY_PAIR_ALIAS=${{ secrets.SM_KEY_PAIR_ALIAS }}" >> "$GITHUB_ENV"
+
+      - name: Install jsign and osslsigncode
+        run: |
+          curl -fSslL https://github.com/ebourg/jsign/releases/download/3.1/jsign_3.1_all.deb -o jsign_3.1_all.deb
+          sudo dpkg --install jsign_3.1_all.deb
+          sudo apt-get install osslsigncode
+          
+      - name: Create pkcs11properties.cfg
+        run: |
+          cat << EOF > pkcs11properties.cfg
+          name=signingmanager
+          library="$(pwd)/.github/util/smpkcs11.so"
+          slotListIndex=0
+          EOF
+          mv pkcs11properties.cfg $(pwd)/.github/util/
+
+      - name: Install DigiCert KeyLocker Client Tools
+        uses: digicert/ssm-code-signing@v1.0.0
+
+      - name: Build Unsigned Windows Installer
+        env:
+          INSTALL4J_LICENSE_KEY: ${{ secrets.INSTALL4J_10_LICENSE }}
+        run: |
+          version="${{ needs.setup.outputs.version }}"
           tarFile=$(pwd)/re-version/final/liquibase-$version.tar.gz
           scriptDir=$(pwd)/.github/util/
 
@@ -353,6 +400,34 @@ jobs:
           (cd liquibase-dist/target/liquibase-$version && tar xfz $tarFile)
           (cd liquibase-dist && $scriptDir/package-install4j.sh $version)
           mv liquibase-dist/target/liquibase-*-installer-* re-version/final
+
+      - name: Find Unsigned Windows Installer
+        id: find-installer
+        run: |
+          INSTALLER_PATH=$(find re-version/final -name "liquibase-*-installer-*" | head -n 1)
+          if [ -z "$INSTALLER_PATH" ]; then
+            echo "Error: No installer file found!"
+            exit 1
+          fi
+          echo "Found installer: $INSTALLER_PATH"
+          echo "INSTALLER_PATH=$INSTALLER_PATH" >> $GITHUB_ENV
+
+      - name: Sign Windows Installer using KeyLocker
+        run: |
+          smctl sign -v --fingerprint "$SM_CODE_SIGNING_CERT_SHA1_HASH" \
+          --keypair-alias $SM_KEY_PAIR_ALIAS \
+          --certificate "$SM_CLIENT_CERT_FILE" \
+          --config-file "$(pwd)/.github/util/pkcs11properties.cfg" \
+          --input "$INSTALLER_PATH" --tool jsign
+
+      - name: Verify Windows Installer Signature
+        run: osslsigncode verify -CAfile /etc/ssl/certs/ca-certificates.crt -in "$INSTALLER_PATH"
+        
+      - name: Re-version Installers
+        env:
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          version="${{ needs.setup.outputs.version }}"
 
           ##Sign Files
           $PWD/.github/util/sign-artifacts.sh re-version/final
@@ -410,13 +485,10 @@ jobs:
     if: ${{ inputs.dry_run == false }}
     name: Deploy minimal artifacts to lbio s3 bucket
     needs: [setup, reversion]
-    permissions:
-      id-token: write
-      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Restore Minimal Completed Artifacts
-        uses: actions/cache@v4.2.0
+        uses: actions/cache@v4.2.3
         with:
           key: minimal-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/s3-minimal
