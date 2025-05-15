@@ -380,8 +380,9 @@ jobs:
             if [ "$ext" != "liquibase-checks" ]; then
               echo "Checking out and building $ext"
               git clone https://github.com/liquibase/$ext.git $ext
-              git checkout $scripts_branch
               cd $ext
+              git checkout $scripts_branch || echo "Branch $scripts_branch not found, staying on default"
+              git branch -a
               sed -i "s/<liquibase.version>.*<\/liquibase.version>/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/" pom.xml
               mvn versions:set -DnewVersion=0-SNAPSHOT
 
