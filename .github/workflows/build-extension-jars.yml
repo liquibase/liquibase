@@ -392,11 +392,15 @@ jobs:
               done
 
               mvn clean install -DskipTests
-
+              echo $ext
               mkdir -p $PWD/.github/util/
+              echo "before 1st curl"
               curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/re-version.sh
+              echo "after 1st curl"
               curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/sign-artifacts.sh
+              echo "before 2 curl"
               curl -o $PWD/.github/util/ManifestReversion.java https://raw.githubusercontent.com/liquibase/liquibase/$scripts_branch/.github/util/ManifestReversion.java
+              echo "after 2 curl"
               chmod +x $PWD/.github/util/re-version.sh
               chmod +x $PWD/.github/util/sign-artifacts.sh
               chmod +x $PWD/.github/util/ManifestReversion.java
