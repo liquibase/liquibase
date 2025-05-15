@@ -124,7 +124,7 @@ jobs:
           private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: liquibase-checks
-          permission-contents: read
+          permission-contents: write
           
       - uses: actions/checkout@v4
         with:
