@@ -1,10 +1,10 @@
 package liquibase.lockservice;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
-import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.DB2Database;
@@ -32,7 +32,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
-import liquibase.statement.core.RawParameterizedSqlStatement;
+import liquibase.ui.ConsoleUIService;
 
 import java.security.SecureRandom;
 import java.text.DateFormat;
@@ -262,6 +262,16 @@ public class StandardLockService implements LockService {
         locked = acquireLock();
         do {
             if (!locked) {
+                try {
+                    //
+                    // Use the ConsoleUIService to prevent mirroring of this message to log
+                    //
+                    Scope.child(Scope.Attr.ui.name(), new ConsoleUIService(),  () -> {
+                        Scope.getCurrentScope().getUI().sendMessage("Waiting for changelog lock....");
+                    });
+                } catch (Exception ignore) {
+                    // continue on
+                }
                 Scope.getCurrentScope().getLog(getClass()).info("Waiting for changelog lock....");
                 try {
                     Thread.sleep(getChangeLogLockRecheckTime() * 1000);
