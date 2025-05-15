@@ -209,6 +209,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         Assumptions.assumeTrue(permutation.testSetupEnvironment.connection != null, "Skipping test: " + permutation.testSetupEnvironment.errorMessage)
 
         def testDef = permutation.definition
+        Assumptions.assumeFalse(testDef.disabled, "Skipping disabled test " + testDef.description)
 
         Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(permutation.testSetupEnvironment.connection))
 
@@ -869,7 +870,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         private Map<String, ?> arguments = new HashMap<>()
         private Map<String, ?> expectedFileContent = new HashMap<>()
         private Map<String, Object> expectedDatabaseContent = new HashMap<>()
-        private Closure<Void> expectations = null;
+        private Closure<Void> expectations = null
+        private boolean disabled = false
 
         private List<TestSetup> setup
 
@@ -942,7 +944,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         }
 
         def setSupportedOs(ArrayList<OperatingSystem> supportedOs) {
-            this.supportedOs = supportedOs;
+            this.supportedOs = supportedOs
         }
 
         def setExpectedFileContent(Map<String, Object> content) {
@@ -950,7 +952,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         }
 
         def setExpectations(Closure<Void> expectations) {
-            this.expectations = expectations;
+            this.expectations = expectations
         }
 
         def setExpectedDatabaseContent(Map<String, Object> content) {
@@ -1052,6 +1054,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         def setExpectFileToNotExist(File expectedFile) {
             this.expectFileToNotExist = expectedFile
+        }
+
+        def setDisabled(boolean disabled) {
+            this.disabled = disabled
         }
 
         void validate() {
@@ -1294,7 +1300,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         List<Resource> getAll(String path) throws IOException {
             def list = super.getAll(path)
             if (list != null && !list.isEmpty()) {
-                return list;
+                return list
             }
 
             return super.getAll(new File(path).getName())
@@ -1425,7 +1431,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
 
         @Override
         def <T> T prompt(String prompt, T valueIfNoEntry, InputHandler<T> inputHandler, Class<T> type) {
-            this.sendMessage(prompt + ": ");
+            this.sendMessage(prompt + ": ")
             return valueIfNoEntry
         }
 
