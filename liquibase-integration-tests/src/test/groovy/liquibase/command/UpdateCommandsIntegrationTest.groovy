@@ -106,7 +106,7 @@ class UpdateCommandsIntegrationTest extends Specification {
     def "run Update from Liquibase class using print writer"() {
         when:
         def liquibase = new Liquibase("liquibase/update-tests.yml", new ClassLoaderResourceAccessor(), h2.getDatabaseFromFactory())
-        liquibase.update(new Contexts(), new PrintWriter(System.out))
+        liquibase.updateSql(new Contexts(), null, new PrintWriter(System.out))
         h2.getConnection().createStatement().executeQuery("select count(1) from databasechangelog")
 
         then:

@@ -6,9 +6,11 @@ import liquibase.analytics.configuration.AnalyticsConfigurationFactory;
 import liquibase.analytics.configuration.LiquibaseRemoteAnalyticsConfiguration;
 import liquibase.license.LicenseService;
 import liquibase.license.LicenseServiceFactory;
+import liquibase.license.LicenseServiceUtils;
 import liquibase.logging.Logger;
 import liquibase.serializer.core.yaml.YamlSerializer;
 import liquibase.util.ExceptionUtil;
+import liquibase.util.LiquibaseUtil;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -47,28 +49,20 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
 
     @Override
     public int getPriority() {
-        boolean analyticsEnabled = false;
-        try {
-            analyticsEnabled = AnalyticsArgs.isAnalyticsEnabled();
-        } catch (Exception e) {
-            Scope.getCurrentScope().getLog(AnalyticsListener.class).log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Failed to determine if analytics is enabled", e);
-        }
-        if (analyticsEnabled) {
-            return PRIORITY_SPECIALIZED;
-        } else {
-            return PRIORITY_NOT_APPLICABLE;
-        }
+        return PRIORITY_SPECIALIZED;
     }
 
     @Override
     public void handleEvent(Event event) throws Exception {
-        addSendEventsOnShutdownHook();
-        cachedEvents.add(event);
-        Integer maxCacheSize = Scope.getCurrentScope().get(Scope.Attr.maxAnalyticsCacheSize, getDefaultMaxAnalyticsCacheSize(event));
-        if (cachedEvents.size() >= maxCacheSize) {
-            flush();
-        } else {
-            Scope.getCurrentScope().getLog(getClass()).log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Caching analytics event to send later. Cache contains " + cachedEvents.size() + " event(s).", null);
+        if (isEnabled()) {
+            addSendEventsOnShutdownHook();
+            cachedEvents.add(event);
+            Integer maxCacheSize = Scope.getCurrentScope().get(Scope.Attr.maxAnalyticsCacheSize, getDefaultMaxAnalyticsCacheSize(event));
+            if (cachedEvents.size() >= maxCacheSize) {
+                flush();
+            } else {
+                Scope.getCurrentScope().getLog(getClass()).log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Caching analytics event to send later. Cache contains " + cachedEvents.size() + " event(s).", null);
+            }
         }
     }
 
@@ -115,41 +109,143 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
         });
 
         try {
-            URL url = new URL(analyticsConfiguration.getDestinationUrl());
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json; utf-8");
-            conn.setRequestProperty("Accept", "application/json");
-            conn.setConnectTimeout(analyticsConfiguration.getTimeoutMillis());
-            conn.setReadTimeout(analyticsConfiguration.getTimeoutMillis());
-            // Enable input and output streams
-            conn.setDoOutput(true);
-
-            DumperOptions dumperOptions = new DumperOptions();
-            dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
-            dumperOptions.setWidth(Integer.MAX_VALUE);
-            dumperOptions.setPrettyFlow(true);
-            Yaml yaml = new Yaml(dumperOptions);
-            yaml.setBeanAccess(BeanAccess.FIELD);
-
             AnalyticsBatch analyticsBatch = AnalyticsBatch.fromLiquibaseEvent(cachedEvents, userId);
-            String jsonInputString = YamlSerializer.removeClassTypeMarksFromSerializedJson(yaml.dumpAs(analyticsBatch, Tag.MAP, DumperOptions.FlowStyle.FLOW));
-            logger.log(logLevel, "Sending anonymous data to Liquibase analytics endpoint. " + System.lineSeparator() + jsonInputString, null);
-
-            IOUtils.write(jsonInputString, conn.getOutputStream(), StandardCharsets.UTF_8);
-
-            int responseCode = conn.getResponseCode();
-            String responseBody = ExceptionUtil.doSilently(() -> {
-                return IOUtils.toString(conn.getInputStream(), StandardCharsets.UTF_8);
-            });
-            logger.log(logLevel, "Response from Liquibase analytics endpoint: " + responseCode + " " + responseBody, null);
-            conn.disconnect();
-            cachedEvents.clear();
+            sendEvent(
+                    analyticsBatch,
+                    new URL(analyticsConfiguration.getDestinationUrl()),
+                    logger,
+                    logLevel,
+                    "Sending anonymous data to Liquibase analytics endpoint. ",
+                    "Response from Liquibase analytics endpoint: ",
+                    analyticsConfiguration.getTimeoutMillis(),
+                    analyticsConfiguration.getTimeoutMillis());
         } catch (Exception e) {
             if (e instanceof SocketTimeoutException) {
                 logger.log(logLevel, "Timed out while waiting for analytics event processing.", null);
             }
             throw e;
         }
+        cachedEvents.clear();
+    }
+
+    public static void sendEvent(Object requestBody, URL url, Logger logger, Level logLevel, String sendingLogMessage, String responseLogMessage, int connectTimeout, int readTimeout) throws Exception {
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/json; utf-8");
+        conn.setRequestProperty("Accept", "application/json");
+        // Enable input and output streams
+        conn.setDoOutput(true);
+        conn.setConnectTimeout(connectTimeout);
+        conn.setReadTimeout(readTimeout);
+
+        DumperOptions dumperOptions = new DumperOptions();
+        dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
+        dumperOptions.setWidth(Integer.MAX_VALUE);
+        dumperOptions.setPrettyFlow(true);
+        Yaml yaml = new Yaml(dumperOptions);
+        yaml.setBeanAccess(BeanAccess.FIELD);
+
+        String jsonInputString = YamlSerializer.removeClassTypeMarksFromSerializedJson(yaml.dumpAs(requestBody, Tag.MAP, DumperOptions.FlowStyle.FLOW));
+        logger.log(logLevel, sendingLogMessage + System.lineSeparator() + jsonInputString, null);
+
+        IOUtils.write(jsonInputString, conn.getOutputStream(), StandardCharsets.UTF_8);
+
+        int responseCode = conn.getResponseCode();
+        String responseBody = ExceptionUtil.doSilently(() -> {
+            return IOUtils.toString(conn.getInputStream());
+        });
+        logger.log(logLevel, responseLogMessage + responseCode + " " + responseBody, null);
+        conn.disconnect();
+    }
+
+    /**
+     * Check whether analytics are enabled. This method handles all the various ways that
+     * analytics can be enabled or disabled and should be the primary way to validate
+     * whether analytics are turned on. You should not use the argument {@link AnalyticsArgs#ENABLED}.
+     * @return true if analytics are enabled, false otherwise.
+     * @throws Exception if there was a problem determining the enabled status of analytics
+     */
+    @Override
+    public boolean isEnabled() {
+        Logger log = Scope.getCurrentScope().getLog(AnalyticsArgs.class);
+
+        if (!isDevAnalyticsEnabled(log)) {
+            return false;
+        }
+
+        Boolean userSuppliedEnabled = didUserEnableAnalytics(log);
+        if (Boolean.FALSE.equals(userSuppliedEnabled)) {
+            return false;
+        }
+
+        return isAnalyticsEnabledBasedOnLicense(log, userSuppliedEnabled);
+    }
+
+    protected Boolean didUserEnableAnalytics(Logger log) {
+        Boolean userSuppliedEnabled = AnalyticsArgs.ENABLED.getCurrentValue();
+        if (Boolean.FALSE.equals(userSuppliedEnabled)) {
+            log.log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "User has disabled analytics.", null);
+            return false;
+        }
+        return userSuppliedEnabled;
+    }
+
+    protected boolean isDevAnalyticsEnabled(Logger log) {
+        Boolean devOverride = AnalyticsArgs.DEV_OVERRIDE.getCurrentValue();
+        if (LiquibaseUtil.isDevVersion() && Boolean.FALSE.equals(devOverride)) {
+            log.severe("Analytics is disabled because this is not a release build and the user has not provided a value for the " + AnalyticsArgs.DEV_OVERRIDE.getKey() + " option.");
+            return false;
+        }
+        String configEndpointUrl = AnalyticsArgs.CONFIG_ENDPOINT_URL.getCurrentValue();
+        if (Boolean.TRUE.equals(devOverride) && AnalyticsArgs.CONFIG_ENDPOINT_URL.getDefaultValue().equals(configEndpointUrl)) {
+            log.severe("Analytics is disabled because " + AnalyticsArgs.DEV_OVERRIDE.getKey() + " was set to true, but the default " +
+                    "value was used for the " + AnalyticsArgs.CONFIG_ENDPOINT_URL.getKey() + " property. This is not permitted, because " +
+                    "dev versions of Liquibase should not be pushing analytics towards the prod analytics stack. To resolve " +
+                    "this, provide a value for " + AnalyticsArgs.CONFIG_ENDPOINT_URL.getKey() + " that is not the default value.");
+            return false;
+        }
+        return true;
+    }
+
+    protected boolean isAnalyticsEnabledBasedOnLicense(Logger log, Boolean userSuppliedEnabled) {
+        boolean proLicenseValid = LicenseServiceUtils.isProLicenseValid();
+        AnalyticsConfigurationFactory analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class);
+
+        if (proLicenseValid) {
+            if (Boolean.TRUE.equals(userSuppliedEnabled)) {
+                boolean enabled = isProRemoteAnalyticsEnabled(analyticsConfigurationFactory);
+                if (Boolean.FALSE.equals(enabled)) {
+                    log.log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Analytics is disabled, because a pro license was detected and analytics was not enabled by the user or because it was turned off by Liquibase.", null);
+                }
+                return enabled;
+            }
+            return false;
+        } else {
+            boolean enabled = isOssRemoteAnalyticsEnabled(analyticsConfigurationFactory);
+            if (Boolean.FALSE.equals(enabled)) {
+                log.log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Analytics is disabled, because it was turned off by Liquibase.", null);
+            }
+            return enabled;
+        }
+    }
+
+    protected static boolean isOssRemoteAnalyticsEnabled(AnalyticsConfigurationFactory analyticsConfigurationFactory) {
+        boolean enabled;
+        try {
+            enabled = analyticsConfigurationFactory.getPlugin().isOssAnalyticsEnabled();
+        } catch (Exception couldNotDetermineRemoteAnalytics) {
+            enabled = false;
+        }
+        return enabled;
+    }
+
+    protected boolean isProRemoteAnalyticsEnabled(AnalyticsConfigurationFactory analyticsConfigurationFactory) {
+        boolean enabled;
+        try {
+            enabled = analyticsConfigurationFactory.getPlugin().isProAnalyticsEnabled();
+        } catch (Exception couldNotDetermineRemoteAnalytics) {
+            enabled = false;
+        }
+        return enabled;
     }
 }

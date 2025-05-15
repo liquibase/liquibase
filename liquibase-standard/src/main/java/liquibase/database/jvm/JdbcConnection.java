@@ -7,7 +7,10 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 
 import java.sql.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,6 +21,7 @@ import java.util.regex.Pattern;
 public class JdbcConnection implements DatabaseConnection {
     private java.sql.Connection con;
     private static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
+    private String originalUrl; // Store the original URL for OAuth validation
 
     private static final List<ConnectionPatterns> JDBC_CONNECTION_PATTERNS = Scope.getCurrentScope().getServiceLocator().findInstances(ConnectionPatterns.class);
 
@@ -39,6 +43,8 @@ public class JdbcConnection implements DatabaseConnection {
         String driverClassName = driverObject.getClass().getName();
         String errorMessage = "Connection could not be created to " + sanitizeUrl(url) + " with driver " + driverClassName;
         try {
+            this.originalUrl = url;
+            
             this.con = driverObject.connect(url, driverProperties);
             if (this.con == null) {
                 throw new DatabaseException(errorMessage + ".  Possibly the wrong driver for the given database URL");
@@ -112,17 +118,29 @@ public class JdbcConnection implements DatabaseConnection {
     /**
      * Remove any secure information from the URL. Used for logging purposes
      * Strips off the <code>;password=</code> property from string.
-     * Note: it does not remove the password from the
-     * <code>user:password@host</code> section
      *
      * @param  url string to remove password=xxx from
      * @return modified string
      */
     public static String sanitizeUrl(String url) {
-        return obfuscateCredentialsPropFromJdbcUrl(url);
+        return sanitizeUrl(url, false);
     }
 
-    private static String obfuscateCredentialsPropFromJdbcUrl(String jdbcUrl) {
+    /**
+     * Remove any secure information from the URL. Used for logging purposes
+     * Strips off the <code>;password=</code> property from string.
+     *
+     * @param  url string to remove password=xxx from
+     * @param replaceWithEmpty if true, the entire username and password string will be completely removed. If false,
+     *                         the username and password will be obfuscated with asterisks. Note that this is only partially
+     *                         implemented, and is only supporting usernames and passwords in the host part of the URL.
+     * @return modified string
+     */
+    public static String sanitizeUrl(String url, boolean replaceWithEmpty) {
+        return obfuscateCredentialsPropFromJdbcUrl(url, replaceWithEmpty);
+    }
+
+    private static String obfuscateCredentialsPropFromJdbcUrl(String jdbcUrl, boolean replaceWithEmpty) {
         if (jdbcUrl == null || (jdbcUrl != null && jdbcUrl.equals(""))) {
             return jdbcUrl;
         }
@@ -137,6 +155,20 @@ public class JdbcConnection implements DatabaseConnection {
 
         if (!JDBC_CONNECTION_PATTERNS.isEmpty()) {
             for (ConnectionPatterns jdbcConnectionPattern : JDBC_CONNECTION_PATTERNS) {
+                if (replaceWithEmpty) {
+                    for (Map.Entry<Pattern, Pattern> entry : jdbcConnectionPattern.getPatternJdbcBlankToObfuscateReplaceWithEmpty()) {
+                        Pattern jdbcUrlPattern = entry.getKey();
+                        Matcher matcher = jdbcUrlPattern.matcher(jdbcUrl);
+                        if (matcher.matches()) {
+                            Pattern pattern = entry.getValue();
+                            Matcher actualMatcher = pattern.matcher(jdbcUrl);
+                            if (actualMatcher.find()) {
+                                jdbcUrl = jdbcUrl.replace(actualMatcher.group(1) + actualMatcher.group(2) + actualMatcher.group(3), "");
+                            }
+                        }
+                    }
+                }
+
                 for (Map.Entry<Pattern, Pattern> entry : jdbcConnectionPattern.getJdbcBlankToObfuscatePatterns()) {
                     Pattern jdbcUrlPattern = entry.getKey();
                     Matcher matcher = jdbcUrlPattern.matcher(jdbcUrl);
@@ -207,7 +239,14 @@ public class JdbcConnection implements DatabaseConnection {
     @Override
     public String getConnectionUserName() {
         try {
-            return con.getMetaData().getUserName();
+            String username = con.getMetaData().getUserName();
+            // Handle Snowflake OAuth authentication with null username
+            // TODO: Move this to Snowflake extension later when appropriate
+            if (username == null && originalUrl != null && originalUrl.startsWith("jdbc:snowflake:") 
+                && originalUrl.contains("authenticator=oauth")) {
+                return "oauth-authenticated-user";
+            }
+            return username;
         } catch (SQLException e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -545,6 +584,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public Connection getUnderlyingConnection() {
         return con;
     }

@@ -149,9 +149,12 @@ public class CommandFactory implements SingletonObject {
     }
 
     private void adjustCommandDefinitionForSteps(CommandDefinition commandDefinition) {
+        boolean allInternal = true;
         for (CommandStep step : commandDefinition.getPipeline()) {
             step.adjustCommandDefinition(commandDefinition);
+            allInternal = step.isInternal() && allInternal;
         }
+        commandDefinition.setInternal(allInternal);
     }
 
     /**

@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class LockServiceCommandStep extends AbstractHelperCommandStep implements CleanUpCommandStep {
 
-    protected static final String[] COMMAND_NAME = {"lockServiceCommandStep"};
+    public static final String[] COMMAND_NAME = {"lockServiceCommandStep"};
 
     private boolean isDBLocked = false;
 
