@@ -37,7 +37,10 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
         validationErrors.checkRequiredField("newColumnName", renameColumnStatement.getNewColumnName());
 
         if (database instanceof MySQLDatabase) {
-            validationErrors.checkRequiredField("columnDataType", StringUtil.trimToNull(renameColumnStatement.getColumnDataType()));
+            MySQLDatabase mySQLDatabase = (MySQLDatabase) database;
+            if (!isRenameKeywordSupported(mySQLDatabase)) {
+                validationErrors.checkRequiredField("columnDataType", StringUtil.trimToNull(renameColumnStatement.getColumnDataType()));
+            }
         }
 
         return validationErrors;
@@ -81,21 +84,24 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
     }
 
     private String generateMysqlStatement(MySQLDatabase database, RenameColumnStatement statement) {
-        String sql;
+        return isRenameKeywordSupported(database)
+                ? "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " RENAME COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " TO " + statement.getNewColumnName()
+                : "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " CHANGE " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database);
+    }
+
+    private boolean isRenameKeywordSupported(MySQLDatabase database) {
         try {
-            boolean isMariaDB = database instanceof MariaDBDatabase;
-            boolean isRenameKeywordSupported = isMariaDB
-                    // https://mariadb.com/kb/en/alter-table/#rename-column
-                    ? (database.getDatabaseMajorVersion() == 10 && database.getDatabaseMinorVersion() >= 5) // RENAME
-                    || database.getDatabaseMajorVersion() >= 11
-                    : database.getDatabaseMajorVersion() >= 8; // https://dev.mysql.com/worklog/task/?id=10761 RENAME COLUMN introduced in v8
-            sql = isRenameKeywordSupported
-                    ? "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " RENAME COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " TO " + statement.getNewColumnName()
-                    : "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " CHANGE " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database);
-        } catch (DatabaseException ignored) {
-            sql ="ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " CHANGE " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database);
+            if (database instanceof MariaDBDatabase) {
+                // https://mariadb.com/kb/en/alter-table/#rename-column
+                return (database.getDatabaseMajorVersion() == 10 && database.getDatabaseMinorVersion() >= 5) // RENAME
+                        || database.getDatabaseMajorVersion() >= 11;
+            } else {
+                // https://dev.mysql.com/worklog/task/?id=10761 RENAME COLUMN introduced in v8
+                return database.getDatabaseMajorVersion() >= 8;
+            }
+        } catch (DatabaseException e) {
+            throw new RuntimeException(e);
         }
-        return sql;
     }
 
     protected Column getAffectedOldColumn(RenameColumnStatement statement) {
