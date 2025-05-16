@@ -390,7 +390,6 @@ jobs:
               git clone https://github.com/liquibase/$ext.git $ext
               cd $ext
               git checkout $matching_branch || echo "Branch $matching_branch not found, staying on default"
-              git branch -a
               sed -i "s/<liquibase.version>.*<\/liquibase.version>/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/" pom.xml
               mvn versions:set -DnewVersion=0-SNAPSHOT
 
@@ -400,7 +399,6 @@ jobs:
               done
 
               mvn clean install -DskipTests
-              echo $ext
               mkdir -p $PWD/.github/util/
               curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/$liquibase_branch/.github/util/re-version.sh
               curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/$liquibase_branch/.github/util/sign-artifacts.sh
