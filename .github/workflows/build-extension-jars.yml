@@ -372,8 +372,8 @@ jobs:
         continue-on-error: true
         run: |
           matching_branch=${{ needs.matching-branch-logic-extensions.outputs.extensions_branch }}
-          # if matching_branch is main set liqubase_branch to master as liquibase has no main branch
 
+          # if matching_branch is main set liqubase_branch to master as liquibase has no main branch
           if [ "$matching_branch" == "main" ]; then
             liquibase_branch="master"
           else
@@ -402,13 +402,9 @@ jobs:
               mvn clean install -DskipTests
               echo $ext
               mkdir -p $PWD/.github/util/
-              echo "before 1st curl"
               curl -o $PWD/.github/util/re-version.sh https://raw.githubusercontent.com/liquibase/liquibase/$liquibase_branch/.github/util/re-version.sh
-              echo "after 1st curl"
               curl -o $PWD/.github/util/sign-artifacts.sh https://raw.githubusercontent.com/liquibase/liquibase/$liquibase_branch/.github/util/sign-artifacts.sh
-              echo "before 2 curl"
               curl -o $PWD/.github/util/ManifestReversion.java https://raw.githubusercontent.com/liquibase/liquibase/$liquibase_branch/.github/util/ManifestReversion.java
-              echo "after 2 curl"
               chmod +x $PWD/.github/util/re-version.sh
               chmod +x $PWD/.github/util/sign-artifacts.sh
               chmod +x $PWD/.github/util/ManifestReversion.java
