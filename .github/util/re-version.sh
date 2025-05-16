@@ -71,7 +71,8 @@ for jar in "${jars[@]}"
 do
   ## MANIFEST.MF settings
   unzip -q $workdir/$jar META-INF/* -d $workdir
-
+  
+  javac "$scriptDir/ManifestReversion.java"
   java -cp $scriptDir ManifestReversion $workdir/META-INF/MANIFEST.MF $version
   find $workdir/META-INF -name pom.xml -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/g" {} \;
   find $workdir/META-INF -name pom.xml -exec sed -i -e "s/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/<liquibase.version>$version<\/liquibase.version>/g" {} \;
