@@ -2,7 +2,7 @@ name: Attach Artifacts To Draft Release
 
 permissions:
   contents: write
-  actions: read
+  actions: write
   packages: write
   id-token: write
 
