@@ -7,7 +7,10 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 
 import java.sql.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -115,17 +118,29 @@ public class JdbcConnection implements DatabaseConnection {
     /**
      * Remove any secure information from the URL. Used for logging purposes
      * Strips off the <code>;password=</code> property from string.
-     * Note: it does not remove the password from the
-     * <code>user:password@host</code> section
      *
      * @param  url string to remove password=xxx from
      * @return modified string
      */
     public static String sanitizeUrl(String url) {
-        return obfuscateCredentialsPropFromJdbcUrl(url);
+        return sanitizeUrl(url, false);
     }
 
-    private static String obfuscateCredentialsPropFromJdbcUrl(String jdbcUrl) {
+    /**
+     * Remove any secure information from the URL. Used for logging purposes
+     * Strips off the <code>;password=</code> property from string.
+     *
+     * @param  url string to remove password=xxx from
+     * @param replaceWithEmpty if true, the entire username and password string will be completely removed. If false,
+     *                         the username and password will be obfuscated with asterisks. Note that this is only partially
+     *                         implemented, and is only supporting usernames and passwords in the host part of the URL.
+     * @return modified string
+     */
+    public static String sanitizeUrl(String url, boolean replaceWithEmpty) {
+        return obfuscateCredentialsPropFromJdbcUrl(url, replaceWithEmpty);
+    }
+
+    private static String obfuscateCredentialsPropFromJdbcUrl(String jdbcUrl, boolean replaceWithEmpty) {
         if (jdbcUrl == null || (jdbcUrl != null && jdbcUrl.equals(""))) {
             return jdbcUrl;
         }
@@ -140,6 +155,20 @@ public class JdbcConnection implements DatabaseConnection {
 
         if (!JDBC_CONNECTION_PATTERNS.isEmpty()) {
             for (ConnectionPatterns jdbcConnectionPattern : JDBC_CONNECTION_PATTERNS) {
+                if (replaceWithEmpty) {
+                    for (Map.Entry<Pattern, Pattern> entry : jdbcConnectionPattern.getPatternJdbcBlankToObfuscateReplaceWithEmpty()) {
+                        Pattern jdbcUrlPattern = entry.getKey();
+                        Matcher matcher = jdbcUrlPattern.matcher(jdbcUrl);
+                        if (matcher.matches()) {
+                            Pattern pattern = entry.getValue();
+                            Matcher actualMatcher = pattern.matcher(jdbcUrl);
+                            if (actualMatcher.find()) {
+                                jdbcUrl = jdbcUrl.replace(actualMatcher.group(1) + actualMatcher.group(2) + actualMatcher.group(3), "");
+                            }
+                        }
+                    }
+                }
+
                 for (Map.Entry<Pattern, Pattern> entry : jdbcConnectionPattern.getJdbcBlankToObfuscatePatterns()) {
                     Pattern jdbcUrlPattern = entry.getKey();
                     Matcher matcher = jdbcUrlPattern.matcher(jdbcUrl);
@@ -555,6 +584,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public Connection getUnderlyingConnection() {
         return con;
     }

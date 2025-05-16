@@ -1,5 +1,7 @@
 package liquibase.database.jvm;
 
+import lombok.Getter;
+
 import java.util.AbstractMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -23,6 +25,8 @@ public abstract class ConnectionPatterns {
     private final Set<Map.Entry<Pattern, Pattern>> patternJdbcBlank = new HashSet<>();
     private final Set<Map.Entry<Pattern, Pattern>> patternJdbcBlankToObfuscate = new HashSet<>();
     private final Set<Map.Entry<Pattern, Pattern>> patternJdbcObfuscate = new HashSet<>();
+    @Getter
+    private final Set<Map.Entry<Pattern, Pattern>> patternJdbcBlankToObfuscateReplaceWithEmpty = new HashSet<>();
 
     public Set<Map.Entry<Pattern, Pattern>> getJdbcBlankPatterns() {
         return patternJdbcBlank;
@@ -59,6 +63,17 @@ public abstract class ConnectionPatterns {
      */
     public void addJdbcBlankToObfuscatePatterns(Map.Entry<Pattern, Pattern> patternJdbcBlankToObfuscate) {
         this.patternJdbcBlankToObfuscate.add(patternJdbcBlankToObfuscate);
+    }
+
+    /**
+     * Holds credential patterns that are located before the domain or subdomain part.
+     * They should be removed from the string.
+     * <p>
+     * jdbc:mariadb://<b>username:password@</b>localhost:3306/lbcat
+     * </p>
+     */
+    public void addJdbcBlankToObfuscatePatternsReplaceWithEmpty(Map.Entry<Pattern, Pattern> patternJdbcBlankToObfuscate) {
+        this.patternJdbcBlankToObfuscateReplaceWithEmpty.add(patternJdbcBlankToObfuscate);
     }
 
     /**

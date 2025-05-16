@@ -2,14 +2,16 @@ package liquibase.command;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.analytics.AnalyticsListener;
-import liquibase.analytics.Event;
 import liquibase.analytics.AnalyticsFactory;
+import liquibase.analytics.Event;
 import liquibase.configuration.*;
 import liquibase.database.Database;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.CommandValidationException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
+import liquibase.license.LicenseTrackList;
+import liquibase.license.LicenseTrackingArgs;
+import liquibase.license.LicenseTrackingFactory;
 import liquibase.listener.LiquibaseListener;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcManager;
@@ -20,7 +22,9 @@ import liquibase.util.ExceptionUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
 
-import java.io.*;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -237,9 +241,14 @@ public class CommandScope {
             return new Event(commandName);
         });
         Event parentAnalyticsEvent = Scope.getCurrentScope().getAnalyticsEvent();
+        LicenseTrackList licenseTrackList = new LicenseTrackList();
+        LicenseTrackList parentLicenseTrackList = Scope.getCurrentScope().getLicenseTrackList();
 
         try {
-            return Scope.child(Collections.singletonMap(Scope.Attr.analyticsEvent.toString(), analyticsEvent), () -> {
+            Map<String, Object> scopeValues = new HashMap<>();
+            scopeValues.put(Scope.Attr.analyticsEvent.toString(), analyticsEvent);
+            scopeValues.put(Scope.Attr.licenseTrackList.toString(), licenseTrackList);
+            return Scope.child(scopeValues, () -> {
                 CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
                 final List<CommandStep> pipeline = commandDefinition.getPipeline();
                 final List<CommandStep> executedCommands = new ArrayList<>();
@@ -319,6 +328,14 @@ public class CommandScope {
                             parentAnalyticsEvent.getChildEvents().add(analyticsEvent);
                         }
                     });
+                    if (Boolean.TRUE.equals(LicenseTrackingArgs.ENABLED.getCurrentValue())) {
+                        if (parentLicenseTrackList == null) {
+                            LicenseTrackingFactory licenseTrackingFactory = Scope.getCurrentScope().getSingleton(LicenseTrackingFactory.class);
+                            licenseTrackingFactory.handleEvent(licenseTrackList);
+                        } else {
+                            parentLicenseTrackList.getLicenseTracks().addAll(licenseTrackList.getLicenseTracks());
+                        }
+                    }
                 }
 
                 return resultsBuilder.build();
