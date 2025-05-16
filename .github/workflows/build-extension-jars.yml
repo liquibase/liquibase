@@ -71,21 +71,12 @@ jobs:
       matrix:
         dependencies: ${{ fromJson(needs.setup_matrix.outputs.dependencies_matrix) }}
     steps:
-      - name: Get GitHub App token
-        id: get-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          permission-packages: write
-          permission-contents: read
 
       - uses: actions/delete-package-versions@v5
         with:
           package-name: org.liquibase.ext.${{ matrix.dependencies }}
           package-type: "maven"
-          token: ${{ steps.get-token.outputs.token }}
+          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           ignore-versions: "^((?!${{ inputs.liquibase-version }}$).)*$"
 
   delete-extension-packages:
@@ -96,21 +87,12 @@ jobs:
       matrix:
         extensions: ${{ fromJson(needs.setup_matrix.outputs.extensions_matrix) }}
     steps:
-      - name: Get GitHub App token
-        id: get-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          permission-packages: write
-          permission-contents: read
 
       - uses: actions/delete-package-versions@v5
         with:
           package-name: org.liquibase.ext.${{ matrix.extensions }}
           package-type: "maven"
-          token: ${{ steps.get-token.outputs.token }}
+          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS}}
           ignore-versions: "^((?!${{ inputs.liquibase-version }}$).)*$"
 
   matching-branch-logic-extensions:
@@ -174,21 +156,11 @@ jobs:
     runs-on: ubuntu-22.04
     continue-on-error: true
     steps:
-      - name: Get GitHub App token
-        id: get-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          permission-packages: write
-          permission-contents: read
-
       - uses: actions/delete-package-versions@v5
         with:
           package-name: org.liquibase.ext.liquibase-checks
           package-type: "maven"
-          token: ${{ steps.get-token.outputs.token }}
+          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
           ignore-versions: "^((?!${{ needs.get-liquibase-checks-version.outputs.version }}$).)*$"
 
   build-liquibase-checks:
