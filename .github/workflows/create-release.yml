@@ -385,6 +385,21 @@ jobs:
           EOF
           mv pkcs11properties.cfg $(pwd)/.github/util/
 
+      - name: Install Android SDK & Build Tools
+        run: |
+          ANDROID_SDK_ROOT=$HOME/android-sdk
+          mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+          cd "$ANDROID_SDK_ROOT/cmdline-tools"
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O tools.zip
+          unzip tools.zip -d tools
+          rm tools.zip
+          
+          echo "y" | tools/bin/sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "platform-tools" "build-tools;30.0.2"
+
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          echo "$ANDROID_SDK_ROOT/build-tools/30.0.2" >> $GITHUB_PATH
+          echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
+
       - name: Install DigiCert KeyLocker Client Tools
         uses: digicert/ssm-code-signing@v1.0.0
 
