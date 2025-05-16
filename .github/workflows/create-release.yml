@@ -347,10 +347,13 @@ jobs:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
 
+       # https://github.com/actions/setup-java/tree/v4/?tab=readme-ov-file#install-multiple-jdks   
       - name: Set up JDK for GPG
         uses: actions/setup-java@v4
         with:
-          java-version: "8"
+          java-version: |
+            17
+            8
           distribution: "adopt"
           gpg-private-key: ${{ secrets.GPG_SECRET }}
           gpg-passphrase: GPG_PASSPHRASE
@@ -387,6 +390,12 @@ jobs:
 
       - name: Install Android SDK & Build Tools
         run: |
+
+          export JAVA_HOME=${JAVA_HOME_17_x64}
+          export PATH="$JAVA_HOME/bin:$PATH"
+
+          java -version
+
           ANDROID_SDK_ROOT=$HOME/android-sdk
           mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
           cd "$ANDROID_SDK_ROOT/cmdline-tools"
@@ -403,6 +412,7 @@ jobs:
           echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
           echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
           echo "$ANDROID_SDK_ROOT/build-tools/30.0.2" >> $GITHUB_PATH
+
       - name: Install DigiCert KeyLocker Client Tools
         uses: digicert/ssm-code-signing@v1.0.0
 
