@@ -217,12 +217,12 @@ jobs:
               {
                 "id": "liquibase",
                 "username": "liquibot",
-                "password": "${{ steps.get-token.outputs.token }}"
+                "password": "${{ secrets.LIQUIBASE_GITHUB_APP_TOKEN }}"
               },
               {
                 "id": "liquibase-pro",
                 "username": "liquibot",
-                "password": "${{ steps.get-token.outputs.token }}"
+                "password": "${{ secrets.LIQUIBASE_GITHUB_APP_TOKEN }}"
               }
             ]
 
