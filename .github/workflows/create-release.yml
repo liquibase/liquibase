@@ -307,8 +307,7 @@ jobs:
           mv re-version/out/liquibase-commercial-${{ needs.setup.outputs.version }}.jar re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
-          # Move all liquibase-minimal files to s3-minimal to ensure they don't get included in the additional zip
-          mv re-version/out/liquibase-minimal-${{ needs.setup.outputs.version }}* re-version/s3-minimal/
+          mv re-version/out/liquibase-minimal-${{ needs.setup.outputs.version }}.zip re-version/s3-minimal
           mv re-version/out/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/final/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar
           (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
