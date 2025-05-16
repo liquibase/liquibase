@@ -110,7 +110,7 @@ jobs:
         with:
           package-name: org.liquibase.ext.${{ matrix.extensions }}
           package-type: "maven"
-          token: ${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}
+          token: ${{ steps.get-token.outputs.token }}
           ignore-versions: "^((?!${{ inputs.liquibase-version }}$).)*$"
 
   matching-branch-logic-extensions:
