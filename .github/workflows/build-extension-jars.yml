@@ -78,8 +78,8 @@ jobs:
           app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
           private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-          permission-packages: write
-          permission-contents: read
+          permission-packages: delete
+          permission-contents: write
 
       - uses: actions/delete-package-versions@v5
         with:
@@ -103,8 +103,8 @@ jobs:
           app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
           private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-          permission-packages: write
-          permission-contents: read
+          permission-packages: delete
+          permission-contents: write
 
       - uses: actions/delete-package-versions@v5
         with:
