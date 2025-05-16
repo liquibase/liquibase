@@ -9,13 +9,20 @@ import liquibase.command.CommandResultsBuilder;
 import liquibase.command.CommandScope;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
+import liquibase.license.LicenseTrack;
+import liquibase.license.LicenseTrackingArgs;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.util.ExceptionUtil;
 import org.apache.commons.lang3.StringUtils;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -126,7 +133,9 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
                 throw new DatabaseException(e);
             }
         }
-        logMdc(url == null ? database.get().getConnection().getURL() : url, database.get());
+        String urlForLogging = url == null ? database.get().getConnection().getURL() : url;
+        logMdc(urlForLogging, database.get());
+        logLicenseUsage(urlForLogging, database.get());
         return database.get();
     }
 
@@ -155,6 +164,45 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
         ExceptionUtil.doSilently(() -> {
             Scope.getCurrentScope().getAnalyticsEvent().setDatabaseVersion(database.getDatabaseProductVersion());
         });
+    }
+
+    private void logLicenseUsage(String url, Database database) {
+        if (Boolean.TRUE.equals(LicenseTrackingArgs.ENABLED.getCurrentValue())) {
+            try {
+                DatabaseConnection connection = database.getConnection();
+                Connection underlyingConnection = connection.getUnderlyingConnection();
+                String schema = underlyingConnection == null ? null : underlyingConnection.getSchema();
+                String catalog = underlyingConnection == null ? null : underlyingConnection.getCatalog();
+                Scope.getCurrentScope().getLicenseTrackList().getLicenseTracks().add(new LicenseTrack(removeQueryParameters(JdbcConnection.sanitizeUrl(url, true)), schema, catalog));
+            } catch (SQLException | URISyntaxException e) {
+                Scope.getCurrentScope().getLog(getClass()).severe("Failed to handle license tracking event", e);
+            }
+        }
+    }
+
+    private static String removeQueryParameters(String jdbcUrl) throws URISyntaxException {
+        String jdbcPrefix = "jdbc:";
+        boolean startsWithJdbc = jdbcUrl.startsWith(jdbcPrefix);
+        URI uri = new URI(jdbcUrl.replaceFirst(jdbcPrefix, StringUtils.EMPTY));
+        String cleanedUri = uri.toString();
+        try {
+            // This the more robust (IMO) way of stripping parameters, but doesn't work for all path formats.
+            cleanedUri = new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), null, uri.getFragment()).toString();
+        } catch (Exception e) {
+            // Remove the query parameters manually.
+            cleanedUri = cleanedUri.split("\\?")[0];
+        }
+        // Neither of the methods for cleansing the parameters handle SQL Server type parameters, so these must be handled manually.
+        cleanedUri = cleanedUri.split("\\;")[0];
+
+        if (startsWithJdbc) {
+            cleanedUri = jdbcPrefix + cleanedUri;
+        }
+        // Remove trailing slash
+        if (cleanedUri.endsWith("/")) {
+            cleanedUri = cleanedUri.substring(0, cleanedUri.length() - 1);
+        }
+        return cleanedUri;
     }
 
     @Override

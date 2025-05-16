@@ -242,6 +242,15 @@ Global Options
                                'LIQUIBASE_INCLUDE_RELATIONS_FOR_COMPUTED_COLUMNS
                                ')
 
+      --include-schema-name-for-default=PARAM
+                             If true, the schema name is included for the
+                               default schema when loading a snapshot
+                             DEFAULT: false
+                             (defaults file: 'liquibase.
+                               includeSchemaNameForDefault', environment
+                               variable:
+                               'LIQUIBASE_INCLUDE_SCHEMA_NAME_FOR_DEFAULT')
+
       --include-system-classpath=PARAM
                              Include the system classpath when resolving
                                classes at runtime
