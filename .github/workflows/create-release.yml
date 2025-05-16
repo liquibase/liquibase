@@ -390,26 +390,21 @@ jobs:
 
       - name: Install Android SDK & Build Tools
         run: |
-          # Use preinstalled Java 17
-          export JAVA_HOME=${JAVA_HOME_17_x64}
-          export PATH="$JAVA_HOME/bin:$PATH"
-          java -version
+          ANDROID_SDK_ROOT=$HOME/android-sdk
+          mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+          cd "$ANDROID_SDK_ROOT/cmdline-tools"
+          
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O tools.zip
+          unzip tools.zip -d temp
+          rm tools.zip
+          mv temp/cmdline-tools "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+      
+          echo "y" | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
+            --sdk_root="$ANDROID_SDK_ROOT" \
+            "platform-tools" "build-tools;30.0.2"
 
-          # Use preinstalled Android SDK location
-          export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
-          export ANDROID_HOME=$ANDROID_SDK_ROOT
-          export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH"
-
-          # Install required build tools version
-          echo "y" | sdkmanager "platform-tools" "build-tools;30.0.2"
-
-          # Persist these for later steps
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-          echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
-          echo "$ANDROID_SDK_ROOT/build-tools/30.0.2" >> $GITHUB_PATH
-          echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
-
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          
       - name: Install DigiCert KeyLocker Client Tools
         uses: digicert/ssm-code-signing@v1.0.0
 
