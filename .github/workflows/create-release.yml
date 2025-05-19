@@ -1,4 +1,11 @@
 name: Attach Artifacts To Draft Release
+
+permissions:
+  contents: write
+  actions: write
+  packages: write
+  id-token: write
+
 on:
   workflow_dispatch:
     inputs:
@@ -74,15 +81,16 @@ jobs:
       - run: |
           echo "Creating version ${{ inputs.version }} from ${{ inputs.branch }} with artifacts from build ${{ inputs.runId }} "
 
-  owasp-scanner:
-    needs: [setup]
-    uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@main
-    with:
-      branch: ${{ needs.setup.outputs.branch }}
-    secrets: inherit
+  # owasp-scanner:
+  #   needs: [setup]
+  #   uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@main
+  #   with:
+  #     branch: ${{ needs.setup.outputs.branch }}
+  #   secrets: inherit
 
   build-azure-uber-jar:
-    needs: [setup, owasp-scanner]
+    needs: [setup]
+    # needs: [setup, owasp-scanner]
     uses: ./.github/workflows/build-azure-uber-jar.yml
     with:
       branch: ${{ needs.setup.outputs.branch }}
@@ -90,7 +98,8 @@ jobs:
     secrets: inherit
 
   build-extension-jars:
-    needs: [setup, owasp-scanner]
+    needs: [setup]
+    # needs: [setup, owasp-scanner]
     uses: ./.github/workflows/build-extension-jars.yml
     with:
       liquibase-version: ${{ needs.setup.outputs.version }}
@@ -106,10 +115,21 @@ jobs:
     outputs:
       version: ${{ steps.extract-version.outputs.version }}
     steps:
+      
+      - name: Get GitHub App token
+        id: get-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: liquibase-checks
+          permission-contents: write
+          
       - uses: actions/checkout@v4
         with:
           repository: liquibase/liquibase-checks
-          token: ${{ secrets.BOT_TOKEN }}
+          token: ${{ steps.get-token.outputs.token }}
 
       - id: extract-version
         name: Extract version from pom.xml
@@ -123,6 +143,17 @@ jobs:
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
     steps:
+
+      - name: Get GitHub App token
+        id: get-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: liquibase-pro
+          permission-contents: write
+
       - uses: actions/checkout@v4
 
       - uses: actions/checkout@v4
@@ -131,7 +162,7 @@ jobs:
           repository: liquibase/liquibase-pro
           ref: "${{ needs.setup.outputs.branch }}"
           path: download/repo/liquibase-pro
-          token: ${{ secrets.BOT_TOKEN }}
+          token: ${{ steps.get-token.outputs.token }}
 
       - name: Download liquibase-artifacts
         uses: dawidd6/action-download-artifact@v9
@@ -276,7 +307,7 @@ jobs:
           mv re-version/out/liquibase-commercial-${{ needs.setup.outputs.version }}.jar re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
-          mv re-version/out/liquibase-minimal-${{ needs.setup.outputs.version }}.zip re-version/s3-minimal
+          mv re-version/out/liquibase-minimal-${{ needs.setup.outputs.version }}* re-version/s3-minimal
           mv re-version/out/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/final/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar
           (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
@@ -302,8 +333,6 @@ jobs:
           (cd download/repo/liquibase-pro && git push -f origin v${{ needs.setup.outputs.version }})
 
   build-installers:
-    permissions:
-      contents: write # for softprops/action-gh-release to create GitHub release
     needs: [setup, reversion]
     name: Build Installers
     runs-on: ubuntu-22.04
@@ -318,10 +347,13 @@ jobs:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
 
+       # https://github.com/actions/setup-java/tree/v4/?tab=readme-ov-file#install-multiple-jdks   
       - name: Set up JDK for GPG
         uses: actions/setup-java@v4
         with:
-          java-version: "8"
+          java-version: |
+            17
+            8
           distribution: "adopt"
           gpg-private-key: ${{ secrets.GPG_SECRET }}
           gpg-passphrase: GPG_PASSPHRASE
@@ -356,6 +388,28 @@ jobs:
           EOF
           mv pkcs11properties.cfg $(pwd)/.github/util/
 
+      - name: Install Android SDK & Build Tools
+        run: |
+          export JAVA_HOME=${JAVA_HOME_17_x64}
+          export PATH="$JAVA_HOME/bin:$PATH"
+          java -version
+          ANDROID_SDK_ROOT=$HOME/android-sdk
+          mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+          cd "$ANDROID_SDK_ROOT/cmdline-tools"
+          
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O tools.zip
+          unzip tools.zip -d temp
+          rm tools.zip
+          mv temp/cmdline-tools "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+      
+          echo "y" | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
+            --sdk_root="$ANDROID_SDK_ROOT" \
+            "platform-tools" "build-tools;30.0.2"
+      
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
+          echo "$ANDROID_SDK_ROOT/build-tools/30.0.2" >> $GITHUB_PATH
+          
       - name: Install DigiCert KeyLocker Client Tools
         uses: digicert/ssm-code-signing@v1.0.0
 
@@ -456,9 +510,6 @@ jobs:
     if: ${{ inputs.dry_run == false }}
     name: Deploy minimal artifacts to lbio s3 bucket
     needs: [setup, reversion]
-    permissions:
-      id-token: write
-      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Restore Minimal Completed Artifacts

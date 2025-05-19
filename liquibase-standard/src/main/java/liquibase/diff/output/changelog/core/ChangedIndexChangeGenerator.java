@@ -95,6 +95,7 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
         addIndexChange.setColumns(columns);
         addIndexChange.setIndexName(index.getName());
         addIndexChange.setUnique(index.isUnique());
+        addIndexChange.setUsing(index.getUsing());
 
         if (control.getIncludeCatalog()) {
             dropIndexChange.setCatalogName(index.getSchema().getCatalogName());

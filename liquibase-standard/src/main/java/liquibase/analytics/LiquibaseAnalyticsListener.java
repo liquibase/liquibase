@@ -109,42 +109,53 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
         });
 
         try {
-            URL url = new URL(analyticsConfiguration.getDestinationUrl());
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json; utf-8");
-            conn.setRequestProperty("Accept", "application/json");
-            conn.setConnectTimeout(analyticsConfiguration.getTimeoutMillis());
-            conn.setReadTimeout(analyticsConfiguration.getTimeoutMillis());
-            // Enable input and output streams
-            conn.setDoOutput(true);
-
-            DumperOptions dumperOptions = new DumperOptions();
-            dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
-            dumperOptions.setWidth(Integer.MAX_VALUE);
-            dumperOptions.setPrettyFlow(true);
-            Yaml yaml = new Yaml(dumperOptions);
-            yaml.setBeanAccess(BeanAccess.FIELD);
-
             AnalyticsBatch analyticsBatch = AnalyticsBatch.fromLiquibaseEvent(cachedEvents, userId);
-            String jsonInputString = YamlSerializer.removeClassTypeMarksFromSerializedJson(yaml.dumpAs(analyticsBatch, Tag.MAP, DumperOptions.FlowStyle.FLOW));
-            logger.log(logLevel, "Sending anonymous data to Liquibase analytics endpoint. " + System.lineSeparator() + jsonInputString, null);
-
-            IOUtils.write(jsonInputString, conn.getOutputStream(), StandardCharsets.UTF_8);
-
-            int responseCode = conn.getResponseCode();
-            String responseBody = ExceptionUtil.doSilently(() -> {
-                return IOUtils.toString(conn.getInputStream(), StandardCharsets.UTF_8);
-            });
-            logger.log(logLevel, "Response from Liquibase analytics endpoint: " + responseCode + " " + responseBody, null);
-            conn.disconnect();
-            cachedEvents.clear();
+            sendEvent(
+                    analyticsBatch,
+                    new URL(analyticsConfiguration.getDestinationUrl()),
+                    logger,
+                    logLevel,
+                    "Sending anonymous data to Liquibase analytics endpoint. ",
+                    "Response from Liquibase analytics endpoint: ",
+                    analyticsConfiguration.getTimeoutMillis(),
+                    analyticsConfiguration.getTimeoutMillis());
         } catch (Exception e) {
             if (e instanceof SocketTimeoutException) {
                 logger.log(logLevel, "Timed out while waiting for analytics event processing.", null);
             }
             throw e;
         }
+        cachedEvents.clear();
+    }
+
+    public static void sendEvent(Object requestBody, URL url, Logger logger, Level logLevel, String sendingLogMessage, String responseLogMessage, int connectTimeout, int readTimeout) throws Exception {
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/json; utf-8");
+        conn.setRequestProperty("Accept", "application/json");
+        // Enable input and output streams
+        conn.setDoOutput(true);
+        conn.setConnectTimeout(connectTimeout);
+        conn.setReadTimeout(readTimeout);
+
+        DumperOptions dumperOptions = new DumperOptions();
+        dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
+        dumperOptions.setWidth(Integer.MAX_VALUE);
+        dumperOptions.setPrettyFlow(true);
+        Yaml yaml = new Yaml(dumperOptions);
+        yaml.setBeanAccess(BeanAccess.FIELD);
+
+        String jsonInputString = YamlSerializer.removeClassTypeMarksFromSerializedJson(yaml.dumpAs(requestBody, Tag.MAP, DumperOptions.FlowStyle.FLOW));
+        logger.log(logLevel, sendingLogMessage + System.lineSeparator() + jsonInputString, null);
+
+        IOUtils.write(jsonInputString, conn.getOutputStream(), StandardCharsets.UTF_8);
+
+        int responseCode = conn.getResponseCode();
+        String responseBody = ExceptionUtil.doSilently(() -> {
+            return IOUtils.toString(conn.getInputStream());
+        });
+        logger.log(logLevel, responseLogMessage + responseCode + " " + responseBody, null);
+        conn.disconnect();
     }
 
     /**
