@@ -1,7 +1,7 @@
 Liquibase Core Changelog
 ===========================================
 
-Changes in version 4.32.0 (2025.05.22)
+Changes in version 4.32.0 (2025.05.21)
 
 ## Liquibase 4.32.0 is a major release
 
