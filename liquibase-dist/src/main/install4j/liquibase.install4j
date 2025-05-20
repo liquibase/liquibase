@@ -17,7 +17,7 @@
         <entry>snowflake-*</entry>
       </macSearchedJars>
     </codeSigning>
-    <jreBundles jdkProviderId="Adoptium" release="21/jdk-21.0.5+11" />
+    <jreBundles jdkProviderId="Adoptium" release="21/jdk-21.0.7+6" />
   </application>
   <files>
     <mountPoints>

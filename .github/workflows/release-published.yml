@@ -3,7 +3,7 @@ name: Release Published
 permissions:
   contents: write
   packages: write
-  actions: read
+  actions: write
   id-token: write
   pull-requests: write
 
