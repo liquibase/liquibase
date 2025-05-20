@@ -359,6 +359,9 @@ createIndex: |
   unique boolean (since 1.8)
     Description: Whether the index is unique (contains no duplicate values)
     Supported: all
+  using string 
+    Description: The index type to use. For example, 'btree' or 'gin'
+    Supported: all
 
 
 createProcedure: |
@@ -1082,6 +1085,9 @@ stop: |
     Supported: all
 
 tagDatabase: |
+  keepTagOnRollback boolean 
+    Description: Tag should not be removed during a rollback. Default: false.
+    Supported: all
   tag string 
     Description: Tag to apply
     Supported: all
