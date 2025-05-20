@@ -110,14 +110,14 @@ public class JdbcExecutor extends AbstractExecutor {
     }
 
     private void showSqlWarnings(Statement stmtToUse) throws SQLException {
-        if (Boolean.TRUE.equals(! SqlConfiguration.SHOW_SQL_WARNING_MESSAGES.getCurrentValue() ||
-            stmtToUse == null) ||
-            stmtToUse.getWarnings() == null) {
+        if (!SqlConfiguration.SHOW_SQL_WARNING_MESSAGES.getCurrentValue() ||
+                stmtToUse == null ||
+                stmtToUse.getWarnings() == null) {
             return;
         }
         SQLWarning sqlWarning = stmtToUse.getWarnings();
         do {
-            Scope.getCurrentScope().getLog(JdbcExecutor.class).warning(sqlWarning.getMessage());
+            Scope.getCurrentScope().getUI().sendMessage(sqlWarning.getMessage());
             sqlWarning = sqlWarning.getNextWarning();
         } while (sqlWarning != null);
     }
