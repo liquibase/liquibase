@@ -310,11 +310,21 @@ jobs:
           path: liquibase-core-repo
           repository: "liquibase/liquibase"
 
+      - name: Get GitHub App token
+        id: get-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: liquibase-pro
+          permission-contents: read
+
       - name: Download liquibase-pro xsd
         uses: actions/checkout@v4
         with:
           ref: "${{ needs.setup.outputs.ref_branch }}"
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.get-token.outputs.token }}
           # Relative path under $GITHUB_WORKSPACE to place the repository
           path: liquibase-pro-repo
           repository: "liquibase/liquibase-pro"
@@ -523,11 +533,15 @@ jobs:
         run: |
           # Fetch all tags from the remote
           git fetch --tags
-          # Get the latest tag
-          echo "latest_version=$(git describe --tags $(git rev-list --tags --max-count=1) | sed 's/^v//')" >> $GITHUB_OUTPUT
-          # Get the previous released version tag
-          echo "previous_version=$(git for-each-ref --sort=creatordate --format '%(refname:short)' refs/tags |sed 's/^v//')" >> $GITHUB_OUTPUT
+          # Get sorted list of tags, strip leading 'v', and get the latest
+          latest=$(git tag --sort=-creatordate | grep -E '^v?[0-9]' | head -n1 | sed 's/^v//')
+          previous=$(git tag --sort=-creatordate | grep -E '^v?[0-9]' | sed 's/^v//' | head -n2 | tail -n1)
 
+          echo "latest_version=$latest" >> $GITHUB_OUTPUT
+          echo "previous_version=$previous" >> $GITHUB_OUTPUT
+          echo "Latest Version: $latest"
+          echo "Previous Version: $previous"
+          
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v3
         with:
