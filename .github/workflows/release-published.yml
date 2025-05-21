@@ -536,7 +536,7 @@ jobs:
           # Get the latest semver tag, strip 'v'
           latest_tag=$(git tag --sort=-creatordate | grep -E '^v?[0-9]' | head -n1 | sed 's/^v//')
           # Get the second latest tag
-          previous=$(git tag --sort=-creatordate | grep -E '^v?[0-9]' | sed 's/^v//' | head -n2 | tail -n1)
+          previous_tag=$(git tag --sort=-creatordate | grep -E '^v?[0-9]' | sed 's/^v//' | head -n2 | tail -n1)
           echo "latest_version=$latest_tag" >> $GITHUB_OUTPUT
           echo "previous_version=$previous_tag" >> $GITHUB_OUTPUT
           echo "Latest Version: $latest_tag"
