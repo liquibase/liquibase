@@ -6,6 +6,7 @@ permissions:
   actions: write
   id-token: write
   pull-requests: write
+  issues: write
 
 on:
   release:
@@ -407,7 +408,7 @@ jobs:
           app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
           private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-          permission-contents: read
+          permission-contents: write
           permission-actions: write
 
       - name: Release liquibase/docker v${{ needs.setup.outputs.version }}
@@ -440,7 +441,7 @@ jobs:
           app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
           private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-          permission-contents: read
+          permission-contents: write
           permission-actions: write
 
       - name: Release liquibase/liquibase-infrastructure v${{ needs.setup.outputs.version }}
@@ -468,7 +469,7 @@ jobs:
           app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
           private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-          permission-contents: read
+          permission-contents: write
           permission-actions: write
 
       - name: Repository Dispatch
@@ -507,7 +508,7 @@ jobs:
           app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
           private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-          permission-contents: read
+          permission-contents: write
           permission-actions: write
 
       - name: Checkout repository
@@ -543,34 +544,6 @@ jobs:
           repository: liquibase/liquibase-aws-license-service
           event-type: oss-released-version
 
-  trigger-sbom-generation-lb-lbpo:
-    if: ${{ inputs.dry_run == false }}
-    name: Generate SBOMS for liquibase and liquibase-pro
-    runs-on: ubuntu-latest
-    needs: [setup, update-docs-oss-pro-version]
-    strategy:
-      matrix:
-        repo: ["liquibase/liquibase", "liquibase/liquibase-pro"]
-
-    steps:
-
-      - name: Get GitHub App token
-        id: get-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          permission-contents: read
-          permission-actions: write
-
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ steps.get-token.outputs.token }}
-          repository: liquibase/build-logic
-          event-type: oss-released-version
-          client-payload: '{"latest_version": "${{ needs.update-docs-oss-pro-version.outputs.latest_version }}", "repo_name": "${{ matrix.repo }}", "branch_name": "${{ github.ref }}" }'
 
   dry_run_deploy_maven:
     if: ${{ inputs.dry_run == true }}
