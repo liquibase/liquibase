@@ -533,11 +533,15 @@ jobs:
         run: |
           # Fetch all tags from the remote
           git fetch --tags
-          # Get the latest tag
-          echo "latest_version=$(git describe --tags $(git rev-list --tags --max-count=1) | sed 's/^v//')" >> $GITHUB_OUTPUT
-          # Get the previous released version tag
-          echo "previous_version=$(git for-each-ref --sort=creatordate --format '%(refname:short)' refs/tags |sed 's/^v//')" >> $GITHUB_OUTPUT
+          # Get sorted list of tags, strip leading 'v', and get the latest
+          latest=$(git tag --sort=-creatordate | grep -E '^v?[0-9]' | head -n1 | sed 's/^v//')
+          previous=$(git tag --sort=-creatordate | grep -E '^v?[0-9]' | sed 's/^v//' | head -n2 | tail -n1)
 
+          echo "latest_version=$latest" >> $GITHUB_OUTPUT
+          echo "previous_version=$previous" >> $GITHUB_OUTPUT
+          echo "Latest Version: $latest"
+          echo "Previous Version: $previous"
+          
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v3
         with:
