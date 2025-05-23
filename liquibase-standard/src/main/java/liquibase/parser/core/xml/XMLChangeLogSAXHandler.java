@@ -5,6 +5,7 @@ import liquibase.change.ChangeFactory;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.logging.Logger;
+import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -14,6 +15,7 @@ import liquibase.sql.visitor.SqlVisitorFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import java.util.Stack;
@@ -86,7 +88,11 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 nodeStack.peek().addChild(node);
             }
             if (nodeStack.isEmpty()) {
+                if(!node.getName().equals(ChangeLogParser.DATABASE_CHANGE_LOG)) {
+                    throw new SAXParseException(String.format("\"%s\" expected as root element", ChangeLogParser.DATABASE_CHANGE_LOG), null);
+                }
                 databaseChangeLogTree = node;
+
             }
             nodeStack.push(node);
             textStack.push(new StringBuilder());
