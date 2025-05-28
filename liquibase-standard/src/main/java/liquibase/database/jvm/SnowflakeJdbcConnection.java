@@ -17,6 +17,9 @@ public class SnowflakeJdbcConnection extends JdbcConnection {
 
     @Override
     public void open(String url, Driver driverObject, Properties driverProperties) throws DatabaseException {
+        //
+        // Add the application name to the JDBC properties
+        //
         driverProperties.put(APPLICATION_KEY, LIQUIBASE_PRODUCT_NAME);
         super.open(url, driverObject, driverProperties);
     }
