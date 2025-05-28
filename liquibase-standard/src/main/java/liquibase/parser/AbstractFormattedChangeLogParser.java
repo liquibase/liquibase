@@ -761,8 +761,13 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         currentRollbackSequence.setLength(0);
     }
 
+    protected boolean handleAdditionalLines(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, String line)
+            throws ChangeLogParseException {
+        return false;
+    }
+
     protected boolean handleAdditionalLines(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, String line, StringBuilder currentSequence)
-        throws ChangeLogParseException {
+            throws ChangeLogParseException {
         return false;
     }
 
