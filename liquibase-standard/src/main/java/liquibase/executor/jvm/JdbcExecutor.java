@@ -84,14 +84,14 @@ public class JdbcExecutor extends AbstractExecutor {
 
             Object object = action.doInStatement(stmtToUse);
             if (stmtToUse.getWarnings() != null) {
-                showSqlWarnings(stmtToUse);
+                showSqlWarnings(stmtToUse, con);
             }
             return object;
         } catch (SQLException ex) {
             // Release Connection early, to avoid potential connection pool deadlock
             // in the case when the exception translator hasn't been initialized yet.
             try {
-                showSqlWarnings(stmt);
+                showSqlWarnings(stmt, con);
             } catch (SQLException sqle) {
                 Scope.getCurrentScope().getLog(JdbcExecutor.class).warning(String.format("Unable to access SQL warning: %s", sqle.getMessage()));
             }
@@ -109,7 +109,8 @@ public class JdbcExecutor extends AbstractExecutor {
         }
     }
 
-    private void showSqlWarnings(Statement stmtToUse) throws SQLException {
+    private void showSqlWarnings(Statement stmtToUse, DatabaseConnection connection)
+            throws SQLException, DatabaseException {
         if (!SqlConfiguration.SHOW_SQL_WARNING_MESSAGES.getCurrentValue() ||
                 stmtToUse == null ||
                 stmtToUse.getWarnings() == null) {
@@ -120,6 +121,19 @@ public class JdbcExecutor extends AbstractExecutor {
             Scope.getCurrentScope().getUI().sendMessage(sqlWarning.getMessage());
             sqlWarning = sqlWarning.getNextWarning();
         } while (sqlWarning != null);
+        if (connection.getDatabaseProductName().toLowerCase().contains("oracle")) {
+            try {
+                List<Map<String, ?>> errors =
+                        queryForList(new RawParameterizedSqlStatement("SELECT SEQUENCE, LINE, POSITION, TEXT FROM USER_ERRORS"));
+                errors.forEach(error -> {
+                    String message = String.format("SEQUENCE: %s LINE: %s POSITION: %s%nTEXT: %s",
+                    error.get("SEQUENCE"), error.get("LINE"), error.get("POSITION"), error.get("TEXT"));
+                    Scope.getCurrentScope().getUI().sendMessage(message);
+                });
+            } catch (DatabaseException dbe) {
+                // ignored
+            }
+        }
     }
 
     // Incorrect warning, at least at this point. The situation here is not that we inject some unsanitised parameter
