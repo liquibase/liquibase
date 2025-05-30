@@ -40,6 +40,7 @@ class ValidateCommandStepIntegrationTest extends Specification {
         exception.message.contains("- Property: context Error: context value cannot be empty while on Strict mode")
         exception.message.contains("- Property: runWith Error: runWith value cannot be empty while on Strict mode")
         exception.message.contains("- Property: dbms Error: dbms value cannot be empty while on Strict mode")
+        exception.message.contains("Property: logicalFilePath Error: logicalFilePath value cannot be empty while on Strict mode")
 
         cleanup:
         h2.getConnection().close()

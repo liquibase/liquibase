@@ -64,6 +64,7 @@ public class ValidateCommandStep extends AbstractCommandStep {
         filters.add(new ContextChangeSetFilter());
         filters.add(new RunWithChangeSetFilter());
         filters.add(new DbmsChangeSetFilter(database));
+        filters.add(new LogicalFilePathChangeSetFilter());
         return filters;
     }
 
