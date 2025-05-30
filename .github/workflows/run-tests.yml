@@ -441,7 +441,7 @@ jobs:
     secrets: inherit
 
   run-build-publish-file:
-    # needs: [ build_tests,integration-test ]
+    needs: [ build_tests,integration-test ]
     uses: ./.github/workflows/build.yml
     secrets: inherit
 
