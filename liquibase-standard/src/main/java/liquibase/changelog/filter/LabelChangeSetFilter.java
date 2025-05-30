@@ -1,12 +1,13 @@
     package liquibase.changelog.filter;
 
+import liquibase.GlobalConfiguration;
 import liquibase.LabelExpression;
 import liquibase.Labels;
 import liquibase.changelog.ChangeSet;
 import liquibase.sql.visitor.SqlVisitor;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class LabelChangeSetFilter implements ChangeSetFilter {
@@ -24,7 +25,7 @@ public class LabelChangeSetFilter implements ChangeSetFilter {
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
         List<SqlVisitor> visitorsToRemove = new ArrayList<>();
         for (SqlVisitor visitor : changeSet.getSqlVisitors()) {
-            if ((visitor.getLabels() != null) && !labelExpression.matches(visitor.getLabels())) {
+            if ((visitor.getLabels() != null) && !labelExpression.matches(visitor.getLabels()))  {
                 visitorsToRemove.add(visitor);
             }
         }
@@ -35,6 +36,12 @@ public class LabelChangeSetFilter implements ChangeSetFilter {
         }
 
         String allLabels = changeSet.buildFullLabels();
+
+        boolean strictValue = GlobalConfiguration.STRICT.getCurrentValue();
+        if(strictValue && StringUtils.trimToEmpty(allLabels).isEmpty()) {
+            return new ChangeSetFilterResult(false, "labels value cannot be empty while on Strict mode", this.getClass(), "labelsEmptyOnStrictMode", "labels");
+        }
+
         if (labelExpression.matches(new Labels(allLabels))) {
             return new ChangeSetFilterResult(true, "Labels matches '" + labelExpression.toString() + "'", this.getClass(), getMdcName(), getDisplayName());
         }

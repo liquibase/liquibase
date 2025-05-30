@@ -2,8 +2,10 @@ package liquibase.changelog.filter;
 
 import liquibase.ContextExpression;
 import liquibase.Contexts;
+import liquibase.GlobalConfiguration;
 import liquibase.changelog.ChangeSet;
 import liquibase.sql.visitor.SqlVisitor;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,6 +41,11 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
         // Because contexts can have logic in both the command arguments (eg --context-filter="x OR y"
         // and in the changeset, we need to evaluate matches from both sides
         // as match only checks one side of the context at a time
+        boolean strictValue = GlobalConfiguration.STRICT.getCurrentValue();
+        if(strictValue && StringUtils.trimToEmpty(changeSet.buildFullContext()).isEmpty()) {
+            return new ChangeSetFilterResult(false, "context value cannot be empty while on Strict mode", this.getClass(), "contextEmptyOnStrictMode", "context");
+        }
+
         if ((providedContext.matches(new Contexts(changeSet.buildFullContext()))
                 || changeSet.getContextFilter().matches(contexts))
                 && ContextExpression.matchesAll(inheritableContexts, contexts)) {
