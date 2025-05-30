@@ -1,0 +1,69 @@
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+                        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+
+    <changeSet id="create-table-for-load-data" author="tfernandez">
+        <createTable tableName="for_load_data">
+            <column name="id" type="int">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="stringType" type="varchar(100)" />
+            <column name="dateType" type="date" />
+            <column name="boolType" type="bool" />
+            <column name="uuidType" type="uuid" />
+            <column name="clobType" type="largetext" />
+        </createTable>
+    </changeSet>
+
+    <changeSet id="load-data" author="tfernandez">
+        <loadData tableName="for_load_data" file="auxFiles/loadData.csv" separator=";"
+            relativeToChangelogFile="true" />
+    </changeSet>
+
+    <changeSet id="load-update-data" author="tfernandez">
+        <loadUpdateData tableName="for_load_data" file="auxFiles/loadUpdateData.csv" primaryKey="id"
+            relativeToChangelogFile="true" />
+    </changeSet>
+
+    <changeSet id="insert" author="tfernandez">
+        <preConditions>
+            <or>
+                <not>
+                    <dbms type="h2" />
+                </not>
+                <dbms type="!oracle" />
+            </or>
+
+        </preConditions>
+        <insert tableName="for_load_data">
+            <column name="id" value="123" />
+            <column name="stringType" value="hello!" />
+            <column name="dateType" value="2000-01-01" />
+            <column name="boolType" value="false" />
+            <column name="uuidType" value="79727041-d930-4484-8fc4-8fc829b7813a" />
+            <column name="clobType"
+                value="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." />
+        </insert>
+        <rollback>
+            <delete tableName="for_load_data">
+                <where>id=123</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="sql-change-type" author="tfernandez">
+        <sql> select * from for_load_data where id = 123 or id = 1; </sql>
+    </changeSet>
+
+    <changeSet id="sqlFile" author="tfernandez">
+        <sqlFile path="auxFiles/sqlFile.sql" relativeToChangelogFile="true" endDelimiter="GO" />
+        <rollback>
+            <sqlFile path="auxFiles/rollbackSql.sql" relativeToChangelogFile="true" endDelimiter="@" />
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
