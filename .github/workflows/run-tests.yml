@@ -446,32 +446,32 @@ jobs:
     secrets: inherit
 
 
-  # update-test-count-secrets:
-  #   needs: [build_tests, integration-test]
-  #   runs-on: ubuntu-latest
-  #   if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-  #     - name: Set GitHub Secret for Test Count
-  #       env:
-  #         TEST_COUNT_SECRET: ${{ secrets.TEST_COUNT_SECRET }}
-  #       run: |
-  #         echo $TEST_COUNT_SECRET | gh auth login --with-token
-  #         repository='${{ github.repository }}'
-  #         gh variable set TEST_COUNT_JAVA_11_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_11_ubuntu }}"
-  #         gh variable set TEST_COUNT_JAVA_17_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_17_ubuntu }}"
-  #         gh variable set TEST_COUNT_JAVA_21_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_21_ubuntu }}"
-  #         gh variable set TEST_COUNT_JAVA_8_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_8_ubuntu }}"
-  #         gh variable set TEST_COUNT_JAVA_MACOS --body "${{ needs.build_tests.outputs.test_count_unit_test_java_macos }}"
-  #         gh variable set TEST_COUNT_JAVA_WINDOWS --body "${{ needs.build_tests.outputs.test_count_unit_test_java_windows}}"
-  #         gh variable set TEST_COUNT_INTEGRATION_DB2 --body "${{ needs.integration-test.outputs.test_count_integration_db2 }}"
-  #         gh variable set TEST_COUNT_INTEGRATION_H2 --body "${{ needs.integration-test.outputs.test_count_integration_h2 }}"
-  #         gh variable set TEST_COUNT_INTEGRATION_HSQLDB --body "${{ needs.integration-test.outputs.test_count_integration_hsqldb }}"
-  #         gh variable set TEST_COUNT_INTEGRATION_MARIADB --body "${{ needs.integration-test.outputs.test_count_integration_mariadb}}"
-  #         gh variable set TEST_COUNT_INTEGRATION_MSSQL --body "${{ needs.integration-test.outputs.test_count_integration_mssql }}"
-  #         gh variable set TEST_COUNT_INTEGRATION_MYSQL --body "${{ needs.integration-test.outputs.test_count_integration_mysql }}"
-  #         gh variable set TEST_COUNT_INTEGRATION_ORACLE --body "${{ needs.integration-test.outputs.test_count_integration_oracle }}"
-  #         gh variable set TEST_COUNT_INTEGRATION_POSTGRESQL --body "${{ needs.integration-test.outputs.test_count_integration_postgresql }}"
-  #         gh variable set TEST_COUNT_INTEGRATION_SQLITE --body "${{ needs.integration-test.outputs.test_count_integration_sqlite }}"
-  #         gh variable set TEST_COUNT_INTEGRATION_FIREBIRD --body "${{ needs.integration-test.outputs.test_count_integration_firebird }}"
+  update-test-count-secrets:
+    needs: [build_tests, integration-test]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set GitHub Secret for Test Count
+        env:
+          TEST_COUNT_SECRET: ${{ secrets.TEST_COUNT_SECRET }}
+        run: |
+          echo $TEST_COUNT_SECRET | gh auth login --with-token
+          repository='${{ github.repository }}'
+          gh variable set TEST_COUNT_JAVA_11_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_11_ubuntu }}"
+          gh variable set TEST_COUNT_JAVA_17_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_17_ubuntu }}"
+          gh variable set TEST_COUNT_JAVA_21_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_21_ubuntu }}"
+          gh variable set TEST_COUNT_JAVA_8_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_8_ubuntu }}"
+          gh variable set TEST_COUNT_JAVA_MACOS --body "${{ needs.build_tests.outputs.test_count_unit_test_java_macos }}"
+          gh variable set TEST_COUNT_JAVA_WINDOWS --body "${{ needs.build_tests.outputs.test_count_unit_test_java_windows}}"
+          gh variable set TEST_COUNT_INTEGRATION_DB2 --body "${{ needs.integration-test.outputs.test_count_integration_db2 }}"
+          gh variable set TEST_COUNT_INTEGRATION_H2 --body "${{ needs.integration-test.outputs.test_count_integration_h2 }}"
+          gh variable set TEST_COUNT_INTEGRATION_HSQLDB --body "${{ needs.integration-test.outputs.test_count_integration_hsqldb }}"
+          gh variable set TEST_COUNT_INTEGRATION_MARIADB --body "${{ needs.integration-test.outputs.test_count_integration_mariadb}}"
+          gh variable set TEST_COUNT_INTEGRATION_MSSQL --body "${{ needs.integration-test.outputs.test_count_integration_mssql }}"
+          gh variable set TEST_COUNT_INTEGRATION_MYSQL --body "${{ needs.integration-test.outputs.test_count_integration_mysql }}"
+          gh variable set TEST_COUNT_INTEGRATION_ORACLE --body "${{ needs.integration-test.outputs.test_count_integration_oracle }}"
+          gh variable set TEST_COUNT_INTEGRATION_POSTGRESQL --body "${{ needs.integration-test.outputs.test_count_integration_postgresql }}"
+          gh variable set TEST_COUNT_INTEGRATION_SQLITE --body "${{ needs.integration-test.outputs.test_count_integration_sqlite }}"
+          gh variable set TEST_COUNT_INTEGRATION_FIREBIRD --body "${{ needs.integration-test.outputs.test_count_integration_firebird }}"
