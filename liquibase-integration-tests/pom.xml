@@ -94,7 +94,6 @@
                             <includes>
                                 <include>**/*ExtensionTests.java</include>
                                 <include>**/*ExtensionTests.groovy</include>
-                                <include>**/*Test.groovy</include>
                             </includes>
                         </configuration>
                     </plugin>

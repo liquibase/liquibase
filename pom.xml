@@ -89,7 +89,7 @@
         <code.coverage.overall.data.folder>${basedir}/target/</code.coverage.overall.data.folder>      
         <itCoverageAgent></itCoverageAgent>
         <sonar.coverage.jacoco.xmlReportPaths>target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-        <surefire.failIfNoTests>false</surefire.failIfNoTests>
+        <surefire.failIfNoTests>true</surefire.failIfNoTests>
     </properties>
 
     <!-- comment -->
