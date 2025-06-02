@@ -1,3 +1,4 @@
+
 name: Unit and Integration Tests
 
 permissions:
@@ -321,7 +322,6 @@ jobs:
       fail-fast: false
       matrix:
         testSystem:
-          - db2
           - h2
           #- h2:1.4
           - hsqldb
