@@ -57,7 +57,7 @@ public abstract class AbstractResource implements Resource {
             StringBuilder result = new StringBuilder();
             try {
                 for (int i = 0; i < uriSplit.length; i++) {
-                    if (i > 0) {
+                    if (i == uriSplit.length -1) {
                         result.append(new URI(uriSplit[i]).normalize());
                     } else {
                         result.append(uriSplit[i]);
