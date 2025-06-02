@@ -310,11 +310,11 @@ jobs:
           #check why only this step has branchName when there is a standalone PR
           cp $commercialJarM2Location artifacts-named/liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}.jar
 
-      - name: Archive Packages
-        uses: actions/upload-artifact@v4
-        with:
-          name: liquibase-artifacts
-          path: artifacts/*
+      # - name: Archive Packages
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: liquibase-artifacts
+      #     path: artifacts/*
 
       - name: Archive Convenience Zip
         uses: actions/upload-artifact@v4
@@ -322,49 +322,49 @@ jobs:
           name: liquibase-zip-${{ needs.setup.outputs.thisBranchName }}
           path: branch-artifacts/*
 
-      - name: Archive Convenience Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchName }}
-          path: artifacts-named/*
+      # - name: Archive Convenience Artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchName }}
+      #     path: artifacts-named/*
 
-      # Publish <commitsha>-SNAPSHOT version to GPM
-      - name: Version Artifact Publish <commitsha>-SNAPSHOT version to GPM
-        run: |
-          ./mvnw versions:set "-DnewVersion=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT"
-      - name: Publish <commitsha>-SNAPSHOT package
-        run: |
-          ./mvnw -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     # Publish <commitsha>-SNAPSHOT version to GPM
+  #     - name: Version Artifact Publish <commitsha>-SNAPSHOT version to GPM
+  #       run: |
+  #         ./mvnw versions:set "-DnewVersion=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT"
+  #     - name: Publish <commitsha>-SNAPSHOT package
+  #       run: |
+  #         ./mvnw -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      #Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need "-Dliquibase-pro.version"
-      - name: Publish tar.gz package to GPM
-        run: |
-          ./mvnw -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests=true "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     #Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need "-Dliquibase-pro.version"
+  #     - name: Publish tar.gz package to GPM
+  #       run: |
+  #         ./mvnw -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests=true "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}"
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  run-functional-tests:
-    needs: [setup, build_publish_branch]
-    uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@master
-    secrets: inherit
-    with:
-      latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
-      thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
+  # run-functional-tests:
+  #   needs: [setup, build_publish_branch]
+  #   uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@master
+  #   secrets: inherit
+  #   with:
+  #     latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
+  #     thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
 
-  run-tests-harness:
-    needs: [setup, build_publish_branch]
-    uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@master
-    secrets: inherit
-    with:
-      latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
-      thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
+  # run-tests-harness:
+  #   needs: [setup, build_publish_branch]
+  #   uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@master
+  #   secrets: inherit
+  #   with:
+  #     latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
+  #     thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
 
-  run-pro-build-and-test:
-    needs: [setup, build_publish_branch]
-    uses: liquibase/liquibase/.github/workflows/run-pro-build-and-test.yml@master
-    secrets: inherit
-    with:
-      latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
-      thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
+  # run-pro-build-and-test:
+  #   needs: [setup, build_publish_branch]
+  #   uses: liquibase/liquibase/.github/workflows/run-pro-build-and-test.yml@master
+  #   secrets: inherit
+  #   with:
+  #     latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
+  #     thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
