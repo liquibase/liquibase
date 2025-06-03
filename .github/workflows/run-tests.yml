@@ -1,4 +1,14 @@
+
 name: Unit and Integration Tests
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  checks: write
+  id-token: write
+  actions: read
+  packages: write
 
 on:
   workflow_call:
@@ -89,21 +99,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, macos-13, windows-2019 ]
+        os: [ ubuntu-22.04, macos-13, windows-latest ]
         java: [ 8, 11, 17, 21 ]
         exclude:
           # exclude non-java 8 on macos and windows builds
           - os: macos-13
             java: 11
-          - os: windows-2019
+          - os: windows-latest
             java: 11
           - os: macos-13
             java: 17
-          - os: windows-2019
+          - os: windows-latest
             java: 17
           - os: macos-13
             java: 21
-          - os: windows-2019
+          - os: windows-latest
             java: 21
     runs-on: ${{ matrix.os }}
     env:
@@ -116,7 +126,7 @@ jobs:
 
       - name: Built Code Cache
         if: ${{ matrix.java == 17}}
-        uses: actions/cache@v4.2.0
+        uses: actions/cache@v4.2.3
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -162,12 +172,12 @@ jobs:
               {
                 "id": "liquibase-pro",
                 "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
+                "password": "${{ secrets.GITHUB_TOKEN }}"
               },
               {
                 "id": "liquibase",
                 "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
+                "password": "${{ secrets.GITHUB_TOKEN }}"
               }
             ]
 
@@ -228,9 +238,9 @@ jobs:
           fi
           echo "test_count_unit_test_java_macos=$TEST_COUNT" >> $GITHUB_OUTPUT
 
-      - name: Check Test Count for windows-2019
+      - name: Check Test Count for windows-latest
         id: check-test-counts-java-windows
-        if: matrix.os == 'windows-2019'
+        if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
           $TEST_COUNT = (Get-ChildItem -Recurse -Filter "*.txt" | Select-String -Pattern 'Tests run: (\d+)' | ForEach-Object { $_.Matches.Groups[1].Value } | Measure-Object -Sum).Sum
@@ -246,7 +256,7 @@ jobs:
           echo "test_count_unit_test_java_windows=$TEST_COUNT" >> $env:GITHUB_OUTPUT
 
       - name: Remove Original Jars for *nix
-        if: env.OS_TYPE != 'windows-2019'
+        if: env.OS_TYPE != 'windows-latest'
         run: |
           find . -name original-*.jar -exec rm {} \;
 
@@ -356,7 +366,7 @@ jobs:
       # getting from build results page. If we remove 0-SNAPSHOT then we will need settings.xml
 
       - name: Restore Built Code Cache
-        uses: actions/cache@v4.2.0
+        uses: actions/cache@v4.2.3
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
