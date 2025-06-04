@@ -15,6 +15,7 @@ public abstract class YamlParser implements LiquibaseParser {
     public static LoaderOptions createLoaderOptions() {
         LoaderOptions options = new LoaderOptions();
         SnakeYamlUtil.setCodePointLimitSafely(options, Integer.MAX_VALUE);
+        SnakeYamlUtil.setMaxAliasesForCollections(options, Integer.MAX_VALUE);
         SnakeYamlUtil.setProcessCommentsSafely(options, false);
         // TODO: remove the below line when we have a general fix for the not allowed duplicated databaseChangelog and sql tags
         //        options.setAllowDuplicateKeys(false);

@@ -39,6 +39,13 @@ public class SnakeYamlUtil {
     }
 
     /**
+     * Safely set the limit for maxAliasesForCollections when using aliases for repetitive columns while configuring a new SnakeYaml instance.
+     */
+    public static void setMaxAliasesForCollections(LoaderOptions loaderOptions, int maxAliasesForCollections) {
+        safelyCallNewSnakeYamlMethod(() -> loaderOptions.setMaxAliasesForCollections(maxAliasesForCollections));
+    }
+
+    /**
      * Helper method to make sure that we display the error message only once.
      */
     private static void safelyCallNewSnakeYamlMethod(Runnable code) {
