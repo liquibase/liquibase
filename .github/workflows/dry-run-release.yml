@@ -46,7 +46,7 @@ jobs:
           app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
           private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-          permission-contents: read
+          permission-contents: write
           permission-actions: write
 
       - name: Invoke Create Release
@@ -64,27 +64,53 @@ jobs:
         run: |
           # Get release info based on draft name
           release_name="vdry-run-${{ github.run_id }}"
+          echo "Looking for release with name: $release_name"
+          
           response=$(curl -s -H "Authorization: token ${{ steps.get-token.outputs.token  }}" \
                         -H "Accept: application/vnd.github.v3+json" \
                         "https://api.github.com/repos/liquibase/liquibase/releases")
+          
+          echo "API Response status code: $?"
+          echo "API Response: $response"
 
           # Find the draft release and get its assets
           draft_release=$(echo "$response" | jq -r --arg name "$release_name" '.[] | select(.name == $name and .draft == true)')
+          echo "Found draft release: $draft_release"
+          
+          if [ -z "$draft_release" ]; then
+            echo "Error: No draft release found with name $release_name"
+            exit 1
+          fi
+          
           assets_url=$(echo "$draft_release" | jq -r '.assets_url')
           dry_run_release_id=$(echo "$draft_release" | jq -r '.id')
+          
+          echo "Assets URL: $assets_url"
+          echo "Release ID: $dry_run_release_id"
 
           # Get the assets
           assets_response=$(curl -s -H "Authorization: token ${{ steps.get-token.outputs.token  }}" \
                              -H "Accept: application/vnd.github.v3+json" \
                              "$assets_url")
+          
+          echo "Assets API Response status code: $?"
+          echo "Assets API Response: $assets_response"
 
           # Get URLs for zip and tar.gz files - getting browser_download_url instead of url
           dry_run_zip_url=$(echo "$assets_response" | jq -r '.[] | select(.name | test("^liquibase-dry-run-.*\\.zip$")) | .browser_download_url')
           dry_run_tar_gz_url=$(echo "$assets_response" | jq -r '.[] | select(.name | test("^liquibase-dry-run-.*\\.tar\\.gz$")) | .browser_download_url')
 
+          echo "Found zip URL: $dry_run_zip_url"
+          echo "Found tar.gz URL: $dry_run_tar_gz_url"
+
           # Remove any newlines or spaces from URLs before setting outputs
           dry_run_zip_url=$(echo "$dry_run_zip_url" | tr -d '[:space:]')
           dry_run_tar_gz_url=$(echo "$dry_run_tar_gz_url" | tr -d '[:space:]')
+
+          if [ -z "$dry_run_zip_url" ] || [ -z "$dry_run_tar_gz_url" ]; then
+            echo "Error: Could not find both zip and tar.gz assets"
+            exit 1
+          fi
 
           echo "dry_run_release_id Id is $dry_run_release_id"
           echo "dry_run_tar_gz_url is $dry_run_tar_gz_url"
@@ -106,7 +132,7 @@ jobs:
           app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
           private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-          permission-contents: read
+          permission-contents: write
           permission-actions: write
 
       - name: Trigger release-published workflow
