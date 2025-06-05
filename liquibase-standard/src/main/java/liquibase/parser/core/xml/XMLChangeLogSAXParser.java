@@ -3,6 +3,7 @@ package liquibase.parser.core.xml;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParserSupportedFileExtension;
@@ -50,6 +51,11 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
     public static String getSchemaVersion() {
         return LIQUIBASE_SCHEMA_VERSION;
+    }
+
+    @Override
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
+        return parse(physicalChangeLogLocation, changeLogParameters, resourceAccessor, null);
     }
 
     @Override
