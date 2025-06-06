@@ -172,7 +172,7 @@ jobs:
 
           unzip -j liquibase-additional-*.zip
 
-          ##extracts and sign poms
+          ##extracts and sign poms, generate checksums for all artifacts
           for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-cdi' 'liquibase-cdi-jakarta' 'liquibase-commercial'; do
             unzip -j $i-${version}.jar META-INF/maven/org.liquibase/$i/pom.xml
             sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
@@ -181,7 +181,20 @@ jobs:
               sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private<\/connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" $i-${version}.pom   ## scm info not in the pom
             fi
 
+            # Sign POM file
             gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i-${version}.pom
+            
+            # Generate checksums for POM file
+            md5sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.md5
+            sha1sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.sha1
+            
+            # Generate checksums for all JAR files (main, sources, javadoc)
+            for jar_file in $i-${version}.jar $i-${version}-sources.jar $i-${version}-javadoc.jar; do
+              if [ -f "$jar_file" ]; then
+                md5sum "$jar_file" | cut -d' ' -f1 > "$jar_file.md5"
+                sha1sum "$jar_file" | cut -d' ' -f1 > "$jar_file.sha1"
+              fi
+            done
           done
 
           # Create Maven repository layout structure for the bundle
@@ -556,7 +569,7 @@ jobs:
 
   dry_run_deploy_maven:
     if: ${{ inputs.dry_run == true }}
-    name: Deploy to repo.liquibase.net
+    name: Deploy to Maven Central Repository
     needs: [setup]
     runs-on: ubuntu-22.04
     steps:
@@ -591,7 +604,7 @@ jobs:
 
           unzip -j liquibase-additional-*.zip
 
-          ##extracts and sign poms
+          ##extracts and sign poms, generate checksums for all artifacts
           for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-cdi' 'liquibase-cdi-jakarta' 'liquibase-commercial'; do
             unzip -j $i-${version}.jar META-INF/maven/org.liquibase/$i/pom.xml
             sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
@@ -600,7 +613,20 @@ jobs:
               sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private<\/connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" $i-${version}.pom   ## scm info not in the pom
             fi
 
+            # Sign POM file
             gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i-${version}.pom
+            
+            # Generate checksums for POM file
+            md5sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.md5
+            sha1sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.sha1
+            
+            # Generate checksums for all JAR files (main, sources, javadoc)
+            for jar_file in $i-${version}.jar $i-${version}-sources.jar $i-${version}-javadoc.jar; do
+              if [ -f "$jar_file" ]; then
+                md5sum "$jar_file" | cut -d' ' -f1 > "$jar_file.md5"
+                sha1sum "$jar_file" | cut -d' ' -f1 > "$jar_file.sha1"
+              fi
+            done
           done
 
           # Create Maven repository layout structure for the bundle
