@@ -20,6 +20,8 @@ import java.util.*;
 public class StringSnapshotSerializerReadable implements SnapshotSerializer {
 
     private static final int INDENT_LENGTH = 4;
+    private static final Set<Class<?>> SKIP_DISPLAYING_TYPES = new HashSet<>(Arrays.asList(Schema.class, Catalog.class, Column.class));
+    private static final Set<Class<?>> EXPAND_NESTED_TYPES = new HashSet<>(Arrays.asList(Table.class, View.class));
 
     @Override
     public String[] getValidFileExtensions() {
@@ -42,7 +44,7 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
             SnapshotControl snapshotControl = snapshot.getSnapshotControl();
             List<Class> includedTypes = sort(snapshotControl.getTypesToInclude());
 
-            buffer.append("Included types:\n" ).append(StringUtil.indent(StringUtil.join(includedTypes, "\n", (StringUtil.StringUtilFormatter<Class>) Class::getName))).append("\n");
+            buffer.append("Included types:\n").append(StringUtil.indent(StringUtil.join(includedTypes, "\n", (StringUtil.StringUtilFormatter<Class>) Class::getName))).append("\n");
 
 
             List<Schema> schemas = sort(snapshot.get(Schema.class), Comparator.comparing(Schema::toString));
@@ -56,7 +58,7 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
 
                 StringBuilder catalogBuffer = new StringBuilder();
                 for (Class type : includedTypes) {
-                    if (type.equals(Schema.class) || type.equals(Catalog.class) || type.equals(Column.class)) {
+                    if (shouldSkipDisplayingType(type)) {
                         continue;
                     }
                     List<DatabaseObject> objects = new ArrayList<DatabaseObject>(snapshot.get(type));
@@ -88,6 +90,20 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
             throw new UnexpectedLiquibaseException(e);
         }
 
+    }
+
+    private boolean shouldSkipDisplayingType(Class<?> type) {
+        return this.getSkipDisplayingTypes().stream().anyMatch(type::isAssignableFrom);
+    }
+
+    /**
+     * We need this method with protected access modifier to be able to extend this set from PRO and/or from extensions.
+     * These types should not be displayed as they are either processed separately like {@link Catalog} and
+     * {@link Schema}, or they are inner entities of the types-containers like {@link Column}-s
+     * to {@link Table}-s and {@link View}-s
+     */
+    protected Set<Class<?>> getSkipDisplayingTypes() {
+        return SKIP_DISPLAYING_TYPES;
     }
 
     protected void outputObjects(List objects, Class type, StringBuilder catalogBuffer) {
@@ -129,16 +145,16 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
             if (value instanceof DatabaseObject) {
                 if (
                         (parentObject != null)
-                        && ((DatabaseObject) value).getSnapshotId() != null
-                        && ((DatabaseObject) value).getSnapshotId().equals(parentObject.getSnapshotId())
-                   ) {
+                                && ((DatabaseObject) value).getSnapshotId() != null
+                                && ((DatabaseObject) value).getSnapshotId().equals(parentObject.getSnapshotId())
+                ) {
                     continue;
                 }
 
-                boolean expandContainedObjects = shouldExpandNestedObject(value, databaseObject);
+                boolean expandContainedObjects = shouldExpandNestedObject(databaseObject);
 
                 if (expandContainedObjects) {
-                    value = ((DatabaseObject) value).getName()+"\n"+ StringUtil.indent(serialize((DatabaseObject) value, databaseObject), INDENT_LENGTH);
+                    value = ((DatabaseObject) value).getName() + "\n" + StringUtil.indent(serialize((DatabaseObject) value, databaseObject), INDENT_LENGTH);
                 } else {
                     value = databaseObject.getSerializableFieldValue(attribute);
                 }
@@ -149,8 +165,8 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
                     if (((Collection) value).iterator().next() instanceof DatabaseObject) {
                         value = StringUtil.join(new TreeSet<>((Collection<DatabaseObject>) value), "\n", obj -> {
                             if (obj instanceof DatabaseObject) {
-                                if (shouldExpandNestedObject(obj, databaseObject)) {
-                                    return ((DatabaseObject) obj).getName()+"\n"+ StringUtil.indent(serialize(((DatabaseObject) obj), databaseObject), INDENT_LENGTH);
+                                if (shouldExpandNestedObject(databaseObject)) {
+                                    return ((DatabaseObject) obj).getName() + "\n" + StringUtil.indent(serialize(((DatabaseObject) obj), databaseObject), INDENT_LENGTH);
                                 } else {
                                     return ((DatabaseObject) obj).getName();
                                 }
@@ -158,7 +174,7 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
                                 return obj.toString();
                             }
                         });
-                        value = "\n"+ StringUtil.indent((String) value, INDENT_LENGTH);
+                        value = "\n" + StringUtil.indent((String) value, INDENT_LENGTH);
                     } else {
                         value = databaseObject.getSerializableFieldValue(attribute);
                     }
@@ -175,8 +191,17 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
 
     }
 
-    protected boolean shouldExpandNestedObject(Object nestedValue, DatabaseObject container) {
-        return (container instanceof Table) || (container instanceof View);
+    protected boolean shouldExpandNestedObject(DatabaseObject container) {
+        return this.getExpandNestedTypes().stream().anyMatch(container.getClass()::isAssignableFrom);
+    }
+
+    /**
+     * We need this method with protected access modifier to be able to extend this set from PRO and/or from extensions.
+     * These types should not be process like regular {@link DatabaseObject}-s as their full structure meters.
+     * Usually these types are type-containers like {@link Table} and {@link View}.
+     */
+    protected Set<Class<?>> getExpandNestedTypes() {
+        return EXPAND_NESTED_TYPES;
     }
 
     protected void addDivider(StringBuilder buffer) {
@@ -190,7 +215,7 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
             } else if (o1 instanceof Class) {
                 return ((Class<?>) o1).getName().compareTo(((Class<?>) o2).getName());
             } else {
-                throw new ClassCastException(o1.getClass().getName()+" cannot be cast to java.lang.Comparable or java.lang.Class");
+                throw new ClassCastException(o1.getClass().getName() + " cannot be cast to java.lang.Comparable or java.lang.Class");
             }
         });
     }

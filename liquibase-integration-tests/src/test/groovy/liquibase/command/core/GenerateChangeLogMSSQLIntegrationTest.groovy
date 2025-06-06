@@ -10,6 +10,7 @@ import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.util.FileUtil
 import liquibase.util.StringUtil
+import org.apache.commons.io.FileUtils
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -20,7 +21,6 @@ class GenerateChangeLogMSSQLIntegrationTest extends Specification {
 
     def "Should generate table comments, view comments, table column comments, view column comments and be able to use the generated sql changelog"() {
         given:
-        CommandUtil.runDropAll(mssql)
         CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/generate.changelog.table.view.comments.sql')
 
         when:
@@ -44,13 +44,11 @@ class GenerateChangeLogMSSQLIntegrationTest extends Specification {
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(mssql)
         outputFile.delete()
     }
 
     def "Should generate table comments, view comments, table column comments, view column comments and be able to use the generated xml/json/yml changelog"(String fileType) {
         given:
-        CommandUtil.runDropAll(mssql)
         CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/generate.changelog.table.view.comments.sql')
 
         when:
@@ -69,7 +67,6 @@ class GenerateChangeLogMSSQLIntegrationTest extends Specification {
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(mssql)
         outputFile.delete()
 
         where:
@@ -134,17 +131,7 @@ CREATE VIEW employees_view AS SELECT FirstName FROM [dbo].Employees;
         generatedChangelogContents.contains("N'CREATE VIEW [employees_view] AS SELECT '")
 
         cleanup:
-        try {
-            generatedChangelog.delete()
-        } catch (Exception ignored) {
-
-        }
-
-        CommandUtil.runDropAll(mssql)
-
-        if (mssql.getConnection()) {
-            mssql.getConnection().close()
-        }
+        FileUtils.deleteQuietly(generatedChangelog)
     }
 
     def "Should not add size to user defined types"() {

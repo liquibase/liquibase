@@ -11,6 +11,7 @@ import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.logging.core.BufferedLogService
 import liquibase.resource.SearchPathResourceAccessor
 import org.apache.commons.lang3.StringUtils
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Timeout
@@ -101,7 +102,26 @@ END;
 
     def "verify foreignKeyExists constraint is not created again when precondition fails because it already exists"() {
         when:
-        def changeLogFile = "changelogs/common/fkep.test.changelog.xml"
+        def changeLogFile = "changelogs/oracle/complete/fkep.test.changelog.xml"
+        def scopeSettings = [
+                (Scope.Attr.resourceAccessor.name()): new SearchPathResourceAccessor(".,target/test-classes")
+        ]
+        Scope.child(scopeSettings, {
+            CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, oracle.getConnectionUrl())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, oracle.getUsername())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, oracle.getPassword())
+            commandScope.addArgumentValue(UpdateCountCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+            commandScope.execute()
+        } as Scope.ScopedRunnerWithReturn<Void>)
+
+        then:
+        noExceptionThrown()
+    }
+
+    def "verify Unique constraint is not created again when precondition fails because it already exists"() {
+        when:
+        def changeLogFile = "changelogs/uniqueConstraint.xml"
         def scopeSettings = [
                 (Scope.Attr.resourceAccessor.name()): new SearchPathResourceAccessor(".,target/test-classes")
         ]

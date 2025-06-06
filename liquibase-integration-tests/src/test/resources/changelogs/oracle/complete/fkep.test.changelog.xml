@@ -5,9 +5,12 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="createTestSchema" author="mallod">
-        <sqlFile path="sql/fkep_test.sql" relativeToChangelogFile="true"/>
+    <changeSet id="createTestSchema" author="mallod" dbms="!oracle">
+        <sqlFile path="fkep_test.sql" relativeToChangelogFile="true"/>
+    </changeSet>
 
+    <changeSet id="createTestSchema" author="mallod" dbms="oracle">
+        <sqlFile path="sql/fkep_test.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
     <changeSet id="addForeignKeyConstraintOnNewSchema" author="mallod">

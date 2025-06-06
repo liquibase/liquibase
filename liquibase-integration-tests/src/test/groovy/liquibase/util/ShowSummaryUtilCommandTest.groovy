@@ -41,12 +41,6 @@ class ShowSummaryUtilCommandTest extends Specification {
         then:
         new File(outputFile).getText("UTF-8").contains("Run:                          0")
         new File(outputFile).getText("UTF-8").contains("Filtered out:                 4")
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
-        if (h2.getConnection() != null) {
-            h2.getConnection().close()
-        }
     }
 
     def "validate update summary output is only written to LOG service"() {
@@ -86,12 +80,6 @@ class ShowSummaryUtilCommandTest extends Specification {
         logContent.contains("DBMS mismatch:                1")
 
         !outputStream.toString().contains("UPDATE SUMMARY")
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
-        if (h2.getConnection() != null) {
-            h2.getConnection().close()
-        }
     }
 
     def "validate update summary output is only written to CONSOLE"() {
@@ -133,12 +121,6 @@ class ShowSummaryUtilCommandTest extends Specification {
         streamContent.contains("DBMS mismatch:                1")
 
         !logContent.contains("UPDATE SUMMARY")
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
-        if (h2.getConnection() != null) {
-            h2.getConnection().close()
-        }
     }
 
     def "validate update summary output is written in both LOG and CONSOLE"() {
@@ -188,12 +170,6 @@ class ShowSummaryUtilCommandTest extends Specification {
         streamContent.contains("FILTERED CHANGE SETS SUMMARY")
         streamContent.contains("Label mismatch:               3")
         streamContent.contains("DBMS mismatch:                1")
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
-        if (h2.getConnection() != null) {
-            h2.getConnection().close()
-        }
     }
 
     def "validate update summary output is correct when OS does not match"() {
@@ -232,12 +208,6 @@ class ShowSummaryUtilCommandTest extends Specification {
         streamContent.contains("FILTERED CHANGE SETS SUMMARY")
         streamContent.contains("DBMS mismatch:                1")
         streamContent.contains("OS mismatch:                  1")
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
-        if (h2.getConnection() != null) {
-            h2.getConnection().close()
-        }
     }
 
     def "validate update summary output is correct when a precondition has continue"() {
@@ -274,11 +244,5 @@ class ShowSummaryUtilCommandTest extends Specification {
         streamContent.contains("Total change sets:            2")
         streamContent.contains("FILTERED CHANGE SETS SUMMARY")
         streamContent.contains("Preconditions:                1")
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
-        if (h2.getConnection() != null) {
-            h2.getConnection().close()
-        }
     }
 }

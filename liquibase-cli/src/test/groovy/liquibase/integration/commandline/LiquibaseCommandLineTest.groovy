@@ -53,8 +53,7 @@ Global Options
       --analytics-enabled=PARAM
                              Enable or disable sending product usage data and
                                analytics to Liquibase. Learn more at https:
-                               //docs.liquibase.com/analytics. DEFAULT: true
-                               for OSS users | false for PRO users
+                               //docs.liquibase.com/analytics.
                              (defaults file: 'liquibase.analytics.enabled',
                                environment variable:
                                'LIQUIBASE_ANALYTICS_ENABLED')
@@ -242,6 +241,15 @@ Global Options
                                variable:
                                'LIQUIBASE_INCLUDE_RELATIONS_FOR_COMPUTED_COLUMNS
                                ')
+
+      --include-schema-name-for-default=PARAM
+                             If true, the schema name is included for the
+                               default schema when loading a snapshot
+                             DEFAULT: false
+                             (defaults file: 'liquibase.
+                               includeSchemaNameForDefault', environment
+                               variable:
+                               'LIQUIBASE_INCLUDE_SCHEMA_NAME_FOR_DEFAULT')
 
       --include-system-classpath=PARAM
                              Include the system classpath when resolving

@@ -155,6 +155,10 @@
 
     <!-- This is the main (root) part of the xsd -->
     <xsd:element name="databaseChangeLog">
+        <xsd:annotation>
+            <xsd:documentation>The root element of the
+                <a href='https://docs.liquibase.com/concepts/changelogs/home.html'>changelog</a></xsd:documentation>
+        </xsd:annotation>
         <xsd:complexType>
             <xsd:sequence>
                 <xsd:element name="removeChangeSetProperty" minOccurs="0" maxOccurs="unbounded">
@@ -521,6 +525,7 @@
         <xsd:attribute name="unique" type="booleanExp"/>
         <xsd:attribute name="clustered" type="booleanExp"/>
         <xsd:attribute name="tablespace" type="xsd:string"/>
+        <xsd:attribute name="using" type="xsd:string"/>
         <xsd:anyAttribute namespace="##other" processContents="lax"/>
     </xsd:attributeGroup>
 
@@ -1227,6 +1232,7 @@
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attribute name="tag" type="xsd:string" use="required"/>
+            <xsd:attribute name="keepTagOnRollback" type="booleanExp" />
             <xsd:anyAttribute namespace="##other"  processContents="lax"/>
         </xsd:complexType>
     </xsd:element>
