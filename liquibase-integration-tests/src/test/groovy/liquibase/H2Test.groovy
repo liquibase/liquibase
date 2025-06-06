@@ -1,4 +1,6 @@
-import liquibase.Scope
+package liquibase
+
+
 import liquibase.command.CommandScope
 import liquibase.command.core.UpdateCommandStep
 import liquibase.command.core.UpdateCountCommandStep
@@ -11,22 +13,22 @@ import spock.lang.Shared
 import spock.lang.Specification
 
 @LiquibaseIntegrationTest
-class MySQLTest extends Specification {
+class H2Test extends Specification {
 
     @Shared
-    private DatabaseTestSystem mysql = Scope.getCurrentScope().getSingleton(TestSystemFactory).getTestSystem("mysql") as DatabaseTestSystem
+    private DatabaseTestSystem h2 = Scope.getCurrentScope().getSingleton(TestSystemFactory).getTestSystem("h2") as DatabaseTestSystem
 
-    def "verify foreignKeyExists constraint is not created again when precondition fails because it already exists"() {
+    def "verify sequence is not created again when precondition fails because it already exists"() {
         when:
-        def changeLogFile = "changelogs/mysql/complete/fkep.test.changelog.xml"
+        def changeLogFile = "changelogs/sequenceExists-h2.xml"
         def scopeSettings = [
                 (Scope.Attr.resourceAccessor.name()): new SearchPathResourceAccessor(".,target/test-classes")
         ]
         Scope.child(scopeSettings, {
             CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, mysql.getConnectionUrl())
-            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, mysql.getUsername())
-            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, mysql.getPassword())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, h2.getUsername())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, h2.getPassword())
             commandScope.addArgumentValue(UpdateCountCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
             commandScope.execute()
         } as Scope.ScopedRunnerWithReturn<Void>)

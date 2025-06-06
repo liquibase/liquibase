@@ -2,7 +2,7 @@
 Uninstalling Liquibase
 --------------------------------------------
 To uninstall Liquibase, delete the directory where it was installed.
-If you used the installer you can also use the uninstall.exe (Windows) or Liquibase Uninstaller (Mac) to remove these files.
+If you used the installer you can also use the uninstall.exe (Windows) to remove these files.
 
 Help & Support
 ----------------------------------------

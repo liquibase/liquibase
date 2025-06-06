@@ -298,7 +298,7 @@ public interface ResourceAccessor extends AutoCloseable {
      */
     List<String> describeLocations();
 
-    class NotFoundResource extends AbstractResource {
+    public class NotFoundResource extends AbstractResource {
         private final ResourceAccessor resourceAccessor;
 
         public NotFoundResource(String path, ResourceAccessor resourceAccessor) {
