@@ -7,7 +7,7 @@ permissions:
   issues: write
   checks: write
   id-token: write
-  actions: read
+  actions: write
   packages: write
 
 on:
