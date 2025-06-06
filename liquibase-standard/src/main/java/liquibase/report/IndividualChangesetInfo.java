@@ -21,6 +21,7 @@ public class IndividualChangesetInfo {
     private String contexts;
     private List<String> attributes;
     private List<String> generatedSql;
+    private String contentType;
 
     /**
      * Used in the report template. Do not remove.
