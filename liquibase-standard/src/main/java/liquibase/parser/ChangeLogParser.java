@@ -10,7 +10,7 @@ import liquibase.resource.ResourceAccessor;
  * are able to parse different file formats (e.g. XML, YAML, JSON, ...)
  */
 public interface ChangeLogParser extends LiquibaseParser {
-    
+    String DATABASE_CHANGE_LOG = "databaseChangeLog";
     /**
      * Parses a Liquibase database changelog and returns the parsed form as an object.
      * @param physicalChangeLogLocation the physical location of the changelog. The exact file formats and locations
