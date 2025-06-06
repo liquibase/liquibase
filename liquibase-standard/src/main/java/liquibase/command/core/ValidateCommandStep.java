@@ -1,6 +1,7 @@
 package liquibase.command.core;
 
 import liquibase.RuntimeEnvironment;
+import liquibase.Scope;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.command.*;
@@ -50,6 +51,8 @@ public class ValidateCommandStep extends AbstractCommandStep {
             }
             resultsBuilder.addResult("statusCode", 1);
             throw new ChangeLogParseException(validateMessage.toString());
+        } else {
+            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("no.validation.errors.found"));
         }
     }
 
