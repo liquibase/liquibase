@@ -38,6 +38,9 @@ public class ExecutorService extends AbstractPluginFactory<Executor>  {
 
     private Executor getExecutorValue(String executorName, Database database) throws UnexpectedLiquibaseException {
         final Executor plugin = getPlugin(executorName.toLowerCase(), database);
+        if (plugin == null) {
+            throw new UnexpectedLiquibaseException("No executor found for name '" + executorName + "'");
+        }
         try {
             return plugin.getClass().newInstance();
         } catch (ReflectiveOperationException e) {

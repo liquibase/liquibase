@@ -1,0 +1,41 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"  
+xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"  
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd 
+http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+  http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+
+<!-- SETUP: Create tables and function for other objects to use. -->
+    <changeSet author="Liquibase Pro User"  id="1::createTableforSynonym" labels="setup" context="first" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <createTable tableName="primary_table">
+            <column name="id" type="NUMBER(20,0)" >
+                <constraints nullable="false" primaryKey="true" unique="true"/>
+            </column>
+            <column name="name" type="VARCHAR(20)"/>
+            <column name="date"  type="TIMESTAMP" />
+            <column name="date1"  type="TIMESTAMP" />
+            <column name="date2"  type="TIMESTAMP" />
+            <column name="date3"  type="TIMESTAMP" />
+            <column name="date4"  type="TIMESTAMP" />
+            <column name="date5"  type="TIMESTAMP" />
+            <column name="date6"  type="TIMESTAMP" />
+            <column name="date7"  type="TIMESTAMP" />
+            <column name="date8"  type="TIMESTAMP" />
+            <column name="date9"  type="TIMESTAMP" />
+        </createTable>
+    </changeSet>
+
+    <changeSet id="34a" author="nvoxland" labels="first" context="first">
+      <addUniqueConstraint tableName="primary_table" columnNames="name" constraintName="uc_name"/>
+    </changeSet>
+    <changeSet author="wesley (generated)" id="1736451873490-4045" dbms="mssql">
+        <preConditions onFail="MARK_RAN" onFailMessage="You are doing it wrong ;-)">
+            <not>
+                <uniqueConstraintExists tableName="primary_table" constraintName="uc_name"/>
+            </not>
+        </preConditions>
+        <addUniqueConstraint tableName="primary_table" columnNames="name" constraintName="uc_name"/>
+    </changeSet>
+</databaseChangeLog>
