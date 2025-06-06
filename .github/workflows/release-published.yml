@@ -3,9 +3,10 @@ name: Release Published
 permissions:
   contents: write
   packages: write
-  actions: read
+  actions: write
   id-token: write
   pull-requests: write
+  issues: write
 
 on:
   release:
@@ -309,11 +310,21 @@ jobs:
           path: liquibase-core-repo
           repository: "liquibase/liquibase"
 
+      - name: Get GitHub App token
+        id: get-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: liquibase-pro
+          permission-contents: read
+          
       - name: Download liquibase-pro xsd
         uses: actions/checkout@v4
         with:
           ref: "${{ needs.setup.outputs.ref_branch }}"
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.get-token.outputs.token }}
           # Relative path under $GITHUB_WORKSPACE to place the repository
           path: liquibase-pro-repo
           repository: "liquibase/liquibase-pro"
@@ -407,7 +418,7 @@ jobs:
           app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
           private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-          permission-contents: read
+          permission-contents: write
           permission-actions: write
 
       - name: Release liquibase/docker v${{ needs.setup.outputs.version }}
@@ -440,7 +451,7 @@ jobs:
           app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
           private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-          permission-contents: read
+          permission-contents: write
           permission-actions: write
 
       - name: Release liquibase/liquibase-infrastructure v${{ needs.setup.outputs.version }}
@@ -468,7 +479,7 @@ jobs:
           app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
           private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-          permission-contents: read
+          permission-contents: write
           permission-actions: write
 
       - name: Repository Dispatch
@@ -507,7 +518,7 @@ jobs:
           app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
           private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-          permission-contents: read
+          permission-contents: write
           permission-actions: write
 
       - name: Checkout repository
@@ -522,10 +533,14 @@ jobs:
         run: |
           # Fetch all tags from the remote
           git fetch --tags
-          # Get the latest tag
-          echo "latest_version=$(git describe --tags $(git rev-list --tags --max-count=1) | sed 's/^v//')" >> $GITHUB_OUTPUT
-          # Get the previous released version tag
-          echo "previous_version=$(git for-each-ref --sort=creatordate --format '%(refname:short)' refs/tags |sed 's/^v//')" >> $GITHUB_OUTPUT
+          # Get the latest semver tag, strip 'v'
+          latest_tag=$(git tag --sort=-creatordate | grep -E '^v?[0-9]' | head -n1 | sed 's/^v//')
+          # Get the second latest tag
+          previous_tag=$(git tag --sort=-creatordate | grep -E '^v?[0-9]' | sed 's/^v//' | head -n2 | tail -n1)
+          echo "latest_version=$latest_tag" >> $GITHUB_OUTPUT
+          echo "previous_version=$previous_tag" >> $GITHUB_OUTPUT
+          echo "Latest Version: $latest_tag"
+          echo "Previous Version: $previous_tag"
 
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v3
@@ -543,34 +558,6 @@ jobs:
           repository: liquibase/liquibase-aws-license-service
           event-type: oss-released-version
 
-  trigger-sbom-generation-lb-lbpo:
-    if: ${{ inputs.dry_run == false }}
-    name: Generate SBOMS for liquibase and liquibase-pro
-    runs-on: ubuntu-latest
-    needs: [setup, update-docs-oss-pro-version]
-    strategy:
-      matrix:
-        repo: ["liquibase/liquibase", "liquibase/liquibase-pro"]
-
-    steps:
-
-      - name: Get GitHub App token
-        id: get-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          permission-contents: read
-          permission-actions: write
-
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ steps.get-token.outputs.token }}
-          repository: liquibase/build-logic
-          event-type: oss-released-version
-          client-payload: '{"latest_version": "${{ needs.update-docs-oss-pro-version.outputs.latest_version }}", "repo_name": "${{ matrix.repo }}", "branch_name": "${{ github.ref }}" }'
 
   dry_run_deploy_maven:
     if: ${{ inputs.dry_run == true }}

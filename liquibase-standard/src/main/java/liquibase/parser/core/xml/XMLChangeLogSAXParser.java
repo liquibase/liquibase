@@ -11,18 +11,26 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.util.BomAwareInputStream;
 import liquibase.util.FileUtil;
 import liquibase.util.LiquibaseUtil;
+import liquibase.util.StreamUtil;
 import org.xml.sax.*;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.regex.Pattern;
 
 public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
     public static final String LIQUIBASE_SCHEMA_VERSION;
     private final SAXParserFactory saxParserFactory;
+
+    private final String FIRST_VALID_TAG_REGEX = "^\\s*<databaseChangeLog\\s?.*";
+    private final Pattern FIRST_VALID_TAG_PATTERN = Pattern.compile(FIRST_VALID_TAG_REGEX, Pattern.CASE_INSENSITIVE);
+    private final String IGNORE_FIRST_LINE_COMMENTS_AND_XML_TAG_REGEX = "^\\s*(<!--|<!|<!DOCTYPE|]>|<\\?xml).*|^\\s*$";
+    private final Pattern IGNORE_FIRST_LINE_COMMENTS_AND_XML_TAG_PATTERN = Pattern.compile(IGNORE_FIRST_LINE_COMMENTS_AND_XML_TAG_REGEX, Pattern.CASE_INSENSITIVE);
 
     static {
         LIQUIBASE_SCHEMA_VERSION = computeSchemaVersion(LiquibaseUtil.getBuildVersion());
@@ -128,7 +136,20 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
         } catch (IOException e) {
             throw new ChangeLogParseException("Error Reading Changelog File: " + e.getMessage(), e);
         } catch (SAXParseException e) {
-            throw new ChangeLogParseException("Error parsing line " + e.getLineNumber() + " column " + e.getColumnNumber() + " of " + physicalChangeLogLocation + ": " + e.getMessage(), e);
+            String errMsg = e.getMessage();
+            try {
+                Boolean isDatabaseChangeLogRootElement = isDatabaseChangeLogTagTheFirstElement(physicalChangeLogLocation, resourceAccessor);
+                if (isDatabaseChangeLogRootElement != null && !isDatabaseChangeLogRootElement) {
+                    errMsg = '"' + DATABASE_CHANGE_LOG + "\" expected as root element";
+                } else if (isDatabaseChangeLogRootElement == null) {
+                    throw new ChangeLogParseException("Unable to parse empty file");
+                }
+
+            } catch (IOException ex) {
+                throw new ChangeLogParseException(errMsg, e);
+            }
+            throw new ChangeLogParseException("Error parsing line " + e.getLineNumber() + " column "
+                    + e.getColumnNumber() + " of " + physicalChangeLogLocation + ": " + errMsg, e);
         } catch (SAXException e) {
             Throwable parentCause = e.getException();
             while (parentCause != null) {
@@ -182,5 +203,53 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
             finalVersion = "latest";
         }
         return finalVersion;
+    }
+
+    private Boolean isDatabaseChangeLogTagTheFirstElement(String changeLogFile, ResourceAccessor resourceAccessor) throws IOException, ChangeLogParseException {
+        BufferedReader reader = null;
+        try {
+                InputStream fileStream = openChangeLogFile(changeLogFile, resourceAccessor);
+                if (fileStream == null) {
+                    return false;
+                }
+                reader = new BufferedReader(StreamUtil.readStreamWithReader(fileStream, null));
+                if(!reader.ready()) {
+                    throw new ChangeLogParseException("Unable to parse empty file");
+                }
+
+                String firstLine = reader.readLine();
+
+            boolean keepSearchingFirstValidTag = true;
+            while (keepSearchingFirstValidTag) {
+                if(IGNORE_FIRST_LINE_COMMENTS_AND_XML_TAG_PATTERN.matcher(firstLine).matches() && reader.ready()) {
+                    firstLine = reader.readLine();
+                } else {
+                    keepSearchingFirstValidTag = false;
+                }
+            }
+            if (firstLine!= null && firstLine.trim().isEmpty()) {
+                throw new ChangeLogParseException("Unable to parse empty file");
+            }
+
+            if(firstLine!= null) {
+                return FIRST_VALID_TAG_PATTERN.matcher(firstLine).matches();
+            }
+            return null;
+        } catch (IOException e) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Exception reading " + changeLogFile, e);
+            return false;
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    Scope.getCurrentScope().getLog(getClass()).fine("Exception closing " + changeLogFile, e);
+                }
+            }
+        }
+    }
+
+    protected InputStream openChangeLogFile(String physicalChangeLogLocation, ResourceAccessor resourceAccessor) throws IOException {
+        return resourceAccessor.getExisting(physicalChangeLogLocation).openInputStream();
     }
 }
