@@ -468,7 +468,7 @@ CREATE TABLE public.Persons (
         new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_WITH_DUPLICATE_HEADERS).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
         then:
         def e = thrown(ChangeLogParseException)
-        e.getMessage().equals("Duplicate header at line 8")
+        e.getMessage().equals("Duplicate formatted SQL header at line 8")
     }
 
     def invalidPrecondition() throws Exception {
