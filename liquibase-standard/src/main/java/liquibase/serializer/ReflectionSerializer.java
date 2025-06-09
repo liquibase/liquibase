@@ -3,6 +3,7 @@ package liquibase.serializer;
 import liquibase.exception.UnexpectedLiquibaseException;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -40,6 +41,9 @@ public class ReflectionSerializer {
                     continue;
                 }
                 if (field.isSynthetic() || "$VRc".equals(field.getName())) { //from emma
+                    continue;
+                }
+                if (Modifier.isStatic(field.getModifiers())) {
                     continue;
                 }
 
