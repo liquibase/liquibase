@@ -165,7 +165,7 @@ jobs:
           token: ${{ steps.get-token.outputs.token }}
 
       - name: Download liquibase-artifacts
-        uses: dawidd6/action-download-artifact@v9
+        uses: dawidd6/action-download-artifact@v10
         with:
           workflow: run-tests.yml
           run_id: ${{ needs.setup.outputs.runId }}
