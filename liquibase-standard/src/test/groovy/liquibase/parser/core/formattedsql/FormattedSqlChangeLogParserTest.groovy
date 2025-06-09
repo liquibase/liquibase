@@ -433,6 +433,21 @@ CREATE TABLE public.Persons (
     Address varchar(255),
     City varchar(255)
 );"""
+
+    private static final String INVALID_CHANGELOG_WITH_DUPLICATE_HEADERS =
+"""
+--liquibase formatted sql
+
+--changeset bharath.javaji1:1-PPgrant labels:CDW-394266   contextFilter:PP
+--comment GMDR - Cleanup of Talend Metrics
+--rollback GRANT `roles/bigquery.dataViewer` ON VIEW IDW_ACQ_REPORTS.CAMP_ENCLSR_1 TO "group:app_gcp_cdwp_idw_0375_uir@schwab.com";
+
+--liquibase formatted sql
+--changeset bharath.javaji1:1-PRODgrant labels:CDW-394266   contextFilter:PRD
+--comment GMDR - Cleanup of Talend Metrics
+--rollback GRANT `roles/bigquery.dataViewer` ON VIEW IDW_ACQ_REPORTS.CAMP_ENCLSR_1 TO "group:app_gcp_cdwp_idw_0374_pir@schwab.com";
+"""
+
     def supports() throws Exception {
         expect:
         assert new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).supports("asdf.sql", new JUnitResourceAccessor())
@@ -446,6 +461,14 @@ CREATE TABLE public.Persons (
         new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_INVALID_PRECONDITION).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
         then:
         thrown(ChangeLogParseException)
+    }
+
+    def duplicateHeaderLines() throws Exception {
+        when:
+        new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_WITH_DUPLICATE_HEADERS).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        then:
+        def e = thrown(ChangeLogParseException)
+        e.getMessage().equals("Duplicate header at line 8")
     }
 
     def invalidPrecondition() throws Exception {
