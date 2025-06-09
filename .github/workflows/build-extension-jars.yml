@@ -200,7 +200,7 @@ jobs:
         delete-checks-packages,
         matching-branch-logic-extensions,
       ]
-    uses: liquibase/build-logic/.github/workflows/publish-for-liquibase.yml@DAT-20044
+    uses: liquibase/build-logic/.github/workflows/publish-for-liquibase.yml@main
     with:
       repository: liquibase/liquibase-checks
       version: ${{ needs.get-liquibase-checks-version.outputs.version }}
