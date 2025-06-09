@@ -576,7 +576,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         then:
         def e = thrown(SetupException)
-        e.getMessage().contains("Unable to parse empty file")
+        e.getMessage().contains(String.format("Unable to parse empty file: '%s'", "com/example/test1.xml"))
     }
 
     def "include fails if SQL file is empty"() {
@@ -593,7 +593,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         then:
         def e = thrown(SetupException)
-        e.getMessage().contains("Unable to parse empty file")
+        e.getMessage().contains(String.format("Unable to parse empty file: '%s'", "com/example/test1.sql"))
     }
 
     def "include fails if JSON file is empty"() {
