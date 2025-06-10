@@ -112,6 +112,7 @@
         <module>liquibase-dist</module>
         <module>liquibase-extension-testing</module>
         <module>liquibase-snowflake</module>
+        <module>liquibase-spring</module>
     </modules>
 
     <dependencyManagement>

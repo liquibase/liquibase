@@ -1,0 +1,4 @@
+databaseChangeLog:
+- include:
+    file: basic/createObjects.xml
+    relativeToChangelogFile: true
