@@ -21,7 +21,10 @@ import liquibase.exception.MigrationFailedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
+import liquibase.ui.ColoredUIService;
+import liquibase.ui.UIService;
 
+import java.awt.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -114,21 +117,37 @@ public class UpdateVisitor implements ChangeSetVisitor {
      */
     private void executeAcceptedChange(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database)
             throws DatabaseException, DatabaseHistoryException, MigrationFailedException {
+        UIService uiService = Scope.getCurrentScope().getUI();
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+
         if (!(executor instanceof LoggingExecutor) && allChangeSetsShouldRun(changeSet)) {
-            Scope.getCurrentScope().getUI().sendMessage("Running Changeset: " + changeSet);
+            if (uiService instanceof ColoredUIService) {
+                ((ColoredUIService) uiService).sendColoredMessage("Running Changeset: ", "default", changeSet.toString(), "light_orange");
+            } else {
+                uiService.sendMessage("Running Changeset: " + changeSet);
+            }
         }
+
         RunStatus runStatus = this.database.getRunStatus(changeSet);
         Scope.getCurrentScope().getLog(getClass()).fine("Running Changeset: " + changeSet);
         fireWillRun(changeSet, databaseChangeLog, database, runStatus);
+
+        final boolean[] isExecuting = {true};
+        Thread spinnerThread = createSpinnerThread((ColoredUIService) uiService, isExecuting);
+        spinnerThread.start();
+
         ExecType execType;
         ObjectQuotingStrategy previousStr = this.database.getObjectQuotingStrategy();
         try {
             execType = changeSet.execute(databaseChangeLog, execListener, this.database);
-
         } catch (MigrationFailedException e) {
+            isExecuting[0] = false;
+            spinnerThread.interrupt();
             fireRunFailed(changeSet, databaseChangeLog, database, e);
             throw e;
+        } finally {
+            isExecuting[0] = false;
+            spinnerThread.interrupt();
         }
         if (!Objects.equals(runStatus, RunStatus.NOT_RAN)
                 && (Objects.equals(execType, ExecType.EXECUTED) || Objects.equals(execType, ExecType.MARK_RAN))) {
@@ -168,6 +187,23 @@ public class UpdateVisitor implements ChangeSetVisitor {
     private void addAttributesForMdc(ChangeSet changeSet, ExecType execType) {
         changeSet.setAttribute("updateExecType", execType);
         changeSet.setAttribute("deploymentId", Scope.getCurrentScope().getDeploymentId());
+    }
+
+    private Thread createSpinnerThread(ColoredUIService uiService, boolean[] isExecuting) {
+        return new Thread(() -> {
+            char[] spinChars = {'|', '/', '-', '\\'};
+            int index = 0;
+            while (isExecuting[0]) {
+                uiService.send("\r" + spinChars[index] + " ");
+                index = (index + 1) % spinChars.length;
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    break;
+                }
+            }
+            uiService.send("\r "); // Clear the spinner
+        });
     }
 }
 

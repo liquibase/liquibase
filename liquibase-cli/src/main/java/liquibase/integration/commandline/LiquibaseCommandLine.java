@@ -23,10 +23,7 @@ import liquibase.logging.mdc.MdcObject;
 import liquibase.logging.mdc.customobjects.ChangesetsUpdated;
 import liquibase.logging.mdc.customobjects.Version;
 import liquibase.resource.*;
-import liquibase.ui.CompositeUIService;
-import liquibase.ui.ConsoleUIService;
-import liquibase.ui.LoggerUIService;
-import liquibase.ui.UIService;
+import liquibase.ui.*;
 import liquibase.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemProperties;
@@ -723,6 +720,7 @@ public class LiquibaseCommandLine {
         Scope.child(new HashMap<>(javaProperties), () -> returnMap.putAll(configureResourceAccessor(Thread.currentThread().getContextClassLoader())));
 
         UIService defaultUiService = getDefaultUiService();
+        UIService coloredUiService = new ColoredUIService(defaultUiService);
 
         if (defaultUiService instanceof ConsoleUIService) {
             defaultUiService.setAllowPrompt(true);
@@ -733,9 +731,9 @@ public class LiquibaseCommandLine {
                 outputServices.add(new LoggerUIService());
             }
             CompositeUIService compositeUIService = new CompositeUIService(defaultUiService, outputServices);
-            returnMap.put(Scope.Attr.ui.name(), compositeUIService);
+            returnMap.put(Scope.Attr.ui.name(), coloredUiService);
         } else {
-            returnMap.put(Scope.Attr.ui.name(), defaultUiService);
+            returnMap.put(Scope.Attr.ui.name(), coloredUiService);
         }
 
         returnMap.put(LiquibaseCommandLineConfiguration.ARGUMENT_CONVERTER.getKey(),
