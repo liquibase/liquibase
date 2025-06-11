@@ -1,7 +1,6 @@
 package liquibase.changelog.filter;
 
-import liquibase.change.Change;
-import liquibase.change.DbmsTargetedChange;
+import liquibase.GlobalConfiguration;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
@@ -39,6 +38,11 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
             dbmsList = "all databases";
         } else {
             dbmsList = "'"+ StringUtil.join(changeSet.getDbmsSet(), ", ") + "'";
+        }
+
+        boolean strictValue = GlobalConfiguration.STRICT.getCurrentValue();
+        if(strictValue && (changeSet.getDbmsSet() == null || changeSet.getDbmsSet().isEmpty())) {
+            return new ChangeSetFilterResult(false, "dbms value cannot be empty while on Strict mode", this.getClass(), "dbmsEmptyOnStrictMode", "dbms");
         }
 
         if (DatabaseList.definitionMatches(changeSet.getDbmsSet(), database, true)) {
