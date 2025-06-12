@@ -142,7 +142,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
                 if (isDatabaseChangeLogRootElement != null && !isDatabaseChangeLogRootElement) {
                     errMsg = '"' + DATABASE_CHANGE_LOG + "\" expected as root element";
                 } else if (isDatabaseChangeLogRootElement == null) {
-                    throw new ChangeLogParseException("Unable to parse empty file");
+                    throw new ChangeLogParseException(String.format("Unable to parse empty file: '%s'", physicalChangeLogLocation));
                 }
 
             } catch (IOException ex) {
@@ -214,7 +214,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
                 }
                 reader = new BufferedReader(StreamUtil.readStreamWithReader(fileStream, null));
                 if(!reader.ready()) {
-                    throw new ChangeLogParseException("Unable to parse empty file");
+                    throw new ChangeLogParseException(String.format("Unable to parse empty file: '%s'", changeLogFile));
                 }
 
                 String firstLine = reader.readLine();
@@ -228,7 +228,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
                 }
             }
             if (firstLine!= null && firstLine.trim().isEmpty()) {
-                throw new ChangeLogParseException("Unable to parse empty file");
+                throw new ChangeLogParseException(String.format("Unable to parse empty file: '%s'", changeLogFile));
             }
 
             if(firstLine!= null) {
