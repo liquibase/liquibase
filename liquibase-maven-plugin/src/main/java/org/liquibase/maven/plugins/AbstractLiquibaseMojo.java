@@ -388,6 +388,16 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected boolean showBanner = true;
 
     /**
+     *
+     * Enable or disable reports
+     *
+     * @parameter property="liquibase.reportsEnabled"
+     *
+     */
+    @PropertyElement
+    protected boolean reportsEnabled = true;
+
+    /**
      * Specifies the server ID in the Maven <i>settings.xml</i> to use when authenticating.
      *
      * @parameter property="liquibase.server"
@@ -990,6 +1000,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 scopeValues.put(Scope.Attr.integrationDetails.name(), integrationDetails);
                 scopeValues.put("liquibase.licenseKey", getLicenseKey());
                 String key = GlobalConfiguration.PRESERVE_SCHEMA_CASE.getKey();
+                scopeValues.put("liquibase.reports.enabled", reportsEnabled);
                 scopeValues.put(key, preserveSchemaCase);
                 scopeValues.putAll(getNativeExecutorProperties());
                 Scope.child(scopeValues, () -> {
