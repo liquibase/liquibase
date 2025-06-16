@@ -13,6 +13,7 @@ import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.core.*;
 import liquibase.util.*;
 import lombok.Getter;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.math.BigInteger;
 import java.text.NumberFormat;
@@ -20,9 +21,6 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
-import lombok.Setter;
-import org.apache.commons.lang3.BooleanUtils;
 
 /**
  * The standard configuration used by Change classes to represent a column.
@@ -68,7 +66,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * This is useful for extensions that need to know the original value passed in, such as Neo4j extension
      */
     @Getter
-    @Setter
     private String rawDateValue;
 
     /**
