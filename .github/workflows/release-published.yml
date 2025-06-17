@@ -172,7 +172,7 @@ jobs:
 
           unzip -j liquibase-additional-*.zip
 
-          ##extracts and sign poms
+          ##extracts and sign poms, generate checksums for all artifacts
           for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-commercial'; do
             unzip -j $i-${version}.jar META-INF/maven/org.liquibase/$i/pom.xml
             sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
@@ -181,55 +181,63 @@ jobs:
               sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private<\/connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" $i-${version}.pom   ## scm info not in the pom
             fi
 
+            # Sign POM file
             gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i-${version}.pom
-
-            mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-              -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
-              -DrepositoryId=sonatype-nexus-staging \
-              -DpomFile=$i-${version}.pom \
-              -DgeneratePom=false \
-              -Dfile=$i-${version}.jar \
-              -Dsources=$i-${version}-sources.jar \
-              -Djavadoc=$i-${version}-javadoc.jar \
-              -Dfiles=$i-${version}.jar.asc,$i-${version}-sources.jar.asc,$i-${version}-javadoc.jar.asc,$i-${version}.pom.asc \
-              -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
-              -Dclassifiers=,sources,javadoc,
+            
+            # Generate checksums for POM file
+            md5sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.md5
+            sha1sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.sha1
+            
+            # Generate checksums for all JAR files (main, sources, javadoc)
+            for jar_file in $i-${version}.jar $i-${version}-sources.jar $i-${version}-javadoc.jar; do
+              if [ -f "$jar_file" ]; then
+                md5sum "$jar_file" | cut -d' ' -f1 > "$jar_file.md5"
+                sha1sum "$jar_file" | cut -d' ' -f1 > "$jar_file.sha1"
+              fi
+            done
           done
 
-          ## Release repository
-          ## Have to find the stagingRepositoryId that was auto-generated
-          api_output=$(curl -s -u "${{ secrets.SONATYPE_USERNAME }}:${{ secrets.SONATYPE_TOKEN }}" "https://oss.sonatype.org/service/local/staging/profile_repositories")
-          # Extract ids of repositories-item containing the string "liquibase"
-          repositories=$(echo "$api_output" | grep -B 8 "liquibase" | grep "<repositoryId>" | awk -F"<|>" '{print $3}')
-          echo "Repository IDs containing 'liquibase': $repositories"
-          for repo_id in $repositories; do
-            echo "Check if $repo_id repository is an extension"
-            api_output=$(curl -s -u "${{ secrets.SONATYPE_USERNAME }}:${{ secrets.SONATYPE_TOKEN }}" "https://oss.sonatype.org/service/local/repositories/$repo_id/content/org/liquibase/")
-            relative_path=$(echo "$api_output" | grep -oP '<relativePath>\K[^<]+' | awk 'NR==1')
-            echo "Relative path: $relative_path"
-            if [[ "$relative_path" == *"/org/liquibase/ext/"* ]]; then
-                echo "Relative path contains '/org/liquibase/ext/'. It is an extension."
-            else
-                echo "Relative path does not contain '/org/liquibase/ext/'. It is not an extension."
-                stagingRepositoryId=$repo_id
-                break
-            fi
+          # Create Maven repository layout structure for the bundle
+          mkdir -p "bundle/org/liquibase"
+          
+          # Copy all artifacts to proper Maven repository layout
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-cdi' 'liquibase-cdi-jakarta' 'liquibase-commercial'; do
+            mkdir -p "bundle/org/liquibase/$i/${version}"
+            cp $i-${version}* "bundle/org/liquibase/$i/${version}/"
           done
-
-          echo "Staging Repository Id: $stagingRepositoryId"
-
-          mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-close \
-            -DnexusUrl=https://oss.sonatype.org/ \
-            -DserverId=sonatype-nexus-staging \
-            -DstagingRepositoryId=$stagingRepositoryId \
-            -DstagingProgressTimeoutMinutes=10
-
-          mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-release \
-            -DautoDropAfterRelease=true \
-            -DnexusUrl=https://oss.sonatype.org/ \
-            -DserverId=sonatype-nexus-staging \
-            -DstagingRepositoryId=$stagingRepositoryId \
-            -DstagingProgressTimeoutMinutes=10
+          
+          # Create the bundle zip file
+          cd bundle
+          zip -r ../central-bundle.zip .
+          cd ..
+          
+          # Create base64 encoded credentials for Bearer auth
+          AUTH_HEADER=$(printf "%s:%s" "${MAVEN_USERNAME}" "${MAVEN_PASSWORD}" | base64 -w 0)
+          
+          # Upload bundle to Central Portal with AUTOMATIC publishing
+          echo "Uploading bundle to Central Portal for liquibase-${version}..."
+          UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X POST \
+            -H "Authorization: Bearer ${AUTH_HEADER}" \
+            -F "bundle=@central-bundle.zip" \
+            "https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC&name=liquibase-${version}")
+          
+          # Parse response
+          HTTP_CODE=$(echo "$UPLOAD_RESPONSE" | tail -n1)
+          DEPLOYMENT_ID=$(echo "$UPLOAD_RESPONSE" | head -n1)
+          
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Deployment ID: $DEPLOYMENT_ID"
+          
+          if [ "$HTTP_CODE" != "201" ]; then
+            echo "Upload failed with HTTP status $HTTP_CODE"
+            echo "Response: $DEPLOYMENT_ID"
+            exit 1
+          fi
+          
+          echo "Bundle uploaded successfully to Central Portal"
+          echo "Deployment ID: $DEPLOYMENT_ID"
+          echo "Automatic publishing initiated for liquibase-${version}"
 
   deploy_javadocs:
     if: ${{ inputs.dry_run == false }}
@@ -561,7 +569,7 @@ jobs:
 
   dry_run_deploy_maven:
     if: ${{ inputs.dry_run == true }}
-    name: Deploy to repo.liquibase.net
+    name: Deploy to Maven Central Repository
     needs: [setup]
     runs-on: ubuntu-22.04
     steps:
@@ -586,17 +594,17 @@ jobs:
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
 
-      - name: Publish to repo.liquibase.net
+      - name: Publish to Central Portal (Dry Run)
         env:
-          MAVEN_USERNAME: ${{ secrets.REPO_LIQUIBASE_NET_USER }}
-          MAVEN_PASSWORD: ${{ secrets.REPO_LIQUIBASE_NET_PASSWORD }}
+          MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.SONATYPE_TOKEN }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           version=${{ needs.setup.outputs.version }}
 
           unzip -j liquibase-additional-*.zip
 
-          ##extracts and sign poms
+          ##extracts and sign poms, generate checksums for all artifacts
           for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-commercial'; do
             unzip -j $i-${version}.jar META-INF/maven/org.liquibase/$i/pom.xml
             sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
@@ -605,21 +613,63 @@ jobs:
               sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private<\/connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" $i-${version}.pom   ## scm info not in the pom
             fi
 
+            # Sign POM file
             gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i-${version}.pom
-
-            mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-              -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
-              -DrepositoryId=dry-run-sonatype-nexus-staging \
-              -DpomFile=$i-${version}.pom \
-              -DgeneratePom=false \
-              -Dfile=$i-${version}.jar \
-              -Dsources=$i-${version}-sources.jar \
-              -Djavadoc=$i-${version}-javadoc.jar \
-              -Dfiles=$i-${version}.jar.asc,$i-${version}-sources.jar.asc,$i-${version}-javadoc.jar.asc,$i-${version}.pom.asc \
-              -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
-              -Dclassifiers=,sources,javadoc,
-
+            
+            # Generate checksums for POM file
+            md5sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.md5
+            sha1sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.sha1
+            
+            # Generate checksums for all JAR files (main, sources, javadoc)
+            for jar_file in $i-${version}.jar $i-${version}-sources.jar $i-${version}-javadoc.jar; do
+              if [ -f "$jar_file" ]; then
+                md5sum "$jar_file" | cut -d' ' -f1 > "$jar_file.md5"
+                sha1sum "$jar_file" | cut -d' ' -f1 > "$jar_file.sha1"
+              fi
+            done
           done
+
+          # Create Maven repository layout structure for the bundle
+          mkdir -p "bundle/org/liquibase"
+          
+          # Copy all artifacts to proper Maven repository layout
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-cdi' 'liquibase-cdi-jakarta' 'liquibase-commercial'; do
+            mkdir -p "bundle/org/liquibase/$i/${version}"
+            cp $i-${version}* "bundle/org/liquibase/$i/${version}/"
+          done
+          
+          # Create the bundle zip file
+          cd bundle
+          zip -r ../central-bundle.zip .
+          cd ..
+          
+          # Create base64 encoded credentials for Bearer auth
+          AUTH_HEADER=$(printf "%s:%s" "${MAVEN_USERNAME}" "${MAVEN_PASSWORD}" | base64 -w 0)
+          
+          # Upload bundle to Central Portal with USER_MANAGED publishing (dry run)
+          echo "Uploading bundle to Central Portal for dry-run liquibase-${version}..."
+          UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X POST \
+            -H "Authorization: Bearer ${AUTH_HEADER}" \
+            -F "bundle=@central-bundle.zip" \
+            "https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED&name=liquibase-${version}-dry-run")
+          
+          # Parse response
+          HTTP_CODE=$(echo "$UPLOAD_RESPONSE" | tail -n1)
+          DEPLOYMENT_ID=$(echo "$UPLOAD_RESPONSE" | head -n1)
+          
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Deployment ID: $DEPLOYMENT_ID"
+          
+          if [ "$HTTP_CODE" != "201" ]; then
+            echo "Upload failed with HTTP status $HTTP_CODE"
+            echo "Response: $DEPLOYMENT_ID"
+            exit 1
+          fi
+          
+          echo "Bundle uploaded successfully to Central Portal for dry-run"
+          echo "Deployment ID: $DEPLOYMENT_ID"
+          echo "Manual publishing required - visit https://central.sonatype.com/publishing/deployments to review and publish"
 
   publish_assets_to_s3_bucket:
     if: ${{ inputs.dry_run == false }}
