@@ -106,8 +106,6 @@
         <module>liquibase-standard</module>
         <module>liquibase-cli</module>
         <module>liquibase-maven-plugin</module>
-        <module>liquibase-cdi-jakarta</module>
-        <module>liquibase-cdi</module>
         <module>liquibase-integration-tests</module>
         <module>liquibase-dist</module>
         <module>liquibase-extension-testing</module>
