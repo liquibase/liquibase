@@ -425,12 +425,11 @@ public class LiquibaseCommandLine {
                                 Scope.getCurrentScope().getUI().sendMessage("Logs saved to " + logFile.getValue());
                             }
 
-                            final ConfiguredValue<String> outputFile = LiquibaseCommandLineConfiguration.OUTPUT_FILE.getCurrentConfiguredValue();
-                            if (outputFile.found()) {
-                                Scope.getCurrentScope().getUI().sendMessage("Output saved to " + outputFile.getValue());
-                            }
-
                             if (response == 0) {
+                                final ConfiguredValue<String> outputFile = LiquibaseCommandLineConfiguration.OUTPUT_FILE.getCurrentConfiguredValue();
+                                if (outputFile.found()) {
+                                    Scope.getCurrentScope().getUI().sendMessage("Output saved to " + outputFile.getValue());
+                                }
                                 final List<CommandLine> commandList = commandLine.getParseResult().asCommandLineList();
                                 final String commandName = StringUtil.join(getCommandNames(commandList.get(commandList.size() - 1)), " ");
                                 Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + commandName + "' was executed successfully.");
