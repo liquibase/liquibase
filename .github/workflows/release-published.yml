@@ -201,7 +201,7 @@ jobs:
           mkdir -p "bundle/org/liquibase"
           
           # Copy all artifacts to proper Maven repository layout
-          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-cdi' 'liquibase-cdi-jakarta' 'liquibase-commercial'; do
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-commercial'; do
             mkdir -p "bundle/org/liquibase/$i/${version}"
             cp $i-${version}* "bundle/org/liquibase/$i/${version}/"
           done
@@ -633,7 +633,7 @@ jobs:
           mkdir -p "bundle/org/liquibase"
           
           # Copy all artifacts to proper Maven repository layout
-          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-cdi' 'liquibase-cdi-jakarta' 'liquibase-commercial'; do
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-commercial'; do
             mkdir -p "bundle/org/liquibase/$i/${version}"
             cp $i-${version}* "bundle/org/liquibase/$i/${version}/"
           done
