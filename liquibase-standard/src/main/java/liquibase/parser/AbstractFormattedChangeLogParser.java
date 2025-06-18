@@ -262,6 +262,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                 }
                 reader = new BufferedReader(StreamUtil.readStreamWithReader(fileStream, null));
 
+
                 String firstLine = reader.readLine();
 
                 while (firstLine != null && firstLine.trim().isEmpty() && reader.ready()) {
@@ -761,6 +762,10 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         currentRollbackSequence.setLength(0);
     }
 
+    /**
+     * @deprecated use {@link AbstractFormattedChangeLogParser#handleAdditionalLines(DatabaseChangeLog, ResourceAccessor, String)}
+     */
+    @Deprecated
     protected boolean handleAdditionalLines(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, String line)
             throws ChangeLogParseException {
         return false;
@@ -768,7 +773,8 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
     protected boolean handleAdditionalLines(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, String line, StringBuilder currentSequence)
             throws ChangeLogParseException {
-        return false;
+        // by default calls the deprecated method , otherwise old code may break.
+        return handleAdditionalLines(changeLog, resourceAccessor, line);
     }
 
     //
