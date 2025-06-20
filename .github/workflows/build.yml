@@ -346,6 +346,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   run-functional-tests:
+    if: github.actor != 'dependabot[bot]'
     needs: [setup, build_publish_branch]
     uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@master
     secrets: inherit
