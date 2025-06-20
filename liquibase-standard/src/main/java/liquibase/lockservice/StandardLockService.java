@@ -529,8 +529,8 @@ public class StandardLockService implements LockService {
             DatabaseObject example =
                     new Table().setName(database.getDatabaseChangeLogLockTableName())
                                .setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName());
-            if (SnapshotGeneratorFactory.getInstance().has(example, database)) {
-                DatabaseObject table = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+            DatabaseObject table = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+            if (table != null) {
                 DiffOutputControl diffOutputControl = new DiffOutputControl(true, true, false, null);
                 Change[] change = ChangeGeneratorFactory.getInstance().fixUnexpected(table, diffOutputControl, database, database);
                 SqlStatement[] sqlStatement = change[0].generateStatements(database);

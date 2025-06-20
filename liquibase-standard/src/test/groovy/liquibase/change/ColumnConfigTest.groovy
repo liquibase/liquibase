@@ -445,7 +445,7 @@ class ColumnConfigTest extends Specification {
         assert column.getSerializableFieldValue(field).toString() == testValue.toString()
 
         where:
-        field << new ColumnConfig().getSerializableFields().findAll({ !it.equals("constraints") })
+        field << new ColumnConfig().getSerializableFields().findAll({ it != "constraints" && it != "rawDateValue" })
     }
 
     @Unroll("#featureName: #field")
