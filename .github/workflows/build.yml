@@ -43,7 +43,7 @@ jobs:
             filters: |
               code:
                 - '**'
-                - '!pom.xml'
+                - '!**/pom.xml'
 
       - name: Get Latest Merge Commit SHA
         id: get-sha
