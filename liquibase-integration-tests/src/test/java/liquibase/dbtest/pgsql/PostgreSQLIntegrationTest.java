@@ -443,5 +443,37 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
         }
     }
 
+    @Test
+    public void testSnapshotIndexSnapshotsIndexFunction() throws Exception {
+        String using = "GIN";
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                .execute(new RawParameterizedSqlStatement("CREATE TABLE GIN_TEST (ID INT, DETAILS JSONB)"));
+
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                .execute(new RawParameterizedSqlStatement(String.format("CREATE INDEX DETAILS_IDX ON GIN_TEST USING %s(DETAILS)", using)));
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(getDatabase(), null, new CompareControl());
+
+        DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult,
+                        new DiffOutputControl(false, false, false, null));
+        List<ChangeSet> changeSets = changeLogWriter.generateChangeSets();
+        boolean found = false;
+        for (ChangeSet changeSet : changeSets) {
+            List<Change> changes = changeSet.getChanges();
+            for (Change change : changes) {
+                if (! (change instanceof CreateIndexChange)) {
+                    continue;
+                }
+                found = ((CreateIndexChange) change).getUsing().equalsIgnoreCase(using);
+                if (found) {
+                    break;
+                }
+            }
+            if (found) {
+                break;
+            }
+        }
+        Assert.assertTrue("Using index function should be \"" + using + "\"", found);
+    }
+
 
 }

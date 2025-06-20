@@ -653,6 +653,29 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return execute(databaseChangeLog, null, database);
     }
 
+    private ExecType isChangeToSkip(Change change, Database database, Logger log) {
+        boolean skipChangeForDbms =
+           (change instanceof DbmsTargetedChange &&
+              ! DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true));
+        boolean skipExecChange = ! change.shouldRunOnOs();
+        if (skipChangeForDbms) {
+            log.fine("Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
+        }
+        if (skipExecChange) {
+            log.fine("Change " + change.getSerializedObjectName() + " not included: " + change.getConfirmationMessage());
+            change.getChangeSet().getChangeLog().getSkippedBecauseOfOsMismatchChangeSets().add(change.getChangeSet());
+        }
+        if (skipChangeForDbms || skipExecChange) {
+            return ExecType.SKIPPED;
+        }
+        return null;
+    }
+
+    private void setStopTime() {
+        stopInstant = Instant.now();
+        operationStopTime = Date.from(stopInstant);
+    }
+
     /**
      * This method will actually execute each of the changes in the list against the
      * specified database.
@@ -778,8 +801,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
                 log.fine("Reading ChangeSet: " + this);
                 for (Change change : changes) {
-                    execType = isChangeToSkip(change, database, log);
-                    if (execType != ExecType.SKIPPED) {
+                    if (isChangeToSkip(change, database, log) != ExecType.SKIPPED) {
                         if (listener != null) {
                             listener.willRun(change, this, changeLog, database);
                         }
@@ -858,29 +880,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
         return execType;
-    }
-
-    private ExecType isChangeToSkip(Change change, Database database, Logger log) {
-        boolean skipChangeForDbms =
-           (change instanceof DbmsTargetedChange &&
-              ! DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true));
-        boolean skipExecChange = ! change.shouldRunOnOs();
-        if (skipChangeForDbms) {
-            log.fine("Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
-        }
-        if (skipExecChange) {
-            log.fine("Change " + change.getSerializedObjectName() + " not included: " + change.getConfirmationMessage());
-            change.getChangeSet().getChangeLog().getSkippedBecauseOfOsMismatchChangeSets().add(change.getChangeSet());
-        }
-        if (skipChangeForDbms || skipExecChange) {
-            return ExecType.SKIPPED;
-        }
-        return null;
-    }
-
-    private void setStopTime() {
-        stopInstant = Instant.now();
-        operationStopTime = Date.from(stopInstant);
     }
 
     private void setStartTime() {

@@ -81,6 +81,10 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     } else {
                         ascOrDesc = row.getString("ASC_OR_DESC");
                     }
+                    if (database instanceof PostgresDatabase) {
+                        String indexType = row.getString("INDEX_TYPE");
+                        index.setUsing(indexType);
+                    }
                     Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : ("A".equals(ascOrDesc) ? Boolean
                             .FALSE : null);
                     if (database instanceof MSSQLDatabase) {
@@ -243,6 +247,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     returnIndex.setRelation(relation.setName(row.getString("TABLE_NAME")).setSchema(schema));
                     returnIndex.setName(indexName);
                     returnIndex.setUnique(!nonUnique);
+                    returnIndex.setUsing(row.getString("INDEX_TYPE"));
 
                     String tablespaceName = row.getString("TABLESPACE_NAME");
                     if ((tablespaceName != null) && database.supportsTablespaces()) {

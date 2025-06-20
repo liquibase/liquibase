@@ -262,6 +262,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                 }
                 reader = new BufferedReader(StreamUtil.readStreamWithReader(fileStream, null));
 
+
                 String firstLine = reader.readLine();
 
                 while (firstLine != null && firstLine.trim().isEmpty() && reader.ready()) {
@@ -322,8 +323,15 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
             int count = 0;
             String line;
+            boolean foundHeader = false;
             while ((line = reader.readLine()) != null) {
                 count++;
+                Matcher changeLogPatternMatcher = FIRST_LINE_PATTERN.matcher(line);
+                if (foundHeader && changeLogPatternMatcher.matches()) {
+                    String message = "Duplicate formatted SQL header at line " + count;
+                    Scope.getCurrentScope().getLog(getClass()).warning(message);
+                    throw new ChangeLogParseException(message);
+                }
                 Matcher commentMatcher = COMMENT_PATTERN.matcher(line);
                 Matcher propertyPatternMatcher = PROPERTY_PATTERN.matcher(line);
                 Matcher altPropertyPatternMatcher = ALT_PROPERTY_ONE_CHARACTER_PATTERN.matcher(line);
@@ -334,9 +342,11 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     String message = String.format(EXCEPTION_MESSAGE, physicalChangeLogLocation, count, getSequenceName(), "--property name=<property name> value=<property value>", getDocumentationLink());
                     throw new ChangeLogParseException("\n" + message);
                 }
-                Matcher changeLogPatterMatcher = FIRST_LINE_PATTERN.matcher(line);
+                if (! foundHeader && changeLogPatternMatcher.matches()) {
+                    foundHeader = true;
+                }
 
-                setLogicalFilePath(changeLog, line, changeLogPatterMatcher);
+                setLogicalFilePath(changeLog, line, changeLogPatternMatcher);
 
                 Matcher ignoreLinesMatcher = IGNORE_LINES_PATTERN.matcher(line);
                 Matcher altIgnoreMatcher = ALT_IGNORE_PATTERN.matcher(line);
@@ -505,7 +515,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                                     String.format("Unexpected formatting at line %d. Formatted %s changelogs do not allow comment lines outside of changesets. Learn all the options at %s", count, getSequenceName(), getDocumentationLink());
                             throw new ChangeLogParseException("\n" + message);
                         } else {
-                            handleAdditionalLines(changeLog, resourceAccessor, line);
+                            handleAdditionalLines(changeLog, resourceAccessor, line, currentSequence);
                         }
                     }
                 }
@@ -730,8 +740,8 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         return changeSet;
     }
 
-    protected void setLogicalFilePath(DatabaseChangeLog changeLog, String line, Matcher changeLogPatterMatcher) {
-        if (changeLogPatterMatcher.matches()) {
+    protected void setLogicalFilePath(DatabaseChangeLog changeLog, String line, Matcher changeLogPatternMatcher) {
+        if (changeLogPatternMatcher.matches()) {
             Matcher logicalFilePathMatcher = LOGICAL_FILE_PATH_PATTERN.matcher(line);
             changeLog.setLogicalFilePath(parseString(logicalFilePathMatcher, LOGICAL_FILE_PATH));
         }
@@ -761,9 +771,19 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         currentRollbackSequence.setLength(0);
     }
 
+    /**
+     * @deprecated use {@link AbstractFormattedChangeLogParser#handleAdditionalLines(DatabaseChangeLog, ResourceAccessor, String)}
+     */
+    @Deprecated
     protected boolean handleAdditionalLines(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, String line)
-        throws ChangeLogParseException {
+            throws ChangeLogParseException {
         return false;
+    }
+
+    protected boolean handleAdditionalLines(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, String line, StringBuilder currentSequence)
+            throws ChangeLogParseException {
+        // by default calls the deprecated method , otherwise old code may break.
+        return handleAdditionalLines(changeLog, resourceAccessor, line);
     }
 
     //
@@ -937,7 +957,11 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                 booleanMatch = Boolean.parseBoolean(matcher.group(1));
                 logMatch(description, String.valueOf(booleanMatch), getClass());
             } catch (Exception e) {
-                throw new ChangeLogParseException("Cannot parse " + changeSet + " " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
+                if (changeSet != null) {
+                    throw new ChangeLogParseException("Cannot parse " + changeSet + " " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
+                } else {
+                    throw new ChangeLogParseException("Cannot parse pattern " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
+                }
             }
         }
         return booleanMatch;

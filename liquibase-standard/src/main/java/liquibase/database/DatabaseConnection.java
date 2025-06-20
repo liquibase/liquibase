@@ -1,9 +1,11 @@
 package liquibase.database;
 
-import java.sql.Driver;
-import java.util.Properties;
 import liquibase.exception.DatabaseException;
 import liquibase.servicelocator.PrioritizedService;
+
+import java.sql.Connection;
+import java.sql.Driver;
+import java.util.Properties;
 
 /**
  * A liquibase abstraction over the normal Connection that is available in
@@ -58,4 +60,8 @@ public interface DatabaseConnection extends PrioritizedService, AutoCloseable {
     boolean isClosed() throws DatabaseException;
 
     void attached(Database database);
+
+    default Connection getUnderlyingConnection() {
+        return null;
+    }
 }
