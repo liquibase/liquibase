@@ -1,4 +1,14 @@
+
 name: Unit and Integration Tests
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  checks: write
+  id-token: write
+  actions: write
+  packages: write
 
 on:
   workflow_call:
@@ -83,33 +93,28 @@ jobs:
       test_count_unit_test_java_11_ubuntu: ${{ steps.check-test-counts-java-all-ubuntu.outputs.test_count_unit_test_java_11_ubuntu }}
       test_count_unit_test_java_17_ubuntu: ${{ steps.check-test-counts-java-all-ubuntu.outputs.test_count_unit_test_java_17_ubuntu }}
       test_count_unit_test_java_21_ubuntu: ${{ steps.check-test-counts-java-all-ubuntu.outputs.test_count_unit_test_java_21_ubuntu }}
-      test_count_unit_test_java_24_ubuntu: ${{ steps.check-test-counts-java-all-ubuntu.outputs.test_count_unit_test_java_24_ubuntu }}
       test_count_unit_test_java_macos: ${{ steps.check-test-counts-java-macos.outputs.test_count_unit_test_java_macos }}
       test_count_unit_test_java_windows: ${{ steps.check-test-counts-java-windows.outputs.test_count_unit_test_java_windows }}
 
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, macos-13, windows-2019 ]
-        java: [ 8, 11, 17, 21, 24 ]
+        os: [ ubuntu-22.04, macos-13, windows-latest ]
+        java: [ 8, 11, 17, 21 ]
         exclude:
           # exclude non-java 8 on macos and windows builds
           - os: macos-13
             java: 11
-          - os: windows-2019
+          - os: windows-latest
             java: 11
           - os: macos-13
             java: 17
-          - os: windows-2019
+          - os: windows-latest
             java: 17
           - os: macos-13
             java: 21
-          - os: windows-2019
+          - os: windows-latest
             java: 21
-          - os: macos-13
-            java: 24
-          - os: windows-2019
-            java: 24
     runs-on: ${{ matrix.os }}
     env:
       OS_TYPE: ${{ matrix.os }}
@@ -120,8 +125,8 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Built Code Cache
-        if: ${{ matrix.java == 21}}
-        uses: actions/cache@v4.2.0
+        if: ${{ matrix.java == 17}}
+        uses: actions/cache@v4.2.3
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -167,12 +172,12 @@ jobs:
               {
                 "id": "liquibase-pro",
                 "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
+                "password": "${{ secrets.GITHUB_TOKEN }}"
               },
               {
                 "id": "liquibase",
                 "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
+                "password": "${{ secrets.GITHUB_TOKEN }}"
               }
             ]
 
@@ -181,14 +186,14 @@ jobs:
       - name: Build & Test Java below 11
         if: ${{ matrix.java == 8 || matrix.java == 11}}
         run: |
-          ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests'  -pl '!liquibase-cdi-jakarta' clean test package surefire-report:report
+          ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
 
       - name: Build & Test Java 11+
         if: ${{ matrix.java != 8 && matrix.java != 11}}
         run: |
           ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
 
-      - name: Check Unit Test Count for Java 8, 11, 17, 21, 24 Ubuntu
+      - name: Check Unit Test Count for Java 8, 11, 17, 21 Ubuntu
         id: check-test-counts-java-all-ubuntu
         if: matrix.os == 'ubuntu-22.04'
         run: |
@@ -207,8 +212,6 @@ jobs:
             EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_JAVA_17_UBUNTU }}
           elif [[ ${{ matrix.java }} == 21 ]]; then
             EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_JAVA_21_UBUNTU }}
-          elif [[ ${{ matrix.java }} == 24 ]]; then
-            EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_JAVA_24_UBUNTU }}
           fi
 
           if [[ ($TEST_COUNT -lt $(($EXPECTED_TEST_COUNT - ($EXPECTED_TEST_COUNT / 100))) ) ]]; then
@@ -235,9 +238,9 @@ jobs:
           fi
           echo "test_count_unit_test_java_macos=$TEST_COUNT" >> $GITHUB_OUTPUT
 
-      - name: Check Test Count for windows-2019
+      - name: Check Test Count for windows-latest
         id: check-test-counts-java-windows
-        if: matrix.os == 'windows-2019'
+        if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
           $TEST_COUNT = (Get-ChildItem -Recurse -Filter "*.txt" | Select-String -Pattern 'Tests run: (\d+)' | ForEach-Object { $_.Matches.Groups[1].Value } | Measure-Object -Sum).Sum
@@ -253,7 +256,7 @@ jobs:
           echo "test_count_unit_test_java_windows=$TEST_COUNT" >> $env:GITHUB_OUTPUT
 
       - name: Remove Original Jars for *nix
-        if: env.OS_TYPE != 'windows-2019'
+        if: env.OS_TYPE != 'windows-latest'
         run: |
           find . -name original-*.jar -exec rm {} \;
 
@@ -298,7 +301,7 @@ jobs:
     with:
       check_snippets: true
       check_ai_generated_code: true
-      generate_sbom: true
+      generate_fossa_3p_license_report: true
 
   integration-test:
     name: Integration Test
@@ -363,7 +366,7 @@ jobs:
       # getting from build results page. If we remove 0-SNAPSHOT then we will need settings.xml
 
       - name: Restore Built Code Cache
-        uses: actions/cache@v4.2.0
+        uses: actions/cache@v4.2.3
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -460,7 +463,6 @@ jobs:
           gh variable set TEST_COUNT_JAVA_11_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_11_ubuntu }}"
           gh variable set TEST_COUNT_JAVA_17_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_17_ubuntu }}"
           gh variable set TEST_COUNT_JAVA_21_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_21_ubuntu }}"
-          gh variable set TEST_COUNT_JAVA_24_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_24_ubuntu }}"
           gh variable set TEST_COUNT_JAVA_8_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_8_ubuntu }}"
           gh variable set TEST_COUNT_JAVA_MACOS --body "${{ needs.build_tests.outputs.test_count_unit_test_java_macos }}"
           gh variable set TEST_COUNT_JAVA_WINDOWS --body "${{ needs.build_tests.outputs.test_count_unit_test_java_windows}}"
