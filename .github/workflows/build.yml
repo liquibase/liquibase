@@ -29,22 +29,11 @@ jobs:
       timeStamp: ${{ steps.get-timestamp.outputs.timestamp }}
       proBranchNamePrefix: ${{ steps.check-branch.outputs.proBranchNamePrefix }}
       unmodifiedBranchName: ${{ steps.get-branch-name.outputs.unmodifiedBranchName }}
-      codeChanged: ${{ steps.changes.outputs.code }}
 
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
-
-      - name: Detect File Changes
-          id: changes
-          uses: dorny/paths-filter@v3
-          with:
-            filters: |
-              code:
-                - '**'
-                - '!**/pom.xml'
-
       - name: Get Latest Merge Commit SHA
         id: get-sha
         run: |
@@ -357,7 +346,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   run-functional-tests:
-    if: needs.setup.outputs.codeChanged == 'true'
+    if: github.actor \!= 'dependabot[bot]'
     needs: [setup, build_publish_branch]
     uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@master
     secrets: inherit
