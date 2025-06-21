@@ -1,6 +1,7 @@
 package liquibase.serializer.core.yaml;
 
 import liquibase.change.Change;
+import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RollbackContainer;
@@ -13,6 +14,7 @@ import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
+
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
@@ -31,9 +33,14 @@ import java.util.*;
 public abstract class YamlSerializer implements LiquibaseSerializer {
 
     protected Yaml yaml;
+    protected boolean preserveNullValues = true;
 
     public YamlSerializer() {
         yaml = createYaml();
+    }
+
+    public void preserveNullValues(boolean preserveNullValues) {
+        this.preserveNullValues = preserveNullValues;
     }
 
     protected DumperOptions createDumperOptions() {
@@ -96,82 +103,84 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
 
         for (String field : getSerializableObjectFields(object)) {
             Object value = object.getSerializableFieldValue(field);
-            if (value != null) {
-                if (value instanceof DataType) {
-                    value = ((Map) toMap((DataType) value)).values().iterator().next();
-                }
-                if (value instanceof Column.AutoIncrementInformation) {
-                    value = ((Map) toMap((Column.AutoIncrementInformation) value)).values().iterator().next();
-                }
-                if (value instanceof ConstraintsConfig) {
-                    value = ((Map) toMap((ConstraintsConfig) value)).values().iterator().next();
-                }
-                if (value instanceof LiquibaseSerializable) {
-                    if(value instanceof RollbackContainer) {
-                        List<Change> changesToRollback = ((RollbackContainer) value).getChanges();
-                        if(changesToRollback.size() == 1) {
-                            value = toMap(changesToRollback.get(0));
-                        } else {
-                            value = toMap((LiquibaseSerializable) value);
-                        }
+            if (null == value) {
+                continue;
+            }
+            if (value instanceof DataType) {
+                value = ((Map) toMap((DataType) value)).values().iterator().next();
+            }
+            if (value instanceof Column.AutoIncrementInformation) {
+                value = ((Map) toMap((Column.AutoIncrementInformation) value)).values().iterator().next();
+            }
+            if (value instanceof ConstraintsConfig) {
+                value = ((Map) toMap((ConstraintsConfig) value)).values().iterator().next();
+            }
+            if (value instanceof LiquibaseSerializable) {
+                if (value instanceof RollbackContainer) {
+                    List<Change> changesToRollback = ((RollbackContainer) value).getChanges();
+                    if (changesToRollback.size() == 1) {
+                        value = toMap(changesToRollback.get(0));
                     } else {
                         value = toMap((LiquibaseSerializable) value);
                     }
+                } else {
+                    value = toMap((LiquibaseSerializable) value);
                 }
-                if (value instanceof Collection) {
-                    List valueAsList = new ArrayList((Collection) value);
-                    if (valueAsList.isEmpty()) {
-                        continue;
-                    }
-                    for (int i = 0; i < valueAsList.size(); i++) {
-                        if (valueAsList.get(i) instanceof LiquibaseSerializable) {
-                            Object m = convertToMap(valueAsList, i);
-                            valueAsList.set(i, m);
-                        }
-                    }
-                    value = valueAsList;
-
+            }
+            if (value instanceof Collection) {
+                List valueAsList = new ArrayList((Collection) value);
+                if (valueAsList.isEmpty()) {
+                    continue;
                 }
-                if (value instanceof Map) {
-                    if  (((Map<?, ?>) value).isEmpty()) {
-                        continue;
-                    }
-
-                    for (Object key : new HashSet<>(((Map) value).keySet())) {
-                        Object mapValue = ((Map<?, ?>) value).get(key);
-                        if (mapValue == null) {
-                            ((Map<?, ?>) value).remove(key);
-                        }
-
-                        if (mapValue instanceof LiquibaseSerializable) {
-                            ((Map) value).put(key, toMap((LiquibaseSerializable) mapValue));
-                        } else if (mapValue instanceof Collection) {
-                            List valueAsList = new ArrayList((Collection) mapValue);
-                            if (valueAsList.isEmpty()) {
+                List result = new ArrayList();
+                for (Object o : valueAsList) {
+                    if (o instanceof LiquibaseSerializable) {
+                        if (!preserveNullValues && o instanceof ColumnConfig) {
+                            ColumnConfig columnConfig = (ColumnConfig) o;
+                            if (columnConfig.isNull()) {
                                 continue;
                             }
-                            for (int i = 0; i < valueAsList.size(); i++) {
-                                if (valueAsList.get(i) instanceof LiquibaseSerializable) {
-                                    valueAsList.set(i, toMap((LiquibaseSerializable) valueAsList.get(i)));
-                                }
-                            }
-                            ((Map) value).put(key, valueAsList);
                         }
+
+                        result.add(toMap((LiquibaseSerializable) o));
+                    }
+                }
+                value = result;
+            }
+            if (value instanceof Map) {
+                if  (((Map<?, ?>) value).isEmpty()) {
+                    continue;
+                }
+
+                for (Object key : new HashSet<>(((Map) value).keySet())) {
+                    Object mapValue = ((Map<?, ?>) value).get(key);
+                    if (mapValue == null) {
+                        ((Map<?, ?>) value).remove(key);
                     }
 
-
+                    if (mapValue instanceof LiquibaseSerializable) {
+                        ((Map) value).put(key, toMap((LiquibaseSerializable) mapValue));
+                    } else if (mapValue instanceof Collection) {
+                        List valueAsList = new ArrayList((Collection) mapValue);
+                        if (valueAsList.isEmpty()) {
+                            continue;
+                        }
+                        for (int i = 0; i < valueAsList.size(); i++) {
+                            if (valueAsList.get(i) instanceof LiquibaseSerializable) {
+                                valueAsList.set(i, toMap((LiquibaseSerializable) valueAsList.get(i)));
+                            }
+                        }
+                        ((Map) value).put(key, valueAsList);
+                    }
                 }
-                objectMap.put(field, value);
             }
+
+            objectMap.put(field, value);
         }
 
         Map<String, Object> containerMap = new HashMap<>();
         containerMap.put(object.getSerializedObjectName(), objectMap);
         return containerMap;
-    }
-
-    protected Object convertToMap(List valueAsList, int index) {
-        return toMap((LiquibaseSerializable) valueAsList.get(index));
     }
 
     protected Comparator<String> getComparator(LiquibaseSerializable object) {
