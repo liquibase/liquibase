@@ -23,3 +23,4 @@ liquibase.datatype.core.UUIDType
 liquibase.datatype.core.UnknownType
 liquibase.datatype.core.VarcharType
 liquibase.datatype.core.XMLType
+liquibase.datatype.core.BitType
