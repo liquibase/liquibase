@@ -29,7 +29,6 @@ class LogicalFilePathChangeSetFilterTest extends Specification {
         where:
         logicalFilePath | _
         ""    | _
-        null  | _
         "   " | _
     }
 

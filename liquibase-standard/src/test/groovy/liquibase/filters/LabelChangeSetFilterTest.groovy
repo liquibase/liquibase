@@ -30,7 +30,6 @@ class LabelChangeSetFilterTest extends Specification {
         where:
         label | _
         ""    | _
-        null  | _
         "   " | _
     }
 

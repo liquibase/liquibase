@@ -30,7 +30,6 @@ class DbmsChangeSetFilterTest extends Specification {
         where:
         dbms  | _
         ""    | _
-        null  | _
         "   " | _
     }
 

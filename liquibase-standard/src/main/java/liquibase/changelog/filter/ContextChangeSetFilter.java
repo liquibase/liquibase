@@ -42,7 +42,7 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
         // and in the changeset, we need to evaluate matches from both sides
         // as match only checks one side of the context at a time
         boolean strictValue = GlobalConfiguration.STRICT.getCurrentValue();
-        if(strictValue && StringUtils.trimToEmpty(changeSet.buildFullContext()).isEmpty()) {
+        if(strictValue && StringUtils.isBlank(changeSet.buildFullContext())) {
             return new ChangeSetFilterResult(false, "context value cannot be empty while on Strict mode", this.getClass(), "contextEmptyOnStrictMode", "context");
         }
 

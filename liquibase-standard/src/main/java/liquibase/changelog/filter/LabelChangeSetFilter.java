@@ -38,7 +38,7 @@ public class LabelChangeSetFilter implements ChangeSetFilter {
         String allLabels = changeSet.buildFullLabels();
 
         boolean strictValue = GlobalConfiguration.STRICT.getCurrentValue();
-        if(strictValue && StringUtils.trimToEmpty(allLabels).isEmpty()) {
+        if(strictValue && StringUtils.isBlank(allLabels)) {
             return new ChangeSetFilterResult(false, "labels value cannot be empty while on Strict mode", this.getClass(), "labelsEmptyOnStrictMode", "labels");
         }
 

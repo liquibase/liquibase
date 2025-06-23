@@ -32,9 +32,7 @@ import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sql.visitor.SqlVisitorFactory;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.util.SqlUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
@@ -376,7 +374,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * @return the runWith value. If the runWith value is empty or not set this method will return null.
      */
     public String getRunWith() {
-        return runWith == null || runWith.isEmpty() ? null : runWith;
+        //return runWith == null || runWith.isEmpty() ? null : runWith;
+        return runWith;
     }
 
     public void setRunWith(String runWith) {
@@ -893,7 +892,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     //
     private Executor setupCustomExecutorIfNecessary(Database database) {
         Executor originalExecutor = getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-        if (getRunWith() == null || originalExecutor instanceof LoggingExecutor) {
+        if (getRunWith() == null || getRunWith().isEmpty()|| originalExecutor instanceof LoggingExecutor) {
             return originalExecutor;
         }
         getCurrentScope().addMdcValue(MdcKey.RUN_WITH, getRunWith());

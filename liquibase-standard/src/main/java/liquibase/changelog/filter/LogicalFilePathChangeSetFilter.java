@@ -7,10 +7,10 @@ import org.apache.commons.lang3.StringUtils;
 public class LogicalFilePathChangeSetFilter implements ChangeSetFilter {
     @Override
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
-        String logicalFilePath = StringUtils.trimToEmpty(changeSet.getLogicalFilePath());
+        String logicalFilePath = changeSet.getLogicalFilePath();
 
         boolean strictValue = GlobalConfiguration.STRICT.getCurrentValue();
-        if((strictValue && logicalFilePath.isEmpty())) {
+        if((strictValue && StringUtils.isBlank(logicalFilePath))) {
             return new ChangeSetFilterResult(false, "logicalFilePath value cannot be empty while on Strict mode", this.getClass(), "logicalFilePathOnStrictMode", "logicalFilePath");
         }
         return new ChangeSetFilterResult(true, "logicalFilePath correctly set", this.getClass(), "validLogicalFilePath", "logicalFilePath");

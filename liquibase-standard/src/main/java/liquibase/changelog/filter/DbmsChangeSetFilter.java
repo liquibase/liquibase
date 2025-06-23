@@ -6,6 +6,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +42,7 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
         }
 
         boolean strictValue = GlobalConfiguration.STRICT.getCurrentValue();
-        if(strictValue && (changeSet.getDbmsSet() == null || changeSet.getDbmsSet().isEmpty())) {
+        if(strictValue && StringUtils.isBlank(changeSet.getDbmsOriginalString())) {
             return new ChangeSetFilterResult(false, "dbms value cannot be empty while on Strict mode", this.getClass(), "dbmsEmptyOnStrictMode", "dbms");
         }
 

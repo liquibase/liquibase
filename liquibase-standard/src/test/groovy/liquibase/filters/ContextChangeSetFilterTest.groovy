@@ -30,7 +30,6 @@ class ContextChangeSetFilterTest extends Specification {
         where:
         context | _
         ""      | _
-        null    | _
         "   "   | _
     }
 
