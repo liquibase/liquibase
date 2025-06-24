@@ -134,9 +134,7 @@ public class ExecutorService extends AbstractPluginFactory<Executor>  {
         }
 
         private String normalizeExecutorName(String executorName) {
-            if (executorName == null) { return ""; } else {
-                return executorName.toLowerCase();
-            }
+            return executorName.toLowerCase();
         }
 
         @Override
