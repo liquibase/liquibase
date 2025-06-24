@@ -55,6 +55,16 @@ public interface DatabaseConnection extends PrioritizedService, AutoCloseable {
 
     String getURL();
 
+    /**
+     *
+     * Default implementation for the URL that is displayed
+     *
+     * @return  String
+     */
+    default String getVisibleUrl() {
+        return getURL();
+    }
+
     String getConnectionUserName();
 
     boolean isClosed() throws DatabaseException;
