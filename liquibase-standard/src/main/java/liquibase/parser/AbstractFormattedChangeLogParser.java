@@ -323,8 +323,15 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
             int count = 0;
             String line;
+            boolean foundHeader = false;
             while ((line = reader.readLine()) != null) {
                 count++;
+                Matcher changeLogPatternMatcher = FIRST_LINE_PATTERN.matcher(line);
+                if (foundHeader && changeLogPatternMatcher.matches()) {
+                    String message = "Duplicate formatted SQL header at line " + count;
+                    Scope.getCurrentScope().getLog(getClass()).warning(message);
+                    throw new ChangeLogParseException(message);
+                }
                 Matcher commentMatcher = COMMENT_PATTERN.matcher(line);
                 Matcher propertyPatternMatcher = PROPERTY_PATTERN.matcher(line);
                 Matcher altPropertyPatternMatcher = ALT_PROPERTY_ONE_CHARACTER_PATTERN.matcher(line);
@@ -335,9 +342,11 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     String message = String.format(EXCEPTION_MESSAGE, physicalChangeLogLocation, count, getSequenceName(), "--property name=<property name> value=<property value>", getDocumentationLink());
                     throw new ChangeLogParseException("\n" + message);
                 }
-                Matcher changeLogPatterMatcher = FIRST_LINE_PATTERN.matcher(line);
+                if (! foundHeader && changeLogPatternMatcher.matches()) {
+                    foundHeader = true;
+                }
 
-                setLogicalFilePath(changeLog, line, changeLogPatterMatcher);
+                setLogicalFilePath(changeLog, line, changeLogPatternMatcher);
 
                 Matcher ignoreLinesMatcher = IGNORE_LINES_PATTERN.matcher(line);
                 Matcher altIgnoreMatcher = ALT_IGNORE_PATTERN.matcher(line);
@@ -731,8 +740,8 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         return changeSet;
     }
 
-    protected void setLogicalFilePath(DatabaseChangeLog changeLog, String line, Matcher changeLogPatterMatcher) {
-        if (changeLogPatterMatcher.matches()) {
+    protected void setLogicalFilePath(DatabaseChangeLog changeLog, String line, Matcher changeLogPatternMatcher) {
+        if (changeLogPatternMatcher.matches()) {
             Matcher logicalFilePathMatcher = LOGICAL_FILE_PATH_PATTERN.matcher(line);
             changeLog.setLogicalFilePath(parseString(logicalFilePathMatcher, LOGICAL_FILE_PATH));
         }
