@@ -1,4 +1,14 @@
+
 name: Unit and Integration Tests
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  checks: write
+  id-token: write
+  actions: write
+  packages: write
 
 on:
   workflow_call:
@@ -89,21 +99,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, macos-13, windows-2019 ]
+        os: [ ubuntu-22.04, macos-13, windows-latest ]
         java: [ 8, 11, 17, 21 ]
         exclude:
           # exclude non-java 8 on macos and windows builds
           - os: macos-13
             java: 11
-          - os: windows-2019
+          - os: windows-latest
             java: 11
           - os: macos-13
             java: 17
-          - os: windows-2019
+          - os: windows-latest
             java: 17
           - os: macos-13
             java: 21
-          - os: windows-2019
+          - os: windows-latest
             java: 21
     runs-on: ${{ matrix.os }}
     env:
@@ -162,12 +172,12 @@ jobs:
               {
                 "id": "liquibase-pro",
                 "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
+                "password": "${{ secrets.GITHUB_TOKEN }}"
               },
               {
                 "id": "liquibase",
                 "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT }}"
+                "password": "${{ secrets.GITHUB_TOKEN }}"
               }
             ]
 
@@ -176,7 +186,7 @@ jobs:
       - name: Build & Test Java below 11
         if: ${{ matrix.java == 8 || matrix.java == 11}}
         run: |
-          ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests'  -pl '!liquibase-cdi-jakarta' clean test package surefire-report:report
+          ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
 
       - name: Build & Test Java 11+
         if: ${{ matrix.java != 8 && matrix.java != 11}}
@@ -228,9 +238,9 @@ jobs:
           fi
           echo "test_count_unit_test_java_macos=$TEST_COUNT" >> $GITHUB_OUTPUT
 
-      - name: Check Test Count for windows-2019
+      - name: Check Test Count for windows-latest
         id: check-test-counts-java-windows
-        if: matrix.os == 'windows-2019'
+        if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
           $TEST_COUNT = (Get-ChildItem -Recurse -Filter "*.txt" | Select-String -Pattern 'Tests run: (\d+)' | ForEach-Object { $_.Matches.Groups[1].Value } | Measure-Object -Sum).Sum
@@ -246,7 +256,7 @@ jobs:
           echo "test_count_unit_test_java_windows=$TEST_COUNT" >> $env:GITHUB_OUTPUT
 
       - name: Remove Original Jars for *nix
-        if: env.OS_TYPE != 'windows-2019'
+        if: env.OS_TYPE != 'windows-latest'
         run: |
           find . -name original-*.jar -exec rm {} \;
 
@@ -291,7 +301,7 @@ jobs:
     with:
       check_snippets: true
       check_ai_generated_code: true
-      generate_sbom: true
+      generate_fossa_3p_license_report: true
 
   integration-test:
     name: Integration Test

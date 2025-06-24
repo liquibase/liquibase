@@ -63,7 +63,7 @@ public class SqlChangeLogParser implements ChangeLogParser {
             // Handle empty files with a WARNING message
             //
             if (StringUtils.isEmpty(sql)) {
-                String message = String.format("Unable to parse empty file '%s'", physicalChangeLogLocation);
+                String message = String.format("Unable to parse empty file: '%s'", physicalChangeLogLocation);
                 Scope.getCurrentScope().getLog(getClass()).warning(message);
                 throw new ChangeLogParseException(message);
             }

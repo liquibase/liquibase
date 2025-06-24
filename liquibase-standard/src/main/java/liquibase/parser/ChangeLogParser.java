@@ -12,6 +12,8 @@ import liquibase.resource.ResourceAccessor;
  */
 public interface ChangeLogParser extends LiquibaseParser {
 
+    String DATABASE_CHANGE_LOG = "databaseChangeLog";
+  
     /**
      * Parses a Liquibase database changelog and returns the parsed form as an object.
      *
