@@ -72,7 +72,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         Database database = (Database) commandScope.getDependency(Database.class);
         updateReportParameters.getDatabaseInfo().setDatabaseType(database.getDatabaseProductName());
         updateReportParameters.getDatabaseInfo().setVersion(database.getDatabaseProductVersion());
-        updateReportParameters.getDatabaseInfo().setDatabaseUrl(database.getConnection().getURL());
+        updateReportParameters.getDatabaseInfo().setDatabaseUrl(database.getConnection().getVisibleUrl());
         updateReportParameters.setJdbcUrl(database.getConnection().getURL());
         final ChangeLogParameters changeLogParameters = (ChangeLogParameters) commandScope.getDependency(ChangeLogParameters.class);
         Contexts contexts = new Contexts(getContextsArg(commandScope));
