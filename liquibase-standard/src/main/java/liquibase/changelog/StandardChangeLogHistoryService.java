@@ -267,7 +267,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             }
             // If there is no table in the database for recording change history create one.
             statementsToExecute.add(createTableStatement);
-            Scope.getCurrentScope().getLog(getClass()).info("Creating database history table with name: " + databaseChangeLogTableName);
+            Scope.getCurrentScope().getLog(getClass()).info("Creating database changelog table with name: " + databaseChangeLogTableName);
         }
 
         for (SqlStatement sql : statementsToExecute) {
@@ -281,13 +281,13 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     // If the user does not have read permission, we can end up here because the
                     // presence of the DBCL was not detected earlier.
                     //
-                    String message = "An error occurred while attempting to create the database history table.  Please make sure that you " +
+                    String message = "An error occurred while attempting to create the database changelog table.  Please make sure that you " +
                                 "have both read and write permissions for the '" + databaseChangeLogTableName + "' table.";
                     throw new DatabaseException(message, e);
                 }
             } else {
                 Scope.getCurrentScope().getLog(getClass()).info("Cannot run " + sql.getClass().getSimpleName() + " on" +
-                        " " + getDatabase().getShortName() + " when checking databasechangelog table");
+                        " " + getDatabase().getShortName() + " when checking database changelog table");
             }
         }
 
