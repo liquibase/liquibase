@@ -1065,7 +1065,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         final String normalizedFilePath = fileName;
 
         ChangeLogParser parser = null;
-        DatabaseChangeLog changeLog = new DatabaseChangeLog();
+        DatabaseChangeLog changeLog;
         try {
             DatabaseChangeLog rootChangeLogInstance = ROOT_CHANGE_LOG.get();
             if (rootChangeLogInstance == null) {
