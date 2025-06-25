@@ -273,11 +273,18 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
         for (SqlStatement sql : statementsToExecute) {
             if (SqlGeneratorFactory.getInstance().supports(sql, database)) {
-                ChangelogJdbcMdcListener.execute(getDatabase(), ex -> ex.execute(sql));
-                getDatabase().commit();
+                try {
+                    ChangelogJdbcMdcListener.execute(getDatabase(), ex -> ex.execute(sql));
+                    getDatabase().commit();
+                } catch (Exception e) {
+                    if (database instanceof MSSQLDatabase) {
+                        Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage());
+                        throw e;
+                    }
+                }
             } else {
                 Scope.getCurrentScope().getLog(getClass()).info("Cannot run " + sql.getClass().getSimpleName() + " on" +
-                    " " + getDatabase().getShortName() + " when checking databasechangelog table");
+                        " " + getDatabase().getShortName() + " when checking databasechangelog table");
             }
         }
 
