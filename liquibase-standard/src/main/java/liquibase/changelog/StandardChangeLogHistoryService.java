@@ -117,6 +117,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
         List<SqlStatement> statementsToExecute = new ArrayList<>();
 
+        String databaseChangeLogTableName = getDatabase().escapeTableName(getLiquibaseCatalogName(),
+                        getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
         boolean changeLogCreateAttempted = false;
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor( "jdbc", getDatabase());
         if (changeLogTable != null) {
@@ -258,17 +260,14 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             executor.comment("Create Database Change Log Table");
             SqlStatement createTableStatement = new CreateDatabaseChangeLogTableStatement();
             if (!canCreateChangeLogTable()) {
-                throw new DatabaseException("Cannot create " + getDatabase().escapeTableName(getLiquibaseCatalogName
-                    (), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " table for your " + database.getDatabaseProductName() +
+                throw new DatabaseException("Cannot create " + databaseChangeLogTableName + " table for your " + database.getDatabaseProductName() +
                     "database.\n\n" +
                         "Please construct it manually using the following SQL as a base and re-run Liquibase:\n\n" +
                         createTableStatement);
             }
             // If there is no table in the database for recording change history create one.
             statementsToExecute.add(createTableStatement);
-            Scope.getCurrentScope().getLog(getClass()).info("Creating database history table with name: " +
-                getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
-                    getDatabaseChangeLogTableName()));
+            Scope.getCurrentScope().getLog(getClass()).info("Creating database history table with name: " + databaseChangeLogTableName);
         }
 
         for (SqlStatement sql : statementsToExecute) {
@@ -283,7 +282,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     // presence of the DBCL was not detected earlier.
                     //
                     String message = "An error occurred while attempting to create the database history table.  Please make sure that you " +
-                                "have both read and write permissions for the table.";
+                                "have both read and write permissions for the '" + databaseChangeLogTableName + "' table.";
                     throw new DatabaseException(message, e);
                 }
             } else {
@@ -316,7 +315,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         if (this.ranChangeSetList == null) {
             Database database = getDatabase();
             String databaseChangeLogTableName = getDatabase().escapeTableName(getLiquibaseCatalogName(),
-                getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
+                    getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
             List<RanChangeSet> ranChangeSets = new ArrayList<>();
             if (hasDatabaseChangeLogTable()) {
                 Scope.getCurrentScope().getLog(getClass()).info("Reading from " + databaseChangeLogTableName);
