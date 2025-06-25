@@ -259,8 +259,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             SqlStatement createTableStatement = new CreateDatabaseChangeLogTableStatement();
             if (!canCreateChangeLogTable()) {
                 throw new DatabaseException("Cannot create " + getDatabase().escapeTableName(getLiquibaseCatalogName
-                    (), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " table for your getDatabase()" +
-                    ".\n\n" +
+                    (), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " table for your " + database.getDatabaseProductName() +
+                    "database.\n\n" +
                         "Please construct it manually using the following SQL as a base and re-run Liquibase:\n\n" +
                         createTableStatement);
             }
@@ -277,10 +277,14 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     ChangelogJdbcMdcListener.execute(getDatabase(), ex -> ex.execute(sql));
                     getDatabase().commit();
                 } catch (Exception e) {
-                    if (database instanceof MSSQLDatabase) {
-                        Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage());
-                        throw e;
-                    }
+                    //
+                    // Trap for an exception here so we can add a message with more information.
+                    // If the user does not have read permission, we can end up here because the
+                    // presence of the DBCL was not detected earlier.
+                    //
+                    String message = "An error occurred while attempting to create the database history table.  Please make sure that you " +
+                                "have both read and write permissions for the table.";
+                    throw new DatabaseException(message, e);
                 }
             } else {
                 Scope.getCurrentScope().getLog(getClass()).info("Cannot run " + sql.getClass().getSimpleName() + " on" +
