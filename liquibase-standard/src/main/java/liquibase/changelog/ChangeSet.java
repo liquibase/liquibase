@@ -800,6 +800,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 }
 
                 log.fine("Reading ChangeSet: " + this);
+                boolean skippedAtLeastOneChange = false;
                 for (Change change : changes) {
                     if (isChangeToSkip(change, database, log) != ExecType.SKIPPED) {
                         if (listener != null) {
@@ -817,11 +818,16 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                         if (listener != null) {
                             listener.ran(change, this, changeLog, database);
                         }
+                    } else {
+                        skippedAtLeastOneChange = true;
                     }
                 }
 
                 if (runInTransaction) {
                     database.commit();
+                }
+                if (skippedAtLeastOneChange && changes.size() == 1) {
+                    execType = ExecType.SKIPPED;
                 }
                 if (execType == null) {
                     execType = ExecType.EXECUTED;

@@ -200,7 +200,7 @@ class ShowSummaryUtilCommandTest extends Specification {
         def streamContent = outputStream.toString();
 
         streamContent.contains("UPDATE SUMMARY")
-        streamContent.contains("Run:                          2")
+        streamContent.contains("Run:                          1")
         streamContent.contains("Previously run:               0")
         streamContent.contains("Filtered out:                 2")
         streamContent.contains("-------------------------------")
