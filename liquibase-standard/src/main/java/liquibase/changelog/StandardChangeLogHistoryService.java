@@ -36,6 +36,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
+import static liquibase.executor.jvm.JdbcExecutor.SHOULD_UPDATE_ROWS_AFFECTED_SCOPE_KEY;
+
 public class StandardChangeLogHistoryService extends AbstractChangeLogHistoryService {
 
     private List<RanChangeSet> ranChangeSetList;
@@ -394,8 +396,14 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     @Override
     public void setExecType(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException {
         SqlStatement markChangeSetRanStatement = new MarkChangeSetRanStatement(changeSet, execType);
-        ChangelogJdbcMdcListener.execute(getDatabase(), executor -> executor.execute(markChangeSetRanStatement));
-        getDatabase().commit();
+        try {
+            Scope.child(Collections.singletonMap(SHOULD_UPDATE_ROWS_AFFECTED_SCOPE_KEY, false), () -> {
+                ChangelogJdbcMdcListener.execute(getDatabase(), executor -> executor.execute(markChangeSetRanStatement));
+                getDatabase().commit();
+            });
+        } catch (Exception e) {
+            throw new DatabaseException(e);
+        }
         if (this.ranChangeSetList != null) {
             this.ranChangeSetList.add(new RanChangeSet(changeSet, execType, null, null));
         }
