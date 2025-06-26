@@ -25,7 +25,6 @@ Test:
 POST MESSAGES TO:
 - blog
 
-
 To update Homebrew with the latest Liquibase installtion tar file do the following:
 1. From a Linux/Mac machine, visit the following page https://download.liquibase.org/download/?frm=n
 2.Download the tar.gz from the link provided on that page.
