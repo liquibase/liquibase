@@ -1,0 +1,28 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro
+        http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+
+    <property name="countries" value="SG,MY" />
+
+    <changeSet author="dev" id="initial_db_setup_secondary">
+        <createTable tableName="country_table">
+            <column name="id" type="int">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_authzPages_id"/>
+            </column>
+            <column name="countries" type="VARCHAR(255)"/>
+        </createTable>
+        <insert tableName="country_table">
+            <column name="id">1</column>
+            <column name="countries">${countries}</column>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
