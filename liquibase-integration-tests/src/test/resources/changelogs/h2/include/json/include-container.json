@@ -1,0 +1,47 @@
+{
+  "databaseChangeLog": [
+    {
+      "property": {
+        "name":"bar",
+        "value":"foo"
+      }
+    },
+    {
+      "include": {
+        "file": "included1.json",
+        "relativeToChangelogFile": "true",
+        "logicalFilePath": "included1",
+        "preConditions": [
+          {
+            "changeLogPropertyDefined": {
+              "property": "bar",
+              "value": "foo"
+            }
+          }
+        ]
+
+      }
+    },
+    {
+      "changeSet": {
+        "id": "include-container",
+        "author": "mallod",
+        "changes": [
+          {
+            "createTable": {
+              "tableName": "IncludePreconditionTest",
+              "columns": [
+                {
+                  "column": {
+                    "name": "ID",
+                    "type": "BIGINT"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
