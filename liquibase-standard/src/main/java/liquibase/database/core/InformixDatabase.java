@@ -99,6 +99,8 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 
         systemTablesAndViews.add("sysdomains");
         systemTablesAndViews.add("sysindexes");
+        systemTablesAndViews.add("informix.ph_version");
+        systemTablesAndViews.add("informix.ph_run");
         super.sequenceNextValueFunction = "%s.NEXTVAL";
         super.sequenceCurrentValueFunction = "%s.CURRVAL";
     }
