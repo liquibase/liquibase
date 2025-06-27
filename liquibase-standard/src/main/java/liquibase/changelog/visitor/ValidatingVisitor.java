@@ -132,7 +132,8 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         }
 
         // Did we already see this ChangeSet?
-        String changeSetString = changeSet.toString(false);
+        // To maintain consistency with the changelog we should use the key which has a normalized changelog path
+        String changeSetString = changeSet.toNormalizedString();
         if (seenChangeSets.contains(changeSetString)) {
             duplicateChangeSets.add(changeSet);
         } else {
