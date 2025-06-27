@@ -1,5 +1,6 @@
 package liquibase.report;
 
+import liquibase.database.jvm.JdbcConnection;
 import lombok.Data;
 
 import java.util.Arrays;
@@ -21,7 +22,7 @@ public class DatabaseInfo {
      * @return the visible url string.
      */
     public String getVisibleDatabaseUrl() {
-        return getVisibleUrl(this.databaseUrl);
+        return getVisibleUrl(JdbcConnection.sanitizeUrl(this.databaseUrl));
     }
 
     /**
