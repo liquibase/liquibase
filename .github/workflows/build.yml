@@ -1,3 +1,4 @@
+
 name: Build and Publish
 
 permissions:
@@ -63,10 +64,20 @@ jobs:
           echo "Modified Branch Name:" $modified_branch_name
           echo "Original Branch Name thisBranchName:" $branch_name
 
-      - name: Checkout OSS Repo
+      - name: Get GitHub App token
+        id: get-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: liquibase
+          permission-contents: read
+
+      - name: Checkout PRO Repo
         uses: actions/checkout@v4
         with:
-          repository: liquibase/liquibase
+          repository: liquibase/liquibase-pro
+          token: ${{ steps.get-token.outputs.token }}
 
       #RUN THIS LOGIC WHEN THERE IS A SAME BRANCH IN OSS AND PRO
 
@@ -77,7 +88,7 @@ jobs:
         id: check-branch
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ steps.get-token.outputs.token }}
           script: |
             const currentBranch = "${{ steps.get-branch-name.outputs.unmodifiedBranchName }}"
             console.log(currentBranch)
@@ -263,7 +274,7 @@ jobs:
           ##create installer - disabled here but run as nightly job and as part of release workflow
           #cp liquibase-dist/target/liquibase-*-installer-* artifacts
 
-          for i in 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-cdi' 'liquibase-cdi-jakarta'; do
+          for i in 'liquibase-maven-plugin' 'liquibase-cli'; do
             cp $i/target/$i-0-SNAPSHOT.jar artifacts
             cp $i/target/$i-0-SNAPSHOT-sources.jar artifacts
             cp $i/target/$i-0-SNAPSHOT-javadoc.jar artifacts
@@ -292,7 +303,7 @@ jobs:
           cp liquibase-dist/target/liquibase-minimal-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}-minimal.tar.gz
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}-deps.jar
 
-          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-cdi' 'liquibase-cdi-jakarta' 'liquibase-extension-testing'; do
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-extension-testing'; do
             cp $i/target/$i-0-SNAPSHOT.jar artifacts-named/$i-${{ needs.setup.outputs.thisBranchName }}.jar
           done
 
@@ -335,6 +346,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   run-functional-tests:
+    if: github.actor != 'dependabot[bot]'
     needs: [setup, build_publish_branch]
     uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@master
     secrets: inherit
