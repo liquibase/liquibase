@@ -1,2 +1,1 @@
 liquibase.database.jvm.JdbcConnection
-liquibase.database.jvm.SnowflakeJdbcConnection
