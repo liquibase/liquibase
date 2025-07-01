@@ -383,7 +383,7 @@ class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 
     def "changeLog parameters that are not global are correctly expanded"() throws Exception {
         when:
-        def changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/localParameters/changelog.xml", new ChangeLogParameters(new MockDatabase()), new JUnitResourceAccessor());
+        def changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/localParameters/plain/changelog.xml", new ChangeLogParameters(new MockDatabase()), new JUnitResourceAccessor());
 
         then: "changeSet 1"
         changeLog.getChangeSets().size() == 2
@@ -396,6 +396,28 @@ class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         changeLog.getChangeSets()[1].getAuthor() == "Author2"
         changeLog.getChangeSets()[1].getId() == "createTable_financial_institution_enum"
         changeLog.getChangeSets()[1].getLogicalFilePath() == "create_table_financial_institution_enum.xml"
+    }
+
+    def "local parameters propagated down in changeLog hierarchy"() throws Exception {
+        when:
+        def changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/localParameters/hierarchy/changelog.xml", new ChangeLogParameters(new MockDatabase()), new JUnitResourceAccessor());
+
+        then: "2 changeSets in changeLog"
+        changeLog.getChangeSets().size() == 2
+
+        and: "table1 changeSet defines author and table properties"
+        changeLog.getChangeSets()[0].tap {
+            assert author == "author1"
+            assert id == "create_table1"
+            assert changes[0].columns[1].type == "varchar(50)"
+        }
+
+        and: "table2 changeSet defines author, table and value.size properties"
+        changeLog.getChangeSets()[1].tap {
+            assert author == "author2"
+            assert id == "create_table2"
+            assert changes[0].columns[1].type == "varchar(200)"
+        }
     }
 
 	def "tests for particular features and edge conditions part 1 testCasesChangeLog.xml"() throws Exception {
