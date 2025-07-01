@@ -284,7 +284,7 @@
         <dependency>
             <groupId>com.ibm.db2</groupId>
             <artifactId>jcc</artifactId>
-            <version>11.5.9.0</version>
+            <version>12.1.2.0</version>
             <scope>test</scope>
         </dependency>
 
