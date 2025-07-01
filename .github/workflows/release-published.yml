@@ -112,6 +112,12 @@ jobs:
             echo "branch=${{ inputs.dry_run_branch_name }}" >> $GITHUB_OUTPUT
           fi
 
+      - name: Checkout the determined branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.ref-branch.outputs.branch }}
+          fetch-depth: 0
+
       - name: Get Latest Merge Commit SHA
         id: get-sha
         run: |
