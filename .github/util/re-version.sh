@@ -60,7 +60,7 @@ mkdir -p $outdir
 MODIFIED_BRANCH_NAME=$(echo "$branch" | sed -e "s/[^a-zA-Z0-9-]/_/g")
 
 #### Update  jars
-declare -a jars=("liquibase-core-0-SNAPSHOT.jar" "liquibase-core-0-SNAPSHOT-sources.jar" "liquibase-commercial-$MODIFIED_BRANCH_NAME-SNAPSHOT.jar" "liquibase-commercial-$MODIFIED_BRANCH_NAME-SNAPSHOT-sources.jar" "liquibase-cdi-0-SNAPSHOT.jar" "liquibase-cdi-0-SNAPSHOT-sources.jar" "liquibase-cdi-jakarta-0-SNAPSHOT.jar" "liquibase-cdi-jakarta-0-SNAPSHOT-sources.jar" "liquibase-maven-plugin-0-SNAPSHOT.jar" "liquibase-maven-plugin-0-SNAPSHOT-sources.jar" "liquibase-cli-0-SNAPSHOT.jar" "liquibase-cli-0-SNAPSHOT-sources.jar")
+declare -a jars=("liquibase-core-0-SNAPSHOT.jar" "liquibase-core-0-SNAPSHOT-sources.jar" "liquibase-commercial-$MODIFIED_BRANCH_NAME-SNAPSHOT.jar" "liquibase-commercial-$MODIFIED_BRANCH_NAME-SNAPSHOT-sources.jar" "liquibase-maven-plugin-0-SNAPSHOT.jar" "liquibase-maven-plugin-0-SNAPSHOT-sources.jar" "liquibase-cli-0-SNAPSHOT.jar" "liquibase-cli-0-SNAPSHOT-sources.jar")
 
 # If extension_name is specified, only reversion those jars
 if [ -n "$extension_name" ]; then
@@ -107,7 +107,7 @@ do
 done
 
 #### Update  javadoc jars
-declare -a javadocJars=("liquibase-core-0-SNAPSHOT-javadoc.jar" "liquibase-cdi-0-SNAPSHOT-javadoc.jar" "liquibase-cdi-jakarta-0-SNAPSHOT-javadoc.jar" "liquibase-maven-plugin-0-SNAPSHOT-javadoc.jar" "liquibase-cli-0-SNAPSHOT-javadoc.jar" "liquibase-commercial-$MODIFIED_BRANCH_NAME-SNAPSHOT-javadoc.jar")
+declare -a javadocJars=("liquibase-core-0-SNAPSHOT-javadoc.jar" "liquibase-maven-plugin-0-SNAPSHOT-javadoc.jar" "liquibase-cli-0-SNAPSHOT-javadoc.jar" "liquibase-commercial-$MODIFIED_BRANCH_NAME-SNAPSHOT-javadoc.jar")
 # If extension_name is specified, only reversion those jars
 if [ -n "$extension_name" ]; then
   javadocJars=("$extension_name-0-SNAPSHOT-javadoc.jar")

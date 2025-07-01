@@ -18,14 +18,14 @@
         <deploy.url>https://maven.pkg.github.com/liquibase/liquibase</deploy.url>
         <h2.version>2.2.224</h2.version>
         <hsqldb.version>2.7.4</hsqldb.version>
-        <postgresql.version>42.7.5</postgresql.version>
-        <mssql.version>12.10.0.jre8</mssql.version>
+        <postgresql.version>42.7.7</postgresql.version>
+        <mssql.version>12.10.1.jre8</mssql.version>
         <mysql.version>9.2.0</mysql.version>
-        <mariadb.version>3.5.3</mariadb.version>
+        <mariadb.version>3.5.4</mariadb.version>
         <oracle.version>19.27.0.0</oracle.version>
-        <sqlite.version>3.49.1.0</sqlite.version>
+        <sqlite.version>3.50.2.0</sqlite.version>
         <db2.version>11.5.9.0</db2.version>
-        <firebird.version>5.0.7.java8</firebird.version>
+        <firebird.version>5.0.8.java8</firebird.version>
         <slf4j.version>2.0.17</slf4j.version>
         <liquibase-pro.version>master-SNAPSHOT</liquibase-pro.version>
         <liquibase-checks.version>0-SNAPSHOT</liquibase-checks.version>
@@ -63,7 +63,7 @@
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.11</version>
+            <version>5.11.2</version>
             <scope>compile</scope>
             <exclusions>
                 <!-- not used by liquibase code -->
@@ -114,7 +114,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.24.0</version>
+            <version>3.24.2</version>
         </dependency>
 
         <!--        CANNOT INCLUDE MYSQL FOR LICENSING REASONS -->
@@ -355,7 +355,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>3.6.1</version>
                 <executions>
                     <execution>
                         <id>timestamp-property</id>

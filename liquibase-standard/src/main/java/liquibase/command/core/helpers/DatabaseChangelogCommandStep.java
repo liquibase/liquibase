@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This helper class provides two objects: a valid and verified DatabaseChangeLog and the ChangeLogParameters
@@ -133,18 +134,20 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
 
     public static DatabaseChangeLog getDatabaseChangeLog(String changeLogFile, ChangeLogParameters changeLogParameters, Database database) throws Exception {
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-        ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
-        if (parser instanceof XMLChangeLogSAXParser) {
-            ((XMLChangeLogSAXParser) parser).setShouldWarnOnMismatchedXsdVersion(false);
-        }
-        DatabaseChangeLog changelog = Scope.child(Collections.singletonMap(Scope.Attr.database.name(), database),
-                () -> parser.parse(changeLogFile, changeLogParameters, resourceAccessor));
-        if (StringUtils.isNotEmpty(changelog.getLogicalFilePath())) {
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changelog.getLogicalFilePath());
+        AtomicReference<DatabaseChangeLog> changelog = new AtomicReference<>();
+        Scope.child(Scope.Attr.database, database, () -> {
+            ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
+            if (parser instanceof XMLChangeLogSAXParser) {
+                ((XMLChangeLogSAXParser) parser).setShouldWarnOnMismatchedXsdVersion(false);
+            }
+            changelog.set(parser.parse(changeLogFile, changeLogParameters, resourceAccessor));
+        });
+        if (StringUtils.isNotEmpty(changelog.get().getLogicalFilePath())) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changelog.get().getLogicalFilePath());
         } else {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changeLogFile);
         }
-        return changelog;
+        return changelog.get();
     }
 
     private void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog,
