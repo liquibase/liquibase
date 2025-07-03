@@ -169,7 +169,7 @@ public class ChangeLogIterator {
      *
      */
     protected void validateChangeSetExecutor(ChangeSet changeSet, RuntimeEnvironment env) throws LiquibaseException {
-        if (changeSet.getRunWith() == null) {
+        if (changeSet.getRunWith() == null || changeSet.getRunWith().isEmpty()) {
             return;
         }
         String executorName = ChangeSet.lookupExecutor(changeSet.getRunWith());
