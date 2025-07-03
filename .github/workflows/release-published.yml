@@ -296,8 +296,7 @@ jobs:
     if: ${{ inputs.dry_run == false }}
     name: Publish artifacts to Github Packages
     runs-on: ubuntu-22.04
-    # needs: [setup, manual_trigger_deployment]
-    needs: [setup]
+    needs: [setup, manual_trigger_deployment]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Java for publishing to GitHub Repository
