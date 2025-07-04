@@ -907,6 +907,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 for (Resource resourcePath : unsortedResources) {
                     // if the resource is inside a jar located in liquibaseHomeUri/internal, we don't want to include it
                     if (liquibaseHomeInternalUri != null && resourcePath.getUri().toString().startsWith("jar:" + liquibaseHomeInternalUri.toString())) {
+                        Scope.getCurrentScope().getLog(getClass()).info("Skipping resource from jar file in liquibase home internal: " + resourcePath);
                         continue;
                     }
                     if ((resourceFilter == null) || resourceFilter.include(resourcePath.getPath())) {
