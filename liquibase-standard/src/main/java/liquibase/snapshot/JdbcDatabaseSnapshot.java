@@ -282,7 +282,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
 
                 private void enrichPostgresqlResult(CatalogAndSchema catalogAndSchema, List<CachedRow> returnList) throws DatabaseException, SQLException {
-                    if (database instanceof PostgresDatabase) {
+                    if (database instanceof PostgresDatabase && !(database instanceof CockroachDatabase)) {
                         StringBuilder sql = new StringBuilder("SELECT ns.nspname as TABLE_SCHEM, tab.relname as TABLE_NAME, " +
                                 "cls.relname as INDEX_NAME, am.amname as INDEX_TYPE " +
                                 " FROM pg_index idx " +
