@@ -1,12 +1,12 @@
 package liquibase.changelog.filter;
 
-import liquibase.change.Change;
-import liquibase.change.DbmsTargetedChange;
+import liquibase.GlobalConfiguration;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +39,11 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
             dbmsList = "all databases";
         } else {
             dbmsList = "'"+ StringUtil.join(changeSet.getDbmsSet(), ", ") + "'";
+        }
+
+        boolean strictValue = GlobalConfiguration.STRICT.getCurrentValue();
+        if(strictValue && StringUtils.isBlank(changeSet.getDbmsOriginalString())) {
+            return new ChangeSetFilterResult(false, "dbms value cannot be empty while on Strict mode", this.getClass(), "dbmsEmptyOnStrictMode", "dbms");
         }
 
         if (DatabaseList.definitionMatches(changeSet.getDbmsSet(), database, true)) {
