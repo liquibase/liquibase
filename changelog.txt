@@ -27,7 +27,7 @@ See the [Liquibase 4.33.0 Release Notes](https://docs.liquibase.com/start/releas
 
 ### Important dependency updates
  - Liquibase OSS 4.33+ has Java 24 core build support.
-- The liquibase-cdi and liquibase-cdi-jakarta modules have been removed and are no longer supported in Liquibase 4.33.0 and later.
+- The liquibase-cdi and liquibase-cdi-jakarta modules are still supported, but have been removed from the OSS distribution to their own repositories.
 
 ## ️[PRO] and [OSS] Upcoming Change in Distributions
 Liquibase is evolving to better serve both open-source contributors and enterprise customers by introducing a clearer separation between its Open Source (OSS) and PRO offerings. This change is designed to ensure that each distribution is optimized for its respective users—providing open-source users with flexibility and control, while delivering scalability, reliability, and governance for enterprise teams.
