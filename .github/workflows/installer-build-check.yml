@@ -13,16 +13,39 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
+      - name: Convert escaped newlines and set GPG key
+        run: |
+          {
+            echo "GPG_KEY_CONTENT<<GPG_EOF"
+            printf '%b' "${{ env.GPG_SECRET }}"
+            echo
+            echo "GPG_EOF"
+          } >> $GITHUB_ENV
+
       - name: Set up JDK for GPG
         uses: actions/setup-java@v4
         with:
           java-version: "17"
           distribution: "temurin"
-          gpg-private-key: ${{ secrets.GPG_SECRET }}
+          gpg-private-key: ${{ env.GPG_KEY_CONTENT }}
           gpg-passphrase: GPG_PASSPHRASE
           overwrite-settings: false
         env:
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
 
       # TODO: Add install4j and DigiCert KeyLocker Client Tools caching if possible
       # - name: Cache Install4j
@@ -41,16 +64,16 @@ jobs:
 
       - name: Decode Client Authentication Certificate
         run: |
-          echo "${{ secrets.SM_CLIENT_CERT_FILE_B64 }}" | base64 --decode > /tmp/client-auth.p12
+          echo "${{ env.SM_CLIENT_CERT_FILE_B64 }}" | base64 --decode > /tmp/client-auth.p12
 
       - name: Set Environment Variables for Signing
         run: |
-          echo "SM_HOST=${{ secrets.SM_HOST }}" >> "$GITHUB_ENV"
-          echo "SM_API_KEY=${{ secrets.SM_API_KEY }}" >> "$GITHUB_ENV"
+          echo "SM_HOST=${{ env.SM_HOST }}" >> "$GITHUB_ENV"
+          echo "SM_API_KEY=${{ env.SM_API_KEY }}" >> "$GITHUB_ENV"
           echo "SM_CLIENT_CERT_FILE=/tmp/client-auth.p12" >> "$GITHUB_ENV"
-          echo "SM_CLIENT_CERT_PASSWORD=${{ secrets.SM_CLIENT_CERT_PASSWORD }}" >> "$GITHUB_ENV"
-          echo "SM_CODE_SIGNING_CERT_SHA1_HASH=${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}" >> "$GITHUB_ENV"
-          echo "SM_KEY_PAIR_ALIAS=${{ secrets.SM_KEY_PAIR_ALIAS }}" >> "$GITHUB_ENV"
+          echo "SM_CLIENT_CERT_PASSWORD=${{ env.SM_CLIENT_CERT_PASSWORD }}" >> "$GITHUB_ENV"
+          echo "SM_CODE_SIGNING_CERT_SHA1_HASH=${{ env.SM_CODE_SIGNING_CERT_SHA1_HASH }}" >> "$GITHUB_ENV"
+          echo "SM_KEY_PAIR_ALIAS=${{ env.SM_KEY_PAIR_ALIAS }}" >> "$GITHUB_ENV"
 
       - name: Install jsign and osslsigncode
         run: |
@@ -84,7 +107,7 @@ jobs:
 
       - name: Build Unsigned Windows Installer
         env:
-          INSTALL4J_LICENSE_KEY: ${{ secrets.INSTALL4J_10_LICENSE }}
+          INSTALL4J_LICENSE_KEY: ${{ env.INSTALL4J_LICENSE }}
         run: |
           tarFile=$(pwd)/re-version/final/liquibase-${BRANCH}-SNAPSHOT.tar.gz
           scriptDir=$(pwd)/.github/util/
@@ -118,7 +141,7 @@ jobs:
 
       - name: GPG Sign Artifacts (After Code Signing the Windows Installer)
         env:
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
         run: |
           .github/util/sign-artifacts.sh re-version/final
 

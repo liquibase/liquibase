@@ -38,12 +38,26 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
       - name: Get GitHub App token
         id: get-token
         uses: actions/create-github-app-token@v2
         with:
-          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           
       - name: Checkout liquibase-pro
