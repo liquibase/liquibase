@@ -59,11 +59,35 @@ jobs:
           ossWorkflowUrl="${repo_url}/actions/runs/${{ github.run_id }}"
           echo "ossWorkflowUrl=${ossWorkflowUrl}" >> $GITHUB_ENV
 
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
+      - name: Get GitHub App token
+        id: get-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          permission-contents: write
+          permission-actions: write
+
       - name: Dispatch an action and get the run ID
         uses: codex-/return-dispatch@v2
         id: return_dispatch
         with:
-          token: ${{ secrets.RUN_FUNCTIONAL_TEST_HARNESS_TESTS_TOKEN  }}
+          token: ${{ steps.get-token.outputs.token }}
           ref: "master"
           repo: liquibase-pro-tests
           owner: liquibase
