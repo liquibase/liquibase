@@ -110,22 +110,22 @@ jobs:
             echo "branch=${{ inputs.dry_run_branch_name }}" >> $GITHUB_OUTPUT
           fi
 
-  manual_trigger_deployment:
-    if: ${{ inputs.dry_run == false }}
-    name: Manually trigger deployment
-    needs: [setup]
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Get Version to deploy
-        uses: trstringer/manual-approval@v1
-        with:
-          secret: ${{ secrets.GITHUB_TOKEN }}
-          approvers: filipelautert,rberezen,jnewton03,kristyldatical,sayaliM0412
-          minimum-approvals: 2
-          issue-title: "Deploying ${{ needs.setup.outputs.version }} to sonatype"
-          issue-body: "Please approve or deny the deployment of version ${{ needs.setup.outputs.version }}"
-          additional-approved-words: "lgtm,✅,👍,proceed,shipit,:shipit:"
-          additional-denied-words: "stop,error,failed,fail,broken,:x:,👎"
+  # manual_trigger_deployment:
+  #   if: ${{ inputs.dry_run == false }}
+  #   name: Manually trigger deployment
+  #   needs: [setup]
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - name: Get Version to deploy
+  #       uses: trstringer/manual-approval@v1
+  #       with:
+  #         secret: ${{ secrets.GITHUB_TOKEN }}
+  #         approvers: filipelautert,rberezen,jnewton03,kristyldatical,sayaliM0412
+  #         minimum-approvals: 2
+  #         issue-title: "Deploying ${{ needs.setup.outputs.version }} to sonatype"
+  #         issue-body: "Please approve or deny the deployment of version ${{ needs.setup.outputs.version }}"
+  #         additional-approved-words: "lgtm,✅,👍,proceed,shipit,:shipit:"
+  #         additional-denied-words: "stop,error,failed,fail,broken,:x:,👎"
 
   # deploy_maven:
   #   if: ${{ inputs.dry_run == false }}
@@ -449,7 +449,8 @@ jobs:
   release-minimal-docker:
     if: ${{ inputs.dry_run == false }}
     name: Release Minimal docker image
-    needs: [setup, manual_trigger_deployment]
+    # needs: [setup, manual_trigger_deployment]
+    needs: [setup]
     runs-on: ubuntu-22.04
     steps:
       - name: Get GitHub App token
