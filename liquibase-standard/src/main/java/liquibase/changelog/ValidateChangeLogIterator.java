@@ -1,55 +1,86 @@
 package liquibase.changelog;
 
-import liquibase.RuntimeEnvironment;
 import liquibase.Scope;
-import liquibase.change.core.TagDatabaseChange;
-import liquibase.changelog.filter.ChangeSetFilter;
-import liquibase.changelog.filter.ChangeSetFilterResult;
-import liquibase.changelog.filter.CountChangeSetFilter;
-import liquibase.changelog.filter.UpToTagChangeSetFilter;
-import liquibase.changelog.visitor.ChangeSetVisitor;
-import liquibase.changelog.visitor.SkippedChangeSetVisitor;
+import liquibase.changelog.contentextractor.JsonChangeSetContentExtractor;
+import liquibase.changelog.contentextractor.SqlChangeSetContentExtractor;
+import liquibase.changelog.contentextractor.XmlChangeSetContentExtractor;
+import liquibase.changelog.contentextractor.YamlChangeSetContentExtractor;
+import liquibase.changelog.filter.*;
+import liquibase.changelog.filter.propertyvalidator.ValidatorFilter;
 import liquibase.exception.LiquibaseException;
 import lombok.Getter;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-public class ValidateChangeLogIterator extends ChangeLogIterator {
+public class ValidateChangeLogIterator {
 
     @Getter
-    private final List<ChangeSetFilterResult> reasonsDenied = new ArrayList<>();
+    private final List<ChangeSetFilterResult> validationErrors = new ArrayList<>();
+    private final ValidatorFilter[] validators;
+    DatabaseChangeLog changeLog;
 
-    public ValidateChangeLogIterator(DatabaseChangeLog databaseChangeLog, ChangeSetFilter... changeSetFilters) {
-        super(databaseChangeLog, changeSetFilters);
+    public ValidateChangeLogIterator(DatabaseChangeLog changeLog, ValidatorFilter... validatorFilters) {
+        this.changeLog = changeLog;
+        this.validators = validatorFilters;
     }
 
-    @Override
-    public void run(ChangeSetVisitor visitor, RuntimeEnvironment env) throws LiquibaseException {
-        databaseChangeLog.setRuntimeEnvironment(env);
+    public void run() throws LiquibaseException {
         try {
-            Scope.child(Scope.Attr.databaseChangeLog, databaseChangeLog, () -> {
-                List<ChangeSet> changeSetList = new ArrayList<>(databaseChangeLog.getChangeSets());
+            Map<String, Object> scopeSetttings = new HashMap<>();
+            scopeSetttings.put(Scope.Attr.databaseChangeLog.name(), this.changeLog);
+            Scope.child(scopeSetttings, () -> {
+                String changelogPath = this.changeLog.getFilePath();
+                String fileContent = readFileContent(changelogPath);
+                String fileFormat = determineFileFormat(changelogPath);
 
-                for (ChangeSet changeSet : changeSetList) {
-                    if (changeSetFilters != null) {
-                        iterateFilters(changeSet, reasonsDenied);
+                List<RawChangeSet> rawChangeSets = extractRawChangeSets(fileContent, fileFormat);
+
+                for (RawChangeSet rawChangeSet : rawChangeSets) {
+                    for(ValidatorFilter filter : validators) {
+                        ChangeSetFilterResult changeSetResult = filter.accepts(rawChangeSet);
+                        if(!changeSetResult.isAccepted()) {
+                            validationErrors.add(changeSetResult);
+                        }
                     }
                 }
             });
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw new LiquibaseException(e);
-        } finally {
-            databaseChangeLog.setRuntimeEnvironment(null);
         }
     }
 
-    private void iterateFilters(ChangeSet changeSet, List<ChangeSetFilterResult> reasonsDenied) {
-        for (ChangeSetFilter filter : changeSetFilters) {
-            ChangeSetFilterResult reason = filter.accepts(changeSet);
-            if(!reason.isAccepted()){
-                reasonsDenied.add(reason);
-            }
+    private String readFileContent(String changelogPath) throws IOException {
+        Path path = Paths.get(changelogPath);
+        byte[] bytes = Files.readAllBytes(path);
+        return new String(bytes, StandardCharsets.UTF_8);
+    }
+
+    private String determineFileFormat(String changelogPath) {
+        if (changelogPath.toLowerCase().endsWith(".xml")) {
+            return "xml";
+        } else if (changelogPath.toLowerCase().endsWith(".json")) {
+            return "json";
+        } else if (changelogPath.toLowerCase().endsWith(".yaml") || changelogPath.toLowerCase().endsWith(".yml")) {
+            return "yaml";
+        } else if (changelogPath.toLowerCase().endsWith(".sql")) {
+            return "sql";
+        } else {
+            return "unknown";
+        }
+    }
+
+    private List<RawChangeSet> extractRawChangeSets(String content, String format) {
+        switch (format) {
+            case "sql":  return new SqlChangeSetContentExtractor().extractSqlChangeSets(content, "sql");
+            case "xml":  return new XmlChangeSetContentExtractor().extractXmlChangeSets(content, "xml");
+            case "yaml": return new YamlChangeSetContentExtractor().extractYamlChangeSets(content, "yaml");
+            case "json": return new JsonChangeSetContentExtractor().extractJsonChangeSets(content, "json");
+            default: return Collections.emptyList();
         }
     }
 
