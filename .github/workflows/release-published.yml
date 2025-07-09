@@ -149,6 +149,29 @@ jobs:
           fileName: "*"
           out-file-path: "."
 
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
+      - name: Convert escaped newlines and set GPG key
+        run: |
+          {
+            echo "GPG_KEY_CONTENT<<GPG_EOF"
+            printf '%b' "${{ env.GPG_SECRET }}"
+            echo
+            echo "GPG_EOF"
+          } >> $GITHUB_ENV
+
       - name: Set up Java for publishing to Maven Central Repository
         uses: actions/setup-java@v4
         with:
@@ -157,16 +180,16 @@ jobs:
           server-id: sonatype-nexus-staging
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
-          gpg-private-key: ${{ secrets.GPG_SECRET }}
+          gpg-private-key: ${{ env.GPG_KEY_CONTENT }}
           gpg-passphrase: GPG_PASSPHRASE
         env:
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
 
       - name: Publish to Maven Central
         env:
-          MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.SONATYPE_TOKEN }}
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+          MAVEN_USERNAME: ${{ env.SONATYPE_USERNAME }}
+          MAVEN_PASSWORD: ${{ env.SONATYPE_TOKEN }}
+          GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
         run: |
           version=${{ needs.setup.outputs.version }}
 
@@ -253,11 +276,27 @@ jobs:
           fileName: "liquibase-additional*.zip"
           out-file-path: "."
 
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
+          aws-region: us-east-1
+
       - name: Unpack javadoc files and upload to s3
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.JAVADOCS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.JAVADOCS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
         # unzip archives, create directory for each jar, and extract jar contents to directory.  Then delete the jar and zip files.  Then upload to s3.
         run: |
           unzip -j '*.zip' '*javadoc*.jar'
@@ -318,12 +357,26 @@ jobs:
           path: liquibase-core-repo
           repository: "liquibase/liquibase"
 
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
       - name: Get GitHub App token
         id: get-token
         uses: actions/create-github-app-token@v2
         with:
-          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: liquibase-pro
           permission-contents: read
@@ -337,11 +390,13 @@ jobs:
           path: liquibase-pro-repo
           repository: "liquibase/liquibase-pro"
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
+          aws-region: us-east-1
+
       - name: Upload to s3
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.LIQUIBASEORIGIN_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
         # aws s3 sync syncs directories and S3 prefixes.
         run: |
           aws s3 sync liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/ s3://liquibaseorg-origin/xml/ns/pro/ --content-type application/octet-stream --only-show-errors
@@ -349,10 +404,6 @@ jobs:
           aws s3 sync liquibase-pro-repo/pro/src/main/resources/schemas/ s3://liquibaseorg-origin/json/schema/ --content-type application/octet-stream --only-show-errors
 
       - name: Index.htm file upload
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.LIQUIBASEORIGIN_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
         # get the major.minor xsd version. grab the index.htm from s3, add the new verison of xsd and sync with the s3 again
         run: |
           version=${{ needs.setup.outputs.version }}
@@ -368,10 +419,10 @@ jobs:
       - name: Liquibase xsds SFTP upload
         uses: wangyucode/sftp-upload-action@v2.0.4
         with:
-          host: ${{ secrets.WPENGINE_SFTP_HOST }}
-          port: ${{ secrets.WPENGINE_SFTP_PORT }}
-          username: ${{ secrets.WPENGINE_SFTP_USER }}
-          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }}
+          host: ${{ env.WPENGINE_SFTP_HOST }}
+          port: ${{ env.WPENGINE_SFTP_PORT }}
+          username: ${{ env.WPENGINE_SFTP_USER }}
+          password: ${{ env.WPENGINE_SFTP_PASSWORD }}
           compress: true
           forceUpload: true
           localDir: "liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/"
@@ -380,10 +431,10 @@ jobs:
       - name: Liquibase PRO xsds SFTP upload
         uses: wangyucode/sftp-upload-action@v2.0.4
         with:
-          host: ${{ secrets.WPENGINE_SFTP_HOST }}
-          port: ${{ secrets.WPENGINE_SFTP_PORT }}
-          username: ${{ secrets.WPENGINE_SFTP_USER }}
-          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }}
+          host: ${{ env.WPENGINE_SFTP_HOST }}
+          port: ${{ env.WPENGINE_SFTP_PORT }}
+          username: ${{ env.WPENGINE_SFTP_USER }}
+          password: ${{ env.WPENGINE_SFTP_PASSWORD }}
           compress: false
           forceUpload: true
           localDir: "liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/"
@@ -392,10 +443,10 @@ jobs:
       - name: Liquibase flow-file schema SFTP upload
         uses: wangyucode/sftp-upload-action@v2.0.4
         with:
-          host: ${{ secrets.WPENGINE_SFTP_HOST }}
-          port: ${{ secrets.WPENGINE_SFTP_PORT }}
-          username: ${{ secrets.WPENGINE_SFTP_USER }}
-          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }}
+          host: ${{ env.WPENGINE_SFTP_HOST }}
+          port: ${{ env.WPENGINE_SFTP_PORT }}
+          username: ${{ env.WPENGINE_SFTP_USER }}
+          password: ${{ env.WPENGINE_SFTP_PASSWORD }}
           compress: false
           forceUpload: true
           localDir: "liquibase-pro-repo/pro/src/main/resources/schemas/"
@@ -404,10 +455,10 @@ jobs:
       - name: Liquibase index.htm SFTP upload
         uses: wangyucode/sftp-upload-action@v2.0.4
         with:
-          host: ${{ secrets.WPENGINE_SFTP_HOST }}
-          port: ${{ secrets.WPENGINE_SFTP_PORT }}
-          username: ${{ secrets.WPENGINE_SFTP_USER }}
-          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }}
+          host: ${{ env.WPENGINE_SFTP_HOST }}
+          port: ${{ env.WPENGINE_SFTP_PORT }}
+          username: ${{ env.WPENGINE_SFTP_USER }}
+          password: ${{ env.WPENGINE_SFTP_PASSWORD }}
           compress: false
           forceUpload: true
           localDir: "index-file/"
@@ -419,12 +470,27 @@ jobs:
     needs: [setup, manual_trigger_deployment]
     runs-on: ubuntu-22.04
     steps:
+
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
       - name: Get GitHub App token
         id: get-token
         uses: actions/create-github-app-token@v2
         with:
-          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           permission-contents: write
           permission-actions: write
@@ -452,12 +518,26 @@ jobs:
     needs: [setup, manual_trigger_deployment]
     runs-on: ubuntu-22.04
     steps:
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
       - name: Get GitHub App token
         id: get-token
         uses: actions/create-github-app-token@v2
         with:
-          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           permission-contents: write
           permission-actions: write
@@ -480,12 +560,26 @@ jobs:
     needs: [setup]
     runs-on: ubuntu-22.04
     steps:
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
       - name: Get GitHub App token
         id: get-token
         uses: actions/create-github-app-token@v2
         with:
-          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           permission-contents: write
           permission-actions: write
@@ -519,12 +613,26 @@ jobs:
       latest_version: ${{ steps.get_latest_oss_version.outputs.latest_version }}
       previous_version: ${{ steps.get_latest_oss_version.outputs.previous_version }}
     steps:
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
       - name: Get GitHub App token
         id: get-token
         uses: actions/create-github-app-token@v2
         with:
-          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           permission-contents: write
           permission-actions: write
@@ -581,6 +689,29 @@ jobs:
           fileName: "*"
           out-file-path: "."
 
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
+      - name: Convert escaped newlines and set GPG key
+        run: |
+          {
+            echo "GPG_KEY_CONTENT<<GPG_EOF"
+            printf '%b' "${{ env.GPG_SECRET }}"
+            echo
+            echo "GPG_EOF"
+          } >> $GITHUB_ENV
+
       - name: Set up Java for publishing to Maven Central Repository
         uses: actions/setup-java@v4
         with:
@@ -589,16 +720,16 @@ jobs:
           server-id: dry-run-sonatype-nexus-staging
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
-          gpg-private-key: ${{ secrets.GPG_SECRET }}
+          gpg-private-key: ${{ env.GPG_KEY_CONTENT }}
           gpg-passphrase: GPG_PASSPHRASE
         env:
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
 
       - name: Publish to Central Portal (Dry Run)
         env:
-          MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.SONATYPE_TOKEN }}
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+          MAVEN_USERNAME: ${{ env.SONATYPE_USERNAME }}
+          MAVEN_PASSWORD: ${{ env.SONATYPE_TOKEN }}
+          GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
         run: |
           version=${{ needs.setup.outputs.version }}
 
@@ -689,10 +820,26 @@ jobs:
         id: timestamp
         run: echo "timestamp=$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
 
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+          
+      - name: Configure AWS credentials for prod account access
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
+          aws-region: us-east-1
+
       - name: Publish released assets to s3 bucket
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.LIQUIBASEORIGIN_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
         run: |
           aws s3 sync "./${{ needs.setup.outputs.version }}-released-assets" s3://liquibaseorg-origin/oss-released-assets/${{ needs.setup.outputs.version }}-released-assets-${{ env.timestamp }}/ --only-show-errors
