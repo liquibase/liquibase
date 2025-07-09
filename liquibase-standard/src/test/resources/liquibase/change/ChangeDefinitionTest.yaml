@@ -913,7 +913,6 @@ renameColumn: |
   columnDataType string 
     Description: Data type of the column
     Supported: all
-    Required For: mariadb,mysql
   newColumnName string 
     Description: New name for the column
     Supported: all
