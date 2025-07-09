@@ -74,8 +74,8 @@
         <commons-collections4.version>4.5.0</commons-collections4.version>
         <commons-text.version>1.13.1</commons-text.version>
         <ant.version>1.10.15</ant.version>
-        <junit-jupiter.version>5.12.2</junit-jupiter.version>
-        <groovy.version>4.0.26</groovy.version>
+        <junit-jupiter.version>5.13.2</junit-jupiter.version>
+        <groovy.version>4.0.27</groovy.version>
         <spock.version>2.3-groovy-4.0</spock.version>
         <spring.version>5.3.39</spring.version>
         <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
@@ -263,7 +263,7 @@
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>12.10.0.jre8</version>
+            <version>12.10.1.jre8</version>
             <scope>test</scope>
         </dependency>
 
@@ -277,7 +277,7 @@
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
-            <version>3.5.3</version>
+            <version>3.5.4</version>
             <scope>test</scope>
         </dependency>
 
@@ -298,21 +298,21 @@
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.50.1.0</version>
+            <version>3.50.2.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.24.0</version>
+            <version>3.24.2</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.firebirdsql.jdbc</groupId>
             <artifactId>jaybird</artifactId>
-            <version>5.0.7.java8</version>
+            <version>5.0.8.java8</version>
             <scope>test</scope>
         </dependency>
 
@@ -349,7 +349,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.6.0</version>
                 <executions>
                     <execution>
                         <id>enforce-maven</id>
@@ -523,7 +523,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.7.0</version>
+                <version>1.7.1</version>
                 <configuration>
                     <updatePomFile>true</updatePomFile>
                     <outputDirectory>${project.build.directory}/flattened-pom</outputDirectory>

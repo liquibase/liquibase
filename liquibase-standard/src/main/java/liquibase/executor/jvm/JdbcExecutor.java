@@ -84,14 +84,14 @@ public class JdbcExecutor extends AbstractExecutor {
 
             Object object = action.doInStatement(stmtToUse);
             if (stmtToUse.getWarnings() != null) {
-                showSqlWarnings(stmtToUse);
+                showSqlWarnings(stmtToUse, action);
             }
             return object;
         } catch (SQLException ex) {
             // Release Connection early, to avoid potential connection pool deadlock
             // in the case when the exception translator hasn't been initialized yet.
             try {
-                showSqlWarnings(stmt);
+                showSqlWarnings(stmt, action);
             } catch (SQLException sqle) {
                 Scope.getCurrentScope().getLog(JdbcExecutor.class).warning(String.format("Unable to access SQL warning: %s", sqle.getMessage()));
             }
@@ -109,15 +109,16 @@ public class JdbcExecutor extends AbstractExecutor {
         }
     }
 
-    private void showSqlWarnings(Statement stmtToUse) throws SQLException {
-        if (Boolean.TRUE.equals(! SqlConfiguration.SHOW_SQL_WARNING_MESSAGES.getCurrentValue() ||
-            stmtToUse == null) ||
-            stmtToUse.getWarnings() == null) {
+    protected void showSqlWarnings(Statement stmtToUse, StatementCallback action)
+            throws SQLException, DatabaseException {
+        if (!SqlConfiguration.SHOW_SQL_WARNING_MESSAGES.getCurrentValue() ||
+                stmtToUse == null ||
+                stmtToUse.getWarnings() == null) {
             return;
         }
         SQLWarning sqlWarning = stmtToUse.getWarnings();
         do {
-            Scope.getCurrentScope().getLog(JdbcExecutor.class).warning(sqlWarning.getMessage());
+            Scope.getCurrentScope().getUI().sendMessage(sqlWarning.getMessage());
             sqlWarning = sqlWarning.getNextWarning();
         } while (sqlWarning != null);
     }
