@@ -5,6 +5,7 @@ permissions:
   contents: write
   packages: write
   actions: read
+  id-token: write # Required for OIDC authentication with AWS
 
 # The concurrency check will cancel in-progress runs on non-master branches and pull requests on forked repositories regardless of the target branch.
 concurrency:

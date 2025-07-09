@@ -16,6 +16,8 @@ on:
   pull_request_target:
     types: [labeled]
 
+permissions:
+  id-token: write # Required for OIDC authentication with AWS
 
 jobs:
   # build and test pro master branch using current branch to ensure nothing is being broken by this PR

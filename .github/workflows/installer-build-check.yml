@@ -6,6 +6,9 @@ on:
     branches:
       - gha-scheduled-*
 
+permissions:
+  id-token: write # Required for OIDC authentication with AWS
+
 jobs:
   build-installers:
     name: Build Installers

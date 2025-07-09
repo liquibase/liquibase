@@ -16,6 +16,9 @@ on:
   pull_request_target:
     types: [ labeled ]
 
+permissions:
+  id-token: write # Required for OIDC authentication with AWS
+  
 jobs:
   functional-tests-build:
     runs-on: ubuntu-latest

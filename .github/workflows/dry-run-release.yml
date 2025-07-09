@@ -4,6 +4,7 @@ permissions:
   actions: write
   contents: write
   packages: write
+  id-token: write # Required for OIDC authentication with AWS
 
 on:
   workflow_dispatch: # Trigger on demand
