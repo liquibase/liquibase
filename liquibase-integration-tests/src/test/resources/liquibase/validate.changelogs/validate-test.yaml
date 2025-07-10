@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: mallodTest
+      labels:
+      context:
+      dbms:
+      runWith:
+      logicalFilePath:
+      changes:
+        - createTable:
+            tableName: testTable
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)

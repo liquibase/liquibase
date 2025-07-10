@@ -18,7 +18,7 @@ public class YamlChangeSetContentExtractor {
 
         // YAML pattern to match changeSet blocks
         Pattern changeSetPattern = Pattern.compile(
-                "-\\s+changeSet:\\s*\\n((?:\\s{2,}[^\\n]*\\n?)*)",
+                "-\\s+changeSet:\\s*\\n((?>(?:\\s{2,}[^\\n]*\\n?)*))",
                 Pattern.CASE_INSENSITIVE | Pattern.MULTILINE
         );
         Matcher matcher = changeSetPattern.matcher(content);
@@ -51,11 +51,6 @@ public class YamlChangeSetContentExtractor {
         String[] lines = yamlBlock.split("\\n");
 
         for (String line : lines) {
-            // Skip empty lines and lines that are too deeply nested (like changes:, createTable:, etc.)
-            if (line.trim().isEmpty()) {
-                continue;
-            }
-
             // Count leading whitespace to determine if this is a top-level changeset property
             int leadingSpaces = 0;
             for (char c : line.toCharArray()) {
@@ -66,14 +61,11 @@ public class YamlChangeSetContentExtractor {
                 }
             }
 
+            String trimmedLine = line.trim();
+
             // Only process lines with 2-8 spaces (changeset properties)
             // Skip deeply nested properties like changes:, createTable:, etc.
-            if (leadingSpaces < 2 || leadingSpaces > 8) {
-                continue;
-            }
-
-            String trimmedLine = line.trim();
-            if (!trimmedLine.contains(":")) {
+            if (trimmedLine.isEmpty() || leadingSpaces < 2 || leadingSpaces > 8 || !trimmedLine.contains(":")) {
                 continue;
             }
 
@@ -116,7 +108,6 @@ public class YamlChangeSetContentExtractor {
         }
 
         // Find the end of preConditions block by looking for the next top-level property
-        // (changes:, rollback:, or any other property at the same indentation level as preConditions)
         String[] allLines = yamlChangeSetContentBlock.split("\\n");
         int preConditionsLineIndex = -1;
 
@@ -138,7 +129,7 @@ public class YamlChangeSetContentExtractor {
         for (int i = preConditionsLineIndex + 1; i < allLines.length; i++) {
             String currentLine = allLines[i];
 
-            // If a line with same or less indentation than preConditions is found that will indicate the end has been reached
+            // If a line with same or less indentation than preConditions is found, the end has been reached
             if (!currentLine.trim().isEmpty() && getIndentationLevel(currentLine) <= preConditionsIndentation) {
                 break;
             }
@@ -146,29 +137,90 @@ public class YamlChangeSetContentExtractor {
             preConditionsContent.append(currentLine).append("\n");
         }
 
-        String[] preConditionLines = preConditionsContent.toString().split("\\n");
+        // Extract all precondition names recursively from the preConditions block
+        extractAllYamlPreconditionNames(preConditionsContent.toString(), preconditionNames);
 
-        for (String line : preConditionLines) {
+        changeSet.setPreconditions(preconditionNames);
+    }
+
+    private void extractAllYamlPreconditionNames(String yamlContent, List<String> preconditionNames) {
+        String[] lines = yamlContent.split("\\n");
+
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i];
             String trimmedLine = line.trim();
+
             if (trimmedLine.isEmpty()) {
                 continue;
             }
-            // Look for lines that start with "- " (direct precondition entries)
-            if (trimmedLine.startsWith("- ")) {
-                String preconditionLine = trimmedLine.substring(2).trim(); // Remove "- "
-                String preconditionName;
-                if (preconditionLine.contains(":")) {
-                    preconditionName = preconditionLine.substring(0, preconditionLine.indexOf(":")).trim();
-                } else {
-                    preconditionName = preconditionLine.trim();
-                }
 
-                if (!preconditionName.isEmpty()) {
+            // Check if this line defines a precondition (has a property name followed by colon)
+            if (trimmedLine.contains(":")) {
+                String preconditionName = extractPreconditionName(trimmedLine);
+
+                if (preconditionName != null && !preconditionName.isEmpty()) {
                     preconditionNames.add(preconditionName);
+
+                    // Extract nested content and process recursively
+                    String nestedContent = extractYamlNestedContent(lines, i);
+                    if (nestedContent != null && !nestedContent.trim().isEmpty()) {
+                        extractAllYamlPreconditionNames(nestedContent, preconditionNames);
+                    }
                 }
             }
         }
-        changeSet.setPreconditions(preconditionNames);
+    }
+
+    private String extractPreconditionName(String trimmedLine) {
+        String preconditionName = null;
+
+        // Handle array item with precondition: "- preconditionName:"
+        if (trimmedLine.startsWith("- ")) {
+            String preconditionLine = trimmedLine.substring(2).trim(); // Remove "- "
+            if (preconditionLine.contains(":")) {
+                preconditionName = preconditionLine.substring(0, preconditionLine.indexOf(":")).trim();
+            }
+        }
+        // Handle direct property: "preconditionName:" or "preconditionName: value"
+        else if (!trimmedLine.startsWith("-")) {
+            preconditionName = trimmedLine.substring(0, trimmedLine.indexOf(":")).trim();
+        }
+
+        return preconditionName;
+    }
+
+    private String extractYamlNestedContent(String[] lines, int startLineIndex) {
+        if (startLineIndex >= lines.length) {
+            return null;
+        }
+
+        String startLine = lines[startLineIndex];
+        int baseIndentation = getIndentationLevel(startLine);
+
+        StringBuilder nestedContent = new StringBuilder();
+
+        // Look for content that is more indented than the current line
+        for (int i = startLineIndex + 1; i < lines.length; i++) {
+            String currentLine = lines[i];
+
+            // If line is empty, include it (to preserve structure)
+            if (currentLine.trim().isEmpty()) {
+                nestedContent.append(currentLine).append("\n");
+                continue;
+            }
+
+            int currentIndentation = getIndentationLevel(currentLine);
+
+            // If we hit a line with same or less indentation, we've reached the end of nested content
+            if (currentIndentation <= baseIndentation) {
+                break;
+            }
+
+            // This line is part of the nested content
+            nestedContent.append(currentLine).append("\n");
+        }
+
+        return nestedContent.toString();
     }
 
     /**

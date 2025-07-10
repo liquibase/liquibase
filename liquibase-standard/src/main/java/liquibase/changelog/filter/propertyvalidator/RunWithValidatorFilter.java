@@ -5,7 +5,6 @@ import liquibase.Scope;
 import liquibase.changelog.RawChangeSet;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
-import liquibase.database.Database;
 import liquibase.executor.ExecutorService;
 
 import java.util.List;

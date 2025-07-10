@@ -13,10 +13,10 @@ import java.util.stream.Collectors;
 
 public class DbmsValidatorFilter implements ValidatorFilter {
 
-    private final List<String> validDbms;
+    private final List<String> validDbmsValues;
 
     public DbmsValidatorFilter() {
-        this.validDbms = fetchSupportedDatabases();
+        this.validDbmsValues = fetchSupportedDatabases();
     }
 
     private List<String> fetchSupportedDatabases() {
@@ -28,7 +28,7 @@ public class DbmsValidatorFilter implements ValidatorFilter {
     }
 
     private boolean isValidDbms(String dbms) {
-        return this.validDbms.stream().anyMatch(validDbms -> validDbms.equalsIgnoreCase(dbms));
+        return this.validDbmsValues.stream().anyMatch(validDbms -> validDbms.equalsIgnoreCase(dbms));
     }
 
     @Override
@@ -56,7 +56,7 @@ public class DbmsValidatorFilter implements ValidatorFilter {
             }
         }
         if(errors.length() == 0) {
-            return new ChangeSetFilterResult(true, "Valid dbms values: " + String.join(", ", validDbms), ChangeSetFilter.class, "validDBMS", "dbms");
+            return new ChangeSetFilterResult(true, "Valid dbms values: " + String.join(", ", validDbmsValues), ChangeSetFilter.class, "validDBMS", "dbms");
         } else {
             return new ChangeSetFilterResult(false, errors.toString(), ChangeSetFilter.class, "invalidDBMS", "dbms");
         }

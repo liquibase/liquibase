@@ -33,25 +33,34 @@ public class SqlChangeSetContentExtractor {
     public List<RawChangeSet> extractSqlChangeSets(String content, String changeLogFormat) {
         List<RawChangeSet> changeSets = new ArrayList<>();
 
-        // SQL pattern to match changeSet blocks
-        Pattern changeSetPattern = Pattern.compile(
-                "--changeset\\s+([^:]+):([^\\s]+)(?:\\s+(.*))?$",
-                Pattern.CASE_INSENSITIVE | Pattern.MULTILINE
-        );
+        // Find all changeset lines first
+        String[] lines = content.split("\\n");
 
-        Matcher matcher = changeSetPattern.matcher(content);
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i];
 
-        while (matcher.find()) {
-            String author = matcher.group(1).trim();
-            String id = matcher.group(2).trim();
-            String attributes = matcher.group(3) != null ? matcher.group(3).trim() : "";
+            // Check if this line is a changeset declaration
+            Pattern changeSetPattern = Pattern.compile(
+                    "--changeset\\s+([^:]+):([^\\s]+)(?:\\s+(.*))?",
+                    Pattern.CASE_INSENSITIVE
+            );
 
-            RawChangeSet rawChangeSet = new RawChangeSet(author, id, "");
-            rawChangeSet.setChangeLogFormat(changeLogFormat);
+            Matcher matcher = changeSetPattern.matcher(line);
 
-            extractSqlAttributes(rawChangeSet, attributes);
-            extractSqlPreconditions(rawChangeSet, content, matcher.end());
-            changeSets.add(rawChangeSet);
+            if (matcher.matches()) {
+                String author = matcher.group(1).trim();
+                String id = matcher.group(2).trim();
+                String attributes = matcher.group(3) != null ? matcher.group(3).trim() : "";
+
+                RawChangeSet rawChangeSet = new RawChangeSet(author, id, "");
+                rawChangeSet.setChangeLogFormat(changeLogFormat);
+
+                extractSqlAttributes(rawChangeSet, attributes);
+
+                // Pass the content and the line index for precondition extraction
+                extractSqlPreconditions(rawChangeSet, lines, i + 1);
+                changeSets.add(rawChangeSet);
+            }
         }
 
         return changeSets;
@@ -66,35 +75,33 @@ public class SqlChangeSetContentExtractor {
         setAttributesFromMap(changeSet, this.changeSetAttributes);
     }
 
-    private void extractSqlPreconditions(RawChangeSet changeSet, String content, int startPos) {
-        // Look for preconditions after the changeset declaration until the next changeset or end of file
-        String afterChangeSet = content.substring(startPos);
+    private void extractSqlPreconditions(RawChangeSet changeSet, String[] lines, int startLineIndex) {
+        List<String> preconditions = new ArrayList<>();
 
-        // Find the end of this changeset (next --changeset or end of file)
-        Pattern nextChangesetPattern = Pattern.compile("--changeset", Pattern.CASE_INSENSITIVE);
-        Matcher nextChangesetMatcher = nextChangesetPattern.matcher(afterChangeSet);
+        // Look for preconditions starting from the line after the changeset declaration
+        for (int i = startLineIndex; i < lines.length; i++) {
+            String line = lines[i].trim();
 
-        String changesetContent;
-        if (nextChangesetMatcher.find()) {
-            changesetContent = afterChangeSet.substring(0, nextChangesetMatcher.start());
-        } else {
-            changesetContent = afterChangeSet;
+            // Stop if we hit another changeset
+            if (line.toLowerCase().startsWith("--changeset")) {
+                break;
+            }
+
+            // Check if this line is a precondition
+            Pattern preconditionPattern = Pattern.compile(
+                    "--precondition-([\\w-]+)(?:\\s+(.*))?",
+                    Pattern.CASE_INSENSITIVE
+            );
+
+            Matcher matcher = preconditionPattern.matcher(line);
+            if (matcher.matches()) {
+                String preconditionName = matcher.group(1);
+                if (preconditionName != null) {
+                    preconditions.add(preconditionName);
+                }
+            }
         }
 
-        // Pattern for SQL preconditions in the format: --precondition-[type] [parameters]
-        Pattern preconditionPattern = Pattern.compile(
-                "^\\s*--precondition-([\\w-]+)(?:\\s+(.*))?$",
-                Pattern.CASE_INSENSITIVE | Pattern.MULTILINE
-        );
-
-        Matcher matcher = preconditionPattern.matcher(changesetContent);
-
-        List<String> preconditions = null;
-        if (matcher.find()) {
-            preconditions = new ArrayList<>();
-            String preconditionName = matcher.group(1);
-            preconditions.add(preconditionName);
-        }
         changeSet.setPreconditions(preconditions);
     }
 

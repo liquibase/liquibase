@@ -9,15 +9,17 @@ import liquibase.precondition.Precondition;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class PreconditionsValidatorFilter implements ValidatorFilter {
 
     private final List<String> availablePreconditions;
 
     public PreconditionsValidatorFilter() {
-        Stream<Precondition> preconditionsStream = Scope.getCurrentScope().getServiceLocator().findInstances(Precondition.class).stream();
-        this.availablePreconditions = preconditionsStream
+        this.availablePreconditions = getAvailablePreconditions();
+    }
+
+    public static List<String> getAvailablePreconditions() {
+        return Scope.getCurrentScope().getServiceLocator().findInstances(Precondition.class).stream()
                 .map(Precondition::getName)
                 .collect(Collectors.toList());
     }
@@ -43,8 +45,8 @@ public class PreconditionsValidatorFilter implements ValidatorFilter {
         boolean strict = GlobalConfiguration.STRICT.getCurrentValue();
 
         if (strict) {
-            if (preconditionNames != null && changeSet.getChangeLogFormat() != null) {
-                if (changeSet.getChangeLogFormat().equals("sql")) {
+            if (changeSet.getChangeLogFormat() != null && changeSet.getChangeLogFormat().equals("sql")) {
+                if (!preconditionNames.isEmpty()) {
                     String preconditionName = preconditionNames.get(0);
                     if (!(preconditionName.equals("table-exists") ||
                             preconditionName.equals("view-exists") ||
@@ -55,11 +57,11 @@ public class PreconditionsValidatorFilter implements ValidatorFilter {
                                 preconditionName));
                     }
                 }
-                else {
-                    for (String preconditionName : preconditionNames) {
-                        if (!availablePreconditions.contains(preconditionName)) {
-                            validationErrors.append(String.format("%n\t- %s is not a valid precondition", preconditionName));
-                        }
+            }
+            else {
+                for (String preconditionName : preconditionNames) {
+                    if (!availablePreconditions.contains(preconditionName)) {
+                        validationErrors.append(String.format("%n\t- %s is not a valid precondition", preconditionName));
                     }
                 }
             }
