@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: mallodTest
+      preConditions:
+        - tor:
+            - dbmsas:
+                type: oracle
+            - dbmesas:
+                type: mysql
+      changes:
+        - createTable:
+            tableName: testTable
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
