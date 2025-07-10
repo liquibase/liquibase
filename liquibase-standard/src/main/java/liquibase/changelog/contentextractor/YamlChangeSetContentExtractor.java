@@ -18,7 +18,7 @@ public class YamlChangeSetContentExtractor {
 
         // YAML pattern to match changeSet blocks
         Pattern changeSetPattern = Pattern.compile(
-                "-\\s+changeSet:\\s*\\n((?>(?:\\s{2,}[^\\n]*\\n?)*))",
+                "-\\s+changeSet:\\s*\\n((?:\\s{2,}+[^\\n]*+\\n?+)*+)",
                 Pattern.CASE_INSENSITIVE | Pattern.MULTILINE
         );
         Matcher matcher = changeSetPattern.matcher(content);
@@ -53,28 +53,18 @@ public class YamlChangeSetContentExtractor {
         for (String line : lines) {
             // Count leading whitespace to determine if this is a top-level changeset property
             int leadingSpaces = 0;
-            for (char c : line.toCharArray()) {
-                if (c == ' ') {
-                    leadingSpaces++;
-                } else {
-                    break;
-                }
+            for (int i = 0; i < line.length() && line.charAt(i) == ' '; i++) {
+                leadingSpaces++;
             }
 
             String trimmedLine = line.trim();
-
-            // Only process lines with 2-8 spaces (changeset properties)
-            // Skip deeply nested properties like changes:, createTable:, etc.
-            if (trimmedLine.isEmpty() || leadingSpaces < 2 || leadingSpaces > 8 || !trimmedLine.contains(":")) {
-                continue;
-            }
-
             int colonIndex = trimmedLine.indexOf(':');
             String attributeName = trimmedLine.substring(0, colonIndex).trim().toLowerCase();
             String attributeValue = trimmedLine.substring(colonIndex + 1).trim();
 
-            // Skip nested properties we don't care about
-            if ("changes".equals(attributeName) || "preconditions".equals(attributeName)) {
+            // Only process lines with 2-8 spaces (changeset properties)
+            // Skip deeply nested properties like changes:, createTable:, etc.
+            if (trimmedLine.isEmpty() || leadingSpaces < 2 || leadingSpaces > 8 || !trimmedLine.contains(":") || "changes".equals(attributeName) || "preconditions".equals(attributeName)) {
                 continue;
             }
 
@@ -203,16 +193,11 @@ public class YamlChangeSetContentExtractor {
         for (int i = startLineIndex + 1; i < lines.length; i++) {
             String currentLine = lines[i];
 
-            // If line is empty, include it (to preserve structure)
-            if (currentLine.trim().isEmpty()) {
-                nestedContent.append(currentLine).append("\n");
-                continue;
-            }
-
             int currentIndentation = getIndentationLevel(currentLine);
-
-            // If we hit a line with same or less indentation, we've reached the end of nested content
-            if (currentIndentation <= baseIndentation) {
+            // If line is empty, include it (to preserve structure)
+            if (currentLine.trim().isEmpty() || currentIndentation > baseIndentation) {
+                nestedContent.append(currentLine).append("\n");
+            } else {  // If we hit a line with same or less indentation, we've reached the end of nested content
                 break;
             }
 
