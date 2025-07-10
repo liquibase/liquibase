@@ -972,7 +972,9 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     public Object getSerializableFieldValue(String field) {
         Object o = ReflectionSerializer.getInstance().getValue(this, field);
         if (field.equals("valueDate") || field.equals("defaultValueDate")) {
-            return new ISODateFormat().format((Date)o);
+            return new ISODateFormat().format((Date) o);
+        } if (field.equals("rawDateValue")) { // this field should not be used for checksum purposes
+            return null;
         } else {
             return o;
         }
