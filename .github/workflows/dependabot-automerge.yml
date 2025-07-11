@@ -4,11 +4,10 @@ name: Dependabot Auto-merge
 # This provides consistent auto-merge behavior across all Liquibase repositories
 
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
   dependabot-automerge:
-    if: github.actor == 'dependabot[bot]'
     uses: liquibase/build-logic/.github/workflows/dependabot-automerge.yml@main
     secrets: inherit
