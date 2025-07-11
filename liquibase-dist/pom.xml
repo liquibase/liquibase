@@ -28,7 +28,6 @@
         <firebird.version>5.0.8.java8</firebird.version>
         <slf4j.version>2.0.17</slf4j.version>
         <liquibase-pro.version>master-SNAPSHOT</liquibase-pro.version>
-        <liquibase-checks.version>0-SNAPSHOT</liquibase-checks.version>
         <assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
         <maven.deploy.skip>true</maven.deploy.skip>
         <maven.install.skip>true</maven.install.skip>
