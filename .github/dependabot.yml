@@ -1,24 +1,132 @@
 version: 2
 updates:
-
+  # =============================================================================
+  # GITHUB ACTIONS DEPENDENCIES
+  # =============================================================================
+  # All GitHub Actions grouped together - these are generally safe to auto-merge
+  # since they don't affect runtime behavior and are validated by CI
   - package-ecosystem: "github-actions"
     directory: "/"
-    open-pull-requests-limit: 50
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "America/Chicago"
+    open-pull-requests-limit: 5
     labels:
       - "sdou"
       - "dependencies"
-
-  - package-ecosystem: "maven"
-    directory: "/"
-    open-pull-requests-limit: 50
-    schedule:
-      interval: "daily"
-    pull-request-branch-name:
-      # Separate sections of the branch name with a hyphen
-      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
-      separator: "-"
+      - "github-actions"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
     ignore:
       - dependency-name: "actions/delete-package-versions"
-        update-types: ["version-update:semver-major"]  
+        update-types: ["version-update:semver-major"]
+
+  # =============================================================================
+  # MAVEN PRODUCTION DEPENDENCIES
+  # =============================================================================
+  # Core runtime dependencies that affect production behavior
+  # These require manual review due to potential impact on end users
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "06:00"
+      timezone: "America/Chicago"
+    open-pull-requests-limit: 3
+    pull-request-branch-name:
+      separator: "-"
+    labels:
+      - "sdou"
+      - "dependencies"
+      - "production-deps"
+    groups:
+      production-deps:
+        patterns:
+          - "org.apache.commons:*"
+          - "org.springframework:*"
+          - "org.apache.ant:*"
+          - "org.glassfish.jaxb:*"
+          - "org.liquibase:*"
+        exclude-patterns:
+          - "*junit*"
+          - "*test*"
+          - "*mockito*"
+          - "*spock*"
+          - "*groovy*"
+
+  # =============================================================================
+  # MAVEN TEST DEPENDENCIES
+  # =============================================================================
+  # Test-scoped dependencies - safer for auto-merge since they don't affect
+  # production runtime but are validated by comprehensive test suite
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "06:00"
+      timezone: "America/Chicago"
+    open-pull-requests-limit: 3
+    pull-request-branch-name:
+      separator: "-"
+    labels:
+      - "sdou"
+      - "dependencies"
+      - "test-deps"
+    groups:
+      test-deps:
+        patterns:
+          - "org.junit.jupiter:*"
+          - "org.junit.platform:*"
+          - "org.junit.vintage:*"
+          - "org.mockito:*"
+          - "org.spockframework:*"
+          - "org.apache.groovy:*"
+          - "org.hamcrest:*"
+          - "org.assertj:*"
+          - "cglib:*"
+          - "org.objenesis:*"
+
+  # =============================================================================
+  # MAVEN BUILD TOOLS & DATABASE DRIVERS
+  # =============================================================================
+  # Build tools and database drivers used for testing - generally safe to
+  # auto-merge as they're validated by integration tests
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "06:00"
+      timezone: "America/Chicago"
+    open-pull-requests-limit: 4
+    pull-request-branch-name:
+      separator: "-"
+    labels:
+      - "sdou"
+      - "dependencies"
+      - "build-tools"
+    groups:
+      build-tools:
+        patterns:
+          - "org.apache.maven.plugins:*"
+          - "org.codehaus.mojo:*"
+          - "org.codehaus.gmavenplus:*"
+          - "org.jacoco:*"
+          - "org.sonarsource.scanner.maven:*"
+          - "com.h2database:*"
+          - "org.hsqldb:*"
+          - "org.xerial:*"
+          - "com.mysql:*"
+          - "org.postgresql:*"
+          - "org.mariadb.jdbc:*"
+          - "com.microsoft.sqlserver:*"
+          - "com.ibm.db2:*"
+          - "com.oracle.database.jdbc:*"
+          - "net.snowflake:*"
+          - "org.firebirdsql.jdbc:*"
