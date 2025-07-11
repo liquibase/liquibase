@@ -94,7 +94,6 @@
             <useTransitiveFiltering>true</useTransitiveFiltering>
             <scope>runtime</scope>
             <includes>
-                <!--<include>org.liquibase.ext:liquibase-commercial-bigquery:</include>-->
             </includes>
 
             <!-- some libraries lie about compile vs. runtime dependencies. Or we don't hit code that uses these. So exclude them manually. -->
