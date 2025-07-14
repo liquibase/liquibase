@@ -11,7 +11,6 @@ internal/lib/commons-text.jar
 internal/lib/jaxb-api.jar
 internal/lib/jaxb-core.jar
 internal/lib/jaxb-runtime.jar
-internal/lib/liquibase-commercial.jar
 internal/lib/liquibase-core.jar
 internal/lib/opencsv.jar
 internal/lib/picocli.jar
@@ -20,12 +19,6 @@ lib/README.txt
 lib/liquibase_autocomplete.sh
 lib/liquibase_autocomplete.zsh
 lib/liquibase_autocomplete_mac.bash
-licenses/commercial/FDHUT.txt
-licenses/commercial/Liquibase Pro EULA Software License Subscription and Support Agreement.txt
-licenses/commercial/README.txt
-licenses/commercial/apache-2.0.txt
-licenses/commercial/bsd-3-clause.txt
-licenses/commercial/mit.txt
 licenses/oss/README.txt
 licenses/oss/apache-2.0.txt
 licenses/oss/bsd-2-clause.txt

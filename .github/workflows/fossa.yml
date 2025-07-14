@@ -48,12 +48,6 @@ jobs:
                 "updatePolicy": "always"
               }
             },
-            {
-              "id": "liquibase-pro",
-              "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
-              "releases": {
-                "enabled": "false"
-              },
               "snapshots": {
                 "enabled": "true",
                 "updatePolicy": "always"
@@ -62,11 +56,6 @@ jobs:
           ]
         servers: |
           [
-            {
-              "id": "liquibase-pro",
-              "username": "liquibot",
-              "password": "${{ secrets.GITHUB_TOKEN }}"
-            },
             {
               "id": "liquibase",
               "username": "liquibot",
@@ -116,21 +105,8 @@ jobs:
       # Upload report to S3
     - name: Upload report to S3
       if: always()
-      run: aws s3 cp /home/runner/fossa_reports/liquibase.csv s3://liquibaseorg-origin/fossa_reports_liquibase-pro/
+      run: aws s3 cp /home/runner/fossa_reports/liquibase.csv s3://liquibaseorg-origin/fossa_reports_liquibase/
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.LIQUIBASEORIGIN_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: us-east-1
-
-  # trigger a job in liquibase-pro for the fossa-scan report generation and merging of OSS and PRO reports 
-  run-pro-fossa-report:
-    runs-on: ubuntu-latest
-    needs: [ fossa-scan ]
-    steps:
-      - name: Dispatch event to PRO repository
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          repository: liquibase/liquibase-pro
-          event-type: FOSSA_Scan_PRO
-          client-payload: '{"repository": "${{ github.repository }}", "branch": "${{ github.ref }}", "sha": "${{ github.sha }}", "server_url": "${{ github.server_url }}", "run_id": "${{ github.run_id }}"}'

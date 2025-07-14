@@ -1,4 +1,4 @@
-name: Run Pro build & tests
+name: Run Pro build & tests when labeled with 'build&TestPro'
 
 on:
   workflow_call:
@@ -18,7 +18,7 @@ on:
 
 
 jobs:
-  # build and test pro master branch using current branch to ensure nothing is being broken by this PR
+  # build and test pro master branch using current branch to ensure this PR is breaking nothing
   run-pro-build:
     name: Build & Test Pro
     runs-on: ubuntu-latest
