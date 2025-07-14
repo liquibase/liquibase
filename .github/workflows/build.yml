@@ -120,11 +120,6 @@ jobs:
                   "enabled": "true",
                   "updatePolicy": "always"
                 }
-              },
-                "snapshots": {
-                  "enabled": "true",
-                  "updatePolicy": "always"
-                }
               }
             ]
           servers: |
