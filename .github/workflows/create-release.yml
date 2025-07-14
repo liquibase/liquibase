@@ -161,11 +161,9 @@ jobs:
           $PWD/.github/util/sign-artifacts.sh re-version/out
 
           # Move files to a specific directory
-          mkdir re-version/final re-version/s3-minimal
           mv re-version/out/liquibase-core-${{ needs.setup.outputs.version }}.jar re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
-          mv re-version/out/liquibase-minimal-${{ needs.setup.outputs.version }}* re-version/s3-minimal
           (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
 
@@ -174,12 +172,6 @@ jobs:
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
-
-      - name: Cache Minimal Completed Artifacts
-        uses: actions/cache@v4.2.3
-        with:
-          key: minimal-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
-          path: re-version/s3-minimal
 
       - name: Set repository tags
         if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
@@ -361,24 +353,3 @@ jobs:
           name: liquibase-installers-${{ needs.setup.outputs.version }}
           path: re-version/final/*
 
-  deploy_minimal_artifact_s3:
-    if: ${{ inputs.dry_run == false }}
-    name: Deploy minimal artifacts to lbio s3 bucket
-    needs: [setup, reversion]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Restore Minimal Completed Artifacts
-        uses: actions/cache@v4.2.3
-        with:
-          key: minimal-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
-          path: re-version/s3-minimal
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_IO_DEV_GITHUB_OIDC_ROLE_ARN_LIQUIBASE }}
-          aws-region: us-east-2
-
-      - name: Publish minimal assets to s3 bucket
-        run: |
-          aws s3 sync "re-version/s3-minimal" s3://${{ secrets.LBIO_DOWNLOADS_S3_BUCKET }}/downloads/liquibase-minimal/v${{ needs.setup.outputs.version }}/ --only-show-errors
