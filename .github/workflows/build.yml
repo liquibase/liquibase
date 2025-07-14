@@ -271,11 +271,3 @@ jobs:
     with:
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
       thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
-
-  run-pro-build-and-test-if-labeled:
-    needs: [setup, build_publish_branch]
-    uses: liquibase/liquibase/.github/workflows/run-pro-build-and-test.yml@master
-    secrets: inherit
-    with:
-      latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
-      thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
