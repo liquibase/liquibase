@@ -102,7 +102,11 @@ jobs:
         os: [ ubuntu-22.04, macos-13, windows-latest ]
         java: [ 8, 11, 17, 21 ]
         exclude:
-          # exclude non-java 8 on macos and windows builds
+          # exclude non-java 21 on macos and windows builds
+          - os: macos-13
+            java: 8
+          - os: windows-latest
+            java: 8
           - os: macos-13
             java: 11
           - os: windows-latest
@@ -111,10 +115,6 @@ jobs:
             java: 17
           - os: windows-latest
             java: 17
-          - os: macos-13
-            java: 21
-          - os: windows-latest
-            java: 21
     runs-on: ${{ matrix.os }}
     env:
       OS_TYPE: ${{ matrix.os }}
