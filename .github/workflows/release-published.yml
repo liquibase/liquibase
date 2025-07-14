@@ -426,22 +426,6 @@ jobs:
           wait-for-completion: true
           workflow-logs: json-output
 
-  generate-PRO-tag:
-    if: ${{ inputs.dry_run == false }}
-    name: Generate PRO tags based on OSS release
-    needs: [setup]
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Get GitHub App token
-        id: get-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          permission-contents: write
-          permission-actions: write
-
   package:
     uses: liquibase/build-logic/.github/workflows/package.yml@main
     needs: [setup]

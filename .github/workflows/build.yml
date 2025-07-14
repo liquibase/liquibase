@@ -70,10 +70,9 @@ jobs:
           permission-contents: read
 
 
-  ### MATCHING BRANCH RUN THIS LOGIC
   build_publish_branch:
     name: Artifacts - Build & Package
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     needs: [setup]
     steps:
       - uses: actions/checkout@v4
@@ -177,6 +176,14 @@ jobs:
           "-Dbuild.number=${{ github.run_number }}" \
           "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT" \
           "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
+
+          # Rename liquibase-minimal tarball to avoid overwriting the commercial one
+          mv liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz liquibase-dist/target/liquibase-minimal-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz
+          mv liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip liquibase-dist/target/liquibase-minimal-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip
+
+          # Restore commercial tarballs from backup into target dir
+          mv liquibase-dist/backup/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz
+          mv liquibase-dist/backup/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip
 
           # Extract the tarball to allow us to upload the liquibase installation files to our
           # github actions workflow so that we don't double zip the archive
