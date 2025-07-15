@@ -39,9 +39,8 @@ updates:
   # =============================================================================
   # MAVEN DEPENDENCIES
   # =============================================================================
-  # All Maven dependencies grouped by risk level for strategic scheduling
-  # Production dependencies get daily schedule for faster security response
-  # Test and build dependencies get weekly schedule for reduced noise
+  # All Maven dependencies use daily schedule for faster security response
+  # Dependencies are grouped by risk level for organization
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
@@ -55,7 +54,7 @@ updates:
       - "sdou"
       - "dependencies"
     groups:
-      # Production dependencies - daily schedule for security responsiveness
+      # Production dependencies - core runtime dependencies
       production-deps:
         patterns:
           - "org.apache.commons:*"
@@ -72,7 +71,7 @@ updates:
         update-types:
           - "version-update:semver-minor"
           - "version-update:semver-patch"
-      # Test dependencies - weekly schedule is sufficient
+      # Test dependencies - testing framework dependencies
       test-deps:
         patterns:
           - "org.junit.jupiter:*"
@@ -88,7 +87,7 @@ updates:
         update-types:
           - "version-update:semver-minor"
           - "version-update:semver-patch"
-      # Build tools and database drivers - weekly schedule is sufficient
+      # Build tools and database drivers - build-time dependencies
       build-tools:
         patterns:
           - "org.apache.maven.plugins:*"
