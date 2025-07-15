@@ -55,6 +55,7 @@ updates:
       - "dependencies"
     groups:
       # Production dependencies - core runtime dependencies
+      # All updates (including major) require manual review
       production-deps:
         patterns:
           - "org.apache.commons:*"
@@ -68,10 +69,8 @@ updates:
           - "*mockito*"
           - "*spock*"
           - "*groovy*"
-        update-types:
-          - "version-update:semver-minor"
-          - "version-update:semver-patch"
       # Test dependencies - testing framework dependencies
+      # Patch/minor updates only = eligible for auto-merge
       test-deps:
         patterns:
           - "org.junit.jupiter:*"
@@ -88,6 +87,7 @@ updates:
           - "version-update:semver-minor"
           - "version-update:semver-patch"
       # Build tools and database drivers - build-time dependencies
+      # Patch/minor updates only = eligible for auto-merge
       build-tools:
         patterns:
           - "org.apache.maven.plugins:*"
