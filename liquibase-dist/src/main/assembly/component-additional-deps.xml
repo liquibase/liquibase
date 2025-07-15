@@ -75,15 +75,6 @@
 				        <exclude>org.liquibase:liquibase-snowflake:jar:</exclude> <!-- from liquibase-core -->
         				<exclude>org.liquibase:liquibase-cli:jar:</exclude> <!-- from liquibase-core  -->
         				<exclude>org.liquibase:liquibase-standard:jar:</exclude> <!-- from liquibase-standard  -->
-			        	<exclude>net.java.truelicense:*:jar:</exclude> <!-- from liquibase-commercial -->
-        				<exclude>com.github.jsqlparser:jsqlparser:jar:</exclude> <!-- from liquibase-commercial -->
-			        	<exclude>org.mvel:mvel2:jar:</exclude> <!-- from liquibase-commercial -->
-        				<exclude>commons-codec:commons-codec:jar:</exclude> <!-- from liquibase-commercial -->
-			        	<exclude>com.fasterxml.jackson.core:*:jar:</exclude> <!-- from liquibase-commercial -->
-        				<exclude>com.fasterxml.jackson.module:*:jar:</exclude> <!-- from liquibase-commercial -->
-			        	<exclude>com.github.spullara.mustache.java:compiler:jar:</exclude> <!-- from liquibase-commercial -->
-        				<exclude>io.github.java-diff-utils:java-diff-utils:jar:</exclude> <!-- from liquibase-commercial -->
-			        	<exclude>com.github.vertical-blank:sql-formatter:jar:</exclude> <!-- from liquibase-commercial -->
             </excludes>
 		    </dependencySet>
 
@@ -98,7 +89,6 @@
             <!-- some libraries lie about compile vs. runtime dependencies. Or we don't hit code that uses these. So exclude them manually. -->
             <excludes>
                 <exclude>org.liquibase:liquibase-core:</exclude> <!-- from internal/lib -->
-                <exclude>org.liquibase:liquibase-commercial:</exclude> <!-- from internal/lib -->
                 <exclude>com.opencsv:opencsv:</exclude> <!-- from internal/lib -->
                 <exclude>org.yaml:snakeyaml:jar:</exclude> <!-- from internal/lib -->
                 <exclude>javax.xml.bind:jaxb-api:jar:</exclude> <!-- from internal/lib -->
@@ -131,15 +121,6 @@
                 <exclude>org.liquibase:liquibase-snowflake:jar:</exclude> <!-- from liquibase-core -->
                 <exclude>org.liquibase:liquibase-cli:jar:</exclude> <!-- from liquibase-core  -->
                 <exclude>org.liquibase:liquibase-standard:jar:</exclude> <!-- from liquibase-standard  -->
-                <exclude>net.java.truelicense:*:jar:</exclude> <!-- from liquibase-commercial -->
-                <exclude>com.github.jsqlparser:jsqlparser:jar:</exclude> <!-- from liquibase-commercial -->
-                <exclude>org.mvel:mvel2:jar:</exclude> <!-- from liquibase-commercial -->
-                <exclude>commons-codec:commons-codec:jar:</exclude> <!-- from liquibase-commercial -->
-                <exclude>com.fasterxml.jackson.core:*:jar:</exclude> <!-- from liquibase-commercial -->
-                <exclude>com.fasterxml.jackson.module:*:jar:</exclude> <!-- from liquibase-commercial -->
-                <exclude>com.github.spullara.mustache.java:compiler:jar:</exclude> <!-- from liquibase-commercial -->
-                <exclude>io.github.java-diff-utils:java-diff-utils:jar:</exclude> <!-- from liquibase-commercial -->
-                <exclude>com.github.vertical-blank:sql-formatter:jar:</exclude> <!-- from liquibase-commercial -->
             </excludes>
         </dependencySet>
     </dependencySets>

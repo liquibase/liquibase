@@ -27,7 +27,6 @@
         <db2.version>11.5.9.0</db2.version>
         <firebird.version>5.0.8.java8</firebird.version>
         <slf4j.version>2.0.17</slf4j.version>
-        <liquibase-pro.version>master-SNAPSHOT</liquibase-pro.version>
         <assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
         <maven.deploy.skip>true</maven.deploy.skip>
         <maven.install.skip>true</maven.install.skip>
@@ -374,71 +373,6 @@
 
     <profiles>
         <profile>
-            <id>liquibase-commercial</id>
-
-            <activation>
-                <file>
-                    <exists>../../liquibase-pro/pom.xml</exists>
-                </file>
-            </activation>
-
-            <properties>
-                <assemblyConfigFile>src/main/assembly/assembly-bin-pro.xml</assemblyConfigFile>
-            </properties>
-
-            <dependencies>
-                <dependency>
-                    <groupId>org.liquibase</groupId>
-                    <artifactId>liquibase-commercial</artifactId>
-                    <version>${liquibase-pro.version}</version>
-                </dependency>
-            </dependencies>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.14.0</version>
-                        <executions>
-                            <execution>
-                                <phase>test-compile</phase>
-                                <goals>
-                                    <goal>testCompile</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <systemPropertyVariables>
-                                <expected.distribution.contents.filename>${expected-distribution-contents-filename}</expected.distribution.contents.filename>
-                            </systemPropertyVariables>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>liquibase-minimal</id>
-
-            <properties>
-                <assemblyConfigFile>src/main/assembly/assembly-bin-pro-minimal.xml</assemblyConfigFile>
-                <expected-distribution-contents-filename>expected-distribution-contents-minimal.txt</expected-distribution-contents-filename>
-            </properties>
-        </profile>
-
-        <profile>
             <id>remote-repositories</id>
             <activation>
                 <property>
@@ -450,14 +384,6 @@
                 <repository>
                     <id>liquibase</id>
                     <url>https://maven.pkg.github.com/liquibase/liquibase</url>
-                    <snapshots>
-                        <enabled>true</enabled>
-                        <updatePolicy>always</updatePolicy>
-                    </snapshots>
-                </repository>
-                <repository>
-                    <id>liquibase-pro</id>
-                    <url>https://maven.pkg.github.com/liquibase/liquibase-pro</url>
                     <snapshots>
                         <enabled>true</enabled>
                         <updatePolicy>always</updatePolicy>
