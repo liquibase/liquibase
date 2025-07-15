@@ -1,4 +1,15 @@
 version: 2
+# =============================================================================
+# SECURITY UPDATES vs VERSION UPDATES
+# =============================================================================
+# IMPORTANT: Security updates are created immediately when vulnerabilities are
+# detected, regardless of the schedule below. The schedule only affects when
+# Dependabot checks for new versions (non-security updates).
+#
+# However, some security fixes may come as regular version updates rather than
+# security advisories, so production dependencies use daily schedule for
+# fastest response while non-production dependencies use weekly batching.
+# =============================================================================
 updates:
   # =============================================================================
   # GITHUB ACTIONS DEPENDENCIES
@@ -29,12 +40,12 @@ updates:
   # MAVEN PRODUCTION DEPENDENCIES
   # =============================================================================
   # Core runtime dependencies that affect production behavior
+  # Daily schedule ensures fast response to security updates
   # These require manual review due to potential impact on end users
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "tuesday"
+      interval: "daily"
       time: "06:00"
       timezone: "America/Chicago"
     open-pull-requests-limit: 3
@@ -62,8 +73,9 @@ updates:
   # =============================================================================
   # MAVEN TEST DEPENDENCIES
   # =============================================================================
-  # Test-scoped dependencies - safer for auto-merge since they don't affect
-  # production runtime but are validated by comprehensive test suite
+  # Test-scoped dependencies - weekly schedule is sufficient since these don't
+  # affect production runtime. Security updates are still created immediately
+  # when vulnerabilities are detected, regardless of this schedule.
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
@@ -95,8 +107,9 @@ updates:
   # =============================================================================
   # MAVEN BUILD TOOLS & DATABASE DRIVERS
   # =============================================================================
-  # Build tools and database drivers used for testing - generally safe to
-  # auto-merge as they're validated by integration tests
+  # Build tools and database drivers used for testing - weekly schedule is
+  # sufficient since these don't affect production runtime. Security updates
+  # are still created immediately when vulnerabilities are detected.
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
