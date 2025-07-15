@@ -55,7 +55,7 @@ updates:
       - "dependencies"
     groups:
       # Production dependencies - core runtime dependencies
-      # All updates (including major) require manual review
+      # Major updates require manual review, patch/minor updates auto-merge
       production-deps:
         patterns:
           - "org.apache.commons:*"
