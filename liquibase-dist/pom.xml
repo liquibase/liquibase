@@ -16,7 +16,7 @@
     <properties>
         <deploy.repositoryId>liquibase</deploy.repositoryId>
         <deploy.url>https://maven.pkg.github.com/liquibase/liquibase</deploy.url>
-        <h2.version>2.2.224</h2.version>
+        <h2.version>2.3.232</h2.version>
         <hsqldb.version>2.7.4</hsqldb.version>
         <postgresql.version>42.7.7</postgresql.version>
         <mssql.version>12.10.1.jre8</mssql.version>
@@ -114,7 +114,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.24.2</version>
+            <version>3.25.0</version>
         </dependency>
 
         <!--        CANNOT INCLUDE MYSQL FOR LICENSING REASONS -->
