@@ -84,8 +84,8 @@ updates:
           - "cglib:*"
           - "org.objenesis:*"
         update-types:
-          - "version-update:semver-minor"
-          - "version-update:semver-patch"
+          - "minor"
+          - "patch"
       # Build tools and database drivers - build-time dependencies
       # Patch/minor updates only = eligible for auto-merge
       build-tools:
@@ -107,5 +107,5 @@ updates:
           - "net.snowflake:*"
           - "org.firebirdsql.jdbc:*"
         update-types:
-          - "version-update:semver-minor"
-          - "version-update:semver-patch"
+          - "minor"
+          - "patch"
