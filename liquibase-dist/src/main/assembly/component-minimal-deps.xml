@@ -52,6 +52,7 @@
             <scope>runtime</scope>
             <includes>
                 <include>org.liquibase:liquibase-core:</include>
+                <include>org.liquibase:liquibase-commercial:</include>
                 <include>com.opencsv:opencsv:</include>
                 <include>org.yaml:snakeyaml:jar:</include>
                 <include>info.picocli:picocli:jar:</include>
