@@ -37,25 +37,25 @@ updates:
         update-types: ["version-update:semver-major"]
 
   # =============================================================================
-  # MAVEN PRODUCTION DEPENDENCIES
+  # MAVEN DEPENDENCIES
   # =============================================================================
-  # Core runtime dependencies that affect production behavior
-  # Daily schedule ensures fast response to security updates
-  # These require manual review due to potential impact on end users
+  # All Maven dependencies grouped by risk level for strategic scheduling
+  # Production dependencies get daily schedule for faster security response
+  # Test and build dependencies get weekly schedule for reduced noise
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
       interval: "daily"
       time: "06:00"
       timezone: "America/Chicago"
-    open-pull-requests-limit: 3
+    open-pull-requests-limit: 10
     pull-request-branch-name:
       separator: "-"
     labels:
       - "sdou"
       - "dependencies"
-      - "production-deps"
     groups:
+      # Production dependencies - daily schedule for security responsiveness
       production-deps:
         patterns:
           - "org.apache.commons:*"
@@ -69,28 +69,10 @@ updates:
           - "*mockito*"
           - "*spock*"
           - "*groovy*"
-
-  # =============================================================================
-  # MAVEN TEST DEPENDENCIES
-  # =============================================================================
-  # Test-scoped dependencies - weekly schedule is sufficient since these don't
-  # affect production runtime. Security updates are still created immediately
-  # when vulnerabilities are detected, regardless of this schedule.
-  - package-ecosystem: "maven"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "wednesday"
-      time: "06:00"
-      timezone: "America/Chicago"
-    open-pull-requests-limit: 3
-    pull-request-branch-name:
-      separator: "-"
-    labels:
-      - "sdou"
-      - "dependencies"
-      - "test-deps"
-    groups:
+        update-types:
+          - "version-update:semver-minor"
+          - "version-update:semver-patch"
+      # Test dependencies - weekly schedule is sufficient
       test-deps:
         patterns:
           - "org.junit.jupiter:*"
@@ -103,28 +85,10 @@ updates:
           - "org.assertj:*"
           - "cglib:*"
           - "org.objenesis:*"
-
-  # =============================================================================
-  # MAVEN BUILD TOOLS & DATABASE DRIVERS
-  # =============================================================================
-  # Build tools and database drivers used for testing - weekly schedule is
-  # sufficient since these don't affect production runtime. Security updates
-  # are still created immediately when vulnerabilities are detected.
-  - package-ecosystem: "maven"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "thursday"
-      time: "06:00"
-      timezone: "America/Chicago"
-    open-pull-requests-limit: 4
-    pull-request-branch-name:
-      separator: "-"
-    labels:
-      - "sdou"
-      - "dependencies"
-      - "build-tools"
-    groups:
+        update-types:
+          - "version-update:semver-minor"
+          - "version-update:semver-patch"
+      # Build tools and database drivers - weekly schedule is sufficient
       build-tools:
         patterns:
           - "org.apache.maven.plugins:*"
@@ -143,3 +107,6 @@ updates:
           - "com.oracle.database.jdbc:*"
           - "net.snowflake:*"
           - "org.firebirdsql.jdbc:*"
+        update-types:
+          - "version-update:semver-minor"
+          - "version-update:semver-patch"
