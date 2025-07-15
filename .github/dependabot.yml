@@ -109,3 +109,7 @@ updates:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      # Ignore Spring Framework 6.x updates (requires Java 17, project uses Java 8)
+      - dependency-name: "org.springframework:*"
+        versions: ["6.*", ">=6.0.0"]
