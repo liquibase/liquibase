@@ -101,6 +101,17 @@ jobs:
         run: |
           run_id=${{ github.run_id }}
           echo "uber_jar_runId=${run_id}" >> $GITHUB_OUTPUT
+          
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: "8"
+          distribution: "temurin"
+          gpg-private-key: ${{ secrets.GPG_SECRET }}
+          gpg-passphrase: GPG_PASSPHRASE
+        env:
+          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+
 
       - name: maven-settings-xml-action
         uses: whelk-io/maven-settings-xml-action@v22
@@ -128,16 +139,6 @@ jobs:
               }
             ]
 
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: "8"
-          distribution: "temurin"
-          gpg-private-key: ${{ secrets.GPG_SECRET }}
-          gpg-passphrase: GPG_PASSPHRASE
-        env:
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
-
       - name: Re-version Artifacts
         env:
           GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
@@ -161,6 +162,7 @@ jobs:
           $PWD/.github/util/sign-artifacts.sh re-version/out
 
           # Move files to a specific directory
+          mkdir re-version/final
           mv re-version/out/liquibase-core-${{ needs.setup.outputs.version }}.jar re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
