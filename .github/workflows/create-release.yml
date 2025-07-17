@@ -87,6 +87,19 @@ jobs:
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
     steps:
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
 
       - name: Download liquibase-artifacts
         uses: dawidd6/action-download-artifact@v9
@@ -227,7 +240,7 @@ jobs:
             17
             8
           distribution: "temurin"
-          gpg-private-key: ${{ env.GPG_SECRET }}
+          gpg-private-key: ${{ env.GPG_KEY_CONTENT }}
           gpg-passphrase: GPG_PASSPHRASE
         env:
           GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}

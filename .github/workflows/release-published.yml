@@ -354,19 +354,11 @@ jobs:
           path: liquibase-core-repo
           repository: "liquibase/liquibase"
 
-      - name: Configure AWS credentials for vault access
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
           aws-region: us-east-1
-
-      - name: Get secrets from vault
-        id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
-        with:
-          secret-ids: |
-            ,/vault/liquibase
-          parse-json-secrets: true
 
       - name: Upload to s3
         # aws s3 sync syncs directories and S3 prefixes.
