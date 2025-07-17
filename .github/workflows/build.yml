@@ -5,6 +5,7 @@ permissions:
   contents: write
   packages: write
   actions: read
+  id-token: write # Required for OIDC authentication with AWS
 
 # The concurrency check will cancel in-progress runs on non-master branches and pull requests on forked repositories regardless of the target branch.
 concurrency:
@@ -60,12 +61,26 @@ jobs:
           echo "Modified Branch Name:" $modified_branch_name
           echo "Original Branch Name thisBranchName:" $branch_name
 
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
       - name: Get GitHub App token
         id: get-token
         uses: actions/create-github-app-token@v2
         with:
-          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: liquibase
           permission-contents: read
 
@@ -92,16 +107,40 @@ jobs:
           path: ~/.install4j8/**
 
       - name: Set up JDK 21
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
+      - name: Convert escaped newlines and set GPG key
+        run: |
+          {
+            echo "GPG_KEY_CONTENT<<GPG_EOF"
+            printf '%b' "${{ env.GPG_SECRET }}"
+            echo
+            echo "GPG_EOF"
+          } >> $GITHUB_ENV
+
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: "21"
           distribution: "temurin"
-          gpg-private-key: ${{ secrets.GPG_SECRET }}
+          gpg-private-key: ${{ env.GPG_KEY_CONTENT }}
           gpg-passphrase: GPG_PASSPHRASE
           cache: "maven"
           overwrite-settings: false
         env:
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
 
       #look for dependencies in maven
       - name: maven-settings-xml-action
@@ -126,7 +165,7 @@ jobs:
               {
                 "id": "liquibase",
                 "username": "liquibot",
-                "password": "${{ secrets.LIQUIBOT_PAT_GPM_ACCESS }}"
+                "password": "${{ env.LIQUIBOT_PAT_GPM_ACCESS }}"
               }
             ]
 
@@ -138,23 +177,13 @@ jobs:
 
       - name: Artifacts - Build & Sign
         env:
-          INSTALL4J_LICENSE: ${{ secrets.INSTALL4J_LICENSE }}
-          INSTALL4J_APPLE_KEY: ${{ secrets.INSTALL4J_APPLE_KEY }}
-          INSTALL4J_APPLE_KEY_PASSWORD: ${{ secrets.INSTALL4J_APPLE_KEY_PASSWORD }}
-          INSTALL4J_APPLE_ID: ${{ secrets.INSTALL4J_APPLE_ID }}
-          INSTALL4J_APPLE_ID_PASSWORD: ${{ secrets.INSTALL4J_APPLE_ID_PASSWORD }}
-          INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
-          INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+          INSTALL4J_LICENSE: ${{ env.INSTALL4J_LICENSE }}
+          GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ## save install4j code signing keys
           mkdir -p liquibase-dist/target/keys
-          echo "Saving apple key"
-          echo "$INSTALL4J_APPLE_KEY" | base64 -d > liquibase-dist/target/keys/datical_apple.p12
-
-          echo "Saving windows key"
-          echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
+        
           ./mvnw -B -pl liquibase-dist source:jar clean package failsafe:integration-test failsafe:verify \
           "-Dbuild.repository.owner=liquibase" \
           "-Dbuild.repository.name=liquibase" \

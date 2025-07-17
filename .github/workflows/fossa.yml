@@ -61,10 +61,24 @@ jobs:
     - name: Install Maven dependencies (excluding test scope)
       run: mvn clean install -DskipTests
       
+    - name: Configure AWS credentials for vault access
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+        aws-region: us-east-1
+
+    - name: Get secrets from vault
+      id: vault-secrets
+      uses: aws-actions/aws-secretsmanager-get-secrets@v2
+      with:
+        secret-ids: |
+          ,/vault/liquibase
+        parse-json-secrets: true
+
     - name: run FOSSA CLI
       uses: fossas/fossa-action@main
       with:
-        api-key: ${{ secrets.FOSSA_API_KEY }}
+        api-key: ${{ env.FOSSA_API_KEY }}
         branch: ${{ github.ref }}
 
     - name: Get the commit sha
@@ -78,7 +92,7 @@ jobs:
       run: |
         mkdir /home/runner/fossa_reports
         curl --location --request PUT 'https://app.fossa.com/api/projects/git+github.com/liquibase/liquibase' \
-        --header 'Authorization: Bearer ${{ secrets.FOSSA_API_KEY }}' \
+        --header 'Authorization: Bearer ${{ env.FOSSA_API_KEY }}' \
         --header 'Content-Type: application/x-www-form-urlencoded' \
           --data-urlencode 'bom_column_settings%5B%5D=Title' \
           --data-urlencode 'bom_column_settings%5B%5D=Version' \
@@ -88,7 +102,7 @@ jobs:
         
 
         curl --location 'https://app.fossa.com/api/revisions/git%2Bgithub.com%2Fliquibase%2Fliquibase%24${{ steps.get_commit_sha_oss.outputs.commit_sha_lb }}/attribution/download?format=CSV&includeDeepDependencies=true&download=true' \
-        --header 'Authorization: Bearer ${{ secrets.FOSSA_API_KEY }}' -o /home/runner/fossa_reports/liquibase.csv
+        --header 'Authorization: Bearer ${{ env.FOSSA_API_KEY }}' -o /home/runner/fossa_reports/liquibase.csv
 
       # Upload to build page for the team to check the csv file contents.
     - name: Upload to build page
@@ -97,11 +111,27 @@ jobs:
         name: fossa-reports
         path: /home/runner/fossa_reports/liquibase.csv
 
+    - name: Configure AWS credentials for vault access
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+        aws-region: us-east-1
+
+    - name: Get secrets from vault
+      id: vault-secrets
+      uses: aws-actions/aws-secretsmanager-get-secrets@v2
+      with:
+        secret-ids: |
+          ,/vault/liquibase
+        parse-json-secrets: true
+
+    - name: Configure AWS credentials for prod account access
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
+        aws-region: us-east-1
+
       # Upload report to S3
     - name: Upload report to S3
       if: always()
       run: aws s3 cp /home/runner/fossa_reports/liquibase.csv s3://liquibaseorg-origin/fossa_reports_liquibase/
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.LIQUIBASEORIGIN_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: us-east-1
