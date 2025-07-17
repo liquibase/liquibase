@@ -3,7 +3,7 @@ name: Build & Deploy extensions
 permissions:
   contents: write
   packages: write
-  actions: read
+  actions: write
   id-token: write
 
 on:
