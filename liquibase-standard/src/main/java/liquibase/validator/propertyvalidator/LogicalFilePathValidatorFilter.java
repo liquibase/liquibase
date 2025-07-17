@@ -5,6 +5,11 @@ import liquibase.validator.RawChangeSet;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 
+/**
+ * Validates the logicalFilePath property of a {@link RawChangeSet}.
+ * This filter checks if the logicalFilePath provided value is not empty when strict mode is enabled.
+ * If the logicalFilePath is empty in strict mode, it won't accept the provided changeSet and will provide a validation error message.
+ */
 public class LogicalFilePathValidatorFilter implements ValidatorFilter {
 
     @Override

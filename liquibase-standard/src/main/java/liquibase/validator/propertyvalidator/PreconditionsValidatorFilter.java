@@ -10,6 +10,10 @@ import liquibase.precondition.Precondition;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Validates the preconditions of a {@link RawChangeSet}. Ensures that the preconditions are valid based on the changeLog format and strict mode.
+ * If the preconditions are invalid, it won't accept the provided changeSet and will provide a validation error message.
+ */
 public class PreconditionsValidatorFilter implements ValidatorFilter {
 
     private final List<String> availablePreconditions;
@@ -40,6 +44,13 @@ public class PreconditionsValidatorFilter implements ValidatorFilter {
         }
     }
 
+    /**
+     * Validates the preconditions parsed from the changeSet. This method will check if preconditions are valid based on the generated list of available preconditions
+     * that Liquibase provides. For SQL changeLog format, it checks if the preconditions are limited to a specific set of valid preconditions.
+     *
+     * @param changeSet The RawChangeSet to validate.
+     * @param validationErrors StringBuilder to accumulate validation error messages.
+     */
     private void validateParsedPreconditions(RawChangeSet changeSet, StringBuilder validationErrors) {
         List<String> preconditionNames = changeSet.getPreconditions();
         boolean strict = GlobalConfiguration.STRICT.getCurrentValue();

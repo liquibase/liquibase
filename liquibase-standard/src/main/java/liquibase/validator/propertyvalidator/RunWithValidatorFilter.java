@@ -9,6 +9,11 @@ import liquibase.executor.ExecutorService;
 
 import java.util.List;
 
+/**
+ * Validates the runWith property of a {@link RawChangeSet}.
+ * This filter checks if the runWith provided value is not empty, or it is valid when strict mode is enabled.
+ * If the runWith is empty or not valid in strict mode, it won't accept the provided changeSet and will provide a validation error message.
+ */
 public class RunWithValidatorFilter implements ValidatorFilter {
     private final List<String> validRunWithOptions;
 

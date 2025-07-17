@@ -11,7 +11,17 @@ import java.util.regex.Pattern;
 
 import static liquibase.validator.contentextractor.common.CommonExtractUtilities.*;
 
+/**
+ * This class will be used to extract changeset content from JSON formatted changelog and set the extracted content to a ChangeSet object (refer to {@link RawChangeSet}) which will be used for validation.
+ */
 public class JsonChangeSetContentExtractor {
+    /**
+     * Extracts changesets with attributes/values we want to validate from the provided JSON content.
+     *
+     * @param content         The JSON content as a string.
+     * @param changeLogFormat The format of the changelog ("json" in this case).
+     * @return A list of {@link RawChangeSet} objects extracted from the JSON content.
+     */
     public List<RawChangeSet> extractJsonChangeSets(String content, String changeLogFormat) {
         List<RawChangeSet> changeSets = new ArrayList<>();
 
@@ -65,6 +75,12 @@ public class JsonChangeSetContentExtractor {
         return changeSets;
     }
 
+    /**
+     * Parses the attributes with their values from a JSON changeSet block and returns them as a map.
+     *
+     * @param jsonBlock The string containing the JSON attributes of the changeSet.
+     * @return A map containing attribute names and their corresponding values.
+     */
     private Map<String, String> parseJsonAttributes(String jsonBlock) {
         Map<String, String> attributeMap = new HashMap<>();
 
@@ -102,6 +118,12 @@ public class JsonChangeSetContentExtractor {
         return attributeMap;
     }
 
+    /**
+     * Extracts preconditions from the JSON changeSet block and sets them in the provided RawChangeSet object.
+     *
+     * @param changeSet      The RawChangeSet object to set preconditions on.
+     * @param changeSetBlock The JSON block of the changeSet containing preconditions.
+     */
     private void extractJsonPreconditions(RawChangeSet changeSet, String changeSetBlock) {
         List<String> preconditionNames = new ArrayList<>();
 

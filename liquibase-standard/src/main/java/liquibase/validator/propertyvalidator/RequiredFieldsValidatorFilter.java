@@ -5,6 +5,11 @@ import liquibase.validator.RawChangeSet;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 
+/**
+ * This filter will make sure that validate command reports an error if the id or author (Required) fields are not provided in a {@link RawChangeSet}.
+ * It checks if the id and author are not null or are not empty strings when strict mode is enabled.
+ * If any of these values are empty or null, it won't accept the provided changeSet and will provide a validation error message.
+ */
 public class RequiredFieldsValidatorFilter implements ValidatorFilter {
 
     @Override

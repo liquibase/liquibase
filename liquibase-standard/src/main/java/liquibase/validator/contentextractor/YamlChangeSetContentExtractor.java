@@ -11,8 +11,18 @@ import java.util.regex.Pattern;
 
 import static liquibase.validator.contentextractor.common.CommonExtractUtilities.*;
 
+/**
+ * This class will be used to extract changeset content from YAML formatted changelog and set the extracted content to a ChangeSet object (refer to {@link RawChangeSet}) which will be used for validation.
+ */
 public class YamlChangeSetContentExtractor {
 
+    /**
+     * Extracts changesets with attributes/values we want to validate from the provided YAML content.
+     *
+     * @param content         The YAML content as a string.
+     * @param changeLogFormat The format of the changelog ("yaml" in this case).
+     * @return A list of {@link RawChangeSet} objects extracted from the YAML/YML content.
+     */
     public List<RawChangeSet> extractYamlChangeSets(String content, String changeLogFormat) {
         List<RawChangeSet> changeSets = new ArrayList<>();
 
@@ -40,6 +50,12 @@ public class YamlChangeSetContentExtractor {
         return changeSets;
     }
 
+    /**
+     * Parses the attributes with and their values from an YAML changeSet string and returns them as a map.
+     *
+     * @param yamlBlock The string containing the attributes of the changeSet.
+     * @return A map containing attribute names and their corresponding values.
+     */
     private Map<String, String> parseYamlAttributes(String yamlBlock) {
         Map<String, String> attributeMap = new HashMap<>();
 
@@ -87,6 +103,14 @@ public class YamlChangeSetContentExtractor {
         return attributeMap;
     }
 
+    /**
+     * Extracts preconditions and its nested preconditions from the YAML content block and sets them in the provided RawChangeSet.
+     *
+     * @param changeSet        The RawChangeSet to set preconditions on.
+     * @param content          The full YAML content as a string.
+     * @param changeSetStart   The start index of the changeSet in the content.
+     * @param changeSetEnd     The end index of the changeSet in the content.
+     */
     private void extractYamlPreconditions(RawChangeSet changeSet, String content, int changeSetStart, int changeSetEnd) {
         String yamlChangeSetContentBlock = content.substring(changeSetStart, changeSetEnd);
 
@@ -133,6 +157,12 @@ public class YamlChangeSetContentExtractor {
         changeSet.setPreconditions(preconditionNames);
     }
 
+    /**
+     * Recursively extracts all precondition names from the YAML content.
+     *
+     * @param yamlContent       The YAML content as a string.
+     * @param preconditionNames The list to store extracted precondition names.
+     */
     private void extractAllYamlPreconditionNames(String yamlContent, List<String> preconditionNames) {
         String[] lines = yamlContent.split("\\n");
 
@@ -209,7 +239,10 @@ public class YamlChangeSetContentExtractor {
     }
 
     /**
-     * Helper method to count leading spaces in a line
+     * Counts the number of leading spaces in a line to determine its indentation level.
+     *
+     * @param line The line to check.
+     * @return The number of leading spaces in the line.
      */
     private int getIndentationLevel(String line) {
         int count = 0;

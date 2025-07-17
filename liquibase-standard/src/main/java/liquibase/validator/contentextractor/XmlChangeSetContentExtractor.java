@@ -11,8 +11,20 @@ import java.util.regex.Pattern;
 
 import static liquibase.validator.contentextractor.common.CommonExtractUtilities.*;
 
+/**
+ * This class will be used to extract changeset content from XML formatted changelog and set the extracted content to a ChangeSet object (refer to {@link RawChangeSet}) which will be used for validation.
+ */
+
 public class XmlChangeSetContentExtractor {
 
+    /**
+     * Extracts changesets with attributes/values we want to validate from the provided XML content.
+     * Note: for the XML format, we are most of the non-boolean attributes we will validate, except for Preconditions, which we will rely validation on XSD schema.
+     *
+     * @param content         The XML content as a string.
+     * @param changeLogFormat The format of the changelog ("xml" in this case).
+     * @return A list of {@link RawChangeSet} objects extracted from the XML content.
+     */
     public List<RawChangeSet> extractXmlChangeSets(String content, String changeLogFormat) {
         List<RawChangeSet> changeSets = new ArrayList<>();
 
@@ -39,6 +51,12 @@ public class XmlChangeSetContentExtractor {
         return changeSets;
     }
 
+    /**
+     * Parses the attributes with and their values from an XML changeSet string and returns them as a map.
+     *
+     * @param attributesString The string containing the attributes of the changeSet.
+     * @return A map containing attribute names and their corresponding values.
+     */
     private Map<String, String> parseXmlAttributes(String attributesString) {
         Map<String, String> attributeMap = new HashMap<>();
 

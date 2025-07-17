@@ -11,6 +11,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * Validates the 'dbms' property of a {@link RawChangeSet}. This filter checks if the specified DBMS values are valid according to the supported databases.
+ * It operates in strict mode, ensuring that all specified DBMS values are recognized values or are not empty.
+ * If the dbms is empty or any of the provided values is invalid, it won't accept the provided changeSet and will provide one or more validation error messages.
+ */
 public class DbmsValidatorFilter implements ValidatorFilter {
 
     private final List<String> validDbmsValues;

@@ -125,6 +125,11 @@ public class ExecutorService extends AbstractPluginFactory<Executor>  {
         executors.clear();
     }
 
+    /**
+     * Returns a list of all executor names available in the current scope.
+     *
+     * @return a list of executor names
+     */
     public List<String> getAllExecutorNames() {
         List<String> executorNames = new ArrayList<>();
 

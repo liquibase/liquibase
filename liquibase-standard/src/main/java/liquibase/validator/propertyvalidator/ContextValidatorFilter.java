@@ -5,6 +5,10 @@ import liquibase.validator.RawChangeSet;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 
+/**
+ * Validates the context property of a {@link RawChangeSet}. Ensures that the context is not empty when strict mode is enabled.
+ * If the context is empty in strict mode, it won't accept the provided changeSet and will provide a validation error message.
+ */
 public class ContextValidatorFilter implements ValidatorFilter {
 
     @Override

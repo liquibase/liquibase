@@ -18,6 +18,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
+/** * This class iterates will read a DatabaseChangeLog content, and depending on its format(SQL, XML, YAML, or JSON) will ask a content extractor to extract the set of changeSets to validate
+ * and then will apply a series of validation filters to each change set. It will collect any validation errors encountered during the process.
+ */
 public class ValidateChangeLogIterator {
 
     @Getter

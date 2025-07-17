@@ -10,6 +10,11 @@ import liquibase.validator.propertyvalidator.*;
 
 import java.util.*;
 
+/**
+ * This class defines the "validate" command step for Liquibase, which validates a changelog file for errors.
+ * It checks for various validation criteria such as required fields, DBMS compatibility, runWith conditions,
+ * preconditions, labels, contexts, and logical file paths.
+ */
 public class ValidateCommandStep extends AbstractCommandStep {
 
     public static final String[] COMMAND_NAME = {"validate"};

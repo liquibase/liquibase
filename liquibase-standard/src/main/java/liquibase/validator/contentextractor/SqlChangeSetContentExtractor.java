@@ -13,6 +13,9 @@ import java.util.regex.Pattern;
 
 import static liquibase.validator.contentextractor.common.CommonExtractUtilities.*;
 
+/**
+ * This class will be used to extract changeset content from SQL formatted changelog and set the extracted content to a ChangeSet object (refer to {@link RawChangeSet}) which will be used for validation.
+ */
 public class SqlChangeSetContentExtractor {
 
     @Getter
@@ -30,6 +33,13 @@ public class SqlChangeSetContentExtractor {
         }
     }
 
+    /**
+     * Extracts changesets with attributes/values we want to validate from the provided SQL content.
+     *
+     * @param content         The SQL content as a string.
+     * @param changeLogFormat The format of the changelog ("sql" in this case).
+     * @return A list of {@link RawChangeSet} objects extracted from the SQL content.
+     */
     public List<RawChangeSet> extractSqlChangeSets(String content, String changeLogFormat) {
         List<RawChangeSet> changeSets = new ArrayList<>();
 
@@ -66,6 +76,12 @@ public class SqlChangeSetContentExtractor {
         return changeSets;
     }
 
+    /**
+     * Sets attributes from a map to the given {@link RawChangeSet} with the attribute values we want to validate.
+     *
+     * @param changeSet The changeSet to set attributes on.
+     * @param attributes The map containing attribute names and values.
+     */
     private void extractSqlAttributes(RawChangeSet changeSet, String attributes) {
         if (attributes == null || attributes.trim().isEmpty()) {
             return;
@@ -75,6 +91,14 @@ public class SqlChangeSetContentExtractor {
         setAttributesFromMap(changeSet, this.changeSetAttributes);
     }
 
+    /**
+     * Extract the precondition from the SQL content and sets them on the given {@link RawChangeSet}.
+     * NOTE: This method assumes that SQL changeSet will contain only a precondition.
+     *
+     * @param changeSet The changeSet to set preconditions on.
+     * @param lines     The lines of the SQL content.
+     * @param startLineIndex The index to start looking for preconditions.
+     */
     private void extractSqlPreconditions(RawChangeSet changeSet, String[] lines, int startLineIndex) {
         List<String> preconditions = new ArrayList<>();
 
@@ -105,6 +129,12 @@ public class SqlChangeSetContentExtractor {
         changeSet.setPreconditions(preconditions);
     }
 
+    /**
+     * Parses the attributes from a SQL changeSet string and returns them as a map.
+     *
+     * @param attributes The string containing the attributes of the changeSet.
+     * @return A map containing attribute names and their corresponding values.
+     */
     private Map<String, String> parseChangeSetAttributes(String attributes) {
         Map<String, String> attributeMap = new HashMap<>();
 
@@ -179,6 +209,9 @@ public class SqlChangeSetContentExtractor {
         return attributeMap;
     }
 
+    /**
+     * Represents the position of an attribute in the SQL changeSet string.
+     */
     private static class AttributePosition {
         final String name;
         final int nameStart;

@@ -5,6 +5,10 @@ import liquibase.validator.RawChangeSet;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 
+/**
+ * Validates the labels property of a {@link RawChangeSet}. Ensures that the labels is not empty when strict mode is enabled.
+ * If the labels is empty in strict mode, it won't accept the provided changeSet and will provide a validation error message.
+ */
 public class LabelsValidatorFilter implements ValidatorFilter {
 
         @Override
