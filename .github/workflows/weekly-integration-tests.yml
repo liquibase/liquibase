@@ -128,14 +128,30 @@ jobs:
             ./**/target/surefire-reports
             ./**/target/site
 
-  destroy-ephemeral-cloud-infra:
+  get-stack-id:
     if: always()
     needs: [ deploy-ephemeral-cloud-infra, snowflake-its ]
+    runs-on: ubuntu-latest
+    outputs:
+      stack-id: ${{ steps.get-stack-id.outputs.stack-id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Get Stack ID
+        id: get-stack-id
+        uses: ./.github/actions/get-stack-id
+        with:
+          stack-id: ${{ needs.deploy-ephemeral-cloud-infra.outputs.stack_id }}
+          run-id: ${{ github.run_id }}
+
+  destroy-ephemeral-cloud-infra:
+    if: always()
+    needs: [ deploy-ephemeral-cloud-infra, snowflake-its, get-stack-id ]
     uses: liquibase/build-logic/.github/workflows/ephemeral-cloud-infra.yml@main
     secrets: inherit
     with:
         destroy: true
-        stack_id: ${{ needs.deploy-ephemeral-cloud-infra.outputs.stack_id }}
+        stack_id: ${{ needs.get-stack-id.outputs.stack-id }}
         snowflake_oss: true
 
   run-slack-notification:
