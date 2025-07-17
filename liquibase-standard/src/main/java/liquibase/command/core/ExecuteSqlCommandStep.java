@@ -76,9 +76,9 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
                 out.append(handleSelect(sqlString, executor));
             } else {
                 executor.execute(new RawParameterizedSqlStatement(sqlString));
-                out.append("Successfully Executed: ").append(sqlString).append("\n");
+                out.append("Successfully Executed: ").append(System.lineSeparator()).append(sqlString).append(System.lineSeparator());
             }
-            out.append("\n");
+            out.append(System.lineSeparator());
         }
 
         database.commit();
