@@ -1,7 +1,7 @@
-package liquibase.changelog.filter.propertyvalidator;
+package liquibase.validator.propertyvalidator;
 
 import liquibase.GlobalConfiguration;
-import liquibase.changelog.RawChangeSet;
+import liquibase.validator.RawChangeSet;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
@@ -41,7 +41,7 @@ public class DbmsValidatorFilter implements ValidatorFilter {
                 return new ChangeSetFilterResult(true, "", ChangeSetFilter.class ,"validDBMS", "dbms");
             }
 
-            String[] dbmsList = changeSet.getDbms() != null ? changeSet.getDbms().split(",") : null;
+            String[] dbmsList = changeSet.getDbms() != null ? changeSet.getDbms().split(",") : new String[0];
 
             for (String dbms : dbmsList) {
                 String cleanDbms = dbms.startsWith("!") ? dbms.substring(1) : dbms.trim();

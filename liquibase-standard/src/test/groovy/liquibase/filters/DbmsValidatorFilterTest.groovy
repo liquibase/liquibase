@@ -2,8 +2,8 @@ package liquibase.filters
 
 import liquibase.GlobalConfiguration
 import liquibase.Scope
-import liquibase.changelog.RawChangeSet
-import liquibase.changelog.filter.propertyvalidator.DbmsValidatorFilter
+import liquibase.validator.RawChangeSet
+import liquibase.validator.propertyvalidator.DbmsValidatorFilter
 import spock.lang.Specification
 import spock.lang.Unroll
 

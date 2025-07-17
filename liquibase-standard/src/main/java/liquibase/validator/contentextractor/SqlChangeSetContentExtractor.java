@@ -1,6 +1,6 @@
-package liquibase.changelog.contentextractor;
+package liquibase.validator.contentextractor;
 
-import liquibase.changelog.RawChangeSet;
+import liquibase.validator.RawChangeSet;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import lombok.Getter;
 
@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static liquibase.changelog.contentextractor.common.CommonExtractUtilities.*;
+import static liquibase.validator.contentextractor.common.CommonExtractUtilities.*;
 
 public class SqlChangeSetContentExtractor {
 

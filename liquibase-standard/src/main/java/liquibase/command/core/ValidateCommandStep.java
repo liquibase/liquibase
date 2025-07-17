@@ -3,10 +3,10 @@ package liquibase.command.core;
 import liquibase.Scope;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
-import liquibase.changelog.filter.propertyvalidator.*;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.exception.ChangeLogParseException;
+import liquibase.validator.propertyvalidator.*;
 
 import java.util.*;
 

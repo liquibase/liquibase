@@ -1,4 +1,4 @@
-package liquibase.changelog;
+package liquibase.validator;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

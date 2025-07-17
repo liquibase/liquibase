@@ -1,12 +1,13 @@
 package liquibase.changelog;
 
 import liquibase.Scope;
-import liquibase.changelog.contentextractor.JsonChangeSetContentExtractor;
-import liquibase.changelog.contentextractor.SqlChangeSetContentExtractor;
-import liquibase.changelog.contentextractor.XmlChangeSetContentExtractor;
-import liquibase.changelog.contentextractor.YamlChangeSetContentExtractor;
+import liquibase.validator.contentextractor.JsonChangeSetContentExtractor;
+import liquibase.validator.contentextractor.SqlChangeSetContentExtractor;
+import liquibase.validator.contentextractor.XmlChangeSetContentExtractor;
+import liquibase.validator.contentextractor.YamlChangeSetContentExtractor;
 import liquibase.changelog.filter.*;
-import liquibase.changelog.filter.propertyvalidator.ValidatorFilter;
+import liquibase.validator.RawChangeSet;
+import liquibase.validator.propertyvalidator.ValidatorFilter;
 import liquibase.exception.LiquibaseException;
 import lombok.Getter;
 

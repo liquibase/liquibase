@@ -1,8 +1,8 @@
-package liquibase.changelog.filter.propertyvalidator;
+package liquibase.validator.propertyvalidator;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.changelog.RawChangeSet;
+import liquibase.validator.RawChangeSet;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.executor.ExecutorService;

@@ -1,6 +1,6 @@
-package liquibase.changelog.contentextractor;
+package liquibase.validator.contentextractor;
 
-import liquibase.changelog.RawChangeSet;
+import liquibase.validator.RawChangeSet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static liquibase.changelog.contentextractor.common.CommonExtractUtilities.*;
+import static liquibase.validator.contentextractor.common.CommonExtractUtilities.*;
 
 public class JsonChangeSetContentExtractor {
     public List<RawChangeSet> extractJsonChangeSets(String content, String changeLogFormat) {

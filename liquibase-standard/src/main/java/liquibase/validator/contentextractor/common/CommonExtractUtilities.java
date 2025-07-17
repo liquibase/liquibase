@@ -1,6 +1,6 @@
-package liquibase.changelog.contentextractor.common;
+package liquibase.validator.contentextractor.common;
 
-import liquibase.changelog.RawChangeSet;
+import liquibase.validator.RawChangeSet;
 
 import java.util.Map;
 
