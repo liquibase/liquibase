@@ -62,10 +62,6 @@ on:
         description: "The URL of the created tar.gz file"
         value: ${{ jobs.build-installers.outputs.dry_run_tar_gz_url }}
 
-env:
-  DEPENDENCIES: "liquibase-bigquery" # Comma separated list of dependencies to release the extensions list
-  EXTENSIONS: "liquibase-commercial-bigquery,liquibase-checks" # Comma separated list of extensions to release to GPM
-
 jobs:
   setup:
     name: Setup
@@ -75,8 +71,6 @@ jobs:
       branch: ${{ inputs.branch }}
       runId: ${{ inputs.runId }}
       uber_jar_runId: ${{ steps.get_run_id.outputs.run_id }}
-      dependencies: ${{ env.DEPENDENCIES }}
-      extensions: ${{ env.EXTENSIONS }}
     steps:
       - run: |
           echo "Creating version ${{ inputs.version }} from ${{ inputs.branch }} with artifacts from build ${{ inputs.runId }} "
@@ -88,76 +82,11 @@ jobs:
   #     branch: ${{ needs.setup.outputs.branch }}
   #   secrets: inherit
 
-  build-azure-uber-jar:
-    needs: [setup]
-    # needs: [setup, owasp-scanner]
-    uses: ./.github/workflows/build-azure-uber-jar.yml
-    with:
-      branch: ${{ needs.setup.outputs.branch }}
-      liquibase-version: ${{ needs.setup.outputs.version }}
-    secrets: inherit
-
-  build-extension-jars:
-    needs: [setup]
-    # needs: [setup, owasp-scanner]
-    uses: ./.github/workflows/build-extension-jars.yml
-    with:
-      liquibase-version: ${{ needs.setup.outputs.version }}
-      dependencies: ${{ needs.setup.outputs.dependencies }}
-      extensions: ${{ needs.setup.outputs.extensions }}
-      branch: ${{ needs.setup.outputs.branch }}
-    secrets: inherit
-
-  get-liquibase-checks-version:
-    needs: [setup]
-    if: ${{ contains(needs.setup.outputs.extensions, 'liquibase-checks') }}
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.extract-version.outputs.version }}
-    steps:
-
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
-          aws-region: us-east-1
-
-      - name: Get secrets from vault
-        id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
-        with:
-          secret-ids: |
-            ,/vault/liquibase
-          parse-json-secrets: true
-      
-      - name: Get GitHub App token
-        id: get-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: liquibase-checks
-          permission-contents: write
-          
-      - uses: actions/checkout@v4
-        with:
-          repository: liquibase/liquibase-checks
-          token: ${{ steps.get-token.outputs.token }}
-
-      - id: extract-version
-        name: Extract version from pom.xml
-        shell: bash
-        run: |
-          VERSION=$(grep '<version>' pom.xml | head -n 1 | sed 's/.*<version>\(.*\)-SNAPSHOT<\/version>.*/\1/')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
   reversion:
-    needs: [setup,build-azure-uber-jar,build-extension-jars,get-liquibase-checks-version]
+    needs: [setup]
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
     steps:
-
       - name: Configure AWS credentials for vault access
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -171,26 +100,6 @@ jobs:
           secret-ids: |
             ,/vault/liquibase
           parse-json-secrets: true
-
-      - name: Get GitHub App token
-        id: get-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: liquibase-pro
-          permission-contents: write
-
-      - uses: actions/checkout@v4
-
-      - uses: actions/checkout@v4
-        name: Checkout liquibase-pro
-        with:
-          repository: liquibase/liquibase-pro
-          ref: "${{ needs.setup.outputs.branch }}"
-          path: download/repo/liquibase-pro
-          token: ${{ steps.get-token.outputs.token }}
 
       - name: Download liquibase-artifacts
         uses: dawidd6/action-download-artifact@v9
@@ -206,11 +115,25 @@ jobs:
           run_id=${{ github.run_id }}
           echo "uber_jar_runId=${run_id}" >> $GITHUB_OUTPUT
 
-      - name: Download liquibase-pro-azure-artifacts
-        uses: actions/download-artifact@v4
+      - name: Convert escaped newlines and set GPG key
+        run: |
+          {
+            echo "GPG_KEY_CONTENT<<GPG_EOF"
+            printf '%b' "${{ env.GPG_SECRET }}"
+            echo
+            echo "GPG_EOF"
+          } >> $GITHUB_ENV
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
         with:
-          name: liquibase-pro-azure-artifacts
-          path: liquibase-pro/liquibase-azure-deps
+          java-version: "8"
+          distribution: "temurin"
+          gpg-private-key: ${{ env.GPG_KEY_CONTENT }}
+          gpg-passphrase: GPG_PASSPHRASE
+        env:
+          GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
+
 
       - name: maven-settings-xml-action
         uses: whelk-io/maven-settings-xml-action@v22
@@ -227,17 +150,6 @@ jobs:
                   "enabled": "true",
                   "updatePolicy": "always"
                 }
-              },
-              {
-                "id": "liquibase-pro",
-                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
-                "releases": {
-                  "enabled": "true"
-                },
-                "snapshots": {
-                  "enabled": "true",
-                  "updatePolicy": "always"
-                }
               }
             ]
           servers: |
@@ -246,43 +158,8 @@ jobs:
                 "id": "liquibase",
                 "username": "liquibot",
                 "password": "${{ env.LIQUIBOT_PAT_GPM_ACCESS }}"
-              },
-              {
-                "id": "liquibase-pro",
-                "username": "liquibot",
-                "password": "${{ env.LIQUIBOT_PAT_GPM_ACCESS }}"
               }
             ]
-
-      - name: Get extensions artifacts
-        run: |
-          IFS=',' read -ra ADDR <<< "${{ needs.setup.outputs.extensions }}"
-          for extension in "${ADDR[@]}"; do
-            if [ "$extension" != "liquibase-checks" ]; then
-              mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=$extension -Dversion=${{ needs.setup.outputs.version }} -Dtransitive=false || echo "Failed to download $extension artifact"
-            else
-              mvn dependency:get -DgroupId=org.liquibase.ext -DartifactId=$extension -Dversion=${{ needs.get-liquibase-checks-version.outputs.version }} -Dtransitive=false || echo "Failed to download $extension artifact"
-            fi
-          done
-
-      - name: Convert escaped newlines and set GPG key
-        run: |
-          {
-            echo "GPG_KEY_CONTENT<<GPG_EOF"
-            printf '%b' "${{ env.GPG_SECRET }}"
-            echo
-            echo "GPG_EOF"
-          } >> $GITHUB_ENV
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: "8"
-          distribution: "adopt"
-          gpg-private-key: ${{ env.GPG_KEY_CONTENT }}
-          gpg-passphrase: GPG_PASSPHRASE
-        env:
-          GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
 
       - name: Re-version Artifacts
         env:
@@ -304,48 +181,13 @@ jobs:
           # Execute the sign-artifacts.sh script with specific arguments
           $PWD/.github/util/sign-artifacts.sh download/liquibase-artifacts "${{ needs.setup.outputs.version }}" "${{ needs.setup.outputs.branch }}"
 
-          ## Sign Files
-          ## liquibase-azure-deps and liquibase extensions are already on its correct version. Check reusable workflow: build-azure-uber-jar.yml and build-extension-jars.yml
-          mv liquibase-pro/liquibase-azure-deps/* re-version/out
-
-          # Modify the zip file
-          unzip re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip -d re-version/out/liquibase-${{ needs.setup.outputs.version }}
-          mkdir -p re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions
-          rm -rf re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip
-          IFS=',' read -ra EXT <<< "${{ needs.setup.outputs.extensions }}"
-          for i in "${EXT[@]}"; do
-            if [ "$i" != "liquibase-checks" ]; then
-              cp ~/.m2/repository/org/liquibase/ext/$i/${{ needs.setup.outputs.version }}/$i-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$i.jar || echo "Failed to move $i artifact"
-            else
-              cp ~/.m2/repository/org/liquibase/ext/$i/${{ needs.get-liquibase-checks-version.outputs.version }}/$i-${{ needs.get-liquibase-checks-version.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$i.jar || echo "Failed to move $i artifact"
-            fi
-          done
-          (cd re-version/out/liquibase-${{ needs.setup.outputs.version }} && zip -r ../liquibase-${{ needs.setup.outputs.version }}.zip . && cd .. && rm -rf liquibase-${{ needs.setup.outputs.version }})
-
-          # Modify the tar.gz file
-          mkdir -p re-version/out/liquibase-${{ needs.setup.outputs.version }}
-          tar -xzvf re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz -C re-version/out/liquibase-${{ needs.setup.outputs.version }}
-          rm -rf re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz
-          mkdir -p re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions
-          for I in "${EXT[@]}"; do
-            if [ "$I" != "liquibase-checks" ]; then
-              cp ~/.m2/repository/org/liquibase/ext/$I/${{ needs.setup.outputs.version }}/$I-${{ needs.setup.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$I.jar || echo "Failed to move $I artifact"
-            else
-              cp ~/.m2/repository/org/liquibase/ext/$I/${{ needs.get-liquibase-checks-version.outputs.version }}/$I-${{ needs.get-liquibase-checks-version.outputs.version }}.jar re-version/out/liquibase-${{ needs.setup.outputs.version }}/internal/extensions/$I.jar || echo "Failed to move $I artifact"
-            fi
-          done
-          (cd re-version/out/liquibase-${{ needs.setup.outputs.version }} && tar -czvf ../liquibase-${{ needs.setup.outputs.version }}.tar.gz * && cd .. && rm -rf liquibase-${{ needs.setup.outputs.version }})
-
           $PWD/.github/util/sign-artifacts.sh re-version/out
 
           # Move files to a specific directory
-          mkdir re-version/final re-version/s3-minimal
+          mkdir re-version/final
           mv re-version/out/liquibase-core-${{ needs.setup.outputs.version }}.jar re-version/final
-          mv re-version/out/liquibase-commercial-${{ needs.setup.outputs.version }}.jar re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.tar.gz re-version/final
           mv re-version/out/liquibase-${{ needs.setup.outputs.version }}.zip re-version/final
-          mv re-version/out/liquibase-minimal-${{ needs.setup.outputs.version }}* re-version/s3-minimal
-          mv re-version/out/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar re-version/final/liquibase-azure-deps-${{ needs.setup.outputs.version }}.jar
           (cd re-version/out/ && zip liquibase-additional-${{ needs.setup.outputs.version }}.zip *)
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
 
@@ -355,19 +197,11 @@ jobs:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
 
-      - name: Cache Minimal Completed Artifacts
-        uses: actions/cache@v4.2.3
-        with:
-          key: minimal-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
-          path: re-version/s3-minimal
-
       - name: Set repository tags
         if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
         run: |
           git tag -f v${{ needs.setup.outputs.version }}
           git push -f origin v${{ needs.setup.outputs.version }}
-          (cd download/repo/liquibase-pro && git tag -f v${{ needs.setup.outputs.version }})
-          (cd download/repo/liquibase-pro && git push -f origin v${{ needs.setup.outputs.version }})
 
   build-installers:
     needs: [setup, reversion]
@@ -414,7 +248,7 @@ jobs:
           java-version: |
             17
             8
-          distribution: "adopt"
+          distribution: "temurin"
           gpg-private-key: ${{ env.GPG_KEY_CONTENT }}
           gpg-passphrase: GPG_PASSPHRASE
         env:
@@ -566,39 +400,3 @@ jobs:
           name: liquibase-installers-${{ needs.setup.outputs.version }}
           path: re-version/final/*
 
-  deploy_minimal_artifact_s3:
-    if: ${{ inputs.dry_run == false }}
-    name: Deploy minimal artifacts to lbio s3 bucket
-    needs: [setup, reversion]
-    runs-on: ubuntu-latest
-    steps:
-
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
-          aws-region: us-east-1
-
-      - name: Get secrets from vault
-        id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
-        with:
-          secret-ids: |
-            ,/vault/liquibase
-          parse-json-secrets: true
-          
-      - name: Restore Minimal Completed Artifacts
-        uses: actions/cache@v4.2.3
-        with:
-          key: minimal-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
-          path: re-version/s3-minimal
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ env.AWS_IO_DEV_GITHUB_OIDC_ROLE_ARN_LIQUIBASE }}
-          aws-region: us-east-2
-
-      - name: Publish minimal assets to s3 bucket
-        run: |
-          aws s3 sync "re-version/s3-minimal" s3://${{ env.LBIO_DOWNLOADS_S3_BUCKET }}/downloads/liquibase-minimal/v${{ needs.setup.outputs.version }}/ --only-show-errors
