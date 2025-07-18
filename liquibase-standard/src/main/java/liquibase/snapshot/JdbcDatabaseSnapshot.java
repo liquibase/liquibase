@@ -225,7 +225,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                         //mysql 8.0.13 introduced support for indexes on `lower(first_name)` which comes back in an "expression" column
                         String filterConditionValue = "NULL";
-                        if (database.getDatabaseMajorVersion() > 8 || (database.getDatabaseMajorVersion() == 8 && ((MySQLDatabase) database).getDatabasePatchVersion() >= 13)) {
+                        if (database.getDatabaseMajorVersion() > 8 ||
+                            (database.getDatabaseMajorVersion() == 8 && ((MySQLDatabase) database).getDatabasePatchVersion() >= 13) ||
+                            (database.getDatabaseMajorVersion() == 8 && database.getDatabaseMinorVersion() > 0)) {
                             filterConditionValue = "EXPRESSION";
                         }
 
