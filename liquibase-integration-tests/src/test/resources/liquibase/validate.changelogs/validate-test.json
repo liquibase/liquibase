@@ -1,0 +1,29 @@
+{
+  "databaseChangeLog": [
+    {
+      "changeSet": {
+        "id": "value",
+        "author": "value",
+        "context": "",
+        "labels": "",
+        "runWith": "",
+        "logicalFilePath": "",
+        "dbms": "",
+        "changes": [
+          {
+            "changeTypeName": {
+              "changeTypeAttribute": "value",
+              "nestedElementGroup": [
+                {
+                  "nestedElementName": {
+                    "nestedElementAttribute": "value"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
