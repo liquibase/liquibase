@@ -1,0 +1,33 @@
+name: 'Get Stack ID'
+description: 'Get stack ID from deploy-ephemeral-cloud-infra job output without triggering secret masking'
+inputs:
+  stack-id:
+    description: 'Stack ID from deploy-ephemeral-cloud-infra job'
+    required: true
+  run-id:
+    description: 'GitHub run ID for generating stack name'
+    required: false
+    default: ${{ github.run_id }}
+outputs:
+  stack-id:
+    description: 'Processed stack ID'
+    value: ${{ steps.process-stack-id.outputs.stack-id }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Process stack ID
+      id: process-stack-id
+      shell: bash
+      run: |
+        # Always construct the stack ID using the run ID to avoid secret masking issues
+        # The upstream workflow skips the stack_id output entirely due to secret detection
+        INPUT_STACK_ID="${{ inputs.stack-id }}"
+        
+        # Always use the reconstructed stack ID since the upstream output is unreliable
+        # Pattern: liquibase-test-automation-ephemeral-{run_id}
+        RECONSTRUCTED_ID="liquibase-test-automation-ephemeral-${{ inputs.run-id }}"
+        echo "stack-id=$RECONSTRUCTED_ID" >> $GITHUB_OUTPUT
+        echo "Using reconstructed stack ID: $RECONSTRUCTED_ID"
+        
+        # Log the original input for debugging
+        echo "Original input was: '$INPUT_STACK_ID'"
