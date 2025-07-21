@@ -176,7 +176,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: "11"
-          distribution: "adopt"
+          distribution: "temurin"
           server-id: sonatype-nexus-staging
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
@@ -196,13 +196,10 @@ jobs:
           unzip -j liquibase-additional-*.zip
 
           ##extracts and sign poms, generate checksums for all artifacts
-          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-commercial'; do
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
             unzip -j $i-${version}.jar META-INF/maven/org.liquibase/$i/pom.xml
             sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
             mv pom.xml $i-${version}.pom
-            if test 'liquibase-commercial' == $i; then
-              sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private<\/connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" $i-${version}.pom   ## scm info not in the pom
-            fi
 
             # Sign POM file
             gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i-${version}.pom
@@ -224,7 +221,7 @@ jobs:
           mkdir -p "bundle/org/liquibase"
           
           # Copy all artifacts to proper Maven repository layout
-          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-commercial'; do
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
             mkdir -p "bundle/org/liquibase/$i/${version}"
             cp $i-${version}* "bundle/org/liquibase/$i/${version}/"
           done
@@ -357,39 +354,6 @@ jobs:
           path: liquibase-core-repo
           repository: "liquibase/liquibase"
 
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
-          aws-region: us-east-1
-
-      - name: Get secrets from vault
-        id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
-        with:
-          secret-ids: |
-            ,/vault/liquibase
-          parse-json-secrets: true
-
-      - name: Get GitHub App token
-        id: get-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: liquibase-pro
-          permission-contents: read
-          
-      - name: Download liquibase-pro xsd
-        uses: actions/checkout@v4
-        with:
-          ref: "${{ needs.setup.outputs.ref_branch }}"
-          token: ${{ steps.get-token.outputs.token }}
-          # Relative path under $GITHUB_WORKSPACE to place the repository
-          path: liquibase-pro-repo
-          repository: "liquibase/liquibase-pro"
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -399,9 +363,7 @@ jobs:
       - name: Upload to s3
         # aws s3 sync syncs directories and S3 prefixes.
         run: |
-          aws s3 sync liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/ s3://liquibaseorg-origin/xml/ns/pro/ --content-type application/octet-stream --only-show-errors
           aws s3 sync liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ s3://liquibaseorg-origin/xml/ns/dbchangelog/ --content-type application/octet-stream --only-show-errors
-          aws s3 sync liquibase-pro-repo/pro/src/main/resources/schemas/ s3://liquibaseorg-origin/json/schema/ --content-type application/octet-stream --only-show-errors
 
       - name: Index.htm file upload
         # get the major.minor xsd version. grab the index.htm from s3, add the new verison of xsd and sync with the s3 again
@@ -427,30 +389,6 @@ jobs:
           forceUpload: true
           localDir: "liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/"
           remoteDir: "/xml/ns/dbchangelog/"
-
-      - name: Liquibase PRO xsds SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.4
-        with:
-          host: ${{ env.WPENGINE_SFTP_HOST }}
-          port: ${{ env.WPENGINE_SFTP_PORT }}
-          username: ${{ env.WPENGINE_SFTP_USER }}
-          password: ${{ env.WPENGINE_SFTP_PASSWORD }}
-          compress: false
-          forceUpload: true
-          localDir: "liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/"
-          remoteDir: "/xml/ns/pro/"
-
-      - name: Liquibase flow-file schema SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.4
-        with:
-          host: ${{ env.WPENGINE_SFTP_HOST }}
-          port: ${{ env.WPENGINE_SFTP_PORT }}
-          username: ${{ env.WPENGINE_SFTP_USER }}
-          password: ${{ env.WPENGINE_SFTP_PASSWORD }}
-          compress: false
-          forceUpload: true
-          localDir: "liquibase-pro-repo/pro/src/main/resources/schemas/"
-          remoteDir: "/json/schema/"
 
       - name: Liquibase index.htm SFTP upload
         uses: wangyucode/sftp-upload-action@v2.0.4
@@ -541,55 +479,6 @@ jobs:
           owner: ${{ github.repository_owner }}
           permission-contents: write
           permission-actions: write
-
-      - name: Release liquibase/liquibase-infrastructure v${{ needs.setup.outputs.version }}
-        uses: the-actions-org/workflow-dispatch@v4
-        id: docker_dispatch
-        with:
-          workflow: build-liquibase-minimal.yml
-          token: ${{ steps.get-token.outputs.token }}
-          inputs: '{ "liquibaseVersion": "${{ needs.setup.outputs.version }}" }'
-          ref: master
-          repo: liquibase/liquibase-infrastructure
-          wait-for-completion: true
-          workflow-logs: json-output
-
-  generate-PRO-tag:
-    if: ${{ inputs.dry_run == false }}
-    name: Generate PRO tags based on OSS release
-    needs: [setup]
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
-          aws-region: us-east-1
-
-      - name: Get secrets from vault
-        id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
-        with:
-          secret-ids: |
-            ,/vault/liquibase
-          parse-json-secrets: true
-
-      - name: Get GitHub App token
-        id: get-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          permission-contents: write
-          permission-actions: write
-
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ steps.get-token.outputs.token }}
-          repository: liquibase/liquibase-pro
-          event-type: oss-released-tag
 
   package:
     uses: liquibase/build-logic/.github/workflows/package.yml@main
@@ -716,7 +605,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: "11"
-          distribution: "adopt"
+          distribution: "temurin"
           server-id: dry-run-sonatype-nexus-staging
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
@@ -736,13 +625,10 @@ jobs:
           unzip -j liquibase-additional-*.zip
 
           ##extracts and sign poms, generate checksums for all artifacts
-          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-commercial'; do
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
             unzip -j $i-${version}.jar META-INF/maven/org.liquibase/$i/pom.xml
             sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
             mv pom.xml $i-${version}.pom
-            if test 'liquibase-commercial' == $i; then
-              sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private<\/connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" $i-${version}.pom   ## scm info not in the pom
-            fi
 
             # Sign POM file
             gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i-${version}.pom
@@ -764,7 +650,7 @@ jobs:
           mkdir -p "bundle/org/liquibase"
           
           # Copy all artifacts to proper Maven repository layout
-          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-commercial'; do
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
             mkdir -p "bundle/org/liquibase/$i/${version}"
             cp $i-${version}* "bundle/org/liquibase/$i/${version}/"
           done
@@ -833,7 +719,7 @@ jobs:
           secret-ids: |
             ,/vault/liquibase
           parse-json-secrets: true
-          
+
       - name: Configure AWS credentials for prod account access
         uses: aws-actions/configure-aws-credentials@v4
         with:
