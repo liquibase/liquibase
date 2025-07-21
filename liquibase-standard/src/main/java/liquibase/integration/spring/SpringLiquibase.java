@@ -2,6 +2,7 @@ package liquibase.integration.spring;
 
 import liquibase.*;
 import liquibase.analytics.configuration.AnalyticsArgs;
+import liquibase.command.CommandScope;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -19,6 +20,7 @@ import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.ui.UIServiceEnum;
 import liquibase.util.StringUtil;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.BeanNameAware;
@@ -309,12 +311,33 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         }
     }
 
+    @Data
+    public class SpringLiquibasePropertiesForFlow {
+        public final String changelogFile;
+        public final Database database;
+    }
+
     protected void performUpdate(Liquibase liquibase) throws LiquibaseException {
         if (isClearCheckSums()) {
             liquibase.clearCheckSums();
         }
 
-        if (isTestRollbackOnUpdate()) {
+        if (getLicenseKey() != null) {
+            try {
+                Map<String, Object> scopeVars = new HashMap<>();
+//                scopeVars.put(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG.getName(), getChangeLog());
+//                scopeVars.put(DbUrlConnectionArgumentsCommandStep.URL_ARG.getName(), liquibase.getDatabase().getConnection().getURL());
+                scopeVars.put("springliquibase", new SpringLiquibasePropertiesForFlow(getChangeLog(), liquibase.getDatabase()));
+                scopeVars.put(Scope.Attr.resourceAccessor.name(), createResourceOpener());
+                Scope.child(scopeVars, ()-> {
+                    CommandScope flowCommandScope = new CommandScope("flow");
+                    flowCommandScope.addArgumentValue("flowFile", "liquibase.flowfile.yaml");
+                    flowCommandScope.execute();
+                });
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else if (isTestRollbackOnUpdate()) {
             if (tag != null) {
                 liquibase.updateTestingRollback(tag, new Contexts(getContexts()), new LabelExpression(getLabelFilter()));
             } else {
