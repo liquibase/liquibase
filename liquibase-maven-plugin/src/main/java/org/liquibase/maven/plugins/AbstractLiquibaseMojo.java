@@ -8,7 +8,6 @@ import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.command.CommandScope;
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
-import liquibase.configuration.ConfiguredValueModifierFactory;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.database.Database;
@@ -19,11 +18,6 @@ import liquibase.integration.IntegrationDetails;
 import liquibase.integration.commandline.ChangeExecListenerUtils;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
-import liquibase.license.LicenseTrackingArgs;
-import liquibase.logging.LogFormat;
-import liquibase.logging.LogService;
-import liquibase.logging.core.JavaLogService;
-import liquibase.logging.core.LogServiceFactory;
 import liquibase.resource.DirectoryResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.SearchPathResourceAccessor;
@@ -53,10 +47,8 @@ import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Handler;
 
 import static java.util.ResourceBundle.getBundle;
-import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
 import static liquibase.util.ObjectUtil.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
@@ -106,10 +98,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     @PropertyElement
     protected String url;
 
-    public void setUrl(String url) throws Exception {
-        this.url = modifyValue(url);
-    }
-
     /**
      * The Maven Wagon manager to use when obtaining server authentication details.
      *
@@ -126,10 +114,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     @PropertyElement
     protected String username;
 
-    public void setUsername(String username) throws Exception {
-        this.username = modifyValue(username);
-    }
-
     /**
      * Specifies the database password for database connection.
      *
@@ -137,10 +121,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement
     protected String password;
-
-    public void setPassword(String password) throws Exception {
-        this.password = modifyValue(password);
-    }
 
     /**
      * Use an empty string as the password for the database connection. This should not be
@@ -441,24 +421,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private File driverPropertiesFile;
 
     /**
-     * Specifies your Liquibase Pro license key. This has been deprecated in favor of using
-     * "liquibase.liquibaseLicenseKey", but this property will continue to be operational.
-     *
-     * @parameter property="liquibase.liquibaseProLicenseKey"
-     */
-    @PropertyElement
-    @Deprecated
-    private String liquibaseProLicenseKey;
-
-    /**
-     * Specifies your Liquibase license key.
-     *
-     * @parameter property="liquibase.licenseKey"
-     */
-    @PropertyElement
-    private String liquibaseLicenseKey;
-
-    /**
      * Specifies your psql path.
      *
      * @parameter property="liquibase.psql.path"
@@ -667,133 +629,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected String changeExecListenerPropertiesFile;
 
     /**
-     * Sets the format of log output to console or log files.
-     * Open Source users default to unstructured TXT logs to the console or output log files.
-     * Pro users have the option to set value as JSON or JSON_PRETTY to enable json-structured log files to the console or output log files.
-     *
-     * @parameter property="liquibase.logFormat"
-     */
-    @PropertyElement
-    protected String logFormat;
-
-    /**
-     * This property enables Liquibase Pro users to store a record of all database changing liquibase operations in a new table
-     * DATABASECHANGELOGHISTORY. This table includes records of rollback, dropalls, and repeated runOnChange type activity,
-     * which is not available in the standard DATABASECHANGELOG table.
-     *
-     * @parameter property="liquibase.dbclHistoryEnabled"
-     */
-    @PropertyElement(key = "liquibase.dbclHistory.enabled")
-    protected Boolean dbclHistoryEnabled;
-
-    /**
-     * This property enables Liquibase Pro users to store a record of all database changing liquibase operations in a new table
-     * DATABASECHANGELOGHISTORY. This table includes records of rollback, dropalls, and repeated runOnChange type activity,
-     * which is not available in the standard DATABASECHANGELOG table.
-     *
-     * @parameter property="liquibase.databaseChangelogHistoryEnabled"
-     */
-    @PropertyElement(key = "liquibase.databaseChangelogHistory.enabled")
-    protected Boolean databaseChangelogHistoryEnabled;
-
-    /**
-     * If true, executed SQL is captured in the history table
-     *
-     * @parameter property="liquibase.dbclHistoryCaptureSql"
-     */
-    @PropertyElement(key = "liquibase.dbclHistory.captureSql")
-    protected Boolean dbclHistoryCaptureSql;
-
-    /**
-     * If true, executed SQL is captured in the history table
-     *
-     * @parameter property="liquibase.databaseChangelogHistoryCaptureSql"
-     */
-    @PropertyElement(key = "liquibase.databaseChangelogHistory.captureSql")
-    protected Boolean databaseChangelogHistoryCaptureSql;
-
-    /**
-     * If true, extensions are captured in the history table
-     *
-     * @parameter property="liquibase.dbclHistoryCaptureExtensions"
-     */
-    @PropertyElement(key = "liquibase.dbclHistory.captureExtensions")
-    protected Boolean dbclHistoryCaptureExtensions;
-
-    /**
-     * If true, extensions are captured in the history table
-     *
-     * @parameter property="liquibase.databaseChangelogHistoryCaptureExtensions"
-     */
-    @PropertyElement(key = "liquibase.databaseChangelogHistory.captureExtensions")
-    protected Boolean databaseChangelogHistoryCaptureExtensions;
-
-    /**
      * Enable or disable sending product usage data and analytics to Liquibase.
      *
      * @parameter property="liquibase.analyticsEnabled"
      */
     @PropertyElement(key = "liquibase.analytics.enabled")
     protected Boolean analyticsEnabled;
-
-    /**
-     * Enable or disable sending license usage data.
-     *
-     * @parameter property="liquibase.licenseUtilityEnabled"
-     */
-    @PropertyElement(key = "liquibase.licenseUtility.enabled")
-    protected Boolean licenseUtilityEnabled;
-
-    /**
-     * @parameter property="liquibase.licenseUtilityUrl"
-     */
-    @PropertyElement(key = "liquibase.licenseUtility.url")
-    protected String licenseUtilityUrl;
-
-    /**
-     * Specifies an identifier (e.g., team name, pipeline ID, or environment) to track and analyze Liquibase license
-     * usage. If not provided, the hostname and user is used for identification.
-     *
-     * @parameter property="liquibase.licenseUtilityTrackingId"
-     */
-    @PropertyElement(key = "liquibase.licenseUtility.trackingId")
-    protected String licenseUtilityTrackingId;
-
-    /**
-     * Specifies the vault URL
-     *
-     * @parameter property="liquibase.vault.addr"
-     */
-    @PropertyElement
-    protected String vaultAddr;
-
-    public void setVaultAddr(String vaultAddr) {
-        this.vaultAddr = vaultAddr;
-    }
-
-    /**
-     * Specifies the vault token
-     *
-     * @parameter property="liquibase.vault.token"
-     */
-    @PropertyElement
-    protected String vaultToken;
-
-    public void setVaultToken(String vaultToken) {
-        this.vaultToken = vaultToken;
-    }
-
-    /**
-     * Specifies the vault namespace
-     *
-     * @parameter property="liquibase.vault.namespace"
-     */
-    @PropertyElement
-    protected String vaultNamespace;
-
-    public void setVaultNamespace(String vaultNamespace) {
-        this.vaultNamespace = vaultNamespace;
-    }
 
     /**
      * When set to true, this global property prevents DBCL and DBCLH sql from being present in console and logs during *-sql commands, such as update-sql, rollback-sql, etc.
@@ -807,54 +648,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected DefaultChangeExecListener defaultChangeExecListener;
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
-
-    /**
-     * Get the specified license key. This first checks liquibaseLicenseKey and if no key is found, then returns
-     * liquibaseProLicenseKey.
-     */
-    protected String getLicenseKey() {
-        if (StringUtil.isNotEmpty(liquibaseLicenseKey)) {
-            return liquibaseLicenseKey;
-        } else {
-            return liquibaseProLicenseKey;
-        }
-    }
-
-    /**
-     * Returns the first non-null Boolean value from the given two Boolean values.
-     * If the first value is not null, returns it. Otherwise, returns the second value.
-     * If both values are null, returns null.
-     *
-     * @param value The first Boolean value to check.
-     * @param altValue The second Boolean value to check.
-     * @return The first non-null Boolean value or null if both values are null.
-     */
-    private Boolean getBooleanValue(Boolean value, Boolean altValue) {
-        return value != null ? value : altValue;
-    }
-
-    /**
-     * Checks if the database changelog history is enabled.
-     */
-    private Boolean isDbclHistoryEnabled() {
-        return getBooleanValue(dbclHistoryEnabled, databaseChangelogHistoryEnabled);
-    }
-
-    /**
-     * Checks if SQL capture is enabled for database changelog history.
-     */
-    private Boolean isDbclHistoryCaptureSql() {
-        return getBooleanValue(dbclHistoryCaptureSql, databaseChangelogHistoryCaptureSql);
-    }
-
-    /**
-     * Checks if extension capture is enabled for database changelog history.
-     */
-    private Boolean isDbclHistoryCaptureExtensions() {
-        return getBooleanValue(dbclHistoryCaptureExtensions, databaseChangelogHistoryCaptureExtensions);
-    }
-
-
     protected Writer getOutputWriter(final File outputFile) throws IOException {
         String encoding = this.outputFileEncoding;
 
@@ -867,41 +660,13 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     private Map<String, Object> setUpLogging() throws Exception {
-        // First determine whether the specified log format requires the use of the standard Scope logger.
-        boolean useScopeLogger = false;
-        if (this.logFormat != null) {
-            try {
-                useScopeLogger = LogFormat.valueOf(this.logFormat.toUpperCase()).isUseScopeLoggerInMaven();
-            } catch (Exception ignored) {
-
-            }
-        }
 
         Map<String, Object> scopeAttrs = new HashMap<>();
-        //
         // Add this to the Scope in order to trim down the exception stack trace
-        //
         scopeAttrs.put(CommandScope.SUPPRESS_SHOWING_EXCEPTION_IN_LOG, new AtomicBoolean());
-        if (!useScopeLogger) {
-            // If the specified log format does not require the use of the standard Liquibase logger, just return the
-            // Maven log service as is traditionally done.
-            scopeAttrs.put(Scope.Attr.logService.name(), new MavenLogService(getLog()));
-            scopeAttrs.put(Scope.Attr.ui.name(), new MavenUi(getLog()));
-            return scopeAttrs;
-        } else {
-            // The log format requires the use of the standard Liquibase logger, so set it up.
-            scopeAttrs.put(LiquibaseCommandLineConfiguration.LOG_FORMAT.getKey(), this.logFormat);
-            scopeAttrs.put(REGISTERED_VALUE_PROVIDERS_KEY, true);
-            // Get a new log service after registering the value providers, since the log service might need to load parameters using newly registered value providers.
-            LogService newLogService = Scope.child(scopeAttrs, () -> Scope.getCurrentScope().getSingleton(LogServiceFactory.class).getDefaultLogService());
-            // Set the formatter on all the handlers.
-            java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
-            for (Handler handler : rootLogger.getHandlers()) {
-                JavaLogService.setFormatterOnHandler(newLogService, handler);
-            }
-            scopeAttrs.put(Scope.Attr.logService.name(), newLogService);
-            return scopeAttrs;
-        }
+        scopeAttrs.put(Scope.Attr.logService.name(), new MavenLogService(getLog()));
+        scopeAttrs.put(Scope.Attr.ui.name(), new MavenUi(getLog()));
+        return scopeAttrs;
     }
 
     @Override
@@ -951,16 +716,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 if (analyticsEnabled != null) {
                     scopeValues.put(AnalyticsArgs.ENABLED.getKey(), analyticsEnabled);
                 }
-                if (licenseUtilityEnabled != null) {
-                    scopeValues.put(LicenseTrackingArgs.ENABLED.getKey(), licenseUtilityEnabled);
-                }
-                if (licenseUtilityUrl != null) {
-                    scopeValues.put(LicenseTrackingArgs.URL.getKey(), licenseUtilityUrl);
-                }
-                if (licenseUtilityTrackingId != null) {
-                    scopeValues.put(LicenseTrackingArgs.TRACKING_ID.getKey(), licenseUtilityTrackingId);
-                }
-                handleVaultProperties(scopeValues);
 
                 IntegrationDetails integrationDetails = new IntegrationDetails();
                 integrationDetails.setName("maven");
@@ -998,7 +753,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 // Add properties to this top-level scope
                 //
                 scopeValues.put(Scope.Attr.integrationDetails.name(), integrationDetails);
-                scopeValues.put("liquibase.licenseKey", getLicenseKey());
                 String key = GlobalConfiguration.PRESERVE_SCHEMA_CASE.getKey();
                 scopeValues.put("liquibase.reports.enabled", reportsEnabled);
                 scopeValues.put(key, preserveSchemaCase);
@@ -1020,14 +774,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     Database database = null;
                     try {
                         if (databaseConnectionRequired()) {
-                            //
-                            // Calling the setters again will allow the code to utilize any secret
-                            // manager settings which weren't available when the url/username/password
-                            // values were loaded the first time
-                            //
-                            setUrl(this.url);
-                            setUsername(this.username);
-                            setPassword(this.password);
                             String dbPassword = (emptyPassword || (password == null)) ? "" : password;
                             String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile.getAbsolutePath();
                             database = CommandLineUtils.createDatabaseObject(mavenClassLoader,
@@ -1094,9 +840,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                         //
                         Map<String, Object> innerScopeValues = new HashMap<>();
                         innerScopeValues.put(key, preserveSchemaCase);
-                        innerScopeValues.put("liquibase.dbclhistory.enabled", isDbclHistoryEnabled());
-                        innerScopeValues.put("liquibase.dbclhistory.captureSql", isDbclHistoryCaptureSql());
-                        innerScopeValues.put("liquibase.dbclhistory.captureExtensions", isDbclHistoryCaptureExtensions());
                         innerScopeValues.put(LiquibaseCommandLineConfiguration.SUPPRESS_LIQUIBASE_SQL.getKey(), suppressLiquibaseSql);
                         Scope.child(innerScopeValues, () -> performLiquibaseTask(liquibase));
                     } catch (LiquibaseException e) {
@@ -1154,18 +897,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             getLog().warn("Failed to obtain values for configuration properties", e);
         }
         return configurationProperties;
-    }
-
-    private void handleVaultProperties(Map<String, Object> scopeValues) {
-        if (StringUtil.isNotEmpty(this.vaultAddr)) {
-            scopeValues.put("liquibase.vault.addr", this.vaultAddr);
-        }
-        if (StringUtil.isNotEmpty(this.vaultToken)) {
-            scopeValues.put("liquibase.vault.token", this.vaultToken);
-        }
-        if (StringUtil.isNotEmpty(this.vaultNamespace)) {
-            scopeValues.put("liquibase.vault.namespace", this.vaultNamespace);
-        }
     }
 
     protected Field getField(Class clazz, String name) throws NoSuchFieldException {
@@ -1469,7 +1200,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     private void setFieldValue(Field field, String value) throws IllegalAccessException {
-        value = Scope.getCurrentScope().getSingleton(ConfiguredValueModifierFactory.class).override(value);
         if (field.getType().equals(Boolean.class) || field.getType().equals(boolean.class)) {
             field.set(this, Boolean.valueOf(value));
         } else if (field.getType().isEnum()) {
@@ -1555,12 +1285,4 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         return fileOut;
     }
 
-    /**
-     * Calls the {@link ConfiguredValueModifierFactory} to expand the provided value.
-     * @return the expanded value, or the original value if expansion is not needed
-     * @throws Exception if expansion fails
-     */
-    private String modifyValue(String value) throws Exception {
-        return Scope.child(Collections.singletonMap("liquibase.licenseKey", getLicenseKey()), () -> Scope.getCurrentScope().getSingleton(ConfiguredValueModifierFactory.class).override(value));
-    }
 }
