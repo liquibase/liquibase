@@ -1,0 +1,10 @@
+liquibase.change.core.CreateWarehouseChange
+liquibase.change.core.DropWarehouseChange
+liquibase.change.core.AlterWarehouseChange
+liquibase.change.core.CreateDatabaseChange
+liquibase.change.core.DropDatabaseChange
+liquibase.change.core.AlterDatabaseChange
+liquibase.change.core.CreateSchemaChange
+liquibase.change.core.DropSchemaChange
+liquibase.change.core.AlterSchemaChange
+liquibase.change.core.CreateTableSnowflakeChange

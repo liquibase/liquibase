@@ -1,3 +1,4 @@
 liquibase.snapshot.jvm.SchemaSnapshotGeneratorSnowflake
 liquibase.snapshot.jvm.SequenceSnapshotGeneratorSnowflake
 liquibase.snapshot.jvm.UniqueConstraintSnapshotGeneratorSnowflake
+liquibase.snapshot.jvm.WarehouseSnapshotGeneratorSnowflake

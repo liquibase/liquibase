@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.33.xsd">
+
+    <!-- Test Basic Sequence Creation -->
+    <changeSet author="liquibase-test" id="sequence-1">
+        <createSequence sequenceName="LB_TEST_SEQ_BASIC"
+                       startValue="1"
+                       incrementBy="1"/>
+        <rollback>
+            <dropSequence sequenceName="LB_TEST_SEQ_BASIC"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Sequence with Custom Properties -->
+    <changeSet author="liquibase-test" id="sequence-2">
+        <createSequence sequenceName="LB_TEST_SEQ_CUSTOM"
+                       startValue="100"
+                       incrementBy="5"
+                       minValue="1"
+                       maxValue="1000"/>
+        <rollback>
+            <dropSequence sequenceName="LB_TEST_SEQ_CUSTOM"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Cycling Sequence -->
+    <changeSet author="liquibase-test" id="sequence-3">
+        <createSequence sequenceName="LB_TEST_SEQ_CYCLE"
+                       startValue="1"
+                       incrementBy="1"
+                       minValue="1"
+                       maxValue="3"
+                       cycle="true"/>
+        <rollback>
+            <dropSequence sequenceName="LB_TEST_SEQ_CYCLE"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Sequence with ORDER option using SQL -->
+    <changeSet author="liquibase-test" id="sequence-4">
+        <sql>
+            CREATE SEQUENCE LB_TEST_SEQ_ORDERED 
+            START = 1 
+            INCREMENT = 1 
+            ORDER
+        </sql>
+        <rollback>
+            <sql>DROP SEQUENCE IF EXISTS LB_TEST_SEQ_ORDERED</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Sequence with NOORDER option using SQL -->
+    <changeSet author="liquibase-test" id="sequence-5">
+        <sql>
+            CREATE SEQUENCE LB_TEST_SEQ_NOORDER 
+            START = 1 
+            INCREMENT = 1 
+            NOORDER
+        </sql>
+        <rollback>
+            <sql>DROP SEQUENCE IF EXISTS LB_TEST_SEQ_NOORDER</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Sequence with Negative Increment -->
+    <changeSet author="liquibase-test" id="sequence-6">
+        <sql>
+            CREATE SEQUENCE LB_TEST_SEQ_NEGATIVE 
+            START = 100 
+            INCREMENT = -5 
+            MINVALUE = 50 
+            MAXVALUE = 100
+        </sql>
+        <rollback>
+            <sql>DROP SEQUENCE IF EXISTS LB_TEST_SEQ_NEGATIVE</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Sequence with Data Type Specification -->
+    <changeSet author="liquibase-test" id="sequence-7">
+        <sql>
+            CREATE SEQUENCE LB_TEST_SEQ_BIGINT 
+            START = 1000000000 
+            INCREMENT = 1000000
+        </sql>
+        <rollback>
+            <sql>DROP SEQUENCE IF EXISTS LB_TEST_SEQ_BIGINT</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Sequence with Comment -->
+    <changeSet author="liquibase-test" id="sequence-8">
+        <sql>
+            CREATE SEQUENCE LB_TEST_SEQ_COMMENT 
+            START = 1 
+            INCREMENT = 1 
+            COMMENT = 'Test sequence with comment'
+        </sql>
+        <rollback>
+            <sql>DROP SEQUENCE IF EXISTS LB_TEST_SEQ_COMMENT</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Sequence Alteration -->
+    <changeSet author="liquibase-test" id="sequence-9">
+        <sql>
+            ALTER SEQUENCE LB_TEST_SEQ_BASIC 
+            SET INCREMENT = 10
+        </sql>
+        <rollback>
+            <sql>
+                ALTER SEQUENCE LB_TEST_SEQ_BASIC 
+                SET INCREMENT = 1
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Multiple Sequences for Ordering -->
+    <changeSet author="liquibase-test" id="sequence-10">
+        <createSequence sequenceName="LB_TEST_SEQ_ORDER_1"
+                       startValue="1"
+                       incrementBy="1"/>
+        <createSequence sequenceName="LB_TEST_SEQ_ORDER_2"
+                       startValue="100"
+                       incrementBy="10"/>
+        <createSequence sequenceName="LB_TEST_SEQ_ORDER_3"
+                       startValue="1000"
+                       incrementBy="100"/>
+        <rollback>
+            <dropSequence sequenceName="LB_TEST_SEQ_ORDER_3"/>
+            <dropSequence sequenceName="LB_TEST_SEQ_ORDER_2"/>
+            <dropSequence sequenceName="LB_TEST_SEQ_ORDER_1"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Sequence Cleanup -->
+    <changeSet author="liquibase-test" id="sequence-cleanup">
+        <dropSequence sequenceName="LB_TEST_SEQ_BASIC"/>
+        <dropSequence sequenceName="LB_TEST_SEQ_CUSTOM"/>
+        <dropSequence sequenceName="LB_TEST_SEQ_CYCLE"/>
+        <dropSequence sequenceName="LB_TEST_SEQ_ORDERED"/>
+        <dropSequence sequenceName="LB_TEST_SEQ_NOORDER"/>
+        <sql>DROP SEQUENCE IF EXISTS LB_TEST_SEQ_NEGATIVE</sql>
+        <sql>DROP SEQUENCE IF EXISTS LB_TEST_SEQ_BIGINT</sql>
+        <sql>DROP SEQUENCE IF EXISTS LB_TEST_SEQ_COMMENT</sql>
+        <dropSequence sequenceName="LB_TEST_SEQ_ORDER_1"/>
+        <dropSequence sequenceName="LB_TEST_SEQ_ORDER_2"/>
+        <dropSequence sequenceName="LB_TEST_SEQ_ORDER_3"/>
+    </changeSet>
+
+</databaseChangeLog>

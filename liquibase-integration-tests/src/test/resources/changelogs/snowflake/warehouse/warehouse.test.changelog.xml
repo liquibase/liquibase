@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.33.xsd">
+
+    <!-- Test Warehouse Creation -->
+    <changeSet author="liquibase-test" id="warehouse-1">
+        <createWarehouse warehouseName="LB_TEST_WAREHOUSE_BASIC" 
+                        warehouseSize="XSMALL"
+                        autoSuspend="60"
+                        autoResume="true"
+                        comment="Basic test warehouse"/>
+        <rollback>
+            <dropWarehouse warehouseName="LB_TEST_WAREHOUSE_BASIC"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Warehouse Modification -->
+    <changeSet author="liquibase-test" id="warehouse-2">
+        <alterWarehouse warehouseName="LB_TEST_WAREHOUSE_BASIC"
+                       newWarehouseSize="SMALL"
+                       newAutoSuspend="120"
+                       newComment="Updated test warehouse"/>
+    </changeSet>
+
+    <!-- Test Multi-cluster Warehouse -->
+    <changeSet author="liquibase-test" id="warehouse-3">
+        <createWarehouse warehouseName="LB_TEST_WAREHOUSE_MULTICLUSTER"
+                        warehouseSize="MEDIUM"
+                        warehouseType="STANDARD"
+                        minClusterCount="1"
+                        maxClusterCount="3"
+                        autoSuspend="300"
+                        autoResume="true"
+                        scalingPolicy="STANDARD"
+                        comment="Multi-cluster test warehouse"/>
+        <rollback>
+            <dropWarehouse warehouseName="LB_TEST_WAREHOUSE_MULTICLUSTER"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Warehouse with Advanced Features -->
+    <changeSet author="liquibase-test" id="warehouse-4">
+        <createWarehouse warehouseName="LB_TEST_WAREHOUSE_ADVANCED"
+                        warehouseSize="LARGE"
+                        autoSuspend="180"
+                        autoResume="true"
+                        initiallySuspended="true"
+                        maxConcurrencyLevel="8"
+                        statementQueuedTimeoutInSeconds="3600"
+                        statementTimeoutInSeconds="172800"
+                        comment="Advanced features test warehouse"/>
+        <rollback>
+            <dropWarehouse warehouseName="LB_TEST_WAREHOUSE_ADVANCED"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Warehouse State Management -->
+    <changeSet author="liquibase-test" id="warehouse-5">
+        <alterWarehouse warehouseName="LB_TEST_WAREHOUSE_ADVANCED"
+                       suspend="true"/>
+    </changeSet>
+
+    <changeSet author="liquibase-test" id="warehouse-6">
+        <alterWarehouse warehouseName="LB_TEST_WAREHOUSE_ADVANCED"
+                       resume="true"/>
+    </changeSet>
+
+    <!-- Test Warehouse Cleanup -->
+    <changeSet author="liquibase-test" id="warehouse-cleanup">
+        <dropWarehouse warehouseName="LB_TEST_WAREHOUSE_BASIC"/>
+        <dropWarehouse warehouseName="LB_TEST_WAREHOUSE_MULTICLUSTER"/>
+        <dropWarehouse warehouseName="LB_TEST_WAREHOUSE_ADVANCED"/>
+    </changeSet>
+
+</databaseChangeLog>

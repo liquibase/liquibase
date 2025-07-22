@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://www.liquibase.org/xml/ns/snowflake"
+            xmlns="http://www.liquibase.org/xml/ns/snowflake"
+            elementFormDefault="qualified">
+
+
+    <!-- Warehouse Operations -->
+    <xsd:element name="createWarehouse">
+        <xsd:complexType>
+            <xsd:attribute name="warehouseName" type="xsd:string" use="required"/>
+            <xsd:attribute name="warehouseSize" type="warehouseSize"/>
+            <xsd:attribute name="warehouseType" type="warehouseType"/>
+            <xsd:attribute name="maxClusterCount" type="xsd:int"/>
+            <xsd:attribute name="minClusterCount" type="xsd:int"/>
+            <xsd:attribute name="scalingPolicy" type="scalingPolicy"/>
+            <xsd:attribute name="autoSuspend" type="xsd:int"/>
+            <xsd:attribute name="autoResume" type="xsd:boolean"/>
+            <xsd:attribute name="initiallySuspended" type="xsd:boolean"/>
+            <xsd:attribute name="resourceMonitor" type="xsd:string"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+            <xsd:attribute name="enableQueryAcceleration" type="xsd:boolean"/>
+            <xsd:attribute name="queryAccelerationMaxScaleFactor" type="xsd:int"/>
+            <xsd:attribute name="maxConcurrencyLevel" type="xsd:int"/>
+            <xsd:attribute name="statementQueuedTimeoutInSeconds" type="xsd:int"/>
+            <xsd:attribute name="statementTimeoutInSeconds" type="xsd:int"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="alterWarehouse">
+        <xsd:complexType>
+            <xsd:attribute name="warehouseName" type="xsd:string" use="required"/>
+            <xsd:attribute name="newWarehouseName" type="xsd:string"/>
+            <xsd:attribute name="warehouseSize" type="warehouseSize"/>
+            <xsd:attribute name="warehouseType" type="warehouseType"/>
+            <xsd:attribute name="maxClusterCount" type="xsd:int"/>
+            <xsd:attribute name="minClusterCount" type="xsd:int"/>
+            <xsd:attribute name="scalingPolicy" type="scalingPolicy"/>
+            <xsd:attribute name="autoSuspend" type="xsd:int"/>
+            <xsd:attribute name="autoResume" type="xsd:boolean"/>
+            <xsd:attribute name="resourceMonitor" type="xsd:string"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+            <xsd:attribute name="enableQueryAcceleration" type="xsd:boolean"/>
+            <xsd:attribute name="queryAccelerationMaxScaleFactor" type="xsd:int"/>
+            <xsd:attribute name="maxConcurrencyLevel" type="xsd:int"/>
+            <xsd:attribute name="statementQueuedTimeoutInSeconds" type="xsd:int"/>
+            <xsd:attribute name="statementTimeoutInSeconds" type="xsd:int"/>
+            <xsd:attribute name="action" type="warehouseAction"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="dropWarehouse">
+        <xsd:complexType>
+            <xsd:attribute name="warehouseName" type="xsd:string" use="required"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <!-- Database Operations -->
+    <xsd:element name="createDatabase">
+        <xsd:complexType>
+            <xsd:attribute name="databaseName" type="xsd:string" use="required"/>
+            <xsd:attribute name="cloneFrom" type="xsd:string"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+            <xsd:attribute name="dataRetentionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="maxDataExtensionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="transient" type="xsd:boolean"/>
+            <xsd:attribute name="defaultDdlCollation" type="xsd:string"/>
+            <xsd:attribute name="tag" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="alterDatabase">
+        <xsd:complexType>
+            <xsd:attribute name="databaseName" type="xsd:string" use="required"/>
+            <xsd:attribute name="newDatabaseName" type="xsd:string"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+            <xsd:attribute name="dataRetentionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="maxDataExtensionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="defaultDdlCollation" type="xsd:string"/>
+            <xsd:attribute name="enableReplication" type="xsd:boolean"/>
+            <xsd:attribute name="replicationAccounts" type="xsd:string"/>
+            <xsd:attribute name="swapWith" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="dropDatabase">
+        <xsd:complexType>
+            <xsd:attribute name="databaseName" type="xsd:string" use="required"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
+            <xsd:attribute name="cascade" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <!-- Schema Operations -->
+    <xsd:element name="createSchema">
+        <xsd:complexType>
+            <xsd:attribute name="schemaName" type="xsd:string" use="required"/>
+            <xsd:attribute name="databaseName" type="xsd:string"/>
+            <xsd:attribute name="cloneFrom" type="xsd:string"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+            <xsd:attribute name="dataRetentionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="maxDataExtensionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="transient" type="xsd:boolean"/>
+            <xsd:attribute name="managedAccess" type="xsd:boolean"/>
+            <xsd:attribute name="defaultDdlCollation" type="xsd:string"/>
+            <xsd:attribute name="tag" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="alterSchema">
+        <xsd:complexType>
+            <xsd:attribute name="schemaName" type="xsd:string" use="required"/>
+            <xsd:attribute name="databaseName" type="xsd:string"/>
+            <xsd:attribute name="newSchemaName" type="xsd:string"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+            <xsd:attribute name="dataRetentionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="maxDataExtensionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="defaultDdlCollation" type="xsd:string"/>
+            <xsd:attribute name="enableManagedAccess" type="xsd:boolean"/>
+            <xsd:attribute name="disableManagedAccess" type="xsd:boolean"/>
+            <xsd:attribute name="swapWith" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="dropSchema">
+        <xsd:complexType>
+            <xsd:attribute name="schemaName" type="xsd:string" use="required"/>
+            <xsd:attribute name="databaseName" type="xsd:string"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
+            <xsd:attribute name="cascade" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <!-- Table Operations -->
+    <xsd:element name="createTable">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="column" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:attribute name="name" type="xsd:string" use="required"/>
+                        <xsd:attribute name="type" type="xsd:string" use="required"/>
+                        <xsd:attribute name="defaultValue" type="xsd:string"/>
+                        <xsd:attribute name="nullable" type="xsd:boolean"/>
+                        <xsd:attribute name="primaryKey" type="xsd:boolean"/>
+                        <xsd:attribute name="unique" type="xsd:boolean"/>
+                        <xsd:attribute name="comment" type="xsd:string"/>
+                    </xsd:complexType>
+                </xsd:element>
+                <xsd:element name="constraint" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:attribute name="name" type="xsd:string"/>
+                        <xsd:attribute name="type" type="constraintType" use="required"/>
+                        <xsd:attribute name="columns" type="xsd:string"/>
+                        <xsd:attribute name="refTable" type="xsd:string"/>
+                        <xsd:attribute name="refColumns" type="xsd:string"/>
+                    </xsd:complexType>
+                </xsd:element>
+            </xsd:sequence>
+            <xsd:attribute name="tableName" type="xsd:string" use="required"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="databaseName" type="xsd:string"/>
+            <xsd:attribute name="cloneFrom" type="xsd:string"/>
+            <xsd:attribute name="likeTable" type="xsd:string"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+            <xsd:attribute name="dataRetentionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="maxDataExtensionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="changeTracking" type="xsd:boolean"/>
+            <xsd:attribute name="copyGrants" type="xsd:boolean"/>
+            <xsd:attribute name="clusterBy" type="xsd:string"/>
+            <xsd:attribute name="enableSchemaEvolution" type="xsd:boolean"/>
+            <xsd:attribute name="transient" type="xsd:boolean"/>
+            <xsd:attribute name="temporary" type="xsd:boolean"/>
+            <xsd:attribute name="stageFileFormat" type="xsd:string"/>
+            <xsd:attribute name="stageCopyOptions" type="xsd:string"/>
+            <xsd:attribute name="defaultDdlCollation" type="xsd:string"/>
+            <xsd:attribute name="tag" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <!-- Sequence Operations -->
+    <xsd:element name="createSequence">
+        <xsd:complexType>
+            <xsd:attribute name="sequenceName" type="xsd:string" use="required"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="databaseName" type="xsd:string"/>
+            <xsd:attribute name="startWith" type="xsd:long"/>
+            <xsd:attribute name="incrementBy" type="xsd:long"/>
+            <xsd:attribute name="ordered" type="xsd:boolean"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="alterSequence">
+        <xsd:complexType>
+            <xsd:attribute name="sequenceName" type="xsd:string" use="required"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="databaseName" type="xsd:string"/>
+            <xsd:attribute name="newSequenceName" type="xsd:string"/>
+            <xsd:attribute name="incrementBy" type="xsd:long"/>
+            <xsd:attribute name="ordered" type="xsd:boolean"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <!-- Type Definitions -->
+    <xsd:simpleType name="warehouseSize">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="XSMALL"/>
+            <xsd:enumeration value="SMALL"/>
+            <xsd:enumeration value="MEDIUM"/>
+            <xsd:enumeration value="LARGE"/>
+            <xsd:enumeration value="XLARGE"/>
+            <xsd:enumeration value="XXLARGE"/>
+            <xsd:enumeration value="XXXLARGE"/>
+            <xsd:enumeration value="X4LARGE"/>
+            <xsd:enumeration value="X5LARGE"/>
+            <xsd:enumeration value="X6LARGE"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="warehouseType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="STANDARD"/>
+            <xsd:enumeration value="SNOWPARK-OPTIMIZED"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="scalingPolicy">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="STANDARD"/>
+            <xsd:enumeration value="ECONOMY"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="warehouseAction">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="SUSPEND"/>
+            <xsd:enumeration value="RESUME"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="constraintType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="PRIMARY KEY"/>
+            <xsd:enumeration value="FOREIGN KEY"/>
+            <xsd:enumeration value="UNIQUE"/>
+            <xsd:enumeration value="CHECK"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+</xsd:schema>

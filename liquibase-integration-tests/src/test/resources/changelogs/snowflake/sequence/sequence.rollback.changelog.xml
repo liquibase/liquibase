@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.33.xsd">
+
+    <!-- Test Rollback Scenarios for Sequences -->
+    
+    <!-- Create sequence that can be rolled back -->
+    <changeSet author="liquibase-test" id="rollback-sequence-1">
+        <createSequence sequenceName="LB_ROLLBACK_TEST_SEQ"
+                       startValue="1"
+                       incrementBy="1"
+                       minValue="1"
+                       maxValue="1000"/>
+        <rollback>
+            <dropSequence sequenceName="LB_ROLLBACK_TEST_SEQ"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Modify sequence properties -->
+    <changeSet author="liquibase-test" id="rollback-sequence-2">
+        <sql>
+            ALTER SEQUENCE LB_ROLLBACK_TEST_SEQ 
+            SET INCREMENT = 5
+        </sql>
+        <rollback>
+            <sql>
+                ALTER SEQUENCE LB_ROLLBACK_TEST_SEQ 
+                SET INCREMENT = 1
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Add comment to sequence -->
+    <changeSet author="liquibase-test" id="rollback-sequence-3">
+        <sql>
+            ALTER SEQUENCE LB_ROLLBACK_TEST_SEQ 
+            SET COMMENT = 'Modified for rollback test'
+        </sql>
+        <rollback>
+            <sql>
+                ALTER SEQUENCE LB_ROLLBACK_TEST_SEQ 
+                UNSET COMMENT
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test tag for rollback point -->
+    <changeSet author="liquibase-test" id="rollback-tag">
+        <tagDatabase tag="before-sequence-drop"/>
+    </changeSet>
+
+    <!-- Drop sequence - this should be rollback-able -->
+    <changeSet author="liquibase-test" id="rollback-sequence-drop">
+        <dropSequence sequenceName="LB_ROLLBACK_TEST_SEQ"/>
+        <rollback>
+            <!-- Recreate the sequence as it was -->
+            <createSequence sequenceName="LB_ROLLBACK_TEST_SEQ"
+                           startValue="1"
+                           incrementBy="5"
+                           minValue="1"
+                           maxValue="1000"/>
+            <sql>
+                ALTER SEQUENCE LB_ROLLBACK_TEST_SEQ 
+                SET COMMENT = 'Modified for rollback test'
+            </sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

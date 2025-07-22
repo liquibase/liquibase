@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:snowflake="http://www.liquibase.org/xml/ns/snowflake"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                      http://www.liquibase.org/xml/ns/snowflake
+                      http://www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd">
+
+    <!-- Clean up any existing test warehouses -->
+    <changeSet id="cleanup-test-warehouses" author="test-harness" runAlways="true">
+        <preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="1">SELECT 1</sqlCheck>
+        </preConditions>
+        <sql>
+            DROP WAREHOUSE IF EXISTS LTHDB_TEST_WAREHOUSE;
+            DROP WAREHOUSE IF EXISTS LTHDB_TEST_MULTICLUSTER_WH;
+            DROP WAREHOUSE IF EXISTS LTHDB_TEST_ADVANCED_WH;
+            DROP WAREHOUSE IF EXISTS LTHDB_DROP_TEST_WH;
+        </sql>
+        <rollback>
+            <!-- No rollback needed for cleanup -->
+        </rollback>
+    </changeSet>
+
+    <!-- Tag the clean state for rollback -->
+    <changeSet id="tag-clean-state" author="test-harness" runAlways="true">
+        <tagDatabase tag="test-harness-clean-state"/>
+    </changeSet>
+
+</databaseChangeLog>

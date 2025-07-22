@@ -31,7 +31,7 @@ public class CreateSequenceGeneratorSnowflake extends CreateSequenceGenerator{
         validationErrors.checkDisallowedField("cacheSize", statement.getCacheSize(), database, SnowflakeDatabase.class);
         validationErrors.checkDisallowedField("cycle", statement.getCycle(), database, SnowflakeDatabase.class);
         validationErrors.checkDisallowedField("datatype", statement.getDataType(), database, SnowflakeDatabase.class);
-        validationErrors.checkDisallowedField("ordered", statement.getOrdered(), database, SnowflakeDatabase.class);
+        // ORDER/NOORDER is supported in Snowflake - removed the disallowed field check
 
         return validationErrors;
     }
@@ -47,6 +47,14 @@ public class CreateSequenceGeneratorSnowflake extends CreateSequenceGenerator{
             }
             if (statement.getIncrementBy() != null) {
                 queryStringBuilder.append(" INCREMENT BY ").append(statement.getIncrementBy());
+            }
+            // Add ORDER/NOORDER support for Snowflake
+            if (statement.getOrdered() != null) {
+                if (statement.getOrdered()) {
+                    queryStringBuilder.append(" ORDER");
+                } else {
+                    queryStringBuilder.append(" NOORDER");
+                }
             }
         }
         return new Sql[]{new UnparsedSql(queryStringBuilder.toString(), getAffectedSequence(statement))};

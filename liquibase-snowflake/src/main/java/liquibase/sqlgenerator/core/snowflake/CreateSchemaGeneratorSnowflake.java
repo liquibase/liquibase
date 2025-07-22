@@ -1,0 +1,76 @@
+package liquibase.sqlgenerator.core.snowflake;
+
+import liquibase.database.Database;
+import liquibase.database.core.SnowflakeDatabase;
+import liquibase.exception.ValidationErrors;
+import liquibase.sql.Sql;
+import liquibase.sql.UnparsedSql;
+import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.sqlgenerator.core.AbstractSqlGenerator;
+import liquibase.statement.core.CreateSchemaStatement;
+import liquibase.structure.core.Table;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class CreateSchemaGeneratorSnowflake extends AbstractSqlGenerator<CreateSchemaStatement> {
+
+    @Override
+    public boolean supports(CreateSchemaStatement statement, Database database) {
+        return database instanceof SnowflakeDatabase;
+    }
+
+    @Override
+    public ValidationErrors validate(CreateSchemaStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        ValidationErrors errors = new ValidationErrors();
+        
+        if (statement.getSchemaName() == null || statement.getSchemaName().trim().isEmpty()) {
+            errors.addError("schemaName is required");
+        }
+        
+        return errors;
+    }
+
+    @Override
+    public Sql[] generateSql(CreateSchemaStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        StringBuilder sql = new StringBuilder("CREATE SCHEMA ");
+        sql.append(database.escapeObjectName(statement.getSchemaName(), Table.class));
+        
+        List<String> options = new ArrayList<>();
+        
+        if (statement.getTransient() != null && statement.getTransient()) {
+            options.add("TRANSIENT");
+        }
+        
+        if (statement.getManaged() != null && statement.getManaged()) {
+            options.add("MANAGED");
+        }
+        
+        if (statement.getDataRetentionTimeInDays() != null) {
+            options.add("DATA_RETENTION_TIME_IN_DAYS = " + statement.getDataRetentionTimeInDays());
+        }
+        
+        if (statement.getMaxDataExtensionTimeInDays() != null) {
+            options.add("MAX_DATA_EXTENSION_TIME_IN_DAYS = " + statement.getMaxDataExtensionTimeInDays());
+        }
+        
+        if (statement.getDefaultDdlCollation() != null) {
+            options.add("DEFAULT_DDL_COLLATION = '" + statement.getDefaultDdlCollation() + "'");
+        }
+        
+        if (statement.getPipeExecutionPaused() != null) {
+            options.add("PIPE_EXECUTION_PAUSED = " + statement.getPipeExecutionPaused());
+        }
+        
+        if (statement.getComment() != null) {
+            options.add("COMMENT = '" + statement.getComment().replace("'", "''") + "'");
+        }
+        
+        if (!options.isEmpty()) {
+            sql.append(" ");
+            sql.append(String.join(" ", options));
+        }
+
+        return new Sql[]{new UnparsedSql(sql.toString())};
+    }
+}

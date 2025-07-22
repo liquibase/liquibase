@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "WebFetch(domain:contribute.liquibase.com)",
+      "WebFetch(domain:docs.snowflake.com)",
+      "Bash(grep:*)",
+      "Bash(./mvnw test:*)",
+      "Bash(./mvnw:*)",
+      "Bash(rm:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(ls:*)",
+      "Bash(../mvnw test -Dtest=SimpleAlterWarehouseTest)",
+      "Bash(../mvnw test:*)",
+      "Bash(java:*)",
+      "Bash(./ai-generated/liquibase-4.33.0/liquibase --url=\"jdbc:snowflake://LWMNXLH-AUB54519.snowflakecomputing.com/?db=LIQUIBASE_SNOWFLAKE_OSS&warehouse=XSMALL_WH2&role=ACCOUNTADMIN\" --username=\"KEVINATLIQUIBASE\" --password=\"ZgMGV2V%Lwg57iCZ%W#Ox^5EzoC\" --defaultSchemaName=\"TEST_SCHEMA\" release-locks)",
+      "Bash(../mvnw compile:*)",
+      "Bash(git mv:*)",
+      "Bash(mv:*)",
+      "Bash(chmod:*)",
+      "Bash(groovy:*)",
+      "Bash(sed:*)",
+      "Bash(for:*)",
+      "Bash(do sed -i '' 's/PUBLIC\\./TESTHARNESS./g' \"$file\")",
+      "Bash(done)",
+      "Bash(cat:*)",
+      "Bash(jar tf:*)",
+      "Bash(jar xf:*)",
+      "Bash(liquibase:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(./run-liquibase.sh:*)",
+      "Bash(snowsql:*)",
+      "Bash(timeout 30s mvn -Dtest=\"liquibase.harness.ChangeObjectTests\" -Dtest.databases=snowflake test)",
+      "Bash(/dev/null)"
+    ],
+    "deny": []
+  }
+}
