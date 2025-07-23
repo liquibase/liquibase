@@ -90,6 +90,7 @@
         <itCoverageAgent></itCoverageAgent>
         <sonar.coverage.jacoco.xmlReportPaths>target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <surefire.failIfNoTests>true</surefire.failIfNoTests>
+        <opencsv.version>5.10</opencsv.version> <!-- 5.11 broke loading CSV files with empty lines, see https://sourceforge.net/p/opencsv/bugs/259/. There are tests in LoadDataChangeTest to validate this issue, once they all pass we can update -->
     </properties>
 
     <!-- comment -->

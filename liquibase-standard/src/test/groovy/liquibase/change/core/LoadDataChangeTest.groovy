@@ -997,6 +997,27 @@ class LoadDataChangeTest extends StandardChangeTest {
         sqlStatement.getColumnValues().keySet()[3] == " description"
     }
 
+    /**
+     * This test validates that blank lines in a CSV file are ignored during the load data process and that subsequent rows are processed correctly.
+     */
+    def "validate blank lines in CSV file are ignored but other rows are loaded as expected"() {
+        when:
+        def table = testTable("table")
+        SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory(table)
+
+        LoadDataChange change = new LoadDataChange()
+        change.setFile("liquibase/change/core/sample.data.with.blank.line.csv")
+        change.setTableName("table")
+
+        SqlStatement[] sqlStatements = change.generateStatements(mockDB)
+
+        then:
+        sqlStatements.length == 2
+        assert columnValue(sqlStatements[0], "username") == "bjohnson"
+        assert columnValue(sqlStatements[1], "username") == "jdoe"
+    }
+
+
 
     class ColDef {
         ColDef(Object n, String type) {
