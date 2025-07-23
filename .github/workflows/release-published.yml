@@ -75,8 +75,8 @@ jobs:
       version: ${{ steps.collect-data.outputs.version }}
       ref_branch: ${{ steps.ref-branch.outputs.branch }}
       dry_run_branch_name: ${{ inputs.dry_run_branch_name }}
-      dry_run_zip_url: ${{ steps.decode-urls.outputs.dry_run_zip_url }}
-      dry_run_tar_gz_url: ${{ steps.decode-urls.outputs.dry_run_tar_gz_url }}
+      dry_run_zip_url_encoded: ${{ steps.pass-urls.outputs.dry_run_zip_url_encoded }}
+      dry_run_tar_gz_url_encoded: ${{ steps.pass-urls.outputs.dry_run_tar_gz_url_encoded }}
     steps:
       - name: Collect Data
         id: collect-data
@@ -96,17 +96,15 @@ jobs:
             core.setOutput("tag", tag);
             core.setOutput("version", version);
 
-      - name: Decode Base64 URLs
-        id: decode-urls
+      - name: Pass Through Encoded URLs
+        id: pass-urls
         if: ${{ inputs.dry_run == true }}
         run: |
           if [ -n "${{ inputs.dry_run_zip_url_encoded }}" ]; then
-            dry_run_zip_url=$(echo "${{ inputs.dry_run_zip_url_encoded }}" | base64 -d)
-            echo "dry_run_zip_url=$dry_run_zip_url" >> $GITHUB_OUTPUT
+            echo "dry_run_zip_url_encoded=${{ inputs.dry_run_zip_url_encoded }}" >> $GITHUB_OUTPUT
           fi
           if [ -n "${{ inputs.dry_run_tar_gz_url_encoded }}" ]; then
-            dry_run_tar_gz_url=$(echo "${{ inputs.dry_run_tar_gz_url_encoded }}" | base64 -d)
-            echo "dry_run_tar_gz_url=$dry_run_tar_gz_url" >> $GITHUB_OUTPUT
+            echo "dry_run_tar_gz_url_encoded=${{ inputs.dry_run_tar_gz_url_encoded }}" >> $GITHUB_OUTPUT
           fi
 
       - run: |
@@ -615,8 +613,8 @@ jobs:
       artifactId: "liquibase"
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run || false}}
-      dry_run_zip_url: ${{ needs.setup.outputs.dry_run_zip_url || '' }}
-      dry_run_tar_gz_url: ${{ needs.setup.outputs.dry_run_tar_gz_url || '' }}
+      dry_run_zip_url: ${{ needs.setup.outputs.dry_run_zip_url_encoded || '' }}
+      dry_run_tar_gz_url: ${{ needs.setup.outputs.dry_run_tar_gz_url_encoded || '' }}
       dry_run_release_id: ${{ inputs.dry_run_release_id || '' }}
 
   update-docs-oss-pro-version:
