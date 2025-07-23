@@ -98,13 +98,18 @@ jobs:
 
       - name: Pass Through Encoded URLs
         id: pass-urls
-        if: ${{ inputs.dry_run == true }}
         run: |
-          if [ -n "${{ inputs.dry_run_zip_url_encoded }}" ]; then
-            echo "dry_run_zip_url_encoded=${{ inputs.dry_run_zip_url_encoded }}" >> $GITHUB_OUTPUT
-          fi
-          if [ -n "${{ inputs.dry_run_tar_gz_url_encoded }}" ]; then
-            echo "dry_run_tar_gz_url_encoded=${{ inputs.dry_run_tar_gz_url_encoded }}" >> $GITHUB_OUTPUT
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            if [ -n "${{ inputs.dry_run_zip_url_encoded }}" ]; then
+              echo "dry_run_zip_url_encoded=${{ inputs.dry_run_zip_url_encoded }}" >> $GITHUB_OUTPUT
+            fi
+            if [ -n "${{ inputs.dry_run_tar_gz_url_encoded }}" ]; then
+              echo "dry_run_tar_gz_url_encoded=${{ inputs.dry_run_tar_gz_url_encoded }}" >> $GITHUB_OUTPUT
+            fi
+          else
+            # Set empty values for non-dry runs to ensure outputs exist
+            echo "dry_run_zip_url_encoded=" >> $GITHUB_OUTPUT
+            echo "dry_run_tar_gz_url_encoded=" >> $GITHUB_OUTPUT
           fi
 
       - run: |
