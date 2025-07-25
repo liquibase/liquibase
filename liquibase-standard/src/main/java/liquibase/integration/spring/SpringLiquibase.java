@@ -446,7 +446,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     @Override
     public String toString() {
-        return getClass().getName() + "(" + this.getResourceLoader().toString() + ")";
+        return getClass().getName() + "(" + this.getResourceLoader() + ")";
     }
 
 }
