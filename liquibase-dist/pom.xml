@@ -19,7 +19,7 @@
         <h2.version>2.2.224</h2.version>
         <hsqldb.version>2.7.4</hsqldb.version>
         <postgresql.version>42.7.7</postgresql.version>
-        <mssql.version>12.10.1.jre8</mssql.version>
+        <mssql.version>13.1.1.jre8-preview</mssql.version>
         <mysql.version>9.2.0</mysql.version>
         <mariadb.version>3.5.4</mariadb.version>
         <oracle.version>19.27.0.0</oracle.version>
