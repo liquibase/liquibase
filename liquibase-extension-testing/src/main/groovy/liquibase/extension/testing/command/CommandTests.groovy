@@ -1239,6 +1239,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.setups.add(new SetupCleanResources(cleanOnSetup, filesToDelete))
         }
 
+        void cleanResources(CleanupMode cleanupMode, File resourceDirectory) {
+            this.setups.add(new SetupCleanResources(cleanupMode, resourceDirectory))
+        }
         /**
          * Mark the changeSets within a changelog as ran without actually running them
          */

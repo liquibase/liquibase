@@ -407,6 +407,7 @@
                         <param>liquibase.analytics.configuration.AnalyticsConfiguration</param>
                         <param>liquibase.command.CommandStep</param>
                         <param>liquibase.command.copy.ProjectCopier</param>
+                        <param>liquibase.diff.output.changelog.core.ChangelogPrintService</param>
                     </services>
                 </configuration>
                 <executions>
