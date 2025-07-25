@@ -55,12 +55,12 @@ on:
         type: boolean
         default: false
     outputs:
-      dry_run_zip_url:
-        description: "The URL of the created zip file"
-        value: ${{ jobs.build-installers.outputs.dry_run_zip_url }}
-      dry_run_tar_gz_url:
-        description: "The URL of the created tar.gz file"
-        value: ${{ jobs.build-installers.outputs.dry_run_tar_gz_url }}
+      dry_run_zip_url_encoded:
+        description: "The Base64 encoded URL of the created zip file"
+        value: ${{ jobs.build-installers.outputs.dry_run_zip_url_encoded }}
+      dry_run_tar_gz_url_encoded:
+        description: "The Base64 encoded URL of the created tar.gz file"
+        value: ${{ jobs.build-installers.outputs.dry_run_tar_gz_url_encoded }}
 
 env:
   DEPENDENCIES: "liquibase-bigquery" # Comma separated list of dependencies to release the extensions list
@@ -193,7 +193,7 @@ jobs:
           token: ${{ steps.get-token.outputs.token }}
 
       - name: Download liquibase-artifacts
-        uses: dawidd6/action-download-artifact@v9
+        uses: dawidd6/action-download-artifact@v11
         with:
           workflow: run-tests.yml
           run_id: ${{ needs.setup.outputs.runId }}
@@ -373,6 +373,9 @@ jobs:
     needs: [setup, reversion]
     name: Build Installers
     runs-on: ubuntu-22.04
+    outputs:
+      dry_run_zip_url_encoded: ${{ steps.encode-urls.outputs.dry_run_zip_url_encoded }}
+      dry_run_tar_gz_url_encoded: ${{ steps.encode-urls.outputs.dry_run_tar_gz_url_encoded }}
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -471,7 +474,7 @@ jobs:
           echo "$ANDROID_SDK_ROOT/build-tools/30.0.2" >> $GITHUB_PATH
           
       - name: Install DigiCert KeyLocker Client Tools
-        uses: digicert/ssm-code-signing@v1.0.1
+        uses: digicert/ssm-code-signing@v1.1.0
 
       - name: Build Unsigned Windows Installer
         env:
@@ -558,6 +561,33 @@ jobs:
           files: re-version/final/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Encode Release URLs
+        id: encode-urls
+        if: ${{ inputs.standalone_zip == false && inputs.dry_run == true }}
+        run: |
+          # Build URLs based on the created release
+          release_url="${{ steps.attach-files-dry-run.outputs.url }}"
+          echo "Release URL: $release_url"
+          
+          # Extract base URL (GitHub will use consistent pattern for asset URLs)
+          base_url="https://github.com/liquibase/liquibase/releases/download/v${{ needs.setup.outputs.version }}"
+          
+          # Build expected asset URLs
+          zip_url="${base_url}/liquibase-${{ needs.setup.outputs.version }}.zip"
+          tar_gz_url="${base_url}/liquibase-${{ needs.setup.outputs.version }}.tar.gz"
+          
+          echo "Expected zip URL: $zip_url"
+          echo "Expected tar.gz URL: $tar_gz_url"
+          
+          # Encode URLs with Base64 to bypass GitHub masking
+          encoded_zip_url=$(echo "$zip_url" | base64 -w 0)
+          encoded_tar_gz_url=$(echo "$tar_gz_url" | base64 -w 0)
+          
+          echo "dry_run_zip_url_encoded=$encoded_zip_url" >> $GITHUB_OUTPUT
+          echo "dry_run_tar_gz_url_encoded=$encoded_tar_gz_url" >> $GITHUB_OUTPUT
+          
+          echo "Successfully encoded both URLs"
 
       - name: Attach standalone zip to Build
         if: ${{ inputs.standalone_zip == true && inputs.dry_run == false }}
