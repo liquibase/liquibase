@@ -1,0 +1,40 @@
+{
+  "databaseChangeLog": [
+    {
+      "changeSet": {
+        "id": "value",
+        "author": "value",
+        "preConditions": [
+          {
+            "tor": [
+              {
+                "dbmsas": {
+                  "type": "oracle"
+                }
+              },
+              {
+                "dbmesas": {
+                  "type": "mysql"
+                }
+              }
+            ]
+          }
+        ],
+        "changes": [
+          {
+            "changeTypeName": {
+              "changeTypeAttribute": "value",
+              "nestedElementGroup": [
+                {
+                  "nestedElementName": {
+                    "nestedElementAttribute": "value"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

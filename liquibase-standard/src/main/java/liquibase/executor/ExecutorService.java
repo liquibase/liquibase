@@ -1,5 +1,6 @@
 package liquibase.executor;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.plugin.AbstractPluginFactory;
@@ -122,6 +123,25 @@ public class ExecutorService extends AbstractPluginFactory<Executor>  {
 
     public void reset() {
         executors.clear();
+    }
+
+    /**
+     * Returns a list of all executor names available in the current scope.
+     *
+     * @return a list of executor names
+     */
+    public List<String> getAllExecutorNames() {
+        List<String> executorNames = new ArrayList<>();
+
+        try {
+            List<Executor> executorsFound = Scope.getCurrentScope().getServiceLocator().findInstances(Executor.class);
+            for (Executor executor : executorsFound) {
+                executorNames.add(executor.getName().toLowerCase());
+            }
+        } catch (Exception e) {
+            Scope.getCurrentScope().getLog(ExecutorService.class).fine("Error finding executor classes: " + e.getMessage());
+        }
+        return executorNames;
     }
 
     private static class Key {
