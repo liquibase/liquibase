@@ -18,12 +18,17 @@ Meta-rule that prevents any iterative process from continuing indefinitely. Ensu
 **ELSE** you're in an infinite loop
 
 ## Scope
-- **Applies To**: ALL processes and rules, especially:
+- **Applies To**: ALL problem-solving loops, especially:
   - ITERATION_WITHOUT_PROGRESS cycles
   - Research-implement cycles  
   - Debug-fix cycles
-  - Any problem-solving loop
-- **Exceptions**: None - this is the ultimate safety net
+  - Pattern matching attempts
+  - Validation-correction loops
+  - Planning-replanning cycles
+  - Any retry/attempt scenario
+- **Does NOT Apply To**: Success processes, celebrations, continuous monitoring, natural workflows
+- **Exceptions**: Emergency production fixes (but still get help in parallel)
+- **Details**: See THREE_STRIKE_META_RULE_APPLICATION.md for complete guidance
 
 ## How It Works
 
@@ -104,8 +109,9 @@ The state machine should:
 - **Time saved**: Average 2-4 hours per trigger
 
 ## Related Documents
-- Rules: ITERATION_WITHOUT_PROGRESS_RULE (process being limited)
-- Processes: All iterative processes
+- Rules: ITERATION_WITHOUT_PROGRESS_RULE (primary example)
+- Rules: THREE_STRIKE_META_RULE_APPLICATION (detailed guidance)
+- Processes: All iterative processes with retry potential
 - States: Help states in state machine
 
 ## Learning History

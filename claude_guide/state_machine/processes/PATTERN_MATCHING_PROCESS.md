@@ -149,7 +149,8 @@ patterns/
 ## Integration Points
 
 ### With Rules
-- Triggered by THREE_STRIKE_META_RULE
+- Triggered by THREE_STRIKE_META_RULE (after 3 failed attempts)
+- Limited by THREE_STRIKE_META_RULE (try only top 3 patterns)
 - Supports ITERATION_WITHOUT_PROGRESS_RULE
 - Feeds confidence scoring
 
