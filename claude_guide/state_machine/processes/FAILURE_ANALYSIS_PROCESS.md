@@ -216,7 +216,7 @@ Process Improvement:
 ## Integration Points
 
 ### With Rules
-- Update THREE_STRIKE_RULE triggers
+- Update THREE_STRIKE_META_RULE triggers
 - Add new validation rules
 - Refine confidence thresholds
 
@@ -232,7 +232,7 @@ Process Improvement:
 
 ## Related Documents
 - Processes: SUCCESS_CAPTURE_PROCESS (opposite)
-- Rules: THREE_STRIKE_RULE (when to stop)
+- Rules: THREE_STRIKE_META_RULE (when to stop)
 - Anti-patterns: Library of what doesn't work
 
 ## Learning History

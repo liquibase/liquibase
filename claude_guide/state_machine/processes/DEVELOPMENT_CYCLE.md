@@ -147,7 +147,7 @@ graph LR
   - Missing retrospective (no learning)
 
 ## Related Documents
-- Rules: THREE_STRIKE_RULE, CONFIDENCE_THRESHOLDS
+- Rules: THREE_STRIKE_META_RULE, CONFIDENCE_THRESHOLDS
 - State Machine: development_machine.yaml
 - Role Docs: `/roles/[role]/GOAL_*.md`
 

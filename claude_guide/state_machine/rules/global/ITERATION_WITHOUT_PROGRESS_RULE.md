@@ -133,8 +133,11 @@ Success OR Revise with new info OR Get help
 - **Time Saved**: 1-3 hours per incident
 
 ## Related Documents
-- Rules: THREE_STRIKE_RULE (for attempts, not iterations)
+- Rules: THREE_STRIKE_META_RULE (limits cycles to 3)
 - Processes: RESEARCH process, HELP_SEEKING process
+
+## Important Note
+This rule is governed by the THREE_STRIKE_META_RULE. You can only go through this iteration cycle 3 times before you MUST seek help. The meta-rule prevents endless loops of "validate assumptions → research → plan → execute" cycles.
 
 ## Learning History
 | Date | Learning | Impact |
@@ -143,5 +146,5 @@ Success OR Revise with new info OR Get help
 
 ## Change Log
 | Version | Date | Change | Reason |
-|---------|------|--------|--------|
+|---------|------|--------|
 | 1.0 | 2025-01-26 | Initial version | Better than perfection trap concept |

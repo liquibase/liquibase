@@ -4,14 +4,16 @@ This document provides a quick reference to all rules in our development system.
 
 ## Global Rules (Apply Everywhere)
 
-### Execution Rules
-1. **[THREE_STRIKE_RULE](global/THREE_STRIKE_RULE.md)** (v2.0, active, validated)
-   - Stop after 3 failed attempts and seek help
-   - Prevents time waste on wrong approaches
+### Meta Rules (Govern Other Rules)
+1. **[THREE_STRIKE_META_RULE](global/THREE_STRIKE_META_RULE.md)** (v3.0, active, validated)
+   - Limits ANY process to 3 cycles before requiring help
+   - The ultimate "circuit breaker" preventing infinite loops
 
+### Execution Rules
 2. **[ITERATION_WITHOUT_PROGRESS_RULE](global/ITERATION_WITHOUT_PROGRESS_RULE.md)** (v1.0, active, 50% confidence)
    - After 3 iterations with no progress, validate assumptions
-   - Indicates fundamental problem, not just needing more tries
+   - Research and plan based on findings
+   - Limited to 3 cycles by THREE_STRIKE_META_RULE
 
 ### Time Management Rules
 3. **[TIME_ESTIMATION_RULE](global/TIME_ESTIMATION_RULE.md)** (v1.0, active, 50% confidence)
@@ -54,7 +56,7 @@ Located in `/accountability/`:
 
 | Rule | Confidence | Status |
 |------|------------|---------|
-| THREE_STRIKE_RULE | 95% | Validated through use |
+| THREE_STRIKE_META_RULE | 95% | Validated as circuit breaker |
 | CONFIDENCE_THRESHOLDS | 90% | Proven in state machine |
 | ITERATION_WITHOUT_PROGRESS | 50% | New, needs validation |
 | TIME_ESTIMATION_RULE | 50% | New, needs validation |
