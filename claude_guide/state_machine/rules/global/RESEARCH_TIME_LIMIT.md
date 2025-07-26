@@ -7,7 +7,14 @@
 - **Enforcement**: manual (timer-based)
 - **Status**: active
 - **Last Updated**: 2025-01-26
-- **Validated Through**: To be validated (starting at 50% confidence)
+- **Confidence**: 65% (conceptually sound, needs validation)
+
+
+## Performance Metrics
+- **Times Applied**: 0
+- **Success Rate**: N/A
+- **Last Applied**: Never
+- **Average Time Impact**: Unknown
 
 ## Purpose
 Prevents endless research without implementation by forcing hands-on learning. Research without application rarely sticks - implementation reveals what you actually need to know.
@@ -130,18 +137,36 @@ Least Effective:
 ```
 
 ## Metrics
-- **Initial Confidence**: 50% (needs validation)
+- **Current Confidence**: 65% (conceptually sound, needs validation)
 - **Success Metric**: Faster to working code
 - **Quality Metric**: Same or better code quality
+
+## Effectiveness Metrics
+- **Time Saved**: To be measured
+- **Errors Prevented**: To be measured
+- **Rework Reduced**: To be measured
+
+## Learning Connections
+- **Reinforces**: To be identified
+- **Conflicts With**: None identified
+- **Depends On**: To be identified
+- **Leads To**: To be identified
+
+## Feedback Protocol
+- **Success**: +10% confidence (first success), +5% (subsequent)
+- **Failure**: -15% confidence
+- **Modification**: Reset to 50%
+- **Review Triggers**: After 10 uses or monthly
 
 ## Related Documents
 - Rules: PLANNING_TIME_LIMIT (similar concept)
 - Patterns: Learning by doing
 
-## Learning History
-| Date | Learning | Impact |
-|------|----------|--------|
-| 2025-01-26 | Rule created from LBCF | To be validated |
+## Confidence Evolution
+| Date | Event | Old Conf | New Conf | Evidence |
+|------|-------|----------|----------|----------|
+| 2025-01-26 | Created | 0% | 50% | New rule from LBCF |
+| 2025-01-26 | Initial validation | 50% | 65% | Rule created from LBCF |
 
 ## Change Log
 | Version | Date | Change | Reason |

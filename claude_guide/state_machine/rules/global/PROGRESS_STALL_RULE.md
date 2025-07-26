@@ -7,7 +7,14 @@
 - **Enforcement**: automatic (timer-based)
 - **Status**: active
 - **Last Updated**: 2025-01-26
-- **Validated Through**: To be validated (starting at 50% confidence)
+- **Confidence**: 75% (proven concept, threshold needs validation)
+
+
+## Performance Metrics
+- **Times Applied**: 0
+- **Success Rate**: N/A
+- **Last Applied**: Never
+- **Average Time Impact**: Unknown
 
 ## Purpose
 Detects when a task is too large or complex by monitoring time without completion. Forces task breakdown to maintain momentum and prevent overwhelm.
@@ -204,19 +211,37 @@ Lesson: Large tasks hide assumptions
 - Clear communication
 
 ## Metrics
-- **Initial Confidence**: 50% (needs validation)
+- **Current Confidence**: 75% (proven concept, threshold needs validation)
 - **Success Metric**: Tasks completed <45 min
 - **Value Metric**: Increased completion rate
+
+## Effectiveness Metrics
+- **Time Saved**: To be measured
+- **Errors Prevented**: To be measured
+- **Rework Reduced**: To be measured
+
+## Learning Connections
+- **Reinforces**: To be identified
+- **Conflicts With**: None identified
+- **Depends On**: To be identified
+- **Leads To**: To be identified
+
+## Feedback Protocol
+- **Success**: +10% confidence (first success), +5% (subsequent)
+- **Failure**: -15% confidence
+- **Modification**: Reset to 50%
+- **Review Triggers**: After 10 uses or monthly
 
 ## Related Documents
 - Rules: TIME_ESTIMATION_RULE (estimates)
 - Rules: THREE_STRIKE_META_RULE (attempts)
 - Processes: Task breakdown templates
 
-## Learning History
-| Date | Learning | Impact |
-|------|----------|--------|
-| 2025-01-26 | Rule created from LBCF | To be validated |
+## Confidence Evolution
+| Date | Event | Old Conf | New Conf | Evidence |
+|------|-------|----------|----------|----------|
+| 2025-01-26 | Created | 0% | 50% | New rule from LBCF |
+| 2025-01-26 | Initial validation | 50% | 75% | Rule created from LBCF |
 
 ## Change Log
 | Version | Date | Change | Reason |

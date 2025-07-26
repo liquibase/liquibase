@@ -7,7 +7,14 @@
 - **Enforcement**: manual (will be automatic)
 - **Status**: active
 - **Last Updated**: 2025-01-26
-- **Validated Through**: To be validated (starting at 50% confidence)
+- **Confidence**: 80% (well-known anti-pattern)
+
+
+## Performance Metrics
+- **Times Applied**: 0
+- **Success Rate**: N/A
+- **Last Applied**: Never
+- **Average Time Impact**: Unknown
 
 ## Purpose
 Prevents endless polishing of working code by enforcing "good enough" principle. Ships at 85% perfect to maintain velocity while ensuring quality.
@@ -156,19 +163,37 @@ Never ships
 ```
 
 ## Metrics
-- **Initial Confidence**: 50% (needs validation)
+- **Current Confidence**: 80% (well-known anti-pattern)
 - **Success Metric**: Features shipped on time
 - **Value Metric**: Velocity maintained/increased
+
+## Effectiveness Metrics
+- **Time Saved**: To be measured
+- **Errors Prevented**: To be measured
+- **Rework Reduced**: To be measured
+
+## Learning Connections
+- **Reinforces**: To be identified
+- **Conflicts With**: None identified
+- **Depends On**: To be identified
+- **Leads To**: To be identified
+
+## Feedback Protocol
+- **Success**: +10% confidence (first success), +5% (subsequent)
+- **Failure**: -15% confidence
+- **Modification**: Reset to 50%
+- **Review Triggers**: After 10 uses or monthly
 
 ## Related Documents
 - Rules: THREE_STRIKE_META_RULE (limits iterations)
 - Processes: Code review (quality gates)
 - Philosophy: Pragmatic > Perfect
 
-## Learning History
-| Date | Learning | Impact |
-|------|----------|--------|
-| 2025-01-26 | Rule created from LBCF | To be validated |
+## Confidence Evolution
+| Date | Event | Old Conf | New Conf | Evidence |
+|------|-------|----------|----------|----------|
+| 2025-01-26 | Created | 0% | 50% | New rule from LBCF |
+| 2025-01-26 | Initial validation | 50% | 80% | Rule created from LBCF |
 
 ## Change Log
 | Version | Date | Change | Reason |

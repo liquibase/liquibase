@@ -7,7 +7,14 @@
 - **Enforcement**: automatic (planning phase)
 - **Status**: active
 - **Last Updated**: 2025-01-26
-- **Validated Through**: To be validated (starting at 50% confidence)
+- **Confidence**: 50% (new rule, unvalidated)
+
+
+## Performance Metrics
+- **Times Applied**: 0
+- **Success Rate**: N/A
+- **Last Applied**: Never
+- **Average Time Impact**: Unknown
 
 ## Purpose
 Links confidence levels directly to task velocity. Higher confidence means faster execution, lower confidence requires more time buffer. Prevents underestimation when uncertain.
@@ -185,19 +192,37 @@ Actual: 145 minutes (needed help)
 - Refined in retrospectives
 
 ## Metrics
-- **Initial Confidence**: 50% (needs validation)
+- **Current Confidence**: 50% (new rule, unvalidated)
 - **Success Metric**: Estimates within ±15%
 - **Value Metric**: Reduced estimation stress
+
+## Effectiveness Metrics
+- **Time Saved**: To be measured
+- **Errors Prevented**: To be measured
+- **Rework Reduced**: To be measured
+
+## Learning Connections
+- **Reinforces**: To be identified
+- **Conflicts With**: None identified
+- **Depends On**: To be identified
+- **Leads To**: To be identified
+
+## Feedback Protocol
+- **Success**: +10% confidence (first success), +5% (subsequent)
+- **Failure**: -15% confidence
+- **Modification**: Reset to 50%
+- **Review Triggers**: After 10 uses or monthly
 
 ## Related Documents
 - Rules: TIME_ESTIMATION_RULE (base formula)
 - Rules: CONFIDENCE_THRESHOLDS (levels)
 - Processes: Time tracking
 
-## Learning History
-| Date | Learning | Impact |
-|------|----------|--------|
-| 2025-01-26 | Rule created from LBCF data | To be validated |
+## Confidence Evolution
+| Date | Event | Old Conf | New Conf | Evidence |
+|------|-------|----------|----------|----------|
+| 2025-01-26 | Created | 0% | 50% | New rule from LBCF |
+| 2025-01-26 | Initial validation | 50% | 50% | Rule created from LBCF data |
 
 ## Change Log
 | Version | Date | Change | Reason |

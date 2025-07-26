@@ -6,8 +6,14 @@
 - **Severity**: [critical|high|medium|low]
 - **Enforcement**: [automatic|manual|audit]
 - **Status**: [draft|active|deprecated]
+- **Confidence**: 50% (new rule, unvalidated)
 - **Last Updated**: YYYY-MM-DD
-- **Validated Through**: [evidence of effectiveness]
+
+## Performance Metrics
+- **Times Applied**: 0
+- **Success Rate**: N/A
+- **Last Applied**: Never
+- **Average Time Impact**: Unknown
 
 ## Purpose
 [Why this rule exists and what problem it prevents]

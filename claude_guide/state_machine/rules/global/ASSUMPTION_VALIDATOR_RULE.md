@@ -6,8 +6,14 @@
 - **Severity**: high
 - **Enforcement**: automatic (confidence-based)
 - **Status**: active
+- **Confidence**: 50% (new rule, unvalidated)
 - **Last Updated**: 2025-01-26
-- **Validated Through**: To be validated (starting at 50% confidence)
+
+## Performance Metrics
+- **Times Applied**: 0
+- **Success Rate**: N/A
+- **Last Applied**: Never
+- **Average Time Impact**: Unknown
 
 ## Purpose
 Forces validation of assumptions when confidence is low. Prevents wasting time on incorrect assumptions by requiring verification before proceeding.
@@ -218,15 +224,32 @@ Find working example:
 - **Success Metric**: <5% wrong assumption rate
 - **Value Metric**: Hours saved from validation
 
+## Effectiveness Metrics
+- **Time Saved**: Estimated 1-4 hours per prevented wrong assumption
+- **Errors Prevented**: Wrong approach errors
+- **Rework Reduced**: Estimated 80% when applied
+
+## Learning Connections
+- **Reinforces**: ITERATION_WITHOUT_PROGRESS_RULE
+- **Conflicts With**: None identified
+- **Depends On**: CONFIDENCE_THRESHOLDS
+- **Leads To**: Faster correct implementation
+
+## Feedback Protocol
+- **Success**: +10% confidence (prevented waste)
+- **Failure**: -15% confidence (didn't catch bad assumption)
+- **Modification**: Reset to 50%
+- **Review Triggers**: After 10 uses or monthly
+
 ## Related Documents
 - Rules: CONFIDENCE_THRESHOLDS (levels)
 - Rules: ITERATION_WITHOUT_PROGRESS (assumptions)
 - Processes: Research validation
 
-## Learning History
-| Date | Learning | Impact |
-|------|----------|--------|
-| 2025-01-26 | Rule created from LBCF | To be validated |
+## Confidence Evolution
+| Date | Event | Old Conf | New Conf | Evidence |
+|------|-------|----------|----------|----------|
+| 2025-01-26 | Created | 0% | 50% | New rule from LBCF |
 
 ## Change Log
 | Version | Date | Change | Reason |

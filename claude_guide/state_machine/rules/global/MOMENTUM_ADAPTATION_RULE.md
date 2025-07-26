@@ -7,7 +7,14 @@
 - **Enforcement**: automatic (system-level)
 - **Status**: active
 - **Last Updated**: 2025-01-26
-- **Validated Through**: To be validated (starting at 50% confidence)
+- **Confidence**: 50% (new rule, unvalidated)
+
+
+## Performance Metrics
+- **Times Applied**: 0
+- **Success Rate**: N/A
+- **Last Applied**: Never
+- **Average Time Impact**: Unknown
 
 ## Purpose
 Dynamically adapts system support level based on current development momentum. When things are going well, reduces friction. When struggling, increases support.
@@ -134,19 +141,37 @@ Adaptations Applied:
 - Don't maintain high bars when failing
 
 ## Metrics
-- **Initial Confidence**: 50% (needs validation)
+- **Current Confidence**: 50% (new rule, unvalidated)
 - **Success Metric**: Appropriate support timing
 - **Value Metric**: Sustained productivity
+
+## Effectiveness Metrics
+- **Time Saved**: To be measured
+- **Errors Prevented**: To be measured
+- **Rework Reduced**: To be measured
+
+## Learning Connections
+- **Reinforces**: To be identified
+- **Conflicts With**: None identified
+- **Depends On**: To be identified
+- **Leads To**: To be identified
+
+## Feedback Protocol
+- **Success**: +10% confidence (first success), +5% (subsequent)
+- **Failure**: -15% confidence
+- **Modification**: Reset to 50%
+- **Review Triggers**: After 10 uses or monthly
 
 ## Related Documents
 - Processes: MOMENTUM_TRACKING_PROCESS (calculation)
 - Rules: CONFIDENCE_THRESHOLDS (thresholds)
 - Safeguards: All safeguard sensitivities
 
-## Learning History
-| Date | Learning | Impact |
-|------|----------|--------|
-| 2025-01-26 | Rule created from LBCF | To be validated |
+## Confidence Evolution
+| Date | Event | Old Conf | New Conf | Evidence |
+|------|-------|----------|----------|----------|
+| 2025-01-26 | Created | 0% | 50% | New rule from LBCF |
+| 2025-01-26 | Initial validation | 50% | 50% | Rule created from LBCF |
 
 ## Change Log
 | Version | Date | Change | Reason |

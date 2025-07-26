@@ -7,7 +7,14 @@
 - **Enforcement**: manual
 - **Status**: active
 - **Last Updated**: 2025-01-26
-- **Validated Through**: To be validated (starting at 50% confidence)
+- **Confidence**: 60% (formula needs calibration)
+
+
+## Performance Metrics
+- **Times Applied**: 0
+- **Success Rate**: N/A
+- **Last Applied**: Never
+- **Average Time Impact**: Unknown
 
 ## Purpose
 Provides realistic time estimates by adjusting base estimates according to confidence level. Higher confidence requires less buffer, lower confidence requires more buffer.
@@ -92,18 +99,36 @@ Should have: 30 × 1.4 = 42 minutes minimum
 - Include learning time
 
 ## Metrics
-- **Initial Confidence**: 50% (needs validation)
+- **Current Confidence**: 60% (formula needs calibration)
 - **Accuracy Goal**: Within 20% of actual
 - **Tracking**: Compare estimated vs actual
+
+## Effectiveness Metrics
+- **Time Saved**: To be measured
+- **Errors Prevented**: To be measured
+- **Rework Reduced**: To be measured
+
+## Learning Connections
+- **Reinforces**: To be identified
+- **Conflicts With**: None identified
+- **Depends On**: To be identified
+- **Leads To**: To be identified
+
+## Feedback Protocol
+- **Success**: +10% confidence (first success), +5% (subsequent)
+- **Failure**: -15% confidence
+- **Modification**: Reset to 50%
+- **Review Triggers**: After 10 uses or monthly
 
 ## Related Documents
 - Rules: CONFIDENCE_THRESHOLDS (confidence scoring)
 - Processes: Planning, Status Updates
 
-## Learning History
-| Date | Learning | Impact |
-|------|----------|--------|
-| 2025-01-26 | Rule created from LBCF | To be validated |
+## Confidence Evolution
+| Date | Event | Old Conf | New Conf | Evidence |
+|------|-------|----------|----------|----------|
+| 2025-01-26 | Created | 0% | 50% | New rule from LBCF |
+| 2025-01-26 | Initial validation | 50% | 60% | Rule created from LBCF |
 
 ## Change Log
 | Version | Date | Change | Reason |

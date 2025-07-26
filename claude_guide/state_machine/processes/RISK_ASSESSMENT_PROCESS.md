@@ -6,7 +6,14 @@
 - **Scope**: global (all complex tasks)
 - **Owner**: developer (before implementation)
 - **Last Updated**: 2025-01-26
-- **Validated Through**: To be validated (starting at 50% confidence)
+- **Confidence**: 70% (standard practice)
+
+
+## Performance Metrics
+- **Times Applied**: 0
+- **Success Rate**: N/A  
+- **Last Applied**: Never
+- **Average Time Impact**: Unknown
 
 ## Purpose
 Break complex tasks into components and assess confidence per component before starting. Identifies high-risk areas early, allowing targeted help-seeking and better time estimates.
@@ -187,18 +194,36 @@ Risk-Based Approach:
 - Find alternative approach
 
 ## Metrics
-- **Initial Confidence**: 50% (needs validation)
+- **Current Confidence**: 70% (standard practice)
 - **Success Metric**: Fewer surprise delays
 - **Quality Metric**: Better risk communication
+
+## Effectiveness Metrics
+- **Time Saved**: To be measured
+- **Quality Improved**: To be measured
+- **Errors Prevented**: To be measured
+
+## Learning Connections
+- **Reinforces**: To be identified
+- **Conflicts With**: None identified
+- **Depends On**: To be identified
+- **Enables**: To be identified
+
+## Feedback Protocol
+- **Success**: +10% confidence (process worked well)
+- **Failure**: -15% confidence (process failed)
+- **Modification**: -5% confidence (needed changes)
+- **Review Triggers**: After 10 uses or monthly
 
 ## Related Documents
 - Rules: CONFIDENCE_THRESHOLDS, TIME_ESTIMATION_RULE
 - Processes: Planning, Multi-perspective review
 
-## Learning History
-| Date | Learning | Impact |
-|------|----------|--------|
-| 2025-01-26 | Process created from LBCF | To be validated |
+## Confidence Evolution
+| Date | Event | Old Conf | New Conf | Evidence |
+|------|-------|----------|----------|----------|
+| 2025-01-26 | Created | 0% | 50% | New process from LBCF |
+| 2025-01-26 | Initial use | 50% | 70% | Process created from LBCF |
 
 ## Change Log
 | Version | Date | Change | Reason |

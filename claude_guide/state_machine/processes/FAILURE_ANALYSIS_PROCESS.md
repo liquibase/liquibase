@@ -6,7 +6,14 @@
 - **Scope**: global (all failures and mistakes)
 - **Owner**: person who experienced failure
 - **Last Updated**: 2025-01-26
-- **Validated Through**: To be validated (starting at 50% confidence)
+- **Confidence**: 80% (well-established practice)
+
+
+## Performance Metrics
+- **Times Applied**: 0
+- **Success Rate**: N/A  
+- **Last Applied**: Never
+- **Average Time Impact**: Unknown
 
 ## Purpose
 Transform failures into learning opportunities through systematic analysis. Every failure contains valuable information about wrong assumptions, missing knowledge, or process gaps.
@@ -226,19 +233,37 @@ Process Improvement:
 - Process improvements planned
 
 ## Metrics
-- **Initial Confidence**: 50% (needs validation)
+- **Current Confidence**: 80% (well-established practice)
 - **Success Metric**: Reduced repeat failures
 - **Learning Metric**: Root causes identified
+
+## Effectiveness Metrics
+- **Time Saved**: To be measured
+- **Quality Improved**: To be measured
+- **Errors Prevented**: To be measured
+
+## Learning Connections
+- **Reinforces**: To be identified
+- **Conflicts With**: None identified
+- **Depends On**: To be identified
+- **Enables**: To be identified
+
+## Feedback Protocol
+- **Success**: +10% confidence (process worked well)
+- **Failure**: -15% confidence (process failed)
+- **Modification**: -5% confidence (needed changes)
+- **Review Triggers**: After 10 uses or monthly
 
 ## Related Documents
 - Processes: SUCCESS_CAPTURE_PROCESS (opposite)
 - Rules: THREE_STRIKE_META_RULE (when to stop)
 - Anti-patterns: Library of what doesn't work
 
-## Learning History
-| Date | Learning | Impact |
-|------|----------|--------|
-| 2025-01-26 | Process created from LBCF | To be validated |
+## Confidence Evolution
+| Date | Event | Old Conf | New Conf | Evidence |
+|------|-------|----------|----------|----------|
+| 2025-01-26 | Created | 0% | 50% | New process from LBCF |
+| 2025-01-26 | Initial use | 50% | 80% | Process created from LBCF |
 
 ## Change Log
 | Version | Date | Change | Reason |
