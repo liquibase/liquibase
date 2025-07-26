@@ -13,6 +13,7 @@ public class CreateSchemaStatement extends AbstractSqlStatement {
     private String defaultDdlCollation;
     private String pipeExecutionPaused;
     private Boolean orReplace;
+    private Boolean ifNotExists;
 
     public String getSchemaName() {
         return schemaName;
@@ -84,5 +85,13 @@ public class CreateSchemaStatement extends AbstractSqlStatement {
 
     public void setOrReplace(Boolean orReplace) {
         this.orReplace = orReplace;
+    }
+
+    public Boolean getIfNotExists() {
+        return ifNotExists;
+    }
+
+    public void setIfNotExists(Boolean ifNotExists) {
+        this.ifNotExists = ifNotExists;
     }
 }

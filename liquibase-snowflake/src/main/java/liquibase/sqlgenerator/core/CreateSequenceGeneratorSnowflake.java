@@ -38,6 +38,7 @@ public class CreateSequenceGeneratorSnowflake extends CreateSequenceGenerator{
             validationErrors.checkDisallowedField("cacheSize", statement.getCacheSize(), database, SnowflakeDatabase.class);
             validationErrors.checkDisallowedField("cycle", statement.getCycle(), database, SnowflakeDatabase.class);
             validationErrors.checkDisallowedField("datatype", statement.getDataType(), database, SnowflakeDatabase.class);
+            // NOTE: ordered is ALLOWED for Snowflake - this is the key feature we're implementing!
         } else {
             // For Snowflake-specific statement, validate OR REPLACE vs IF NOT EXISTS
             CreateSequenceStatementSnowflake snowflakeStatement = (CreateSequenceStatementSnowflake) statement;
@@ -87,19 +88,27 @@ public class CreateSequenceGeneratorSnowflake extends CreateSequenceGenerator{
             
             // Add comment support
             if (snowflakeStatement.getComment() != null) {
-                queryStringBuilder.append(" COMMENT = '").append(snowflakeStatement.getComment()).append("'");
+                queryStringBuilder.append(" COMMENT = '").append(snowflakeStatement.getComment().replace("'", "''")).append("'");
             }
             
         } else {
-            // Standard sequence creation for backwards compatibility
+            // Standard sequence creation - now with ORDER support!
             queryStringBuilder.append("CREATE SEQUENCE ");
             queryStringBuilder.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
-            if (database instanceof SnowflakeDatabase) {
-                if (statement.getStartValue() != null) {
-                    queryStringBuilder.append(" START WITH ").append(statement.getStartValue());
-                }
-                if (statement.getIncrementBy() != null) {
-                    queryStringBuilder.append(" INCREMENT BY ").append(statement.getIncrementBy());
+            
+            if (statement.getStartValue() != null) {
+                queryStringBuilder.append(" START WITH ").append(statement.getStartValue());
+            }
+            if (statement.getIncrementBy() != null) {
+                queryStringBuilder.append(" INCREMENT BY ").append(statement.getIncrementBy());
+            }
+            
+            // Add ORDER/NOORDER support for standard sequences too!
+            if (statement.getOrdered() != null) {
+                if (statement.getOrdered()) {
+                    queryStringBuilder.append(" ORDER");
+                } else {
+                    queryStringBuilder.append(" NOORDER");
                 }
             }
         }

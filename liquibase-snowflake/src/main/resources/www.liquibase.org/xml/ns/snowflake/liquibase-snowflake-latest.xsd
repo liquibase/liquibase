@@ -156,32 +156,47 @@
         <xsd:attribute name="tag" type="xsd:string"/>
     </xsd:attributeGroup>
 
-    <!-- Sequence Operations -->
+    <!-- Sequence Operations (Snowflake-specific) -->
     <xsd:element name="createSequence">
         <xsd:complexType>
             <xsd:attribute name="sequenceName" type="xsd:string" use="required"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
             <xsd:attribute name="schemaName" type="xsd:string"/>
-            <xsd:attribute name="databaseName" type="xsd:string"/>
-            <xsd:attribute name="startWith" type="xsd:long"/>
-            <xsd:attribute name="incrementBy" type="xsd:long"/>
-            <xsd:attribute name="ordered" type="xsd:boolean"/>
+            <xsd:attribute name="startValue" type="xsd:string"/>
+            <xsd:attribute name="incrementBy" type="xsd:string"/>
+            <xsd:attribute name="minValue" type="xsd:string"/>
+            <xsd:attribute name="maxValue" type="xsd:string"/>
+            <xsd:attribute name="cycle" type="xsd:boolean"/>
+            <xsd:attribute name="cacheSize" type="xsd:string"/>
+            <xsd:attribute name="dataType" type="xsd:string"/>
+            <xsd:attribute name="order" type="xsd:boolean"/>
             <xsd:attribute name="comment" type="xsd:string"/>
+            <xsd:attribute name="orReplace" type="xsd:boolean"/>
+            <xsd:attribute name="ifNotExists" type="xsd:boolean"/>
         </xsd:complexType>
     </xsd:element>
 
-    <xsd:element name="alterSequence">
-        <xsd:complexType>
-            <xsd:attribute name="sequenceName" type="xsd:string" use="required"/>
-            <xsd:attribute name="schemaName" type="xsd:string"/>
-            <xsd:attribute name="databaseName" type="xsd:string"/>
-            <xsd:attribute name="newSequenceName" type="xsd:string"/>
-            <xsd:attribute name="incrementBy" type="xsd:long"/>
-            <xsd:attribute name="ordered" type="xsd:boolean"/>
-            <xsd:attribute name="comment" type="xsd:string"/>
-        </xsd:complexType>
-    </xsd:element>
+    <!-- Sequence namespace attributes (for use on standard createSequence) -->
+    <xsd:attribute name="order" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Whether to maintain order in sequence values (ORDER) or not (NOORDER). Default is NOORDER.</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="orReplace" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Use CREATE OR REPLACE SEQUENCE instead of CREATE SEQUENCE</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="ifNotExists" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Use CREATE SEQUENCE IF NOT EXISTS instead of CREATE SEQUENCE</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
 
     <!-- Type Definitions -->
+
     <xsd:simpleType name="warehouseSize">
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="XSMALL"/>

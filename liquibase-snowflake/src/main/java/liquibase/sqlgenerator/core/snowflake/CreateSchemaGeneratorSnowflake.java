@@ -33,6 +33,11 @@ public class CreateSchemaGeneratorSnowflake extends AbstractSqlGenerator<CreateS
             errors.addError("schemaName is required");
         }
         
+        // Validate that orReplace and ifNotExists are not both set
+        if (Boolean.TRUE.equals(statement.getOrReplace()) && Boolean.TRUE.equals(statement.getIfNotExists())) {
+            errors.addError("Cannot use both OR REPLACE and IF NOT EXISTS");
+        }
+        
         return errors;
     }
 
@@ -45,15 +50,21 @@ public class CreateSchemaGeneratorSnowflake extends AbstractSqlGenerator<CreateS
             sql.append("OR REPLACE ");
         }
         
-        // Add TRANSIENT before SCHEMA keyword
-        if (statement.getTransient() != null && statement.getTransient()) {
-            sql.append("TRANSIENT ");
+        sql.append("SCHEMA ");
+        
+        // IF NOT EXISTS must come after SCHEMA
+        if (statement.getIfNotExists() != null && statement.getIfNotExists()) {
+            sql.append("IF NOT EXISTS ");
         }
         
-        sql.append("SCHEMA ");
         sql.append(database.escapeObjectName(statement.getSchemaName(), liquibase.structure.core.Schema.class));
         
         List<String> options = new ArrayList<>();
+        
+        // Add TRANSIENT after schema name (correct Snowflake syntax)
+        if (statement.getTransient() != null && statement.getTransient()) {
+            options.add("TRANSIENT");
+        }
         
         if (statement.getManaged() != null && statement.getManaged()) {
             options.add("WITH MANAGED ACCESS");

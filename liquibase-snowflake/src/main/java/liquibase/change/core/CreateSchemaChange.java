@@ -27,6 +27,7 @@ public class CreateSchemaChange extends AbstractChange {
     private String defaultDdlCollation;
     private String pipeExecutionPaused;
     private Boolean orReplace;
+    private Boolean ifNotExists;
 
     @DatabaseChangeProperty(description = "Name of the schema to create", requiredForDatabase = "snowflake")
     public String getSchemaName() {
@@ -109,6 +110,15 @@ public class CreateSchemaChange extends AbstractChange {
         this.orReplace = orReplace;
     }
 
+    @DatabaseChangeProperty(description = "Whether to use CREATE SCHEMA IF NOT EXISTS")
+    public Boolean getIfNotExists() {
+        return ifNotExists;
+    }
+
+    public void setIfNotExists(Boolean ifNotExists) {
+        this.ifNotExists = ifNotExists;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
         CreateSchemaStatement statement = new CreateSchemaStatement();
@@ -121,6 +131,7 @@ public class CreateSchemaChange extends AbstractChange {
         statement.setDefaultDdlCollation(getDefaultDdlCollation());
         statement.setPipeExecutionPaused(getPipeExecutionPaused());
         statement.setOrReplace(getOrReplace());
+        statement.setIfNotExists(getIfNotExists());
         
         return new SqlStatement[]{statement};
     }
@@ -149,6 +160,11 @@ public class CreateSchemaChange extends AbstractChange {
         
         if (getSchemaName() == null || getSchemaName().trim().isEmpty()) {
             errors.addError("schemaName is required");
+        }
+        
+        // Validate that orReplace and ifNotExists are not both set
+        if (Boolean.TRUE.equals(getOrReplace()) && Boolean.TRUE.equals(getIfNotExists())) {
+            errors.addError("Cannot use both OR REPLACE and IF NOT EXISTS");
         }
         
         return errors;

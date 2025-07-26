@@ -22,7 +22,7 @@ import liquibase.statement.core.snowflake.CreateSequenceStatementSnowflake;
 public class CreateSequenceChangeSnowflake extends CreateSequenceChange {
     
     private String comment;
-    private Boolean order;
+    private Boolean ordered;  // Use standard Liquibase attribute name
     private Boolean orReplace;
     private Boolean ifNotExists;
     
@@ -41,12 +41,12 @@ public class CreateSequenceChangeSnowflake extends CreateSequenceChange {
     }
     
     @DatabaseChangeProperty(description = "Whether to maintain order in sequence values (ORDER) or not (NOORDER). Default is NOORDER.")
-    public Boolean getOrder() {
-        return order;
+    public Boolean isOrdered() {
+        return ordered;
     }
     
-    public void setOrder(Boolean order) {
-        this.order = order;
+    public void setOrdered(Boolean ordered) {
+        this.ordered = ordered;
     }
     
     @DatabaseChangeProperty(description = "Whether to use CREATE OR REPLACE SEQUENCE")
@@ -96,7 +96,7 @@ public class CreateSequenceChangeSnowflake extends CreateSequenceChange {
         
         // Set Snowflake-specific properties
         statement.setComment(getComment());
-        statement.setOrdered(getOrder());
+        statement.setOrdered(isOrdered());
         statement.setOrReplace(getOrReplace());
         statement.setIfNotExists(getIfNotExists());
         

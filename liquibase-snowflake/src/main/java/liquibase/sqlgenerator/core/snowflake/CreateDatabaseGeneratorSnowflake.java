@@ -28,6 +28,11 @@ public class CreateDatabaseGeneratorSnowflake extends AbstractSqlGenerator<Creat
             errors.addError("databaseName is required");
         }
         
+        // Validate that orReplace and ifNotExists are not both set
+        if (Boolean.TRUE.equals(statement.getOrReplace()) && Boolean.TRUE.equals(statement.getIfNotExists())) {
+            errors.addError("Cannot use both OR REPLACE and IF NOT EXISTS");
+        }
+        
         return errors;
     }
 
@@ -46,6 +51,12 @@ public class CreateDatabaseGeneratorSnowflake extends AbstractSqlGenerator<Creat
         }
         
         sql.append("DATABASE ");
+        
+        // IF NOT EXISTS must come after DATABASE
+        if (statement.getIfNotExists() != null && statement.getIfNotExists()) {
+            sql.append("IF NOT EXISTS ");
+        }
+        
         sql.append(database.escapeObjectName(statement.getDatabaseName(), Table.class));
         
         List<String> options = new ArrayList<>();

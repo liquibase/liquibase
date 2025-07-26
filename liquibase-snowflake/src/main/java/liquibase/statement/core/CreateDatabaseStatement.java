@@ -11,6 +11,7 @@ public class CreateDatabaseStatement extends AbstractSqlStatement {
     private Boolean transient_;
     private String defaultDdlCollation;
     private Boolean orReplace;
+    private Boolean ifNotExists;
 
     public String getDatabaseName() {
         return databaseName;
@@ -66,5 +67,13 @@ public class CreateDatabaseStatement extends AbstractSqlStatement {
 
     public void setOrReplace(Boolean orReplace) {
         this.orReplace = orReplace;
+    }
+
+    public Boolean getIfNotExists() {
+        return ifNotExists;
+    }
+
+    public void setIfNotExists(Boolean ifNotExists) {
+        this.ifNotExists = ifNotExists;
     }
 }

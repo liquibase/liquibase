@@ -25,6 +25,7 @@ public class CreateDatabaseChange extends AbstractChange {
     private Boolean transient_;
     private String defaultDdlCollation;
     private Boolean orReplace;
+    private Boolean ifNotExists;
 
     @DatabaseChangeProperty(description = "Name of the database to create", requiredForDatabase = "snowflake")
     public String getDatabaseName() {
@@ -89,6 +90,15 @@ public class CreateDatabaseChange extends AbstractChange {
         this.orReplace = orReplace;
     }
 
+    @DatabaseChangeProperty(description = "Whether to use CREATE DATABASE IF NOT EXISTS")
+    public Boolean getIfNotExists() {
+        return ifNotExists;
+    }
+
+    public void setIfNotExists(Boolean ifNotExists) {
+        this.ifNotExists = ifNotExists;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
         CreateDatabaseStatement statement = new CreateDatabaseStatement();
@@ -99,6 +109,7 @@ public class CreateDatabaseChange extends AbstractChange {
         statement.setTransient(getTransient());
         statement.setDefaultDdlCollation(getDefaultDdlCollation());
         statement.setOrReplace(getOrReplace());
+        statement.setIfNotExists(getIfNotExists());
         
         return new SqlStatement[]{statement};
     }
@@ -127,6 +138,11 @@ public class CreateDatabaseChange extends AbstractChange {
         
         if (getDatabaseName() == null || getDatabaseName().trim().isEmpty()) {
             errors.addError("databaseName is required");
+        }
+        
+        // Validate that orReplace and ifNotExists are not both set
+        if (Boolean.TRUE.equals(getOrReplace()) && Boolean.TRUE.equals(getIfNotExists())) {
+            errors.addError("Cannot use both OR REPLACE and IF NOT EXISTS");
         }
         
         return errors;
