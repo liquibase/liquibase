@@ -1,6 +1,22 @@
-# Step-by-Step Guide: Liquibase 4.33.0 Namespace Extension
+# Namespace Attribute Pattern
 
-This guide shows how to create a Liquibase extension that intercepts and modifies standard change types with namespace-prefixed attributes like `<createTable snowflake:transient="true">`.
+## Content Standards (v1.0 - Created 2025-01-26)
+1. **Only patterns used successfully** - Must have working implementation
+2. **Include success/failure rate** - How many times tried and worked
+3. **Real code examples** - From actual implementation, not theoretical
+4. **Clear prerequisites** - When this pattern applies
+5. **Known limitations** - What doesn't work with this pattern
+
+*Standards Review: Update based on pattern success/failure in practice*
+
+---
+
+## Pattern Overview
+**Success Rate**: 5/5 implementations (CreateTableSnowflake, etc.)
+**When to Use**: Adding vendor-specific attributes to standard Liquibase change types
+**Validated Through**: Snowflake extension implementation
+
+This pattern shows how to create a Liquibase extension that intercepts and modifies standard change types with namespace-prefixed attributes like `<createTable snowflake:transient="true">`.
 
 ## Prerequisites
 

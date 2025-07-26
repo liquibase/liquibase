@@ -1,7 +1,45 @@
 # LBCF Project Planning and Status Tracking Template
 
+## How to Use This Template
+
+### For AI Assistants:
+1. **Create this document FIRST** when starting any database extension
+2. **Update after EVERY task** - Even small updates build trust
+3. **Be honest about blockers** - Transparency is crucial
+4. **Time estimates are examples** - Add 3x buffer for new patterns
+5. **Use the status table** as your primary communication tool
+
+## Status Update - [Timestamp]
+
+### Status Update Pattern:
+**Completed**: [What was just finished]
+**Result**: [Outcome/findings]
+**Next**: [What I'm doing next]
+**Blockers**: [Any issues]
+**ETA**: [Updated timeline if changed]
+
+### Why This Matters:
+- **Visibility** creates confidence
+- **Transparency** builds trust
+- **Regular updates** show progress
+- **Honest assessment** prevents surprises
+
 ## Purpose
 This template ensures complete transparency and visibility into the database extension development process. By maintaining a detailed project plan and real-time status tracking, we build trust through clear communication of intentions, progress, and results.
+
+## Template Sections:
+1. **Project Overview** - Metadata and executive summary
+2. **Implementation Status Tracker** - The core tracking table
+3. **Current Focus** - What's happening right now
+4. **Risk Register** - Known risks and mitigation
+5. **Decision Log** - Key decisions and rationale
+6. **Metrics Dashboard** - Team and project health
+
+### Important Notes:
+- **Confidence scores** must be based on actual attempts, not guesses
+- **Time estimates** are examples only - your actual times will vary
+- **Status updates** should happen after every task completion
+- **Phases** follow the team Development Cycle (Requirements → Implementation → Test → Document → Retrospective)
 
 ---
 
@@ -16,42 +54,8 @@ This template ensures complete transparency and visibility into the database ext
 ## Executive Summary
 [Brief description of what this extension will provide and its scope]
 
-## Project Phases and Timeline
-
-### Phase 1: Analysis and Planning (Est. 2-3 hours)
-1. **Documentation Analysis** - Parse and understand database vendor documentation
-2. **Object Identification** - List all database objects to implement
-3. **Attribute Mapping** - Map database attributes to Java types
-4. **Pattern Selection** - Identify appropriate Liquibase patterns
-5. **Test Planning** - Define test scenarios and validation approach
-6. **Create Implementation Plan** - Detailed step-by-step plan
-
-### Phase 2: Infrastructure Setup (Est. 1 hour)
-1. **Module Creation** - Set up Maven project structure
-2. **Dependencies** - Configure database driver and dependencies
-3. **Package Structure** - Create required package hierarchy
-4. **Service Files** - Set up META-INF/services structure
-5. **Build Verification** - Ensure project builds successfully
-
-### Phase 3: Core Implementation (Est. 8-12 hours)
-1. **Database Class** - Implement database-specific class
-2. **Change Types** - Implement each change type (Create/Alter/Drop)
-3. **Statements** - Create statement classes for each change
-4. **SQL Generators** - Implement SQL generation logic
-5. **XSD Schema** - Define XML schema for validation
-
-### Phase 4: Testing (Est. 4-6 hours)
-1. **Unit Tests** - Test each component in isolation
-2. **Integration Tests** - Test against real database
-3. **Changelog Tests** - Test complete changelog execution
-4. **Edge Cases** - Test error conditions and limits
-5. **Performance Tests** - Validate acceptable performance
-
-### Phase 5: Documentation and Polish (Est. 2 hours)
-1. **User Documentation** - Usage examples and guides
-2. **API Documentation** - JavaDoc completion
-3. **Troubleshooting Guide** - Common issues and solutions
-4. **Release Notes** - Summary of features and limitations
+## Project Scope
+[Brief description of what database objects this extension will implement]
 
 ## Implementation Status Tracker
 
@@ -326,27 +330,18 @@ Track these metrics for continuous improvement:
 
 ---
 
-## How to Use This Template
+## Risk Register
 
-### For AI Assistants:
-1. **Create this document FIRST** when starting any database extension
-2. **Update after EVERY task** - Even small updates build trust
-3. **Be honest about blockers** - Transparency is crucial
-4. **Time estimates are targets** - Update if they change
-5. **Use the status table** as your primary communication tool
+| Risk | Impact | Probability | Mitigation Strategy | Status |
+|------|--------|-------------|---------------------|--------|
+| [Unknown validation rules] | High | Medium | Research thoroughly, test early | Active |
+| [Complex SQL generation] | Medium | High | Use existing patterns, seek help | Monitoring |
 
-### Status Update Pattern:
-```markdown
-## Status Update - [Timestamp]
-**Completed**: [What was just finished]
-**Result**: [Outcome/findings]
-**Next**: [What I'm doing next]
-**Blockers**: [Any issues]
-**ETA**: [Updated timeline if changed]
-```
+## Decision Log
 
-### Why This Matters:
-- **Visibility** creates confidence
+| Date | Decision | Rationale | Impact |
+|------|----------|-----------|--------|
+| [Date] | [What was decided] | [Why] | [What it affects] |
 - **Transparency** builds trust  
 - **Regular updates** show progress
 - **Clear planning** prevents surprises

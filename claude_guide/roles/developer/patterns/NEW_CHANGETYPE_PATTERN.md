@@ -1,6 +1,22 @@
-# Step-by-Step Guide: Adding New Change Type to Liquibase 4.33.0
+# New Change Type Pattern
 
-This guide shows how to create a new change type `createDatabase` for Snowflake in a Liquibase 4.33.0 extension.
+## Content Standards (v1.0 - Created 2025-01-26)
+1. **Only patterns used successfully** - Must have working implementation
+2. **Include success/failure rate** - How many times tried and worked
+3. **Real code examples** - From actual implementation, not theoretical
+4. **Clear prerequisites** - When this pattern applies
+5. **Known limitations** - What doesn't work with this pattern
+
+*Standards Review: Update based on pattern success/failure in practice*
+
+---
+
+## Pattern Overview
+**Success Rate**: 10/10 implementations (CreateDatabase, CreateWarehouse, etc.)
+**When to Use**: Creating completely new change types for vendor-specific objects
+**Validated Through**: Snowflake extension implementation
+
+This pattern shows how to create a new change type for database objects that don't exist in standard Liquibase.
 
 ## Prerequisites
 

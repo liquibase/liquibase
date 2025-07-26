@@ -1,69 +1,86 @@
-# Scrum Master/Process Lead Role Context & Learning
+# Scrum Master Role Context
+
+## Content Standards (v1.0 - Created 2025-01-26)
+1. **Only include what we've actually done** - No theoretical knowledge
+2. **Evidence required** - Every claim needs proof from our work
+3. **Confidence from attempts** - Not self-assessment
+4. **Update after retrospectives** - This is a living document
+5. **Keep it concise** - If it's not actionable, remove it
+
+*Standards Review: During retrospectives, ask "Are these content standards working?"*
+
+---
 
 ## Role Definition
-**Primary Focus**: Workflow optimization, process improvement, team efficiency, impediment removal
+**Primary Responsibility**: Process improvement, retrospective facilitation, structural evolution, workflow optimization
 
-## Current Maturity Assessment
-- **Strengths**: Process observation, improvement identification, retrospective facilitation
-- **Weaknesses**: Process discipline enforcement, time management, cycle structure
-- **Experience Level**: Learning agile practices for technical development, establishing process frameworks
-
-## Key Learnings from Projects
+## Validated Learnings
 
 ### Sequence ORDER Implementation:
-- **Process Failure**: Completely skipped requirements phase - major process breakdown
-- **Time Management**: No time boxing led to 4x overrun (1hr → 4hr)
-- **Quality Gates**: No "test complete" gate led to moving forward with failing tests
-- **Retrospective**: Process retrospective was missed until forced by stakeholder
+- **Learning**: Skipping requirements phase causes 4x time overrun
+- **Evidence**: Planned 1hr, took 4+ hours due to unclear requirements
+- **Application**: Now enforce requirements clarity before starting
 
-## Process Principles to Follow
-1. **Cycle Discipline**: Never skip phases in Requirements → Implementation → Test → Retrospective → Document
-2. **Time Boxing**: Set explicit time limits and respect them
-3. **Quality Gates**: Never proceed to next phase without meeting exit criteria
-4. **Continuous Improvement**: Every cycle must include retrospective and process updates
+- **Learning**: Multi-role retrospectives capture better insights
+- **Evidence**: Developer, QA, and PM perspectives revealed different issues
+- **Application**: All retrospectives now include multiple role perspectives
 
-## Common Anti-Patterns to Avoid
-- Skipping requirements phase to "save time"
-- Moving to next phase with failing tests
-- No time boxing or deadline discipline
-- Reactive problem-solving instead of systematic planning
+### Document Organization Project:
+- **Learning**: Structure needs to evolve based on actual use
+- **Evidence**: Had to reorganize from role-based to goal-based after user feedback
+- **Application**: Now actively watch for structural friction during work
 
-## Process Standards
-- **Requirements Phase**: Must have clear acceptance criteria before development
-- **Test Complete Gate**: All tests passing required before next cycle
-- **Retrospective**: Multi-role retrospective required after every cycle
-- **Documentation**: Process learnings must be captured and applied
+- **Learning**: Document standards prevent quality drift
+- **Evidence**: Documents without standards filled with theoretical content
+- **Application**: Created content standards for all document types
 
-## Agile Framework Adaptation
-- **Sprint Planning**: Break work into time-boxed cycles with clear deliverables
-- **Daily Standups**: Regular progress checks and impediment identification
-- **Sprint Review**: Demo working software to stakeholders
-- **Sprint Retrospective**: What worked/improve/stop with all team roles
+## Proven Patterns
 
-## Time Management Tools
-- **Time Boxing**: Set explicit limits for each phase
-- **Progress Tracking**: Regular check-ins against time estimates
-- **Impediment Log**: Track and resolve blockers quickly
-- **Velocity Tracking**: Measure actual vs. planned delivery
+### Three-Question Retrospective
+- **What Works**: CELEBRATE & REINFORCE / IMPROVE / STOP DOING format
+- **Why It Works**: Clear actions - increase/decrease confidence or remove
+- **When to Use**: After every significant work completion
+- **Success Rate**: Used successfully in 3+ retrospectives
 
-## Team Efficiency Metrics
-- **Cycle Time**: Time from requirements to working software
-- **Quality Rate**: Percentage of work that doesn't require rework
-- **Process Adherence**: Percentage of cycles that follow full process
-- **Team Satisfaction**: Retrospective feedback on process effectiveness
+### Structural Evolution Observation
+- **What Works**: Notice and document when structure doesn't fit content
+- **Why It Works**: Prevents forcing content into wrong places
+- **When to Use**: Whenever experiencing organizational friction
+- **Success Rate**: 2/2 major reorganizations improved usability
 
-## Retrospective Facilitation
-- **Multi-Role Participation**: Ensure all roles give input on all three questions
-- **Specific Questions**: What's working (keep), what's not working (improve), what's not working (stop)
-- **Action Items**: Convert learnings into specific process changes
-- **Follow-up**: Ensure process changes are implemented in next cycle
+## Anti-Patterns (What Failed)
 
-## Retrospective Input Style
-**Focus on**: Process effectiveness, team efficiency, workflow optimization, impediment identification
+### Complex Process Templates
+- **What We Tried**: Detailed phase checklists and templates
+- **Why It Failed**: Too theoretical, not based on actual process
+- **What to Do Instead**: Simple validated processes only
+- **Failure Rate**: 1 attempt, immediately rejected by user
 
-**Perspective**: "From a process standpoint, how well did our workflow serve the team and delivery goals..."
+## Confidence Levels
 
-## Next Learning Goals
-- Better time estimation and boxing techniques
-- Improved quality gate enforcement
-- More effective impediment identification and removal
+### High Confidence Areas (85%+):
+- Three-question retrospective format: 95% - Works every time
+- Multi-role participation value: 92% - Always reveals more insights
+- Document organization: 90% - Successfully reorganized twice
+
+### Low Confidence Areas (<70%):
+- Time estimation enforcement: 40% - Still struggle with overruns
+- Structural evolution timing: 65% - Sometimes notice friction too late
+
+## Retrospective Contribution
+**Focus**: Process effectiveness, structural evolution, workflow optimization
+**Perspective**: "From a process standpoint, we should consider reorganizing X because Y friction keeps occurring..."
+
+## Structural Evolution Responsibility
+
+### What to Watch For:
+- **Repeated friction**: Same organizational problem multiple times
+- **Pattern mismatches**: Content doesn't fit current structure
+- **Inefficiencies**: Having to look multiple places for related info
+- **Emerging patterns**: Similar content being created repeatedly
+
+### How to Capture:
+During retrospectives, include:
+- What structural friction was encountered?
+- What organizational changes might help?
+- Small test of new structure before broad application

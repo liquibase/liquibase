@@ -1,0 +1,212 @@
+# Development State Machine Definition
+# This defines our turn-based development process as an executable state machine
+
+version: 1.0
+name: LBCF Development Machine
+
+# Define all possible states (Phase:Role combinations)
+states:
+  requirements_product_owner:
+    description: "Define clear acceptance criteria"
+    process_doc: "/roles/product_owner/GOAL_DEFINE_REQUIREMENTS.md"
+    entry_criteria:
+      - user_request_exists
+    exit_criteria:
+      - acceptance_criteria_defined
+      - definition_of_done_clear
+    transitions:
+      - to: implementation_developer
+        when: requirements_clear
+        confidence_required: 70
+      - to: requirements_product_owner
+        when: needs_clarification
+        action: ask_user
+    learn:
+      - pattern: requirement_clarity
+      - metric: time_to_clear_requirements
+
+  implementation_developer:
+    description: "Build the feature following patterns"
+    process_doc: "/roles/developer/GOAL_PROVE_CODE_WORKS.md"
+    patterns:
+      - "/roles/developer/patterns/THREE_LAYER_PATTERN.md"
+      - "/roles/developer/patterns/QUALITY_FIRST_DEVELOPMENT.md"
+    entry_criteria:
+      - requirements_clear
+      - patterns_identified
+    exit_criteria:
+      - code_complete
+      - unit_tests_pass
+    transitions:
+      - to: test_qa
+        when: code_complete
+        confidence_required: 85
+      - to: help_architect
+        when: three_strikes_rule
+        trigger: tried_3_approaches_failed
+      - to: implementation_developer
+        when: low_confidence
+        confidence_required: 70
+    learn:
+      - pattern: implementation_time
+      - confidence: pattern_application
+
+  help_architect:
+    description: "Get architectural guidance"
+    process_doc: "/roles/architect/GOAL_PROVIDE_GUIDANCE.md"
+    entry_criteria:
+      - stuck_on_pattern
+      - tried_3_approaches
+    exit_criteria:
+      - pattern_understood
+      - approach_validated
+    transitions:
+      - to: implementation_developer
+        when: guidance_received
+        confidence_boost: 20
+    learn:
+      - pattern: architectural_pattern
+      - document: new_pattern_if_needed
+
+  test_qa:
+    description: "Verify feature works correctly"
+    process_doc: "/roles/qa/GOAL_PROVE_CODE_WONT_BREAK.md"
+    patterns:
+      - "/roles/qa/patterns/TEST_HARNESS_PATTERN.md"
+    entry_criteria:
+      - code_complete
+      - unit_tests_pass
+    exit_criteria:
+      - integration_tests_pass
+      - test_harness_pass
+    transitions:
+      - to: document_technical_writer
+        when: all_tests_pass
+      - to: implementation_developer
+        when: tests_fail
+        with_data: failure_details
+      - to: help_devops
+        when: environment_issues
+        trigger: jar_deployment_problems
+    learn:
+      - pattern: test_coverage
+      - metric: bug_detection_rate
+
+  help_devops:
+    description: "Resolve environment/build issues"
+    process_doc: "/roles/devops_engineer/GOAL_FIX_ENVIRONMENT.md"
+    entry_criteria:
+      - environment_issue_detected
+    exit_criteria:
+      - environment_working
+      - deployment_verified
+    transitions:
+      - to: test_qa
+        when: issue_resolved
+    learn:
+      - pattern: environment_fix
+      - document: troubleshooting_steps
+
+  document_technical_writer:
+    description: "Document the implementation"
+    process_doc: "/roles/technical_writer/GOAL_DOCUMENT_FEATURE.md"
+    patterns:
+      - "/roles/technical_writer/patterns/GOAL_BASED_DOCUMENTATION_PATTERN.md"
+    entry_criteria:
+      - feature_working
+      - tests_passing
+    exit_criteria:
+      - user_docs_complete
+      - patterns_documented
+    transitions:
+      - to: retrospective_scrum_master
+        when: documentation_complete
+    learn:
+      - pattern: documentation_completeness
+      - metric: documentation_time
+
+  retrospective_scrum_master:
+    description: "Facilitate learning and improvement"
+    process_doc: "/roles/scrum_master/GOAL_CAPTURE_LEARNING.md"
+    patterns:
+      - "/roles/scrum_master/patterns/RETROSPECTIVE_PATTERN.md"
+    entry_criteria:
+      - cycle_complete
+    exit_criteria:
+      - learnings_captured
+      - confidence_updated
+      - improvements_identified
+    transitions:
+      - to: structural_evolution_scrum_master
+        when: friction_detected
+        trigger: organizational_issues
+      - to: complete
+        when: retrospective_complete
+    learn:
+      - update: all_confidence_levels
+      - capture: new_patterns
+      - identify: process_improvements
+
+  structural_evolution_scrum_master:
+    description: "Evolve the system structure"
+    process_doc: "/roles/scrum_master/GOAL_EVOLVE_STRUCTURE.md"
+    entry_criteria:
+      - friction_detected
+      - pattern_mismatch
+    exit_criteria:
+      - structure_improved
+      - friction_resolved
+    transitions:
+      - to: retrospective_scrum_master
+        when: evolution_complete
+    learn:
+      - evolution: system_structure
+      - document: structural_changes
+
+# Global rules and triggers
+global_rules:
+  three_strikes:
+    description: "After 3 failed attempts, seek help"
+    applies_to: all_states
+    action: transition_to_help_state
+    
+  confidence_threshold:
+    description: "Below 70% confidence requires help"
+    applies_to: execution_states
+    action: loop_or_seek_help
+    
+  time_box:
+    description: "Spending 3x estimated time triggers help"
+    applies_to: all_states
+    action: transition_to_help_state
+
+# Learning mechanisms
+learning:
+  retrospective_updates:
+    - confidence_levels
+    - pattern_success_rates
+    - time_estimates
+    
+  pattern_discovery:
+    - document_new_patterns
+    - update_existing_patterns
+    - deprecate_failed_patterns
+    
+  structural_evolution:
+    - add_new_states
+    - modify_transitions
+    - update_process_docs
+
+# Metrics tracked
+metrics:
+  cycle_time:
+    description: "Time from requirements to complete"
+    target: "< 2x estimate"
+    
+  confidence_growth:
+    description: "Average confidence increase per cycle"
+    target: "> 5% per cycle"
+    
+  pattern_reuse:
+    description: "Patterns successfully reused"
+    target: "> 80% success rate"

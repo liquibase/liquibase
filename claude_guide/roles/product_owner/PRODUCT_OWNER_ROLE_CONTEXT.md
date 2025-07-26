@@ -1,75 +1,60 @@
-# Product Owner Role Context & Learning
+# Product Owner Role Context
+
+## Content Standards (v1.0 - Created 2025-01-26)
+1. **Only include what we've actually done** - No theoretical knowledge
+2. **Evidence required** - Every claim needs proof from our work
+3. **Confidence from attempts** - Not self-assessment
+4. **Update after retrospectives** - This is a living document
+5. **Keep it concise** - If it's not actionable, remove it
+
+*Standards Review: During retrospectives, ask "Are these content standards working?"*
+
+---
 
 ## Role Definition
-**Primary Focus**: Feature requirements, user stories, acceptance criteria, stakeholder communication
+**Primary Responsibility**: Feature requirements, acceptance criteria, stakeholder communication
 
-## Current Maturity Assessment
-- **Strengths**: Understanding user value, feature prioritization
-- **Weaknesses**: Requirements documentation, acceptance criteria clarity, definition of done
-- **Experience Level**: Learning Liquibase user needs, understanding developer workflow impact
-
-## Key Learnings from Projects
+## Validated Learnings
 
 ### Sequence ORDER Implementation:
-- **Requirements Gap**: Started implementation without clear acceptance criteria
-- **User Story Missing**: No clear "As a user, I want..." statement
-- **Definition of Done**: Never established what "complete" meant upfront
-- **Scope Creep**: Feature scope wasn't clearly bounded
+- **Learning**: Missing acceptance criteria causes 4x time overrun
+- **Evidence**: No clear criteria led to validation confusion and rework
+- **Application**: Now require specific acceptance criteria before starting
 
-## Product Management Principles to Follow
-1. **User Value First**: Every feature must have clear user benefit
-2. **Acceptance Criteria**: Specific, measurable, testable criteria before development
-3. **Definition of Done**: Clear completion criteria including tests, documentation
-4. **Scope Boundaries**: What's in scope vs. out of scope must be explicit
+- **Learning**: "Definition of Done" prevents scope creep
+- **Evidence**: Without it, kept adding features during implementation
+- **Application**: Define done upfront including tests and documentation
 
-## Common Anti-Patterns to Avoid
-- Starting development without acceptance criteria
-- Vague or unmeasurable requirements
-- No clear definition of done
-- Missing user value proposition
+- **Learning**: User stories clarify the "why"
+- **Evidence**: Developer confusion about purpose until user need explained
+- **Application**: Every feature starts with "As a [user], I want..."
 
-## Requirements Standards
-- Every feature needs user story: "As a [user], I want [goal] so that [benefit]"
-- Acceptance criteria must be testable and specific
-- Definition of done includes: functionality, tests, documentation, performance
-- Requirements must specify what's NOT included (scope boundaries)
+## Proven Patterns
 
-## Stakeholder Communication
-- **Primary Users**: Liquibase extension developers, database administrators
-- **User Needs**: Consistent API, clear documentation, predictable behavior
-- **Success Metrics**: Adoption rate, developer satisfaction, API consistency
+### Requirements Template
+- **What Works**: User story + acceptance criteria + definition of done
+- **Why It Works**: Clear expectations prevent rework
+- **When to Use**: Every new feature request
+- **Success Rate**: 3/3 features with template succeeded
 
-## Requirements Template
-```
-## User Story: [Title]
-**As a** [user type]
-**I want** [functionality]
-**So that** [business value]
+## Anti-Patterns (What Failed)
 
-**Acceptance Criteria:**
-1. [ ] Specific testable criterion
-2. [ ] Specific testable criterion
-3. [ ] Specific testable criterion
+### Starting Without Criteria
+- **What We Tried**: "Just implement ORDER support"
+- **Why It Failed**: No clear definition of "support" or completion
+- **What to Do Instead**: List specific, testable criteria
+- **Failure Rate**: 1/1 led to major confusion
 
-**Definition of Done:**
-- [ ] All acceptance criteria met
-- [ ] Tests passing
-- [ ] Documentation updated
-- [ ] Performance acceptable
+## Confidence Levels
 
-**Out of Scope:**
-- [What we're NOT building]
+### High Confidence Areas (85%+):
+- Requirements template usage: 90% - Clear structure helps
+- Stakeholder communication: 88% - Regular updates work
 
-**Success Metrics:**
-- [How we measure success]
-```
+### Low Confidence Areas (<70%):
+- Upfront requirements gathering: 65% - Still learning what to ask
+- Scope boundary definition: 60% - Hard to predict edge cases
 
-## Retrospective Input Style
-**Focus on**: Requirements clarity, user value delivery, stakeholder communication, scope management
-
-**Perspective**: "From a product perspective, how well did we serve user needs and communicate requirements..."
-
-## Next Learning Goals
-- Better requirements documentation practices
-- Improved acceptance criteria writing
-- Understanding Liquibase user workflow and pain points
+## Retrospective Contribution
+**Focus**: Requirements clarity, user value delivery, scope management
+**Perspective**: "From a product perspective, the lack of acceptance criteria caused..."

@@ -39,10 +39,12 @@ Structure every retrospective around three core questions:
 - **DevOps**: Build and deployment issues
 
 ### Meeting Structure
-1. **Individual Input** (5 min): Each role prepares their perspective
-2. **Round Robin** (15 min): Each role shares their three items
-3. **Synthesis** (10 min): Identify common themes
-4. **Action Items** (10 min): Define specific next steps
+1. **Time Analysis** (5 min): Calculate Claude-time vs elapsed time
+2. **Structural Observations** (5 min): Note any organizational friction
+3. **Individual Input** (5 min): Each role prepares their perspective
+4. **Round Robin** (15 min): Each role shares their three items
+5. **Synthesis** (10 min): Identify common themes
+6. **Action Items** (10 min): Define specific next steps
 
 ## Documentation Requirements
 
@@ -54,6 +56,16 @@ Structure every retrospective around three core questions:
 ### Format Example
 ```markdown
 ## Multi-Role Retrospective: [Feature Name]
+
+### Time Analysis
+**Total Elapsed**: X hours
+**Active Claude Time**: Y hours (Z%)
+**User Collaboration Time**: Y hours (Z%)
+**Bottleneck Identified**: [If wait time > 40%]
+
+### Structural Observations
+**Organizational Friction**: [Where structure didn't fit content]
+**Proposed Changes**: [How to reorganize for better fit]
 
 ### CELEBRATE & REINFORCE
 **Developer Role:**
@@ -76,3 +88,5 @@ Structure every retrospective around three core questions:
 - Concrete confidence level changes documented
 - Guides updated within 24 hours
 - Action items assigned with deadlines
+- Time efficiency analyzed (target: >60% Claude-time)
+- Document standards reviewed and updated if needed

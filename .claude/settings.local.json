@@ -63,7 +63,8 @@
       "Bash(bash:*)",
       "Bash(timeout 45 mvn test:*)",
       "Bash(unzip:*)",
-      "Bash(./build-and-test.sh)"
+      "Bash(./build-and-test.sh)",
+      "Bash(git checkout:*)"
     ],
     "deny": []
   }
