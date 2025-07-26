@@ -107,8 +107,8 @@ ID | DEPLOYMENT_ID | CHANGELOG_FILE | CHANGESET_ID | CHANGESET_AUTHOR |
         firstIndex == lastIndex
     }
 
-    def "No changes marked as ran if multiple SQL changes with DBMS mismatch"() {
-        def changelogFile = "target/test-classes/changelogs/multiple-sql-changes.yaml"
+    def "No change sets marked as ran if all SQL changes have DBMS mismatch"() {
+        def changelogFile = "target/test-classes/changelogs/multiple-sql-changes-none-ran.yaml"
         when:
 
         Map<String, Object> scopeValues = new HashMap<>()
@@ -141,7 +141,7 @@ ID | DEPLOYMENT_ID | CHANGELOG_FILE | CHANGESET_ID | CHANGESET_AUTHOR |
         console.contains("Previously run:               0")
         console.contains("Filtered out:                 0")
         console.contains("-------------------------------")
-        console.contains("Total change sets:            1")
+        console.contains("Total change sets:            0")
 
         when:
         def outputStream = new ByteArrayOutputStream()
@@ -158,8 +158,8 @@ ID | DEPLOYMENT_ID | CHANGELOG_FILE | CHANGESET_ID | CHANGESET_AUTHOR |
         outputBuffer.contains("No changesets deployed")
     }
 
-    def "One changed marked as ran if not all SQL changes with DBMS mismatch"() {
-        def changelogFile = "target/test-classes/changelogs/one-ran.yaml"
+    def "Changeset should be marked as ran if not all SQL changes have DBMS mismatch"() {
+        def changelogFile = "target/test-classes/changelogs/multiple-sql-changes-one-ran.yaml"
         when:
 
         Map<String, Object> scopeValues = new HashMap<>()
@@ -206,7 +206,7 @@ ID | DEPLOYMENT_ID | CHANGELOG_FILE | CHANGESET_ID | CHANGESET_AUTHOR |
 
         then:
         outputBuffer != null
-        assert outputBuffer.contains("target/test-classes/changelogs/one-ran.yaml")
+        assert outputBuffer.contains("target/test-classes/changelogs/multiple-sql-changes-one-ran.yaml")
         assert outputBuffer.contains("nvoxland")
     }
 }
