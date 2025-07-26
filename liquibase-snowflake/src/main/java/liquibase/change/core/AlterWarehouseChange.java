@@ -45,11 +45,11 @@ public class AlterWarehouseChange extends AbstractChange {
     }
 
     @DatabaseChangeProperty(description = "New name for the warehouse")
-    public String getNewName() {
+    public String getNewWarehouseName() {
         return newName;
     }
 
-    public void setNewName(String newName) {
+    public void setNewWarehouseName(String newName) {
         this.newName = newName;
     }
 
@@ -184,7 +184,7 @@ public class AlterWarehouseChange extends AbstractChange {
         return new SqlStatement[]{
             new AlterWarehouseStatement()
                 .setWarehouseName(getWarehouseName())
-                .setNewName(getNewName())
+                .setNewName(getNewWarehouseName())
                 .setWarehouseSize(getWarehouseSize())
                 .setWarehouseType(getWarehouseType())
                 .setMaxClusterCount(getMaxClusterCount())
@@ -221,7 +221,7 @@ public class AlterWarehouseChange extends AbstractChange {
         }
         
         // At least one alteration property must be specified
-        boolean hasAlteration = getNewName() != null ||
+        boolean hasAlteration = getNewWarehouseName() != null ||
                               getWarehouseSize() != null ||
                               getWarehouseType() != null ||
                               getMaxClusterCount() != null ||

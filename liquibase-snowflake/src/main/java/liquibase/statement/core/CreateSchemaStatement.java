@@ -12,6 +12,7 @@ public class CreateSchemaStatement extends AbstractSqlStatement {
     private Boolean managed_;
     private String defaultDdlCollation;
     private String pipeExecutionPaused;
+    private Boolean orReplace;
 
     public String getSchemaName() {
         return schemaName;
@@ -75,5 +76,13 @@ public class CreateSchemaStatement extends AbstractSqlStatement {
 
     public void setPipeExecutionPaused(String pipeExecutionPaused) {
         this.pipeExecutionPaused = pipeExecutionPaused;
+    }
+
+    public Boolean getOrReplace() {
+        return orReplace;
+    }
+
+    public void setOrReplace(Boolean orReplace) {
+        this.orReplace = orReplace;
     }
 }

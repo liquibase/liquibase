@@ -23,9 +23,10 @@ public class CreateSchemaChange extends AbstractChange {
     private String dataRetentionTimeInDays;
     private String maxDataExtensionTimeInDays;
     private Boolean transient_;
-    private Boolean managed_;
+    private Boolean managedAccess;
     private String defaultDdlCollation;
     private String pipeExecutionPaused;
+    private Boolean orReplace;
 
     @DatabaseChangeProperty(description = "Name of the schema to create", requiredForDatabase = "snowflake")
     public String getSchemaName() {
@@ -72,13 +73,13 @@ public class CreateSchemaChange extends AbstractChange {
         this.transient_ = transient_;
     }
 
-    @DatabaseChangeProperty(description = "Whether this is a managed schema")
-    public Boolean getManaged() {
-        return managed_;
+    @DatabaseChangeProperty(description = "Whether this is a managed access schema")
+    public Boolean getManagedAccess() {
+        return managedAccess;
     }
 
-    public void setManaged(Boolean managed_) {
-        this.managed_ = managed_;
+    public void setManagedAccess(Boolean managedAccess) {
+        this.managedAccess = managedAccess;
     }
 
     @DatabaseChangeProperty(description = "Default DDL collation")
@@ -99,6 +100,15 @@ public class CreateSchemaChange extends AbstractChange {
         this.pipeExecutionPaused = pipeExecutionPaused;
     }
 
+    @DatabaseChangeProperty(description = "Whether to use CREATE OR REPLACE SCHEMA")
+    public Boolean getOrReplace() {
+        return orReplace;
+    }
+
+    public void setOrReplace(Boolean orReplace) {
+        this.orReplace = orReplace;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
         CreateSchemaStatement statement = new CreateSchemaStatement();
@@ -107,9 +117,10 @@ public class CreateSchemaChange extends AbstractChange {
         statement.setDataRetentionTimeInDays(getDataRetentionTimeInDays());
         statement.setMaxDataExtensionTimeInDays(getMaxDataExtensionTimeInDays());
         statement.setTransient(getTransient());
-        statement.setManaged(getManaged());
+        statement.setManaged(getManagedAccess());
         statement.setDefaultDdlCollation(getDefaultDdlCollation());
         statement.setPipeExecutionPaused(getPipeExecutionPaused());
+        statement.setOrReplace(getOrReplace());
         
         return new SqlStatement[]{statement};
     }
@@ -141,5 +152,10 @@ public class CreateSchemaChange extends AbstractChange {
         }
         
         return errors;
+    }
+    
+    @Override
+    public String getSerializedObjectNamespace() {
+        return "http://www.liquibase.org/xml/ns/snowflake";
     }
 }

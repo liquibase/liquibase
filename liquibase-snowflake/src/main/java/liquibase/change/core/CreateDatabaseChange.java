@@ -24,6 +24,7 @@ public class CreateDatabaseChange extends AbstractChange {
     private String maxDataExtensionTimeInDays;
     private Boolean transient_;
     private String defaultDdlCollation;
+    private Boolean orReplace;
 
     @DatabaseChangeProperty(description = "Name of the database to create", requiredForDatabase = "snowflake")
     public String getDatabaseName() {
@@ -79,6 +80,15 @@ public class CreateDatabaseChange extends AbstractChange {
         this.defaultDdlCollation = defaultDdlCollation;
     }
 
+    @DatabaseChangeProperty(description = "Whether to use CREATE OR REPLACE DATABASE")
+    public Boolean getOrReplace() {
+        return orReplace;
+    }
+
+    public void setOrReplace(Boolean orReplace) {
+        this.orReplace = orReplace;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
         CreateDatabaseStatement statement = new CreateDatabaseStatement();
@@ -88,6 +98,7 @@ public class CreateDatabaseChange extends AbstractChange {
         statement.setMaxDataExtensionTimeInDays(getMaxDataExtensionTimeInDays());
         statement.setTransient(getTransient());
         statement.setDefaultDdlCollation(getDefaultDdlCollation());
+        statement.setOrReplace(getOrReplace());
         
         return new SqlStatement[]{statement};
     }

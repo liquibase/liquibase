@@ -30,21 +30,33 @@ public class CreateWarehouseGeneratorSnowflake extends AbstractSqlGenerator<Crea
     @Override
     public Sql[] generateSql(CreateWarehouseStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuilder sql = new StringBuilder();
-        sql.append("CREATE WAREHOUSE ");
-        sql.append(database.escapeObjectName(statement.getWarehouseName(), liquibase.structure.core.Table.class));
+        sql.append("CREATE ");
         
+        // Add OR REPLACE if specified
+        if (Boolean.TRUE.equals(statement.getOrReplace())) {
+            sql.append("OR REPLACE ");
+        }
+        
+        sql.append("WAREHOUSE ");
+        
+        // Add IF NOT EXISTS if specified
+        if (Boolean.TRUE.equals(statement.getIfNotExists())) {
+            sql.append("IF NOT EXISTS ");
+        }
+        
+        sql.append(database.escapeObjectName(statement.getWarehouseName(), liquibase.structure.core.Table.class));
         // Add WITH clause if any parameters are specified
         boolean hasWithClause = false;
         StringBuilder withClause = new StringBuilder();
         
-        if (statement.getWarehouseSize() != null) {
-            withClause.append("WAREHOUSE_SIZE = ").append(statement.getWarehouseSize());
+        if (statement.getWarehouseType() != null) {
+            withClause.append("WAREHOUSE_TYPE = '").append(statement.getWarehouseType()).append("'");
             hasWithClause = true;
         }
         
-        if (statement.getWarehouseType() != null) {
+        if (statement.getWarehouseSize() != null) {
             if (hasWithClause) withClause.append(" ");
-            withClause.append("WAREHOUSE_TYPE = '").append(statement.getWarehouseType()).append("'");
+            withClause.append("WAREHOUSE_SIZE = ").append(statement.getWarehouseSize());
             hasWithClause = true;
         }
         
@@ -87,6 +99,12 @@ public class CreateWarehouseGeneratorSnowflake extends AbstractSqlGenerator<Crea
         if (statement.getResourceMonitor() != null) {
             if (hasWithClause) withClause.append(" ");
             withClause.append("RESOURCE_MONITOR = ").append(database.escapeObjectName(statement.getResourceMonitor(), liquibase.structure.core.Table.class));
+            hasWithClause = true;
+        }
+        
+        if (statement.getResourceConstraint() != null) {
+            if (hasWithClause) withClause.append(" ");
+            withClause.append("RESOURCE_CONSTRAINT = ").append(statement.getResourceConstraint());
             hasWithClause = true;
         }
         

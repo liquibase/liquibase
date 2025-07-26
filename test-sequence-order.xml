@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:snowflake="http://www.liquibase.org/xml/ns/snowflake"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                   http://www.liquibase.org/xml/ns/snowflake
+                   http://www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd">
+
+    <!-- Test ORDER support (INT-151) -->
+    <changeSet id="test-sequence-order" author="test">
+        <createSequence sequenceName="test_sequence_ordered"
+                       startValue="1"
+                       incrementBy="1"
+                       order="true"
+                       comment="Test ordered sequence"/>
+    </changeSet>
+
+    <!-- Test NOORDER support -->
+    <changeSet id="test-sequence-noorder" author="test">
+        <createSequence sequenceName="test_sequence_noorder"
+                       startValue="100"
+                       incrementBy="10"
+                       order="false"
+                       comment="Test unordered sequence"/>
+    </changeSet>
+
+    <!-- Test OR REPLACE -->
+    <changeSet id="test-sequence-or-replace" author="test">
+        <createSequence sequenceName="test_sequence_or_replace"
+                       orReplace="true"
+                       startValue="1000"
+                       comment="Test OR REPLACE sequence"/>
+    </changeSet>
+
+    <!-- Test IF NOT EXISTS -->
+    <changeSet id="test-sequence-if-not-exists" author="test">
+        <createSequence sequenceName="test_sequence_if_not_exists"
+                       ifNotExists="true"
+                       startValue="5000"
+                       comment="Test IF NOT EXISTS sequence"/>
+    </changeSet>
+
+</databaseChangeLog>

@@ -37,20 +37,20 @@ public class AlterDatabaseChange extends AbstractChange {
     }
 
     @DatabaseChangeProperty(description = "New name for the database")
-    public String getNewName() {
+    public String getNewDatabaseName() {
         return newName;
     }
 
-    public void setNewName(String newName) {
+    public void setNewDatabaseName(String newName) {
         this.newName = newName;
     }
 
     @DatabaseChangeProperty(description = "New data retention time in days")
-    public String getNewDataRetentionTimeInDays() {
+    public String getDataRetentionTimeInDays() {
         return newDataRetentionTimeInDays;
     }
 
-    public void setNewDataRetentionTimeInDays(String newDataRetentionTimeInDays) {
+    public void setDataRetentionTimeInDays(String newDataRetentionTimeInDays) {
         this.newDataRetentionTimeInDays = newDataRetentionTimeInDays;
     }
 
@@ -73,11 +73,11 @@ public class AlterDatabaseChange extends AbstractChange {
     }
 
     @DatabaseChangeProperty(description = "New comment for the database")
-    public String getNewComment() {
+    public String getComment() {
         return newComment;
     }
 
-    public void setNewComment(String newComment) {
+    public void setComment(String newComment) {
         this.newComment = newComment;
     }
 
@@ -103,11 +103,11 @@ public class AlterDatabaseChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) {
         AlterDatabaseStatement statement = new AlterDatabaseStatement();
         statement.setDatabaseName(getDatabaseName());
-        statement.setNewName(getNewName());
-        statement.setNewDataRetentionTimeInDays(getNewDataRetentionTimeInDays());
+        statement.setNewName(getNewDatabaseName());
+        statement.setNewDataRetentionTimeInDays(getDataRetentionTimeInDays());
         statement.setNewMaxDataExtensionTimeInDays(getNewMaxDataExtensionTimeInDays());
         statement.setNewDefaultDdlCollation(getNewDefaultDdlCollation());
-        statement.setNewComment(getNewComment());
+        statement.setNewComment(getComment());
         statement.setReplaceComment(getReplaceComment());
         statement.setDropComment(getDropComment());
         
@@ -133,18 +133,18 @@ public class AlterDatabaseChange extends AbstractChange {
         }
         
         // At least one change must be specified
-        if (getNewName() == null && 
-            getNewDataRetentionTimeInDays() == null && 
+        if (getNewDatabaseName() == null && 
+            getDataRetentionTimeInDays() == null && 
             getNewMaxDataExtensionTimeInDays() == null &&
             getNewDefaultDdlCollation() == null &&
-            getNewComment() == null &&
+            getComment() == null &&
             (getDropComment() == null || !getDropComment())) {
             errors.addError("At least one database property must be changed");
         }
         
         // Cannot specify both newComment and dropComment
-        if (getNewComment() != null && getDropComment() != null && getDropComment()) {
-            errors.addError("Cannot specify both newComment and dropComment");
+        if (getComment() != null && getDropComment() != null && getDropComment()) {
+            errors.addError("Cannot specify both comment and dropComment");
         }
         
         return errors;

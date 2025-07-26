@@ -10,6 +10,7 @@ public class CreateDatabaseStatement extends AbstractSqlStatement {
     private String maxDataExtensionTimeInDays;
     private Boolean transient_;
     private String defaultDdlCollation;
+    private Boolean orReplace;
 
     public String getDatabaseName() {
         return databaseName;
@@ -57,5 +58,13 @@ public class CreateDatabaseStatement extends AbstractSqlStatement {
 
     public void setDefaultDdlCollation(String defaultDdlCollation) {
         this.defaultDdlCollation = defaultDdlCollation;
+    }
+
+    public Boolean getOrReplace() {
+        return orReplace;
+    }
+
+    public void setOrReplace(Boolean orReplace) {
+        this.orReplace = orReplace;
     }
 }

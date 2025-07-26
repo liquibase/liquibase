@@ -13,6 +13,7 @@ import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class CreateTableGeneratorSnowflake extends CreateTableGenerator {
 
@@ -52,17 +53,26 @@ public class CreateTableGeneratorSnowflake extends CreateTableGenerator {
         // Enhance the CREATE TABLE statement with Snowflake-specific features
         String originalSql = baseSql[0].toSql();
         
-        // Check if this is a transient table (using tablespace as a way to specify this)
-        boolean isTransient = statement.getTablespace() != null && 
-                             statement.getTablespace().toLowerCase().contains("transient");
-        
-        // Check for cluster by columns (using remarks as a way to specify this for now)
+        // Initialize variables
+        boolean isTransient = false;
         String clusterByColumns = null;
         String dataRetentionDays = null;
+        String maxDataExtensionDays = null;
         String comment = null;
+        boolean copyGrants = false;
+        boolean changeTracking = false;
+        boolean enableSchemaEvolution = false;
+        String stageFileFormat = null;
+        String stageCopyOptions = null;
+        String defaultDdlCollation = null;
+        String tag = null;
         
-        if (statement.getRemarks() != null && !statement.getRemarks().trim().isEmpty()) {
-            String remarks = statement.getRemarks().trim();
+        // Use the approach of encoding in tablespace and remarks
+        isTransient = statement.getTablespace() != null && 
+                     statement.getTablespace().toLowerCase().contains("transient");
+        
+            if (statement.getRemarks() != null && !statement.getRemarks().trim().isEmpty()) {
+                String remarks = statement.getRemarks().trim();
             
             // Parse special Snowflake options from remarks
             // Format: "CLUSTER_BY:col1,col2|DATA_RETENTION:7|COMMENT:actual comment"
@@ -72,6 +82,22 @@ public class CreateTableGeneratorSnowflake extends CreateTableGenerator {
                     clusterByColumns = option.substring("CLUSTER_BY:".length()).trim();
                 } else if (option.startsWith("DATA_RETENTION:")) {
                     dataRetentionDays = option.substring("DATA_RETENTION:".length()).trim();
+                } else if (option.startsWith("MAX_DATA_EXTENSION:")) {
+                    maxDataExtensionDays = option.substring("MAX_DATA_EXTENSION:".length()).trim();
+                } else if (option.startsWith("COPY_GRANTS:")) {
+                    copyGrants = Boolean.parseBoolean(option.substring("COPY_GRANTS:".length()).trim());
+                } else if (option.startsWith("CHANGE_TRACKING:")) {
+                    changeTracking = Boolean.parseBoolean(option.substring("CHANGE_TRACKING:".length()).trim());
+                } else if (option.startsWith("ENABLE_SCHEMA_EVOLUTION:")) {
+                    enableSchemaEvolution = Boolean.parseBoolean(option.substring("ENABLE_SCHEMA_EVOLUTION:".length()).trim());
+                } else if (option.startsWith("STAGE_FILE_FORMAT:")) {
+                    stageFileFormat = option.substring("STAGE_FILE_FORMAT:".length()).trim();
+                } else if (option.startsWith("STAGE_COPY_OPTIONS:")) {
+                    stageCopyOptions = option.substring("STAGE_COPY_OPTIONS:".length()).trim();
+                } else if (option.startsWith("DEFAULT_DDL_COLLATION:")) {
+                    defaultDdlCollation = option.substring("DEFAULT_DDL_COLLATION:".length()).trim();
+                } else if (option.startsWith("TAG:")) {
+                    tag = option.substring("TAG:".length()).trim();
                 } else if (option.startsWith("COMMENT:")) {
                     comment = option.substring("COMMENT:".length()).trim();
                 } else if (!option.contains(":")) {
@@ -79,7 +105,7 @@ public class CreateTableGeneratorSnowflake extends CreateTableGenerator {
                     comment = option;
                 }
             }
-        }
+            }
         
         // Rebuild the CREATE TABLE statement with Snowflake enhancements
         StringBuilder enhancedSql = new StringBuilder();
@@ -111,8 +137,42 @@ public class CreateTableGeneratorSnowflake extends CreateTableGenerator {
             snowflakeOptions.add("CLUSTER BY (" + clusterByColumns + ")");
         }
         
-        if (dataRetentionDays != null && !dataRetentionDays.isEmpty()) {
+        // DATA_RETENTION_TIME_IN_DAYS is only valid for permanent tables, not transient tables
+        if (!isTransient && dataRetentionDays != null && !dataRetentionDays.isEmpty()) {
             snowflakeOptions.add("DATA_RETENTION_TIME_IN_DAYS = " + dataRetentionDays);
+        }
+        
+        // MAX_DATA_EXTENSION_TIME_IN_DAYS is only valid for permanent tables, not transient tables
+        if (!isTransient && maxDataExtensionDays != null && !maxDataExtensionDays.isEmpty()) {
+            snowflakeOptions.add("MAX_DATA_EXTENSION_TIME_IN_DAYS = " + maxDataExtensionDays);
+        }
+        
+        if (copyGrants) {
+            snowflakeOptions.add("COPY GRANTS");
+        }
+        
+        if (changeTracking) {
+            snowflakeOptions.add("CHANGE_TRACKING = TRUE");
+        }
+        
+        if (enableSchemaEvolution) {
+            snowflakeOptions.add("ENABLE_SCHEMA_EVOLUTION = TRUE");
+        }
+        
+        if (stageFileFormat != null && !stageFileFormat.isEmpty()) {
+            snowflakeOptions.add("STAGE_FILE_FORMAT = " + stageFileFormat);
+        }
+        
+        if (stageCopyOptions != null && !stageCopyOptions.isEmpty()) {
+            snowflakeOptions.add("STAGE_COPY_OPTIONS = " + stageCopyOptions);
+        }
+        
+        if (defaultDdlCollation != null && !defaultDdlCollation.isEmpty()) {
+            snowflakeOptions.add("DEFAULT_DDL_COLLATION = '" + defaultDdlCollation.replace("'", "''") + "'");
+        }
+        
+        if (tag != null && !tag.isEmpty()) {
+            snowflakeOptions.add("TAG (" + tag + ")");
         }
         
         if (comment != null && !comment.isEmpty()) {

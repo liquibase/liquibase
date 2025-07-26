@@ -94,4 +94,9 @@ public class DropSchemaChange extends AbstractChange {
         
         return errors;
     }
+    
+    @Override
+    public String getSerializedObjectNamespace() {
+        return "http://www.liquibase.org/xml/ns/snowflake";
+    }
 }

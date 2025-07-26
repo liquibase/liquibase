@@ -24,6 +24,9 @@
             <xsd:attribute name="maxConcurrencyLevel" type="xsd:int"/>
             <xsd:attribute name="statementQueuedTimeoutInSeconds" type="xsd:int"/>
             <xsd:attribute name="statementTimeoutInSeconds" type="xsd:int"/>
+            <xsd:attribute name="resourceConstraint" type="xsd:string"/>
+            <xsd:attribute name="ifNotExists" type="xsd:boolean"/>
+            <xsd:attribute name="orReplace" type="xsd:boolean"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -67,6 +70,7 @@
             <xsd:attribute name="transient" type="xsd:boolean"/>
             <xsd:attribute name="defaultDdlCollation" type="xsd:string"/>
             <xsd:attribute name="tag" type="xsd:string"/>
+            <xsd:attribute name="orReplace" type="xsd:boolean"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -105,6 +109,7 @@
             <xsd:attribute name="managedAccess" type="xsd:boolean"/>
             <xsd:attribute name="defaultDdlCollation" type="xsd:string"/>
             <xsd:attribute name="tag" type="xsd:string"/>
+            <xsd:attribute name="orReplace" type="xsd:boolean"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -112,11 +117,11 @@
         <xsd:complexType>
             <xsd:attribute name="schemaName" type="xsd:string" use="required"/>
             <xsd:attribute name="databaseName" type="xsd:string"/>
-            <xsd:attribute name="newSchemaName" type="xsd:string"/>
-            <xsd:attribute name="comment" type="xsd:string"/>
-            <xsd:attribute name="dataRetentionTimeInDays" type="xsd:int"/>
-            <xsd:attribute name="maxDataExtensionTimeInDays" type="xsd:int"/>
-            <xsd:attribute name="defaultDdlCollation" type="xsd:string"/>
+            <xsd:attribute name="newName" type="xsd:string"/>
+            <xsd:attribute name="newComment" type="xsd:string"/>
+            <xsd:attribute name="newDataRetentionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="newMaxDataExtensionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="newDefaultDdlCollation" type="xsd:string"/>
             <xsd:attribute name="enableManagedAccess" type="xsd:boolean"/>
             <xsd:attribute name="disableManagedAccess" type="xsd:boolean"/>
             <xsd:attribute name="swapWith" type="xsd:string"/>
@@ -133,50 +138,23 @@
     </xsd:element>
 
     <!-- Table Operations -->
-    <xsd:element name="createTable">
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element name="column" maxOccurs="unbounded">
-                    <xsd:complexType>
-                        <xsd:attribute name="name" type="xsd:string" use="required"/>
-                        <xsd:attribute name="type" type="xsd:string" use="required"/>
-                        <xsd:attribute name="defaultValue" type="xsd:string"/>
-                        <xsd:attribute name="nullable" type="xsd:boolean"/>
-                        <xsd:attribute name="primaryKey" type="xsd:boolean"/>
-                        <xsd:attribute name="unique" type="xsd:boolean"/>
-                        <xsd:attribute name="comment" type="xsd:string"/>
-                    </xsd:complexType>
-                </xsd:element>
-                <xsd:element name="constraint" minOccurs="0" maxOccurs="unbounded">
-                    <xsd:complexType>
-                        <xsd:attribute name="name" type="xsd:string"/>
-                        <xsd:attribute name="type" type="constraintType" use="required"/>
-                        <xsd:attribute name="columns" type="xsd:string"/>
-                        <xsd:attribute name="refTable" type="xsd:string"/>
-                        <xsd:attribute name="refColumns" type="xsd:string"/>
-                    </xsd:complexType>
-                </xsd:element>
-            </xsd:sequence>
-            <xsd:attribute name="tableName" type="xsd:string" use="required"/>
-            <xsd:attribute name="schemaName" type="xsd:string"/>
-            <xsd:attribute name="databaseName" type="xsd:string"/>
-            <xsd:attribute name="cloneFrom" type="xsd:string"/>
-            <xsd:attribute name="likeTable" type="xsd:string"/>
-            <xsd:attribute name="comment" type="xsd:string"/>
-            <xsd:attribute name="dataRetentionTimeInDays" type="xsd:int"/>
-            <xsd:attribute name="maxDataExtensionTimeInDays" type="xsd:int"/>
-            <xsd:attribute name="changeTracking" type="xsd:boolean"/>
-            <xsd:attribute name="copyGrants" type="xsd:boolean"/>
-            <xsd:attribute name="clusterBy" type="xsd:string"/>
-            <xsd:attribute name="enableSchemaEvolution" type="xsd:boolean"/>
-            <xsd:attribute name="transient" type="xsd:boolean"/>
-            <xsd:attribute name="temporary" type="xsd:boolean"/>
-            <xsd:attribute name="stageFileFormat" type="xsd:string"/>
-            <xsd:attribute name="stageCopyOptions" type="xsd:string"/>
-            <xsd:attribute name="defaultDdlCollation" type="xsd:string"/>
-            <xsd:attribute name="tag" type="xsd:string"/>
-        </xsd:complexType>
-    </xsd:element>
+    <!-- Snowflake table attributes are defined as namespace-prefixed attributes on standard createTable elements -->
+    <xsd:attributeGroup name="snowflakeTableAttributes">
+        <xsd:attribute name="transient" type="xsd:boolean"/>
+        <xsd:attribute name="temporary" type="xsd:boolean"/>
+        <xsd:attribute name="clusterBy" type="xsd:string"/>
+        <xsd:attribute name="dataRetentionTimeInDays" type="xsd:int"/>
+        <xsd:attribute name="maxDataExtensionTimeInDays" type="xsd:int"/>
+        <xsd:attribute name="changeTracking" type="xsd:boolean"/>
+        <xsd:attribute name="copyGrants" type="xsd:boolean"/>
+        <xsd:attribute name="enableSchemaEvolution" type="xsd:boolean"/>
+        <xsd:attribute name="cloneFrom" type="xsd:string"/>
+        <xsd:attribute name="likeTable" type="xsd:string"/>
+        <xsd:attribute name="stageFileFormat" type="xsd:string"/>
+        <xsd:attribute name="stageCopyOptions" type="xsd:string"/>
+        <xsd:attribute name="defaultDdlCollation" type="xsd:string"/>
+        <xsd:attribute name="tag" type="xsd:string"/>
+    </xsd:attributeGroup>
 
     <!-- Sequence Operations -->
     <xsd:element name="createSequence">

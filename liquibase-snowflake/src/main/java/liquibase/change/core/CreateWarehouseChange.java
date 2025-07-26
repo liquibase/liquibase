@@ -38,6 +38,9 @@ public class CreateWarehouseChange extends AbstractChange {
     private Integer maxConcurrencyLevel;
     private Integer statementQueuedTimeoutInSeconds;
     private Integer statementTimeoutInSeconds;
+    private Boolean orReplace;
+    private Boolean ifNotExists;
+    private String resourceConstraint;
 
     @DatabaseChangeProperty(description = "Name of the warehouse to create", requiredForDatabase = "snowflake")
     public String getWarehouseName() {
@@ -183,6 +186,33 @@ public class CreateWarehouseChange extends AbstractChange {
         this.statementTimeoutInSeconds = statementTimeoutInSeconds;
     }
 
+    @DatabaseChangeProperty(description = "Whether to use CREATE OR REPLACE WAREHOUSE")
+    public Boolean getOrReplace() {
+        return orReplace;
+    }
+
+    public void setOrReplace(Boolean orReplace) {
+        this.orReplace = orReplace;
+    }
+
+    @DatabaseChangeProperty(description = "Whether to use CREATE WAREHOUSE IF NOT EXISTS")
+    public Boolean getIfNotExists() {
+        return ifNotExists;
+    }
+
+    public void setIfNotExists(Boolean ifNotExists) {
+        this.ifNotExists = ifNotExists;
+    }
+
+    @DatabaseChangeProperty(description = "Resource constraint for the warehouse (e.g., MEMORY_1X, MEMORY_2X)")
+    public String getResourceConstraint() {
+        return resourceConstraint;
+    }
+
+    public void setResourceConstraint(String resourceConstraint) {
+        this.resourceConstraint = resourceConstraint;
+    }
+
     @Override
     public boolean supports(Database database) {
         return database instanceof SnowflakeDatabase;
@@ -234,6 +264,11 @@ public class CreateWarehouseChange extends AbstractChange {
             errors.addError("minClusterCount cannot be greater than maxClusterCount");
         }
         
+        // Validate that orReplace and ifNotExists are not both set
+        if (Boolean.TRUE.equals(orReplace) && Boolean.TRUE.equals(ifNotExists)) {
+            errors.addError("Cannot use both OR REPLACE and IF NOT EXISTS");
+        }
+        
         return errors;
     }
 
@@ -264,6 +299,9 @@ public class CreateWarehouseChange extends AbstractChange {
         statement.setMaxConcurrencyLevel(getMaxConcurrencyLevel());
         statement.setStatementQueuedTimeoutInSeconds(getStatementQueuedTimeoutInSeconds());
         statement.setStatementTimeoutInSeconds(getStatementTimeoutInSeconds());
+        statement.setOrReplace(getOrReplace());
+        statement.setIfNotExists(getIfNotExists());
+        statement.setResourceConstraint(getResourceConstraint());
         
         return new SqlStatement[]{statement};
     }

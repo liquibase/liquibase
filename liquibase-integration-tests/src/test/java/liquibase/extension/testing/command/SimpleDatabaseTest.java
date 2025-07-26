@@ -140,8 +140,8 @@ public class SimpleDatabaseTest {
         
         AlterDatabaseChange change1 = new AlterDatabaseChange();
         change1.setDatabaseName(testDb);
-        change1.setNewComment("Updated comment");
-        change1.setNewDataRetentionTimeInDays("5");
+        change1.setComment("Updated comment");
+        change1.setDataRetentionTimeInDays("5");
         
         changeSet1.addChange(change1);
         changeLog1.addChangeSet(changeSet1);
@@ -164,7 +164,7 @@ public class SimpleDatabaseTest {
         
         AlterDatabaseChange change2 = new AlterDatabaseChange();
         change2.setDatabaseName(testDb);
-        change2.setNewName(newDb);
+        change2.setNewDatabaseName(newDb);
         
         changeSet2.addChange(change2);
         changeLog2.addChangeSet(changeSet2);

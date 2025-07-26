@@ -16,6 +16,11 @@ import java.util.List;
 public class CreateSchemaGeneratorSnowflake extends AbstractSqlGenerator<CreateSchemaStatement> {
 
     @Override
+    public int getPriority() {
+        return PRIORITY_DATABASE;
+    }
+
+    @Override
     public boolean supports(CreateSchemaStatement statement, Database database) {
         return database instanceof SnowflakeDatabase;
     }
@@ -33,17 +38,25 @@ public class CreateSchemaGeneratorSnowflake extends AbstractSqlGenerator<CreateS
 
     @Override
     public Sql[] generateSql(CreateSchemaStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuilder sql = new StringBuilder("CREATE SCHEMA ");
-        sql.append(database.escapeObjectName(statement.getSchemaName(), Table.class));
+        StringBuilder sql = new StringBuilder("CREATE ");
+        
+        // Add OR REPLACE if specified
+        if (Boolean.TRUE.equals(statement.getOrReplace())) {
+            sql.append("OR REPLACE ");
+        }
+        
+        // Add TRANSIENT before SCHEMA keyword
+        if (statement.getTransient() != null && statement.getTransient()) {
+            sql.append("TRANSIENT ");
+        }
+        
+        sql.append("SCHEMA ");
+        sql.append(database.escapeObjectName(statement.getSchemaName(), liquibase.structure.core.Schema.class));
         
         List<String> options = new ArrayList<>();
         
-        if (statement.getTransient() != null && statement.getTransient()) {
-            options.add("TRANSIENT");
-        }
-        
         if (statement.getManaged() != null && statement.getManaged()) {
-            options.add("MANAGED");
+            options.add("WITH MANAGED ACCESS");
         }
         
         if (statement.getDataRetentionTimeInDays() != null) {

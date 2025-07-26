@@ -20,6 +20,9 @@ public class CreateWarehouseStatement extends AbstractSqlStatement {
     private Integer maxConcurrencyLevel;
     private Integer statementQueuedTimeoutInSeconds;
     private Integer statementTimeoutInSeconds;
+    private Boolean orReplace;
+    private Boolean ifNotExists;
+    private String resourceConstraint;
 
     public String getWarehouseName() {
         return warehouseName;
@@ -147,5 +150,29 @@ public class CreateWarehouseStatement extends AbstractSqlStatement {
 
     public void setStatementTimeoutInSeconds(Integer statementTimeoutInSeconds) {
         this.statementTimeoutInSeconds = statementTimeoutInSeconds;
+    }
+
+    public Boolean getOrReplace() {
+        return orReplace;
+    }
+
+    public void setOrReplace(Boolean orReplace) {
+        this.orReplace = orReplace;
+    }
+
+    public Boolean getIfNotExists() {
+        return ifNotExists;
+    }
+
+    public void setIfNotExists(Boolean ifNotExists) {
+        this.ifNotExists = ifNotExists;
+    }
+
+    public String getResourceConstraint() {
+        return resourceConstraint;
+    }
+
+    public void setResourceConstraint(String resourceConstraint) {
+        this.resourceConstraint = resourceConstraint;
     }
 }

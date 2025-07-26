@@ -35,7 +35,12 @@ public class CreateDatabaseGeneratorSnowflake extends AbstractSqlGenerator<Creat
     public Sql[] generateSql(CreateDatabaseStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuilder sql = new StringBuilder("CREATE ");
         
-        // TRANSIENT must come immediately after CREATE
+        // OR REPLACE must come after CREATE but before TRANSIENT
+        if (statement.getOrReplace() != null && statement.getOrReplace()) {
+            sql.append("OR REPLACE ");
+        }
+        
+        // TRANSIENT must come after OR REPLACE (if present)
         if (statement.getTransient() != null && statement.getTransient()) {
             sql.append("TRANSIENT ");
         }
