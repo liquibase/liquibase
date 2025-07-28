@@ -158,7 +158,9 @@ public class LoggingExecutor extends AbstractExecutor {
                 } else {
                     String endDelimiter = ";";
                     String potentialDelimiter = null;
-                    if (sql instanceof RawParameterizedSqlStatement) {
+                    if (sql instanceof RawSqlStatement) {
+                        potentialDelimiter = ((RawSqlStatement) sql).getEndDelimiter();
+                    } else if (sql instanceof RawParameterizedSqlStatement) {
                         potentialDelimiter = ((RawParameterizedSqlStatement) sql).getEndDelimiter();
                     } else if (sql instanceof CreateProcedureStatement) {
                         potentialDelimiter = ((CreateProcedureStatement) sql).getEndDelimiter();
