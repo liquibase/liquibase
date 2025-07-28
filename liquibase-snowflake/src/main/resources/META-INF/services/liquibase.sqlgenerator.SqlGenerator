@@ -1,3 +1,4 @@
+liquibase.sqlgenerator.core.CreateSchemaGeneratorSnowflake
 liquibase.sqlgenerator.core.CreateSequenceGeneratorSnowflake
 liquibase.sqlgenerator.core.DropDefaultValueGeneratorSnowflake
 liquibase.sqlgenerator.core.DropProcedureGeneratorSnowflake
@@ -7,3 +8,5 @@ liquibase.sqlgenerator.core.RenameViewGeneratorSnowflake
 liquibase.sqlgenerator.core.SetColumnRemarksGeneratorSnowflake
 liquibase.sqlgenerator.core.SetTableRemarksGeneratorSnowflake
 liquibase.sqlgenerator.core.GetViewDefinitionGeneratorSnowflake
+liquibase.sqlgenerator.core.snowflake.DropSchemaGeneratorSnowflake
+liquibase.sqlgenerator.core.snowflake.AlterSchemaGeneratorSnowflake

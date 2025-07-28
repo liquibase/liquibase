@@ -7,6 +7,8 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateSequenceStatement;
+import liquibase.ext.snowflake.SnowflakeNamespaceAttributeStorage;
+import java.util.Map;
 
 public class CreateSequenceGeneratorSnowflake extends CreateSequenceGenerator{
 
@@ -22,6 +24,7 @@ public class CreateSequenceGeneratorSnowflake extends CreateSequenceGenerator{
 
     @Override
     public ValidationErrors validate(CreateSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        System.out.println("[CreateSequenceGeneratorSnowflake] validate() called for " + statement.getSequenceName());
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("sequenceName", statement.getSequenceName());
@@ -47,6 +50,41 @@ public class CreateSequenceGeneratorSnowflake extends CreateSequenceGenerator{
             }
             if (statement.getIncrementBy() != null) {
                 queryStringBuilder.append(" INCREMENT BY ").append(statement.getIncrementBy());
+            }
+            
+            // Check for namespace attributes stored during XML parsing
+            Map<String, String> namespaceAttrs = SnowflakeNamespaceAttributeStorage.getAttributes("sequence", statement.getSequenceName());
+            if (namespaceAttrs != null) {
+                System.out.println("[CreateSequenceGeneratorSnowflake] Found namespace attributes for " + statement.getSequenceName() + ": " + namespaceAttrs);
+                
+                // Handle ordered attribute
+                String orderedStr = namespaceAttrs.get("ordered");
+                if (orderedStr != null) {
+                    boolean ordered = Boolean.parseBoolean(orderedStr);
+                    if (ordered) {
+                        queryStringBuilder.append(" ORDER");
+                    } else {
+                        queryStringBuilder.append(" NOORDER");
+                    }
+                }
+                
+                // Handle comment attribute
+                String comment = namespaceAttrs.get("comment");
+                if (comment != null) {
+                    queryStringBuilder.append(" COMMENT = '").append(comment.replace("'", "''")).append("'");
+                }
+                
+                // Clean up after use
+                SnowflakeNamespaceAttributeStorage.removeAttributes("sequence", statement.getSequenceName());
+            } else {
+                // Fall back to standard ordered attribute if present
+                if (statement.getOrdered() != null) {
+                    if (statement.getOrdered()) {
+                        queryStringBuilder.append(" ORDER");
+                    } else {
+                        queryStringBuilder.append(" NOORDER");
+                    }
+                }
             }
         }
         return new Sql[]{new UnparsedSql(queryStringBuilder.toString(), getAffectedSequence(statement))};
