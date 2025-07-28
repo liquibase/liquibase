@@ -76,7 +76,6 @@ public class DropSchemaChange extends AbstractChange {
     }
 
     @Override
-    @Override
     public boolean supports(Database database) {
         return database instanceof SnowflakeDatabase;
     }
@@ -94,7 +93,7 @@ public class DropSchemaChange extends AbstractChange {
         }
         
         if (getCascade() != null && getCascade() && getRestrict() != null && getRestrict()) {
-            errors.addError("Cannot specify both CASCADE and RESTRICT");
+            errors.addError("Cannot use both CASCADE and RESTRICT");
         }
         
         return errors;

@@ -120,7 +120,6 @@ public class AlterDatabaseChange extends AbstractChange {
     }
 
     @Override
-    @Override
     public boolean supports(Database database) {
         return database instanceof SnowflakeDatabase;
     }

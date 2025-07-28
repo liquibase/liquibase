@@ -2,33 +2,45 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## CRITICAL: AI Development Pattern Library for Test Harness
+## CRITICAL: Snowflake Extension Development Pattern Library
 
-**When working on Liquibase Test Harness (especially Snowflake tests), ALWAYS consult the AI Extension Developer Guide FIRST:**
-- Location: `liquibase-test-harness/claude_guide/AI_EXTENSION_DEVELOPER_GUIDE.md`
-- Purpose: Provides exact templates and patterns that MUST be followed
-- Requirement: Do NOT deviate from documented patterns unless explicitly instructed
+**When working on Liquibase Snowflake Extension, ALWAYS consult these guides in order:**
 
-### Test Harness Development Philosophy
-1. **Pattern-First Development**: Always use existing working patterns from the guide
-2. **Document As You Go**: When discovering new patterns, immediately document them
-3. **Test-Driven**: Write tests following the exact templates before implementation
-4. **Copy Don't Create**: Use working examples as templates rather than creating from scratch
+### 1. Implementation Guide (Start Here)
+- Location: `claude_guide/roles/developer/patterns/NEW_CHANGETYPE_PATTERN_2.md`
+- Purpose: Step-by-step implementation with integrated testing
+- Includes: Change class, Statement, Generator, Service registration, XSD, Unit tests
 
-### Before ANY Snowflake Test Development
-1. READ: `liquibase-test-harness/claude_guide/AI_EXTENSION_DEVELOPER_GUIDE.md`
-2. IDENTIFY: Is it schema-level or account-level object?
-3. COPY: Use the exact template for that type
-4. FOLLOW: The validation checklist exactly
-5. TEST: Using the documented test execution pattern
+### 2. Test Harness Guide (After Implementation)
+- Location: `claude_guide/roles/qa/patterns/TEST_HARNESS_IMPLEMENTATION_GUIDE_2.md`
+- Purpose: End-to-end database testing against real Snowflake
+- Prerequisite: All unit tests passing
 
-### Test Harness Knowledge Base Structure
+### 3. Detailed Requirements (For Each Change Type)
+- Location: `claude_guide/project/requirements/detailed_requirements/<changeType>_requirements.md`
+- Purpose: Specific requirements, mutual exclusivity rules, SQL variations
+- Example: `createSchema_requirements.md`
+
+### Development Philosophy
+1. **Pattern-First Development**: Use proven patterns from the guides
+2. **Test-Driven**: Write tests at each step, not just at the end
+3. **Document As You Go**: Update patterns when discovering new insights
+4. **Copy Don't Create**: Use working examples as templates
+
+### Knowledge Base Structure
 ```
-liquibase-test-harness/claude_guide/
-├── AI_EXTENSION_DEVELOPER_GUIDE.md     # START HERE - Main guide for all development
-├── SNOWFLAKE_TEST_PATTERNS_COMPLETE.md # Detailed explanations
-├── SNOWFLAKE_TEST_QUICK_REFERENCE.md   # Quick lookup
-└── SNOWFLAKE_SCHEMA_VS_ACCOUNT_OBJECTS.md # Object categorization
+claude_guide/
+├── roles/
+│   ├── developer/patterns/
+│   │   ├── NEW_CHANGETYPE_PATTERN_2.md          # Implementation guide
+│   │   └── CHANGE_CLASS_CHECKLIST.md            # Quick reference
+│   └── qa/patterns/
+│       ├── TEST_HARNESS_IMPLEMENTATION_GUIDE_2.md # Test harness guide
+│       └── INTEGRATION_TEST_CHECKLIST.md         # Testing checklist
+├── project/requirements/
+│   └── detailed_requirements/                     # Per-feature requirements
+└── examples/                                      # Reference implementations
+    └── postgresql/                                # CREATE DOMAIN example
 ```
 
 ## Build Commands
@@ -112,48 +124,62 @@ Extensible architecture for database support through JDBC. Database-specific imp
 ## Snowflake Extension Development
 
 ### Project Context
-Working on improving the Liquibase Snowflake Community Extension by implementing missing features for 5 specific object types as outlined in the requirements document.
+Working on the Liquibase Snowflake Extension in `liquibase-snowflake/` directory. This is a separate Maven module that extends Liquibase with Snowflake-specific functionality.
 
 ### Key Requirements
-Focus on these 5 objects only (from claude_folder/Snowflake Enhancements Needed.md):
+Focus on these 5 objects (from original requirements):
 - TABLE: Additional features (INT-155, INT-149, INT-150, INT-148)
 - SEQUENCE: ORDER support (INT-151)
 - DATABASE: Full object support (INT-1244)
-- SCHEMA: Full object support (INT-1245)
+- SCHEMA: Full object support (INT-1245) - ✅ CreateSchema implemented
 - WAREHOUSE: Full object support (INT-1287)
 
-### Build Commands for Snowflake Development
-```bash
-# Build entire Liquibase project (excluding problematic maven plugin)
-./mvnw clean install -DskipTests -pl '!liquibase-maven-plugin'
+### Build Commands for Snowflake Extension
 
-# Run Snowflake integration tests
-./mvnw test -pl liquibase-integration-tests -Dtest="*Snowflake*" -Dliquibase.sdk.testSystem.test=snowflake
+```bash
+# Build Snowflake extension only
+cd liquibase-snowflake
+mvn clean package -DskipTests
+
+# Run unit tests
+mvn test
+
+# Run specific test
+mvn test -Dtest=CreateSchemaChangeTest
+
+# Copy JAR to test harness
+cp target/liquibase-snowflake-*.jar ../liquibase-test-harness/lib/
 ```
 
 ### Test Infrastructure
-- Tests must be placed in `liquibase-integration-tests` module (not in snowflake module)
-- Snowflake connection is configured in `liquibase-extension-testing/src/main/resources/liquibase.sdk.local.yaml`
-- URL format must be: `LWMNXLH-AUB54519.snowflakecomputing.com` (not just account ID)
-- See `claude_folder/snowflake-test-process.md` for detailed test patterns and troubleshooting
+
+#### Unit/Integration Tests (in liquibase-snowflake)
+- Location: `src/test/java/liquibase/`
+- Framework: JUnit 5 (Jupiter)
+- Structure: See `src/test/java/README_TEST_STRUCTURE.md`
+- Purpose: Test Java code without database connection
+
+#### Test Harness Tests (in liquibase-test-harness)
+- Location: `liquibase-test-harness/src/main/resources/liquibase/harness/change/changelogs/snowflake/`
+- Purpose: End-to-end testing against real Snowflake database
+- Prerequisites: All unit tests passing, JAR deployed to test harness
 
 ### Current Status
-- ✅ Built Liquibase successfully
-- ✅ Created integration test infrastructure
-- ✅ Verified Snowflake connection works (version 11.13.0)
-- ✅ Confirmed change types don't exist yet (ready for implementation)
-- 🔄 Next: Implement WAREHOUSE object change types
+- ✅ CreateSchema fully implemented with tests
+- ✅ DropSchema implemented (example for rollback support)
+- ✅ Comprehensive pattern documentation created
+- 🔄 Next: Implement remaining change types following patterns
 
-### Implementation Pattern
-1. Create change type classes extending `AbstractChange`
-2. Create statement classes implementing `SqlStatement`
-3. Create SQL generators extending `AbstractSqlGenerator<Statement>`
-4. Register in META-INF/services files
-5. Add snapshot support for object discovery
-6. Write comprehensive tests
+### Implementation Workflow
+1. **Create Requirements**: Document in `detailed_requirements/<changeType>_requirements.md`
+2. **Implement Code**: Follow `NEW_CHANGETYPE_PATTERN_2.md`
+   - Change class → Statement → Generator → Service registration → XSD
+3. **Unit Tests**: Write tests at each step
+4. **Test Harness**: Follow `TEST_HARNESS_IMPLEMENTATION_GUIDE_2.md`
+   - Only after all unit tests pass
 
 ### Important Notes
-- Use test-first development approach
-- Always run tests with real Snowflake database (no mocks)
-- Follow existing Liquibase patterns found in other database extensions
-- Check existing Snowflake code for patterns before implementing new features
+- **Namespace**: All Snowflake changes use `snowflake:` namespace
+- **Testing**: JUnit 5 only (no JUnit 4 dependencies)
+- **SQL Generation**: Snowflake uses uppercase identifiers by default
+- **Documentation**: Update patterns when discovering new insights
