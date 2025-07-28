@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.exception.ValidationErrors;
+import liquibase.database.core.SnowflakeDatabase;import liquibase.exception.ValidationErrors;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropDatabaseStatement;
 
@@ -76,7 +76,12 @@ public class DropDatabaseChange extends AbstractChange {
     }
 
     @Override
-    public boolean supportsRollback(Database database) {
+    @Override
+    public boolean supports(Database database) {
+        return database instanceof SnowflakeDatabase;
+    }
+
+    @Override    public boolean supportsRollback(Database database) {
         return false;
     }
 

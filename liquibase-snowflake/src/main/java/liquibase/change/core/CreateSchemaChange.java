@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.database.core.SnowflakeDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateSchemaStatement;
@@ -139,6 +140,11 @@ public class CreateSchemaChange extends AbstractChange {
     @Override
     public String getConfirmationMessage() {
         return "Schema " + getSchemaName() + " created";
+    }
+
+    @Override
+    public boolean supports(Database database) {
+        return database instanceof SnowflakeDatabase;
     }
 
     @Override
