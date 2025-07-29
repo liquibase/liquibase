@@ -132,7 +132,7 @@ ALTER TABLE old_table DROP CLUSTERING KEY;
 
 ## 5. Implementation Approach
 
-Using NAMESPACE_ATTRIBUTE_PATTERN_2.md:
+Using EXISTING_CHANGETYPE_EXTENSION_PATTERN.md:
 
 1. **Storage**: Use existing `SnowflakeNamespaceAttributeStorage`
 2. **Parser**: Extend `SnowflakeNamespaceAwareXMLParser` to handle alterTable

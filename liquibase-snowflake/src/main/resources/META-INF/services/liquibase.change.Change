@@ -7,4 +7,4 @@ liquibase.change.core.AlterDatabaseChange
 liquibase.change.core.CreateSchemaChange
 liquibase.change.core.DropSchemaChange
 liquibase.change.core.AlterSchemaChange
-liquibase.change.core.AlterTableClusterChange
+liquibase.change.core.AlterTableChange

@@ -4,8 +4,9 @@ This file provides high-level guidance to Claude Code when working on the Liquib
 
 ## 🎯 Current Focus: Snowflake Extension Development
 
-Working on: DATABASE object change types (createDatabase ✅, dropDatabase, alterDatabase)
+Working on: COLUMN object change types (SQL generator overrides)
 Project Plan: `claude_guide/snowflake-project/SNOWFLAKE_IMPLEMENTATION_PROJECT_PLAN.md`
+Next: Column operations needing SQL syntax overrides
 
 ## 🔄 CRITICAL: Follow the Master Process Loop
 
@@ -16,12 +17,12 @@ Project Plan: `claude_guide/snowflake-project/SNOWFLAKE_IMPLEMENTATION_PROJECT_P
 ## 📚 Essential Guides (In Order of Use)
 
 1. **Process & Workflow**
-   - `MASTER_PROCESS_LOOP.md` - The process to follow for every task
-   - `SNOWFLAKE_CHANGETYPE_IMPLEMENTATION_PROMPT.md` - Complete implementation workflow
+   - `MASTER_PROCESS_LOOP.md` - The complete process with all file references
 
 2. **Implementation**
    - `NEW_CHANGETYPE_PATTERN_2.md` - For new change types
-   - `NAMESPACE_ATTRIBUTE_PATTERN_2.md` - For enhancing existing types
+   - `EXISTING_CHANGETYPE_EXTENSION_PATTERN.md` - For extending existing types
+   - `SQL_GENERATOR_OVERRIDE_STEP_BY_STEP.md` - For SQL syntax overrides (column operations)
 
 3. **Testing**
    - `TEST_HARNESS_IMPLEMENTATION_GUIDE_2.md` - After unit tests pass

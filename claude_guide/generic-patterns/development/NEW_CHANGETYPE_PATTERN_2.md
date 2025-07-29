@@ -357,15 +357,15 @@ public void testPhase3_SqlGenerator() {
 
 ### Phase 4: Service Registration
 
-#### File: `src/main/resources/META-INF/services/liquibase.change.Change`
-```
-liquibase.change.core.<ChangeType>Change
-```
+#### Register the Change Class
+**File**: `src/main/resources/META-INF/services/liquibase.change.Change`
+**Add line**: `liquibase.change.<database>.<ChangeType>Change<Database>`
+**Example**: `liquibase.change.snowflake.CreateWarehouseChangeSnowflake`
 
-#### File: `src/main/resources/META-INF/services/liquibase.sqlgenerator.SqlGenerator`
-```
-liquibase.sqlgenerator.core.snowflake.<ChangeType>GeneratorSnowflake
-```
+#### Register the SQL Generator
+**File**: `src/main/resources/META-INF/services/liquibase.sqlgenerator.SqlGenerator`  
+**Add line**: `liquibase.sqlgenerator.core.<database>.<ChangeType>Generator<Database>`
+**Example**: `liquibase.sqlgenerator.core.snowflake.CreateWarehouseGeneratorSnowflake`
 
 ### 🧪 Quick Test for Phase 4
 
@@ -388,7 +388,8 @@ public void testPhase4_ServiceRegistration() {
 
 **Real Example**: In alterSchema, we added `ifExists` attribute but integration tests failed until XSD was updated.
 
-#### File: `src/main/resources/www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd`
+**File**: `src/main/resources/www.liquibase.org/xml/ns/<database>/liquibase-<database>-latest.xsd`
+**Example**: `src/main/resources/www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd`
 
 Add the element definition based on requirements:
 
@@ -456,7 +457,8 @@ Both are important - the production tests ensure long-term maintainability, whil
 
 #### Step 1: Create Change Class Unit Test
 
-File: `src/test/java/liquibase/change/core/<ChangeType>ChangeTest.java`
+**File**: `src/test/java/liquibase/change/<database>/<ChangeType>Change<Database>Test.java`
+**Example**: `src/test/java/liquibase/change/snowflake/CreateWarehouseChangeSnowflakeTest.java`
 
 ```java
 package liquibase.change.core;
@@ -600,7 +602,8 @@ public class <ChangeType>ChangeTest {
 
 #### Step 2: Create Statement Class Unit Test
 
-File: `src/test/java/liquibase/statement/core/<ChangeType>StatementTest.java`
+**File**: `src/test/java/liquibase/statement/<database>/<ChangeType>Statement<Database>Test.java`
+**Example**: `src/test/java/liquibase/statement/snowflake/CreateWarehouseStatementSnowflakeTest.java`
 
 ```java
 package liquibase.statement.core;
@@ -661,7 +664,8 @@ public class <ChangeType>StatementTest {
 
 #### Step 3: Create SQL Generator Unit Test
 
-File: `src/test/java/liquibase/sqlgenerator/core/snowflake/<ChangeType>GeneratorSnowflakeTest.java`
+**File**: `src/test/java/liquibase/sqlgenerator/core/<database>/<ChangeType>Generator<Database>Test.java`
+**Example**: `src/test/java/liquibase/sqlgenerator/core/snowflake/CreateWarehouseGeneratorSnowflakeTest.java`
 
 ```java
 package liquibase.sqlgenerator.core.snowflake;
@@ -914,6 +918,12 @@ Test Harness tests:
 - Test **actual SQL execution** against the database
 - Verify **database objects are created correctly**
 - Compare **expected vs actual SQL output**
+
+### Test Harness File Locations
+- **Test XML Files**: `liquibase-test-harness/src/test/resources/liquibase/harness/change/changelogs/<database>/<changeType>.xml`
+- **Expected SQL**: `liquibase-test-harness/src/test/resources/liquibase/harness/change/expectedSql/<database>/<changeType>.sql`
+- **Expected Snapshot**: `liquibase-test-harness/src/test/resources/liquibase/harness/change/expectedSnapshot/<database>/<changeType>.json`
+- **Global Cleanup**: `liquibase-test-harness/src/test/resources/liquibase/harness/change/changelogs/<database>/cleanup.xml`
 
 ### CRITICAL: Test Harness Pattern
 

@@ -71,7 +71,7 @@ Before starting ANY implementation:
 - [ ] Git status clean (no uncommitted changes)
 
 ### Knowledge Check
-- [ ] Understand difference between NEW_CHANGETYPE_PATTERN_2 and NAMESPACE_ATTRIBUTE_PATTERN_2
+- [ ] Understand difference between NEW_CHANGETYPE_PATTERN_2 and EXISTING_CHANGETYPE_EXTENSION_PATTERN
 - [ ] Know the 5-step test harness structure
 - [ ] Understand schema vs database vs account level objects
 - [ ] Know when to rebuild and redeploy JAR

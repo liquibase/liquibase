@@ -91,7 +91,7 @@ DROP SEQUENCE IF EXISTS maybe_exists CASCADE;
 
 ## 5. Implementation Approach
 
-Using NAMESPACE_ATTRIBUTE_PATTERN_2.md:
+Using EXISTING_CHANGETYPE_EXTENSION_PATTERN.md:
 
 1. **Storage**: Use existing `SnowflakeNamespaceAttributeStorage`
 2. **Parser**: Extend `SnowflakeNamespaceAwareXMLParser` to handle dropSequence

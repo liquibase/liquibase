@@ -81,13 +81,17 @@ public class SnowflakeNamespaceAwareXMLParserTest {
             "    </changeSet>\n" +
             "</databaseChangeLog>\n";
         
-        InputStream inputStream = new ByteArrayInputStream(xml.getBytes());
-        when(resource.openInputStream()).thenReturn(inputStream);
+        when(resource.openInputStream()).thenReturn(
+            new ByteArrayInputStream(xml.getBytes()),
+            new ByteArrayInputStream(xml.getBytes())
+        );
         when(resource.exists()).thenReturn(true);
         when(resource.getPath()).thenReturn("test.xml");
         List<Resource> resources = new ArrayList<>();
         resources.add(resource);
         when(resourceAccessor.getAll(anyString())).thenReturn(resources);
+        when(resourceAccessor.get(anyString())).thenReturn(resource);
+        when(resourceAccessor.getExisting(anyString())).thenReturn(resource);
         
         // When
         parser.parseToNode("test.xml", changeLogParameters, resourceAccessor);
@@ -119,13 +123,17 @@ public class SnowflakeNamespaceAwareXMLParserTest {
             "    </changeSet>\n" +
             "</databaseChangeLog>\n";
         
-        InputStream inputStream = new ByteArrayInputStream(xml.getBytes());
-        when(resource.openInputStream()).thenReturn(inputStream);
+        when(resource.openInputStream()).thenReturn(
+            new ByteArrayInputStream(xml.getBytes()),
+            new ByteArrayInputStream(xml.getBytes())
+        );
         when(resource.exists()).thenReturn(true);
         when(resource.getPath()).thenReturn("test.xml");
         List<Resource> resources = new ArrayList<>();
         resources.add(resource);
         when(resourceAccessor.getAll(anyString())).thenReturn(resources);
+        when(resourceAccessor.get(anyString())).thenReturn(resource);
+        when(resourceAccessor.getExisting(anyString())).thenReturn(resource);
         
         // When
         parser.parseToNode("test.xml", changeLogParameters, resourceAccessor);
@@ -158,13 +166,17 @@ public class SnowflakeNamespaceAwareXMLParserTest {
             "    </changeSet>\n" +
             "</databaseChangeLog>\n";
         
-        InputStream inputStream = new ByteArrayInputStream(xml.getBytes());
-        when(resource.openInputStream()).thenReturn(inputStream);
+        when(resource.openInputStream()).thenReturn(
+            new ByteArrayInputStream(xml.getBytes()),
+            new ByteArrayInputStream(xml.getBytes())
+        );
         when(resource.exists()).thenReturn(true);
         when(resource.getPath()).thenReturn("test.xml");
         List<Resource> resources = new ArrayList<>();
         resources.add(resource);
         when(resourceAccessor.getAll(anyString())).thenReturn(resources);
+        when(resourceAccessor.get(anyString())).thenReturn(resource);
+        when(resourceAccessor.getExisting(anyString())).thenReturn(resource);
         
         // When
         parser.parseToNode("test.xml", changeLogParameters, resourceAccessor);
@@ -193,13 +205,17 @@ public class SnowflakeNamespaceAwareXMLParserTest {
             "    </changeSet>\n" +
             "</databaseChangeLog>\n";
         
-        InputStream inputStream = new ByteArrayInputStream(xml.getBytes());
-        when(resource.openInputStream()).thenReturn(inputStream);
+        when(resource.openInputStream()).thenReturn(
+            new ByteArrayInputStream(xml.getBytes()),
+            new ByteArrayInputStream(xml.getBytes())
+        );
         when(resource.exists()).thenReturn(true);
         when(resource.getPath()).thenReturn("test.xml");
         List<Resource> resources = new ArrayList<>();
         resources.add(resource);
         when(resourceAccessor.getAll(anyString())).thenReturn(resources);
+        when(resourceAccessor.get(anyString())).thenReturn(resource);
+        when(resourceAccessor.getExisting(anyString())).thenReturn(resource);
         
         // When
         parser.parseToNode("test.xml", changeLogParameters, resourceAccessor);
@@ -227,13 +243,17 @@ public class SnowflakeNamespaceAwareXMLParserTest {
             "    </changeSet>\n" +
             "</databaseChangeLog>\n";
         
-        InputStream inputStream = new ByteArrayInputStream(xml.getBytes());
-        when(resource.openInputStream()).thenReturn(inputStream);
+        when(resource.openInputStream()).thenReturn(
+            new ByteArrayInputStream(xml.getBytes()),
+            new ByteArrayInputStream(xml.getBytes())
+        );
         when(resource.exists()).thenReturn(true);
         when(resource.getPath()).thenReturn("test.xml");
         List<Resource> resources = new ArrayList<>();
         resources.add(resource);
         when(resourceAccessor.getAll(anyString())).thenReturn(resources);
+        when(resourceAccessor.get(anyString())).thenReturn(resource);
+        when(resourceAccessor.getExisting(anyString())).thenReturn(resource);
         
         // When
         parser.parseToNode("test.xml", changeLogParameters, resourceAccessor);
@@ -261,13 +281,17 @@ public class SnowflakeNamespaceAwareXMLParserTest {
             "    </changeSet>\n" +
             "</databaseChangeLog>\n";
         
-        InputStream inputStream = new ByteArrayInputStream(xml.getBytes());
-        when(resource.openInputStream()).thenReturn(inputStream);
+        when(resource.openInputStream()).thenReturn(
+            new ByteArrayInputStream(xml.getBytes()),
+            new ByteArrayInputStream(xml.getBytes())
+        );
         when(resource.exists()).thenReturn(true);
         when(resource.getPath()).thenReturn("test.xml");
         List<Resource> resources = new ArrayList<>();
         resources.add(resource);
         when(resourceAccessor.getAll(anyString())).thenReturn(resources);
+        when(resourceAccessor.get(anyString())).thenReturn(resource);
+        when(resourceAccessor.getExisting(anyString())).thenReturn(resource);
         
         // When
         parser.parseToNode("test.xml", changeLogParameters, resourceAccessor);

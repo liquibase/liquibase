@@ -129,7 +129,7 @@ CREATE TEMPORARY TABLE temp_calculations (
 
 ## 5. Implementation Approach
 
-Using NAMESPACE_ATTRIBUTE_PATTERN_2.md:
+Using EXISTING_CHANGETYPE_EXTENSION_PATTERN.md:
 
 1. **Storage**: `SnowflakeNamespaceAttributeStorage` to capture attributes
 2. **Parser**: `SnowflakeNamespaceAwareXMLParser` to intercept snowflake: attributes

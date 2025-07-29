@@ -9,7 +9,7 @@ Core development patterns for implementing Liquibase extensions.
 
 #### Key Documents:
 - **NEW_CHANGETYPE_PATTERN_2.md** - Step-by-step guide for creating new change types
-- **NAMESPACE_ATTRIBUTE_PATTERN_2.md** - Adding database-specific attributes to existing changes
+- **EXISTING_CHANGETYPE_EXTENSION_PATTERN.md** - Extending existing Liquibase change types (namespace attributes, SQL generator overrides)
 - **DETAILED_REQUIREMENTS_CREATION_GUIDE.md** - How to research and document requirements
 - **CHANGE_CLASS_CHECKLIST.md** - Quick reference for change class implementation
 - **QUALITY_FIRST_DEVELOPMENT.md** - Development philosophy and best practices
@@ -87,7 +87,7 @@ Meta documentation about the guide structure and vision.
 
 4. **Choose Implementation Pattern**
    - New change type? Use `development/NEW_CHANGETYPE_PATTERN_2.md`
-   - Enhancing existing? Use `development/NAMESPACE_ATTRIBUTE_PATTERN_2.md`
+   - Enhancing existing? Use `development/EXISTING_CHANGETYPE_EXTENSION_PATTERN.md`
 
 5. **Implement with Testing**
    - Write unit tests at each step

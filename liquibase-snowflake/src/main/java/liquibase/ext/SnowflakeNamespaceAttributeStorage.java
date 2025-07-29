@@ -21,6 +21,8 @@ public class SnowflakeNamespaceAttributeStorage {
     public static void storeAttributes(String objectName, Map<String, String> attributes) {
         if (objectName != null && attributes != null && !attributes.isEmpty()) {
             storage.put(objectName, new ConcurrentHashMap<>(attributes));
+            System.out.println("DEBUG: SnowflakeNamespaceAttributeStorage.storeAttributes - stored for '" + objectName + "': " + attributes);
+            System.out.println("DEBUG: Storage now contains: " + storage);
         }
     }
     
@@ -34,7 +36,10 @@ public class SnowflakeNamespaceAttributeStorage {
         if (objectName == null) {
             return null;
         }
-        return storage.get(objectName);
+        Map<String, String> result = storage.get(objectName);
+        System.out.println("DEBUG: SnowflakeNamespaceAttributeStorage.getAttributes - requested for '" + objectName + "', found: " + result);
+        System.out.println("DEBUG: Storage currently contains: " + storage);
+        return result;
     }
     
     /**

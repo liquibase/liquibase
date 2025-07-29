@@ -9,7 +9,7 @@ Successfully implemented namespace attribute support for the existing createTabl
 
 ## What Went Well ✨
 
-1. **Clear Pattern Guide**: NAMESPACE_ATTRIBUTE_PATTERN_2.md provided excellent step-by-step instructions.
+1. **Clear Pattern Guide**: EXISTING_CHANGETYPE_EXTENSION_PATTERN.md provided excellent step-by-step instructions.
 
 2. **Modular Implementation**: Created three clean components:
    - Storage layer (thread-safe attribute storage)

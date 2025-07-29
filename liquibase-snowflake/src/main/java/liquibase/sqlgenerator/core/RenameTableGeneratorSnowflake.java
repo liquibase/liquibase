@@ -10,7 +10,7 @@ import liquibase.statement.core.RenameTableStatement;
 public class RenameTableGeneratorSnowflake extends RenameTableGenerator{
     @Override
     public int getPriority() {
-        return PRIORITY_DATABASE;
+        return PRIORITY_DATABASE + 5;
     }
 
     @Override

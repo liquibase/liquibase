@@ -41,7 +41,7 @@ Snowflake-specific implementation documentation and project files.
 
 ### Generic Patterns
 - [New Change Type Pattern](generic-patterns/development/NEW_CHANGETYPE_PATTERN_2.md)
-- [Namespace Attribute Pattern](generic-patterns/development/NAMESPACE_ATTRIBUTE_PATTERN_2.md)
+- [Namespace Attribute Pattern](generic-patterns/development/EXISTING_CHANGETYPE_EXTENSION_PATTERN.md)
 - [Test Harness Guide](generic-patterns/testing/TEST_HARNESS_IMPLEMENTATION_GUIDE_2.md)
 - [Requirements Creation Guide](generic-patterns/development/DETAILED_REQUIREMENTS_CREATION_GUIDE.md)
 

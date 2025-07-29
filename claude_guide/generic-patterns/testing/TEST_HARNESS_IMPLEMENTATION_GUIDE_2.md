@@ -86,17 +86,35 @@ mvn test -Dtest=ChangeObjectTests -DchangeObjects=myTest -DdbName=snowflake
 ```bash
 # 1. Am I in the RIGHT directory?
 pwd
-# MUST show: /Users/kevinchappell/Documents/GitHub/liquibase-test-harness
-# NOT: /Users/kevinchappell/Documents/GitHub/liquibase/liquibase-snowflake
+# MUST show: liquibase-test-harness
+# NOT: liquibase-snowflake
 
 # 2. Does the test harness directory exist?
-ls /Users/kevinchappell/Documents/GitHub/liquibase-test-harness
+ls ../liquibase-test-harness
 # If not found, STOP - test harness is not set up
 
 # 3. Is the JAR up to date?
-ls -la /Users/kevinchappell/Documents/GitHub/liquibase-test-harness/lib/liquibase-snowflake*.jar
+ls -la ../liquibase-test-harness/lib/liquibase-snowflake*.jar
 # Check timestamp - if older than your last code change, YOU MUST REBUILD
 ```
+
+### Test Harness File Locations
+
+**Test XML Files**:
+- **Directory**: `liquibase-test-harness/src/test/resources/liquibase/harness/change/changelogs/<database>/`
+- **Example**: `liquibase-test-harness/src/test/resources/liquibase/harness/change/changelogs/snowflake/createWarehouse.xml`
+
+**Expected SQL Files**:
+- **Directory**: `liquibase-test-harness/src/test/resources/liquibase/harness/change/expectedSql/<database>/`
+- **Example**: `liquibase-test-harness/src/test/resources/liquibase/harness/change/expectedSql/snowflake/createWarehouse.sql`
+
+**Expected Snapshot Files**:
+- **Directory**: `liquibase-test-harness/src/test/resources/liquibase/harness/change/expectedSnapshot/<database>/`
+- **Example**: `liquibase-test-harness/src/test/resources/liquibase/harness/change/expectedSnapshot/snowflake/createWarehouse.json`
+
+**Initialization & Cleanup**:
+- **Init**: `liquibase-test-harness/src/test/resources/liquibase/harness/change/changelogs/<database>/init.xml`
+- **Cleanup**: `liquibase-test-harness/src/test/resources/liquibase/harness/change/changelogs/<database>/cleanup.xml`
 
 ### Step 1: MANDATORY - Build and Deploy JAR First
 ```bash
@@ -263,14 +281,12 @@ Determine what objects your change creates for the snapshot:
 
 ### Phase 1: Create Changelog Files
 
-#### Location
-```
-liquibase-test-harness/
-└── src/main/resources/liquibase/harness/change/changelogs/snowflake/
-    ├── <changeType>.xml
-    ├── <changeType>OrReplace.xml     (if needed)
-    └── <changeType>IfNotExists.xml   (if needed)
-```
+#### File Locations
+
+**Test Changelog Files**:
+- **Directory**: `liquibase-test-harness/src/test/resources/liquibase/harness/change/changelogs/snowflake/`
+- **File naming**: `<changeType>.xml`, `<changeType>OrReplace.xml`, `<changeType>IfNotExists.xml`
+- **Full path example**: `liquibase-test-harness/src/test/resources/liquibase/harness/change/changelogs/snowflake/createWarehouse.xml`
 
 #### Required Structure
 
@@ -368,7 +384,8 @@ GENERATED SQL:
 
 #### Step 2: Create Expected SQL File
 
-Location: `src/main/resources/liquibase/harness/change/expectedSql/snowflake/<changeType>.sql`
+**File Location**: `liquibase-test-harness/src/test/resources/liquibase/harness/change/expectedSql/snowflake/<changeType>.sql`
+**Full path example**: `liquibase-test-harness/src/test/resources/liquibase/harness/change/expectedSql/snowflake/createWarehouse.sql`
 
 **CRITICAL FORMAT RULES**:
 1. NO semicolons at end of lines
@@ -420,8 +437,8 @@ CREATE <OBJECT> TEST_OBJECT_2 WITH <OPTION> value
 
 ### Phase 3: Create Expected Snapshot
 
-#### Location
-`src/main/resources/liquibase/harness/change/expectedSnapshot/snowflake/<changeType>.json`
+**File Location**: `liquibase-test-harness/src/test/resources/liquibase/harness/change/expectedSnapshot/snowflake/<changeType>.json`
+**Full path example**: `liquibase-test-harness/src/test/resources/liquibase/harness/change/expectedSnapshot/snowflake/createWarehouse.json`
 
 #### Structure Based on Object Type
 

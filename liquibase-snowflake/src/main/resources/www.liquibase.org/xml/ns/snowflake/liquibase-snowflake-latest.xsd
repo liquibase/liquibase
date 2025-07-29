@@ -154,15 +154,20 @@
     </xsd:element>
 
     <!-- Table Operations -->
-    <xsd:element name="alterTableCluster">
+    <xsd:element name="alterTable">
         <xsd:complexType>
             <xsd:attribute name="catalogName" type="xsd:string"/>
             <xsd:attribute name="schemaName" type="xsd:string"/>
             <xsd:attribute name="tableName" type="xsd:string" use="required"/>
+            <!-- Clustering operations (mutually exclusive) -->
             <xsd:attribute name="clusterBy" type="xsd:string"/>
             <xsd:attribute name="dropClusteringKey" type="xsd:boolean"/>
             <xsd:attribute name="suspendRecluster" type="xsd:boolean"/>
             <xsd:attribute name="resumeRecluster" type="xsd:boolean"/>
+            <!-- Property settings (can be combined) -->
+            <xsd:attribute name="setDataRetentionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="setChangeTracking" type="xsd:boolean"/>
+            <xsd:attribute name="setEnableSchemaEvolution" type="xsd:boolean"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -205,6 +210,25 @@
         </xsd:complexType>
     </xsd:element>
 
+    <!-- AlterSequence-specific namespace attributes -->
+    <xsd:attribute name="setNoOrder" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Set sequence to NOORDER (one-way operation - cannot be undone)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="setComment" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Set a comment on the sequence</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="unsetComment" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Remove the comment from the sequence (mutually exclusive with setComment)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
     <!-- Sequence namespace attributes (for use on standard createSequence) -->
     <xsd:attribute name="order" type="xsd:boolean">
         <xsd:annotation>
@@ -437,6 +461,9 @@
             <xsd:documentation>Prevent drop if foreign key references exist (DROP TABLE ... RESTRICT)</xsd:documentation>
         </xsd:annotation>
     </xsd:attribute>
+
+    <!-- DropSequence-specific namespace attributes -->
+    <!-- Note: cascade and restrict attributes are reused from DropTable for consistency -->
 
     <!-- Type Definitions -->
 
