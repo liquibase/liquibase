@@ -96,114 +96,21 @@ liquibase-<extension>/
 
 ### CRITICAL: Before ANY Implementation
 
-Before writing any code, you MUST create a detailed requirements document by researching the database vendor's official documentation.
+Before writing any code, you MUST create a detailed requirements document.
 
-#### 1. Create Requirements Document
+**See**: `DETAILED_REQUIREMENTS_CREATION_GUIDE.md` for complete instructions on creating requirements.
 
-Create a file: `claude_guide/project/requirements/detailed_requirements/<changeTypeName>_requirements.md`
+**Location**: Requirements must be stored in `claude_guide/project/requirements/detailed_requirements/<changeTypeName>_requirements.md`
 
-Example: `claude_guide/project/requirements/detailed_requirements/createSchema_requirements.md`
+### Requirements Checklist
 
-#### 2. Requirements Document Template
-
-```markdown
-# <ChangeType> Detailed Requirements
-
-## 1. SQL Syntax Research
-
-### Official Documentation Reference
-- URL: [Link to vendor documentation]
-- Version: [Database version]
-- Last Updated: [Date]
-
-### Basic Syntax
-```sql
--- Minimal syntax
-CREATE SCHEMA schema_name;
-
--- Full syntax with all options
-CREATE [OR REPLACE] [TRANSIENT] SCHEMA [IF NOT EXISTS] schema_name
-  [CLONE source_schema_name]
-  [WITH MANAGED ACCESS]
-  [DATA_RETENTION_TIME_IN_DAYS = <integer>]
-  [MAX_DATA_EXTENSION_TIME_IN_DAYS = <integer>]
-  [DEFAULT_DDL_COLLATION = '<collation_specification>']
-  [COMMENT = '<string_literal>'];
-```
-
-## 2. Attribute Analysis
-
-| Attribute | Description | Data Type | Default | Valid Values | Required |
-|-----------|-------------|-----------|---------|--------------|----------|
-| schemaName | Name of the schema | String | - | Valid identifier | Yes |
-| orReplace | Replace if exists | Boolean | false | true/false | No |
-| transient | Create transient schema | Boolean | false | true/false | No |
-| ifNotExists | Only create if not exists | Boolean | false | true/false | No |
-| managedAccess | Enable managed access | Boolean | false | true/false | No |
-| dataRetentionTimeInDays | Data retention period | Integer | 1 | 0-90 | No |
-| comment | Schema comment | String | null | Any string | No |
-
-## 3. Mutual Exclusivity Rules
-
-### Mutually Exclusive Combinations
-1. `orReplace` and `ifNotExists` - Cannot be used together
-2. `transient` and `dataRetentionTimeInDays > 0` - Transient schemas have 0 retention
-
-### Required Combinations
-1. None identified
-
-## 4. SQL Examples for Testing
-
-### Example 1: Basic Schema
-```sql
-CREATE SCHEMA basic_schema;
-```
-
-### Example 2: Transient Schema
-```sql
-CREATE TRANSIENT SCHEMA transient_schema;
-```
-
-### Example 3: Schema with All Options
-```sql
-CREATE OR REPLACE SCHEMA full_schema
-  WITH MANAGED ACCESS
-  DATA_RETENTION_TIME_IN_DAYS = 7
-  COMMENT = 'Full featured schema';
-```
-
-### Example 4: Conditional Creation
-```sql
-CREATE SCHEMA IF NOT EXISTS conditional_schema;
-```
-
-## 5. Test Scenarios
-
-Based on the mutual exclusivity rules, we need the following test files:
-
-1. **createSchema.xml** - Basic functionality, transient, managed access, retention
-2. **createOrReplaceSchema.xml** - OR REPLACE variations (separate due to mutual exclusivity)
-3. **createSchemaIfNotExists.xml** - IF NOT EXISTS variations (separate due to mutual exclusivity)
-
-## 6. Validation Rules
-
-1. schemaName cannot be null or empty
-2. If orReplace=true and ifNotExists=true, throw validation error
-3. dataRetentionTimeInDays must be between 0 and 90
-4. Schema names must follow identifier rules (alphanumeric, underscore, no spaces)
-```
-
-#### 3. Research Checklist
-
-- [ ] Find official vendor documentation
-- [ ] Document complete SQL syntax
-- [ ] List ALL attributes with descriptions
-- [ ] Identify data types and valid ranges
-- [ ] Find default values
-- [ ] Identify mutual exclusivity rules
-- [ ] Identify required combinations
-- [ ] Create syntactically correct examples
-- [ ] Plan test scenarios based on rules
+- [ ] Created requirements document following the guide
+- [ ] Researched official database documentation  
+- [ ] Documented all SQL syntax variations
+- [ ] Created attribute analysis table
+- [ ] Identified mutual exclusivity rules
+- [ ] Planned test scenarios
+- [ ] Defined validation rules
 
 ---
 

@@ -137,8 +137,8 @@ liquibase-test-harness/
     <!-- CRITICAL: ALWAYS include init.xml first -->
     <include file="liquibase/harness/change/changelogs/snowflake/init.xml"/>
     
-    <!-- CRITICAL: Cleanup changeset with runAlways="true" -->
-    <changeSet id="cleanup" author="test-harness" runAlways="true">
+    <!-- Test-specific cleanup changeset with runAlways="true" -->
+    <changeSet id="cleanup-test-objects" author="test-harness" runAlways="true">
         <sql>
             <!-- Drop ALL objects this test will create -->
             <!-- MUST use IF EXISTS -->
@@ -156,6 +156,25 @@ liquibase-test-harness/
         <snowflake:<changeType> <requiredAttribute>="TEST_OBJECT_2"
                                <optionalAttribute>="value"/>
     </changeSet>
+
+    <!-- Account-level cleanup (second to last) - ONLY if needed -->
+    <changeSet id="cleanup-account-objects" author="test-harness" runAlways="true">
+        <preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="1">SELECT 1</sqlCheck>
+        </preConditions>
+        <sql>
+            <!-- Clean up account-level objects like WAREHOUSE, DATABASE -->
+            <!-- These are NOT covered by cleanup.xml schema reset -->
+            DROP WAREHOUSE IF EXISTS TEST_WAREHOUSE CASCADE;
+            DROP DATABASE IF EXISTS TEST_DATABASE CASCADE;
+            <!-- Restore context after cleanup -->
+            USE WAREHOUSE LTHDB_TEST_WH;
+            USE DATABASE LTHDB;
+        </sql>
+    </changeSet>
+
+    <!-- CRITICAL: ALWAYS include cleanup.xml as LAST changeset -->
+    <include file="liquibase/harness/change/changelogs/snowflake/cleanup.xml"/>
 </databaseChangeLog>
 ```
 
@@ -395,12 +414,19 @@ Object 'TEST_OBJECT' already exists
 - Newline differences
 - Parameter order
 - Missing init.xml SQL
+- **Missing actual test SQL** (only shows cleanup)
 
 **Debug Process**:
 1. Copy GENERATED SQL to text editor
 2. Show whitespace characters
 3. Update expectedSql exactly
 4. No trailing spaces or extra newlines
+
+**If only cleanup SQL appears**:
+- Check if changesets have been previously run
+- Verify changesets don't have `runAlways="true"`
+- Check DATABASECHANGELOG table for existing executions
+- Consider adding unique context or labels to force re-execution
 
 #### 4. "Snapshot comparison failed"
 
@@ -421,6 +447,137 @@ Object 'TEST_OBJECT' already exists
 
 ### Database State Issues
 
+#### Test Harness Execution Order Problem
+
+**Critical Issue**: The test harness runs commands in this order:
+1. `updateSql` - Generates SQL by checking DATABASECHANGELOG
+2. `update` - Actually executes the changes
+
+This means cleanup that happens during `update` is too late - `updateSql` has already checked the old state!
+
+**Solution**: Comprehensive cleanup strategy with proper ordering.
+
+---
+
+## Comprehensive Cleanup Strategy
+
+### Required Test File Structure
+
+Every test MUST follow this exact structure:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog ...>
+
+    <!-- 1. ALWAYS start with init.xml -->
+    <include file="liquibase/harness/change/changelogs/snowflake/init.xml"/>
+    
+    <!-- 2. Test-specific cleanup (what THIS test creates) -->
+    <changeSet id="cleanup-test-objects" author="test-harness" runAlways="true">
+        <sql>
+            -- Drop all objects this test will create
+            DROP TABLE IF EXISTS MY_TEST_TABLE CASCADE;
+            DROP SCHEMA IF EXISTS MY_TEST_SCHEMA CASCADE;
+        </sql>
+    </changeSet>
+    
+    <!-- 3. Your test changesets -->
+    <changeSet id="1" author="test-harness">
+        <snowflake:createSchema schemaName="MY_TEST_SCHEMA"/>
+    </changeSet>
+    
+    <!-- 4. Account-level cleanup (ONLY if creating WAREHOUSE/DATABASE) -->
+    <changeSet id="cleanup-account-objects" author="test-harness" runAlways="true">
+        <preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="1">SELECT 1</sqlCheck>
+        </preConditions>
+        <sql>
+            -- Clean up account-level objects
+            DROP WAREHOUSE IF EXISTS MY_TEST_WAREHOUSE CASCADE;
+            DROP DATABASE IF EXISTS MY_TEST_DATABASE CASCADE;
+            -- CRITICAL: Restore context after cleanup
+            USE WAREHOUSE LTHDB_TEST_WH;
+            USE DATABASE LTHDB;
+            USE SCHEMA TESTHARNESS;
+        </sql>
+    </changeSet>
+    
+    <!-- 5. ALWAYS end with cleanup.xml -->
+    <include file="liquibase/harness/change/changelogs/snowflake/cleanup.xml"/>
+</databaseChangeLog>
+```
+
+### Object Cleanup Responsibilities
+
+#### Schema-Level Objects (handled by cleanup.xml)
+These exist within the test schema and are cleaned by the schema reset:
+- Tables, Views, Sequences
+- Procedures, Functions
+- Constraints, Indexes
+- Any object created within the test schema
+
+#### Database-Level Objects (require explicit cleanup)
+These exist at database level and need manual cleanup:
+- **SCHEMA** objects (created by createSchema)
+- **ROLE** grants at database level
+- Any object scoped to the database
+
+#### Account-Level Objects (require explicit cleanup)
+These exist at account level and MUST be explicitly cleaned:
+- **WAREHOUSE** objects (compute resources)
+- **DATABASE** objects (if creating new databases)
+- **ROLE** objects (security)
+- **USER** objects (security)
+- **RESOURCE MONITOR** objects (governance)
+- **NETWORK POLICY** objects (security)
+
+### Why This Structure Works
+
+1. **init.xml** - Sets up basic test environment
+2. **Test-specific cleanup** - Ensures clean state before test runs
+3. **Test changesets** - Execute the actual test
+4. **Account-level cleanup** - Removes objects outside schema scope
+5. **cleanup.xml** - Complete schema reset including DATABASECHANGELOG
+
+This ensures:
+- `updateSql` sees a clean state
+- Tests are repeatable
+- No manual cleanup needed
+- Account-level objects don't accumulate
+
+### Common Mistakes to Avoid
+
+❌ **DON'T** forget cleanup.xml at the end
+❌ **DON'T** forget to restore context after dropping WAREHOUSE/DATABASE
+❌ **DON'T** put test changesets before cleanup
+❌ **DON'T** forget `runAlways="true"` on cleanup changesets
+❌ **DON'T** forget `IF EXISTS` in cleanup SQL
+
+✅ **DO** follow the 5-step structure exactly
+✅ **DO** clean up ALL objects your test creates
+✅ **DO** use CASCADE for dependent objects
+✅ **DO** restore context after account-level cleanup
+✅ **DO** test your cleanup by running the test twice
+1. **Manual cleanup before test**: Run a cleanup script or init.xml separately
+2. **Move cleanup to END of test**: Each test cleans up for the NEXT test
+3. **Use unique object names**: Avoid conflicts between test runs
+
+**Recommended Pattern**:
+```xml
+<!-- Test changesets FIRST -->
+<changeSet id="1" author="test-harness">
+    <snowflake:createSchema schemaName="TEST_SCHEMA"/>
+</changeSet>
+
+<!-- Test-specific cleanup -->
+<changeSet id="cleanup" author="test-harness" runAlways="true">
+    <sql>DROP SCHEMA IF EXISTS TEST_SCHEMA CASCADE;</sql>
+</changeSet>
+
+<!-- Global cleanup at END -->
+<include file="liquibase/harness/change/changelogs/snowflake/cleanup.xml"/>
+```
+
 #### When Snowflake Gets Into Bad State
 
 1. **Check current objects**:
@@ -432,6 +589,7 @@ SHOW TABLES IN SCHEMA TESTHARNESS;
 2. **Manual cleanup**:
 ```sql
 USE ROLE LIQUIBASE_TEST_HARNESS_ROLE;
+USE DATABASE LTHDB;
 DROP SCHEMA IF EXISTS TESTHARNESS CASCADE;
 -- Drop any test objects
 DROP SCHEMA IF EXISTS TEST_% CASCADE;

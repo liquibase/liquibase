@@ -6,20 +6,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **When working on Liquibase Snowflake Extension, ALWAYS consult these guides in order:**
 
-### 1. Implementation Guide (Start Here)
-- Location: `claude_guide/roles/developer/patterns/NEW_CHANGETYPE_PATTERN_2.md`
+### 0. Master Implementation Prompt (Start Here First!)
+- Location: `claude_guide/snowflake-project/quick-reference/SNOWFLAKE_CHANGETYPE_IMPLEMENTATION_PROMPT.md`
+- Purpose: Complete workflow, role definition, and process overview
+- Includes: All steps, guide references, and working process
+
+### 1. Implementation Guide
+- Location: `claude_guide/generic-patterns/development/NEW_CHANGETYPE_PATTERN_2.md`
 - Purpose: Step-by-step implementation with integrated testing
 - Includes: Change class, Statement, Generator, Service registration, XSD, Unit tests
 
 ### 2. Test Harness Guide (After Implementation)
-- Location: `claude_guide/roles/qa/patterns/TEST_HARNESS_IMPLEMENTATION_GUIDE_2.md`
+- Location: `claude_guide/generic-patterns/testing/TEST_HARNESS_IMPLEMENTATION_GUIDE_2.md`
 - Purpose: End-to-end database testing against real Snowflake
 - Prerequisite: All unit tests passing
 
 ### 3. Detailed Requirements (For Each Change Type)
-- Location: `claude_guide/project/requirements/detailed_requirements/<changeType>_requirements.md`
+- Location: `claude_guide/snowflake-project/requirements/detailed_requirements/<changeType>_requirements.md`
 - Purpose: Specific requirements, mutual exclusivity rules, SQL variations
 - Example: `createSchema_requirements.md`
+
+### 4. Project Tracking
+- Location: `claude_guide/snowflake-project/SNOWFLAKE_IMPLEMENTATION_PROJECT_PLAN.md`
+- Purpose: Track progress, status, and work logs
+- Update: After every major step
 
 ### Development Philosophy
 1. **Pattern-First Development**: Use proven patterns from the guides
@@ -30,17 +40,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Knowledge Base Structure
 ```
 claude_guide/
-├── roles/
-│   ├── developer/patterns/
-│   │   ├── NEW_CHANGETYPE_PATTERN_2.md          # Implementation guide
-│   │   └── CHANGE_CLASS_CHECKLIST.md            # Quick reference
-│   └── qa/patterns/
-│       ├── TEST_HARNESS_IMPLEMENTATION_GUIDE_2.md # Test harness guide
-│       └── INTEGRATION_TEST_CHECKLIST.md         # Testing checklist
-├── project/requirements/
-│   └── detailed_requirements/                     # Per-feature requirements
-└── examples/                                      # Reference implementations
-    └── postgresql/                                # CREATE DOMAIN example
+├── generic-patterns/                              # Reusable patterns for any DB
+│   ├── development/                               # Implementation patterns
+│   │   ├── NEW_CHANGETYPE_PATTERN_2.md
+│   │   ├── NAMESPACE_ATTRIBUTE_PATTERN_2.md
+│   │   └── DETAILED_REQUIREMENTS_CREATION_GUIDE.md
+│   ├── testing/                                   # Testing patterns
+│   │   └── TEST_HARNESS_IMPLEMENTATION_GUIDE_2.md
+│   └── examples/postgresql/                       # Reference implementation
+└── snowflake-project/                             # Snowflake-specific
+    ├── quick-reference/                           # Quick start guides
+    │   └── SNOWFLAKE_CHANGETYPE_IMPLEMENTATION_PROMPT.md
+    ├── SNOWFLAKE_IMPLEMENTATION_PROJECT_PLAN.md   # Master project plan
+    └── requirements/detailed_requirements/        # Snowflake requirements
 ```
 
 ## Build Commands
@@ -164,11 +176,12 @@ cp target/liquibase-snowflake-*.jar ../liquibase-test-harness/lib/
 - Purpose: End-to-end testing against real Snowflake database
 - Prerequisites: All unit tests passing, JAR deployed to test harness
 
-### Current Status
-- ✅ CreateSchema fully implemented with tests
-- ✅ DropSchema implemented (example for rollback support)
-- ✅ Comprehensive pattern documentation created
-- 🔄 Next: Implement remaining change types following patterns
+### Current Status (Updated 2025-01-29)
+- ✅ ALL 9 core change types already implemented (SCHEMA, DATABASE, WAREHOUSE)
+- ✅ All registered in services and XSD
+- ❌ No test harness tests exist yet
+- 🔄 Next: Create test harness tests for all implemented change types
+- 📄 See: `claude_guide/IMPLEMENTATION_AUDIT.md` for full discovery details
 
 ### Implementation Workflow
 1. **Create Requirements**: Document in `detailed_requirements/<changeType>_requirements.md`
