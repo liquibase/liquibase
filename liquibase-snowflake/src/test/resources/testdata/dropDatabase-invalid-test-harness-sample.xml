@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:snowflake="http://www.liquibase.org/xml/ns/snowflake"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                      http://www.liquibase.org/xml/ns/snowflake
+                      http://www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd">
+
+    <!-- These tests are expected to FAIL due to validation errors -->
+
+    <!-- Invalid Test 1: Both CASCADE and RESTRICT -->
+    <changeSet id="invalid-1-both-modifiers" author="test-harness">
+        <!-- This should fail validation -->
+        <snowflake:dropDatabase databaseName="INVALID_BOTH_MODIFIERS"
+                                cascade="true"
+                                restrict="true"/>
+    </changeSet>
+
+    <!-- Invalid Test 2: Missing required databaseName -->
+    <changeSet id="invalid-2-missing-name" author="test-harness">
+        <!-- This should fail validation -->
+        <snowflake:dropDatabase ifExists="true"/>
+    </changeSet>
+
+</databaseChangeLog>

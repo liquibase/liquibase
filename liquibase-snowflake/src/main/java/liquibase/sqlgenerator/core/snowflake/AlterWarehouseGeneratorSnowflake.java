@@ -55,15 +55,23 @@ public class AlterWarehouseGeneratorSnowflake extends AbstractSqlGenerator<Alter
         }
         
         StringBuilder sql = new StringBuilder("ALTER WAREHOUSE ");
+        if (Boolean.TRUE.equals(statement.getIfExists())) {
+            sql.append("IF EXISTS ");
+        }
         sql.append(database.escapeObjectName(statement.getWarehouseName(), Table.class));
         
+        // Handle action operations (SUSPEND, RESUME, ABORT ALL QUERIES)
+        if (statement.getAction() != null) {
+            sql.append(" ").append(statement.getAction());
+        }
         // Handle rename separately as it uses different syntax
-        if (statement.getNewName() != null) {
+        else if (statement.getNewName() != null) {
             sql.append(" RENAME TO ");
             sql.append(database.escapeObjectName(statement.getNewName(), Table.class));
         } else {
-            // All other alterations use SET syntax
+            // Handle SET/UNSET operations
             List<String> setClause = new ArrayList<>();
+            List<String> unsetClause = new ArrayList<>();
             
             if (statement.getWarehouseSize() != null) {
                 setClause.add("WAREHOUSE_SIZE = " + statement.getWarehouseSize());
@@ -121,9 +129,32 @@ public class AlterWarehouseGeneratorSnowflake extends AbstractSqlGenerator<Alter
                 setClause.add("TAG " + statement.getWarehouseTag());
             }
             
+            // Handle UNSET operations
+            if (Boolean.TRUE.equals(statement.getUnsetResourceMonitor())) {
+                unsetClause.add("RESOURCE_MONITOR");
+            }
+            
+            if (Boolean.TRUE.equals(statement.getUnsetComment())) {
+                unsetClause.add("COMMENT");
+            }
+            
             if (!setClause.isEmpty()) {
                 sql.append(" SET ");
                 sql.append(String.join(", ", setClause));
+            }
+            
+            if (!unsetClause.isEmpty()) {
+                // If we already have SET, we need a separate statement for UNSET
+                if (!setClause.isEmpty()) {
+                    sqlList.add(new UnparsedSql(sql.toString()));
+                    sql = new StringBuilder("ALTER WAREHOUSE ");
+                    if (Boolean.TRUE.equals(statement.getIfExists())) {
+                        sql.append("IF EXISTS ");
+                    }
+                    sql.append(database.escapeObjectName(statement.getWarehouseName(), Table.class));
+                }
+                sql.append(" UNSET ");
+                sql.append(String.join(", ", unsetClause));
             }
         }
 

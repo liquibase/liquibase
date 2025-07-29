@@ -20,12 +20,18 @@ public class AlterDatabaseChange extends AbstractChange {
 
     private String databaseName;
     private String newName;
+    private Boolean ifExists;
     private String newDataRetentionTimeInDays;
     private String newMaxDataExtensionTimeInDays;
     private String newDefaultDdlCollation;
     private String newComment;
     private Boolean replaceComment;
     private Boolean dropComment;
+    // UNSET operations
+    private Boolean unsetDataRetentionTimeInDays;
+    private Boolean unsetMaxDataExtensionTimeInDays;
+    private Boolean unsetDefaultDdlCollation;
+    private Boolean unsetComment;
 
     @DatabaseChangeProperty(description = "Name of the database to alter", requiredForDatabase = "snowflake")
     public String getDatabaseName() {
@@ -99,17 +105,67 @@ public class AlterDatabaseChange extends AbstractChange {
         this.dropComment = dropComment;
     }
 
+    @DatabaseChangeProperty(description = "Only alter if database exists")
+    public Boolean getIfExists() {
+        return ifExists;
+    }
+
+    public void setIfExists(Boolean ifExists) {
+        this.ifExists = ifExists;
+    }
+
+    @DatabaseChangeProperty(description = "Unset data retention time")
+    public Boolean getUnsetDataRetentionTimeInDays() {
+        return unsetDataRetentionTimeInDays;
+    }
+
+    public void setUnsetDataRetentionTimeInDays(Boolean unsetDataRetentionTimeInDays) {
+        this.unsetDataRetentionTimeInDays = unsetDataRetentionTimeInDays;
+    }
+
+    @DatabaseChangeProperty(description = "Unset max data extension time")
+    public Boolean getUnsetMaxDataExtensionTimeInDays() {
+        return unsetMaxDataExtensionTimeInDays;
+    }
+
+    public void setUnsetMaxDataExtensionTimeInDays(Boolean unsetMaxDataExtensionTimeInDays) {
+        this.unsetMaxDataExtensionTimeInDays = unsetMaxDataExtensionTimeInDays;
+    }
+
+    @DatabaseChangeProperty(description = "Unset default DDL collation")
+    public Boolean getUnsetDefaultDdlCollation() {
+        return unsetDefaultDdlCollation;
+    }
+
+    public void setUnsetDefaultDdlCollation(Boolean unsetDefaultDdlCollation) {
+        this.unsetDefaultDdlCollation = unsetDefaultDdlCollation;
+    }
+
+    @DatabaseChangeProperty(description = "Unset comment")
+    public Boolean getUnsetComment() {
+        return unsetComment;
+    }
+
+    public void setUnsetComment(Boolean unsetComment) {
+        this.unsetComment = unsetComment;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
         AlterDatabaseStatement statement = new AlterDatabaseStatement();
         statement.setDatabaseName(getDatabaseName());
         statement.setNewName(getNewDatabaseName());
+        statement.setIfExists(getIfExists());
         statement.setNewDataRetentionTimeInDays(getDataRetentionTimeInDays());
         statement.setNewMaxDataExtensionTimeInDays(getNewMaxDataExtensionTimeInDays());
         statement.setNewDefaultDdlCollation(getNewDefaultDdlCollation());
         statement.setNewComment(getComment());
         statement.setReplaceComment(getReplaceComment());
         statement.setDropComment(getDropComment());
+        statement.setUnsetDataRetentionTimeInDays(getUnsetDataRetentionTimeInDays());
+        statement.setUnsetMaxDataExtensionTimeInDays(getUnsetMaxDataExtensionTimeInDays());
+        statement.setUnsetDefaultDdlCollation(getUnsetDefaultDdlCollation());
+        statement.setUnsetComment(getUnsetComment());
         
         return new SqlStatement[]{statement};
     }
@@ -142,13 +198,31 @@ public class AlterDatabaseChange extends AbstractChange {
             getNewMaxDataExtensionTimeInDays() == null &&
             getNewDefaultDdlCollation() == null &&
             getComment() == null &&
-            (getDropComment() == null || !getDropComment())) {
+            (getDropComment() == null || !getDropComment()) &&
+            (getUnsetDataRetentionTimeInDays() == null || !getUnsetDataRetentionTimeInDays()) &&
+            (getUnsetMaxDataExtensionTimeInDays() == null || !getUnsetMaxDataExtensionTimeInDays()) &&
+            (getUnsetDefaultDdlCollation() == null || !getUnsetDefaultDdlCollation()) &&
+            (getUnsetComment() == null || !getUnsetComment())) {
             errors.addError("At least one database property must be changed");
         }
         
         // Cannot specify both newComment and dropComment
         if (getComment() != null && getDropComment() != null && getDropComment()) {
             errors.addError("Cannot specify both comment and dropComment");
+        }
+        
+        // Cannot SET and UNSET same property
+        if (getDataRetentionTimeInDays() != null && Boolean.TRUE.equals(getUnsetDataRetentionTimeInDays())) {
+            errors.addError("Cannot both SET and UNSET dataRetentionTimeInDays");
+        }
+        if (getNewMaxDataExtensionTimeInDays() != null && Boolean.TRUE.equals(getUnsetMaxDataExtensionTimeInDays())) {
+            errors.addError("Cannot both SET and UNSET maxDataExtensionTimeInDays");
+        }
+        if (getNewDefaultDdlCollation() != null && Boolean.TRUE.equals(getUnsetDefaultDdlCollation())) {
+            errors.addError("Cannot both SET and UNSET defaultDdlCollation");
+        }
+        if (getComment() != null && Boolean.TRUE.equals(getUnsetComment())) {
+            errors.addError("Cannot both SET and UNSET comment");
         }
         
         return errors;

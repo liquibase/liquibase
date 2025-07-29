@@ -26,6 +26,7 @@ public class CreateDatabaseChange extends AbstractChange {
     private String defaultDdlCollation;
     private Boolean orReplace;
     private Boolean ifNotExists;
+    private String cloneFrom;
 
     @DatabaseChangeProperty(description = "Name of the database to create", requiredForDatabase = "snowflake")
     public String getDatabaseName() {
@@ -99,6 +100,15 @@ public class CreateDatabaseChange extends AbstractChange {
         this.ifNotExists = ifNotExists;
     }
 
+    @DatabaseChangeProperty(description = "Source database to clone from")
+    public String getCloneFrom() {
+        return cloneFrom;
+    }
+
+    public void setCloneFrom(String cloneFrom) {
+        this.cloneFrom = cloneFrom;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
         CreateDatabaseStatement statement = new CreateDatabaseStatement();
@@ -110,6 +120,7 @@ public class CreateDatabaseChange extends AbstractChange {
         statement.setDefaultDdlCollation(getDefaultDdlCollation());
         statement.setOrReplace(getOrReplace());
         statement.setIfNotExists(getIfNotExists());
+        statement.setCloneFrom(getCloneFrom());
         
         return new SqlStatement[]{statement};
     }
@@ -147,6 +158,18 @@ public class CreateDatabaseChange extends AbstractChange {
         // Validate that orReplace and ifNotExists are not both set
         if (Boolean.TRUE.equals(getOrReplace()) && Boolean.TRUE.equals(getIfNotExists())) {
             errors.addError("Cannot use both OR REPLACE and IF NOT EXISTS");
+        }
+        
+        // Validate transient databases must have 0 retention time
+        if (Boolean.TRUE.equals(getTransient()) && getDataRetentionTimeInDays() != null) {
+            try {
+                int days = Integer.parseInt(getDataRetentionTimeInDays());
+                if (days > 0) {
+                    errors.addError("Transient databases must have DATA_RETENTION_TIME_IN_DAYS = 0");
+                }
+            } catch (NumberFormatException e) {
+                errors.addError("Invalid dataRetentionTimeInDays value: " + getDataRetentionTimeInDays());
+            }
         }
         
         return errors;

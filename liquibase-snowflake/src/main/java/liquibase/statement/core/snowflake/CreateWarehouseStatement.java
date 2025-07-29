@@ -16,7 +16,7 @@ public class CreateWarehouseStatement extends AbstractSqlStatement {
     private String resourceMonitor;
     private String comment;
     private Boolean enableQueryAcceleration;
-    private String queryAccelerationMaxScaleFactor;
+    private Integer queryAccelerationMaxScaleFactor;
     private Integer maxConcurrencyLevel;
     private Integer statementQueuedTimeoutInSeconds;
     private Integer statementTimeoutInSeconds;
@@ -120,11 +120,11 @@ public class CreateWarehouseStatement extends AbstractSqlStatement {
         this.enableQueryAcceleration = enableQueryAcceleration;
     }
 
-    public String getQueryAccelerationMaxScaleFactor() {
+    public Integer getQueryAccelerationMaxScaleFactor() {
         return queryAccelerationMaxScaleFactor;
     }
 
-    public void setQueryAccelerationMaxScaleFactor(String queryAccelerationMaxScaleFactor) {
+    public void setQueryAccelerationMaxScaleFactor(Integer queryAccelerationMaxScaleFactor) {
         this.queryAccelerationMaxScaleFactor = queryAccelerationMaxScaleFactor;
     }
 

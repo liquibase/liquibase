@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:snowflake="http://www.liquibase.org/xml/ns/snowflake"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                      http://www.liquibase.org/xml/ns/snowflake
+                      http://www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd">
+
+    <!-- Include the standard test harness initialization -->
+    <include file="liquibase/harness/change/changelogs/snowflake/common/init.xml"/>
+
+    <!-- Create test databases first -->
+    <changeSet id="setup-test-databases" author="test-harness">
+        <sql>
+            CREATE DATABASE IF NOT EXISTS LBTEST_DROP_BASIC;
+            CREATE DATABASE IF NOT EXISTS LBTEST_DROP_CASCADE;
+            CREATE DATABASE IF NOT EXISTS LBTEST_DROP_RESTRICT;
+            CREATE DATABASE IF NOT EXISTS LBTEST_DROP_IFEXISTS;
+            
+            -- Add schema to CASCADE test database
+            USE DATABASE LBTEST_DROP_CASCADE;
+            CREATE SCHEMA TEST_SCHEMA;
+            CREATE TABLE TEST_SCHEMA.TEST_TABLE (ID INT);
+        </sql>
+    </changeSet>
+
+    <!-- Test 1: Basic database drop -->
+    <changeSet id="test-1-basic-drop" author="test-harness">
+        <snowflake:dropDatabase databaseName="LBTEST_DROP_BASIC"/>
+        <rollback>
+            <sql>CREATE DATABASE LBTEST_DROP_BASIC</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test 2: Drop with IF EXISTS (non-existent database) -->
+    <changeSet id="test-2-drop-if-exists" author="test-harness">
+        <snowflake:dropDatabase databaseName="LBTEST_NONEXISTENT"
+                                ifExists="true"/>
+        <rollback>
+            <!-- No rollback needed - database didn't exist -->
+        </rollback>
+    </changeSet>
+
+    <!-- Test 3: Drop with CASCADE -->
+    <changeSet id="test-3-drop-cascade" author="test-harness">
+        <snowflake:dropDatabase databaseName="LBTEST_DROP_CASCADE"
+                                cascade="true"/>
+        <rollback>
+            <sql>
+                CREATE DATABASE LBTEST_DROP_CASCADE;
+                CREATE SCHEMA LBTEST_DROP_CASCADE.TEST_SCHEMA;
+                CREATE TABLE LBTEST_DROP_CASCADE.TEST_SCHEMA.TEST_TABLE (ID INT);
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test 4: Drop with RESTRICT (explicit) -->
+    <changeSet id="test-4-drop-restrict" author="test-harness">
+        <snowflake:dropDatabase databaseName="LBTEST_DROP_RESTRICT"
+                                restrict="true"/>
+        <rollback>
+            <sql>CREATE DATABASE LBTEST_DROP_RESTRICT</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test 5: Drop with IF EXISTS (existing database) -->
+    <changeSet id="test-5-drop-if-exists-real" author="test-harness">
+        <snowflake:dropDatabase databaseName="LBTEST_DROP_IFEXISTS"
+                                ifExists="true"/>
+        <rollback>
+            <sql>CREATE DATABASE LBTEST_DROP_IFEXISTS</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Final cleanup -->
+    <changeSet id="final-cleanup" author="test-harness" runAlways="true">
+        <sql>
+            DROP DATABASE IF EXISTS LBTEST_DROP_BASIC;
+            DROP DATABASE IF EXISTS LBTEST_DROP_CASCADE;
+            DROP DATABASE IF EXISTS LBTEST_DROP_RESTRICT;
+            DROP DATABASE IF EXISTS LBTEST_DROP_IFEXISTS;
+        </sql>
+    </changeSet>
+
+    <!-- Include the standard test harness cleanup -->
+    <include file="liquibase/harness/change/changelogs/snowflake/common/cleanup.xml"/>
+
+</databaseChangeLog>

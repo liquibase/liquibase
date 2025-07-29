@@ -136,3 +136,33 @@ When implementing a new change type:
 ## Integration with Test Harness
 
 These unit tests run independently of the Liquibase Test Harness. The test harness tests are located in a separate repository and test the full end-to-end functionality against a real Snowflake database.
+
+### Test Infrastructure Details
+
+#### Unit/Integration Tests (in liquibase-snowflake)
+- Location: `src/test/java/liquibase/`
+- Framework: JUnit 5 (Jupiter) only - no JUnit 4 dependencies
+- Purpose: Test Java code without database connection
+- Build: Part of Maven build process
+
+#### Test Harness Tests (in liquibase-test-harness)
+- Location: `liquibase-test-harness/src/main/resources/liquibase/harness/change/changelogs/snowflake/`
+- Purpose: End-to-end testing against real Snowflake database
+- Prerequisites: 
+  - All unit tests passing
+  - JAR deployed to test harness lib directory
+  - Database credentials configured
+- Execution: Separate from unit test build
+
+### Implementation Workflow
+1. **Create Requirements**: Document in `detailed_requirements/<changeType>_requirements.md`
+2. **Implement Code**: Follow `NEW_CHANGETYPE_PATTERN_2.md`
+   - Change class → Statement → Generator → Service registration → XSD
+3. **Unit Tests**: Write tests at each step (must pass before proceeding)
+4. **Test Harness**: Follow `TEST_HARNESS_IMPLEMENTATION_GUIDE_2.md`
+   - Only after all unit tests pass
+
+### Important Testing Notes
+- **Namespace**: All Snowflake changes use `snowflake:` namespace
+- **SQL Generation**: Snowflake uses uppercase identifiers by default
+- **Documentation**: Update patterns when discovering new insights

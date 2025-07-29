@@ -19,6 +19,7 @@ import liquibase.statement.core.AlterSchemaStatement;
 public class AlterSchemaChange extends AbstractChange {
 
     private String schemaName;
+    private Boolean ifExists;
     private String newName;
     private String newDataRetentionTimeInDays;
     private String newMaxDataExtensionTimeInDays;
@@ -28,6 +29,13 @@ public class AlterSchemaChange extends AbstractChange {
     private String newPipeExecutionPaused;
     private Boolean enableManagedAccess;
     private Boolean disableManagedAccess;
+    
+    // UNSET attributes
+    private Boolean unsetDataRetentionTimeInDays;
+    private Boolean unsetMaxDataExtensionTimeInDays;
+    private Boolean unsetDefaultDdlCollation;
+    private Boolean unsetPipeExecutionPaused;
+    private Boolean unsetComment;
 
     @DatabaseChangeProperty(description = "Name of the schema to alter", requiredForDatabase = "snowflake")
     public String getSchemaName() {
@@ -36,6 +44,15 @@ public class AlterSchemaChange extends AbstractChange {
 
     public void setSchemaName(String schemaName) {
         this.schemaName = schemaName;
+    }
+
+    @DatabaseChangeProperty(description = "Only alter if schema exists")
+    public Boolean getIfExists() {
+        return ifExists;
+    }
+
+    public void setIfExists(Boolean ifExists) {
+        this.ifExists = ifExists;
     }
 
     @DatabaseChangeProperty(description = "New name for the schema")
@@ -119,10 +136,56 @@ public class AlterSchemaChange extends AbstractChange {
         this.disableManagedAccess = disableManagedAccess;
     }
 
+    @DatabaseChangeProperty(description = "Remove data retention time setting")
+    public Boolean getUnsetDataRetentionTimeInDays() {
+        return unsetDataRetentionTimeInDays;
+    }
+
+    public void setUnsetDataRetentionTimeInDays(Boolean unsetDataRetentionTimeInDays) {
+        this.unsetDataRetentionTimeInDays = unsetDataRetentionTimeInDays;
+    }
+
+    @DatabaseChangeProperty(description = "Remove max data extension time setting")
+    public Boolean getUnsetMaxDataExtensionTimeInDays() {
+        return unsetMaxDataExtensionTimeInDays;
+    }
+
+    public void setUnsetMaxDataExtensionTimeInDays(Boolean unsetMaxDataExtensionTimeInDays) {
+        this.unsetMaxDataExtensionTimeInDays = unsetMaxDataExtensionTimeInDays;
+    }
+
+    @DatabaseChangeProperty(description = "Remove default DDL collation setting")
+    public Boolean getUnsetDefaultDdlCollation() {
+        return unsetDefaultDdlCollation;
+    }
+
+    public void setUnsetDefaultDdlCollation(Boolean unsetDefaultDdlCollation) {
+        this.unsetDefaultDdlCollation = unsetDefaultDdlCollation;
+    }
+
+    @DatabaseChangeProperty(description = "Remove pipe execution paused setting")
+    public Boolean getUnsetPipeExecutionPaused() {
+        return unsetPipeExecutionPaused;
+    }
+
+    public void setUnsetPipeExecutionPaused(Boolean unsetPipeExecutionPaused) {
+        this.unsetPipeExecutionPaused = unsetPipeExecutionPaused;
+    }
+
+    @DatabaseChangeProperty(description = "Remove comment setting")
+    public Boolean getUnsetComment() {
+        return unsetComment;
+    }
+
+    public void setUnsetComment(Boolean unsetComment) {
+        this.unsetComment = unsetComment;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
         AlterSchemaStatement statement = new AlterSchemaStatement();
         statement.setSchemaName(getSchemaName());
+        statement.setIfExists(getIfExists());
         statement.setNewName(getNewName());
         statement.setNewDataRetentionTimeInDays(getNewDataRetentionTimeInDays());
         statement.setNewMaxDataExtensionTimeInDays(getNewMaxDataExtensionTimeInDays());
@@ -132,6 +195,11 @@ public class AlterSchemaChange extends AbstractChange {
         statement.setNewPipeExecutionPaused(getNewPipeExecutionPaused());
         statement.setEnableManagedAccess(getEnableManagedAccess());
         statement.setDisableManagedAccess(getDisableManagedAccess());
+        statement.setUnsetDataRetentionTimeInDays(getUnsetDataRetentionTimeInDays());
+        statement.setUnsetMaxDataExtensionTimeInDays(getUnsetMaxDataExtensionTimeInDays());
+        statement.setUnsetDefaultDdlCollation(getUnsetDefaultDdlCollation());
+        statement.setUnsetPipeExecutionPaused(getUnsetPipeExecutionPaused());
+        statement.setUnsetComment(getUnsetComment());
         
         return new SqlStatement[]{statement};
     }
@@ -167,7 +235,12 @@ public class AlterSchemaChange extends AbstractChange {
             getNewPipeExecutionPaused() == null &&
             (getDropComment() == null || !getDropComment()) &&
             (getEnableManagedAccess() == null || !getEnableManagedAccess()) &&
-            (getDisableManagedAccess() == null || !getDisableManagedAccess())) {
+            (getDisableManagedAccess() == null || !getDisableManagedAccess()) &&
+            (getUnsetDataRetentionTimeInDays() == null || !getUnsetDataRetentionTimeInDays()) &&
+            (getUnsetMaxDataExtensionTimeInDays() == null || !getUnsetMaxDataExtensionTimeInDays()) &&
+            (getUnsetDefaultDdlCollation() == null || !getUnsetDefaultDdlCollation()) &&
+            (getUnsetPipeExecutionPaused() == null || !getUnsetPipeExecutionPaused()) &&
+            (getUnsetComment() == null || !getUnsetComment())) {
             errors.addError("At least one schema property must be changed");
         }
         
@@ -180,6 +253,28 @@ public class AlterSchemaChange extends AbstractChange {
         if (getEnableManagedAccess() != null && getEnableManagedAccess() &&
             getDisableManagedAccess() != null && getDisableManagedAccess()) {
             errors.addError("Cannot specify both enableManagedAccess and disableManagedAccess");
+        }
+        
+        // Cannot SET and UNSET the same property
+        if (getNewDataRetentionTimeInDays() != null && getUnsetDataRetentionTimeInDays() != null && getUnsetDataRetentionTimeInDays()) {
+            errors.addError("Cannot specify both newDataRetentionTimeInDays and unsetDataRetentionTimeInDays");
+        }
+        
+        if (getNewMaxDataExtensionTimeInDays() != null && getUnsetMaxDataExtensionTimeInDays() != null && getUnsetMaxDataExtensionTimeInDays()) {
+            errors.addError("Cannot specify both newMaxDataExtensionTimeInDays and unsetMaxDataExtensionTimeInDays");
+        }
+        
+        if (getNewDefaultDdlCollation() != null && getUnsetDefaultDdlCollation() != null && getUnsetDefaultDdlCollation()) {
+            errors.addError("Cannot specify both newDefaultDdlCollation and unsetDefaultDdlCollation");
+        }
+        
+        if (getNewPipeExecutionPaused() != null && getUnsetPipeExecutionPaused() != null && getUnsetPipeExecutionPaused()) {
+            errors.addError("Cannot specify both newPipeExecutionPaused and unsetPipeExecutionPaused");
+        }
+        
+        if ((getNewComment() != null || (getDropComment() != null && getDropComment())) && 
+            getUnsetComment() != null && getUnsetComment()) {
+            errors.addError("Cannot specify comment operations (set/drop) with unsetComment");
         }
         
         return errors;

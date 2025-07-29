@@ -6,6 +6,7 @@ public class AlterWarehouseStatement extends AbstractSqlStatement {
     
     private String warehouseName;
     private String newName;
+    private Boolean ifExists;
     private String warehouseSize;
     private String warehouseType;
     private Integer maxClusterCount;
@@ -20,6 +21,9 @@ public class AlterWarehouseStatement extends AbstractSqlStatement {
     private Long statementQueuedTimeoutInSeconds;
     private Long statementTimeoutInSeconds;
     private String warehouseTag;
+    private String action;
+    private Boolean unsetResourceMonitor;
+    private Boolean unsetComment;
 
     public String getWarehouseName() {
         return warehouseName;
@@ -36,6 +40,15 @@ public class AlterWarehouseStatement extends AbstractSqlStatement {
 
     public AlterWarehouseStatement setNewName(String newName) {
         this.newName = newName;
+        return this;
+    }
+
+    public Boolean getIfExists() {
+        return ifExists;
+    }
+
+    public AlterWarehouseStatement setIfExists(Boolean ifExists) {
+        this.ifExists = ifExists;
         return this;
     }
 
@@ -162,6 +175,33 @@ public class AlterWarehouseStatement extends AbstractSqlStatement {
 
     public AlterWarehouseStatement setWarehouseTag(String warehouseTag) {
         this.warehouseTag = warehouseTag;
+        return this;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public AlterWarehouseStatement setAction(String action) {
+        this.action = action;
+        return this;
+    }
+
+    public Boolean getUnsetResourceMonitor() {
+        return unsetResourceMonitor;
+    }
+
+    public AlterWarehouseStatement setUnsetResourceMonitor(Boolean unsetResourceMonitor) {
+        this.unsetResourceMonitor = unsetResourceMonitor;
+        return this;
+    }
+
+    public Boolean getUnsetComment() {
+        return unsetComment;
+    }
+
+    public AlterWarehouseStatement setUnsetComment(Boolean unsetComment) {
+        this.unsetComment = unsetComment;
         return this;
     }
 }

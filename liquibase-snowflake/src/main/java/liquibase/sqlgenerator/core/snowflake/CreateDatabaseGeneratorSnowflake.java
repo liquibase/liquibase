@@ -33,6 +33,18 @@ public class CreateDatabaseGeneratorSnowflake extends AbstractSqlGenerator<Creat
             errors.addError("Cannot use both OR REPLACE and IF NOT EXISTS");
         }
         
+        // Validate transient databases must have 0 retention time
+        if (Boolean.TRUE.equals(statement.getTransient()) && statement.getDataRetentionTimeInDays() != null) {
+            try {
+                int days = Integer.parseInt(statement.getDataRetentionTimeInDays());
+                if (days > 0) {
+                    errors.addError("Transient databases must have DATA_RETENTION_TIME_IN_DAYS = 0");
+                }
+            } catch (NumberFormatException e) {
+                errors.addError("Invalid dataRetentionTimeInDays value: " + statement.getDataRetentionTimeInDays());
+            }
+        }
+        
         return errors;
     }
 
@@ -58,6 +70,11 @@ public class CreateDatabaseGeneratorSnowflake extends AbstractSqlGenerator<Creat
         }
         
         sql.append(database.escapeObjectName(statement.getDatabaseName(), Table.class));
+        
+        // Handle CLONE clause
+        if (statement.getCloneFrom() != null) {
+            sql.append(" CLONE ").append(statement.getCloneFrom());
+        }
         
         List<String> options = new ArrayList<>();
         

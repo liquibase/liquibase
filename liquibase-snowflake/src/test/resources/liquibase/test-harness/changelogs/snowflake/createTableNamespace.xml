@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:snowflake="http://www.liquibase.org/xml/ns/snowflake"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/snowflake
+                        http://www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd">
+
+    <!-- Test transient table with clustering -->
+    <changeSet id="1" author="test">
+        <createTable tableName="TRANSIENT_SESSIONS" 
+                     snowflake:transient="true"
+                     snowflake:clusterBy="user_id,session_start">
+            <column name="user_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="session_start" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="session_data" type="VARCHAR(1000)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Test table with change tracking and retention -->
+    <changeSet id="2" author="test">
+        <createTable tableName="CUSTOMER_ORDERS"
+                     snowflake:changeTracking="true"
+                     snowflake:dataRetentionTimeInDays="7"
+                     snowflake:maxDataExtensionTimeInDays="30">
+            <column name="order_id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="customer_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_date" type="DATE"/>
+            <column name="total_amount" type="DECIMAL(10,2)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Test temporary table -->
+    <changeSet id="3" author="test">
+        <createTable tableName="TEMP_CALCULATIONS"
+                     snowflake:temporary="true">
+            <column name="calc_id" type="INT"/>
+            <column name="result" type="DECIMAL(10,2)"/>
+            <column name="computed_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP()"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Test table with schema evolution -->
+    <changeSet id="4" author="test">
+        <createTable tableName="EVOLVING_SCHEMA"
+                     snowflake:enableSchemaEvolution="true"
+                     snowflake:defaultDdlCollation="en-ci">
+            <column name="id" type="VARCHAR(36)">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="data" type="VARIANT"/>
+            <column name="metadata" type="OBJECT"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Test volatile table -->
+    <changeSet id="5" author="test">
+        <createTable tableName="VOLATILE_STAGING"
+                     snowflake:volatile="true">
+            <column name="staging_id" type="INT"/>
+            <column name="raw_data" type="TEXT"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Test with multiple features -->
+    <changeSet id="6" author="test">
+        <createTable tableName="MULTI_FEATURE_TABLE"
+                     snowflake:clusterBy="id,created_date"
+                     snowflake:changeTracking="true"
+                     snowflake:dataRetentionTimeInDays="14"
+                     snowflake:copyGrants="true">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="created_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(20)"/>
+            <column name="details" type="VARIANT"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Cleanup -->
+    <changeSet id="99" author="test">
+        <dropTable tableName="TRANSIENT_SESSIONS"/>
+        <dropTable tableName="CUSTOMER_ORDERS"/>
+        <dropTable tableName="TEMP_CALCULATIONS"/>
+        <dropTable tableName="EVOLVING_SCHEMA"/>
+        <dropTable tableName="VOLATILE_STAGING"/>
+        <dropTable tableName="MULTI_FEATURE_TABLE"/>
+    </changeSet>
+
+</databaseChangeLog>

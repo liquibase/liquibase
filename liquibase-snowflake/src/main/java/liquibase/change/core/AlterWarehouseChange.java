@@ -20,6 +20,7 @@ public class AlterWarehouseChange extends AbstractChange {
 
     private String warehouseName;
     private String newName;
+    private Boolean ifExists;
     private String warehouseSize;
     private String warehouseType;
     private Integer maxClusterCount;
@@ -34,6 +35,9 @@ public class AlterWarehouseChange extends AbstractChange {
     private Long statementQueuedTimeoutInSeconds;
     private Long statementTimeoutInSeconds;
     private String warehouseTag;
+    private String action; // SUSPEND, RESUME, ABORT ALL QUERIES
+    private Boolean unsetResourceMonitor;
+    private Boolean unsetComment;
 
     @DatabaseChangeProperty(description = "Name of the warehouse to alter", requiredForDatabase = "snowflake")
     public String getWarehouseName() {
@@ -51,6 +55,15 @@ public class AlterWarehouseChange extends AbstractChange {
 
     public void setNewWarehouseName(String newName) {
         this.newName = newName;
+    }
+
+    @DatabaseChangeProperty(description = "Only alter if warehouse exists")
+    public Boolean getIfExists() {
+        return ifExists;
+    }
+
+    public void setIfExists(Boolean ifExists) {
+        this.ifExists = ifExists;
     }
 
     @DatabaseChangeProperty(description = "Size of the warehouse (XSMALL, SMALL, MEDIUM, LARGE, XLARGE, XXLARGE, XXXLARGE, X4LARGE, X5LARGE, X6LARGE)")
@@ -179,11 +192,39 @@ public class AlterWarehouseChange extends AbstractChange {
         this.warehouseTag = warehouseTag;
     }
 
+    @DatabaseChangeProperty(description = "Action to perform (SUSPEND, RESUME, ABORT ALL QUERIES)")
+    public String getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
+
+    @DatabaseChangeProperty(description = "Unset resource monitor")
+    public Boolean getUnsetResourceMonitor() {
+        return unsetResourceMonitor;
+    }
+
+    public void setUnsetResourceMonitor(Boolean unsetResourceMonitor) {
+        this.unsetResourceMonitor = unsetResourceMonitor;
+    }
+
+    @DatabaseChangeProperty(description = "Unset comment")
+    public Boolean getUnsetComment() {
+        return unsetComment;
+    }
+
+    public void setUnsetComment(Boolean unsetComment) {
+        this.unsetComment = unsetComment;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[]{
             new AlterWarehouseStatement()
                 .setWarehouseName(getWarehouseName())
+                .setIfExists(getIfExists())
                 .setNewName(getNewWarehouseName())
                 .setWarehouseSize(getWarehouseSize())
                 .setWarehouseType(getWarehouseType())
@@ -199,6 +240,9 @@ public class AlterWarehouseChange extends AbstractChange {
                 .setStatementQueuedTimeoutInSeconds(getStatementQueuedTimeoutInSeconds())
                 .setStatementTimeoutInSeconds(getStatementTimeoutInSeconds())
                 .setWarehouseTag(getWarehouseTag())
+                .setAction(getAction())
+                .setUnsetResourceMonitor(getUnsetResourceMonitor())
+                .setUnsetComment(getUnsetComment())
         };
     }
 
@@ -239,13 +283,111 @@ public class AlterWarehouseChange extends AbstractChange {
                               getQueryAccelerationMaxScaleFactor() != null ||
                               getStatementQueuedTimeoutInSeconds() != null ||
                               getStatementTimeoutInSeconds() != null ||
-                              getWarehouseTag() != null;
+                              getWarehouseTag() != null ||
+                              getAction() != null ||
+                              Boolean.TRUE.equals(getUnsetResourceMonitor()) ||
+                              Boolean.TRUE.equals(getUnsetComment());
                               
         if (!hasAlteration) {
             errors.addError("At least one alteration property must be specified");
         }
         
+        // Validate warehouse size if provided
+        if (getWarehouseSize() != null && !isValidWarehouseSize(getWarehouseSize())) {
+            errors.addError("Invalid warehouse size: " + getWarehouseSize());
+        }
+        
+        // Validate warehouse type if provided
+        if (getWarehouseType() != null) {
+            String type = getWarehouseType().toUpperCase();
+            if (!type.equals("STANDARD") && !type.equals("SNOWPARK-OPTIMIZED")) {
+                errors.addError("Invalid warehouse type: " + getWarehouseType());
+            }
+        }
+        
+        // Validate scaling policy if provided
+        if (getScalingPolicy() != null) {
+            String policy = getScalingPolicy().toUpperCase();
+            if (!policy.equals("STANDARD") && !policy.equals("ECONOMY")) {
+                errors.addError("Invalid scaling policy: " + getScalingPolicy());
+            }
+        }
+        
+        // Validate action if provided
+        if (getAction() != null) {
+            String act = getAction().toUpperCase();
+            if (!act.equals("SUSPEND") && !act.equals("RESUME") && !act.equals("ABORT ALL QUERIES")) {
+                errors.addError("Invalid action: " + getAction() + ". Valid actions are: SUSPEND, RESUME, ABORT ALL QUERIES");
+            }
+        }
+        
+        // Validate cluster counts
+        if (getMinClusterCount() != null && getMinClusterCount() < 1) {
+            errors.addError("minClusterCount must be at least 1");
+        }
+        if (getMaxClusterCount() != null && getMaxClusterCount() < 1) {
+            errors.addError("maxClusterCount must be at least 1");
+        }
+        if (getMinClusterCount() != null && getMaxClusterCount() != null && getMinClusterCount() > getMaxClusterCount()) {
+            errors.addError("minClusterCount cannot be greater than maxClusterCount");
+        }
+        if (getMaxClusterCount() != null && getMaxClusterCount() > 10) {
+            errors.addError("maxClusterCount cannot exceed 10");
+        }
+        
+        // Validate autoSuspend
+        if (getAutoSuspend() != null && getAutoSuspend() != 0 && getAutoSuspend() < 60) {
+            errors.addError("autoSuspend must be 0 (never suspend) or at least 60 seconds");
+        }
+        
+        // Validate queryAccelerationMaxScaleFactor
+        if (getQueryAccelerationMaxScaleFactor() != null && 
+            (getQueryAccelerationMaxScaleFactor() < 0 || getQueryAccelerationMaxScaleFactor() > 100)) {
+            errors.addError("queryAccelerationMaxScaleFactor must be between 0 and 100");
+        }
+        
+        // Validate mutual exclusivity
+        if (getResourceMonitor() != null && Boolean.TRUE.equals(getUnsetResourceMonitor())) {
+            errors.addError("Cannot both set and unset resourceMonitor");
+        }
+        if (getComment() != null && Boolean.TRUE.equals(getUnsetComment())) {
+            errors.addError("Cannot both set and unset comment");
+        }
+        
+        // Validate that action cannot be combined with other operations
+        if (getAction() != null && hasNonActionAlterations()) {
+            errors.addError("Action (" + getAction() + ") cannot be combined with other alterations");
+        }
+        
         return errors;
+    }
+    
+    private boolean isValidWarehouseSize(String size) {
+        String upperSize = size.toUpperCase();
+        return upperSize.equals("XSMALL") || upperSize.equals("SMALL") || upperSize.equals("MEDIUM") || 
+               upperSize.equals("LARGE") || upperSize.equals("XLARGE") || upperSize.equals("XXLARGE") || 
+               upperSize.equals("XXXLARGE") || upperSize.equals("X4LARGE") || upperSize.equals("X5LARGE") || 
+               upperSize.equals("X6LARGE");
+    }
+    
+    private boolean hasNonActionAlterations() {
+        return getNewWarehouseName() != null ||
+               getWarehouseSize() != null ||
+               getWarehouseType() != null ||
+               getMaxClusterCount() != null ||
+               getMinClusterCount() != null ||
+               getScalingPolicy() != null ||
+               getAutoSuspend() != null ||
+               getAutoResume() != null ||
+               getResourceMonitor() != null ||
+               getComment() != null ||
+               getEnableQueryAcceleration() != null ||
+               getQueryAccelerationMaxScaleFactor() != null ||
+               getStatementQueuedTimeoutInSeconds() != null ||
+               getStatementTimeoutInSeconds() != null ||
+               getWarehouseTag() != null ||
+               Boolean.TRUE.equals(getUnsetResourceMonitor()) ||
+               Boolean.TRUE.equals(getUnsetComment());
     }
 
     @Override

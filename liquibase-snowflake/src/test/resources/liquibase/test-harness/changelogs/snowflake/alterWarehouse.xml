@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:snowflake="http://www.liquibase.org/xml/ns/snowflake"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/snowflake
+                        http://www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd">
+
+    <!-- Create warehouses to alter -->
+    <changeSet id="1" author="test">
+        <snowflake:createWarehouse warehouseName="WAREHOUSE_TO_ALTER" warehouseSize="SMALL"/>
+        <snowflake:createWarehouse warehouseName="WAREHOUSE_TO_RENAME" warehouseSize="XSMALL"/>
+        <snowflake:createWarehouse warehouseName="WAREHOUSE_TO_SUSPEND" warehouseSize="XSMALL" autoResume="true"/>
+    </changeSet>
+
+    <!-- Rename warehouse -->
+    <changeSet id="2" author="test">
+        <snowflake:alterWarehouse warehouseName="WAREHOUSE_TO_RENAME" newWarehouseName="WAREHOUSE_RENAMED"/>
+        <rollback>
+            <snowflake:alterWarehouse warehouseName="WAREHOUSE_RENAMED" newWarehouseName="WAREHOUSE_TO_RENAME"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Resize warehouse -->
+    <changeSet id="3" author="test">
+        <snowflake:alterWarehouse warehouseName="WAREHOUSE_TO_ALTER" 
+                                  warehouseSize="MEDIUM" 
+                                  autoSuspend="300"/>
+        <rollback>
+            <snowflake:alterWarehouse warehouseName="WAREHOUSE_TO_ALTER" 
+                                      warehouseSize="SMALL" 
+                                      autoSuspend="600"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Configure multi-cluster -->
+    <changeSet id="4" author="test">
+        <snowflake:alterWarehouse warehouseName="WAREHOUSE_TO_ALTER" 
+                                  minClusterCount="1" 
+                                  maxClusterCount="3" 
+                                  scalingPolicy="STANDARD"/>
+    </changeSet>
+
+    <!-- Set properties with IF EXISTS -->
+    <changeSet id="5" author="test">
+        <snowflake:alterWarehouse warehouseName="WAREHOUSE_TO_ALTER" 
+                                  ifExists="true"
+                                  comment="Updated warehouse"
+                                  enableQueryAcceleration="true"
+                                  queryAccelerationMaxScaleFactor="8"/>
+    </changeSet>
+
+    <!-- Suspend warehouse -->
+    <changeSet id="6" author="test">
+        <snowflake:alterWarehouse warehouseName="WAREHOUSE_TO_SUSPEND" action="SUSPEND"/>
+        <rollback>
+            <snowflake:alterWarehouse warehouseName="WAREHOUSE_TO_SUSPEND" action="RESUME"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Resume warehouse -->
+    <changeSet id="7" author="test">
+        <snowflake:alterWarehouse warehouseName="WAREHOUSE_TO_SUSPEND" action="RESUME"/>
+    </changeSet>
+
+    <!-- UNSET operations -->
+    <changeSet id="8" author="test">
+        <snowflake:alterWarehouse warehouseName="WAREHOUSE_TO_ALTER" 
+                                  unsetComment="true"/>
+    </changeSet>
+
+    <!-- Change warehouse type -->
+    <changeSet id="9" author="test">
+        <snowflake:alterWarehouse warehouseName="WAREHOUSE_TO_ALTER" 
+                                  warehouseType="SNOWPARK-OPTIMIZED"/>
+        <rollback>
+            <snowflake:alterWarehouse warehouseName="WAREHOUSE_TO_ALTER" 
+                                      warehouseType="STANDARD"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Cleanup -->
+    <changeSet id="99" author="test">
+        <snowflake:dropWarehouse warehouseName="WAREHOUSE_TO_ALTER" ifExists="true"/>
+        <snowflake:dropWarehouse warehouseName="WAREHOUSE_RENAMED" ifExists="true"/>
+        <snowflake:dropWarehouse warehouseName="WAREHOUSE_TO_SUSPEND" ifExists="true"/>
+    </changeSet>
+
+</databaseChangeLog>

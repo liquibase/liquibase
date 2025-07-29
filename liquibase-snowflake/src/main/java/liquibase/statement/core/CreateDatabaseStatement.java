@@ -12,6 +12,7 @@ public class CreateDatabaseStatement extends AbstractSqlStatement {
     private String defaultDdlCollation;
     private Boolean orReplace;
     private Boolean ifNotExists;
+    private String cloneFrom;
 
     public String getDatabaseName() {
         return databaseName;
@@ -75,5 +76,13 @@ public class CreateDatabaseStatement extends AbstractSqlStatement {
 
     public void setIfNotExists(Boolean ifNotExists) {
         this.ifNotExists = ifNotExists;
+    }
+
+    public String getCloneFrom() {
+        return cloneFrom;
+    }
+
+    public void setCloneFrom(String cloneFrom) {
+        this.cloneFrom = cloneFrom;
     }
 }

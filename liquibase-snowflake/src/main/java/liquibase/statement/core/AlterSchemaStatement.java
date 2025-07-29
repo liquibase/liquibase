@@ -5,6 +5,7 @@ import liquibase.statement.AbstractSqlStatement;
 public class AlterSchemaStatement extends AbstractSqlStatement {
     
     private String schemaName;
+    private Boolean ifExists;
     private String newName;
     private String newDataRetentionTimeInDays;
     private String newMaxDataExtensionTimeInDays;
@@ -14,6 +15,13 @@ public class AlterSchemaStatement extends AbstractSqlStatement {
     private String newPipeExecutionPaused;
     private Boolean enableManagedAccess;
     private Boolean disableManagedAccess;
+    
+    // UNSET attributes
+    private Boolean unsetDataRetentionTimeInDays;
+    private Boolean unsetMaxDataExtensionTimeInDays;
+    private Boolean unsetDefaultDdlCollation;
+    private Boolean unsetPipeExecutionPaused;
+    private Boolean unsetComment;
 
     public String getSchemaName() {
         return schemaName;
@@ -21,6 +29,14 @@ public class AlterSchemaStatement extends AbstractSqlStatement {
 
     public void setSchemaName(String schemaName) {
         this.schemaName = schemaName;
+    }
+
+    public Boolean getIfExists() {
+        return ifExists;
+    }
+
+    public void setIfExists(Boolean ifExists) {
+        this.ifExists = ifExists;
     }
 
     public String getNewName() {
@@ -93,5 +109,45 @@ public class AlterSchemaStatement extends AbstractSqlStatement {
 
     public void setDisableManagedAccess(Boolean disableManagedAccess) {
         this.disableManagedAccess = disableManagedAccess;
+    }
+
+    public Boolean getUnsetDataRetentionTimeInDays() {
+        return unsetDataRetentionTimeInDays;
+    }
+
+    public void setUnsetDataRetentionTimeInDays(Boolean unsetDataRetentionTimeInDays) {
+        this.unsetDataRetentionTimeInDays = unsetDataRetentionTimeInDays;
+    }
+
+    public Boolean getUnsetMaxDataExtensionTimeInDays() {
+        return unsetMaxDataExtensionTimeInDays;
+    }
+
+    public void setUnsetMaxDataExtensionTimeInDays(Boolean unsetMaxDataExtensionTimeInDays) {
+        this.unsetMaxDataExtensionTimeInDays = unsetMaxDataExtensionTimeInDays;
+    }
+
+    public Boolean getUnsetDefaultDdlCollation() {
+        return unsetDefaultDdlCollation;
+    }
+
+    public void setUnsetDefaultDdlCollation(Boolean unsetDefaultDdlCollation) {
+        this.unsetDefaultDdlCollation = unsetDefaultDdlCollation;
+    }
+
+    public Boolean getUnsetPipeExecutionPaused() {
+        return unsetPipeExecutionPaused;
+    }
+
+    public void setUnsetPipeExecutionPaused(Boolean unsetPipeExecutionPaused) {
+        this.unsetPipeExecutionPaused = unsetPipeExecutionPaused;
+    }
+
+    public Boolean getUnsetComment() {
+        return unsetComment;
+    }
+
+    public void setUnsetComment(Boolean unsetComment) {
+        this.unsetComment = unsetComment;
     }
 }

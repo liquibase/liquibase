@@ -50,7 +50,7 @@ public class CreateWarehouseGeneratorSnowflake extends AbstractSqlGenerator<Crea
         StringBuilder withClause = new StringBuilder();
         
         if (statement.getWarehouseType() != null) {
-            withClause.append("WAREHOUSE_TYPE = '").append(statement.getWarehouseType()).append("'");
+            withClause.append("WAREHOUSE_TYPE = ").append(statement.getWarehouseType());
             hasWithClause = true;
         }
         

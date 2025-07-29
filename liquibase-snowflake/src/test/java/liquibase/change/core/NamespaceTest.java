@@ -52,4 +52,28 @@ public class NamespaceTest {
                      change.getSerializedObjectNamespace(),
                      "DropDatabaseChange should return Snowflake namespace");
     }
+    
+    @Test
+    public void testCreateSchemaNamespace() {
+        CreateSchemaChange change = new CreateSchemaChange();
+        assertEquals("http://www.liquibase.org/xml/ns/snowflake", 
+                     change.getSerializedObjectNamespace(),
+                     "CreateSchemaChange should return Snowflake namespace");
+    }
+    
+    @Test
+    public void testAlterSchemaNamespace() {
+        AlterSchemaChange change = new AlterSchemaChange();
+        assertEquals("http://www.liquibase.org/xml/ns/snowflake", 
+                     change.getSerializedObjectNamespace(),
+                     "AlterSchemaChange should return Snowflake namespace");
+    }
+    
+    @Test
+    public void testDropSchemaNamespace() {
+        DropSchemaChange change = new DropSchemaChange();
+        assertEquals("http://www.liquibase.org/xml/ns/snowflake", 
+                     change.getSerializedObjectNamespace(),
+                     "DropSchemaChange should return Snowflake namespace");
+    }
 }

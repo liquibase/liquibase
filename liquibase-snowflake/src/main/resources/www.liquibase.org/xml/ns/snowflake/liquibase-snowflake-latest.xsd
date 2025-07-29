@@ -34,6 +34,7 @@
         <xsd:complexType>
             <xsd:attribute name="warehouseName" type="xsd:string" use="required"/>
             <xsd:attribute name="newWarehouseName" type="xsd:string"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
             <xsd:attribute name="warehouseSize" type="warehouseSize"/>
             <xsd:attribute name="warehouseType" type="warehouseType"/>
             <xsd:attribute name="maxClusterCount" type="xsd:int"/>
@@ -49,6 +50,8 @@
             <xsd:attribute name="statementQueuedTimeoutInSeconds" type="xsd:int"/>
             <xsd:attribute name="statementTimeoutInSeconds" type="xsd:int"/>
             <xsd:attribute name="action" type="warehouseAction"/>
+            <xsd:attribute name="unsetResourceMonitor" type="xsd:boolean"/>
+            <xsd:attribute name="unsetComment" type="xsd:boolean"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -78,10 +81,15 @@
         <xsd:complexType>
             <xsd:attribute name="databaseName" type="xsd:string" use="required"/>
             <xsd:attribute name="newDatabaseName" type="xsd:string"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
             <xsd:attribute name="comment" type="xsd:string"/>
             <xsd:attribute name="dataRetentionTimeInDays" type="xsd:int"/>
             <xsd:attribute name="maxDataExtensionTimeInDays" type="xsd:int"/>
             <xsd:attribute name="defaultDdlCollation" type="xsd:string"/>
+            <xsd:attribute name="unsetDataRetentionTimeInDays" type="xsd:boolean"/>
+            <xsd:attribute name="unsetMaxDataExtensionTimeInDays" type="xsd:boolean"/>
+            <xsd:attribute name="unsetDefaultDdlCollation" type="xsd:boolean"/>
+            <xsd:attribute name="unsetComment" type="xsd:boolean"/>
             <xsd:attribute name="enableReplication" type="xsd:boolean"/>
             <xsd:attribute name="replicationAccounts" type="xsd:string"/>
             <xsd:attribute name="swapWith" type="xsd:string"/>
@@ -93,6 +101,7 @@
             <xsd:attribute name="databaseName" type="xsd:string" use="required"/>
             <xsd:attribute name="ifExists" type="xsd:boolean"/>
             <xsd:attribute name="cascade" type="xsd:boolean"/>
+            <xsd:attribute name="restrict" type="xsd:boolean"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -117,14 +126,21 @@
         <xsd:complexType>
             <xsd:attribute name="schemaName" type="xsd:string" use="required"/>
             <xsd:attribute name="databaseName" type="xsd:string"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
             <xsd:attribute name="newName" type="xsd:string"/>
-            <xsd:attribute name="newComment" type="xsd:string"/>
-            <xsd:attribute name="newDataRetentionTimeInDays" type="xsd:int"/>
-            <xsd:attribute name="newMaxDataExtensionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="newDataRetentionTimeInDays" type="xsd:string"/>
+            <xsd:attribute name="newMaxDataExtensionTimeInDays" type="xsd:string"/>
             <xsd:attribute name="newDefaultDdlCollation" type="xsd:string"/>
+            <xsd:attribute name="newComment" type="xsd:string"/>
+            <xsd:attribute name="dropComment" type="xsd:boolean"/>
+            <xsd:attribute name="newPipeExecutionPaused" type="xsd:string"/>
             <xsd:attribute name="enableManagedAccess" type="xsd:boolean"/>
             <xsd:attribute name="disableManagedAccess" type="xsd:boolean"/>
-            <xsd:attribute name="swapWith" type="xsd:string"/>
+            <xsd:attribute name="unsetDataRetentionTimeInDays" type="xsd:boolean"/>
+            <xsd:attribute name="unsetMaxDataExtensionTimeInDays" type="xsd:boolean"/>
+            <xsd:attribute name="unsetDefaultDdlCollation" type="xsd:boolean"/>
+            <xsd:attribute name="unsetPipeExecutionPaused" type="xsd:boolean"/>
+            <xsd:attribute name="unsetComment" type="xsd:boolean"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -134,6 +150,19 @@
             <xsd:attribute name="databaseName" type="xsd:string"/>
             <xsd:attribute name="ifExists" type="xsd:boolean"/>
             <xsd:attribute name="cascade" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <!-- Table Operations -->
+    <xsd:element name="alterTableCluster">
+        <xsd:complexType>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="tableName" type="xsd:string" use="required"/>
+            <xsd:attribute name="clusterBy" type="xsd:string"/>
+            <xsd:attribute name="dropClusteringKey" type="xsd:boolean"/>
+            <xsd:attribute name="suspendRecluster" type="xsd:boolean"/>
+            <xsd:attribute name="resumeRecluster" type="xsd:boolean"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -192,6 +221,207 @@
     <xsd:attribute name="ifNotExists" type="xsd:boolean">
         <xsd:annotation>
             <xsd:documentation>Use CREATE SEQUENCE IF NOT EXISTS instead of CREATE SEQUENCE</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+
+    <!-- Table namespace attributes (for use on standard createTable) -->
+    <xsd:attribute name="transient" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Creates a transient table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="volatile" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Creates a volatile table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="temporary" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Creates a temporary table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="localTemporary" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Creates a local temporary table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="globalTemporary" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Creates a global temporary table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="clusterBy" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Comma-separated list of columns to cluster by</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="dataRetentionTimeInDays" type="xsd:int">
+        <xsd:annotation>
+            <xsd:documentation>Time Travel retention period in days (0-90 for permanent tables)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="maxDataExtensionTimeInDays" type="xsd:int">
+        <xsd:annotation>
+            <xsd:documentation>Maximum Time Travel extension period in days</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="changeTracking" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Enable change tracking on the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="copyGrants" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Copy grants from replaced table (only valid with OR REPLACE)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="enableSchemaEvolution" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Enable automatic schema evolution</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="defaultDdlCollation" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Default collation specification for the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+
+    <!-- AlterTable-specific namespace attributes -->
+    <xsd:attribute name="dropClusteringKey" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Drop the clustering key from the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="suspendRecluster" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Suspend automatic reclustering for the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="resumeRecluster" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Resume automatic reclustering for the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="setEnableSchemaEvolution" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Enable or disable schema evolution for the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="setDataRetentionTimeInDays" type="xsd:int">
+        <xsd:annotation>
+            <xsd:documentation>Set Time Travel retention period in days (0-90)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="setMaxDataExtensionTimeInDays" type="xsd:int">
+        <xsd:annotation>
+            <xsd:documentation>Set maximum Time Travel extension period in days (0-90)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="setChangeTracking" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Enable or disable change tracking for the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="addSearchOptimization" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Add search optimization to the table (empty for default, or specific method)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="dropSearchOptimization" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Drop search optimization from the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="addRowAccessPolicy" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Add row access policy (format: "policy_name ON (col1, col2)")</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="dropRowAccessPolicy" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Drop row access policy (policy name or "ALL" for all policies)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="setAggregationPolicy" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Set aggregation policy for the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="unsetAggregationPolicy" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Remove aggregation policy from the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="forceAggregationPolicy" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Force setting aggregation policy (use with setAggregationPolicy)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="setProjectionPolicy" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Set projection policy for the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="unsetProjectionPolicy" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Remove projection policy from the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="forceProjectionPolicy" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Force setting projection policy (use with setProjectionPolicy)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="setTag" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Set tags on the table (format: "tag1 = 'value1', tag2 = 'value2'")</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="unsetTag" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Unset tags from the table (format: "tag1, tag2, tag3")</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+
+    <!-- DropTable-specific namespace attributes -->
+    <xsd:attribute name="cascade" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Force drop table even with foreign key references (DROP TABLE ... CASCADE)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="restrict" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Prevent drop if foreign key references exist (DROP TABLE ... RESTRICT)</xsd:documentation>
         </xsd:annotation>
     </xsd:attribute>
 

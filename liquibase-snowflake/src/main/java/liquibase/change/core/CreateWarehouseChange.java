@@ -34,7 +34,7 @@ public class CreateWarehouseChange extends AbstractChange {
     private String resourceMonitor;
     private String comment;
     private Boolean enableQueryAcceleration;
-    private String queryAccelerationMaxScaleFactor;
+    private Integer queryAccelerationMaxScaleFactor;
     private Integer maxConcurrencyLevel;
     private Integer statementQueuedTimeoutInSeconds;
     private Integer statementTimeoutInSeconds;
@@ -150,12 +150,12 @@ public class CreateWarehouseChange extends AbstractChange {
         this.enableQueryAcceleration = enableQueryAcceleration;
     }
 
-    @DatabaseChangeProperty(description = "Query acceleration max scale factor")
-    public String getQueryAccelerationMaxScaleFactor() {
+    @DatabaseChangeProperty(description = "Query acceleration max scale factor (0-100)")
+    public Integer getQueryAccelerationMaxScaleFactor() {
         return queryAccelerationMaxScaleFactor;
     }
 
-    public void setQueryAccelerationMaxScaleFactor(String queryAccelerationMaxScaleFactor) {
+    public void setQueryAccelerationMaxScaleFactor(Integer queryAccelerationMaxScaleFactor) {
         this.queryAccelerationMaxScaleFactor = queryAccelerationMaxScaleFactor;
     }
 
@@ -267,6 +267,21 @@ public class CreateWarehouseChange extends AbstractChange {
         // Validate that orReplace and ifNotExists are not both set
         if (Boolean.TRUE.equals(orReplace) && Boolean.TRUE.equals(ifNotExists)) {
             errors.addError("Cannot use both OR REPLACE and IF NOT EXISTS");
+        }
+        
+        // Validate autoSuspend if provided
+        if (autoSuspend != null && autoSuspend != 0 && autoSuspend < 60) {
+            errors.addError("autoSuspend must be 0 (never suspend) or at least 60 seconds");
+        }
+        
+        // Validate queryAccelerationMaxScaleFactor if provided
+        if (queryAccelerationMaxScaleFactor != null && (queryAccelerationMaxScaleFactor < 0 || queryAccelerationMaxScaleFactor > 100)) {
+            errors.addError("queryAccelerationMaxScaleFactor must be between 0 and 100");
+        }
+        
+        // Validate maxClusterCount limit
+        if (maxClusterCount != null && maxClusterCount > 10) {
+            errors.addError("maxClusterCount cannot exceed 10");
         }
         
         return errors;

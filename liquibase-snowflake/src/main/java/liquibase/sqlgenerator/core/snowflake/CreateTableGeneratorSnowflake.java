@@ -10,6 +10,7 @@ import liquibase.sqlgenerator.core.CreateTableGenerator;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
+import liquibase.ext.SnowflakeNamespaceAttributeStorage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +56,10 @@ public class CreateTableGeneratorSnowflake extends CreateTableGenerator {
         
         // Initialize variables
         boolean isTransient = false;
+        boolean isVolatile = false;
+        boolean isTemporary = false;
+        boolean isLocalTemporary = false;
+        boolean isGlobalTemporary = false;
         String clusterByColumns = null;
         String dataRetentionDays = null;
         String maxDataExtensionDays = null;
@@ -67,9 +72,38 @@ public class CreateTableGeneratorSnowflake extends CreateTableGenerator {
         String defaultDdlCollation = null;
         String tag = null;
         
-        // Use the approach of encoding in tablespace and remarks
-        isTransient = statement.getTablespace() != null && 
-                     statement.getTablespace().toLowerCase().contains("transient");
+        // First, check for namespace attributes
+        Map<String, String> namespaceAttrs = SnowflakeNamespaceAttributeStorage.getAttributes(statement.getTableName());
+        if (namespaceAttrs != null && !namespaceAttrs.isEmpty()) {
+            // Process namespace attributes
+            isTransient = Boolean.parseBoolean(namespaceAttrs.get("transient"));
+            isVolatile = Boolean.parseBoolean(namespaceAttrs.get("volatile"));
+            isTemporary = Boolean.parseBoolean(namespaceAttrs.get("temporary"));
+            isLocalTemporary = Boolean.parseBoolean(namespaceAttrs.get("localTemporary"));
+            isGlobalTemporary = Boolean.parseBoolean(namespaceAttrs.get("globalTemporary"));
+            clusterByColumns = namespaceAttrs.get("clusterBy");
+            dataRetentionDays = namespaceAttrs.get("dataRetentionTimeInDays");
+            maxDataExtensionDays = namespaceAttrs.get("maxDataExtensionTimeInDays");
+            String attrChangeTracking = namespaceAttrs.get("changeTracking");
+            if (attrChangeTracking != null) {
+                changeTracking = Boolean.parseBoolean(attrChangeTracking);
+            }
+            String attrCopyGrants = namespaceAttrs.get("copyGrants");
+            if (attrCopyGrants != null) {
+                copyGrants = Boolean.parseBoolean(attrCopyGrants);
+            }
+            String attrSchemaEvolution = namespaceAttrs.get("enableSchemaEvolution");
+            if (attrSchemaEvolution != null) {
+                enableSchemaEvolution = Boolean.parseBoolean(attrSchemaEvolution);
+            }
+            defaultDdlCollation = namespaceAttrs.get("defaultDdlCollation");
+            
+            // Clean up stored attributes
+            SnowflakeNamespaceAttributeStorage.removeAttributes(statement.getTableName());
+        } else {
+            // Fall back to legacy approach of encoding in tablespace and remarks
+            isTransient = statement.getTablespace() != null && 
+                         statement.getTablespace().toLowerCase().contains("transient");
         
             if (statement.getRemarks() != null && !statement.getRemarks().trim().isEmpty()) {
                 String remarks = statement.getRemarks().trim();
@@ -106,6 +140,16 @@ public class CreateTableGeneratorSnowflake extends CreateTableGenerator {
                 }
             }
             }
+        }
+        
+        // Validate mutual exclusivity of table types
+        int tableTypeCount = 0;
+        if (isTransient) tableTypeCount++;
+        if (isVolatile) tableTypeCount++;
+        if (isTemporary || isLocalTemporary || isGlobalTemporary) tableTypeCount++;
+        if (tableTypeCount > 1) {
+            throw new RuntimeException("Only one table type (transient, volatile, temporary) can be specified");
+        }
         
         // Rebuild the CREATE TABLE statement with Snowflake enhancements
         StringBuilder enhancedSql = new StringBuilder();
@@ -118,32 +162,44 @@ public class CreateTableGeneratorSnowflake extends CreateTableGenerator {
             return baseSql;
         }
         
-        // Add CREATE TABLE part
-        enhancedSql.append(originalSql, 0, tableNameEnd);
+        // Handle table type modifiers
+        String tableTypeModifier = "";
+        if (isTransient) {
+            tableTypeModifier = "TRANSIENT ";
+        } else if (isVolatile) {
+            tableTypeModifier = "VOLATILE ";
+        } else if (isTemporary) {
+            tableTypeModifier = "TEMPORARY ";
+        } else if (isLocalTemporary) {
+            tableTypeModifier = "LOCAL TEMPORARY ";
+        } else if (isGlobalTemporary) {
+            tableTypeModifier = "GLOBAL TEMPORARY ";
+        }
         
-        // Add column definitions and constraints
-        enhancedSql.append(originalSql.substring(tableNameEnd));
+        if (!tableTypeModifier.isEmpty()) {
+            // Insert table type modifier after CREATE
+            enhancedSql.append("CREATE ").append(tableTypeModifier).append("TABLE");
+            enhancedSql.append(originalSql.substring(createTablePrefix.length() - 1));
+        } else {
+            // Use original SQL as base
+            enhancedSql.append(originalSql);
+        }
         
         // Now add Snowflake-specific options before the final semicolon or at the end
         List<String> snowflakeOptions = new ArrayList<>();
-        
-        if (isTransient) {
-            // For transient tables, we need to insert TRANSIENT after CREATE but before TABLE
-            String modifiedSql = originalSql.replaceFirst("CREATE TABLE", "CREATE TRANSIENT TABLE");
-            enhancedSql = new StringBuilder(modifiedSql);
-        }
         
         if (clusterByColumns != null && !clusterByColumns.isEmpty()) {
             snowflakeOptions.add("CLUSTER BY (" + clusterByColumns + ")");
         }
         
-        // DATA_RETENTION_TIME_IN_DAYS is only valid for permanent tables, not transient tables
-        if (!isTransient && dataRetentionDays != null && !dataRetentionDays.isEmpty()) {
+        // DATA_RETENTION_TIME_IN_DAYS is only valid for permanent tables
+        boolean isPermanentTable = !isTransient && !isVolatile && !isTemporary && !isLocalTemporary && !isGlobalTemporary;
+        if (isPermanentTable && dataRetentionDays != null && !dataRetentionDays.isEmpty()) {
             snowflakeOptions.add("DATA_RETENTION_TIME_IN_DAYS = " + dataRetentionDays);
         }
         
-        // MAX_DATA_EXTENSION_TIME_IN_DAYS is only valid for permanent tables, not transient tables
-        if (!isTransient && maxDataExtensionDays != null && !maxDataExtensionDays.isEmpty()) {
+        // MAX_DATA_EXTENSION_TIME_IN_DAYS is only valid for permanent tables
+        if (isPermanentTable && maxDataExtensionDays != null && !maxDataExtensionDays.isEmpty()) {
             snowflakeOptions.add("MAX_DATA_EXTENSION_TIME_IN_DAYS = " + maxDataExtensionDays);
         }
         
