@@ -19,3 +19,4 @@ liquibase.sqlgenerator.core.snowflake.AlterSchemaGeneratorSnowflake
 liquibase.sqlgenerator.core.snowflake.CreateTableGeneratorSnowflake
 liquibase.sqlgenerator.core.snowflake.DropTableGeneratorSnowflake
 liquibase.sqlgenerator.core.snowflake.AlterTableClusterGeneratorSnowflake
+liquibase.sqlgenerator.core.snowflake.RenameTableGeneratorSnowflake

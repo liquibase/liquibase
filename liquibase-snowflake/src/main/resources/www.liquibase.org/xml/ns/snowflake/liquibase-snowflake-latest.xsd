@@ -412,6 +412,19 @@
         </xsd:annotation>
     </xsd:attribute>
 
+    <!-- RenameTable-specific namespace attributes -->
+    <xsd:attribute name="preserveClusterBy" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Preserve clustering key during table rename (default: true, automatically preserved by Snowflake)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="preserveAttributes" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Preserve table attributes during rename (default: true, automatically preserved by Snowflake)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+
     <!-- DropTable-specific namespace attributes -->
     <xsd:attribute name="cascade" type="xsd:boolean">
         <xsd:annotation>

@@ -7,14 +7,23 @@
 # Build extension (from liquibase-snowflake directory)
 mvn clean package -DskipTests
 
+# Full build with tests
+./mvnw clean install
+
 # Copy to test harness
 cp target/liquibase-snowflake-*.jar ../liquibase-test-harness/lib/
 
 # Run specific unit test
 mvn test -Dtest=CreateSchemaChangeTest
 
+# Run specific test method
+mvn test -Dtest=YourTestClass#yourTestMethod
+
 # Run all unit tests
 mvn test
+
+# Run integration tests
+mvn verify
 ```
 
 ### Test Harness Commands

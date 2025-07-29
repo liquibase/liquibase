@@ -1,5 +1,11 @@
 # Snowflake ChangeType Implementation Prompt
 
+## 🔄 MASTER PROCESS LOOP
+**CRITICAL**: Follow `MASTER_PROCESS_LOOP.md` for EVERY task!
+Don't skip operational steps - they're part of the work, not overhead.
+
+✅ SUCCESS STORY: Used process loop for dropDatabase = zero missed steps!
+
 ## Role Assignment
 You are working as both a Developer and QA Engineer on the Liquibase Snowflake Extension project. You will systematically implement or verify each change type for Snowflake objects following established patterns and guides.
 
@@ -37,6 +43,33 @@ You are working as both a Developer and QA Engineer on the Liquibase Snowflake E
 - **Test Structure**: `liquibase-snowflake/src/test/java/README_TEST_STRUCTURE.md`
 - **Completed Example**: CreateSchema and DropSchema implementations
 - **CLAUDE.md**: Project-specific guidance
+
+## 🛑 CRITICAL: When You Encounter Errors
+
+**DO NOT ASSUME WHERE THE BUG IS!**
+1. Follow the systematic debugging in `NEW_CHANGETYPE_PATTERN_2.md`
+2. Run phase tests after EACH implementation phase
+3. Create isolated tests for each layer when debugging
+
+**Real Impact**: Not doing this wasted 4 hours on alterSchema "XML parsing bug" that didn't exist
+
+## 🔍 CRITICAL: Check XSD Before Adding Attributes
+
+**ALWAYS CHECK XSD FIRST!**
+1. Look in: `src/main/resources/www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd`
+2. Use exact XSD attribute names (e.g., `cloneFrom` not `cloneSource`)
+3. XSD is the source of truth for XML attribute naming
+
+**Real Impact**: Had to rename all `cloneSource` to `cloneFrom` in createDatabase
+
+## ✅ MANDATORY Task Checklist
+
+For EVERY change type implementation:
+- [ ] Update project plan status BEFORE starting
+- [ ] Update project plan status AFTER each phase
+- [ ] Create retrospective IMMEDIATELY after completion
+- [ ] Update project plan with completion date
+- [ ] Share retrospective synopsis for review
 
 ## Implementation Workflow for Each ChangeType
 

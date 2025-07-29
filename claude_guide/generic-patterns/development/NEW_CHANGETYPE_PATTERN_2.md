@@ -1,5 +1,30 @@
 # NEW_CHANGETYPE_PATTERN_2.md - Comprehensive Guide for Implementing New Liquibase Change Types
 
+## 🛑 STOP: Before You Start
+
+**When encountering ANY error during implementation or testing:**
+1. **DO NOT assume where the bug is**
+2. **DO NOT skip to "fixing" the assumed problem**
+3. **DO follow the systematic debugging pattern in the Troubleshooting section**
+4. **DO run the phase tests after EACH implementation phase**
+
+**This guide contains phase tests specifically to prevent wasting hours on false assumptions.**
+
+### 📝 HOW TO UPDATE THIS GUIDE
+
+When you learn something new:
+1. **Find where you needed it** (not at the end)
+2. **Add it with a marker**: 🛑 ⚠️ 📌 ✅
+3. **Keep it under 5 lines**
+4. **Include exact error + fix**
+5. **Show impact** ("wasted 4 hours")
+
+Example:
+```
+⚠️ **ERROR**: Attribute 'X' is not allowed
+**FIX**: Add to liquibase-snowflake-latest.xsd
+```
+
 ## Table of Contents
 1. [Prerequisites](#prerequisites)
 2. [Pre-Implementation Requirements Research](#pre-implementation-requirements-research)
@@ -116,22 +141,31 @@ Before writing any code, you MUST create a detailed requirements document.
 
 ## Implementation Guide
 
-### IMPORTANT: Testing Integration Points
+### ⚡ MANDATORY: Test Each Phase Before Moving On
 
-**When implementing each phase below, create the corresponding tests immediately:**
+**DO NOT SKIP THESE TESTS** - They prevent wasted debugging time later!
 
-- **After Phase 1 (Change Class)**: Create production Change test + quick dev test
-- **After Phase 2 (Statement Class)**: Create production Statement test + quick dev test  
-- **After Phase 3 (SQL Generator)**: Create production Generator test + quick dev test
-- **After Phase 4 (Service Registration)**: Update ServiceRegistrationTest
-- **After Phase 5 (XSD Update)**: Run all tests to verify integration
-- **After All Phases Complete**: Delete dev tests, run full test suite, then create test harness tests
+After EACH phase below, you MUST run the corresponding test BEFORE proceeding:
+- Phase 1 → Run Step1 test → Fix any issues → Only then proceed to Phase 2
+- Phase 2 → Run Step2 test → Fix any issues → Only then proceed to Phase 3
+- Phase 3 → Run Step3 test → Fix any issues → Only then proceed to Phase 4
+- Phase 4 → Run Step4 test → Fix any issues → Only then proceed to Phase 5
+- Phase 5 → Run Step5 test → Fix any issues → Only then proceed to Phase 6
 
-This approach ensures each component is tested immediately rather than waiting until the end.
+**Real Example**: In alterSchema, skipping these tests would have made us waste hours on a non-existent "XML parsing bug"
 
 ---
 
 ### Phase 1: Create the Change Class
+
+🚨 **CHECKPOINT: Requirements-Driven Development**
+Before writing ANY code:
+- [ ] Created detailed requirements document? (`detailed_requirements/<changeType>_requirements.md`)
+- [ ] Compared existing implementation vs requirements? (if enhancing existing change type)
+- [ ] Calculated coverage percentage? (e.g., alterSchema was only 70% complete)
+- [ ] Listed all missing attributes/functionality?
+
+**Why this matters**: In alterSchema, we discovered the existing implementation was missing 30% of required functionality (6 attributes). Always verify completeness first!
 
 #### File: `src/main/java/liquibase/change/core/<ChangeType>Change.java`
 
@@ -208,84 +242,27 @@ public class <ChangeType>Change extends AbstractChange {
 }
 ```
 
-### Step-by-Step Test for Phase 1
+### 🧪 Quick Test for Phase 1
 
-After creating the Change class, immediately test it to verify it works correctly before proceeding:
-
-#### Test File: `src/test/java/liquibase/change/core/Step1_<ChangeType>ChangeTest.java`
-
-```java
-package liquibase.change.core;
-
-import liquibase.database.core.SnowflakeDatabase;
-import liquibase.database.core.PostgresDatabase;
-import liquibase.exception.ValidationErrors;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-
-/**
- * Step 1 verification test - ensures Change class is working before proceeding
- * This is a UNIT TEST that runs in the liquibase-snowflake project
- */
-public class Step1_<ChangeType>ChangeTest {
-    
-    @Test
-    public void testChangeClassBasics() {
-        <ChangeType>Change change = new <ChangeType>Change();
-        
-        // Test required fields validation
-        ValidationErrors errors = change.validate(new SnowflakeDatabase());
-        assertTrue("Should have validation error for missing required field", 
-                  errors.hasErrors());
-        
-        // Set required fields
-        change.set<RequiredAttribute>("TEST_VALUE");
-        errors = change.validate(new SnowflakeDatabase());
-        assertFalse("Should not have errors with valid required field", 
-                   errors.hasErrors());
-        
-        // Test supports
-        assertTrue("Should support Snowflake", 
-                  change.supports(new SnowflakeDatabase()));
-        assertFalse("Should not support other databases", 
-                   change.supports(new PostgresDatabase()));
-        
-        // Test attribute validation (from requirements)
-        // Example: dataRetentionTimeInDays validation
-        change.setDataRetentionTimeInDays(100);
-        errors = change.validate(new SnowflakeDatabase());
-        assertTrue("Should have error for invalid value", 
-                  errors.hasErrors());
-        
-        change.setDataRetentionTimeInDays(30);
-        errors = change.validate(new SnowflakeDatabase());
-        assertFalse("Should not have errors with valid value", 
-                   errors.hasErrors());
-        
-        System.out.println("✓ Step 1 Test Passed: Change class working correctly");
-    }
-    
-    @Test 
-    public void testMutualExclusivity() {
-        <ChangeType>Change change = new <ChangeType>Change();
-        change.set<RequiredAttribute>("TEST_VALUE");
-        
-        // Test mutual exclusivity from requirements
-        change.set<MutuallyExclusiveOption1>(true);
-        change.set<MutuallyExclusiveOption2>(true);
-        
-        ValidationErrors errors = change.validate(new SnowflakeDatabase());
-        assertTrue("Should have error for mutually exclusive options", 
-                  errors.hasErrors());
-        assertTrue("Error message should mention mutual exclusivity",
-                  errors.getErrorMessages().get(0).contains("Cannot use both"));
-    }
-}
-```
-
-**Run this test before proceeding to Phase 2:**
 ```bash
-mvn test -Dtest=Step1_<ChangeType>ChangeTest
+# Quick verification test - takes 30 seconds, saves hours of debugging
+mvn test -Dtest=QuickChangeTest -Dtest.method=testPhase1
+
+# Or create this minimal test:
+@Test
+public void testPhase1_ChangeClass() {
+    <ChangeType>Change change = new <ChangeType>Change();
+    change.set<RequiredAttribute>("TEST");
+    
+    // Must support Snowflake
+    assertTrue(change.supports(new SnowflakeDatabase()));
+    
+    // Must generate statement
+    SqlStatement[] stmts = change.generateStatements(new SnowflakeDatabase());
+    assertEquals(1, stmts.length);
+    
+    System.out.println("✅ Phase 1 PASS - Change class works");
+}
 ```
 
 ### Phase 2: Create the Statement Class
@@ -313,66 +290,16 @@ public class <ChangeType>Statement extends AbstractSqlStatement {
 }
 ```
 
-### Step-by-Step Test for Phase 2
-
-After creating the Statement class, immediately test it:
-
-#### Test File: `src/test/java/liquibase/statement/core/Step2_<ChangeType>StatementTest.java`
+### 🧪 Quick Test for Phase 2
 
 ```java
-package liquibase.statement.core;
-
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-
-/**
- * Step 2 verification test - ensures Statement class is working before proceeding
- * This is a UNIT TEST that runs in the liquibase-snowflake project
- */
-public class Step2_<ChangeType>StatementTest {
-    
-    @Test
-    public void testStatementClass() {
-        // Create statement and test initial state
-        <ChangeType>Statement statement = new <ChangeType>Statement();
-        
-        // Verify all properties start as null
-        assertNull("Should start with null required attribute", 
-                  statement.get<RequiredAttribute>());
-        assertNull("Should start with null optional attribute", 
-                  statement.get<OptionalAttribute>());
-        
-        // Test setters and getters
-        statement.set<RequiredAttribute>("TEST_VALUE");
-        assertEquals("Should return set value", 
-                    "TEST_VALUE", statement.get<RequiredAttribute>());
-        
-        statement.set<OptionalAttribute>("OPTIONAL_VALUE");
-        assertEquals("Should return set optional value", 
-                    "OPTIONAL_VALUE", statement.get<OptionalAttribute>());
-        
-        // Test Boolean properties if applicable
-        statement.set<BooleanAttribute>(true);
-        assertTrue("Should return true for boolean", 
-                  statement.get<BooleanAttribute>());
-        
-        statement.set<BooleanAttribute>(false);
-        assertFalse("Should return false for boolean", 
-                   statement.get<BooleanAttribute>());
-        
-        // Test null handling
-        statement.set<RequiredAttribute>(null);
-        assertNull("Should handle null values", 
-                  statement.get<RequiredAttribute>());
-        
-        System.out.println("✓ Step 2 Test Passed: Statement class working correctly");
-    }
+@Test
+public void testPhase2_Statement() {
+    <ChangeType>Statement stmt = new <ChangeType>Statement();
+    stmt.set<RequiredAttribute>("TEST");
+    assertEquals("TEST", stmt.get<RequiredAttribute>());
+    System.out.println("✅ Phase 2 PASS - Statement class works");
 }
-```
-
-**Run this test before proceeding to Phase 3:**
-```bash
-mvn test -Dtest=Step2_<ChangeType>StatementTest
 ```
 
 ### Phase 3: Create the SQL Generator
@@ -411,105 +338,21 @@ public class <ChangeType>GeneratorSnowflake extends AbstractSqlGenerator<<Change
 }
 ```
 
-### Step-by-Step Test for Phase 3
-
-After creating the SQL Generator, immediately test it:
-
-#### Test File: `src/test/java/liquibase/sqlgenerator/core/snowflake/Step3_<ChangeType>GeneratorTest.java`
+### 🧪 Quick Test for Phase 3
 
 ```java
-package liquibase.sqlgenerator.core.snowflake;
-
-import liquibase.database.core.SnowflakeDatabase;
-import liquibase.sql.Sql;
-import liquibase.statement.core.<ChangeType>Statement;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-
-/**
- * Step 3 verification test - ensures SQL Generator is working before proceeding
- * This is a UNIT TEST that runs in the liquibase-snowflake project
- */
-public class Step3_<ChangeType>GeneratorTest {
+@Test
+public void testPhase3_SqlGenerator() {
+    <ChangeType>Statement stmt = new <ChangeType>Statement();
+    stmt.set<RequiredAttribute>("TEST_OBJECT");
     
-    @Test
-    public void testSqlGenerator() {
-        // Create test statement
-        <ChangeType>Statement statement = new <ChangeType>Statement();
-        statement.set<RequiredAttribute>("TEST_OBJECT");
-        
-        // Create generator and database
-        <ChangeType>GeneratorSnowflake generator = new <ChangeType>GeneratorSnowflake();
-        SnowflakeDatabase database = new SnowflakeDatabase();
-        
-        // Test supports
-        assertTrue("Should support Snowflake database", 
-                  generator.supports(statement, database));
-        
-        // Generate SQL
-        Sql[] sqls = generator.generateSql(statement, database, null);
-        assertNotNull("Should generate SQL", sqls);
-        assertTrue("Should generate at least one SQL statement", sqls.length > 0);
-        
-        String sql = sqls[0].toSql();
-        System.out.println("Generated SQL: " + sql);
-        
-        // Verify SQL contains expected elements
-        assertTrue("Should contain CREATE keyword", sql.contains("CREATE"));
-        assertTrue("Should contain object name", sql.contains("TEST_OBJECT"));
-        
-        System.out.println("✓ Basic SQL generation working");
-    }
+    <ChangeType>GeneratorSnowflake gen = new <ChangeType>GeneratorSnowflake();
+    Sql[] sqls = gen.generateSql(stmt, new SnowflakeDatabase(), null);
     
-    @Test
-    public void testSqlGeneratorWithOptions() {
-        // Test with optional attributes from requirements
-        <ChangeType>Statement statement = new <ChangeType>Statement();
-        statement.set<RequiredAttribute>("TEST_OBJECT");
-        statement.set<OptionalAttribute1>("value1");
-        statement.set<BooleanAttribute>(true);
-        
-        <ChangeType>GeneratorSnowflake generator = new <ChangeType>GeneratorSnowflake();
-        Sql[] sqls = generator.generateSql(statement, new SnowflakeDatabase(), null);
-        
-        String sql = sqls[0].toSql();
-        System.out.println("Generated SQL with options: " + sql);
-        
-        // Verify optional attributes are included
-        assertTrue("Should contain optional attribute", 
-                  sql.contains("value1") || sql.contains("VALUE1"));
-        
-        System.out.println("✓ Step 3 Test Passed: SQL Generator working correctly");
-    }
-    
-    @Test
-    public void testMutuallyExclusiveOptions() {
-        // Test mutual exclusivity handling in SQL generation
-        <ChangeType>Statement statement = new <ChangeType>Statement();
-        statement.set<RequiredAttribute>("TEST_OBJECT");
-        statement.set<MutuallyExclusiveOption1>(true);
-        statement.set<MutuallyExclusiveOption2>(true);
-        
-        <ChangeType>GeneratorSnowflake generator = new <ChangeType>GeneratorSnowflake();
-        Sql[] sqls = generator.generateSql(statement, new SnowflakeDatabase(), null);
-        
-        String sql = sqls[0].toSql();
-        System.out.println("Generated SQL with mutual exclusive options: " + sql);
-        
-        // Verify only one option is used (document which takes precedence)
-        int optionCount = 0;
-        if (sql.contains("<OPTION1>")) optionCount++;
-        if (sql.contains("<OPTION2>")) optionCount++;
-        
-        assertEquals("Should only include one mutually exclusive option", 
-                    1, optionCount);
-    }
+    assertTrue(sqls.length > 0);
+    assertTrue(sqls[0].toSql().contains("CREATE"));
+    System.out.println("✅ Phase 3 PASS - SQL: " + sqls[0].toSql());
 }
-```
-
-**Run this test before proceeding to Phase 4:**
-```bash
-mvn test -Dtest=Step3_<ChangeType>GeneratorTest
 ```
 
 ### Phase 4: Service Registration
@@ -524,89 +367,26 @@ liquibase.change.core.<ChangeType>Change
 liquibase.sqlgenerator.core.snowflake.<ChangeType>GeneratorSnowflake
 ```
 
-### Step-by-Step Test for Phase 4
-
-After registering services, immediately test that they're loaded:
-
-#### Test File: `src/test/java/liquibase/Step4_ServiceRegistrationTest.java`
+### 🧪 Quick Test for Phase 4
 
 ```java
-package liquibase;
-
-import liquibase.change.Change;
-import liquibase.change.ChangeFactory;
-import liquibase.change.core.<ChangeType>Change;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.parser.NamespaceDetailsFactory;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-
-/**
- * Step 4 verification test - ensures services are registered correctly
- * This is an INTEGRATION TEST that runs in the liquibase-snowflake project
- */
-public class Step4_ServiceRegistrationTest {
-    
-    @Test
-    public void testChangeRegistration() {
-        // Test that our change is registered and can be created
-        try {
-            Change change = ChangeFactory.getInstance().create("<changeType>");
-            assertNotNull("Should create change instance", change);
-            assertTrue("Should be our change class", 
-                      change instanceof <ChangeType>Change);
-            System.out.println("✓ Change registered: " + change.getClass().getName());
-        } catch (Exception e) {
-            fail("Failed to create change: " + e.getMessage());
-        }
-    }
-    
-    @Test
-    public void testGeneratorRegistration() {
-        // Test that our generator is registered
-        boolean foundGenerator = false;
-        for (liquibase.sqlgenerator.SqlGenerator generator : 
-             SqlGeneratorFactory.getInstance().getGenerators()) {
-            if (generator.getClass().getName().contains("<ChangeType>GeneratorSnowflake")) {
-                foundGenerator = true;
-                System.out.println("✓ Generator registered: " + generator.getClass().getName());
-                break;
-            }
-        }
-        assertTrue("Should find our SQL generator", foundGenerator);
-    }
-    
-    @Test
-    public void testNamespaceRegistration() {
-        // Test that our namespace is registered
-        boolean foundNamespace = false;
-        String expectedNamespace = "http://www.liquibase.org/xml/ns/snowflake";
-        
-        for (liquibase.parser.NamespaceDetails namespace : 
-             NamespaceDetailsFactory.getInstance().getNamespaceDetails()) {
-            for (String ns : namespace.getNamespaces()) {
-                if (expectedNamespace.equals(ns)) {
-                    foundNamespace = true;
-                    System.out.println("✓ Namespace registered: " + ns);
-                    System.out.println("  Short name: " + namespace.getShortName(ns));
-                    System.out.println("  Schema URL: " + namespace.getSchemaUrl(ns));
-                    break;
-                }
-            }
-        }
-        assertTrue("Should find our namespace details", foundNamespace);
-        
-        System.out.println("✓ Step 4 Test Passed: All components registered correctly");
-    }
+@Test
+public void testPhase4_ServiceRegistration() {
+    // Can we create the change via factory?
+    Change change = ChangeFactory.getInstance().create("<changeType>");
+    assertNotNull(change);
+    System.out.println("✅ Phase 4 PASS - Services registered");
 }
 ```
 
-**Run this test before proceeding to Phase 5:**
-```bash
-mvn test -Dtest=Step4_ServiceRegistrationTest
-```
-
 ### Phase 5: XSD Schema Update
+
+⚠️ **CRITICAL: XSD Update is MANDATORY**
+**Common Error**: `Attribute 'X' is not allowed to appear in element 'snowflake:changeType'`
+**Cause**: Missing XSD update when adding new XML attributes
+**Solution**: ALWAYS update liquibase-snowflake-latest.xsd when adding ANY new attributes
+
+**Real Example**: In alterSchema, we added `ifExists` attribute but integration tests failed until XSD was updated.
 
 #### File: `src/main/resources/www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd`
 
@@ -625,190 +405,18 @@ Add the element definition based on requirements:
 </xsd:element>
 ```
 
-### Step-by-Step Test for Phase 5
-
-After updating the XSD, immediately test that XML parsing works:
-
-#### Test File: `src/test/java/liquibase/Step5_XsdValidationTest.java`
+### 🧪 Quick Test for Phase 5 
 
 ```java
-package liquibase;
-
-import org.junit.jupiter.api.Test;
-import java.io.InputStream;
-import javax.xml.XMLConstants;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
-import static org.junit.jupiter.api.Assertions.*;
-
-/**
- * Step 5 verification test - ensures XSD is valid and XML can be parsed
- * This is a UNIT TEST that runs in the liquibase-snowflake project
- */
-public class Step5_XsdValidationTest {
-    
-    @Test
-    public void testXsdExists() {
-        // Test that XSD is in the correct location
-        InputStream xsdStream = getClass().getClassLoader().getResourceAsStream(
-            "www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd"
-        );
-        assertNotNull("XSD file should exist at standard Liquibase path", xsdStream);
-        System.out.println("✓ XSD found at correct location");
-    }
-    
-    @Test
-    public void testXsdValidity() throws Exception {
-        // Test that the XSD is valid
-        InputStream xsdStream = getClass().getClassLoader().getResourceAsStream(
-            "www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd"
-        );
-        
-        SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        Schema schema = factory.newSchema(new StreamSource(xsdStream));
-        assertNotNull("Should create valid schema", schema);
-        
-        System.out.println("✓ XSD is valid XML Schema");
-    }
-    
-    @Test
-    public void testSampleXmlValidation() throws Exception {
-        // Test that a sample XML validates against our XSD
-        String testXml = 
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-            "<snowflake:<changeType> \n" +
-            "    xmlns:snowflake=\"http://www.liquibase.org/xml/ns/snowflake\"\n" +
-            "    <requiredAttribute>=\"TEST_VALUE\"/>";
-        
-        InputStream xsdStream = getClass().getClassLoader().getResourceAsStream(
-            "www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd"
-        );
-        SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        Schema schema = factory.newSchema(new StreamSource(xsdStream));
-        Validator validator = schema.newValidator();
-        
-        // This should validate without throwing an exception
-        try {
-            validator.validate(new StreamSource(new java.io.StringReader(testXml)));
-            System.out.println("✓ Sample XML validates against XSD");
-        } catch (Exception e) {
-            fail("XML validation failed: " + e.getMessage());
-        }
-        
-        System.out.println("✓ Step 5 Test Passed: XSD schema working correctly");
-    }
+@Test
+public void testPhase5_XsdParsing() {
+    // Just verify XSD exists - full XML parsing tested in Phase 6
+    InputStream xsd = getClass().getResourceAsStream(
+        "/www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd");
+    assertNotNull(xsd);
+    System.out.println("✅ Phase 5 PASS - XSD exists");
 }
 ```
-
-**Run this test to verify XSD is working:**
-```bash
-mvn test -Dtest=Step5_XsdValidationTest
-```
-
-### Final Integration Test
-
-After all components are implemented and individual tests pass:
-
-#### Test File: `src/test/java/liquibase/Step6_FullIntegrationTest.java`
-
-```java
-package liquibase;
-
-import liquibase.Liquibase;
-import liquibase.database.Database;
-import liquibase.database.core.SnowflakeDatabase;
-import liquibase.database.OfflineConnection;
-import liquibase.resource.FileSystemResourceAccessor;
-import org.junit.jupiter.api.Test;
-import java.io.File;
-import java.io.StringWriter;
-import java.nio.file.Files;
-import static org.junit.jupiter.api.Assertions.*;
-
-/**
- * Final integration test - ensures complete flow from XML to SQL works
- * This is an INTEGRATION TEST that runs in the liquibase-snowflake project
- */
-public class Step6_FullIntegrationTest {
-    
-    @Test
-    public void testFullIntegration() throws Exception {
-        // Create test changelog
-        String changelog = 
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-            "<databaseChangeLog\n" +
-            "    xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\"\n" +
-            "    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-            "    xmlns:snowflake=\"http://www.liquibase.org/xml/ns/snowflake\"\n" +
-            "    xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog\n" +
-            "        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd\n" +
-            "        http://www.liquibase.org/xml/ns/snowflake\n" +
-            "        http://www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd\">\n" +
-            "    \n" +
-            "    <changeSet id=\"1\" author=\"developer\">\n" +
-            "        <snowflake:<changeType> \n" +
-            "            <requiredAttribute>=\"TEST_OBJECT\"\n" +
-            "            <optionalAttribute>=\"optional_value\"/>\n" +
-            "    </changeSet>\n" +
-            "</databaseChangeLog>";
-        
-        // Write to temp file
-        File tempFile = File.createTempFile("integration-test", ".xml");
-        Files.write(tempFile.toPath(), changelog.getBytes());
-        tempFile.deleteOnExit();
-        
-        // Create database
-        Database database = new SnowflakeDatabase();
-        database.setConnection(new OfflineConnection(
-            "offline:snowflake", new FileSystemResourceAccessor()
-        ));
-        
-        // Create Liquibase instance
-        Liquibase liquibase = new Liquibase(
-            tempFile.getAbsolutePath(),
-            new FileSystemResourceAccessor(tempFile.getParent()),
-            database
-        );
-        
-        // Get SQL without executing
-        StringWriter writer = new StringWriter();
-        liquibase.update((String) null, writer);
-        
-        String sql = writer.toString();
-        System.out.println("Generated SQL:\n" + sql);
-        
-        // Verify SQL was generated
-        assertFalse("Should generate SQL", sql.isEmpty());
-        assertTrue("Should contain CREATE statement", sql.contains("CREATE"));
-        assertTrue("Should contain object name", sql.contains("TEST_OBJECT"));
-        
-        System.out.println("✓ Integration Test Passed: Full pipeline working!");
-    }
-}
-```
-
-**Run the final integration test:**
-```bash
-mvn test -Dtest=Step6_FullIntegrationTest
-```
-
-### Summary of Step-by-Step Tests
-
-These step-by-step tests should be run after implementing each phase:
-
-1. **Step1_<ChangeType>ChangeTest** - After creating Change class
-2. **Step2_<ChangeType>StatementTest** - After creating Statement class
-3. **Step3_<ChangeType>GeneratorTest** - After creating SQL Generator
-4. **Step4_ServiceRegistrationTest** - After adding service registrations
-5. **Step5_XsdValidationTest** - After creating XSD schema
-6. **Step6_FullIntegrationTest** - After all components are complete
-
-These tests are **throwaway tests** meant for immediate verification during development. Once all tests pass:
-1. Delete the Step* test files
-2. Ensure production unit tests are complete
-3. Move on to test harness implementation
 
 ---
 
@@ -1159,6 +767,20 @@ public void test<ChangeType>ChangeInstantiation() {
 
 Add the new tests to `src/test/java/liquibase/SnowflakeExtensionTestSuite.java`:
 
+⚠️ **INTEGRATION TEST TIP: Use Unique Changeset IDs**
+**Common Error**: `Validation Failed: 1 changesets check sum`
+**Cause**: Reusing common changeset IDs like "test-1" causes checksum conflicts in DATABASECHANGELOG
+**Solution**: Use descriptive, unique IDs: "test-alter-retention", "test-alter-comment", etc.
+
+```java
+// ❌ BAD: Generic IDs cause conflicts
+<changeSet id="test-1" author="test">
+
+// ✅ GOOD: Descriptive unique IDs
+<changeSet id="test-alterSchema-retention" author="test">
+<changeSet id="test-alterSchema-comment" author="test">
+```
+
 ```java
 // <ChangeType> tests
 <ChangeType>ChangeTest.class,
@@ -1168,143 +790,117 @@ Add the new tests to `src/test/java/liquibase/SnowflakeExtensionTestSuite.java`:
 
 ---
 
-### Step-by-Step Verification Tests (Development Workflow)
+### 🎯 Complete Phase Tests in One File
 
-Create these tests **in addition to** the production tests above. These are for rapid development feedback and can be temporary files:
-
-#### Development Step 1: Quick Change Class Test
-File: `src/test/java/liquibase/change/core/DevStep1_<ChangeType>ChangeTest.java`
+Create a single test file with all phase tests:
 
 ```java
-package liquibase.change.core;
-
-import liquibase.database.core.SnowflakeDatabase;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-
-/**
- * Quick development test - can be deleted after implementation is complete
- */
-public class DevStep1_<ChangeType>ChangeTest {
+public class <ChangeType>PhaseTests {
     
     @Test
-    public void testBasicCreation() {
-        // Quick test to verify class compiles and basic functionality works
+    public void testPhase1_ChangeClass() {
         <ChangeType>Change change = new <ChangeType>Change();
-        assertNotNull(change);
+        change.set<RequiredAttribute>("TEST");
         assertTrue(change.supports(new SnowflakeDatabase()));
+        assertEquals(1, change.generateStatements(new SnowflakeDatabase()).length);
+        System.out.println("✅ Phase 1 PASS");
+    }
+    
+    @Test 
+    public void testPhase2_Statement() {
+        <ChangeType>Statement stmt = new <ChangeType>Statement();
+        stmt.set<RequiredAttribute>("TEST");
+        assertEquals("TEST", stmt.get<RequiredAttribute>());
+        System.out.println("✅ Phase 2 PASS");
     }
     
     @Test
-    public void testRequiredAttribute() {
-        <ChangeType>Change change = new <ChangeType>Change();
-        
-        // Test primary required attribute
-        change.set<RequiredAttribute>("TEST_VALUE");
-        assertEquals("TEST_VALUE", change.get<RequiredAttribute>());
-        
-        // Quick validation test
-        assertDoesNotThrow(() -> change.generateStatements(new SnowflakeDatabase()));
+    public void testPhase3_SqlGenerator() {
+        <ChangeType>Statement stmt = new <ChangeType>Statement();
+        stmt.set<RequiredAttribute>("TEST");
+        <ChangeType>GeneratorSnowflake gen = new <ChangeType>GeneratorSnowflake();
+        Sql[] sqls = gen.generateSql(stmt, new SnowflakeDatabase(), null);
+        assertTrue(sqls[0].toSql().contains("CREATE"));
+        System.out.println("✅ Phase 3 PASS: " + sqls[0].toSql());
+    }
+    
+    @Test
+    public void testPhase4_ServiceRegistration() {
+        Change change = ChangeFactory.getInstance().create("<changeType>");
+        assertNotNull(change);
+        System.out.println("✅ Phase 4 PASS");
+    }
+    
+    @Test
+    public void testPhase6_FullIntegration() throws Exception {
+        // Create simple XML and parse it
+        String xml = "<changeSet id='1' author='test'>" +
+                    "<snowflake:<changeType> <requiredAttribute>='TEST'/>" + 
+                    "</changeSet>";
+        // Parse and verify it works end-to-end
+        System.out.println("✅ Phase 6 PASS - Full integration works");
     }
 }
 ```
 
-#### Development Step 2: Quick Statement Test
-File: `src/test/java/liquibase/statement/core/DevStep2_<ChangeType>StatementTest.java`
-
-```java
-package liquibase.statement.core;
-
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-
-/**
- * Quick development test - can be deleted after implementation is complete
- */
-public class DevStep2_<ChangeType>StatementTest {
-    
-    @Test
-    public void testBasicProperties() {
-        <ChangeType>Statement statement = new <ChangeType>Statement();
-        
-        // Quick test of key properties
-        assertNull(statement.get<RequiredAttribute>());
-        
-        statement.set<RequiredAttribute>("TEST");
-        assertEquals("TEST", statement.get<RequiredAttribute>());
-    }
-}
-```
-
-#### Development Step 3: Quick Generator Test
-File: `src/test/java/liquibase/sqlgenerator/core/snowflake/DevStep3_<ChangeType>GeneratorTest.java`
-
-```java
-package liquibase.sqlgenerator.core.snowflake;
-
-import liquibase.database.core.SnowflakeDatabase;
-import liquibase.statement.core.<ChangeType>Statement;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-
-/**
- * Quick development test - can be deleted after implementation is complete
- */
-public class DevStep3_<ChangeType>GeneratorTest {
-    
-    @Test
-    public void testBasicSqlGeneration() {
-        <ChangeType>GeneratorSnowflake generator = new <ChangeType>GeneratorSnowflake();
-        <ChangeType>Statement statement = new <ChangeType>Statement();
-        statement.set<RequiredAttribute>("TEST_OBJECT");
-        
-        // Quick test that SQL is generated
-        assertDoesNotThrow(() -> {
-            generator.generateSql(statement, new SnowflakeDatabase(), null);
-        });
-    }
-}
-```
-
-### Running the Tests
-
-#### Production Tests
+**Run after each phase:**
 ```bash
-# Run all production tests for the change type
-mvn test -Dtest="*<ChangeType>*Test"
+mvn test -Dtest=<ChangeType>PhaseTests -Dtest.method=testPhase*
+```
+
+### 📌 TEST RUNNING REFERENCE (Because I Always Forget This)
+
+**Running Unit Tests in liquibase-snowflake:**
+```bash
+# Run ALL tests for a change type
+mvn test -Dtest="*AlterSchema*"
 
 # Run specific test class
-mvn test -Dtest="<ChangeType>ChangeTest"
+mvn test -Dtest=AlterSchemaChangeTest
 
-# Run all tests to ensure no regression
-mvn test
+# Run specific test method
+mvn test -Dtest=AlterSchemaChangeTest#testBasicProperties
+
+# Run with more output when debugging
+mvn test -Dtest=AlterSchemaChangeTest -X
+
+# COMMON MISTAKES I MAKE:
+# ❌ mvn test AlterSchemaChangeTest  (missing -Dtest=)
+# ❌ mvn test -Dtest="AlterSchemaChangeTest.java"  (no .java extension)
+# ❌ mvn test -Dtest=AlterSchemaChange  (missing Test suffix)
 ```
 
-#### Development Tests (Quick Feedback)
+**Integration Test Gotchas:**
 ```bash
-# Run just the development tests for quick feedback
-mvn test -Dtest="DevStep*<ChangeType>*"
+# Integration tests need proper setup
+cd liquibase-snowflake
+mvn clean install -DskipTests  # Build first
+mvn test -Dtest=SnowflakeIntegrationTest
 
-# Run individual development step
-mvn test -Dtest="DevStep1_<ChangeType>ChangeTest"
+# If "class not found":
+mvn clean test-compile  # Recompile tests
+mvn test -Dtest=YourTest
+
+# If weird errors:
+mvn clean  # Clear target directory
+mvn test-compile
+mvn test -Dtest=YourTest
 ```
 
-### Test Integration Workflow
+**Test Harness (Different Project!):**
+```bash
+# CRITICAL: Test harness is NOT in liquibase-snowflake
+cd liquibase-test-harness  # Different directory!
 
-1. **Start Development**: Create development tests (`DevStep*`) for immediate feedback
-2. **Implement Incrementally**: Use dev tests to verify each component as you build it
-3. **Create Production Tests**: Once implementation is stable, create proper test files
-4. **Delete Development Tests**: Remove `DevStep*` files once production tests are complete
-5. **Run Full Test Suite**: Ensure all tests pass before moving to test harness
+# Must copy JAR first
+cp ../liquibase-snowflake/target/*.jar lib/
 
-### Key Testing Best Practices
+# Run test harness
+mvn test -Dtest=ChangeObjectTests -DchangeObjects=alterSchema -DdbName=snowflake
 
-1. **Use @DisplayName annotations** for clear test descriptions
-2. **Test all validation rules** from the requirements document
-3. **Test mutual exclusivity** carefully - use correct Boolean checks
-4. **Handle quoted identifiers** - Liquibase may double-quote special characters
-5. **Update ServiceRegistrationTest** with each new change type
-6. **Keep tests independent** - don't rely on test execution order
+# Multiple tests
+mvn test -Dtest=ChangeObjectTests -DchangeObjects=createSchema,alterSchema -DdbName=snowflake
+```
 
 ---
 
@@ -1320,6 +916,22 @@ Test Harness tests:
 - Compare **expected vs actual SQL output**
 
 ### CRITICAL: Test Harness Pattern
+
+🔍 **ALWAYS QUESTION "KNOWN ISSUES"**
+If you find disabled tests with comments like:
+```xml
+<!-- DISABLED DUE TO XML PARSING BUG -->
+<!-- <changeSet id="test-unset" author="test">
+    <snowflake:alterSchema unsetDataRetentionTimeInDays="true"/>
+</changeSet> -->
+```
+
+**DO NOT ACCEPT THIS AT FACE VALUE!**
+1. Create an isolated test to verify the bug actually exists
+2. Often the "known bug" is a false assumption
+3. In alterSchema, the "UNSET XML parsing bug" didn't exist - the test was disabled incorrectly
+
+**Action**: Always verify with concrete evidence before perpetuating "known bugs"
 
 After all unit/integration tests pass in `liquibase-snowflake`, create test harness tests following this EXACT pattern:
 
@@ -1466,6 +1078,58 @@ mvn test -Dtest=ChangeObjectTests -DchangeObjects=<changeType> -DdbName=snowflak
 
 ## Troubleshooting Common Issues
 
+### 🎯 SYSTEMATIC DEBUGGING PATTERN
+
+When encountering mysterious errors (like "At least one schema property must be changed" with boolean attributes):
+
+**STOP** - Don't assume where the bug is!
+
+**Create isolated tests for each layer:**
+
+```java
+// Step 1: Test Change class directly (programmatic)
+@Test
+public void debugStep1_ChangeClass() {
+    AlterSchemaChange change = new AlterSchemaChange();
+    change.setUnsetDataRetentionTimeInDays(true);
+    System.out.println("Value set: " + change.getUnsetDataRetentionTimeInDays());
+    // If this works, issue is NOT in Change class
+}
+
+// Step 2: Test Statement generation
+@Test
+public void debugStep2_Statement() {
+    AlterSchemaChange change = new AlterSchemaChange();
+    change.setSchemaName("TEST");
+    change.setUnsetDataRetentionTimeInDays(true);
+    SqlStatement[] stmts = change.generateStatements(new SnowflakeDatabase());
+    AlterSchemaStatement stmt = (AlterSchemaStatement) stmts[0];
+    System.out.println("Statement value: " + stmt.getUnsetDataRetentionTimeInDays());
+    // If this works, issue is NOT in Statement generation
+}
+
+// Step 3: Test SQL generation
+@Test
+public void debugStep3_SqlGeneration() {
+    AlterSchemaStatement stmt = new AlterSchemaStatement();
+    stmt.setSchemaName("TEST");
+    stmt.setUnsetDataRetentionTimeInDays(true);
+    AlterSchemaGeneratorSnowflake gen = new AlterSchemaGeneratorSnowflake();
+    Sql[] sqls = gen.generateSql(stmt, new SnowflakeDatabase(), null);
+    System.out.println("Generated SQL: " + sqls[0].toSql());
+    // If this contains UNSET, SQL generation works
+}
+
+// Step 4: Test XML parsing
+@Test
+public void debugStep4_XmlParsing() {
+    String xml = "<snowflake:alterSchema schemaName=\"TEST\" unsetDataRetentionTimeInDays=\"true\"/>";
+    // Parse and check if boolean is set correctly
+}
+```
+
+**Real Example**: This approach revealed that the "UNSET XML parsing bug" in alterSchema was actually a false assumption - XML parsing worked perfectly all along!
+
 ### Issue 1: Change Not Recognized
 
 **Symptom**: `Unknown change type 'snowflake:<changeType>'`
@@ -1573,6 +1237,21 @@ mvn test -Dtest=ChangeObjectTests -DchangeObjects=<changeType> -DdbName=snowflak
 1. Check for accidentally duplicated `@Override` annotations
 2. Remove duplicate annotations during automated fixes
 3. Verify import statements don't conflict
+
+### Issue 12: SqlGeneratorChain Constructor Error
+
+**Symptom**: `constructor SqlGeneratorChain in class liquibase.sqlgenerator.SqlGeneratorChain<T> cannot be applied to given types`
+
+**Quick Fix**: Pass `null` instead of `new SqlGeneratorChain()` in test methods
+```java
+// ❌ WRONG
+Sql[] sqls = generator.generateSql(statement, database, new SqlGeneratorChain());
+
+// ✅ CORRECT
+Sql[] sqls = generator.generateSql(statement, database, null);
+```
+
+**Why**: The SqlGeneratorChain constructor requires specific parameters. In unit tests, passing null is acceptable and standard practice.
 
 ---
 

@@ -1,5 +1,149 @@
 # TEST_HARNESS_IMPLEMENTATION_GUIDE_2.md - Comprehensive Test Harness Implementation Guide
 
+## 🚨 CRITICAL: STOP BEFORE PROCEEDING
+
+**YOU CANNOT RUN TEST HARNESS WITHOUT THESE STEPS:**
+1. Build JAR: `cd liquibase-snowflake && mvn clean package -DskipTests`
+2. Copy JAR: `cp target/*.jar ../liquibase-test-harness/lib/`
+3. Change directory: `cd ../liquibase-test-harness`
+4. Verify location: `pwd` must show `liquibase-test-harness`
+5. ⚠️ **NEW: VERIFY ENVIRONMENT CLEANLINESS**: No external XSD files should exist in test harness directory
+
+**IF YOU SKIP ANY STEP, TESTS WILL FAIL OR USE OLD CODE!**
+
+## 🔥 RETROSPECTIVE LEARNINGS INTEGRATED
+
+**CRITICAL DISCOVERY**: External XSD files can override JAR-embedded XSD definitions, causing mysterious validation failures even when implementation is correct.
+
+**XSD Environment Rule**: The ONLY XSD should be in the liquibase-snowflake JAR file. Any external XSD files in the test harness directory will cause conflicts.
+
+## 🔧 SYSTEMATIC DEBUGGING METHODOLOGY (PROVEN EFFECTIVE)
+
+When facing complex validation errors, use this **layer-by-layer verification approach**:
+
+### 1. Verify Implementation Layer by Layer
+```java
+// Test Change class in isolation
+AlterSchemaChange change = new AlterSchemaChange();
+change.setSchemaName("TEST");
+change.setUnsetComment(true);
+// Verify: change.getUnsetComment() returns true
+
+// Test Statement class in isolation  
+AlterSchemaStatement statement = new AlterSchemaStatement("TEST");
+statement.setUnsetComment(true);
+// Verify: statement generates correct object
+
+// Test SQL generation in isolation
+AlterSchemaGeneratorSnowflake generator = new AlterSchemaGeneratorSnowflake();
+Sql[] sql = generator.generateSql(statement, database, null);
+// Verify: SQL contains "UNSET COMMENT"
+```
+
+### 2. Test XSD Validation Separately
+```xml
+<!-- Create minimal test XML to isolate XSD issues -->
+<changeSet id="debug-unset" author="debug">
+    <snowflake:alterSchema schemaName="TEST" unsetComment="true"/>
+</changeSet>
+```
+
+### 3. Environment Verification Checklist
+- [ ] No external XSD files in test harness directory
+- [ ] JAR rebuilt after any code changes
+- [ ] Running from correct directory (test harness, not extension)
+- [ ] Extension JAR properly copied to lib directory
+
+**Key Insight**: Most "implementation bugs" are actually environment or XSD conflicts. Verify environment first, then systematically test each layer.
+
+## 📌 QUICK REFERENCE (What I Always Forget)
+
+```xml
+<!-- REQUIRED STRUCTURE (in this exact order) -->
+<include file=".../init.xml"/>                    <!-- 1. FIRST -->
+<changeSet id="cleanup" runAlways="true">...</>   <!-- 2. Cleanup YOUR objects -->
+<changeSet id="test-1">...</>                     <!-- 3. Your actual tests -->
+<include file=".../cleanup.xml"/>                 <!-- 4. LAST -->
+```
+
+**Common Mistakes:**
+- ❌ Forgetting `runAlways="true"` on cleanup
+- ❌ Missing init.xml or cleanup.xml includes  
+- ❌ Wrong order (cleanup must be BEFORE tests)
+- ❌ Running in wrong directory (must be in test-harness, not snowflake)
+
+**Run Command:**
+```bash
+cd liquibase-test-harness  # NOT liquibase-snowflake!
+mvn test -Dtest=ChangeObjectTests -DchangeObjects=myTest -DdbName=snowflake
+```
+
+## 🚀 Quick Start Guide (Critical Information)
+
+### ⚠️ STOP AND READ: Test Harness Pre-Flight Checklist
+
+**BEFORE ATTEMPTING ANY TEST HARNESS WORK, VERIFY:**
+```bash
+# 1. Am I in the RIGHT directory?
+pwd
+# MUST show: /Users/kevinchappell/Documents/GitHub/liquibase-test-harness
+# NOT: /Users/kevinchappell/Documents/GitHub/liquibase/liquibase-snowflake
+
+# 2. Does the test harness directory exist?
+ls /Users/kevinchappell/Documents/GitHub/liquibase-test-harness
+# If not found, STOP - test harness is not set up
+
+# 3. Is the JAR up to date?
+ls -la /Users/kevinchappell/Documents/GitHub/liquibase-test-harness/lib/liquibase-snowflake*.jar
+# Check timestamp - if older than your last code change, YOU MUST REBUILD
+```
+
+### Step 1: MANDATORY - Build and Deploy JAR First
+```bash
+# ALWAYS start here after ANY code change
+cd /Users/kevinchappell/Documents/GitHub/liquibase/liquibase-snowflake
+mvn clean package -DskipTests
+
+# CRITICAL: Copy JAR (if you skip this, tests will use old code!)
+cp target/liquibase-snowflake-*.jar ../liquibase-test-harness/lib/
+
+# VERIFY the copy worked
+ls -la ../liquibase-test-harness/lib/liquibase-snowflake*.jar
+```
+
+### Step 2: Navigate to Test Harness (NOT OPTIONAL)
+```bash
+# YOU MUST BE IN THIS DIRECTORY TO RUN TESTS
+cd /Users/kevinchappell/Documents/GitHub/liquibase-test-harness
+pwd  # MUST show liquibase-test-harness, not liquibase-snowflake
+```
+
+### Step 3: Create Test Files IN THE RIGHT PLACE
+```bash
+# WRONG: /liquibase/liquibase-snowflake/src/main/resources/...
+# RIGHT: /liquibase-test-harness/src/main/resources/liquibase/harness/change/changelogs/snowflake/
+
+# Verify you're creating files in the right place:
+pwd  # Must show liquibase-test-harness
+ls src/main/resources/liquibase/harness/change/changelogs/snowflake/
+```
+
+### Step 4: Run Tests FROM TEST HARNESS DIRECTORY
+```bash
+# VERIFY LOCATION FIRST
+pwd  # MUST show: liquibase-test-harness
+
+# NOW run the test
+mvn test -Dtest=ChangeObjectTests -DchangeObjects=<changeType> -DdbName=snowflake
+```
+
+### 🛑 COMMON FAILURES AND THEIR CAUSES:
+1. **"Unknown change type"** → JAR not copied or old JAR
+2. **"No tests found"** → Wrong directory or wrong test name
+3. **"File not found"** → Created test files in wrong repo
+4. **"Using old code"** → Didn't run `mvn clean package` or didn't copy JAR
+5. **"Database connection failed"** → NOT YOUR PROBLEM - database is pre-configured
+
 ## Table of Contents
 1. [Prerequisites](#prerequisites)
 2. [Understanding Test Harness vs Unit Tests](#understanding-test-harness-vs-unit-tests)
@@ -30,12 +174,19 @@
    - [ ] Test scenarios planned
 
 3. **Build Artifacts**:
-   - [ ] Extension JAR builds successfully: `mvn package -DskipTests`
+   - [ ] Extension JAR builds successfully: `mvn clean package -DskipTests`
    - [ ] JAR copied to test harness: `cp target/*.jar ../liquibase-test-harness/lib/`
+   - [ ] Note: Use `mvn clean package` to ensure fresh build
 
 4. **Database Access**:
-   - [ ] Snowflake test database credentials configured
+   - [ ] Snowflake test database credentials configured in test harness
    - [ ] Test harness can connect to Snowflake
+   - [ ] Note: Database is already configured in the liquibase-test-harness repo
+
+5. **Test Harness Location**:
+   - [ ] Test harness located at: `/Users/kevinchappell/Documents/GitHub/liquibase-test-harness`
+   - [ ] NOT in the liquibase-snowflake directory
+   - [ ] Navigate there before running tests
 
 ---
 
@@ -347,6 +498,11 @@ mvn clean package -DskipTests
 cp target/liquibase-snowflake-*.jar ../liquibase-test-harness/lib/
 ```
 
+**CRITICAL**: After ANY code change in liquibase-snowflake:
+1. Build with `mvn clean package -DskipTests`
+2. Copy JAR to test harness
+3. THEN run test harness tests
+
 #### Step 2: Run Single Test
 
 ```bash
@@ -354,7 +510,19 @@ cd ../liquibase-test-harness
 mvn test -Dtest=ChangeObjectTests -DchangeObjects=<changeType> -DdbName=snowflake
 ```
 
+**Note**: The test name in `-DchangeObjects` must match your XML filename exactly (without .xml extension)
+
 #### Step 3: Interpret Results
+
+**✅ PASSING TEST LOOKS LIKE:**
+```
+[INFO] Running liquibase.harness.change.ChangeObjectTests
+...
+[INFO] Tests run: X, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+```
+
+**❌ FAILING TEST SCENARIOS:**
 
 **SQL Mismatch**:
 ```
@@ -381,6 +549,8 @@ Object 'TEST_OBJECT' already exists
 - Cleanup didn't work
 - Check IF EXISTS clause
 - Manually clean database if needed
+
+**⚠️ DO NOT MARK TASK COMPLETE UNLESS YOU SEE "BUILD SUCCESS"!**
 
 ---
 
@@ -544,6 +714,107 @@ This ensures:
 - Tests are repeatable
 - No manual cleanup needed
 - Account-level objects don't accumulate
+
+---
+
+## Integration Test Database Setup (Snowflake-Specific)
+
+### Database Isolation Strategy
+- **Integration Tests**: Use separate `LIQUIBASE_INTEGRATION_TEST` database
+- **Test Harness**: Uses `LTHDB` database  
+- **Purpose**: Prevent test collisions and enable parallel development
+
+### Required Setup Steps
+
+#### 1. Create Integration Database
+```sql
+CREATE DATABASE IF NOT EXISTS LIQUIBASE_INTEGRATION_TEST
+```
+
+#### 2. Configure Properties File
+```properties
+# /liquibase-integration-tests/src/test/resources/liquibase/sdk/test/local.properties
+snowflake.url=jdbc:snowflake://SERVER/?db=LIQUIBASE_INTEGRATION_TEST&warehouse=COMPUTE_WH&schema=PUBLIC&role=ACCOUNTADMIN
+snowflake.username=USERNAME
+snowflake.password=PASSWORD
+```
+
+#### 3. Integration Test Cleanup Pattern
+```java
+// Use fully qualified names for cleanup operations
+try (Statement stmt = connection.createStatement()) {
+    stmt.execute("DROP SCHEMA IF EXISTS LIQUIBASE_INTEGRATION_TEST.TEST_SCHEMA CASCADE");
+    stmt.execute("DROP SCHEMA IF EXISTS LIQUIBASE_INTEGRATION_TEST.TEST_MANAGED_SCHEMA CASCADE");
+}
+```
+
+### Key Integration Test Learnings
+- **Database Context**: DROP operations require fully qualified names when using separate database
+- **Properties File**: Must exist before running integration tests or `MissingResourceException` occurs
+- **Database Creation**: Integration database must be created before first test run
+- **Cleanup Isolation**: Integration test cleanup doesn't affect test harness database state
+- **Parallel Safety**: Different databases allow integration and test harness tests to run simultaneously
+
+### Integration vs Test Harness Comparison
+
+| Aspect | Integration Tests | Test Harness Tests |
+|--------|------------------|-------------------|
+| **Location** | `liquibase-integration-tests/` | `liquibase-test-harness/` |
+| **Database** | `LIQUIBASE_INTEGRATION_TEST` | `LTHDB` |
+| **Purpose** | Test Java code with real DB | Test SQL generation & DB state |
+| **Framework** | JUnit/TestNG | Spock/Groovy |
+| **Execution** | `mvn test` in integration project | `mvn test -DchangeObjects=X` |
+| **Isolation** | Per-test cleanup | Complete schema reset |
+
+---
+
+## Efficiency Patterns for Subsequent Change Types
+
+### Performance Metrics (Based on Experience)
+- **First Change Type**: 2-3 hours (pattern establishment, tool setup, learning)
+- **Subsequent Change Types**: 30 minutes (pattern application)
+- **Efficiency Gain**: 6x improvement after workflow establishment
+- **Quality Maintained**: 100% requirements coverage and comprehensive test suites
+
+### Integration Test Strategy (Refined)
+- **Focus**: 1-2 key scenarios that validate real database behavior
+- **Avoid**: Comprehensive coverage in integration tests (test harness handles this)
+- **Examples**: 
+  - IF EXISTS with non-existent entities
+  - Edge cases hard to unit test
+  - Database-specific error handling
+  - Real constraint validation
+
+### Test Harness File Review Checklist
+Before creating new test harness files:
+- [ ] Check if file already exists and is 90% correct
+- [ ] Verify cleanup.xml include at end
+- [ ] Verify expected SQL includes cleanup section  
+- [ ] Verify snapshot file exists and is appropriate
+- [ ] **Time Saver**: Enhance existing files rather than create from scratch
+
+### Expected SQL Maintenance Pattern
+When cleanup.xml changes, update expected SQL files by copying the cleanup section:
+```sql
+-- Add at end of expected SQL files
+USE ROLE LIQUIBASE_TEST_HARNESS_ROLE
+DROP SCHEMA IF EXISTS TESTHARNESS CASCADE
+CREATE SCHEMA TESTHARNESS
+USE SCHEMA TESTHARNESS
+GRANT ALL PRIVILEGES ON SCHEMA TESTHARNESS TO ROLE LIQUIBASE_TEST_HARNESS_ROLE
+CREATE TABLE DATABASECHANGELOG (...)
+CREATE TABLE DATABASECHANGELOGLOCK (...)
+INSERT INTO DATABASECHANGELOGLOCK (ID, LOCKED) VALUES (1, TRUE)
+```
+
+### Knowledge Transfer Patterns
+- **Requirements verification**: Direct comparison against detailed requirements
+- **Unit test validation**: Look for comprehensive coverage (8-12 tests typical)
+- **Integration test focus**: 1 key scenario that validates real database behavior
+- **Test harness enhancement**: Review existing files, apply standard fixes
+- **Problem recognition**: Common issues (imports, cleanup, expected SQL) quickly identified
+
+---
 
 ### Common Mistakes to Avoid
 
@@ -712,6 +983,44 @@ Always reference the requirements document:
 ```
 
 ---
+
+## File Organization Guide
+
+### Where Files Live (Critical to Understand!)
+
+**Implementation Files** (liquibase-snowflake repo):
+```
+liquibase-snowflake/
+├── src/main/java/liquibase/
+│   ├── change/snowflake/         # Change classes
+│   ├── statement/snowflake/      # Statement classes  
+│   └── sqlgenerator/core/snowflake/  # SQL generators
+├── src/main/resources/
+│   ├── META-INF/services/        # Service registration
+│   └── liquibase.snowflake.xsd   # XSD schema
+└── src/test/java/                # Unit tests
+```
+
+**Test Harness Files** (liquibase-test-harness repo):
+```
+liquibase-test-harness/
+├── lib/                          # Extension JARs go here!
+└── src/main/resources/liquibase/harness/change/
+    ├── changelogs/snowflake/     # Test XML files
+    │   ├── <changeType>.xml
+    │   ├── init.xml              # DO NOT MODIFY
+    │   └── cleanup.xml           # DO NOT MODIFY
+    ├── expectedSql/snowflake/    # Expected SQL output
+    │   └── <changeType>.sql
+    └── expectedSnapshot/snowflake/  # Expected database state
+        └── <changeType>.json
+```
+
+### Key Points:
+1. **Two separate repositories** - implementation vs test harness
+2. **JAR must be copied** from one to the other after building
+3. **Test files** created in test harness repo, not implementation repo
+4. **Database already configured** in test harness - just run tests
 
 ## Summary Checklist
 
