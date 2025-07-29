@@ -23,6 +23,9 @@ import liquibase.exception.CommandValidationException;
 import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
 
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -176,9 +179,25 @@ public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
     private boolean areThereChangeObjectsToWrite(DiffResult diffResult) {
         // diffResult always includes catalog and schema as missing objects
         // in this context, they are not counted as effective changes
-        return diffResult.getMissingObjects().size() > 2 ||
+        return hasMissingObjects(diffResult) ||
                !diffResult.getUnexpectedObjects().isEmpty() ||
                !diffResult.getChangedObjects().isEmpty();
+    }
+
+    /**
+     *
+     * Check for conditions that indicate that there are missing objects
+     *
+     * @param   diffResult       The DiffResult object
+     * @return  boolean          True if there are missing objects to write out False if not
+     *
+     */
+    private static boolean hasMissingObjects(DiffResult diffResult) {
+        if (diffResult.getChangedObjects().size() > 2) {
+            return true;
+        }
+        DatabaseObject next = diffResult.getMissingObjects().iterator().next();
+        return diffResult.getMissingObjects().size() == 1 && !(next instanceof Schema || next instanceof Catalog);
     }
 
     @Override
