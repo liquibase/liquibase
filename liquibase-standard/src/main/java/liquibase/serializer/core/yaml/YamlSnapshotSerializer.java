@@ -1,6 +1,7 @@
 package liquibase.serializer.core.yaml;
 
 import liquibase.GlobalConfiguration;
+import liquibase.Scope;
 import liquibase.diff.compare.DatabaseObjectCollectionComparator;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.LiquibaseSerializable;
@@ -29,6 +30,7 @@ import java.util.*;
 public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSerializer {
 
     private boolean alreadySerializingObject;
+    private Object objectBeingSerialized;
 
     @Override
     public void write(DatabaseSnapshot snapshot, OutputStream out) throws IOException {
@@ -58,11 +60,21 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
                         name = ((DatabaseObject) object).getSchema().toString() + "." + name;
                     }
 
-                    throw new UnexpectedLiquibaseException("Found a null snapshotId for " + StringUtil.lowerCaseFirst(object.getClass().getSimpleName()) + " " + name);
+                    Scope.getCurrentScope().getLog(YamlSnapshotSerializer.class).warning("Found a null snapshotId for " + StringUtil.lowerCaseFirst(object.getClass().getSimpleName()) + " " + name);
+                    if (objectBeingSerialized != null) {
+                        Scope.getCurrentScope().getLog(YamlSnapshotSerializer.class).warning("The object already being serialized is " + ((DatabaseObject) objectBeingSerialized).getName());
+                    }
+                    if (System.getenv("IGNORE_NULL_SNAPSHOT_ID") == null) {
+                        throw new UnexpectedLiquibaseException("Found a null snapshotId for " + StringUtil.lowerCaseFirst(object.getClass().getSimpleName()) + " " + name);
+                    }
+                    snapshotId = "NULL_SNAPSHOT_ID:" + name;
+                    objectBeingSerialized = null;
+                    alreadySerializingObject = false;
                 }
                 return ((DatabaseObject) object).getClass().getName() + "#" + snapshotId;
             } else {
                 alreadySerializingObject = true;
+                objectBeingSerialized = object;
                 Object map = super.toMap(object);
                 alreadySerializingObject = false;
                 return map;
