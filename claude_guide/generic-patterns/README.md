@@ -18,7 +18,7 @@ Core development patterns for implementing Liquibase extensions.
 Comprehensive testing patterns for Liquibase extensions.
 
 #### Key Documents:
-- **TEST_HARNESS_IMPLEMENTATION_GUIDE_2.md** - End-to-end database testing guide
+- **TEST_HARNESS_IMPLEMENTATION_GUIDE_3.md** - End-to-end database testing guide (simplified with schema isolation)
 - **INTEGRATION_TEST_CHECKLIST.md** - Checklist for integration testing
 - **GOAL_PROVE_CODE_WORKS.md** - Testing philosophy for proving functionality
 - **GOAL_PROVE_CODE_WONT_BREAK.md** - Testing for robustness and edge cases
@@ -91,7 +91,7 @@ Meta documentation about the guide structure and vision.
 
 5. **Implement with Testing**
    - Write unit tests at each step
-   - Follow `testing/TEST_HARNESS_IMPLEMENTATION_GUIDE_2.md`
+   - Follow `testing/TEST_HARNESS_IMPLEMENTATION_GUIDE_3.md`
 
 6. **Track Progress**
    - Use `project-management/LBCF-STATUS-TRACKING-GUIDE.md`

@@ -3,8 +3,8 @@
 ## 🚨 CRITICAL: STOP BEFORE PROCEEDING
 
 **YOU CANNOT RUN TEST HARNESS WITHOUT THESE STEPS:**
-1. Build JAR: `cd liquibase-snowflake && mvn clean package -DskipTests`
-2. Copy JAR: `cp target/*.jar ../liquibase-test-harness/lib/`
+1. Build and install JAR: `cd liquibase-snowflake && mvn clean install -DskipTests`
+2. ⚠️ CRITICAL: Use mvn install not mvn package! Test harness loads via Maven dependencies
 3. Change directory: `cd ../liquibase-test-harness`
 4. Verify location: `pwd` must show `liquibase-test-harness`
 5. ⚠️ **NEW: VERIFY ENVIRONMENT CLEANLINESS**: No external XSD files should exist in test harness directory

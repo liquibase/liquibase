@@ -10,8 +10,8 @@ mvn clean package -DskipTests
 # Full build with tests
 ./mvnw clean install
 
-# Copy to test harness
-cp target/liquibase-snowflake-*.jar ../liquibase-test-harness/lib/
+# Install to Maven repo (test harness loads via Maven dependencies)
+mvn install -DskipTests
 
 # Run specific unit test
 mvn test -Dtest=CreateSchemaChangeTest

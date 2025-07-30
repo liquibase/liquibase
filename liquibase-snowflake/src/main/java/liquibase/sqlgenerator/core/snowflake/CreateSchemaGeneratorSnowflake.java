@@ -17,7 +17,7 @@ public class CreateSchemaGeneratorSnowflake extends AbstractSqlGenerator<CreateS
 
     @Override
     public int getPriority() {
-        return PRIORITY_DATABASE;
+        return PRIORITY_DATABASE + 10; // Higher priority to ensure this generator is used
     }
 
     @Override
@@ -50,9 +50,14 @@ public class CreateSchemaGeneratorSnowflake extends AbstractSqlGenerator<CreateS
             sql.append("OR REPLACE ");
         }
         
+        // Add TRANSIENT before SCHEMA (correct Snowflake syntax)
+        if (statement.getTransient() != null && statement.getTransient()) {
+            sql.append("TRANSIENT ");
+        }
+        
         sql.append("SCHEMA ");
         
-        // IF NOT EXISTS must come after SCHEMA
+        // IF NOT EXISTS must come after SCHEMA  
         if (statement.getIfNotExists() != null && statement.getIfNotExists()) {
             sql.append("IF NOT EXISTS ");
         }
@@ -60,11 +65,6 @@ public class CreateSchemaGeneratorSnowflake extends AbstractSqlGenerator<CreateS
         sql.append(database.escapeObjectName(statement.getSchemaName(), liquibase.structure.core.Schema.class));
         
         List<String> options = new ArrayList<>();
-        
-        // Add TRANSIENT after schema name (correct Snowflake syntax)
-        if (statement.getTransient() != null && statement.getTransient()) {
-            options.add("TRANSIENT");
-        }
         
         if (statement.getManaged() != null && statement.getManaged()) {
             options.add("WITH MANAGED ACCESS");

@@ -78,7 +78,7 @@ For each change type, track:
 1. **Requirements**: Use DETAILED_REQUIREMENTS_CREATION_GUIDE.md
 2. **New Change Types**: Use NEW_CHANGETYPE_PATTERN_2.md
 3. **Enhance Existing**: Use EXISTING_CHANGETYPE_EXTENSION_PATTERN.md
-4. **Test Harness**: Use TEST_HARNESS_IMPLEMENTATION_GUIDE_2.md
+4. **Test Harness**: Use TEST_HARNESS_IMPLEMENTATION_GUIDE_3.md
 
 ### Success Metrics
 - All unit tests passing

@@ -896,8 +896,8 @@ mvn test -Dtest=YourTest
 # CRITICAL: Test harness is NOT in liquibase-snowflake
 cd liquibase-test-harness  # Different directory!
 
-# Must copy JAR first
-cp ../liquibase-snowflake/target/*.jar lib/
+# Must install JAR first - test harness loads via Maven dependencies
+cd ../liquibase-snowflake && mvn install -DskipTests && cd ../liquibase-test-harness
 
 # Run test harness
 mvn test -Dtest=ChangeObjectTests -DchangeObjects=alterSchema -DdbName=snowflake
@@ -1065,10 +1065,9 @@ File: `expectedSnapshot/snowflake/<changeType>.json`
 #### 5. Running Test Harness Tests
 
 ```bash
-# First, rebuild the extension JAR
+# First, rebuild and install the extension JAR
 cd liquibase-snowflake
-mvn package -DskipTests
-cp target/liquibase-snowflake-*.jar ../liquibase-test-harness/lib/
+mvn install -DskipTests
 
 # Run the test
 cd ../liquibase-test-harness
@@ -1321,7 +1320,7 @@ liquibase/
 1. Make changes in liquibase-snowflake
 2. Run unit tests: `mvn test`
 3. Build JAR: `mvn package -DskipTests`
-4. Copy to test harness: `cp target/*.jar ../liquibase-test-harness/lib/`
+4. Install to Maven repo: `mvn install -DskipTests` (test harness loads via Maven dependencies)
 5. Run test harness tests
 
 ### Version Compatibility

@@ -55,10 +55,10 @@ START
 ├── 5. VALIDATE
 │   ├── Run all unit tests
 │   ├── Create test harness XML file:
-│   │   └── Guide: claude_guide/generic-patterns/qa/TEST_HARNESS_IMPLEMENTATION_GUIDE_2.md
+│   │   └── Guide: claude_guide/generic-patterns/testing/TEST_HARNESS_IMPLEMENTATION_GUIDE_3.md
 │   ├── 🚨 TEST HARNESS EXECUTION (MANDATORY):
-│   │   ├── Build JAR: cd liquibase-snowflake && mvn clean package -DskipTests
-│   │   ├── Copy JAR: cp target/*.jar ../liquibase-test-harness/lib/
+│   │   ├── Build & Install JAR: cd liquibase-snowflake && mvn clean install -DskipTests
+│   │   │   ⚠️ CRITICAL: Use mvn install not mvn package! Test harness loads via Maven dependencies
 │   │   ├── Change to harness: cd ../liquibase-test-harness
 │   │   ├── Verify location: pwd (MUST show liquibase-test-harness)
 │   │   ├── Run test: mvn test -Dtest=ChangeObjectTests -DchangeObjects=X -DdbName=snowflake
@@ -203,7 +203,7 @@ If I realize I'm mid-task without following the loop:
 ### Implementation Guides
 - **New Change Types**: claude_guide/generic-patterns/development/NEW_CHANGETYPE_PATTERN_2.md
 - **Extending Existing Types**: claude_guide/generic-patterns/development/EXISTING_CHANGETYPE_EXTENSION_PATTERN.md
-- **Test Harness**: claude_guide/generic-patterns/qa/TEST_HARNESS_IMPLEMENTATION_GUIDE_2.md
+- **Test Harness**: claude_guide/generic-patterns/testing/TEST_HARNESS_IMPLEMENTATION_GUIDE_3.md
 - **Requirements Creation**: claude_guide/generic-patterns/requirements/DETAILED_REQUIREMENTS_CREATION_GUIDE.md
 
 ### Source Code Locations

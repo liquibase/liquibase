@@ -25,7 +25,7 @@ Next: Column operations needing SQL syntax overrides
    - `SQL_GENERATOR_OVERRIDE_STEP_BY_STEP.md` - For SQL syntax overrides (column operations)
 
 3. **Testing**
-   - `TEST_HARNESS_IMPLEMENTATION_GUIDE_2.md` - After unit tests pass
+   - `TEST_HARNESS_IMPLEMENTATION_GUIDE_3.md` - After unit tests pass (simplified with schema isolation)
 
 4. **Requirements & Tracking**
    - `detailed_requirements/<changeType>_requirements.md` - Per change type

@@ -159,7 +159,7 @@ These unit tests run independently of the Liquibase Test Harness. The test harne
 2. **Implement Code**: Follow `NEW_CHANGETYPE_PATTERN_2.md`
    - Change class → Statement → Generator → Service registration → XSD
 3. **Unit Tests**: Write tests at each step (must pass before proceeding)
-4. **Test Harness**: Follow `TEST_HARNESS_IMPLEMENTATION_GUIDE_2.md`
+4. **Test Harness**: Follow `TEST_HARNESS_IMPLEMENTATION_GUIDE_3.md`
    - Only after all unit tests pass
 
 ### Important Testing Notes

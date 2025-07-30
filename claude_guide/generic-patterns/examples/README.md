@@ -35,7 +35,7 @@ When implementing a new change type:
 3. Adapt for your specific database and feature
 4. Follow the complete implementation guides in:
    - `/claude_guide/roles/developer/patterns/NEW_CHANGETYPE_PATTERN_2.md`
-   - `/claude_guide/roles/qa/patterns/TEST_HARNESS_IMPLEMENTATION_GUIDE_2.md`
+   - `/claude_guide/generic-patterns/testing/TEST_HARNESS_IMPLEMENTATION_GUIDE_3.md`
 
 ## Why Keep Examples Separate
 

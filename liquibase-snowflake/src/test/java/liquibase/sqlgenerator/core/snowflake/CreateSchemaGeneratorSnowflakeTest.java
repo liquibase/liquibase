@@ -25,7 +25,7 @@ public class CreateSchemaGeneratorSnowflakeTest {
         assertThat(sql).isNotNull();
         assertThat(sql).hasSize(1);
         assertThat(sql[0].toSql())
-            .isEqualTo("CREATE SCHEMA TEST_TRANSIENT_SCHEMA TRANSIENT COMMENT = 'Transient test schema'");
+            .isEqualTo("CREATE TRANSIENT SCHEMA TEST_TRANSIENT_SCHEMA COMMENT = 'Transient test schema'");
     }
     
     @Test
@@ -62,7 +62,7 @@ public class CreateSchemaGeneratorSnowflakeTest {
         assertThat(sql).isNotNull();
         assertThat(sql).hasSize(1);
         assertThat(sql[0].toSql())
-            .isEqualTo("CREATE SCHEMA TEST_FULL_SCHEMA TRANSIENT WITH MANAGED ACCESS COMMENT = 'Full featured schema'");
+            .isEqualTo("CREATE TRANSIENT SCHEMA TEST_FULL_SCHEMA WITH MANAGED ACCESS COMMENT = 'Full featured schema'");
     }
     
     @Test
