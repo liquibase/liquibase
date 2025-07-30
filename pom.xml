@@ -69,13 +69,13 @@
         <trimStackTrace>false</trimStackTrace>
         <liquibase-pro.version>0-SNAPSHOT</liquibase-pro.version>
         <argLine></argLine>
-        <commons-lang3.version>3.17.0</commons-lang3.version>
-        <commons-io.version>2.19.0</commons-io.version>
+        <commons-lang3.version>3.18.0</commons-lang3.version>
+        <commons-io.version>2.20.0</commons-io.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
-        <commons-text.version>1.13.1</commons-text.version>
+        <commons-text.version>1.14.0</commons-text.version>
         <ant.version>1.10.15</ant.version>
-        <junit-jupiter.version>5.12.2</junit-jupiter.version>
-        <groovy.version>4.0.27</groovy.version>
+        <junit-jupiter.version>5.13.4</junit-jupiter.version>
+        <groovy.version>4.0.28</groovy.version>
         <spock.version>2.3-groovy-4.0</spock.version>
         <spring.version>5.3.39</spring.version>
         <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
@@ -90,6 +90,7 @@
         <itCoverageAgent></itCoverageAgent>
         <sonar.coverage.jacoco.xmlReportPaths>target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <surefire.failIfNoTests>true</surefire.failIfNoTests>
+        <opencsv.version>5.12.0</opencsv.version> <!-- 5.11 broke loading CSV files with empty lines, see https://sourceforge.net/p/opencsv/bugs/259/. There are tests in LoadDataChangeTest to validate this issue, once they all pass we can update -->
     </properties>
 
     <!-- comment -->
@@ -298,14 +299,14 @@
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.50.2.0</version>
+            <version>3.50.3.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.24.2</version>
+            <version>3.25.1</version>
             <scope>test</scope>
         </dependency>
 
@@ -349,7 +350,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.6.1</version>
                 <executions>
                     <execution>
                         <id>enforce-maven</id>
@@ -372,7 +373,7 @@
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>4.2.0</version>
+                <version>4.2.1</version>
                 <executions>
                     <execution>
                         <goals>
@@ -523,7 +524,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.7.1</version>
+                <version>1.7.2</version>
                 <configuration>
                     <updatePomFile>true</updatePomFile>
                     <outputDirectory>${project.build.directory}/flattened-pom</outputDirectory>

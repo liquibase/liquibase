@@ -248,7 +248,6 @@
                             <xsd:attribute name="runWithSpoolFile" type="xsd:string" />
                             <xsd:attribute name="endDelimiter" type="xsd:string" />
                             <xsd:attribute name="stripComments" type="xsd:boolean" />
-                            <xsd:attribute name="failOnError" type="xsd:boolean" />
                         </xsd:complexType>
                     </xsd:element>
                 </xsd:choice>
