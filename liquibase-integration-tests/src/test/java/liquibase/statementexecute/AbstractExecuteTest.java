@@ -79,6 +79,15 @@ public abstract class AbstractExecuteTest {
         assertCorrect(new String[]{expectedSql}, includeDatabases);
     }
 
+    /**
+     *
+     * Make the assertion if the included database is under test
+     *
+     * @param   expectedSql
+     * @param   includeDatabases
+     * @throws  Exception
+     *
+     */
     @SafeVarargs
     protected final void assertCorrectUnderTest(String expectedSql, Class<? extends Database>... includeDatabases) throws
             Exception {
