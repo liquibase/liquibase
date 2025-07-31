@@ -213,10 +213,13 @@ public class DiffToChangeLog {
     private Database determineDatabase(DatabaseSnapshot snapshot) {
         Database database = snapshot.getDatabase();
         DatabaseConnection connection = database.getConnection();
-        if (! (connection instanceof OfflineConnection)) {
+        if (! (connection instanceof OfflineConnection) && database instanceof PostgresDatabase) {
             return database;
+        } else {
+            DatabaseFactory databaseFactory = Scope.getCurrentScope().getSingleton(DatabaseFactory.class);
+            database = databaseFactory.getDatabase(database.getShortName());
         }
-        return null;
+        return database;
     }
 
     /**
