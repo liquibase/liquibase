@@ -87,7 +87,7 @@ public abstract class AbstractExecuteTest {
         for (DatabaseTestSystem databaseTestSystem : underTest) {
             Database database = databaseTestSystem.getDatabaseFromFactory();
             if (includeDatabasesList.contains(database.getClass())) {
-                assertCorrect("alter table table_name change column_name new_name int", includeDatabases);
+                assertCorrect(expectedSql, database.getClass());
                 break;
             }
         }
