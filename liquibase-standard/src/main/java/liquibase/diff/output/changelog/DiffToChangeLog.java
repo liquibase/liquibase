@@ -213,7 +213,7 @@ public class DiffToChangeLog {
     private Database determineDatabase(DatabaseSnapshot snapshot) {
         Database database = snapshot.getDatabase();
         DatabaseConnection connection = database.getConnection();
-        if (! (connection instanceof OfflineConnection) && database instanceof PostgresDatabase) {
+        if (! (connection instanceof OfflineConnection)) {
             return database;
         }
         return null;
