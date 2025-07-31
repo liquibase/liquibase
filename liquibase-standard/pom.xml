@@ -119,7 +119,7 @@
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.11.2</version>
+            <version>${opencsv.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-beanutils</groupId>

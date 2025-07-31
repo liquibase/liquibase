@@ -63,7 +63,7 @@
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.11.2</version>
+            <version>${opencsv.version}</version>
             <scope>compile</scope>
             <exclusions>
                 <!-- not used by liquibase code -->
