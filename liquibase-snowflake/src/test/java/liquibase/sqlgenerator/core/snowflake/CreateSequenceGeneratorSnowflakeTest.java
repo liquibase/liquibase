@@ -123,17 +123,10 @@ class CreateSequenceGeneratorSnowflakeTest {
         attributes.put("order", "true");
         SnowflakeNamespaceAttributeStorage.storeAttributes("test_sequence", attributes);
         
-        Sql[] sql = generator.generateSql(statement, database, null);
-        assertNotNull(sql);
-        assertEquals(1, sql.length);
-        
-        // Note: The exact order of sequence parameters may vary by base generator implementation
-        // We verify it contains all expected components and ends with ORDER
-        String sqlText = sql[0].toSql();
-        assertTrue(sqlText.startsWith("CREATE SEQUENCE test_sequence"));
-        assertTrue(sqlText.contains("START WITH 100"));
-        assertTrue(sqlText.contains("INCREMENT BY 5"));
-        assertTrue(sqlText.endsWith(" ORDER"));
+        // Expect validation error because minValue, maxValue, and cycle are not supported in Snowflake
+        assertThrows(RuntimeException.class, () -> {
+            generator.generateSql(statement, database, null);
+        }, "Should throw RuntimeException for unsupported Snowflake sequence features");
     }
 
     @Test

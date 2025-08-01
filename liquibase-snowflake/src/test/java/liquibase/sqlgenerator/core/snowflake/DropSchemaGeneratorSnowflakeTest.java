@@ -128,16 +128,16 @@ public class DropSchemaGeneratorSnowflakeTest {
     }
     
     @Test
-    @DisplayName("Should prioritize CASCADE over RESTRICT when both are set")
+    @DisplayName("Should reject both CASCADE and RESTRICT when both are set")
     public void testCascadeTakesPrecedenceOverRestrict() {
         DropSchemaStatement statement = new DropSchemaStatement();
         statement.setSchemaName("TEST_SCHEMA");
         statement.setCascade(true);
         statement.setRestrict(true);
         
-        Sql[] sqls = generator.generateSql(statement, database, null);
-        
-        assertEquals(1, sqls.length);
-        assertEquals("DROP SCHEMA TEST_SCHEMA CASCADE", sqls[0].toSql());
+        // Expect validation error because both CASCADE and RESTRICT cannot be specified
+        assertThrows(RuntimeException.class, () -> {
+            generator.generateSql(statement, database, null);
+        }, "Should throw RuntimeException when both CASCADE and RESTRICT are specified");
     }
 }
