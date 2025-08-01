@@ -70,7 +70,7 @@ public class SnowflakeNamespaceDebugTest {
             String sql = sqls[0].toSql();
             System.out.println("Generated SQL: " + sql);
             
-            assertTrue(sql.contains("SET NOORDER"), "SQL should contain SET NOORDER");
+            assertEquals("ALTER SEQUENCE TESTHARNESS.test_seq SET INCREMENT BY 5, NOORDER", sql);
             
         } finally {
             // Cleanup

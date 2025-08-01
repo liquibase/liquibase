@@ -67,9 +67,6 @@ class AlterSequenceNamespaceTest {
         
         System.out.println("Generated SQL: " + sqlText);
         
-        assertTrue(sqlText.contains("ALTER SEQUENCE"));
-        assertTrue(sqlText.contains("test_sequence"));
-        assertTrue(sqlText.contains("INCREMENT BY 5"));
-        assertTrue(sqlText.contains("SET NOORDER"), "SQL should contain SET NOORDER");
+        assertEquals("ALTER SEQUENCE test_sequence SET INCREMENT BY 5, NOORDER", sqlText);
     }
 }

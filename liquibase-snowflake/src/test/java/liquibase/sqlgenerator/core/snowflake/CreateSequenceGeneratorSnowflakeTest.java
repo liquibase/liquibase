@@ -54,14 +54,8 @@ class CreateSequenceGeneratorSnowflakeTest {
         assertNotNull(sql);
         assertEquals(1, sql.length);
         
-        String sqlText = sql[0].toSql();
-        assertTrue(sqlText.contains("CREATE SEQUENCE"));
-        assertTrue(sqlText.contains("test_sequence"));
-        assertTrue(sqlText.contains("START WITH 1"));
-        assertTrue(sqlText.contains("INCREMENT BY 1"));
-        // Should not contain ORDER/NOORDER without namespace attributes
-        assertFalse(sqlText.contains(" ORDER"));
-        assertFalse(sqlText.contains(" NOORDER"));
+        // Should return standard CREATE SEQUENCE SQL without ORDER/NOORDER
+        assertEquals("CREATE SEQUENCE test_sequence START WITH 1 INCREMENT BY 1", sql[0].toSql());
     }
 
     @Test
@@ -78,10 +72,7 @@ class CreateSequenceGeneratorSnowflakeTest {
         assertNotNull(sql);
         assertEquals(1, sql.length);
         
-        String sqlText = sql[0].toSql();
-        assertTrue(sqlText.contains("CREATE SEQUENCE"));
-        assertTrue(sqlText.contains("test_sequence"));
-        assertTrue(sqlText.endsWith(" ORDER"));
+        assertEquals("CREATE SEQUENCE test_sequence START WITH 1 INCREMENT BY 1 ORDER", sql[0].toSql());
     }
 
     @Test
@@ -98,10 +89,7 @@ class CreateSequenceGeneratorSnowflakeTest {
         assertNotNull(sql);
         assertEquals(1, sql.length);
         
-        String sqlText = sql[0].toSql();
-        assertTrue(sqlText.contains("CREATE SEQUENCE"));
-        assertTrue(sqlText.contains("test_sequence"));
-        assertTrue(sqlText.endsWith(" NOORDER"));
+        assertEquals("CREATE SEQUENCE test_sequence START WITH 1 INCREMENT BY 1 NOORDER", sql[0].toSql());
     }
 
     @Test
@@ -118,10 +106,8 @@ class CreateSequenceGeneratorSnowflakeTest {
         assertNotNull(sql);
         assertEquals(1, sql.length);
         
-        String sqlText = sql[0].toSql();
-        assertTrue(sqlText.endsWith(" NOORDER"));
-        // Should not have both ORDER and NOORDER
-        assertFalse(sqlText.contains(" ORDER NOORDER"));
+        // Should end with NOORDER and not contain conflicting ORDER
+        assertEquals("CREATE SEQUENCE test_sequence START WITH 1 INCREMENT BY 1 NOORDER", sql[0].toSql());
     }
 
     @Test
@@ -141,9 +127,10 @@ class CreateSequenceGeneratorSnowflakeTest {
         assertNotNull(sql);
         assertEquals(1, sql.length);
         
+        // Note: The exact order of sequence parameters may vary by base generator implementation
+        // We verify it contains all expected components and ends with ORDER
         String sqlText = sql[0].toSql();
-        assertTrue(sqlText.contains("CREATE SEQUENCE"));
-        assertTrue(sqlText.contains("test_sequence"));
+        assertTrue(sqlText.startsWith("CREATE SEQUENCE test_sequence"));
         assertTrue(sqlText.contains("START WITH 100"));
         assertTrue(sqlText.contains("INCREMENT BY 5"));
         assertTrue(sqlText.endsWith(" ORDER"));
@@ -223,12 +210,8 @@ class CreateSequenceGeneratorSnowflakeTest {
         assertNotNull(sql);
         assertEquals(1, sql.length);
         
-        String sqlText = sql[0].toSql();
-        assertTrue(sqlText.contains("CREATE SEQUENCE"));
-        assertTrue(sqlText.contains("test_sequence"));
-        // Should not contain ORDER/NOORDER with empty attributes
-        assertFalse(sqlText.contains(" ORDER"));
-        assertFalse(sqlText.contains(" NOORDER"));
+        // Should return standard SQL without ORDER/NOORDER
+        assertEquals("CREATE SEQUENCE test_sequence START WITH 1 INCREMENT BY 1", sql[0].toSql());
     }
 
     @Test
@@ -246,12 +229,8 @@ class CreateSequenceGeneratorSnowflakeTest {
         assertNotNull(sql);
         assertEquals(1, sql.length);
         
-        String sqlText = sql[0].toSql();
-        assertTrue(sqlText.contains("CREATE SEQUENCE"));
-        assertTrue(sqlText.contains("test_sequence"));
-        // Should not contain ORDER/NOORDER without order-related attributes
-        assertFalse(sqlText.contains(" ORDER"));
-        assertFalse(sqlText.contains(" NOORDER"));
+        // Should return standard SQL without ORDER/NOORDER for non-order attributes
+        assertEquals("CREATE SEQUENCE test_sequence START WITH 1 INCREMENT BY 1", sql[0].toSql());
     }
 
     @Test
@@ -268,12 +247,8 @@ class CreateSequenceGeneratorSnowflakeTest {
         assertNotNull(sql);
         assertEquals(1, sql.length);
         
-        String sqlText = sql[0].toSql();
-        assertTrue(sqlText.contains("CREATE SEQUENCE"));
-        assertTrue(sqlText.contains("test_sequence"));
-        // Should not contain ORDER/NOORDER with false value
-        assertFalse(sqlText.contains(" ORDER"));
-        assertFalse(sqlText.contains(" NOORDER"));
+        // Should return standard SQL without ORDER/NOORDER for false values
+        assertEquals("CREATE SEQUENCE test_sequence START WITH 1 INCREMENT BY 1", sql[0].toSql());
     }
 
     @Test
@@ -290,11 +265,7 @@ class CreateSequenceGeneratorSnowflakeTest {
         assertNotNull(sql);
         assertEquals(1, sql.length);
         
-        String sqlText = sql[0].toSql();
-        assertTrue(sqlText.contains("CREATE SEQUENCE"));
-        assertTrue(sqlText.contains("test_sequence"));
-        // Should not contain ORDER/NOORDER with false value
-        assertFalse(sqlText.contains(" ORDER"));
-        assertFalse(sqlText.contains(" NOORDER"));
+        // Should return standard SQL without ORDER/NOORDER for false values
+        assertEquals("CREATE SEQUENCE test_sequence START WITH 1 INCREMENT BY 1", sql[0].toSql());
     }
 }

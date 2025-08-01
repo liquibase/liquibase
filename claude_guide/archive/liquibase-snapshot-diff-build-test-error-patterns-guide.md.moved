@@ -1,0 +1,453 @@
+# Liquibase Extension Development - Common Error Patterns and Debugging Guide
+
+## Overview
+This guide consolidates field-tested error patterns and solutions discovered during Liquibase extension development. Use this as a reference when encountering issues.
+
+---
+
+## Quick Diagnosis Flowchart
+
+```
+Test Failure
+├── Build/Compilation Error?
+│   └── Check: Service Registration (Pattern #1)
+├── Test Not Executing?
+│   └── Check: Database State (Pattern #2)
+├── Objects Not Found?
+│   └── Check: Scope & Creation (Pattern #3)
+├── SQL/Database Errors?
+│   └── Check: Case Sensitivity (Pattern #4)
+└── JSON Comparison Failure?
+    └── Check: Format Issues (Pattern #5)
+```
+
+---
+
+## Common Error Patterns
+
+### Pattern #1: Service Registration Issues
+
+**Error Messages:**
+- "No snapshot generator found for type [ObjectType]"
+- "Cannot find implementation of [Interface]"
+- "No extension found for database [database]"
+
+**Root Cause:** Liquibase cannot discover your components
+
+**Diagnostic Steps:**
+```bash
+# 1. Check service files exist
+ls -la src/main/resources/META-INF/services/
+
+# 2. Verify service file contents
+cat src/main/resources/META-INF/services/liquibase.snapshot.SnapshotGenerator
+
+# 3. Check JAR contains service files
+jar -tf target/liquibase-*.jar | grep META-INF/services
+
+# 4. Verify class names match exactly
+grep "class.*SnapshotGenerator" src/main/java/**/*.java
+```
+
+**Solution:**
+1. Create missing service files
+2. Ensure exact package.ClassName match
+3. Rebuild with `mvn clean install`
+
+---
+
+### Pattern #2: Database State Persistence
+
+**Error Messages:**
+- "liquibase.changelog.ChangeSet - ChangeSet [id] has already been executed"
+- "Database is up to date, no changesets to execute"
+- "Skipping changeset [id]"
+
+**Root Cause:** DATABASECHANGELOG table retains execution history
+
+**Diagnostic Steps:**
+```sql
+-- Check changelog history
+SELECT * FROM DATABASECHANGELOG WHERE ID LIKE '%test%';
+
+-- See what Liquibase thinks is executed
+SELECT ID, AUTHOR, FILENAME FROM DATABASECHANGELOG ORDER BY DATEEXECUTED DESC;
+```
+
+**Solution:**
+```xml
+<!-- Add cleanup changeset with runAlways="true" -->
+<changeSet id="cleanup-test-objects" author="test-harness" runAlways="true">
+    <sql>
+        DROP [OBJECT_TYPE] IF EXISTS TEST_[OBJECT] CASCADE;
+    </sql>
+</changeSet>
+
+<changeSet id="create-test-object" author="test-harness">
+    <!-- Your creation logic here -->
+</changeSet>
+```
+
+---
+
+### Pattern #3: Objects Not in Snapshot
+
+**Error Messages:**
+- "Expected: [ObjectType] objects but none found"
+- "Snapshot does not contain [ObjectType]"
+- "AssertionError: expected [1] but found [0]"
+
+**Root Cause:** Either objects not created OR not in snapshot scope
+
+**Diagnostic Steps:**
+```bash
+# 1. Check if changeset executed
+grep "Running Changeset.*create-test" test-output.log
+
+# 2. Verify object exists in database
+# For Snowflake:
+SHOW WAREHOUSES LIKE 'TEST_%';
+
+# For PostgreSQL:
+SELECT * FROM information_schema.tables WHERE table_name LIKE 'test_%';
+
+# 3. Check snapshot scope
+grep -i "includedType" test-output.log | grep -i [ObjectType]
+```
+
+**Solution:**
+If object exists in DB but not in snapshot:
+1. **FIRST CHECK**: Verify `META-INF/services/liquibase.structure.DatabaseObject` registration
+2. Ensure custom DatabaseObject class is registered for service discovery
+3. Rebuild JAR and verify service file is included
+4. If registration correct, accept as framework limitation
+5. Adjust success criteria to changeset execution
+6. Add manual database verification
+
+If object doesn't exist in DB:
+1. Check changeset SQL syntax
+2. Verify database permissions
+3. Look for SQL execution errors
+
+---
+
+### Pattern #4: Case Sensitivity Issues
+
+**Error Messages:**
+- "Column 'name' not found"
+- "SQLException: Invalid column name"
+- "Unknown column '[column]' in result set"
+
+**Root Cause:** Database returns columns in different case than expected
+
+**Diagnostic Steps:**
+```java
+// Add debug logging to see actual column names
+ResultSetMetaData metadata = rs.getMetaData();
+for (int i = 1; i <= metadata.getColumnCount(); i++) {
+    System.out.println("Column " + i + ": " + metadata.getColumnName(i));
+}
+```
+
+**Solution:**
+```java
+// Handle multiple case variations
+private String getColumnValue(ResultSet rs, String... possibleNames) {
+    for (String name : possibleNames) {
+        try {
+            return rs.getString(name);
+        } catch (SQLException e) {
+            // Try next variation
+        }
+    }
+    throw new DatabaseException("Column not found: " + Arrays.toString(possibleNames));
+}
+
+// Usage
+String name = getColumnValue(rs, "name", "NAME", "Name");
+```
+
+---
+
+### Pattern #5: JSON Format Mismatches
+
+**Error Messages:**
+- "JSONAssert.assertEquals() failed"
+- "Expected: {...} but was: {...}"
+- "Unexpected: database"
+
+**Root Cause:** Test harness expects specific JSON structure
+
+**Working Format:**
+```json
+{
+  "snapshot": {
+    "objects": {
+      "liquibase.ext.snowflake.database.object.Warehouse": [
+        {
+          "warehouse": {
+            "name": "TEST_WAREHOUSE",
+            "warehouseSize": "SMALL",
+            "autoSuspend": 600
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+**Common Mistakes:**
+```json
+// ❌ BAD - Includes database metadata
+{
+  "snapshot": {
+    "database": {  // Remove this entire section
+      "productName": "Snowflake"
+    },
+    "objects": {...}
+  }
+}
+
+// ❌ BAD - Uses IGNORE values
+{
+  "warehouse": {
+    "name": "TEST_WAREHOUSE",
+    "state": "IGNORE"  // Remove IGNORE values
+  }
+}
+
+// ❌ BAD - Wrong structure
+{
+  "warehouses": [  // Should be under snapshot.objects.[FullClassName]
+    {...}
+  ]
+}
+```
+
+---
+
+## Systematic Debugging Framework
+
+### The 5-Layer Analysis Approach
+
+When any test fails, analyze systematically from bottom up:
+
+#### Layer 1: Code Compilation and Loading
+**Question:** Is the code being compiled and loaded?
+
+```bash
+# Check compilation
+mvn compile
+
+# Check JAR contents
+jar -tf target/liquibase-*.jar | grep [YourClass]
+
+# Check service registration
+jar -tf target/liquibase-*.jar | grep META-INF/services
+```
+
+#### Layer 2: Component Registration
+**Question:** Is Liquibase finding and registering your components?
+
+```bash
+# Look for loading messages
+mvn test -X | grep -i "loading\|found\|registered"
+
+# Check for your classes
+mvn test -X | grep -i [YourClass]
+```
+
+#### Layer 3: Execution Flow
+**Question:** Are your methods being called?
+
+```java
+// Add debug logging
+public class MySnapshotGenerator extends SnapshotGenerator {
+    @Override
+    public int getPriority(Class<?> objectType, Database database) {
+        System.out.println("DEBUG: getPriority called for " + objectType.getName());
+        return PRIORITY_DATABASE;
+    }
+    
+    @Override
+    protected DatabaseObject snapshotObject(...) {
+        System.out.println("DEBUG: snapshotObject called");
+        // implementation
+    }
+}
+```
+
+#### Layer 4: Data Creation
+**Question:** Is data being created in the database?
+
+```sql
+-- Manual verification queries
+-- Snowflake:
+SHOW WAREHOUSES;
+SELECT * FROM INFORMATION_SCHEMA.WAREHOUSES;
+
+-- PostgreSQL:
+\dt
+SELECT * FROM pg_tables WHERE schemaname = 'public';
+
+-- Generic:
+SELECT * FROM [OBJECT_TABLE] WHERE [NAME] LIKE 'TEST_%';
+```
+
+#### Layer 5: Test Framework Integration
+**Question:** Is the test framework configured correctly?
+
+Check:
+- JSON format matches expected structure
+- Object types included in snapshot scope
+- File locations correct (test harness vs extension repo)
+
+---
+
+## Build Process Issues
+
+### Issue: Changes Not Reflected in Tests
+
+**Symptom:** Code changes don't affect test behavior
+
+**Root Cause:** Test harness using stale JAR from local repository
+
+**Solution:** Automated build script
+```bash
+#!/bin/bash
+# dev-workflow.sh
+set -e
+
+echo "1. Building extension..."
+cd liquibase-[database]
+mvn clean install -DskipTests
+
+echo "2. Running test harness..."
+cd ../liquibase-test-harness
+mvn test -Dtest=SnapshotObjectTests -DdbName=[database] -DsnapshotObjects="$1"
+```
+
+### Issue: Dependency Resolution Failures
+
+**Symptom:** "Could not resolve dependencies"
+
+**Solution:**
+```bash
+# Ensure extension is in local repository
+cd liquibase-[database]
+mvn clean install -DskipTests
+
+# Verify installation
+ls ~/.m2/repository/org/liquibase/ext/liquibase-[database]/
+```
+
+---
+
+## Test Harness Specific Issues
+
+### Understanding Scope Limitations
+
+**Key Learning:** Test harness may not include custom objects in snapshot scope
+
+**Verification:**
+```bash
+# Run with standard objects first
+mvn test -Dtest=SnapshotObjectTests -DdbName=[database] -DsnapshotObjects=createTable
+
+# Check what's included
+grep -i "includedType" test-output.log
+```
+
+**Adjusted Success Criteria:**
+- If custom objects ARE in scope: Full test pass expected
+- If custom objects NOT in scope: Success = changesets execute + manual DB verification
+
+---
+
+## Prevention Strategies
+
+### 1. Add Comprehensive Logging
+```java
+private static final Logger LOG = LoggerFactory.getLogger(MyClass.class);
+
+public void criticalMethod() {
+    LOG.info("=== criticalMethod called ===");
+    try {
+        // implementation
+        LOG.info("criticalMethod completed successfully");
+    } catch (Exception e) {
+        LOG.error("criticalMethod failed", e);
+        throw e;
+    }
+}
+```
+
+### 2. Create Diagnostic Utilities
+```java
+public class DiagnosticUtils {
+    public static void printResultSetMetadata(ResultSet rs) throws SQLException {
+        ResultSetMetaData metadata = rs.getMetaData();
+        System.out.println("=== ResultSet Columns ===");
+        for (int i = 1; i <= metadata.getColumnCount(); i++) {
+            System.out.println(i + ": " + metadata.getColumnName(i) + 
+                             " (" + metadata.getColumnTypeName(i) + ")");
+        }
+    }
+}
+```
+
+### 3. Implement Defensive Coding
+```java
+// Null-safe parsing
+private String safeGetString(ResultSet rs, String column) {
+    try {
+        String value = rs.getString(column);
+        return (value != null && !"null".equalsIgnoreCase(value)) ? value : null;
+    } catch (SQLException e) {
+        LOG.warn("Column {} not found, trying uppercase", column);
+        try {
+            return rs.getString(column.toUpperCase());
+        } catch (SQLException e2) {
+            return null;
+        }
+    }
+}
+```
+
+---
+
+## Quick Reference Card
+
+### When You See This Error... Try This First:
+
+| Error | First Check | Quick Fix |
+|-------|-------------|-----------|
+| "No generator found" | Service files | Check META-INF/services |
+| "Already executed" | Changelog history | Add runAlways="true" |
+| "Objects not found" | Database query | Manual verification |
+| "Column not found" | Case sensitivity | Try uppercase |
+| "JSON mismatch" | Format structure | Remove metadata |
+
+### Debug Commands Cheatsheet:
+
+```bash
+# Check service registration
+jar -tf target/*.jar | grep META-INF
+
+# Check execution
+mvn test -X | grep -i [YourClass]
+
+# Check database
+echo "SHOW [OBJECTS];" | database-cli
+
+# Clean rebuild
+mvn clean install -DskipTests
+
+# Full workflow
+./scripts/dev-workflow.sh [database] [test]
+```
+
+---
+
+This guide will be updated as new patterns are discovered. Always check the latest version before debugging.

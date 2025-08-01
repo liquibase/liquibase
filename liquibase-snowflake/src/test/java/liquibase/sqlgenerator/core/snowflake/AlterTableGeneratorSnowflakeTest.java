@@ -53,10 +53,7 @@ public class AlterTableGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, null);
         
         assertEquals(1, sqls.length);
-        String sql = sqls[0].toSql();
-        assertTrue(sql.contains("ALTER TABLE"));
-        assertTrue(sql.contains("TEST_TABLE"));
-        assertTrue(sql.contains("CLUSTER BY (col1,col2)"));
+        assertEquals("ALTER TABLE TEST_TABLE CLUSTER BY (col1,col2)", sqls[0].toSql());
     }
     
     @Test
@@ -68,10 +65,7 @@ public class AlterTableGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, null);
         
         assertEquals(1, sqls.length);
-        String sql = sqls[0].toSql();
-        assertTrue(sql.contains("ALTER TABLE"));
-        assertTrue(sql.contains("TEST_TABLE"));
-        assertTrue(sql.contains("DROP CLUSTERING KEY"));
+        assertEquals("ALTER TABLE TEST_TABLE DROP CLUSTERING KEY", sqls[0].toSql());
     }
     
     @Test
@@ -83,10 +77,7 @@ public class AlterTableGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, null);
         
         assertEquals(1, sqls.length);
-        String sql = sqls[0].toSql();
-        assertTrue(sql.contains("ALTER TABLE"));
-        assertTrue(sql.contains("TEST_TABLE"));
-        assertTrue(sql.contains("SUSPEND RECLUSTER"));
+        assertEquals("ALTER TABLE TEST_TABLE SUSPEND RECLUSTER", sqls[0].toSql());
     }
     
     @Test
@@ -98,10 +89,7 @@ public class AlterTableGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, null);
         
         assertEquals(1, sqls.length);
-        String sql = sqls[0].toSql();
-        assertTrue(sql.contains("ALTER TABLE"));
-        assertTrue(sql.contains("TEST_TABLE"));
-        assertTrue(sql.contains("RESUME RECLUSTER"));
+        assertEquals("ALTER TABLE TEST_TABLE RESUME RECLUSTER", sqls[0].toSql());
     }
     
     @Test
@@ -113,10 +101,7 @@ public class AlterTableGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, null);
         
         assertEquals(1, sqls.length);
-        String sql = sqls[0].toSql();
-        assertTrue(sql.contains("ALTER TABLE"));
-        assertTrue(sql.contains("TEST_TABLE"));
-        assertTrue(sql.contains("SET DATA_RETENTION_TIME_IN_DAYS = 30"));
+        assertEquals("ALTER TABLE TEST_TABLE SET DATA_RETENTION_TIME_IN_DAYS = 30", sqls[0].toSql());
     }
     
     @Test
@@ -130,16 +115,7 @@ public class AlterTableGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, null);
         
         assertEquals(1, sqls.length);
-        String sql = sqls[0].toSql();
-        assertTrue(sql.contains("ALTER TABLE"));
-        assertTrue(sql.contains("TEST_TABLE"));
-        assertTrue(sql.contains("SET"));
-        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS = 30"));
-        assertTrue(sql.contains("CHANGE_TRACKING = TRUE"));
-        assertTrue(sql.contains("ENABLE_SCHEMA_EVOLUTION = FALSE"));
-        
-        // Should be comma-separated
-        assertTrue(sql.contains(","));
+        assertEquals("ALTER TABLE TEST_TABLE SET DATA_RETENTION_TIME_IN_DAYS = 30, CHANGE_TRACKING = TRUE, ENABLE_SCHEMA_EVOLUTION = FALSE", sqls[0].toSql());
     }
     
     @Test
@@ -154,15 +130,10 @@ public class AlterTableGeneratorSnowflakeTest {
         assertEquals(2, sqls.length);
         
         // First SQL should be clustering
-        String clusteringSql = sqls[0].toSql();
-        assertTrue(clusteringSql.contains("CLUSTER BY"));
-        assertFalse(clusteringSql.contains("SET"));
+        assertEquals("ALTER TABLE TEST_TABLE CLUSTER BY (col1,col2)", sqls[0].toSql());
         
         // Second SQL should be properties
-        String propertiesSql = sqls[1].toSql();
-        assertTrue(propertiesSql.contains("SET"));
-        assertTrue(propertiesSql.contains("DATA_RETENTION_TIME_IN_DAYS"));
-        assertFalse(propertiesSql.contains("CLUSTER BY"));
+        assertEquals("ALTER TABLE TEST_TABLE SET DATA_RETENTION_TIME_IN_DAYS = 30", sqls[1].toSql());
     }
     
     @Test
@@ -174,12 +145,7 @@ public class AlterTableGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, null);
         
         assertEquals(1, sqls.length);
-        String sql = sqls[0].toSql();
-        
-        // The exact format depends on database.escapeTableName() implementation
-        // But it should contain the table name
-        assertTrue(sql.contains("TEST_TABLE"));
-        assertTrue(sql.contains("CLUSTER BY"));
+        assertEquals("ALTER TABLE TEST_CATALOG.TEST_SCHEMA.TEST_TABLE CLUSTER BY (col1)", sqls[0].toSql());
     }
     
     @Test
@@ -191,11 +157,7 @@ public class AlterTableGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, null);
         
         assertEquals(1, sqls.length);
-        String sql = sqls[0].toSql();
-        
-        // Should contain the table name (escaped by database)
-        assertTrue(sql.contains("TEST-TABLE"));
-        assertTrue(sql.contains("CLUSTER BY"));
+        assertEquals("ALTER TABLE \"\"\"TEST-TABLE\"\"\" CLUSTER BY (col1)", sqls[0].toSql());
     }
     
     @Test
@@ -207,13 +169,13 @@ public class AlterTableGeneratorSnowflakeTest {
         
         Sql[] sqls = generator.generateSql(statement, database, null);
         assertEquals(1, sqls.length);
-        assertTrue(sqls[0].toSql().contains("DATA_RETENTION_TIME_IN_DAYS = 0"));
+        assertEquals("ALTER TABLE TEST_TABLE SET DATA_RETENTION_TIME_IN_DAYS = 0", sqls[0].toSql());
         
         // Test maximum value
         statement.setSetDataRetentionTimeInDays(90);
         sqls = generator.generateSql(statement, database, null);
         assertEquals(1, sqls.length);
-        assertTrue(sqls[0].toSql().contains("DATA_RETENTION_TIME_IN_DAYS = 90"));
+        assertEquals("ALTER TABLE TEST_TABLE SET DATA_RETENTION_TIME_IN_DAYS = 90", sqls[0].toSql());
     }
     
     @Test
@@ -225,8 +187,7 @@ public class AlterTableGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, null);
         
         assertEquals(1, sqls.length);
-        String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CLUSTER BY (SUBSTR(name, 1, 3), created_date DESC, id)"));
+        assertEquals("ALTER TABLE TEST_TABLE CLUSTER BY (SUBSTR(name, 1, 3), created_date DESC, id)", sqls[0].toSql());
     }
     
     @Test
@@ -250,11 +211,7 @@ public class AlterTableGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, null);
         
         assertEquals(1, sqls.length);
-        String sql = sqls[0].toSql();
-        
-        // Should use clusterBy (first in precedence) 
-        assertTrue(sql.contains("CLUSTER BY"));
-        assertFalse(sql.contains("DROP CLUSTERING KEY"));
+        assertEquals("ALTER TABLE TEST_TABLE CLUSTER BY (col1,col2)", sqls[0].toSql());
     }
     
     @Test
@@ -267,8 +224,6 @@ public class AlterTableGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, null);
         
         assertEquals(1, sqls.length);
-        String sql = sqls[0].toSql();
-        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS = 30"));
-        assertFalse(sql.contains("CHANGE_TRACKING"));
+        assertEquals("ALTER TABLE TEST_TABLE SET DATA_RETENTION_TIME_IN_DAYS = 30", sqls[0].toSql());
     }
 }

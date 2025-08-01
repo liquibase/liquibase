@@ -52,11 +52,7 @@ class AlterSequenceGeneratorSnowflakeTest {
         
         assertNotNull(sql);
         assertEquals(1, sql.length);
-        String sqlText = sql[0].toSql();
-        assertTrue(sqlText.contains("ALTER SEQUENCE"));
-        assertTrue(sqlText.contains("test_sequence"));
-        assertTrue(sqlText.contains("INCREMENT BY 5"));
-        assertFalse(sqlText.contains("NOORDER"));
+        assertEquals("ALTER SEQUENCE test_sequence SET INCREMENT BY 5", sql[0].toSql());
     }
 
     @Test
@@ -83,11 +79,8 @@ class AlterSequenceGeneratorSnowflakeTest {
         Sql[] sql = generator.generateSql(statement, database, null);
         
         assertEquals(1, sql.length);
-        String sqlText = sql[0].toSql();
-        assertTrue(sqlText.contains("ALTER SEQUENCE"));
-        assertTrue(sqlText.contains("test_sequence"));
-        assertTrue(sqlText.contains("INCREMENT BY 3"));
-        assertFalse(sqlText.contains("SET NOORDER"));
+        assertEquals("ALTER SEQUENCE test_sequence SET INCREMENT BY 3", sql[0].toSql());
+        assertFalse(sql[0].toSql().contains("SET NOORDER"));
     }
 
     @Test

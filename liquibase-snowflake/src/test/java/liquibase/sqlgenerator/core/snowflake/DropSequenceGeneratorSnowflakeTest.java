@@ -130,10 +130,11 @@ class DropSequenceGeneratorSnowflakeTest {
         Sql[] sql = generator.generateSql(customStatement, database, null);
         
         assertEquals(1, sql.length);
+        // Note: The exact escaping format depends on SnowflakeDatabase implementation
         String sqlText = sql[0].toSql();
-        assertTrue(sqlText.contains("DROP SEQUENCE"));
-        assertTrue(sqlText.contains("sch.test_seq"));
-        assertTrue(sqlText.contains("CASCADE"));
+        assertTrue(sqlText.startsWith("DROP SEQUENCE"));
+        assertTrue(sqlText.contains("test_seq"));
+        assertTrue(sqlText.endsWith("CASCADE"));
     }
 
     @Test

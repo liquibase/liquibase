@@ -1,0 +1,543 @@
+# Liquibase 4.33.0 Extension Implementation - AI-Optimized Sequential Guide V2
+## Updated with Field-Tested Improvements
+
+## EXECUTION PROTOCOL
+```yaml
+PROTOCOL_VERSION: 2.0
+EXECUTION_MODE: SEQUENTIAL_BLOCKING
+VALIDATION_MODE: STRICT
+FAILURE_BEHAVIOR: STOP_AND_REPORT
+IMPROVEMENTS: "Test harness scope validation, automated builds, error patterns"
+```
+
+## CRITICAL LEARNINGS INTEGRATED
+```yaml
+NEW_IN_V2:
+  - TEST_HARNESS_SCOPE_VALIDATION: "Step 6.0 added"
+  - BUILD_AUTOMATION: "Automated workflow scripts"
+  - ERROR_PATTERN_LIBRARY: "Common failures documented"
+  - REALISTIC_SUCCESS_CRITERIA: "Based on framework limitations"
+  - SYSTEMATIC_DEBUGGING: "5-layer analysis framework"
+```
+
+## REQUIRED_DOCUMENTS
+```yaml
+DOCUMENT_1: 
+  NAME: "Liquibase 4.33.0 Snapshot and Diff Implementation Guide - Main Document"
+  VERSION: "V2 - Updated with retrospective"
+  CRITICAL_SECTIONS:
+    - "Common Pitfalls and Solutions"
+    - "Systematic Debugging Framework"
+    - "Build Process Optimization"
+  
+DOCUMENT_2: 
+  NAME: "Liquibase 4.33.0 Guide - Part 1: Database Object Model"
+  PURPOSE: "Object implementation patterns, property handling, testing"
+  
+DOCUMENT_3: 
+  NAME: "Liquibase 4.33.0 Guide - Part 2: Snapshot Implementation"
+  PURPOSE: "SnapshotGenerator patterns, SQL queries, ResultSet parsing"
+  
+DOCUMENT_4: 
+  NAME: "Liquibase 4.33.0 Guide - Part 3: Diff Implementation"
+  PURPOSE: "Comparator and DiffGenerator patterns"
+  
+DOCUMENT_5: 
+  NAME: "Liquibase 4.33.0 Guide - Part 4: Testing Guide"
+  VERSION: "V2 - Critical test harness limitations added"
+  CRITICAL_SECTIONS:
+    - "Test Harness - CRITICAL LIMITATIONS"
+    - "Common Error Patterns and Solutions"
+    - "Systematic Debugging Framework"
+  
+DOCUMENT_6: 
+  NAME: "Liquibase 4.33.0 Guide - Part 5: Complete Snowflake Warehouse Reference"
+  PURPOSE: "Complete working implementation example"
+```
+
+## BUILD_AUTOMATION_SETUP
+```yaml
+CREATE_SCRIPT:
+  FILE: "scripts/dev-workflow.sh"
+  CONTENT: |
+    #!/bin/bash
+    set -e
+    
+    echo "=== Liquibase Extension Development Workflow ==="
+    echo "1. Building extension..."
+    cd liquibase-$1
+    mvn clean install -DskipTests
+    
+    echo "2. Installing to local repository..."
+    echo "   (Required for test harness dependency resolution)"
+    
+    echo "3. Changing to test harness..."
+    cd ../liquibase-test-harness
+    
+    echo "4. Running test harness..."
+    mvn test -Dtest=SnapshotObjectTests -DdbName=$1 -DsnapshotObjects="$2"
+    
+    echo "=== Workflow Complete ==="
+
+USAGE: "./scripts/dev-workflow.sh [database] [testname]"
+BENEFIT: "Single command to build, install, and test"
+```
+
+## EXECUTION_STATE
+```yaml
+CURRENT_STEP: 1.1
+CURRENT_STATUS: NOT_STARTED
+LAST_COMPLETED_STEP: None
+FAILED_VALIDATIONS: []
+KNOWN_LIMITATIONS: []
+```
+
+---
+
+## STEP 1.1: Document ALL Database Object Properties
+```yaml
+STEP_ID: 1.1
+STATUS: NOT_STARTED
+PREREQUISITES: []
+BLOCKS: [1.2, 2.1, 2.2, 3.1, 3.2, 3.3, 3.4, 4.1, 4.2, 4.3, 5.1, 5.2, 5.3, 5.4, 6.0, 6.1, 6.2, 6.3, 6.4, 7.1, 7.2]
+```
+
+### INPUTS_REQUIRED
+```yaml
+- DATABASE_TYPE: "[PostgreSQL|MySQL|Oracle|Snowflake|SQLServer|Other]"
+- OBJECT_TYPE: "[name of database object to implement]"
+```
+
+### ACTIONS
+```yaml
+- ACTION_1:
+    DESCRIPTION: "Locate official database documentation"
+    TARGET_URL: "[vendor documentation site]"
+    
+- ACTION_2:
+    DESCRIPTION: "Find and document SQL syntax"
+    REQUIRED_SYNTAX:
+      - "CREATE [OBJECT_TYPE]"
+      - "ALTER [OBJECT_TYPE]"
+      - "DROP [OBJECT_TYPE]"
+      - "SHOW/DESCRIBE [OBJECT_TYPE]"
+    
+- ACTION_3:
+    DESCRIPTION: "Create requirements file"
+    FILE_PATH: "requirements/[ObjectType]_requirements.md"
+    TEMPLATE: |
+      # [ObjectType] Requirements Specification
+      
+      ## Total Property Count: [NUMBER]
+      
+      ## Properties Table
+      | Property Name | Data Type | Required | Default Value | Valid Values | Constraints |
+      |--------------|-----------|----------|---------------|--------------|-------------|
+      | [name]       | [type]    | [Y/N]    | [default]     | [values]     | [limits]    |
+```
+
+### VALIDATIONS
+```yaml
+- VALIDATION_1:
+    TYPE: "FILE_EXISTS"
+    PATH: "requirements/[ObjectType]_requirements.md"
+    
+- VALIDATION_2:
+    TYPE: "FILE_CONTAINS"
+    PATH: "requirements/[ObjectType]_requirements.md"
+    REQUIRED_CONTENT: "Total Property Count:"
+    
+- VALIDATION_3:
+    TYPE: "FILE_CONTAINS"
+    PATH: "requirements/[ObjectType]_requirements.md"
+    REQUIRED_CONTENT: "Properties Table"
+    
+- VALIDATION_4:
+    TYPE: "PROPERTY_COUNT"
+    MINIMUM: 1
+    
+- VALIDATION_5:
+    TYPE: "FILE_CONTAINS"
+    PATH: "requirements/[ObjectType]_requirements.md"
+    REQUIRED_CONTENT: "CREATE [OBJECT_TYPE]"
+```
+
+### ON_SUCCESS
+```yaml
+UPDATE_STATE:
+  CURRENT_STEP: 1.2
+  LAST_COMPLETED_STEP: 1.1
+PROCEED_TO: STEP_1.2
+```
+
+### ON_FAILURE
+```yaml
+REPORT_ERROR: "[VALIDATION_ID] failed: [ERROR_MESSAGE]"
+UPDATE_STATE:
+  FAILED_VALIDATIONS: "[VALIDATION_ID]"
+STOP_EXECUTION: true
+```
+
+---
+
+## STEP 1.2: Categorize Properties
+```yaml
+STEP_ID: 1.2
+STATUS: BLOCKED
+PREREQUISITES: [1.1]
+BLOCKS: [2.1, 2.2, 3.1, 3.2, 3.3, 3.4, 4.1, 4.2, 4.3, 5.1, 5.2, 5.3, 5.4, 6.0, 6.1, 6.2, 6.3, 6.4, 7.1, 7.2]
+```
+
+### CRITICAL_LEARNING
+```yaml
+IMPORTANCE: "State properties MUST be excluded from comparisons"
+EVIDENCE: "Warehouse implementation showed state properties causing false differences"
+ACTION: "Carefully categorize every property"
+```
+
+### ACTIONS
+```yaml
+- ACTION_1:
+    DESCRIPTION: "Open requirements file"
+    FILE_PATH: "requirements/[ObjectType]_requirements.md"
+    
+- ACTION_2:
+    DESCRIPTION: "Add property categories section"
+    APPEND_TO_FILE: true
+    CONTENT: |
+      ## Property Categories
+      
+      ### Required Properties
+      Count: [N]
+      - [property_name]: [description]
+      
+      ### Optional Configuration Properties  
+      Count: [N]
+      - [property_name]: [description]
+      
+      ### State Properties (Read-Only)
+      Count: [N]
+      - [property_name]: [description]
+      
+- ACTION_3:
+    DESCRIPTION: "Categorize each property"
+    RULES:
+      - "Required: Must be specified at object creation"
+      - "Optional Configuration: Can be set/changed by user"
+      - "State: Runtime information, read-only, EXCLUDE FROM COMPARISONS"
+```
+
+### VALIDATIONS
+```yaml
+- VALIDATION_1:
+    TYPE: "FILE_CONTAINS"
+    PATH: "requirements/[ObjectType]_requirements.md"
+    REQUIRED_CONTENT: "## Property Categories"
+    
+- VALIDATION_2:
+    TYPE: "SECTION_EXISTS"
+    PATH: "requirements/[ObjectType]_requirements.md"
+    SECTIONS:
+      - "### Required Properties"
+      - "### Optional Configuration Properties"
+      - "### State Properties (Read-Only)"
+      
+- VALIDATION_3:
+    TYPE: "COUNT_VERIFICATION"
+    VERIFY: "Sum of category counts equals Total Property Count"
+    
+- VALIDATION_4:
+    TYPE: "NO_DUPLICATES"
+    VERIFY: "Each property appears in exactly one category"
+```
+
+### ON_SUCCESS
+```yaml
+UPDATE_STATE:
+  CURRENT_STEP: 2.1
+  LAST_COMPLETED_STEP: 1.2
+PROCEED_TO: STEP_2.1
+```
+
+---
+
+[Previous steps 2.1 through 5.4 remain the same with document references]
+
+---
+
+## STEP 6.0: Validate Test Harness Compatibility
+```yaml
+STEP_ID: 6.0
+STATUS: BLOCKED
+PREREQUISITES: [5.4]
+BLOCKS: [6.1, 6.2, 6.3, 6.4, 7.1, 7.2]
+NEW_IN_V2: true
+CRITICAL: "Must verify framework capabilities before writing tests"
+```
+
+### RATIONALE
+```yaml
+LEARNING: "Test harness may not include custom objects in snapshot scope"
+IMPACT: "Tests may fail for wrong reasons if scope not understood"
+SOLUTION: "Verify scope and adjust success criteria before implementation"
+```
+
+### REQUIRED_DOCUMENTS
+```yaml
+CONSULT_BEFORE_ACTION:
+  - DOCUMENT_5:
+      NAME: "Part 4: Testing Guide V2"
+      SECTION: "Test Harness - CRITICAL LIMITATIONS"
+      CRITICAL_INFO: "Custom objects may not be in snapshot scope"
+      ACTION: "Read entire section before proceeding"
+```
+
+### ACTIONS
+```yaml
+- ACTION_1:
+    DESCRIPTION: "Build and install extension first"
+    COMMANDS:
+      - "cd liquibase-[database]"
+      - "mvn clean install -DskipTests"
+    REASON: "Test harness needs extension in local repository"
+    
+- ACTION_2:
+    DESCRIPTION: "Test with standard objects"
+    COMMAND: "mvn test -Dtest=SnapshotObjectTests -DdbName=[database] -DsnapshotObjects=createTable"
+    EXPECTED: "Test should pass for standard table creation"
+    
+- ACTION_3:
+    DESCRIPTION: "Check snapshot scope"
+    EXAMINE_OUTPUT: "Look for 'includedType' in test output"
+    CHECK_FOR: "Your custom object type in the list"
+    
+- ACTION_4:
+    DESCRIPTION: "Set realistic success criteria"
+    IF_CUSTOM_OBJECTS_INCLUDED:
+      SUCCESS_CRITERIA: "Full test harness pass with snapshot validation"
+    IF_CUSTOM_OBJECTS_NOT_INCLUDED:
+      SUCCESS_CRITERIA: "Changesets execute + objects created in DB"
+      ADJUST_EXPECTATIONS: "Focus on execution, not snapshot comparison"
+```
+
+### VALIDATIONS
+```yaml
+- VALIDATION_1:
+    TYPE: "STANDARD_TEST_WORKS"
+    VERIFY: "createTable test passes"
+    
+- VALIDATION_2:
+    TYPE: "SCOPE_DOCUMENTED"
+    CREATE_FILE: "requirements/test_harness_scope.md"
+    CONTENT: "Document whether custom objects are included"
+    
+- VALIDATION_3:
+    TYPE: "SUCCESS_CRITERIA_SET"
+    VERIFY: "Clear criteria established based on scope"
+```
+
+### ON_SUCCESS
+```yaml
+UPDATE_STATE:
+  CURRENT_STEP: 6.1
+  LAST_COMPLETED_STEP: 6.0
+  KNOWN_LIMITATIONS: "[Document any scope limitations]"
+PROCEED_TO: STEP_6.1
+```
+
+---
+
+## STEP 6.1: Create Integration Test
+```yaml
+STEP_ID: 6.1
+STATUS: BLOCKED
+PREREQUISITES: [6.0]
+BLOCKS: [6.2, 6.3, 6.4, 7.1, 7.2]
+```
+
+[Rest of step 6.1 remains the same]
+
+---
+
+## STEP 6.3: Create Test Harness Tests
+```yaml
+STEP_ID: 6.3
+STATUS: BLOCKED
+PREREQUISITES: [6.2]
+BLOCKS: [6.4, 7.1, 7.2]
+```
+
+### CRITICAL_UPDATES
+```yaml
+NEW_REQUIREMENT: "Add runAlways cleanup changesets"
+REASON: "DATABASECHANGELOG persists between test runs"
+SOLUTION: "Ensure fresh state for each test"
+```
+
+### REQUIRED_DOCUMENTS
+```yaml
+CONSULT_BEFORE_ACTION:
+  - DOCUMENT_5:
+      NAME: "Part 4: Testing Guide V2"
+      SECTION: "Common Test Harness Issues and Solutions"
+      FIND: "Issue 1: Database is up to date"
+      CRITICAL_PATTERN: 'runAlways="true" for cleanup'
+```
+
+### ACTIONS
+```yaml
+- ACTION_1:
+    DESCRIPTION: "Create harness directory"
+    COMMAND: "mkdir -p src/test/groovy/.../harness/"
+    
+- ACTION_2:
+    DESCRIPTION: "Create changelog with cleanup"
+    FILE_PATH: "src/main/resources/liquibase/harness/snapshot/changelogs/[database]/[test].xml"
+    CRITICAL_PATTERN: |
+      <changeSet id="cleanup-[object]" author="test-harness" runAlways="true">
+          <sql>DROP [OBJECT_TYPE] IF EXISTS TEST_[OBJECT] CASCADE;</sql>
+      </changeSet>
+      
+      <changeSet id="create-[object]" author="test-harness">
+          <!-- Your creation logic -->
+      </changeSet>
+    
+- ACTION_3:
+    DESCRIPTION: "Create expected JSON"
+    FILE_PATH: "src/main/resources/liquibase/harness/snapshot/expectedSnapshot/[database]/[test].json"
+    CRITICAL_FORMAT: |
+      {
+        "snapshot": {
+          "objects": {
+            "liquibase.ext.[database].database.object.[ObjectType]": [
+              {
+                "[objectType]": {
+                  "name": "TEST_[OBJECT]",
+                  // Only include configuration properties
+                  // NO database metadata
+                  // NO "IGNORE" values
+                }
+              }
+            ]
+          }
+        }
+      }
+```
+
+### VALIDATIONS
+```yaml
+- VALIDATION_1:
+    TYPE: "CLEANUP_CHANGESET_EXISTS"
+    VERIFY: "Changeset with runAlways='true' exists"
+    
+- VALIDATION_2:
+    TYPE: "JSON_FORMAT_VALID"
+    VERIFY: "No database metadata fields"
+    VERIFY: "No IGNORE values"
+    
+- VALIDATION_3:
+    TYPE: "FILE_LOCATIONS_CORRECT"
+    VERIFY: "Files in test harness repo, not extension repo"
+```
+
+### ON_SUCCESS
+```yaml
+UPDATE_STATE:
+  CURRENT_STEP: 6.4
+  LAST_COMPLETED_STEP: 6.3
+PROCEED_TO: STEP_6.4
+```
+
+---
+
+## ERROR_PATTERN_LIBRARY
+```yaml
+PATTERN_1:
+  ERROR: "No snapshot generator found for type"
+  CAUSE: "Service registration missing or incorrect"
+  SOLUTION:
+    - "Check META-INF/services files"
+    - "Verify class names match exactly"
+    - "Rebuild JAR and check contents"
+    
+PATTERN_2:
+  ERROR: "Database is up to date"
+  CAUSE: "DATABASECHANGELOG has execution history"
+  SOLUTION: "Add runAlways='true' to cleanup changesets"
+  
+PATTERN_3:
+  ERROR: "Expected: [ObjectType] but none found"
+  CAUSE: "Object not in snapshot scope OR not created"
+  SOLUTION:
+    - "Check if changeset executed"
+    - "Verify object in database manually"
+    - "CRITICAL: Check META-INF/services/liquibase.structure.DatabaseObject registration"
+    - "Objects must be registered to appear in default snapshot scope"
+    - "Adjust success criteria if not in scope"
+    
+PATTERN_4:
+  ERROR: "Column '[name]' not found"
+  CAUSE: "Case sensitivity in ResultSet"
+  SOLUTION: "Try multiple case variations"
+  
+PATTERN_5:
+  ERROR: "JSONAssert mismatch"
+  CAUSE: "Format doesn't match test harness expectations"
+  SOLUTION:
+    - "Remove database metadata"
+    - "Remove IGNORE values"
+    - "Match working examples exactly"
+```
+
+## SYSTEMATIC_DEBUGGING_FRAMEWORK
+```yaml
+WHEN_TESTS_FAIL:
+  LAYER_1_CODE_LOADING:
+    CHECK: "Is JAR built? Are services registered?"
+    VERIFY: "jar -tf target/*.jar | grep META-INF"
+    
+  LAYER_2_REGISTRATION:
+    CHECK: "Is Liquibase finding components?"
+    VERIFY: "Look for loading messages in logs"
+    
+  LAYER_3_EXECUTION:
+    CHECK: "Are methods being called?"
+    VERIFY: "Add debug logging to methods"
+    
+  LAYER_4_DATA_CREATION:
+    CHECK: "Is data in database?"
+    VERIFY: "Manual query: SHOW [OBJECTS] LIKE 'TEST_%'"
+    
+  LAYER_5_TEST_FRAMEWORK:
+    CHECK: "Is test framework configured correctly?"
+    VERIFY: "Check JSON format, snapshot scope"
+    
+APPLY_IN_ORDER: "Start at Layer 1, work up to Layer 5"
+```
+
+## COMPLETION_CRITERIA
+```yaml
+ALL_STEPS_STATUS: "COMPLETE"
+FINAL_JAR_VALID: true
+TEST_SUITE_PASSING: true
+CLI_VERIFICATION: true
+DOCUMENTATION_COMPLETE: true
+LIMITATIONS_DOCUMENTED: true
+SUCCESS_CRITERIA_MET: "Based on realistic framework capabilities"
+```
+
+## ERROR_RECOVERY_PROTOCOL
+```yaml
+ON_VALIDATION_FAILURE:
+  - STOP_EXECUTION: true
+  - CHECK_ERROR_PATTERN_LIBRARY: true
+  - APPLY_SYSTEMATIC_DEBUGGING: true
+  - REPORT_FAILURE:
+      STEP_ID: "[current_step]"
+      VALIDATION_ID: "[failed_validation]"
+      ERROR_MESSAGE: "[detailed_error]"
+      PATTERN_MATCH: "[matching error pattern if found]"
+  - DO_NOT_PROCEED: true
+  - FIX_ISSUE: true
+  - RETRY_FROM_CURRENT_STEP: true
+```

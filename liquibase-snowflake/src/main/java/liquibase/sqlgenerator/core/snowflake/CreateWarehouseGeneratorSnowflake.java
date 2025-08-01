@@ -50,13 +50,7 @@ public class CreateWarehouseGeneratorSnowflake extends AbstractSqlGenerator<Crea
         StringBuilder withClause = new StringBuilder();
         
         if (statement.getWarehouseType() != null) {
-            String warehouseType = statement.getWarehouseType();
-            // Quote warehouse type if it contains special characters like hyphens
-            if (warehouseType.contains("-") || warehouseType.contains(" ")) {
-                withClause.append("WAREHOUSE_TYPE = '").append(warehouseType).append("'");
-            } else {
-                withClause.append("WAREHOUSE_TYPE = ").append(warehouseType);
-            }
+            withClause.append("WAREHOUSE_TYPE = '").append(statement.getWarehouseType()).append("'");
             hasWithClause = true;
         }
         

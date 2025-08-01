@@ -51,11 +51,7 @@ class DropTableGeneratorSnowflakeTest {
         // Should return standard DROP TABLE SQL
         assertNotNull(sql);
         assertEquals(1, sql.length);
-        String sqlText = sql[0].toSql();
-        assertTrue(sqlText.contains("DROP TABLE"));
-        assertTrue(sqlText.contains("test_table"));
-        assertFalse(sqlText.contains("CASCADE"));
-        assertFalse(sqlText.contains("RESTRICT"));
+        assertEquals("DROP TABLE test_table", sql[0].toSql());
     }
 
     @Test
@@ -67,11 +63,7 @@ class DropTableGeneratorSnowflakeTest {
         Sql[] sql = generator.generateSql(statement, database, null);
         
         assertEquals(1, sql.length);
-        String sqlText = sql[0].toSql();
-        assertTrue(sqlText.contains("DROP TABLE"));
-        assertTrue(sqlText.contains("test_table"));
-        assertTrue(sqlText.contains("CASCADE"));
-        assertFalse(sqlText.contains("RESTRICT"));
+        assertEquals("DROP TABLE test_table CASCADE", sql[0].toSql());
     }
 
     @Test
@@ -83,11 +75,7 @@ class DropTableGeneratorSnowflakeTest {
         Sql[] sql = generator.generateSql(statement, database, null);
         
         assertEquals(1, sql.length);
-        String sqlText = sql[0].toSql();
-        assertTrue(sqlText.contains("DROP TABLE"));
-        assertTrue(sqlText.contains("test_table"));
-        assertFalse(sqlText.contains("CASCADE"));
-        assertTrue(sqlText.contains("RESTRICT"));
+        assertEquals("DROP TABLE test_table RESTRICT", sql[0].toSql());
     }
 
     @Test
@@ -100,11 +88,7 @@ class DropTableGeneratorSnowflakeTest {
         Sql[] sql = generator.generateSql(statement, database, null);
         
         assertEquals(1, sql.length);
-        String sqlText = sql[0].toSql();
-        assertTrue(sqlText.contains("DROP TABLE"));
-        assertTrue(sqlText.contains("test_table"));
-        assertFalse(sqlText.contains("CASCADE"));
-        assertFalse(sqlText.contains("RESTRICT"));
+        assertEquals("DROP TABLE test_table", sql[0].toSql());
     }
 
     @Test
@@ -162,10 +146,12 @@ class DropTableGeneratorSnowflakeTest {
         Sql[] sql = generator.generateSql(customStatement, database, null);
         
         assertEquals(1, sql.length);
+        // Note: Snowflake database escaping may add quotes/formatting depending on the database implementation
+        // The exact format depends on SnowflakeDatabase.escapeObjectName() behavior
         String sqlText = sql[0].toSql();
-        // The exact escaping format depends on SnowflakeDatabase implementation
+        assertTrue(sqlText.startsWith("DROP TABLE"));
         assertTrue(sqlText.contains("my_table"));
-        assertTrue(sqlText.contains("CASCADE"));
+        assertTrue(sqlText.endsWith("CASCADE"));
     }
 
     @Test
@@ -193,11 +179,11 @@ class DropTableGeneratorSnowflakeTest {
         
         assertEquals(1, sql.length);
         String sqlText = sql[0].toSql();
-        assertTrue(sqlText.contains("DROP TABLE"));
+        // The base generator may or may not include IF EXISTS depending on implementation
+        // Our enhancement should add CASCADE regardless
+        assertTrue(sqlText.startsWith("DROP TABLE"));
         assertTrue(sqlText.contains("test_table"));
-        assertTrue(sqlText.contains("CASCADE"));
-        // Note: IF EXISTS is not supported by Snowflake base generator
-        // but our CASCADE enhancement should work regardless
+        assertTrue(sqlText.endsWith("CASCADE"));
     }
 
     @Test
@@ -211,9 +197,6 @@ class DropTableGeneratorSnowflakeTest {
         Sql[] sql = generator.generateSql(complexStatement, database, null);
         
         assertEquals(1, sql.length);
-        String sqlText = sql[0].toSql();
-        assertTrue(sqlText.contains("DROP TABLE"));
-        assertTrue(sqlText.contains("complex_table_name"));
-        assertTrue(sqlText.contains("RESTRICT"));
+        assertEquals("DROP TABLE complex_table_name RESTRICT", sql[0].toSql());
     }
 }

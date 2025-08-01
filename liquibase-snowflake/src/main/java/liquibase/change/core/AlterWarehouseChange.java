@@ -18,6 +18,7 @@ import liquibase.statement.core.AlterWarehouseStatement;
 )
 public class AlterWarehouseChange extends AbstractChange {
 
+    private String operationType; // Enhanced: explicit operation type
     private String warehouseName;
     private String newName;
     private Boolean ifExists;
@@ -221,29 +222,41 @@ public class AlterWarehouseChange extends AbstractChange {
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[]{
-            new AlterWarehouseStatement()
-                .setWarehouseName(getWarehouseName())
-                .setIfExists(getIfExists())
-                .setNewName(getNewWarehouseName())
-                .setWarehouseSize(getWarehouseSize())
-                .setWarehouseType(getWarehouseType())
-                .setMaxClusterCount(getMaxClusterCount())
-                .setMinClusterCount(getMinClusterCount())
-                .setScalingPolicy(getScalingPolicy())
-                .setAutoSuspend(getAutoSuspend())
-                .setAutoResume(getAutoResume())
-                .setResourceMonitor(getResourceMonitor())
-                .setComment(getComment())
-                .setEnableQueryAcceleration(getEnableQueryAcceleration())
-                .setQueryAccelerationMaxScaleFactor(getQueryAccelerationMaxScaleFactor())
-                .setStatementQueuedTimeoutInSeconds(getStatementQueuedTimeoutInSeconds())
-                .setStatementTimeoutInSeconds(getStatementTimeoutInSeconds())
-                .setWarehouseTag(getWarehouseTag())
-                .setAction(getAction())
-                .setUnsetResourceMonitor(getUnsetResourceMonitor())
-                .setUnsetComment(getUnsetComment())
-        };
+        AlterWarehouseStatement statement = new AlterWarehouseStatement()
+            .setWarehouseName(getWarehouseName())
+            .setIfExists(getIfExists())
+            .setNewName(getNewWarehouseName())
+            .setWarehouseSize(getWarehouseSize())
+            .setWarehouseType(getWarehouseType())
+            .setMaxClusterCount(getMaxClusterCount())
+            .setMinClusterCount(getMinClusterCount())
+            .setScalingPolicy(getScalingPolicy())
+            .setAutoSuspend(getAutoSuspend())
+            .setAutoResume(getAutoResume())
+            .setResourceMonitor(getResourceMonitor())
+            .setComment(getComment())
+            .setEnableQueryAcceleration(getEnableQueryAcceleration())
+            .setQueryAccelerationMaxScaleFactor(getQueryAccelerationMaxScaleFactor())
+            .setStatementQueuedTimeoutInSeconds(getStatementQueuedTimeoutInSeconds())
+            .setStatementTimeoutInSeconds(getStatementTimeoutInSeconds())
+            .setWarehouseTag(getWarehouseTag())
+            .setAction(getAction()) // Maintain backward compatibility
+            .setUnsetResourceMonitor(getUnsetResourceMonitor())
+            .setUnsetComment(getUnsetComment());
+
+        // Enhanced Phase 2 API: Set explicit operation type if provided
+        if (getOperationType() != null && !getOperationType().trim().isEmpty()) {
+            try {
+                AlterWarehouseStatement.OperationType opType = 
+                    AlterWarehouseStatement.OperationType.valueOf(getOperationType().toUpperCase());
+                statement.setOperationType(opType);
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("Invalid operation type: " + getOperationType() + 
+                    ". Valid types are: RENAME, SET, UNSET, SUSPEND, RESUME, ABORT_ALL_QUERIES");
+            }
+        }
+
+        return new SqlStatement[]{statement};
     }
 
     @Override
@@ -388,6 +401,17 @@ public class AlterWarehouseChange extends AbstractChange {
                getWarehouseTag() != null ||
                Boolean.TRUE.equals(getUnsetResourceMonitor()) ||
                Boolean.TRUE.equals(getUnsetComment());
+    }
+
+    // Enhanced Phase 2 API: Explicit operation type support
+
+    @DatabaseChangeProperty(description = "Type of ALTER WAREHOUSE operation (RENAME, SET, UNSET, SUSPEND, RESUME, ABORT_ALL_QUERIES)")
+    public String getOperationType() {
+        return operationType;
+    }
+
+    public void setOperationType(String operationType) {
+        this.operationType = operationType;
     }
 
     @Override

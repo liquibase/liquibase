@@ -53,10 +53,13 @@ public class AlterWarehouseGeneratorSnowflakeTest {
     @Test
     @DisplayName("Should validate warehouse name is required")
     void shouldValidateWarehouseNameRequired() {
+        // Don't set warehouse name, but set an operation so validation runs
+        statement.setWarehouseSize("LARGE");
+        
         ValidationErrors errors = generator.validate(statement, database, sqlGeneratorChain);
         
         assertTrue(errors.hasErrors());
-        assertTrue(errors.getErrorMessages().get(0).contains("warehouseName is required"));
+        assertTrue(errors.getErrorMessages().get(0).contains("Warehouse name is required"));
     }
     
     @Test
@@ -122,7 +125,7 @@ public class AlterWarehouseGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
         
         assertTrue(sqls.length >= 1);
-        assertTrue(sqls[0].toSql().contains("SET WAREHOUSE_SIZE = LARGE"));
+        assertEquals("ALTER WAREHOUSE TEST_WAREHOUSE SET WAREHOUSE_SIZE = LARGE", sqls[0].toSql());
     }
     
     @Test
@@ -138,11 +141,15 @@ public class AlterWarehouseGeneratorSnowflakeTest {
         
         assertTrue(sqls.length >= 1);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("SET"));
+        // Verify it starts correctly and contains all expected properties
+        assertTrue(sql.startsWith("ALTER WAREHOUSE TEST_WAREHOUSE SET"));
         assertTrue(sql.contains("WAREHOUSE_SIZE = XLARGE"));
         assertTrue(sql.contains("AUTO_SUSPEND = 300"));
         assertTrue(sql.contains("AUTO_RESUME = true"));
         assertTrue(sql.contains("RESOURCE_MONITOR = MONTHLY_BUDGET"));
+        // Verify properties are comma-separated
+        long commaCount = sql.chars().filter(ch -> ch == ',').count();
+        assertEquals(3, commaCount, "Should have 3 commas separating 4 properties");
     }
     
     @Test
@@ -154,7 +161,7 @@ public class AlterWarehouseGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
         
         assertTrue(sqls.length >= 1);
-        assertTrue(sqls[0].toSql().contains("COMMENT = 'Test''s warehouse'"));
+        assertEquals("ALTER WAREHOUSE TEST_WAREHOUSE SET COMMENT = 'Test''s warehouse'", sqls[0].toSql());
     }
     
     @Test
@@ -167,36 +174,24 @@ public class AlterWarehouseGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
         
         assertTrue(sqls.length >= 1);
-        String sql = sqls[0].toSql();
-        assertTrue(sql.contains("UNSET"));
-        assertTrue(sql.contains("RESOURCE_MONITOR"));
-        assertTrue(sql.contains("COMMENT"));
+        // UNSET properties are comma-separated
+        assertEquals("ALTER WAREHOUSE TEST_WAREHOUSE UNSET RESOURCE_MONITOR, COMMENT", sqls[0].toSql());
     }
     
     @Test
-    @DisplayName("Should generate separate statements for SET and UNSET")
-    void shouldGenerateSeparateStatementsForSetAndUnset() {
+    @DisplayName("Should validate that SET and UNSET cannot be combined")
+    void shouldValidateThatSetAndUnsetCannotBeCombined() {
         statement.setWarehouseName("TEST_WAREHOUSE");
-        statement.setWarehouseSize("LARGE");
-        statement.setUnsetComment(true);
+        statement.setWarehouseSize("LARGE");  // SET operation
+        statement.setUnsetComment(true);      // UNSET operation
         
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        ValidationErrors errors = generator.validate(statement, database, sqlGeneratorChain);
         
-        // Should generate at least 2 statements (SET and UNSET)
-        assertTrue(sqls.length >= 2);
-        
-        // First should be SET
-        assertTrue(sqls[0].toSql().contains("SET WAREHOUSE_SIZE = LARGE"));
-        
-        // Second should be UNSET (or could be USE WAREHOUSE, then UNSET)
-        boolean foundUnset = false;
-        for (Sql sql : sqls) {
-            if (sql.toSql().contains("UNSET COMMENT")) {
-                foundUnset = true;
-                break;
-            }
-        }
-        assertTrue(foundUnset);
+        // Should have validation errors because SET and UNSET operations are mutually exclusive
+        assertTrue(errors.hasErrors());
+        // The validation should indicate the operation type conflict
+        assertTrue(errors.getErrorMessages().toString().contains("Operation type must be specified") ||
+                  errors.getErrorMessages().toString().contains("cannot be determined"));
     }
     
     @Test
@@ -220,6 +215,8 @@ public class AlterWarehouseGeneratorSnowflakeTest {
         assertTrue(sqls.length >= 1);
         String sql = sqls[0].toSql();
         
+        // Verify structure and all properties (order may vary)
+        assertTrue(sql.startsWith("ALTER WAREHOUSE TEST_WAREHOUSE SET"));
         assertTrue(sql.contains("WAREHOUSE_SIZE = X4LARGE"));
         assertTrue(sql.contains("WAREHOUSE_TYPE = SNOWPARK-OPTIMIZED"));
         assertTrue(sql.contains("MAX_CLUSTER_COUNT = 8"));
@@ -231,5 +228,9 @@ public class AlterWarehouseGeneratorSnowflakeTest {
         assertTrue(sql.contains("COMMENT = 'Production warehouse'"));
         assertTrue(sql.contains("ENABLE_QUERY_ACCELERATION = true"));
         assertTrue(sql.contains("QUERY_ACCELERATION_MAX_SCALE_FACTOR = 10"));
+        
+        // Verify we have the correct number of commas (11 properties = 10 commas)
+        long commaCount = sql.chars().filter(ch -> ch == ',').count();
+        assertEquals(10, commaCount, "Should have 10 commas separating 11 properties");
     }
 }

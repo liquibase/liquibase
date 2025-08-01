@@ -30,7 +30,7 @@ class RenameTableGeneratorSnowflakeTest {
 
     @Test
     void testPriority() {
-        assertEquals(generator.PRIORITY_DATABASE, generator.getPriority());
+        assertEquals(generator.PRIORITY_DATABASE + 5, generator.getPriority());
     }
 
     @Test

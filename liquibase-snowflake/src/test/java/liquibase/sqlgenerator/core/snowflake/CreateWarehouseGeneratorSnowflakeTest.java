@@ -58,7 +58,7 @@ public class CreateWarehouseGeneratorSnowflakeTest {
     }
     
     @Test
-    @DisplayName("Should generate basic CREATE WAREHOUSE SQL")
+    @DisplayName("Should generate basic CREATE WAREHOUSE SQL - Basic Required Only")
     void shouldGenerateBasicCreateWarehouseSql() {
         statement.setWarehouseName("TEST_WAREHOUSE");
         
@@ -69,7 +69,7 @@ public class CreateWarehouseGeneratorSnowflakeTest {
     }
     
     @Test
-    @DisplayName("Should generate CREATE OR REPLACE WAREHOUSE SQL")
+    @DisplayName("Should generate CREATE OR REPLACE WAREHOUSE SQL - OR REPLACE")
     void shouldGenerateCreateOrReplaceWarehouseSql() {
         statement.setWarehouseName("TEST_WAREHOUSE");
         statement.setOrReplace(true);
@@ -81,7 +81,7 @@ public class CreateWarehouseGeneratorSnowflakeTest {
     }
     
     @Test
-    @DisplayName("Should generate CREATE WAREHOUSE IF NOT EXISTS SQL")
+    @DisplayName("Should generate CREATE WAREHOUSE IF NOT EXISTS SQL - IF NOT EXISTS")
     void shouldGenerateCreateWarehouseIfNotExistsSql() {
         statement.setWarehouseName("TEST_WAREHOUSE");
         statement.setIfNotExists(true);
@@ -93,7 +93,7 @@ public class CreateWarehouseGeneratorSnowflakeTest {
     }
     
     @Test
-    @DisplayName("Should generate SQL with warehouse size")
+    @DisplayName("Should generate SQL with warehouse size - With Warehouse Size")
     void shouldGenerateSqlWithWarehouseSize() {
         statement.setWarehouseName("TEST_WAREHOUSE");
         statement.setWarehouseSize("LARGE");
@@ -101,13 +101,11 @@ public class CreateWarehouseGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
         
         assertEquals(1, sqls.length);
-        String sql = sqls[0].toSql();
-        assertTrue(sql.contains("WITH"));
-        assertTrue(sql.contains("WAREHOUSE_SIZE = LARGE"));
+        assertEquals("CREATE WAREHOUSE TEST_WAREHOUSE WITH WAREHOUSE_SIZE = LARGE", sqls[0].toSql());
     }
     
     @Test
-    @DisplayName("Should generate SQL with warehouse type")
+    @DisplayName("Should generate SQL with warehouse type - With Warehouse Type")
     void shouldGenerateSqlWithWarehouseType() {
         statement.setWarehouseName("TEST_WAREHOUSE");
         statement.setWarehouseType("SNOWPARK-OPTIMIZED");
@@ -115,13 +113,11 @@ public class CreateWarehouseGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
         
         assertEquals(1, sqls.length);
-        String sql = sqls[0].toSql();
-        assertTrue(sql.contains("WAREHOUSE_TYPE = SNOWPARK-OPTIMIZED"));
-        assertFalse(sql.contains("'SNOWPARK-OPTIMIZED'")); // Should not be quoted
+        assertEquals("CREATE WAREHOUSE TEST_WAREHOUSE WITH WAREHOUSE_TYPE = SNOWPARK-OPTIMIZED", sqls[0].toSql());
     }
     
     @Test
-    @DisplayName("Should generate SQL with multi-cluster settings")
+    @DisplayName("Should generate SQL with multi-cluster settings - Multi-cluster Basic")
     void shouldGenerateSqlWithMultiClusterSettings() {
         statement.setWarehouseName("TEST_WAREHOUSE");
         statement.setMinClusterCount(1);
@@ -131,14 +127,11 @@ public class CreateWarehouseGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
         
         assertEquals(1, sqls.length);
-        String sql = sqls[0].toSql();
-        assertTrue(sql.contains("MIN_CLUSTER_COUNT = 1"));
-        assertTrue(sql.contains("MAX_CLUSTER_COUNT = 3"));
-        assertTrue(sql.contains("SCALING_POLICY = ECONOMY"));
+        assertEquals("CREATE WAREHOUSE TEST_WAREHOUSE WITH MAX_CLUSTER_COUNT = 3 MIN_CLUSTER_COUNT = 1 SCALING_POLICY = ECONOMY", sqls[0].toSql());
     }
     
     @Test
-    @DisplayName("Should generate SQL with auto-suspend and auto-resume")
+    @DisplayName("Should generate SQL with auto-suspend and auto-resume - Auto Settings")
     void shouldGenerateSqlWithAutoSettings() {
         statement.setWarehouseName("TEST_WAREHOUSE");
         statement.setAutoSuspend(300);
@@ -147,13 +140,11 @@ public class CreateWarehouseGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
         
         assertEquals(1, sqls.length);
-        String sql = sqls[0].toSql();
-        assertTrue(sql.contains("AUTO_SUSPEND = 300"));
-        assertTrue(sql.contains("AUTO_RESUME = true"));
+        assertEquals("CREATE WAREHOUSE TEST_WAREHOUSE WITH AUTO_SUSPEND = 300 AUTO_RESUME = true", sqls[0].toSql());
     }
     
     @Test
-    @DisplayName("Should generate SQL with initially suspended")
+    @DisplayName("Should generate SQL with initially suspended - Initially Suspended")
     void shouldGenerateSqlWithInitiallySuspended() {
         statement.setWarehouseName("TEST_WAREHOUSE");
         statement.setInitiallySuspended(true);
@@ -161,11 +152,11 @@ public class CreateWarehouseGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
         
         assertEquals(1, sqls.length);
-        assertTrue(sqls[0].toSql().contains("INITIALLY_SUSPENDED = true"));
+        assertEquals("CREATE WAREHOUSE TEST_WAREHOUSE WITH INITIALLY_SUSPENDED = true", sqls[0].toSql());
     }
     
     @Test
-    @DisplayName("Should generate SQL with resource monitor")
+    @DisplayName("Should generate SQL with resource monitor - With Resource Monitor")
     void shouldGenerateSqlWithResourceMonitor() {
         statement.setWarehouseName("TEST_WAREHOUSE");
         statement.setResourceMonitor("MONTHLY_BUDGET");
@@ -173,11 +164,11 @@ public class CreateWarehouseGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
         
         assertEquals(1, sqls.length);
-        assertTrue(sqls[0].toSql().contains("RESOURCE_MONITOR = MONTHLY_BUDGET"));
+        assertEquals("CREATE WAREHOUSE TEST_WAREHOUSE WITH RESOURCE_MONITOR = MONTHLY_BUDGET", sqls[0].toSql());
     }
     
     @Test
-    @DisplayName("Should generate SQL with comment")
+    @DisplayName("Should generate SQL with comment - With Comment")
     void shouldGenerateSqlWithComment() {
         statement.setWarehouseName("TEST_WAREHOUSE");
         statement.setComment("Test warehouse for development");
@@ -185,11 +176,11 @@ public class CreateWarehouseGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
         
         assertEquals(1, sqls.length);
-        assertTrue(sqls[0].toSql().contains("COMMENT = 'Test warehouse for development'"));
+        assertEquals("CREATE WAREHOUSE TEST_WAREHOUSE WITH COMMENT = 'Test warehouse for development'", sqls[0].toSql());
     }
     
     @Test
-    @DisplayName("Should escape quotes in comment")
+    @DisplayName("Should escape quotes in comment - Special Characters in Comment")
     void shouldEscapeQuotesInComment() {
         statement.setWarehouseName("TEST_WAREHOUSE");
         statement.setComment("Test's warehouse");
@@ -197,11 +188,11 @@ public class CreateWarehouseGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
         
         assertEquals(1, sqls.length);
-        assertTrue(sqls[0].toSql().contains("COMMENT = 'Test''s warehouse'"));
+        assertEquals("CREATE WAREHOUSE TEST_WAREHOUSE WITH COMMENT = 'Test''s warehouse'", sqls[0].toSql());
     }
     
     @Test
-    @DisplayName("Should generate SQL with query acceleration")
+    @DisplayName("Should generate SQL with query acceleration - Query Acceleration")
     void shouldGenerateSqlWithQueryAcceleration() {
         statement.setWarehouseName("TEST_WAREHOUSE");
         statement.setEnableQueryAcceleration(true);
@@ -210,13 +201,11 @@ public class CreateWarehouseGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
         
         assertEquals(1, sqls.length);
-        String sql = sqls[0].toSql();
-        assertTrue(sql.contains("ENABLE_QUERY_ACCELERATION = true"));
-        assertTrue(sql.contains("QUERY_ACCELERATION_MAX_SCALE_FACTOR = 10"));
+        assertEquals("CREATE WAREHOUSE TEST_WAREHOUSE WITH ENABLE_QUERY_ACCELERATION = true QUERY_ACCELERATION_MAX_SCALE_FACTOR = 10", sqls[0].toSql());
     }
     
     @Test
-    @DisplayName("Should generate SQL with all properties")
+    @DisplayName("Should generate SQL with all properties - All Properties")
     void shouldGenerateSqlWithAllProperties() {
         statement.setWarehouseName("TEST_WAREHOUSE");
         statement.setWarehouseSize("XLARGE");
@@ -234,34 +223,16 @@ public class CreateWarehouseGeneratorSnowflakeTest {
         statement.setMaxConcurrencyLevel(16);
         statement.setStatementQueuedTimeoutInSeconds(300);
         statement.setStatementTimeoutInSeconds(3600);
-        statement.setResourceConstraint("MEMORY_2X");
+        statement.setResourceConstraint("MEMORY_16X");
         
         Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
         
         assertEquals(1, sqls.length);
-        String sql = sqls[0].toSql();
-        
-        // Verify all properties are included
-        assertTrue(sql.contains("WAREHOUSE_TYPE = STANDARD"));
-        assertTrue(sql.contains("WAREHOUSE_SIZE = XLARGE"));
-        assertTrue(sql.contains("MIN_CLUSTER_COUNT = 2"));
-        assertTrue(sql.contains("MAX_CLUSTER_COUNT = 5"));
-        assertTrue(sql.contains("SCALING_POLICY = STANDARD"));
-        assertTrue(sql.contains("AUTO_SUSPEND = 600"));
-        assertTrue(sql.contains("AUTO_RESUME = false"));
-        assertTrue(sql.contains("INITIALLY_SUSPENDED = false"));
-        assertTrue(sql.contains("RESOURCE_MONITOR = MONTHLY_BUDGET"));
-        assertTrue(sql.contains("RESOURCE_CONSTRAINT = MEMORY_2X"));
-        assertTrue(sql.contains("COMMENT = 'Production warehouse'"));
-        assertTrue(sql.contains("ENABLE_QUERY_ACCELERATION = true"));
-        assertTrue(sql.contains("QUERY_ACCELERATION_MAX_SCALE_FACTOR = 8"));
-        assertTrue(sql.contains("MAX_CONCURRENCY_LEVEL = 16"));
-        assertTrue(sql.contains("STATEMENT_QUEUED_TIMEOUT_IN_SECONDS = 300"));
-        assertTrue(sql.contains("STATEMENT_TIMEOUT_IN_SECONDS = 3600"));
+        assertEquals("CREATE WAREHOUSE TEST_WAREHOUSE WITH WAREHOUSE_TYPE = STANDARD WAREHOUSE_SIZE = XLARGE MAX_CLUSTER_COUNT = 5 MIN_CLUSTER_COUNT = 2 SCALING_POLICY = STANDARD AUTO_SUSPEND = 600 AUTO_RESUME = false INITIALLY_SUSPENDED = false RESOURCE_MONITOR = MONTHLY_BUDGET RESOURCE_CONSTRAINT = MEMORY_16X COMMENT = 'Production warehouse' ENABLE_QUERY_ACCELERATION = true QUERY_ACCELERATION_MAX_SCALE_FACTOR = 8 MAX_CONCURRENCY_LEVEL = 16 STATEMENT_QUEUED_TIMEOUT_IN_SECONDS = 300 STATEMENT_TIMEOUT_IN_SECONDS = 3600", sqls[0].toSql());
     }
     
     @Test
-    @DisplayName("Should format WITH clause correctly")
+    @DisplayName("Should format WITH clause correctly - WITH Clause Format")
     void shouldFormatWithClauseCorrectly() {
         statement.setWarehouseName("TEST_WAREHOUSE");
         statement.setWarehouseSize("MEDIUM");
@@ -270,11 +241,6 @@ public class CreateWarehouseGeneratorSnowflakeTest {
         Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
         
         assertEquals(1, sqls.length);
-        String sql = sqls[0].toSql();
-        
-        // Should have WITH keyword and proper spacing
-        assertTrue(sql.matches(".*WITH\\s+WAREHOUSE_SIZE.*"));
-        // Properties should be space-separated, not comma-separated
-        assertTrue(sql.contains("WAREHOUSE_SIZE = MEDIUM AUTO_SUSPEND = 300"));
+        assertEquals("CREATE WAREHOUSE TEST_WAREHOUSE WITH WAREHOUSE_SIZE = MEDIUM AUTO_SUSPEND = 300", sqls[0].toSql());
     }
 }

@@ -127,9 +127,7 @@ public class CreateDatabaseGeneratorSnowflakeTest {
         
         Sql[] sqls = generator.generateSql(statement, database, null);
         
-        String sql = sqls[0].toSql();
-        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS = 7"));
-        assertTrue(sql.contains("MAX_DATA_EXTENSION_TIME_IN_DAYS = 30"));
+        assertEquals("CREATE DATABASE TEST_DB DATA_RETENTION_TIME_IN_DAYS = 7 MAX_DATA_EXTENSION_TIME_IN_DAYS = 30", sqls[0].toSql());
     }
     
     @Test
@@ -141,7 +139,7 @@ public class CreateDatabaseGeneratorSnowflakeTest {
         
         Sql[] sqls = generator.generateSql(statement, database, null);
         
-        assertTrue(sqls[0].toSql().contains("DEFAULT_DDL_COLLATION = 'en-ci'"));
+        assertEquals("CREATE DATABASE TEST_DB DEFAULT_DDL_COLLATION = 'en-ci'", sqls[0].toSql());
     }
     
     @Test
@@ -153,7 +151,7 @@ public class CreateDatabaseGeneratorSnowflakeTest {
         
         Sql[] sqls = generator.generateSql(statement, database, null);
         
-        assertTrue(sqls[0].toSql().contains("COMMENT = 'Test database'"));
+        assertEquals("CREATE DATABASE TEST_DB COMMENT = 'Test database'", sqls[0].toSql());
     }
     
     @Test
@@ -165,7 +163,7 @@ public class CreateDatabaseGeneratorSnowflakeTest {
         
         Sql[] sqls = generator.generateSql(statement, database, null);
         
-        assertTrue(sqls[0].toSql().contains("COMMENT = 'Test''s database'"));
+        assertEquals("CREATE DATABASE TEST_DB COMMENT = 'Test''s database'", sqls[0].toSql());
     }
     
     @Test
@@ -182,13 +180,7 @@ public class CreateDatabaseGeneratorSnowflakeTest {
         
         Sql[] sqls = generator.generateSql(statement, database, null);
         
-        String sql = sqls[0].toSql();
-        assertTrue(sql.startsWith("CREATE OR REPLACE TRANSIENT DATABASE"));
-        assertTrue(sql.contains("FULL_DB"));
-        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS = 0"));
-        assertTrue(sql.contains("MAX_DATA_EXTENSION_TIME_IN_DAYS = 0"));
-        assertTrue(sql.contains("DEFAULT_DDL_COLLATION = 'en-ci'"));
-        assertTrue(sql.contains("COMMENT = 'Full test database'"));
+        assertEquals("CREATE OR REPLACE TRANSIENT DATABASE FULL_DB DATA_RETENTION_TIME_IN_DAYS = 0 MAX_DATA_EXTENSION_TIME_IN_DAYS = 0 DEFAULT_DDL_COLLATION = 'en-ci' COMMENT = 'Full test database'", sqls[0].toSql());
     }
     
     @Test
