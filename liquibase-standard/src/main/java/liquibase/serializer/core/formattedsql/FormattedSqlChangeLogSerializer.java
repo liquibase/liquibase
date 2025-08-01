@@ -1,8 +1,5 @@
 package liquibase.serializer.core.formattedsql;
 
-import liquibase.*;
-import liquibase.change.AbstractChange;
-import liquibase.change.AbstractSQLChange;
 import liquibase.ContextExpression;
 import liquibase.GlobalConfiguration;
 import liquibase.Labels;
@@ -19,7 +16,6 @@ import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import org.apache.tools.ant.taskdefs.condition.Or;
 
 import java.io.File;
 import java.io.IOException;
