@@ -863,7 +863,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 throw new MigrationFailedException(this, e);
             }
             if ((failOnError != null) && !failOnError) {
-                log.info("Changeset " + toString(false) + " failed, but failOnError was false.  Error: " + e.getMessage());
+                Scope.getCurrentScope().getUI().sendMessage("Changeset " + toString(false) + " failed, and the error was ignored because 'failOnError' was set to false. ");
+                log.info("Changeset " + toString(false) + " failed, and the error was ignored because 'failOnError' was set to false.  Error: " + e.getMessage());
                 log.fine("Failure Stacktrace", e);
                 execType = ExecType.FAILED;
             } else {

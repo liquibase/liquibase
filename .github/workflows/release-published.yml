@@ -75,6 +75,8 @@ jobs:
       version: ${{ steps.collect-data.outputs.version }}
       ref_branch: ${{ steps.ref-branch.outputs.branch }}
       dry_run_branch_name: ${{ inputs.dry_run_branch_name }}
+      latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
+      timeStamp: ${{ steps.get-timestamp.outputs.timeStamp }}
     steps:
       - name: Collect Data
         id: collect-data
@@ -109,6 +111,24 @@ jobs:
           else
             echo "branch=${{ inputs.dry_run_branch_name }}" >> $GITHUB_OUTPUT
           fi
+
+      - name: Checkout the determined branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.ref-branch.outputs.branch }}
+          fetch-depth: 0
+
+      - name: Get Latest Merge Commit SHA
+        id: get-sha
+        run: |
+          latest_merge_sha=`(git rev-parse --short HEAD)`
+          echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
+
+      - name: Get Timestamp
+        id: get-timestamp
+        run: |
+          timestamp=`(date +'%Y-%m-%d %H:%M:%S %Z')`
+          echo "timeStamp=${timestamp}" >> $GITHUB_OUTPUT
 
   manual_trigger_deployment:
     if: ${{ inputs.dry_run == false }}
@@ -316,7 +336,6 @@ jobs:
     name: Publish artifacts to Github Packages
     runs-on: ubuntu-22.04
     needs: [setup, manual_trigger_deployment]
-
     steps:
       - uses: actions/checkout@v4
       - name: Set up Java for publishing to GitHub Repository
@@ -326,6 +345,7 @@ jobs:
           distribution: "temurin"
           cache: "maven"
           server-id: liquibase
+
       - name: Set up Maven
         uses: stCarolas/setup-maven@v5
         with:
@@ -336,10 +356,10 @@ jobs:
 
       # Publish to GitHub Packages
       - name: Publish package to Github
-        run: mvn -B clean deploy -DskipTests=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TARGET_ARTIFACT_REPOSITORY: liquibase
+        run: mvn -B clean deploy -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.version }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
 
   deploy_xsd:
     if: ${{ inputs.dry_run == false }}
@@ -673,7 +693,6 @@ jobs:
           token: ${{ steps.get-token.outputs.token }}
           repository: liquibase/liquibase-aws-license-service
           event-type: oss-released-version
-
 
   dry_run_deploy_maven:
     if: ${{ inputs.dry_run == true }}
