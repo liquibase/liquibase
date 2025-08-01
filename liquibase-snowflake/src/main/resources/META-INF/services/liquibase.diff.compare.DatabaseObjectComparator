@@ -1,1 +1,3 @@
+liquibase.diff.output.DatabaseComparator
+liquibase.diff.output.SchemaComparator
 liquibase.diff.output.WarehouseComparator

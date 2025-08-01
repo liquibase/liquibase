@@ -4,6 +4,25 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class AlterSchemaStatement extends AbstractSqlStatement {
     
+    /**
+     * Enum defining the type of ALTER SCHEMA operation to perform.
+     * Each operation type has different valid properties and SQL generation logic.
+     */
+    public enum OperationType {
+        /** RENAME operation: ALTER SCHEMA [IF EXISTS] name RENAME TO new_name */
+        RENAME,
+        /** SET operation: ALTER SCHEMA [IF EXISTS] name SET property = value, ... */
+        SET,
+        /** UNSET operation: ALTER SCHEMA [IF EXISTS] name UNSET property, ... */
+        UNSET,
+        /** ENABLE MANAGED ACCESS operation: ALTER SCHEMA [IF EXISTS] name ENABLE MANAGED ACCESS */
+        ENABLE_MANAGED_ACCESS,
+        /** DISABLE MANAGED ACCESS operation: ALTER SCHEMA [IF EXISTS] name DISABLE MANAGED ACCESS */
+        DISABLE_MANAGED_ACCESS
+    }
+    
+    private OperationType operationType;
+    
     private String schemaName;
     private Boolean ifExists;
     private String newName;
@@ -149,5 +168,15 @@ public class AlterSchemaStatement extends AbstractSqlStatement {
 
     public void setUnsetComment(Boolean unsetComment) {
         this.unsetComment = unsetComment;
+    }
+
+    // Enhanced API methods for sophisticated operation-type-driven architecture
+
+    public OperationType getOperationType() {
+        return operationType;
+    }
+
+    public void setOperationType(OperationType operationType) {
+        this.operationType = operationType;
     }
 }

@@ -1,1 +1,2 @@
+liquibase.database.object.Database
 liquibase.database.object.Warehouse

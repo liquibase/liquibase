@@ -18,6 +18,7 @@ import liquibase.statement.core.AlterDatabaseStatement;
 )
 public class AlterDatabaseChange extends AbstractChange {
 
+    private String operationType; // Enhanced: explicit operation type
     private String databaseName;
     private String newName;
     private Boolean ifExists;
@@ -167,6 +168,18 @@ public class AlterDatabaseChange extends AbstractChange {
         statement.setUnsetDefaultDdlCollation(getUnsetDefaultDdlCollation());
         statement.setUnsetComment(getUnsetComment());
         
+        // Enhanced Phase 2 API: Set explicit operation type if provided
+        if (getOperationType() != null && !getOperationType().trim().isEmpty()) {
+            try {
+                AlterDatabaseStatement.OperationType opType = 
+                    AlterDatabaseStatement.OperationType.valueOf(getOperationType().toUpperCase());
+                statement.setOperationType(opType);
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("Invalid operation type: " + getOperationType() + 
+                    ". Valid types are: RENAME, SET, UNSET");
+            }
+        }
+
         return new SqlStatement[]{statement};
     }
 
@@ -226,6 +239,17 @@ public class AlterDatabaseChange extends AbstractChange {
         }
         
         return errors;
+    }
+
+    // Enhanced Phase 2 API: Explicit operation type support
+
+    @DatabaseChangeProperty(description = "Type of ALTER DATABASE operation (RENAME, SET, UNSET)")
+    public String getOperationType() {
+        return operationType;
+    }
+
+    public void setOperationType(String operationType) {
+        this.operationType = operationType;
     }
 
     @Override

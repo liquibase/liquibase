@@ -1,5 +1,11 @@
 liquibase.diff.output.changelog.core.ChangedSequenceChangeGeneratorSnowflake
 liquibase.diff.output.changelog.core.MissingSequenceChangeGeneratorSnowflake
+liquibase.diff.output.changelog.core.MissingDatabaseChangeGenerator
+liquibase.diff.output.changelog.core.UnexpectedDatabaseChangeGenerator
+liquibase.diff.output.changelog.core.ChangedDatabaseChangeGenerator
+liquibase.diff.output.changelog.core.MissingSchemaChangeGenerator
+liquibase.diff.output.changelog.core.UnexpectedSchemaChangeGenerator
+liquibase.diff.output.changelog.core.ChangedSchemaChangeGenerator
 liquibase.diff.output.changelog.core.MissingWarehouseChangeGenerator
 liquibase.diff.output.changelog.core.UnexpectedWarehouseChangeGenerator
 liquibase.diff.output.changelog.core.ChangedWarehouseChangeGenerator

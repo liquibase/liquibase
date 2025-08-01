@@ -18,6 +18,7 @@ import liquibase.statement.core.AlterSchemaStatement;
 )
 public class AlterSchemaChange extends AbstractChange {
 
+    private String operationType; // Enhanced: explicit operation type
     private String schemaName;
     private Boolean ifExists;
     private String newName;
@@ -201,6 +202,18 @@ public class AlterSchemaChange extends AbstractChange {
         statement.setUnsetPipeExecutionPaused(getUnsetPipeExecutionPaused());
         statement.setUnsetComment(getUnsetComment());
         
+        // Enhanced Phase 2 API: Set explicit operation type if provided
+        if (getOperationType() != null && !getOperationType().trim().isEmpty()) {
+            try {
+                AlterSchemaStatement.OperationType opType = 
+                    AlterSchemaStatement.OperationType.valueOf(getOperationType().toUpperCase());
+                statement.setOperationType(opType);
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("Invalid operation type: " + getOperationType() + 
+                    ". Valid types are: RENAME, SET, UNSET, ENABLE_MANAGED_ACCESS, DISABLE_MANAGED_ACCESS");
+            }
+        }
+
         return new SqlStatement[]{statement};
     }
 
@@ -278,6 +291,60 @@ public class AlterSchemaChange extends AbstractChange {
         }
         
         return errors;
+    }
+
+    // Enhanced Phase 2 API: Explicit operation type support
+
+    @DatabaseChangeProperty(description = "Type of ALTER SCHEMA operation (RENAME, SET, UNSET, ENABLE_MANAGED_ACCESS, DISABLE_MANAGED_ACCESS)")
+    public String getOperationType() {
+        return operationType;
+    }
+
+    public void setOperationType(String operationType) {
+        this.operationType = operationType;
+    }
+
+    // Additional getter/setter methods for compatibility with ChangedSchemaChangeGenerator
+
+    @DatabaseChangeProperty(description = "New comment for the schema")
+    public String getComment() {
+        return newComment;
+    }
+
+    public void setComment(String comment) {
+        this.newComment = comment;
+    }
+
+    @DatabaseChangeProperty(description = "New data retention time in days")
+    public String getDataRetentionTimeInDays() {
+        return newDataRetentionTimeInDays;
+    }
+
+    public void setDataRetentionTimeInDays(String dataRetentionTimeInDays) {
+        this.newDataRetentionTimeInDays = dataRetentionTimeInDays;
+    }
+
+    @DatabaseChangeProperty(description = "Enable/disable managed access for the schema")
+    public Boolean getManagedAccess() {
+        if (enableManagedAccess != null && enableManagedAccess) {
+            return true;
+        }
+        if (disableManagedAccess != null && disableManagedAccess) {
+            return false;
+        }
+        return null;
+    }
+
+    public void setManagedAccess(Boolean managedAccess) {
+        if (managedAccess != null) {
+            if (managedAccess) {
+                this.enableManagedAccess = true;
+                this.disableManagedAccess = false;
+            } else {
+                this.enableManagedAccess = false;
+                this.disableManagedAccess = true;
+            }
+        }
     }
     
     @Override
