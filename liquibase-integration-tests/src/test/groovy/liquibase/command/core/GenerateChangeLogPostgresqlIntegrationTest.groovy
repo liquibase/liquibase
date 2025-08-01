@@ -10,6 +10,8 @@ import liquibase.exception.CommandExecutionException
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
+import liquibase.ui.ConsoleUIService
+import liquibase.ui.UIService
 import liquibase.util.FileUtil
 import spock.lang.Shared
 import spock.lang.Specification
@@ -73,6 +75,43 @@ INSERT INTO "public"."TEST" ("afoo", "bfoo", "foo", "fool") VALUES ('AFOO', 'BFO
 
         cleanup:
         outputFile.delete()
+    }
+
+    def "Should not show message saying that no changesets were generated"() {
+        given:
+        db.executeSql("""
+CREATE TABLE "public"."TEST2" (
+    AFOO VARCHAR(4),
+    BFOO VARCHAR(4),
+    FOO  VARCHAR(4),
+    FOOL VARCHAR(4)
+);
+INSERT INTO "public"."TEST2" (AFOO, BFOO, FOO, FOOL) VALUES ('AFOO', 'BFOO', 'FOO', 'FOOL');
+COMMIT;
+""")
+
+        when:
+        def outputFileName = 'test/test-classes/output.postgresql.sql'
+        OutputStream os = new ByteArrayOutputStream()
+        PrintStream printStream = new PrintStream(os)
+        UIService uiService = Scope.getCurrentScope().getUI()
+        ConsoleUIService consoleUIService = (ConsoleUIService)uiService
+        consoleUIService.setOutputStream(printStream)
+        callGenerateChangeLog (outputFileName, null, null)
+
+        then:
+        def outputFile = new File(outputFileName)
+        outputFile.exists()
+        def contents = FileUtil.getContents(outputFile)
+        contents.contains("""
+INSERT INTO "public"."TEST2" ("afoo", "bfoo", "foo", "fool") VALUES ('AFOO', 'BFOO', 'FOO', 'FOOL');
+"""
+        )
+
+        cleanup:
+        outputFile.delete()
+        ! os.toString().contains("Changelog not generated. There are no changesets to write")
+        os.toString().contains("Generated changelog written to test/test-classes/output.postgresql.sql")
     }
 
     def "Should export database table TEST by applying includeObjects filter"() {
