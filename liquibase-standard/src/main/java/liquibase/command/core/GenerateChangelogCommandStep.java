@@ -193,7 +193,7 @@ public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
      *
      */
     private static boolean hasMissingObjects(DiffResult diffResult) {
-        if (diffResult.getChangedObjects().size() > 2) {
+        if (diffResult.getMissingObjects().size() > 2) {
             return true;
         }
         DatabaseObject next = diffResult.getMissingObjects().iterator().next();
