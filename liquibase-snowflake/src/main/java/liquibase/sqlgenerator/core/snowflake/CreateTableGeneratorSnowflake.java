@@ -44,6 +44,12 @@ public class CreateTableGeneratorSnowflake extends CreateTableGenerator {
 
     @Override
     public Sql[] generateSql(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        // Check validation first - prevent generating invalid SQL
+        ValidationErrors errors = validate(statement, database, sqlGeneratorChain);
+        if (errors.hasErrors()) {
+            throw new RuntimeException("Validation failed for CreateTable: " + errors.toString());
+        }
+        
         // First get the standard CREATE TABLE SQL
         Sql[] baseSql = super.generateSql(statement, database, sqlGeneratorChain);
         

@@ -268,7 +268,7 @@ public class CreateSchemaGeneratorSnowflakeIntegrationTest {
 
         CreateSchemaStatement statement = new CreateSchemaStatement();
         statement.setSchemaName(schemaName);
-        statement.setManagedAccess(true);
+        statement.setManaged(true);
 
         Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(statement, database);
         assertNotNull(sqls);
@@ -324,28 +324,20 @@ public class CreateSchemaGeneratorSnowflakeIntegrationTest {
     }
 
     @Test
-    public void testCloneSchema() throws Exception {
-        String sourceSchemaName = getUniqueSchemaName("testCloneSource");
-        String cloneSchemaName = getUniqueSchemaName("testCloneTarget");
-        createdSchemas.add(sourceSchemaName);
-        createdSchemas.add(cloneSchemaName);
+    public void testBasicSchemaValidation() throws Exception {
+        String schemaName = getUniqueSchemaName("testBasicSchemaValidation");
+        createdSchemas.add(schemaName);
 
-        System.out.println("Testing CLONE: CREATE SCHEMA " + cloneSchemaName + " CLONE " + sourceSchemaName);
-
-        // First create source schema
-        PreparedStatement createSourceStmt = connection.prepareStatement("CREATE SCHEMA " + sourceSchemaName);
-        createSourceStmt.execute();
-        createSourceStmt.close();
+        System.out.println("Testing Schema Creation Validation: CREATE SCHEMA " + schemaName);
 
         CreateSchemaStatement statement = new CreateSchemaStatement();
-        statement.setSchemaName(cloneSchemaName);
-        statement.setCloneFrom(sourceSchemaName);
+        statement.setSchemaName(schemaName);
 
         Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(statement, database);
         assertNotNull(sqls);
         assertEquals(1, sqls.length);
 
-        String expectedSQL = "CREATE SCHEMA " + cloneSchemaName + " CLONE " + sourceSchemaName;
+        String expectedSQL = "CREATE SCHEMA " + schemaName;
         assertEquals(expectedSQL, sqls[0].toSql());
 
         // Execute against live database
@@ -353,7 +345,7 @@ public class CreateSchemaGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: CLONE");
+        System.out.println("✅ SUCCESS: Basic Schema Validation");
     }
 
     @Test

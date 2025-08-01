@@ -5,13 +5,18 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.core.SnowflakeDatabase;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
-import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.DirectoryResourceAccessor;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.File;
+import java.io.FileWriter;
+import java.nio.file.Path;
 
 public class AlterSchemaXmlParsingTest {
+
+    @TempDir
+    Path tempDir;
 
     @Test
     public void testUnsetCommentXmlParsing() throws Exception {
@@ -31,23 +36,25 @@ public class AlterSchemaXmlParsingTest {
         XMLChangeLogSAXParser parser = new XMLChangeLogSAXParser();
         SnowflakeDatabase database = new SnowflakeDatabase();
         
-        try (InputStream is = new ByteArrayInputStream(xml.getBytes())) {
-            DatabaseChangeLog changeLog = parser.parse(
-                "test.xml", 
-                new ChangeLogParameters(database), 
-                new ClassLoaderResourceAccessor()
-            );
-            
-            System.out.println("Parsed successfully! Found " + changeLog.getChangeSets().size() + " changesets");
-            
-            if (!changeLog.getChangeSets().isEmpty()) {
-                AlterSchemaChange change = (AlterSchemaChange) changeLog.getChangeSets().get(0).getChanges().get(0);
-                System.out.println("unsetComment value: " + change.getUnsetComment());
-            }
-            
-        } catch (ChangeLogParseException e) {
-            System.out.println("Parse error: " + e.getMessage());
-            throw e;
+        // Write XML to temporary file
+        File xmlFile = new File(tempDir.toFile(), "test.xml");
+        try (FileWriter writer = new FileWriter(xmlFile)) {
+            writer.write(xml);
+        }
+        
+        DirectoryResourceAccessor resourceAccessor = new DirectoryResourceAccessor(tempDir.toFile());
+        
+        DatabaseChangeLog changeLog = parser.parse(
+            "test.xml", 
+            new ChangeLogParameters(database), 
+            resourceAccessor
+        );
+        
+        System.out.println("Parsed successfully! Found " + changeLog.getChangeSets().size() + " changesets");
+        
+        if (!changeLog.getChangeSets().isEmpty()) {
+            AlterSchemaChange change = (AlterSchemaChange) changeLog.getChangeSets().get(0).getChanges().get(0);
+            System.out.println("unsetComment value: " + change.getUnsetComment());
         }
     }
 
@@ -69,23 +76,25 @@ public class AlterSchemaXmlParsingTest {
         XMLChangeLogSAXParser parser = new XMLChangeLogSAXParser();
         SnowflakeDatabase database = new SnowflakeDatabase();
         
-        try (InputStream is = new ByteArrayInputStream(xml.getBytes())) {
-            DatabaseChangeLog changeLog = parser.parse(
-                "test.xml", 
-                new ChangeLogParameters(database), 
-                new ClassLoaderResourceAccessor()
-            );
-            
-            System.out.println("Parsed successfully! Found " + changeLog.getChangeSets().size() + " changesets");
-            
-            if (!changeLog.getChangeSets().isEmpty()) {
-                AlterSchemaChange change = (AlterSchemaChange) changeLog.getChangeSets().get(0).getChanges().get(0);
-                System.out.println("unsetDataRetentionTimeInDays value: " + change.getUnsetDataRetentionTimeInDays());
-            }
-            
-        } catch (ChangeLogParseException e) {
-            System.out.println("Parse error: " + e.getMessage());
-            throw e;
+        // Write XML to temporary file
+        File xmlFile = new File(tempDir.toFile(), "test.xml");
+        try (FileWriter writer = new FileWriter(xmlFile)) {
+            writer.write(xml);
+        }
+        
+        DirectoryResourceAccessor resourceAccessor = new DirectoryResourceAccessor(tempDir.toFile());
+        
+        DatabaseChangeLog changeLog = parser.parse(
+            "test.xml", 
+            new ChangeLogParameters(database), 
+            resourceAccessor
+        );
+        
+        System.out.println("Parsed successfully! Found " + changeLog.getChangeSets().size() + " changesets");
+        
+        if (!changeLog.getChangeSets().isEmpty()) {
+            AlterSchemaChange change = (AlterSchemaChange) changeLog.getChangeSets().get(0).getChanges().get(0);
+            System.out.println("unsetDataRetentionTimeInDays value: " + change.getUnsetDataRetentionTimeInDays());
         }
     }
 }

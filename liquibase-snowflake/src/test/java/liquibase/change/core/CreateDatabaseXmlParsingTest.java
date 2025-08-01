@@ -6,12 +6,15 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.core.SnowflakeDatabase;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.ResourceAccessor;
+import liquibase.resource.DirectoryResourceAccessor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,14 +25,15 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("CreateDatabase XML Parsing")
 public class CreateDatabaseXmlParsingTest {
     
+    @TempDir
+    Path tempDir;
+    
     private XMLChangeLogSAXParser parser;
-    private ResourceAccessor resourceAccessor;
     private SnowflakeDatabase database;
     
     @BeforeEach
     void setUp() {
         parser = new XMLChangeLogSAXParser();
-        resourceAccessor = new ClassLoaderResourceAccessor();
         database = new SnowflakeDatabase();
     }
     
@@ -50,29 +54,29 @@ public class CreateDatabaseXmlParsingTest {
             "    </changeSet>\n" +
             "</databaseChangeLog>";
         
-        // Save to a temporary file for parsing
-        java.nio.file.Path tempFile = java.nio.file.Files.createTempFile("test-", ".xml");
-        java.nio.file.Files.write(tempFile, xml.getBytes());
-        
-        try {
-            DatabaseChangeLog changeLog = parser.parse(tempFile.toString(), 
-                new ChangeLogParameters(database), resourceAccessor);
-            
-            assertNotNull(changeLog);
-            List<ChangeSet> changeSets = changeLog.getChangeSets();
-            assertEquals(1, changeSets.size());
-            
-            ChangeSet changeSet = changeSets.get(0);
-            assertEquals(1, changeSet.getChanges().size());
-            
-            Change change = changeSet.getChanges().get(0);
-            assertTrue(change instanceof CreateDatabaseChange);
-            
-            CreateDatabaseChange createDb = (CreateDatabaseChange) change;
-            assertEquals("TEST_DB", createDb.getDatabaseName());
-        } finally {
-            java.nio.file.Files.deleteIfExists(tempFile);
+        // Write XML to temporary file
+        File xmlFile = new File(tempDir.toFile(), "test.xml");
+        try (FileWriter writer = new FileWriter(xmlFile)) {
+            writer.write(xml);
         }
+        
+        DirectoryResourceAccessor resourceAccessor = new DirectoryResourceAccessor(tempDir.toFile());
+        
+        DatabaseChangeLog changeLog = parser.parse("test.xml", 
+            new ChangeLogParameters(database), resourceAccessor);
+        
+        assertNotNull(changeLog);
+        List<ChangeSet> changeSets = changeLog.getChangeSets();
+        assertEquals(1, changeSets.size());
+        
+        ChangeSet changeSet = changeSets.get(0);
+        assertEquals(1, changeSet.getChanges().size());
+        
+        Change change = changeSet.getChanges().get(0);
+        assertTrue(change instanceof CreateDatabaseChange);
+        
+        CreateDatabaseChange createDb = (CreateDatabaseChange) change;
+        assertEquals("TEST_DB", createDb.getDatabaseName());
     }
     
     @Test
@@ -94,31 +98,30 @@ public class CreateDatabaseXmlParsingTest {
             "                                  transient=\"false\"\n" +
             "                                  defaultDdlCollation=\"en-ci\"\n" +
             "                                  orReplace=\"true\"\n" +
-            "                                  ifNotExists=\"false\"\n" +
             "                                  cloneFrom=\"SOURCE_DB\"/>\n" +
             "    </changeSet>\n" +
             "</databaseChangeLog>";
         
-        java.nio.file.Path tempFile = java.nio.file.Files.createTempFile("test-", ".xml");
-        java.nio.file.Files.write(tempFile, xml.getBytes());
-        
-        try {
-            DatabaseChangeLog changeLog = parser.parse(tempFile.toString(), 
-                new ChangeLogParameters(database), resourceAccessor);
-            
-            CreateDatabaseChange createDb = (CreateDatabaseChange) changeLog.getChangeSets().get(0).getChanges().get(0);
-            
-            assertEquals("FULL_DB", createDb.getDatabaseName());
-            assertEquals("Test database", createDb.getComment());
-            assertEquals("7", createDb.getDataRetentionTimeInDays());
-            assertEquals("30", createDb.getMaxDataExtensionTimeInDays());
-            assertEquals(false, createDb.getTransient());
-            assertEquals("en-ci", createDb.getDefaultDdlCollation());
-            assertEquals(true, createDb.getOrReplace());
-            assertEquals(false, createDb.getIfNotExists());
-            assertEquals("SOURCE_DB", createDb.getCloneFrom());
-        } finally {
-            java.nio.file.Files.deleteIfExists(tempFile);
+        // Write XML to temporary file
+        File xmlFile = new File(tempDir.toFile(), "test.xml");
+        try (FileWriter writer = new FileWriter(xmlFile)) {
+            writer.write(xml);
         }
+        
+        DirectoryResourceAccessor resourceAccessor = new DirectoryResourceAccessor(tempDir.toFile());
+        
+        DatabaseChangeLog changeLog = parser.parse("test.xml", 
+            new ChangeLogParameters(database), resourceAccessor);
+        
+        CreateDatabaseChange createDb = (CreateDatabaseChange) changeLog.getChangeSets().get(0).getChanges().get(0);
+        
+        assertEquals("FULL_DB", createDb.getDatabaseName());
+        assertEquals("Test database", createDb.getComment());
+        assertEquals("7", createDb.getDataRetentionTimeInDays());
+        assertEquals("30", createDb.getMaxDataExtensionTimeInDays());
+        assertEquals(false, createDb.getTransient());
+        assertEquals("en-ci", createDb.getDefaultDdlCollation());
+        assertEquals(true, createDb.getOrReplace());
+        assertEquals("SOURCE_DB", createDb.getCloneFrom());
     }
 }

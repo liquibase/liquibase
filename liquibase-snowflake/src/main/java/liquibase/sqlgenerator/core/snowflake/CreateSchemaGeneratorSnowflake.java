@@ -29,9 +29,7 @@ public class CreateSchemaGeneratorSnowflake extends AbstractSqlGenerator<CreateS
     public ValidationErrors validate(CreateSchemaStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors errors = new ValidationErrors();
         
-        if (statement.getSchemaName() == null || statement.getSchemaName().trim().isEmpty()) {
-            errors.addError("schemaName is required");
-        }
+        errors.checkRequiredField("schemaName", statement.getSchemaName());
         
         // Validate that orReplace and ifNotExists are not both set
         if (Boolean.TRUE.equals(statement.getOrReplace()) && Boolean.TRUE.equals(statement.getIfNotExists())) {
@@ -43,6 +41,12 @@ public class CreateSchemaGeneratorSnowflake extends AbstractSqlGenerator<CreateS
 
     @Override
     public Sql[] generateSql(CreateSchemaStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        // Check validation first - prevent generating invalid SQL
+        ValidationErrors errors = validate(statement, database, sqlGeneratorChain);
+        if (errors.hasErrors()) {
+            throw new RuntimeException("Validation failed for CreateSchema: " + errors.toString());
+        }
+        
         StringBuilder sql = new StringBuilder("CREATE ");
         
         // Add OR REPLACE if specified

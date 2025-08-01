@@ -24,9 +24,7 @@ public class CreateDatabaseGeneratorSnowflake extends AbstractSqlGenerator<Creat
     public ValidationErrors validate(CreateDatabaseStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors errors = new ValidationErrors();
         
-        if (statement.getDatabaseName() == null || statement.getDatabaseName().trim().isEmpty()) {
-            errors.addError("databaseName is required");
-        }
+        errors.checkRequiredField("databaseName", statement.getDatabaseName());
         
         // Validate that orReplace and ifNotExists are not both set
         if (Boolean.TRUE.equals(statement.getOrReplace()) && Boolean.TRUE.equals(statement.getIfNotExists())) {
@@ -50,6 +48,12 @@ public class CreateDatabaseGeneratorSnowflake extends AbstractSqlGenerator<Creat
 
     @Override
     public Sql[] generateSql(CreateDatabaseStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        // Check validation first - prevent generating invalid SQL
+        ValidationErrors errors = validate(statement, database, sqlGeneratorChain);
+        if (errors.hasErrors()) {
+            throw new RuntimeException("Validation failed for CreateDatabase: " + errors.toString());
+        }
+        
         StringBuilder sql = new StringBuilder("CREATE ");
         
         // OR REPLACE must come after CREATE but before TRANSIENT

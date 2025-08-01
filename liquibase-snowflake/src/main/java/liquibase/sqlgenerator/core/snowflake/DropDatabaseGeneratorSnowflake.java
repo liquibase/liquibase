@@ -21,9 +21,7 @@ public class DropDatabaseGeneratorSnowflake extends AbstractSqlGenerator<DropDat
     public ValidationErrors validate(DropDatabaseStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors errors = new ValidationErrors();
         
-        if (statement.getDatabaseName() == null || statement.getDatabaseName().trim().isEmpty()) {
-            errors.addError("databaseName is required");
-        }
+        errors.checkRequiredField("databaseName", statement.getDatabaseName());
         
         if (statement.getCascade() != null && statement.getCascade() && 
             statement.getRestrict() != null && statement.getRestrict()) {
@@ -35,6 +33,12 @@ public class DropDatabaseGeneratorSnowflake extends AbstractSqlGenerator<DropDat
 
     @Override
     public Sql[] generateSql(DropDatabaseStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        // Check validation first - prevent generating invalid SQL
+        ValidationErrors errors = validate(statement, database, sqlGeneratorChain);
+        if (errors.hasErrors()) {
+            throw new RuntimeException("Validation failed for DropDatabase: " + errors.toString());
+        }
+        
         StringBuilder sql = new StringBuilder("DROP DATABASE ");
         
         if (statement.getIfExists() != null && statement.getIfExists()) {

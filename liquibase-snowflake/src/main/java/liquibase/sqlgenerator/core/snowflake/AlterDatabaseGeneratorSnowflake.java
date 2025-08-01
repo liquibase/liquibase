@@ -24,9 +24,7 @@ public class AlterDatabaseGeneratorSnowflake extends AbstractSqlGenerator<AlterD
     public ValidationErrors validate(AlterDatabaseStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors errors = new ValidationErrors();
         
-        if (statement.getDatabaseName() == null || statement.getDatabaseName().trim().isEmpty()) {
-            errors.addError("databaseName is required");
-        }
+        errors.checkRequiredField("databaseName", statement.getDatabaseName());
         
         // At least one change must be specified
         if (statement.getNewName() == null && 
@@ -47,6 +45,12 @@ public class AlterDatabaseGeneratorSnowflake extends AbstractSqlGenerator<AlterD
 
     @Override
     public Sql[] generateSql(AlterDatabaseStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        // Check validation first - prevent generating invalid SQL
+        ValidationErrors errors = validate(statement, database, sqlGeneratorChain);
+        if (errors.hasErrors()) {
+            throw new RuntimeException("Validation failed for AlterDatabase: " + errors.toString());
+        }
+        
         List<Sql> sqlList = new ArrayList<>();
         
         // Handle RENAME TO separately as it requires a different syntax

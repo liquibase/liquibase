@@ -21,9 +21,7 @@ public class DropSchemaGeneratorSnowflake extends AbstractSqlGenerator<DropSchem
     public ValidationErrors validate(DropSchemaStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors errors = new ValidationErrors();
         
-        if (statement.getSchemaName() == null || statement.getSchemaName().trim().isEmpty()) {
-            errors.addError("schemaName is required");
-        }
+        errors.checkRequiredField("schemaName", statement.getSchemaName());
         
         if (statement.getCascade() != null && statement.getCascade() && 
             statement.getRestrict() != null && statement.getRestrict()) {
@@ -35,6 +33,12 @@ public class DropSchemaGeneratorSnowflake extends AbstractSqlGenerator<DropSchem
 
     @Override
     public Sql[] generateSql(DropSchemaStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        // Check validation first - prevent generating invalid SQL
+        ValidationErrors errors = validate(statement, database, sqlGeneratorChain);
+        if (errors.hasErrors()) {
+            throw new RuntimeException("Validation failed for DropSchema: " + errors.toString());
+        }
+        
         StringBuilder sql = new StringBuilder("DROP SCHEMA ");
         
         if (statement.getIfExists() != null && statement.getIfExists()) {

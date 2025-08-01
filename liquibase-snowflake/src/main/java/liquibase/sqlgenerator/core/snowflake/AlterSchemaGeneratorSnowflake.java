@@ -24,9 +24,7 @@ public class AlterSchemaGeneratorSnowflake extends AbstractSqlGenerator<AlterSch
     public ValidationErrors validate(AlterSchemaStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors errors = new ValidationErrors();
         
-        if (statement.getSchemaName() == null || statement.getSchemaName().trim().isEmpty()) {
-            errors.addError("schemaName is required");
-        }
+        errors.checkRequiredField("schemaName", statement.getSchemaName());
         
         // At least one change must be specified
         if (statement.getNewName() == null && 
@@ -51,6 +49,12 @@ public class AlterSchemaGeneratorSnowflake extends AbstractSqlGenerator<AlterSch
 
     @Override
     public Sql[] generateSql(AlterSchemaStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        // Check validation first - prevent generating invalid SQL
+        ValidationErrors errors = validate(statement, database, sqlGeneratorChain);
+        if (errors.hasErrors()) {
+            throw new RuntimeException("Validation failed for AlterSchema: " + errors.toString());
+        }
+        
         List<Sql> sqlList = new ArrayList<>();
         
         // Handle RENAME TO separately as it requires a different syntax

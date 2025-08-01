@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -52,6 +53,12 @@ public class CreateSequenceGeneratorSnowflake extends CreateSequenceGenerator{
 
     @Override
     public Sql[] generateSql(CreateSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        // Check validation first - prevent generating invalid SQL
+        ValidationErrors errors = validate(statement, database, sqlGeneratorChain);
+        if (errors.hasErrors()) {
+            throw new RuntimeException("Validation failed for CreateSequence: " + errors.toString());
+        }
+        
         StringBuilder queryStringBuilder = new StringBuilder();
         
         // Handle OR REPLACE and IF NOT EXISTS for Snowflake-specific statements
@@ -92,7 +99,7 @@ public class CreateSequenceGeneratorSnowflake extends CreateSequenceGenerator{
             }
             
         } else {
-            // Standard sequence creation - now with ORDER support!
+            // Standard sequence creation - now with full Snowflake support!
             queryStringBuilder.append("CREATE SEQUENCE ");
             queryStringBuilder.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
             
