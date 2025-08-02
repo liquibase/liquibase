@@ -52,6 +52,8 @@
             <xsd:attribute name="action" type="warehouseAction"/>
             <xsd:attribute name="unsetResourceMonitor" type="xsd:boolean"/>
             <xsd:attribute name="unsetComment" type="xsd:boolean"/>
+            <xsd:attribute name="operationType" type="xsd:string"/>
+            <xsd:attribute name="warehouseTag" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -67,6 +69,7 @@
         <xsd:complexType>
             <xsd:attribute name="databaseName" type="xsd:string" use="required"/>
             <xsd:attribute name="cloneFrom" type="xsd:string"/>
+            <xsd:attribute name="fromDatabase" type="xsd:string"/>
             <xsd:attribute name="comment" type="xsd:string"/>
             <xsd:attribute name="dataRetentionTimeInDays" type="xsd:int"/>
             <xsd:attribute name="maxDataExtensionTimeInDays" type="xsd:int"/>
@@ -74,6 +77,14 @@
             <xsd:attribute name="defaultDdlCollation" type="xsd:string"/>
             <xsd:attribute name="tag" type="xsd:string"/>
             <xsd:attribute name="orReplace" type="xsd:boolean"/>
+            <xsd:attribute name="ifNotExists" type="xsd:boolean"/>
+            <xsd:attribute name="externalVolume" type="xsd:string"/>
+            <xsd:attribute name="catalog" type="xsd:string"/>
+            <xsd:attribute name="replaceInvalidCharacters" type="xsd:boolean"/>
+            <xsd:attribute name="storageSerializationPolicy" type="xsd:string"/>
+            <xsd:attribute name="catalogSync" type="xsd:string"/>
+            <xsd:attribute name="catalogSyncNamespaceMode" type="xsd:string"/>
+            <xsd:attribute name="catalogSyncNamespaceFlattenDelimiter" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -93,6 +104,11 @@
             <xsd:attribute name="enableReplication" type="xsd:boolean"/>
             <xsd:attribute name="replicationAccounts" type="xsd:string"/>
             <xsd:attribute name="swapWith" type="xsd:string"/>
+            <xsd:attribute name="replaceComment" type="xsd:boolean"/>
+            <xsd:attribute name="newDefaultDdlCollation" type="xsd:string"/>
+            <xsd:attribute name="dropComment" type="xsd:boolean"/>
+            <xsd:attribute name="operationType" type="xsd:string"/>
+            <xsd:attribute name="newMaxDataExtensionTimeInDays" type="xsd:int"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -119,6 +135,13 @@
             <xsd:attribute name="defaultDdlCollation" type="xsd:string"/>
             <xsd:attribute name="tag" type="xsd:string"/>
             <xsd:attribute name="orReplace" type="xsd:boolean"/>
+            <xsd:attribute name="ifNotExists" type="xsd:boolean"/>
+            <xsd:attribute name="pipeExecutionPaused" type="xsd:boolean"/>
+            <xsd:attribute name="externalVolume" type="xsd:string"/>
+            <xsd:attribute name="catalog" type="xsd:string"/>
+            <xsd:attribute name="replaceInvalidCharacters" type="xsd:boolean"/>
+            <xsd:attribute name="classificationProfile" type="xsd:string"/>
+            <xsd:attribute name="storageSerializationPolicy" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -141,6 +164,10 @@
             <xsd:attribute name="unsetDefaultDdlCollation" type="xsd:boolean"/>
             <xsd:attribute name="unsetPipeExecutionPaused" type="xsd:boolean"/>
             <xsd:attribute name="unsetComment" type="xsd:boolean"/>
+            <xsd:attribute name="dataRetentionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+            <xsd:attribute name="operationType" type="xsd:string"/>
+            <xsd:attribute name="managedAccess" type="xsd:boolean"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -150,6 +177,7 @@
             <xsd:attribute name="databaseName" type="xsd:string"/>
             <xsd:attribute name="ifExists" type="xsd:boolean"/>
             <xsd:attribute name="cascade" type="xsd:boolean"/>
+            <xsd:attribute name="restrict" type="xsd:boolean"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -188,6 +216,9 @@
         <xsd:attribute name="stageCopyOptions" type="xsd:string"/>
         <xsd:attribute name="defaultDdlCollation" type="xsd:string"/>
         <xsd:attribute name="tag" type="xsd:string"/>
+        <xsd:attribute name="rowAccessPolicy" type="xsd:string"/>
+        <xsd:attribute name="aggregationPolicy" type="xsd:string"/>
+        <xsd:attribute name="projectionPolicy" type="xsd:string"/>
     </xsd:attributeGroup>
 
     <!-- Sequence Operations (Snowflake-specific) -->
@@ -204,6 +235,7 @@
             <xsd:attribute name="cacheSize" type="xsd:string"/>
             <xsd:attribute name="dataType" type="xsd:string"/>
             <xsd:attribute name="order" type="xsd:boolean"/>
+            <xsd:attribute name="ordered" type="xsd:boolean"/>
             <xsd:attribute name="comment" type="xsd:string"/>
             <xsd:attribute name="orReplace" type="xsd:boolean"/>
             <xsd:attribute name="ifNotExists" type="xsd:boolean"/>

@@ -75,6 +75,7 @@ DROP SCHEMA IF EXISTS <schema_name> RESTRICT;
 | ifExists | Suppress errors if schema doesn't exist | Boolean | Optional | false | true/false | None | None | HIGH | Prevents errors for idempotent operations |
 | cascade | Drop schema and all contained objects | Boolean | Optional | false | true/false | Cannot be used with restrict=true | Mutually exclusive with restrict | HIGH | Forces deletion of all contents |
 | restrict | Fail if schema contains objects | Boolean | Optional | false | true/false | Cannot be used with cascade=true | Mutually exclusive with cascade | HIGH | Default behavior when neither specified |
+| databaseName | Database name for schema | String | Optional | null | Valid database identifier | Must exist if specified | None | HIGH | Schema location identifier |
 
 ## 3. Mutual Exclusivity Rules
 
@@ -158,6 +159,16 @@ DROP SCHEMA current_session_schema;
 ```
 **Expected Behavior**: Error thrown about cannot drop current schema
 **Test Validation**: Verify connection context validation error
+
+### Example 9: Drop Schema with Database Name
+```xml
+<dropSchema schemaName="target_schema"
+            databaseName="my_database"
+            ifExists="true"
+            cascade="true"/>
+```
+**Expected Behavior**: Drop schema in specific database with CASCADE behavior
+**Test Validation**: Verify database-qualified schema deletion
 
 ## TEST_SCENARIO_MATRIX
 

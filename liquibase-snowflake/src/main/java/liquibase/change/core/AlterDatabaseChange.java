@@ -33,6 +33,12 @@ public class AlterDatabaseChange extends AbstractChange {
     private Boolean unsetMaxDataExtensionTimeInDays;
     private Boolean unsetDefaultDdlCollation;
     private Boolean unsetComment;
+    // Missing parameters from TDD test
+    private String defaultDdlCollation;
+    private String enableReplication;
+    private String replicationAccounts;
+    private String maxDataExtensionTimeInDays;
+    private String swapWith;
 
     @DatabaseChangeProperty(description = "Name of the database to alter", requiredForDatabase = "snowflake")
     public String getDatabaseName() {
@@ -167,6 +173,11 @@ public class AlterDatabaseChange extends AbstractChange {
         statement.setUnsetMaxDataExtensionTimeInDays(getUnsetMaxDataExtensionTimeInDays());
         statement.setUnsetDefaultDdlCollation(getUnsetDefaultDdlCollation());
         statement.setUnsetComment(getUnsetComment());
+        statement.setDefaultDdlCollation(getDefaultDdlCollation());
+        statement.setEnableReplication(getEnableReplication());
+        statement.setReplicationAccounts(getReplicationAccounts());
+        statement.setMaxDataExtensionTimeInDays(getMaxDataExtensionTimeInDays());
+        statement.setSwapWith(getSwapWith());
         
         // Enhanced Phase 2 API: Set explicit operation type if provided
         if (getOperationType() != null && !getOperationType().trim().isEmpty()) {
@@ -250,6 +261,51 @@ public class AlterDatabaseChange extends AbstractChange {
 
     public void setOperationType(String operationType) {
         this.operationType = operationType;
+    }
+
+    @DatabaseChangeProperty(description = "Description for defaultDdlCollation")
+    public String getDefaultDdlCollation() {
+        return defaultDdlCollation;
+    }
+
+    public void setDefaultDdlCollation(String defaultDdlCollation) {
+        this.defaultDdlCollation = defaultDdlCollation;
+    }
+
+    @DatabaseChangeProperty(description = "Description for enableReplication")
+    public String getEnableReplication() {
+        return enableReplication;
+    }
+
+    public void setEnableReplication(String enableReplication) {
+        this.enableReplication = enableReplication;
+    }
+
+    @DatabaseChangeProperty(description = "Description for replicationAccounts")
+    public String getReplicationAccounts() {
+        return replicationAccounts;
+    }
+
+    public void setReplicationAccounts(String replicationAccounts) {
+        this.replicationAccounts = replicationAccounts;
+    }
+
+    @DatabaseChangeProperty(description = "Description for maxDataExtensionTimeInDays")
+    public String getMaxDataExtensionTimeInDays() {
+        return maxDataExtensionTimeInDays;
+    }
+
+    public void setMaxDataExtensionTimeInDays(String maxDataExtensionTimeInDays) {
+        this.maxDataExtensionTimeInDays = maxDataExtensionTimeInDays;
+    }
+
+    @DatabaseChangeProperty(description = "Description for swapWith")
+    public String getSwapWith() {
+        return swapWith;
+    }
+
+    public void setSwapWith(String swapWith) {
+        this.swapWith = swapWith;
     }
 
     @Override

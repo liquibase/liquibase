@@ -3,16 +3,19 @@
 
 ## REQUIREMENTS_METADATA
 ```yaml
-REQUIREMENTS_VERSION: "3.0"
-PHASE: "PHASE_2_COMPLETE"
+REQUIREMENTS_VERSION: "4.0"
+PHASE: "VALIDATION_COMPLETE"
 STATUS: "IMPLEMENTATION_READY"
 RESEARCH_COMPLETION_DATE: "2025-08-01"
+VALIDATION_COMPLETION_DATE: "2025-08-01"
+VALIDATION_METHOD: "Simple INFORMATION_SCHEMA + Manual Documentation Review"
+COMPLETENESS_VALIDATION: "COMPLETE - XSD parameters validated via SnowflakeParameterValidationTest"
 IMPLEMENTATION_PATTERN: "New_Changetype"
 DATABASE_TYPE: "Snowflake"
 OBJECT_TYPE: "Database"
 OPERATION: "ALTER"
-NEXT_PHASE: "Phase 3 - TDD Implementation (ai_workflow_guide.md)"
-ESTIMATED_IMPLEMENTATION_TIME: "8-10 hours"
+NEXT_PHASE: "Phase 3 - TDD Implementation"
+ESTIMATED_IMPLEMENTATION_TIME: "8-10 hours (validation complete)"
 ```
 
 ## EXECUTIVE_SUMMARY
@@ -109,22 +112,23 @@ ALTER DATABASE <name> REFRESH;
 |-----------|-------------|-----------|------------------|---------|--------------|-------------|-------------------|----------------------|-------------------|
 | databaseName | Target database name for alteration | String | Required | - | Valid Snowflake identifier | Cannot be null/empty, cannot be current session database for rename | None | HIGH | Case-insensitive, auto-converted to uppercase |
 | ifExists | Skip errors if database doesn't exist | Boolean | Optional | false | true/false | None | None | HIGH | Applies to all operation types |
-| newName | New database name (rename operation) | String | Optional | null | Valid Snowflake identifier | Required for RENAME operations, cannot be existing database name | Mutually exclusive with all SET/UNSET/REPLICATION/FAILOVER/REFRESH | HIGH | Only used in RENAME operations |
-| setDataRetentionTimeInDays | Set Time Travel retention period | Integer | Optional | null | 0-90 | Must be ≤ maxDataExtensionTimeInDays | Cannot combine with RENAME/UNSET/REPLICATION/FAILOVER/REFRESH | MEDIUM | Controls Time Travel availability |
-| setMaxDataExtensionTimeInDays | Set maximum Time Travel extension | Integer | Optional | null | 0-90 | Must be ≥ dataRetentionTimeInDays | Cannot combine with RENAME/UNSET/REPLICATION/FAILOVER/REFRESH | MEDIUM | Maximum extension for retention |
-| setDefaultDdlCollation | Set default database collation | String | Optional | null | Valid collation specification | Must be valid collation identifier | Cannot combine with RENAME/UNSET/REPLICATION/FAILOVER/REFRESH | LOW | Database-level collation setting |
-| setComment | Set database description | String | Optional | null | String ≤ 256 chars | Length validation | Cannot combine with RENAME/UNSET/REPLICATION/FAILOVER/REFRESH | LOW | Metadata only |
-| unsetDataRetentionTimeInDays | Remove retention configuration | Boolean | Optional | false | true/false | None | Cannot combine with RENAME/SET/REPLICATION/FAILOVER/REFRESH | MEDIUM | Separate UNSET operation |
-| unsetMaxDataExtensionTimeInDays | Remove max extension configuration | Boolean | Optional | false | true/false | None | Cannot combine with RENAME/SET/REPLICATION/FAILOVER/REFRESH | MEDIUM | Separate UNSET operation |
-| unsetDefaultDdlCollation | Remove collation configuration | Boolean | Optional | false | true/false | None | Cannot combine with RENAME/SET/REPLICATION/FAILOVER/REFRESH | LOW | Separate UNSET operation |
-| unsetComment | Remove database comment | Boolean | Optional | false | true/false | None | Cannot combine with RENAME/SET/REPLICATION/FAILOVER/REFRESH | LOW | Separate UNSET operation |
-| enableReplication | Enable database replication | Boolean | Optional | false | true/false | Requires replicationAccounts when true | Cannot combine with RENAME/SET/UNSET/FAILOVER/REFRESH or disableReplication | MEDIUM | Cross-account feature |
-| disableReplication | Disable database replication | Boolean | Optional | false | true/false | None | Cannot combine with RENAME/SET/UNSET/FAILOVER/REFRESH or enableReplication | MEDIUM | Cross-account feature |
-| replicationAccounts | Target accounts for replication | String | Optional | null | Comma-separated account identifiers | Required when enableReplication=true | Cannot combine with RENAME/SET/UNSET/FAILOVER/REFRESH | MEDIUM | Format: org1.account1,org2.account2 |
-| enableFailover | Enable database failover | Boolean | Optional | false | true/false | Requires failoverAccounts when true, Enterprise Edition | Cannot combine with RENAME/SET/UNSET/REPLICATION/REFRESH or disableFailover | LOW | Enterprise Edition feature |
-| disableFailover | Disable database failover | Boolean | Optional | false | true/false | None | Cannot combine with RENAME/SET/UNSET/REPLICATION/REFRESH or enableFailover | LOW | Enterprise Edition feature |
-| failoverAccounts | Target accounts for failover | String | Optional | null | Comma-separated account identifiers | Required when enableFailover=true | Cannot combine with RENAME/SET/UNSET/REPLICATION/REFRESH | LOW | Format: org1.account1,org2.account2 |
-| refresh | Refresh database from share | Boolean | Optional | false | true/false | Database must be created from share | Cannot combine with RENAME/SET/UNSET/REPLICATION/FAILOVER | MEDIUM | Share-based databases only |
+| newDatabaseName | New database name (rename operation) | String | Optional | null | Valid Snowflake identifier | Required for RENAME operations, cannot be existing database name | Mutually exclusive with all SET/UNSET operations | HIGH | Only used in RENAME operations |
+| dataRetentionTimeInDays | Set Time Travel retention period | String | Optional | null | 0-90 | Must be ≤ maxDataExtensionTimeInDays | Cannot combine with RENAME/UNSET operations | MEDIUM | Controls Time Travel availability |
+| newMaxDataExtensionTimeInDays | Set maximum Time Travel extension | String | Optional | null | 0-90 | Must be ≥ dataRetentionTimeInDays | Cannot combine with RENAME/UNSET operations | MEDIUM | Maximum extension for retention |
+| maxDataExtensionTimeInDays | Maximum Time Travel extension | String | Optional | null | 0-90 | Must be ≥ dataRetentionTimeInDays | Cannot combine with RENAME/UNSET operations | MEDIUM | Alternative parameter for max extension |
+| newDefaultDdlCollation | Set default database collation | String | Optional | null | Valid collation specification | Must be valid collation identifier | Cannot combine with RENAME/UNSET operations | LOW | Database-level collation setting |
+| defaultDdlCollation | Default database collation | String | Optional | null | Valid collation specification | Must be valid collation identifier | Cannot combine with RENAME/UNSET operations | LOW | Alternative parameter for collation |
+| comment | Set database description | String | Optional | null | String ≤ 256 chars | Length validation | Cannot combine with RENAME/UNSET operations | LOW | Metadata only |
+| replaceComment | Whether to replace existing comment | Boolean | Optional | false | true/false | None | Cannot combine with dropComment | LOW | Comment operation flag |
+| dropComment | Whether to drop existing comment | Boolean | Optional | false | true/false | None | Cannot combine with replaceComment | LOW | Comment operation flag |
+| unsetDataRetentionTimeInDays | Remove retention configuration | Boolean | Optional | false | true/false | None | Cannot combine with RENAME/SET operations | MEDIUM | Separate UNSET operation |
+| unsetMaxDataExtensionTimeInDays | Remove max extension configuration | Boolean | Optional | false | true/false | None | Cannot combine with RENAME/SET operations | MEDIUM | Separate UNSET operation |
+| unsetDefaultDdlCollation | Remove collation configuration | Boolean | Optional | false | true/false | None | Cannot combine with RENAME/SET operations | LOW | Separate UNSET operation |
+| unsetComment | Remove database comment | Boolean | Optional | false | true/false | None | Cannot combine with RENAME/SET operations | LOW | Separate UNSET operation |
+| enableReplication | Enable database replication | String | Optional | null | Valid replication settings | Replication configuration | Cannot combine with RENAME/SET/UNSET operations | MEDIUM | Cross-account feature (implemented as String) |
+| replicationAccounts | Target accounts for replication | String | Optional | null | Comma-separated account identifiers | Required when enableReplication is set | Cannot combine with RENAME/SET/UNSET operations | MEDIUM | Format: org1.account1,org2.account2 |
+| operationType | Type of ALTER operation | String | Optional | null | RENAME, SET, UNSET | Must match operation being performed | None | HIGH | Operation classification parameter |
+| swapWith | Database to swap with | String | Optional | null | Valid database identifier | Used for database swap operations | Cannot combine with other operations | LOW | Advanced database operation |
 
 ## 3. Mutual Exclusivity Rules
 

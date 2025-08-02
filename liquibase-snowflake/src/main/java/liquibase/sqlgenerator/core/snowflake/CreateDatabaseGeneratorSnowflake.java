@@ -75,9 +75,11 @@ public class CreateDatabaseGeneratorSnowflake extends AbstractSqlGenerator<Creat
         
         sql.append(database.escapeObjectName(statement.getDatabaseName(), Table.class));
         
-        // Handle CLONE clause
+        // Handle CLONE clause - handle both cloneFrom and fromDatabase (alternative names)
         if (statement.getCloneFrom() != null) {
             sql.append(" CLONE ").append(statement.getCloneFrom());
+        } else if (statement.getFromDatabase() != null) {
+            sql.append(" CLONE ").append(statement.getFromDatabase());
         }
         
         List<String> options = new ArrayList<>();
@@ -94,8 +96,42 @@ public class CreateDatabaseGeneratorSnowflake extends AbstractSqlGenerator<Creat
             options.add("DEFAULT_DDL_COLLATION = '" + statement.getDefaultDdlCollation() + "'");
         }
         
+        if (statement.getExternalVolume() != null) {
+            options.add("EXTERNAL_VOLUME = '" + statement.getExternalVolume() + "'");
+        }
+        
+        if (statement.getCatalog() != null) {
+            options.add("CATALOG = '" + statement.getCatalog() + "'");
+        }
+        
+        if (statement.getReplaceInvalidCharacters() != null) {
+            options.add("REPLACE_INVALID_CHARACTERS = " + statement.getReplaceInvalidCharacters());
+        }
+        
+        if (statement.getStorageSerializationPolicy() != null) {
+            options.add("STORAGE_SERIALIZATION_POLICY = '" + statement.getStorageSerializationPolicy() + "'");
+        }
+        
+        if (statement.getCatalogSync() != null) {
+            options.add("CATALOG_SYNC = '" + statement.getCatalogSync() + "'");
+        }
+        
+        if (statement.getCatalogSyncNamespaceMode() != null) {
+            options.add("CATALOG_SYNC_NAMESPACE_MODE = '" + statement.getCatalogSyncNamespaceMode() + "'");
+        }
+        
+        if (statement.getCatalogSyncNamespaceFlattenDelimiter() != null) {
+            options.add("CATALOG_SYNC_NAMESPACE_FLATTEN_DELIMITER = '" + statement.getCatalogSyncNamespaceFlattenDelimiter() + "'");
+        }
+        
         if (statement.getComment() != null) {
             options.add("COMMENT = '" + statement.getComment().replace("'", "''") + "'");
+        }
+        
+        // Handle TAG clause separately as it has special syntax
+        if (statement.getTag() != null) {
+            // For now, treat as simple string - could be enhanced for key-value pairs later
+            options.add("TAG ('" + statement.getTag() + "')");
         }
         
         if (!options.isEmpty()) {

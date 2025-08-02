@@ -19,6 +19,7 @@ import liquibase.statement.core.DropSchemaStatement;
 public class DropSchemaChange extends AbstractChange {
 
     private String schemaName;
+    private String databaseName;
     private Boolean ifExists;
     private Boolean cascade;
     private Boolean restrict;
@@ -30,6 +31,15 @@ public class DropSchemaChange extends AbstractChange {
 
     public void setSchemaName(String schemaName) {
         this.schemaName = schemaName;
+    }
+
+    @DatabaseChangeProperty(description = "Description for databaseName")
+    public String getDatabaseName() {
+        return databaseName;
+    }
+
+    public void setDatabaseName(String databaseName) {
+        this.databaseName = databaseName;
     }
 
     @DatabaseChangeProperty(description = "Only drop if the schema exists")
@@ -63,6 +73,7 @@ public class DropSchemaChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) {
         DropSchemaStatement statement = new DropSchemaStatement();
         statement.setSchemaName(getSchemaName());
+        statement.setDatabaseName(getDatabaseName());
         statement.setIfExists(getIfExists());
         statement.setCascade(getCascade());
         statement.setRestrict(getRestrict());

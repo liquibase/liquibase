@@ -33,6 +33,12 @@ public class AlterDatabaseStatement extends AbstractSqlStatement {
     private Boolean unsetMaxDataExtensionTimeInDays;
     private Boolean unsetDefaultDdlCollation;
     private Boolean unsetComment;
+    // Missing parameters from TDD test
+    private String defaultDdlCollation;
+    private String enableReplication;
+    private String replicationAccounts;
+    private String maxDataExtensionTimeInDays;
+    private String swapWith;
 
     public String getDatabaseName() {
         return databaseName;
@@ -136,6 +142,46 @@ public class AlterDatabaseStatement extends AbstractSqlStatement {
 
     public void setUnsetComment(Boolean unsetComment) {
         this.unsetComment = unsetComment;
+    }
+
+    public String getDefaultDdlCollation() {
+        return defaultDdlCollation;
+    }
+
+    public void setDefaultDdlCollation(String defaultDdlCollation) {
+        this.defaultDdlCollation = defaultDdlCollation;
+    }
+
+    public String getEnableReplication() {
+        return enableReplication;
+    }
+
+    public void setEnableReplication(String enableReplication) {
+        this.enableReplication = enableReplication;
+    }
+
+    public String getReplicationAccounts() {
+        return replicationAccounts;
+    }
+
+    public void setReplicationAccounts(String replicationAccounts) {
+        this.replicationAccounts = replicationAccounts;
+    }
+
+    public String getMaxDataExtensionTimeInDays() {
+        return maxDataExtensionTimeInDays;
+    }
+
+    public void setMaxDataExtensionTimeInDays(String maxDataExtensionTimeInDays) {
+        this.maxDataExtensionTimeInDays = maxDataExtensionTimeInDays;
+    }
+
+    public String getSwapWith() {
+        return swapWith;
+    }
+
+    public void setSwapWith(String swapWith) {
+        this.swapWith = swapWith;
     }
 
     // Enhanced API methods for sophisticated operation-type-driven architecture

@@ -24,6 +24,7 @@ public class AlterSchemaStatement extends AbstractSqlStatement {
     private OperationType operationType;
     
     private String schemaName;
+    private String databaseName;
     private Boolean ifExists;
     private String newName;
     private String newDataRetentionTimeInDays;
@@ -48,6 +49,14 @@ public class AlterSchemaStatement extends AbstractSqlStatement {
 
     public void setSchemaName(String schemaName) {
         this.schemaName = schemaName;
+    }
+
+    public String getDatabaseName() {
+        return databaseName;
+    }
+
+    public void setDatabaseName(String databaseName) {
+        this.databaseName = databaseName;
     }
 
     public Boolean getIfExists() {

@@ -23,6 +23,7 @@ public class CreateSequenceChangeSnowflake extends CreateSequenceChange {
     
     private String comment;
     private Boolean ordered;  // Use standard Liquibase attribute name
+    private Boolean order;    // XSD also requires this parameter
     private Boolean orReplace;
     private Boolean ifNotExists;
     
@@ -47,6 +48,15 @@ public class CreateSequenceChangeSnowflake extends CreateSequenceChange {
     
     public void setOrdered(Boolean ordered) {
         this.ordered = ordered;
+    }
+    
+    @DatabaseChangeProperty(description = "Description for order")
+    public Boolean getOrder() {
+        return order;
+    }
+    
+    public void setOrder(Boolean order) {
+        this.order = order;
     }
     
     @DatabaseChangeProperty(description = "Whether to use CREATE OR REPLACE SEQUENCE")
@@ -97,6 +107,7 @@ public class CreateSequenceChangeSnowflake extends CreateSequenceChange {
         // Set Snowflake-specific properties
         statement.setComment(getComment());
         statement.setOrdered(isOrdered());
+        statement.setOrder(getOrder());
         statement.setOrReplace(getOrReplace());
         statement.setIfNotExists(getIfNotExists());
         

@@ -33,6 +33,7 @@ public class AlterWarehouseChange extends AbstractChange {
     private String comment;
     private Boolean enableQueryAcceleration;
     private Integer queryAccelerationMaxScaleFactor;
+    private Integer maxConcurrencyLevel;
     private Long statementQueuedTimeoutInSeconds;
     private Long statementTimeoutInSeconds;
     private String warehouseTag;
@@ -166,6 +167,15 @@ public class AlterWarehouseChange extends AbstractChange {
         this.queryAccelerationMaxScaleFactor = queryAccelerationMaxScaleFactor;
     }
 
+    @DatabaseChangeProperty(description = "Description for maxConcurrencyLevel")
+    public Integer getMaxConcurrencyLevel() {
+        return maxConcurrencyLevel;
+    }
+
+    public void setMaxConcurrencyLevel(Integer maxConcurrencyLevel) {
+        this.maxConcurrencyLevel = maxConcurrencyLevel;
+    }
+
     @DatabaseChangeProperty(description = "Timeout in seconds for queued statements")
     public Long getStatementQueuedTimeoutInSeconds() {
         return statementQueuedTimeoutInSeconds;
@@ -237,6 +247,7 @@ public class AlterWarehouseChange extends AbstractChange {
             .setComment(getComment())
             .setEnableQueryAcceleration(getEnableQueryAcceleration())
             .setQueryAccelerationMaxScaleFactor(getQueryAccelerationMaxScaleFactor())
+            .setMaxConcurrencyLevel(getMaxConcurrencyLevel())
             .setStatementQueuedTimeoutInSeconds(getStatementQueuedTimeoutInSeconds())
             .setStatementTimeoutInSeconds(getStatementTimeoutInSeconds())
             .setWarehouseTag(getWarehouseTag())

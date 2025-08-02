@@ -27,6 +27,15 @@ public class CreateDatabaseChange extends AbstractChange {
     private Boolean orReplace;
     private Boolean ifNotExists;
     private String cloneFrom;
+    private String fromDatabase;
+    private String tag;
+    private String externalVolume;
+    private String catalog;
+    private Boolean replaceInvalidCharacters;
+    private String storageSerializationPolicy;
+    private String catalogSync;
+    private String catalogSyncNamespaceMode;
+    private String catalogSyncNamespaceFlattenDelimiter;
 
     @DatabaseChangeProperty(description = "Name of the database to create", requiredForDatabase = "snowflake")
     public String getDatabaseName() {
@@ -109,6 +118,87 @@ public class CreateDatabaseChange extends AbstractChange {
         this.cloneFrom = cloneFrom;
     }
 
+    @DatabaseChangeProperty(description = "Alternative source database name for cloning")
+    public String getFromDatabase() {
+        return fromDatabase;
+    }
+
+    public void setFromDatabase(String fromDatabase) {
+        this.fromDatabase = fromDatabase;
+    }
+
+    @DatabaseChangeProperty(description = "Tag to apply to the database")
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    @DatabaseChangeProperty(description = "External volume for Iceberg tables")
+    public String getExternalVolume() {
+        return externalVolume;
+    }
+
+    public void setExternalVolume(String externalVolume) {
+        this.externalVolume = externalVolume;
+    }
+
+    @DatabaseChangeProperty(description = "Catalog integration for Iceberg tables")
+    public String getCatalog() {
+        return catalog;
+    }
+
+    public void setCatalog(String catalog) {
+        this.catalog = catalog;
+    }
+
+    @DatabaseChangeProperty(description = "Replace invalid UTF-8 characters")
+    public Boolean getReplaceInvalidCharacters() {
+        return replaceInvalidCharacters;
+    }
+
+    public void setReplaceInvalidCharacters(Boolean replaceInvalidCharacters) {
+        this.replaceInvalidCharacters = replaceInvalidCharacters;
+    }
+
+    @DatabaseChangeProperty(description = "Storage serialization policy")
+    public String getStorageSerializationPolicy() {
+        return storageSerializationPolicy;
+    }
+
+    public void setStorageSerializationPolicy(String storageSerializationPolicy) {
+        this.storageSerializationPolicy = storageSerializationPolicy;
+    }
+
+    @DatabaseChangeProperty(description = "Snowflake Open Catalog integration name")
+    public String getCatalogSync() {
+        return catalogSync;
+    }
+
+    public void setCatalogSync(String catalogSync) {
+        this.catalogSync = catalogSync;
+    }
+
+    @DatabaseChangeProperty(description = "Catalog sync namespace mode")
+    public String getCatalogSyncNamespaceMode() {
+        return catalogSyncNamespaceMode;
+    }
+
+    public void setCatalogSyncNamespaceMode(String catalogSyncNamespaceMode) {
+        this.catalogSyncNamespaceMode = catalogSyncNamespaceMode;
+    }
+
+    @DatabaseChangeProperty(description = "Namespace flatten delimiter for catalog sync")
+    public String getCatalogSyncNamespaceFlattenDelimiter() {
+        return catalogSyncNamespaceFlattenDelimiter;
+    }
+
+    public void setCatalogSyncNamespaceFlattenDelimiter(String catalogSyncNamespaceFlattenDelimiter) {
+        this.catalogSyncNamespaceFlattenDelimiter = catalogSyncNamespaceFlattenDelimiter;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
         CreateDatabaseStatement statement = new CreateDatabaseStatement();
@@ -121,6 +211,15 @@ public class CreateDatabaseChange extends AbstractChange {
         statement.setOrReplace(getOrReplace());
         statement.setIfNotExists(getIfNotExists());
         statement.setCloneFrom(getCloneFrom());
+        statement.setFromDatabase(getFromDatabase());
+        statement.setTag(getTag());
+        statement.setExternalVolume(getExternalVolume());
+        statement.setCatalog(getCatalog());
+        statement.setReplaceInvalidCharacters(getReplaceInvalidCharacters());
+        statement.setStorageSerializationPolicy(getStorageSerializationPolicy());
+        statement.setCatalogSync(getCatalogSync());
+        statement.setCatalogSyncNamespaceMode(getCatalogSyncNamespaceMode());
+        statement.setCatalogSyncNamespaceFlattenDelimiter(getCatalogSyncNamespaceFlattenDelimiter());
         
         return new SqlStatement[]{statement};
     }

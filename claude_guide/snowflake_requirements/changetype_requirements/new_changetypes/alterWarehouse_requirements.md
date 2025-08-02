@@ -3,16 +3,19 @@
 
 ## REQUIREMENTS_METADATA
 ```yaml
-REQUIREMENTS_VERSION: "3.0"
-PHASE: "PHASE_2_COMPLETE"
+REQUIREMENTS_VERSION: "4.0"
+PHASE: "VALIDATION_COMPLETE"
 STATUS: "IMPLEMENTATION_READY"
+VALIDATION_COMPLETION_DATE: "2025-08-01"
+VALIDATION_METHOD: "Simple INFORMATION_SCHEMA + Manual Documentation Review"
+COMPLETENESS_VALIDATION: "COMPLETE - XSD parameters validated via SnowflakeParameterValidationTest"
 RESEARCH_COMPLETION_DATE: "2025-08-01"
 IMPLEMENTATION_PATTERN: "New_Changetype"
 DATABASE_TYPE: "Snowflake"
 OBJECT_TYPE: "Warehouse"
 OPERATION: "ALTER"
-NEXT_PHASE: "Phase 3 - TDD Implementation (ai_workflow_guide.md)"
-ESTIMATED_IMPLEMENTATION_TIME: "6-8 hours"
+NEXT_PHASE: "Phase 3 - TDD Implementation"
+ESTIMATED_IMPLEMENTATION_TIME: "6-8 hours (validation complete)"
 ```
 
 ## EXECUTIVE_SUMMARY
@@ -91,23 +94,27 @@ ALTER WAREHOUSE <name> ABORT ALL QUERIES;
 |-----------|-------------|-----------|------------------|---------|--------------|-------------|-------------------|----------------------|-------------------|
 | warehouseName | Target warehouse name | String | Required | - | Valid Snowflake identifier | Cannot be null/empty | None | HIGH | Always required, case-insensitive |
 | ifExists | Skip errors if not exists | Boolean | Optional | false | true/false | None | None | HIGH | Applies to all operation types |
-| newName | New warehouse name (rename) | String | Optional | null | Valid Snowflake identifier | Required for RENAME operations | Mutually exclusive with all SET/UNSET/SUSPEND/RESUME/ABORT | HIGH | Only used in RENAME operations |
-| setWarehouseSize | Resize warehouse | String | Optional | null | XSMALL, SMALL, MEDIUM, LARGE, XLARGE, XXLARGE, XXXLARGE, X4LARGE, X5LARGE, X6LARGE | Must be valid size enum | Cannot combine with RENAME/UNSET/SUSPEND/RESUME/ABORT | HIGH | Triggers warehouse restart |
-| setMaxClusterCount | Set maximum clusters | Integer | Optional | null | 1-10 | Must be ≥ minClusterCount | Cannot combine with RENAME/UNSET/SUSPEND/RESUME/ABORT | MEDIUM | Enterprise Edition required |
-| setMinClusterCount | Set minimum clusters | Integer | Optional | null | 1-10 | Must be ≤ maxClusterCount | Cannot combine with RENAME/UNSET/SUSPEND/RESUME/ABORT | MEDIUM | Enterprise Edition required |
-| setScalingPolicy | Set scaling policy | String | Optional | null | STANDARD, ECONOMY | Must be valid enum | Cannot combine with RENAME/UNSET/SUSPEND/RESUME/ABORT | MEDIUM | Enterprise Edition required |
-| setAutoSuspend | Set auto-suspend timeout | Integer | Optional | null | 0, NULL, or ≥60 | Special validation rules | Cannot combine with RENAME/UNSET/SUSPEND/RESUME/ABORT | HIGH | 0=disabled, NULL=never |
-| setAutoResume | Set auto-resume behavior | Boolean | Optional | null | true/false | None | Cannot combine with RENAME/UNSET/SUSPEND/RESUME/ABORT | HIGH | Common warehouse setting |
-| setResourceMonitor | Assign resource monitor | String | Optional | null | Valid monitor name | Monitor must exist | Cannot combine with RENAME/UNSET/SUSPEND/RESUME/ABORT | MEDIUM | Requires monitor existence |
-| setComment | Set warehouse comment | String | Optional | null | String ≤ 256 chars | Length validation | Cannot combine with RENAME/UNSET/SUSPEND/RESUME/ABORT | LOW | Metadata only |
-| setEnableQueryAcceleration | Enable query acceleration | Boolean | Optional | null | true/false | Enterprise Edition required | Cannot combine with RENAME/UNSET/SUSPEND/RESUME/ABORT | LOW | Enterprise feature |
-| setQueryAccelerationMaxScaleFactor | Set acceleration scale | Integer | Optional | null | 0-100 | Only valid if enableQueryAcceleration=true | Cannot combine with RENAME/UNSET/SUSPEND/RESUME/ABORT | LOW | Requires acceleration enabled |
-| unsetResourceMonitor | Remove resource monitor | Boolean | Optional | false | true/false | None | Cannot combine with RENAME/SET/SUSPEND/RESUME/ABORT | MEDIUM | Separate UNSET operation |
-| unsetComment | Remove comment | Boolean | Optional | false | true/false | None | Cannot combine with RENAME/SET/SUSPEND/RESUME/ABORT | LOW | Separate UNSET operation |
-| suspend | Suspend warehouse | Boolean | Optional | false | true/false | None | Cannot combine with RENAME/SET/UNSET/RESUME/ABORT | HIGH | State management operation |
-| resume | Resume warehouse | Boolean | Optional | false | true/false | None | Cannot combine with RENAME/SET/UNSET/SUSPEND/ABORT | HIGH | State management operation |
-| resumeIfSuspended | Resume only if suspended | Boolean | Optional | false | true/false | Only valid with resume=true | Cannot combine with RENAME/SET/UNSET/SUSPEND/ABORT | HIGH | Conditional resume |
-| abortAllQueries | Abort running queries | Boolean | Optional | false | true/false | None | Cannot combine with RENAME/SET/UNSET/SUSPEND/RESUME | MEDIUM | Administrative operation |
+| newWarehouseName | New warehouse name (rename) | String | Optional | null | Valid Snowflake identifier | Required for RENAME operations | Mutually exclusive with all SET operations | HIGH | Only used in RENAME operations |
+| scalingPolicy | Scaling policy for multi-cluster | String | Optional | null | STANDARD, ECONOMY | Must be valid enum | Cannot combine with RENAME operations | MEDIUM | Enterprise Edition required |
+| warehouseSize | Warehouse compute size | String | Optional | null | XSMALL, SMALL, MEDIUM, LARGE, XLARGE, XXLARGE, XXXLARGE, X4LARGE, X5LARGE, X6LARGE | Must be valid size enum | Cannot combine with RENAME operations | HIGH | Triggers warehouse restart |
+| minClusterCount | Minimum cluster count | Integer | Optional | null | 1-10 | Must be ≤ maxClusterCount | Cannot combine with RENAME operations | MEDIUM | Enterprise Edition required |
+| resourceMonitor | Resource monitor assignment | String | Optional | null | Valid monitor name | Monitor must exist | Cannot combine with RENAME operations | MEDIUM | Requires monitor existence |
+| queryAccelerationMaxScaleFactor | Query acceleration scale factor | Integer | Optional | null | 0-100 | Only valid if enableQueryAcceleration=true | Cannot combine with RENAME operations | LOW | Requires acceleration enabled |
+| maxClusterCount | Maximum cluster count | Integer | Optional | null | 1-10 | Must be ≥ minClusterCount | Cannot combine with RENAME operations | MEDIUM | Enterprise Edition required |
+| enableQueryAcceleration | Enable query acceleration service | Boolean | Optional | null | true/false | Enterprise Edition required | Cannot combine with RENAME operations | LOW | Enterprise feature |
+| statementQueuedTimeoutInSeconds | Statement queue timeout | Integer | Optional | null | Positive integers | Must be > 0 | Cannot combine with RENAME operations | MEDIUM | Query management |
+| statementTimeoutInSeconds | Statement execution timeout | Integer | Optional | null | Positive integers | Must be > 0 | Cannot combine with RENAME operations | MEDIUM | Query management |
+| maxConcurrencyLevel | Maximum concurrent statements | Integer | Optional | null | Positive integers | Must be > 0 | Cannot combine with RENAME operations | MEDIUM | Concurrency control |
+| autoResume | Auto-resume warehouse behavior | Boolean | Optional | null | true/false | None | Cannot combine with RENAME operations | HIGH | Common warehouse setting |
+| newWarehouseName | New warehouse name for rename | String | Optional | null | Valid Snowflake identifier | Required for RENAME operations | Mutually exclusive with all SET operations | HIGH | Only used in RENAME operations |
+| action | Warehouse action to perform | String | Optional | null | Various action types | Must be valid action | Operation type specification | HIGH | Action classification |
+| comment | Warehouse comment | String | Optional | null | String ≤ 256 chars | Length validation | Cannot combine with RENAME operations | LOW | Metadata only |
+| operationType | Type of ALTER operation | String | Optional | null | RENAME, SET, UNSET | Must match operation being performed | None | HIGH | Operation classification parameter |
+| warehouseType | Type of warehouse | String | Optional | null | STANDARD, SNOWPARK-OPTIMIZED | Must be valid type | Cannot combine with RENAME operations | MEDIUM | Warehouse architecture type |
+| warehouseTag | Warehouse tag assignment | String | Optional | null | Valid tag syntax | Must be valid tag format | Cannot combine with RENAME operations | LOW | Object tagging |
+| autoSuspend | Auto-suspend timeout | Integer | Optional | null | 0, NULL, or ≥60 | Special validation rules | Cannot combine with RENAME operations | HIGH | 0=disabled, NULL=never |
+| unsetResourceMonitor | Remove resource monitor assignment | Boolean | Optional | false | true/false | None | Cannot combine with RENAME operations | MEDIUM | UNSET operation for resource monitor |
+| unsetComment | Remove warehouse comment | Boolean | Optional | false | true/false | None | Cannot combine with RENAME operations | LOW | UNSET operation for comment |
 
 ## 3. Mutual Exclusivity Rules
 
@@ -174,13 +181,20 @@ ALTER WAREHOUSE enterprise_warehouse SET
 
 ### Example 4: UNSET Operations for Property Removal
 ```sql
--- Remove resource monitor and comment
+-- Remove resource monitor and comment  
 ALTER WAREHOUSE my_warehouse UNSET
   RESOURCE_MONITOR
   COMMENT;
 ```
 **Expected Behavior**: Resource monitor assignment removed, comment cleared
 **Test Validation**: Verify properties are null/unset in system views
+
+**XML Example with UNSET attributes**:
+```xml
+<alterWarehouse warehouseName="my_warehouse"
+                unsetResourceMonitor="true"
+                unsetComment="true"/>
+```
 
 ### Example 5: Warehouse State Management - Suspend
 ```sql

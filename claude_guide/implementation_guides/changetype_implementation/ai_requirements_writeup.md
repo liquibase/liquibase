@@ -42,31 +42,32 @@ COMPANION_DOCUMENTS:
 ```yaml
 BLOCKING_VALIDATION_2.1:
   TYPE: "RESEARCH_COMPLETENESS_VERIFIED"
-  REQUIREMENT: "Research findings document complete with all validation checkpoints passed"
-  INPUT_VALIDATION: "research_findings_[object].md must exist and be comprehensive"
-  FAILURE_ACTION: "STOP - Return to Phase 1 to complete missing research"
+  REQUIREMENT: "Research findings document complete with all validation checkpoints passed INCLUDING mandatory DDL completeness"
+  INPUT_VALIDATION: "research_findings_[object].md must exist and be comprehensive with DDL completeness status COMPLETE or COMPLETE_WITH_JUSTIFICATIONS"
+  FAILURE_ACTION: "STOP - Return to Phase 1 to complete missing research or achieve DDL completeness"
 
 DOCUMENTATION_ACTIVITIES:
   RESEARCH_VALIDATION:
-    - "Verify research findings document exists and is complete"
-    - "Confirm all Phase 1 validation checkpoints are marked complete"
-    - "Review research findings for completeness and accuracy"
-    - "Identify any gaps or areas needing additional research"
-    - "Validate that research covers all areas needed for implementation"
+    - "Verify research_findings_[object].md exists and is complete"
+    - "Validate all Phase 1 validation checkpoints are passed"
+    - "MANDATORY: Verify DDL completeness validation status is COMPLETE or COMPLETE_WITH_JUSTIFICATIONS"
+    - "Review parameter gap analysis and missing parameter list"
+    - "Validate structured gap report with AI-actionable implementation commands"
     
-  GAP_ANALYSIS:
-    - "Compare research findings against requirements template"
-    - "Identify missing information needed for complete requirements"
-    - "Flag areas where research may need additional investigation"
-    - "Ensure research findings support all required implementation patterns"
-    - "Validate research quality meets standards for requirements creation"
+  DDL_COMPLETENESS_GATE:
+    - "Verify BLOCKING_VALIDATION_1.7 checkpoint is completed"
+    - "Review parameter_gaps_[object].yaml file exists and is complete"
+    - "Validate completeness percentage is 100% OR justified exclusions documented"
+    - "Confirm missing parameters have implementation commands and priority levels"
+    - "Verify gap analysis includes current Snowflake version and documentation sources"
 
 VALIDATION_CHECKPOINT_2.1:
   - [ ] Research findings document exists and is comprehensive
-  - [ ] All Phase 1 validation checkpoints confirmed complete
-  - [ ] Research findings reviewed and validated for accuracy
-  - [ ] No critical gaps identified in research coverage
-  - [ ] Research quality confirmed adequate for requirements documentation
+  - [ ] All Phase 1 validation checkpoints confirmed passed
+  - [ ] DDL completeness validation status: COMPLETE or COMPLETE_WITH_JUSTIFICATIONS
+  - [ ] Parameter gap analysis reviewed and validated
+  - [ ] Missing parameters documented with implementation commands (if any)
+  - [ ] Research quality sufficient for comprehensive requirements documentation
 ```
 
 ### Step 2.2: Requirements Document Structure and Template Application
@@ -281,7 +282,9 @@ DOCUMENTATION_ACTIVITIES:
 VALIDATION_CHECKPOINT_2.8:
   - [ ] Requirements document passes all quality standards
   - [ ] All sections complete and comprehensive
-  - [ ] All research findings properly integrated
+  - [ ] All research findings properly integrated (including DDL completeness analysis)
+  - [ ] DDL completeness status verified: COMPLETE or COMPLETE_WITH_JUSTIFICATIONS
+  - [ ] Missing parameters (if any) documented with implementation commands and priorities
   - [ ] Requirements support chosen implementation pattern completely
   - [ ] Requirements document marked IMPLEMENTATION_READY for Phase 3
 ```
@@ -309,6 +312,14 @@ OFFICIAL_DOCUMENTATION_ANALYSIS:
   - "Documentation analysis summary with key implementation insights"
   - "Version-specific differences and compatibility requirements"
   - "Official examples integrated with implementation guidance"
+
+DDL_COMPLETENESS_VALIDATION:
+  - "COMPLETENESS_STATUS: [COMPLETE|COMPLETE_WITH_JUSTIFICATIONS]"
+  - "VALIDATION_DATE: [YYYY-MM-DD] against Snowflake version [X.X]"
+  - "TOTAL_PARAMETERS: [X] documented vs [Y] in current Snowflake DDL"
+  - "MISSING_PARAMETERS: [List with implementation commands] OR [None - 100% complete]"
+  - "JUSTIFIED_EXCLUSIONS: [List with rationale] OR [None]"
+  - "COMPLETENESS_PERCENTAGE: [X%]"
 
 COMPLETE_SQL_SYNTAX_DEFINITION:
   - "Complete SQL syntax with all variations and optional clauses"

@@ -122,27 +122,24 @@ ALTER SCHEMA [ IF EXISTS ] <schema_name> UNSET TAG <tag_name> [ , <tag_name> , .
 | setDataRetentionTimeInDays | Set Time Travel retention | Integer | Optional | null | 0-90 | Must be <= maxDataExtensionTime | Group 2 (SET/UNSET) | MEDIUM | Time Travel configuration |
 | setMaxDataExtensionTimeInDays | Set max Time Travel extension | Integer | Optional | null | 0-90 | Must be >= dataRetentionTime | Group 2 (SET/UNSET) | MEDIUM | Time Travel configuration |
 | setDefaultDdlCollation | Set default collation | String | Optional | null | Valid collation specs | Must be valid collation | Group 2 (SET/UNSET) | LOW | Collation configuration |
-| setLogLevel | Set logging level | String | Optional | null | OFF, FATAL, ERROR, WARN, INFO, DEBUG, TRACE | Predefined enum values | Group 2 (SET/UNSET) | LOW | Logging configuration |
-| setTraceLevel | Set trace level | String | Optional | null | OFF, ALWAYS, ON_EVENT, CRITICAL | Predefined enum values | Group 2 (SET/UNSET) | LOW | Tracing configuration |
-| setSuspendTaskAfterNumFailures | Set task failure threshold | Integer | Optional | null | Positive integers | Must be > 0 | Group 2 (SET/UNSET) | MEDIUM | Task management |
-| setTaskAutoRetryAttempts | Set task retry attempts | Integer | Optional | null | 0-10 | Limited retry range | Group 2 (SET/UNSET) | MEDIUM | Task management |
-| setUserTaskManagedInitialWarehouseSize | Set warehouse size | String | Optional | null | XSMALL, SMALL, MEDIUM, etc. | Predefined warehouse sizes | Group 2 (SET/UNSET) | MEDIUM | Task management |
-| setUserTaskTimeoutMs | Set task timeout | Integer | Optional | null | Positive integers | Must be > 0 | Group 2 (SET/UNSET) | MEDIUM | Task management |
-| setUserTaskMinimumTriggerIntervalInSeconds | Set trigger interval | Integer | Optional | null | >= 60 | Minimum 60 seconds | Group 2 (SET/UNSET) | MEDIUM | Task management |
-| setQuotedIdentifiersIgnoreCase | Set case sensitivity | Boolean | Optional | null | true/false | - | Group 2 (SET/UNSET) | LOW | Identifier handling |
-| setEnableConsoleOutput | Set console output | Boolean | Optional | null | true/false | - | Group 2 (SET/UNSET) | LOW | Output configuration |
-| setPipeExecutionPaused | Set pipe execution state | Boolean | Optional | null | true/false | - | Group 2 (SET/UNSET) | MEDIUM | Pipe management |
-| setComment | Set schema comment | String | Optional | null | String up to 256 chars | Length constraint | Group 2 (SET/UNSET) | HIGH | Documentation |
 | unsetDataRetentionTimeInDays | Remove retention setting | Boolean | Optional | false | true/false | Cannot combine with SET | Group 2 (SET/UNSET) | MEDIUM | Time Travel configuration |
 | unsetMaxDataExtensionTimeInDays | Remove extension setting | Boolean | Optional | false | true/false | Cannot combine with SET | Group 2 (SET/UNSET) | MEDIUM | Time Travel configuration |
 | unsetDefaultDdlCollation | Remove collation setting | Boolean | Optional | false | true/false | Cannot combine with SET | Group 2 (SET/UNSET) | LOW | Collation configuration |
-| unsetLogLevel | Remove log level setting | Boolean | Optional | false | true/false | Cannot combine with SET | Group 2 (SET/UNSET) | LOW | Logging configuration |
-| unsetTraceLevel | Remove trace level setting | Boolean | Optional | false | true/false | Cannot combine with SET | Group 2 (SET/UNSET) | LOW | Tracing configuration |
 | unsetComment | Remove comment | Boolean | Optional | false | true/false | Cannot combine with SET | Group 2 (SET/UNSET) | HIGH | Documentation |
 | enableManagedAccess | Enable managed access | Boolean | Optional | false | true/false | Cannot combine with disable | Group 3 (MANAGED ACCESS) | HIGH | Access control |
 | disableManagedAccess | Disable managed access | Boolean | Optional | false | true/false | Cannot combine with enable | Group 3 (MANAGED ACCESS) | HIGH | Access control |
-| setTags | Set tag values | Map<String,String> | Optional | null | Tag name-value pairs | Valid tag syntax | Can combine with SET/UNSET | LOW | Object tagging |
-| unsetTags | Remove tags | List<String> | Optional | null | Tag names | Valid tag names | Can combine with SET/UNSET | LOW | Object tagging |
+| databaseName | Database name for schema | String | Optional | null | Valid database identifier | Must exist if specified | None | HIGH | Schema location identifier |
+| newPipeExecutionPaused | New pipe execution state | String | Optional | null | TRUE, FALSE | String representation | Group 2 (SET/UNSET) | MEDIUM | Pipe management setting |
+| newDefaultDdlCollation | New default DDL collation | String | Optional | null | Valid collation specs | Must be valid collation | Group 2 (SET/UNSET) | LOW | Collation configuration |
+| newComment | New schema comment | String | Optional | null | String up to 256 chars | Length constraint | Group 2 (SET/UNSET) | HIGH | Documentation |
+| newDataRetentionTimeInDays | New data retention period | String | Optional | null | 0-90 | Must be <= maxDataExtensionTime | Group 2 (SET/UNSET) | MEDIUM | Time Travel configuration |
+| dropComment | Drop existing comment | Boolean | Optional | false | true/false | Cannot combine with SET comment | Group 2 (SET/UNSET) | HIGH | Documentation |
+| unsetPipeExecutionPaused | Remove pipe execution setting | Boolean | Optional | false | true/false | Cannot combine with SET | Group 2 (SET/UNSET) | MEDIUM | Pipe management |
+| dataRetentionTimeInDays | Data retention period | String | Optional | null | 0-90 | Must be <= maxDataExtensionTime | Group 2 (SET/UNSET) | MEDIUM | Time Travel configuration |
+| comment | Schema comment | String | Optional | null | String up to 256 chars | Length constraint | Group 2 (SET/UNSET) | HIGH | Documentation |
+| operationType | Type of ALTER operation | String | Optional | null | RENAME, SET, UNSET, ENABLE_MANAGED_ACCESS, DISABLE_MANAGED_ACCESS | Must match operation | None | HIGH | Operation classification |
+| newMaxDataExtensionTimeInDays | New max data extension period | String | Optional | null | 0-90 | Must be >= dataRetentionTime | Group 2 (SET/UNSET) | MEDIUM | Time Travel configuration |
+| managedAccess | Managed access setting | Boolean | Optional | null | true/false | Convenience attribute for enable/disable | Group 3 (MANAGED ACCESS) | HIGH | Access control wrapper |
 
 ## COMPREHENSIVE_SQL_EXAMPLES
 
@@ -219,9 +216,7 @@ ALTER SCHEMA debug_schema SET
 ### Example 9: Tag Operations
 ```sql
 ALTER SCHEMA my_schema SET TAG
-  environment = 'production'
-  cost_center = 'engineering'
-  data_classification = 'internal';
+  ; -- Additional tag operations can be added
 ```
 **Expected Behavior**: Tags applied to schema for governance/tracking
 **Test Validation**: Query tag values using information schema

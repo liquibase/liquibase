@@ -4,9 +4,27 @@ This file provides high-level guidance to Claude Code when working on the Liquib
 
 ## 🎯 Current Focus: Snowflake Extension Development
 
-Working on: COLUMN object change types (SQL generator overrides)
-Project Plan: `claude_guide/snowflake-project/SNOWFLAKE_IMPLEMENTATION_PROJECT_PLAN.md`
-Next: Column operations needing SQL syntax overrides
+Working on: Phase 1 - Framework-Driven Parameter Discovery (Confidence-based validation)
+Project Plan: Systematic changetype requirements update following new requirements gathering guide
+Next: Phase 2 - Requirements document updates with confidence-validated parameters
+
+## ⚡ Snowflake Database Connection (CRITICAL - DO NOT FORGET)
+
+### Connection Credentials (ALWAYS USE WITH VALIDATION TESTS)
+```bash
+SNOWFLAKE_URL="jdbc:snowflake://rziymts-xbb66763.snowflakecomputing.com/?db=LTHDB&warehouse=LTHDB_TEST_WH&schema=TESTHARNESS&role=LIQUIBASE_TEST_HARNESS_ROLE" SNOWFLAKE_USER="COMMUNITYKEVIN" SNOWFLAKE_PASSWORD="uQ1lAjwVisliu8CpUTVh0UnxoTUk3"
+```
+
+### Simple Parameter Validation (REQUIRES SNOWFLAKE CONNECTION)
+```bash
+SNOWFLAKE_URL="jdbc:snowflake://rziymts-xbb66763.snowflakecomputing.com/?db=LTHDB&warehouse=LTHDB_TEST_WH&schema=TESTHARNESS&role=LIQUIBASE_TEST_HARNESS_ROLE" SNOWFLAKE_USER="COMMUNITYKEVIN" SNOWFLAKE_PASSWORD="uQ1lAjwVisliu8CpUTVh0UnxoTUk3" mvn test -Dtest=SnowflakeParameterValidationTest -q
+```
+
+**Effective 3-Step Process:**
+1. Query INFORMATION_SCHEMA for actual parameters
+2. Compare against XSD schema  
+3. Manual doc review for gaps
+**Result: 15 minutes vs days of frameworks**
 
 ## 🔄 CRITICAL: Follow the Master Process Loop
 

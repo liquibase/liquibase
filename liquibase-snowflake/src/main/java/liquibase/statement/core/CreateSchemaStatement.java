@@ -5,6 +5,7 @@ import liquibase.statement.AbstractSqlStatement;
 public class CreateSchemaStatement extends AbstractSqlStatement {
     
     private String schemaName;
+    private String databaseName;
     private String comment;
     private String dataRetentionTimeInDays;
     private String maxDataExtensionTimeInDays;
@@ -14,6 +15,13 @@ public class CreateSchemaStatement extends AbstractSqlStatement {
     private String pipeExecutionPaused;
     private Boolean orReplace;
     private Boolean ifNotExists;
+    private String externalVolume;
+    private String catalog;
+    private String cloneFrom;
+    private String classificationProfile;
+    private String tag;
+    private String replaceInvalidCharacters;
+    private String storageSerializationPolicy;
 
     public String getSchemaName() {
         return schemaName;
@@ -93,5 +101,69 @@ public class CreateSchemaStatement extends AbstractSqlStatement {
 
     public void setIfNotExists(Boolean ifNotExists) {
         this.ifNotExists = ifNotExists;
+    }
+
+    public String getDatabaseName() {
+        return databaseName;
+    }
+
+    public void setDatabaseName(String databaseName) {
+        this.databaseName = databaseName;
+    }
+
+    public String getExternalVolume() {
+        return externalVolume;
+    }
+
+    public void setExternalVolume(String externalVolume) {
+        this.externalVolume = externalVolume;
+    }
+
+    public String getCatalog() {
+        return catalog;
+    }
+
+    public void setCatalog(String catalog) {
+        this.catalog = catalog;
+    }
+
+    public String getCloneFrom() {
+        return cloneFrom;
+    }
+
+    public void setCloneFrom(String cloneFrom) {
+        this.cloneFrom = cloneFrom;
+    }
+
+    public String getClassificationProfile() {
+        return classificationProfile;
+    }
+
+    public void setClassificationProfile(String classificationProfile) {
+        this.classificationProfile = classificationProfile;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    public String getReplaceInvalidCharacters() {
+        return replaceInvalidCharacters;
+    }
+
+    public void setReplaceInvalidCharacters(String replaceInvalidCharacters) {
+        this.replaceInvalidCharacters = replaceInvalidCharacters;
+    }
+
+    public String getStorageSerializationPolicy() {
+        return storageSerializationPolicy;
+    }
+
+    public void setStorageSerializationPolicy(String storageSerializationPolicy) {
+        this.storageSerializationPolicy = storageSerializationPolicy;
     }
 }

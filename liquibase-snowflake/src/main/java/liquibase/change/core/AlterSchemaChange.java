@@ -20,6 +20,7 @@ public class AlterSchemaChange extends AbstractChange {
 
     private String operationType; // Enhanced: explicit operation type
     private String schemaName;
+    private String databaseName;
     private Boolean ifExists;
     private String newName;
     private String newDataRetentionTimeInDays;
@@ -45,6 +46,15 @@ public class AlterSchemaChange extends AbstractChange {
 
     public void setSchemaName(String schemaName) {
         this.schemaName = schemaName;
+    }
+
+    @DatabaseChangeProperty(description = "Description for databaseName")
+    public String getDatabaseName() {
+        return databaseName;
+    }
+
+    public void setDatabaseName(String databaseName) {
+        this.databaseName = databaseName;
     }
 
     @DatabaseChangeProperty(description = "Only alter if schema exists")
@@ -186,6 +196,7 @@ public class AlterSchemaChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) {
         AlterSchemaStatement statement = new AlterSchemaStatement();
         statement.setSchemaName(getSchemaName());
+        statement.setDatabaseName(getDatabaseName());
         statement.setIfExists(getIfExists());
         statement.setNewName(getNewName());
         statement.setNewDataRetentionTimeInDays(getNewDataRetentionTimeInDays());

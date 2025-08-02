@@ -10,6 +10,7 @@ public class CreateSequenceStatementSnowflake extends CreateSequenceStatement {
     private Boolean orReplace;
     private Boolean ifNotExists;
     private String comment;
+    private Boolean order;
     
     public CreateSequenceStatementSnowflake(String catalogName, String schemaName, String sequenceName) {
         super(catalogName, schemaName, sequenceName);
@@ -52,5 +53,16 @@ public class CreateSequenceStatementSnowflake extends CreateSequenceStatement {
     
     public void setComment(String comment) {
         this.comment = comment;
+    }
+    
+    /**
+     * Order parameter for the sequence.
+     */
+    public Boolean getOrder() {
+        return order;
+    }
+    
+    public void setOrder(Boolean order) {
+        this.order = order;
     }
 }

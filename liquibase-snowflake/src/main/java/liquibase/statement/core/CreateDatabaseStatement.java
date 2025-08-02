@@ -13,6 +13,15 @@ public class CreateDatabaseStatement extends AbstractSqlStatement {
     private Boolean orReplace;
     private Boolean ifNotExists;
     private String cloneFrom;
+    private String fromDatabase;
+    private String tag;
+    private String externalVolume;
+    private String catalog;
+    private Boolean replaceInvalidCharacters;
+    private String storageSerializationPolicy;
+    private String catalogSync;
+    private String catalogSyncNamespaceMode;
+    private String catalogSyncNamespaceFlattenDelimiter;
 
     public String getDatabaseName() {
         return databaseName;
@@ -84,5 +93,77 @@ public class CreateDatabaseStatement extends AbstractSqlStatement {
 
     public void setCloneFrom(String cloneFrom) {
         this.cloneFrom = cloneFrom;
+    }
+
+    public String getFromDatabase() {
+        return fromDatabase;
+    }
+
+    public void setFromDatabase(String fromDatabase) {
+        this.fromDatabase = fromDatabase;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    public String getExternalVolume() {
+        return externalVolume;
+    }
+
+    public void setExternalVolume(String externalVolume) {
+        this.externalVolume = externalVolume;
+    }
+
+    public String getCatalog() {
+        return catalog;
+    }
+
+    public void setCatalog(String catalog) {
+        this.catalog = catalog;
+    }
+
+    public Boolean getReplaceInvalidCharacters() {
+        return replaceInvalidCharacters;
+    }
+
+    public void setReplaceInvalidCharacters(Boolean replaceInvalidCharacters) {
+        this.replaceInvalidCharacters = replaceInvalidCharacters;
+    }
+
+    public String getStorageSerializationPolicy() {
+        return storageSerializationPolicy;
+    }
+
+    public void setStorageSerializationPolicy(String storageSerializationPolicy) {
+        this.storageSerializationPolicy = storageSerializationPolicy;
+    }
+
+    public String getCatalogSync() {
+        return catalogSync;
+    }
+
+    public void setCatalogSync(String catalogSync) {
+        this.catalogSync = catalogSync;
+    }
+
+    public String getCatalogSyncNamespaceMode() {
+        return catalogSyncNamespaceMode;
+    }
+
+    public void setCatalogSyncNamespaceMode(String catalogSyncNamespaceMode) {
+        this.catalogSyncNamespaceMode = catalogSyncNamespaceMode;
+    }
+
+    public String getCatalogSyncNamespaceFlattenDelimiter() {
+        return catalogSyncNamespaceFlattenDelimiter;
+    }
+
+    public void setCatalogSyncNamespaceFlattenDelimiter(String catalogSyncNamespaceFlattenDelimiter) {
+        this.catalogSyncNamespaceFlattenDelimiter = catalogSyncNamespaceFlattenDelimiter;
     }
 }

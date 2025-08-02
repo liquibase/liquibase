@@ -39,6 +39,7 @@ public class AlterWarehouseStatement extends AbstractSqlStatement {
     private String comment;
     private Boolean enableQueryAcceleration;
     private Integer queryAccelerationMaxScaleFactor;
+    private Integer maxConcurrencyLevel;
     private Long statementQueuedTimeoutInSeconds;
     private Long statementTimeoutInSeconds;
     private String warehouseTag;
@@ -169,6 +170,15 @@ public class AlterWarehouseStatement extends AbstractSqlStatement {
 
     public AlterWarehouseStatement setQueryAccelerationMaxScaleFactor(Integer queryAccelerationMaxScaleFactor) {
         this.queryAccelerationMaxScaleFactor = queryAccelerationMaxScaleFactor;
+        return this;
+    }
+
+    public Integer getMaxConcurrencyLevel() {
+        return maxConcurrencyLevel;
+    }
+
+    public AlterWarehouseStatement setMaxConcurrencyLevel(Integer maxConcurrencyLevel) {
+        this.maxConcurrencyLevel = maxConcurrencyLevel;
         return this;
     }
 
@@ -406,8 +416,8 @@ public class AlterWarehouseStatement extends AbstractSqlStatement {
                minClusterCount != null || scalingPolicy != null || autoSuspend != null || 
                autoResume != null || resourceMonitor != null || comment != null || 
                enableQueryAcceleration != null || queryAccelerationMaxScaleFactor != null ||
-               statementQueuedTimeoutInSeconds != null || statementTimeoutInSeconds != null ||
-               warehouseTag != null;
+               maxConcurrencyLevel != null || statementQueuedTimeoutInSeconds != null || 
+               statementTimeoutInSeconds != null || warehouseTag != null;
     }
 
     private boolean hasUnsetProperties() {

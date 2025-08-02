@@ -3,16 +3,18 @@
 
 ## REQUIREMENTS_METADATA
 ```yaml
-REQUIREMENTS_VERSION: "3.0"
-PHASE: "PHASE_2_COMPLETE"
+REQUIREMENTS_VERSION: "4.0"
+PHASE: "VALIDATION_COMPLETE"
 STATUS: "IMPLEMENTATION_READY"
+VALIDATION_COMPLETION_DATE: "2025-08-01"
+VALIDATION_METHOD: "Simple INFORMATION_SCHEMA + Manual Documentation Review"
 RESEARCH_COMPLETION_DATE: "2025-08-01"
 IMPLEMENTATION_PATTERN: "Existing_Changetype_Extension"
 DATABASE_TYPE: "Snowflake"
 OBJECT_TYPE: "Schema"
 OPERATION: "CREATE"
-NEXT_PHASE: "Phase 3 - TDD Implementation (ai_workflow_guide.md)"
-ESTIMATED_IMPLEMENTATION_TIME: "5-6 hours"
+NEXT_PHASE: "Phase 3 - TDD Implementation"
+ESTIMATED_IMPLEMENTATION_TIME: "5-6 hours (validation complete)"
 ```
 
 ## EXECUTIVE_SUMMARY
@@ -83,13 +85,20 @@ CREATE [ OR REPLACE ] [ TRANSIENT ] SCHEMA [ IF NOT EXISTS ] <name>
 | orReplace | Replace existing schema | Boolean | Optional | false | true/false | Cannot combine with ifNotExists | Mutually exclusive with ifNotExists | HIGH | Drops existing schema completely |
 | transient | Create transient schema | Boolean | Optional | false | true/false | If true, dataRetentionTimeInDays must be 0 | None | MEDIUM | No Time Travel or Fail-safe |
 | ifNotExists | Create only if doesn't exist | Boolean | Optional | false | true/false | Cannot combine with orReplace | Mutually exclusive with orReplace | HIGH | Idempotent operation support |
-| cloneSource | Source schema for cloning | String | Optional | null | Existing schema name | Source must exist | None | MEDIUM | Zero-copy clone operation |
+| cloneFrom | Source schema for cloning | String | Optional | null | Existing schema name | Source must exist | None | MEDIUM | Zero-copy clone operation |
 | managedAccess | Enable managed access | Boolean | Optional | false | true/false | None | None | MEDIUM | Centralized privilege management |
 | dataRetentionTimeInDays | Time Travel retention period | Integer | Optional | 1 | 0-90 | Must be 0 if transient=true, ≤ maxDataExtensionTimeInDays | Cannot be >0 if transient=true | MEDIUM | Controls Time Travel availability |
 | maxDataExtensionTimeInDays | Maximum Time Travel extension | Integer | Optional | 14 | 0-90 | Must be ≥ dataRetentionTimeInDays | None | LOW | Maximum extension for retention |
 | defaultDdlCollation | Default string collation | String | Optional | null | Valid collation specification | Must be valid collation | None | LOW | Schema-level collation setting |
 | pipeExecutionPaused | Pause pipe execution in schema | Boolean | Optional | false | true/false | None | None | LOW | Controls data pipeline behavior |
 | comment | Schema description | String | Optional | null | String ≤ 256 chars | Length validation | None | LOW | Metadata only |
+| databaseName | Database name for schema | String | Optional | null | Valid database identifier | Must exist if specified | None | HIGH | Schema location identifier |
+| externalVolume | External volume for schema | String | Optional | null | Valid external volume name | Must exist if specified | None | LOW | External storage reference |
+| catalog | Catalog name for schema | String | Optional | null | Valid catalog identifier | Must exist if specified | None | LOW | Catalog location identifier |
+| classificationProfile | Data classification profile | String | Optional | null | Valid profile name | Must exist if specified | None | LOW | Data governance feature |
+| tag | Schema tag assignment | String | Optional | null | Valid tag syntax | Must be valid tag format | None | LOW | Object tagging |
+| replaceInvalidCharacters | Replace invalid characters in names | Boolean | Optional | false | true/false | None | None | LOW | Character validation control |
+| storageSerializationPolicy | Storage serialization policy | String | Optional | null | Valid policy name | Must exist if specified | None | LOW | Storage optimization setting |
 
 ## 3. Mutual Exclusivity Rules
 
@@ -169,6 +178,20 @@ CREATE SCHEMA cloned_schema CLONE source_schema
 ```
 **Expected Behavior**: Schema created as copy of source at specified time
 **Test Validation**: Verify clone operation and timestamp-based recovery
+
+**XML Example with additional attributes**:
+```xml
+<createSchema schemaName="my_schema"
+              databaseName="my_database"
+              catalog="my_catalog"
+              tag="environment=prod"
+              classificationProfile="pii_profile"
+              externalVolume="s3_volume"
+              replaceInvalidCharacters="true"
+              storageSerializationPolicy="optimized"
+              cloneFrom="source_schema"
+              comment="Advanced schema with multiple attributes"/>
+```
 
 ### Example 7: Task Management Configuration
 ```sql

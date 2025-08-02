@@ -75,6 +75,15 @@ public class CreateDatabaseChangeTest {
         change.setOrReplace(true);
         change.setIfNotExists(false);
         change.setCloneFrom("SOURCE_DB");
+        change.setFromDatabase("ALT_SOURCE_DB");
+        change.setTag("test-tag");
+        change.setExternalVolume("my_volume");
+        change.setCatalog("iceberg_catalog");
+        change.setReplaceInvalidCharacters(true);
+        change.setStorageSerializationPolicy("COMPATIBLE");
+        change.setCatalogSync("my_catalog_sync");
+        change.setCatalogSyncNamespaceMode("SINGLE");
+        change.setCatalogSyncNamespaceFlattenDelimiter("_");
         
         SqlStatement[] statements = change.generateStatements(database);
         CreateDatabaseStatement stmt = (CreateDatabaseStatement) statements[0];
@@ -88,6 +97,15 @@ public class CreateDatabaseChangeTest {
         assertEquals(true, stmt.getOrReplace());
         assertEquals(false, stmt.getIfNotExists());
         assertEquals("SOURCE_DB", stmt.getCloneFrom());
+        assertEquals("ALT_SOURCE_DB", stmt.getFromDatabase());
+        assertEquals("test-tag", stmt.getTag());
+        assertEquals("my_volume", stmt.getExternalVolume());
+        assertEquals("iceberg_catalog", stmt.getCatalog());
+        assertEquals(true, stmt.getReplaceInvalidCharacters());
+        assertEquals("COMPATIBLE", stmt.getStorageSerializationPolicy());
+        assertEquals("my_catalog_sync", stmt.getCatalogSync());
+        assertEquals("SINGLE", stmt.getCatalogSyncNamespaceMode());
+        assertEquals("_", stmt.getCatalogSyncNamespaceFlattenDelimiter());
     }
     
     @Test
@@ -211,5 +229,113 @@ public class CreateDatabaseChangeTest {
         
         ValidationErrors errors = change.validate(database);
         assertFalse(errors.hasErrors());
+    }
+    
+    @Test
+    @DisplayName("Should handle external volume parameter")
+    void shouldHandleExternalVolume() {
+        change.setDatabaseName("TEST_DB");
+        change.setExternalVolume("my_external_volume");
+        
+        SqlStatement[] statements = change.generateStatements(database);
+        CreateDatabaseStatement stmt = (CreateDatabaseStatement) statements[0];
+        
+        assertEquals("my_external_volume", stmt.getExternalVolume());
+    }
+    
+    @Test
+    @DisplayName("Should handle catalog parameter")
+    void shouldHandleCatalog() {
+        change.setDatabaseName("TEST_DB");
+        change.setCatalog("my_iceberg_catalog");
+        
+        SqlStatement[] statements = change.generateStatements(database);
+        CreateDatabaseStatement stmt = (CreateDatabaseStatement) statements[0];
+        
+        assertEquals("my_iceberg_catalog", stmt.getCatalog());
+    }
+    
+    @Test
+    @DisplayName("Should handle replace invalid characters parameter")
+    void shouldHandleReplaceInvalidCharacters() {
+        change.setDatabaseName("TEST_DB");
+        change.setReplaceInvalidCharacters(true);
+        
+        SqlStatement[] statements = change.generateStatements(database);
+        CreateDatabaseStatement stmt = (CreateDatabaseStatement) statements[0];
+        
+        assertEquals(true, stmt.getReplaceInvalidCharacters());
+    }
+    
+    @Test
+    @DisplayName("Should handle storage serialization policy parameter")
+    void shouldHandleStorageSerializationPolicy() {
+        change.setDatabaseName("TEST_DB");
+        change.setStorageSerializationPolicy("COMPATIBLE");
+        
+        SqlStatement[] statements = change.generateStatements(database);
+        CreateDatabaseStatement stmt = (CreateDatabaseStatement) statements[0];
+        
+        assertEquals("COMPATIBLE", stmt.getStorageSerializationPolicy());
+    }
+    
+    @Test
+    @DisplayName("Should handle catalog sync parameter")
+    void shouldHandleCatalogSync() {
+        change.setDatabaseName("TEST_DB");
+        change.setCatalogSync("my_catalog_sync");
+        
+        SqlStatement[] statements = change.generateStatements(database);
+        CreateDatabaseStatement stmt = (CreateDatabaseStatement) statements[0];
+        
+        assertEquals("my_catalog_sync", stmt.getCatalogSync());
+    }
+    
+    @Test
+    @DisplayName("Should handle catalog sync namespace mode parameter")
+    void shouldHandleCatalogSyncNamespaceMode() {
+        change.setDatabaseName("TEST_DB");
+        change.setCatalogSyncNamespaceMode("SINGLE");
+        
+        SqlStatement[] statements = change.generateStatements(database);
+        CreateDatabaseStatement stmt = (CreateDatabaseStatement) statements[0];
+        
+        assertEquals("SINGLE", stmt.getCatalogSyncNamespaceMode());
+    }
+    
+    @Test
+    @DisplayName("Should handle catalog sync namespace flatten delimiter parameter")
+    void shouldHandleCatalogSyncNamespaceFlattenDelimiter() {
+        change.setDatabaseName("TEST_DB");
+        change.setCatalogSyncNamespaceFlattenDelimiter("_");
+        
+        SqlStatement[] statements = change.generateStatements(database);
+        CreateDatabaseStatement stmt = (CreateDatabaseStatement) statements[0];
+        
+        assertEquals("_", stmt.getCatalogSyncNamespaceFlattenDelimiter());
+    }
+    
+    @Test
+    @DisplayName("Should handle tag parameter")
+    void shouldHandleTag() {
+        change.setDatabaseName("TEST_DB");
+        change.setTag("environment=test");
+        
+        SqlStatement[] statements = change.generateStatements(database);
+        CreateDatabaseStatement stmt = (CreateDatabaseStatement) statements[0];
+        
+        assertEquals("environment=test", stmt.getTag());
+    }
+    
+    @Test
+    @DisplayName("Should handle fromDatabase parameter as alternative to cloneFrom")
+    void shouldHandleFromDatabase() {
+        change.setDatabaseName("TEST_DB");
+        change.setFromDatabase("TEMPLATE_DB");
+        
+        SqlStatement[] statements = change.generateStatements(database);
+        CreateDatabaseStatement stmt = (CreateDatabaseStatement) statements[0];
+        
+        assertEquals("TEMPLATE_DB", stmt.getFromDatabase());
     }
 }
