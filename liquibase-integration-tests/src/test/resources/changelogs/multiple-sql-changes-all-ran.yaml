@@ -1,0 +1,14 @@
+databaseChangeLog:
+- changeSet:
+      id: 1
+      author: nvoxland
+      comment: Test
+      changes:
+        - sql:
+            dbms: h2
+            sql: >-
+              create table test1 (id int);
+        - sql:
+            dbms: h2
+            sql: >-
+              create table test2 (id int);
