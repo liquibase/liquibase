@@ -1,201 +1,138 @@
 # Changetype Requirements Navigation
-## Complete Requirements Documentation for Snowflake Changetype Implementation
+## AI-Optimized Requirements Index for Snowflake Changetype Implementation
 
-## FOLDER_OVERVIEW
+## NAVIGATION_METADATA
 ```yaml
-PURPOSE: "Requirements for implementing Snowflake-specific changetypes and extensions"
-ORGANIZATION: "New changetypes vs existing changetype extensions"
-LAST_UPDATED: "2025-08-01"
-SUPPORTS_IMPLEMENTATION_GUIDES: "../../../implementation_guides/changetype_implementation/"
+PURPOSE: "Instant access to changetype requirements and implementation patterns"
+OPTIMIZATION: "AI-optimized for rapid scanning and development workflow"
+LAST_UPDATED: "2025-08-03"
+TOTAL_REQUIREMENTS: "18 requirement documents"
+IMPLEMENTATION_GUIDE: "../../../implementation_guides/changetype_implementation/CHANGETYPE_IMPLEMENTATION_GUIDE.md"
 ```
 
-## 🎯 QUICK NAVIGATION BY IMPLEMENTATION PATTERN
+## 🎯 INSTANT REQUIREMENTS ACCESS
 
-### New Changetype Implementation (Objects not in core Liquibase)
-**GO TO**: `new_changetypes/`
+### Quick Pattern Selection
+| Pattern | Use When | Folder | Implementation Time |
+|---------|----------|--------|-------------------|
+| **New Changetype** | Object doesn't exist in Liquibase | `new_changetypes/` | 6-10 hours |
+| **Extension** | Add Snowflake attributes to existing changetype | `existing_changetype_extensions/` | 4-6 hours |
+| **SQL Override** | Override SQL generation for existing changetype | `existing_changetype_extensions/` | 3-5 hours |
+
+### Object Type Quick Access
+| Object | Create | Alter | Drop | Status |
+|--------|--------|-------|------|--------|
+| **Warehouse** | [✅](new_changetypes/createWarehouse_requirements.md) | [📋](new_changetypes/alterWarehouse_requirements.md) | [📋](new_changetypes/dropWarehouse_requirements.md) | High Priority |
+| **Database** | [📋](new_changetypes/createDatabase_requirements.md) | [📋](new_changetypes/alterDatabase_requirements.md) | [📋](new_changetypes/dropDatabase_requirements.md) | Medium Priority |
+| **Schema** | [📋](existing_changetype_extensions/createSchema_requirements.md) | [📋](existing_changetype_extensions/alterSchema_requirements.md) | [📋](existing_changetype_extensions/dropSchema_requirements.md) | Ready |
+| **Table** | [📋](existing_changetype_extensions/createTableEnhanced_requirements.md) | [✅](existing_changetype_extensions/alterTable_requirements.md) | [📋](existing_changetype_extensions/dropTableEnhanced_requirements.md) | Partial Complete |
+| **Sequence** | [✅](existing_changetype_extensions/createSequenceEnhanced_requirements.md) | [📋](existing_changetype_extensions/alterSequenceEnhanced_requirements.md) | [📋](existing_changetype_extensions/dropSequenceEnhanced_requirements.md) | Partial Complete |
+
+### Special Requirements
+| Type | File | Status | Notes |
+|------|------|--------|-------|
+| **Data Types** | [✅](existing_changetype_extensions/snowflake_datatypes_requirements.md) | COMPLETE | VARIANT, ARRAY, OBJECT, etc. |
+| **Column Remarks** | [✅](existing_changetype_extensions/setColumnRemarks_requirements.md) | COMPLETE | Unicode support validated |
+| **Table Enhanced** | [📋](existing_changetype_extensions/alterTableEnhanced_requirements.md) | READY | Namespace attributes |
+
+## 📊 IMPLEMENTATION STATUS LEGEND
+- **✅ COMPLETE**: Implementation finished, production ready
+- **📋 READY**: Requirements complete, ready for implementation
+- **⚠️ PARTIAL**: Some components implemented
+- **❌ TODO**: Not yet started
+
+## 🚀 DEVELOPMENT WORKFLOW
+
+### Step 1: Select Pattern
 ```yaml
-PATTERN: "New Changetype Pattern"  
-IMPLEMENTATION_GUIDE: "../../../implementation_guides/changetype_implementation/changetype_patterns.md"
-REQUIREMENTS_INCLUDE:
-  - "Complete Snowflake object lifecycle (create/alter/drop)"
-  - "All official parameters and syntax variations"
-  - "Comprehensive SQL examples and test scenarios"
-  - "Service registration requirements"
+NEW_OBJECT_CHECKLIST:
+  - Object doesn't exist in core Liquibase (warehouses, databases)
+  - Need complete object lifecycle (create/alter/drop)
+  - Requires service registration and XSD elements
+
+EXTENSION_CHECKLIST:
+  - Object exists in Liquibase but missing Snowflake features
+  - Need namespace attributes (transient, clustering, etc.)
+  - Requires XSD namespace attributes and SQL generator extension
+
+SQL_OVERRIDE_CHECKLIST:
+  - Object exists but needs Snowflake-specific SQL generation
+  - Core changetype sufficient but SQL syntax different
+  - Requires SQL generator override only
 ```
 
-**Available Requirements:**
-- `createWarehouse_requirements.md` ✅ UPDATED with RESOURCE_CONSTRAINT
-- `alterWarehouse_requirements.md`
-- `dropWarehouse_requirements.md`
-- `createDatabase_requirements.md`
-- `alterDatabase_requirements.md`
-- `dropDatabase_requirements.md`
-
-### Existing Changetype Extension (Adding Snowflake attributes to core changetypes)
-**GO TO**: `existing_changetype_extensions/`
+### Step 2: Access Requirements
 ```yaml
-PATTERN: "Extension Pattern or SQL Override Pattern"
-IMPLEMENTATION_GUIDE: "../../../implementation_guides/changetype_implementation/changetype_patterns.md"
-SQL_OVERRIDE_GUIDE: "../../../implementation_guides/changetype_implementation/sql_generator_overrides.md"
-REQUIREMENTS_INCLUDE:
-  - "Snowflake-specific attributes analysis"
-  - "Priority classification (HIGH/MEDIUM/LOW)"
-  - "Integration strategy with existing Liquibase changetype"
-  - "Namespace attribute mapping"
+REQUIREMENT_FILE_FORMAT:
+  METADATA: "YAML header with status, time estimates, patterns"
+  QUICK_ACCESS: "Parameter tables, constraints, SQL templates"
+  IMPLEMENTATION: "Detailed specifications and validation rules"
+  TESTING: "Test scenarios and coverage requirements"
 ```
 
-**Available Requirements:**
-- **Schema Operations:**
-  - `createSchema_requirements.md`
-  - `alterSchema_requirements.md`
-  - `dropSchema_requirements.md`
-- **Table Operations:**
-  - `alterTable_requirements.md`
-  - `createTableEnhanced_requirements.md` (namespace attributes)
-  - `alterTableEnhanced_requirements.md` (namespace attributes)
-  - `dropTableEnhanced_requirements.md` (namespace attributes)
-  - `ALTERTABLE_NAMESPACE_REQUIREMENTS_UPDATED.md`
-- **Sequence Operations:**
-  - `createSequenceEnhanced_requirements.md` (namespace attributes)
-  - `alterSequenceEnhanced_requirements.md` (namespace attributes)
-  - `dropSequenceEnhanced_requirements.md` (namespace attributes)
+### Step 3: Implementation Guide
+- **Primary Guide**: [CHANGETYPE_IMPLEMENTATION_GUIDE.md](../../../implementation_guides/changetype_implementation/CHANGETYPE_IMPLEMENTATION_GUIDE.md)
+- **Sequential Execution**: Phase 0 → Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5
+- **Validation Points**: Blocking checkpoints at each phase
 
-## 🔍 FINDING THE RIGHT REQUIREMENTS
+## 🔍 QUICK SEARCH PATTERNS
 
-### By Snowflake Object Type
+### By Snowflake Object
 ```yaml
-WAREHOUSES: "new_changetypes/[create|alter|drop]Warehouse_requirements.md"
-DATABASES: "new_changetypes/[create|alter|drop]Database_requirements.md"
-SCHEMAS: "existing_changetype_extensions/[create|alter|drop]Schema_requirements.md"
-TABLES: "existing_changetype_extensions/[create|alter|drop]Table*_requirements.md"
-SEQUENCES: "existing_changetype_extensions/[create|alter|drop]Sequence*_requirements.md"
+warehouse: new_changetypes/[create|alter|drop]Warehouse_requirements.md
+database: new_changetypes/[create|alter|drop]Database_requirements.md
+schema: existing_changetype_extensions/[create|alter|drop]Schema_requirements.md
+table: existing_changetype_extensions/[create|alter|drop]Table*_requirements.md
+sequence: existing_changetype_extensions/[create|alter|drop]Sequence*_requirements.md
 ```
 
-### By Implementation Need
+### By Implementation Status
 ```yaml
-COMPLETELY_NEW_OBJECT:
-  FOLDER: "new_changetypes/"
-  EXAMPLE: "Warehouses don't exist in core Liquibase"
-  
-ADD_SNOWFLAKE_ATTRIBUTES:
-  FOLDER: "existing_changetype_extensions/"
-  EXAMPLE: "Add 'transient' attribute to createTable"
-  
-OVERRIDE_SQL_GENERATION:
-  FOLDER: "existing_changetype_extensions/"
-  EXAMPLE: "Generate Snowflake-specific SQL for existing changetype"
+complete: alterTable, sequences, data types, column remarks
+ready: warehouses, table enhancements, all schema operations
+planning: databases, some sequence operations
 ```
 
-## 📊 REQUIREMENTS QUALITY STANDARDS
-
-### High-Quality Requirements Include:
+### By Business Priority
 ```yaml
-OFFICIAL_DOCUMENTATION:
-  - "Snowflake documentation URLs with specific versions"
-  - "Complete parameter documentation from official source"
-  
-COMPLETE_SYNTAX_COVERAGE:
-  - "All SQL syntax variations documented"
-  - "Optional clauses and parameters identified"
-  - "Mutual exclusivity rules documented"
-  
-COMPREHENSIVE_EXAMPLES:
-  - "5+ complete SQL examples covering all scenarios"
-  - "Edge cases and boundary conditions"
-  - "Examples demonstrating all parameter combinations"
-  
-TEST_SCENARIO_PLANNING:
-  - "Test scenarios for all SQL generation paths"
-  - "Separate test files for mutually exclusive features"
-  - "Integration test coverage requirements"
-  
-VALIDATION_REQUIREMENTS:
-  - "All validation rules with error messages"
-  - "Input validation and constraint checking"
-  - "Database compatibility requirements"
+critical: alterTable (COMPLETE), data types (COMPLETE)
+high: warehouses (READY), sequences (PARTIAL)
+medium: databases, schemas, table enhancements
+low: drop operations
 ```
 
-## 🚀 USING THESE REQUIREMENTS
+## ⚡ COMMON DEVELOPMENT PATHS
 
-### Step-by-Step Process
-1. **Identify Implementation Pattern**
-   - New object not in Liquibase core? → `new_changetypes/`
-   - Adding attributes to existing changetype? → `existing_changetype_extensions/`
+### Path A: New Warehouse Operations
+1. **Requirements**: `new_changetypes/createWarehouse_requirements.md`
+2. **Pattern**: New Changetype (6-8 hours)
+3. **Components**: Change class + Statement class + SQL generator + Service registration + XSD element
 
-2. **Find Specific Requirements**
-   - Navigate to appropriate subfolder
-   - Open the `[changetype]_requirements.md` file
-   - Review complete requirements document
+### Path B: Table Clustering Attributes  
+1. **Requirements**: `existing_changetype_extensions/alterTableEnhanced_requirements.md`
+2. **Pattern**: Extension (3-4 hours)
+3. **Components**: XSD namespace attributes + SQL generator extension
 
-3. **Follow Implementation Guide**
-   - Use `../../../implementation_guides/changetype_implementation/changetype_patterns.md`
-   - For SQL overrides: use `sql_generator_overrides.md`
-   - Follow sequential blocking execution protocols
+### Path C: Sequence ORDER/NOORDER
+1. **Requirements**: `existing_changetype_extensions/alterSequenceEnhanced_requirements.md` 
+2. **Pattern**: SQL Override (2-3 hours)
+3. **Components**: SQL generator override only
 
-4. **Test Implementation**
-   - Use `../../../implementation_guides/changetype_implementation/test_harness_guide.md`
-   - Ensure comprehensive coverage of all documented scenarios
-
-## 📋 REQUIREMENTS CHECKLIST
-
-### Before Starting Implementation
-- [ ] Requirements document exists and is complete
-- [ ] Official Snowflake documentation references verified
-- [ ] All SQL syntax variations documented
-- [ ] Test scenarios planned and documented
-- [ ] Validation rules identified
-- [ ] Implementation pattern chosen (New vs Extension vs SQL Override)
-
-### During Implementation
-- [ ] All documented parameters implemented
-- [ ] All SQL examples tested
-- [ ] Validation rules implemented with documented error messages
-- [ ] Integration tests cover all documented scenarios
-- [ ] Unit tests compare complete SQL strings exactly
-
-### After Implementation
-- [ ] All documented test scenarios pass
-- [ ] Edge cases handled as documented
-- [ ] Error conditions produce documented error messages
-- [ ] Requirements updated based on implementation learnings
-
-## 🔗 CROSS-REFERENCES
-
-### Implementation Guides
+## 📋 QUALITY STANDARDS
 ```yaml
-MASTER_PROCESS: "../../../implementation_guides/changetype_implementation/master_process_loop.md"
-CHANGETYPE_PATTERNS: "../../../implementation_guides/changetype_implementation/changetype_patterns.md"
-SQL_OVERRIDES: "../../../implementation_guides/changetype_implementation/sql_generator_overrides.md"
-TEST_HARNESS: "../../../implementation_guides/changetype_implementation/test_harness_guide.md"
-QUICK_REFERENCE: "../../../implementation_guides/changetype_implementation/quick_reference.md"
+HIGH_QUALITY_REQUIREMENTS:
+  DOCUMENTATION: "Official Snowflake URLs with versions"
+  SYNTAX: "Complete SQL syntax with all parameters"
+  EXAMPLES: "5+ SQL examples covering all scenarios"
+  VALIDATION: "All constraints and mutual exclusivity rules"
+  TESTING: "Comprehensive test scenarios with separate files for incompatible features"
 ```
 
-### Parent Navigation
-```yaml
-MAIN_REQUIREMENTS: "../README.md"
-SNAPSHOT_DIFF_REQUIREMENTS: "../snapshot_diff_requirements/README.md"
-DOCUMENTATION: "../documentation/"
-```
+## 🔗 NAVIGATION SHORTCUTS
+- **Master Requirements**: [../MASTER_INDEX.md](../MASTER_INDEX.md)
+- **Quick Reference**: [../QUICK_REFERENCE.md](../QUICK_REFERENCE.md)
+- **Missing Parameters**: [../REQUIREMENTS_SUMMARY.md](../REQUIREMENTS_SUMMARY.md)
+- **Implementation Guide**: [../../../implementation_guides/changetype_implementation/CHANGETYPE_IMPLEMENTATION_GUIDE.md](../../../implementation_guides/changetype_implementation/CHANGETYPE_IMPLEMENTATION_GUIDE.md)
 
-## 💡 COMMON IMPLEMENTATION PATHS
-
-### Path 1: New Warehouse Changetype
-1. Read `new_changetypes/createWarehouse_requirements.md`
-2. Follow New Changetype Pattern in implementation guides
-3. Implement change class, statement class, SQL generator
-4. Register services and update XSD
-5. Write comprehensive tests as documented
-
-### Path 2: Add Transient Attribute to createTable
-1. Read `existing_changetype_extensions/createTableEnhanced_requirements.md`
-2. Choose Extension Pattern or SQL Override Pattern
-3. Follow appropriate implementation guide
-4. Test all documented attribute combinations
-
-### Path 3: Override SQL Generation for alterSequence
-1. Read `existing_changetype_extensions/alterSequenceEnhanced_requirements.md`
-2. Follow SQL Override Pattern in implementation guides
-3. Implement SQL generator override
-4. Test complete SQL string generation as documented
-
-Remember: These requirements are designed to address the four core issues that cause incomplete implementations. They provide the foundation for comprehensive, correct Snowflake extension development.
+---
+*This navigation index is optimized for AI rapid scanning and development workflow efficiency. All requirements follow consistent quality standards and include comprehensive implementation support.*

@@ -1,16 +1,16 @@
----
-REQUIREMENTS_METADATA:
-  REQUIREMENTS_VERSION: "3.0"
-  PHASE: "PHASE_2_COMPLETE"
-  STATUS: "IMPLEMENTATION_READY"
-  RESEARCH_COMPLETION_DATE: "2025-08-01"
-  IMPLEMENTATION_PATTERN: "Existing_Changetype_Extension"
-  DATABASE_TYPE: "Snowflake"
-  OBJECT_TYPE: "Sequence"
-  OPERATION: "DROP"
-  NEXT_PHASE: "Phase 3 - TDD Implementation (ai_workflow_guide.md)"
-  ESTIMATED_IMPLEMENTATION_TIME: "3-4 hours"
----
+## REQUIREMENTS_METADATA
+```yaml
+REQUIREMENTS_VERSION: "3.0"
+PHASE: "PHASE_2_COMPLETE"
+STATUS: "IMPLEMENTATION_READY"
+RESEARCH_COMPLETION_DATE: "2025-08-01"
+IMPLEMENTATION_PATTERN: "Existing_Changetype_Extension"
+DATABASE_TYPE: "Snowflake"
+OBJECT_TYPE: "Sequence"
+OPERATION: "DROP"
+NEXT_PHASE: "Phase 3 - TDD Implementation (ai_workflow_guide.md)"
+ESTIMATED_IMPLEMENTATION_TIME: "3-4 hours"
+```
 
 # DropSequence Enhanced Requirements (Snowflake Namespace Attributes)
 
@@ -149,6 +149,23 @@ DROP SEQUENCE audit_seq RESTRICT;
 DROP SEQUENCE IF EXISTS maybe_exists CASCADE;
 -- INFO: CASCADE provides syntax consistency but no functional behavior
 ```
+
+### Example 5: Drop with Documentation Comment
+```xml
+<dropSequence sequenceName="deprecated_sequence"
+              snowflake:restrict="true"
+              snowflake:comment="Removing deprecated sequence - replaced by auto-increment"/>
+```
+
+**Generated SQL:**
+```sql
+DROP SEQUENCE deprecated_sequence RESTRICT;
+-- COMMENT: Removing deprecated sequence - replaced by auto-increment
+-- INFO: RESTRICT provides syntax consistency but no functional behavior
+```
+
+**Expected Behavior:** Sequence dropped with documentation comment in generated SQL for audit trail
+**Test Validation:** Verify sequence removed, comment appears in generated SQL for documentation purposes
 
 ## Technical Implementation Approach
 

@@ -26,7 +26,7 @@ This requirement enhances the existing Liquibase `createTable` changetype with S
 - Mutual exclusivity validation for table types
 - Full backwards compatibility with standard Liquibase
 
-## SQL_SYNTAX_RESEARCH
+## 🎯 SQL SYNTAX TEMPLATES
 
 ### Official Documentation
 - **Primary Source**: https://docs.snowflake.com/en/sql-reference/sql/create-table
@@ -425,6 +425,42 @@ CREATE TABLE customer_orders (
   CHANGE_TRACKING = TRUE
   DEFAULT_DDL_COLLATION = 'utf8';
 ```
+
+### Example 5: Conditional Table Creation with Safe Guards
+```xml
+<changeSet id="create-safe-analytics" author="analyst">
+    <createTable tableName="analytics_summary"
+                 snowflake:ifNotExists="true"
+                 snowflake:transient="true"
+                 snowflake:comment="Analytics summary table - recreated daily">
+        <column name="summary_id" type="BIGINT" autoIncrement="true">
+            <constraints primaryKey="true"/>
+        </column>
+        <column name="report_date" type="DATE">
+            <constraints nullable="false"/>
+        </column>
+        <column name="metric_name" type="VARCHAR(100)">
+            <constraints nullable="false"/>
+        </column>
+        <column name="metric_value" type="DECIMAL(20,4)"/>
+        <column name="metadata" type="VARIANT"/>
+    </createTable>
+</changeSet>
+```
+
+**Generated SQL:**
+```sql
+CREATE TRANSIENT TABLE IF NOT EXISTS analytics_summary (
+    summary_id BIGINT AUTOINCREMENT PRIMARY KEY,
+    report_date DATE NOT NULL,
+    metric_name VARCHAR(100) NOT NULL,
+    metric_value DECIMAL(20,4),
+    metadata VARIANT
+) COMMENT = 'Analytics summary table - recreated daily';
+```
+
+**Expected Behavior:** Transient table created only if it doesn't exist, optimized for temporary analytics data
+**Test Validation:** Verify transient storage, IF NOT EXISTS safety, comment applied, no errors on re-execution
 
 ## ERROR_SCENARIOS_AND_HANDLING
 

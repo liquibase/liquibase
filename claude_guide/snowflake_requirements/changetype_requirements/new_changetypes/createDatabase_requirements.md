@@ -1,139 +1,138 @@
-# Snowflake CreateDatabase Requirements Document
-## Implementation-Ready Requirements for CreateDatabase Changetype Development
+# CREATE DATABASE Requirements
+## AI-Optimized Requirements for Snowflake CREATE DATABASE Implementation
 
 ## REQUIREMENTS_METADATA
 ```yaml
-REQUIREMENTS_VERSION: "5.0"
-PHASE: "VALIDATION_COMPLETE"
+REQUIREMENTS_VERSION: "3.0"
 STATUS: "IMPLEMENTATION_READY"
-RESEARCH_COMPLETION_DATE: "2025-08-01"
-VALIDATION_COMPLETION_DATE: "2025-08-01"
-COMPLETENESS_VALIDATION_REQUIRED: "COMPLETE - 100% DDL completeness achieved"
+OPTIMIZATION_DATE: "2025-08-03"
 IMPLEMENTATION_PATTERN: "New_Changetype"
-DATABASE_TYPE: "Snowflake"
 OBJECT_TYPE: "Database"
 OPERATION: "CREATE"
-NEXT_PHASE: "Phase 3 - TDD Implementation (ready to proceed)"
-ESTIMATED_IMPLEMENTATION_TIME: "6-8 hours (validation complete)"
+ESTIMATED_TIME: "6-8 hours"
+COMPLEXITY: "HIGH"
+ATTRIBUTES_COUNT: 14
+PRIORITY: "READY"
 ```
 
-## EXECUTIVE_SUMMARY
+## ⚡ INSTANT REQUIREMENTS ACCESS
+
+### Core Operation Types
+| Type | SQL Pattern | Key Features | Attributes |
+|------|-------------|--------------|------------|
+| **BASIC** | `CREATE [TRANSIENT] DATABASE name` | Standard creation | 4 core attributes |
+| **CONDITIONAL** | `CREATE [OR REPLACE\|IF NOT EXISTS] DATABASE` | Safe operations | Mutual exclusivity |
+| **CLONE** | `CREATE DATABASE name CLONE source` | Zero-copy cloning | Point-in-time options |
+| **ADVANCED** | With retention, tasks, collation | Full configuration | 14 total attributes |
+
+### Quick Implementation Pattern
 ```yaml
-IMPLEMENTATION_SCOPE: "Complete CREATE DATABASE changetype supporting all Snowflake database creation operations"
-KEY_OPERATIONS:
-  - "Basic database creation with standard and transient options"
-  - "OR REPLACE and IF NOT EXISTS conditional operations"
-  - "Database cloning with point-in-time recovery options"
-  - "Time Travel and retention configuration"
-  - "Task management and collation settings"
-COMPLEXITY_ASSESSMENT: "HIGH - Complex parameter interactions, mutual exclusivity rules, and cloning capabilities"
-SUCCESS_CRITERIA: "All database creation scenarios implemented with comprehensive validation and cloning support"
+PATTERN: "New Changetype"
+REASON: "CREATE DATABASE doesn't exist in core Liquibase"
+IMPLEMENTATION: "Complete new changetype with SnowflakeCreateDatabaseChange"
+VALIDATION: "Mutual exclusivity + transient constraints + cloning validation"
 ```
 
-## DDL_COMPLETENESS_VALIDATION
+## 📋 CORE IMPLEMENTATION REQUIREMENTS
+
+### Documentation Reference
 ```yaml
-COMPLETENESS_STATUS: "COMPLETE - VALIDATED"
-VALIDATION_DATE: "2025-08-01"
-VALIDATION_METHOD: "INFORMATION_SCHEMA + Manual Documentation Review"
-SNOWFLAKE_VERSION_ANALYZED: "2024 Q4"
-DOCUMENTATION_SOURCES:
-  - "https://docs.snowflake.com/en/sql-reference/sql/create-database"
-  - "Snowflake SQL Reference Manual 2024"
-
-COMPLETENESS_METRICS:
-  TOTAL_SNOWFLAKE_PARAMETERS: "14"
-  XSD_PARAMETERS: "14"
-  MISSING_PARAMETERS: "0"
-  COMPLETENESS_PERCENTAGE: "100%"
-
-VALIDATED_PARAMETERS:
-  ✅ ALL 14 DDL PARAMETERS CONFIRMED IN XSD:
-  - databaseName (required)
-  - transient
-  - cloneFrom, fromDatabase
-  - dataRetentionTimeInDays, maxDataExtensionTimeInDays
-  - defaultDdlCollation
-  - comment
-  - orReplace, ifNotExists
-  - externalVolume
-  - catalog
-  - replaceInvalidCharacters
-  - storageSerializationPolicy
-  - catalogSync, catalogSyncNamespaceMode, catalogSyncNamespaceFlattenDelimiter
-
-JUSTIFIED_EXCLUSIONS:
-  - PARAMETER_NAME: "WITH TAG"
-    EXCLUSION_REASON: "Complex key-value structure requires advanced implementation"
-    FUTURE_CONSIDERATION: "Yes - Phase 2 enhancement"
-
-VALIDATION_COMPLETE:
-  VALIDATION_STATUS: "COMPLETE"
-  VALIDATION_METHOD: "Simple INFORMATION_SCHEMA + doc review (15 minutes vs complex frameworks)"
-  BLOCKING_REQUIREMENT: "RESOLVED - All parameters validated"
+SOURCE: "https://docs.snowflake.com/en/sql-reference/sql/create-database"
+VERSION: "Snowflake 2024"
+COMPLETENESS: "✅ 100% DDL completeness - All 14 parameters validated"
 ```
 
-## OFFICIAL_DOCUMENTATION_ANALYSIS
+### Critical Implementation Points
+```yaml
+MUTUAL_EXCLUSIVITY: "OR REPLACE and IF NOT EXISTS cannot be combined"
+TRANSIENT_CONSTRAINT: "Transient databases must have dataRetentionTimeInDays = 0"
+CLONING_SUPPORT: "Zero-copy cloning with point-in-time recovery options"
+VALIDATION_COMPLEXITY: "Complex parameter interactions and constraints"
+```
 
-### Primary Documentation Sources
-- **URL**: https://docs.snowflake.com/en/sql-reference/sql/create-database
-- **Version**: Snowflake 2024/2025
-- **Last Updated**: 2025-08-01
-- **Cross-Reference**: https://docs.snowflake.com/en/sql-reference/sql/clone (for cloning operations)
+## 🎯 SQL SYNTAX TEMPLATES
 
-### Documentation Analysis and Key Insights
-- **Complex Parameter Set**: CREATE DATABASE supports extensive configuration options
-- **Mutual Exclusivity**: OR REPLACE and IF NOT EXISTS cannot be combined
-- **Transient Restrictions**: Transient databases have specific retention limitations
-- **Cloning Capabilities**: Zero-copy cloning with point-in-time recovery support
-- **Task Management**: Built-in task management configuration at database level
-
-### Basic Syntax
+### Basic Creation
 ```sql
--- Minimal syntax
-CREATE DATABASE database_name;
-
--- Full syntax with all options
-CREATE [ OR REPLACE ] [ TRANSIENT ] DATABASE [ IF NOT EXISTS ] <name>
-  [ CLONE <source_db_name>
-        [ { AT | BEFORE } ( { TIMESTAMP => <timestamp> | OFFSET => <time_difference> | STATEMENT => <id> } ) ] ]
-  [ DATA_RETENTION_TIME_IN_DAYS = <integer> ]
-  [ MAX_DATA_EXTENSION_TIME_IN_DAYS = <integer> ]
-  [ DEFAULT_DDL_COLLATION = '<collation_specification>' ]
-  [ LOG_LEVEL = '<log_level>' ]
-  [ TRACE_LEVEL = '<trace_level>' ]
-  [ SUSPEND_TASK_AFTER_NUM_FAILURES = <num> ]
-  [ TASK_AUTO_RETRY_ATTEMPTS = <num> ]
-  [ USER_TASK_MANAGED_INITIAL_WAREHOUSE_SIZE = <warehouse_size> ]
-  [ USER_TASK_TIMEOUT_MS = <num> ]
-  [ USER_TASK_MINIMUM_TRIGGER_INTERVAL_IN_SECONDS = <num> ]
-  [ QUOTED_IDENTIFIERS_IGNORE_CASE = { TRUE | FALSE } ]
-  [ ENABLE_CONSOLE_OUTPUT = { TRUE | FALSE } ]
-  [ COMMENT = '<string_literal>' ]
-  [ [ WITH ] TAG ( <tag_name> = '<tag_value>' [ , <tag_name> = '<tag_value>' , ... ] ) ]
+CREATE [TRANSIENT] DATABASE database_name;
 ```
 
-## COMPREHENSIVE_ATTRIBUTE_ANALYSIS
+### Conditional Creation (Mutually Exclusive)
+```sql
+-- Safe replacement
+CREATE OR REPLACE DATABASE database_name;
 
-| Attribute | Description | Data Type | Required/Optional | Default | Valid Values | Constraints | Mutual Exclusivity | Implementation Priority | Implementation Notes |
-|-----------|-------------|-----------|------------------|---------|--------------|-------------|-------------------|----------------------|-------------------|
-| databaseName | Target database name for creation | String | Required | - | Valid Snowflake identifier | Cannot be null/empty | None | HIGH | Case-insensitive, auto-converted to uppercase |
-| orReplace | Replace existing database | Boolean | Optional | false | true/false | Cannot combine with ifNotExists | Mutually exclusive with ifNotExists | HIGH | Drops existing database completely |
-| transient | Create transient database | Boolean | Optional | false | true/false | If true, dataRetentionTimeInDays must be 0 | None | MEDIUM | No Time Travel or Fail-safe |
-| ifNotExists | Create only if doesn't exist | Boolean | Optional | false | true/false | Cannot combine with orReplace | Mutually exclusive with orReplace | HIGH | Idempotent operation support |
-| cloneFrom | Source database for cloning | String | Optional | null | Existing database name | Source must exist | None | MEDIUM | Zero-copy clone operation |
-| dataRetentionTimeInDays | Time Travel retention period | Integer | Optional | 1 | 0-90 | Must be 0 if transient=true, ≤ maxDataExtensionTimeInDays | Cannot be >0 if transient=true | MEDIUM | Controls Time Travel availability |
-| maxDataExtensionTimeInDays | Maximum Time Travel extension | Integer | Optional | 14 | 0-90 | Must be ≥ dataRetentionTimeInDays | None | LOW | Maximum extension for retention |
-| defaultDdlCollation | Default string collation | String | Optional | null | Valid collation specification | Must be valid collation | None | LOW | Database-level collation setting |
-| comment | Database description | String | Optional | null | String ≤ 256 chars | Length validation | None | LOW | Metadata only |
-| catalogSync | Enable catalog synchronization | String | Optional | null | Valid sync settings | Must be valid sync configuration | None | LOW | Catalog integration feature |
-| externalVolume | External volume for database | String | Optional | null | Valid external volume name | Must exist if specified | None | LOW | External storage reference |
-| catalog | Catalog name for database | String | Optional | null | Valid catalog identifier | Must exist if specified | None | LOW | Catalog location identifier |
-| fromDatabase | Source database reference | String | Optional | null | Valid database identifier | Must exist if specified | None | MEDIUM | Alternative database source |
-| tag | Database tag assignment | String | Optional | null | Valid tag syntax | Must be valid tag format | None | LOW | Object tagging |
-| catalogSyncNamespaceFlattenDelimiter | Delimiter for namespace flattening | String | Optional | null | Valid delimiter character | Single character only | None | LOW | Catalog sync configuration |
-| replaceInvalidCharacters | Replace invalid characters in names | Boolean | Optional | false | true/false | None | None | LOW | Character validation control |
-| storageSerializationPolicy | Storage serialization policy | String | Optional | null | Valid policy name | Must exist if specified | None | LOW | Storage optimization setting |
-| catalogSyncNamespaceMode | Namespace mode for catalog sync | String | Optional | null | Valid mode identifier | Must be valid mode | None | LOW | Catalog sync mode configuration |
+-- Idempotent creation
+CREATE DATABASE IF NOT EXISTS database_name;
+```
+
+### Cloning
+```sql
+-- Basic clone
+CREATE DATABASE new_db CLONE source_db;
+
+-- Point-in-time clone
+CREATE DATABASE new_db CLONE source_db
+  AT (TIMESTAMP => '2024-01-01 00:00:00');
+```
+
+### Full Configuration
+```sql
+CREATE [OR REPLACE] [TRANSIENT] DATABASE [IF NOT EXISTS] database_name
+  [CLONE source_database [AT|BEFORE (options)]]
+  [DATA_RETENTION_TIME_IN_DAYS = 0-90]
+  [MAX_DATA_EXTENSION_TIME_IN_DAYS = 0-90]
+  [DEFAULT_DDL_COLLATION = 'collation_spec']
+  [COMMENT = 'description']
+  [task_management_parameters]
+  [logging_parameters];
+```
+
+## 📊 ATTRIBUTES QUICK REFERENCE
+
+### Core Attributes (All Operations)
+| Attribute | Type | Required | Values | Constraints |
+|-----------|------|----------|--------|-----------|
+| **databaseName** | String | ✅ | Valid identifier | Primary key |
+| **orReplace** | Boolean | ❌ | true/false | Mutually exclusive with ifNotExists |
+| **ifNotExists** | Boolean | ❌ | true/false | Mutually exclusive with orReplace |
+| **transient** | Boolean | ❌ | true/false | Forces dataRetentionTimeInDays = 0 |
+
+### Cloning Attributes
+| Attribute | Type | Required | Values | Notes |
+|-----------|------|----------|--------|---------|
+| **cloneFrom** | String | ❌ | Existing database | Zero-copy clone |
+| **fromDatabase** | String | ❌ | Valid identifier | Alternative source |
+
+### Time Travel Attributes
+| Attribute | Type | Values | Constraint | Priority |
+|-----------|------|--------|------------|----------|
+| **dataRetentionTimeInDays** | Integer | 0-90 | Must be 0 if transient | MEDIUM |
+| **maxDataExtensionTimeInDays** | Integer | 0-90 | ≥ dataRetention | LOW |
+
+### Configuration Attributes
+| Attribute | Type | Values | Purpose | Priority |
+|-----------|------|--------|---------|----------|
+| **defaultDdlCollation** | String | Valid collation | String handling | LOW |
+| **comment** | String | ≤256 chars | Documentation | LOW |
+| **catalog** | String | Valid identifier | Catalog reference | LOW |
+| **externalVolume** | String | Valid volume | External storage | LOW |
+
+### Advanced Attributes (Low Priority)
+| Attribute | Type | Purpose |
+|-----------|------|----------|
+| **catalogSync** | String | Catalog synchronization |
+| **catalogSyncNamespaceMode** | String | Sync mode configuration |
+| **catalogSyncNamespaceFlattenDelimiter** | String | Namespace flattening |
+| **replaceInvalidCharacters** | Boolean | Character validation |
+| **storageSerializationPolicy** | String | Storage optimization |
+
+### Mutual Exclusivity Rules
+```yaml
+CONDITIONAL_EXCLUSIVITY: "Cannot combine OR REPLACE + IF NOT EXISTS"
+TRANSIENT_CONSTRAINT: "Transient databases must have dataRetentionTimeInDays = 0"
+RETENTION_CONSTRAINT: "maxDataExtensionTimeInDays >= dataRetentionTimeInDays"
+```
 
 ## 3. Mutual Exclusivity Rules
 

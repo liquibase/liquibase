@@ -1,52 +1,57 @@
-# Snowflake CreateWarehouse Requirements Document
-## Implementation-Ready Requirements for CreateWarehouse Changetype Development
+# CREATE WAREHOUSE Requirements
+## AI-Optimized Implementation Guide for Enterprise Data Warehouse Management
 
-## REQUIREMENTS_METADATA
+### REQUIREMENTS_METADATA
 ```yaml
 REQUIREMENTS_VERSION: "4.0"
-PHASE: "VALIDATION_COMPLETE"
 STATUS: "IMPLEMENTATION_READY"
-RESEARCH_COMPLETION_DATE: "2025-08-01"
-VALIDATION_COMPLETION_DATE: "2025-08-01"
-VALIDATION_METHOD: "Simple INFORMATION_SCHEMA + Manual Documentation Review"
-COMPLETENESS_VALIDATION: "COMPLETE - XSD parameters validated via SnowflakeParameterValidationTest"
+OPTIMIZATION_DATE: "2025-08-03"
 IMPLEMENTATION_PATTERN: "New_Changetype"
-DATABASE_TYPE: "Snowflake"
 OBJECT_TYPE: "Warehouse"
 OPERATION: "CREATE"
-NEXT_PHASE: "Phase 3 - TDD Implementation"
-ESTIMATED_IMPLEMENTATION_TIME: "6-8 hours (validation complete)"
+ESTIMATED_TIME: "6-8 hours"
+COMPLEXITY: "HIGH"
+ATTRIBUTES_COUNT: 17
+PRIORITY: "READY"
 ```
 
-## EXECUTIVE_SUMMARY
+## ⚡ INSTANT REQUIREMENTS ACCESS
+
+### Implementation Pattern
 ```yaml
-IMPLEMENTATION_SCOPE: "Complete CREATE WAREHOUSE changetype supporting all Snowflake warehouse creation operations"
-KEY_OPERATIONS:
-  - "Basic warehouse creation with size and type configuration"
-  - "OR REPLACE and IF NOT EXISTS conditional operations"
-  - "Multi-cluster warehouse configuration (Enterprise Edition)"
-  - "Query acceleration and resource constraint settings"
-  - "Auto-suspend/resume and resource monitoring configuration"
-COMPLEXITY_ASSESSMENT: "HIGH - Complex parameter interactions, Enterprise Edition dependencies, and resource constraint validation"
-SUCCESS_CRITERIA: "All warehouse creation scenarios implemented with comprehensive validation and Enterprise Edition feature support"
+PATTERN: "New Changetype Pattern"
+PURPOSE: "CREATE WAREHOUSE doesn't exist in core Liquibase"
+COMPONENTS: "Change class + Statement class + SQL generator + Service registration + XSD element"
+COMPLEXITY_FACTORS: "Enterprise Edition dependencies, resource constraints, multi-cluster configuration"
 ```
 
-## OFFICIAL_DOCUMENTATION_ANALYSIS
+### Core Features
+| Feature | Parameters | SQL Impact | Business Value |
+|---------|------------|------------|----------------|
+| **Basic Creation** | warehouseName, warehouseSize, warehouseType | Core warehouse creation | HIGH |
+| **Conditional Operations** | orReplace, ifNotExists | Safe deployment patterns | HIGH |
+| **Multi-Cluster** | minClusterCount, maxClusterCount, scalingPolicy | Enterprise performance | MEDIUM |
+| **Auto Management** | autoSuspend, autoResume | Cost optimization | HIGH |
+| **Resource Control** | resourceMonitor | Budget management | MEDIUM |
 
-### Primary Documentation Sources
-- **URL**: https://docs.snowflake.com/en/sql-reference/sql/create-warehouse
-- **Version**: Snowflake 2024/2025
-- **Last Updated**: 2025-08-01
-- **Cross-Reference**: https://docs.snowflake.com/en/user-guide/warehouses-overview (for warehouse concepts)
+## 📋 CORE IMPLEMENTATION REQUIREMENTS
 
-### Documentation Analysis and Key Insights
-- **Complex Parameter Set**: CREATE WAREHOUSE supports extensive configuration options
-- **Mutual Exclusivity**: OR REPLACE and IF NOT EXISTS cannot be combined
-- **Enterprise Dependencies**: Multi-cluster and query acceleration require Enterprise Edition
-- **Resource Constraints**: New feature with compatibility requirements across warehouse types
-- **Cost Implications**: Many parameters directly impact billing and performance
+### Documentation Reference
+```yaml
+SOURCE: "https://docs.snowflake.com/en/sql-reference/sql/create-warehouse"
+VERSION: "Snowflake 2024/2025"
+COMPLETENESS: "✅ Complete syntax, enterprise features, resource constraints"
+```
 
-## COMPLETE_SQL_SYNTAX_DEFINITION
+### Critical Implementation Points
+```yaml
+MUTUAL_EXCLUSIVITY: "OR REPLACE and IF NOT EXISTS cannot be combined"
+ENTERPRISE_DEPENDENCIES: "Multi-cluster and query acceleration require Enterprise Edition"
+RESOURCE_CONSTRAINTS: "Complex parameter interactions with cost implications"
+PERFORMANCE_IMPACT: "Warehouse size and clustering directly affect billing"
+```
+
+## 🎯 SQL SYNTAX TEMPLATES
 
 ### Full Snowflake CREATE WAREHOUSE Syntax
 ```sql
@@ -82,7 +87,9 @@ CREATE [ OR REPLACE ] WAREHOUSE [ IF NOT EXISTS ] <name>
 - **Cluster Count Relationships**: MIN_CLUSTER_COUNT must be ≤ MAX_CLUSTER_COUNT
 - **Auto-Suspend Values**: Must be 0 (disabled), NULL (never), or ≥ 60 seconds
 
-## COMPREHENSIVE_ATTRIBUTE_ANALYSIS
+## 📊 ATTRIBUTES QUICK REFERENCE
+
+### COMPREHENSIVE_ATTRIBUTE_ANALYSIS
 
 | Attribute | Description | Data Type | Required/Optional | Default | Valid Values | Constraints | Mutual Exclusivity | Implementation Priority | Implementation Notes |
 |-----------|-------------|-----------|------------------|---------|--------------|-------------|-------------------|----------------------|-------------------|
@@ -106,94 +113,131 @@ CREATE [ OR REPLACE ] WAREHOUSE [ IF NOT EXISTS ] <name>
 | statementQueuedTimeoutInSeconds | Timeout for queued statements | Integer | Optional | null | Positive integer | None | None | LOW | Performance tuning parameter |
 | statementTimeoutInSeconds | Timeout for statement execution | Integer | Optional | null | Positive integer | None | None | LOW | Performance tuning parameter |
 
-## 3. Mutual Exclusivity Rules
+### Core Attributes (All Warehouses)
+| Attribute | Type | Values | Constraints | Priority |
+|-----------|------|--------|-------------|----------|
+| **warehouseName** | String | Valid identifier | Required, unique | HIGH |
+| **warehouseSize** | String | XSMALL to X6LARGE | Size compatibility | HIGH |
+| **warehouseType** | String | STANDARD, SNOWPARK-OPTIMIZED | Resource constraints | MEDIUM |
+| **orReplace** | Boolean | true/false | Mutual exclusive with ifNotExists | HIGH |
+| **ifNotExists** | Boolean | true/false | Mutual exclusive with orReplace | HIGH |
+| **autoSuspend** | Integer | 0, NULL, ≥60 | 0=disabled, NULL=never | HIGH |
+| **autoResume** | Boolean | true/false | None | HIGH |
+| **comment** | String | ≤256 chars | Length limit | LOW |
 
-### Mutually Exclusive Combinations
-1. **orReplace** and **ifNotExists** - Cannot use both in same statement
-   - `CREATE OR REPLACE WAREHOUSE` - Valid
-   - `CREATE WAREHOUSE IF NOT EXISTS` - Valid
-   - `CREATE OR REPLACE WAREHOUSE IF NOT EXISTS` - Invalid
+### Enterprise Edition Attributes
+| Attribute | Type | Values | Constraints | Notes |
+|-----------|------|--------|-------------|-------|
+| **minClusterCount** | Integer | 1-10 | ≤ maxClusterCount | Enterprise only |
+| **maxClusterCount** | Integer | 1-10 | ≥ minClusterCount | Enterprise only |
+| **scalingPolicy** | String | STANDARD, ECONOMY | Multi-cluster required | Enterprise only |
+| **enableQueryAcceleration** | Boolean | true/false | Enterprise only | Performance feature |
+| **queryAccelerationMaxScaleFactor** | Integer | 0-100 | Requires acceleration enabled | Conditional |
 
-### Resource Constraint Compatibility
-1. **STANDARD warehouses**: Only STANDARD_GEN_1, STANDARD_GEN_2 allowed
-2. **SNOWPARK-OPTIMIZED warehouses**: Only MEMORY_* variants allowed
-3. **Size constraints**: X5LARGE and X6LARGE only supported with MEMORY_16X constraint
+### Resource Management Attributes  
+| Attribute | Type | Values | Constraints | Notes |
+|-----------|------|--------|-------------|-------|
+| **resourceMonitor** | String | Monitor name | Monitor must exist | Budget control |
+| **initiallySuspended** | Boolean | true/false | None | Cost optimization |
+| **maxConcurrencyLevel** | Integer | Positive | Size-dependent | Performance tuning |
+| **statementQueuedTimeoutInSeconds** | Integer | Positive | None | Performance tuning |
+| **statementTimeoutInSeconds** | Integer | Positive | None | Performance tuning |
 
-### Enterprise Edition Requirements
-1. **Multi-cluster features**: maxClusterCount > 1, minClusterCount > 1, scalingPolicy require Enterprise Edition
-2. **Query acceleration**: enableQueryAcceleration, queryAccelerationMaxScaleFactor require Enterprise Edition
-
-## COMPREHENSIVE_SQL_EXAMPLES
-
-### Example 1: Basic Warehouse Creation
-```sql
--- Simple warehouse with default settings
-CREATE WAREHOUSE basic_warehouse;
+### Mutual Exclusivity Rules
+```yaml
+CONDITIONAL_CREATION:
+  MUTUALLY_EXCLUSIVE: ["orReplace", "ifNotExists"]
+  RULE: "Cannot use CREATE OR REPLACE and IF NOT EXISTS together"
+  
+RESOURCE_CONSTRAINTS:
+  STANDARD_WAREHOUSES: "Only STANDARD_GEN_1, STANDARD_GEN_2 allowed"
+  SNOWPARK_WAREHOUSES: "Only MEMORY_* variants allowed"
+  SIZE_CONSTRAINTS: "X5LARGE and X6LARGE only with MEMORY_16X"
+  
+ENTERPRISE_REQUIREMENTS:
+  MULTI_CLUSTER: "minClusterCount > 1, maxClusterCount > 1, scalingPolicy require Enterprise"
+  QUERY_ACCELERATION: "enableQueryAcceleration, queryAccelerationMaxScaleFactor require Enterprise"
 ```
-**Expected Behavior**: Warehouse created with XSMALL size, single cluster, 600s auto-suspend
-**Test Validation**: Verify warehouse exists with default properties in system views
 
-### Example 2: Sized Warehouse with Auto-Suspend Configuration
+## 🚀 SQL EXAMPLES (Validation Ready)
+
+### Basic Examples
 ```sql
--- Warehouse with specific size and auto-suspend settings
+-- Simple warehouse
+CREATE WAREHOUSE basic_warehouse;
+
+-- Sized warehouse with auto-suspend
 CREATE WAREHOUSE sized_warehouse
   WITH WAREHOUSE_SIZE = MEDIUM
   AUTO_SUSPEND = 300
   AUTO_RESUME = TRUE
   COMMENT = 'Medium warehouse with 5-minute auto-suspend';
-```
-**Expected Behavior**: MEDIUM warehouse created with 300-second auto-suspend, auto-resume enabled
-**Test Validation**: Verify size, auto-suspend, and auto-resume settings in system views
 
-### Example 3: Multi-Cluster Warehouse (Enterprise Edition)
+-- Initially suspended for cost control
+CREATE WAREHOUSE suspended_warehouse
+  WITH WAREHOUSE_SIZE = XLARGE
+  INITIALLY_SUSPENDED = TRUE
+  AUTO_SUSPEND = 60;
+```
+
+### Enterprise Edition Examples
 ```sql
--- Multi-cluster warehouse with scaling policy
+-- Multi-cluster warehouse (Enterprise)
 CREATE WAREHOUSE multi_cluster_warehouse
   WITH WAREHOUSE_SIZE = LARGE
   MIN_CLUSTER_COUNT = 1
   MAX_CLUSTER_COUNT = 3
-  SCALING_POLICY = STANDARD
-  COMMENT = 'Multi-cluster warehouse for variable workloads';
-```
-**Expected Behavior**: Multi-cluster warehouse created with scaling capabilities
-**Test Validation**: Verify cluster count settings and scaling policy configuration
+  SCALING_POLICY = STANDARD;
 
-### Example 4: Initially Suspended Warehouse for Cost Control
-```sql
--- Warehouse that starts suspended to minimize costs
-CREATE WAREHOUSE suspended_warehouse
-  WITH WAREHOUSE_SIZE = XLARGE
-  INITIALLY_SUSPENDED = TRUE
-  AUTO_SUSPEND = 60
-  COMMENT = 'Start suspended to save costs until first use';
-```
-**Expected Behavior**: Warehouse created in suspended state, ready for on-demand activation
-**Test Validation**: Verify warehouse state is SUSPENDED after creation
-
-### Example 5: Warehouse with Resource Monitor Assignment
-```sql
--- Warehouse with cost monitoring
-CREATE WAREHOUSE monitored_warehouse
-  WITH WAREHOUSE_SIZE = SMALL
-  RESOURCE_MONITOR = monthly_budget_monitor
-  AUTO_SUSPEND = 120
-  COMMENT = 'Cost-controlled warehouse with budget monitoring';
-```
-**Expected Behavior**: Warehouse created with resource monitor for cost control
-**Test Validation**: Verify resource monitor assignment and cost tracking
-
-### Example 6: Query Acceleration Warehouse (Enterprise Edition)
-```sql
--- High-performance warehouse with query acceleration
+-- Query acceleration warehouse (Enterprise)
 CREATE WAREHOUSE accelerated_warehouse
   WITH WAREHOUSE_SIZE = XLARGE
   ENABLE_QUERY_ACCELERATION = TRUE
-  QUERY_ACCELERATION_MAX_SCALE_FACTOR = 10
-  MAX_CONCURRENCY_LEVEL = 16
-  COMMENT = 'High-performance warehouse with query acceleration';
+  QUERY_ACCELERATION_MAX_SCALE_FACTOR = 10;
 ```
-**Expected Behavior**: Warehouse created with query acceleration service enabled
-**Test Validation**: Verify query acceleration settings and performance configurations
+
+### Advanced Examples
+```sql
+-- Resource monitor assignment
+CREATE WAREHOUSE monitored_warehouse
+  WITH WAREHOUSE_SIZE = SMALL
+  RESOURCE_MONITOR = monthly_budget_monitor
+  AUTO_SUSPEND = 120;
+
+-- Conditional creation
+CREATE WAREHOUSE IF NOT EXISTS safe_warehouse
+  WITH WAREHOUSE_SIZE = MEDIUM;
+
+CREATE OR REPLACE WAREHOUSE replace_warehouse
+  WITH WAREHOUSE_SIZE = LARGE
+  AUTO_SUSPEND = 300;
+```
+
+### Snowpark-Optimized Examples
+```sql
+-- Snowpark-optimized warehouse
+CREATE WAREHOUSE snowpark_warehouse
+  WITH WAREHOUSE_TYPE = 'SNOWPARK-OPTIMIZED'
+  WAREHOUSE_SIZE = MEDIUM
+  RESOURCE_CONSTRAINT = 'MEMORY_4X';
+
+-- Large Snowpark warehouse
+CREATE WAREHOUSE large_snowpark_warehouse
+  WITH WAREHOUSE_TYPE = 'SNOWPARK-OPTIMIZED'
+  WAREHOUSE_SIZE = X5LARGE
+  RESOURCE_CONSTRAINT = 'MEMORY_16X';
+```
+
+### Validation Points
+```yaml
+BASIC_VALIDATION: "Warehouse exists with correct size, auto-suspend settings"
+ENTERPRISE_VALIDATION: "Multi-cluster and query acceleration configured correctly"
+COST_VALIDATION: "Resource monitor assignment and suspended state verified"
+CONSTRAINT_VALIDATION: "Resource constraints match warehouse type"
+CONDITIONAL_VALIDATION: "IF NOT EXISTS and OR REPLACE behavior correct"
+```
+
+## 🧪 TEST SCENARIOS (TDD Ready)
 
 ### Example 7: Snowpark-Optimized Warehouse with Memory Constraint
 ```sql
@@ -239,7 +283,7 @@ CREATE OR REPLACE WAREHOUSE IF NOT EXISTS invalid_warehouse;
 **Expected Behavior**: Error thrown about mutual exclusivity violation
 **Test Validation**: Verify exact error message matches Snowflake behavior
 
-## TEST_SCENARIO_MATRIX
+## 🧪 TEST SCENARIOS (TDD Ready)
 
 ### Unit Test Scenarios for TDD Implementation
 
@@ -343,7 +387,7 @@ CREATE OR REPLACE WAREHOUSE IF NOT EXISTS invalid_warehouse;
 - **Integration 4**: Error handling with invalid configurations
 - **Integration 5**: Resource constraint and warehouse type compatibility testing
 
-## IMPLEMENTATION_GUIDANCE
+## ⚙️ IMPLEMENTATION GUIDE
 
 ### TDD Implementation Plan
 ```yaml
@@ -395,7 +439,7 @@ REQUIRED_XSD_ELEMENTS:
   - "Validation annotations for parameter constraints and compatibility"
 ```
 
-## QUALITY_VALIDATION
+## ✅ IMPLEMENTATION STATUS
 
 ### Requirements Completeness Checklist
 - [✓] YAML metadata headers complete
@@ -424,7 +468,7 @@ REQUIRED_XSD_ELEMENTS:
 - [✓] Success criteria defined and measurable
 - [✓] Implementation pattern selected with rationale
 
-## 9. Implementation Notes
+### Implementation Notes
 
 - Warehouse names are automatically converted to uppercase unless quoted
 - Resource constraints became generally available in March 2025

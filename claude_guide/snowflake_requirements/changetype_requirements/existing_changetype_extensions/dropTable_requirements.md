@@ -123,6 +123,25 @@ if (cascade == true) {
 ```
 **Generated SQL**: `DROP TABLE IF EXISTS maybe_exists CASCADE;`
 
+### Example 5: Documented Drop with Audit Trail
+```xml
+<changeSet id="drop-with-reason" author="cleanup">
+    <dropTable tableName="legacy_customer_data"
+               snowflake:restrict="true"
+               snowflake:comment="Removing legacy table - data migrated to customer_v2"/>
+</changeSet>
+```
+
+**Generated SQL:**
+```sql
+DROP TABLE legacy_customer_data RESTRICT;
+-- COMMENT: Removing legacy table - data migrated to customer_v2
+-- INFO: RESTRICT provides syntax consistency but no functional behavior in Snowflake
+```
+
+**Expected Behavior:** Table dropped with documentation comment for audit trail and compliance
+**Test Validation:** Verify table removed, comment appears in generated SQL for documentation
+
 ## IMPLEMENTATION_ARCHITECTURE
 
 ### Pattern: Existing Changetype Extension
