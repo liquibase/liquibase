@@ -43,7 +43,7 @@ public class SnowflakeImplementationAlignmentTest {
         map.put(CreateSchemaChange.class, "createSchema");
         map.put(AlterSchemaChange.class, "alterSchema");
         map.put(DropSchemaChange.class, "dropSchema");
-        map.put(CreateSequenceChangeSnowflake.class, "createSequence");
+        // Note: createSequence uses namespace attribute extension pattern, not custom change class
         map.put(CreateWarehouseChange.class, "createWarehouse");
         map.put(AlterWarehouseChange.class, "alterWarehouse");
         map.put(DropWarehouseChange.class, "dropWarehouse");
@@ -87,11 +87,7 @@ public class SnowflakeImplementationAlignmentTest {
         validateImplementationAlignment(AlterSchemaChange.class, "alterSchema");
     }
     
-    @Test
-    @DisplayName("CreateSequenceChangeSnowflake Java implementation must exactly match XSD schema")
-    public void testCreateSequenceImplementationAlignment() {
-        validateImplementationAlignment(CreateSequenceChangeSnowflake.class, "createSequence");
-    }
+    // Note: createSequence test removed - uses namespace attribute extension pattern
     
     @Test
     @DisplayName("DropDatabaseChange Java implementation must exactly match XSD schema")

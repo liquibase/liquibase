@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Debug test to verify parser is capturing namespace attributes
  */
-class SnowflakeParserDebugTest {
+class SnowflakeParserTest {
     
     @BeforeEach
     void setUp() {

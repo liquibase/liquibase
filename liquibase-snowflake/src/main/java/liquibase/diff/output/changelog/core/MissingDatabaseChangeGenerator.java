@@ -58,10 +58,10 @@ public class MissingDatabaseChangeGenerator implements MissingObjectChangeGenera
             change.setComment(database.getComment());
         }
         if (database.getDataRetentionTimeInDays() != null) {
-            change.setDataRetentionTimeInDays(database.getDataRetentionTimeInDays());
+            change.setDataRetentionTimeInDays(database.getDataRetentionTimeInDays().toString());
         }
         if (database.getMaxDataExtensionTimeInDays() != null) {
-            change.setMaxDataExtensionTimeInDays(database.getMaxDataExtensionTimeInDays());
+            change.setMaxDataExtensionTimeInDays(database.getMaxDataExtensionTimeInDays().toString());
         }
         if (database.getTransient() != null && database.getTransient()) {
             change.setTransient(database.getTransient());

@@ -1,8 +1,13 @@
-liquibase.datatype.core.TextDataTypeSnowflake
+liquibase.datatype.core.TextTypeSnowflake
 liquibase.datatype.core.TimestampNTZTypeSnowflake
-liquibase.datatype.core.DoubleDataTypeSnowflake
+liquibase.datatype.core.DoubleTypeSnowflake
 liquibase.datatype.core.BinaryTypeSnowflake
 liquibase.datatype.core.ClobTypeSnowflake
 liquibase.datatype.core.DateTypeSnowflake
 liquibase.datatype.core.TimeTypeSnowflake
 liquibase.datatype.core.TimestampTypeSnowflake
+liquibase.datatype.core.VariantTypeSnowflake
+liquibase.datatype.core.ArrayTypeSnowflake
+liquibase.datatype.core.ObjectTypeSnowflake
+liquibase.datatype.core.GeographyTypeSnowflake
+liquibase.datatype.core.GeometryTypeSnowflake

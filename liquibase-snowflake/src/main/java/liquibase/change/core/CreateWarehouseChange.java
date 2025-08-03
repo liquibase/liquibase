@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
+import liquibase.change.Change;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
@@ -324,6 +325,19 @@ public class CreateWarehouseChange extends AbstractChange {
     @Override
     public String getConfirmationMessage() {
         return "Warehouse " + getWarehouseName() + " created";
+    }
+
+    @Override
+    public boolean supportsRollback(Database database) {
+        return database instanceof SnowflakeDatabase;
+    }
+    
+    @Override
+    public Change[] createInverses() {
+        DropWarehouseChange inverse = new DropWarehouseChange();
+        inverse.setWarehouseName(getWarehouseName());
+        inverse.setIfExists(true);
+        return new Change[]{inverse};
     }
 
     @Override

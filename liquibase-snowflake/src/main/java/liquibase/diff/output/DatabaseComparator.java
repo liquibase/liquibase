@@ -81,8 +81,8 @@ public class DatabaseComparator implements DatabaseObjectComparator {
         compareField(differences, "transient", database1.getTransient(), database2.getTransient());
         compareField(differences, "defaultDdlCollation", 
                     database1.getDefaultDdlCollation(), database2.getDefaultDdlCollation());
-        compareField(differences, "resourceMonitor", 
-                    database1.getResourceMonitor(), database2.getResourceMonitor());
+        compareField(differences, "tag", 
+                    database1.getTag(), database2.getTag());
         
         return differences;
     }

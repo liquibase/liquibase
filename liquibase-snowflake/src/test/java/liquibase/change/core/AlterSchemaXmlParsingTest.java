@@ -1,9 +1,8 @@
 package liquibase.change.core;
 
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.database.core.SnowflakeDatabase;
-import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.DirectoryResourceAccessor;
 import org.junit.jupiter.api.Test;
@@ -11,90 +10,87 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.nio.file.Path;
+import java.io.IOException;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Debug test to isolate XML parsing issues with UNSET boolean attributes
+ */
 public class AlterSchemaXmlParsingTest {
 
     @TempDir
-    Path tempDir;
+    File tempDir;
 
     @Test
-    public void testUnsetCommentXmlParsing() throws Exception {
+    public void testParseWorkingBooleanAttribute() throws Exception {
         String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-            "<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\"\n" +
-            "                   xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-            "                   xmlns:snowflake=\"http://www.liquibase.org/xml/ns/snowflake\"\n" +
-            "                   xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog\n" +
-            "                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd\n" +
-            "                      http://www.liquibase.org/xml/ns/snowflake\n" +
-            "                      http://www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd\">\n" +
-            "    <changeSet author=\"test\" id=\"test-unset-comment\">\n" +
-            "        <snowflake:alterSchema schemaName=\"TEST_SCHEMA\" unsetComment=\"true\"/>\n" +
+            "<databaseChangeLog \n" +
+            "    xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\"\n" +
+            "    xmlns:snowflake=\"http://www.liquibase.org/xml/ns/snowflake\"\n" +
+            "    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+            "    xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog\n" +
+            "        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd\n" +
+            "        http://www.liquibase.org/xml/ns/snowflake\n" +
+            "        http://www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd\">\n" +
+            "        \n" +
+            "    <changeSet id=\"test-working-boolean\" author=\"test\">\n" +
+            "        <snowflake:alterSchema schemaName=\"TEST_SCHEMA\" ifExists=\"true\" newName=\"NEW_SCHEMA\"/>\n" +
             "    </changeSet>\n" +
             "</databaseChangeLog>";
 
-        XMLChangeLogSAXParser parser = new XMLChangeLogSAXParser();
-        SnowflakeDatabase database = new SnowflakeDatabase();
+        DatabaseChangeLog changeLog = parseXml(xml);
+        ChangeSet changeSet = changeLog.getChangeSets().get(0);
+        AlterSchemaChange change = (AlterSchemaChange) changeSet.getChanges().get(0);
         
-        // Write XML to temporary file
-        File xmlFile = new File(tempDir.toFile(), "test.xml");
-        try (FileWriter writer = new FileWriter(xmlFile)) {
-            writer.write(xml);
-        }
+        System.out.println("Working boolean test:");
+        System.out.println("ifExists: " + change.getIfExists());
+        System.out.println("newName: " + change.getNewName());
         
-        DirectoryResourceAccessor resourceAccessor = new DirectoryResourceAccessor(tempDir.toFile());
-        
-        DatabaseChangeLog changeLog = parser.parse(
-            "test.xml", 
-            new ChangeLogParameters(database), 
-            resourceAccessor
-        );
-        
-        System.out.println("Parsed successfully! Found " + changeLog.getChangeSets().size() + " changesets");
-        
-        if (!changeLog.getChangeSets().isEmpty()) {
-            AlterSchemaChange change = (AlterSchemaChange) changeLog.getChangeSets().get(0).getChanges().get(0);
-            System.out.println("unsetComment value: " + change.getUnsetComment());
-        }
+        // This should work
+        assertNotNull(change.getIfExists());
+        assertTrue(change.getIfExists());
+        assertEquals("NEW_SCHEMA", change.getNewName());
     }
 
     @Test
-    public void testUnsetDataRetentionXmlParsing() throws Exception {
+    public void testParseUnsetBooleanAttribute() throws Exception {
         String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-            "<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\"\n" +
-            "                   xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-            "                   xmlns:snowflake=\"http://www.liquibase.org/xml/ns/snowflake\"\n" +
-            "                   xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog\n" +
-            "                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd\n" +
-            "                      http://www.liquibase.org/xml/ns/snowflake\n" +
-            "                      http://www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd\">\n" +
-            "    <changeSet author=\"test\" id=\"test-unset-retention\">\n" +
+            "<databaseChangeLog \n" +
+            "    xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\"\n" +
+            "    xmlns:snowflake=\"http://www.liquibase.org/xml/ns/snowflake\"\n" +
+            "    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+            "    xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog\n" +
+            "        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd\n" +
+            "        http://www.liquibase.org/xml/ns/snowflake\n" +
+            "        http://www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd\">\n" +
+            "        \n" +
+            "    <changeSet id=\"test-unset-boolean\" author=\"test\">\n" +
             "        <snowflake:alterSchema schemaName=\"TEST_SCHEMA\" unsetDataRetentionTimeInDays=\"true\"/>\n" +
             "    </changeSet>\n" +
             "</databaseChangeLog>";
 
-        XMLChangeLogSAXParser parser = new XMLChangeLogSAXParser();
-        SnowflakeDatabase database = new SnowflakeDatabase();
+        DatabaseChangeLog changeLog = parseXml(xml);
+        ChangeSet changeSet = changeLog.getChangeSets().get(0);
+        AlterSchemaChange change = (AlterSchemaChange) changeSet.getChanges().get(0);
         
-        // Write XML to temporary file
-        File xmlFile = new File(tempDir.toFile(), "test.xml");
+        System.out.println("UNSET boolean test:");
+        System.out.println("unsetDataRetentionTimeInDays: " + change.getUnsetDataRetentionTimeInDays());
+        System.out.println("schemaName: " + change.getSchemaName());
+        
+        // This is what we expect but doesn't work
+        assertNotNull(change.getUnsetDataRetentionTimeInDays());
+        assertTrue(change.getUnsetDataRetentionTimeInDays());
+    }
+
+    private DatabaseChangeLog parseXml(String xml) throws Exception {
+        File xmlFile = new File(tempDir, "test.xml");
         try (FileWriter writer = new FileWriter(xmlFile)) {
             writer.write(xml);
         }
         
-        DirectoryResourceAccessor resourceAccessor = new DirectoryResourceAccessor(tempDir.toFile());
-        
-        DatabaseChangeLog changeLog = parser.parse(
-            "test.xml", 
-            new ChangeLogParameters(database), 
-            resourceAccessor
-        );
-        
-        System.out.println("Parsed successfully! Found " + changeLog.getChangeSets().size() + " changesets");
-        
-        if (!changeLog.getChangeSets().isEmpty()) {
-            AlterSchemaChange change = (AlterSchemaChange) changeLog.getChangeSets().get(0).getChanges().get(0);
-            System.out.println("unsetDataRetentionTimeInDays value: " + change.getUnsetDataRetentionTimeInDays());
-        }
+        DirectoryResourceAccessor resourceAccessor = new DirectoryResourceAccessor(tempDir);
+        XMLChangeLogSAXParser parser = new XMLChangeLogSAXParser();
+        return parser.parse("test.xml", new ChangeLogParameters(), resourceAccessor);
     }
 }

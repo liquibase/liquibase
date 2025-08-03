@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Debug test to understand why validation fails for UNSET attributes
  */
-public class AlterSchemaXmlValidationDebugTest {
+public class AlterSchemaXmlValidationTest {
 
     @TempDir
     File tempDir;

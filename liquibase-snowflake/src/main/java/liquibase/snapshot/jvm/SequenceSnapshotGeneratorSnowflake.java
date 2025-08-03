@@ -36,7 +36,7 @@ public class SequenceSnapshotGeneratorSnowflake extends SequenceSnapshotGenerato
 
             StringBuilder sql = new StringBuilder(String.format("SELECT SEQUENCE_NAME, START_VALUE, MINIMUM_VALUE AS MIN_VALUE, MAXIMUM_VALUE AS MAX_VALUE, %s AS INCREMENT_BY, ",
                     database.escapeObjectName("INCREMENT", Column.class)))
-                    .append("CYCLE_OPTION AS WILL_CYCLE FROM information_schema.sequences ")
+                    .append("CYCLE_OPTION AS WILL_CYCLE, ORDERED, COMMENT FROM information_schema.sequences ")
                     .append("WHERE SEQUENCE_CATALOG=? AND SEQUENCE_SCHEMA=?");
 
             return new RawParameterizedSqlStatement(sql.toString(), parameter.toArray());

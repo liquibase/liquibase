@@ -47,7 +47,7 @@ public class SnowflakeRequirementsAlignmentTest {
         map.put(AlterDatabaseChange.class, "new_changetypes/alterDatabase_requirements.md");
         map.put(AlterWarehouseChange.class, "new_changetypes/alterWarehouse_requirements.md");
         map.put(AlterSchemaChange.class, "existing_changetype_extensions/alterSchema_requirements.md");
-        map.put(CreateSequenceChangeSnowflake.class, "existing_changetype_extensions/createSequenceEnhanced_requirements.md");
+        // Note: createSequence uses namespace attribute extension pattern, not custom change class
         map.put(DropDatabaseChange.class, "new_changetypes/dropDatabase_requirements.md");
         map.put(DropWarehouseChange.class, "new_changetypes/dropWarehouse_requirements.md");
         map.put(DropSchemaChange.class, "existing_changetype_extensions/dropSchema_requirements.md");
@@ -90,11 +90,7 @@ public class SnowflakeRequirementsAlignmentTest {
         validateRequirementsAlignment(AlterSchemaChange.class);
     }
     
-    @Test
-    @DisplayName("CreateSequence requirements must match actual Java implementation")
-    public void testCreateSequenceRequirementsAlignment() {
-        validateRequirementsAlignment(CreateSequenceChangeSnowflake.class);
-    }
+    // Note: createSequence test removed - uses namespace attribute extension pattern
     
     @Test
     @DisplayName("ALL requirements documents must align with their implementations")

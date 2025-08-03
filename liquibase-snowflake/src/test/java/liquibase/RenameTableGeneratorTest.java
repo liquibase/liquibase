@@ -6,7 +6,7 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.RenameTableStatement;
 import org.junit.jupiter.api.Test;
 
-public class RenameTableDebugTest {
+public class RenameTableGeneratorTest {
     
     @Test
     public void testWhichGeneratorIsUsed() {

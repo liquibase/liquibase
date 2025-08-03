@@ -74,6 +74,11 @@ public class DropWarehouseChange extends AbstractChange {
     }
 
     @Override
+    public boolean supportsRollback(Database database) {
+        return false;
+    }
+
+    @Override
     public String getSerializedObjectNamespace() {
         return "http://www.liquibase.org/xml/ns/snowflake";
     }

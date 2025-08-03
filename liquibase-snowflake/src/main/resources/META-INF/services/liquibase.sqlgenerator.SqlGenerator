@@ -21,3 +21,6 @@ liquibase.sqlgenerator.core.snowflake.DropTableGeneratorSnowflake
 liquibase.sqlgenerator.core.snowflake.AlterSequenceGeneratorSnowflake
 liquibase.sqlgenerator.core.snowflake.DropSequenceGeneratorSnowflake
 liquibase.sqlgenerator.core.snowflake.AlterTableGeneratorSnowflake
+liquibase.sqlgenerator.core.snowflake.CreateFileFormatGeneratorSnowflake
+liquibase.sqlgenerator.core.snowflake.AlterFileFormatGeneratorSnowflake
+liquibase.sqlgenerator.core.snowflake.DropFileFormatGeneratorSnowflake

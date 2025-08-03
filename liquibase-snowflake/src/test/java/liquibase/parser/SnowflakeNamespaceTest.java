@@ -17,7 +17,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SnowflakeNamespaceDebugTest {
+public class SnowflakeNamespaceTest {
     
     @Test
     public void testNamespaceAttributeParsing() throws Exception {

@@ -44,7 +44,7 @@ public class SnowflakeParameterValidationTest {
         try (Connection conn = DriverManager.getConnection(url, user, password)) {
             
             // Core object types we support
-            String[] objectTypes = {"DATABASES", "WAREHOUSES", "SEQUENCES"};
+            String[] objectTypes = {"DATABASES", "WAREHOUSES", "SEQUENCES", "FILE_FORMATS"};
             
             for (String objectType : objectTypes) {
                 validateObjectType(conn, objectType);

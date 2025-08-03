@@ -14,7 +14,7 @@
       "Bash(../mvnw test -Dtest=SimpleAlterWarehouseTest)",
       "Bash(../mvnw test:*)",
       "Bash(java:*)",
-      "Bash(./ai-generated/liquibase-4.33.0/liquibase --url=\"jdbc:snowflake://LWMNXLH-AUB54519.snowflakecomputing.com/?db=LIQUIBASE_SNOWFLAKE_OSS&warehouse=XSMALL_WH2&role=ACCOUNTADMIN\" --username=\"KEVINATLIQUIBASE\" --password=\"ZgMGV2V%Lwg57iCZ%W#Ox^5EzoC\" --defaultSchemaName=\"TEST_SCHEMA\" release-locks)",
+      "Bash(./ai-generated/liquibase-4.33.0/liquibase --url=\"jdbc:snowflake://rziymts-xbb66763.snowflakecomputing.com/?db=LB_DBEXT_INT_DB&warehouse=LTHDB_TEST_WH&role=LB_INT_ROLE\" --username=\"COMMUNITYKEVIN\" --password=\"uQ1lAjwVisliu8CpUTVh0UnxoTUk3\" --defaultSchemaName=\"BASE_SCHEMA\" release-locks)",
       "Bash(../mvnw compile:*)",
       "Bash(git mv:*)",
       "Bash(mv:*)",

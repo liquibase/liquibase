@@ -2,6 +2,7 @@ package liquibase.database.object;
 
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtil;
 
@@ -10,37 +11,42 @@ import java.util.Objects;
 
 /**
  * Represents a Snowflake database object.
+ * Based on snowflake_database_snapshot_diff_requirements.md
  */
 public class Database extends AbstractDatabaseObject {
     
     // Required properties
     private String name;
     
-    // Optional configuration properties
+    // Optional configuration properties (XSD attributes)
     private String comment;
-    private String dataRetentionTimeInDays;
-    private String maxDataExtensionTimeInDays;
+    private Integer dataRetentionTimeInDays;
+    private Integer maxDataExtensionTimeInDays;
     private Boolean transient_;
     private String defaultDdlCollation;
-    private String resourceMonitor;
+    private String tag;
     
-    // State properties (read-only, from SHOW DATABASES)
-    private Date createdOn;
-    private String origin;
+    // Iceberg database attributes
+    private String externalVolume;
+    private String catalog;
+    private String storageSerializationPolicy;
+    
+    // Creation-only operational attributes
+    private Boolean orReplace;
+    private Boolean ifNotExists;
+    
+    // State properties (read-only, from database queries - excluded from diff)
     private String owner;
-    private String ownerRoleType;
-    private String retention_time;
-    private String kind;
-    private Boolean isTransient;
-    private Boolean isCurrent;
-    private Boolean isDefault;
-    private String resourceMonitorName;
-    private Date droppedOn;
+    private String databaseType;
+    private Date created;
     private Date lastAltered;
-    private String budget;
+    private String ownerRoleType;
+    
+    // Catalog relationship
+    private Catalog catalogObject;
 
     public Database() {
-        // Empty constructor
+        setSnapshotId("name");
     }
 
     @Override
@@ -55,7 +61,7 @@ public class Database extends AbstractDatabaseObject {
 
     @Override
     public Database setName(String name) {
-        if (StringUtil.isEmpty(name)) {
+        if (StringUtil.isEmpty(name) || (name != null && name.trim().isEmpty())) {
             throw new IllegalArgumentException("Database name cannot be null or empty");
         }
         this.name = name.toUpperCase(); // Snowflake stores identifiers in uppercase
@@ -64,8 +70,8 @@ public class Database extends AbstractDatabaseObject {
 
     @Override
     public DatabaseObject[] getContainingObjects() {
-        // Databases exist at account level, not within schemas
-        return null;
+        // Databases exist at account level, no containing objects
+        return new DatabaseObject[0];
     }
 
     @Override
@@ -91,30 +97,37 @@ public class Database extends AbstractDatabaseObject {
     }
 
     public Database setComment(String comment) {
+        // Treat empty strings as null for consistency
+        if (comment != null && comment.trim().isEmpty()) {
+            comment = null;
+        }
         this.comment = comment;
         return this;
     }
 
-    public String getDataRetentionTimeInDays() {
+    public Integer getDataRetentionTimeInDays() {
         return dataRetentionTimeInDays;
     }
 
-    public Database setDataRetentionTimeInDays(String dataRetentionTimeInDays) {
+    public Database setDataRetentionTimeInDays(Integer dataRetentionTimeInDays) {
+        if (dataRetentionTimeInDays != null && (dataRetentionTimeInDays < 0 || dataRetentionTimeInDays > 90)) {
+            throw new IllegalArgumentException("Data retention time must be between 0 and 90 days for permanent databases");
+        }
         this.dataRetentionTimeInDays = dataRetentionTimeInDays;
         return this;
     }
 
-    public String getMaxDataExtensionTimeInDays() {
+    public Integer getMaxDataExtensionTimeInDays() {
         return maxDataExtensionTimeInDays;
     }
 
-    public Database setMaxDataExtensionTimeInDays(String maxDataExtensionTimeInDays) {
+    public Database setMaxDataExtensionTimeInDays(Integer maxDataExtensionTimeInDays) {
         this.maxDataExtensionTimeInDays = maxDataExtensionTimeInDays;
         return this;
     }
 
     public Boolean getTransient() {
-        return transient_;
+        return transient_ != null ? transient_ : false;
     }
 
     public Database setTransient(Boolean transient_) {
@@ -127,36 +140,77 @@ public class Database extends AbstractDatabaseObject {
     }
 
     public Database setDefaultDdlCollation(String defaultDdlCollation) {
+        if (defaultDdlCollation != null && defaultDdlCollation.trim().isEmpty()) {
+            defaultDdlCollation = null;
+        }
         this.defaultDdlCollation = defaultDdlCollation;
         return this;
     }
 
-    public String getResourceMonitor() {
-        return resourceMonitor;
+    public String getTag() {
+        return tag;
     }
 
-    public Database setResourceMonitor(String resourceMonitor) {
-        this.resourceMonitor = resourceMonitor;
+    public Database setTag(String tag) {
+        this.tag = tag;
+        return this;
+    }
+    
+    // Iceberg database attributes
+    public String getExternalVolume() {
+        return externalVolume;
+    }
+
+    public Database setExternalVolume(String externalVolume) {
+        this.externalVolume = externalVolume;
+        return this;
+    }
+    
+    public String getCatalogString() {
+        return catalog;
+    }
+
+    public Database setCatalogString(String catalog) {
+        this.catalog = catalog;
+        return this;
+    }
+    
+    public String getStorageSerializationPolicy() {
+        return storageSerializationPolicy;
+    }
+
+    public Database setStorageSerializationPolicy(String storageSerializationPolicy) {
+        this.storageSerializationPolicy = storageSerializationPolicy;
+        return this;
+    }
+    
+    // Creation-only operational attributes
+    public Boolean getOrReplace() {
+        return orReplace != null ? orReplace : false;
+    }
+
+    public Database setOrReplace(Boolean orReplace) {
+        this.orReplace = orReplace;
+        return this;
+    }
+    
+    public Boolean getIfNotExists() {
+        return ifNotExists != null ? ifNotExists : false;
+    }
+
+    public Database setIfNotExists(Boolean ifNotExists) {
+        this.ifNotExists = ifNotExists;
         return this;
     }
 
-    // State Properties Getters and Setters (read-only from database)
-
-    public Date getCreatedOn() {
-        return createdOn;
+    // State Properties Getters and Setters (read-only from database - excluded from diff)
+    
+    public Date getCreated() {
+        return created;
     }
 
-    public Database setCreatedOn(Date createdOn) {
-        this.createdOn = createdOn;
-        return this;
-    }
-
-    public String getOrigin() {
-        return origin;
-    }
-
-    public Database setOrigin(String origin) {
-        this.origin = origin;
+    public Database setCreated(Date created) {
+        this.created = created;
         return this;
     }
 
@@ -168,6 +222,15 @@ public class Database extends AbstractDatabaseObject {
         this.owner = owner;
         return this;
     }
+    
+    public String getDatabaseType() {
+        return databaseType;
+    }
+
+    public Database setDatabaseType(String databaseType) {
+        this.databaseType = databaseType;
+        return this;
+    }
 
     public String getOwnerRoleType() {
         return ownerRoleType;
@@ -177,70 +240,7 @@ public class Database extends AbstractDatabaseObject {
         this.ownerRoleType = ownerRoleType;
         return this;
     }
-
-    public String getRetention_time() {
-        return retention_time;
-    }
-
-    public Database setRetention_time(String retention_time) {
-        this.retention_time = retention_time;
-        return this;
-    }
-
-    public String getKind() {
-        return kind;
-    }
-
-    public Database setKind(String kind) {
-        this.kind = kind;
-        return this;
-    }
-
-    public Boolean getIsTransient() {
-        return isTransient;
-    }
-
-    public Database setIsTransient(Boolean isTransient) {
-        this.isTransient = isTransient;
-        return this;
-    }
-
-    public Boolean getIsCurrent() {
-        return isCurrent;
-    }
-
-    public Database setIsCurrent(Boolean isCurrent) {
-        this.isCurrent = isCurrent;
-        return this;
-    }
-
-    public Boolean getIsDefault() {
-        return isDefault;
-    }
-
-    public Database setIsDefault(Boolean isDefault) {
-        this.isDefault = isDefault;
-        return this;
-    }
-
-    public String getResourceMonitorName() {
-        return resourceMonitorName;
-    }
-
-    public Database setResourceMonitorName(String resourceMonitorName) {
-        this.resourceMonitorName = resourceMonitorName;
-        return this;
-    }
-
-    public Date getDroppedOn() {
-        return droppedOn;
-    }
-
-    public Database setDroppedOn(Date droppedOn) {
-        this.droppedOn = droppedOn;
-        return this;
-    }
-
+    
     public Date getLastAltered() {
         return lastAltered;
     }
@@ -249,13 +249,14 @@ public class Database extends AbstractDatabaseObject {
         this.lastAltered = lastAltered;
         return this;
     }
-
-    public String getBudget() {
-        return budget;
+    
+    // Catalog relationship
+    public Catalog getCatalog() {
+        return catalogObject;
     }
 
-    public Database setBudget(String budget) {
-        this.budget = budget;
+    public Database setCatalog(Catalog catalog) {
+        this.catalogObject = catalog;
         return this;
     }
 
@@ -264,19 +265,12 @@ public class Database extends AbstractDatabaseObject {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Database database = (Database) o;
-        return Objects.equals(name, database.name) &&
-               Objects.equals(comment, database.comment) &&
-               Objects.equals(dataRetentionTimeInDays, database.dataRetentionTimeInDays) &&
-               Objects.equals(maxDataExtensionTimeInDays, database.maxDataExtensionTimeInDays) &&
-               Objects.equals(transient_, database.transient_) &&
-               Objects.equals(defaultDdlCollation, database.defaultDdlCollation) &&
-               Objects.equals(resourceMonitor, database.resourceMonitor);
+        return Objects.equals(name, database.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, comment, dataRetentionTimeInDays, maxDataExtensionTimeInDays, 
-                           transient_, defaultDdlCollation, resourceMonitor);
+        return Objects.hash(name);
     }
 
     @Override
@@ -284,13 +278,9 @@ public class Database extends AbstractDatabaseObject {
         return "Database{" +
                 "name='" + name + '\'' +
                 ", comment='" + comment + '\'' +
-                ", dataRetentionTimeInDays='" + dataRetentionTimeInDays + '\'' +
-                ", maxDataExtensionTimeInDays='" + maxDataExtensionTimeInDays + '\'' +
+                ", dataRetentionTimeInDays=" + dataRetentionTimeInDays +
                 ", transient=" + transient_ +
-                ", defaultDdlCollation='" + defaultDdlCollation + '\'' +
-                ", resourceMonitor='" + resourceMonitor + '\'' +
                 ", owner='" + owner + '\'' +
-                ", createdOn=" + createdOn +
                 '}';
     }
 

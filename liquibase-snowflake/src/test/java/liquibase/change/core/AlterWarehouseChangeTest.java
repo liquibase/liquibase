@@ -33,9 +33,54 @@ public class AlterWarehouseChangeTest {
     }
     
     @Test
-    @DisplayName("Should not support rollback")
-    void shouldNotSupportRollback() {
+    @DisplayName("Should not support rollback by default")
+    void shouldNotSupportRollbackByDefault() {
+        change.setWarehouseName("TEST_WAREHOUSE");
+        change.setWarehouseSize("LARGE");
         assertFalse(change.supportsRollback(database));
+    }
+    
+    @Test
+    @DisplayName("Should support rollback for RENAME operations")
+    void shouldSupportRollbackForRename() {
+        change.setWarehouseName("OLD_WAREHOUSE");
+        change.setNewWarehouseName("NEW_WAREHOUSE");
+        
+        assertTrue(change.supportsRollback(database));
+    }
+    
+    @Test
+    @DisplayName("Should not support rollback when newWarehouseName is empty")
+    void shouldNotSupportRollbackWhenNewNameEmpty() {
+        change.setWarehouseName("TEST_WAREHOUSE");
+        change.setNewWarehouseName("");
+        
+        assertFalse(change.supportsRollback(database));
+    }
+    
+    @Test
+    @DisplayName("Should create inverse for RENAME operation")
+    void shouldCreateInverseForRename() {
+        change.setWarehouseName("OLD_WAREHOUSE");
+        change.setNewWarehouseName("NEW_WAREHOUSE");
+        
+        Change[] inverses = change.createInverses();
+        assertEquals(1, inverses.length);
+        
+        AlterWarehouseChange inverse = (AlterWarehouseChange) inverses[0];
+        assertEquals("NEW_WAREHOUSE", inverse.getWarehouseName());
+        assertEquals("OLD_WAREHOUSE", inverse.getNewWarehouseName());
+        assertTrue(inverse.getIfExists());
+    }
+    
+    @Test
+    @DisplayName("Should return empty array when not supporting rollback")
+    void shouldReturnEmptyArrayWhenNotSupportingRollback() {
+        change.setWarehouseName("TEST_WAREHOUSE");
+        change.setWarehouseSize("LARGE");
+        
+        Change[] inverses = change.createInverses();
+        assertEquals(0, inverses.length);
     }
     
     @Test

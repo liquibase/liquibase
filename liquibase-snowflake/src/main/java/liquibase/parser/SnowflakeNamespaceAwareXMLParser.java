@@ -105,7 +105,10 @@ public class SnowflakeNamespaceAwareXMLParser extends XMLChangeLogSAXParser {
                    "renameTable".equals(localName) ||
                    "createSequence".equals(localName) ||
                    "alterSequence".equals(localName) ||
-                   "dropSequence".equals(localName);
+                   "dropSequence".equals(localName) ||
+                   "createFileFormat".equals(localName) ||
+                   "alterFileFormat".equals(localName) ||
+                   "dropFileFormat".equals(localName);
         }
         
         private String getObjectName(String changeType, Attributes attributes) {
@@ -121,6 +124,10 @@ public class SnowflakeNamespaceAwareXMLParser extends XMLChangeLogSAXParser {
                 case "alterSequence":
                 case "dropSequence":
                     return attributes.getValue("sequenceName");
+                case "createFileFormat":
+                case "alterFileFormat":
+                case "dropFileFormat":
+                    return attributes.getValue("fileFormatName");
                 default:
                     return null;
             }

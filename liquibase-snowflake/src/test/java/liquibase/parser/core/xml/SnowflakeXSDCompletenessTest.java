@@ -43,7 +43,7 @@ public class SnowflakeXSDCompletenessTest {
         map.put(CreateSchemaChange.class, "createSchema");
         map.put(AlterSchemaChange.class, "alterSchema");
         map.put(DropSchemaChange.class, "dropSchema");
-        map.put(CreateSequenceChangeSnowflake.class, "createSequence");
+        // Note: createSequence uses namespace attribute extension pattern, not custom change class
         map.put(CreateWarehouseChange.class, "createWarehouse");
         map.put(AlterWarehouseChange.class, "alterWarehouse");
         map.put(DropWarehouseChange.class, "dropWarehouse");

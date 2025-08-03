@@ -33,9 +33,46 @@ public class CreateWarehouseChangeTest {
     }
     
     @Test
-    @DisplayName("Should not support rollback")
-    void shouldNotSupportRollback() {
-        assertFalse(change.supportsRollback(database));
+    @DisplayName("Should support rollback for Snowflake database")
+    void shouldSupportRollback() {
+        assertTrue(change.supportsRollback(database));
+    }
+    
+    @Test
+    @DisplayName("Should not support rollback for non-Snowflake database")
+    void shouldNotSupportRollbackForNonSnowflake() {
+        assertFalse(change.supportsRollback(null));
+    }
+    
+    @Test
+    @DisplayName("Should create inverse DropWarehouseChange")
+    void shouldCreateInverseDropWarehouse() {
+        change.setWarehouseName("TEST_WAREHOUSE");
+        
+        Change[] inverses = change.createInverses();
+        
+        assertNotNull(inverses);
+        assertEquals(1, inverses.length);
+        assertTrue(inverses[0] instanceof DropWarehouseChange);
+        
+        DropWarehouseChange dropChange = (DropWarehouseChange) inverses[0];
+        assertEquals("TEST_WAREHOUSE", dropChange.getWarehouseName());
+        assertTrue(dropChange.getIfExists());
+    }
+    
+    @Test
+    @DisplayName("Should create inverse with minimal properties")
+    void shouldCreateInverseWithMinimalProperties() {
+        change.setWarehouseName("MINIMAL_WAREHOUSE");
+        
+        Change[] inverses = change.createInverses();
+        
+        assertNotNull(inverses);
+        assertEquals(1, inverses.length);
+        
+        DropWarehouseChange dropChange = (DropWarehouseChange) inverses[0];
+        assertEquals("MINIMAL_WAREHOUSE", dropChange.getWarehouseName());
+        assertTrue(dropChange.getIfExists());
     }
     
     @Test

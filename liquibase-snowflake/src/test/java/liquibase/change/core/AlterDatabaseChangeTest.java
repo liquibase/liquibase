@@ -33,9 +33,54 @@ public class AlterDatabaseChangeTest {
     }
     
     @Test
-    @DisplayName("Should not support rollback")
-    void shouldNotSupportRollback() {
+    @DisplayName("Should not support rollback by default")
+    void shouldNotSupportRollbackByDefault() {
+        change.setDatabaseName("TEST_DB");
+        change.setDataRetentionTimeInDays("7");
         assertFalse(change.supportsRollback(database));
+    }
+    
+    @Test
+    @DisplayName("Should support rollback for RENAME operations")
+    void shouldSupportRollbackForRename() {
+        change.setDatabaseName("OLD_DB");
+        change.setNewDatabaseName("NEW_DB");
+        
+        assertTrue(change.supportsRollback(database));
+    }
+    
+    @Test
+    @DisplayName("Should not support rollback when newDatabaseName is empty")
+    void shouldNotSupportRollbackWhenNewNameEmpty() {
+        change.setDatabaseName("TEST_DB");
+        change.setNewDatabaseName("");
+        
+        assertFalse(change.supportsRollback(database));
+    }
+    
+    @Test
+    @DisplayName("Should create inverse for RENAME operation")
+    void shouldCreateInverseForRename() {
+        change.setDatabaseName("OLD_DB");
+        change.setNewDatabaseName("NEW_DB");
+        
+        Change[] inverses = change.createInverses();
+        assertEquals(1, inverses.length);
+        
+        AlterDatabaseChange inverse = (AlterDatabaseChange) inverses[0];
+        assertEquals("NEW_DB", inverse.getDatabaseName());
+        assertEquals("OLD_DB", inverse.getNewDatabaseName());
+        assertTrue(inverse.getIfExists());
+    }
+    
+    @Test
+    @DisplayName("Should return empty array when not supporting rollback")
+    void shouldReturnEmptyArrayWhenNotSupportingRollback() {
+        change.setDatabaseName("TEST_DB");
+        change.setDataRetentionTimeInDays("7");
+        
+        Change[] inverses = change.createInverses();
+        assertEquals(0, inverses.length);
     }
     
     @Test

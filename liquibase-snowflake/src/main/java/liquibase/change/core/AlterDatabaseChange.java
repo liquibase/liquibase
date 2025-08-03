@@ -2,7 +2,8 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.core.SnowflakeDatabase;import liquibase.exception.ValidationErrors;
+import liquibase.database.core.SnowflakeDatabase;
+import liquibase.exception.ValidationErrors;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AlterDatabaseStatement;
 
@@ -204,8 +205,24 @@ public class AlterDatabaseChange extends AbstractChange {
         return database instanceof SnowflakeDatabase;
     }
 
-    @Override    public boolean supportsRollback(Database database) {
-        return false;
+    @Override
+    public boolean supportsRollback(Database database) {
+        return database instanceof SnowflakeDatabase && 
+               getNewDatabaseName() != null && !getNewDatabaseName().trim().isEmpty();
+    }
+
+    @Override
+    public Change[] createInverses() {
+        if (getNewDatabaseName() == null || getNewDatabaseName().trim().isEmpty()) {
+            return new Change[0];
+        }
+        
+        AlterDatabaseChange inverse = new AlterDatabaseChange();
+        inverse.setDatabaseName(getNewDatabaseName());
+        inverse.setNewDatabaseName(getDatabaseName());
+        inverse.setIfExists(true);
+        
+        return new Change[]{inverse};
     }
 
     @Override

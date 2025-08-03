@@ -13,7 +13,7 @@ import org.junit.jupiter.api.DisplayName;
  * Debug tests to isolate the TRANSIENT schema issue systematically
  */
 @DisplayName("CreateSchema TRANSIENT Debug")
-public class CreateSchemaTransientDebugTest {
+public class CreateSchemaTransientTest {
     
     @Test
     @DisplayName("Step 1: Test Change class directly (programmatic)")

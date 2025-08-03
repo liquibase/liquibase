@@ -20,8 +20,44 @@ public class CreateWarehouseGeneratorSnowflake extends AbstractSqlGenerator<Crea
     public ValidationErrors validate(CreateWarehouseStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors errors = new ValidationErrors();
         
+        // Required field validation
         if (statement.getWarehouseName() == null || statement.getWarehouseName().trim().isEmpty()) {
             errors.addError("Warehouse name is required");
+        }
+        
+        // Mutual exclusivity validation: OR REPLACE and IF NOT EXISTS cannot be used together
+        if (Boolean.TRUE.equals(statement.getOrReplace()) && Boolean.TRUE.equals(statement.getIfNotExists())) {
+            errors.addError("Cannot use both OR REPLACE and IF NOT EXISTS");
+        }
+        
+        // Cluster count validation
+        if (statement.getMinClusterCount() != null && statement.getMaxClusterCount() != null) {
+            if (statement.getMinClusterCount() > statement.getMaxClusterCount()) {
+                errors.addError("minClusterCount must be less than or equal to maxClusterCount");
+            }
+        }
+        
+        // Cluster count range validation
+        if (statement.getMinClusterCount() != null && (statement.getMinClusterCount() < 1 || statement.getMinClusterCount() > 10)) {
+            errors.addError("minClusterCount must be between 1 and 10");
+        }
+        if (statement.getMaxClusterCount() != null && (statement.getMaxClusterCount() < 1 || statement.getMaxClusterCount() > 10)) {
+            errors.addError("maxClusterCount must be between 1 and 10");
+        }
+        
+        // Auto-suspend validation: must be 0 (disabled), NULL (never), or >= 60 seconds
+        if (statement.getAutoSuspend() != null && statement.getAutoSuspend() > 0 && statement.getAutoSuspend() < 60) {
+            errors.addError("autoSuspend must be 0 (disabled), null (never), or >= 60 seconds");
+        }
+        
+        // Query acceleration scale factor validation
+        if (statement.getQueryAccelerationMaxScaleFactor() != null) {
+            if (Boolean.FALSE.equals(statement.getEnableQueryAcceleration()) || statement.getEnableQueryAcceleration() == null) {
+                errors.addError("queryAccelerationMaxScaleFactor can only be set when enableQueryAcceleration is true");
+            }
+            if (statement.getQueryAccelerationMaxScaleFactor() < 0 || statement.getQueryAccelerationMaxScaleFactor() > 100) {
+                errors.addError("queryAccelerationMaxScaleFactor must be between 0 and 100");
+            }
         }
         
         return errors;

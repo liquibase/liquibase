@@ -2,7 +2,8 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.core.SnowflakeDatabase;import liquibase.exception.ValidationErrors;
+import liquibase.database.core.SnowflakeDatabase;
+import liquibase.exception.ValidationErrors;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AlterWarehouseStatement;
 
@@ -280,8 +281,24 @@ public class AlterWarehouseChange extends AbstractChange {
         return database instanceof SnowflakeDatabase;
     }
 
-    @Override    public boolean supportsRollback(Database database) {
-        return false;
+    @Override
+    public boolean supportsRollback(Database database) {
+        return database instanceof SnowflakeDatabase && 
+               getNewWarehouseName() != null && !getNewWarehouseName().trim().isEmpty();
+    }
+
+    @Override
+    public Change[] createInverses() {
+        if (getNewWarehouseName() == null || getNewWarehouseName().trim().isEmpty()) {
+            return new Change[0];
+        }
+        
+        AlterWarehouseChange inverse = new AlterWarehouseChange();
+        inverse.setWarehouseName(getNewWarehouseName());
+        inverse.setNewWarehouseName(getWarehouseName());
+        inverse.setIfExists(true);
+        
+        return new Change[]{inverse};
     }
 
     @Override

@@ -8,46 +8,45 @@ Working on: Phase 1 - Framework-Driven Parameter Discovery (Confidence-based val
 Project Plan: Systematic changetype requirements update following new requirements gathering guide
 Next: Phase 2 - Requirements document updates with confidence-validated parameters
 
-## ⚡ Snowflake Database Connection (CRITICAL - DO NOT FORGET)
+## ⚡ Database Connection & Validation
 
-### Connection Credentials (ALWAYS USE WITH VALIDATION TESTS)
-```bash
-SNOWFLAKE_URL="jdbc:snowflake://rziymts-xbb66763.snowflakecomputing.com/?db=LTHDB&warehouse=LTHDB_TEST_WH&schema=TESTHARNESS&role=LIQUIBASE_TEST_HARNESS_ROLE" SNOWFLAKE_USER="COMMUNITYKEVIN" SNOWFLAKE_PASSWORD="uQ1lAjwVisliu8CpUTVh0UnxoTUk3"
-```
+**For all database credentials and validation commands**, see the implementation guide Phase 0 (Quick Validation).
 
-### Simple Parameter Validation (REQUIRES SNOWFLAKE CONNECTION)
-```bash
-SNOWFLAKE_URL="jdbc:snowflake://rziymts-xbb66763.snowflakecomputing.com/?db=LTHDB&warehouse=LTHDB_TEST_WH&schema=TESTHARNESS&role=LIQUIBASE_TEST_HARNESS_ROLE" SNOWFLAKE_USER="COMMUNITYKEVIN" SNOWFLAKE_PASSWORD="uQ1lAjwVisliu8CpUTVh0UnxoTUk3" mvn test -Dtest=SnowflakeParameterValidationTest -q
-```
+## 🔄 Implementation Workflow Overview
 
-**Effective 3-Step Process:**
-1. Query INFORMATION_SCHEMA for actual parameters
-2. Compare against XSD schema  
-3. Manual doc review for gaps
-**Result: 15 minutes vs days of frameworks**
+### When to Use Each Guide
 
-## 🔄 CRITICAL: Follow the Master Process Loop
+**Changetype Implementation** (Database operations like CREATE, ALTER, DROP):
+- Use: `claude_guide/implementation_guides/changetype_implementation/CHANGETYPE_IMPLEMENTATION_GUIDE.md`
+- Scenarios: New changetypes, extending existing changetypes, SQL generator overrides
 
-**For EVERY task**: Follow `claude_guide/snowflake-project/quick-reference/MASTER_PROCESS_LOOP.md`
-- This ensures project tracking and retrospectives happen
-- Operational tasks are part of the work, not overhead
+**Snapshot/Diff Implementation** (Database introspection and comparison):
+- Use: `claude_guide/implementation_guides/snapshot_diff_implementation/SNAPSHOT_DIFF_IMPLEMENTATION_GUIDE.md`  
+- Scenarios: Database object discovery, schema comparison, migration analysis
+
+### Implementation Process
+1. **Requirements Research** → Use requirements documentation in `claude_guide/snowflake_requirements/`
+2. **Choose Pattern** → Follow appropriate implementation guide
+3. **Implement** → Use guide phases and validation steps  
+4. **Test & Validate** → Follow guide testing protocols
 
 ## 📚 Essential Guides (In Order of Use)
 
 1. **Process & Workflow**
-   - `MASTER_PROCESS_LOOP.md` - The complete process with all file references
+   - `claude_guide/snowflake_requirements/MASTER_INDEX.md` - AI-optimized navigation for all requirements
 
 2. **Implementation**
-   - `NEW_CHANGETYPE_PATTERN_2.md` - For new change types
-   - `EXISTING_CHANGETYPE_EXTENSION_PATTERN.md` - For extending existing types
-   - `SQL_GENERATOR_OVERRIDE_STEP_BY_STEP.md` - For SQL syntax overrides (column operations)
+   - `claude_guide/implementation_guides/changetype_implementation/CHANGETYPE_IMPLEMENTATION_GUIDE.md` - Complete changetype implementation workflow
+   - `claude_guide/implementation_guides/snapshot_diff_implementation/SNAPSHOT_DIFF_IMPLEMENTATION_GUIDE.md` - Snapshot and diff implementation
+   - `claude_guide/implementation_guides/aipl_programs/` - AIPL automation programs for debugging, validation, and file management
 
-3. **Testing**
-   - `TEST_HARNESS_IMPLEMENTATION_GUIDE_3.md` - After unit tests pass (simplified with schema isolation)
+3. **Requirements & Documentation**
+   - `claude_guide/snowflake_requirements/changetype_requirements/` - Per-changetype requirements
+   - `claude_guide/snowflake_requirements/REQUIREMENTS_SUMMARY.md` - Missing parameters reference
 
-4. **Requirements & Tracking**
-   - `detailed_requirements/<changeType>_requirements.md` - Per change type
-   - `SNOWFLAKE_IMPLEMENTATION_PROJECT_PLAN.md` - Update continuously
+## 🚨 XSD Schema Validation
+
+**For complete XSD validation protocols, checklists, and troubleshooting**, see the implementation guide Phase 3 (XSD Schema Integration).
 
 ## 🚨 When Things Go Wrong
 
@@ -55,26 +54,30 @@ SNOWFLAKE_URL="jdbc:snowflake://rziymts-xbb66763.snowflakecomputing.com/?db=LTHD
 - Use systematic debugging (test each layer separately)
 - Question "known bugs" - they might be false
 - See troubleshooting in implementation guides
+- **For automated debugging**: Use `claude_guide/implementation_guides/aipl_programs/systematic-implementation-debugging.yaml`
 
-## 🏗️ Project Structure
+## 🏗️ Project Structure Overview
 
 ```
 liquibase/
-├── liquibase-snowflake/          # Extension module (YOU ARE HERE)
+├── liquibase-snowflake/          # Extension module (YOU ARE HERE)  
 │   ├── src/main/java/           # Implementation
 │   ├── src/test/java/           # Unit tests
 │   └── src/main/resources/      # XSD, services
 └── claude_guide/                 # All guides and patterns
-    ├── generic-patterns/         # Reusable patterns
-    └── snowflake-project/        # Project-specific
+    ├── implementation_guides/    # Complete implementation workflows
+    │   └── aipl_programs/        # AIPL automation programs
+    └── snowflake_requirements/   # Comprehensive requirements documentation
 ```
+
+**For detailed file placement rules and repository management**, see the implementation guides.
 
 ## 🔗 Quick Links
 
-- Build Commands: See `SNOWFLAKE_QUICK_REFERENCE.md`
-- Architecture Details: See `LIQUIBASE_ARCHITECTURE_OVERVIEW.md`
-- Test Structure: `src/test/java/README_TEST_STRUCTURE.md`
-- Current Status: Check project plan
+- **Requirements Navigation**: `claude_guide/snowflake_requirements/MASTER_INDEX.md`
+- **Implementation Workflow**: `claude_guide/implementation_guides/changetype_implementation/CHANGETYPE_IMPLEMENTATION_GUIDE.md`
+- **AIPL Automation Programs**: `claude_guide/implementation_guides/aipl_programs/README.md`
+- **Test Structure**: `liquibase-snowflake/src/test/java/README_TEST_STRUCTURE.md`
 
 ---
 **Remember**: This is a high-level entry point. For specifics, follow the guides.

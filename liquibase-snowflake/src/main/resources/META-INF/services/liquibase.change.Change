@@ -8,3 +8,6 @@ liquibase.change.core.CreateSchemaChange
 liquibase.change.core.DropSchemaChange
 liquibase.change.core.AlterSchemaChange
 liquibase.change.core.AlterTableChange
+liquibase.change.core.CreateFileFormatChange
+liquibase.change.core.AlterFileFormatChange
+liquibase.change.core.DropFileFormatChange

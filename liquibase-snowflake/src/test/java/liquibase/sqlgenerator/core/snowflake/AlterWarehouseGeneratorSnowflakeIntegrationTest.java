@@ -60,9 +60,9 @@ public class AlterWarehouseGeneratorSnowflakeIntegrationTest {
         createdWarehouses = new ArrayList<>();
         
         // Follow test harness configuration pattern - check for required config
-        String url = "jdbc:snowflake://rziymts-xbb66763.snowflakecomputing.com/?db=LTHDB&warehouse=LTHDB_TEST_WH&schema=TESTHARNESS&role=LIQUIBASE_TEST_HARNESS_ROLE";
-        String username = "COMMUNITYKEVIN";
-        String password = "uQ1lAjwVisliu8CpUTVh0UnxoTUk3";
+        String url = System.getenv("SNOWFLAKE_URL");
+        String username = System.getenv("SNOWFLAKE_USER");
+        String password = System.getenv("SNOWFLAKE_PASSWORD");
         
         // Skip tests if not configured (like test harness does with assumeTrue)
         Assumptions.assumeTrue(url != null && username != null && password != null, 

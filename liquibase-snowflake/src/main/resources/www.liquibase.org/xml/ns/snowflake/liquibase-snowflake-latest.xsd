@@ -194,8 +194,27 @@
             <xsd:attribute name="resumeRecluster" type="xsd:boolean"/>
             <!-- Property settings (can be combined) -->
             <xsd:attribute name="setDataRetentionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="setMaxDataExtensionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="setDefaultDdlCollation" type="xsd:string"/>
             <xsd:attribute name="setChangeTracking" type="xsd:boolean"/>
             <xsd:attribute name="setEnableSchemaEvolution" type="xsd:boolean"/>
+            <!-- Search optimization operations -->
+            <xsd:attribute name="addSearchOptimization" type="xsd:string"/>
+            <xsd:attribute name="dropSearchOptimization" type="xsd:boolean"/>
+            <!-- Row access policy operations -->
+            <xsd:attribute name="addRowAccessPolicy" type="xsd:string"/>
+            <xsd:attribute name="dropRowAccessPolicy" type="xsd:string"/>
+            <!-- Aggregation policy operations -->
+            <xsd:attribute name="setAggregationPolicy" type="xsd:string"/>
+            <xsd:attribute name="unsetAggregationPolicy" type="xsd:boolean"/>
+            <xsd:attribute name="forceAggregationPolicy" type="xsd:boolean"/>
+            <!-- Projection policy operations -->
+            <xsd:attribute name="setProjectionPolicy" type="xsd:string"/>
+            <xsd:attribute name="unsetProjectionPolicy" type="xsd:boolean"/>
+            <xsd:attribute name="forceProjectionPolicy" type="xsd:boolean"/>
+            <!-- Tag operations -->
+            <xsd:attribute name="setTag" type="xsd:string"/>
+            <xsd:attribute name="unsetTag" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -396,6 +415,12 @@
         </xsd:annotation>
     </xsd:attribute>
     
+    <xsd:attribute name="setDefaultDdlCollation" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Set default DDL collation specification for the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
     <xsd:attribute name="addSearchOptimization" type="xsd:string">
         <xsd:annotation>
             <xsd:documentation>Add search optimization to the table (empty for default, or specific method)</xsd:documentation>
@@ -543,5 +568,199 @@
             <xsd:enumeration value="CHECK"/>
         </xsd:restriction>
     </xsd:simpleType>
+
+    <!-- File Format Operations -->
+    <xsd:element name="createFileFormat">
+        <xsd:complexType>
+            <xsd:attribute name="fileFormatName" type="xsd:string" use="required"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="fileFormatType" type="fileFormatType"/>
+            <xsd:attribute name="orReplace" type="xsd:boolean"/>
+            <xsd:attribute name="ifNotExists" type="xsd:boolean"/>
+            <xsd:attribute name="temporary" type="xsd:boolean"/>
+            <xsd:attribute name="volatile" type="xsd:boolean"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+            
+            <!-- Common Format Options -->
+            <xsd:attribute name="compression" type="compressionType"/>
+            <xsd:attribute name="dateFormat" type="xsd:string"/>
+            <xsd:attribute name="timeFormat" type="xsd:string"/>
+            <xsd:attribute name="timestampFormat" type="xsd:string"/>
+            <xsd:attribute name="binaryFormat" type="binaryFormatType"/>
+            <xsd:attribute name="trimSpace" type="xsd:boolean"/>
+            <xsd:attribute name="nullIf" type="xsd:string"/>
+            <xsd:attribute name="replaceInvalidCharacters" type="xsd:boolean"/>
+            <xsd:attribute name="fileExtension" type="xsd:string"/>
+            
+            <!-- CSV-Specific Options -->
+            <xsd:attribute name="recordDelimiter" type="xsd:string"/>
+            <xsd:attribute name="fieldDelimiter" type="xsd:string"/>
+            <xsd:attribute name="parseHeader" type="xsd:boolean"/>
+            <xsd:attribute name="skipHeader" type="xsd:int"/>
+            <xsd:attribute name="skipBlankLines" type="xsd:boolean"/>
+            <xsd:attribute name="escape" type="xsd:string"/>
+            <xsd:attribute name="escapeUnenclosedField" type="xsd:string"/>
+            <xsd:attribute name="fieldOptionallyEnclosedBy" type="xsd:string"/>
+            <xsd:attribute name="errorOnColumnCountMismatch" type="xsd:boolean"/>
+            <xsd:attribute name="validateUtf8" type="xsd:boolean"/>
+            <xsd:attribute name="emptyFieldAsNull" type="xsd:boolean"/>
+            <xsd:attribute name="skipByteOrderMark" type="xsd:boolean"/>
+            <xsd:attribute name="encoding" type="encodingType"/>
+            
+            <!-- JSON-Specific Options -->
+            <xsd:attribute name="enableOctal" type="xsd:boolean"/>
+            <xsd:attribute name="allowDuplicate" type="xsd:boolean"/>
+            <xsd:attribute name="stripOuterArray" type="xsd:boolean"/>
+            <xsd:attribute name="stripNullValues" type="xsd:boolean"/>
+            <xsd:attribute name="ignoreUtf8Errors" type="xsd:boolean"/>
+            
+            <!-- Parquet-Specific Options -->
+            <xsd:attribute name="snappyCompression" type="xsd:boolean"/>
+            <xsd:attribute name="binaryAsText" type="xsd:boolean"/>
+            <xsd:attribute name="useLogicalType" type="xsd:boolean"/>
+            <xsd:attribute name="useVectorizedScanner" type="xsd:boolean"/>
+            
+            <!-- XML-Specific Options -->
+            <xsd:attribute name="preserveSpace" type="xsd:boolean"/>
+            <xsd:attribute name="stripOuterElement" type="xsd:boolean"/>
+            <xsd:attribute name="disableSnowflakeData" type="xsd:boolean"/>
+            <xsd:attribute name="disableAutoConvert" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="alterFileFormat">
+        <xsd:complexType>
+            <xsd:attribute name="fileFormatName" type="xsd:string" use="required"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
+            <xsd:attribute name="newFileFormatName" type="xsd:string"/>
+            <xsd:attribute name="operationType" type="alterFileFormatOperationType"/>
+            
+            <!-- SET Operations -->
+            <xsd:attribute name="newFileFormatType" type="fileFormatType"/>
+            <xsd:attribute name="newComment" type="xsd:string"/>
+            
+            <!-- All format options from CREATE for SET operations -->
+            <xsd:attribute name="compression" type="compressionType"/>
+            <xsd:attribute name="dateFormat" type="xsd:string"/>
+            <xsd:attribute name="timeFormat" type="xsd:string"/>
+            <xsd:attribute name="timestampFormat" type="xsd:string"/>
+            <xsd:attribute name="binaryFormat" type="binaryFormatType"/>
+            <xsd:attribute name="trimSpace" type="xsd:boolean"/>
+            <xsd:attribute name="nullIf" type="xsd:string"/>
+            <xsd:attribute name="replaceInvalidCharacters" type="xsd:boolean"/>
+            <xsd:attribute name="fileExtension" type="xsd:string"/>
+            <xsd:attribute name="recordDelimiter" type="xsd:string"/>
+            <xsd:attribute name="fieldDelimiter" type="xsd:string"/>
+            <xsd:attribute name="parseHeader" type="xsd:boolean"/>
+            <xsd:attribute name="skipHeader" type="xsd:int"/>
+            <xsd:attribute name="skipBlankLines" type="xsd:boolean"/>
+            <xsd:attribute name="escape" type="xsd:string"/>
+            <xsd:attribute name="escapeUnenclosedField" type="xsd:string"/>
+            <xsd:attribute name="fieldOptionallyEnclosedBy" type="xsd:string"/>
+            <xsd:attribute name="errorOnColumnCountMismatch" type="xsd:boolean"/>
+            <xsd:attribute name="validateUtf8" type="xsd:boolean"/>
+            <xsd:attribute name="emptyFieldAsNull" type="xsd:boolean"/>
+            <xsd:attribute name="skipByteOrderMark" type="xsd:boolean"/>
+            <xsd:attribute name="encoding" type="encodingType"/>
+            <xsd:attribute name="enableOctal" type="xsd:boolean"/>
+            <xsd:attribute name="allowDuplicate" type="xsd:boolean"/>
+            <xsd:attribute name="stripOuterArray" type="xsd:boolean"/>
+            <xsd:attribute name="stripNullValues" type="xsd:boolean"/>
+            <xsd:attribute name="ignoreUtf8Errors" type="xsd:boolean"/>
+            <xsd:attribute name="snappyCompression" type="xsd:boolean"/>
+            <xsd:attribute name="binaryAsText" type="xsd:boolean"/>
+            <xsd:attribute name="useLogicalType" type="xsd:boolean"/>
+            <xsd:attribute name="useVectorizedScanner" type="xsd:boolean"/>
+            <xsd:attribute name="preserveSpace" type="xsd:boolean"/>
+            <xsd:attribute name="stripOuterElement" type="xsd:boolean"/>
+            <xsd:attribute name="disableSnowflakeData" type="xsd:boolean"/>
+            <xsd:attribute name="disableAutoConvert" type="xsd:boolean"/>
+            
+            <!-- UNSET Operations -->
+            <xsd:attribute name="unsetComment" type="xsd:boolean"/>
+            <xsd:attribute name="unsetCompression" type="xsd:boolean"/>
+            <xsd:attribute name="unsetDateFormat" type="xsd:boolean"/>
+            <xsd:attribute name="unsetTimeFormat" type="xsd:boolean"/>
+            <xsd:attribute name="unsetTimestampFormat" type="xsd:boolean"/>
+            <xsd:attribute name="unsetBinaryFormat" type="xsd:boolean"/>
+            <xsd:attribute name="unsetTrimSpace" type="xsd:boolean"/>
+            <xsd:attribute name="unsetNullIf" type="xsd:boolean"/>
+            <xsd:attribute name="unsetFileExtension" type="xsd:boolean"/>
+            <xsd:attribute name="unsetRecordDelimiter" type="xsd:boolean"/>
+            <xsd:attribute name="unsetFieldDelimiter" type="xsd:boolean"/>
+            <xsd:attribute name="unsetParseHeader" type="xsd:boolean"/>
+            <xsd:attribute name="unsetSkipHeader" type="xsd:boolean"/>
+            <xsd:attribute name="unsetEscape" type="xsd:boolean"/>
+            <xsd:attribute name="unsetFieldOptionallyEnclosedBy" type="xsd:boolean"/>
+            <xsd:attribute name="unsetStripOuterArray" type="xsd:boolean"/>
+            <xsd:attribute name="unsetStripNullValues" type="xsd:boolean"/>
+            <xsd:attribute name="unsetAllowDuplicate" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="dropFileFormat">
+        <xsd:complexType>
+            <xsd:attribute name="fileFormatName" type="xsd:string" use="required"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <!-- File Format Type Definitions -->
+    <xsd:simpleType name="fileFormatType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="CSV"/>
+            <xsd:enumeration value="JSON"/>
+            <xsd:enumeration value="AVRO"/>
+            <xsd:enumeration value="ORC"/>
+            <xsd:enumeration value="PARQUET"/>
+            <xsd:enumeration value="XML"/>
+            <xsd:enumeration value="CUSTOM"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="compressionType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="AUTO"/>
+            <xsd:enumeration value="GZIP"/>
+            <xsd:enumeration value="BZ2"/>
+            <xsd:enumeration value="BROTLI"/>
+            <xsd:enumeration value="ZSTD"/>
+            <xsd:enumeration value="DEFLATE"/>
+            <xsd:enumeration value="RAW_DEFLATE"/>
+            <xsd:enumeration value="NONE"/>
+            <xsd:enumeration value="LZO"/>
+            <xsd:enumeration value="SNAPPY"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="binaryFormatType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="HEX"/>
+            <xsd:enumeration value="BASE64"/>
+            <xsd:enumeration value="UTF8"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="encodingType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="UTF8"/>
+            <xsd:enumeration value="ISO-8859-1"/>
+            <xsd:enumeration value="WINDOWS-1252"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="alterFileFormatOperationType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="SET"/>
+            <xsd:enumeration value="RENAME"/>
+            <xsd:enumeration value="UNSET"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
 
 </xsd:schema>

@@ -60,10 +60,13 @@ public class CreateWarehouseGeneratorSnowflakeIntegrationTest {
         generator = new CreateWarehouseGeneratorSnowflake();
         createdWarehouses = new ArrayList<>();
         
+        // Initialize testSchemaName FIRST to prevent null cleanup issues
+        testSchemaName = "TEST_WAREHOUSE_INTEGRATION";
+        
         // Follow test harness configuration pattern - check for required config
-        String url = "jdbc:snowflake://rziymts-xbb66763.snowflakecomputing.com/?db=LTHDB&warehouse=LTHDB_TEST_WH&schema=TESTHARNESS&role=LIQUIBASE_TEST_HARNESS_ROLE";
-        String username = "COMMUNITYKEVIN";
-        String password = "uQ1lAjwVisliu8CpUTVh0UnxoTUk3";
+        String url = System.getenv("SNOWFLAKE_URL");
+        String username = System.getenv("SNOWFLAKE_USER");
+        String password = System.getenv("SNOWFLAKE_PASSWORD");
         
         // Skip tests if not configured (like test harness does with assumeTrue)
         Assumptions.assumeTrue(url != null && username != null && password != null, 
@@ -90,8 +93,7 @@ public class CreateWarehouseGeneratorSnowflakeIntegrationTest {
         }
         
         // Implement schema isolation following SchemaIsolationHook pattern
-        // Generate predictable schema name based on test class
-        testSchemaName = "TEST_WAREHOUSE_INTEGRATION";
+        // testSchemaName already initialized at the beginning of setUp()
         
         try {
             // Store original schema before switching
@@ -146,11 +148,13 @@ public class CreateWarehouseGeneratorSnowflakeIntegrationTest {
                 }
                 
                 // Drop test schema (like SchemaIsolationHook cleanup)
-                try {
-                    stmt.execute("DROP SCHEMA IF EXISTS " + testSchemaName);
-                    System.out.println("SchemaIsolationHook: Cleaned up schema: " + testSchemaName);
-                } catch (Exception e) {
-                    System.err.println("Failed to cleanup schema " + testSchemaName + ": " + e.getMessage());
+                if (testSchemaName != null) {
+                    try {
+                        stmt.execute("DROP SCHEMA IF EXISTS " + testSchemaName);
+                        System.out.println("SchemaIsolationHook: Cleaned up schema: " + testSchemaName);
+                    } catch (Exception e) {
+                        System.err.println("Failed to cleanup schema " + testSchemaName + ": " + e.getMessage());
+                    }
                 }
             }
             rawConnection.close();
