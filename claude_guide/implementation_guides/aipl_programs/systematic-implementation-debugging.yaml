@@ -1,0 +1,203 @@
+AIPL_VERSION: "1.0"
+PROGRAM_NAME: "systematic-implementation-debugging"
+DESCRIPTION: "Layer-by-layer debugging of Liquibase extension implementations"
+
+VARIABLES:
+  EXTENSION_PATH: "${LIQUIBASE_EXTENSION_ROOT}"
+  TEST_HARNESS_PATH: "${LIQUIBASE_TEST_HARNESS_ROOT}"
+  CHANGE_CLASS: "${CHANGE_CLASS_NAME}"
+  STATEMENT_CLASS: "${STATEMENT_CLASS_NAME}"
+  SQL_GENERATOR: "${SQL_GENERATOR_CLASS_NAME}"
+  TEST_ATTRIBUTE: "${TEST_ATTRIBUTE_NAME}"
+  DATABASE_TYPE: "${DB_NAME}"
+
+PHASES:
+  LAYER_1_CHANGE_TO_STATEMENT:
+    DESCRIPTION: "Verify attribute transfer from Change to Statement"
+    STEPS:
+      - COMMAND:
+          NAME: "find-change-getter"
+          EXECUTE: "grep -n 'get${TEST_ATTRIBUTE}()' ${EXTENSION_PATH}/src/main/java/liquibase/change/core/${CHANGE_CLASS}.java"
+          
+      - COMMAND:
+          NAME: "find-statement-setter"
+          EXECUTE: "grep -n 'set${TEST_ATTRIBUTE}(' ${EXTENSION_PATH}/src/main/java/liquibase/statement/core/${STATEMENT_CLASS}.java"
+          
+      - COMMAND:
+          NAME: "find-generatestatements-call"
+          EXECUTE: "grep -n 'statement.set${TEST_ATTRIBUTE}(' ${EXTENSION_PATH}/src/main/java/liquibase/change/core/${CHANGE_CLASS}.java"
+          
+      - VALIDATE:
+          NAME: "verify-attribute-transfer"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/java/liquibase/change/core/${CHANGE_CLASS}.java"
+          PATTERN: "statement.set${TEST_ATTRIBUTE}\\(get${TEST_ATTRIBUTE}\\(\\)\\)"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Attribute not transferred from Change to Statement"
+
+  LAYER_2_STATEMENT_TO_SQL:
+    DESCRIPTION: "Verify Statement attribute is processed in SQL generation"
+    STEPS:
+      - COMMAND:
+          NAME: "find-statement-getter"
+          EXECUTE: "grep -n 'get${TEST_ATTRIBUTE}()' ${EXTENSION_PATH}/src/main/java/liquibase/statement/core/${STATEMENT_CLASS}.java"
+          
+      - COMMAND:
+          NAME: "find-sql-generator-usage"
+          EXECUTE: "grep -n 'statement.get${TEST_ATTRIBUTE}()' ${EXTENSION_PATH}/src/main/java/liquibase/sqlgenerator/core/snowflake/${SQL_GENERATOR}.java"
+          
+      - VALIDATE:
+          NAME: "verify-sql-processing"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/java/liquibase/sqlgenerator/core/snowflake/${SQL_GENERATOR}.java"
+          PATTERN: "statement.get${TEST_ATTRIBUTE}\\(\\)"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Statement attribute not processed in SQL generator"
+
+  LAYER_3_SQL_SYNTAX:
+    DESCRIPTION: "Verify SQL generation produces correct syntax"
+    STEPS:
+      - COMMAND:
+          NAME: "run-sql-generation-test"
+          EXECUTE: "cd ${TEST_HARNESS_PATH} && mvn test -Dtest=ChangeObjectTests -DchangeObjects=${CHANGE_CLASS} -DdbName=${DATABASE_TYPE} -q 2>&1 | grep -A5 'GENERATED SQL'"
+          
+      - VALIDATE:
+          NAME: "check-sql-spacing"
+          TYPE: "NOT_CONTAINS_TEXT"
+          TARGET: "/tmp/generated_sql.txt"
+          PATTERN: "SET[A-Z]"
+          FAILURE_ACTION: "CONTINUE"
+          ERROR_MESSAGE: "SQL spacing issue detected"
+          
+      - COMMAND:
+          NAME: "extract-alter-statement"
+          EXECUTE: "cd ${TEST_HARNESS_PATH} && mvn test -Dtest=ChangeObjectTests -DchangeObjects=${CHANGE_CLASS} -DdbName=${DATABASE_TYPE} -q 2>&1 | grep 'ALTER.*${TEST_ATTRIBUTE}'"
+
+  LAYER_4_END_TO_END:
+    DESCRIPTION: "Verify complete end-to-end functionality"
+    STEPS:
+      - COMMAND:
+          NAME: "run-comprehensive-test"
+          EXECUTE: "cd ${TEST_HARNESS_PATH} && mvn test -Dtest=ChangeObjectTests -DchangeObjects=${CHANGE_CLASS} -DdbName=${DATABASE_TYPE} -q"
+          
+      - VALIDATE:
+          NAME: "verify-test-passes"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "cd ${TEST_HARNESS_PATH} && mvn test -Dtest=ChangeObjectTests -DchangeObjects=${CHANGE_CLASS} -DdbName=${DATABASE_TYPE} -q"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "End-to-end test fails"
+          
+      - COMMAND:
+          NAME: "check-changelog-success"
+          EXECUTE: "cd ${TEST_HARNESS_PATH} && mvn test -Dtest=ChangeObjectTests -DchangeObjects=${CHANGE_CLASS} -DdbName=${DATABASE_TYPE} -q 2>&1 | grep 'ran successfully'"
+
+  ISOLATE_FAILURE_POINT:
+    DESCRIPTION: "Determine which layer contains the failure"
+    STEPS:
+      - CONDITIONAL:
+          NAME: "check-layer-1-failure"
+          CONDITION:
+            TYPE: "NOT_CONTAINS_TEXT"
+            TARGET: "${EXTENSION_PATH}/src/main/java/liquibase/change/core/${CHANGE_CLASS}.java"
+            PATTERN: "statement.set${TEST_ATTRIBUTE}"
+          THEN:
+            - COMMAND:
+                EXECUTE: "echo 'FAILURE IN LAYER 1: Change to Statement transfer'"
+          ELSE:
+            - CONDITIONAL:
+                NAME: "check-layer-2-failure"
+                CONDITION:
+                  TYPE: "NOT_CONTAINS_TEXT"
+                  TARGET: "${EXTENSION_PATH}/src/main/java/liquibase/sqlgenerator/core/snowflake/${SQL_GENERATOR}.java"
+                  PATTERN: "statement.get${TEST_ATTRIBUTE}"
+                THEN:
+                  - COMMAND:
+                      EXECUTE: "echo 'FAILURE IN LAYER 2: Statement to SQL generation'"
+                ELSE:
+                  - COMMAND:
+                      EXECUTE: "echo 'FAILURE IN LAYER 3: SQL syntax or execution'"
+
+  GENERATE_FIXES:
+    DESCRIPTION: "Generate fix templates based on layer failure"
+    STEPS:
+      - CONDITIONAL:
+          NAME: "fix-missing-transfer"
+          CONDITION:
+            TYPE: "NOT_CONTAINS_TEXT"
+            TARGET: "${EXTENSION_PATH}/src/main/java/liquibase/change/core/${CHANGE_CLASS}.java"
+            PATTERN: "statement.set${TEST_ATTRIBUTE}"
+          THEN:
+            - CREATE_FILE:
+                NAME: "generate-transfer-fix"
+                TEMPLATE: "MISSING_TRANSFER_FIX"
+                OUTPUT: "${EXTENSION_PATH}/temp/transfer_fix.java"
+          ELSE:
+            - CONDITIONAL:
+                NAME: "fix-missing-sql"
+                CONDITION:
+                  TYPE: "NOT_CONTAINS_TEXT"
+                  TARGET: "${EXTENSION_PATH}/src/main/java/liquibase/sqlgenerator/core/snowflake/${SQL_GENERATOR}.java"
+                  PATTERN: "statement.get${TEST_ATTRIBUTE}"
+                THEN:
+                  - CREATE_FILE:
+                      NAME: "generate-sql-fix"
+                      TEMPLATE: "MISSING_SQL_PROCESSING_FIX"
+                      OUTPUT: "${EXTENSION_PATH}/temp/sql_fix.java"
+                ELSE:
+                  - CREATE_FILE:
+                      NAME: "generate-syntax-fix"
+                      TEMPLATE: "SQL_SYNTAX_FIX"
+                      OUTPUT: "${EXTENSION_PATH}/temp/syntax_fix.java"
+
+TEMPLATES:
+  MISSING_TRANSFER_FIX: |
+    // Add to generateStatements() method:
+    statement.set${TEST_ATTRIBUTE}(get${TEST_ATTRIBUTE}());
+
+  MISSING_SQL_PROCESSING_FIX: |
+    // Add to addSetOptions() method:
+    hasOptions = addOption(sql, hasOptions, "${TEST_ATTRIBUTE}", statement.get${TEST_ATTRIBUTE}(), false);
+
+  SQL_SYNTAX_FIX: |
+    // Fix spacing in addOption() method:
+    if (hasOptions) sql.append(" ");
+    else sql.append(" "); // Always add space after SET
+    sql.append("${TEST_ATTRIBUTE} = ");
+
+  LAYER_TEST_SCRIPT: |
+    #!/bin/bash
+    echo "Testing Layer 1: Change -> Statement"
+    grep -q "statement.set${TEST_ATTRIBUTE}" ${CHANGE_CLASS}.java && echo "✓ Layer 1 OK" || echo "✗ Layer 1 FAIL"
+    
+    echo "Testing Layer 2: Statement -> SQL"
+    grep -q "statement.get${TEST_ATTRIBUTE}" ${SQL_GENERATOR}.java && echo "✓ Layer 2 OK" || echo "✗ Layer 2 FAIL"
+    
+    echo "Testing Layer 3: SQL Generation"
+    mvn test -Dtest=ChangeObjectTests -DchangeObjects=${CHANGE_CLASS} -DdbName=${DATABASE_TYPE} -q
+
+DEBUGGING_COMMANDS:
+  TRACE_ATTRIBUTE_FLOW:
+    CHANGE_CLASS_CHECK:
+      COMMAND: "grep -n '${TEST_ATTRIBUTE}' ${EXTENSION_PATH}/src/main/java/liquibase/change/core/${CHANGE_CLASS}.java"
+      DESCRIPTION: "Find all references to attribute in Change class"
+      
+    STATEMENT_CLASS_CHECK:
+      COMMAND: "grep -n '${TEST_ATTRIBUTE}' ${EXTENSION_PATH}/src/main/java/liquibase/statement/core/${STATEMENT_CLASS}.java"
+      DESCRIPTION: "Find all references to attribute in Statement class"
+      
+    SQL_GENERATOR_CHECK:
+      COMMAND: "grep -n '${TEST_ATTRIBUTE}' ${EXTENSION_PATH}/src/main/java/liquibase/sqlgenerator/core/snowflake/${SQL_GENERATOR}.java"
+      DESCRIPTION: "Find all references to attribute in SQL Generator class"
+
+ERROR_HANDLING:
+  GLOBAL_FAILURE_ACTION: "CONTINUE"
+  LAYER_SPECIFIC_HANDLING:
+    LAYER_1_FAILURE:
+      MESSAGE: "Change class not transferring attributes to Statement"
+      NEXT_STEP: "Check generateStatements() method implementation"
+    LAYER_2_FAILURE:
+      MESSAGE: "Statement attributes not processed in SQL generation"
+      NEXT_STEP: "Check addSetOptions() method in SQL generator"
+    LAYER_3_FAILURE:
+      MESSAGE: "SQL syntax or execution issues"
+      NEXT_STEP: "Check spacing, quoting, and Snowflake syntax compliance"

@@ -1,0 +1,184 @@
+AIPL_VERSION: "1.0"
+PROGRAM_NAME: "test-harness-orphaned-files"
+DESCRIPTION: "Audit and resolve orphaned test harness files"
+
+VARIABLES:
+  TEST_HARNESS_PATH: "${LIQUIBASE_TEST_HARNESS_ROOT}"
+  DATABASE_TYPE: "${DB_NAME}"
+  TEST_NAME: "${TEST_NAME}"
+  CHANGETYPE_NAME: "${CHANGETYPE_NAME}"
+  SCHEMA_NAME: "${SCHEMA_NAME}"
+
+PHASES:
+  AUDIT_FILES:
+    DESCRIPTION: "Generate file lists and identify orphaned files"
+    STEPS:
+      - COMMAND:
+          NAME: "navigate-to-test-harness"
+          EXECUTE: "cd ${TEST_HARNESS_PATH}/src/main/resources/liquibase/harness/change"
+          
+      - COMMAND:
+          NAME: "generate-xml-list"
+          EXECUTE: "find changelogs/${DATABASE_TYPE} -name '*.xml' -exec basename {} .xml \\; | sort > /tmp/${DATABASE_TYPE}_xml.txt"
+          
+      - COMMAND:
+          NAME: "generate-sql-list"
+          EXECUTE: "find expectedSql/${DATABASE_TYPE} -name '*.sql' -exec basename {} .sql \\; | sort > /tmp/${DATABASE_TYPE}_sql.txt"
+          
+      - COMMAND:
+          NAME: "generate-json-list"
+          EXECUTE: "find expectedSnapshot/${DATABASE_TYPE} -name '*.json' -exec basename {} .json \\; | sort > /tmp/${DATABASE_TYPE}_json.txt"
+
+  IDENTIFY_ORPHANS:
+    DESCRIPTION: "Find files missing their required companions"
+    STEPS:
+      - COMMAND:
+          NAME: "find-xml-without-sql"
+          EXECUTE: "comm -23 /tmp/${DATABASE_TYPE}_xml.txt /tmp/${DATABASE_TYPE}_sql.txt"
+          
+      - COMMAND:
+          NAME: "find-sql-without-xml"
+          EXECUTE: "comm -13 /tmp/${DATABASE_TYPE}_xml.txt /tmp/${DATABASE_TYPE}_sql.txt"
+          
+      - COMMAND:
+          NAME: "find-xml-without-json"
+          EXECUTE: "comm -23 /tmp/${DATABASE_TYPE}_xml.txt /tmp/${DATABASE_TYPE}_json.txt"
+          
+      - COMMAND:
+          NAME: "count-orphaned-files"
+          EXECUTE: "echo 'XML without SQL:' && comm -23 /tmp/${DATABASE_TYPE}_xml.txt /tmp/${DATABASE_TYPE}_sql.txt | wc -l"
+
+  RESOLVE_MISSING_SQL:
+    DESCRIPTION: "Create missing SQL files for existing XML tests"
+    STEPS:
+      - CONDITIONAL:
+          NAME: "check-missing-sql"
+          CONDITION:
+            TYPE: "FILE_EXISTS"
+            TARGET: "expectedSql/${DATABASE_TYPE}/${TEST_NAME}.sql"
+          THEN:
+            - CONTINUE
+          ELSE:
+            - COMMAND:
+                NAME: "run-test-to-generate-sql"
+                EXECUTE: "cd ${TEST_HARNESS_PATH} && mvn test -Dtest=ChangeObjectTests -DchangeObjects=${TEST_NAME} -DdbName=${DATABASE_TYPE} -q 2>&1 | grep -A20 'GENERATED SQL'"
+            - CREATE_FILE:
+                NAME: "create-placeholder-sql"
+                TEMPLATE: "EXPECTED_SQL_TEMPLATE"
+                OUTPUT: "expectedSql/${DATABASE_TYPE}/${TEST_NAME}.sql"
+
+  RESOLVE_MISSING_JSON:
+    DESCRIPTION: "Create missing JSON snapshot files"
+    STEPS:
+      - CONDITIONAL:
+          NAME: "check-missing-json"
+          CONDITION:
+            TYPE: "FILE_EXISTS"
+            TARGET: "expectedSnapshot/${DATABASE_TYPE}/${TEST_NAME}.json"
+          THEN:
+            - CONTINUE
+          ELSE:
+            - CREATE_FILE:
+                NAME: "create-basic-snapshot"
+                TEMPLATE: "BASIC_SNAPSHOT_TEMPLATE"
+                OUTPUT: "expectedSnapshot/${DATABASE_TYPE}/${TEST_NAME}.json"
+
+  VALIDATE_COMPLETENESS:
+    DESCRIPTION: "Verify all test triads are complete"
+    STEPS:
+      - VALIDATE:
+          NAME: "verify-xml-exists"
+          TYPE: "FILE_EXISTS"
+          TARGET: "changelogs/${DATABASE_TYPE}/${TEST_NAME}.xml"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "XML changelog missing"
+          
+      - VALIDATE:
+          NAME: "verify-sql-exists"
+          TYPE: "FILE_EXISTS"
+          TARGET: "expectedSql/${DATABASE_TYPE}/${TEST_NAME}.sql"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Expected SQL missing"
+          
+      - VALIDATE:
+          NAME: "verify-json-exists"
+          TYPE: "FILE_EXISTS"
+          TARGET: "expectedSnapshot/${DATABASE_TYPE}/${TEST_NAME}.json"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Expected snapshot missing"
+
+  TEST_FIXED_FILES:
+    DESCRIPTION: "Run tests to verify orphaned files are resolved"
+    STEPS:
+      - COMMAND:
+          NAME: "run-individual-test"
+          EXECUTE: "cd ${TEST_HARNESS_PATH} && mvn test -Dtest=ChangeObjectTests -DchangeObjects=${TEST_NAME} -DdbName=${DATABASE_TYPE} -q"
+          
+      - VALIDATE:
+          NAME: "verify-test-passes"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "cd ${TEST_HARNESS_PATH} && mvn test -Dtest=ChangeObjectTests -DchangeObjects=${TEST_NAME} -DdbName=${DATABASE_TYPE} -q"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Test still failing after orphan resolution"
+
+TEMPLATES:
+  EXPECTED_SQL_TEMPLATE: |
+    -- Generated placeholder SQL for ${TEST_NAME}
+    -- Replace with actual expected SQL output
+    
+  BASIC_SNAPSHOT_TEMPLATE: |
+    {
+      "snapshot": {
+        "objects": {
+          "liquibase.structure.core.Schema": [
+            {
+              "schema": {
+                "name": "${SCHEMA_NAME}"
+              }
+            }
+          ]
+        }
+      }
+    }
+
+  COMPREHENSIVE_XML_TEMPLATE: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:snowflake="http://www.liquibase.org/xml/ns/snowflake"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                            http://www.liquibase.org/xml/ns/snowflake
+                            http://www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd">
+
+        <changeSet id="1" author="test-harness">
+            <snowflake:${CHANGETYPE_NAME} />
+        </changeSet>
+
+    </databaseChangeLog>
+
+COMMON_COMMAND_PATTERNS:
+  FILE_COMPARISON:
+    FIND_ORPHANED_FILES:
+      COMMAND: "comm -23 /tmp/${DATABASE_TYPE}_xml.txt /tmp/${DATABASE_TYPE}_sql.txt"
+      DESCRIPTION: "Find XML files without corresponding SQL files"
+      
+  TEST_EXECUTION:
+    RUN_SPECIFIC_TEST:
+      COMMAND: "mvn test -Dtest=ChangeObjectTests -DchangeObjects=${TEST_NAME} -DdbName=${DATABASE_TYPE} -q"
+      DESCRIPTION: "Run specific test harness test"
+      
+  FILE_VALIDATION:
+    CHECK_TRIAD_COMPLETE:
+      COMMANDS:
+        - "test -f changelogs/${DATABASE_TYPE}/${TEST_NAME}.xml"
+        - "test -f expectedSql/${DATABASE_TYPE}/${TEST_NAME}.sql"
+        - "test -f expectedSnapshot/${DATABASE_TYPE}/${TEST_NAME}.json"
+
+ERROR_HANDLING:
+  GLOBAL_FAILURE_ACTION: "STOP"
+  CLEANUP_ON_FAILURE:
+    - COMMAND:
+        EXECUTE: "rm -f /tmp/${DATABASE_TYPE}_*.txt"
+        CONTINUE_ON_ERROR: true

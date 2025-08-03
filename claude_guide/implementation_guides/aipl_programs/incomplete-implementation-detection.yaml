@@ -1,0 +1,164 @@
+AIPL_VERSION: "1.0"
+PROGRAM_NAME: "incomplete-implementation-detection"
+DESCRIPTION: "Systematic detection and resolution of incomplete Liquibase extension implementations"
+
+VARIABLES:
+  EXTENSION_PATH: "${LIQUIBASE_EXTENSION_ROOT}"
+  CHANGE_CLASS: "${CHANGE_CLASS_NAME}"
+  STATEMENT_CLASS: "${STATEMENT_CLASS_NAME}"
+  SQL_GENERATOR: "${SQL_GENERATOR_CLASS_NAME}"
+  ATTRIBUTE_NAME: "${ATTRIBUTE_NAME}"
+  ATTRIBUTE_TYPE: "${ATTRIBUTE_TYPE}"
+  ATTRIBUTE_FIELD: "${ATTRIBUTE_FIELD}"
+  ATTRIBUTE_DESCRIPTION: "${ATTRIBUTE_DESCRIPTION}"
+  SQL_OPTION_NAME: "${SQL_OPTION_NAME}"
+  QUOTED: "${QUOTED_BOOLEAN}"
+
+PHASES:
+  DETECT_INCOMPLETE_CHANGE:
+    DESCRIPTION: "Identify incomplete Change class implementations"
+    STEPS:
+      - VALIDATE:
+          NAME: "check-placeholder-comments"
+          TYPE: "NOT_CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/java/liquibase/change/core/${CHANGE_CLASS}.java"
+          PATTERN: "// ... \\["
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Found placeholder comments indicating incomplete implementation"
+          
+      - COMMAND:
+          NAME: "find-declared-fields"
+          EXECUTE: "grep -n 'private.*${ATTRIBUTE_NAME}' ${EXTENSION_PATH}/src/main/java/liquibase/change/core/${CHANGE_CLASS}.java"
+          
+      - COMMAND:
+          NAME: "find-getter-methods"
+          EXECUTE: "grep -n 'get${ATTRIBUTE_NAME}()' ${EXTENSION_PATH}/src/main/java/liquibase/change/core/${CHANGE_CLASS}.java"
+          
+      - COMMAND:
+          NAME: "find-setter-methods"
+          EXECUTE: "grep -n 'set${ATTRIBUTE_NAME}(' ${EXTENSION_PATH}/src/main/java/liquibase/change/core/${CHANGE_CLASS}.java"
+          
+      - VALIDATE:
+          NAME: "verify-generatestatements-complete"
+          TYPE: "NOT_CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/java/liquibase/change/core/${CHANGE_CLASS}.java"
+          PATTERN: "// ... \\[Set all other"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "generateStatements() method incomplete"
+
+  DETECT_INCOMPLETE_STATEMENT:
+    DESCRIPTION: "Identify incomplete Statement class implementations"
+    STEPS:
+      - COMMAND:
+          NAME: "find-statement-fields"
+          EXECUTE: "grep -n 'private.*${ATTRIBUTE_NAME}' ${EXTENSION_PATH}/src/main/java/liquibase/statement/core/${STATEMENT_CLASS}.java"
+          
+      - VALIDATE:
+          NAME: "verify-statement-getter"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/java/liquibase/statement/core/${STATEMENT_CLASS}.java"
+          PATTERN: "get${ATTRIBUTE_NAME}()"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Missing getter method in Statement class"
+          
+      - VALIDATE:
+          NAME: "verify-statement-setter"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/java/liquibase/statement/core/${STATEMENT_CLASS}.java"
+          PATTERN: "set${ATTRIBUTE_NAME}("
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Missing setter method in Statement class"
+
+  DETECT_INCOMPLETE_SQL_GENERATOR:
+    DESCRIPTION: "Identify incomplete SQL Generator implementations"
+    STEPS:
+      - COMMAND:
+          NAME: "find-addoption-calls"
+          EXECUTE: "grep -n 'addOption.*${SQL_OPTION_NAME}' ${EXTENSION_PATH}/src/main/java/liquibase/sqlgenerator/core/snowflake/${SQL_GENERATOR}.java"
+          
+      - VALIDATE:
+          NAME: "verify-sql-option-processed"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/java/liquibase/sqlgenerator/core/snowflake/${SQL_GENERATOR}.java"
+          PATTERN: "statement.get${ATTRIBUTE_NAME}()"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "SQL Generator not processing attribute"
+          
+      - VALIDATE:
+          NAME: "check-spacing-fix"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/java/liquibase/sqlgenerator/core/snowflake/${SQL_GENERATOR}.java"
+          PATTERN: "else sql.append\\(\" \"\\)"
+          FAILURE_ACTION: "CONTINUE"
+          ERROR_MESSAGE: "SQL spacing may be incorrect"
+
+  GENERATE_MISSING_CODE:
+    DESCRIPTION: "Create templates for missing implementation parts"
+    STEPS:
+      - CREATE_FILE:
+          NAME: "create-getter-setter"
+          TEMPLATE: "COMPLETE_GETTER_SETTER"
+          OUTPUT: "${EXTENSION_PATH}/temp/${ATTRIBUTE_NAME}_methods.java"
+          
+      - CREATE_FILE:
+          NAME: "create-generatestatements-line"
+          TEMPLATE: "COMPLETE_GENERATE_STATEMENTS"
+          OUTPUT: "${EXTENSION_PATH}/temp/${ATTRIBUTE_NAME}_statement.java"
+          
+      - CREATE_FILE:
+          NAME: "create-sql-generator-line"
+          TEMPLATE: "SQL_GENERATOR_OPTION"
+          OUTPUT: "${EXTENSION_PATH}/temp/${ATTRIBUTE_NAME}_sql.java"
+
+  VALIDATE_COMPREHENSIVE_TEST:
+    DESCRIPTION: "Ensure comprehensive testing with multiple attributes"
+    STEPS:
+      - VALIDATE:
+          NAME: "check-test-harness-exists"
+          TYPE: "FILE_EXISTS"
+          TARGET: "${EXTENSION_PATH}/../liquibase-test-harness/src/main/resources/liquibase/harness/change/changelogs/snowflake/${CHANGE_CLASS}.xml"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Test harness XML missing"
+          
+      - COMMAND:
+          NAME: "count-attributes-in-test"
+          EXECUTE: "grep -c '${ATTRIBUTE_NAME}=' ${EXTENSION_PATH}/../liquibase-test-harness/src/main/resources/liquibase/harness/change/changelogs/snowflake/${CHANGE_CLASS}.xml"
+          
+      - COMMAND:
+          NAME: "run-comprehensive-test"
+          EXECUTE: "cd ${EXTENSION_PATH}/../liquibase-test-harness && mvn test -Dtest=ChangeObjectTests -DchangeObjects=${CHANGE_CLASS} -DdbName=snowflake -q"
+
+TEMPLATES:
+  COMPLETE_GETTER_SETTER: |
+    @DatabaseChangeProperty(description = "${ATTRIBUTE_DESCRIPTION}")
+    public ${ATTRIBUTE_TYPE} get${ATTRIBUTE_NAME}() {
+        return ${ATTRIBUTE_FIELD};
+    }
+    
+    public void set${ATTRIBUTE_NAME}(${ATTRIBUTE_TYPE} ${ATTRIBUTE_FIELD}) {
+        this.${ATTRIBUTE_FIELD} = ${ATTRIBUTE_FIELD};
+    }
+
+  COMPLETE_GENERATE_STATEMENTS: |
+    statement.set${ATTRIBUTE_NAME}(get${ATTRIBUTE_NAME}());
+
+  SQL_GENERATOR_OPTION: |
+    hasOptions = addOption(sql, hasOptions, "${SQL_OPTION_NAME}", statement.get${ATTRIBUTE_NAME}(), ${QUOTED});
+
+  FIX_SQL_SPACING: |
+    if (hasOptions) sql.append(" ");
+    else sql.append(" "); // Always add space after SET
+    sql.append("${SQL_OPTION_NAME} = ");
+
+ERROR_HANDLING:
+  GLOBAL_FAILURE_ACTION: "STOP"
+  CLEANUP_ON_FAILURE:
+    - COMMAND:
+        EXECUTE: "rm -f ${EXTENSION_PATH}/temp/*_methods.java"
+        CONTINUE_ON_ERROR: true
+    - COMMAND:
+        EXECUTE: "rm -f ${EXTENSION_PATH}/temp/*_statement.java"
+        CONTINUE_ON_ERROR: true
+    - COMMAND:
+        EXECUTE: "rm -f ${EXTENSION_PATH}/temp/*_sql.java"
+        CONTINUE_ON_ERROR: true

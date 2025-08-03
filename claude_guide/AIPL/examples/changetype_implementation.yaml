@@ -1,0 +1,378 @@
+AIPL_VERSION: "1.0"
+PROGRAM_NAME: "changetype-implementation-snowflake"
+DESCRIPTION: "Complete changetype implementation workflow for Snowflake database extensions"
+
+VARIABLES:
+  CHANGETYPE_NAME: "${TARGET_CHANGETYPE}"
+  OBJECT_TYPE: "${DATABASE_OBJECT}"
+  PACKAGE_BASE: "com.liquibase.ext.snowflake"
+  IMPLEMENTATION_PATTERN: "UNKNOWN"
+  SNOWFLAKE_URL: "jdbc:snowflake://rziymts-xbb66763.snowflakecomputing.com/?db=LB_DBEXT_INT_DB&warehouse=LTHDB_TEST_WH&schema=BASE_SCHEMA&role=LB_INT_ROLE"
+  SNOWFLAKE_USER: "${DB_USER}"
+  SNOWFLAKE_PASSWORD: "${DB_PASSWORD}"
+
+PHASES:
+  PHASE_0_QUICK_VALIDATION:
+    DESCRIPTION: "Optional 15-minute validation before full implementation"
+    STEPS:
+      - COMMAND:
+          NAME: "run-information-schema-query"
+          EXECUTE: "SNOWFLAKE_URL='${SNOWFLAKE_URL}' SNOWFLAKE_USER='${SNOWFLAKE_USER}' SNOWFLAKE_PASSWORD='${SNOWFLAKE_PASSWORD}' mvn test -Dtest=SnowflakeParameterValidationTest -q"
+          
+      - COMMAND:
+          NAME: "check-xsd-coverage"
+          EXECUTE: "grep -n 'create${OBJECT_TYPE}\\|${CHANGETYPE_NAME}' src/main/resources/www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd"
+          
+      - VALIDATE:
+          NAME: "verify-xsd-completeness"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "grep -c 'name=\"${CHANGETYPE_NAME}' src/main/resources/*.xsd"
+
+  PHASE_1_ARCHITECTURAL_DECISION:
+    DESCRIPTION: "Determine implementation pattern based on existing Liquibase core"
+    DEPENDS_ON: ["PHASE_0_QUICK_VALIDATION"]
+    STEPS:
+      - CAPTURE:
+          NAME: "check-core-changetype-exists"
+          COMMAND: "find . -name '*${CHANGETYPE_NAME}*Change*.java' -path '*/liquibase-core/*'"
+          STORE_AS: "CORE_CHANGETYPE_EXISTS"
+          
+      - CONDITIONAL:
+          NAME: "determine-implementation-pattern"
+          CONDITION:
+            TYPE: "NOT_EQUALS"
+            LEFT: "${CORE_CHANGETYPE_EXISTS}"
+            RIGHT: ""
+          THEN:
+            - CAPTURE:
+                COMMAND: "echo 'NAMESPACE_ATTRIBUTE_EXTENSION'"
+                STORE_AS: "IMPLEMENTATION_PATTERN"
+          ELSE:
+            - CAPTURE:
+                COMMAND: "echo 'NEW_CHANGETYPE_CREATION'"
+                STORE_AS: "IMPLEMENTATION_PATTERN"
+                
+      - VALIDATE:
+          NAME: "check-no-architectural-violations"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "find . -name '*${CHANGETYPE_NAME}*ChangeSnowflake.java' -path '*/change/core/*' | wc -l | grep '^0$'"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Architectural violation: ChangeSnowflake classes forbidden for existing changetypes"
+
+  PHASE_2_REQUIREMENTS_RESEARCH:
+    DESCRIPTION: "Research and document complete requirements"
+    DEPENDS_ON: ["PHASE_1_ARCHITECTURAL_DECISION"]
+    STEPS:
+      - VALIDATE:
+          NAME: "verify-official-documentation-research"
+          TYPE: "FILE_EXISTS"
+          TARGET: "docs/${CHANGETYPE_NAME}_requirements.md"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Official documentation research required - create requirements document"
+          
+      - CREATE_FILE:
+          NAME: "create-attribute-analysis-table"
+          TEMPLATE: "ATTRIBUTE_ANALYSIS_TEMPLATE"
+          OUTPUT: "docs/${CHANGETYPE_NAME}_attributes.md"
+          
+      - VALIDATE:
+          NAME: "verify-sql-examples-minimum"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "grep -c 'CREATE ${OBJECT_TYPE}' docs/${CHANGETYPE_NAME}_requirements.md | awk '$1>=5'"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Minimum 5 SQL examples required in requirements"
+
+  PHASE_3_XSD_SCHEMA_INTEGRATION:
+    DESCRIPTION: "Implement XSD schema changes"
+    DEPENDS_ON: ["PHASE_2_REQUIREMENTS_RESEARCH"]
+    STEPS:
+      - CONDITIONAL:
+          NAME: "implement-xsd-pattern"
+          CONDITION:
+            TYPE: "EQUALS"
+            LEFT: "${IMPLEMENTATION_PATTERN}"
+            RIGHT: "NAMESPACE_ATTRIBUTE_EXTENSION"
+          THEN:
+            - CREATE_FILE:
+                NAME: "add-namespace-attributes"
+                TEMPLATE: "XSD_NAMESPACE_ATTRIBUTES_TEMPLATE"
+                OUTPUT: "src/main/resources/www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd"
+                MODE: "APPEND"
+          ELSE:
+            - CREATE_FILE:
+                NAME: "add-new-xsd-element"
+                TEMPLATE: "XSD_NEW_ELEMENT_TEMPLATE"
+                OUTPUT: "src/main/resources/www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd"
+                MODE: "APPEND"
+                
+      - VALIDATE:
+          NAME: "validate-xsd-syntax"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "xmllint --schema xsd-validation.xsd --noout src/main/resources/www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "XSD syntax validation failed"
+          
+      - VALIDATE:
+          NAME: "verify-parser-support"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "src/main/java/liquibase/parser/SnowflakeNamespaceAwareXMLParser.java"
+          PATTERN: "${CHANGETYPE_NAME}"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Parser support required for ${CHANGETYPE_NAME}"
+
+  PHASE_4_IMPLEMENTATION:
+    DESCRIPTION: "Create core implementation classes"
+    DEPENDS_ON: ["PHASE_3_XSD_SCHEMA_INTEGRATION"]
+    STEPS:
+      - CONDITIONAL:
+          NAME: "create-change-classes"
+          CONDITION:
+            TYPE: "EQUALS"
+            LEFT: "${IMPLEMENTATION_PATTERN}"
+            RIGHT: "NEW_CHANGETYPE_CREATION"
+          THEN:
+            - CREATE_FILE:
+                NAME: "create-change-class"
+                TEMPLATE: "CHANGE_CLASS_TEMPLATE"
+                OUTPUT: "src/main/java/${PACKAGE_BASE/\./\/}/change/${CHANGETYPE_NAME}Change.java"
+            - CREATE_FILE:
+                NAME: "create-statement-class"
+                TEMPLATE: "STATEMENT_CLASS_TEMPLATE"
+                OUTPUT: "src/main/java/${PACKAGE_BASE/\./\/}/statement/${CHANGETYPE_NAME}Statement.java"
+                
+      - CREATE_FILE:
+          NAME: "create-sql-generator"
+          TEMPLATE: "SQL_GENERATOR_TEMPLATE"
+          OUTPUT: "src/main/java/${PACKAGE_BASE/\./\/}/sqlgenerator/${CHANGETYPE_NAME}GeneratorSnowflake.java"
+          
+      - LOOP:
+          NAME: "register-services"
+          ITERATE_OVER:
+            TYPE: "LIST"
+            VALUES: ["liquibase.change.Change", "liquibase.sqlgenerator.SqlGenerator", "liquibase.structure.DatabaseObject"]
+          VARIABLE: "service_type"
+          STEPS:
+            - CREATE_FILE:
+                NAME: "register-${service_type}"
+                TEMPLATE: "SERVICE_REGISTRATION_TEMPLATE"
+                OUTPUT: "src/main/resources/META-INF/services/${service_type}"
+                MODE: "APPEND"
+                
+      - COMMAND:
+          NAME: "compile-implementation"
+          EXECUTE: "mvn compile"
+          
+      - VALIDATE:
+          NAME: "verify-compilation-success"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "mvn compile"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Implementation compilation failed"
+
+  PHASE_5_TESTING_AND_VALIDATION:
+    DESCRIPTION: "Create comprehensive test suite and validate"
+    DEPENDS_ON: ["PHASE_4_IMPLEMENTATION"]
+    STEPS:
+      - CREATE_FILE:
+          NAME: "create-unit-tests"
+          TEMPLATE: "UNIT_TEST_TEMPLATE"
+          OUTPUT: "src/test/java/${PACKAGE_BASE/\./\/}/sqlgenerator/${CHANGETYPE_NAME}GeneratorSnowflakeTest.java"
+          
+      - CREATE_FILE:
+          NAME: "create-integration-tests"
+          TEMPLATE: "INTEGRATION_TEST_TEMPLATE"
+          OUTPUT: "src/test/java/${PACKAGE_BASE/\./\/}/integration/${CHANGETYPE_NAME}IntegrationTest.java"
+          
+      - COMMAND:
+          NAME: "compile-tests"
+          EXECUTE: "mvn test-compile"
+          
+      - RETRY:
+          NAME: "run-unit-tests"
+          MAX_ATTEMPTS: 3
+          STEP:
+            COMMAND:
+              EXECUTE: "mvn test -Dtest='*${CHANGETYPE_NAME}*Test'"
+              
+      - RETRY:
+          NAME: "run-integration-tests"
+          MAX_ATTEMPTS: 3
+          STEP:
+            COMMAND:
+              EXECUTE: "mvn test -Dtest='*${CHANGETYPE_NAME}*IntegrationTest'"
+              
+      - PARALLEL:
+          NAME: "final-validation-suite"
+          WAIT_FOR_ALL: true
+          TIMEOUT: 600
+          TASKS:
+            - COMMAND:
+                NAME: "run-full-test-suite"
+                EXECUTE: "mvn test"
+            - COMMAND:
+                NAME: "package-build"
+                EXECUTE: "mvn package -DskipTests"
+            - COMMAND:
+                NAME: "lint-check"
+                EXECUTE: "mvn checkstyle:check"
+                
+      - VALIDATE:
+          NAME: "verify-architectural-compliance"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "find . -name '*${CHANGETYPE_NAME}*ChangeSnowflake.java' -path '*/change/core/*' | wc -l | grep '^0$'"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Final architectural compliance check failed"
+
+TEMPLATES:
+  ATTRIBUTE_ANALYSIS_TEMPLATE: |
+    # ${CHANGETYPE_NAME} Attribute Analysis
+    
+    ## Official Documentation
+    Database: Snowflake
+    URL: [Snowflake Documentation URL]
+    Version: [Database Version]
+    
+    ## Attribute Analysis Table
+    | Attribute | Description | Data Type | Default | Valid Values | Required | Constraints |
+    |-----------|-------------|-----------|---------|--------------|----------|-------------|
+    | name | Object identifier | String | - | Valid identifier | Yes | Must be unique |
+    
+    ## SQL Examples
+    ```sql
+    -- Minimal example
+    CREATE ${OBJECT_TYPE} example_name;
+    
+    -- With optional attributes
+    CREATE ${OBJECT_TYPE} example_name WITH (attribute1 = 'value1');
+    ```
+    
+  XSD_NAMESPACE_ATTRIBUTES_TEMPLATE: |
+    <!-- ${CHANGETYPE_NAME} namespace attributes -->
+    <xsd:attribute name="${CHANGETYPE_NAME}Comment" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Comment for ${CHANGETYPE_NAME}</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+  SQL_GENERATOR_TEMPLATE: |
+    package ${PACKAGE_BASE}.sqlgenerator;
+    
+    import liquibase.database.Database;
+    import liquibase.database.core.SnowflakeDatabase;
+    import liquibase.sql.Sql;
+    import liquibase.sql.UnparsedSql;
+    import liquibase.sqlgenerator.SqlGeneratorChain;
+    import liquibase.sqlgenerator.core.AbstractSqlGenerator;
+    import liquibase.statement.core.${CHANGETYPE_NAME}Statement;
+    import ${PACKAGE_BASE}.parser.SnowflakeNamespaceAttributeStorage;
+    import java.util.Map;
+    
+    public class ${CHANGETYPE_NAME}GeneratorSnowflake extends AbstractSqlGenerator<${CHANGETYPE_NAME}Statement> {
+        
+        @Override
+        public int getPriority() {
+            return PRIORITY_10;
+        }
+        
+        @Override
+        public boolean supports(${CHANGETYPE_NAME}Statement statement, Database database) {
+            return database instanceof SnowflakeDatabase;
+        }
+        
+        @Override
+        public Sql[] generateSql(${CHANGETYPE_NAME}Statement statement, Database database, SqlGeneratorChain chain) {
+            StringBuilder sql = new StringBuilder();
+            sql.append("CREATE ${OBJECT_TYPE} ");
+            sql.append(database.escapeObjectName(statement.getObjectName(), null));
+            
+            // Access namespace attributes
+            Map<String, String> attributes = SnowflakeNamespaceAttributeStorage.getAttributes(statement.getObjectName());
+            
+            if (attributes != null && !attributes.isEmpty()) {
+                return enhanceWithNamespaceAttributes(sql.toString(), attributes);
+            }
+            
+            return new Sql[]{new UnparsedSql(sql.toString())};
+        }
+        
+        private Sql[] enhanceWithNamespaceAttributes(String baseSql, Map<String, String> attributes) {
+            StringBuilder enhancedSql = new StringBuilder(baseSql);
+            
+            // Add Snowflake-specific syntax based on attributes
+            for (Map.Entry<String, String> entry : attributes.entrySet()) {
+                enhancedSql.append(" ").append(entry.getKey()).append(" = ").append(entry.getValue());
+            }
+            
+            return new Sql[]{new UnparsedSql(enhancedSql.toString())};
+        }
+    }
+    
+  UNIT_TEST_TEMPLATE: |
+    package ${PACKAGE_BASE}.sqlgenerator;
+    
+    import liquibase.database.core.SnowflakeDatabase;
+    import liquibase.sql.Sql;
+    import liquibase.statement.core.${CHANGETYPE_NAME}Statement;
+    import org.junit.jupiter.api.Test;
+    import static org.junit.jupiter.api.Assertions.*;
+    
+    public class ${CHANGETYPE_NAME}GeneratorSnowflakeTest {
+        
+        @Test
+        public void testSupports() {
+            ${CHANGETYPE_NAME}GeneratorSnowflake generator = new ${CHANGETYPE_NAME}GeneratorSnowflake();
+            ${CHANGETYPE_NAME}Statement statement = new ${CHANGETYPE_NAME}Statement();
+            SnowflakeDatabase database = new SnowflakeDatabase();
+            
+            assertTrue(generator.supports(statement, database));
+        }
+        
+        @Test
+        public void testGenerateSql() {
+            ${CHANGETYPE_NAME}GeneratorSnowflake generator = new ${CHANGETYPE_NAME}GeneratorSnowflake();
+            ${CHANGETYPE_NAME}Statement statement = new ${CHANGETYPE_NAME}Statement();
+            statement.setObjectName("TEST_${OBJECT_TYPE}");
+            SnowflakeDatabase database = new SnowflakeDatabase();
+            
+            Sql[] sql = generator.generateSql(statement, database, null);
+            
+            assertNotNull(sql);
+            assertEquals(1, sql.length);
+            assertTrue(sql[0].toSql().contains("CREATE ${OBJECT_TYPE} TEST_${OBJECT_TYPE}"));
+        }
+    }
+    
+  SERVICE_REGISTRATION_TEMPLATE: |
+    ${PACKAGE_BASE}.sqlgenerator.${CHANGETYPE_NAME}GeneratorSnowflake
+
+ERROR_HANDLING:
+  GLOBAL_FAILURE_ACTION: "STOP"
+  
+  PHASE_FAILURE_HANDLERS:
+    PHASE_1_ARCHITECTURAL_DECISION:
+      ACTION: "STOP"
+      MESSAGE: "Architectural pattern must be determined before proceeding"
+      
+    PHASE_2_REQUIREMENTS_RESEARCH:
+      ACTION: "STOP"
+      MESSAGE: "Complete requirements research required"
+      
+    PHASE_3_XSD_SCHEMA_INTEGRATION:
+      ACTION: "STOP"
+      MESSAGE: "XSD schema integration must be complete"
+      
+    PHASE_4_IMPLEMENTATION:
+      ACTION: "STOP"
+      MESSAGE: "Implementation must compile successfully"
+      
+    PHASE_5_TESTING_AND_VALIDATION:
+      ACTION: "STOP"
+      MESSAGE: "All tests must pass for complete implementation"
+      
+  CLEANUP_ON_FAILURE:
+    - COMMAND:
+        EXECUTE: "git checkout -- src/"
+        CONTINUE_ON_ERROR: true
+    - COMMAND:
+        EXECUTE: "mvn clean"
+        CONTINUE_ON_ERROR: true

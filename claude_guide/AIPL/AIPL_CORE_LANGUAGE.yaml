@@ -1,0 +1,397 @@
+AIPL_VERSION: "2.0"
+DOCUMENT_TYPE: CORE_LANGUAGE_SPECIFICATION
+VALIDATION_MODE: STRICT
+
+PURPOSE: "Generic AI Implementation Programming Language - Domain-agnostic execution primitives"
+
+LANGUAGE_PRINCIPLES:
+  DOMAIN_AGNOSTIC: "No technology-specific knowledge in core language"
+  COMPOSABLE: "Domain libraries imported for specific functionality"
+  EXECUTABLE: "All constructs immediately actionable by AI"
+  DETERMINISTIC: "Boolean conditions with clear branching"
+  PARAMETERIZED: "Variable substitution throughout"
+
+PROGRAM_STRUCTURE:
+  REQUIRED_SECTIONS:
+    AIPL_VERSION: "Language version identifier"
+    PROGRAM_NAME: "Kebab-case program identifier"
+    DESCRIPTION: "Single line purpose statement"
+    
+  OPTIONAL_SECTIONS:
+    IMPORTS: "List of domain library files to include"
+    VARIABLES: "Key-value pairs for substitution"
+    PHASES: "Sequential execution blocks with dependencies"
+    TEMPLATES: "Reusable code generation patterns"
+    ERROR_HANDLING: "Failure response specifications"
+
+IMPORT_SYSTEM:
+  SYNTAX:
+    IMPORTS:
+      - "libraries/domain/TEMPLATE_LIBRARY.yaml"
+      - "libraries/tools/TOOL_PATTERNS.yaml"
+      
+  RESOLUTION:
+    RELATIVE_PATHS: "Resolved relative to AIPL program location"
+    TEMPLATE_MERGING: "Imported templates available in current program"
+    VARIABLE_INHERITANCE: "Imported variables available for substitution"
+    PATTERN_AVAILABILITY: "Imported patterns usable in phases"
+
+VARIABLE_SYSTEM:
+  SYNTAX:
+    DECLARATION: "VARIABLE_NAME: \"${SUBSTITUTION_VALUE}\""
+    SUBSTITUTION: "${VARIABLE_NAME}"
+    NESTED_SUBSTITUTION: "${BASE_PATH}/${SUB_PATH}"
+    COMPUTED_VALUES: "${PREFIX}_${SUFFIX}"
+    
+  BUILT_IN_FUNCTIONS:
+    STRING_OPERATIONS:
+      upper: "upper(${TEXT})"
+      lower: "lower(${TEXT})"
+      replace: "replace(${TEXT}, ${OLD}, ${NEW})"
+    PATH_OPERATIONS:
+      path_join: "path_join(${PART1}, ${PART2})"
+      dirname: "dirname(${PATH})"
+      basename: "basename(${PATH})"
+    SYSTEM_OPERATIONS:
+      env: "env(${VARIABLE})"
+      timestamp: "timestamp()"
+      uuid: "uuid()"
+
+EXECUTION_PRIMITIVES:
+  COMMAND:
+    PURPOSE: "Execute shell command"
+    SYNTAX: |
+      COMMAND:
+        NAME: "step-identifier"
+        EXECUTE: "shell command string"
+        WORKING_DIR: "${DIRECTORY}"
+        TIMEOUT: 120
+        EXPECTED_EXIT_CODE: 0
+        CONTINUE_ON_ERROR: false
+        
+  VALIDATE:
+    PURPOSE: "Assert condition and block on failure"
+    SYNTAX: |
+      VALIDATE:
+        NAME: "validation-identifier"
+        TYPE: "VALIDATION_TYPE"
+        TARGET: "${VALIDATION_TARGET}"
+        FAILURE_ACTION: "STOP"
+        ERROR_MESSAGE: "Failure description"
+        CONTINUE_ON_ERROR: false
+        
+  CAPTURE:
+    PURPOSE: "Execute command and store result in variable"
+    SYNTAX: |
+      CAPTURE:
+        NAME: "capture-identifier"
+        COMMAND: "command to execute"
+        STORE_AS: "VARIABLE_NAME"
+        DEFAULT_VALUE: ""
+        TRIM_WHITESPACE: true
+        
+  CONDITIONAL:
+    PURPOSE: "Branch execution based on boolean condition"
+    SYNTAX: |
+      CONDITIONAL:
+        NAME: "decision-identifier"
+        CONDITION:
+          TYPE: "CONDITION_TYPE"
+          LEFT: "${COMPARISON_VALUE_1}"
+          RIGHT: "${COMPARISON_VALUE_2}"
+        THEN:
+          - STEP_IF_TRUE
+        ELSE:
+          - STEP_IF_FALSE
+          
+  LOOP:
+    PURPOSE: "Iterate over collection with variable binding"
+    SYNTAX: |
+      LOOP:
+        NAME: "iteration-identifier"
+        ITERATE_OVER:
+          TYPE: "ITERATION_TYPE"
+          SOURCE: "${DATA_SOURCE}"
+        VARIABLE: "loop_variable"
+        STEPS:
+          - LOOP_STEP
+          
+  PARALLEL:
+    PURPOSE: "Execute multiple steps concurrently"
+    SYNTAX: |
+      PARALLEL:
+        NAME: "concurrent-identifier"
+        WAIT_FOR_ALL: true
+        TIMEOUT: 300
+        TASKS:
+          - CONCURRENT_STEP_1
+          - CONCURRENT_STEP_2
+          
+  RETRY:
+    PURPOSE: "Re-attempt step with backoff strategy"
+    SYNTAX: |
+      RETRY:
+        NAME: "retry-identifier"
+        MAX_ATTEMPTS: 3
+        DELAY: 5
+        BACKOFF_MULTIPLIER: 2
+        STEP:
+          NESTED_STEP: {}
+        ON_FINAL_FAILURE: "CONTINUE"
+        
+  CREATE_FILE:
+    PURPOSE: "Generate file from template with variable substitution"
+    SYNTAX: |
+      CREATE_FILE:
+        NAME: "file-creation-identifier"
+        TEMPLATE: "TEMPLATE_NAME"
+        OUTPUT: "${OUTPUT_PATH}"
+        MODE: "WRITE"
+        VARIABLES:
+          TEMPLATE_VAR: "${SUBSTITUTION_VALUE}"
+
+VALIDATION_TYPES:
+  FILE_EXISTS:
+    PURPOSE: "Assert file exists at path"
+    SYNTAX: |
+      TYPE: "FILE_EXISTS"
+      TARGET: "${FILE_PATH}"
+      
+  DIRECTORY_EXISTS:
+    PURPOSE: "Assert directory exists at path"
+    SYNTAX: |
+      TYPE: "DIRECTORY_EXISTS"
+      TARGET: "${DIRECTORY_PATH}"
+      
+  COMMAND_SUCCESS:
+    PURPOSE: "Assert command exits with code 0"
+    SYNTAX: |
+      TYPE: "COMMAND_SUCCESS"
+      COMMAND: "${VALIDATION_COMMAND}"
+      
+  CONTAINS_TEXT:
+    PURPOSE: "Assert file contains pattern"
+    SYNTAX: |
+      TYPE: "CONTAINS_TEXT"
+      TARGET: "${FILE_PATH}"
+      PATTERN: "${SEARCH_PATTERN}"
+      
+  NOT_CONTAINS_TEXT:
+    PURPOSE: "Assert file does not contain pattern"
+    SYNTAX: |
+      TYPE: "NOT_CONTAINS_TEXT"
+      TARGET: "${FILE_PATH}"
+      PATTERN: "${FORBIDDEN_PATTERN}"
+      
+  EQUALS:
+    PURPOSE: "Assert two values are equal"
+    SYNTAX: |
+      TYPE: "EQUALS"
+      LEFT: "${VALUE_1}"
+      RIGHT: "${VALUE_2}"
+      
+  NOT_EQUALS:
+    PURPOSE: "Assert two values are not equal"
+    SYNTAX: |
+      TYPE: "NOT_EQUALS"
+      LEFT: "${VALUE_1}"
+      RIGHT: "${VALUE_2}"
+      
+  FILE_COUNT:
+    PURPOSE: "Assert file count matches expectation"
+    SYNTAX: |
+      TYPE: "FILE_COUNT"
+      PATTERN: "${GLOB_PATTERN}"
+      EXPECTED_COUNT: 0
+      OPERATOR: "EQUALS"
+
+CONDITION_TYPES:
+  FILE_EXISTS:
+    PURPOSE: "Test if file exists"
+    SYNTAX: |
+      TYPE: "FILE_EXISTS"
+      TARGET: "${FILE_PATH}"
+      
+  COMMAND_SUCCESS:
+    PURPOSE: "Test if command succeeds"
+    SYNTAX: |
+      TYPE: "COMMAND_SUCCESS"
+      COMMAND: "${TEST_COMMAND}"
+      
+  CONTAINS_TEXT:
+    PURPOSE: "Test if file contains pattern"
+    SYNTAX: |
+      TYPE: "CONTAINS_TEXT"
+      TARGET: "${FILE_PATH}"
+      PATTERN: "${SEARCH_PATTERN}"
+      
+  EQUALS:
+    PURPOSE: "Test if values are equal"
+    SYNTAX: |
+      TYPE: "EQUALS"
+      LEFT: "${VALUE_1}"
+      RIGHT: "${VALUE_2}"
+      
+  NOT_EQUALS:
+    PURPOSE: "Test if values are not equal"
+    SYNTAX: |
+      TYPE: "NOT_EQUALS"
+      LEFT: "${VALUE_1}"
+      RIGHT: "${VALUE_2}"
+
+ITERATION_TYPES:
+  LIST:
+    PURPOSE: "Iterate over static list"
+    SYNTAX: |
+      TYPE: "LIST"
+      VALUES: ["item1", "item2", "item3"]
+      
+  COMMAND_OUTPUT:
+    PURPOSE: "Iterate over command output lines"
+    SYNTAX: |
+      TYPE: "COMMAND_OUTPUT"
+      COMMAND: "${COMMAND_TO_EXECUTE}"
+      SPLIT_ON: "\n"
+      
+  FILE_LINES:
+    PURPOSE: "Iterate over file lines"
+    SYNTAX: |
+      TYPE: "FILE_LINES"
+      FILE: "${FILE_PATH}"
+      
+  GLOB_PATTERN:
+    PURPOSE: "Iterate over files matching pattern"
+    SYNTAX: |
+      TYPE: "GLOB_PATTERN"
+      PATTERN: "${FILE_GLOB}"
+
+CONTROL_FLOW:
+  GOTO:
+    PURPOSE: "Jump to named phase"
+    SYNTAX: |
+      GOTO: "PHASE_NAME"
+      
+  SKIP_PHASE:
+    PURPOSE: "Skip execution of named phase"
+    SYNTAX: |
+      SKIP_PHASE: "PHASE_NAME"
+      
+  EXIT_SUCCESS:
+    PURPOSE: "Terminate with success"
+    SYNTAX: |
+      EXIT_SUCCESS: "Success message"
+      
+  EXIT_FAILURE:
+    PURPOSE: "Terminate with failure"
+    SYNTAX: |
+      EXIT_FAILURE: "Failure message"
+
+PHASE_SYSTEM:
+  PHASE_STRUCTURE:
+    SYNTAX: |
+      PHASE_NAME:
+        DESCRIPTION: "Phase purpose"
+        DEPENDS_ON: ["PREREQUISITE_PHASE"]
+        STEPS:
+          - EXECUTION_STEP
+          
+  DEPENDENCY_RESOLUTION:
+    SEQUENTIAL_EXECUTION: "Phases execute in declared order"
+    DEPENDENCY_ENFORCEMENT: "DEPENDS_ON blocks execution until prerequisites complete"
+    CIRCULAR_DEPENDENCY_DETECTION: "Error on circular dependencies"
+
+TEMPLATE_SYSTEM:
+  TEMPLATE_DEFINITION:
+    SYNTAX: |
+      TEMPLATES:
+        TEMPLATE_NAME: |
+          Content with ${VARIABLE_SUBSTITUTION}
+          Fixed text content
+          More ${VARIABLES}
+          
+  TEMPLATE_USAGE:
+    SYNTAX: |
+      CREATE_FILE:
+        TEMPLATE: "TEMPLATE_NAME"
+        VARIABLES:
+          VARIABLE_SUBSTITUTION: "replacement_value"
+          VARIABLES: "other_value"
+          
+  VARIABLE_SUBSTITUTION:
+    PROCESS: "All ${VARIABLE} patterns replaced before file creation"
+    NESTED_SUBSTITUTION: "Variables can reference other variables"
+    UNDEFINED_VARIABLE_HANDLING: "Error on undefined variables"
+
+ERROR_HANDLING:
+  FAILURE_ACTIONS:
+    STOP: "Halt execution immediately"
+    CONTINUE: "Log error but continue execution"
+    RETRY: "Re-attempt current step"
+    SKIP_PHASE: "Skip current phase and continue"
+    
+  ERROR_PROPAGATION:
+    STEP_FAILURE: "Step failure triggers step-level handler"
+    PHASE_FAILURE: "Phase failure triggers phase-level handler"
+    GLOBAL_FAILURE: "Unhandled failures trigger global handler"
+    
+  CLEANUP_SYSTEM:
+    SYNTAX: |
+      ERROR_HANDLING:
+        GLOBAL_FAILURE_ACTION: "STOP"
+        PHASE_FAILURE_HANDLERS:
+          PHASE_NAME:
+            ACTION: "RETRY"
+            MAX_ATTEMPTS: 2
+            MESSAGE: "Phase failed"
+        CLEANUP_ON_FAILURE:
+          - COMMAND:
+              EXECUTE: "${CLEANUP_COMMAND}"
+              CONTINUE_ON_ERROR: true
+
+EXECUTION_SEMANTICS:
+  VARIABLE_RESOLUTION: "All variables resolved before step execution"
+  TEMPLATE_EXPANSION: "Templates expanded with current variable context"
+  PHASE_ISOLATION: "Each phase has independent error handling"
+  STEP_ATOMICITY: "Steps complete fully or fail completely"
+  DETERMINISTIC_EXECUTION: "Same inputs produce same outputs"
+
+VALIDATION_RULES:
+  SYNTAX_VALIDATION: "YAML syntax must be valid"
+  STRUCTURE_VALIDATION: "Required sections must be present"
+  REFERENCE_VALIDATION: "All template/variable references must be resolvable"
+  DEPENDENCY_VALIDATION: "Phase dependencies must form acyclic graph"
+  TYPE_VALIDATION: "Step types must be recognized primitives"
+
+EXTENSION_POINTS:
+  CUSTOM_VALIDATION_TYPES: "Domain libraries can define new validation types"
+  CUSTOM_STEP_TYPES: "Domain libraries can define new step types"
+  CUSTOM_FUNCTIONS: "Domain libraries can define new built-in functions"
+  CUSTOM_TEMPLATES: "Domain libraries provide domain-specific templates"
+
+LIBRARY_INTERFACE:
+  LIBRARY_STRUCTURE:
+    SYNTAX: |
+      LIBRARY_NAME: "domain-library"
+      LIBRARY_VERSION: "1.0"
+      PROVIDES:
+        TEMPLATES:
+          TEMPLATE_NAME: |
+            Template content
+        VALIDATION_TYPES:
+          CUSTOM_VALIDATION:
+            IMPLEMENTATION: "validation logic"
+        STEP_TYPES:
+          CUSTOM_STEP:
+            IMPLEMENTATION: "step execution logic"
+            
+  IMPORT_RESOLUTION:
+    TEMPLATE_MERGING: "Imported templates merged into program namespace"
+    CONFLICT_RESOLUTION: "Later imports override earlier imports"
+    NAMESPACE_ISOLATION: "Libraries cannot access each other's internals"
+
+CORE_LANGUAGE_CONSTRAINTS:
+  NO_DOMAIN_KNOWLEDGE: "Core language contains no technology-specific information"
+  NO_HARD_CODED_PATHS: "All paths parameterized with variables"
+  NO_TOOL_SPECIFIC_COMMANDS: "All commands parameterized and templated"
+  NO_BUSINESS_LOGIC: "Core provides execution primitives only"
+  PURE_EXECUTION_MODEL: "Language defines how to execute, not what to execute"

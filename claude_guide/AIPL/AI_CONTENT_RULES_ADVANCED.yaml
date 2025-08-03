@@ -1,0 +1,320 @@
+AIPL_VERSION: "2.0"
+DOCUMENT_TYPE: AI_CONTENT_CREATION_RULES_ADVANCED
+VALIDATION_MODE: STRICT
+
+PURPOSE: "Advanced AI content creation rules for composable, domain-separated AIPL programs with library system"
+
+ADVANCED_CONTENT_PRINCIPLES:
+  DOMAIN_SEPARATION: "Core language agnostic, domain knowledge in libraries"
+  COMPOSABILITY: "Programs import and compose domain-specific patterns"
+  REUSABILITY: "Libraries shared across multiple programs"
+  MODULARITY: "Clean separation between execution logic and domain expertise"
+  LAYERED_ARCHITECTURE: "Core language + domain libraries + concrete programs"
+
+LAYERED_ARCHITECTURE_OVERVIEW:
+  LAYER_1_CORE_LANGUAGE:
+    PURPOSE: "Generic execution primitives and control flow"
+    CONTENT: "Domain-agnostic step types, validation types, control structures"
+    FILE: "AIPL_CORE_LANGUAGE.yaml"
+    CONSTRAINTS: "NO domain-specific knowledge allowed"
+    
+  LAYER_2_DOMAIN_LIBRARIES:
+    PURPOSE: "Technology-specific templates, patterns, and validation rules"
+    CONTENT: "Reusable domain expertise organized by technology"
+    STRUCTURE: "libraries/domain/DOMAIN_PATTERNS.yaml"
+    EXAMPLES: "liquibase/, snowflake/, maven/, java/"
+    
+  LAYER_3_CONCRETE_PROGRAMS:
+    PURPOSE: "Executable workflows combining core language + domain libraries"
+    CONTENT: "Specific implementations using generic AIPL + imported expertise"
+    IMPORT_SYNTAX: "IMPORTS: [library paths]"
+    COMPOSITION: "Reference imported templates, patterns, validation types"
+
+ADVANCED_PROGRAM_STRUCTURE:
+  REQUIRED_SECTIONS:
+    AIPL_VERSION: "2.0"
+    PROGRAM_NAME: "kebab-case-identifier"
+    DESCRIPTION: "Single line purpose statement"
+    
+  OPTIONAL_SECTIONS:
+    IMPORTS: "List of domain library files to include"
+    VARIABLES: "Program-specific variables (library variables inherited)"
+    PHASES: "Execution workflow using imported patterns"
+    TEMPLATES: "Program-specific templates (supplementing imported)"
+    ERROR_HANDLING: "Program-specific error handling"
+
+IMPORT_SYSTEM_RULES:
+  IMPORT_SYNTAX:
+    BASIC_IMPORT: |
+      IMPORTS:
+        - "libraries/liquibase/LIQUIBASE_CORE_PATTERNS.yaml"
+        - "libraries/maven/MAVEN_BUILD_PATTERNS.yaml"
+        
+  IMPORT_RESOLUTION:
+    PATH_RESOLUTION: "Relative to AIPL program location"
+    TEMPLATE_MERGING: "Imported templates available in current program namespace"
+    VARIABLE_INHERITANCE: "Library variables available with ${} syntax"
+    PATTERN_AVAILABILITY: "Library patterns usable in phase steps"
+    CONFLICT_RESOLUTION: "Later imports override earlier imports with same names"
+    
+  IMPORT_VALIDATION:
+    LIBRARY_EXISTS: "All imported library files must exist"
+    VERSION_COMPATIBILITY: "Library versions must be compatible with program"
+    CIRCULAR_IMPORTS: "Error on circular import dependencies"
+    NAMESPACE_CONFLICTS: "Warning on template/pattern name conflicts"
+
+DOMAIN_LIBRARY_CREATION_RULES:
+  LIBRARY_STRUCTURE:
+    REQUIRED_METADATA:
+      LIBRARY_NAME: "domain-library-identifier"
+      LIBRARY_VERSION: "semantic version"
+      DESCRIPTION: "Library purpose and scope"
+      
+    PROVIDES_SECTION:
+      VALIDATION_TYPES: "Custom validation types for domain"
+      STEP_TYPES: "Custom step types for domain operations"
+      TEMPLATES: "Reusable code generation patterns"
+      PATTERNS: "Common workflow patterns"
+      
+    OPTIONAL_SECTIONS:
+      COMMON_VARIABLES: "Default variable values"
+      USAGE_NOTES: "Import and usage instructions"
+
+  DOMAIN_SEPARATION_GUIDELINES:
+    TECHNOLOGY_BOUNDARIES:
+      RULE: "One domain per technology/tool"
+      EXAMPLES: "liquibase/, snowflake/, maven/, java/, docker/, kubernetes/"
+      
+    ABSTRACTION_LEVEL:
+      CORE_OPERATIONS: "Fundamental operations for the domain"
+      COMMON_PATTERNS: "Frequently used workflow combinations"
+      SPECIALIZED_TEMPLATES: "Advanced or complex implementations"
+      
+    REUSABILITY_FOCUS:
+      PARAMETERIZATION: "All domain-specific content parameterized"
+      COMPOSITION_READY: "Patterns designed for combination with other domains"
+      MINIMAL_ASSUMPTIONS: "Minimal dependencies on other domains"
+
+TEMPLATE_LIBRARY_PATTERNS:
+  TEMPLATE_ORGANIZATION:
+    BY_FUNCTION:
+      GENERATORS: "Code generation templates (classes, configs, etc.)"
+      VALIDATORS: "Validation and compliance templates"
+      WORKFLOWS: "Multi-step process templates"
+      
+    BY_COMPLEXITY:
+      BASIC_TEMPLATES: "Simple, single-purpose templates"
+      COMPOSITE_TEMPLATES: "Templates that use other templates"
+      ADVANCED_PATTERNS: "Complex workflows with multiple branching"
+      
+  TEMPLATE_PARAMETERIZATION:
+    VARIABLE_DESIGN: "All variable content as ${VARIABLE_NAME}"
+    NESTED_VARIABLES: "Support ${BASE_${SUFFIX}} patterns"
+    CONDITIONAL_CONTENT: "Use {{#if CONDITION}}...{{/if}} for optional sections"
+    DEFAULT_VALUES: "Provide sensible defaults in library COMMON_VARIABLES"
+
+VALIDATION_TYPE_LIBRARIES:
+  CUSTOM_VALIDATION_CREATION:
+    DOMAIN_SPECIFIC_VALIDATIONS:
+      PURPOSE: "Validations that require domain expertise"
+      EXAMPLES: "ARCHITECTURAL_COMPLIANCE, SERVICE_REGISTRATION_COMPLETE, SQL_FORMAT_COMPLIANCE"
+      IMPLEMENTATION: "Combine multiple core validations with domain logic"
+      
+    VALIDATION_COMPOSITION:
+      PATTERN: "Custom validations built from core validation primitives"
+      REUSABILITY: "Custom validations usable across multiple programs"
+      PARAMETERIZATION: "Accept domain-specific parameters"
+
+STEP_TYPE_LIBRARIES:
+  CUSTOM_STEP_CREATION:
+    DOMAIN_WORKFLOWS:
+      PURPOSE: "Multi-step workflows common to domain"
+      EXAMPLES: "LIQUIBASE_COMPILE_AND_VALIDATE, MAVEN_BUILD_CYCLE"
+      IMPLEMENTATION: "Sequence of core primitives with domain expertise"
+      
+    STEP_COMPOSITION:
+      PATTERN: "Custom steps built from core step primitives"
+      ERROR_HANDLING: "Domain-appropriate error handling and recovery"
+      VALIDATION_INTEGRATION: "Use domain validation types"
+
+PATTERN_LIBRARY_DESIGN:
+  WORKFLOW_PATTERNS:
+    ARCHITECTURAL_PATTERNS:
+      PURPOSE: "Enforce domain architectural decisions"
+      EXAMPLES: "LIQUIBASE_ARCHITECTURAL_DECISION, MAVEN_DEPENDENCY_RESOLUTION"
+      COMPOSITION: "Combine validation, conditional logic, and domain templates"
+      
+    DIAGNOSTIC_PATTERNS:
+      PURPOSE: "Structured troubleshooting for domain issues"
+      EXAMPLES: "XSD_RESOLUTION_TROUBLESHOOTING, GENERATOR_PRIORITY_DEBUGGING"
+      IMPLEMENTATION: "Symptom collection → diagnosis → resolution → verification"
+      
+    BUILD_AND_TEST_PATTERNS:
+      PURPOSE: "Standard build/test cycles for domain"
+      EXAMPLES: "JAVA_COMPILE_TEST_PACKAGE, LIQUIBASE_INTEGRATION_TEST"
+      FLEXIBILITY: "Parameterized for different project configurations"
+
+CONTENT_TRANSFORMATION_TO_LIBRARIES:
+  DOMAIN_KNOWLEDGE_EXTRACTION:
+    IDENTIFY_DOMAIN_BOUNDARIES:
+      RULE: "Group content by technology or tool"
+      PROCESS: "Scan for technology-specific commands, templates, validation rules"
+      OUTPUT: "Separate domain libraries for each technology"
+      
+    EXTRACT_REUSABLE_PATTERNS:
+      RULE: "Identify repeated workflows and templates"
+      PROCESS: "Find common patterns across multiple implementations"
+      OUTPUT: "Generalized, parameterized patterns in domain libraries"
+      
+    PARAMETERIZE_DOMAIN_CONTENT:
+      RULE: "Replace all specific values with variables"
+      PROCESS: "Convert hardcoded paths, names, commands to ${VARIABLES}"
+      OUTPUT: "Reusable templates with parameter substitution"
+
+  LIBRARY_CREATION_WORKFLOW:
+    STEP_1_DOMAIN_ANALYSIS:
+      PURPOSE: "Identify domain boundaries and expertise areas"
+      INPUTS: "Existing implementation guides, command references, troubleshooting docs"
+      OUTPUTS: "Domain library specifications and content categorization"
+      
+    STEP_2_PATTERN_EXTRACTION:
+      PURPOSE: "Extract reusable patterns from domain content"
+      PROCESS: "Identify templates, workflows, validation rules, common commands"
+      OUTPUTS: "Parameterized patterns organized by function and complexity"
+      
+    STEP_3_LIBRARY_IMPLEMENTATION:
+      PURPOSE: "Create structured domain library files"
+      STRUCTURE: "PROVIDES section with validation types, step types, templates, patterns"
+      VALIDATION: "Ensure all content is parameterized and reusable"
+      
+    STEP_4_PROGRAM_REFACTORING:
+      PURPOSE: "Convert existing programs to use library system"
+      PROCESS: "Add IMPORTS, replace hardcoded content with library references"
+      VALIDATION: "Ensure programs produce identical results"
+
+ADVANCED_CONVERSION_PATTERNS:
+  GUIDE_TO_LIBRARY_CONVERSION:
+    TECHNOLOGY_IDENTIFICATION:
+      INPUT_PATTERN: "Content mentioning specific tools, frameworks, databases"
+      OUTPUT_TEMPLATE: |
+        # Identify domain: liquibase, maven, java, snowflake, etc.
+        # Create library: libraries/DOMAIN/DOMAIN_PATTERNS.yaml
+        # Extract patterns: templates, validations, workflows
+        
+    PATTERN_GENERALIZATION:
+      INPUT_PATTERN: "Specific implementation steps"
+      OUTPUT_TEMPLATE: |
+        # Convert to parameterized pattern
+        # Add to appropriate library PATTERNS section
+        # Reference from programs via USE_PATTERN
+        
+    TEMPLATE_EXTRACTION:
+      INPUT_PATTERN: "Code examples in guides"
+      OUTPUT_TEMPLATE: |
+        # Extract to library TEMPLATES section
+        # Parameterize with ${VARIABLES}
+        # Reference from programs via CREATE_FILE with template
+
+  PROGRAM_COMPOSITION_PATTERNS:
+    MULTI_DOMAIN_PROGRAMS:
+      PATTERN: "Import multiple domain libraries"
+      EXAMPLE: |
+        IMPORTS:
+          - "libraries/liquibase/LIQUIBASE_CORE_PATTERNS.yaml"
+          - "libraries/snowflake/SNOWFLAKE_SQL_PATTERNS.yaml"
+          - "libraries/maven/MAVEN_BUILD_PATTERNS.yaml"
+        PHASES:
+          PHASE_1:
+            STEPS:
+              - USE_PATTERN: "LIQUIBASE_ARCHITECTURAL_DECISION"
+              - USE_TEMPLATE: "SNOWFLAKE_GENERATOR_TEMPLATE"
+              - USE_PATTERN: "MAVEN_BUILD_CYCLE"
+              
+    DOMAIN_LIBRARY_COMPOSITION:
+      PATTERN: "Libraries can import other libraries"
+      EXAMPLE: |
+        # In liquibase library
+        IMPORTS:
+          - "../java/JAVA_BUILD_PATTERNS.yaml"
+        # Liquibase patterns can use Java patterns
+
+ADVANCED_VALIDATION_RULES:
+  LIBRARY_VALIDATION:
+    DOMAIN_PURITY:
+      CHECK: "Libraries contain only domain-specific content"
+      VALIDATION: "No generic execution primitives in domain libraries"
+      ERROR: "Generic primitives belong in core language"
+      
+    REUSABILITY_COMPLIANCE:
+      CHECK: "All library content is parameterized and reusable"
+      VALIDATION: "No hardcoded values in templates or patterns"
+      ERROR: "Content must be parameterized with ${VARIABLES}"
+      
+    IMPORT_DEPENDENCY_VALIDATION:
+      CHECK: "All library imports exist and are acyclic"
+      VALIDATION: "Dependency graph has no cycles"
+      ERROR: "Circular dependencies in library imports"
+      
+  PROGRAM_VALIDATION:
+    IMPORT_RESOLUTION:
+      CHECK: "All imported libraries exist and are accessible"
+      VALIDATION: "Library files exist at specified paths"
+      ERROR: "Cannot resolve library import: ${LIBRARY_PATH}"
+      
+    TEMPLATE_REFERENCE_VALIDATION:
+      CHECK: "All referenced templates exist in imported libraries"
+      VALIDATION: "Templates used in CREATE_FILE exist in imports"
+      ERROR: "Template ${TEMPLATE_NAME} not found in imported libraries"
+      
+    PATTERN_REFERENCE_VALIDATION:
+      CHECK: "All referenced patterns exist in imported libraries"
+      VALIDATION: "Patterns used in USE_PATTERN exist in imports"
+      ERROR: "Pattern ${PATTERN_NAME} not found in imported libraries"
+
+MIGRATION_FROM_BASIC_TO_ADVANCED:
+  MIGRATION_PROCESS:
+    STEP_1_IDENTIFY_DOMAINS:
+      PURPOSE: "Analyze existing basic AIPL programs for domain boundaries"
+      PROCESS: "Scan for technology-specific content (maven, git, java, etc.)"
+      OUTPUT: "List of domains and their content"
+      
+    STEP_2_CREATE_DOMAIN_LIBRARIES:
+      PURPOSE: "Extract domain content into separate library files"
+      PROCESS: "Move templates, validations, patterns to domain libraries"
+      OUTPUT: "Domain library files in libraries/ directory"
+      
+    STEP_3_REFACTOR_PROGRAMS:
+      PURPOSE: "Update programs to use import system"
+      PROCESS: "Add IMPORTS section, replace content with library references"
+      OUTPUT: "Refactored programs using library system"
+      
+    STEP_4_VALIDATE_EQUIVALENCE:
+      PURPOSE: "Ensure refactored programs produce identical results"
+      PROCESS: "Compare execution results before and after migration"
+      OUTPUT: "Validated migration with equivalent functionality"
+
+ADVANCED_SUCCESS_CRITERIA:
+  DOMAIN_SEPARATION: "Core language contains no technology-specific knowledge"
+  LIBRARY_REUSABILITY: "Domain libraries usable across multiple programs"
+  COMPOSITION_FLEXIBILITY: "Programs can combine multiple domains"
+  MAINTENANCE_EFFICIENCY: "Updates to domain libraries propagate to all users"
+  SCALING_CAPABILITY: "New domains can be added without core language changes"
+  IMPORT_SYSTEM_FUNCTIONALITY: "Import resolution and merging works correctly"
+  PATTERN_AVAILABILITY: "Imported patterns accessible in program phases"
+  TEMPLATE_SUBSTITUTION: "Variable substitution works across import boundaries"
+
+WHEN_TO_USE_ADVANCED_APPROACH:
+  MULTI_DOMAIN_WORKFLOWS: "Processes spanning multiple technologies"
+  REUSABLE_PATTERNS: "Common patterns used across multiple programs"
+  LARGE_TEAMS: "Multiple teams working with shared domain expertise"
+  ENTERPRISE_SCALE: "Large number of similar workflows"
+  LONG_TERM_MAINTENANCE: "Programs that will evolve over time"
+  DOMAIN_EXPERTISE_SHARING: "Want to share specialized knowledge across programs"
+
+ADVANCED_APPROACH_BENEFITS:
+  MODULARITY: "Clean separation of concerns"
+  REUSABILITY: "Share patterns across programs"
+  MAINTAINABILITY: "Update domain expertise in one place"
+  COMPOSABILITY: "Combine different domain expertises"
+  SCALABILITY: "Add new domains without changing core"
+  EXPERTISE_CAPTURE: "Preserve domain knowledge in reusable form"

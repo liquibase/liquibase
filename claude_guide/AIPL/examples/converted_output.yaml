@@ -1,0 +1,381 @@
+AIPL_VERSION: "1.0"
+PROGRAM_NAME: "rest-api-client-implementation"
+DESCRIPTION: "Implement REST API client for customer management system"
+
+VARIABLES:
+  PACKAGE_BASE: "com.example.client"
+  PROJECT_NAME: "customer-api-client"
+  BASE_URL: "https://api.example.com/v1"
+  API_KEY: "${API_KEY_VALUE}"
+  JAVA_VERSION: "11"
+  MAVEN_VERSION: "3.6"
+  TIMEOUT: "30000"
+  COVERAGE_THRESHOLD: "80"
+
+PHASES:
+  PHASE_0_PREREQUISITES:
+    DESCRIPTION: "Validate environment and prerequisites"
+    STEPS:
+      - VALIDATE:
+          NAME: "check-java-version"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "java -version"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Java not installed or not in PATH"
+          
+      - VALIDATE:
+          NAME: "check-maven-version"
+          TYPE: "COMMAND_SUCCESS" 
+          COMMAND: "mvn -version"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Maven not installed or not in PATH"
+          
+      - CAPTURE:
+          NAME: "verify-java-version"
+          COMMAND: "java -version 2>&1 | grep 'version' | cut -d'\"' -f2"
+          STORE_AS: "DETECTED_JAVA_VERSION"
+          
+      - VALIDATE:
+          NAME: "check-java-compatibility"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "echo '${DETECTED_JAVA_VERSION}' | grep -E '^(11|1[2-9]|[2-9][0-9])'"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Java ${JAVA_VERSION}+ required, found ${DETECTED_JAVA_VERSION}"
+
+  PHASE_1_PROJECT_SETUP:
+    DESCRIPTION: "Create project structure"
+    DEPENDS_ON: ["PHASE_0_PREREQUISITES"]
+    STEPS:
+      - COMMAND:
+          NAME: "create-main-package-dir"
+          EXECUTE: "mkdir -p src/main/java/${PACKAGE_BASE/\./\/}"
+          
+      - COMMAND:
+          NAME: "create-test-package-dir"
+          EXECUTE: "mkdir -p src/test/java/${PACKAGE_BASE/\./\/}"
+          
+      - VALIDATE:
+          NAME: "verify-main-dir-created"
+          TYPE: "DIRECTORY_EXISTS"
+          TARGET: "src/main/java/${PACKAGE_BASE/\./\/}"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Failed to create main package directory"
+          
+      - VALIDATE:
+          NAME: "verify-test-dir-created"
+          TYPE: "DIRECTORY_EXISTS"
+          TARGET: "src/test/java/${PACKAGE_BASE/\./\/}"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Failed to create test package directory"
+
+  PHASE_2_CORE_IMPLEMENTATION:
+    DESCRIPTION: "Create core API client classes"
+    DEPENDS_ON: ["PHASE_1_PROJECT_SETUP"]
+    STEPS:
+      - CREATE_FILE:
+          NAME: "create-api-client"
+          TEMPLATE: "API_CLIENT_TEMPLATE"
+          OUTPUT: "src/main/java/${PACKAGE_BASE/\./\/}/CustomerApiClient.java"
+          
+      - CREATE_FILE:
+          NAME: "create-customer-model"
+          TEMPLATE: "CUSTOMER_MODEL_TEMPLATE"
+          OUTPUT: "src/main/java/${PACKAGE_BASE/\./\/}/Customer.java"
+          
+      - VALIDATE:
+          NAME: "verify-api-client-created"
+          TYPE: "FILE_EXISTS"
+          TARGET: "src/main/java/${PACKAGE_BASE/\./\/}/CustomerApiClient.java"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Failed to create CustomerApiClient.java"
+          
+      - VALIDATE:
+          NAME: "verify-customer-model-created"
+          TYPE: "FILE_EXISTS"
+          TARGET: "src/main/java/${PACKAGE_BASE/\./\/}/Customer.java"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Failed to create Customer.java"
+
+  PHASE_3_CONFIGURATION:
+    DESCRIPTION: "Create configuration and properties"
+    DEPENDS_ON: ["PHASE_2_CORE_IMPLEMENTATION"]
+    STEPS:
+      - CREATE_FILE:
+          NAME: "create-api-config"
+          TEMPLATE: "API_CONFIG_TEMPLATE"
+          OUTPUT: "src/main/java/${PACKAGE_BASE/\./\/}/ApiConfig.java"
+          
+      - VALIDATE:
+          NAME: "verify-config-created"
+          TYPE: "FILE_EXISTS"
+          TARGET: "src/main/java/${PACKAGE_BASE/\./\/}/ApiConfig.java"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Failed to create ApiConfig.java"
+
+  PHASE_4_TESTING:
+    DESCRIPTION: "Create and run comprehensive tests"
+    DEPENDS_ON: ["PHASE_3_CONFIGURATION"]
+    STEPS:
+      - CREATE_FILE:
+          NAME: "create-unit-tests"
+          TEMPLATE: "UNIT_TEST_TEMPLATE"
+          OUTPUT: "src/test/java/${PACKAGE_BASE/\./\/}/CustomerApiClientTest.java"
+          
+      - CREATE_FILE:
+          NAME: "create-integration-tests"
+          TEMPLATE: "INTEGRATION_TEST_TEMPLATE"
+          OUTPUT: "src/test/java/${PACKAGE_BASE/\./\/}/CustomerApiClientIntegrationTest.java"
+          
+      - COMMAND:
+          NAME: "compile-project"
+          EXECUTE: "mvn compile"
+          
+      - VALIDATE:
+          NAME: "verify-compilation-success"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "mvn compile"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Project compilation failed"
+          
+      - RETRY:
+          NAME: "run-unit-tests"
+          MAX_ATTEMPTS: 3
+          STEP:
+            COMMAND:
+              EXECUTE: "mvn test -Dtest=*ApiClientTest"
+              
+      - RETRY:
+          NAME: "run-integration-tests"
+          MAX_ATTEMPTS: 3
+          STEP:
+            COMMAND:
+              EXECUTE: "mvn test -Dtest=*IntegrationTest"
+
+  PHASE_5_ERROR_HANDLING:
+    DESCRIPTION: "Add error handling and validation"
+    DEPENDS_ON: ["PHASE_4_TESTING"]
+    STEPS:
+      - CREATE_FILE:
+          NAME: "create-error-handler"
+          TEMPLATE: "ERROR_HANDLER_TEMPLATE"
+          OUTPUT: "src/main/java/${PACKAGE_BASE/\./\/}/ApiErrorHandler.java"
+          
+      - COMMAND:
+          NAME: "run-error-handling-tests"
+          EXECUTE: "mvn test -Dtest=*ErrorHandlingTest"
+
+  PHASE_6_FINAL_VALIDATION:
+    DESCRIPTION: "Final validation and packaging"
+    DEPENDS_ON: ["PHASE_5_ERROR_HANDLING"]
+    STEPS:
+      - PARALLEL:
+          NAME: "run-validation-suite"
+          WAIT_FOR_ALL: true
+          TIMEOUT: 600
+          TASKS:
+            - COMMAND:
+                NAME: "run-full-test-suite"
+                EXECUTE: "mvn test"
+            - COMMAND:
+                NAME: "generate-coverage-report"
+                EXECUTE: "mvn jacoco:report"
+            - COMMAND:
+                NAME: "check-pmd-violations"
+                EXECUTE: "mvn pmd:check"
+                
+      - VALIDATE:
+          NAME: "verify-test-success"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "mvn test"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Full test suite failed"
+          
+      - VALIDATE:
+          NAME: "verify-coverage-threshold"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "mvn jacoco:check -Dcoverage.threshold=${COVERAGE_THRESHOLD}"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Code coverage below ${COVERAGE_THRESHOLD}%"
+          
+      - COMMAND:
+          NAME: "package-application"
+          EXECUTE: "mvn package"
+          
+      - VALIDATE:
+          NAME: "verify-packaging-success"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "mvn package"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Application packaging failed"
+
+TEMPLATES:
+  API_CLIENT_TEMPLATE: |
+    package ${PACKAGE_BASE};
+    
+    import java.net.http.HttpClient;
+    import java.net.http.HttpRequest;
+    import java.net.http.HttpResponse;
+    import java.util.List;
+    
+    public class CustomerApiClient {
+        private final String baseUrl;
+        private final HttpClient httpClient;
+        private final String apiKey;
+        
+        public CustomerApiClient(String baseUrl, String apiKey) {
+            this.baseUrl = baseUrl;
+            this.apiKey = apiKey;
+            this.httpClient = HttpClient.newHttpClient();
+        }
+        
+        public Customer getCustomer(String customerId) {
+            // Implementation here
+            return null;
+        }
+        
+        public List<Customer> getAllCustomers() {
+            // Implementation here
+            return null;
+        }
+    }
+    
+  CUSTOMER_MODEL_TEMPLATE: |
+    package ${PACKAGE_BASE};
+    
+    public class Customer {
+        private String id;
+        private String name;
+        private String email;
+        
+        public Customer() {}
+        
+        public Customer(String id, String name, String email) {
+            this.id = id;
+            this.name = name;
+            this.email = email;
+        }
+        
+        public String getId() { return id; }
+        public void setId(String id) { this.id = id; }
+        
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+        
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+    }
+    
+  API_CONFIG_TEMPLATE: |
+    package ${PACKAGE_BASE};
+    
+    public class ApiConfig {
+        private String baseUrl = "${BASE_URL}";
+        private String apiKey;
+        private int timeout = ${TIMEOUT};
+        
+        public ApiConfig() {}
+        
+        public String getBaseUrl() { return baseUrl; }
+        public void setBaseUrl(String baseUrl) { this.baseUrl = baseUrl; }
+        
+        public String getApiKey() { return apiKey; }
+        public void setApiKey(String apiKey) { this.apiKey = apiKey; }
+        
+        public int getTimeout() { return timeout; }
+        public void setTimeout(int timeout) { this.timeout = timeout; }
+    }
+    
+  UNIT_TEST_TEMPLATE: |
+    package ${PACKAGE_BASE};
+    
+    import org.junit.jupiter.api.Test;
+    import org.junit.jupiter.api.BeforeEach;
+    import static org.junit.jupiter.api.Assertions.*;
+    
+    public class CustomerApiClientTest {
+        
+        private CustomerApiClient client;
+        
+        @BeforeEach
+        void setUp() {
+            client = new CustomerApiClient("${BASE_URL}", "test-api-key");
+        }
+        
+        @Test
+        void testGetCustomer() {
+            // Test implementation
+        }
+        
+        @Test
+        void testGetAllCustomers() {
+            // Test implementation
+        }
+    }
+    
+  INTEGRATION_TEST_TEMPLATE: |
+    package ${PACKAGE_BASE};
+    
+    import org.junit.jupiter.api.Test;
+    import org.junit.jupiter.api.BeforeEach;
+    import static org.junit.jupiter.api.Assertions.*;
+    
+    public class CustomerApiClientIntegrationTest {
+        
+        private CustomerApiClient client;
+        
+        @BeforeEach
+        void setUp() {
+            client = new CustomerApiClient("${BASE_URL}", "${API_KEY}");
+        }
+        
+        @Test
+        void testRealApiConnection() {
+            // Integration test implementation
+        }
+    }
+    
+  ERROR_HANDLER_TEMPLATE: |
+    package ${PACKAGE_BASE};
+    
+    public class ApiErrorHandler {
+        
+        public static void handleHttpError(int statusCode, String responseBody) {
+            if (statusCode >= 400 && statusCode < 500) {
+                throw new ApiClientException("Client error: " + statusCode + " - " + responseBody);
+            } else if (statusCode >= 500) {
+                throw new ApiServerException("Server error: " + statusCode + " - " + responseBody);
+            }
+        }
+        
+        public static class ApiClientException extends RuntimeException {
+            public ApiClientException(String message) { super(message); }
+        }
+        
+        public static class ApiServerException extends RuntimeException {
+            public ApiServerException(String message) { super(message); }
+        }
+    }
+
+ERROR_HANDLING:
+  GLOBAL_FAILURE_ACTION: "STOP"
+  
+  PHASE_FAILURE_HANDLERS:
+    PHASE_0_PREREQUISITES:
+      ACTION: "STOP"
+      MESSAGE: "Environment prerequisites not met"
+      
+    PHASE_4_TESTING:
+      ACTION: "CONTINUE"
+      MESSAGE: "Tests failed but continuing with error handling implementation"
+      
+    PHASE_6_FINAL_VALIDATION:
+      ACTION: "STOP"
+      MESSAGE: "Final validation failed - implementation incomplete"
+      
+  CLEANUP_ON_FAILURE:
+    - COMMAND:
+        EXECUTE: "mvn clean"
+        CONTINUE_ON_ERROR: true
+    - COMMAND:
+        EXECUTE: "rm -rf src/main/java/${PACKAGE_BASE/\./\/}/*"
+        CONTINUE_ON_ERROR: true

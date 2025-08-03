@@ -1,0 +1,615 @@
+AIPL_VERSION: "1.0"
+PROGRAM_NAME: "snapshot-diff-implementation-snowflake"
+DESCRIPTION: "Complete snapshot/diff implementation workflow for Snowflake database objects"
+
+VARIABLES:
+  OBJECT_TYPE: "${DATABASE_OBJECT_TYPE}"
+  OBJECT_TYPE_LOWER: "${lower(DATABASE_OBJECT_TYPE)}"
+  PACKAGE_BASE: "com.liquibase.ext.snowflake"
+  IMPLEMENTATION_SCOPE: "UNKNOWN"
+  TEST_DATABASE: "SNOWFLAKE"
+
+PHASES:
+  PHASE_0_QUICK_VALIDATION:
+    DESCRIPTION: "Optional assessment before full implementation"
+    STEPS:
+      - COMMAND:
+          NAME: "test-database-connectivity"
+          EXECUTE: "echo 'SELECT * FROM INFORMATION_SCHEMA.${OBJECT_TYPE}S LIMIT 1' | sqlcmd"
+          
+      - CAPTURE:
+          NAME: "check-existing-snapshot"
+          COMMAND: "find . -name '*${OBJECT_TYPE}*SnapshotGenerator*'"
+          STORE_AS: "EXISTING_SNAPSHOT"
+          
+      - CAPTURE:
+          NAME: "check-existing-comparator"
+          COMMAND: "find . -name '*${OBJECT_TYPE}*Comparator*'"
+          STORE_AS: "EXISTING_COMPARATOR"
+          
+      - CAPTURE:
+          NAME: "check-core-object"
+          COMMAND: "find . -name '*${OBJECT_TYPE}*.java' -path '*/liquibase-core/*'"
+          STORE_AS: "CORE_OBJECT_EXISTS"
+          
+      - CONDITIONAL:
+          NAME: "determine-implementation-scope"
+          CONDITION:
+            TYPE: "NOT_EQUALS"
+            LEFT: "${CORE_OBJECT_EXISTS}"
+            RIGHT: ""
+          THEN:
+            - CAPTURE:
+                COMMAND: "echo 'EXTEND_EXISTING_OBJECT'"
+                STORE_AS: "IMPLEMENTATION_SCOPE"
+          ELSE:
+            - CAPTURE:
+                COMMAND: "echo 'NEW_OBJECT_IMPLEMENTATION'"
+                STORE_AS: "IMPLEMENTATION_SCOPE"
+                
+      - COMMAND:
+          NAME: "test-object-creation-permissions"
+          EXECUTE: "echo 'CREATE ${OBJECT_TYPE} test_validation_temp; DROP ${OBJECT_TYPE} test_validation_temp;' | sqlcmd"
+
+  PHASE_1_REQUIREMENTS_RESEARCH:
+    DESCRIPTION: "Research and document complete requirements"
+    DEPENDS_ON: ["PHASE_0_QUICK_VALIDATION"]
+    STEPS:
+      - CREATE_FILE:
+          NAME: "create-requirements-document"
+          TEMPLATE: "REQUIREMENTS_DOCUMENT_TEMPLATE"
+          OUTPUT: "docs/${OBJECT_TYPE_LOWER}_snapshot_diff_requirements.md"
+          
+      - VALIDATE:
+          NAME: "verify-official-documentation-research"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "docs/${OBJECT_TYPE_LOWER}_snapshot_diff_requirements.md"
+          PATTERN: "Official Documentation"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Official documentation research required"
+          
+      - CREATE_FILE:
+          NAME: "create-property-analysis"
+          TEMPLATE: "PROPERTY_ANALYSIS_TEMPLATE"
+          OUTPUT: "docs/${OBJECT_TYPE_LOWER}_property_analysis.md"
+          
+      - VALIDATE:
+          NAME: "verify-sql-query-development"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "docs/${OBJECT_TYPE_LOWER}_snapshot_diff_requirements.md"
+          PATTERN: "INFORMATION_SCHEMA"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "SQL query development required"
+
+  PHASE_2_OBJECT_MODEL:
+    DESCRIPTION: "Create or enhance database object model"
+    DEPENDS_ON: ["PHASE_1_REQUIREMENTS_RESEARCH"]
+    STEPS:
+      - CONDITIONAL:
+          NAME: "create-object-model"
+          CONDITION:
+            TYPE: "EQUALS"
+            LEFT: "${IMPLEMENTATION_SCOPE}"
+            RIGHT: "NEW_OBJECT_IMPLEMENTATION"
+          THEN:
+            - CREATE_FILE:
+                NAME: "create-database-object"
+                TEMPLATE: "DATABASE_OBJECT_TEMPLATE"
+                OUTPUT: "src/main/java/${PACKAGE_BASE/\./\/}/structure/${OBJECT_TYPE}.java"
+          ELSE:
+            - CREATE_FILE:
+                NAME: "enhance-existing-object"
+                TEMPLATE: "OBJECT_ENHANCEMENT_TEMPLATE"
+                OUTPUT: "src/main/java/${PACKAGE_BASE/\./\/}/structure/${OBJECT_TYPE}Enhancement.java"
+                
+      - VALIDATE:
+          NAME: "verify-object-model-created"
+          TYPE: "FILE_EXISTS"
+          TARGET: "src/main/java/${PACKAGE_BASE/\./\/}/structure/${OBJECT_TYPE}.java"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Object model creation failed"
+          
+      - COMMAND:
+          NAME: "compile-object-model"
+          EXECUTE: "mvn compile"
+          
+      - VALIDATE:
+          NAME: "verify-object-compilation"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "mvn compile"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Object model compilation failed"
+
+  PHASE_3_SNAPSHOT_IMPLEMENTATION:
+    DESCRIPTION: "Implement snapshot generator"
+    DEPENDS_ON: ["PHASE_2_OBJECT_MODEL"]
+    STEPS:
+      - CREATE_FILE:
+          NAME: "create-snapshot-generator"
+          TEMPLATE: "SNAPSHOT_GENERATOR_TEMPLATE"
+          OUTPUT: "src/main/java/${PACKAGE_BASE/\./\/}/snapshot/${OBJECT_TYPE}SnapshotGeneratorSnowflake.java"
+          
+      - CREATE_FILE:
+          NAME: "register-snapshot-service"
+          TEMPLATE: "SNAPSHOT_SERVICE_REGISTRATION"
+          OUTPUT: "src/main/resources/META-INF/services/liquibase.snapshot.SnapshotGenerator"
+          MODE: "APPEND"
+          
+      - CREATE_FILE:
+          NAME: "create-snapshot-unit-test"
+          TEMPLATE: "SNAPSHOT_UNIT_TEST_TEMPLATE"
+          OUTPUT: "src/test/java/${PACKAGE_BASE/\./\/}/snapshot/${OBJECT_TYPE}SnapshotGeneratorSnowflakeTest.java"
+          
+      - COMMAND:
+          NAME: "compile-snapshot-implementation"
+          EXECUTE: "mvn test-compile"
+          
+      - RETRY:
+          NAME: "run-snapshot-unit-tests"
+          MAX_ATTEMPTS: 3
+          STEP:
+            COMMAND:
+              EXECUTE: "mvn test -Dtest=*${OBJECT_TYPE}*SnapshotGenerator*Test"
+
+  PHASE_4_DIFF_IMPLEMENTATION:
+    DESCRIPTION: "Implement diff comparator"
+    DEPENDS_ON: ["PHASE_3_SNAPSHOT_IMPLEMENTATION"]
+    STEPS:
+      - CREATE_FILE:
+          NAME: "create-comparator"
+          TEMPLATE: "COMPARATOR_TEMPLATE"
+          OUTPUT: "src/main/java/${PACKAGE_BASE/\./\/}/diff/${OBJECT_TYPE}ComparatorSnowflake.java"
+          
+      - CREATE_FILE:
+          NAME: "register-comparator-service"
+          TEMPLATE: "COMPARATOR_SERVICE_REGISTRATION"
+          OUTPUT: "src/main/resources/META-INF/services/liquibase.diff.compare.DatabaseObjectComparator"
+          MODE: "APPEND"
+          
+      - CREATE_FILE:
+          NAME: "create-comparator-unit-test"
+          TEMPLATE: "COMPARATOR_UNIT_TEST_TEMPLATE"
+          OUTPUT: "src/test/java/${PACKAGE_BASE/\./\/}/diff/${OBJECT_TYPE}ComparatorSnowflakeTest.java"
+          
+      - COMMAND:
+          NAME: "compile-diff-implementation"
+          EXECUTE: "mvn test-compile"
+          
+      - RETRY:
+          NAME: "run-diff-unit-tests"
+          MAX_ATTEMPTS: 3
+          STEP:
+            COMMAND:
+              EXECUTE: "mvn test -Dtest=*${OBJECT_TYPE}*Comparator*Test"
+
+  PHASE_5_INTEGRATION_TESTING:
+    DESCRIPTION: "Create and run comprehensive integration tests"
+    DEPENDS_ON: ["PHASE_4_DIFF_IMPLEMENTATION"]
+    STEPS:
+      - CREATE_FILE:
+          NAME: "create-integration-test"
+          TEMPLATE: "INTEGRATION_TEST_TEMPLATE"
+          OUTPUT: "src/test/java/${PACKAGE_BASE/\./\/}/integration/${OBJECT_TYPE}SnapshotDiffIntegrationTest.java"
+          
+      - COMMAND:
+          NAME: "compile-integration-tests"
+          EXECUTE: "mvn test-compile"
+          
+      - RETRY:
+          NAME: "run-integration-tests"
+          MAX_ATTEMPTS: 3
+          DELAY: 10
+          STEP:
+            COMMAND:
+              EXECUTE: "mvn test -Dtest=*${OBJECT_TYPE}*Integration*Test -DdbName=${TEST_DATABASE}"
+              TIMEOUT: 300
+              
+      - PARALLEL:
+          NAME: "final-validation-suite"
+          WAIT_FOR_ALL: true
+          TIMEOUT: 600
+          TASKS:
+            - COMMAND:
+                NAME: "run-all-object-tests"
+                EXECUTE: "mvn test -Dtest=*${OBJECT_TYPE}*"
+            - COMMAND:
+                NAME: "compile-final-build"
+                EXECUTE: "mvn compile"
+            - COMMAND:
+                NAME: "package-build"
+                EXECUTE: "mvn package -DskipTests"
+                
+      - VALIDATE:
+          NAME: "verify-all-tests-pass"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "mvn test -Dtest=*${OBJECT_TYPE}*"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Not all tests pass - implementation incomplete"
+
+TEMPLATES:
+  REQUIREMENTS_DOCUMENT_TEMPLATE: |
+    # ${OBJECT_TYPE} Snapshot/Diff Requirements
+    
+    ## Object Overview
+    Database: Snowflake
+    Object Type: ${OBJECT_TYPE}
+    Implementation Scope: ${IMPLEMENTATION_SCOPE}
+    
+    ## Official Documentation
+    - URL: [Snowflake ${OBJECT_TYPE} Documentation]
+    - Version: [Database Version]
+    - Reference: [Official SQL Reference]
+    
+    ## Property Analysis Table
+    | Property | Type | Required | Default | Comparison | Notes |
+    |----------|------|----------|---------|------------|-------|
+    | name | String | Yes | - | Full | Object identifier |
+    | catalogName | String | Yes | - | Full | Database catalog |
+    | schemaName | String | Yes | - | Full | Schema name |
+    
+    ## SQL Query Specifications
+    ```sql
+    SELECT 
+        object_name,
+        object_catalog,
+        object_schema,
+        property1,
+        property2
+    FROM INFORMATION_SCHEMA.${OBJECT_TYPE}S
+    WHERE object_catalog = ?
+    AND object_schema = ?
+    ```
+    
+    ## Comparison Logic Requirements
+    - Compare all configuration properties
+    - Exclude system metadata (timestamps, IDs)
+    - Handle null/default value normalization
+    
+  DATABASE_OBJECT_TEMPLATE: |
+    package ${PACKAGE_BASE}.structure;
+    
+    import liquibase.structure.core.AbstractDatabaseObject;
+    import liquibase.structure.DatabaseObject;
+    import liquibase.util.ObjectUtil;
+    import java.util.Date;
+    
+    public class ${OBJECT_TYPE} extends AbstractDatabaseObject {
+        private String name;
+        private String catalogName;
+        private String schemaName;
+        
+        // Configuration properties
+        private String comment;
+        private Boolean configProperty1;
+        private String configProperty2;
+        
+        // State properties (exclude from comparison)
+        private Date createdTime;
+        private String systemId;
+        
+        public ${OBJECT_TYPE}() {
+            setName(null);
+        }
+        
+        public ${OBJECT_TYPE}(String catalogName, String schemaName, String name) {
+            this.catalogName = catalogName;
+            this.schemaName = schemaName;
+            setName(name);
+        }
+        
+        @Override
+        public String getName() {
+            return name;
+        }
+        
+        @Override
+        public ${OBJECT_TYPE} setName(String name) {
+            this.name = name;
+            setAttribute("name", name);
+            return this;
+        }
+        
+        public String getCatalogName() {
+            return catalogName;
+        }
+        
+        public void setCatalogName(String catalogName) {
+            this.catalogName = catalogName;
+        }
+        
+        public String getSchemaName() {
+            return schemaName;
+        }
+        
+        public void setSchemaName(String schemaName) {
+            this.schemaName = schemaName;
+        }
+        
+        public String getComment() {
+            return comment;
+        }
+        
+        public void setComment(String comment) {
+            this.comment = comment;
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null || getClass() != obj.getClass()) return false;
+            
+            ${OBJECT_TYPE} that = (${OBJECT_TYPE}) obj;
+            return ObjectUtil.equals(this.name, that.name) &&
+                   ObjectUtil.equals(this.catalogName, that.catalogName) &&
+                   ObjectUtil.equals(this.schemaName, that.schemaName);
+        }
+        
+        @Override
+        public int hashCode() {
+            return ObjectUtil.hashCode(name, catalogName, schemaName);
+        }
+        
+        @Override
+        public String toString() {
+            return getName();
+        }
+    }
+    
+  SNAPSHOT_GENERATOR_TEMPLATE: |
+    package ${PACKAGE_BASE}.snapshot;
+    
+    import liquibase.database.Database;
+    import liquibase.database.core.SnowflakeDatabase;
+    import liquibase.exception.DatabaseException;
+    import liquibase.snapshot.DatabaseSnapshot;
+    import liquibase.snapshot.InvalidExampleException;
+    import liquibase.snapshot.SnapshotGenerator;
+    import liquibase.structure.DatabaseObject;
+    import liquibase.executor.ExecutorService;
+    import liquibase.statement.core.RawParameterizedSql;
+    import ${PACKAGE_BASE}.structure.${OBJECT_TYPE};
+    
+    import java.util.*;
+    
+    public class ${OBJECT_TYPE}SnapshotGeneratorSnowflake extends SnapshotGenerator {
+        
+        @Override
+        public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
+            if (${OBJECT_TYPE}.class.isAssignableFrom(objectType) && database instanceof SnowflakeDatabase) {
+                return PRIORITY_DATABASE;
+            }
+            return PRIORITY_NONE;
+        }
+        
+        @Override
+        protected Class<? extends DatabaseObject>[] getOtherObjectTypes() {
+            return new Class[]{${OBJECT_TYPE}.class};
+        }
+        
+        @Override
+        protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) 
+                throws DatabaseException, InvalidExampleException {
+            return snapshot${OBJECT_TYPE}((${OBJECT_TYPE}) example, snapshot);
+        }
+        
+        protected ${OBJECT_TYPE} snapshot${OBJECT_TYPE}(${OBJECT_TYPE} example, DatabaseSnapshot snapshot) 
+                throws DatabaseException {
+            Database database = snapshot.getDatabase();
+            
+            String sql = "SELECT " +
+                        "    ${OBJECT_TYPE_LOWER}_name as name, " +
+                        "    ${OBJECT_TYPE_LOWER}_catalog as catalog_name, " +
+                        "    ${OBJECT_TYPE_LOWER}_schema as schema_name, " +
+                        "    comment " +
+                        "FROM INFORMATION_SCHEMA.${OBJECT_TYPE}S " +
+                        "WHERE ${OBJECT_TYPE_LOWER}_catalog = ? " +
+                        "AND ${OBJECT_TYPE_LOWER}_schema = ?";
+                        
+            List<Object> params = Arrays.asList(
+                database.getDefaultCatalogName(),
+                database.getDefaultSchemaName()
+            );
+            
+            if (example.getName() != null) {
+                sql += " AND ${OBJECT_TYPE_LOWER}_name = ?";
+                params.add(example.getName());
+            }
+            
+            List<Map<String, ?>> results = ExecutorService.getInstance()
+                .getExecutor(database).queryForList(new RawParameterizedSql(sql, params.toArray()));
+                
+            Set<${OBJECT_TYPE}> objects = new HashSet<>();
+            for (Map<String, ?> row : results) {
+                ${OBJECT_TYPE} obj = new ${OBJECT_TYPE}();
+                obj.setName((String) row.get("NAME"));
+                obj.setCatalogName((String) row.get("CATALOG_NAME"));
+                obj.setSchemaName((String) row.get("SCHEMA_NAME"));
+                obj.setComment(normalizeString((String) row.get("COMMENT")));
+                objects.add(obj);
+            }
+            
+            if (example.getName() != null) {
+                return objects.stream().findFirst().orElse(null);
+            }
+            
+            return null;
+        }
+        
+        private String normalizeString(String value) {
+            if (value == null || "NULL".equalsIgnoreCase(value) || value.trim().isEmpty()) {
+                return null;
+            }
+            return value.trim();
+        }
+    }
+    
+  COMPARATOR_TEMPLATE: |
+    package ${PACKAGE_BASE}.diff;
+    
+    import liquibase.database.Database;
+    import liquibase.database.core.SnowflakeDatabase;
+    import liquibase.diff.ObjectDifferences;
+    import liquibase.diff.compare.DatabaseObjectComparator;
+    import liquibase.diff.compare.CompareControl;
+    import liquibase.snapshot.DatabaseSnapshot;
+    import liquibase.structure.DatabaseObject;
+    import ${PACKAGE_BASE}.structure.${OBJECT_TYPE};
+    
+    import java.util.Objects;
+    
+    public class ${OBJECT_TYPE}ComparatorSnowflake extends DatabaseObjectComparator {
+        
+        @Override
+        public boolean supports(Class<? extends DatabaseObject> type, Database database) {
+            return ${OBJECT_TYPE}.class.isAssignableFrom(type) && 
+                   database instanceof SnowflakeDatabase;
+        }
+        
+        @Override
+        public ObjectDifferences compare(DatabaseObject referenceObject, 
+                                       DatabaseObject comparisonObject, 
+                                       DatabaseSnapshot referenceSnapshot,
+                                       DatabaseSnapshot comparisonSnapshot, 
+                                       CompareControl compareControl) {
+            return compare${OBJECT_TYPE}((${OBJECT_TYPE}) referenceObject, 
+                                        (${OBJECT_TYPE}) comparisonObject, 
+                                        compareControl);
+        }
+        
+        protected ObjectDifferences compare${OBJECT_TYPE}(${OBJECT_TYPE} reference, 
+                                                         ${OBJECT_TYPE} comparison, 
+                                                         CompareControl compareControl) {
+            ObjectDifferences differences = new ObjectDifferences(compareControl);
+            
+            // Compare configuration properties only (exclude state properties)
+            compareStringProperty(differences, "comment", 
+                                reference.getComment(), comparison.getComment());
+            
+            // Add other property comparisons here
+            
+            return differences;
+        }
+        
+        private void compareStringProperty(ObjectDifferences differences, String propertyName, 
+                                         String reference, String comparison) {
+            reference = normalizeString(reference);
+            comparison = normalizeString(comparison);
+            
+            if (!Objects.equals(reference, comparison)) {
+                differences.addDifference(propertyName, reference, comparison);
+            }
+        }
+        
+        private String normalizeString(String value) {
+            if (value == null || "NULL".equalsIgnoreCase(value) || value.trim().isEmpty()) {
+                return null;
+            }
+            return value.trim();
+        }
+    }
+    
+  INTEGRATION_TEST_TEMPLATE: |
+    package ${PACKAGE_BASE}.integration;
+    
+    import liquibase.database.Database;
+    import liquibase.database.core.SnowflakeDatabase;
+    import liquibase.snapshot.DatabaseSnapshot;
+    import liquibase.snapshot.SnapshotGeneratorFactory;
+    import liquibase.diff.DiffGeneratorFactory;
+    import liquibase.diff.DiffResult;
+    import liquibase.diff.compare.CompareControl;
+    import ${PACKAGE_BASE}.structure.${OBJECT_TYPE};
+    import org.junit.jupiter.api.Test;
+    import org.junit.jupiter.api.BeforeEach;
+    import static org.junit.jupiter.api.Assertions.*;
+    
+    public class ${OBJECT_TYPE}SnapshotDiffIntegrationTest {
+        
+        private Database database;
+        
+        @BeforeEach
+        void setUp() {
+            database = new SnowflakeDatabase();
+            // Configure database connection
+        }
+        
+        @Test
+        void testSnapshotGeneration() throws Exception {
+            // Create test object in database
+            // ...
+            
+            DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance()
+                .createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
+                
+            // Verify object appears in snapshot
+            Set<${OBJECT_TYPE}> objects = snapshot.get(${OBJECT_TYPE}.class);
+            assertNotNull(objects);
+            
+            // Clean up test object
+            // ...
+        }
+        
+        @Test
+        void testDiffComparison() throws Exception {
+            // Create reference and comparison snapshots
+            DatabaseSnapshot reference = createReferenceSnapshot();
+            DatabaseSnapshot comparison = createComparisonSnapshot();
+            
+            DiffResult diff = DiffGeneratorFactory.getInstance()
+                .compare(reference, comparison, new CompareControl());
+                
+            // Verify diff results
+            assertNotNull(diff);
+            
+            // Clean up test objects
+            // ...
+        }
+        
+        private DatabaseSnapshot createReferenceSnapshot() throws Exception {
+            // Implementation
+            return null;
+        }
+        
+        private DatabaseSnapshot createComparisonSnapshot() throws Exception {
+            // Implementation  
+            return null;
+        }
+    }
+    
+  SNAPSHOT_SERVICE_REGISTRATION: |
+    ${PACKAGE_BASE}.snapshot.${OBJECT_TYPE}SnapshotGeneratorSnowflake
+    
+  COMPARATOR_SERVICE_REGISTRATION: |
+    ${PACKAGE_BASE}.diff.${OBJECT_TYPE}ComparatorSnowflake
+
+ERROR_HANDLING:
+  GLOBAL_FAILURE_ACTION: "STOP"
+  
+  PHASE_FAILURE_HANDLERS:
+    PHASE_1_REQUIREMENTS_RESEARCH:
+      ACTION: "STOP"
+      MESSAGE: "Requirements research must be complete"
+      
+    PHASE_2_OBJECT_MODEL:
+      ACTION: "STOP"
+      MESSAGE: "Object model must compile successfully"
+      
+    PHASE_3_SNAPSHOT_IMPLEMENTATION:
+      ACTION: "STOP"
+      MESSAGE: "Snapshot implementation must pass unit tests"
+      
+    PHASE_4_DIFF_IMPLEMENTATION:
+      ACTION: "STOP"
+      MESSAGE: "Diff implementation must pass unit tests"
+      
+    PHASE_5_INTEGRATION_TESTING:
+      ACTION: "STOP"
+      MESSAGE: "Integration tests must pass for complete implementation"
+      
+  CLEANUP_ON_FAILURE:
+    - COMMAND:
+        EXECUTE: "git checkout -- src/"
+        CONTINUE_ON_ERROR: true
+    - COMMAND:
+        EXECUTE: "mvn clean"
+        CONTINUE_ON_ERROR: true

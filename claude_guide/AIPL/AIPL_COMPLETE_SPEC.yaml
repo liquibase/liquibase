@@ -1,0 +1,1330 @@
+AIPL_VERSION: "1.0"
+DOCUMENT_TYPE: AI_COMPLETE_EXECUTION_SPECIFICATION
+VALIDATION_MODE: STRICT
+
+EXECUTION_PROTOCOL:
+  DOCUMENT_STRUCTURE:
+    AIPL_VERSION: "Required version identifier"
+    PROGRAM_NAME: "Kebab-case identifier"
+    DESCRIPTION: "Single line purpose"
+    VARIABLES: "Key-value pairs for substitution"
+    PHASES: "Sequential execution blocks"
+    TEMPLATES: "Code generation patterns"
+    ERROR_HANDLING: "Failure response patterns"
+
+VARIABLE_SYNTAX:
+  SUBSTITUTION_PATTERN: "${VARIABLE_NAME}"
+  NESTED_SUBSTITUTION: "${BASE_PATH}/${SUB_PATH}"
+  PATH_CONVERSION: "${PACKAGE_PATH/\./\/}"
+  COMPUTED_VALUES: "${OBJECT_TYPE}Generator"
+
+STEP_TYPES:
+  COMMAND:
+    TEMPLATE: |
+      COMMAND:
+        NAME: "identifier"
+        EXECUTE: "shell command"
+        WORKING_DIR: "${PATH}"
+        TIMEOUT: 120
+        EXPECTED_EXIT_CODE: 0
+        
+  VALIDATE:
+    TEMPLATE: |
+      VALIDATE:
+        NAME: "check-identifier"
+        TYPE: "VALIDATION_TYPE"
+        TARGET: "${FILE_PATH}"
+        FAILURE_ACTION: "STOP"
+        ERROR_MESSAGE: "Failure description"
+        
+  CREATE_FILE:
+    TEMPLATE: |
+      CREATE_FILE:
+        NAME: "file-operation"
+        TEMPLATE: "TEMPLATE_NAME"
+        OUTPUT: "${OUTPUT_PATH}"
+        MODE: "WRITE"
+        VARIABLES:
+          KEY: "${VALUE}"
+          
+  CONDITIONAL:
+    TEMPLATE: |
+      CONDITIONAL:
+        NAME: "decision-point"
+        CONDITION:
+          TYPE: "CONDITION_TYPE"
+          TARGET: "${CHECK_TARGET}"
+        THEN:
+          - ACTION_IF_TRUE
+        ELSE:
+          - ACTION_IF_FALSE
+          
+  LOOP:
+    TEMPLATE: |
+      LOOP:
+        NAME: "iteration-name"
+        ITERATE_OVER:
+          TYPE: "COMMAND_OUTPUT"
+          COMMAND: "find . -name '${PATTERN}'"
+          SPLIT_ON: "\n"
+        VARIABLE: "loop_variable"
+        STEPS:
+          - LOOP_ACTION
+          
+  CAPTURE:
+    TEMPLATE: |
+      CAPTURE:
+        NAME: "store-result"
+        COMMAND: "command to execute"
+        STORE_AS: "VARIABLE_NAME"
+        DEFAULT_VALUE: ""
+        
+  PARALLEL:
+    TEMPLATE: |
+      PARALLEL:
+        NAME: "concurrent-tasks"
+        WAIT_FOR_ALL: true
+        TIMEOUT: 300
+        TASKS:
+          - TASK_1
+          - TASK_2
+          
+  RETRY:
+    TEMPLATE: |
+      RETRY:
+        NAME: "fault-tolerant-step"
+        MAX_ATTEMPTS: 3
+        DELAY: 5
+        STEP:
+          COMMAND: {}
+        ON_FINAL_FAILURE: "CONTINUE"
+        
+  DIAGNOSTIC:
+    TEMPLATE: |
+      DIAGNOSTIC:
+        NAME: "troubleshoot-issue"
+        SYMPTOMS:
+          - "${SYMPTOM_1}"
+          - "${SYMPTOM_2}"
+        DIAGNOSTIC_COMMANDS:
+          - COMMAND:
+              NAME: "check-condition-1"
+              EXECUTE: "${DIAGNOSTIC_COMMAND_1}"
+          - COMMAND:
+              NAME: "check-condition-2"
+              EXECUTE: "${DIAGNOSTIC_COMMAND_2}"
+        ROOT_CAUSE_ANALYSIS:
+          CONDITIONAL:
+            NAME: "identify-root-cause"
+            CONDITION:
+              TYPE: "CONTAINS_TEXT"
+              TARGET: "${LOG_FILE}"
+              PATTERN: "${ERROR_PATTERN}"
+            THEN:
+              - CAPTURE:
+                  COMMAND: "echo '${ROOT_CAUSE_1}'"
+                  STORE_AS: "ROOT_CAUSE"
+            ELSE:
+              - CAPTURE:
+                  COMMAND: "echo '${ROOT_CAUSE_2}'"
+                  STORE_AS: "ROOT_CAUSE"
+        RESOLUTION_STEPS:
+          - COMMAND:
+              NAME: "apply-fix"
+              EXECUTE: "${RESOLUTION_COMMAND}"
+        VERIFICATION:
+          VALIDATE:
+            NAME: "verify-fix"
+            TYPE: "${VERIFICATION_TYPE}"
+            TARGET: "${VERIFICATION_TARGET}"
+            
+  PRIORITY_MANAGEMENT:
+    TEMPLATE: |
+      PRIORITY_MANAGEMENT:
+        NAME: "manage-generator-priority"
+        GENERATOR_TYPE: "${GENERATOR_CLASS}"
+        EXPECTED_PRIORITY: "${PRIORITY_LEVEL}"
+        DIAGNOSTIC_STEPS:
+          - CAPTURE:
+              NAME: "check-priority"
+              COMMAND: "grep -n 'getPriority()' ${GENERATOR_FILE}"
+              STORE_AS: "CURRENT_PRIORITY"
+          - CAPTURE:
+              NAME: "check-supports"
+              COMMAND: "grep -A 5 'supports(' ${GENERATOR_FILE}"
+              STORE_AS: "SUPPORTS_LOGIC"
+          - CAPTURE:
+              NAME: "check-registration"
+              COMMAND: "grep '${GENERATOR_CLASS}' src/main/resources/META-INF/services/liquibase.sqlgenerator.SqlGenerator"
+              STORE_AS: "SERVICE_REGISTRATION"
+        VALIDATION:
+          VALIDATE:
+            NAME: "verify-priority-correct"
+            TYPE: "CONTAINS_TEXT"
+            TARGET: "${GENERATOR_FILE}"
+            PATTERN: "return PRIORITY_${EXPECTED_PRIORITY}"
+            FAILURE_ACTION: "STOP"
+            ERROR_MESSAGE: "Generator priority mismatch: expected PRIORITY_${EXPECTED_PRIORITY}"
+            
+  SERVICE_DISCOVERY:
+    TEMPLATE: |
+      SERVICE_DISCOVERY:
+        NAME: "validate-service-registration"
+        SERVICE_INVENTORY:
+          NAMESPACE_DETAILS:
+            FILE: "src/main/resources/META-INF/services/liquibase.parser.NamespaceDetails"
+            PURPOSE: "Maps Snowflake XML namespace to XSD schema file"
+            REQUIRED_CONTENT: "${PACKAGE_BASE}.parser.SnowflakeNamespaceDetails"
+            CRITICAL: "Required for XSD resolution - blocks XML validation if missing"
+          CHANGE_TYPES:
+            FILE: "src/main/resources/META-INF/services/liquibase.change.Change"
+            PURPOSE: "Registers Snowflake-specific change types for XML changelog usage"
+            REQUIRED_CONTENT: "${PACKAGE_BASE}.change.Create${OBJECT_TYPE}Change"
+          DATABASE_INTEGRATION:
+            FILE: "src/main/resources/META-INF/services/liquibase.database.Database"
+            PURPOSE: "Registers SnowflakeDatabase class for connection recognition"
+            REQUIRED_CONTENT: "${PACKAGE_BASE}.database.SnowflakeDatabase"
+          DATA_TYPE_MAPPINGS:
+            FILE: "src/main/resources/META-INF/services/liquibase.datatype.LiquibaseDataType"
+            PURPOSE: "Registers Snowflake-specific data type mappings"
+            REQUIRED_CONTENT: "${PACKAGE_BASE}.datatype.${TYPE}TypeSnowflake"
+          SQL_GENERATORS:
+            FILE: "src/main/resources/META-INF/services/liquibase.sqlgenerator.SqlGenerator"
+            PURPOSE: "Registers SQL generators for Snowflake-specific SQL syntax"
+            REQUIRED_CONTENT: "${PACKAGE_BASE}.sqlgenerator.${OBJECT_TYPE}Generator"
+          DATABASE_OBJECTS:
+            FILE: "src/main/resources/META-INF/services/liquibase.structure.DatabaseObject"
+            PURPOSE: "CRITICAL - Registers custom objects for automatic snapshot inclusion"
+            REQUIRED_CONTENT: "${PACKAGE_BASE}.structure.${OBJECT_TYPE}"
+            WARNING: "Without this registration, custom objects will NOT appear in snapshots"
+        VALIDATION_STEPS:
+          - VALIDATE:
+              NAME: "check-all-service-files-exist"
+              TYPE: "COMMAND_SUCCESS"
+              COMMAND: "ls src/main/resources/META-INF/services/liquibase.*.* | wc -l | awk '$1>=6'"
+              FAILURE_ACTION: "STOP"
+              ERROR_MESSAGE: "Missing service registration files - require all 6 service types"
+          - LOOP:
+              NAME: "validate-each-service"
+              ITERATE_OVER:
+                TYPE: "LIST"
+                VALUES: ["NamespaceDetails", "Change", "Database", "LiquibaseDataType", "SqlGenerator", "DatabaseObject"]
+              VARIABLE: "service_type"
+              STEPS:
+                - VALIDATE:
+                    NAME: "verify-${service_type}-registration"
+                    TYPE: "FILE_EXISTS"
+                    TARGET: "src/main/resources/META-INF/services/liquibase.${service_type}"
+                    FAILURE_ACTION: "STOP"
+                    ERROR_MESSAGE: "Missing service registration: liquibase.${service_type}"
+                    
+  ARCHITECTURAL_COMPLIANCE:
+    TEMPLATE: |
+      ARCHITECTURAL_COMPLIANCE:
+        NAME: "enforce-architecture-patterns"
+        VIOLATION_PATTERNS:
+          CHANGETYPE_SNOWFLAKE_CLASSES:
+            PATTERN: "*ChangeSnowflake.java"
+            SEARCH_PATH: "*/change/core/*"
+            VIOLATION_TYPE: "FORBIDDEN_CLASS_NAMING"
+            ERROR_MESSAGE: "ChangeSnowflake classes forbidden for existing changetypes"
+          DIRECT_CORE_MODIFICATION:
+            PATTERN: "Modified liquibase-core classes"
+            SEARCH_PATH: "*/liquibase-core/*"
+            VIOLATION_TYPE: "CORE_MODIFICATION"
+            ERROR_MESSAGE: "Direct modification of Liquibase core classes forbidden"
+          NEW_XSD_ELEMENTS_FOR_EXISTING:
+            PATTERN: "<xsd:element.*name=\"${EXISTING_CHANGETYPE}\""
+            SEARCH_PATH: "*/liquibase-snowflake-latest.xsd"
+            VIOLATION_TYPE: "FORBIDDEN_XSD_ELEMENT"
+            ERROR_MESSAGE: "New XSD elements forbidden for existing changetypes - use namespace attributes"
+        COMPLIANCE_CHECKS:
+          - VALIDATE:
+              NAME: "check-no-changetype-snowflake-violations"
+              TYPE: "COMMAND_SUCCESS"
+              COMMAND: "find . -name '*ChangeSnowflake.java' -path '*/change/core/*' | wc -l | grep '^0$'"
+              FAILURE_ACTION: "STOP"
+              ERROR_MESSAGE: "Architectural violation: ChangeSnowflake classes found in change/core"
+          - VALIDATE:
+              NAME: "verify-namespace-pattern-usage"
+              TYPE: "CONTAINS_TEXT"
+              TARGET: "${GENERATOR_FILE}"
+              PATTERN: "SnowflakeNamespaceAttributeStorage"
+              FAILURE_ACTION: "STOP"
+              ERROR_MESSAGE: "Must use namespace attribute storage pattern"
+          - VALIDATE:
+              NAME: "verify-generator-extends-pattern"
+              TYPE: "CONTAINS_TEXT"
+              TARGET: "${GENERATOR_FILE}"
+              PATTERN: "extends.*Generator"
+              FAILURE_ACTION: "STOP"
+              ERROR_MESSAGE: "Generator must extend standard generator class"
+              
+  TROUBLESHOOTING_WORKFLOW:
+    TEMPLATE: |
+      TROUBLESHOOTING_WORKFLOW:
+        NAME: "structured-troubleshooting"
+        ISSUE_CATEGORY: "${ISSUE_TYPE}"
+        TROUBLESHOOTING_STEPS:
+          SYMPTOM_COLLECTION:
+            - CAPTURE:
+                NAME: "collect-error-logs"
+                COMMAND: "grep -i error ${LOG_FILE} | tail -20"
+                STORE_AS: "ERROR_LOGS"
+            - CAPTURE:
+                NAME: "collect-system-state"
+                COMMAND: "${SYSTEM_STATE_COMMAND}"
+                STORE_AS: "SYSTEM_STATE"
+          DIAGNOSTIC_MATRIX:
+            CONDITIONAL:
+              NAME: "categorize-issue"
+              CONDITION:
+                TYPE: "CONTAINS_TEXT"
+                TARGET: "${ERROR_LOGS}"
+                PATTERN: "${SPECIFIC_ERROR_PATTERN}"
+              THEN:
+                - GOTO: "SPECIFIC_TROUBLESHOOTING_${ISSUE_CATEGORY}"
+              ELSE:
+                - GOTO: "GENERIC_TROUBLESHOOTING_${ISSUE_CATEGORY}"
+          RESOLUTION_VERIFICATION:
+            VALIDATE:
+              NAME: "verify-issue-resolved"
+              TYPE: "${VERIFICATION_TYPE}"
+              TARGET: "${VERIFICATION_TARGET}"
+              FAILURE_ACTION: "CONTINUE"
+              ERROR_MESSAGE: "Issue not fully resolved - additional investigation required"
+
+VALIDATION_TYPES:
+  FILE_EXISTS:
+    TEMPLATE: |
+      TYPE: "FILE_EXISTS"
+      TARGET: "${FILE_PATH}"
+      
+  DIRECTORY_EXISTS:
+    TEMPLATE: |
+      TYPE: "DIRECTORY_EXISTS"
+      TARGET: "${DIR_PATH}"
+      
+  COMMAND_SUCCESS:
+    TEMPLATE: |
+      TYPE: "COMMAND_SUCCESS"
+      COMMAND: "${VALIDATION_COMMAND}"
+      
+  CONTAINS_TEXT:
+    TEMPLATE: |
+      TYPE: "CONTAINS_TEXT"
+      TARGET: "${FILE_PATH}"
+      PATTERN: "${SEARCH_PATTERN}"
+      
+  NOT_CONTAINS_TEXT:
+    TEMPLATE: |
+      TYPE: "NOT_CONTAINS_TEXT"
+      TARGET: "${FILE_PATH}"
+      PATTERN: "${FORBIDDEN_PATTERN}"
+      
+  FILE_COUNT:
+    TEMPLATE: |
+      TYPE: "FILE_COUNT"
+      PATTERN: "${GLOB_PATTERN}"
+      EXPECTED_COUNT: 0
+      OPERATOR: "EQUALS"
+      
+  GENERATOR_PRIORITY_CONFLICT:
+    TEMPLATE: |
+      TYPE: "GENERATOR_PRIORITY_CONFLICT"
+      GENERATOR_CLASS: "${GENERATOR_CLASS}"
+      EXPECTED_PRIORITY: "${PRIORITY_LEVEL}"
+      DATABASE_TYPE: "${DATABASE_TYPE}"
+      
+  XSD_RESOLUTION_SUCCESS:
+    TEMPLATE: |
+      TYPE: "XSD_RESOLUTION_SUCCESS"
+      NAMESPACE_URL: "${NAMESPACE_URL}"
+      XSD_PATH: "${XSD_PATH}"
+      VALIDATION_COMMAND: "mvn test -Dtest=XsdResolutionTest"
+      
+  SERVICE_REGISTRATION_COMPLETE:
+    TEMPLATE: |
+      TYPE: "SERVICE_REGISTRATION_COMPLETE"
+      SERVICE_COUNT: 6
+      REQUIRED_SERVICES:
+        - "liquibase.parser.NamespaceDetails"
+        - "liquibase.change.Change"
+        - "liquibase.database.Database"
+        - "liquibase.datatype.LiquibaseDataType"
+        - "liquibase.sqlgenerator.SqlGenerator"
+        - "liquibase.structure.DatabaseObject"
+        
+  SNOWFLAKE_SQL_FORMAT:
+    TEMPLATE: |
+      TYPE: "SNOWFLAKE_SQL_FORMAT"
+      SQL_CONTENT: "${GENERATED_SQL}"
+      FORMAT_RULES:
+        BOOLEAN_VALUES: "Without quotes (true, false)"
+        ENUM_VALUES: "Without quotes (XSMALL, MEDIUM)"
+        STRING_LITERALS: "With single quotes ('string')"
+        NULL_VALUES: "Uppercase (NULL)"
+        
+  TEST_HARNESS_INTEGRATION:
+    TEMPLATE: |
+      TYPE: "TEST_HARNESS_INTEGRATION"
+      DEPENDENCY_CHECK: "mvn dependency:tree | grep liquibase-snowflake"
+      CLASSPATH_VALIDATION: "mvn test -X | grep 'liquibase-snowflake.*jar'"
+      CONNECTION_TEST: "mvn test -Dtest=DatabaseConnectionTest -DdbName=snowflake"
+
+CONTROL_FLOW:
+  GOTO:
+    TEMPLATE: |
+      GOTO: "PHASE_NAME"
+      
+  SKIP_PHASE:
+    TEMPLATE: |
+      SKIP_PHASE: "PHASE_NAME"
+      
+  EXIT_SUCCESS:
+    TEMPLATE: |
+      EXIT_SUCCESS: "Success message"
+      
+  EXIT_FAILURE:
+    TEMPLATE: |
+      EXIT_FAILURE: "Failure message"
+
+TEMPLATE_SYSTEM:
+  TEMPLATE_DEFINITION:
+    TEMPLATE: |
+      TEMPLATE_NAME: |
+        ${VARIABLE_SUBSTITUTION}
+        Fixed text content
+        More ${VARIABLES}
+        
+  TEMPLATE_USAGE:
+    TEMPLATE: |
+      CREATE_FILE:
+        TEMPLATE: "TEMPLATE_NAME"
+        VARIABLES:
+          VARIABLE_SUBSTITUTION: "value"
+          VARIABLES: "other_value"
+
+ERROR_HANDLING_PATTERNS:
+  GLOBAL_FAILURE:
+    TEMPLATE: |
+      ERROR_HANDLING:
+        GLOBAL_FAILURE_ACTION: "STOP"
+        
+  PHASE_SPECIFIC:
+    TEMPLATE: |
+      ERROR_HANDLING:
+        PHASE_FAILURE_HANDLERS:
+          PHASE_NAME:
+            ACTION: "RETRY"
+            MAX_ATTEMPTS: 2
+            MESSAGE: "Phase failed"
+            
+  CLEANUP_PATTERN:
+    TEMPLATE: |
+      ERROR_HANDLING:
+        CLEANUP_ON_FAILURE:
+          - COMMAND:
+              EXECUTE: "git checkout -- ."
+          - COMMAND:
+              EXECUTE: "mvn clean"
+
+BUILT_IN_FUNCTIONS:
+  STRING_OPERATIONS:
+    upper: "upper(${TEXT})"
+    lower: "lower(${TEXT})"
+    replace: "replace(${TEXT}, ${OLD}, ${NEW})"
+    
+  FILE_OPERATIONS:
+    file_exists: "file_exists('${PATH}')"
+    read_file: "read_file('${PATH}')"
+    
+  PATH_OPERATIONS:
+    join_path: "join_path(${PART1}, ${PART2})"
+    dirname: "dirname('${PATH}')"
+    
+  SYSTEM_OPERATIONS:
+    env: "env('${VARIABLE}')"
+    timestamp: "timestamp()"
+
+COMPLETE_PROGRAM_TEMPLATE:
+  AIPL_VERSION: "1.0"
+  PROGRAM_NAME: "${PROGRAM_IDENTIFIER}"
+  DESCRIPTION: "${SINGLE_LINE_PURPOSE}"
+
+  VARIABLES:
+    OBJECT_TYPE: "${IMPLEMENTATION_OBJECT}"
+    PACKAGE_BASE: "${BASE_PACKAGE}"
+    OUTPUT_DIR: "${TARGET_DIRECTORY}"
+
+  PHASES:
+    PHASE_0_VALIDATION:
+      DESCRIPTION: "Validate prerequisites"
+      STEPS:
+        - VALIDATE:
+            NAME: "check-environment"
+            TYPE: "DIRECTORY_EXISTS"
+            TARGET: "${OUTPUT_DIR}"
+            
+    PHASE_1_IMPLEMENTATION:
+      DESCRIPTION: "Execute implementation"
+      DEPENDS_ON: ["PHASE_0_VALIDATION"]
+      STEPS:
+        - CREATE_FILE:
+            NAME: "generate-implementation"
+            TEMPLATE: "IMPLEMENTATION_TEMPLATE"
+            OUTPUT: "${OUTPUT_DIR}/${OBJECT_TYPE}.java"
+            
+        - COMMAND:
+            NAME: "compile-implementation"
+            EXECUTE: "mvn compile"
+            
+        - VALIDATE:
+            NAME: "verify-compilation"
+            TYPE: "COMMAND_SUCCESS"
+            COMMAND: "mvn compile"
+
+  TEMPLATES:
+    IMPLEMENTATION_TEMPLATE: |
+      package ${PACKAGE_BASE};
+      
+      public class ${OBJECT_TYPE} {
+          // Implementation
+      }
+
+  ERROR_HANDLING:
+    GLOBAL_FAILURE_ACTION: "STOP"
+    CLEANUP_ON_FAILURE:
+      - COMMAND:
+          EXECUTE: "mvn clean"
+
+FILE_GENERATION_PATTERN:
+  AIPL_VERSION: "1.0"
+  PROGRAM_NAME: "file-generation-${OBJECT_TYPE}"
+  DESCRIPTION: "Generate ${OBJECT_TYPE} implementation files"
+
+  VARIABLES:
+    OBJECT_TYPE: "${TARGET_OBJECT}"
+    PACKAGE_BASE: "${BASE_PACKAGE}"
+    OUTPUT_DIR: "src/main/java"
+
+  PHASES:
+    PHASE_0_SETUP:
+      DESCRIPTION: "Validate environment"
+      STEPS:
+        - VALIDATE:
+            NAME: "check-output-dir"
+            TYPE: "DIRECTORY_EXISTS"
+            TARGET: "${OUTPUT_DIR}"
+            
+        - COMMAND:
+            NAME: "create-package-structure"
+            EXECUTE: "mkdir -p ${OUTPUT_DIR}/${PACKAGE_BASE/\./\/}"
+
+    PHASE_1_GENERATION:
+      DESCRIPTION: "Generate implementation files"
+      DEPENDS_ON: ["PHASE_0_SETUP"]
+      STEPS:
+        - CREATE_FILE:
+            NAME: "create-main-class"
+            TEMPLATE: "MAIN_CLASS_TEMPLATE"
+            OUTPUT: "${OUTPUT_DIR}/${PACKAGE_BASE/\./\/}/${OBJECT_TYPE}.java"
+            
+        - VALIDATE:
+            NAME: "verify-file-created"
+            TYPE: "FILE_EXISTS"
+            TARGET: "${OUTPUT_DIR}/${PACKAGE_BASE/\./\/}/${OBJECT_TYPE}.java"
+            
+        - COMMAND:
+            NAME: "compile-generated-code"
+            EXECUTE: "mvn compile"
+
+  TEMPLATES:
+    MAIN_CLASS_TEMPLATE: |
+      package ${PACKAGE_BASE};
+      
+      public class ${OBJECT_TYPE} {
+          private String name;
+          
+          public ${OBJECT_TYPE}() {}
+          
+          public String getName() { return name; }
+          public void setName(String name) { this.name = name; }
+      }
+
+  ERROR_HANDLING:
+    GLOBAL_FAILURE_ACTION: "STOP"
+    CLEANUP_ON_FAILURE:
+      - COMMAND:
+          EXECUTE: "rm -f ${OUTPUT_DIR}/${PACKAGE_BASE/\./\/}/${OBJECT_TYPE}.java"
+
+DATABASE_IMPLEMENTATION_PATTERN:
+  AIPL_VERSION: "1.0"
+  PROGRAM_NAME: "database-implementation-${OBJECT_TYPE}"
+  DESCRIPTION: "Complete database object implementation"
+
+  VARIABLES:
+    OBJECT_TYPE: "${DATABASE_OBJECT}"
+    PACKAGE_BASE: "com.liquibase.ext.snowflake"
+    IMPLEMENTATION_PATTERN: "UNKNOWN"
+
+  PHASES:
+    PHASE_0_DISCOVERY:
+      DESCRIPTION: "Determine implementation approach"
+      STEPS:
+        - CAPTURE:
+            NAME: "check-core-existence"
+            COMMAND: "find . -name '*${OBJECT_TYPE}*Change.java' -path '*/liquibase-core/*'"
+            STORE_AS: "CORE_EXISTS"
+            
+        - CONDITIONAL:
+            NAME: "set-pattern"
+            CONDITION:
+              TYPE: "NOT_EQUALS"
+              LEFT: "${CORE_EXISTS}"
+              RIGHT: ""
+            THEN:
+              - CAPTURE:
+                  COMMAND: "echo 'NAMESPACE_EXTENSION'"
+                  STORE_AS: "IMPLEMENTATION_PATTERN"
+            ELSE:
+              - CAPTURE:
+                  COMMAND: "echo 'NEW_CHANGETYPE'"
+                  STORE_AS: "IMPLEMENTATION_PATTERN"
+                  
+        - VALIDATE:
+            NAME: "check-no-violations"
+            TYPE: "COMMAND_SUCCESS"
+            COMMAND: "find . -name '*${OBJECT_TYPE}*ChangeSnowflake.java' -path '*/change/core/*' | wc -l | grep '^0$'"
+
+    PHASE_1_XSD:
+      DESCRIPTION: "Update XSD schema"
+      DEPENDS_ON: ["PHASE_0_DISCOVERY"]
+      STEPS:
+        - CONDITIONAL:
+            NAME: "handle-namespace-pattern"
+            CONDITION:
+              TYPE: "EQUALS"
+              LEFT: "${IMPLEMENTATION_PATTERN}"
+              RIGHT: "NAMESPACE_EXTENSION"
+            THEN:
+              - CREATE_FILE:
+                  NAME: "add-namespace-attributes"
+                  TEMPLATE: "XSD_NAMESPACE_TEMPLATE"
+                  OUTPUT: "src/main/resources/www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd"
+                  MODE: "APPEND"
+            ELSE:
+              - CREATE_FILE:
+                  NAME: "add-new-element"
+                  TEMPLATE: "XSD_ELEMENT_TEMPLATE"
+                  OUTPUT: "src/main/resources/www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd"
+                  MODE: "APPEND"
+
+    PHASE_2_IMPLEMENTATION:
+      DESCRIPTION: "Create implementation classes"
+      DEPENDS_ON: ["PHASE_1_XSD"]
+      STEPS:
+        - CONDITIONAL:
+            NAME: "create-change-class"
+            CONDITION:
+              TYPE: "EQUALS"
+              LEFT: "${IMPLEMENTATION_PATTERN}"
+              RIGHT: "NEW_CHANGETYPE"
+            THEN:
+              - CREATE_FILE:
+                  NAME: "create-change"
+                  TEMPLATE: "CHANGE_CLASS_TEMPLATE"
+                  OUTPUT: "src/main/java/${PACKAGE_BASE/\./\/}/change/Create${OBJECT_TYPE}Change.java"
+                  
+        - CREATE_FILE:
+            NAME: "create-generator"
+            TEMPLATE: "GENERATOR_TEMPLATE"
+            OUTPUT: "src/main/java/${PACKAGE_BASE/\./\/}/sqlgenerator/Create${OBJECT_TYPE}GeneratorSnowflake.java"
+            
+        - CREATE_FILE:
+            NAME: "register-generator"
+            TEMPLATE: "SERVICE_REGISTRATION_TEMPLATE"
+            OUTPUT: "src/main/resources/META-INF/services/liquibase.sqlgenerator.SqlGenerator"
+            MODE: "APPEND"
+
+    PHASE_3_TESTING:
+      DESCRIPTION: "Create and run tests"
+      DEPENDS_ON: ["PHASE_2_IMPLEMENTATION"]
+      STEPS:
+        - CREATE_FILE:
+            NAME: "create-unit-test"
+            TEMPLATE: "UNIT_TEST_TEMPLATE"
+            OUTPUT: "src/test/java/${PACKAGE_BASE/\./\/}/sqlgenerator/Create${OBJECT_TYPE}GeneratorSnowflakeTest.java"
+            
+        - COMMAND:
+            NAME: "compile-tests"
+            EXECUTE: "mvn test-compile"
+            
+        - RETRY:
+            NAME: "run-unit-tests"
+            MAX_ATTEMPTS: 3
+            STEP:
+              COMMAND:
+                EXECUTE: "mvn test -Dtest=*${OBJECT_TYPE}*Test"
+
+  TEMPLATES:
+    XSD_NAMESPACE_TEMPLATE: |
+      <!-- ${OBJECT_TYPE} namespace attributes -->
+      <xsd:attribute name="${lower(OBJECT_TYPE)}Comment" type="xsd:string">
+          <xsd:annotation>
+              <xsd:documentation>Comment for ${OBJECT_TYPE}</xsd:documentation>
+          </xsd:annotation>
+      </xsd:attribute>
+      
+    GENERATOR_TEMPLATE: |
+      package ${PACKAGE_BASE}.sqlgenerator;
+      
+      import liquibase.database.Database;
+      import liquibase.database.core.SnowflakeDatabase;
+      import liquibase.sql.Sql;
+      import liquibase.sql.UnparsedSql;
+      import liquibase.sqlgenerator.SqlGeneratorChain;
+      import liquibase.sqlgenerator.core.AbstractSqlGenerator;
+      import liquibase.statement.core.Create${OBJECT_TYPE}Statement;
+      
+      public class Create${OBJECT_TYPE}GeneratorSnowflake extends AbstractSqlGenerator<Create${OBJECT_TYPE}Statement> {
+          
+          @Override
+          public boolean supports(Create${OBJECT_TYPE}Statement statement, Database database) {
+              return database instanceof SnowflakeDatabase;
+          }
+          
+          @Override
+          public Sql[] generateSql(Create${OBJECT_TYPE}Statement statement, Database database, SqlGeneratorChain chain) {
+              StringBuilder sql = new StringBuilder();
+              sql.append("CREATE ${OBJECT_TYPE} ");
+              sql.append(database.escapeObjectName(statement.get${OBJECT_TYPE}Name(), null));
+              
+              return new Sql[]{new UnparsedSql(sql.toString())};
+          }
+      }
+      
+    SERVICE_REGISTRATION_TEMPLATE: |
+      ${PACKAGE_BASE}.sqlgenerator.Create${OBJECT_TYPE}GeneratorSnowflake
+
+  ERROR_HANDLING:
+    GLOBAL_FAILURE_ACTION: "STOP"
+    CLEANUP_ON_FAILURE:
+      - COMMAND:
+          EXECUTE: "git checkout -- src/"
+
+TESTING_WORKFLOW_PATTERN:
+  AIPL_VERSION: "1.0"
+  PROGRAM_NAME: "testing-workflow-${COMPONENT}"
+  DESCRIPTION: "Comprehensive testing with parallel execution"
+
+  VARIABLES:
+    COMPONENT: "${TEST_COMPONENT}"
+    TEST_DATABASE: "SNOWFLAKE"
+    TIMEOUT: 300
+
+  PHASES:
+    PHASE_0_SETUP:
+      DESCRIPTION: "Prepare test environment"
+      STEPS:
+        - VALIDATE:
+            NAME: "check-database-connection"
+            TYPE: "COMMAND_SUCCESS"
+            COMMAND: "mvn test -Dtest=DatabaseConnectionTest -DdbName=${TEST_DATABASE}"
+            
+        - COMMAND:
+            NAME: "clean-compile"
+            EXECUTE: "mvn clean test-compile"
+
+    PHASE_1_UNIT_TESTS:
+      DESCRIPTION: "Run unit tests in parallel"
+      DEPENDS_ON: ["PHASE_0_SETUP"]
+      STEPS:
+        - PARALLEL:
+            NAME: "parallel-unit-tests"
+            WAIT_FOR_ALL: true
+            TIMEOUT: ${TIMEOUT}
+            TASKS:
+              - RETRY:
+                  MAX_ATTEMPTS: 3
+                  STEP:
+                    COMMAND:
+                      EXECUTE: "mvn test -Dtest=*${COMPONENT}*GeneratorTest"
+              - RETRY:
+                  MAX_ATTEMPTS: 3
+                  STEP:
+                    COMMAND:
+                      EXECUTE: "mvn test -Dtest=*${COMPONENT}*ComparatorTest"
+
+    PHASE_2_INTEGRATION_TESTS:
+      DESCRIPTION: "Run integration tests sequentially"
+      DEPENDS_ON: ["PHASE_1_UNIT_TESTS"]
+      STEPS:
+        - LOOP:
+            NAME: "run-integration-tests"
+            ITERATE_OVER:
+              TYPE: "COMMAND_OUTPUT"
+              COMMAND: "find . -name '*${COMPONENT}*IntegrationTest.java' -exec basename {} .java \\;"
+              SPLIT_ON: "\n"
+            VARIABLE: "test_class"
+            STEPS:
+              - RETRY:
+                  NAME: "run-${test_class}"
+                  MAX_ATTEMPTS: 3
+                  DELAY: 10
+                  STEP:
+                    COMMAND:
+                      EXECUTE: "mvn test -Dtest=${test_class} -DdbName=${TEST_DATABASE}"
+                      TIMEOUT: ${TIMEOUT}
+
+    PHASE_3_VALIDATION:
+      DESCRIPTION: "Validate test results"
+      DEPENDS_ON: ["PHASE_2_INTEGRATION_TESTS"]
+      STEPS:
+        - VALIDATE:
+            NAME: "check-test-success"
+            TYPE: "CONTAINS_TEXT"
+            TARGET: "target/surefire-reports/TEST-*.xml"
+            PATTERN: 'failures="0"'
+
+  ERROR_HANDLING:
+    GLOBAL_FAILURE_ACTION: "CONTINUE"
+    PHASE_FAILURE_HANDLERS:
+      PHASE_1_UNIT_TESTS:
+        ACTION: "CONTINUE"
+        MESSAGE: "Unit tests failed but continuing"
+
+CONDITIONAL_IMPLEMENTATION_PATTERN:
+  DISCOVERY_STEP:
+    CAPTURE:
+      NAME: "check-existing-${OBJECT_TYPE}"
+      COMMAND: "find . -name '*${OBJECT_TYPE}*.java' -path '*/change/core/*'"
+      STORE_AS: "EXISTING_IMPLEMENTATION"
+      
+  DECISION_STEP:
+    CONDITIONAL:
+      NAME: "determine-strategy"
+      CONDITION:
+        TYPE: "NOT_EQUALS"
+        LEFT: "${EXISTING_IMPLEMENTATION}"
+        RIGHT: ""
+      THEN:
+        - CAPTURE:
+            COMMAND: "echo 'EXTEND_EXISTING'"
+            STORE_AS: "STRATEGY"
+      ELSE:
+        - CAPTURE:
+            COMMAND: "echo 'CREATE_NEW'"
+            STORE_AS: "STRATEGY"
+            
+  EXECUTION_STEP:
+    CONDITIONAL:
+      NAME: "execute-strategy"
+      CONDITION:
+        TYPE: "EQUALS"
+        LEFT: "${STRATEGY}"
+        RIGHT: "EXTEND_EXISTING"
+      THEN:
+        - GOTO: "PHASE_EXTEND_EXISTING"
+      ELSE:
+        - GOTO: "PHASE_CREATE_NEW"
+
+PARALLEL_EXECUTION_PATTERN:
+  PARALLEL_TASKS:
+    PARALLEL:
+      NAME: "concurrent-operations"
+      WAIT_FOR_ALL: true
+      TIMEOUT: 600
+      TASKS:
+        - COMMAND:
+            NAME: "task-1"
+            EXECUTE: "${COMMAND_1}"
+        - COMMAND:
+            NAME: "task-2"
+            EXECUTE: "${COMMAND_2}"
+        - VALIDATE:
+            NAME: "check-condition"
+            TYPE: "${VALIDATION_TYPE}"
+            TARGET: "${VALIDATION_TARGET}"
+            
+  RESULT_AGGREGATION:
+    COMMAND:
+      NAME: "aggregate-results"
+      EXECUTE: "${AGGREGATION_COMMAND}"
+      
+  VALIDATION_CHECK:
+    VALIDATE:
+      NAME: "verify-all-success"
+      TYPE: "CONTAINS_TEXT"
+      TARGET: "${RESULT_FILE}"
+      PATTERN: "${SUCCESS_PATTERN}"
+
+RETRY_PATTERN:
+  PRIMARY_ATTEMPT:
+    RETRY:
+      NAME: "primary-approach"
+      MAX_ATTEMPTS: 2
+      STEP:
+        COMMAND:
+          EXECUTE: "${PRIMARY_COMMAND}"
+      ON_FINAL_FAILURE:
+        - RETRY:
+            NAME: "secondary-approach"
+            MAX_ATTEMPTS: 2
+            STEP:
+              COMMAND:
+                EXECUTE: "${SECONDARY_COMMAND}"
+            ON_FINAL_FAILURE:
+              - COMMAND:
+                  NAME: "fallback-approach"
+                  EXECUTE: "${FALLBACK_COMMAND}"
+
+ERROR_RECOVERY_PATTERN:
+  ERROR_DETECTION:
+    VALIDATE:
+      NAME: "check-for-errors"
+      TYPE: "CONTAINS_TEXT"
+      TARGET: "${LOG_FILE}"
+      PATTERN: "${ERROR_PATTERN}"
+      ON_FAILURE:
+        CONDITIONAL:
+          CONDITION:
+            TYPE: "CONTAINS_TEXT"
+            TARGET: "${LOG_FILE}"
+            PATTERN: "${SPECIFIC_ERROR}"
+          THEN:
+            - COMMAND:
+                EXECUTE: "${SPECIFIC_RECOVERY_COMMAND}"
+          ELSE:
+            - COMMAND:
+                EXECUTE: "${GENERIC_RECOVERY_COMMAND}"
+
+ARCHITECTURAL_VALIDATION_PATTERN:
+  VIOLATION_CHECK:
+    VALIDATE:
+      NAME: "check-violations"
+      TYPE: "COMMAND_SUCCESS"
+      COMMAND: "find . -name '*${OBJECT_TYPE}*ChangeSnowflake.java' -path '*/change/core/*' | wc -l | grep '^0$'"
+      ERROR_MESSAGE: "Architectural violation: ChangeSnowflake pattern not allowed"
+      
+  COMPLIANCE_VALIDATION:
+    VALIDATE:
+      NAME: "verify-pattern-compliance"
+      TYPE: "CONTAINS_TEXT"
+      TARGET: "${IMPLEMENTATION_FILE}"
+      PATTERN: "extends.*Generator"
+      ERROR_MESSAGE: "Must extend standard generator class"
+      
+  SERVICE_REGISTRATION_CHECK:
+    VALIDATE:
+      NAME: "check-service-registration"
+      TYPE: "CONTAINS_TEXT"
+      TARGET: "src/main/resources/META-INF/services/liquibase.sqlgenerator.SqlGenerator"
+      PATTERN: "${PACKAGE_BASE}.sqlgenerator.${OBJECT_TYPE}Generator"
+      
+TROUBLESHOOTING_TEMPLATES:
+  XSD_RESOLUTION_TROUBLESHOOTING_TEMPLATE: |
+    EXECUTION_STEP: "XSD_RESOLUTION_TROUBLESHOOTING"
+    PURPOSE: "Diagnose and resolve XSD resolution failures that block XML validation"
+    
+    COMMON_ERROR_PATTERN:
+      ERROR_MESSAGE: "Unable to resolve xml entity ${XSD_URL}"
+      ROOT_CAUSE: "liquibase-snowflake JAR not on classpath OR SnowflakeNamespaceDetails not registered"
+    
+    DIAGNOSTIC_COMMANDS:
+      CHECK_JAR_CLASSPATH: "ls -la target/liquibase-snowflake-*.jar"
+      CHECK_XSD_IN_JAR: "jar -tf target/liquibase-snowflake-*.jar | grep liquibase-snowflake-latest.xsd"
+      CHECK_NAMESPACE_SERVICE: "cat src/main/resources/META-INF/services/liquibase.parser.NamespaceDetails"
+      VERIFY_CLASS_EXISTS: "find . -name 'SnowflakeNamespaceDetails.java'"
+    
+    RESOLUTION_WORKFLOW:
+      NAMESPACE_DETAILS_IMPLEMENTATION: |
+        public class SnowflakeNamespaceDetails implements NamespaceDetails {
+            @Override
+            public String getNamespaceUrl() {
+                return "http://www.liquibase.org/xml/ns/dbchangelog-ext/snowflake";
+            }
+            
+            @Override
+            public String getLocalSchemaUrl() {
+                return "/www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd";
+            }
+        }
+      SERVICE_REGISTRATION_REQUIRED: "src/main/resources/META-INF/services/liquibase.parser.NamespaceDetails"
+      SERVICE_CONTENT: "${PACKAGE_BASE}.parser.SnowflakeNamespaceDetails"
+      XSD_LOCATION_CRITICAL: "/www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd"
+    
+  GENERATOR_CHAIN_DEBUGGING_TEMPLATE: |
+    PURPOSE: "Understand and control SQL generator selection and priority"
+    
+    GENERATOR_PRIORITY_SELECTION:
+      RULE_1: "Database-specific generators override generic ones"
+      RULE_2: "Higher priority (lower number) generators selected first"
+      RULE_3: "Last registered generator of same priority wins"
+      RULE_4: "supports() method determines eligibility"
+      
+    PRIORITY_LEVELS:
+      PRIORITY_5: "Generic Liquibase generators (lowest priority)"
+      PRIORITY_10: "Database-specific generators (medium priority)"
+      PRIORITY_1: "Override generators (highest priority)"
+      
+    SELECTION_ALGORITHM:
+      STEP_1: "Filter by supports(statement, database) returning true"
+      STEP_2: "Sort by priority (ascending - lower numbers first)"
+      STEP_3: "Select first generator from sorted list"
+      STEP_4: "Call generateSql() on selected generator"
+    
+    DEBUGGING_COMMANDS:
+      PRIORITY_CONFLICTS: "Add logging to supports() and getPriority() methods"
+      CHECK_PRIORITY: "grep -n 'getPriority()' ${GENERATOR_FILE}"
+      CHECK_SUPPORTS: "grep -A 5 'supports(' ${GENERATOR_FILE}"
+      GENERATOR_NOT_FOUND: "grep '${GENERATOR_CLASS}' src/main/resources/META-INF/services/liquibase.sqlgenerator.SqlGenerator"
+      
+  TEST_DEVELOPMENT_PROTOCOLS_TEMPLATE: |
+    PURPOSE: "Snowflake-specific test development patterns and troubleshooting"
+    
+    SNOWFLAKE_SQL_FORMAT_EXPECTATIONS:
+      BOOLEAN_VALUES:
+        GENERATED: "true"
+        NOT_GENERATED: "'TRUE'"
+        RULE: "Boolean values without quotes"
+      ENUM_VALUES:
+        GENERATED: "XSMALL"
+        NOT_GENERATED: "'XSMALL'"
+        RULE: "Enum values without quotes"
+      STRING_LITERALS:
+        GENERATED: "'actual string'"
+        NOT_GENERATED: "actual string"
+        RULE: "String literals with single quotes"
+      NULL_VALUES:
+        GENERATED: "NULL"
+        NOT_GENERATED: "null"
+        RULE: "NULL uppercase, not lowercase"
+    
+    TEST_HARNESS_INTEGRATION:
+      REQUIRED_DEPENDENCY: |
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-snowflake</artifactId>
+            <version>0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+      CRITICAL: "Must be on test classpath for XSD resolution"
+      
+    ROLLBACK_STRATEGY_SELECTION:
+      ROLLBACK_BY_TAG:
+        USAGE: "mvn test -DrollbackStrategy=rollbackByTag -DdbName=snowflake"
+        RECOMMENDED_FOR: "Cloud databases like Snowflake"
+        BEHAVIOR: "Tags database state, rolls back to tag"
+      ROLLBACK_TO_DATE:
+        USAGE: "mvn test -DrollbackStrategy=rollbackToDate -DdbName=snowflake"
+        DEFAULT: "true"
+        BEHAVIOR: "Records timestamp, rolls back changes after time"
+    
+    COMMON_TEST_FAILURE_PATTERNS:
+      XSD_RESOLUTION_FAILURE:
+        ERROR: "Unable to resolve xml entity"
+        CAUSE: "liquibase-snowflake JAR not on test classpath"
+        SOLUTION: "Verify dependency configuration and mvn clean install"
+      SQL_FORMAT_MISMATCH:
+        ERROR: "Expected SQL string doesn't match generated"
+        CAUSE: "Incorrect expectations for Snowflake SQL format"
+        SOLUTION: "Use format guidelines for test expectations"
+      WAREHOUSE_STATE_ISSUES:
+        ERROR: "Warehouse suspended or unavailable"
+        CAUSE: "Warehouses auto-suspend and need resuming"
+        SOLUTION: "Add warehouse resume commands to test setup"
+        
+  SERVICE_REGISTRATION_INVENTORY_TEMPLATE: |
+    PURPOSE: "Complete service discovery registration for all Liquibase components"
+    
+    COMPLETE_SERVICE_FILE_INVENTORY:
+      NAMESPACE_DETAILS:
+        FILE: "src/main/resources/META-INF/services/liquibase.parser.NamespaceDetails"
+        PURPOSE: "Maps Snowflake XML namespace to XSD schema file"
+        CONTENT: "${PACKAGE_BASE}.parser.SnowflakeNamespaceDetails"
+        CRITICAL: "Required for XSD resolution - blocks XML validation if missing"
+      CHANGE_TYPES:
+        FILE: "src/main/resources/META-INF/services/liquibase.change.Change"
+        PURPOSE: "Registers Snowflake-specific change types for XML changelog usage"
+        CONTENT_PATTERN: "${PACKAGE_BASE}.change.Create${OBJECT_TYPE}Change"
+      DATABASE_INTEGRATION:
+        FILE: "src/main/resources/META-INF/services/liquibase.database.Database"
+        PURPOSE: "Registers SnowflakeDatabase class for connection recognition"
+        CONTENT: "${PACKAGE_BASE}.database.SnowflakeDatabase"
+      DATA_TYPE_MAPPINGS:
+        FILE: "src/main/resources/META-INF/services/liquibase.datatype.LiquibaseDataType"
+        PURPOSE: "Registers Snowflake-specific data type mappings"
+        CONTENT_PATTERN: "${PACKAGE_BASE}.datatype.${TYPE}TypeSnowflake"
+      SQL_GENERATORS:
+        FILE: "src/main/resources/META-INF/services/liquibase.sqlgenerator.SqlGenerator"
+        PURPOSE: "Registers SQL generators for Snowflake-specific SQL syntax"
+        CONTENT_PATTERN: "${PACKAGE_BASE}.sqlgenerator.${OBJECT_TYPE}Generator"
+      DATABASE_OBJECTS:
+        FILE: "src/main/resources/META-INF/services/liquibase.structure.DatabaseObject"
+        PURPOSE: "CRITICAL - Registers custom objects for automatic snapshot inclusion"
+        CONTENT_PATTERN: "${PACKAGE_BASE}.structure.${OBJECT_TYPE}"
+        WARNING: "Without this registration, custom objects will NOT appear in snapshots"
+    
+    DIAGNOSTIC_COMMANDS:
+      CHECK_ALL_SERVICES: "ls -la src/main/resources/META-INF/services/"
+      VERIFY_CONTENT: "head -1 src/main/resources/META-INF/services/liquibase.*.* | grep -v '^$'"
+      CHECK_JAR_SERVICES: "jar -tf target/liquibase-*.jar | grep META-INF/services"
+      VALIDATE_CLASSES: "find . -name '*.java' | grep -E '(Change|Generator|Database)'"
+
+FILE_OPERATION_PATTERNS:
+  CREATE_FROM_TEMPLATE:
+    CREATE_FILE:
+      NAME: "generate-${FILE_TYPE}"
+      TEMPLATE: "${TEMPLATE_NAME}"
+      OUTPUT: "${OUTPUT_PATH}"
+      VARIABLES:
+        PARAM1: "${VALUE1}"
+        PARAM2: "${VALUE2}"
+        
+  APPEND_TO_FILE:
+    CREATE_FILE:
+      NAME: "append-content"
+      TEMPLATE: "${APPEND_TEMPLATE}"
+      OUTPUT: "${TARGET_FILE}"
+      MODE: "APPEND"
+      
+  CONDITIONAL_FILE_CREATION:
+    CONDITIONAL:
+      NAME: "create-if-missing"
+      CONDITION:
+        TYPE: "FILE_EXISTS"
+        TARGET: "${TARGET_FILE}"
+      THEN:
+        - COMMAND:
+            EXECUTE: "echo 'File exists, skipping creation'"
+      ELSE:
+        - CREATE_FILE:
+            NAME: "create-missing-file"
+            TEMPLATE: "${FILE_TEMPLATE}"
+            OUTPUT: "${TARGET_FILE}"
+
+VALIDATION_CHECKPOINT_PATTERNS:
+  PRE_EXECUTION_CHECK:
+    VALIDATE:
+      NAME: "verify-prerequisites"
+      TYPE: "FILE_EXISTS"
+      TARGET: "${REQUIRED_FILE}"
+      FAILURE_ACTION: "STOP"
+      ERROR_MESSAGE: "Prerequisites not met: ${REQUIRED_FILE} missing"
+      
+  POST_EXECUTION_CHECK:
+    VALIDATE:
+      NAME: "verify-results"
+      TYPE: "COMMAND_SUCCESS"
+      COMMAND: "${VERIFICATION_COMMAND}"
+      FAILURE_ACTION: "STOP"
+      ERROR_MESSAGE: "Execution failed verification"
+      
+  COMPILATION_CHECK:
+    COMMAND:
+      NAME: "compile-code"
+      EXECUTE: "mvn compile"
+      
+    VALIDATE:
+      NAME: "verify-compilation-success"
+      TYPE: "COMMAND_SUCCESS"
+      COMMAND: "mvn compile"
+      FAILURE_ACTION: "STOP"
+      ERROR_MESSAGE: "Compilation failed"
+
+DIAGNOSTIC_WORKFLOW_PATTERNS:
+  ERROR_DETECTION_WORKFLOW:
+    CAPTURE:
+      NAME: "collect-error-information"
+      COMMAND: "grep -i '${ERROR_PATTERN}' ${LOG_FILE} | tail -10"
+      STORE_AS: "ERROR_DETAILS"
+    CONDITIONAL:
+      NAME: "categorize-error"
+      CONDITION:
+        TYPE: "CONTAINS_TEXT"
+        TARGET: "${ERROR_DETAILS}"
+        PATTERN: "${SPECIFIC_ERROR_SIGNATURE}"
+      THEN:
+        - GOTO: "SPECIFIC_ERROR_RESOLUTION"
+      ELSE:
+        - GOTO: "GENERIC_ERROR_RESOLUTION"
+        
+  ROOT_CAUSE_ANALYSIS_WORKFLOW:
+    PARALLEL:
+      NAME: "gather-diagnostic-data"
+      WAIT_FOR_ALL: true
+      TIMEOUT: 60
+      TASKS:
+        - CAPTURE:
+            NAME: "check-environment"
+            COMMAND: "${ENVIRONMENT_CHECK_COMMAND}"
+            STORE_AS: "ENVIRONMENT_STATE"
+        - CAPTURE:
+            NAME: "check-configuration"
+            COMMAND: "${CONFIG_CHECK_COMMAND}"
+            STORE_AS: "CONFIG_STATE"
+        - CAPTURE:
+            NAME: "check-dependencies"
+            COMMAND: "${DEPENDENCY_CHECK_COMMAND}"
+            STORE_AS: "DEPENDENCY_STATE"
+    CONDITIONAL:
+      NAME: "identify-root-cause"
+      CONDITION:
+        TYPE: "CONTAINS_TEXT"
+        TARGET: "${ENVIRONMENT_STATE}"
+        PATTERN: "${ROOT_CAUSE_PATTERN}"
+      THEN:
+        - CAPTURE:
+            COMMAND: "echo 'ENVIRONMENT_ISSUE'"
+            STORE_AS: "ROOT_CAUSE_CATEGORY"
+      ELSE:
+        - CONDITIONAL:
+            CONDITION:
+              TYPE: "CONTAINS_TEXT"
+              TARGET: "${CONFIG_STATE}"
+              PATTERN: "${CONFIG_ISSUE_PATTERN}"
+            THEN:
+              - CAPTURE:
+                  COMMAND: "echo 'CONFIGURATION_ISSUE'"
+                  STORE_AS: "ROOT_CAUSE_CATEGORY"
+            ELSE:
+              - CAPTURE:
+                  COMMAND: "echo 'DEPENDENCY_ISSUE'"
+                  STORE_AS: "ROOT_CAUSE_CATEGORY"
+                  
+  RESOLUTION_VERIFICATION_WORKFLOW:
+    COMMAND:
+      NAME: "apply-resolution"
+      EXECUTE: "${RESOLUTION_COMMAND}"
+    RETRY:
+      NAME: "verify-resolution"
+      MAX_ATTEMPTS: 3
+      DELAY: 5
+      STEP:
+        VALIDATE:
+          NAME: "check-issue-resolved"
+          TYPE: "${VERIFICATION_TYPE}"
+          TARGET: "${VERIFICATION_TARGET}"
+      ON_FINAL_FAILURE:
+        - CAPTURE:
+            COMMAND: "echo 'RESOLUTION_FAILED'"
+            STORE_AS: "RESOLUTION_STATUS"
+        - GOTO: "ESCALATION_PROCEDURE"
+        
+PRIORITY_VALIDATION_PATTERNS:
+  GENERATOR_PRIORITY_CHECK:
+    CAPTURE:
+      NAME: "get-generator-priority"
+      COMMAND: "grep -n 'getPriority()' ${GENERATOR_FILE} | grep -o 'PRIORITY_[0-9]*'"
+      STORE_AS: "ACTUAL_PRIORITY"
+    CONDITIONAL:
+      NAME: "verify-priority-correct"
+      CONDITION:
+        TYPE: "EQUALS"
+        LEFT: "${ACTUAL_PRIORITY}"
+        RIGHT: "PRIORITY_${EXPECTED_PRIORITY}"
+      THEN:
+        - COMMAND:
+            NAME: "log-priority-success"
+            EXECUTE: "echo 'Generator priority correct: ${ACTUAL_PRIORITY}'"
+      ELSE:
+        - COMMAND:
+            NAME: "log-priority-error"
+            EXECUTE: "echo 'ERROR: Expected PRIORITY_${EXPECTED_PRIORITY}, got ${ACTUAL_PRIORITY}'"
+        - EXIT_FAILURE: "Generator priority mismatch"
+        
+  GENERATOR_SUPPORTS_CHECK:
+    CAPTURE:
+      NAME: "get-supports-logic"
+      COMMAND: "grep -A 5 'supports(' ${GENERATOR_FILE}"
+      STORE_AS: "SUPPORTS_IMPLEMENTATION"
+    VALIDATE:
+      NAME: "verify-database-check"
+      TYPE: "CONTAINS_TEXT"
+      TARGET: "${SUPPORTS_IMPLEMENTATION}"
+      PATTERN: "instanceof ${DATABASE_TYPE}Database"
+      FAILURE_ACTION: "STOP"
+      ERROR_MESSAGE: "Generator must check for ${DATABASE_TYPE}Database instance"
+      
+SERVICE_INVENTORY_PATTERNS:
+  COMPLETE_SERVICE_VALIDATION:
+    LOOP:
+      NAME: "validate-each-service-type"
+      ITERATE_OVER:
+        TYPE: "LIST"
+        VALUES: ["NamespaceDetails", "Change", "Database", "LiquibaseDataType", "SqlGenerator", "DatabaseObject"]
+      VARIABLE: "service_type"
+      STEPS:
+        - VALIDATE:
+            NAME: "check-${service_type}-file-exists"
+            TYPE: "FILE_EXISTS"
+            TARGET: "src/main/resources/META-INF/services/liquibase.${service_type}"
+            FAILURE_ACTION: "STOP"
+            ERROR_MESSAGE: "Missing service file: liquibase.${service_type}"
+        - VALIDATE:
+            NAME: "check-${service_type}-content"
+            TYPE: "CONTAINS_TEXT"
+            TARGET: "src/main/resources/META-INF/services/liquibase.${service_type}"
+            PATTERN: "${PACKAGE_BASE}"
+            FAILURE_ACTION: "STOP"
+            ERROR_MESSAGE: "Service file liquibase.${service_type} missing package registration"
+            
+  SERVICE_DISCOVERY_TROUBLESHOOTING:
+    DIAGNOSTIC:
+      NAME: "diagnose-service-issues"
+      SYMPTOMS:
+        - "Component not found during runtime"
+        - "Custom objects not appearing in snapshots"
+        - "Generator not being selected"
+      DIAGNOSTIC_COMMANDS:
+        - COMMAND:
+            NAME: "check-service-files"
+            EXECUTE: "ls -la src/main/resources/META-INF/services/ | wc -l"
+        - COMMAND:
+            NAME: "verify-jar-services"
+            EXECUTE: "jar -tf target/*.jar | grep META-INF/services | wc -l"
+        - COMMAND:
+            NAME: "check-classpath"
+            EXECUTE: "mvn dependency:build-classpath | grep liquibase"
+      ROOT_CAUSE_ANALYSIS:
+        CONDITIONAL:
+          NAME: "identify-service-issue"
+          CONDITION:
+            TYPE: "COMMAND_SUCCESS"
+            COMMAND: "ls src/main/resources/META-INF/services/ | wc -l | awk '$1>=6'"
+          THEN:
+            - CAPTURE:
+                COMMAND: "echo 'SERVICE_FILES_EXIST'"
+                STORE_AS: "SERVICE_ISSUE_TYPE"
+          ELSE:
+            - CAPTURE:
+                COMMAND: "echo 'MISSING_SERVICE_FILES'"
+                STORE_AS: "SERVICE_ISSUE_TYPE"
+      RESOLUTION_STEPS:
+        - CONDITIONAL:
+            NAME: "apply-service-fix"
+            CONDITION:
+              TYPE: "EQUALS"
+              LEFT: "${SERVICE_ISSUE_TYPE}"
+              RIGHT: "MISSING_SERVICE_FILES"
+            THEN:
+              - COMMAND:
+                  NAME: "create-missing-services"
+                  EXECUTE: "${CREATE_SERVICE_FILES_COMMAND}"
+            ELSE:
+              - COMMAND:
+                  NAME: "check-jar-packaging"
+                  EXECUTE: "mvn clean package"
+
+EXECUTION_RULES:
+  SEQUENTIAL_EXECUTION: "Phases execute in declared order"
+  DEPENDENCY_ENFORCEMENT: "DEPENDS_ON blocks execution until prerequisites complete"
+  VARIABLE_SUBSTITUTION: "All ${VARIABLE} patterns replaced before execution"
+  VALIDATION_BLOCKING: "FAILURE_ACTION: STOP prevents continuation"
+  TEMPLATE_EXPANSION: "Templates expanded with provided variables"
+  ERROR_PROPAGATION: "Phase failure triggers ERROR_HANDLING"
+  DIAGNOSTIC_INTEGRATION: "DIAGNOSTIC steps provide structured troubleshooting"
+  PRIORITY_MANAGEMENT: "PRIORITY_MANAGEMENT steps enforce generator chain compliance"
+  SERVICE_DISCOVERY: "SERVICE_DISCOVERY steps validate complete registration"
+  ARCHITECTURAL_COMPLIANCE: "ARCHITECTURAL_COMPLIANCE steps enforce design patterns"
