@@ -6,7 +6,6 @@ import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.ReplaceIfExists;
 import liquibase.change.core.*;
-import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.ChangeSet;
 import liquibase.changeset.ChangeSetService;
 import liquibase.changeset.ChangeSetServiceFactory;
@@ -25,7 +24,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.resource.OpenOptions;
 import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
 import liquibase.serializer.ChangeLogSerializer;
@@ -44,7 +42,6 @@ import org.apache.commons.lang3.SystemProperties;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -57,7 +54,7 @@ public class DiffToChangeLog {
     public static final String ORDER_ATTRIBUTE = "order";
     public static final String DATABASE_CHANGE_LOG_CLOSING_XML_TAG = "</databaseChangeLog>";
     public static final String EXTERNAL_FILE_DIR_SCOPE_KEY = "DiffToChangeLog.externalFilesDir";
-    public static final String OBJECTS_CHANGELOG_SCOPE_KEY = "DiffToChangeLog.objectsChangelog";
+    public static final String OBJECT_CHANGELOGS_SCOPE_KEY = "DiffToChangeLog.objectsChangelog";
     public static final String DIFF_OUTPUT_CONTROL_SCOPE_KEY = "diffOutputControl";
     public static final String DIFF_SNAPSHOT_DATABASE = "snapshotDatabase";
 
