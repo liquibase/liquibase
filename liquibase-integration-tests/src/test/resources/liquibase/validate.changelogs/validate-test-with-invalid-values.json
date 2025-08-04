@@ -1,0 +1,26 @@
+{
+  "databaseChangeLog": [
+    {
+      "changeSet": {
+        "id": "value",
+        "author": "value",
+        "runWith": "testRunWith",
+        "dbms": "postgreqs",
+        "changes": [
+          {
+            "changeTypeName": {
+              "changeTypeAttribute": "value",
+              "nestedElementGroup": [
+                {
+                  "nestedElementName": {
+                    "nestedElementAttribute": "value"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
