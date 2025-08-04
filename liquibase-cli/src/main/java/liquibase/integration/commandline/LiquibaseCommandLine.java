@@ -408,9 +408,7 @@ public class LiquibaseCommandLine {
                             Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersionInfo()));
 
                             final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
-                            if (licenseService == null) {
-                                Scope.getCurrentScope().getUI().sendMessage("WARNING: License service not loaded, cannot determine Liquibase Pro license status. Please consider re-installing Liquibase to include all dependencies. Continuing operation without Pro license.");
-                            } else {
+                            if (licenseService != null) {
                                 Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
                             }
                         }
@@ -1285,9 +1283,7 @@ public class LiquibaseCommandLine {
             Version mdcVersion = new Version();
             final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
             String licenseInfo = "";
-            if (licenseService == null) {
-                licenseInfo = "WARNING: License service not loaded, cannot determine Liquibase Pro license status. Please consider re-installing Liquibase to include all dependencies. Continuing operation without Pro license.";
-            } else {
+            if (licenseService != null) {
                 licenseInfo = licenseService.getLicenseInfo();
             }
 

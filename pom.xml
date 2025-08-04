@@ -67,8 +67,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <trimStackTrace>false</trimStackTrace>
-        <liquibase-pro.version>0-SNAPSHOT</liquibase-pro.version>
-        <argLine></argLine>
         <commons-lang3.version>3.18.0</commons-lang3.version>
         <commons-io.version>2.19.0</commons-io.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
@@ -620,13 +618,6 @@
                 <repository>
                     <id>liquibase</id>
                     <url>https://maven.pkg.github.com/liquibase/liquibase</url>
-                    <snapshots>
-                        <enabled>true</enabled>
-                    </snapshots>
-                </repository>
-                <repository>
-                    <id>liquibase-pro</id>
-                    <url>https://maven.pkg.github.com/liquibase/liquibase-pro</url>
                     <snapshots>
                         <enabled>true</enabled>
                     </snapshots>
