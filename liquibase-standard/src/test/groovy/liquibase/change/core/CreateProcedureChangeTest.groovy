@@ -167,24 +167,24 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         when:
         CreateProcedureChange change = new CreateProcedureChange()
         change.setProcedureText(PROCEDURE_TEXT)
-        CheckSum procedureCheckSumWithoutComments = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+        CheckSum procedureCheckSumWithoutComment = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
             return change.generateCheckSum()
         } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
 
         CreateProcedureChange change2 = new CreateProcedureChange()
         change2.setProcedureText(PROCEDURE_TEXT)
-        change2.setComments("This is a test")
-        CheckSum procedureCheckSumWithComments = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
+        change2.setComment("This is a test")
+        CheckSum procedureCheckSumWithComment = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
             return change2.generateCheckSum()
         } as Scope.ScopedRunnerWithReturn<CheckSum>) as CheckSum
 
         then:
-        procedureCheckSumWithoutComments.toString() == originalChecksum
-        procedureCheckSumWithComments.toString() == updatedChecksum
+        procedureCheckSumWithoutComment.toString() == originalChecksum
+        procedureCheckSumWithComment.toString() == updatedChecksum
 
         where:
         version | originalChecksum | updatedChecksum
-        ChecksumVersion.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:f834f1891f07c1a2242c346499e16b22"
+        ChecksumVersion.V8 | "8:977441683eb54d6ee1b2de400adb5eed" | "8:38156c6db9ca9fe4a9ae30ea6efe6ae8"
         ChecksumVersion.latest() | "9:4ec1db90234ea750169f7d94f7e5c425" | "9:4ec1db90234ea750169f7d94f7e5c425"
     }
 

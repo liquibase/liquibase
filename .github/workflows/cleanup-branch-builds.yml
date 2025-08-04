@@ -46,16 +46,12 @@ jobs:
     - uses: actions/delete-package-versions@v5
       if: ${{ steps.version.outputs.ids != '' }}
       with:
+        # Delete all deletable versions
         package-type: maven
-        # The number of latest versions to keep.
-        # This cannot be specified with `num-old-versions-to-delete`. By default, `num-old-versions-to-delete` takes precedence over `min-versions-to-keep`.
-        # When set to 0, all deletable versions will be deleted.
-        # When set greater than 0, all deletable package versions except the specified number will be deleted.
-        min-versions-to-keep: 0
         
         # on branch id's deletion we only want to delete that particular branch version
         package-version-ids: "${{ steps.version.outputs.ids }}"
-
+        
   delete-sha-package:
     name: Delete SHA-SNAPSHOT Github Package for Branch
     needs: [ delete-dat-package, extract-branch-info ]
@@ -63,7 +59,7 @@ jobs:
 
     strategy:
       matrix:
-        packages_to_delete: [org.liquibase.liquibase-core, org.liquibase.liquibase-extension-testing, org.liquibase.liquibase-integration-tests, org.liquibase.liquibase-maven-plugin, org.liquibase.liquibase-cdi-jakarta, org.liquibase.liquibase-cdi, org.liquibase.liquibase]
+        packages_to_delete: [org.liquibase.liquibase-core, org.liquibase.liquibase-extension-testing, org.liquibase.liquibase-integration-tests, org.liquibase.liquibase-maven-plugin, org.liquibase.liquibase]
 
     steps:
 

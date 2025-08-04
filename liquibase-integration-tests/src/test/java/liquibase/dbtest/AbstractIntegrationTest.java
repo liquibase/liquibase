@@ -4,6 +4,7 @@ import groovy.lang.Tuple2;
 import liquibase.*;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.LoadDataChange;
+import liquibase.change.custom.ExampleCustomTaskChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -437,7 +438,7 @@ public abstract class AbstractIntegrationTest {
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter("loginuser", testSystem.getUsername());
-        liquibase.update(this.contexts, output);
+        liquibase.updateSql(new Contexts(this.contexts), null, output);
 
         String outputResult = output.getBuffer().toString();
         assertNotNull("generated output change log must not be empty", outputResult);
@@ -545,6 +546,7 @@ public abstract class AbstractIntegrationTest {
         liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         liquibase.update(this.contexts);
         liquibase.update(this.contexts);
+
     }
 
     @Test
@@ -569,21 +571,34 @@ public abstract class AbstractIntegrationTest {
     @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testRollbackableChangeLog() throws Exception {
         assumeNotNull(this.getDatabase());
+        Map<String, Object> initialMap =  new HashMap<>();
+        initialMap.put(ExampleCustomTaskChange.COUNT_MAP_EXECUTE_CALL_COUNT, 0);
+        initialMap.put(ExampleCustomTaskChange.COUNT_MAP_ROLLBACK_CALL_COUNT, 0);
 
-        Liquibase liquibase = createLiquibase(rollbackChangeLog);
-        clearDatabase();
+        Scope.child(ExampleCustomTaskChange.SCOPE_ATTR_CALL_COUNT_MAP, initialMap, () -> {
+            Liquibase liquibase = createLiquibase(rollbackChangeLog);
+            clearDatabase();
 
-        liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.update(this.contexts);
+            liquibase.update(this.contexts);
 
-        liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.rollback(new Date(0), this.contexts);
+            Map<String, Object> map = Scope.getCurrentScope().get(ExampleCustomTaskChange.SCOPE_ATTR_CALL_COUNT_MAP, Map.class);
+            Integer executeCallCountInteger = (Integer) map.get(ExampleCustomTaskChange.COUNT_MAP_EXECUTE_CALL_COUNT);
+            Integer rollbackCallCount = (Integer)map.get(ExampleCustomTaskChange.COUNT_MAP_ROLLBACK_CALL_COUNT);
+            // call `execute` method
+            assertEquals(1, (int)executeCallCountInteger);
+            assertEquals(0, (int)rollbackCallCount);
 
-        liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.update(this.contexts);
+            liquibase.rollback(new Date(0), this.contexts);
+            executeCallCountInteger = (Integer) map.get(ExampleCustomTaskChange.COUNT_MAP_EXECUTE_CALL_COUNT) ;
+            rollbackCallCount = (Integer)map.get(ExampleCustomTaskChange.COUNT_MAP_ROLLBACK_CALL_COUNT);
+            // call `rollback` method
+            assertEquals(1, (int)executeCallCountInteger);
+            assertEquals(1, (int)rollbackCallCount);
 
-        liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.rollback(new Date(0), this.contexts);
+            liquibase.update(this.contexts);
+
+            liquibase.rollback(new Date(0), this.contexts);
+        });
     }
 
     @Test
@@ -632,6 +647,8 @@ public abstract class AbstractIntegrationTest {
 
         liquibase.tag("Test Tag");
         assertTrue(liquibase.tagExists("Test Tag"));
+
+        clearDatabase();
     }
 
     @Test
@@ -681,13 +698,7 @@ public abstract class AbstractIntegrationTest {
                 compareControl.addSuppressedField(View.class, "name");
             }
 
-            DiffOutputControl diffOutputControl = new DiffOutputControl();
             File tempFile = tempDirectory.getRoot().createTempFile("liquibase-test", ".xml");
-
-            if (outputCsv) {
-                diffOutputControl.setDataDir(new File(tempFile.getParentFile(), "liquibase-data").getCanonicalPath().replaceFirst("\\w:",""));
-            }
-
             DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, null, compareControl);
 
 
@@ -935,6 +946,8 @@ public abstract class AbstractIntegrationTest {
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         liquibase.generateDocumentation(outputDir.toAbsolutePath().toString(), this.contexts);
+
+        clearDatabase();
     }
 
     /**
@@ -950,7 +963,7 @@ public abstract class AbstractIntegrationTest {
         Liquibase liquibase = createLiquibase(encodingChangeLog);
 
         StringWriter writer=new StringWriter();
-        liquibase.update(this.contexts,writer);
+        liquibase.updateSql(new Contexts(this.contexts), null, writer);
         assertTrue("Update to SQL preserves encoding",
             new RegexMatcher(writer.toString(), new String[] {
                 //For the UTF-8 encoded cvs
@@ -1053,7 +1066,7 @@ public abstract class AbstractIntegrationTest {
         clearDatabase();
 
         liquibase = createLiquibase(includedChangeLog);
-        liquibase.update(contexts, output);
+        liquibase.updateSql(new Contexts(contexts), null, output);
 
         String outputResult = output.getBuffer().toString();
         assertNotNull("generated SQL may not be empty", outputResult);
@@ -1077,6 +1090,7 @@ public abstract class AbstractIntegrationTest {
         List<ChangeSet> changeSets = changeLogWriter.generateChangeSets();
         assertEquals("generating two change logs without any changes in between should result in an empty generated " +
                 "differential changeset.", 0, changeSets.size());
+        clearDatabase();
     }
 
     @Test

@@ -31,13 +31,6 @@ public class LiquibaseDbclHistoryMojo extends AbstractLiquibaseMojo {
     protected File outputFile;
 
     /**
-     * Set to 'true' to output all data from EXECUTEDSQL and EXTENSIONS columns
-     * @parameter property="liquibase.verbose"
-     */
-    @PropertyElement
-    protected Boolean verbose;
-
-    /**
      * Sets the output method to JSON or JSON_PRETTY
      * @parameter property="liquibase.format"
      */
@@ -48,7 +41,7 @@ public class LiquibaseDbclHistoryMojo extends AbstractLiquibaseMojo {
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
         CommandScope liquibaseCommand = new CommandScope("dbclHistory");
         liquibaseCommand.addArgumentValue("format", format);
-        liquibaseCommand.addArgumentValue("verbose", verbose);
+        liquibaseCommand.addArgumentValue("verbose", verbose); //Set to 'true' to output all data from EXECUTEDSQL and EXTENSIONS columns
         liquibaseCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, username);
         liquibaseCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, password);
         liquibaseCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, url);

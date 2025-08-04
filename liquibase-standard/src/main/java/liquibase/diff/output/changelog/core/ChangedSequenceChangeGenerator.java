@@ -60,7 +60,6 @@ public class ChangedSequenceChangeGenerator extends AbstractChangeGenerator impl
             change.setMinValue(sequence.getMinValue());
             accumulatedChange.setMinValue(sequence.getMinValue());
             changes.add(change);
-            changes.add(change);
         }
 
         if (differences.isDifferent("ordered")) {

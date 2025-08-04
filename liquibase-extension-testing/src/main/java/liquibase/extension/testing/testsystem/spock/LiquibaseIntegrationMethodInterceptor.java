@@ -12,6 +12,7 @@ import liquibase.extension.testing.testsystem.TestSystem;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.structure.core.DatabaseObjectFactory;
+import liquibase.util.StringUtil;
 import org.junit.jupiter.api.Assumptions;
 import org.spockframework.runtime.extension.AbstractMethodInterceptor;
 import org.spockframework.runtime.extension.IMethodInvocation;
@@ -142,6 +143,7 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
                     TestSystem testSystem = readContainerFromField(field, invocation);
                     if (testSystem == startedTestSystem) {
                         runDropAll(((DatabaseTestSystem) startedTestSystem));
+                        runDropAll(((DatabaseTestSystem) startedTestSystem), ((DatabaseTestSystem) startedTestSystem).getAltSchema());
                     }
                 }
             }
@@ -157,16 +159,24 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
         invocation.proceed();
     }
 
-    private static void runDropAll(DatabaseTestSystem db) throws Exception {
-        LockService lockService = LockServiceFactory.getInstance().getLockService(db.getDatabaseFromFactory());
-        lockService.releaseLock();
-        CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME);
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl());
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername());
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword());
-        // this is a pro only argument, but is added here because there is no mechanism for adding the argument from the pro tests
-        commandScope.addArgumentValue("dropDbclhistory", true);
-        commandScope.setOutput(new ByteArrayOutputStream());
-        commandScope.execute();
+    private static void runDropAll(DatabaseTestSystem db, String... schemas) throws Exception {
+        Map<String, Object> scopeValues = new HashMap<>();
+        scopeValues.put("liquibase.compatibility.check.enableCompatibilityCheck", false);
+        Scope.child(scopeValues, () -> {
+            LockService lockService = LockServiceFactory.getInstance().getLockService(db.getDatabaseFromFactory());
+            lockService.releaseLock();
+            CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME);
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl());
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername());
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword());
+            // this is a pro only argument, but is added here because there is no mechanism for adding the argument from the pro tests
+            commandScope.addArgumentValue("dropDbclhistory", true);
+            if (schemas != null) {
+                commandScope.addArgumentValue(DropAllCommandStep.SCHEMAS_ARG, StringUtil.join(schemas, ","));
+            }
+            commandScope.setOutput(new ByteArrayOutputStream());
+            commandScope.execute();
+        });
+
     }
 }

@@ -3,11 +3,7 @@ package liquibase.parser.core.xml;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.logging.Logger;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.InputStreamList;
 import liquibase.resource.Resource;
-import liquibase.resource.ResourceAccessor;
 import liquibase.util.LiquibaseUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -16,7 +12,6 @@ import org.xml.sax.ext.EntityResolver2;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -71,7 +66,8 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
             if (GlobalConfiguration.SECURE_PARSING.getCurrentValue()) {
                 String errorMessage = "Unable to resolve xml entity " + systemId + ". " +
                         GlobalConfiguration.SECURE_PARSING.getKey() + " is set to 'true' which does not allow remote lookups. " +
-                        "Check for spelling or capitalization errors and missing extensions such as liquibase-commercial in your XSD definition. Or, set it to 'false' to allow remote lookups of xsd files.";
+                        "Check for spelling or capitalization errors and missing extensions such as liquibase-commercial in your XSD definition. Or, set it to 'false' to allow remote lookups of xsd files. " +
+                        "If you are using a changelog with custom change types, ensure you have the appropriate database extension on the classpath.";
                 throw new XSDLookUpException(errorMessage);
             } else {
                 log.fine("Unable to resolve XML entity locally. Will load from network.");
@@ -104,7 +100,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
             boolean found = versionMatcher.find();
             if (found) {
                 String buildVersion = LiquibaseUtil.getBuildVersion();
-                if (!buildVersion.equals(LiquibaseUtil.DEV_VERSION)) {
+                if (!LiquibaseUtil.isDevVersion()) {
                     String xsdVersion = versionMatcher.group("version");
                     if (!buildVersion.startsWith(xsdVersion)) {
                         hasWarnedAboutMismatchedXsdVersion = true;

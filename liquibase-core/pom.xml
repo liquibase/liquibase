@@ -39,7 +39,7 @@
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
-            <version>4.7.6</version>
+            <version>4.7.7</version>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -63,6 +63,11 @@
             <artifactId>commons-lang3</artifactId>
             <version>${commons-lang3.version}</version>
         </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+        </dependency>
 
     </dependencies>
 
@@ -71,7 +76,7 @@
             <plugin>
                 <groupId>org.liquibase.ext</groupId>
                 <artifactId>liquibase-sdk-maven-plugin</artifactId>
-                <version>0.10.23</version>
+                <version>0.10.25</version>
             </plugin>
 
             <plugin>
@@ -145,7 +150,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.6.0</version>
+                <version>1.7.2</version>
                 <configuration>
                     <outputDirectory>${project.build.directory}/classes/META-INF/maven/org.liquibase/liquibase-core/</outputDirectory>
                     <flattenedPomFilename>pom.xml</flattenedPomFilename>
@@ -187,7 +192,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>3.6.1</version>
                 <executions>
                     <execution>
                         <id>timestamp-property</id>

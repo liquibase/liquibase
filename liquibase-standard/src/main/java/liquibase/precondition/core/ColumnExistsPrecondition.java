@@ -99,7 +99,7 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
         example.setName(database.correctObjectName(getColumnName(), Column.class));
 
         try {
-            if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
+            if (!SnapshotGeneratorFactory.getInstance().hasIgnoreNested(example, database)) {
                 throw new PreconditionFailedException("Column '" + database.escapeColumnName(catalogName, schemaName, getTableName(), getColumnName()) + "' does not exist", changeLog, this);
             }
         } catch (LiquibaseException e) {

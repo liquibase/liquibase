@@ -50,6 +50,14 @@ Global Options
                                variable:
                                'LIQUIBASE_ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA')
 
+      --analytics-enabled=PARAM
+                             Enable or disable sending product usage data and
+                               analytics to Liquibase. Learn more at https:
+                               //docs.liquibase.com/analytics.
+                             (defaults file: 'liquibase.analytics.enabled',
+                               environment variable:
+                               'LIQUIBASE_ANALYTICS_ENABLED')
+
       --auto-reorg=PARAM     Should Liquibase automatically include REORG TABLE
                                commands when needed?
                              DEFAULT: true
@@ -234,6 +242,15 @@ Global Options
                                'LIQUIBASE_INCLUDE_RELATIONS_FOR_COMPUTED_COLUMNS
                                ')
 
+      --include-schema-name-for-default=PARAM
+                             If true, the schema name is included for the
+                               default schema when loading a snapshot
+                             DEFAULT: false
+                             (defaults file: 'liquibase.
+                               includeSchemaNameForDefault', environment
+                               variable:
+                               'LIQUIBASE_INCLUDE_SCHEMA_NAME_FOR_DEFAULT')
+
       --include-system-classpath=PARAM
                              Include the system classpath when resolving
                                classes at runtime
@@ -268,7 +285,9 @@ Global Options
                              (defaults file: 'liquibase.logChannels',
                                environment variable: 'LIQUIBASE_LOG_CHANNELS')
 
-      --log-file=PARAM       (defaults file: 'liquibase.logFile', environment
+      --log-file=PARAM       Users can use .gz file extension to enable log
+                               files compression.
+                             (defaults file: 'liquibase.logFile', environment
                                variable: 'LIQUIBASE_LOG_FILE')
 
       --log-format=PARAM     Sets the format of log output to console or log

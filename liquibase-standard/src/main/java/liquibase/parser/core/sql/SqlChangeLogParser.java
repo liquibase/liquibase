@@ -21,6 +21,7 @@ import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
+import liquibase.util.ExceptionUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -61,7 +62,7 @@ public class SqlChangeLogParser implements ChangeLogParser {
             // Handle empty files with a WARNING message
             //
             if (StringUtils.isEmpty(sql)) {
-                String message = String.format("Unable to parse empty file '%s'", physicalChangeLogLocation);
+                String message = String.format("Unable to parse empty file: '%s'", physicalChangeLogLocation);
                 Scope.getCurrentScope().getLog(getClass()).warning(message);
                 throw new ChangeLogParseException(message);
             }
@@ -70,7 +71,7 @@ public class SqlChangeLogParser implements ChangeLogParser {
             throw new ChangeLogParseException(e);
         }
         change.setSplitStatements(false);
-        change.setStripComments(false);
+        change.setStripComments(false, true);
 
         Database database = Scope.getCurrentScope().getDatabase();
         ChangeSetServiceFactory factory = ChangeSetServiceFactory.getInstance();
@@ -83,6 +84,10 @@ public class SqlChangeLogParser implements ChangeLogParser {
         changeSet.addChange(change);
 
         changeLog.addChangeSet(changeSet);
+
+        ExceptionUtil.doSilently(() -> {
+            Scope.getCurrentScope().getAnalyticsEvent().incrementSqlChangelogCount();
+        });
 
         return changeLog;
     }
@@ -111,16 +116,17 @@ public class SqlChangeLogParser implements ChangeLogParser {
             return "raw";
         }
 
+        String interimId = "raw_" + DatabaseChangeLog.normalizePath(physicalChangeLogLocation).replace("/", "_");
         Optional<RanChangeSet> ranChangeSet =
             ranChangeSets.stream().filter(rc -> {
-                return rc.getId().equals("raw") &&
+                return rc.getId().equals(interimId) &&
                        rc.getAuthor().equals("includeAll") &&
                        rc.getChangeLog().equals(physicalChangeLogLocation);
             }).findFirst();
         if (ranChangeSet.isPresent()) {
-            return "raw";
+            return interimId;
         }
-        return "raw_" + DatabaseChangeLog.normalizePath(physicalChangeLogLocation).replace("/", "_");
+        return "raw";
     }
 
     /**

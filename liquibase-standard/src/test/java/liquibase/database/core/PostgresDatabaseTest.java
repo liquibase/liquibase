@@ -6,13 +6,20 @@ import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.DatabaseException;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
 import liquibase.util.StringUtil;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.stream.Stream;
 
 /**
  * Tests for {@link PostgresDatabase}
@@ -164,5 +171,22 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
     private void assertPrimaryKeyName(String expected, String actual) {
         assertTrue(expected.getBytes(GlobalConfiguration.FILE_ENCODING.getCurrentValue()).length <= PostgresDatabase.PGSQL_PK_BYTES_LIMIT);
         assert expected.equals(actual) : "Invalid " + actual + " vs expected " + expected;
+    }
+
+    @ParameterizedTest
+    @MethodSource("dbOjectsProvider")
+    void testIsSystemObject(DatabaseObject example, boolean expected) {
+        assertEquals(expected, database.isSystemObject(example));
+    }
+
+    private static Stream<Arguments> dbOjectsProvider() {
+        return Stream.of(
+            Arguments.of(new Table("some_catalog_name", "pg_catalog", "some_table"), true),
+            Arguments.of(new Table("some_catalog_name", "pg_toast", "some_table"), true),
+            Arguments.of(new Table("some_catalog_name", "some_schema", "some_table"), false),
+            Arguments.of(new View("some_catalog_name", "some_schema", "pg_stat_statements"), true),
+            Arguments.of(new View("some_catalog_name", "some_schema", "pg_stat_statements_info"), true),
+            Arguments.of(new View("some_catalog_name", "some_schema", "some_view"), false)
+        );
     }
 }

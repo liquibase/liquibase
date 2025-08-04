@@ -56,6 +56,10 @@ public class OutputChange extends AbstractChange {
         return new SqlStatement[] { new RuntimeStatement() {
             @Override
             public Sql[] generate(Database database) {
+                if (! shouldExecuteChange(database)) {
+                    return null;
+                }
+
                 String target = getTarget();
                 if ("STDOUT".equalsIgnoreCase(target)) {
                     System.out.println(getMessage());

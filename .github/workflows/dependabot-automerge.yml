@@ -1,0 +1,13 @@
+name: Dependabot Auto-merge
+
+# Use the standard liquibase/build-logic reusable workflow for dependabot auto-merge
+# This provides consistent auto-merge behavior across all Liquibase repositories
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  dependabot-automerge:
+    uses: liquibase/build-logic/.github/workflows/dependabot-automerge.yml@main
+    secrets: inherit

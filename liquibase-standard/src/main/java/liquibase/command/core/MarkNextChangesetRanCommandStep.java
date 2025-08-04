@@ -48,8 +48,6 @@ public class MarkNextChangesetRanCommandStep extends AbstractCommandStep {
             Contexts contexts = ((Contexts) commandScope.getDependency(Contexts.class));
             LabelExpression labelExpression = ((LabelExpression) commandScope.getDependency(LabelExpression.class));
 
-            Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).generateDeploymentId();
-
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
                     new NotRanChangeSetFilter(database.getRanChangeSetList()),
                     new ContextChangeSetFilter(contexts),

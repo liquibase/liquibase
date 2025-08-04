@@ -1,0 +1,9 @@
+Usage Data. Notwithstanding anything to the contrary, Liquibase may collect
+and use Usage Data to develop, improve, support, and operate its products and
+services. Liquibase may not share any Usage Data that includes Customer’s
+Confidential Information with a third party except (a) in accordance with
+(Confidentiality) of this license, or (b) to the extent the Usage Data is
+aggregated and anonymized such that Customer’s Users cannot be identified.
+“Usage Data” means usage data in connection with the Customer’s use of the
+Service, such as Liquibase commands used (e.g. update, rollback, checks run)
+and metadata (e.g. timestamp, Liquibase version, database type).

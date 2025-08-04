@@ -4,10 +4,7 @@ import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Scope;
 import liquibase.UpdateSummaryEnum;
-import liquibase.changelog.ChangeLogIterator;
-import liquibase.changelog.ChangeLogParameters;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.StatusChangeLogIterator;
+import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.command.*;
 import liquibase.database.Database;
@@ -15,7 +12,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.logging.mdc.MdcKey;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class UpdateCountCommandStep extends AbstractUpdateCommandStep {
@@ -115,11 +111,7 @@ public class UpdateCountCommandStep extends AbstractUpdateCommandStep {
     }
 
     @Override
-    public void postUpdateLog(int rowsAffected) {
-        if (rowsAffected > -1) {
-            Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("update.count.successful.with.row.count"), rowsAffected));
-        } else {
-            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.count.successful"));
-        }
+    public void postUpdateLog(int rowsAffected, List<ChangeSet> exceptionChangeSets) {
+        this.postUpdateLogForActualUpdate(rowsAffected, exceptionChangeSets, coreBundle.getString("update.count.successful.with.row.count"), coreBundle.getString("update.count.successful"));
     }
 }

@@ -1,8 +1,10 @@
 package liquibase.changelog;
 
+import liquibase.Beta;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.ChecksumVersion;
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
@@ -68,10 +70,22 @@ public interface ChangeLogHistoryService extends Plugin {
 
     void destroy() throws DatabaseException;
 
+    /**
+     * @deprecated use {@link Scope#getDeploymentId()}
+     */
+    @Deprecated
     String getDeploymentId();
 
+    /**
+     * @deprecated This is now handled automatically by the root scope
+     */
+    @Deprecated
     void resetDeploymentId();
 
+    /**
+     * @deprecated This is now handled automatically by the root scope
+     */
+    @Deprecated
     void generateDeploymentId();
 
     /**
@@ -88,5 +102,16 @@ public interface ChangeLogHistoryService extends Plugin {
      * this method to support checksum upgrades.
      */
     default void replaceChecksum(ChangeSet changeSet) throws DatabaseException {
+    }
+
+    /**
+     * By default does nothing to keep compatibility with older versions, but subclasses may like to implement
+     * this method to support eventual minor file path fixes.
+     *
+     * @Deprecated to be removed around Liquibase 4.34.0 - DO NOT USE
+     */
+    @Beta
+    @Deprecated
+    default void replaceFilePath(ChangeSet changeSet, String oldPath) throws DatabaseException {
     }
 }

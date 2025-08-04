@@ -1,6 +1,7 @@
 package liquibase.changelog
 
 import liquibase.ContextExpression
+import liquibase.GlobalConfiguration
 import liquibase.LabelExpression
 import liquibase.Labels
 import liquibase.Scope
@@ -9,11 +10,14 @@ import liquibase.change.core.RawSQLChange
 import liquibase.change.visitor.ChangeVisitor
 import liquibase.database.Database
 import liquibase.database.core.MockDatabase
+import liquibase.exception.ChangeLogParseException
 import liquibase.exception.SetupException
 import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.logging.core.BufferedLogService
+import liquibase.parser.ChangeLogParser
 import liquibase.parser.ChangeLogParserConfiguration
 import liquibase.parser.core.ParsedNode
+import liquibase.parser.core.xml.XMLChangeLogSAXParser
 import liquibase.precondition.core.OrPrecondition
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.RunningAsPrecondition
@@ -22,14 +26,11 @@ import liquibase.resource.ResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.util.FileUtil
-import org.mockito.Mock
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import java.nio.file.Paths
 import java.util.logging.Level
-import java.util.stream.Stream
 
 class DatabaseChangeLogTest extends Specification {
 
@@ -251,7 +252,7 @@ create view sql_view as select * from sql_table;'''
                 new ParsedNode(null, "databaseChangeLog")
                         .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
         def modifyNode =
-                new ParsedNode(null, "modifyChangeSets").addChildren([runWith: "psql"])
+                new ParsedNode(null, "modifyChangeSets").addChildren([runWith: "psql", stripComments: true])
         modifyNode
                 .addChildren([include: [file: "com/example/test1.xml"]])
                 .addChildren([include: [file: "com/example/test2.xml"]])
@@ -325,7 +326,7 @@ create view sql_view as select * from sql_table;'''
                 new ParsedNode(null, "databaseChangeLog")
                         .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
         def modifyNode =
-                new ParsedNode(null, "modifyChangeSets").addChildren([runWith: "psql"])
+                new ParsedNode(null, "modifyChangeSets").addChildren([runWith: "psql", stripComments: true])
         modifyNode
                 .addChildren([includeAll: [path: "com/example", resourceComparator: "liquibase.changelog.ReversedChangeLogNamesComparator"]])
         topLevel.addChild(modifyNode)
@@ -340,6 +341,7 @@ create view sql_view as select * from sql_table;'''
         rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").getRunWith() == "psql"
         rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").getRunWith() == "psql"
         ((RawSQLChange) rootChangeLog.getChangeSet("com/example/test.sql", "includeAll", "raw").changes[0]).sql == testSql
+        ((RawSQLChange) rootChangeLog.getChangeSets().get(3).changes[0]).isStripComments()
 
         // assert reversed order
         ((CreateTableChange) rootChangeLog.getChangeSets().get(0).changes[0]).tableName == "test_table"
@@ -574,7 +576,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         then:
         def e = thrown(SetupException)
-        e.getMessage().contains("Premature end of file.")
+        e.getMessage().contains(String.format("Unable to parse empty file: '%s'", "com/example/test1.xml"))
     }
 
     def "include fails if SQL file is empty"() {
@@ -591,7 +593,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         then:
         def e = thrown(SetupException)
-        e.getMessage().contains("Unable to parse empty file")
+        e.getMessage().contains(String.format("Unable to parse empty file: '%s'", "com/example/test1.sql"))
     }
 
     def "include fails if JSON file is empty"() {
@@ -892,7 +894,12 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         def s3DatabaseChangeLog = new DatabaseChangeLog(s3RootChangelog)
         s3DatabaseChangeLog.load(new ParsedNode(null, "databaseChangeLog")
-                .addChildren([includeAll: [relativeToChangelogFile: true, path: s3ChangelogPathRelative, minDepth: minDepth, maxDepth: maxDepth, errorIfMissingOrEmpty: false]]), s3ResourceAccessor)
+                .addChildren([includeAll: [relativeToChangelogFile: true,
+                                           path: s3ChangelogPathRelative,
+                                           minDepth: minDepth,
+                                           maxDepth: maxDepth,
+                                           errorIfMissingOrEmpty: false,
+                                           modifyChangeSets: new ModifyChangeSets(null, null, true)]]), s3ResourceAccessor)
 
 
         // Scenario 4: includeAll in root changelog, relativeToChangelogFile true, path multi child
@@ -1075,6 +1082,66 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         "3.xml"         | 1
         "4.xml"         | 2
         "5.xml"         | 0
+    }
+
+    @Unroll
+    def "#tag as root element"(String tag) {
+        when:
+        String content = """<$tag xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+                                    www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"/>
+        """
+        String rootChangeLogPath = "root.xml"
+        def resourceAccessor = new MockResourceAccessor([(rootChangeLogPath): content])
+        DatabaseChangeLog changeLog =
+                Scope.child([(GlobalConfiguration.SECURE_PARSING.key): Boolean.FALSE], {
+                    // Create a new parser instead of using the parserFactory to make sure SECURE_PARSING is used
+                    new XMLChangeLogSAXParser().parse(rootChangeLogPath, new ChangeLogParameters(), resourceAccessor)
+                } as Scope.ScopedRunnerWithReturn<DatabaseChangeLog>)
+        then:
+        ChangeLogParseException e = thrown()
+        e.message.contains("\"$ChangeLogParser.DATABASE_CHANGE_LOG\" expected as root element")
+        where:
+        tag << [
+                'addAutoIncrement', 'addColumn',
+                'addDefaultValue',  'addForeignKeyConstraint',
+                'addLookupTable',   'addNotNullConstraint',
+                'addPrimaryKey',    'addUniqueConstraint',
+                'alterSequence',    'and',
+                'changeLogPropertyDefined',
+                'changeSetExecuted','column',
+                'columnExists',     'comment',
+                'constraints',      'createIndex',
+                'createProcedure',  'createSequence',
+                'createTable',      'createView',
+                'customChange',     'customPrecondition',
+                'dbms',             'delete',
+                'dropAllForeignKeyConstraints','dropColumn',
+                'dropDefaultValue', 'dropForeignKeyConstraint',
+                'dropIndex',        'dropNotNullConstraint',
+                'dropPrimaryKey',   'dropProcedure',
+                'dropSequence'  ,   'dropTable',
+                'dropUniqueConstraint','dropView',
+                'empty',            'executeCommand',
+                'expectedQuotingStrategy','foreignKeyConstraintExists',
+                'include',          'includeAll',
+                'insert',           'loadData',
+                'loadUpdateData',   'mergeColumns',
+                'modifyDataType',   'not',
+                'or',   'output',   'param',
+                'primaryKeyExists', 'preConditions',
+                'renameSequence',   'renameTable',
+                'renameView',       'rollback',
+                'rowCount',         'runningAs',
+                'sequenceExists',   'setColumnRemarks',
+                'setTableRemarks',  'sql',
+                'sqlCheck',         'sqlFile',
+                'stop',             'tableExists',
+                'tableIsEmpty',     'tagDatabase',
+                'uniqueConstraintExists', 'update',
+                'viewExists',       'whereParams'
+        ]
     }
 
 }

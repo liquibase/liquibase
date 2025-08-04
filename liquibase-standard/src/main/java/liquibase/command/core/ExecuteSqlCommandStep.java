@@ -1,6 +1,5 @@
 package liquibase.command.core;
 
-import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changeset.ChangeSetService;
@@ -20,8 +19,6 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -33,6 +30,7 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> SQL_ARG;
     public static final CommandArgumentDefinition<String> SQLFILE_ARG;
     public static final CommandArgumentDefinition<String> DELIMITER_ARG;
+    public static final String STRIP_COMMENTS_KEY = "stripCommentsKey";
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -68,18 +66,19 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
         final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         final String sqlText = getSqlScript(sql, sqlFile);
         final StringBuilder out = new StringBuilder();
-        final String[] sqlStrings = StringUtil.processMultiLineSQL(sqlText, true, true, determineEndDelimiter(commandScope), null);
+        final boolean stripComments = Scope.getCurrentScope().get(STRIP_COMMENTS_KEY, true);
+        final String[] sqlStrings = StringUtil.processMultiLineSQL(sqlText, stripComments, true, determineEndDelimiter(commandScope), null);
 
         ChangeLogParameters changeLogParameters = new ChangeLogParameters(database);
         for (String sqlString : sqlStrings) {
             sqlString = changeLogParameters.expandExpressions(sqlString, null);
-            if (sqlString.toLowerCase().matches("\\s*select .*")) {
+            if (sqlString.toLowerCase().matches("(?s)\\s*select\\s+.*")) {
                 out.append(handleSelect(sqlString, executor));
             } else {
                 executor.execute(new RawParameterizedSqlStatement(sqlString));
-                out.append("Successfully Executed: ").append(sqlString).append("\n");
+                out.append("Successfully Executed: ").append(System.lineSeparator()).append(sqlString).append(System.lineSeparator());
             }
-            out.append("\n");
+            out.append(System.lineSeparator());
         }
 
         database.commit();
@@ -98,13 +97,6 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
             delimiter = service.getEndDelimiter(null);
         }
         return delimiter;
-    }
-
-    protected void handleOutput(CommandResultsBuilder resultsBuilder, String output) throws IOException {
-        String charsetName = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
-        Writer outputWriter = new OutputStreamWriter(resultsBuilder.getOutputStream(), charsetName);
-        outputWriter.write(output);
-        outputWriter.flush();
     }
 
     protected String getSqlScript(String sql, String sqlFile) throws IOException, LiquibaseException {

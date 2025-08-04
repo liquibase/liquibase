@@ -69,7 +69,7 @@ public class ChangeLogSyncVisitor implements ChangeSetVisitor {
     private void postRunMdc(ChangeSet changeSet) {
         try {
             ChangeLogHistoryServiceFactory instance = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class);
-            String deploymentId = instance.getChangeLogService(database).getDeploymentId();
+            String deploymentId = Scope.getCurrentScope().getDeploymentId();
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, deploymentId);
         } catch (Exception e) {
             Scope.getCurrentScope().getLog(getClass()).fine("Failed to retrieve deployment ID for MDC", e);

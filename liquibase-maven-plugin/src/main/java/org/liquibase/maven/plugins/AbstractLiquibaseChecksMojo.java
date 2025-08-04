@@ -19,4 +19,13 @@ public abstract class AbstractLiquibaseChecksMojo extends AbstractLiquibaseMojo{
     public boolean databaseConnectionRequired() {
         return false;
     }
+    protected boolean doesMarkerClassExist() {
+        try {
+            Class.forName("com.datical.liquibase.ext.command.helpers.ChecksCompatibilityCommandStep");
+            return true;
+        } catch (ClassNotFoundException ignored) {
+            return false;
+        }
+    }
+
 }

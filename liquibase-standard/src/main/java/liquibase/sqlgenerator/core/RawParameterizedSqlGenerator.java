@@ -13,7 +13,6 @@ public class RawParameterizedSqlGenerator extends AbstractSqlGenerator<RawParame
     public ValidationErrors validate(RawParameterizedSqlStatement statement, Database database, SqlGeneratorChain<RawParameterizedSqlStatement> sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("sql", statement.getSql());
-        validationErrors.checkRequiredField("parameters", statement.getParameters(), true);
         return validationErrors;
     }
 

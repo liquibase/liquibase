@@ -37,7 +37,7 @@ public class RollbackReportParameters implements UpdateRollbackReportParameters 
     public void setupDatabaseInfo(Database database) throws DatabaseException {
         this.getDatabaseInfo().setDatabaseType(database.getDatabaseProductName());
         this.getDatabaseInfo().setVersion(database.getDatabaseProductVersion());
-        this.getDatabaseInfo().setDatabaseUrl(database.getConnection().getURL());
+        this.getDatabaseInfo().setDatabaseUrl(database.getConnection().getVisibleUrl());
         this.setJdbcUrl(database.getConnection().getURL());
     }
 
@@ -58,5 +58,15 @@ public class RollbackReportParameters implements UpdateRollbackReportParameters 
                 exceptionDetails.getFormattedPrimaryExceptionSource(),
                 // Intentionally not using the formatted version for this last item.
                 exceptionDetails.getPrimaryExceptionReason()));
+    }
+
+    @Override
+    public void suppressSql() {
+        changesetInfo.suppressSql();
+    }
+
+    @Override
+    public void suppressException() {
+        operationInfo.suppressException();
     }
 }

@@ -12,6 +12,8 @@ import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import spock.lang.Shared
 import spock.lang.Specification
 
+import java.sql.ResultSet
+
 @LiquibaseIntegrationTest
 class ClearCheckSumsIntegrationTest extends Specification {
 
@@ -19,9 +21,6 @@ class ClearCheckSumsIntegrationTest extends Specification {
     private DatabaseTestSystem h2 = (DatabaseTestSystem) Scope.currentScope.getSingleton(TestSystemFactory.class).getTestSystem("h2")
 
     def "clearing checksums in an empty database does not throw an exception"() {
-        given:
-        CommandUtil.runDropAll(h2)
-
         when:
         def h2Database = h2.getDatabaseFromFactory()
         def commandResults = new CommandScope("clearChecksums")
@@ -31,9 +30,6 @@ class ClearCheckSumsIntegrationTest extends Specification {
 
         then:
         commandResults.results.size() == 0
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     def "validate checksums are cleared"() {
@@ -54,8 +50,40 @@ class ClearCheckSumsIntegrationTest extends Specification {
 
         then:
         changeLogService.getRanChangeSets().stream().allMatch({ ranChangeSet -> ranChangeSet.getLastCheckSum() == null })
+    }
 
-        cleanup:
-        CommandUtil.runDropAll(h2)
+    def "validate generated CheckSum doesn't change after perform a clearCheckSum command and then a new update command"() {
+        given:
+        def changeLogFile = "changelogs/h2/complete/sqlchange.with.dbms.changelog.xml"
+        def id = "clearCheckSumTest"
+        def author = "mallod"
+        def filePath = "changelogs/h2/complete/sqlchange.with.dbms.changelog.xml"
+        CommandUtil.runUpdate(h2, changeLogFile, null, null, null)
+
+        def originalCheckSum = queryGeneratedCheckSum(id, author, filePath)
+
+        when:
+        CommandUtil.runClearCheckSum(h2)
+
+        then:
+        queryGeneratedCheckSum(id, author, filePath) == null
+
+        when:
+        CommandUtil.runUpdate(h2, changeLogFile, null, null, null)
+
+        then:
+        noExceptionThrown()
+        def newCheckSum = queryGeneratedCheckSum(id, author, filePath)
+        originalCheckSum == newCheckSum
+    }
+
+    private String queryGeneratedCheckSum(String id, String author, String filePath) {
+        ResultSet resultSet = h2.getConnection().createStatement().executeQuery(String.format("select md5sum from databasechangelog WHERE id='%s' AND author='%s' AND filename='%s'", id, author, filePath))
+        def originalCheckSum = ""
+        if (resultSet.next()) {
+            originalCheckSum = resultSet.getString("md5sum")
+        }
+
+        return originalCheckSum
     }
 }

@@ -192,14 +192,17 @@ public class CustomChangeWrapper extends AbstractChange {
     @Override
     public SqlStatement[] generateRollbackStatements(Database database) throws RollbackImpossibleException {
         SqlStatement[] statements = null;
+        boolean shouldExecute = Scope.getCurrentScope().get(Change.SHOULD_EXECUTE, Boolean.TRUE);
         try {
             configureCustomChange();
-            if (customChange instanceof CustomSqlRollback) {
-                statements = ((CustomSqlRollback) customChange).generateRollbackStatements(database);
-            } else if (customChange instanceof CustomTaskRollback) {
-                ((CustomTaskRollback) customChange).rollback(database);
-            } else {
-                throw new RollbackImpossibleException("Unknown rollback type: " + customChange.getClass().getName());
+            if (shouldExecute) {
+                if (customChange instanceof CustomSqlRollback) {
+                    statements = ((CustomSqlRollback) customChange).generateRollbackStatements(database);
+                } else if (customChange instanceof CustomTaskRollback) {
+                    ((CustomTaskRollback) customChange).rollback(database);
+                } else {
+                    throw new RollbackImpossibleException("Unknown rollback type: " + customChange.getClass().getName());
+                }
             }
         } catch (CustomChangeException e) {
             throw new UnexpectedLiquibaseException(e);

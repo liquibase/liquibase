@@ -55,7 +55,10 @@ public class ChangeLogPropertyDefinedPrecondition extends AbstractPrecondition {
         }
         Object propertyValue = changeLogParameters.getValue(property, changeLog);
         if (propertyValue == null) {
-            throw new PreconditionFailedException("Changelog property '"+ property +"' was not set", changeLog, this);
+            propertyValue = changeLogParameters.getLocalValue(property, changeSet);
+            if (null == propertyValue) {
+                throw new PreconditionFailedException("Changelog property '"+ property +"' was not set", changeLog, this);
+            }
         }
         if ((value != null) && !propertyValue.toString().equals(value)) {
             throw new PreconditionFailedException("Expected changelog property '"+ property +"' to have a value of '"+value+"'.  Got '"+propertyValue+"'", changeLog, this);

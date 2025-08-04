@@ -112,6 +112,8 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     private final Map<String, Object> attributes = new HashMap<>();
 
+    private boolean messageDisplayed = false;
+
     public String getName() {
         return toString();
     }
@@ -713,7 +715,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
 
         final ConfiguredValue<String> configuredValue = GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentConfiguredValue();
-        if (!configuredValue.wasDefaultValueUsed()) {
+        if (configuredValue.found() && !configuredValue.wasDefaultValueUsed()) {
             return configuredValue.getValue();
         }
 
@@ -825,7 +827,14 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String toString() {
-        if (getConnection() == null) {
+        boolean closed = false;
+        try {
+            closed = getConnection().isClosed();
+        } catch (Exception ignored) {
+
+        }
+
+        if (getConnection() == null || closed) {
             return getShortName() + " Database";
         }
 
@@ -1520,11 +1529,12 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     @Override
     public int getMaxFractionalDigitsForTimestamp() {
-        if (getConnection() == null) {
+        if (getConnection() == null && ! messageDisplayed) {
             // if no connection is there we cannot do anything...
             Scope.getCurrentScope().getLog(getClass()).warning(
                     "No database connection available - specified"
                             + " DATETIME/TIMESTAMP precision will be tried");
+            messageDisplayed = true;
         }
         return DEFAULT_MAX_TIMESTAMP_FRACTIONAL_DIGITS;
     }

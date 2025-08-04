@@ -602,6 +602,7 @@ class StringUtilTest extends Specification {
         "select * from x"                      | null
         "select * from /* a comment here */ x" | null
         "select * from /* a comment here */"   | "/* a comment here */"
+        "/*CREATE PROC... */"                  | "/*CREATE PROC... */"
     }
 
     @Unroll

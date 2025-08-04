@@ -17,16 +17,16 @@
         <deploy.repositoryId>liquibase</deploy.repositoryId>
         <deploy.url>https://maven.pkg.github.com/liquibase/liquibase</deploy.url>
         <h2.version>2.2.224</h2.version>
-        <hsqldb.version>2.7.3</hsqldb.version>
-        <postgresql.version>42.7.4</postgresql.version>
-        <mssql.version>12.8.1.jre8</mssql.version>
-        <mysql.version>8.0.21</mysql.version>
-        <mariadb.version>3.4.1</mariadb.version>
-        <oracle.version>19.24.0.0</oracle.version>
-        <sqlite.version>3.46.1.0</sqlite.version>
+        <hsqldb.version>2.7.4</hsqldb.version>
+        <postgresql.version>42.7.7</postgresql.version>
+        <mssql.version>12.10.1.jre8</mssql.version>
+        <mysql.version>9.2.0</mysql.version>
+        <mariadb.version>3.5.4</mariadb.version>
+        <oracle.version>19.28.0.0</oracle.version>
+        <sqlite.version>3.50.3.0</sqlite.version>
         <db2.version>11.5.9.0</db2.version>
-        <firebird.version>5.0.5.java8</firebird.version>
-        <slf4j.version>2.0.16</slf4j.version>
+        <firebird.version>5.0.8.java8</firebird.version>
+        <slf4j.version>2.0.17</slf4j.version>
         <liquibase-pro.version>master-SNAPSHOT</liquibase-pro.version>
         <liquibase-checks.version>0-SNAPSHOT</liquibase-checks.version>
         <assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
@@ -34,7 +34,19 @@
         <maven.install.skip>true</maven.install.skip>
         <artifact.version>${project.version}</artifact.version>
         <sonar.coverage.jacoco.xmlReportPaths>../target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <expected-distribution-contents-filename>expected-distribution-contents.txt</expected-distribution-contents-filename>
     </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>5.13.4</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -45,19 +57,27 @@
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
-            <version>4.7.6</version>
+            <version>4.7.7</version>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.9</version>
+            <version>${opencsv.version}</version>
             <scope>compile</scope>
             <exclusions>
                 <!-- not used by liquibase code -->
                 <exclusion>
                     <groupId>commons-beanutils</groupId>
                     <artifactId>commons-beanutils</artifactId>
+                </exclusion>
+                <exclusion> <!-- direct dependency for better dependabot control -->
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-text</artifactId>
+                </exclusion>
+                <exclusion> <!-- direct dependency for better dependabot control -->
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-collections4</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -94,15 +114,15 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.18.0</version>
+            <version>3.25.1</version>
         </dependency>
 
         <!--        CANNOT INCLUDE MYSQL FOR LICENSING REASONS -->
-        <!--        <dependency>-->
-        <!--            <groupId>mysql</groupId>-->
-        <!--            <artifactId>mysql-connector-java</artifactId>-->
-        <!--            <version>${mysql.version}</version>-->
-        <!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.mysql</groupId>-->
+<!--            <artifactId>mysql-connector-j</artifactId>-->
+<!--            <version>${mysql.version}</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
@@ -146,7 +166,7 @@
              We also add it here to be able to manage the version for it -->
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
+            <artifactId>slf4j-nop</artifactId>
             <version>${slf4j.version}</version>
         </dependency>
 
@@ -160,7 +180,7 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>2.3</version>
+            <version>2.4</version>
         </dependency>
 
         <!-- needed for inclusion in CLI when running in newer java versions -->
@@ -180,6 +200,17 @@
             <artifactId>jaxb-runtime</artifactId>
             <version>4.0.5</version>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.28.0</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -244,7 +275,7 @@
             <plugin>
                 <groupId>org.liquibase.ext</groupId>
                 <artifactId>liquibase-sdk-maven-plugin</artifactId>
-                <version>0.10.23</version>
+                <version>0.10.25</version>
             </plugin>
 
             <plugin>
@@ -281,7 +312,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-install-plugin</artifactId>
-                <version>3.1.3</version>
+                <version>3.1.4</version>
                 <configuration>
                     <groupId>${project.groupId}</groupId>
                     <version>${artifact.version}</version>
@@ -301,7 +332,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>3.1.3</version>
+                <version>3.1.4</version>
                 <configuration>
                     <groupId>${project.groupId}</groupId>
                     <version>${artifact.version}</version>
@@ -324,7 +355,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>3.6.1</version>
                 <executions>
                     <execution>
                         <id>timestamp-property</id>
@@ -363,6 +394,49 @@
                     <version>${liquibase-pro.version}</version>
                 </dependency>
             </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <version>3.14.0</version>
+                        <executions>
+                            <execution>
+                                <phase>test-compile</phase>
+                                <goals>
+                                    <goal>testCompile</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <expected.distribution.contents.filename>${expected-distribution-contents-filename}</expected.distribution.contents.filename>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>liquibase-minimal</id>
+
+            <properties>
+                <assemblyConfigFile>src/main/assembly/assembly-bin-pro-minimal.xml</assemblyConfigFile>
+                <expected-distribution-contents-filename>expected-distribution-contents-minimal.txt</expected-distribution-contents-filename>
+            </properties>
         </profile>
 
         <profile>

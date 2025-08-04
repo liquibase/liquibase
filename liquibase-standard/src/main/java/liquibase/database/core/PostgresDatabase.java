@@ -15,6 +15,7 @@ import liquibase.logging.Logger;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtil;
@@ -75,6 +76,9 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         super.sequenceCurrentValueFunction = "currval('%s')";
         super.unmodifiableDataTypes.addAll(Arrays.asList("bool", "int4", "int8", "float4", "float8", "bigserial", "serial", "oid", "bytea", "date", "timestamptz", "text", "int2[]", "int4[]", "int8[]", "float4[]", "float8[]", "bool[]", "varchar[]", "text[]", "numeric[]"));
         super.unquotedObjectsAreUppercased = false;
+
+        systemTablesAndViews.add("pg_stat_statements");
+        systemTablesAndViews.add("pg_stat_statements_info");
     }
 
     @Override
@@ -301,6 +305,10 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         // Check preserve case flag for schema
         //
         if (objectType.equals(Schema.class) && Boolean.TRUE.equals(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue())) {
+            return objectName;
+        }
+
+        if(objectType.equals(Catalog.class) && !StringUtil.hasLowerCase(objectName)) {
             return objectName;
         }
 

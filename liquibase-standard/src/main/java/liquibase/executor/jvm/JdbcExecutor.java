@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Class to simplify execution of SqlStatements.  Based heavily on <a href="http://static.springframework.org/spring/docs/2.0.x/reference/jdbc.html">Spring's JdbcTemplate</a>.
@@ -75,21 +77,21 @@ public class JdbcExecutor extends AbstractExecutor {
                 throw new DatabaseException("Cannot execute commands against an offline database");
             }
             stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement();
-            if (Boolean.TRUE.equals(SqlConfiguration.ALWAYS_SET_FETCH_SIZE.getCurrentValue())) {
+            if (database instanceof OracleDatabase && Boolean.TRUE.equals(SqlConfiguration.ALWAYS_SET_FETCH_SIZE.getCurrentValue())) {
                 stmt.setFetchSize(database.getFetchSize());
             }
             Statement stmtToUse = stmt;
 
             Object object = action.doInStatement(stmtToUse);
             if (stmtToUse.getWarnings() != null) {
-                showSqlWarnings(stmtToUse);
+                showSqlWarnings(stmtToUse, action);
             }
             return object;
         } catch (SQLException ex) {
             // Release Connection early, to avoid potential connection pool deadlock
             // in the case when the exception translator hasn't been initialized yet.
             try {
-                showSqlWarnings(stmt);
+                showSqlWarnings(stmt, action);
             } catch (SQLException sqle) {
                 Scope.getCurrentScope().getLog(JdbcExecutor.class).warning(String.format("Unable to access SQL warning: %s", sqle.getMessage()));
             }
@@ -107,15 +109,16 @@ public class JdbcExecutor extends AbstractExecutor {
         }
     }
 
-    private void showSqlWarnings(Statement stmtToUse) throws SQLException {
-        if (Boolean.TRUE.equals(! SqlConfiguration.SHOW_SQL_WARNING_MESSAGES.getCurrentValue() ||
-            stmtToUse == null) ||
-            stmtToUse.getWarnings() == null) {
+    protected void showSqlWarnings(Statement stmtToUse, StatementCallback action)
+            throws SQLException, DatabaseException {
+        if (!SqlConfiguration.SHOW_SQL_WARNING_MESSAGES.getCurrentValue() ||
+                stmtToUse == null ||
+                stmtToUse.getWarnings() == null) {
             return;
         }
         SQLWarning sqlWarning = stmtToUse.getWarnings();
         do {
-            Scope.getCurrentScope().getLog(JdbcExecutor.class).warning(sqlWarning.getMessage());
+            Scope.getCurrentScope().getUI().sendMessage(sqlWarning.getMessage());
             sqlWarning = sqlWarning.getNextWarning();
         } while (sqlWarning != null);
     }
@@ -238,7 +241,9 @@ public class JdbcExecutor extends AbstractExecutor {
 
             try (PreparedStatement pstmt = factory.create(finalSql)) {
                 setParameters(pstmt, (RawParameterizedSqlStatement) sql);
-                return rse.extractData(pstmt.executeQuery());
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    return rse.extractData(rs);
+                }
             } catch (SQLException e) {
                 throw new DatabaseException(e);
             }
@@ -464,6 +469,22 @@ public class JdbcExecutor extends AbstractExecutor {
             this.sqlVisitors = sqlVisitors;
         }
 
+        private void addUpdateCountToScope(int updateCount) {
+            if (updateCount > -1) {
+                AtomicInteger scopeRowsAffected = Scope.getCurrentScope().get(ROWS_AFFECTED_SCOPE_KEY, AtomicInteger.class);
+                Boolean shouldUpdateRowsAffected = Scope.getCurrentScope().get(SHOULD_UPDATE_ROWS_AFFECTED_SCOPE_KEY, true);
+                if (scopeRowsAffected != null && Boolean.TRUE.equals(shouldUpdateRowsAffected)) {
+                    scopeRowsAffected.addAndGet(updateCount);
+                }
+            }
+        }
+
+        private boolean isDML(String statement) {
+            Pattern dmlPattern = Pattern.compile("^\\s*?(SELECT\\s|INSERT\\s|UPDATE\\s|DELETE\\s|MERGE\\s)(.*)");
+            Matcher m = dmlPattern.matcher(statement);
+            return m.matches();
+        }
+
         @Override
         public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
             Logger log = Scope.getCurrentScope().getLog(getClass());
@@ -481,7 +502,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
                 Level sqlLogLevel = SqlConfiguration.SHOW_AT_LOG_LEVEL.getCurrentValue();
 
-                log.log(sqlLogLevel, statement, null);
+                log.log(sqlLogLevel, System.lineSeparator() + statement, null);
                 if (statement.contains("?")) {
                     stmt.setEscapeProcessing(false);
                 }
@@ -491,7 +512,9 @@ public class JdbcExecutor extends AbstractExecutor {
                     if (!stmt.execute(statement)) {
                         int updateCount = stmt.getUpdateCount();
                         addUpdateCountToScope(updateCount);
-                        log.log(sqlLogLevel, updateCount + " row(s) affected", null);
+                        if (isDML(statement)) {
+                            log.log(sqlLogLevel, updateCount + " row(s) affected", null);
+                        }
                     }
                 } catch (Throwable e) {
                     throw new DatabaseException(e.getMessage() + " [Failed SQL: " + getErrorCode(e) + statement + "]", e);
@@ -521,15 +544,6 @@ public class JdbcExecutor extends AbstractExecutor {
         }
     }
 
-    private void addUpdateCountToScope(int updateCount) {
-        if (updateCount > -1) {
-            AtomicInteger scopeRowsAffected = Scope.getCurrentScope().get(ROWS_AFFECTED_SCOPE_KEY, AtomicInteger.class);
-            Boolean shouldUpdateRowsAffected = Scope.getCurrentScope().get(SHOULD_UPDATE_ROWS_AFFECTED_SCOPE_KEY, true);
-            if (scopeRowsAffected != null && Boolean.TRUE.equals(shouldUpdateRowsAffected)) {
-                scopeRowsAffected.addAndGet(updateCount);
-            }
-        }
-    }
 
     private class QueryStatementCallback implements StatementCallback {
 

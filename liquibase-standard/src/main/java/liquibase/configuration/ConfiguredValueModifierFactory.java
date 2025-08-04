@@ -40,7 +40,7 @@ public class ConfiguredValueModifierFactory  implements SingletonObject {
         for (Iterator<ConfiguredValueModifier> iterator = allInstances.descendingIterator(); iterator.hasNext(); ) {
             ConfiguredValueModifier allInstance = iterator.next();
             String overriddenValue = allInstance.override(configuredValue);
-            if (!configuredValue.equals(overriddenValue)) {
+            if (configuredValue == null || !configuredValue.equals(overriddenValue)) {
                 return overriddenValue;
             }
         }

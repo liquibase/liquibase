@@ -51,7 +51,6 @@ class StandardServiceLocatorTest extends Specification {
                 ChangeLogHistoryService.class,
                 Database.class,
                 ChangeLogParser.class,
-                CommandStep.class,
                 LiquibaseDataType.class,
                 DiffGenerator.class,
                 DatabaseObjectComparator.class,

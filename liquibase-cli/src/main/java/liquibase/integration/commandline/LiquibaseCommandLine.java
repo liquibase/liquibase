@@ -2,10 +2,7 @@ package liquibase.integration.commandline;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.command.CommandArgumentDefinition;
-import liquibase.command.CommandDefinition;
-import liquibase.command.CommandFactory;
-import liquibase.command.CommandFailedException;
+import liquibase.command.*;
 import liquibase.command.core.*;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueProvider;
@@ -32,27 +29,24 @@ import liquibase.ui.LoggerUIService;
 import liquibase.ui.UIService;
 import liquibase.util.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemProperties;
 import picocli.CommandLine;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.GZIPOutputStream;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.configuration.LiquibaseConfiguration.REGISTERED_VALUE_PROVIDERS_KEY;
-import static liquibase.integration.commandline.VersionUtils.*;
-import static liquibase.util.SystemUtil.isWindows;
+import static liquibase.util.VersionUtils.*;
 
 
 public class LiquibaseCommandLine {
@@ -92,11 +86,46 @@ public class LiquibaseCommandLine {
     public static void main(String[] args) {
         //we don't ship jansi, so we know we can disable it without having to do the slow class checking
         System.setProperty("org.fusesource.jansi.Ansi.disable", "true");
-        final LiquibaseCommandLine cli = new LiquibaseCommandLine();
 
+        //
+        // Do not allow any checks commands if the extension JAR is not present
+        //
+        if (args.length > 1 && args[0].equalsIgnoreCase("checks")) {
+            try {
+                Class.forName("com.datical.liquibase.ext.command.checks.ChecksRunCommandStep");
+            } catch (ClassNotFoundException ignored) {
+                System.out.println(Scope.CHECKS_MESSAGE);
+                Scope.getCurrentScope().getLog(LiquibaseCommandLine.class).severe(Scope.CHECKS_MESSAGE);
+                System.exit(1);
+            }
+        }
+
+        //
+        // Check for arguments which contain azure-storage and get out
+        //
+        if (args.length > 1 && azureArgumentIsPresent(args)) {
+            try {
+                Class.forName("liquibase.resource.azure.AzurePathHandler");
+            } catch (ClassNotFoundException ignored) {
+                System.out.println(Scope.AZURE_MESSAGE);
+                Scope.getCurrentScope().getLog(LiquibaseCommandLine.class).severe(Scope.AZURE_MESSAGE);
+                System.exit(1);
+            }
+        }
+
+        final LiquibaseCommandLine cli = new LiquibaseCommandLine();
         int returnCode = cli.execute(args);
 
         System.exit(returnCode);
+    }
+
+    private static boolean azureArgumentIsPresent(String[] args) {
+        for (String arg : args) {
+            if (arg.replace("-","").toLowerCase().contains("azurestorage")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void cleanup() {
@@ -116,11 +145,11 @@ public class LiquibaseCommandLine {
         this.legacyPositionalArguments.put("tag", TagCommandStep.TAG_ARG.getName());
         this.legacyPositionalArguments.put("tagexists", TagExistsCommandStep.TAG_ARG.getName());
         this.legacyPositionalArguments.put("rollback", RollbackCommandStep.TAG_ARG.getName());
-        this.legacyPositionalArguments.put("rollbacksql", RollbackSqlCommandStep.TAG_ARG.getName());
+        this.legacyPositionalArguments.put("rollbacksql", RollbackCommandStep.TAG_ARG.getName());
         this.legacyPositionalArguments.put("rollbacktodate", RollbackToDateCommandStep.DATE_ARG.getName());
-        this.legacyPositionalArguments.put("rollbacktodatesql", RollbackToDateSqlCommandStep.DATE_ARG.getName());
+        this.legacyPositionalArguments.put("rollbacktodatesql", RollbackToDateCommandStep.DATE_ARG.getName());
         this.legacyPositionalArguments.put("rollbackcount", RollbackCountCommandStep.COUNT_ARG.getName());
-        this.legacyPositionalArguments.put("rollbackcountsql", RollbackCountSqlCommandStep.COUNT_ARG.getName());
+        this.legacyPositionalArguments.put("rollbackcountsql", RollbackCountCommandStep.COUNT_ARG.getName());
         this.legacyPositionalArguments.put("updatecount", UpdateCountCommandStep.COUNT_ARG.getName());
         this.legacyPositionalArguments.put("updatecountsql", UpdateCountSqlCommandStep.COUNT_ARG.getName());
         this.legacyPositionalArguments.put("updatetotag", UpdateToTagCommandStep.TAG_ARG.getName());
@@ -201,36 +230,36 @@ public class LiquibaseCommandLine {
         ;
 
 
-        CommandLine commandLine = new CommandLine(rootCommandSpec, defaultFactory)
+        CommandLine cmdLine = new CommandLine(rootCommandSpec, defaultFactory)
                 .setCaseInsensitiveEnumValuesAllowed(true)
                 .setOptionsCaseInsensitive(true)
                 .setUsageHelpAutoWidth(true);
 
-        addGlobalArguments(commandLine);
+        addGlobalArguments(cmdLine);
 
         for (CommandDefinition commandDefinition : getCommands()) {
-            addSubcommand(commandDefinition, commandLine);
+            addSubcommand(commandDefinition, cmdLine);
         }
 
-        commandLine.setExecutionExceptionHandler((ex, commandLine1, parseResult) -> LiquibaseCommandLine.this.handleException(ex));
+        cmdLine.setExecutionExceptionHandler((ex, commandLine1, parseResult) -> LiquibaseCommandLine.this.handleException(ex));
 
-        commandLine.setUsageHelpAutoWidth(true);
+        cmdLine.setUsageHelpAutoWidth(true);
 
-        return commandLine;
+        return cmdLine;
     }
 
     protected int handleException(Throwable exception) {
         Throwable cause = exception;
 
-        String uiMessage = "";
+        StringBuilder uiMessage = new StringBuilder();
         while (cause != null) {
-            String newMessage = StringUtil.trimToNull(cleanExceptionMessage(cause.getMessage()));
+            String newMessage = StringUtils.trimToNull(cleanExceptionMessage(cause.getMessage()));
             if (newMessage != null) {
-                if (!uiMessage.contains(newMessage)) {
-                    if (!uiMessage.equals("")) {
-                        uiMessage += System.lineSeparator() + "  - Caused by: ";
+                if (!String.valueOf(uiMessage).contains(newMessage)) {
+                    if (!String.valueOf(uiMessage).isEmpty()) {
+                        uiMessage.append(System.lineSeparator()).append("  - Caused by: ");
                     }
-                    uiMessage += newMessage;
+                    uiMessage.append(newMessage);
                 }
             }
 
@@ -238,7 +267,7 @@ public class LiquibaseCommandLine {
         }
 
         if (StringUtils.isEmpty(uiMessage)) {
-            uiMessage = exception.getClass().getName();
+            uiMessage = new StringBuilder(exception.getClass().getName());
         }
 
         //
@@ -246,8 +275,8 @@ public class LiquibaseCommandLine {
         //
         Level level = determineLogLevel(exception);
 
-        if (showExceptionInLog(exception)) {
-            Scope.getCurrentScope().getLog(getClass()).log(level, uiMessage, exception);
+        if (ExceptionUtil.showExceptionInLog(exception)) {
+            Scope.getCurrentScope().getLog(getClass()).log(level, String.valueOf(uiMessage), exception);
         }
 
         boolean printUsage = false;
@@ -276,7 +305,8 @@ public class LiquibaseCommandLine {
                 if (Level.OFF.equals(this.configuredLogLevel)) {
                     System.err.println("For more information, please use the --log-level flag");
                 } else {
-                    if (LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentValue() == null) {
+                    if (LiquibaseCommandLineConfiguration.LOG_FILE.getCurrentValue() == null &&
+                        ! CommandScope.isSuppressExceptionLogging()) {
                         exception.printStackTrace(System.err);
                     }
                 }
@@ -304,20 +334,6 @@ public class LiquibaseCommandLine {
             }
         }
         return 1;
-    }
-
-    //
-    // Honor the expected flag on a CommandFailedException
-    //
-    private boolean showExceptionInLog(Throwable exception) {
-        Throwable t = exception;
-        while (t != null) {
-            if (t instanceof CommandFailedException && ((CommandFailedException) t).isExpected()) {
-                return false;
-            }
-            t = t.getCause();
-        }
-        return true;
     }
 
     //
@@ -365,7 +381,7 @@ public class LiquibaseCommandLine {
 
             configureLogging(Level.OFF, null);
 
-            Main.runningFromNewCli = true;
+            Main.setRunningFromNewCli(true);
 
             final List<ConfigurationValueProvider> valueProviders = registerValueProviders(finalArgs);
             LogService newLogService = Scope.child(Collections.singletonMap(REGISTERED_VALUE_PROVIDERS_KEY, true), () -> {
@@ -377,8 +393,8 @@ public class LiquibaseCommandLine {
                 addEmptyMdcValues();
                 try {
                     return Scope.child(configureScope(args), () -> {
-
-                        if (!LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue()) {
+                        Boolean shouldExecuteCmd = LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentValue();
+                        if (!Boolean.TRUE.equals(shouldExecuteCmd)) {
                             Scope.getCurrentScope().getUI().sendErrorMessage((
                                     String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
                                             LiquibaseCommandLineConfiguration.SHOULD_RUN.getCurrentConfiguredValue().getProvidedValue().getActualKey())));
@@ -409,19 +425,16 @@ public class LiquibaseCommandLine {
                                 Scope.getCurrentScope().getUI().sendMessage("Logs saved to " + logFile.getValue());
                             }
 
-                            final ConfiguredValue<String> outputFile = LiquibaseCommandLineConfiguration.OUTPUT_FILE.getCurrentConfiguredValue();
-                            if (outputFile.found()) {
-                                Scope.getCurrentScope().getUI().sendMessage("Output saved to " + outputFile.getValue());
-                            }
-
                             if (response == 0) {
+                                final ConfiguredValue<String> outputFile = LiquibaseCommandLineConfiguration.OUTPUT_FILE.getCurrentConfiguredValue();
+                                if (outputFile.found()) {
+                                    Scope.getCurrentScope().getUI().sendMessage("Output saved to " + outputFile.getValue());
+                                }
                                 final List<CommandLine> commandList = commandLine.getParseResult().asCommandLineList();
                                 final String commandName = StringUtil.join(getCommandNames(commandList.get(commandList.size() - 1)), " ");
                                 Scope.getCurrentScope().getUI().sendMessage("Liquibase command '" + commandName + "' was executed successfully.");
                             }
                         }
-
-
                         return response;
                     });
                 } finally {
@@ -443,7 +456,8 @@ public class LiquibaseCommandLine {
     }
 
     private void addEmptyMdcValues() {
-        if (LiquibaseCommandLineConfiguration.ADD_EMPTY_MDC_VALUES.getCurrentValue()) {
+        Boolean addEmptyMdcValues = LiquibaseCommandLineConfiguration.ADD_EMPTY_MDC_VALUES.getCurrentValue();
+        if (Boolean.TRUE.equals(addEmptyMdcValues)) {
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, "");
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME, "NOOP");
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_OUTCOME_COUNT, "0");
@@ -466,10 +480,10 @@ public class LiquibaseCommandLine {
     /**
      * Log MDC data related to Liquibase system information.
      */
-    private void logMdcData() throws IOException {
+    private void logMdcData() {
         MdcManager mdcManager = Scope.getCurrentScope().getMdcManager();
         String localHostName = NetUtil.getLocalHostName();
-        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SYSTEM_USER, System.getProperty("user.name"), false);
+        Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_SYSTEM_USER, SystemProperties.getUserName(), false);
         try (MdcObject version = mdcManager.put(MdcKey.LIQUIBASE_VERSION, LiquibaseUtil.getBuildVersion());
              MdcObject systemName = mdcManager.put(MdcKey.LIQUIBASE_SYSTEM_NAME, localHostName);
              // The host name here is purposefully the same as the system name. The system name is retained for backwards compatibility.
@@ -551,7 +565,7 @@ public class LiquibaseCommandLine {
 
         Map<String, String> changelogParameters = subcommandParseResult.matchedOptionValue("-D", new HashMap<>());
         if (changelogParameters.size() != 0) {
-            Main.newCliChangelogParameters = changelogParameters;
+            Main.setNewCliChangelogParameters(changelogParameters);
         }
         return changelogParameters;
     }
@@ -651,7 +665,8 @@ public class LiquibaseCommandLine {
                 Scope.getCurrentScope().getLog(getClass()).fine("Cannot find defaultsFile " + defaultsFileConfigValue);
                 if (!defaultsFileConfig.wasDefaultValueUsed()) {
                             //can't use UI since it's not configured correctly yet
-                    if (GlobalConfiguration.STRICT.getCurrentValue()) {
+                    Boolean strict = GlobalConfiguration.STRICT.getCurrentValue();
+                    if (Boolean.TRUE.equals(strict)) {
                         throw new UnexpectedLiquibaseException("ERROR: The file '"+defaultsFileConfigValue+"' was not found. The global argument 'strict' is enabled, which validates the existence of files specified in liquibase files, such as changelogs, flowfiles, checks packages files, and more. To prevent this message, check your configurations, or disable the 'strict' setting.");
                     } else {
                         System.err.println("Could not find defaults file " + defaultsFileConfigValue);
@@ -692,19 +707,19 @@ public class LiquibaseCommandLine {
         returnMap.put(COMMAND_ARGUMENTS, args);
 
         final IntegrationDetails integrationDetails = new IntegrationDetails();
-        integrationDetails.setName("cli");
-        returnMap.put("integrationDetails", integrationDetails);
-
-        final ClassLoader classLoader = configureClassLoader();
+        integrationDetails.setName(LiquibaseCommandLineConfiguration.INTEGRATION_NAME.getCurrentValue());
+        returnMap.put(Scope.Attr.integrationDetails.name(), integrationDetails);
 
         returnMap.putAll(configureLogging());
+        final String configuredChannels = LiquibaseCommandLineConfiguration.LOG_CHANNELS.getCurrentValue();
+        returnMap.put("logChannels", configuredChannels);
 
         //
         // Pass any -D properties in the scope so that they will be available to
         // any logging that might happen
         //
         Map<String, String> javaProperties = addJavaPropertiesToChangelogParameters();
-        Scope.child(new HashMap<>(javaProperties), () -> returnMap.putAll(configureResourceAccessor(classLoader)));
+        Scope.child(new HashMap<>(javaProperties), () -> returnMap.putAll(configureResourceAccessor(Thread.currentThread().getContextClassLoader())));
 
         UIService defaultUiService = getDefaultUiService();
 
@@ -726,7 +741,11 @@ public class LiquibaseCommandLine {
                 (LiquibaseCommandLineConfiguration.ArgumentConverter) argument -> "--" + StringUtil.toKabobCase(argument));
 
         returnMap.put(Scope.JAVA_PROPERTIES, javaProperties);
-
+        //
+        // Load this object for setting suppression of exception logging flag
+        // Methods in the CommandScope class are used to set and retrieve the flag
+        //
+        returnMap.put(CommandScope.SUPPRESS_SHOWING_EXCEPTION_IN_LOG, new AtomicBoolean());
         return returnMap;
     }
 
@@ -758,6 +777,7 @@ public class LiquibaseCommandLine {
         }
 
         configureLogging(logLevel, logFile, currentConfiguredValue.wasDefaultValueUsed());
+        returnMap.put("logLevel", logLevel);
 
         return returnMap;
     }
@@ -790,6 +810,9 @@ public class LiquibaseCommandLine {
             if (fileHandler == null) {
                 final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
                 OutputStream outputStream = pathHandlerFactory.openResourceOutputStream(logFile, new OpenOptions().setAppend(true));
+                if (StringUtils.endsWithIgnoreCase(logFile, ".gz")) {
+                    outputStream = new GZIPOutputStream(outputStream);
+                }
                 fileHandler = new StreamHandler(outputStream, new SimpleFormatter());
 
                 JavaLogService.setFormatterOnHandler(logService, fileHandler);
@@ -854,50 +877,9 @@ public class LiquibaseCommandLine {
         return returnMap;
     }
 
-    protected ClassLoader configureClassLoader() throws IllegalArgumentException {
-        final String classpath = LiquibaseCommandLineConfiguration.CLASSPATH.getCurrentValue();
-
-        final List<URL> urls = new ArrayList<>();
-        if (classpath != null) {
-            String[] classpathSoFar;
-            if (isWindows()) {
-                classpathSoFar = classpath.split(";");
-            } else {
-                classpathSoFar = classpath.split(":");
-            }
-
-            for (String classpathEntry : classpathSoFar) {
-                File classPathFile = new File(classpathEntry);
-                if (!classPathFile.exists()) {
-                    throw new IllegalArgumentException(classPathFile.getAbsolutePath() + " does not exist");
-                }
-
-                try {
-                    URL newUrl = new File(classpathEntry).toURI().toURL();
-                    Scope.getCurrentScope().getLog(getClass()).fine(newUrl.toExternalForm() + " added to class loader");
-                    urls.add(newUrl);
-                } catch (MalformedURLException e) {
-                    throw new IllegalArgumentException(e);
-                }
-            }
-        }
-
-        final ClassLoader classLoader;
-        if (LiquibaseCommandLineConfiguration.INCLUDE_SYSTEM_CLASSPATH.getCurrentValue()) {
-            classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), Thread.currentThread()
-                    .getContextClassLoader()));
-
-        } else {
-            classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), null));
-        }
-
-        Thread.currentThread().setContextClassLoader(classLoader);
-
-        return classLoader;
-    }
-
     private void addSubcommand(CommandDefinition commandDefinition, CommandLine rootCommand) {
         List<String[]> commandNames = expandCommandNames(commandDefinition);
+        Boolean showHidden = LiquibaseCommandLineConfiguration.SHOW_HIDDEN_ARGS.getCurrentValue();
 
         boolean showCommand = true;
         for (String[] commandName : commandNames) {
@@ -991,7 +973,7 @@ public class LiquibaseCommandLine {
                     if (i > 0) {
                         builder.hidden(true);
                     } else {
-                        builder.hidden(def.getHidden() && !LiquibaseCommandLineConfiguration.SHOW_HIDDEN_ARGS.getCurrentValue());
+                        builder.hidden(def.getHidden() && !showHidden);
                     }
 
                     subCommandSpec.addOption(builder.build());

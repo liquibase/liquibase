@@ -8,6 +8,7 @@
     <changeSet id="1" author="jlyle">
         <createTable tableName="parameter_value_tests">
             <column name="id" type="number" autoIncrement="true" />
+            <column name="deployment_id" type="varchar2(10)" />
             <column name="changelog_file" type="varchar(4000)" />
             <column name="changeset_id" type="varchar(4000)" />
             <column name="changeset_author" type="varchar(4000)" />

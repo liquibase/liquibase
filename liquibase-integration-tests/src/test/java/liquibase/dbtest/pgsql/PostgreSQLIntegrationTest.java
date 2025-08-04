@@ -9,8 +9,11 @@ import liquibase.change.core.AddPrimaryKeyChange;
 import liquibase.change.core.CreateIndexChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.changelog.ChangeSet;
+import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.core.GenerateChangelogCommandStep;
+import liquibase.command.core.StatusCommandStep;
+import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
@@ -21,9 +24,12 @@ import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
+import liquibase.exception.CommandExecutionException;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.executor.ExecutorService;
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
+import liquibase.logging.mdc.customobjects.SimpleStatus;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -37,6 +43,7 @@ import org.junit.Test;
 import java.io.ByteArrayOutputStream;
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -47,13 +54,63 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
 
     private String dependenciesChangeLog;
     private String blobChangeLog;
+    private String sleepChangelog;
     private static DatabaseTestSystem localTestSystem;
 
     public PostgreSQLIntegrationTest() throws Exception {
         super("pgsql", DatabaseFactory.getInstance().getDatabase("postgresql"));
         dependenciesChangeLog = "changelogs/pgsql/complete/testFkPkDependencies.xml";
         blobChangeLog = "changelogs/pgsql/complete/testBlob.changelog.xml";
+        sleepChangelog = "changelogs/pgsql/pg_sleep.sql";
         localTestSystem = testSystem;
+    }
+
+    @Test
+    public void testStatusRunDuringUpdate() throws Exception {
+        assumeNotNull(this.getDatabase());
+
+        clearDatabase();
+        Liquibase liquibase = createLiquibase(sleepChangelog);
+
+        CommandScope commandScope = getStatusCommandScope(this.sleepChangelog);
+        CommandResults statusCheckBefore = commandScope.execute();
+
+        CompletableFuture<Boolean> updateFuture =
+                CompletableFuture.supplyAsync(() -> {
+                    try {
+                        liquibase.update(new Contexts());
+                        return true;
+                    } catch (LiquibaseException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+
+        Thread.sleep(3000); // wait for update to start running
+        CommandResults statusCheckDuring = commandScope.execute();
+
+        assertTrue(updateFuture.get());
+
+        CommandResults statusCheckAfter = commandScope.execute();
+
+        assertTrue(updateFuture.isDone());
+
+        assertEquals("undeployed", ((SimpleStatus)statusCheckBefore.getResult("status")).getMessage());
+        assertEquals(1, ((SimpleStatus)statusCheckBefore.getResult("status")).getChangesetCount());
+        assertEquals("undeployed", ((SimpleStatus)statusCheckDuring.getResult("status")).getMessage());
+        assertEquals(1, ((SimpleStatus)statusCheckDuring.getResult("status")).getChangesetCount());
+        assertEquals("up-to-date", ((SimpleStatus)statusCheckAfter.getResult("status")).getMessage());
+        assertEquals(0, ((SimpleStatus)statusCheckAfter.getResult("status")).getChangesetCount());
+
+
+    }
+
+    private CommandScope getStatusCommandScope(String changelogFile) throws CommandExecutionException {
+        CommandScope commandScope = new CommandScope(StatusCommandStep.COMMAND_NAME);
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, testSystem.getConnectionUrl());
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, testSystem.getUsername());
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, testSystem.getPassword());
+        commandScope.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_FILE_ARG, changelogFile);
+        return commandScope;
     }
 
     @Test
@@ -384,6 +441,38 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
             statement.execute("DROP TABLE IF EXISTS public.DATABASECHANGELOGLOCK");
             statement.execute("DROP TABLE IF EXISTS public.DUMMY_TABLE");
         }
+    }
+
+    @Test
+    public void testSnapshotIndexSnapshotsIndexFunction() throws Exception {
+        String using = "GIN";
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                .execute(new RawParameterizedSqlStatement("CREATE TABLE GIN_TEST (ID INT, DETAILS JSONB)"));
+
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
+                .execute(new RawParameterizedSqlStatement(String.format("CREATE INDEX DETAILS_IDX ON GIN_TEST USING %s(DETAILS)", using)));
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(getDatabase(), null, new CompareControl());
+
+        DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult,
+                        new DiffOutputControl(false, false, false, null));
+        List<ChangeSet> changeSets = changeLogWriter.generateChangeSets();
+        boolean found = false;
+        for (ChangeSet changeSet : changeSets) {
+            List<Change> changes = changeSet.getChanges();
+            for (Change change : changes) {
+                if (! (change instanceof CreateIndexChange)) {
+                    continue;
+                }
+                found = ((CreateIndexChange) change).getUsing().equalsIgnoreCase(using);
+                if (found) {
+                    break;
+                }
+            }
+            if (found) {
+                break;
+            }
+        }
+        Assert.assertTrue("Using index function should be \"" + using + "\"", found);
     }
 
 

@@ -1,6 +1,5 @@
 package liquibase.extension.testing.command
 
-
 import liquibase.change.ColumnConfig
 import liquibase.change.ConstraintsConfig
 import liquibase.change.core.AddPrimaryKeyChange
@@ -27,6 +26,8 @@ Optional Args:
     Default: null
   contextFilter (String) Changeset contexts to generate
     Default: null
+  dataOutputDirectory (String) Specifies a directory to send the loadData output of a diff-changelog/generate-changelog command as a CSV file.
+    Default: null
   defaultCatalogName (String) The default catalog name to use for the database connection
     Default: null
   defaultSchemaName (String) The default schema name to use for the database connection
@@ -37,11 +38,13 @@ Optional Args:
     Default: null
   driverPropertiesFile (String) The JDBC driver properties file
     Default: null
-  excludeObjects (String) Objects to exclude from diff
+  excludeObjects (String) Objects to exclude from diff. Supports regular expressions. Defaults to null.
     Default: null
+  ignoreMissingReferences (Boolean) If true, diff operations will ignore referenced objects which are not found in a snapshot.
+    Default: false
   includeCatalog (Boolean) If true, the catalog will be included in generated changeSets. Defaults to false.
     Default: false
-  includeObjects (String) Objects to include in diff
+  includeObjects (String) Objects to include in diff. Supports regular expressions. Defaults to null.
     Default: null
   includeSchema (Boolean) If true, the schema will be included in generated changeSets. Defaults to false.
     Default: false
@@ -99,7 +102,7 @@ Optional Args:
         ]
 
         setup {
-            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "diffChangelog-test.xml")
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_BOTH, "diffChangelog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "FirstTable",
@@ -169,7 +172,7 @@ Optional Args:
         ]
 
         setup {
-            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "diffChangeLog-test.xml")
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_BOTH, "diffChangeLog-test.xml")
             database = [
                     new CreateTableChange(
                             tableName: "SharedTable",
@@ -228,7 +231,7 @@ Optional Args:
         ]
 
         setup {
-            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_SETUP, "diffChangelogOrder-test.xml")
+            cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_BOTH, "diffChangelogOrder-test.xml")
             database = [
                     new CreateTableChange(
                         tableName: "person",

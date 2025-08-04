@@ -145,4 +145,20 @@ class ChangeLogParametersTest extends Specification {
         then:
         expanded == "1234"
     }
+
+    def "System properties set up naively are not filtered when using required labels or contexts"() {
+        when:
+        def database = new MockDatabase()
+
+        System.setProperty("SOME_PROPERTY", "This should not be filtered")
+        def changeLogParameters = new ChangeLogParameters(database)
+        changeLogParameters.setLabels(new LabelExpression("@required"))
+        changeLogParameters.setContexts(new Contexts("@required"))
+
+        then:
+        changeLogParameters.getValue("SOME_PROPERTY", null) == "This should not be filtered"
+
+        cleanup:
+        System.clearProperty("SOME_PROPERTY")
+    }
 }

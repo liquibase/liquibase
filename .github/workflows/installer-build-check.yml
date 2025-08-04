@@ -1,84 +1,162 @@
 name: Build Test Installers
 
-# Job will run nightly at 03:05 EDT / 02:05 CDT
-# Time below is UTC
 on:
-  schedule:
-    - cron: "5 7 * * *"
   workflow_dispatch:
   push:
     branches:
       - gha-scheduled-*
 
+permissions:
+  id-token: write # Required for OIDC authentication with AWS
 
 jobs:
   build-installers:
     name: Build Installers
-    runs-on: macos-latest #needs macos for apple notarization
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
+      - name: Convert escaped newlines and set GPG key
+        run: |
+          {
+            echo "GPG_KEY_CONTENT<<GPG_EOF"
+            printf '%b' "${{ env.GPG_SECRET }}"
+            echo
+            echo "GPG_EOF"
+          } >> $GITHUB_ENV
 
       - name: Set up JDK for GPG
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
-          gpg-private-key: ${{ secrets.GPG_SECRET }}
+          java-version: "17"
+          distribution: "temurin"
+          gpg-private-key: ${{ env.GPG_KEY_CONTENT }}
           gpg-passphrase: GPG_PASSPHRASE
           overwrite-settings: false
         env:
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
 
-      - name: Download liquibase-artifacts
-        uses: liquibase/action-download-artifact@v2-liquibase
-        with:
-          workflow: run-tests.yml
-          workflow_conclusion: success
-          branch: ${{ github.head_ref }}
-          name: liquibase-artifacts
-          path: re-version/final
-      
+      # TODO: Add install4j and DigiCert KeyLocker Client Tools caching if possible
+      # - name: Cache Install4j
+      #   id: cache-install4j
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: /usr/local/bin/install4jc
+      #     key: install4j-${{ runner.os }}-10_0_9
+
+      # - name: Install Install4j (if not cached)
+      #   if: steps.cache-install4j.outputs.cache-hit != 'true'
+      #   run: |
+      #     wget -nv -O install4j.deb "https://download.ej-technologies.com/install4j/install4j_linux-x64_10_0_9.deb"
+      #     sudo apt install -y ./install4j.deb
+      #     rm install4j.deb
+
+      - name: Decode Client Authentication Certificate
+        run: |
+          echo "${{ env.SM_CLIENT_CERT_FILE_B64 }}" | base64 --decode > /tmp/client-auth.p12
+
+      - name: Set Environment Variables for Signing
+        run: |
+          echo "SM_HOST=${{ env.SM_HOST }}" >> "$GITHUB_ENV"
+          echo "SM_API_KEY=${{ env.SM_API_KEY }}" >> "$GITHUB_ENV"
+          echo "SM_CLIENT_CERT_FILE=/tmp/client-auth.p12" >> "$GITHUB_ENV"
+          echo "SM_CLIENT_CERT_PASSWORD=${{ env.SM_CLIENT_CERT_PASSWORD }}" >> "$GITHUB_ENV"
+          echo "SM_CODE_SIGNING_CERT_SHA1_HASH=${{ env.SM_CODE_SIGNING_CERT_SHA1_HASH }}" >> "$GITHUB_ENV"
+          echo "SM_KEY_PAIR_ALIAS=${{ env.SM_KEY_PAIR_ALIAS }}" >> "$GITHUB_ENV"
+
+      - name: Install jsign and osslsigncode
+        run: |
+          curl -fSslL https://github.com/ebourg/jsign/releases/download/3.1/jsign_3.1_all.deb -o jsign_3.1_all.deb
+          sudo dpkg --install jsign_3.1_all.deb
+          sudo apt-get install osslsigncode
+
+      - name: Create pkcs11properties.cfg
+        run: |
+          cat << EOF > pkcs11properties.cfg
+          name=signingmanager
+          library="$(pwd)/.github/util/smpkcs11.so"
+          slotListIndex=0
+          EOF
+          mv pkcs11properties.cfg $(pwd)/.github/util/
+
+      - name: Install DigiCert KeyLocker Client Tools
+        uses: digicert/ssm-code-signing@v1.1.0
+
       - name: Set branch variable
         run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
 
-      - name: Re-version Installers
+      - name: Download liquibase-artifacts
+        uses: dawidd6/action-download-artifact@v11
+        with:
+          workflow: run-tests.yml
+          workflow_conclusion: success
+          branch: ${{ env.BRANCH }}
+          name: liquibase-artifacts
+          path: re-version/final
+
+      - name: Build Unsigned Windows Installer
         env:
-          INSTALL4J_10_LICENSE: ${{ secrets.INSTALL4J_10_LICENSE }}
-          INSTALL4J_APPLE_KEY: ${{ secrets.INSTALL4J_APPLE_KEY }}
-          INSTALL4J_APPLE_KEY_PASSWORD: ${{ secrets.INSTALL4J_APPLE_KEY_PASSWORD }}
-          INSTALL4J_APPLE_ID: ${{ secrets.INSTALL4J_APPLE_ID }}
-          INSTALL4J_APPLE_ID_PASSWORD: ${{ secrets.INSTALL4J_APPLE_ID_PASSWORD }}
-          INSTALL4J_WINDOWS_KEY: ${{ secrets.INSTALL4J_WINDOWS_KEY }}
-          INSTALL4J_WINDOWS_KEY_PASSWORD: ${{ secrets.INSTALL4J_WINDOWS_KEY_PASSWORD }}
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
-          BRANCH: ${{ github.ref_name || github.head_ref }}
+          INSTALL4J_LICENSE_KEY: ${{ env.INSTALL4J_LICENSE }}
         run: |
-          mkdir -p liquibase-dist/target/keys
-          echo "Saving apple key"
-          echo "$INSTALL4J_APPLE_KEY" | base64 -d > liquibase-dist/target/keys/datical_apple.p12
-          echo "Saving windows key"
-          echo "$INSTALL4J_WINDOWS_KEY" | base64 -d > liquibase-dist/target/keys/datical_windows.pfx
-          
-          ##### Rebuild installers
           tarFile=$(pwd)/re-version/final/liquibase-${BRANCH}-SNAPSHOT.tar.gz
           scriptDir=$(pwd)/.github/util/
-          
+
           mkdir -p liquibase-dist/target/liquibase-0-SNAPSHOT
           (cd liquibase-dist/target/liquibase-0-SNAPSHOT && tar xfz $tarFile)
           (cd liquibase-dist && $scriptDir/package-install4j.sh 0-SNAPSHOT)
           mv liquibase-dist/target/liquibase-*-installer-* re-version/final
 
-          ##Sign Files
-          .github/util/sign-artifacts.sh re-version/final
+      - name: Find Unsigned Windows Installer
+        id: find-installer
+        run: |
+          INSTALLER_PATH=$(find re-version/final -name "liquibase-*-installer-*" | head -n 1)
+          if [ -z "$INSTALLER_PATH" ]; then
+            echo "Error: No installer file found!"
+            exit 1
+          fi
+          echo "Found installer: $INSTALLER_PATH"
+          echo "INSTALLER_PATH=$INSTALLER_PATH" >> $GITHUB_ENV
+
+      - name: Sign Windows Installer using KeyLocker
+        run: |
+          smctl sign -v --fingerprint "$SM_CODE_SIGNING_CERT_SHA1_HASH" \
+          --keypair-alias $SM_KEY_PAIR_ALIAS \
+          --certificate "$SM_CLIENT_CERT_FILE" \
+          --config-file "$(pwd)/.github/util/pkcs11properties.cfg" \
+          --input "$INSTALLER_PATH" --tool jsign
           
+      - name: Verify Windows Installer Signature
+        run: osslsigncode verify -CAfile /etc/ssl/certs/ca-certificates.crt -in "$INSTALLER_PATH"
+
+      - name: GPG Sign Artifacts (After Code Signing the Windows Installer)
+        env:
+          GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
+        run: |
+          .github/util/sign-artifacts.sh re-version/final
+
+      - name: Re-version Installers
+        run: |
           (cd re-version/final && zip liquibase-additional-0-SNAPSHOT.zip *.asc *.md5 *.sha1)
           rm re-version/final/*.asc
           rm re-version/final/*.md5
           rm re-version/final/*.sha1
 
       - name: Archive Packages
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: liquibase-test-packages
           path: re-version/final/*
-
