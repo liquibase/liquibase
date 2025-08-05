@@ -153,6 +153,20 @@ NEW_CHANGETYPE_REQUIREMENTS:
 
 ## PHASE 2: REQUIREMENTS RESEARCH
 
+### APPROACH SELECTION: MANUAL vs TASK-DELEGATED RESEARCH
+
+**Choose your approach based on complexity and time availability:**
+
+#### OPTION A: MANUAL RESEARCH (2-4 hours)
+Best for: Simple objects, existing implementations, when you need direct control
+
+#### OPTION B: TASK-DELEGATED RESEARCH (30 min setup + autonomous execution)
+Best for: Complex new objects, comprehensive analysis needed, parallel work desired
+
+---
+
+## OPTION A: MANUAL RESEARCH WORKFLOW
+
 ### STEP 2.1: OFFICIAL_DOCUMENTATION_RESEARCH
 ```yaml
 BLOCKING_VALIDATION:
@@ -217,6 +231,122 @@ MUTUAL_EXCLUSIVITY_ANALYSIS:
   DOCUMENTATION: "Document which attributes conflict"
   TEST_STRATEGY: "Plan separate test files for incompatible features"
 ```
+
+---
+
+## OPTION B: TASK-DELEGATED RESEARCH WORKFLOW
+
+### WHEN TO USE TASK DELEGATION
+- **Complex new object types** with many unknown parameters
+- **Time-intensive research** (would take 2+ hours manually)
+- **Need comprehensive cross-validation** across multiple sources
+- **Want to work on other components** while research runs autonomously
+
+### TASK DELEGATION SETUP
+
+#### STEP 2B.1: LAUNCH REQUIREMENTS RESEARCH TASK
+```markdown
+Task(
+  subagent_type: "general-purpose",
+  description: "Comprehensive requirements research for [OBJECT_TYPE]",
+  prompt: "Research and create complete requirements documentation for Snowflake [OBJECT_TYPE]:
+
+RESEARCH_OBJECTIVES:
+1. OFFICIAL_DOCUMENTATION_ANALYSIS:
+   - Find and analyze Snowflake official documentation for CREATE/ALTER/DROP [OBJECT_TYPE]
+   - Document complete syntax with all optional clauses and parameters
+   - Include version compatibility information and constraints
+   - Extract BNF/syntax diagrams and examples
+
+2. INFORMATION_SCHEMA_ANALYSIS:
+   - Query available INFORMATION_SCHEMA views for [OBJECT_TYPE] metadata
+   - Cross-reference schema columns with official documentation
+   - Identify properties not covered in official docs
+   - Document queryable vs non-queryable properties
+
+3. EXISTING_IMPLEMENTATION_ANALYSIS:
+   - Search liquibase-snowflake codebase for existing [OBJECT_TYPE] implementations
+   - Analyze similar objects (e.g., if researching STAGE, look at WAREHOUSE patterns)
+   - Document current coverage gaps and missing components
+   - Identify reusable patterns from similar implementations
+
+4. COMPREHENSIVE_REQUIREMENTS_DOCUMENT:
+   Create structured requirements document with:
+   - Complete attribute table with columns: [Attribute, Description, Data Type, Default, Valid Values, Required, Constraints]
+   - Property categorization (Required/Optional/State properties)
+   - SQL syntax examples from official documentation
+   - Edge cases and validation rules
+   - Test scenario recommendations
+   - Implementation gap analysis
+
+DELIVERABLE: Complete requirements document ready for immediate use in Phase 3 (XSD Schema Integration)"
+)
+```
+
+#### STEP 2B.2: TASK OUTPUT VALIDATION
+While the Task runs autonomously, prepare for validation:
+
+**Task Completion Checklist:**
+- [ ] Official Snowflake documentation URL and version documented
+- [ ] Complete attribute table with all required columns filled
+- [ ] Property categorization completed (Required/Optional/State)
+- [ ] SQL syntax examples included with all optional clauses
+- [ ] Cross-validation completed between docs and INFORMATION_SCHEMA
+- [ ] Existing implementation analysis completed
+- [ ] Edge cases and constraints documented
+- [ ] Test scenarios recommended
+
+**Quality Gates:**
+- All parameters have complete descriptions and constraints
+- No "TODO" or "Unknown" entries in requirements table
+- SQL examples are complete and syntactically valid
+- Implementation gaps clearly identified
+
+#### STEP 2B.3: REQUIREMENTS INTEGRATION
+Once Task completes:
+
+1. **Review Task Output** against validation checklist
+2. **Validate Key Requirements** by spot-checking official docs
+3. **Test SQL Examples** if database access available
+4. **Proceed to Phase 3** with comprehensive requirements
+
+### TASK OUTPUT TEMPLATE
+The Task should produce a requirements document with this structure:
+
+```markdown
+# [OBJECT_TYPE] Requirements Documentation
+
+## Official Documentation Reference
+- **URL**: [Snowflake official docs URL]
+- **Version**: [Snowflake version compatibility]
+- **Last Updated**: [Date]
+
+## Complete Attribute Table
+| Attribute | Description | Data Type | Default | Valid Values | Required | Constraints |
+|-----------|-------------|-----------|---------|--------------|----------|-------------|
+| [attr1] | [desc] | [type] | [default] | [values] | [Y/N] | [constraints] |
+
+## Property Categorization
+### Required Properties
+[Properties that must be specified at object creation]
+
+### Optional Configuration  
+[Properties that can be set/changed by user]
+
+### State Properties
+[Runtime information, read-only]
+
+## SQL Syntax Examples
+[Complete CREATE/ALTER/DROP examples with all clauses]
+
+## Implementation Analysis
+[Current coverage, gaps, and recommendations]
+
+## Test Scenarios
+[Recommended test cases based on parameter combinations]
+```
+
+---
 
 ## PHASE 3: XSD SCHEMA INTEGRATION
 

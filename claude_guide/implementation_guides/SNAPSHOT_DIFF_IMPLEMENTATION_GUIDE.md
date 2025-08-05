@@ -131,6 +131,20 @@ SCOPE_DECISION_MATRIX:
 
 ## PHASE 1: REQUIREMENTS RESEARCH AND DOCUMENTATION
 
+### APPROACH SELECTION: MANUAL vs TASK-DELEGATED RESEARCH
+
+**Choose your approach based on object complexity and research depth needed:**
+
+#### OPTION A: MANUAL RESEARCH (2-4 hours)
+Best for: Extending existing objects, simple property additions, direct control needed
+
+#### OPTION B: TASK-DELEGATED RESEARCH (30 min setup + autonomous execution) 
+Best for: New object types, comprehensive property analysis, parallel work desired
+
+---
+
+## OPTION A: MANUAL RESEARCH WORKFLOW
+
 ### STEP 1.1: Official Documentation Research
 ```yaml
 RESEARCH_PROCESS:
@@ -214,6 +228,145 @@ PROPERTY_ANALYSIS_TABLE:
     | comment | String | No | NULL | Exclude if both null | User description |
     | created_time | Timestamp | No | CURRENT_TIME | Exclude | System metadata |
 ```
+
+---
+
+## OPTION B: TASK-DELEGATED RESEARCH WORKFLOW
+
+### WHEN TO USE TASK DELEGATION
+- **New database object types** with unknown properties and behavior
+- **Complex objects** with many optional properties and constraints
+- **Comprehensive analysis needed** across multiple information sources
+- **Want to work on implementation** while research runs autonomously
+
+### TASK DELEGATION SETUP
+
+#### STEP 1B.1: LAUNCH SNAPSHOT/DIFF REQUIREMENTS RESEARCH TASK
+```markdown
+Task(
+  subagent_type: "general-purpose", 
+  description: "Comprehensive snapshot/diff requirements research for [OBJECT_TYPE]",
+  prompt: "Research and create complete snapshot/diff requirements for Snowflake [OBJECT_TYPE]:
+
+RESEARCH_OBJECTIVES:
+1. OFFICIAL_DOCUMENTATION_ANALYSIS:
+   - Find Snowflake official documentation for [OBJECT_TYPE]
+   - Document CREATE/ALTER/DROP/SHOW syntax and all parameters
+   - Extract complete property list with descriptions and constraints
+   - Document relationships to other objects (dependencies, references)
+
+2. INFORMATION_SCHEMA_INVESTIGATION:
+   - Identify INFORMATION_SCHEMA views that contain [OBJECT_TYPE] metadata
+   - Document available columns and their meanings
+   - Test queryability of all properties
+   - Cross-reference with official documentation to identify gaps
+
+3. EXISTING_IMPLEMENTATION_ANALYSIS:
+   - Search liquibase-snowflake codebase for similar object patterns
+   - Analyze existing snapshot generators (Table, Sequence, Warehouse, etc.)
+   - Document reusable patterns and architectural approaches
+   - Identify object model structure requirements
+
+4. PROPERTY_CATEGORIZATION_AND_COMPARISON_ANALYSIS:
+   For each identified property, determine:
+   - **Snapshot Inclusion**: Should this property be captured in snapshots?
+   - **Comparison Strategy**: How should differences be detected? (Full comparison, exclude if both null, ignore completely)
+   - **Required vs Optional**: Is this property required for object creation?
+   - **State vs Configuration**: Is this a user-settable property or system state?
+
+5. COMPREHENSIVE_REQUIREMENTS_DOCUMENT:
+   Create structured document with:
+   - Complete property table with snapshot/comparison strategy
+   - Object model class structure recommendations
+   - INFORMATION_SCHEMA query patterns for snapshot generation
+   - Diff comparison logic recommendations
+   - Edge cases and special handling requirements
+   - Test scenario recommendations
+
+DELIVERABLE: Complete snapshot/diff requirements document ready for Phase 2 (Object Model Implementation)"
+)
+```
+
+#### STEP 1B.2: TASK OUTPUT VALIDATION
+While Task runs autonomously, prepare for validation:
+
+**Task Completion Checklist:**
+- [ ] Official Snowflake documentation analyzed and referenced  
+- [ ] Complete property list with types and constraints documented
+- [ ] INFORMATION_SCHEMA views identified and column mappings created
+- [ ] Property categorization completed (snapshot inclusion, comparison strategy)
+- [ ] Object model structure recommendations provided
+- [ ] Existing implementation patterns analyzed and documented
+- [ ] Edge cases and special handling requirements identified
+- [ ] Test scenarios recommended based on property combinations
+
+**Quality Gates:**
+- All properties have clear snapshot inclusion decisions
+- Comparison strategies defined for each property type
+- No "TODO" or "Unknown" entries in property analysis
+- Object model recommendations are architecturally sound
+- INFORMATION_SCHEMA queries are testable and complete
+
+#### STEP 1B.3: REQUIREMENTS INTEGRATION
+Once Task completes:
+
+1. **Review Task Output** against validation checklist
+2. **Validate INFORMATION_SCHEMA queries** with database if available
+3. **Cross-check object model recommendations** against existing patterns  
+4. **Proceed to Phase 2** with comprehensive requirements
+
+### TASK OUTPUT TEMPLATE
+The Task should produce a requirements document with this structure:
+
+```markdown
+# [OBJECT_TYPE] Snapshot/Diff Requirements Documentation
+
+## Official Documentation Reference
+- **URL**: [Snowflake official docs URL]
+- **Key Properties**: [Summary of main configurable properties] 
+- **Dependencies**: [Related objects and constraints]
+
+## Property Analysis Table
+| Property | Type | Snapshot Include | Comparison Strategy | Required | Default | Notes |
+|----------|------|------------------|-------------------|----------|---------|-------|
+| [prop1] | [type] | [Yes/No] | [Full/Exclude if both null/Ignore] | [Y/N] | [default] | [notes] |
+
+## INFORMATION_SCHEMA Analysis
+### Primary View: [VIEW_NAME]
+- **Location**: `INFORMATION_SCHEMA.[VIEW_NAME]`
+- **Key Columns**: [List of relevant columns]
+- **Query Pattern**: [Sample query for snapshot generation]
+
+### Property Mappings
+| Property | INFORMATION_SCHEMA Column | Data Type | Special Handling |
+|----------|--------------------------|-----------|------------------|
+| [prop] | [column] | [type] | [any special processing needed] |
+
+## Object Model Recommendations
+### Class Structure
+[Recommended Java class structure with key properties]
+
+### Architectural Pattern
+[Extend existing vs create new, integration points]
+
+## Comparison Logic Recommendations
+### Full Comparison Properties
+[Properties that should always be compared for differences]
+
+### Conditional Comparison Properties  
+[Properties with special comparison rules]
+
+### Excluded Properties
+[Properties to ignore in diff comparison]
+
+## Implementation Patterns from Similar Objects
+[Reusable patterns from existing implementations]
+
+## Test Scenarios
+[Recommended test cases covering property combinations and edge cases]
+```
+
+---
 
 ## PHASE 2: OBJECT MODEL IMPLEMENTATION
 

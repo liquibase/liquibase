@@ -36,6 +36,20 @@ SCENARIO_C_FIX_CHANGELOG_BUGS:
 
 ## PHASE 0: PREREQUISITES VALIDATION
 
+### APPROACH SELECTION: MANUAL vs TASK-DELEGATED VALIDATION
+
+**Choose your validation approach:**
+
+#### OPTION A: MANUAL VALIDATION (30-60 minutes)
+Best for: Known stable implementations, quick verification needed
+
+#### OPTION B: TASK-DELEGATED VALIDATION (15 min setup + autonomous execution)
+Best for: Comprehensive analysis, parallel work, thorough gap detection
+
+---
+
+## OPTION A: MANUAL VALIDATION WORKFLOW
+
 ### STEP 0.1: Validate Changetype Implementation
 ```bash
 # Test that all changetypes work correctly
@@ -75,6 +89,86 @@ SNOWFLAKE_USER="COMMUNITYKEVIN" \
 SNOWFLAKE_PASSWORD="uQ1lAjwVisliu8CpUTVh0UnxoTUk3" \
 mvn test -Dtest="DatabaseObjectIntegrationTest" -q
 ```
+
+---
+
+## OPTION B: TASK-DELEGATED VALIDATION WORKFLOW
+
+### WHEN TO USE TASK DELEGATION
+- **Comprehensive validation needed** across multiple components
+- **Unknown implementation status** - need thorough gap analysis
+- **Want to work on other components** while validation runs
+- **Need detailed analysis** of what's missing or broken
+
+### TASK DELEGATION SETUP
+
+#### STEP 0B.1: LAUNCH COMPREHENSIVE PREREQUISITES VALIDATION TASK
+```markdown
+Task(
+  subagent_type: "general-purpose",
+  description: "Comprehensive diff/changelog prerequisites validation",
+  prompt: "Analyze and validate the completeness of changetype and snapshot/diff implementations for diff/changelog functionality:
+
+VALIDATION_OBJECTIVES:
+1. CHANGETYPE_IMPLEMENTATION_ANALYSIS:
+   - Run all changetype tests and document results: mvn test -Dtest='*Change*Test' -q
+   - Run integration tests and document failures: mvn test -Dtest='*Change*IntegrationTest' -q  
+   - Identify any failing tests and analyze root causes
+   - Document SQL generation completeness for each changetype
+
+2. SNAPSHOT_DIFF_IMPLEMENTATION_ANALYSIS:
+   - Run snapshot generator tests: mvn test -Dtest='*Snapshot*Test' -q
+   - Run diff comparator tests: mvn test -Dtest='*Comparator*Test' -q
+   - Run object integration tests: mvn test -Dtest='*ObjectIntegrationTest' -q
+   - Document any missing snapshot generators or comparators
+
+3. SERVICE_REGISTRATION_VALIDATION:
+   - Check META-INF/services registration for all components
+   - Verify ChangeGenerator registration for diff-changelog functionality
+   - Document any missing service registrations
+
+4. DATABASE_CONNECTIVITY_VALIDATION:
+   - Test database connectivity with provided credentials
+   - Validate schema creation and cleanup capabilities
+   - Document any connection or permission issues
+
+5. IMPLEMENTATION_COMPLETENESS_REPORT:
+   Create comprehensive report with:
+   - Summary of passing/failing tests by category
+   - List of missing implementations (snapshot generators, comparators, changetypes)
+   - Service registration gaps and recommendations
+   - Database connectivity status and any issues
+   - Readiness assessment for diff/changelog functionality
+   - Recommended actions before proceeding
+
+DELIVERABLE: Complete prerequisites validation report with go/no-go recommendation"
+)
+```
+
+#### STEP 0B.2: TASK OUTPUT VALIDATION
+While Task runs autonomously:
+
+**Task Completion Checklist:**
+- [ ] All test suites executed and results documented
+- [ ] Implementation gaps clearly identified
+- [ ] Service registration status validated
+- [ ] Database connectivity confirmed
+- [ ] Go/no-go recommendation provided with reasoning
+
+**Quality Gates:**
+- Test results are comprehensive and accurate
+- Missing implementations are specifically identified
+- Service registration issues are documented with solutions
+- Database connectivity problems are clearly described
+
+#### STEP 0B.3: READINESS DECISION
+Based on Task output:
+
+1. **Review validation report** and test results
+2. **Address critical issues** identified by Task before proceeding
+3. **Proceed to Phase 1** only if validation shows readiness
+
+---
 
 ## PHASE 1: SCHEMA ISOLATION SETUP
 
