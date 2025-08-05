@@ -30,6 +30,7 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> SQL_ARG;
     public static final CommandArgumentDefinition<String> SQLFILE_ARG;
     public static final CommandArgumentDefinition<String> DELIMITER_ARG;
+    public static final String STRIP_COMMENTS_KEY = "stripCommentsKey";
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -65,7 +66,8 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
         final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         final String sqlText = getSqlScript(sql, sqlFile);
         final StringBuilder out = new StringBuilder();
-        final String[] sqlStrings = StringUtil.processMultiLineSQL(sqlText, true, true, determineEndDelimiter(commandScope), null);
+        final boolean stripComments = Scope.getCurrentScope().get(STRIP_COMMENTS_KEY, true);
+        final String[] sqlStrings = StringUtil.processMultiLineSQL(sqlText, stripComments, true, determineEndDelimiter(commandScope), null);
 
         ChangeLogParameters changeLogParameters = new ChangeLogParameters(database);
         for (String sqlString : sqlStrings) {
@@ -74,9 +76,9 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
                 out.append(handleSelect(sqlString, executor));
             } else {
                 executor.execute(new RawParameterizedSqlStatement(sqlString));
-                out.append("Successfully Executed: ").append(sqlString).append("\n");
+                out.append("Successfully Executed: ").append(System.lineSeparator()).append(sqlString).append(System.lineSeparator());
             }
-            out.append("\n");
+            out.append(System.lineSeparator());
         }
 
         database.commit();

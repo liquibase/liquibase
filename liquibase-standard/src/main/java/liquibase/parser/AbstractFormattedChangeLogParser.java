@@ -422,7 +422,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     boolean runOnChange = parseBoolean(runOnChangePatternMatcher, changeSet, false, "runOnChange");
                     boolean runAlways = parseBoolean(runAlwaysPatternMatcher, changeSet, false, "runAlways");
                     boolean runInTransaction = parseBoolean(runInTransactionPatternMatcher, changeSet, true, "runInTransaction");
-                    boolean failOnError = parseBoolean(failOnErrorPatternMatcher, changeSet, true, "failOnError");
+                    Boolean failOnError = parseBooleanObject(failOnErrorPatternMatcher, changeSet, null, "failOnError");
 
                     String runWith = parseString(runWithMatcher, RUN_WITH);
                     if (runWith != null) {
@@ -724,7 +724,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     }
 
     protected ChangeSet configureChangeSet(DatabaseChangeLog changeLog, boolean runOnChange, boolean runAlways,
-                                           boolean runInTransaction, boolean failOnError, String runWith,
+                                           boolean runInTransaction, Boolean failOnError, String runWith,
                                            String runWithSpoolFile, String context, String labels, String logicalFilePath,
                                            String dbms, String ignore, String changeSetId, String changeSetAuthor) {
         ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
@@ -947,6 +947,24 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
     protected boolean parseBoolean(Matcher matcher, ChangeSet changeSet, boolean defaultValue) throws ChangeLogParseException {
         return parseBoolean(matcher, changeSet, defaultValue, null);
+    }
+
+    protected Boolean parseBooleanObject(Matcher matcher, ChangeSet changeSet, Boolean defaultValue, String description)
+            throws ChangeLogParseException {
+        Boolean booleanMatch = defaultValue;
+        if (matcher.matches()) {
+            try {
+                booleanMatch = Boolean.parseBoolean(matcher.group(1));
+                logMatch(description, String.valueOf(booleanMatch), getClass());
+            } catch (Exception e) {
+                if (changeSet != null) {
+                    throw new ChangeLogParseException("Cannot parse " + changeSet + " " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
+                } else {
+                    throw new ChangeLogParseException("Cannot parse pattern " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
+                }
+            }
+        }
+        return booleanMatch;
     }
 
     protected boolean parseBoolean(Matcher matcher, ChangeSet changeSet, boolean defaultValue, String description)
