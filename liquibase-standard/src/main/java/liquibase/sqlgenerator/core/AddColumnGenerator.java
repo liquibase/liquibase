@@ -269,11 +269,12 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
                     refTableName = referencesMatcher.group(1);
                     refColName = referencesMatcher.group(2);
                 } else {
+                    refSchemaName = ((ForeignKeyConstraint) constraint).getReferencedTableSchemaName();
                     refTableName = ((ForeignKeyConstraint) constraint).getReferencedTableName();
                     refColName = ((ForeignKeyConstraint) constraint).getReferencedColumnNames();
                 }
 
-                if (refTableName.indexOf(".") > 0) {
+                if (refSchemaName == null && refTableName.indexOf(".") > 0) {
                     refSchemaName = refTableName.split("\\.")[0];
                     refTableName = refTableName.split("\\.")[1];
                 }
