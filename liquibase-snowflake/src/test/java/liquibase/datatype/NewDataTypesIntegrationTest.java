@@ -9,12 +9,12 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.ColumnConstraint;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.core.CreateTableStatement;
+import liquibase.util.TestDatabaseConfigUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -40,15 +40,8 @@ public class NewDataTypesIntegrationTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        String url = System.getenv("SNOWFLAKE_URL");
-        String user = System.getenv("SNOWFLAKE_USER");
-        String password = System.getenv("SNOWFLAKE_PASSWORD");
-        
-        if (url == null || user == null || password == null) {
-            throw new RuntimeException("Snowflake connection environment variables not set");
-        }
-
-        connection = DriverManager.getConnection(url, user, password);
+        // Use YAML configuration instead of environment variables
+        connection = TestDatabaseConfigUtil.getSnowflakeConnection();
         database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
         
         // Create test database and schema

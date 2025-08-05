@@ -45,8 +45,8 @@ public class DataTypeValidationTest {
         assertEquals("VARIANT max params", 0, new VariantTypeSnowflake().getMaxParameters(snowflakeDb));
         assertEquals("ARRAY max params", 1, new ArrayTypeSnowflake().getMaxParameters(snowflakeDb));
         assertEquals("OBJECT max params", 0, new ObjectTypeSnowflake().getMaxParameters(snowflakeDb));
-        assertEquals("GEOGRAPHY max params", 0, new GeographyTypeSnowflake().getMaxParameters(snowflakeDb));
-        assertEquals("GEOMETRY max params", 0, new GeometryTypeSnowflake().getMaxParameters(snowflakeDb));
+        assertEquals("GEOGRAPHY max params", 1, new GeographyTypeSnowflake().getMaxParameters(snowflakeDb));
+        assertEquals("GEOMETRY max params", 1, new GeometryTypeSnowflake().getMaxParameters(snowflakeDb));
         
         // Verify database support constraints prevent wrong database usage
         liquibase.database.core.PostgresDatabase postgresDb = new liquibase.database.core.PostgresDatabase();

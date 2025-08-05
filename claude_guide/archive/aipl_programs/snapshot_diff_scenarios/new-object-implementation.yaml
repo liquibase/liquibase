@@ -1,0 +1,487 @@
+AIPL_VERSION: "2.0"
+PROGRAM_NAME: "new-object-implementation"
+DESCRIPTION: "Complete snapshot/diff implementation for new Snowflake database object"
+
+IMPORTS:
+  - "../../../AIPL/core/TERMINOLOGY_DEFINITIONS.yaml"
+  - "../../../AIPL/core/STEP_SPECIFICATIONS.yaml"
+  - "../../../AIPL/core/AUTONOMOUS_OPERATION.yaml"
+  - "../../../AIPL/libraries/snowflake/SNOWFLAKE_SNAPSHOT_DIFF_PATTERNS.yaml"
+
+REQUIRES:
+  - BEHAVIORAL_KEYWORDS
+  - STEP_CLASSIFICATION
+  - AUTONOMOUS_PREREQUISITE_PHASE
+  - SNOWFLAKE_PATTERNS
+
+EXECUTION_PROTOCOL:
+  PURPOSE: "Implement complete snapshot and diff capability for new Snowflake database object"
+  INPUT: "Target object type (e.g., FileFormat, Warehouse, Stage)"
+  OUTPUT: "Complete object model, snapshot generator, diff comparator with comprehensive tests"
+  VALIDATION: "All tests pass, object integrates with Liquibase snapshot/diff system"
+
+VARIABLES:
+  OBJECT_TYPE: "${TARGET_OBJECT_TYPE}"
+  OBJECT_TYPE_LOWER: "fileformat"  # Will be replaced with actual value
+  PROJECT_BASE: "liquibase-snowflake"
+  PACKAGE_BASE: "liquibase.ext.snowflake"
+  TEST_PACKAGE: "liquibase.ext.snowflake"
+  REQUIREMENTS_FILE: "requirements_${OBJECT_TYPE_LOWER}.md"
+  
+PHASES:
+  PHASE_0_5_AUTONOMOUS_PREREQUISITES:
+    STEP_TYPE: "VALIDATION"
+    PURPOSE: "Validate autonomous operation capability before implementation"
+    
+    INPUT_REQUIREMENTS:
+      - "CLAUDE.md file exists in project root"
+      - "Implementation requires test execution and compilation"
+      
+    QUALITY_GATE:
+      NAME: "validate-autonomous-commands"
+      TYPE: "BLOCKING"
+      FAILURE_ACTION: "STOP"
+      ERROR_MESSAGE: "Missing autonomous operation capability - update CLAUDE.md with required auto-approval patterns"
+      RECOVERY_STEPS:
+        - "Add required command patterns to CLAUDE.md"
+        - "Verify patterns match expected format"
+        - "Re-run autonomous validation"
+        
+    ACCEPTANCE_CRITERIA:
+      - CRITERION: "CLAUDE.md contains required auto-approval patterns"
+        VALIDATION_COMMAND: "grep -c 'mvn test.*-Dtest=' CLAUDE.md"
+        PASS_CONDITION: "≥ 3 autonomous test command patterns found"
+      - CRITERION: "CLAUDE.md accessible and readable"
+        VALIDATION_COMMAND: "test -r CLAUDE.md"
+        PASS_CONDITION: "File is readable"
+        
+    DELIVERABLES:
+      - ARTIFACT: "Autonomous capability validation result"
+        LOCATION: "Validation log or confirmation"
+        VALIDATION: "All validation commands passed successfully"
+
+  PHASE_1_REQUIREMENTS_RESEARCH:
+    STEP_1_1_DOMAIN_RESEARCH:
+      STEP_TYPE: "RESEARCH"
+      PURPOSE: "Research comprehensive Snowflake object properties and behavior"
+      
+      INPUT_REQUIREMENTS:
+        - "Internet access for documentation research" 
+        - "Target object type specified"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Research Snowflake CREATE syntax"
+          COMMAND: "echo 'Research Snowflake CREATE ${OBJECT_TYPE} documentation'"
+          EXPECTED_OUTPUT: "Complete CREATE syntax with all parameters"
+        - ACTION: "Research INFORMATION_SCHEMA structure"
+          COMMAND: "echo 'Research INFORMATION_SCHEMA.${OBJECT_TYPE}S columns'"
+          EXPECTED_OUTPUT: "Complete column list with data types"
+        - ACTION: "Research ALTER and DROP syntax"
+          COMMAND: "echo 'Research ALTER/DROP ${OBJECT_TYPE} operations'"
+          EXPECTED_OUTPUT: "Complete modification capabilities"
+        - ACTION: "Document comprehensive property list"
+          COMMAND: "echo 'Document all ${OBJECT_TYPE} properties with types and requirements'"
+          EXPECTED_OUTPUT: "Structured requirements document"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Found comprehensive property list"
+          VALIDATION_COMMAND: "wc -l ${REQUIREMENTS_FILE} | awk '{print $1}'"
+          PASS_CONDITION: "≥ 50 lines in requirements document"
+        - CRITERION: "Documented required vs optional properties"
+          VALIDATION_COMMAND: "grep -c 'REQUIRED\\|OPTIONAL' ${REQUIREMENTS_FILE}"
+          PASS_CONDITION: "≥ 10 property classifications found"
+        - CRITERION: "Identified INFORMATION_SCHEMA columns"
+          VALIDATION_COMMAND: "grep -c 'INFORMATION_SCHEMA' ${REQUIREMENTS_FILE}"
+          PASS_CONDITION: "≥ 5 schema references found"
+
+      DELIVERABLES:
+        - ARTIFACT: "Comprehensive requirements document"
+          LOCATION: "${REQUIREMENTS_FILE}"
+          VALIDATION: "Document contains complete property analysis"
+
+    STEP_1_2_DATABASE_VALIDATION:
+      STEP_TYPE: "VALIDATION"  
+      PURPOSE: "Validate database connectivity and object accessibility"
+      
+      INPUT_REQUIREMENTS:
+        - "Snowflake database credentials available"
+        - "Network connectivity to Snowflake"
+        
+      QUALITY_GATE:
+        NAME: "database-connectivity-check"
+        TYPE: "BLOCKING"
+        FAILURE_ACTION: "STOP"
+        ERROR_MESSAGE: "Cannot access Snowflake database - verify credentials and connectivity"
+        RECOVERY_STEPS:
+          - "Check SNOWFLAKE_URL, SNOWFLAKE_USER, SNOWFLAKE_PASSWORD environment variables"
+          - "Test network connectivity to Snowflake endpoint"
+          - "Verify database and schema permissions"
+
+      EXECUTION_STEPS:
+        - ACTION: "Test basic database connectivity"
+          COMMAND: "echo 'Testing Snowflake connection with provided credentials'"
+          EXPECTED_OUTPUT: "Connection successful"
+        - ACTION: "Verify INFORMATION_SCHEMA access"
+          COMMAND: "echo 'SELECT COUNT(*) FROM INFORMATION_SCHEMA.${OBJECT_TYPE}S LIMIT 1'"
+          EXPECTED_OUTPUT: "Query executes successfully"
+        - ACTION: "Test object creation permissions"
+          COMMAND: "echo 'Test CREATE ${OBJECT_TYPE} permission'"
+          EXPECTED_OUTPUT: "Permission granted or sample creation succeeds"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Database connection established"
+          VALIDATION_COMMAND: "echo 'Connection test would be implemented here'"
+          PASS_CONDITION: "Connection successful"
+        - CRITERION: "INFORMATION_SCHEMA accessible"
+          VALIDATION_COMMAND: "echo 'Schema access test would be implemented here'"
+          PASS_CONDITION: "Schema query successful"
+
+      DELIVERABLES:
+        - ARTIFACT: "Database connectivity validation"
+          LOCATION: "Connection test results"
+          VALIDATION: "All database operations accessible"
+
+  PHASE_2_OBJECT_MODEL_IMPLEMENTATION:
+    STEP_2_1_CREATE_OBJECT_MODEL:
+      STEP_TYPE: "CREATION"
+      PURPOSE: "Create Liquibase DatabaseObject model for target object type"
+      
+      INPUT_REQUIREMENTS:
+        - "Requirements document completed"
+        - "Liquibase core dependencies available"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Create object model class structure"
+          COMMAND: "echo 'Creating ${OBJECT_TYPE} class with properties'"
+          EXPECTED_OUTPUT: "Java class with all required properties"
+        - ACTION: "Implement getters and setters"
+          COMMAND: "echo 'Adding property accessors'"
+          EXPECTED_OUTPUT: "Complete property interface"
+        - ACTION: "Add schema relationship"
+          COMMAND: "echo 'Implementing schema containment'"
+          EXPECTED_OUTPUT: "Proper schema association"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Object model class created"
+          VALIDATION_COMMAND: "test -f src/main/java/liquibase/ext/snowflake/database/${OBJECT_TYPE}.java"
+          PASS_CONDITION: "File exists"
+        - CRITERION: "All required properties implemented"
+          VALIDATION_COMMAND: "grep -c 'getAttribute\\|setAttribute' src/main/java/liquibase/ext/snowflake/database/${OBJECT_TYPE}.java"
+          PASS_CONDITION: "≥ 5 property methods found"
+        - CRITERION: "Compiles without errors"
+          VALIDATION_COMMAND: "mvn compile -q"
+          PASS_CONDITION: "Build success"
+
+      DELIVERABLES:
+        - ARTIFACT: "Object model class"
+          LOCATION: "src/main/java/liquibase/ext/snowflake/database/${OBJECT_TYPE}.java"
+          VALIDATION: "Class compiles and follows Liquibase patterns"
+
+    STEP_2_2_CREATE_UNIT_TESTS:
+      STEP_TYPE: "CREATION"
+      PURPOSE: "Create comprehensive unit tests for object model"
+      
+      INPUT_REQUIREMENTS:
+        - "Object model class completed"
+        - "JUnit dependencies available"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Create test class structure"
+          COMMAND: "echo 'Creating ${OBJECT_TYPE}Test class'"
+          EXPECTED_OUTPUT: "JUnit test class with setup methods"
+        - ACTION: "Add property validation tests"
+          COMMAND: "echo 'Adding getter/setter tests'"
+          EXPECTED_OUTPUT: "Tests for all properties"
+        - ACTION: "Add equality and hash tests"
+          COMMAND: "echo 'Adding equals/hashCode tests'"
+          EXPECTED_OUTPUT: "Object equality validation"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Test class created"
+          VALIDATION_COMMAND: "test -f src/test/java/liquibase/ext/snowflake/${OBJECT_TYPE}Test.java"
+          PASS_CONDITION: "File exists"
+        - CRITERION: "All tests pass"
+          VALIDATION_COMMAND: "mvn test -Dtest=\"${OBJECT_TYPE}Test\" -q"
+          PASS_CONDITION: "All tests successful"
+        - CRITERION: "Test coverage adequate"
+          VALIDATION_COMMAND: "grep -c '@Test' src/test/java/liquibase/ext/snowflake/${OBJECT_TYPE}Test.java"
+          PASS_CONDITION: "≥ 5 test methods found"
+
+      DELIVERABLES:
+        - ARTIFACT: "Object model unit tests"
+          LOCATION: "src/test/java/liquibase/ext/snowflake/${OBJECT_TYPE}Test.java"
+          VALIDATION: "All tests pass with good coverage"
+
+  PHASE_3_SNAPSHOT_GENERATOR_IMPLEMENTATION:
+    STEP_3_1_CREATE_SNAPSHOT_GENERATOR:
+      STEP_TYPE: "CREATION"
+      PURPOSE: "Implement SnapshotGenerator for database object introspection"
+      
+      INPUT_REQUIREMENTS:
+        - "Object model completed and tested"
+        - "Database connectivity validated"
+        - "INFORMATION_SCHEMA structure documented"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Create snapshot generator class"
+          COMMAND: "echo 'Creating ${OBJECT_TYPE}SnapshotGenerator'"
+          EXPECTED_OUTPUT: "SnapshotGenerator implementation"
+        - ACTION: "Implement snapshotObject method"
+          COMMAND: "echo 'Adding object introspection logic'"
+          EXPECTED_OUTPUT: "Database query and object population"
+        - ACTION: "Implement addTo method"  
+          COMMAND: "echo 'Adding schema population logic'"
+          EXPECTED_OUTPUT: "Schema-level object discovery"
+        - ACTION: "Configure priority and database support"
+          COMMAND: "echo 'Setting Snowflake database priority'"
+          EXPECTED_OUTPUT: "Proper database targeting"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Snapshot generator class created"
+          VALIDATION_COMMAND: "test -f src/main/java/liquibase/ext/snowflake/snapshot/${OBJECT_TYPE}SnapshotGenerator.java"
+          PASS_CONDITION: "File exists"
+        - CRITERION: "Compiles without errors"
+          VALIDATION_COMMAND: "mvn compile -q"
+          PASS_CONDITION: "Build success"
+        - CRITERION: "Follows SnapshotGenerator interface"
+          VALIDATION_COMMAND: "grep -c 'snapshotObject\\|addTo\\|getPriority' src/main/java/liquibase/ext/snowflake/snapshot/${OBJECT_TYPE}SnapshotGenerator.java"
+          PASS_CONDITION: "≥ 3 required methods found"
+
+      DELIVERABLES:
+        - ARTIFACT: "Snapshot generator implementation"
+          LOCATION: "src/main/java/liquibase/ext/snowflake/snapshot/${OBJECT_TYPE}SnapshotGenerator.java"
+          VALIDATION: "Generator follows Liquibase patterns and compiles"
+
+    STEP_3_2_CREATE_SNAPSHOT_TESTS:
+      STEP_TYPE: "CREATION"
+      PURPOSE: "Create comprehensive tests for snapshot generator"
+      
+      INPUT_REQUIREMENTS:
+        - "Snapshot generator implementation completed"
+        - "Test database access available"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Create snapshot generator test class"
+          COMMAND: "echo 'Creating ${OBJECT_TYPE}SnapshotGeneratorTest'"
+          EXPECTED_OUTPUT: "JUnit test class for snapshot functionality"
+        - ACTION: "Add priority and support tests"
+          COMMAND: "echo 'Testing database priority and support'"
+          EXPECTED_OUTPUT: "Basic functionality tests"
+        - ACTION: "Add object snapshot tests"
+          COMMAND: "echo 'Testing object introspection'"
+          EXPECTED_OUTPUT: "Database query and mapping tests"
+        - ACTION: "Add schema population tests"
+          COMMAND: "echo 'Testing schema object discovery'"
+          EXPECTED_OUTPUT: "Multi-object discovery tests"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Test class created"
+          VALIDATION_COMMAND: "test -f src/test/java/liquibase/ext/snowflake/${OBJECT_TYPE}SnapshotGeneratorTest.java"
+          PASS_CONDITION: "File exists"
+        - CRITERION: "All tests pass"
+          VALIDATION_COMMAND: "mvn test -Dtest=\"${OBJECT_TYPE}SnapshotGeneratorTest\" -q"
+          PASS_CONDITION: "All tests successful"
+        - CRITERION: "Integration tests included"
+          VALIDATION_COMMAND: "grep -c 'SnapshotGeneratorFactory\\|DatabaseSnapshot' src/test/java/liquibase/ext/snowflake/${OBJECT_TYPE}SnapshotGeneratorTest.java"
+          PASS_CONDITION: "≥ 2 integration test patterns found"
+
+      DELIVERABLES:
+        - ARTIFACT: "Snapshot generator tests"
+          LOCATION: "src/test/java/liquibase/ext/snowflake/${OBJECT_TYPE}SnapshotGeneratorTest.java"
+          VALIDATION: "All tests pass including integration scenarios"
+
+  PHASE_4_DIFF_COMPARATOR_IMPLEMENTATION:
+    STEP_4_1_CREATE_DIFF_COMPARATOR:
+      STEP_TYPE: "CREATION"
+      PURPOSE: "Implement DatabaseObjectComparator for difference detection"
+      
+      INPUT_REQUIREMENTS:
+        - "Object model and snapshot generator completed"
+        - "Understanding of object equality semantics"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Create comparator class"
+          COMMAND: "echo 'Creating ${OBJECT_TYPE}Comparator'"
+          EXPECTED_OUTPUT: "DatabaseObjectComparator implementation"
+        - ACTION: "Implement hash method"
+          COMMAND: "echo 'Adding object hashing logic'"
+          EXPECTED_OUTPUT: "Consistent object hashing"
+        - ACTION: "Implement isSameObject method"
+          COMMAND: "echo 'Adding object identity logic'"
+          EXPECTED_OUTPUT: "Object identity comparison"
+        - ACTION: "Implement compare method"
+          COMMAND: "echo 'Adding difference detection logic'"
+          EXPECTED_OUTPUT: "Property-level difference detection"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Comparator class created"
+          VALIDATION_COMMAND: "test -f src/main/java/liquibase/ext/snowflake/diff/compare/${OBJECT_TYPE}Comparator.java"
+          PASS_CONDITION: "File exists"
+        - CRITERION: "Compiles without errors"
+          VALIDATION_COMMAND: "mvn compile -q"
+          PASS_CONDITION: "Build success"
+        - CRITERION: "Implements required methods"
+          VALIDATION_COMMAND: "grep -c 'hash\\|isSameObject\\|compare\\|getPriority' src/main/java/liquibase/ext/snowflake/diff/compare/${OBJECT_TYPE}Comparator.java"
+          PASS_CONDITION: "≥ 4 required methods found"
+
+      DELIVERABLES:
+        - ARTIFACT: "Diff comparator implementation"
+          LOCATION: "src/main/java/liquibase/ext/snowflake/diff/compare/${OBJECT_TYPE}Comparator.java"
+          VALIDATION: "Comparator follows Liquibase patterns and compiles"
+
+    STEP_4_2_CREATE_COMPARATOR_TESTS:
+      STEP_TYPE: "CREATION"
+      PURPOSE: "Create comprehensive tests for diff comparator"
+      
+      INPUT_REQUIREMENTS:
+        - "Diff comparator implementation completed"
+        - "Sample objects for testing"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Create comparator test class"
+          COMMAND: "echo 'Creating ${OBJECT_TYPE}ComparatorTest'"
+          EXPECTED_OUTPUT: "JUnit test class for comparison functionality"
+        - ACTION: "Add hash consistency tests"
+          COMMAND: "echo 'Testing hash method consistency'"
+          EXPECTED_OUTPUT: "Hash validation tests"
+        - ACTION: "Add object identity tests"
+          COMMAND: "echo 'Testing isSameObject logic'"
+          EXPECTED_OUTPUT: "Identity comparison tests"
+        - ACTION: "Add difference detection tests"
+          COMMAND: "echo 'Testing compare method'"
+          EXPECTED_OUTPUT: "Property difference detection tests"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Test class created"
+          VALIDATION_COMMAND: "test -f src/test/java/liquibase/ext/snowflake/${OBJECT_TYPE}ComparatorTest.java"
+          PASS_CONDITION: "File exists"
+        - CRITERION: "All tests pass"
+          VALIDATION_COMMAND: "mvn test -Dtest=\"${OBJECT_TYPE}ComparatorTest\" -q"
+          PASS_CONDITION: "All tests successful"
+        - CRITERION: "Edge cases covered"
+          VALIDATION_COMMAND: "grep -c 'null\\|empty\\|different' src/test/java/liquibase/ext/snowflake/${OBJECT_TYPE}ComparatorTest.java"
+          PASS_CONDITION: "≥ 3 edge case patterns found"
+
+      DELIVERABLES:
+        - ARTIFACT: "Diff comparator tests"
+          LOCATION: "src/test/java/liquibase/ext/snowflake/${OBJECT_TYPE}ComparatorTest.java"
+          VALIDATION: "All tests pass including edge cases"
+
+  PHASE_5_INTEGRATION_AND_VALIDATION:
+    STEP_5_1_SERVICE_REGISTRATION:
+      STEP_TYPE: "PROCESSING"
+      PURPOSE: "Register services with Liquibase service discovery"
+      
+      INPUT_REQUIREMENTS:
+        - "All implementation classes completed"
+        - "Service files structure understood"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Register snapshot generator service"
+          COMMAND: "echo '${PACKAGE_BASE}.snapshot.${OBJECT_TYPE}SnapshotGenerator' >> src/main/resources/META-INF/services/liquibase.snapshot.SnapshotGenerator"
+          EXPECTED_OUTPUT: "Service registration entry added"
+        - ACTION: "Register comparator service"
+          COMMAND: "echo '${PACKAGE_BASE}.diff.compare.${OBJECT_TYPE}Comparator' >> src/main/resources/META-INF/services/liquibase.diff.compare.DatabaseObjectComparator"
+          EXPECTED_OUTPUT: "Service registration entry added"
+        - ACTION: "Verify service file format"
+          COMMAND: "cat src/main/resources/META-INF/services/liquibase.snapshot.SnapshotGenerator | tail -1"
+          EXPECTED_OUTPUT: "Correct service entry format"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Snapshot generator registered"
+          VALIDATION_COMMAND: "grep -q '${OBJECT_TYPE}SnapshotGenerator' src/main/resources/META-INF/services/liquibase.snapshot.SnapshotGenerator"
+          PASS_CONDITION: "Service entry found"
+        - CRITERION: "Comparator registered"
+          VALIDATION_COMMAND: "grep -q '${OBJECT_TYPE}Comparator' src/main/resources/META-INF/services/liquibase.diff.compare.DatabaseObjectComparator"
+          PASS_CONDITION: "Service entry found"
+        - CRITERION: "Services compile and load"
+          VALIDATION_COMMAND: "mvn compile -q"
+          PASS_CONDITION: "Build success"
+
+      DELIVERABLES:
+        - ARTIFACT: "Service registration files"
+          LOCATION: "src/main/resources/META-INF/services/*"
+          VALIDATION: "Services properly registered and discoverable"
+
+    STEP_5_2_INTEGRATION_TESTING:
+      STEP_TYPE: "VALIDATION"
+      PURPOSE: "Execute comprehensive integration tests"
+      
+      INPUT_REQUIREMENTS:
+        - "All components implemented and registered"
+        - "Test database accessible"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Run all object-related tests"
+          COMMAND: "mvn test -Dtest=\"*${OBJECT_TYPE}*Test*\" -q"
+          EXPECTED_OUTPUT: "All tests pass"
+        - ACTION: "Test snapshot/diff integration"
+          COMMAND: "echo 'Testing full snapshot/diff workflow'"
+          EXPECTED_OUTPUT: "End-to-end functionality verified"
+        - ACTION: "Validate service discovery"
+          COMMAND: "echo 'Testing Liquibase service loading'"
+          EXPECTED_OUTPUT: "Services discovered and instantiated"
+
+      QUALITY_GATE:
+        NAME: "integration-test-gate"
+        TYPE: "BLOCKING"
+        FAILURE_ACTION: "STOP"
+        ERROR_MESSAGE: "Integration tests failed - implementation not ready for production"
+        RECOVERY_STEPS:
+          - "Review test failures and fix implementation issues"
+          - "Verify service registration correctness"
+          - "Re-run integration tests"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "All unit tests pass"
+          VALIDATION_COMMAND: "mvn test -Dtest=\"*${OBJECT_TYPE}*Test*\" -q"
+          PASS_CONDITION: "All tests successful"
+        - CRITERION: "Integration tests pass"
+          VALIDATION_COMMAND: "echo 'Integration test validation would be implemented here'"
+          PASS_CONDITION: "End-to-end functionality verified"
+        - CRITERION: "No compilation errors"
+          VALIDATION_COMMAND: "mvn compile -q"
+          PASS_CONDITION: "Build success"
+
+      DELIVERABLES:
+        - ARTIFACT: "Integration test results"
+          LOCATION: "Test execution reports"
+          VALIDATION: "All tests pass with complete functionality verified"
+
+SUCCESS_CRITERIA:
+  IMPLEMENTATION_COMPLETENESS:
+    - "Object model class created with all required properties"
+    - "Snapshot generator implemented with database introspection"
+    - "Diff comparator implemented with property comparison"
+    - "All components have comprehensive unit tests"
+    - "Services properly registered with Liquibase"
+    
+  QUALITY_VALIDATION:
+    - "All tests pass consistently"
+    - "Code compiles without errors or warnings"
+    - "Integration with Liquibase snapshot/diff system verified"
+    - "Database connectivity and operations validated"
+    
+  AUTONOMOUS_OPERATION:
+    - "Implementation completed using autonomous test execution"
+    - "All command patterns approved for autonomous operation"
+    - "Test-driven development cycle successfully executed"
+
+ERROR_HANDLING:
+  GLOBAL_FAILURE_ACTION: "STOP"
+  PHASE_FAILURE_HANDLERS:
+    PHASE_1_REQUIREMENTS_RESEARCH:
+      ACTION: "WARN"
+      MESSAGE: "Requirements research incomplete - proceeding with available information may cause implementation gaps"
+    PHASE_2_OBJECT_MODEL_IMPLEMENTATION:
+      ACTION: "STOP"
+      MESSAGE: "Object model implementation failed - cannot proceed without core data structure"
+    PHASE_3_SNAPSHOT_GENERATOR_IMPLEMENTATION:
+      ACTION: "STOP"
+      MESSAGE: "Snapshot generator implementation failed - database introspection capability required"
+    PHASE_4_DIFF_COMPARATOR_IMPLEMENTATION:
+      ACTION: "STOP"
+      MESSAGE: "Diff comparator implementation failed - difference detection capability required"
+    PHASE_5_INTEGRATION_AND_VALIDATION:
+      ACTION: "STOP"
+      MESSAGE: "Integration validation failed - implementation not production ready"

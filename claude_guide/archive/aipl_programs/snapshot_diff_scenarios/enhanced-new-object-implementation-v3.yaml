@@ -1,0 +1,815 @@
+# Enhanced New Object Implementation AIPL Program v3.0
+# Combines executable automation with comprehensive methodology from MD guide
+# Estimated Duration: 2-4 hours (varies by object complexity)
+# 
+# USAGE:
+# 1. Set OBJECT_TYPE variable (e.g., "FileFormat", "Stage", "Pipe")
+# 2. Execute phases sequentially with validation gates
+# 3. Use autonomous operation for test execution
+# 4. Follow AI-TDD micro-cycle patterns throughout
+
+metadata:
+  version: "3.0"
+  type: "enhanced-snapshot-diff-implementation"
+  domain: "liquibase-snowflake"
+  complexity: "moderate-to-high"
+  estimated_duration: "2-4_hours"
+  author: "Enhanced AIPL Framework"
+  last_updated: "2025-08-03"
+
+# =============================================================================
+# PHASE 0: AUTONOMOUS OPERATION SETUP & COMPREHENSIVE DOMAIN RESEARCH
+# =============================================================================
+
+phase_0_autonomous_prerequisites:
+  description: "Enhanced autonomous operation setup with deep domain research"
+  behavioral_pattern: "RESEARCH→VALIDATION→SETUP"
+  duration: "45_minutes"
+  
+  variables:
+    OBJECT_TYPE: "FileFormat"  # CHANGE THIS: Your specific object (e.g., Stage, Pipe, Task)
+    PROJECT_ROOT: "/Users/kevinchappell/Documents/GitHub/liquibase/liquibase-snowflake"
+    CLAUDE_ROOT: "/Users/kevinchappell/Documents/GitHub/liquibase/claude_guide"
+    WORKING_DIR: "src/main/java/liquibase"
+    TEST_DIR: "src/test/java/liquibase"
+    
+  # Enhanced Domain Research Methodology (45-minute comprehensive research)
+  domain_research_methodology:
+    description: "Comprehensive domain understanding before implementation"
+    duration: "45_minutes"
+    
+    snowflake_documentation_research:
+      purpose: "Understand official Snowflake object specifications"
+      creates: "Complete parameter inventory and behavior understanding"
+      validates: "Official syntax and feature completeness"
+      duration: "15_minutes"
+      
+      steps:
+        - type: "RESEARCH"
+          action: "ACCESS_SNOWFLAKE_DOCS"
+          details: "Navigate to docs.snowflake.com/{OBJECT_TYPE} documentation"
+          validation: "All syntax variations and parameters identified"
+          
+        - type: "PROCESSING" 
+          action: "ANALYZE_SYNTAX_PATTERNS"
+          details: "Document CREATE/ALTER/DROP syntax, all parameters, data types"
+          validation: "Comprehensive parameter matrix created"
+          
+        - type: "CREATION"
+          action: "CREATE_PARAMETER_INVENTORY"
+          details: "Categorize: required/optional, data types, constraints, defaults"
+          validation: "Complete parameter categorization matrix"
+    
+    information_schema_investigation:
+      purpose: "Understand database introspection capabilities"
+      creates: "INFORMATION_SCHEMA query templates and column mappings"
+      validates: "Snapshot generation feasibility"
+      duration: "15_minutes"
+      
+      steps:
+        - type: "RESEARCH"
+          action: "INVESTIGATE_INFORMATION_SCHEMA"
+          details: "Query INFORMATION_SCHEMA.{OBJECT_TYPE}S for available columns"
+          query_template: |
+            SELECT * FROM INFORMATION_SCHEMA.{OBJECT_TYPE}S 
+            WHERE {OBJECT_TYPE}_SCHEMA = 'TEST_SCHEMA' LIMIT 1;
+          validation: "All introspectable properties identified"
+          
+        - type: "PROCESSING"
+          action: "MAP_PROPERTIES_TO_COLUMNS"
+          details: "Create Java property → database column mapping matrix"
+          validation: "Complete property-to-column mapping documented"
+          
+        - type: "VALIDATION"
+          action: "VALIDATE_QUERY_ACCESSIBILITY"
+          details: "Confirm INFORMATION_SCHEMA queries return expected data"
+          validation: "Query templates verified with live database"
+    
+    existing_liquibase_patterns_analysis:
+      purpose: "Understand Liquibase framework integration patterns"
+      creates: "Implementation pattern templates and framework compliance rules"
+      validates: "Framework integration approach"
+      duration: "15_minutes"
+      
+      steps:
+        - type: "RESEARCH"
+          action: "ANALYZE_EXISTING_OBJECTS"
+          details: "Study similar objects (Sequence, Table, Warehouse) for patterns"
+          targets: ["SequenceSnapshotGeneratorSnowflake", "TableSnapshotGeneratorSnowflake"]
+          validation: "Common implementation patterns identified"
+          
+        - type: "PROCESSING"
+          action: "EXTRACT_FRAMEWORK_PATTERNS"
+          details: "Document: inheritance hierarchy, method signatures, service registration"
+          validation: "Framework integration template created"
+          
+        - type: "CREATION"
+          action: "CREATE_IMPLEMENTATION_TEMPLATES"
+          details: "Generate object model, snapshot generator, comparator templates"
+          validation: "Complete template set with framework compliance"
+
+  # Autonomous Operation Validation
+  autonomous_operation_validation:
+    description: "Verify autonomous operation capabilities before proceeding"
+    behavioral_pattern: "VALIDATE→CONFIGURE→ENABLE"
+    
+    steps:
+      - type: "VALIDATION"
+        action: "VERIFY_TDD_ENFORCEMENT"
+        command: "test -f .scripts/tdd_workflow.sh && echo '✅ TDD available' || echo '❌ Missing'"
+        validation: "TDD enforcement system operational"
+        
+      - type: "VALIDATION" 
+        action: "VERIFY_AUTONOMOUS_TESTS"
+        command: "grep -c 'mvn test.*-Dtest=' CLAUDE.md"
+        validation: "Autonomous test patterns available in CLAUDE.md"
+        
+      - type: "VALIDATION"
+        action: "VERIFY_PROJECT_COMPILATION"
+        command: "mvn compile -q"
+        validation: "Project compiles without errors"
+        
+      - type: "CONFIGURATION"
+        action: "ENABLE_AUTONOMOUS_OPERATION"
+        details: "Configure autonomous test execution for {OBJECT_TYPE}"
+        validation: "Autonomous operation enabled and tested"
+
+# =============================================================================
+# PHASE 1: AI-TDD ENHANCED OBJECT MODEL IMPLEMENTATION
+# =============================================================================
+
+phase_1_object_model:
+  description: "Implement complete object model using AI-TDD micro-cycle methodology"
+  behavioral_pattern: "AI_TDD_MICRO_CYCLES→VALIDATION→FRAMEWORK_INTEGRATION"
+  duration: "60-90_minutes"
+  
+  # Property Categorization Framework (from MD guide)
+  property_categorization_framework:
+    description: "Systematic property analysis and categorization"
+    categories:
+      core_identity_properties:
+        description: "Properties that define object identity"
+        examples: ["name", "schema", "database"] 
+        validation_pattern: "Required for equals() and hashCode()"
+        
+      configuration_properties:
+        description: "Properties that define object behavior/configuration"
+        examples: ["formatType", "compression", "fieldDelimiter"]
+        validation_pattern: "Should affect object comparison but not identity"
+        
+      metadata_properties:
+        description: "Properties that provide additional information"
+        examples: ["owner", "createdOn", "lastAltered"]
+        validation_pattern: "Should not affect equals() or comparisons"
+        
+      derived_properties:
+        description: "Properties computed from other properties"
+        examples: ["fullName", "qualifiedName"]
+        validation_pattern: "Should be excluded from equals() and serialization"
+
+  # AI-TDD Micro-Cycle Implementation Pattern
+  ai_tdd_micro_cycle_pattern:
+    description: "Enhanced TDD micro-cycles with AI-assisted test generation"
+    cycle_duration: "5-10_minutes_per_property"
+    
+    micro_cycle_template:
+      red_phase:
+        - type: "CREATION"
+          action: "WRITE_FAILING_TEST"
+          details: "Create specific test for single property/behavior"
+          template: |
+            @Test
+            void should{PropertyBehavior}() {
+                {OBJECT_TYPE} obj = new {OBJECT_TYPE}("test");
+                // Test specific property behavior
+                assertThat(obj.get{Property}()).{expectedBehavior}();
+            }
+          validation: "Test fails with expected compilation/runtime error"
+          
+      green_phase:
+        - type: "CREATION"
+          action: "IMPLEMENT_MINIMAL_CODE"
+          details: "Add minimal code to make test pass"
+          validation: "Test passes, no existing tests broken"
+          
+      refactor_phase:
+        - type: "PROCESSING"
+          action: "IMPROVE_IMPLEMENTATION"
+          details: "Enhance code quality while maintaining test passage"
+          validation: "All tests pass, code quality improved"
+          
+      framework_integration_validation:
+        - type: "VALIDATION"
+          action: "VALIDATE_FRAMEWORK_COMPLIANCE"
+          details: "Check inheritance, method signatures, Liquibase patterns"
+          validation: "Framework integration compliance confirmed"
+
+  # Enhanced Implementation Steps
+  implementation_steps:
+    step_1_create_object_model:
+      purpose: "Create complete {OBJECT_TYPE} object model with property categorization"
+      creates: "src/main/java/liquibase/database/object/{OBJECT_TYPE}.java"
+      validates: "Object model completeness and framework compliance"
+      
+      ai_tdd_micro_cycles:
+        cycle_1_core_identity:
+          red: "Write test for core identity properties (name, schema)"
+          green: "Implement basic constructor and identity properties"
+          refactor: "Optimize constructor validation and null handling"
+          framework_validation: "Verify AbstractDatabaseObject inheritance"
+          
+        cycle_2_configuration_properties:
+          red: "Write tests for configuration properties based on domain research"
+          green: "Implement configuration properties with proper types"
+          refactor: "Add validation and default value handling"
+          framework_validation: "Verify property naming conventions"
+          
+        cycle_3_metadata_properties:
+          red: "Write tests for metadata properties (owner, timestamps)"
+          green: "Implement metadata properties with appropriate access"
+          refactor: "Ensure metadata doesn't affect object identity"
+          framework_validation: "Verify serialization behavior"
+          
+        cycle_4_derived_properties:
+          red: "Write tests for derived properties (fullName, qualifiedName)"
+          green: "Implement computed properties with caching if needed"
+          refactor: "Optimize computation and memory usage"
+          framework_validation: "Verify exclusion from equals/hashCode"
+          
+        cycle_5_framework_integration:
+          red: "Write tests for Liquibase framework integration methods"
+          green: "Implement required framework methods (clone, load, etc.)"
+          refactor: "Optimize framework integration performance"
+          framework_validation: "Full framework compliance verification"
+      
+      autonomous_validation:
+        command: "mvn test -Dtest='{OBJECT_TYPE}Test' -q"
+        success_criteria: "All object model tests pass"
+        failure_action: "Review and fix failing tests before proceeding"
+
+# =============================================================================
+# PHASE 2: ENHANCED SNAPSHOT GENERATOR IMPLEMENTATION
+# =============================================================================
+
+phase_2_snapshot_generator:
+  description: "Implement comprehensive snapshot generator with database introspection"
+  behavioral_pattern: "DATABASE_INTEGRATION→AI_TDD→QUERY_OPTIMIZATION"
+  duration: "45-75_minutes"
+  
+  # SQL Query Development Patterns (from MD guide)
+  sql_query_development_methodology:
+    description: "Systematic approach to developing database introspection queries"
+    
+    query_development_pattern:
+      step_1_basic_query:
+        purpose: "Establish basic INFORMATION_SCHEMA connectivity"
+        query_template: |
+          SELECT {OBJECT_TYPE}_NAME, {OBJECT_TYPE}_SCHEMA, {OBJECT_TYPE}_DATABASE
+          FROM INFORMATION_SCHEMA.{OBJECT_TYPE}S
+          WHERE {OBJECT_TYPE}_SCHEMA = ? AND {OBJECT_TYPE}_DATABASE = ?
+        validation: "Basic object retrieval works"
+        
+      step_2_property_mapping:
+        purpose: "Map all domain properties to database columns"
+        query_template: |
+          SELECT {OBJECT_TYPE}_NAME, {OBJECT_TYPE}_SCHEMA, {OBJECT_TYPE}_DATABASE,
+                 {PROPERTY_1}, {PROPERTY_2}, {PROPERTY_N},
+                 CREATED, LAST_ALTERED, OWNER
+          FROM INFORMATION_SCHEMA.{OBJECT_TYPE}S
+          WHERE {OBJECT_TYPE}_SCHEMA = ? AND {OBJECT_TYPE}_DATABASE = ?
+        validation: "All properties retrievable from database"
+        
+      step_3_error_handling:
+        purpose: "Handle edge cases and error conditions"
+        error_scenarios: ["object_not_found", "permission_denied", "invalid_schema"]
+        validation: "Graceful error handling for all scenarios"
+        
+      step_4_performance_optimization:
+        purpose: "Optimize query performance for large schemas"
+        optimizations: ["index_hints", "result_limiting", "connection_pooling"]
+        validation: "Performance acceptable for production use"
+
+  # Implementation Steps with Enhanced AI-TDD
+  implementation_steps:
+    step_1_create_snapshot_generator:
+      purpose: "Create {OBJECT_TYPE}SnapshotGeneratorSnowflake with database integration"
+      creates: "src/main/java/liquibase/snapshot/jvm/{OBJECT_TYPE}SnapshotGeneratorSnowflake.java"
+      validates: "Complete snapshot generation capability"
+      
+      ai_tdd_micro_cycles:
+        cycle_1_basic_structure:
+          red: "Write test for basic snapshot generator structure and priority"
+          green: "Create class extending JdbcSnapshotGenerator with priority method"
+          refactor: "Optimize class structure and imports"
+          validation: "mvn test -Dtest='{OBJECT_TYPE}SnapshotGeneratorTest#shouldHaveHighPriorityForSnowflake' -q"
+          
+        cycle_2_object_existence:
+          red: "Write test for object existence detection"
+          green: "Implement snapshotObject method with existence check"
+          refactor: "Optimize existence check query"
+          validation: "mvn test -Dtest='{OBJECT_TYPE}SnapshotGeneratorTest#shouldReturnNullWhenObjectDoesNotExist' -q"
+          
+        cycle_3_property_population:
+          red: "Write test for complete property population from database"
+          green: "Implement full property mapping from ResultSet"
+          refactor: "Optimize property mapping and type conversion"
+          validation: "mvn test -Dtest='{OBJECT_TYPE}SnapshotGeneratorTest#shouldPopulateAllPropertiesFromDatabase' -q"
+          
+        cycle_4_error_handling:
+          red: "Write tests for error scenarios (permissions, missing objects)"
+          green: "Implement robust error handling and logging"
+          refactor: "Optimize error messages and recovery strategies"
+          validation: "mvn test -Dtest='{OBJECT_TYPE}SnapshotGeneratorTest#shouldHandleErrorConditionsGracefully' -q"
+          
+        cycle_5_performance_optimization:
+          red: "Write tests for performance requirements and large schemas"
+          green: "Implement query optimization and result caching"
+          refactor: "Optimize memory usage and connection handling"
+          validation: "mvn test -Dtest='{OBJECT_TYPE}SnapshotGeneratorTest#shouldPerformEfficientlyWithLargeSchemas' -q"
+    
+    step_2_service_registration:
+      purpose: "Register snapshot generator with Liquibase service framework"
+      creates: "Updated META-INF/services/liquibase.snapshot.SnapshotGenerator"
+      validates: "Service discovery and registration"
+      
+      registration_steps:
+        - type: "PROCESSING"
+          action: "ADD_SERVICE_REGISTRATION"
+          file: "src/main/resources/META-INF/services/liquibase.snapshot.SnapshotGenerator"
+          line_to_add: "liquibase.snapshot.jvm.{OBJECT_TYPE}SnapshotGeneratorSnowflake"
+          validation: "Service properly registered and discoverable"
+
+# =============================================================================
+# PHASE 3: ENHANCED COMPARATOR IMPLEMENTATION WITH DEEP COMPARISON LOGIC
+# =============================================================================
+
+phase_3_comparator:
+  description: "Implement comprehensive object comparator with detailed difference detection"
+  behavioral_pattern: "COMPARISON_ANALYSIS→AI_TDD→DIFFERENCE_DETECTION"
+  duration: "45-60_minutes"
+  
+  # Anti-Generic Validation Checklist (from MD guide)
+  anti_generic_validation_checklist:
+    description: "Comprehensive validation to prevent generic, incomplete implementations"
+    
+    validation_categories:
+      property_completeness:
+        - "All properties from domain research included in comparison"
+        - "Configuration properties properly weighted in difference detection"
+        - "Metadata properties appropriately excluded from critical differences"
+        - "Derived properties excluded from comparison logic"
+        
+      comparison_accuracy:
+        - "Identity comparison uses appropriate properties (name, schema)"
+        - "Property differences detected with correct granularity"
+        - "Type-specific comparison logic (not generic string comparison)"
+        - "Null handling for all property types"
+        
+      framework_integration:
+        - "Implements DatabaseObjectComparator interface correctly"
+        - "Priority method returns appropriate values for Snowflake database"
+        - "Hash method uses stable, identity-based properties"
+        - "Difference detection respects CompareControl settings"
+        
+      edge_case_handling:
+        - "Handles null objects gracefully"
+        - "Handles mismatched object types"
+        - "Handles partial object data (missing properties)"
+        - "Handles schema/database case sensitivity issues"
+
+  # Implementation Steps with Enhanced Validation
+  implementation_steps:
+    step_1_create_comparator:
+      purpose: "Create {OBJECT_TYPE}Comparator with comprehensive difference detection"
+      creates: "src/main/java/liquibase/diff/output/{OBJECT_TYPE}Comparator.java"
+      validates: "Complete object comparison capability"
+      
+      ai_tdd_micro_cycles:
+        cycle_1_identity_comparison:
+          red: "Write tests for object identity comparison (same object detection)"
+          green: "Implement isSameObject method using identity properties"
+          refactor: "Optimize identity comparison performance"
+          validation: "mvn test -Dtest='{OBJECT_TYPE}ComparatorTest#shouldIdentifySameObjects' -q"
+          
+        cycle_2_hash_generation:
+          red: "Write tests for stable hash generation based on identity"
+          green: "Implement hash method using stable identity properties"
+          refactor: "Optimize hash computation and collision avoidance"
+          validation: "mvn test -Dtest='{OBJECT_TYPE}ComparatorTest#shouldGenerateStableHashes' -q"
+          
+        cycle_3_difference_detection:
+          red: "Write tests for detecting property differences"
+          green: "Implement findDifferences with property-by-property comparison"
+          refactor: "Optimize difference detection algorithms"
+          validation: "mvn test -Dtest='{OBJECT_TYPE}ComparatorTest#shouldDetectPropertyDifferences' -q"
+          
+        cycle_4_priority_handling:
+          red: "Write tests for priority system and database type detection"
+          green: "Implement getPriority with Snowflake database detection"
+          refactor: "Optimize priority calculation"
+          validation: "mvn test -Dtest='{OBJECT_TYPE}ComparatorTest#shouldHaveCorrectPriorityForSnowflake' -q"
+          
+        cycle_5_edge_case_handling:
+          red: "Write tests for edge cases (nulls, mismatched types, errors)"
+          green: "Implement robust edge case handling"
+          refactor: "Optimize error handling and recovery"
+          validation: "mvn test -Dtest='{OBJECT_TYPE}ComparatorTest#shouldHandleEdgeCasesGracefully' -q"
+    
+    step_2_service_registration:
+      purpose: "Register comparator with Liquibase service framework"
+      creates: "Updated META-INF/services/liquibase.diff.compare.DatabaseObjectComparator"
+      validates: "Service discovery and registration"
+      
+      registration_steps:
+        - type: "PROCESSING"
+          action: "ADD_SERVICE_REGISTRATION"
+          file: "src/main/resources/META-INF/services/liquibase.diff.compare.DatabaseObjectComparator"
+          line_to_add: "liquibase.diff.output.{OBJECT_TYPE}Comparator"
+          validation: "Service properly registered and discoverable"
+
+# =============================================================================
+# PHASE 4: COMPREHENSIVE INTEGRATION TESTING & VALIDATION
+# =============================================================================
+
+phase_4_integration_testing:
+  description: "Comprehensive integration testing with live database validation"
+  behavioral_pattern: "UNIT_TESTS→INTEGRATION_TESTS→SYSTEM_VALIDATION"
+  duration: "30-45_minutes"
+  
+  # Quality Gates Framework (from MD guide)
+  quality_gates_framework:
+    description: "Multi-level quality assurance with specific gates"
+    
+    gate_1_unit_test_coverage:
+      description: "Comprehensive unit test coverage for all components"
+      success_criteria:
+        - "Object model: 100% property coverage, edge cases tested"
+        - "Snapshot generator: Database integration, error handling tested"
+        - "Comparator: All comparison scenarios, edge cases tested"
+      validation_command: "mvn test -Dtest='*{OBJECT_TYPE}*Test' -q"
+      failure_action: "Fix failing tests before proceeding to integration"
+      
+    gate_2_integration_test_validation:
+      description: "Live database integration testing"
+      success_criteria:
+        - "Snapshot generation works with real Snowflake database"
+        - "Object comparison produces accurate difference reports"
+        - "Service registration enables discovery by Liquibase framework"
+      validation_command: |
+        SNOWFLAKE_URL="jdbc:snowflake://..." SNOWFLAKE_USER="..." SNOWFLAKE_PASSWORD="..." \
+        mvn test -Dtest='{OBJECT_TYPE}ObjectIntegrationTest' -q
+      failure_action: "Debug database connectivity and query issues"
+      
+    gate_3_framework_integration:
+      description: "Full Liquibase framework integration validation"
+      success_criteria:
+        - "Objects discoverable via service registration"
+        - "Snapshot/diff operations work in Liquibase context"
+        - "No conflicts with existing object types"
+      validation_command: "mvn test -Dtest='DatabaseObjectIntegrationTest' -q"
+      failure_action: "Fix service registration and framework integration"
+      
+    gate_4_performance_validation:
+      description: "Performance and scalability validation"
+      success_criteria:
+        - "Snapshot generation completes within reasonable time"
+        - "Memory usage stays within acceptable bounds"
+        - "Large schema handling performs adequately"
+      validation_approach: "Manual testing with large schemas and monitoring"
+      failure_action: "Optimize queries and memory usage"
+
+  # Enhanced Testing Implementation
+  testing_implementation_steps:
+    step_1_comprehensive_unit_tests:
+      purpose: "Create complete unit test suite covering all scenarios"
+      creates: "Complete test coverage for all components"
+      validates: "Unit test quality gate passage"
+      
+      test_categories:
+        object_model_tests:
+          - "Property getter/setter validation"
+          - "Equals/hashCode contract compliance"
+          - "Serialization/deserialization"
+          - "Edge cases (null values, empty strings)"
+          - "Framework integration methods"
+          
+        snapshot_generator_tests:
+          - "Priority calculation for different databases"
+          - "Object existence detection"
+          - "Property population from ResultSet"
+          - "Error handling (SQL exceptions, missing data)"
+          - "Performance with large result sets"
+          
+        comparator_tests:
+          - "Identity comparison accuracy"
+          - "Hash generation stability"
+          - "Difference detection granularity"
+          - "Edge case handling"
+          - "Priority system validation"
+      
+      autonomous_validation:
+        command: "mvn test -Dtest='*{OBJECT_TYPE}*Test' -q"
+        success_criteria: "All unit tests pass"
+        failure_action: "Fix unit test failures before integration testing"
+    
+    step_2_integration_testing:
+      purpose: "Validate integration with live Snowflake database"
+      creates: "Integration test validation results"
+      validates: "Database integration quality gate passage"
+      
+      integration_test_scenarios:
+        - "Create {OBJECT_TYPE} object in Snowflake"
+        - "Snapshot object and validate all properties populated"
+        - "Modify object properties in database"
+        - "Re-snapshot and detect differences accurately"
+        - "Handle non-existent objects gracefully"
+        - "Test with different schema/database contexts"
+      
+      autonomous_validation:
+        command: |
+          SNOWFLAKE_URL="jdbc:snowflake://rziymts-xbb66763.snowflakecomputing.com/?db=LB_DBEXT_INT_DB&warehouse=LTHDB_TEST_WH&schema=BASE_SCHEMA&role=LB_INT_ROLE" \
+          SNOWFLAKE_USER="COMMUNITYKEVIN" SNOWFLAKE_PASSWORD="uQ1lAjwVisliu8CpUTVh0UnxoTUk3" \
+          mvn test -Dtest='{OBJECT_TYPE}ObjectIntegrationTest' -q
+        success_criteria: "All integration tests pass"
+        failure_action: "Debug database queries and connection issues"
+
+# =============================================================================
+# PHASE 5: COMPREHENSIVE DOCUMENTATION & PROJECT INTEGRATION
+# =============================================================================
+
+phase_5_documentation_integration:
+  description: "Complete documentation and project integration"
+  behavioral_pattern: "DOCUMENTATION→INTEGRATION→VALIDATION"
+  duration: "15-30_minutes"
+  
+  # Universal Implementation Templates (from MD guide)
+  universal_implementation_templates:
+    description: "Standardized templates for consistent documentation"
+    
+    implementation_summary_template:
+      overview: |
+        # {OBJECT_TYPE} Implementation Summary
+        
+        ## Implementation Scope
+        - **Object Type**: {OBJECT_TYPE}
+        - **Implementation Duration**: {ACTUAL_DURATION}
+        - **Components Implemented**: Object Model, Snapshot Generator, Comparator
+        - **Test Coverage**: {TEST_COUNT} tests across {TEST_CATEGORIES} categories
+        
+        ## Key Features
+        - Complete property mapping from Snowflake INFORMATION_SCHEMA
+        - Robust error handling and edge case management
+        - Framework-compliant implementation following Liquibase patterns
+        - Comprehensive test coverage including integration tests
+        
+        ## Domain Research Results
+        - **Properties Identified**: {PROPERTY_COUNT} total ({CORE_COUNT} core, {CONFIG_COUNT} configuration, {META_COUNT} metadata)
+        - **INFORMATION_SCHEMA Mapping**: {MAPPED_COLUMNS} columns mapped to Java properties
+        - **Validation Results**: All properties validated against Snowflake documentation
+        
+      technical_details: |
+        ## Technical Implementation Details
+        
+        ### Object Model ({OBJECT_TYPE}.java)
+        - Extends AbstractDatabaseObject for framework integration
+        - Implements {PROPERTY_COUNT} properties with proper categorization
+        - Includes validation logic and null handling
+        - Framework-compliant equals/hashCode implementation
+        
+        ### Snapshot Generator ({OBJECT_TYPE}SnapshotGeneratorSnowflake.java)
+        - Extends JdbcSnapshotGenerator for database integration
+        - Implements optimized INFORMATION_SCHEMA queries
+        - Includes comprehensive error handling and logging
+        - Performance-optimized for large schemas
+        
+        ### Comparator ({OBJECT_TYPE}Comparator.java)
+        - Implements DatabaseObjectComparator interface
+        - Property-by-property difference detection
+        - Identity-based object comparison
+        - Handles edge cases and error conditions
+        
+      validation_results: |
+        ## Validation Results
+        
+        ### Quality Gate Results
+        - ✅ Unit Test Coverage: {UNIT_TEST_COUNT} tests, 100% pass rate
+        - ✅ Integration Testing: Database connectivity and query validation passed
+        - ✅ Framework Integration: Service registration and discovery validated
+        - ✅ Performance Validation: Acceptable performance with large schemas
+        
+        ### Test Execution Summary
+        ```bash
+        # Unit Tests
+        mvn test -Dtest='*{OBJECT_TYPE}*Test' -q
+        Result: {UNIT_TEST_RESULTS}
+        
+        # Integration Tests  
+        mvn test -Dtest='{OBJECT_TYPE}ObjectIntegrationTest' -q
+        Result: {INTEGRATION_TEST_RESULTS}
+        ```
+
+  # Documentation Steps
+  documentation_steps:
+    step_1_implementation_summary:
+      purpose: "Create comprehensive implementation documentation"
+      creates: "Implementation summary with technical details"
+      validates: "Complete documentation of implementation approach"
+      
+      documentation_components:
+        - "Implementation overview and scope"
+        - "Domain research results and property analysis"
+        - "Technical implementation details for each component"
+        - "Test coverage summary and validation results"
+        - "Performance characteristics and optimization notes"
+    
+    step_2_project_integration:
+      purpose: "Integrate implementation with project tracking and planning"
+      creates: "Updated project documentation and status"
+      validates: "Project integration and status tracking"
+      
+      integration_components:
+        - "Update CLAUDE.md with new autonomous test commands"
+        - "Update project plan with implementation completion"
+        - "Add implementation to requirements tracking"
+        - "Document lessons learned and optimization opportunities"
+
+# =============================================================================
+# TROUBLESHOOTING & ERROR RECOVERY PATTERNS
+# =============================================================================
+
+troubleshooting_framework:
+  description: "Systematic approach to handling implementation issues"
+  
+  common_error_patterns:
+    compilation_errors:
+      symptoms: ["Missing imports", "Method signature mismatches", "Type errors"]
+      diagnosis: "Framework integration or template generation issues"
+      resolution: "Review framework patterns, check inheritance hierarchy"
+      prevention: "Use enhanced template validation in Phase 0"
+      
+    test_failures:
+      symptoms: ["Assertion failures", "Mock setup issues", "Database connectivity"]
+      diagnosis: "Implementation logic or test setup problems"
+      resolution: "AI-TDD micro-cycle debugging, incremental fixes"
+      prevention: "Follow micro-cycle patterns strictly"
+      
+    integration_issues:
+      symptoms: ["Service not discovered", "Priority conflicts", "Database errors"]
+      diagnosis: "Service registration or database configuration problems"
+      resolution: "Verify META-INF/services files, check database credentials"
+      prevention: "Validate service registration immediately after creation"
+      
+    performance_problems:
+      symptoms: ["Slow queries", "Memory issues", "Timeout errors"]
+      diagnosis: "Query optimization or resource management issues"
+      resolution: "Optimize queries, implement caching, tune connection handling"
+      prevention: "Include performance tests in integration validation"
+
+  error_recovery_procedures:
+    incremental_rollback:
+      description: "Roll back to last known good state incrementally"
+      steps:
+        - "Identify last passing test or validation point"
+        - "Revert changes to that state"
+        - "Re-apply changes incrementally with validation"
+        - "Use micro-cycle approach for problem isolation"
+        
+    systematic_debugging:
+      description: "Layer-by-layer debugging approach"
+      steps:
+        - "Test object model in isolation"
+        - "Test snapshot generator with mock database"
+        - "Test comparator with known object pairs"
+        - "Test integration with minimal database setup"
+        - "Scale up complexity gradually"
+
+# =============================================================================
+# SUCCESS CRITERIA & COMPLETION VALIDATION
+# =============================================================================
+
+success_criteria:
+  description: "Comprehensive success validation for implementation completion"
+  
+  technical_completion:
+    object_model_success:
+      - "All properties identified in domain research implemented"
+      - "Framework integration methods implemented correctly"
+      - "Comprehensive unit test coverage (>95%)"
+      - "Equals/hashCode contract compliance validated"
+      
+    snapshot_generator_success:
+      - "Database connectivity and query execution working"
+      - "All INFORMATION_SCHEMA properties mapped correctly"
+      - "Error handling tested with various scenarios"
+      - "Performance acceptable for production use"
+      
+    comparator_success:
+      - "Identity comparison working accurately"
+      - "Difference detection granular and complete"
+      - "Edge cases handled gracefully"
+      - "Framework integration validated"
+      
+    integration_success:
+      - "Service registration enables framework discovery"
+      - "End-to-end snapshot/diff operations working"
+      - "No conflicts with existing implementations"
+      - "Performance meets production requirements"
+  
+  process_completion:
+    methodology_adherence:
+      - "Domain research methodology followed completely"
+      - "AI-TDD micro-cycles used throughout implementation"
+      - "Quality gates passed at each phase"
+      - "Anti-generic validation checklist completed"
+      
+    documentation_completion:
+      - "Implementation summary created with technical details"
+      - "Test coverage documented and validated"
+      - "Project integration completed"
+      - "Troubleshooting patterns documented"
+
+# =============================================================================
+# FINAL VALIDATION & AUTONOMOUS OPERATION COMMANDS
+# =============================================================================
+
+final_validation:
+  description: "Complete validation of implementation success"
+  
+  autonomous_validation_commands:
+    unit_test_validation:
+      command: "mvn test -Dtest='*{OBJECT_TYPE}*Test' -q"
+      success_criteria: "All unit tests pass"
+      failure_action: "Review and fix unit test failures"
+      
+    integration_test_validation:
+      command: |
+        SNOWFLAKE_URL="jdbc:snowflake://rziymts-xbb66763.snowflakecomputing.com/?db=LB_DBEXT_INT_DB&warehouse=LTHDB_TEST_WH&schema=BASE_SCHEMA&role=LB_INT_ROLE" \
+        SNOWFLAKE_USER="COMMUNITYKEVIN" SNOWFLAKE_PASSWORD="uQ1lAjwVisliu8CpUTVh0UnxoTUk3" \
+        mvn test -Dtest='*{OBJECT_TYPE}*IntegrationTest' -q
+      success_criteria: "All integration tests pass"
+      failure_action: "Debug database connectivity and integration issues"
+      
+    framework_integration_validation:
+      command: "mvn test -Dtest='DatabaseObjectIntegrationTest' -q"
+      success_criteria: "Framework integration tests pass"
+      failure_action: "Fix service registration and framework issues"
+      
+    compilation_validation:
+      command: "mvn compile -q"
+      success_criteria: "Project compiles without errors"
+      failure_action: "Fix compilation errors before proceeding"
+
+# =============================================================================
+# ENHANCED AIPL PROGRAM EXECUTION NOTES
+# =============================================================================
+
+execution_notes:
+  description: "Guidelines for successful AIPL program execution"
+  
+  phase_execution_strategy:
+    sequential_execution: "Execute phases in order, completing validation before proceeding"
+    micro_cycle_discipline: "Follow AI-TDD micro-cycles strictly, avoid skipping steps"
+    autonomous_operation: "Use autonomous test commands for continuous validation"
+    quality_gate_enforcement: "Do not proceed past quality gates until success criteria met"
+    
+  customization_guidelines:
+    object_type_adaptation: "Update OBJECT_TYPE variable and related templates"
+    property_customization: "Adapt property lists based on domain research results"
+    query_customization: "Modify INFORMATION_SCHEMA queries for specific object types"
+    test_customization: "Adapt test templates for object-specific behaviors"
+    
+  optimization_opportunities:
+    parallel_development: "Object model and tests can be developed in parallel"
+    template_reuse: "Reuse templates and patterns across similar objects"
+    incremental_validation: "Validate incrementally to catch issues early"
+    performance_optimization: "Optimize queries and algorithms during implementation"
+
+# =============================================================================
+# AIPL PROGRAM METADATA & VERSION CONTROL
+# =============================================================================
+
+program_metadata:
+  creation_method: "Enhanced translation from comprehensive MD methodology"
+  source_documents: 
+    - "SNAPSHOT_DIFF_IMPLEMENTATION_GUIDE.md (1851 lines)"
+    - "new-object-implementation-v2.yaml (101 lines)"
+    - "Enhanced with comprehensive methodology and quality frameworks"
+  
+  key_enhancements:
+    - "45-minute comprehensive domain research methodology"
+    - "AI-TDD micro-cycle templates with framework integration"
+    - "Property categorization framework for systematic analysis"
+    - "Anti-generic validation checklist for quality assurance"
+    - "Universal implementation templates for consistent documentation"
+    - "Comprehensive troubleshooting and error recovery patterns"
+    - "Enhanced quality gates with specific success criteria"
+    - "Autonomous operation commands for continuous validation"
+    
+  version_history:
+    v1.0: "Basic executable AIPL program"
+    v2.0: "Enhanced with comprehensive testing and validation"
+    v3.0: "Complete methodology integration with enhanced quality frameworks"
+
+# =============================================================================
+# END OF ENHANCED AIPL PROGRAM
+# =============================================================================

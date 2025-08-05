@@ -13,6 +13,7 @@
 
     <properties>
         <sonar.coverage.jacoco.xmlReportPaths>../target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <argLine>-Duser.timezone=UTC</argLine>
     </properties>
     
     <build>
@@ -21,8 +22,48 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <argLine>--add-opens=java.base/java.nio=org.apache.arrow.memory.core,ALL-UNNAMED</argLine>
+                    <argLine>--add-opens=java.base/java.nio=org.apache.arrow.memory.core,ALL-UNNAMED @{argLine}</argLine>
+                    <!-- Enable parallel execution for all tests -->
+                    <!-- Unit tests: Safe in parallel (no external dependencies) -->
+                    <!-- Integration tests: Safe in parallel (schema isolation implemented) -->
+                    <forkCount>4</forkCount>
+                    <reuseForks>true</reuseForks>
+                    <parallel>classes</parallel>
+                    <threadCount>4</threadCount>
+                    <perCoreThreadCount>false</perCoreThreadCount>
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*IntegrationTest.java</include>
+                    </includes>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent-snowflake</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <destFile>${project.build.directory}/jacoco.exec</destFile>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>report-snowflake</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <dataFile>${project.build.directory}/jacoco.exec</dataFile>
+                            <outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -32,6 +73,14 @@
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-standard</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        
+        <!-- Testing Framework for Modern Integration Tests -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-extension-testing</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

@@ -1,0 +1,102 @@
+AIPL_VERSION: "2.0"
+PROGRAM_NAME: "new-object-implementation-v2"
+DESCRIPTION: "Complete snapshot/diff implementation for new Snowflake database object - optimized for actionability"
+
+IMPORTS:
+  - "../../../AIPL/core/TERMINOLOGY_DEFINITIONS.yaml"
+  - "../../../AIPL/core/STEP_SPECIFICATIONS.yaml"
+  - "../../../AIPL/core/AUTONOMOUS_OPERATION.yaml"
+  - "../../../AIPL/libraries/snowflake/SNOWFLAKE_SNAPSHOT_DIFF_PATTERNS.yaml"
+
+REQUIRES:
+  - BEHAVIORAL_KEYWORDS
+  - STEP_CLASSIFICATION
+  - AUTONOMOUS_PREREQUISITE_PHASE
+  - SNOWFLAKE_PATTERNS
+
+EXECUTION_PROTOCOL:
+  PURPOSE: "Implement complete snapshot and diff capability for new Snowflake database object"
+  INPUT: "Target object type (e.g., FileFormat, Warehouse, Stage)"
+  OUTPUT: "Complete object model, snapshot generator, diff comparator with comprehensive tests"
+  VALIDATION: "All tests pass, object integrates with Liquibase snapshot/diff system"
+
+VARIABLES:
+  OBJECT_TYPE: "${TARGET_OBJECT_TYPE}"
+  OBJECT_TYPE_LOWER: "fileformat"  # Will be replaced with actual value
+  PACKAGE_BASE: "liquibase.ext.snowflake"
+  PACKAGE_PATH: "liquibase/ext/snowflake"
+  
+PHASES:
+  PHASE_0_5_AUTONOMOUS_PREREQUISITES:
+    PURPOSE: "Validate autonomous operation capability"
+    VALIDATES: ["FILE_EXISTS:CLAUDE.md", "PROPERTIES_COUNT:CLAUDE.md:mvn test.*-Dtest=:3"]
+    QUALITY_GATE: "STOP_ON_FAILURE"
+
+  PHASE_1_REQUIREMENTS_RESEARCH:
+    RESEARCH_SNOWFLAKE_OBJECT:
+      USE_PATTERN: "DOMAIN_RESEARCH_PATTERN"
+      PURPOSE: "Research ${OBJECT_TYPE} properties and syntax"
+      CREATES: "requirements_${OBJECT_TYPE_LOWER}.md"
+      VALIDATES: ["FILE_EXISTS", "PROPERTIES_COUNT:requirements_${OBJECT_TYPE_LOWER}.md:REQUIRED|OPTIONAL:10"]
+
+    VALIDATE_DATABASE_ACCESS:
+      PURPOSE: "Validate database connectivity and object accessibility"
+      VALIDATES: ["DATABASE_CONNECTION", "INFORMATION_SCHEMA_ACCESS"]
+      QUALITY_GATE: "STOP_ON_FAILURE"
+
+  PHASE_2_OBJECT_MODEL_IMPLEMENTATION:
+    CREATE_OBJECT_MODEL:
+      PURPOSE: "Create ${OBJECT_TYPE} object model"
+      CREATES: "src/main/java/${PACKAGE_PATH}/database/${OBJECT_TYPE}.java"
+      VALIDATES: ["FILE_EXISTS", "COMPILES", "PROPERTIES_COUNT:getAttribute|setAttribute:5"]
+
+    CREATE_OBJECT_TESTS:
+      PURPOSE: "Create ${OBJECT_TYPE} unit tests"
+      CREATES: "src/test/java/${PACKAGE_PATH}/${OBJECT_TYPE}Test.java"
+      VALIDATES: ["FILE_EXISTS", "TESTS_PASS:${OBJECT_TYPE}Test", "PROPERTIES_COUNT:@Test:5"]
+
+  PHASE_3_SNAPSHOT_GENERATOR_IMPLEMENTATION:
+    CREATE_SNAPSHOT_GENERATOR:
+      PURPOSE: "Create ${OBJECT_TYPE}SnapshotGenerator"
+      CREATES: "src/main/java/${PACKAGE_PATH}/snapshot/${OBJECT_TYPE}SnapshotGenerator.java"
+      VALIDATES: ["FILE_EXISTS", "COMPILES", "PROPERTIES_COUNT:snapshotObject|addTo|getPriority:3"]
+
+    CREATE_SNAPSHOT_TESTS:
+      PURPOSE: "Create ${OBJECT_TYPE}SnapshotGenerator tests"
+      CREATES: "src/test/java/${PACKAGE_PATH}/${OBJECT_TYPE}SnapshotGeneratorTest.java"
+      VALIDATES: ["FILE_EXISTS", "TESTS_PASS:${OBJECT_TYPE}SnapshotGeneratorTest"]
+
+  PHASE_4_DIFF_COMPARATOR_IMPLEMENTATION:
+    CREATE_DIFF_COMPARATOR:
+      PURPOSE: "Create ${OBJECT_TYPE}Comparator"
+      CREATES: "src/main/java/${PACKAGE_PATH}/diff/compare/${OBJECT_TYPE}Comparator.java"
+      VALIDATES: ["FILE_EXISTS", "COMPILES", "PROPERTIES_COUNT:hash|isSameObject|compare|getPriority:4"]
+
+    CREATE_COMPARATOR_TESTS:
+      PURPOSE: "Create ${OBJECT_TYPE}Comparator tests"
+      CREATES: "src/test/java/${PACKAGE_PATH}/${OBJECT_TYPE}ComparatorTest.java"
+      VALIDATES: ["FILE_EXISTS", "TESTS_PASS:${OBJECT_TYPE}ComparatorTest"]
+
+  PHASE_5_INTEGRATION_AND_VALIDATION:
+    REGISTER_SERVICES:
+      PURPOSE: "Register services with Liquibase"
+      CREATES: 
+        - "Entry in META-INF/services/liquibase.snapshot.SnapshotGenerator"
+        - "Entry in META-INF/services/liquibase.diff.compare.DatabaseObjectComparator"
+      VALIDATES: ["SERVICE_REGISTERED:${OBJECT_TYPE}SnapshotGenerator", "SERVICE_REGISTERED:${OBJECT_TYPE}Comparator"]
+
+    FINAL_INTEGRATION_TEST:
+      PURPOSE: "Execute comprehensive integration tests"
+      VALIDATES: ["TESTS_PASS:*${OBJECT_TYPE}*Test*", "COMPILES"]
+      QUALITY_GATE: "STOP_ON_FAILURE"
+
+SUCCESS_CRITERIA:
+  - "Complete object model with all required properties"
+  - "Functional snapshot generator with database introspection"
+  - "Working diff comparator with property comparison"
+  - "All tests pass consistently"
+  - "Services properly registered with Liquibase"
+
+ERROR_HANDLING:
+  GLOBAL_FAILURE_ACTION: "STOP"
+  CRITICAL_PHASES: ["PHASE_2_OBJECT_MODEL_IMPLEMENTATION", "PHASE_5_INTEGRATION_AND_VALIDATION"]

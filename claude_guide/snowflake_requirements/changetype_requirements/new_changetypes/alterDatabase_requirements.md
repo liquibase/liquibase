@@ -11,7 +11,7 @@ OBJECT_TYPE: "Database"
 OPERATION: "ALTER"
 ESTIMATED_TIME: "8-10 hours"
 COMPLEXITY: "HIGH"
-ATTRIBUTES_COUNT: 15
+ATTRIBUTES_COUNT: 19
 OPERATION_GROUPS: 6
 PRIORITY: "READY"
 ```
@@ -115,59 +115,50 @@ ACCOUNT_FORMAT: "org.account or account format required"
 SESSION_CONTEXT: "Cannot rename current database"
 ```
 
-## 📊 ATTRIBUTES QUICK REFERENCE
+## 📊 COMPREHENSIVE_ATTRIBUTE_ANALYSIS
 
 ### Core Attributes (All Operations)
-| Attribute | Type | Required | Values | Notes |
-|-----------|------|----------|--------|-------|
-| **databaseName** | String | ✅ | Valid identifier | Primary key |
-| **ifExists** | Boolean | ❌ | true/false | Error prevention |
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **databaseName** | String | Required | N/A | Valid identifier | Must exist | None | HIGH | Primary database identifier |
+| **ifExists** | Boolean | Optional | false | true/false | None | None | MEDIUM | Error prevention for non-existent databases |
+| **operationType** | String | Optional | Detected | RENAME/SET/UNSET/REPLICATION/FAILOVER/REFRESH | Single operation type | Mutually exclusive | HIGH | Operation type detection |
 
 ### Group 1: RENAME Attributes
-| Attribute | Type | Required | Values | Constraints |
-|-----------|------|----------|--------|-------------|
-| **newDatabaseName** | String | ✅ | Valid identifier | Must be unique, not current DB |
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **newDatabaseName** | String | Required (for RENAME) | N/A | Valid identifier | Must be unique, not current DB | RENAME operation only | HIGH | Target database name |
 
 ### Group 2: SET Property Attributes
-| Attribute | Type | Values | Constraint | Priority |
-|-----------|------|--------|------------|----------|
-| **dataRetentionTimeInDays** | Integer | 0-90 | ≤ maxDataExtension | MEDIUM |
-| **maxDataExtensionTimeInDays** | Integer | 0-90 | ≥ dataRetention | MEDIUM |
-| **defaultDdlCollation** | String | Valid collation | Must be valid | LOW |
-| **comment** | String | ≤256 chars | Length limit | LOW |
-| **logLevel** | String | Enum values | Predefined list | LOW |
-| **traceLevel** | String | Enum values | Predefined list | LOW |
-| **suspendTaskAfterNumFailures** | Integer | Positive | Task management | LOW |
-| **taskAutoRetryAttempts** | Integer | Positive | Task management | LOW |
-| **userTaskManagedInitialWarehouseSize** | String | Warehouse sizes | Task management | LOW |
-| **userTaskTimeoutMs** | Integer | Positive | Task management | LOW |
-| **userTaskMinimumTriggerIntervalInSeconds** | Integer | Positive | Task management | LOW |
-| **quotedIdentifiersIgnoreCase** | Boolean | true/false | Case handling | LOW |
-| **enableConsoleOutput** | Boolean | true/false | Logging | LOW |
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **dataRetentionTimeInDays** | Integer | Optional | Current | 0-90 | ≤ maxDataExtension | SET/UNSET operations | MEDIUM | Time Travel retention period |
+| **maxDataExtensionTimeInDays** | Integer | Optional | Current | 0-90 | ≥ dataRetention | SET/UNSET operations | MEDIUM | Maximum Time Travel extension |
+| **defaultDdlCollation** | String | Optional | Current | Valid collation | Must be valid | SET/UNSET operations | LOW | Default collation for objects |
+| **comment** | String | Optional | Current | String ≤256 chars | Length limit | SET/UNSET operations | LOW | Database description |
 
 ### Group 3: UNSET Property Attributes
-| Attribute | Type | Required | Values | Notes |
-|-----------|------|----------|--------|-------|
-| **unset[PropertyName]** | Boolean | ❌ | true/false | For each SET property |
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **unsetDataRetentionTimeInDays** | Boolean | Optional | false | true/false | None | UNSET operations only | MEDIUM | Remove retention setting |
+| **unsetComment** | Boolean | Optional | false | true/false | None | UNSET operations only | LOW | Remove comment |
+| **unsetMaxDataExtensionTimeInDays** | Boolean | Optional | false | true/false | None | UNSET operations only | MEDIUM | Remove max extension setting |
+| **unsetDefaultDdlCollation** | Boolean | Optional | false | true/false | None | UNSET operations only | LOW | Remove collation setting |
 
 ### Group 4: REPLICATION Attributes
-| Attribute | Type | Required | Values | Notes |
-|-----------|------|----------|--------|-------|
-| **enableReplication** | Boolean | ❌ | true/false | Cross-account sharing |
-| **disableReplication** | Boolean | ❌ | true/false | Remove sharing |
-| **replicationAccounts** | String | ❌ | Comma-separated accounts | Required when enabling |
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **enableReplication** | Boolean | Optional | false | true/false | None | REPLICATION operations only | MEDIUM | Cross-account sharing |
+| **replicationAccounts** | String | Optional | N/A | Comma-separated accounts | Required when enabling | REPLICATION operations only | MEDIUM | Target accounts for replication |
 
-### Group 5: FAILOVER Attributes
-| Attribute | Type | Required | Values | Notes |
-|-----------|------|----------|--------|-------|
-| **enableFailover** | Boolean | ❌ | true/false | Enterprise Edition |
-| **disableFailover** | Boolean | ❌ | true/false | Remove failover |
-| **failoverAccounts** | String | ❌ | Comma-separated accounts | Required when enabling |
-
-### Group 6: REFRESH Attributes
-| Attribute | Type | Required | Values | Notes |
-|-----------|------|----------|--------|-------|
-| **refresh** | Boolean | ❌ | true/false | Share synchronization |
+### Group 5: Additional Implementation Attributes
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **replaceComment** | Boolean | Optional | false | true/false | None | SET operations only | LOW | Replace existing comment |
+| **dropComment** | Boolean | Optional | false | true/false | None | UNSET operations only | LOW | Drop comment entirely |
+| **newDefaultDdlCollation** | String | Optional | Current | Valid collation | Must be valid | SET operations only | LOW | New default collation |
+| **newMaxDataExtensionTimeInDays** | Integer | Optional | Current | 0-90 | ≥ dataRetention | SET operations only | MEDIUM | New max extension period |
+| **swapWith** | String | Optional | N/A | Valid database name | Must exist | RENAME operations only | LOW | Swap database names |
 
 ### Mutual Exclusivity Rules
 ```yaml
@@ -207,6 +198,28 @@ ALTER DATABASE debug_database SET
   LOG_LEVEL = 'DEBUG'
   TRACE_LEVEL = 'ON_EVENT'
   ENABLE_CONSOLE_OUTPUT = TRUE;
+
+-- Complete example with all attributes
+ALTER DATABASE comprehensive_database SET
+  replaceComment = "true"
+  databaseName = "test_db"
+  unsetDataRetentionTimeInDays = "false"
+  enableReplication = "true"
+  replicationAccounts = "org1.account1,org2.account2"
+  dropComment = "false"
+  maxDataExtensionTimeInDays = "90"
+  unsetComment = "false"
+  defaultDdlCollation = "utf8"
+  unsetMaxDataExtensionTimeInDays = "false"
+  newDefaultDdlCollation = "utf8mb4"
+  ifExists = "true"
+  newDatabaseName = "renamed_db"
+  dataRetentionTimeInDays = "30"
+  comment = "Database comment"
+  operationType = "SET"
+  newMaxDataExtensionTimeInDays = "60"
+  unsetDefaultDdlCollation = "false"
+  swapWith = "other_database";
 ```
 
 ### UNSET PROPERTY Examples

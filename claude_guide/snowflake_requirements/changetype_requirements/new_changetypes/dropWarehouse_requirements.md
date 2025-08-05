@@ -68,13 +68,13 @@ AUTO_SUSPEND: "Running warehouses automatically suspended first"
 CASE_SENSITIVITY: "Unquoted names converted to uppercase, quoted names preserved"
 ```
 
-## 📊 ATTRIBUTES QUICK REFERENCE
+## 📊 COMPREHENSIVE_ATTRIBUTE_ANALYSIS
 
 ### Core Attributes
-| Attribute | Type | Required | Values | Constraints |
-|-----------|------|----------|--------|-------------|
-| **warehouseName** | String | ✅ | Valid identifier | Cannot be null/empty |
-| **ifExists** | Boolean | ❌ | true/false | Error prevention |
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **warehouseName** | String | Required | N/A | Valid identifier | Must exist | None | HIGH | Primary warehouse identifier |
+| **ifExists** | Boolean | Optional | false | true/false | None | None | MEDIUM | Error prevention for non-existent warehouses |
 
 ### Validation Rules
 ```yaml
@@ -116,6 +116,14 @@ DROP WAREHOUSE non_existent_warehouse;
 
 -- Success: Using IF EXISTS
 DROP WAREHOUSE IF EXISTS non_existent_warehouse;
+```
+
+### Complete Example with All Attributes
+```sql
+-- Complete example with all attributes  
+DROP WAREHOUSE IF EXISTS comprehensive_warehouse
+  ifExists = "true"
+  warehouseName = "test_warehouse";
 ```
 
 ### Validation Points

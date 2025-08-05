@@ -1,0 +1,298 @@
+AIPL_VERSION: "2.0"
+DOCUMENT_TYPE: BASIC_APPROACH_SPECIFICATION
+VALIDATION_MODE: STRICT
+
+IMPORTS:
+  - "../core/TERMINOLOGY_DEFINITIONS.yaml"
+  - "../core/STEP_SPECIFICATIONS.yaml"
+  - "../core/AUTONOMOUS_OPERATION.yaml"
+
+REQUIRES:
+  - BEHAVIORAL_KEYWORDS
+  - STEP_CLASSIFICATION
+  - AUTONOMOUS_PREREQUISITE_PHASE
+
+PURPOSE: "Basic monolithic approach for simple, self-contained AIPL programs - single file contains all knowledge"
+
+APPROACH_OVERVIEW:
+  APPROACH_NAME: "Basic Monolithic AIPL"
+  COMPLEXITY_LEVEL: "Simple"
+  TARGET_AUDIENCE: "Individual developers, small teams, prototype development"
+  PROGRAM_STRUCTURE: "Single AIPL file with embedded domain knowledge"
+  MAINTENANCE_MODEL: "Direct file editing, no shared dependencies"
+
+WHEN_TO_USE_BASIC_APPROACH:
+  IDEAL_SCENARIOS:
+    - "Simple, linear workflows (3-10 steps)"
+    - "Prototype development and proof-of-concepts"
+    - "Single-domain processes (only one technology)"
+    - "Small teams (1-3 developers)"
+    - "Learning AIPL concepts"
+    - "One-off tasks that won't be repeated"
+    - "Quick automation of manual processes"
+    
+  ANTI_PATTERNS:
+    - "Multi-domain workflows spanning different technologies"
+    - "Reusable patterns used across multiple programs"
+    - "Large teams needing shared domain expertise"
+    - "Enterprise-scale automation"
+    - "Long-term maintenance scenarios"
+    - "Complex workflows with 15+ steps"
+
+BASIC_PROGRAM_STRUCTURE:
+  PURPOSE: "Standard structure for basic monolithic programs"
+  
+  REQUIRED_SECTIONS:
+    HEADER_BLOCK:
+      AIPL_VERSION: "2.0"
+      PROGRAM_NAME: "kebab-case-identifier"
+      DESCRIPTION: "Single line purpose statement"
+      
+    EXECUTION_PROTOCOL:
+      PURPOSE: "What the program accomplishes"
+      INPUT: "What AI receives to execute the program"
+      OUTPUT: "What AI produces as result"
+      VALIDATION: "How to verify successful completion"
+      
+    VARIABLES_BLOCK:
+      PURPOSE: "All parameterizable content as variables"
+      SYNTAX: "VARIABLE_NAME: \"${SUBSTITUTION_VALUE}\""
+      SCOPE: "Available throughout entire program"
+      
+    PHASES_BLOCK:
+      PURPOSE: "Sequential execution workflow using STEP_SPECIFICATIONS"
+      STRUCTURE: "Ordered phases with dependencies"
+      STEP_INTEGRATION: "All steps follow UNIVERSAL_STEP_TEMPLATE"
+      
+  OPTIONAL_SECTIONS:
+    TEMPLATES_BLOCK:
+      PURPOSE: "Code generation patterns embedded in program"
+      SCOPE: "Program-specific templates only"
+      
+    ERROR_HANDLING_BLOCK:
+      PURPOSE: "Program-specific failure response patterns"
+      INTEGRATION: "Uses QUALITY_GATE patterns from TERMINOLOGY_DEFINITIONS"
+
+BASIC_CONTENT_CREATION_PRINCIPLES:
+  PRIMARY_PRINCIPLES:
+    MONOLITHIC_COMPLETENESS: "Single file contains all necessary knowledge"
+    IMMEDIATE_ACTIONABILITY: "AI can execute without external references"
+    EMBEDDED_DOMAIN_KNOWLEDGE: "All technology-specific knowledge included inline"
+    SELF_CONTAINED_VALIDATION: "All validation logic embedded in program"
+    
+  BEHAVIORAL_INTEGRATION:
+    TERMINOLOGY_USAGE: "Use BEHAVIORAL_KEYWORDS from TERMINOLOGY_DEFINITIONS"
+    STEP_CLASSIFICATION: "Classify all steps using STEP_CATEGORIES"
+    AUTONOMOUS_INTEGRATION: "Include AUTONOMOUS_PREREQUISITE_PHASE"
+    QUALITY_GATES: "Use QUALITY_GATE patterns for critical validations"
+
+BASIC_STEP_CREATION_PATTERNS:
+  PURPOSE: "How to create steps in basic approach programs"
+  
+  STEP_CREATION_PROCESS:
+    STEP_1_CLASSIFY:
+      ACTION: "Determine step category using STEP_CLASSIFICATION"
+      REFERENCE: "STEP_CATEGORIES from STEP_SPECIFICATIONS"
+      
+    STEP_2_TEMPLATE:
+      ACTION: "Apply UNIVERSAL_STEP_TEMPLATE structure"
+      CUSTOMIZATION: "Embed domain-specific knowledge inline"
+      
+    STEP_3_BEHAVIORAL_KEYWORDS:
+      ACTION: "Use BEHAVIORAL_KEYWORDS appropriately"
+      VALIDATION: "Reference TERMINOLOGY_DEFINITIONS for correct usage"
+      
+    STEP_4_AUTONOMOUS_COMPLIANCE:
+      ACTION: "Ensure step commands are autonomous-compatible"
+      REFERENCE: "AUTO_APPROVAL_COMMAND_PATTERNS"
+      
+  EMBEDDED_DOMAIN_KNOWLEDGE:
+    INLINE_TEMPLATES: "Embed code templates directly in steps"
+    DIRECT_COMMANDS: "Include specific shell commands without abstraction"
+    EXPLICIT_VALIDATION: "Embed validation logic directly in ACCEPTANCE_CRITERIA"
+    CONTEXTUAL_ERROR_HANDLING: "Include domain-specific error patterns"
+
+BASIC_PROGRAM_TEMPLATE:
+  PURPOSE: "Complete template for basic approach programs"
+  
+  PROGRAM_TEMPLATE: |
+    AIPL_VERSION: "2.0"
+    PROGRAM_NAME: "implementation-task-name"
+    DESCRIPTION: "Single line description of what this program accomplishes"
+    
+    EXECUTION_PROTOCOL:
+      PURPOSE: "Implement [specific task] following [methodology]"
+      INPUT: "Project setup with [requirements]"
+      OUTPUT: "[Specific deliverables] with validation"
+      VALIDATION: "[Specific success criteria]"
+    
+    VARIABLES:
+      # Program-specific variables
+      OBJECT_TYPE: "${TARGET_OBJECT}"
+      PROJECT_PATH: "${BASE_PROJECT_PATH}"
+      PACKAGE_BASE: "com.example"
+      
+    PHASES:
+      PHASE_0_5_AUTONOMOUS_PREREQUISITES:
+        # Import template from AUTONOMOUS_OPERATION.yaml
+        STEP_TYPE: "VALIDATION"
+        PURPOSE: "Validate autonomous operation capability"
+        # ... (use template)
+        
+      PHASE_1_REQUIREMENTS_RESEARCH:
+        STEP_1_1_DOMAIN_RESEARCH:
+          STEP_TYPE: "RESEARCH"
+          PURPOSE: "Research domain-specific requirements"
+          INPUT_REQUIREMENTS:
+            - "Access to documentation sources"
+            - "Project context available"
+          EXECUTION_STEPS:
+            - ACTION: "Search vendor documentation"
+              COMMAND: "# Embedded search strategies"
+              EXPECTED_OUTPUT: "Comprehensive property list"
+          ACCEPTANCE_CRITERIA:
+            - CRITERION: "Found 15+ domain-specific properties"
+              VALIDATION_COMMAND: "# Embedded validation logic"
+              PASS_CONDITION: "Property count ≥ 15"
+          DELIVERABLES:
+            - ARTIFACT: "Requirements document"
+              LOCATION: "${PROJECT_PATH}/requirements.md"
+              VALIDATION: "# Embedded validation commands"
+              
+      PHASE_2_IMPLEMENTATION:
+        # Implementation phases with embedded domain knowledge
+        
+    TEMPLATES:
+      # Program-specific templates embedded inline
+      JAVA_CLASS_TEMPLATE: |
+        package ${PACKAGE_BASE};
+        public class ${OBJECT_TYPE} {
+            // Embedded template content
+        }
+        
+    ERROR_HANDLING:
+      GLOBAL_FAILURE_ACTION: "STOP"
+      PHASE_FAILURE_HANDLERS:
+        PHASE_1_REQUIREMENTS_RESEARCH:
+          ACTION: "WARN"
+          MESSAGE: "Requirements research incomplete - proceeding with available information"
+
+BASIC_VALIDATION_PATTERNS:
+  PURPOSE: "Validation patterns specific to basic approach"
+  
+  MONOLITHIC_VALIDATION:
+    COMPLETENESS_CHECK:
+      COMMAND: "grep -c 'STEP_TYPE\\|PURPOSE\\|DELIVERABLES' ${PROGRAM_FILE}"
+      PURPOSE: "Verify all steps have required sections"
+      EXPECTED: "Count matches step count × 3"
+      
+    BEHAVIORAL_KEYWORD_USAGE:
+      COMMAND: "grep -E 'ACCEPTANCE_CRITERIA|QUALITY_GATE|SUCCESS_CRITERIA' ${PROGRAM_FILE}"
+      PURPOSE: "Verify correct behavioral keyword usage"
+      VALIDATION: "Keywords used appropriately for step types"
+      
+    AUTONOMOUS_COMPLIANCE:
+      COMMAND: "grep -c 'PHASE_0_5_AUTONOMOUS_PREREQUISITES' ${PROGRAM_FILE}"
+      PURPOSE: "Verify autonomous operation validation included"
+      EXPECTED: "Exactly 1 autonomous prerequisite phase"
+      
+  EMBEDDED_KNOWLEDGE_VALIDATION:
+    DOMAIN_SPECIFICITY:
+      CHECK: "Program contains actual domain values, not generic placeholders"
+      COMMAND: "grep -c 'PROPERTY_1\\|GENERIC_\\|PLACEHOLDER_' ${PROGRAM_FILE}"
+      EXPECTED: "0 generic placeholders found"
+      
+    TEMPLATE_COMPLETENESS:
+      CHECK: "All templates are fully specified with actual content"
+      VALIDATION: "No template stubs or TODO markers"
+      
+    COMMAND_SPECIFICITY:
+      CHECK: "All commands are copy-paste executable"
+      VALIDATION: "No abstract or parameterized commands requiring interpretation"
+
+BASIC_CONTENT_CONVERSION_RULES:
+  PURPOSE: "Rules for converting guides to basic approach programs"
+  
+  NARRATIVE_TO_EXECUTION:
+    PROSE_ELIMINATION:
+      INPUT_PATTERN: "This section explains how to implement..."
+      OUTPUT_PATTERN: |
+        IMPLEMENTATION_PHASE:
+          STEP_TYPE: "PROCESSING"
+          PURPOSE: "Implement [specific functionality]"
+          # Use UNIVERSAL_STEP_TEMPLATE
+          
+    EXPLANATION_TO_TEMPLATE:
+      INPUT_PATTERN: "Create a Java class with the following structure..."
+      OUTPUT_PATTERN: |
+        TEMPLATES:
+          JAVA_CLASS_TEMPLATE: |
+            # Actual code template content
+            
+    INSTRUCTION_TO_STEP:
+      INPUT_PATTERN: "Run the following command: mvn compile"
+      OUTPUT_PATTERN: |
+        COMPILE_STEP:
+          STEP_TYPE: "EXECUTION"
+          EXECUTION_STEPS:
+            - ACTION: "Compile project"
+              COMMAND: "mvn compile -q"
+              EXPECTED_OUTPUT: "BUILD SUCCESS"
+
+BASIC_SUCCESS_CRITERIA:
+  PURPOSE: "Success criteria specific to basic approach programs"
+  
+  PROGRAM_QUALITY:
+    IMMEDIATE_EXECUTABILITY: "AI can execute program without external references"
+    COMPLETE_KNOWLEDGE: "All domain knowledge embedded in single file"
+    BEHAVIORAL_CONSISTENCY: "Correct use of BEHAVIORAL_KEYWORDS throughout"
+    AUTONOMOUS_COMPLIANCE: "Includes autonomous operation validation"
+    
+  EXECUTION_QUALITY:
+    STEP_COMPLETENESS: "All steps follow UNIVERSAL_STEP_TEMPLATE"
+    VALIDATION_COVERAGE: "All critical points have QUALITY_GATE validation"
+    ERROR_HANDLING: "Clear error messages and recovery steps"
+    DELIVERABLE_SPECIFICATION: "All outputs clearly defined and validated"
+    
+  MAINTENANCE_QUALITY:
+    SELF_DOCUMENTATION: "Program structure is self-explanatory"
+    MODULAR_PHASES: "Phases can be executed independently when appropriate"
+    VARIABLE_PARAMETERIZATION: "Common values parameterized for reuse"
+    TEMPLATE_REUSABILITY: "Templates can be easily modified"
+
+BASIC_APPROACH_LIMITATIONS:
+  PURPOSE: "Understanding when basic approach is insufficient"
+  
+  SCALABILITY_LIMITS:
+    PROGRAM_SIZE: "Becomes unwieldy beyond 15-20 steps"
+    DOMAIN_COMPLEXITY: "Single domain only, no multi-technology workflows"
+    TEAM_COLLABORATION: "No sharing of domain expertise across programs"
+    
+  MAINTENANCE_CHALLENGES:
+    DUPLICATION: "Domain knowledge duplicated across similar programs"
+    UPDATE_OVERHEAD: "Changes require updating multiple program files"
+    CONSISTENCY: "No mechanism to ensure consistent patterns across programs"
+    
+  MIGRATION_PATH:
+    TO_ADVANCED_APPROACH: "Extract domain knowledge to libraries"
+    REFACTORING_STRATEGY: "Identify reusable patterns for library extraction"
+    TRANSITION_TIMELINE: "Gradual migration, not all-at-once conversion"
+
+IMPORT_AND_USAGE:
+  PURPOSE: "How to use this specification in practice"
+  
+  CREATING_BASIC_PROGRAMS:
+    STEP_1: "Import this specification to understand basic approach principles"
+    STEP_2: "Use BASIC_PROGRAM_TEMPLATE as starting point"
+    STEP_3: "Follow BASIC_CONTENT_CREATION_PRINCIPLES"
+    STEP_4: "Validate using BASIC_VALIDATION_PATTERNS"
+    
+  REFERENCE_INTEGRATION:
+    TERMINOLOGY: "Always reference TERMINOLOGY_DEFINITIONS for behavioral keywords"
+    STEP_PATTERNS: "Always use STEP_SPECIFICATIONS for step structure"
+    AUTONOMOUS_OPERATION: "Always include AUTONOMOUS_OPERATION validation"
+    
+  QUALITY_ASSURANCE:
+    VALIDATION_CHECKLIST: "Use BASIC_SUCCESS_CRITERIA as quality checklist"
+    LIMITATION_AWARENESS: "Understand BASIC_APPROACH_LIMITATIONS"
+    MIGRATION_PLANNING: "Plan migration path for growing complexity"

@@ -1,0 +1,212 @@
+AIPL_VERSION: "1.0"
+PROGRAM_NAME: "implementation-completeness-validation"
+DESCRIPTION: "Comprehensive validation of Liquibase extension implementation completeness"
+
+VARIABLES:
+  EXTENSION_PATH: "${LIQUIBASE_EXTENSION_ROOT}"
+  TEST_HARNESS_PATH: "${LIQUIBASE_TEST_HARNESS_ROOT}"
+  CHANGE_CLASS: "${CHANGE_CLASS_NAME}"
+  STATEMENT_CLASS: "${STATEMENT_CLASS_NAME}"
+  SQL_GENERATOR: "${SQL_GENERATOR_CLASS_NAME}"
+  DATABASE_TYPE: "${DB_NAME}"
+  MIN_ATTRIBUTES: "${MINIMUM_ATTRIBUTE_COUNT}"
+
+PHASES:
+  VALIDATE_CHANGE_CLASS:
+    DESCRIPTION: "Validate Change class implementation completeness"
+    STEPS:
+      - VALIDATE:
+          NAME: "no-placeholder-comments"
+          TYPE: "NOT_CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/java/liquibase/change/core/${CHANGE_CLASS}.java"
+          PATTERN: "// ... \\["
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Placeholder comments found - implementation incomplete"
+          
+      - VALIDATE:
+          NAME: "no-omitted-brevity"
+          TYPE: "NOT_CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/java/liquibase/change/core/${CHANGE_CLASS}.java"
+          PATTERN: "omitted for brevity"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Brevity comments found - methods missing"
+          
+      - COMMAND:
+          NAME: "count-private-fields"
+          EXECUTE: "grep -c '^[[:space:]]*private[[:space:]]' ${EXTENSION_PATH}/src/main/java/liquibase/change/core/${CHANGE_CLASS}.java"
+          
+      - COMMAND:
+          NAME: "count-getter-methods"
+          EXECUTE: "grep -c 'public.*get.*()' ${EXTENSION_PATH}/src/main/java/liquibase/change/core/${CHANGE_CLASS}.java"
+          
+      - COMMAND:
+          NAME: "count-setter-methods"
+          EXECUTE: "grep -c 'public void set.*(' ${EXTENSION_PATH}/src/main/java/liquibase/change/core/${CHANGE_CLASS}.java"
+          
+      - VALIDATE:
+          NAME: "generatestatements-complete"
+          TYPE: "NOT_CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/java/liquibase/change/core/${CHANGE_CLASS}.java"
+          PATTERN: "// ... \\[Set all other"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "generateStatements() method incomplete"
+
+  VALIDATE_STATEMENT_CLASS:
+    DESCRIPTION: "Validate Statement class implementation completeness"
+    STEPS:
+      - COMMAND:
+          NAME: "count-statement-fields"
+          EXECUTE: "grep -c '^[[:space:]]*private[[:space:]]' ${EXTENSION_PATH}/src/main/java/liquibase/statement/core/${STATEMENT_CLASS}.java"
+          
+      - COMMAND:
+          NAME: "count-statement-getters"
+          EXECUTE: "grep -c 'public.*get.*()' ${EXTENSION_PATH}/src/main/java/liquibase/statement/core/${STATEMENT_CLASS}.java"
+          
+      - COMMAND:
+          NAME: "count-statement-setters"
+          EXECUTE: "grep -c 'public void set.*(' ${EXTENSION_PATH}/src/main/java/liquibase/statement/core/${STATEMENT_CLASS}.java"
+          
+      - VALIDATE:
+          NAME: "no-statement-placeholders"
+          TYPE: "NOT_CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/java/liquibase/statement/core/${STATEMENT_CLASS}.java"
+          PATTERN: "// Additional getters/setters"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Statement class has placeholder comments"
+
+  VALIDATE_SQL_GENERATOR:
+    DESCRIPTION: "Validate SQL Generator implementation completeness"
+    STEPS:
+      - COMMAND:
+          NAME: "count-addoption-calls"
+          EXECUTE: "grep -c 'addOption(' ${EXTENSION_PATH}/src/main/java/liquibase/sqlgenerator/core/snowflake/${SQL_GENERATOR}.java"
+          
+      - COMMAND:
+          NAME: "count-statement-getters-used"
+          EXECUTE: "grep -c 'statement.get.*()' ${EXTENSION_PATH}/src/main/java/liquibase/sqlgenerator/core/snowflake/${SQL_GENERATOR}.java"
+          
+      - VALIDATE:
+          NAME: "sql-spacing-fixed"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/java/liquibase/sqlgenerator/core/snowflake/${SQL_GENERATOR}.java"
+          PATTERN: "else sql.append\\(\" \"\\)"
+          FAILURE_ACTION: "CONTINUE"
+          ERROR_MESSAGE: "SQL spacing fix recommended"
+
+  VALIDATE_TEST_COVERAGE:
+    DESCRIPTION: "Validate test harness coverage and completeness"
+    STEPS:
+      - VALIDATE:
+          NAME: "xml-test-exists"
+          TYPE: "FILE_EXISTS"
+          TARGET: "${TEST_HARNESS_PATH}/src/main/resources/liquibase/harness/change/changelogs/${DATABASE_TYPE}/${CHANGE_CLASS}.xml"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Test harness XML missing"
+          
+      - VALIDATE:
+          NAME: "expected-sql-exists"
+          TYPE: "FILE_EXISTS"
+          TARGET: "${TEST_HARNESS_PATH}/src/main/resources/liquibase/harness/change/expectedSql/${DATABASE_TYPE}/${CHANGE_CLASS}.sql"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Expected SQL file missing"
+          
+      - VALIDATE:
+          NAME: "expected-snapshot-exists"
+          TYPE: "FILE_EXISTS"
+          TARGET: "${TEST_HARNESS_PATH}/src/main/resources/liquibase/harness/change/expectedSnapshot/${DATABASE_TYPE}/${CHANGE_CLASS}.json"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Expected snapshot file missing"
+          
+      - COMMAND:
+          NAME: "count-test-attributes"
+          EXECUTE: "grep -c '[a-zA-Z]*=' ${TEST_HARNESS_PATH}/src/main/resources/liquibase/harness/change/changelogs/${DATABASE_TYPE}/${CHANGE_CLASS}.xml"
+          
+      - CONDITIONAL:
+          NAME: "verify-sufficient-attributes"
+          CONDITION:
+            TYPE: "COMMAND_SUCCESS"
+            COMMAND: "test $(grep -c '[a-zA-Z]*=' ${TEST_HARNESS_PATH}/src/main/resources/liquibase/harness/change/changelogs/${DATABASE_TYPE}/${CHANGE_CLASS}.xml) -ge ${MIN_ATTRIBUTES}"
+          THEN:
+            - CONTINUE
+          ELSE:
+            - COMMAND:
+                EXECUTE: "echo 'WARNING: Test may not exercise sufficient attributes'"
+
+  RUN_COMPREHENSIVE_TESTS:
+    DESCRIPTION: "Execute comprehensive test validation"
+    STEPS:
+      - COMMAND:
+          NAME: "build-extension"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn clean package -DskipTests -q"
+          
+      - COMMAND:
+          NAME: "install-extension"
+          EXECUTE: "cd ${TEST_HARNESS_PATH} && mvn install:install-file -Dfile=${EXTENSION_PATH}/target/*.jar -DgroupId=org.liquibase -DartifactId=liquibase-${DATABASE_TYPE} -Dversion=0-SNAPSHOT -Dpackaging=jar -q"
+          
+      - VALIDATE:
+          NAME: "test-harness-passes"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "cd ${TEST_HARNESS_PATH} && mvn test -Dtest=ChangeObjectTests -DchangeObjects=${CHANGE_CLASS} -DdbName=${DATABASE_TYPE} -q"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Test harness fails - implementation issues remain"
+          
+      - COMMAND:
+          NAME: "extract-generated-sql"
+          EXECUTE: "cd ${TEST_HARNESS_PATH} && mvn test -Dtest=ChangeObjectTests -DchangeObjects=${CHANGE_CLASS} -DdbName=${DATABASE_TYPE} -q 2>&1 | grep 'ALTER\\|CREATE\\|DROP' | head -5"
+
+  GENERATE_COMPLETENESS_REPORT:
+    DESCRIPTION: "Generate implementation completeness report"
+    STEPS:
+      - CREATE_FILE:
+          NAME: "create-completeness-report"
+          TEMPLATE: "COMPLETENESS_REPORT_TEMPLATE"
+          OUTPUT: "${EXTENSION_PATH}/temp/completeness_report.txt"
+          
+      - COMMAND:
+          NAME: "display-report"
+          EXECUTE: "cat ${EXTENSION_PATH}/temp/completeness_report.txt"
+
+TEMPLATES:
+  COMPLETENESS_REPORT_TEMPLATE: |
+    IMPLEMENTATION COMPLETENESS REPORT
+    ==================================
+    Change Class: ${CHANGE_CLASS}
+    Statement Class: ${STATEMENT_CLASS}
+    SQL Generator: ${SQL_GENERATOR}
+    Database Type: ${DATABASE_TYPE}
+    
+    VALIDATION RESULTS:
+    - Change Class: $(grep -c 'private' ${EXTENSION_PATH}/src/main/java/liquibase/change/core/${CHANGE_CLASS}.java) fields, $(grep -c 'get.*()' ${EXTENSION_PATH}/src/main/java/liquibase/change/core/${CHANGE_CLASS}.java) getters
+    - Statement Class: $(grep -c 'private' ${EXTENSION_PATH}/src/main/java/liquibase/statement/core/${STATEMENT_CLASS}.java) fields, $(grep -c 'get.*()' ${EXTENSION_PATH}/src/main/java/liquibase/statement/core/${STATEMENT_CLASS}.java) getters
+    - SQL Generator: $(grep -c 'addOption' ${EXTENSION_PATH}/src/main/java/liquibase/sqlgenerator/core/snowflake/${SQL_GENERATOR}.java) addOption calls
+    - Test Coverage: $(grep -c '[a-zA-Z]*=' ${TEST_HARNESS_PATH}/src/main/resources/liquibase/harness/change/changelogs/${DATABASE_TYPE}/${CHANGE_CLASS}.xml) attributes tested
+    
+    COMPLETENESS STATUS: $(if [ -f "${TEST_HARNESS_PATH}/src/main/resources/liquibase/harness/change/changelogs/${DATABASE_TYPE}/${CHANGE_CLASS}.xml" ]; then echo "COMPLETE"; else echo "INCOMPLETE"; fi)
+
+VALIDATION_CHECKLIST:
+  IMPLEMENTATION_COMPLETE:
+    CHANGE_CLASS_CHECKS:
+      - NO_PLACEHOLDER_COMMENTS: "grep -q '// ... \\[' file && echo FAIL || echo PASS"
+      - GETTER_SETTER_RATIO: "test $(grep -c 'get.*()' file) -eq $(grep -c 'set.*(' file)"
+      - GENERATESTATEMENTS_COMPLETE: "grep -qv '// ... \\[Set all other' file"
+      
+    STATEMENT_CLASS_CHECKS:
+      - FIELD_METHOD_RATIO: "test $(grep -c 'private' file) -le $(($(grep -c 'get.*()' file) / 2))"
+      - NO_OMITTED_METHODS: "grep -qv 'omitted for brevity' file"
+      
+    SQL_GENERATOR_CHECKS:
+      - STATEMENT_USAGE: "test $(grep -c 'statement.get' file) -ge 3"
+      - SPACING_HANDLED: "grep -q 'else sql.append.*\" \"' file"
+      
+    TEST_COVERAGE_CHECKS:
+      - TRIAD_COMPLETE: "test -f xml && test -f sql && test -f json"
+      - COMPREHENSIVE_ATTRIBUTES: "test $(grep -c '[a-zA-Z]*=' xml) -ge ${MIN_ATTRIBUTES}"
+
+ERROR_HANDLING:
+  GLOBAL_FAILURE_ACTION: "STOP"
+  VALIDATION_FAILURE_MESSAGES:
+    INCOMPLETE_CHANGE: "Change class implementation incomplete - check for placeholder comments"
+    INCOMPLETE_STATEMENT: "Statement class missing methods - verify all getters/setters exist"
+    INCOMPLETE_SQL: "SQL Generator not processing all attributes - check addOption calls"
+    MISSING_TESTS: "Test harness coverage incomplete - create XML/SQL/JSON triad"
+    TEST_FAILURES: "Tests fail - implementation has runtime issues"

@@ -82,16 +82,16 @@ DEFAULT_BEHAVIOR: "RESTRICT behavior when neither CASCADE nor RESTRICT specified
 CASE_SENSITIVITY: "Unquoted names converted to uppercase, quoted names preserved"
 ```
 
-## 📊 ATTRIBUTES QUICK REFERENCE
+## 📊 COMPREHENSIVE_ATTRIBUTE_ANALYSIS
 
 ### Core Attributes
-| Attribute | Type | Required | Values | Constraints |
-|-----------|------|----------|--------|-------------|
-| **schemaName** | String | ✅ | Valid identifier | Cannot be null/empty, not current schema |
-| **databaseName** | String | ❌ | Valid identifier | Schema location |
-| **ifExists** | Boolean | ❌ | true/false | Error prevention |
-| **cascade** | Boolean | ❌ | true/false | Mutually exclusive with restrict |
-| **restrict** | Boolean | ❌ | true/false | Mutually exclusive with cascade |
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **schemaName** | String | Required | N/A | Valid identifier | Must exist | None | HIGH | Primary schema identifier |
+| **databaseName** | String | Optional | Current DB | Valid identifier | Must exist | None | MEDIUM | Schema location specification |
+| **cascade** | Boolean | Optional | false | true/false | None | Mutually exclusive with restrict | MEDIUM | Drop with dependent objects |
+| **ifExists** | Boolean | Optional | false | true/false | None | None | MEDIUM | Error prevention for non-existent schemas |
+| **restrict** | Boolean | Optional | false | true/false | None | Mutually exclusive with cascade | MEDIUM | Fail if dependent objects exist |
 
 ### Mutual Exclusivity Rules
 ```yaml
@@ -136,6 +136,17 @@ DROP SCHEMA database_name.schema_name;
 
 -- With IF EXISTS and CASCADE
 DROP SCHEMA IF EXISTS database_name.schema_name CASCADE;
+```
+
+### Complete Example with All Attributes
+```sql
+-- Complete example with all attributes
+DROP SCHEMA IF EXISTS comprehensive_schema CASCADE
+  databaseName = "test_db"
+  cascade = "true"
+  ifExists = "true"
+  restrict = "false"
+  schemaName = "test_schema";
 ```
 
 ### Error Scenarios
@@ -274,22 +285,22 @@ public class SnowflakeDropSchemaGenerator extends AbstractSqlGenerator<DropSchem
     @Override
     public Sql[] generateSql(DropSchemaStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         // Implementation with CASCADE/RESTRICT logic
-        String sql = "DROP SCHEMA";
+        StringBuilder query = new StringBuilder("DROP SCHEMA");
         
         if (statement.getIfExists()) {
-            sql += " IF EXISTS";
+            query.append(" IF EXISTS");
         }
         
-        sql += " " + database.escapeObjectName(statement.getSchemaName(), Schema.class);
+        query.append(" ").append(database.escapeObjectName(statement.getSchemaName(), Schema.class));
         
         if (statement.getCascade()) {
-            sql += " CASCADE";
+            query.append(" CASCADE");
         } else if (statement.getRestrict()) {
-            sql += " RESTRICT";
+            query.append(" RESTRICT");
         }
         // Default is RESTRICT behavior
         
-        return new Sql[]{new UnparsedSql(sql, getAffectedSchema(statement))};
+        return new Sql[]{new UnparsedSql(query.toString(), getAffectedSchema(statement))};
     }
 }
 ```

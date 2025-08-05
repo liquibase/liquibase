@@ -1,0 +1,333 @@
+AIPL_VERSION: "2.0"
+DOCUMENT_TYPE: EXECUTION_SEMANTICS
+VALIDATION_MODE: STRICT
+
+IMPORTS:
+  - "../core/TERMINOLOGY_DEFINITIONS.yaml"
+  - "CORE_PRIMITIVES.yaml"
+
+REQUIRES:
+  - BEHAVIORAL_KEYWORDS
+  - EXECUTION_PRIMITIVES
+
+PURPOSE: "Runtime behavior and execution semantics for AIPL programs - how programs actually execute"
+
+EXECUTION_MODEL:
+  PURPOSE: "How AIPL programs are interpreted and executed"
+  
+  PROGRAM_LIFECYCLE:
+    INITIALIZATION:
+      VARIABLE_RESOLUTION: "All variables resolved and validated before execution"
+      IMPORT_RESOLUTION: "All imports loaded and templates/patterns merged"
+      DEPENDENCY_VALIDATION: "Phase and step dependencies validated for cycles"
+      TEMPLATE_COMPILATION: "All templates pre-compiled with variable context"
+      
+    EXECUTION:
+      PHASE_SEQUENCING: "Phases execute in dependency order"
+      STEP_SEQUENCING: "Steps within phases execute sequentially unless parallel"
+      ERROR_HANDLING: "Errors handled according to FAILURE_ACTION specifications"
+      STATE_MANAGEMENT: "Program state maintained throughout execution"
+      
+    TERMINATION:
+      SUCCESS_TERMINATION: "All phases complete successfully"
+      ERROR_TERMINATION: "Execution halted by QUALITY_GATE failure"
+      CLEANUP_EXECUTION: "Cleanup handlers run regardless of termination type"
+      RESULT_REPORTING: "Execution results and DELIVERABLES reported"
+
+BEHAVIORAL_KEYWORD_EXECUTION:
+  PURPOSE: "How behavioral keywords affect program execution flow"
+  
+  ACCEPTANCE_CRITERIA_BEHAVIOR:
+    EXECUTION_TIMING: "Evaluated at step completion"
+    AI_RESPONSE: "Must validate each criterion before proceeding to next step"
+    FAILURE_HANDLING: "Step fails if any criterion fails validation"
+    VALIDATION_COMMANDS: "Commands executed in current working directory context"
+    EXAMPLE_EXECUTION: |
+      # Step executes normally
+      # At step completion:
+      FOR each CRITERION in ACCEPTANCE_CRITERIA:
+        result = execute(VALIDATION_COMMAND)
+        IF result != PASS_CONDITION:
+          FAIL step with criterion failure
+      # Only proceed if all criteria pass
+      
+  QUALITY_GATE_BEHAVIOR:
+    EXECUTION_TIMING: "Evaluated immediately when encountered"
+    AI_RESPONSE: "Blocking behavior - execution stops on failure"
+    FAILURE_ACTIONS:
+      STOP: "Immediately halt program execution"
+      WARN: "Log warning but continue execution"
+      CONTINUE: "Log error but continue execution"
+    EXAMPLE_EXECUTION: |
+      # Quality gate encountered
+      gate_result = evaluate_quality_gate_condition()
+      IF gate_result == FAIL:
+        EXECUTE(ERROR_MESSAGE display)
+        IF FAILURE_ACTION == "STOP":
+          HALT_PROGRAM_EXECUTION()
+        # Other actions continue execution
+        
+  SUCCESS_CRITERIA_BEHAVIOR:
+    EXECUTION_TIMING: "Evaluated at phase completion"
+    AI_RESPONSE: "Determines if phase objective achieved"
+    USAGE_PATTERN: "Used for completion verification, not blocking"
+    REPORTING: "Success criteria reported in execution results"
+    
+  DELIVERABLE_BEHAVIOR:
+    EXECUTION_TIMING: "Validated at step/phase completion"
+    AI_RESPONSE: "Verifies expected outputs exist and are correct"
+    VALIDATION_EXECUTION: "Validation commands run with artifact context"
+    FAILURE_HANDLING: "Missing or invalid deliverables cause step failure"
+
+VARIABLE_RESOLUTION_SEMANTICS:
+  PURPOSE: "How variables are resolved during execution"
+  
+  RESOLUTION_ORDER:
+    PROGRAM_VARIABLES: "Program-declared variables (highest precedence)"
+    IMPORTED_VARIABLES: "Variables from imported libraries"
+    BUILT_IN_VARIABLES: "System-provided variables (lowest precedence)"
+    ENVIRONMENT_VARIABLES: "OS environment variables when explicitly referenced"
+    
+  RESOLUTION_TIMING:
+    STATIC_RESOLUTION: "Most variables resolved at program initialization"
+    DYNAMIC_RESOLUTION: "Loop variables and capture results resolved at runtime"
+    TEMPLATE_RESOLUTION: "Template variables resolved when template is used"
+    
+  RESOLUTION_CONTEXT:
+    GLOBAL_CONTEXT: "Variables available throughout entire program"
+    PHASE_CONTEXT: "Phase-specific variables"
+    STEP_CONTEXT: "Step-specific variables (loop variables, captures)"
+    TEMPLATE_CONTEXT: "Additional variables passed to templates"
+    
+  RESOLUTION_EXAMPLES: |
+    # Static resolution at initialization
+    PROJECT_PATH: "/home/user/project"
+    JAVA_CLASS: "${PROJECT_PATH}/src/Main.java"  # Resolved to "/home/user/project/src/Main.java"
+    
+    # Dynamic resolution during loop
+    LOOP:
+      ITERATE_OVER:
+        TYPE: "COMMAND_OUTPUT"
+        SOURCE: "find . -name '*.java'"
+      VARIABLE: "java_file"
+      STEPS:
+        - COMMAND:
+            EXECUTE: "javac ${java_file}"  # Resolved for each iteration
+
+EXECUTION_CONTEXT_MANAGEMENT:
+  PURPOSE: "How execution context is maintained and managed"
+  
+  WORKING_DIRECTORY_MANAGEMENT:
+    DEFAULT_DIRECTORY: "Directory where program file is located"
+    DIRECTORY_CHANGES: "Commands can specify WORKING_DIR"
+    DIRECTORY_PERSISTENCE: "Directory changes persist within step scope"
+    DIRECTORY_RESTORATION: "Working directory restored between steps"
+    
+  ENVIRONMENT_MANAGEMENT:
+    VARIABLE_INHERITANCE: "Programs inherit system environment"
+    VARIABLE_OVERRIDE: "Program variables can override environment"
+    VARIABLE_ISOLATION: "Changes don't affect system environment"
+    CUSTOM_ENVIRONMENT: "Commands can specify custom environment variables"
+    
+  RESOURCE_MANAGEMENT:
+    FILE_HANDLE_MANAGEMENT: "Automatic cleanup of file handles"
+    PROCESS_MANAGEMENT: "Child processes managed and cleaned up"
+    MEMORY_MANAGEMENT: "Variable and template memory managed"
+    TEMPORARY_RESOURCE_CLEANUP: "Temporary files and resources cleaned up"
+
+PARALLEL_EXECUTION_SEMANTICS:
+  PURPOSE: "How parallel execution works in AIPL programs"
+  
+  PARALLEL_STEP_EXECUTION:
+    CONCURRENCY_MODEL: "Shared-nothing parallelism"
+    SYNCHRONIZATION: "All parallel tasks must complete before proceeding"
+    FAILURE_HANDLING: "If any parallel task fails, entire parallel block fails"
+    RESOURCE_ISOLATION: "Parallel tasks have isolated working directories"
+    
+  VARIABLE_SHARING:
+    READ_ACCESS: "Parallel tasks can read shared variables"
+    WRITE_ISOLATION: "Parallel tasks cannot modify shared variables"
+    CAPTURE_ISOLATION: "Each parallel task has separate capture namespace"
+    RESULT_AGGREGATION: "Parallel task results aggregated after completion"
+    
+  EXECUTION_LIMITS:
+    MAX_CONCURRENT: "Configurable limit on concurrent tasks"
+    TIMEOUT_MANAGEMENT: "Individual task timeouts and overall parallel timeout"
+    RESOURCE_LIMITS: "Memory and CPU limits for parallel execution"
+
+ERROR_HANDLING_SEMANTICS:
+  PURPOSE: "How errors are handled and propagated during execution"
+  
+  ERROR_DETECTION:
+    COMMAND_ERRORS: "Non-zero exit codes from shell commands"
+    VALIDATION_ERRORS: "Failed VALIDATE primitive assertions"
+    FILE_ERRORS: "File creation/access failures"
+    TEMPLATE_ERRORS: "Template processing failures"
+    VARIABLE_ERRORS: "Undefined variable references"
+    
+  ERROR_PROPAGATION:
+    STEP_LEVEL_HANDLING: |
+      step_result = execute_step()
+      IF step_result == ERROR:
+        IF step has error_handler:
+          handler_result = execute_step_error_handler()
+          IF handler_result == CONTINUE:
+            proceed_to_next_step()
+          ELSE:
+            propagate_error_to_phase_level()
+        ELSE:
+          propagate_error_to_phase_level()
+          
+    PHASE_LEVEL_HANDLING: |
+      phase_result = execute_phase()
+      IF phase_result == ERROR:
+        IF phase has error_handler:
+          handler_result = execute_phase_error_handler()
+          # Handle based on handler result
+        ELSE:
+          propagate_error_to_global_level()
+          
+    GLOBAL_LEVEL_HANDLING: |
+      program_result = execute_program()
+      IF program_result == ERROR:
+        execute_cleanup_handlers()
+        report_program_failure()
+        exit_with_error_status()
+        
+  ERROR_RECOVERY:
+    RETRY_SEMANTICS: "Automatic retry with exponential backoff"
+    FALLBACK_EXECUTION: "Alternative execution paths on failure"
+    PARTIAL_SUCCESS: "Continue with successful subset of operations"
+    STATE_RESTORATION: "Restore system state to known good state"
+
+TEMPLATE_EXECUTION_SEMANTICS:
+  PURPOSE: "How templates are processed and executed"
+  
+  TEMPLATE_PROCESSING:
+    VARIABLE_SUBSTITUTION: |
+      template_content = load_template(TEMPLATE_NAME)
+      FOR each ${VARIABLE} in template_content:
+        IF VARIABLE exists in context:
+          replace ${VARIABLE} with value
+        ELSE:
+          ERROR: "Undefined variable in template"
+      return processed_content
+      
+    NESTED_TEMPLATE_RESOLUTION:
+      DEPENDENCY_RESOLUTION: "Templates can reference other templates"
+      CIRCULAR_DETECTION: "Error on circular template references"
+      RESOLUTION_ORDER: "Dependencies resolved before dependent templates"
+      
+    CONDITIONAL_TEMPLATE_PROCESSING:
+      IF_BLOCKS: "Templates can include conditional content blocks"
+      LOOP_BLOCKS: "Templates can include iterative content blocks"
+      VARIABLE_SCOPING: "Template-local variables don't affect global scope"
+
+AUTONOMOUS_EXECUTION_SEMANTICS:
+  PURPOSE: "How autonomous operation affects execution behavior"
+  
+  AUTONOMOUS_VALIDATION:
+    PREREQUISITE_CHECKING: "PHASE_0_5_AUTONOMOUS_PREREQUISITES must pass"
+    COMMAND_PATTERN_MATCHING: "Commands matched against approved patterns"
+    SAFETY_BOUNDARY_ENFORCEMENT: "Unsafe commands trigger human escalation"
+    
+  AUTONOMOUS_COMMAND_EXECUTION:
+    PATTERN_MATCHING: |
+      FOR each COMMAND in execution_step:
+        command_pattern = extract_pattern(COMMAND.EXECUTE)
+        IF command_pattern in APPROVED_PATTERNS:
+          execute_command_autonomously()
+        ELSE:
+          request_human_approval()
+          
+    SAFETY_MONITORING:
+      EXECUTION_TIMEOUT: "Commands have maximum execution time"
+      RESOURCE_MONITORING: "Monitor CPU, memory, disk usage"
+      OUTPUT_VALIDATION: "Validate command outputs match expectations"
+      
+    ESCALATION_TRIGGERS:
+      PATTERN_MISMATCH: "Command doesn't match approved patterns"
+      EXECUTION_FAILURE: "Repeated failures of approved commands"
+      RESOURCE_EXHAUSTION: "System resource limits exceeded"
+      UNEXPECTED_BEHAVIOR: "Command behavior differs from expected"
+
+PERFORMANCE_EXECUTION_SEMANTICS:
+  PURPOSE: "How programs execute efficiently and manage resources"
+  
+  EXECUTION_OPTIMIZATION:
+    VARIABLE_CACHING: "Variables resolved once and cached"
+    TEMPLATE_COMPILATION: "Templates pre-compiled for faster processing"
+    COMMAND_BATCHING: "Related commands batched when possible"
+    PARALLEL_OPPORTUNITY_DETECTION: "Automatically identify parallelizable steps"
+    
+  RESOURCE_MANAGEMENT:
+    MEMORY_EFFICIENCY: "Variables and templates released when no longer needed"
+    PROCESS_EFFICIENCY: "Minimize process creation overhead"
+    I_O_EFFICIENCY: "Batch file operations when possible"
+    NETWORK_EFFICIENCY: "Cache remote resources when appropriate"
+    
+  PERFORMANCE_MONITORING:
+    EXECUTION_TIMING: "Track phase and step execution times"
+    RESOURCE_USAGE: "Monitor memory, CPU, and I/O usage"
+    BOTTLENECK_IDENTIFICATION: "Identify slow steps and phases"
+    OPTIMIZATION_SUGGESTIONS: "Suggest performance improvements"
+
+DEBUGGING_AND_OBSERVABILITY:
+  PURPOSE: "How to debug and observe AIPL program execution"
+  
+  EXECUTION_LOGGING:
+    PHASE_LOGGING: "Log phase start, completion, and results"
+    STEP_LOGGING: "Log step execution and validation results"
+    COMMAND_LOGGING: "Log command execution and output"
+    ERROR_LOGGING: "Detailed error information and stack traces"
+    
+  VARIABLE_INSPECTION:
+    VARIABLE_DUMP: "Dump all variables at any execution point"
+    VARIABLE_TRACKING: "Track variable changes throughout execution"
+    TEMPLATE_INSPECTION: "Inspect template processing and results"
+    
+  EXECUTION_TRACING:
+    CALL_STACK: "Maintain execution call stack for debugging"
+    EXECUTION_PATH: "Trace which paths were taken through conditionals"
+    DEPENDENCY_RESOLUTION: "Trace how dependencies were resolved"
+    
+  PERFORMANCE_PROFILING:
+    EXECUTION_PROFILES: "Detailed timing information for all operations"
+    RESOURCE_PROFILES: "Resource usage profiles for optimization"
+    BOTTLENECK_ANALYSIS: "Identify and report performance bottlenecks"
+
+COMPATIBILITY_AND_VERSIONING:
+  PURPOSE: "How execution semantics maintain compatibility across versions"
+  
+  VERSION_COMPATIBILITY:
+    BACKWARD_COMPATIBILITY: "Newer executors run older programs"
+    FORWARD_COMPATIBILITY: "Graceful handling of newer features"
+    VERSION_DETECTION: "Programs declare required AIPL_VERSION"
+    
+  SEMANTIC_EVOLUTION:
+    ADDITIVE_CHANGES: "New features don't break existing programs"
+    DEPRECATION_POLICY: "Deprecated features supported with warnings"
+    MIGRATION_SUPPORT: "Tools to migrate programs to newer semantics"
+    
+  EXECUTION_ENVIRONMENT:
+    PLATFORM_INDEPENDENCE: "Semantics work across different operating systems"
+    TOOL_INDEPENDENCE: "Programs work with different underlying tools"
+    RUNTIME_ADAPTATION: "Adapt execution to available system capabilities"
+
+INTEGRATION_REQUIREMENTS:
+  PURPOSE: "How execution semantics integrate with the broader AIPL ecosystem"
+  
+  BEHAVIORAL_KEYWORD_INTEGRATION:
+    CONSISTENT_BEHAVIOR: "Keywords trigger same behavior across all programs"
+    SEMANTIC_VALIDATION: "Validate correct keyword usage during execution"
+    BEHAVIORAL_REPORTING: "Report how keywords affected execution flow"
+    
+  LIBRARY_INTEGRATION:
+    IMPORT_RESOLUTION: "Resolve and merge library content correctly"
+    PATTERN_EXECUTION: "Execute library patterns according to semantics"
+    LIBRARY_VERSIONING: "Handle library version compatibility"
+    
+  TOOLCHAIN_INTEGRATION:
+    EDITOR_SUPPORT: "Provide semantic information for editors"
+    DEBUGGER_SUPPORT: "Support debugging tools and interfaces"
+    EXECUTION_ENGINES: "Work with different AIPL execution engines"

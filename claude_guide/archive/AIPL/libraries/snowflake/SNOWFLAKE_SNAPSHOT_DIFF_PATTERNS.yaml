@@ -1,0 +1,338 @@
+AIPL_VERSION: "2.0"
+LIBRARY_NAME: "snowflake-snapshot-diff-patterns"
+LIBRARY_VERSION: "1.0"
+DESCRIPTION: "Snowflake-specific patterns for snapshot and diff implementation"
+
+IMPORTS:
+  - "../../core/TERMINOLOGY_DEFINITIONS.yaml"
+  - "../../core/STEP_SPECIFICATIONS.yaml"
+  - "../../core/AUTONOMOUS_OPERATION.yaml"
+
+REQUIRES:
+  - BEHAVIORAL_KEYWORDS
+  - STEP_CLASSIFICATION
+  - AUTONOMOUS_PREREQUISITE_PHASE
+
+DOMAIN_EXPERTISE:
+  TECHNOLOGY_OVERVIEW: "Snowflake Cloud Data Platform snapshot and diff implementation patterns"
+  COMMON_PATTERNS: "Database object introspection, snapshot generation, difference comparison"
+  BEST_PRACTICES: "Test-driven development, property-based validation, autonomous operation"
+
+VARIABLES:
+  OBJECT_TYPE: "${TARGET_OBJECT_TYPE}"
+  OBJECT_TYPE_LOWER: "${TARGET_OBJECT_TYPE_LOWER}"
+  PROJECT_BASE: "liquibase-snowflake"
+  PACKAGE_BASE: "liquibase.ext.snowflake"
+  TEST_PACKAGE: "liquibase.ext.snowflake"
+  SNOWFLAKE_URL: "jdbc:snowflake://rziymts-xbb66763.snowflakecomputing.com/?db=LTHDB&warehouse=LTHDB_TEST_WH&schema=TESTHARNESS&role=LIQUIBASE_TEST_HARNESS_ROLE"
+  SNOWFLAKE_USER: "COMMUNITYKEVIN"
+  SNOWFLAKE_PASSWORD: "uQ1lAjwVisliu8CpUTVh0UnxoTUk3"
+
+TEMPLATES:
+  OBJECT_MODEL_TEMPLATE: |
+    package ${PACKAGE_BASE}.database;
+    
+    import liquibase.database.Database;
+    import liquibase.structure.DatabaseObject;
+    import liquibase.structure.core.Schema;
+    
+    public class ${OBJECT_TYPE} extends DatabaseObject {
+        public static final String ATTRIBUTE_NAME = "name";
+        
+        public ${OBJECT_TYPE}() {
+            setName(null);
+        }
+        
+        public ${OBJECT_TYPE}(String name) {
+            setName(name);
+        }
+        
+        @Override
+        public DatabaseObject[] getContainingObjects() {
+            return new DatabaseObject[] { getSchema() };
+        }
+        
+        @Override
+        public String getName() {
+            return getAttribute(ATTRIBUTE_NAME, String.class);
+        }
+        
+        @Override
+        public ${OBJECT_TYPE} setName(String name) {
+            this.setAttribute(ATTRIBUTE_NAME, name);
+            return this;
+        }
+        
+        @Override
+        public Schema getSchema() {
+            return getAttribute(ATTRIBUTE_SCHEMA, Schema.class);
+        }
+        
+        public ${OBJECT_TYPE} setSchema(Schema schema) {
+            this.setAttribute(ATTRIBUTE_SCHEMA, schema);
+            return this;
+        }
+    }
+
+  SNAPSHOT_GENERATOR_TEMPLATE: |
+    package ${PACKAGE_BASE}.snapshot;
+    
+    import liquibase.database.Database;
+    import liquibase.ext.snowflake.database.SnowflakeDatabase;
+    import liquibase.snapshot.SnapshotGenerator;
+    import liquibase.snapshot.DatabaseSnapshot;
+    import liquibase.snapshot.InvalidExampleException;
+    import liquibase.structure.DatabaseObject;
+    import liquibase.structure.core.Schema;
+    import ${PACKAGE_BASE}.database.${OBJECT_TYPE};
+    
+    import java.sql.SQLException;
+    import java.util.List;
+    
+    public class ${OBJECT_TYPE}SnapshotGenerator extends SnapshotGenerator {
+        
+        public ${OBJECT_TYPE}SnapshotGenerator() {
+            super(${OBJECT_TYPE}.class, new Class[]{Schema.class});
+        }
+        
+        @Override
+        protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) 
+                throws DatabaseException, InvalidExampleException {
+            Database database = snapshot.getDatabase();
+            Schema schema = example.getSchema();
+            
+            String sql = "SELECT * FROM INFORMATION_SCHEMA.${OBJECT_TYPE}S WHERE ${OBJECT_TYPE}_SCHEMA = ?";
+            List<Map<String, Object>> rows = Scope.getCurrentScope().getSingleton(ExecutorService.class)
+                .getExecutor("jdbc", database)
+                .queryForList(new RawParameterizedSql(sql, schema.getName()));
+            
+            if (rows.isEmpty()) {
+                return null;
+            }
+            
+            Map<String, Object> row = rows.get(0);
+            ${OBJECT_TYPE} object = new ${OBJECT_TYPE}();
+            object.setName((String) row.get("${OBJECT_TYPE}_NAME"));
+            object.setSchema(schema);
+            
+            return object;
+        }
+        
+        @Override
+        protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) 
+                throws DatabaseException, InvalidExampleException {
+            if (!snapshot.getSnapshotControl().shouldInclude(${OBJECT_TYPE}.class)) {
+                return;
+            }
+            
+            if (foundObject instanceof Schema) {
+                Schema schema = (Schema) foundObject;
+                Database database = snapshot.getDatabase();
+                
+                String sql = "SELECT ${OBJECT_TYPE}_NAME FROM INFORMATION_SCHEMA.${OBJECT_TYPE}S WHERE ${OBJECT_TYPE}_SCHEMA = ?";
+                List<Map<String, Object>> rows = Scope.getCurrentScope().getSingleton(ExecutorService.class)
+                    .getExecutor("jdbc", database)
+                    .queryForList(new RawParameterizedSql(sql, schema.getName()));
+                    
+                for (Map<String, Object> row : rows) {
+                    ${OBJECT_TYPE} object = new ${OBJECT_TYPE}((String) row.get("${OBJECT_TYPE}_NAME"));
+                    object.setSchema(schema);
+                    schema.addDatabaseObject(object);
+                }
+            }
+        }
+        
+        @Override
+        public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
+            if (database instanceof SnowflakeDatabase) {
+                return PRIORITY_DEFAULT;
+            }
+            return PRIORITY_NONE;
+        }
+        
+        @Override
+        public Class<? extends SnapshotGenerator>[] replaces() {
+            return new Class[0];
+        }
+    }
+
+  DIFF_COMPARATOR_TEMPLATE: |
+    package ${PACKAGE_BASE}.diff.compare;
+    
+    import liquibase.database.Database;
+    import liquibase.diff.compare.DatabaseObjectComparator;
+    import liquibase.diff.compare.DatabaseObjectComparatorChain;
+    import liquibase.diff.compare.DatabaseObjectComparatorFactory;
+    import liquibase.diff.ObjectDifferences;
+    import liquibase.ext.snowflake.database.SnowflakeDatabase;
+    import liquibase.structure.DatabaseObject;
+    import ${PACKAGE_BASE}.database.${OBJECT_TYPE};
+    
+    public class ${OBJECT_TYPE}Comparator implements DatabaseObjectComparator {
+        
+        @Override
+        public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
+            if (${OBJECT_TYPE}.class.isAssignableFrom(objectType) && database instanceof SnowflakeDatabase) {
+                return PRIORITY_TYPE;
+            }
+            return PRIORITY_NONE;
+        }
+        
+        @Override
+        public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
+            ${OBJECT_TYPE} object = (${OBJECT_TYPE}) databaseObject;
+            return new String[] {
+                object.getName(),
+                object.getSchema().getName()
+            };
+        }
+        
+        @Override
+        public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, 
+                Database accordingTo, DatabaseObjectComparatorChain chain) {
+            if (!(databaseObject1 instanceof ${OBJECT_TYPE}) || !(databaseObject2 instanceof ${OBJECT_TYPE})) {
+                return false;
+            }
+            
+            ${OBJECT_TYPE} object1 = (${OBJECT_TYPE}) databaseObject1;
+            ${OBJECT_TYPE} object2 = (${OBJECT_TYPE}) databaseObject2;
+            
+            return DatabaseObjectComparatorFactory.getInstance()
+                .isSameObject(object1.getSchema(), object2.getSchema(), accordingTo, chain)
+                && object1.getName().equalsIgnoreCase(object2.getName());
+        }
+        
+        @Override
+        public ObjectDifferences compare(DatabaseObject databaseObject1, DatabaseObject databaseObject2, 
+                Database accordingTo, DatabaseObjectComparatorChain chain) {
+            return chain.compare(databaseObject1, databaseObject2, accordingTo);
+        }
+    }
+
+  TEST_CLASS_TEMPLATE: |
+    package ${TEST_PACKAGE};
+    
+    import liquibase.database.Database;
+    import liquibase.ext.snowflake.database.SnowflakeDatabase;
+    import liquibase.snapshot.DatabaseSnapshot;
+    import liquibase.snapshot.SnapshotControl;
+    import liquibase.snapshot.SnapshotGeneratorFactory;
+    import liquibase.structure.core.Schema;
+    import ${PACKAGE_BASE}.database.${OBJECT_TYPE};
+    import ${PACKAGE_BASE}.snapshot.${OBJECT_TYPE}SnapshotGenerator;
+    import org.junit.jupiter.api.Test;
+    import org.junit.jupiter.api.BeforeEach;
+    
+    import static org.junit.jupiter.api.Assertions.*;
+    
+    public class ${OBJECT_TYPE}SnapshotGeneratorTest {
+        
+        private ${OBJECT_TYPE}SnapshotGenerator generator;
+        private Database database;
+        private Schema schema;
+        
+        @BeforeEach
+        public void setUp() {
+            generator = new ${OBJECT_TYPE}SnapshotGenerator();
+            database = new SnowflakeDatabase();
+            schema = new Schema("TEST_SCHEMA");
+        }
+        
+        @Test
+        public void testGetPriority() {
+            assertEquals(SnapshotGenerator.PRIORITY_DEFAULT, 
+                generator.getPriority(${OBJECT_TYPE}.class, database));
+        }
+        
+        @Test
+        public void testSupports() {
+            assertTrue(generator.supports(${OBJECT_TYPE}.class, database));
+        }
+        
+        @Test
+        public void testSnapshotObject() throws Exception {
+            ${OBJECT_TYPE} example = new ${OBJECT_TYPE}("test_${OBJECT_TYPE_LOWER}");
+            example.setSchema(schema);
+            
+            SnapshotControl snapshotControl = new SnapshotControl(database);
+            DatabaseSnapshot snapshot = new DatabaseSnapshot(database, snapshotControl);
+            
+            // Test implementation would go here
+            assertNotNull(example);
+        }
+    }
+
+PATTERNS:
+  DOMAIN_RESEARCH_PATTERN:
+    DESCRIPTION: "Research Snowflake object properties and syntax"
+    VARIABLES: ["OBJECT_TYPE"]
+    SHORTHAND:
+      PURPOSE: "Research ${OBJECT_TYPE} properties and syntax"
+      CREATES: "requirements_${OBJECT_TYPE_LOWER}.md"
+      VALIDATES: ["FILE_EXISTS", "CONTENT_SUFFICIENT"]
+      
+  LIQUIBASE_OBJECT_PATTERN:
+    DESCRIPTION: "Create complete Liquibase object implementation"
+    VARIABLES: ["OBJECT_TYPE", "PACKAGE_BASE"]
+    SHORTHAND:
+      PURPOSE: "Create ${OBJECT_TYPE} object model, snapshot generator, and diff comparator"
+      CREATES: 
+        - "src/main/java/${PACKAGE_BASE}/database/${OBJECT_TYPE}.java"
+        - "src/main/java/${PACKAGE_BASE}/snapshot/${OBJECT_TYPE}SnapshotGenerator.java"
+        - "src/main/java/${PACKAGE_BASE}/diff/compare/${OBJECT_TYPE}Comparator.java"
+      VALIDATES: ["FILE_EXISTS", "COMPILES", "TESTS_PASS", "SERVICE_REGISTERED"]
+
+  DATABASE_VALIDATION_PATTERN:
+    DESCRIPTION: "Validate database connectivity and object accessibility"
+    VARIABLES: ["OBJECT_TYPE", "SNOWFLAKE_URL", "SNOWFLAKE_USER", "SNOWFLAKE_PASSWORD"]
+    STEPS:
+      - STEP_TYPE: "VALIDATION"
+        PURPOSE: "Validate database connection and object query capability"
+        EXECUTION_STEPS:
+          - ACTION: "Test database connectivity"
+            COMMAND: "echo 'Testing connection to Snowflake database'"
+            EXPECTED_OUTPUT: "Connection successful"
+        QUALITY_GATE:
+          NAME: "database-connectivity"
+          TYPE: "BLOCKING"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Cannot connect to Snowflake database - check credentials"
+
+  TDD_MICRO_CYCLE_PATTERN:
+    DESCRIPTION: "AI-TDD micro-cycle for snapshot/diff development"
+    VARIABLES: ["OBJECT_TYPE", "TEST_CLASS"]
+    STEPS:
+      - STEP_TYPE: "EXECUTION"
+        PURPOSE: "Execute Red-Green-Refactor TDD cycle"
+        EXECUTION_STEPS:
+          - ACTION: "Run failing test (Red)"
+            COMMAND: "mvn test -Dtest=\"${TEST_CLASS}\" -q"
+            EXPECTED_OUTPUT: "Test failure"
+          - ACTION: "Implement minimal code (Green)"
+            COMMAND: "echo 'Implement minimal code to pass test'"
+            EXPECTED_OUTPUT: "Test passes"
+          - ACTION: "Run all tests (Refactor)"
+            COMMAND: "mvn test -Dtest=\"*${OBJECT_TYPE}*Test*\" -q"
+            EXPECTED_OUTPUT: "All tests pass"
+
+VALIDATION_TYPES:
+  SNOWFLAKE_CONNECTION_VALIDATION:
+    TYPE: "SNOWFLAKE_DATABASE_ACCESSIBLE"
+    IMPLEMENTATION: "Test connection to Snowflake database with provided credentials"
+    
+  OBJECT_QUERYABLE_VALIDATION:
+    TYPE: "INFORMATION_SCHEMA_ACCESSIBLE"
+    IMPLEMENTATION: "Verify object type appears in INFORMATION_SCHEMA queries"
+    
+  IMPLEMENTATION_COMPLETENESS_VALIDATION:
+    TYPE: "SNAPSHOT_DIFF_COMPLETE"
+    IMPLEMENTATION: "Verify all three components exist: object model, snapshot generator, diff comparator"
+
+STEP_EXTENSIONS:
+  SNOWFLAKE_RESEARCH_STEP:
+    TYPE: "SNOWFLAKE_DOMAIN_RESEARCH"
+    IMPLEMENTATION: "Comprehensive Snowflake object documentation research with property extraction"
+    
+  TDD_MICRO_CYCLE_STEP:
+    TYPE: "AI_TDD_MICRO_CYCLE"
+    IMPLEMENTATION: "Red-Green-Refactor cycle with autonomous test execution"

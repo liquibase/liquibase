@@ -7,13 +7,13 @@ import liquibase.exception.DatabaseException;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateFileFormatStatement;
+import liquibase.util.TestDatabaseConfigUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Assumptions;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
@@ -33,17 +33,10 @@ public class CreateFileFormatGeneratorSnowflakeIntegrationTest {
     
     @BeforeEach
     void setUp() throws Exception {
-        String url = System.getProperty("SNOWFLAKE_URL", System.getenv("SNOWFLAKE_URL"));
-        String user = System.getProperty("SNOWFLAKE_USER", System.getenv("SNOWFLAKE_USER"));
-        String password = System.getProperty("SNOWFLAKE_PASSWORD", System.getenv("SNOWFLAKE_PASSWORD"));
-        
-        // Skip integration tests if Snowflake credentials not available
-        Assumptions.assumeTrue(url != null && user != null && password != null,
-            "Snowflake credentials not available - skipping integration tests");
-        
         try {
+            // Use YAML configuration instead of environment variables
             Class.forName("net.snowflake.client.jdbc.SnowflakeDriver");
-            connection = DriverManager.getConnection(url, user, password);
+            connection = TestDatabaseConfigUtil.getSnowflakeConnection();
             database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
             generator = new CreateFileFormatGeneratorSnowflake();
             sqlGeneratorChain = null; // Not needed for integration tests

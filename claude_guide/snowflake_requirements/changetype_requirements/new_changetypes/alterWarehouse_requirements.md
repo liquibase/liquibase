@@ -11,7 +11,7 @@ OBJECT_TYPE: "Warehouse"
 OPERATION: "ALTER"
 ESTIMATED_TIME: "6-8 hours"
 COMPLEXITY: "HIGH"
-ATTRIBUTES_COUNT: 18
+ATTRIBUTES_COUNT: 22
 OPERATION_GROUPS: 6
 PRIORITY: "READY"
 ```
@@ -108,50 +108,53 @@ SIZE_VALIDATION: "Valid warehouse sizes from XSMALL to X6LARGE"
 ENTERPRISE_REQUIREMENTS: "Multi-cluster and query acceleration need Enterprise Edition"
 ```
 
-## 📊 ATTRIBUTES QUICK REFERENCE
+## 📊 COMPREHENSIVE_ATTRIBUTE_ANALYSIS
 
 ### Core Attributes (All Operations)
-| Attribute | Type | Required | Values | Notes |
-|-----------|------|----------|--------|-------|
-| **warehouseName** | String | ✅ | Valid identifier | Primary key |
-| **ifExists** | Boolean | ❌ | true/false | Error prevention |
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **warehouseName** | String | Required | N/A | Valid identifier | Must exist | None | HIGH | Primary warehouse identifier |
+| **ifExists** | Boolean | Optional | false | true/false | None | None | MEDIUM | Error prevention for non-existent warehouses |
+| **operationType** | String | Optional | Detected | RENAME/SET/UNSET/SUSPEND/RESUME/ABORT | Single operation type | Mutually exclusive | HIGH | Operation type detection |
+| **action** | String | Optional | Detected | RENAME/SET/UNSET/SUSPEND/RESUME/ABORT | Action type | Mutually exclusive | HIGH | Action type specification |
 
 ### Group 1: RENAME Attributes
-| Attribute | Type | Required | Values | Constraints |
-|-----------|------|----------|--------|-------------|
-| **newWarehouseName** | String | ✅ | Valid identifier | Must be unique |
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **newWarehouseName** | String | Required (for RENAME) | N/A | Valid identifier | Must be unique | RENAME operation only | HIGH | Target warehouse name |
 
 ### Group 2: SET Property Attributes
-| Attribute | Type | Values | Constraint | Priority |
-|-----------|------|--------|------------|----------|
-| **warehouseSize** | String | Size enums | Valid size | HIGH |
-| **autoSuspend** | Integer | 0, NULL, ≥60 | Special validation | HIGH |
-| **autoResume** | Boolean | true/false | None | HIGH |
-| **minClusterCount** | Integer | 1-10 | ≤ maxClusterCount | MEDIUM |
-| **maxClusterCount** | Integer | 1-10 | ≥ minClusterCount | MEDIUM |
-| **scalingPolicy** | String | STANDARD/ECONOMY | Enterprise Edition | MEDIUM |
-| **resourceMonitor** | String | Valid monitor | Must exist | MEDIUM |
-| **comment** | String | ≤256 chars | Length limit | LOW |
-| **enableQueryAcceleration** | Boolean | true/false | Enterprise Edition | LOW |
-| **queryAccelerationMaxScaleFactor** | Integer | 0-100 | Requires acceleration enabled | LOW |
-| **statementQueuedTimeoutInSeconds** | Integer | Positive | Query management | MEDIUM |
-| **statementTimeoutInSeconds** | Integer | Positive | Query management | MEDIUM |
-| **maxConcurrencyLevel** | Integer | Positive | Concurrency control | MEDIUM |
-| **warehouseType** | String | STANDARD/SNOWPARK-OPTIMIZED | Architecture type | MEDIUM |
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **warehouseSize** | String | Optional | Current | XSMALL to X6LARGE | Valid size enum | SET operation only | HIGH | Compute capacity |
+| **autoSuspend** | Integer | Optional | Current | 0, NULL, ≥60 | 0=disabled, NULL=never, ≥60 seconds | SET operation only | HIGH | Auto-suspend timeout |
+| **autoResume** | Boolean | Optional | Current | true/false | None | SET operation only | HIGH | Auto-resume on query |
+| **minClusterCount** | Integer | Optional | 1 | 1-10 | ≤ maxClusterCount | SET operation only | MEDIUM | Minimum cluster count |
+| **maxClusterCount** | Integer | Optional | 1 | 1-10 | ≥ minClusterCount | SET operation only | MEDIUM | Maximum cluster count |
+| **scalingPolicy** | String | Optional | STANDARD | STANDARD/ECONOMY | Enterprise Edition | SET operation only | MEDIUM | Multi-cluster scaling policy |
+| **resourceMonitor** | String | Optional | Current | Valid monitor name | Must exist in system | SET operation only | MEDIUM | Resource monitor assignment |
+| **comment** | String | Optional | Current | String ≤256 chars | Length limit | SET operation only | LOW | Warehouse description |
+| **enableQueryAcceleration** | Boolean | Optional | false | true/false | Enterprise Edition | SET operation only | LOW | Query acceleration feature |
+| **queryAccelerationMaxScaleFactor** | Integer | Optional | 8 | 0-100 | Requires enableQueryAcceleration=true | SET operation only | LOW | Max acceleration scale |
+| **statementQueuedTimeoutInSeconds** | Integer | Optional | Current | Positive integer | Must be positive | SET operation only | MEDIUM | Queue timeout for statements |
+| **statementTimeoutInSeconds** | Integer | Optional | Current | Positive integer | Must be positive | SET operation only | MEDIUM | Execution timeout for statements |
+| **maxConcurrencyLevel** | Integer | Optional | Current | Positive integer | Must be positive | SET operation only | MEDIUM | Maximum concurrent queries |
+| **warehouseType** | String | Optional | STANDARD | STANDARD/SNOWPARK-OPTIMIZED | Architecture constraint | SET operation only | MEDIUM | Warehouse architecture type |
+| **warehouseTag** | String | Optional | Current | Valid tag format | Tag format validation | SET operation only | LOW | Warehouse tagging |
 
 ### Group 3: UNSET Property Attributes
-| Attribute | Type | Required | Values | Notes |
-|-----------|------|----------|--------|-------|
-| **unsetResourceMonitor** | Boolean | ❌ | true/false | Remove monitor assignment |
-| **unsetComment** | Boolean | ❌ | true/false | Remove comment |
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **unsetResourceMonitor** | Boolean | Optional | false | true/false | None | UNSET operation only | MEDIUM | Remove resource monitor |
+| **unsetComment** | Boolean | Optional | false | true/false | None | UNSET operation only | LOW | Remove comment |
 
 ### Group 4-6: State Management Attributes
-| Attribute | Type | Required | Values | Notes |
-|-----------|------|----------|--------|-------|
-| **suspend** | Boolean | ❌ | true/false | Suspend warehouse |
-| **resume** | Boolean | ❌ | true/false | Resume warehouse |
-| **resumeIfSuspended** | Boolean | ❌ | true/false | Conditional resume |
-| **abortAllQueries** | Boolean | ❌ | true/false | Terminate all queries |
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **suspend** | Boolean | Optional | false | true/false | None | State operations only | HIGH | Suspend warehouse |
+| **resume** | Boolean | Optional | false | true/false | None | State operations only | HIGH | Resume warehouse |
+| **resumeIfSuspended** | Boolean | Optional | false | true/false | None | State operations only | MEDIUM | Conditional resume |
+| **abortAllQueries** | Boolean | Optional | false | true/false | None | ABORT operation only | MEDIUM | Terminate all queries |
 
 ### Mutual Exclusivity Rules
 ```yaml
@@ -196,6 +199,29 @@ ALTER WAREHOUSE query_warehouse SET
   STATEMENT_TIMEOUT_IN_SECONDS = 3600
   MAX_CONCURRENCY_LEVEL = 10;
 
+-- Complete example with all attributes
+ALTER WAREHOUSE comprehensive_warehouse SET
+  warehouseName = "production_warehouse"
+  newWarehouseName = "renamed_warehouse"
+  warehouseSize = "LARGE"
+  minClusterCount = "2"
+  resourceMonitor = "production_monitor"
+  queryAccelerationMaxScaleFactor = "8"
+  maxClusterCount = "5"
+  enableQueryAcceleration = "true"
+  statementQueuedTimeoutInSeconds = "120"
+  statementTimeoutInSeconds = "3600"
+  maxConcurrencyLevel = "10"
+  autoResume = "true"
+  ifExists = "true"
+  action = "SET"
+  comment = "Production warehouse"
+  operationType = "SET"
+  warehouseType = "STANDARD"
+  autoSuspend = "300"
+  warehouseTag = "production"
+  scalingPolicy = "STANDARD";
+
 -- Auto-suspend variations
 ALTER WAREHOUSE never_suspend_warehouse SET AUTO_SUSPEND = NULL;
 ALTER WAREHOUSE disabled_suspend_warehouse SET AUTO_SUSPEND = 0;
@@ -208,6 +234,11 @@ ALTER WAREHOUSE quick_suspend_warehouse SET AUTO_SUSPEND = 60;
 ALTER WAREHOUSE my_warehouse UNSET
   RESOURCE_MONITOR
   COMMENT;
+
+-- Complete UNSET example with all attributes
+ALTER WAREHOUSE comprehensive_warehouse UNSET
+  unsetResourceMonitor = "true"
+  unsetComment = "true";
 ```
 
 ### STATE MANAGEMENT Examples

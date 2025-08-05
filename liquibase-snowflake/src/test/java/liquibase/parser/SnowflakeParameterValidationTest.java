@@ -1,5 +1,6 @@
 package liquibase.parser;
 
+import liquibase.util.TestDatabaseConfigUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
@@ -20,18 +21,9 @@ public class SnowflakeParameterValidationTest {
 
     @Test 
     @DisplayName("Validate XSD completeness against Snowflake INFORMATION_SCHEMA")
-    public void validateXSDCompleteness() {
-        String url = System.getProperty("SNOWFLAKE_URL", System.getenv("SNOWFLAKE_URL"));
-        String user = System.getProperty("SNOWFLAKE_USER", System.getenv("SNOWFLAKE_USER"));
-        String password = System.getProperty("SNOWFLAKE_PASSWORD", System.getenv("SNOWFLAKE_PASSWORD"));
-        
-        if (url == null || user == null || password == null) {
-            System.out.println("ℹ️  Snowflake credentials not available - skipping live validation");
-            System.out.println("   Use: SNOWFLAKE_URL, SNOWFLAKE_USER, SNOWFLAKE_PASSWORD");
-            return;
-        }
-        
+    public void validateXSDCompleteness() throws Exception {
         try {
+            // Use YAML configuration instead of environment variables
             Class.forName("net.snowflake.client.jdbc.SnowflakeDriver");
         } catch (ClassNotFoundException e) {
             System.out.println("⚠️  Snowflake JDBC driver not available - skipping");
@@ -41,7 +33,7 @@ public class SnowflakeParameterValidationTest {
         System.out.println("🔍 SNOWFLAKE XSD VALIDATION");
         System.out.println("=" + String.join("", Collections.nCopies(40, "=")));
         
-        try (Connection conn = DriverManager.getConnection(url, user, password)) {
+        try (Connection conn = TestDatabaseConfigUtil.getSnowflakeConnection()) {
             
             // Core object types we support
             String[] objectTypes = {"DATABASES", "WAREHOUSES", "SEQUENCES", "FILE_FORMATS"};

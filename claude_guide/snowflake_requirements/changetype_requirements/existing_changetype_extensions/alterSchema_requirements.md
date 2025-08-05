@@ -11,7 +11,7 @@ OBJECT_TYPE: "Schema"
 OPERATION: "ALTER"
 ESTIMATED_TIME: "5-6 hours"
 COMPLEXITY: "MEDIUM"
-ATTRIBUTES_COUNT: 26
+ATTRIBUTES_COUNT: 21
 OPERATION_GROUPS: 3
 PRIORITY: "READY"
 ```
@@ -92,43 +92,43 @@ COMMENT_LIMIT: "256 characters maximum"
 ENUM_VALIDATION: "LOG_LEVEL, TRACE_LEVEL, warehouse sizes have specific values"
 ```
 
-## 📊 ATTRIBUTES QUICK REFERENCE
+## 📊 COMPREHENSIVE_ATTRIBUTE_ANALYSIS
 
 ### Core Attributes (All Operations)
-| Attribute | Type | Required | Values | Notes |
-|-----------|------|----------|--------|-------|
-| **schemaName** | String | ✅ | Valid identifier | Primary key |
-| **ifExists** | Boolean | ❌ | true/false | Error prevention |
-| **databaseName** | String | ❌ | Valid identifier | Schema location |
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **schemaName** | String | Required | N/A | Valid identifier | Must exist | None | HIGH | Primary schema identifier |
+| **ifExists** | Boolean | Optional | false | true/false | None | None | MEDIUM | Error prevention for non-existent schemas |
+| **databaseName** | String | Optional | Current DB | Valid identifier | Must exist | None | MEDIUM | Schema location specification |
+| **operationType** | String | Optional | Detected | RENAME/SET/UNSET/ACCESS | Single operation type | Mutually exclusive | HIGH | Operation type detection |
 
 ### Group 1: RENAME Attributes
-| Attribute | Type | Required | Values | Constraints |
-|-----------|------|----------|--------|-----------|
-| **newName** | String | ✅ | Valid identifier | Must be unique |
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **newName** | String | Required (for RENAME) | N/A | Valid identifier | Must be unique | RENAME operation only | HIGH | Target schema name |
 
 ### Group 2: PROPERTY Attributes (SET/UNSET)
-| Attribute | Type | Values | Constraint | Priority |
-|-----------|------|--------|------------|----------|
-| **dataRetentionTimeInDays** | Integer | 0-90 | ≤ maxDataExtension | MEDIUM |
-| **maxDataExtensionTimeInDays** | Integer | 0-90 | ≥ dataRetention | MEDIUM |
-| **defaultDdlCollation** | String | Valid collation | Must be valid | LOW |
-| **comment** | String | ≤256 chars | Length limit | HIGH |
-| **logLevel** | String | Enum values | Predefined list | MEDIUM |
-| **traceLevel** | String | Enum values | Predefined list | MEDIUM |
-| **suspendTaskAfterNumFailures** | Integer | Positive | Task management | MEDIUM |
-| **taskAutoRetryAttempts** | Integer | Positive | Task management | MEDIUM |
-| **userTaskManagedInitialWarehouseSize** | String | Warehouse sizes | Task management | MEDIUM |
-| **userTaskTimeoutMs** | Integer | Positive | Task management | MEDIUM |
-| **userTaskMinimumTriggerIntervalInSeconds** | Integer | Positive | Task management | MEDIUM |
-| **quotedIdentifiersIgnoreCase** | Boolean | true/false | Case handling | LOW |
-| **enableConsoleOutput** | Boolean | true/false | Logging | LOW |
-| **pipeExecutionPaused** | Boolean | true/false | Pipe management | MEDIUM |
-
-### Group 3: ACCESS Attributes
-| Attribute | Type | Required | Values | Notes |
-|-----------|------|----------|--------|-------|
-| **enableManagedAccess** | Boolean | ❌ | true/false | Access control |
-| **disableManagedAccess** | Boolean | ❌ | true/false | Access control |
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **dataRetentionTimeInDays** | Integer | Optional | Current | 0-90 | ≤ maxDataExtension | SET/UNSET operations | MEDIUM | Time Travel retention period |
+| **maxDataExtensionTimeInDays** | Integer | Optional | Current | 0-90 | ≥ dataRetention | SET/UNSET operations | MEDIUM | Maximum Time Travel extension |
+| **defaultDdlCollation** | String | Optional | Current | Valid collation | Must be valid | SET/UNSET operations | LOW | Default collation for objects |
+| **comment** | String | Optional | Current | String ≤256 chars | Length limit | SET/UNSET operations | HIGH | Schema description |
+| **pipeExecutionPaused** | Boolean | Optional | false | true/false | None | SET/UNSET operations | MEDIUM | Pipe execution control |
+| **newPipeExecutionPaused** | Boolean | Optional | Current | true/false | None | SET operations only | MEDIUM | New pipe execution state |
+| **unsetDataRetentionTimeInDays** | Boolean | Optional | false | true/false | None | UNSET operations only | MEDIUM | Remove retention setting |
+| **newDataRetentionTimeInDays** | Integer | Optional | Current | 0-90 | ≤ maxDataExtension | SET operations only | MEDIUM | New retention period |
+| **newComment** | String | Optional | Current | String ≤256 chars | Length limit | SET operations only | HIGH | New schema comment |
+| **dropComment** | Boolean | Optional | false | true/false | None | UNSET operations only | MEDIUM | Remove comment |
+| **managedAccess** | Boolean | Optional | Current | true/false | None | SET operations only | MEDIUM | Managed access control |
+| **disableManagedAccess** | Boolean | Optional | false | true/false | None | Operations only | MEDIUM | Disable managed access |
+| **unsetComment** | Boolean | Optional | false | true/false | None | UNSET operations only | MEDIUM | Remove comment setting |
+| **unsetMaxDataExtensionTimeInDays** | Boolean | Optional | false | true/false | None | UNSET operations only | MEDIUM | Remove max extension setting |
+| **newDefaultDdlCollation** | String | Optional | Current | Valid collation | Must be valid | SET operations only | LOW | New default collation |
+| **unsetPipeExecutionPaused** | Boolean | Optional | false | true/false | None | UNSET operations only | MEDIUM | Remove pipe execution setting |
+| **enableManagedAccess** | Boolean | Optional | false | true/false | None | ACCESS operations only | MEDIUM | Enable managed access |
+| **newMaxDataExtensionTimeInDays** | Integer | Optional | Current | 0-90 | ≥ dataRetention | SET operations only | MEDIUM | New max extension period |
+| **unsetDefaultDdlCollation** | Boolean | Optional | false | true/false | None | UNSET operations only | LOW | Remove collation setting |
 
 ### Mutual Exclusivity Rules
 ```yaml
@@ -172,6 +172,30 @@ ALTER SCHEMA debug_schema SET
   LOG_LEVEL = 'DEBUG'
   TRACE_LEVEL = 'ON_EVENT'
   ENABLE_CONSOLE_OUTPUT = TRUE;
+
+-- Complete example with all attributes
+ALTER SCHEMA comprehensive_schema SET
+  newPipeExecutionPaused = "true"
+  databaseName = "test_db"
+  unsetDataRetentionTimeInDays = "false"
+  newDataRetentionTimeInDays = "30"
+  newComment = "Updated schema comment"
+  dropComment = "false"
+  schemaName = "test_schema"
+  managedAccess = "true"
+  disableManagedAccess = "false"
+  unsetComment = "false"
+  unsetMaxDataExtensionTimeInDays = "false"
+  newName = "renamed_schema"
+  newDefaultDdlCollation = "utf8"
+  unsetPipeExecutionPaused = "false"
+  ifExists = "true"
+  dataRetentionTimeInDays = "7"
+  enableManagedAccess = "true"
+  comment = "Schema comment"
+  operationType = "SET"
+  newMaxDataExtensionTimeInDays = "90"
+  unsetDefaultDdlCollation = "false";
 ```
 
 ### ACCESS Examples

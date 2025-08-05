@@ -8,6 +8,66 @@ Working on: Snowflake extension development
 Validation: Simple INFORMATION_SCHEMA + manual doc review (replaced complex frameworks)
 Status: XSD schemas validated as complete for core operations (DATABASE, WAREHOUSE, SEQUENCE)
 
+## ⚡ PRE-FLIGHT VALIDATION (MANDATORY BEFORE ANY SNAPSHOT/DIFF IMPLEMENTATION)
+
+**ALWAYS run these validation checks before starting any new object implementation:**
+
+### ✅ Autonomous Operation Prerequisites
+```bash
+# Verify TDD enforcement system is available
+test -f .scripts/tdd_workflow.sh && echo "✅ TDD workflow available" || echo "❌ TDD workflow missing"
+test -f .scripts/validation_functions.sh && echo "✅ Validation functions available" || echo "❌ Validation functions missing"
+test -f .templates/object_model_template.java && echo "✅ Templates available" || echo "❌ Templates missing"
+
+# Verify autonomous test commands work
+mvn --version >/dev/null 2>&1 && echo "✅ Maven available" || echo "❌ Maven not found"
+mvn compile -q >/dev/null 2>&1 && echo "✅ Project compiles" || echo "❌ Compilation issues"
+
+# Count existing autonomous test patterns in CLAUDE.md
+grep -c "mvn test.*-Dtest=" CLAUDE.md && echo "autonomous test commands found" || echo "❌ No autonomous test commands"
+```
+
+### ✅ Enhanced TDD Enforcement System Status
+
+**VALIDATED ENFORCEMENT MECHANISM**: External behavioral enforcement system with hard validation blocks.
+
+#### Enhanced Validation Checkpoints
+- **Template Generation**: Immediate package structure, import, and compilation validation
+- **Framework Integration**: Method signature, inheritance, and pattern compliance checks  
+- **Micro-Cycle Integration**: Framework compliance validation after each TDD cycle
+- **Property Patterns**: Getter/setter consistency and return type validation
+
+#### Enhanced Validation Commands
+```bash
+# Enhanced template validation (blocks progression on failure)
+validate_complete_template_generation ObjectType
+
+# Framework integration compliance (catches inheritance/signature issues)
+validate_framework_integration_compliance ObjectType
+
+# Enhanced micro-cycle validation (includes framework integration checks)
+validate_micro_cycle_integration TestClass TestMethod ObjectType
+```
+
+**Enforcement Result**: Template issues like package structure, method signatures, and framework integration problems are caught immediately rather than discovered during compilation.
+
+### ✅ TDD Enforcement System Status
+```bash
+# Check if enforcement system is operational
+.scripts/tdd_workflow.sh status 2>/dev/null && echo "✅ TDD enforcement operational" || echo "❌ TDD enforcement not initialized"
+
+# Verify checkpoint/validation system
+test -d .process_state && test -d .checkpoints && echo "✅ State management ready" || echo "❌ State management not ready"
+```
+
+### ✅ Database Connection Validation (For Integration Tests)
+```bash
+# Verify Snowflake connection using YAML configuration
+mvn test -Dtest=SnowflakeParameterValidationTest -q >/dev/null 2>&1 && echo "✅ Database connection works" || echo "❌ Database connection failed"
+```
+
+**🚨 CRITICAL: If any pre-flight check fails, STOP and fix the issue before proceeding.**
+
 ## 🔄 CRITICAL: Follow the Master Process Loop
 
 **For EVERY task**: Follow `claude_guide/snowflake-project/quick-reference/MASTER_PROCESS_LOOP.md`
@@ -107,31 +167,73 @@ liquibase/
 
 ## ⚡ Snowflake Database Connection
 
-### Connection Credentials (ALWAYS USE WITH TESTS)
-```bash
-SNOWFLAKE_URL="jdbc:snowflake://rziymts-xbb66763.snowflakecomputing.com/?db=LB_DBEXT_INT_DB&warehouse=LTHDB_TEST_WH&schema=BASE_SCHEMA&role=LB_INT_ROLE" SNOWFLAKE_USER="COMMUNITYKEVIN" SNOWFLAKE_PASSWORD="uQ1lAjwVisliu8CpUTVh0UnxoTUk3"
+### YAML Configuration (Used by All Tests)
+All tests now use the YAML configuration file instead of environment variables:
+```yaml
+# Location: src/test/resources/liquibase.sdk.local.yaml
+liquibase:
+  sdk:
+    testSystem:
+      snowflake:
+        url: "jdbc:snowflake://rziymts-xbb66763.snowflakecomputing.com/?db=LB_DBEXT_INT_DB&warehouse=LTHDB_TEST_WH&schema=BASE_SCHEMA&role=LB_INT_ROLE"
+        username: "COMMUNITYKEVIN"
+        password: "uQ1lAjwVisliu8CpUTVh0UnxoTUk3"
+        catalog: "LB_DBEXT_INT_DB"  
+        schema: "BASE_SCHEMA"
+        altSchema: "ALT_SCHEMA"
 ```
 
 ## ⚡ Integration Test Commands
 
-### Unit Tests Only
+### Unit Tests Only (Fast - Now Parallel)
 ```bash
 mvn test -Dtest="!*IntegrationTest" -q
 ```
 
-### Integration Tests (Parallel - Default)
+### AI-TDD Micro-Cycle Test Commands (Autonomous Operation Enabled)
 ```bash
-SNOWFLAKE_URL="jdbc:snowflake://rziymts-xbb66763.snowflakecomputing.com/?db=LB_DBEXT_INT_DB&warehouse=LTHDB_TEST_WH&schema=BASE_SCHEMA&role=LB_INT_ROLE" SNOWFLAKE_USER="COMMUNITYKEVIN" SNOWFLAKE_PASSWORD="uQ1lAjwVisliu8CpUTVh0UnxoTUk3" mvn test -Dtest="*GeneratorSnowflakeIntegrationTest" -DforkCount=4 -DreuseForks=true -Dparallel=classes
+# FileFormat object testing (Red-Green-Refactor cycles)
+mvn test -Dtest="*FileFormat*Test*" -q
+mvn test -Dtest="FileFormatTest" -q
+mvn test -Dtest="*FileFormat*SnapshotGenerator*Test*" -q
+mvn test -Dtest="*FileFormat*Comparator*Test*" -q
+
+# FileFormat AI-TDD Micro-Cycle Specific Tests (Method-level testing)
+mvn test -Dtest="FileFormatTest#shouldNotIncludeConfigurationPropertiesInEquals" -q
+mvn test -Dtest="FileFormatTest#shouldSupportCsvSpecificProperties" -q
+mvn test -Dtest="FileFormatTest#shouldHandleAllFileFormatTypes" -q
+mvn test -Dtest="FileFormatTest#shouldSupportCompressionOptions" -q
+mvn test -Dtest="FileFormatTest#shouldHandleDelimiterProperties" -q
+mvn test -Dtest="FileFormatSnapshotGeneratorTest#shouldHaveHighPriorityForFileFormatOnSnowflake" -q
+mvn test -Dtest="FileFormatSnapshotGeneratorTest#shouldReturnNullWhenFileFormatDoesNotExist" -q
+mvn test -Dtest="FileFormatSnapshotGeneratorTest#shouldPopulateFileFormatFromDatabase" -q
+mvn test -Dtest="FileFormatComparatorTest#shouldIdentifySameObjectsWhenIdentityMatches" -q
+mvn test -Dtest="FileFormatComparatorTest#shouldDetectConfigurationPropertyChanges" -q
+
+# Generic object testing patterns
+mvn test -Dtest="*{OBJECT_TYPE}*Test*" -q
+mvn test -Dtest="{OBJECT_TYPE}Test" -q
+mvn test -Dtest="*{OBJECT_TYPE}*SnapshotGenerator*Test*" -q
+mvn test -Dtest="*{OBJECT_TYPE}*Comparator*Test*" -q
 ```
 
-### Integration Tests (Sequential - Debugging)
+### Integration Tests (Parallel - Now Default!)
 ```bash
-SNOWFLAKE_URL="jdbc:snowflake://rziymts-xbb66763.snowflakecomputing.com/?db=LB_DBEXT_INT_DB&warehouse=LTHDB_TEST_WH&schema=BASE_SCHEMA&role=LB_INT_ROLE" SNOWFLAKE_USER="COMMUNITYKEVIN" SNOWFLAKE_PASSWORD="uQ1lAjwVisliu8CpUTVh0UnxoTUk3" mvn test -Dtest="*GeneratorSnowflakeIntegrationTest" -q
+# All integration tests now run in parallel by default (4 threads) due to schema isolation
+# Uses YAML configuration from src/test/resources/liquibase.sdk.local.yaml
+mvn test -Dtest="*IntegrationTest" -q
 ```
 
-### Simple Parameter Validation (REQUIRES SNOWFLAKE CONNECTION)
+### Integration Tests (Sequential - For Debugging Only)
 ```bash
-SNOWFLAKE_URL="jdbc:snowflake://rziymts-xbb66763.snowflakecomputing.com/?db=LB_DBEXT_INT_DB&warehouse=LTHDB_TEST_WH&schema=BASE_SCHEMA&role=LB_INT_ROLE" SNOWFLAKE_USER="COMMUNITYKEVIN" SNOWFLAKE_PASSWORD="uQ1lAjwVisliu8CpUTVh0UnxoTUk3" mvn test -Dtest=SnowflakeParameterValidationTest -q
+# Force sequential execution when debugging specific issues
+mvn test -Dtest="*IntegrationTest" -DforkCount=1 -Dparallel=none -q
+```
+
+### Simple Parameter Validation (Uses YAML Config)
+```bash
+# Uses YAML configuration from src/test/resources/liquibase.sdk.local.yaml
+mvn test -Dtest=SnowflakeParameterValidationTest -q
 ```
 
 **Simple 3-Step Validation Process:**
@@ -140,15 +242,18 @@ SNOWFLAKE_URL="jdbc:snowflake://rziymts-xbb66763.snowflakecomputing.com/?db=LB_D
 3. Manual Snowflake doc review for gaps
 **Time: 15 minutes vs days of complex frameworks**
 
-### All Tests
+### All Tests (Now Fully Parallel!)
 ```bash
-SNOWFLAKE_URL="jdbc:snowflake://rziymts-xbb66763.snowflakecomputing.com/?db=LB_DBEXT_INT_DB&warehouse=LTHDB_TEST_WH&schema=BASE_SCHEMA&role=LB_INT_ROLE" SNOWFLAKE_USER="COMMUNITYKEVIN" SNOWFLAKE_PASSWORD="uQ1lAjwVisliu8CpUTVh0UnxoTUk3" mvn test -q
+# Runs all unit tests and integration tests in parallel (4 threads each)
+# Uses YAML configuration from src/test/resources/liquibase.sdk.local.yaml
+mvn test -q
 ```
 
 ### Command Selection
-- **Fast execution**: Use parallel format
-- **Test failures**: Use sequential for debugging
+- **Default execution**: Now automatically parallel (4 threads) for fast execution
+- **Test failures**: Use sequential format (`-DforkCount=1 -Dparallel=none`) for easier debugging
 - **Connection issues**: Verify credentials first
+- **Schema isolation**: Enables safe parallel execution for all Snowflake integration tests
 
 ## ⚡ JAR BUILD/INSTALL WORKFLOW (MANDATORY AFTER CODE CHANGES)
 

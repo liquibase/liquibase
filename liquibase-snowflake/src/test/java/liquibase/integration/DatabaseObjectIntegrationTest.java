@@ -7,12 +7,12 @@ import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DatabaseComparator;
 import liquibase.snapshot.jvm.DatabaseSnapshotGeneratorSnowflake;
+import liquibase.util.TestDatabaseConfigUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -39,21 +39,8 @@ public class DatabaseObjectIntegrationTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        String url = System.getenv("SNOWFLAKE_URL");
-        String user = System.getenv("SNOWFLAKE_USER");
-        String password = System.getenv("SNOWFLAKE_PASSWORD");
-        
-        if (url == null || user == null || password == null) {
-            throw new RuntimeException("Snowflake connection environment variables not set");
-        }
-
-        // For database integration tests, we expect the URL to point to LB_DBEXT_INT_DB for database operations
-        if (!url.contains("LB_DBEXT_INT_DB")) {
-            System.out.println("WARNING: URL should contain LB_DBEXT_INT_DB for database integration tests");
-            System.out.println("Current URL: " + url);
-        }
-
-        connection = DriverManager.getConnection(url, user, password);
+        // Use YAML configuration instead of environment variables
+        connection = TestDatabaseConfigUtil.getSnowflakeConnection();
         database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
     }
 

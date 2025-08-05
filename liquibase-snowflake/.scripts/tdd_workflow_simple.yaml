@@ -1,0 +1,95 @@
+AIPL_VERSION: "2.0"
+PROGRAM_NAME: "tdd-fileformat-workflow"
+DESCRIPTION: "TDD-enforced FileFormat implementation workflow"
+
+ENFORCEMENT_MODE: "STRICT_TDD"
+BLOCKING_BEHAVIOR: "STOP_ON_VIOLATION"
+
+VARIABLES:
+  OBJECT_TYPE: "FileFormat"
+  OBJECT_TYPE_LOWER: "fileformat"
+  PACKAGE_PATH: "liquibase/ext/snowflake"
+  REQUIREMENTS_PATH: "FileFormat_requirements.md"
+
+PHASES:
+  PHASE_1_REQUIREMENTS:
+    VALIDATE_WEBFETCH_REQUIREMENTS:
+      PURPOSE: "Ensure WebFetch requirements research is complete"
+      BLOCKING_PREREQUISITE_CHECK:
+        BLOCKING_VALIDATIONS:
+          - "FILE_EXISTS:${REQUIREMENTS_PATH}"
+        STOP_ON_FAILURE: false
+        ERROR_MESSAGE: "Requirements document not found - WebFetch research needed"
+    
+    CREATE_BASIC_REQUIREMENTS:
+      PURPOSE: "Create basic requirements document if missing"
+      CREATES: "${REQUIREMENTS_PATH}"
+      TEMPLATE: |
+        # ${OBJECT_TYPE} Snapshot/Diff Requirements
+        
+        ## Official Documentation URLs
+        - CREATE: https://docs.snowflake.com/en/sql-reference/sql/create-${OBJECT_TYPE_LOWER}
+        - SHOW: https://docs.snowflake.com/en/sql-reference/sql/show-${OBJECT_TYPE_LOWER}s
+        - DESCRIBE: https://docs.snowflake.com/en/sql-reference/sql/describe-${OBJECT_TYPE_LOWER}
+        
+        ## Complete Property List
+        | Property | Type | Required | Default | Constraints | Comparison | Notes |
+        |----------|------|----------|---------|-------------|------------|-------|
+        | name | String | Yes | - | Non-empty | Full | Primary identifier |
+        | formatType | String | Yes | - | CSV,JSON,PARQUET,etc | Full | Format type |
+        | compression | String | No | AUTO | AUTO,GZIP,BZ2,etc | Full | Compression type |
+        | recordDelimiter | String | No | \\n | Single char | Full | Record separator |
+        | fieldDelimiter | String | No | , | Single char | Full | Field separator |
+        | quoteCharacter | String | No | " | Single char | Full | Quote character |
+        | escapeCharacter | String | No | \\\\ | Single char | Full | Escape character |
+        | dateFormat | String | No | AUTO | Format string | Full | Date format |
+        | timestampFormat | String | No | AUTO | Format string | Full | Timestamp format |
+        | binaryFormat | String | No | HEX | HEX,BASE64 | Full | Binary encoding |
+        | nullIf | String | No | - | Pattern | Full | Null representation |
+        | errorOnColumnCountMismatch | Boolean | No | true | true/false | Full | Validation flag |
+        | skipHeader | Integer | No | 0 | >= 0 | Full | Skip header lines |
+        | skipBlankLines | Boolean | No | false | true/false | Full | Skip empty lines |
+        | trimSpace | Boolean | No | false | true/false | Full | Trim whitespace |
+        | emptyFieldAsNull | Boolean | No | true | true/false | Full | Empty field handling |
+        
+        ## TDD Implementation Plan
+        ### Unit Test Requirements:
+        - Constructor tests (valid/invalid inputs)
+        - Property getter/setter tests
+        - Validation constraint tests
+        - equals/hashCode/toString tests
+      BLOCKING_VALIDATION: "FILE_EXISTS:${REQUIREMENTS_PATH}"
+      STOP_ON_FAILURE: true
+      ERROR_MESSAGE: "Failed to create requirements document"
+
+  PHASE_2_TDD_OBJECT_MODEL:
+    VALIDATE_EXISTING_OBJECT:
+      PURPOSE: "Check if ${OBJECT_TYPE} object model already exists"
+      BLOCKING_PREREQUISITE_CHECK:
+        BLOCKING_VALIDATIONS:
+          - "FILE_EXISTS:src/main/java/liquibase/database/object/${OBJECT_TYPE}.java"
+        STOP_ON_FAILURE: false
+        ERROR_MESSAGE: "Object model not found - this is expected for new implementation"
+    
+    RUN_BASIC_TESTS:
+      PURPOSE: "Run existing ${OBJECT_TYPE} tests to validate current state"
+      AUTONOMOUS_COMMAND: "mvn test -Dtest=*${OBJECT_TYPE}*Test* -q"
+      BLOCKING_VALIDATION: "TESTS_PASS:*${OBJECT_TYPE}*Test*"
+      STOP_ON_FAILURE: false
+      ERROR_MESSAGE: "Current tests are failing - fix before proceeding"
+
+  PHASE_3_VALIDATION:
+    FINAL_COMPILATION_CHECK:
+      PURPOSE: "Ensure everything compiles correctly"
+      AUTONOMOUS_COMMAND: "mvn compile -q"
+      BLOCKING_VALIDATION: "COMPILATION_SUCCESS:"
+      STOP_ON_FAILURE: true
+      ERROR_MESSAGE: "Compilation failed - fix errors before completing workflow"
+    
+    SUMMARY:
+      PURPOSE: "Display workflow completion summary"
+      EXECUTION_STEPS:
+        - "TDD workflow completed for ${OBJECT_TYPE}"
+        - "Requirements document created: ${REQUIREMENTS_PATH}"
+        - "Object model validated and tested"
+        - "Ready for snapshot/diff implementation phases"

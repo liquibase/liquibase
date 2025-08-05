@@ -1,0 +1,50 @@
+AIPL_VERSION: "2.0"
+PROGRAM_NAME: "error-recovery-test"
+DESCRIPTION: "Test workflow for error handling and recovery scenarios"
+
+ENFORCEMENT_MODE: "STANDARD"
+BLOCKING_BEHAVIOR: "WARN_ON_VIOLATION"
+
+VARIABLES:
+  TEMP_FILE: "temp_recovery_test.txt"
+  RECOVERY_FILE: "recovery_success.txt"
+
+PHASES:
+  PHASE_1_INITIAL_FAILURE:
+    EXPECTED_FAILURE:
+      PURPOSE: "This step is expected to fail initially"
+      BLOCKING_VALIDATION: "FILE_EXISTS:non_existent_file.txt"
+      STOP_ON_FAILURE: false
+      ERROR_MESSAGE: "Expected failure for testing error handling"
+    
+    RECOVERY_ACTION:
+      PURPOSE: "Create file to enable recovery"
+      CREATES: "${TEMP_FILE}"
+      TEMPLATE: "Recovery test file created"
+      BLOCKING_VALIDATION: "FILE_EXISTS:${TEMP_FILE}"
+      STOP_ON_FAILURE: true
+      ERROR_MESSAGE: "Recovery action failed"
+
+  PHASE_2_RETRY_SUCCESS:
+    VALIDATE_RECOVERY:
+      PURPOSE: "Validate that recovery was successful"
+      BLOCKING_PREREQUISITE_CHECK:
+        BLOCKING_VALIDATIONS:
+          - "FILE_EXISTS:${TEMP_FILE}"
+        STOP_ON_FAILURE: true
+        ERROR_MESSAGE: "Recovery validation failed"
+    
+    FINAL_SUCCESS:
+      PURPOSE: "Demonstrate successful completion after recovery"
+      CREATES: "${RECOVERY_FILE}"
+      TEMPLATE: "Error recovery test completed successfully"
+      AUTONOMOUS_COMMAND: "echo 'Recovery test success'"
+      BLOCKING_VALIDATION: "FILE_EXISTS:${RECOVERY_FILE}"
+      ERROR_MESSAGE: "Final success step failed"
+
+  PHASE_3_CLEANUP:
+    CLEANUP_FILES:
+      PURPOSE: "Clean up test files"
+      EXECUTION_STEPS:
+        - "Remove temp files: rm -f ${TEMP_FILE} ${RECOVERY_FILE}"
+        - "Verify cleanup completed"

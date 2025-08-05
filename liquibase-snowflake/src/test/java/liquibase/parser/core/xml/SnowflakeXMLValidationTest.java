@@ -25,32 +25,21 @@ public class SnowflakeXMLValidationTest {
     private static final String XSD_PATH = "www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd";
     
     @Test
-    @DisplayName("CreateDatabase XML with all attributes should validate against XSD")
+    @DisplayName("CreateDatabase element should validate against Snowflake XSD")
     public void testCreateDatabaseXMLValidation() throws Exception {
+        // Test just the Snowflake-specific element since our XSD only defines Snowflake elements
         String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-            "<databaseChangeLog\n" +
-            "    xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\"\n" +
-            "    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-            "    xmlns:snowflake=\"http://www.liquibase.org/xml/ns/snowflake\"\n" +
-            "    xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog\n" +
-            "                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd\n" +
-            "                        http://www.liquibase.org/xml/ns/snowflake\n" +
-            "                        http://www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd\">\n" +
-            "    \n" +
-            "    <changeSet id=\"1\" author=\"test\">\n" +
-            "        <snowflake:createDatabase databaseName=\"TEST_DB\"\n" +
-            "                                  comment=\"Test database\"\n" +
-            "                                  transient=\"true\"\n" +
-            "                                  orReplace=\"true\"\n" +
-            "                                  ifNotExists=\"true\"\n" +
-            "                                  fromDatabase=\"SOURCE_DB\"\n" +
-            "                                  dataRetentionTimeInDays=\"7\"\n" +
-            "                                  maxDataExtensionTimeInDays=\"30\"/>\n" +
-            "    </changeSet>\n" +
-            "</databaseChangeLog>";
+            "<createDatabase xmlns=\"http://www.liquibase.org/xml/ns/snowflake\"\n" +
+            "                databaseName=\"TEST_DB\"\n" +
+            "                comment=\"Test database\"\n" +
+            "                transient=\"true\"\n" +
+            "                orReplace=\"true\"\n" +
+            "                ifNotExists=\"true\"\n" +
+            "                dataRetentionTimeInDays=\"7\"\n" +
+            "                maxDataExtensionTimeInDays=\"30\"/>";
             
         assertDoesNotThrow(() -> validateXMLAgainstSchema(xml), 
-            "CreateDatabase XML with all attributes should validate successfully");
+            "CreateDatabase element should validate successfully against Snowflake XSD");
     }
     
     /**

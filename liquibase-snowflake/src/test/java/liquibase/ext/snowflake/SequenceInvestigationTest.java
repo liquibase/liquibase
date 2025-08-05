@@ -5,6 +5,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.util.TestDatabaseConfigUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,13 +22,10 @@ public class SequenceInvestigationTest {
     
     @BeforeEach
     public void setUp() throws Exception {
-        String url = System.getenv("SNOWFLAKE_URL");
-        String username = System.getenv("SNOWFLAKE_USER");
-        String password = System.getenv("SNOWFLAKE_PASSWORD");
-        
-        if (url == null || username == null || password == null) {
-            throw new RuntimeException("Missing Snowflake credentials");
-        }
+        // Use YAML configuration instead of environment variables
+        String url = TestDatabaseConfigUtil.getSnowflakeUrl();
+        String username = TestDatabaseConfigUtil.getSnowflakeUsername();
+        String password = TestDatabaseConfigUtil.getSnowflakePassword();
         
         database = DatabaseFactory.getInstance().openDatabase(url, username, password, null, null);
     }

@@ -3,12 +3,13 @@ package liquibase.integration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.util.TestDatabaseConfigUtil;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -18,10 +19,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Connection validation test for snapshot/diff integration testing.
- * Validates that the LB_INT_SNAPSHOT_DB environment is accessible and functional.
+ * Uses configuration from src/test/resources/liquibase.sdk.local.yaml instead of environment variables.
+ * This eliminates the need to set SNOWFLAKE_URL, SNOWFLAKE_USER, SNOWFLAKE_PASSWORD environment variables.
  * 
  * ADDRESSES_CORE_ISSUE: Validate test environment before integration tests.
  */
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class SnapshotConnectionValidationTest {
 
     private Database database;
@@ -39,23 +42,11 @@ public class SnapshotConnectionValidationTest {
         return "SNAP_TEST_" + methodName.toUpperCase() + "_" + System.currentTimeMillis();
     }
 
-    @BeforeEach
+    @BeforeAll
     public void setUp() throws Exception {
-        String url = System.getenv("SNOWFLAKE_URL");
-        String user = System.getenv("SNOWFLAKE_USER");
-        String password = System.getenv("SNOWFLAKE_PASSWORD");
-        
-        if (url == null || user == null || password == null) {
-            throw new RuntimeException("Snowflake connection environment variables not set");
-        }
-
-        // For integration tests, we expect the URL to point to LB_INT_SNAPSHOT_DB
-        if (!url.contains("LB_INT_SNAPSHOT_DB")) {
-            System.out.println("WARNING: URL should contain LB_INT_SNAPSHOT_DB for integration tests");
-            System.out.println("Current URL: " + url);
-        }
-
-        connection = DriverManager.getConnection(url, user, password);
+        // Get database connection using configuration from liquibase.sdk.local.yaml
+        // No environment variables needed!
+        connection = TestDatabaseConfigUtil.getSnowflakeConnection();
         database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
     }
 
@@ -73,17 +64,17 @@ public class SnapshotConnectionValidationTest {
                 System.err.println("Failed to cleanup test object " + objectName + ": " + e.getMessage());
             }
         }
+        createdTestObjects.clear();
         
-        if (connection != null && !connection.isClosed()) {
-            connection.close();
-        }
+        // Note: Connection is closed when JVM shuts down in @BeforeAll pattern
     }
 
     @Test
     public void testSnapshotEnvironmentConnection() throws Exception {
         System.out.println("Testing connection to snapshot integration test environment...");
         
-        // Verify connection is active
+        // Verify database and connection are initialized
+        assertNotNull(database, "Database should be established");
         assertNotNull(connection, "Connection should be established");
         assertFalse(connection.isClosed(), "Connection should be active");
         
@@ -101,15 +92,15 @@ public class SnapshotConnectionValidationTest {
         System.out.println("✅ Using schema: " + currentSchema);
         System.out.println("✅ With role: " + currentRole);
         
-        // Verify expected test environment
-        assertEquals("LB_INT_SNAPSHOT_DB", currentDatabase, "Should be connected to integration test database");
+        // Verify expected test environment (updated for current configuration)
+        assertEquals("LB_DBEXT_INT_DB", currentDatabase, "Should be connected to integration test database");
         assertEquals("BASE_SCHEMA", currentSchema, "Should be using integration test schema");
         assertEquals("LB_INT_ROLE", currentRole, "Should be using integration test role");
         
         rs.close();
         stmt.close();
         
-        System.out.println("✅ SUCCESS: Snapshot integration test environment validated");
+        System.out.println("✅ SUCCESS: Snapshot integration test environment validated (using liquibase.sdk.local.yaml)");
     }
 
     @Test
@@ -121,7 +112,7 @@ public class SnapshotConnectionValidationTest {
         
         // Create a test table to verify we can create objects
         PreparedStatement createStmt = connection.prepareStatement(
-            "CREATE TABLE " + testTableName + " (id INTEGER, name VARCHAR(50))");
+            String.format("CREATE TABLE %s (id INTEGER, name VARCHAR(50))", testTableName));
         createStmt.execute();
         createStmt.close();
         

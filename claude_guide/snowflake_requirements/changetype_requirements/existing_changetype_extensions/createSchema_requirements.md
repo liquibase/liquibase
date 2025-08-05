@@ -11,7 +11,7 @@ OBJECT_TYPE: "Schema"
 OPERATION: "CREATE"
 ESTIMATED_TIME: "5-6 hours"
 COMPLEXITY: "MEDIUM"
-ATTRIBUTES_COUNT: 15
+ATTRIBUTES_COUNT: 18
 PRIORITY: "READY"
 ```
 
@@ -90,44 +90,45 @@ CREATE [OR REPLACE] [TRANSIENT] SCHEMA [IF NOT EXISTS] schema_name
   [logging_parameters];
 ```
 
-## 📊 ATTRIBUTES QUICK REFERENCE
+## 📊 COMPREHENSIVE_ATTRIBUTE_ANALYSIS
 
 ### Core Attributes (All Operations)
-| Attribute | Type | Required | Values | Constraints |
-|-----------|------|----------|--------|-------------|
-| **schemaName** | String | ✅ | Valid identifier | Primary key |
-| **databaseName** | String | ❌ | Valid identifier | Schema location |
-| **orReplace** | Boolean | ❌ | true/false | Mutually exclusive with ifNotExists |
-| **ifNotExists** | Boolean | ❌ | true/false | Mutually exclusive with orReplace |
-| **transient** | Boolean | ❌ | true/false | Forces dataRetentionTimeInDays = 0 |
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **schemaName** | String | Required | N/A | Valid identifier | Must be unique | None | HIGH | Primary schema identifier |
+| **databaseName** | String | Optional | Current DB | Valid identifier | Must exist | None | MEDIUM | Schema location specification |
+| **orReplace** | Boolean | Optional | false | true/false | None | Mutually exclusive with ifNotExists | MEDIUM | Replace existing schema |
+| **ifNotExists** | Boolean | Optional | false | true/false | None | Mutually exclusive with orReplace | MEDIUM | Idempotent creation |
+| **transient** | Boolean | Optional | false | true/false | Forces dataRetentionTimeInDays = 0 | None | MEDIUM | No Time Travel schema |
 
 ### Cloning Attributes
-| Attribute | Type | Required | Values | Notes |
-|-----------|------|----------|--------|------------|
-| **cloneFrom** | String | ❌ | Existing schema | Zero-copy clone |
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **cloneFrom** | String | Optional | N/A | Existing schema | Must exist | None | LOW | Zero-copy clone source |
 
-### Time Travel Attributes
-| Attribute | Type | Values | Constraint | Priority |
-|-----------|------|--------|------------|----------|
-| **dataRetentionTimeInDays** | Integer | 0-90 | Must be 0 if transient | MEDIUM |
-| **maxDataExtensionTimeInDays** | Integer | 0-90 | ≥ dataRetention | LOW |
+### Time Travel and Storage Attributes
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **dataRetentionTimeInDays** | Integer | Optional | 1 | 0-90 | Must be 0 if transient, ≤ maxDataExtension | None | MEDIUM | Time Travel retention period |
+| **maxDataExtensionTimeInDays** | Integer | Optional | 14 | 0-90 | ≥ dataRetention | None | LOW | Maximum Time Travel extension |
 
 ### Access and Configuration Attributes
-| Attribute | Type | Values | Purpose | Priority |
-|-----------|------|--------|---------|----------|
-| **managedAccess** | Boolean | true/false | Centralized privilege management | MEDIUM |
-| **defaultDdlCollation** | String | Valid collation | String handling | LOW |
-| **comment** | String | ≤256 chars | Documentation | LOW |
-| **pipeExecutionPaused** | Boolean | true/false | Pipeline control | LOW |
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **managedAccess** | Boolean | Optional | false | true/false | None | None | MEDIUM | Centralized privilege management |
+| **defaultDdlCollation** | String | Optional | Database default | Valid collation | Must be valid | None | LOW | String handling collation |
+| **comment** | String | Optional | N/A | String ≤256 chars | Length limit | None | LOW | Schema description |
+| **pipeExecutionPaused** | Boolean | Optional | false | true/false | None | None | LOW | Pipeline control |
 
-### Advanced Attributes (Low Priority)
-| Attribute | Type | Purpose |
-|-----------|------|----------|
-| **catalog** | String | Catalog reference |
-| **externalVolume** | String | External storage |
-| **classificationProfile** | String | Data governance |
-| **replaceInvalidCharacters** | Boolean | Character validation |
-| **storageSerializationPolicy** | String | Storage optimization |
+### Advanced Snowflake Attributes
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **catalog** | String | Optional | N/A | Valid identifier | Must exist | None | LOW | Catalog reference |
+| **externalVolume** | String | Optional | N/A | Valid volume name | Must exist | None | LOW | External storage volume |
+| **classificationProfile** | String | Optional | N/A | Valid profile name | Must exist | None | LOW | Data governance profile |
+| **replaceInvalidCharacters** | Boolean | Optional | false | true/false | None | None | LOW | Character validation |
+| **storageSerializationPolicy** | String | Optional | N/A | Valid policy name | Must exist | None | LOW | Storage optimization |
+| **tag** | String | Optional | N/A | Valid tag format | Tag format validation | None | LOW | Schema tagging |
 
 ### Mutual Exclusivity Rules
 ```yaml
@@ -197,6 +198,27 @@ CREATE SCHEMA enterprise_schema
   DEFAULT_DDL_COLLATION = 'en-ci'
   PIPE_EXECUTION_PAUSED = FALSE
   COMMENT = 'Enterprise schema with full config';
+
+-- Complete example with all attributes
+CREATE SCHEMA comprehensive_schema WITH
+  pipeExecutionPaused = "false"
+  databaseName = "test_db"
+  externalVolume = "external_vol"
+  catalog = "test_catalog"
+  cloneFrom = "source_schema"
+  maxDataExtensionTimeInDays = "90"
+  replaceInvalidCharacters = "true"
+  schemaName = "test_schema"
+  managedAccess = "true"
+  defaultDdlCollation = "utf8"
+  transient = "false"
+  orReplace = "false"
+  classificationProfile = "sensitive_profile"
+  ifNotExists = "true"
+  dataRetentionTimeInDays = "30"
+  comment = "Comprehensive schema"
+  tag = "production"
+  storageSerializationPolicy = "optimized";
 ```
 
 ### Constraint Examples

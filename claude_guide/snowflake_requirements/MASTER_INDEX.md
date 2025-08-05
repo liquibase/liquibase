@@ -32,7 +32,7 @@ COMPLETION_STATUS: "Production-ready requirements available"
 ```yaml
 FOLDER: "changetype_requirements/new_changetypes/"
 PATTERN: "New Changetype Pattern"
-IMPLEMENTATION_GUIDE: "../implementation_guides/changetype_implementation/changetype_patterns.md"
+IMPLEMENTATION_GUIDE: "../implementation_guides/changetype/CHANGETYPE_IMPLEMENTATION_GUIDE.md"
 ```
 
 | Changetype | Create | Alter | Drop | Implementation Priority |
@@ -44,7 +44,7 @@ IMPLEMENTATION_GUIDE: "../implementation_guides/changetype_implementation/change
 ```yaml
 FOLDER: "changetype_requirements/existing_changetype_extensions/"
 PATTERN: "Extension Pattern or SQL Override Pattern"
-IMPLEMENTATION_GUIDE: "../implementation_guides/changetype_implementation/changetype_patterns.md"
+IMPLEMENTATION_GUIDE: "../implementation_guides/changetype/CHANGETYPE_IMPLEMENTATION_GUIDE.md"
 ```
 
 | Object Type | Base Requirements | Enhanced Requirements | Implementation Status |
@@ -143,9 +143,9 @@ HIGH_QUALITY_INDICATORS:
 
 ### Implementation Guides
 ```yaml
-CHANGETYPE_IMPLEMENTATION: "../implementation_guides/changetype_implementation/"
-SNAPSHOT_DIFF_IMPLEMENTATION: "../implementation_guides/snapshot_diff_implementation/"
-MASTER_PROCESS: "../implementation_guides/changetype_implementation/master_process_loop.md"
+CHANGETYPE_IMPLEMENTATION: "../implementation_guides/changetype/"
+SNAPSHOT_DIFF_IMPLEMENTATION: "../implementation_guides/scenario_programs/snapshot_diff/"
+MASTER_PROCESS: "../implementation_guides/changetype/CHANGETYPE_IMPLEMENTATION_GUIDE.md"
 ```
 
 ### Support Documentation

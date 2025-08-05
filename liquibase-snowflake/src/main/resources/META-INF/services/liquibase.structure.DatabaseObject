@@ -1,2 +1,3 @@
 liquibase.database.object.Database
+liquibase.database.object.FileFormat
 liquibase.database.object.Warehouse

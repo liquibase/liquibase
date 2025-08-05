@@ -1,0 +1,276 @@
+AIPL_VERSION: "2.0"
+PROGRAM_NAME: "tdd-enforced-object-implementation"
+DESCRIPTION: "TDD-enforced snapshot/diff implementation with mandatory test-first discipline"
+
+ENFORCEMENT_MODE: "STRICT_TDD"
+BLOCKING_BEHAVIOR: "STOP_ON_VIOLATION"
+
+VARIABLES:
+  OBJECT_TYPE: "${TARGET_OBJECT_TYPE}"
+  OBJECT_TYPE_LOWER: "${TARGET_OBJECT_TYPE_LOWER}"
+  PACKAGE_PATH: "liquibase/ext/snowflake"
+  REQUIREMENTS_PATH: "claude_guide/snowflake_requirements/snapshot_diff_requirements/${OBJECT_TYPE}_requirements.md"
+
+TDD_ENFORCEMENT_RULES:
+  NO_CODE_WITHOUT_FAILING_TEST: "BLOCKING - Cannot write implementation without failing test first"
+  NO_NEXT_FEATURE_WITHOUT_REFACTOR: "BLOCKING - Must complete refactor step before next feature"
+  NO_INTEGRATION_WITHOUT_UNIT_TESTS: "BLOCKING - All unit tests must pass before integration tests"
+  FULL_PROPERTY_SET_REQUIRED: "BLOCKING - Must have ALL properties from official Snowflake docs before coding"
+  MICRO_CYCLE_DURATION: "2-3 minutes per Red→Green→Refactor cycle"
+  TEST_FIRST_ALWAYS: "Write failing test before any implementation"
+  MINIMAL_IMPLEMENTATION: "Write only code needed to make test pass"
+  IMMEDIATE_FEEDBACK: "Run tests after every change"
+
+PHASES:
+  PHASE_0_TDD_SETUP:
+    VALIDATE_TDD_COMMANDS:
+      PURPOSE: "Ensure TDD test commands are available in CLAUDE.md"
+      BLOCKING_VALIDATION: "PROPERTIES_COUNT:CLAUDE.md:mvn test.*-Dtest=:4"
+      STOP_ON_FAILURE: true
+      ERROR_MESSAGE: "TDD impossible without autonomous test commands - add to CLAUDE.md first"
+
+  PHASE_1_COMPLETE_REQUIREMENTS:
+    RESEARCH_OFFICIAL_DOCS:
+      PURPOSE: "Research ALL ${OBJECT_TYPE} parameters from official Snowflake docs"
+      EXECUTION_STEPS:
+        - "WebFetch: https://docs.snowflake.com/en/sql-reference/sql/create-${OBJECT_TYPE_LOWER}"
+        - "WebFetch: https://docs.snowflake.com/en/sql-reference/sql/show-${OBJECT_TYPE_LOWER}s"
+        - "WebFetch: https://docs.snowflake.com/en/sql-reference/sql/describe-${OBJECT_TYPE_LOWER}"
+      DELIVERABLE: "Complete parameter documentation with types, defaults, constraints"
+    
+    CREATE_REQUIREMENTS_DOCUMENT:
+      PURPOSE: "Create complete requirements document"
+      CREATES: "${REQUIREMENTS_PATH}"
+      TEMPLATE: |
+        # ${OBJECT_TYPE} Snapshot/Diff Requirements
+        
+        ## Official Documentation URLs
+        - CREATE: https://docs.snowflake.com/en/sql-reference/sql/create-${OBJECT_TYPE_LOWER}
+        - SHOW: https://docs.snowflake.com/en/sql-reference/sql/show-${OBJECT_TYPE_LOWER}s
+        - DESCRIBE: https://docs.snowflake.com/en/sql-reference/sql/describe-${OBJECT_TYPE_LOWER}
+        
+        ## Complete Property List
+        | Property | Type | Required | Default | Constraints | Comparison | Notes |
+        |----------|------|----------|---------|-------------|------------|-------|
+        | name | String | Yes | - | Non-empty | Full | Primary identifier |
+        
+        ## SQL Introspection Queries
+        ```sql
+        -- Snapshot query
+        SHOW ${OBJECT_TYPE}S IN SCHEMA ?
+        
+        -- Detail query  
+        DESCRIBE ${OBJECT_TYPE} ?
+        ```
+        
+        ## TDD Implementation Plan
+        ### Unit Test Requirements:
+        - Constructor tests (valid/invalid inputs)
+        - Property getter/setter tests
+        - Validation constraint tests
+        - equals/hashCode/toString tests
+        
+        ### Integration Test Requirements:
+        - Database connectivity tests
+        - Snapshot generation tests
+        - Diff comparison tests
+      
+      BLOCKING_VALIDATION: "ALL_OFFICIAL_PROPERTIES_DOCUMENTED:${REQUIREMENTS_PATH}"
+      COMPLETENESS_CHECK:
+        - "WebFetch validation: All CREATE ${OBJECT_TYPE} parameters captured"
+        - "WebFetch validation: All SHOW ${OBJECT_TYPE}S columns captured" 
+        - "WebFetch validation: All DESCRIBE ${OBJECT_TYPE} fields captured"
+        - "Property count minimum: 15+ properties documented"
+      STOP_ON_FAILURE: true
+      ERROR_MESSAGE: "INCOMPLETE REQUIREMENTS - Must capture ALL properties from official Snowflake docs before any coding"
+
+  PHASE_2_TDD_OBJECT_MODEL:
+    BLOCKING_PREREQUISITE_CHECK:
+      PURPOSE: "Verify requirements are complete before any coding"
+      BLOCKING_VALIDATIONS:
+        - "FILE_EXISTS:${REQUIREMENTS_PATH}"
+        - "PROPERTIES_COUNT:${REQUIREMENTS_PATH}:Property.*Required|Optional:15"
+      STOP_ON_FAILURE: true
+      ERROR_MESSAGE: "BLOCKED - Complete requirements first. No coding allowed without full specification."
+    
+    AI_TDD_MICRO_CYCLE_1_OBJECT_IDENTITY:
+      OBJECTIVE: "Create object with identity properties and equals/hashCode"
+      DURATION: "2-3 minutes"
+      AUTONOMOUS_EXECUTION: "ENABLED"
+      
+      RED_PHASE:
+        PURPOSE: "Write failing identity test FIRST"
+        CREATES: "src/test/java/${PACKAGE_PATH}/database/${OBJECT_TYPE}Test.java"
+        FAILING_TEST_TEMPLATE: |
+          @Test
+          void shouldIdentifyObjectsByNameAndSchema() {
+              ${OBJECT_TYPE} obj1 = new ${OBJECT_TYPE}();
+              obj1.setName("TEST_FORMAT");
+              
+              ${OBJECT_TYPE} obj2 = new ${OBJECT_TYPE}();
+              obj2.setName("TEST_FORMAT");
+              
+              assertEquals(obj1, obj2);
+              assertEquals(obj1.hashCode(), obj2.hashCode());
+          }
+        AUTONOMOUS_COMMAND: "mvn test -Dtest=${OBJECT_TYPE}Test#shouldIdentifyObjectsByNameAndSchema -q"
+        BLOCKING_VALIDATION: "TEST_MUST_FAIL"
+        ERROR_HANDLING: "Test passes immediately - invalid test. Test must fail first."
+      
+      GREEN_PHASE:
+        PURPOSE: "Write MINIMAL code to make test pass"
+        CREATES: "src/main/java/${PACKAGE_PATH}/database/${OBJECT_TYPE}.java"
+        MINIMAL_IMPLEMENTATION: |
+          public class ${OBJECT_TYPE} extends AbstractDatabaseObject {
+              private String name;
+              
+              public ${OBJECT_TYPE}() {}
+              
+              @Override
+              public String getName() { return name; }
+              
+              @Override
+              public DatabaseObject setName(String name) { 
+                  this.name = name; 
+                  return this; 
+              }
+              
+              @Override
+              public Schema getSchema() { return null; }
+              
+              @Override
+              public boolean equals(Object obj) {
+                  if (!(obj instanceof ${OBJECT_TYPE})) return false;
+                  ${OBJECT_TYPE} other = (${OBJECT_TYPE}) obj;
+                  return Objects.equals(this.name, other.name);
+              }
+              
+              @Override
+              public int hashCode() {
+                  return Objects.hash(name);
+              }
+          }
+        AUTONOMOUS_COMMAND: "mvn test -Dtest=${OBJECT_TYPE}Test#shouldIdentifyObjectsByNameAndSchema -q"
+        BLOCKING_VALIDATION: "TEST_MUST_PASS"
+        ERROR_HANDLING: "Test still fails - fix implementation before proceeding"
+      
+      REFACTOR_PHASE:
+        PURPOSE: "Clean up code without changing behavior"
+        AUTONOMOUS_COMMAND: "mvn test -Dtest=${OBJECT_TYPE}Test -q"
+        BLOCKING_VALIDATION: "ALL_TESTS_PASS"
+        ERROR_HANDLING: "Refactoring broke tests - revert changes"
+    
+    TDD_CYCLE_2_BASIC_PROPERTIES:
+      RED_PHASE:
+        PURPOSE: "Write failing tests for first 3 properties from requirements"
+        ADD_TO_TEST: |
+          @Test
+          public void testFormatTypeProperty() {
+              ${OBJECT_TYPE} obj = new ${OBJECT_TYPE}("TEST");
+              obj.setFormatType("CSV");
+              assertEquals("CSV", obj.getFormatType());
+          }
+        BLOCKING_VALIDATION: "TEST_FAILS:${OBJECT_TYPE}Test#testFormatTypeProperty"
+        STOP_ON_FAILURE: true
+        ERROR_MESSAGE: "RED PHASE VIOLATION - Property tests must fail before implementation"
+      
+      GREEN_PHASE:
+        PURPOSE: "Add minimal property implementation"
+        ADD_TO_CLASS: |
+          public String getFormatType() { return getAttribute("formatType", String.class); }
+          public ${OBJECT_TYPE} setFormatType(String formatType) { 
+              setAttribute("formatType", formatType); 
+              return this; 
+          }
+        BLOCKING_VALIDATION: "TESTS_PASS:${OBJECT_TYPE}Test"
+        STOP_ON_FAILURE: true
+      
+      REFACTOR_PHASE:
+        PURPOSE: "Refactor property implementation"
+        BLOCKING_VALIDATION: "TESTS_PASS:${OBJECT_TYPE}Test"
+    
+    TDD_CYCLE_N_REMAINING_PROPERTIES:
+      PURPOSE: "Continue TDD cycles for ALL remaining properties from requirements"
+      ENFORCEMENT: "MUST complete Red-Green-Refactor for each property group"
+      BLOCKING_VALIDATION: "PROPERTIES_IMPLEMENTED_COUNT:${OBJECT_TYPE}.java:15"
+      STOP_ON_FAILURE: true
+      ERROR_MESSAGE: "All properties from requirements must be TDD-implemented before snapshot phase"
+
+  PHASE_3_TDD_SNAPSHOT_GENERATOR:
+    BLOCKING_PREREQUISITE_CHECK:
+      PURPOSE: "Verify object model is complete"
+      BLOCKING_VALIDATIONS:
+        - "TESTS_PASS:${OBJECT_TYPE}Test"
+        - "PROPERTIES_IMPLEMENTED_COUNT:${OBJECT_TYPE}.java:15"
+      STOP_ON_FAILURE: true
+      ERROR_MESSAGE: "BLOCKED - Object model incomplete. Finish TDD cycles first."
+    
+    TDD_CYCLE_SNAPSHOT_BASIC:
+      RED_PHASE:
+        PURPOSE: "Write failing snapshot generator test"
+        CREATES: "src/test/java/${PACKAGE_PATH}/snapshot/${OBJECT_TYPE}SnapshotGeneratorTest.java"
+        TEST_TEMPLATE: |
+          @Test
+          public void testSnapshotGeneratorBasic() {
+              ${OBJECT_TYPE}SnapshotGenerator generator = new ${OBJECT_TYPE}SnapshotGenerator();
+              assertTrue(generator.supports(${OBJECT_TYPE}.class, database));
+          }
+        BLOCKING_VALIDATION: "TEST_FAILS:${OBJECT_TYPE}SnapshotGeneratorTest"
+        STOP_ON_FAILURE: true
+      
+      GREEN_PHASE:
+        PURPOSE: "Create minimal snapshot generator"
+        CREATES: "src/main/java/${PACKAGE_PATH}/snapshot/${OBJECT_TYPE}SnapshotGenerator.java"
+        BLOCKING_VALIDATION: "TESTS_PASS:${OBJECT_TYPE}SnapshotGeneratorTest"
+        STOP_ON_FAILURE: true
+
+  PHASE_4_TDD_DIFF_COMPARATOR:
+    BLOCKING_PREREQUISITE_CHECK:
+      BLOCKING_VALIDATIONS:
+        - "TESTS_PASS:${OBJECT_TYPE}SnapshotGeneratorTest"
+      STOP_ON_FAILURE: true
+    
+    TDD_CYCLE_COMPARATOR_BASIC:
+      RED_PHASE:
+        CREATES: "src/test/java/${PACKAGE_PATH}/diff/compare/${OBJECT_TYPE}ComparatorTest.java"
+        BLOCKING_VALIDATION: "TEST_FAILS:${OBJECT_TYPE}ComparatorTest"
+        STOP_ON_FAILURE: true
+      
+      GREEN_PHASE:
+        CREATES: "src/main/java/${PACKAGE_PATH}/diff/compare/${OBJECT_TYPE}Comparator.java"
+        BLOCKING_VALIDATION: "TESTS_PASS:${OBJECT_TYPE}ComparatorTest"
+        STOP_ON_FAILURE: true
+
+  PHASE_5_INTEGRATION_VALIDATION:
+    BLOCKING_PREREQUISITE_CHECK:
+      BLOCKING_VALIDATIONS:
+        - "TESTS_PASS:*${OBJECT_TYPE}*Test*"
+      STOP_ON_FAILURE: true
+      ERROR_MESSAGE: "BLOCKED - All unit tests must pass before integration"
+    
+    SERVICE_REGISTRATION:
+      PURPOSE: "Register services with Liquibase"
+      EXECUTION_STEPS:
+        - "Add ${OBJECT_TYPE}SnapshotGenerator to META-INF/services/liquibase.snapshot.SnapshotGenerator"
+        - "Add ${OBJECT_TYPE}Comparator to META-INF/services/liquibase.diff.compare.DatabaseObjectComparator"
+      VALIDATES: ["SERVICE_REGISTERED:${OBJECT_TYPE}SnapshotGenerator", "SERVICE_REGISTERED:${OBJECT_TYPE}Comparator"]
+    
+    FINAL_INTEGRATION_TEST:
+      PURPOSE: "Run complete integration test suite"
+      BLOCKING_VALIDATION: "TESTS_PASS:*${OBJECT_TYPE}*Test*"
+      STOP_ON_FAILURE: true
+      SUCCESS_MESSAGE: "TDD-enforced ${OBJECT_TYPE} implementation complete"
+
+TDD_VIOLATION_HANDLERS:
+  CODE_WITHOUT_TEST: "STOP - Delete implementation code. Write failing test first."
+  TEST_PASSES_IMMEDIATELY: "STOP - Test must fail first. Check test validity."
+  SKIP_REFACTOR: "STOP - Complete refactor phase before next feature."
+  INCOMPLETE_REQUIREMENTS: "STOP - Add missing properties to requirements document."
+
+SUCCESS_CRITERIA:
+  - "Complete requirements document with 15+ properties"
+  - "All implementation follows strict Red-Green-Refactor cycles"
+  - "100% test coverage for object model properties"
+  - "All unit tests pass consistently"
+  - "Integration tests validate complete functionality"
+  - "Services properly registered with Liquibase"

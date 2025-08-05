@@ -11,12 +11,12 @@ import liquibase.statement.NotNullConstraint;
 import liquibase.datatype.core.IntType;
 import liquibase.datatype.core.VarcharType;
 import liquibase.datatype.core.TimestampType;
+import liquibase.util.TestDatabaseConfigUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public class CreateTableGeneratorSnowflakeIntegrationTest {
     private Database database;
     private Connection connection;
     private List<String> createdTables = new ArrayList<>();
-    private String testDatabase = "TEST_INTEGRATION_DB";
+    private String testDatabase; // Will be set from YAML configuration
     private String testSchema = "TEST_TABLE_SCHEMA";
 
     /**
@@ -52,27 +52,18 @@ public class CreateTableGeneratorSnowflakeIntegrationTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        String url = System.getenv("SNOWFLAKE_URL");
-        String user = System.getenv("SNOWFLAKE_USER");
-        String password = System.getenv("SNOWFLAKE_PASSWORD");
-        
-        if (url == null || user == null || password == null) {
-            throw new RuntimeException("Snowflake connection environment variables not set");
-        }
-
-        connection = DriverManager.getConnection(url, user, password);
+        // Use YAML configuration instead of environment variables
+        connection = TestDatabaseConfigUtil.getSnowflakeConnection();
         database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
         
-        // Create test database and schema for table isolation
+        // Get database name from the connection
+        testDatabase = database.getDefaultCatalogName();
+        if (testDatabase == null) {
+            testDatabase = "LB_DBEXT_INT_DB"; // Fallback to YAML configured database
+        }
+        
+        // Create test schema for table isolation
         try {
-            PreparedStatement createDbStmt = connection.prepareStatement("CREATE DATABASE IF NOT EXISTS " + testDatabase);
-            createDbStmt.execute();
-            createDbStmt.close();
-            
-            PreparedStatement useDbStmt = connection.prepareStatement("USE DATABASE " + testDatabase);
-            useDbStmt.execute();
-            useDbStmt.close();
-            
             PreparedStatement createSchemaStmt = connection.prepareStatement("CREATE SCHEMA IF NOT EXISTS " + testSchema);
             createSchemaStmt.execute();
             createSchemaStmt.close();
@@ -81,7 +72,7 @@ public class CreateTableGeneratorSnowflakeIntegrationTest {
             useSchemaStmt.execute();
             useSchemaStmt.close();
         } catch (SQLException e) {
-            System.out.println("Database/schema already exists or creation failed: " + e.getMessage());
+            System.out.println("Schema already exists or creation failed: " + e.getMessage());
         }
     }
 

@@ -1,0 +1,297 @@
+AIPL_VERSION: "2.0"
+DOCUMENT_TYPE: AUTONOMOUS_OPERATION_SPECIFICATIONS
+VALIDATION_MODE: STRICT
+
+IMPORTS:
+  - "TERMINOLOGY_DEFINITIONS.yaml"
+  - "STEP_SPECIFICATIONS.yaml"
+
+REQUIRES:
+  - BEHAVIORAL_KEYWORDS
+  - STEP_CLASSIFICATION
+
+PURPOSE: "Autonomous operation patterns and validation templates - enables AI to execute without human approval"
+
+AUTONOMOUS_OPERATION_PRINCIPLES:
+  PURPOSE: "Core principles enabling autonomous AI execution"
+  
+  AUTO_APPROVAL_CONCEPT:
+    DEFINITION: "Pre-approved command patterns that AI can execute without asking permission"
+    MECHANISM: "CLAUDE.md file contains approved command patterns"
+    VALIDATION: "Programs must validate autonomous capability before execution"
+    SCOPE: "Limited to safe, reversible operations with clear validation"
+    
+  SAFETY_BOUNDARIES:
+    SAFE_OPERATIONS:
+      - "Read-only operations (grep, find, cat, ls)"
+      - "Test execution (mvn test, gradle test)"
+      - "Compilation (mvn compile, gradle build)"
+      - "Version control read operations (git status, git diff)"
+    RESTRICTED_OPERATIONS:
+      - "File deletion or modification"
+      - "System configuration changes"
+      - "Network operations"
+      - "Database schema changes"
+    PROHIBITED_OPERATIONS:
+      - "Sudo or elevated privilege commands"
+      - "System service management"
+      - "Security configuration changes"
+      - "Production environment modifications"
+      
+  VALIDATION_REQUIREMENTS:
+    PREREQUISITE_VALIDATION: "Must validate autonomous capability before starting"
+    CONTINUOUS_MONITORING: "Monitor execution for unexpected results"
+    FAILURE_HANDLING: "Clear escalation path when autonomous operations fail"
+    HUMAN_ESCALATION: "Automatic escalation for operations outside safe boundaries"
+
+AUTONOMOUS_PREREQUISITE_PHASE:
+  PURPOSE: "Mandatory validation phase for all autonomous programs"
+  
+  PHASE_TEMPLATE: |
+    PHASE_0_5_AUTONOMOUS_PREREQUISITES:
+      STEP_TYPE: "VALIDATION"
+      PURPOSE: "Validate autonomous operation capability before implementation"
+      
+      INPUT_REQUIREMENTS:
+        - "CLAUDE.md file exists in project root"
+        - "Implementation requires test execution or compilation"
+        
+      QUALITY_GATE:
+        NAME: "validate-autonomous-commands"
+        TYPE: "BLOCKING"
+        FAILURE_ACTION: "STOP"
+        ERROR_MESSAGE: "Missing autonomous operation capability - update CLAUDE.md with required auto-approval patterns"
+        RECOVERY_STEPS:
+          - "Add required command patterns to CLAUDE.md"
+          - "Verify patterns match expected format"
+          - "Re-run autonomous validation"
+          
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "CLAUDE.md contains required auto-approval patterns"
+          VALIDATION_COMMAND: "grep -E 'mvn test.*-Dtest=.*-q' CLAUDE.md | wc -l"
+          PASS_CONDITION: "≥ 3 autonomous test command patterns found"
+        - CRITERION: "CLAUDE.md accessible and readable"
+          VALIDATION_COMMAND: "test -r CLAUDE.md"
+          PASS_CONDITION: "File is readable"
+          
+      DELIVERABLES:
+        - ARTIFACT: "Autonomous capability validation result"
+          LOCATION: "Validation log or confirmation"
+          VALIDATION: "All validation commands passed successfully"
+
+AUTO_APPROVAL_COMMAND_PATTERNS:
+  PURPOSE: "Standard command patterns that enable autonomous operation"
+  
+  TEST_EXECUTION_PATTERNS:
+    SPECIFIC_TEST_METHOD:
+      PATTERN: "mvn test -Dtest=${TEST_CLASS}#${TEST_METHOD} -q"
+      PURPOSE: "Execute specific test method autonomously"
+      SAFETY: "Read-only operation, validates code without modification"
+      EXAMPLES:
+        - "mvn test -Dtest=FileFormatTest#testEquals -q"
+        - "mvn test -Dtest=WarehouseTest#testValidation -q"
+        
+    SPECIFIC_TEST_CLASS:
+      PATTERN: "mvn test -Dtest=${TEST_CLASS} -q"
+      PURPOSE: "Execute entire test class autonomously"
+      SAFETY: "Read-only operation, comprehensive test validation"
+      EXAMPLES:
+        - "mvn test -Dtest=FileFormatTest -q"
+        - "mvn test -Dtest=WarehouseSnapshotGeneratorTest -q"
+        
+    PATTERN_BASED_TESTS:
+      PATTERN: "mvn test -Dtest=\"*${OBJECT_TYPE}*Test*\" -q"
+      PURPOSE: "Execute all tests matching pattern autonomously"
+      SAFETY: "Read-only operation, pattern-based test execution"
+      EXAMPLES:
+        - "mvn test -Dtest=\"*FileFormat*Test*\" -q"
+        - "mvn test -Dtest=\"*Warehouse*Test*\" -q"
+        
+  COMPILATION_PATTERNS:
+    BASIC_COMPILATION:
+      PATTERN: "mvn compile -q"
+      PURPOSE: "Compile source code autonomously"
+      SAFETY: "Safe operation, only compiles without deployment"
+      VALIDATION: "No system modifications, only validates compilation"
+      
+    CLEAN_COMPILE:
+      PATTERN: "mvn clean compile -q"
+      PURPOSE: "Clean and compile from scratch autonomously"
+      SAFETY: "Safe operation, cleans build artifacts and recompiles"
+      
+  VALIDATION_PATTERNS:
+    SYNTAX_VALIDATION:
+      PATTERN: "find . -name '*.java' -exec javac -cp ${CLASSPATH} {} \\;"
+      PURPOSE: "Validate Java syntax without full compilation"
+      SAFETY: "Read-only validation, no artifacts generated"
+      
+    TEST_COMPILATION:
+      PATTERN: "mvn test-compile -q"
+      PURPOSE: "Compile test classes autonomously"
+      SAFETY: "Safe operation, only compiles test code"
+
+CLAUDE_MD_INTEGRATION:
+  PURPOSE: "Integration specifications for CLAUDE.md file"
+  
+  REQUIRED_SECTIONS:
+    AI_TDD_MICRO_CYCLE_COMMANDS:
+      SECTION_NAME: "AI-TDD Micro-Cycle Test Commands (Autonomous Operation Enabled)"
+      REQUIRED_PATTERNS:
+        - "mvn test -Dtest=\"*${OBJECT_TYPE}*Test*\" -q"
+        - "mvn test -Dtest=\"${TEST_CLASS}\" -q"
+        - "mvn test -Dtest=\"${TEST_CLASS}#${TEST_METHOD}\" -q"
+        - "mvn compile -q"
+      VALIDATION_COMMAND: "grep -c 'mvn test.*-Dtest=' CLAUDE.md"
+      MINIMUM_MATCHES: 3
+      
+  VALIDATION_TEMPLATE:
+    CLAUDE_MD_VALIDATION: |
+      VALIDATE_CLAUDE_MD:
+        STEP_TYPE: "VALIDATION"
+        PURPOSE: "Validate CLAUDE.md contains required autonomous patterns"
+        
+        QUALITY_GATE:
+          NAME: "claude-md-validation"
+          TYPE: "BLOCKING"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: |
+            CLAUDE.md missing required autonomous operation patterns.
+            Required patterns:
+            - mvn test -Dtest="*${OBJECT_TYPE}*Test*" -q
+            - mvn test -Dtest="${TEST_CLASS}" -q  
+            - mvn test -Dtest="${TEST_CLASS}#${TEST_METHOD}" -q
+            - mvn compile -q
+            
+        ACCEPTANCE_CRITERIA:
+          - CRITERION: "Autonomous test patterns present"
+            VALIDATION_COMMAND: "grep -c 'mvn test.*-Dtest=' CLAUDE.md"
+            PASS_CONDITION: "≥ 3 patterns found"
+          - CRITERION: "File is accessible"
+            VALIDATION_COMMAND: "test -r CLAUDE.md"
+            PASS_CONDITION: "File readable"
+            
+  UPDATE_INSTRUCTIONS:
+    PURPOSE: "Instructions for updating CLAUDE.md with autonomous patterns"
+    
+    ADDING_PATTERNS:
+      LOCATION: "Add to existing test command sections or create new section"
+      FORMAT: "Use exact pattern syntax with ${VARIABLE} placeholders"
+      VALIDATION: "Test patterns work with actual variable substitution"
+      
+    SECTION_TEMPLATE: |
+      ## ⚡ AI-TDD Micro-Cycle Test Commands (Autonomous Operation Enabled)
+      ```bash
+      # Object-specific testing (Red-Green-Refactor cycles)
+      mvn test -Dtest="*${OBJECT_TYPE}*Test*" -q
+      mvn test -Dtest="${TEST_CLASS}" -q
+      mvn test -Dtest="${TEST_CLASS}#${TEST_METHOD}" -q
+      
+      # Compilation validation
+      mvn compile -q
+      mvn test-compile -q
+      ```
+
+AUTONOMOUS_WORKFLOW_PATTERNS:
+  PURPOSE: "Common workflow patterns for autonomous execution"
+  
+  AI_TDD_MICRO_CYCLE:
+    DESCRIPTION: "Autonomous Test-Driven Development micro-cycle"
+    DURATION: "2-3 minutes per cycle"
+    PHASES:
+      RED_PHASE:
+        AUTONOMOUS_COMMANDS:
+          - "mvn test -Dtest=${TEST_CLASS}#${TEST_METHOD} -q"
+        EXPECTED_RESULT: "Test failure (red state)"
+        AUTO_VALIDATION: "Check exit code != 0"
+        
+      GREEN_PHASE:
+        AUTONOMOUS_COMMANDS:
+          - "mvn compile -q"
+          - "mvn test -Dtest=${TEST_CLASS}#${TEST_METHOD} -q"
+        EXPECTED_RESULT: "Test success (green state)"
+        AUTO_VALIDATION: "Check exit code == 0"
+        
+      REFACTOR_PHASE:
+        AUTONOMOUS_COMMANDS:
+          - "mvn test -Dtest=${TEST_CLASS} -q"
+        EXPECTED_RESULT: "All tests still pass"
+        AUTO_VALIDATION: "Check exit code == 0"
+        
+  COMPILATION_VALIDATION_CYCLE:
+    DESCRIPTION: "Autonomous compilation and validation"
+    PHASES:
+      CLEAN_COMPILE:
+        AUTONOMOUS_COMMANDS:
+          - "mvn clean compile -q"
+        VALIDATION: "Check for compilation errors"
+        
+      TEST_COMPILE:
+        AUTONOMOUS_COMMANDS:
+          - "mvn test-compile -q"
+        VALIDATION: "Check test compilation"
+        
+      VALIDATION:
+        AUTONOMOUS_COMMANDS:
+          - "mvn test -Dtest=\"*${OBJECT_TYPE}*Test*\" -q"
+        VALIDATION: "Execute related tests"
+
+SAFETY_MONITORING:
+  PURPOSE: "Monitoring and safety mechanisms for autonomous operation"
+  
+  EXECUTION_MONITORING:
+    TIMEOUT_LIMITS:
+      TEST_EXECUTION: "300 seconds maximum"
+      COMPILATION: "180 seconds maximum"
+      VALIDATION: "60 seconds maximum"
+      
+    RESOURCE_LIMITS:
+      MEMORY_USAGE: "Monitor JVM memory consumption"
+      CPU_USAGE: "Monitor compilation/test CPU usage"
+      DISK_SPACE: "Monitor build artifact disk usage"
+      
+  FAILURE_ESCALATION:
+    AUTO_RECOVERY:
+      - "Retry failed operations once"
+      - "Clear build artifacts and retry"
+      - "Skip problematic tests and continue"
+      
+    HUMAN_ESCALATION_TRIGGERS:
+      - "Repeated compilation failures"
+      - "Test failures in unrelated areas"
+      - "Resource exhaustion"
+      - "Unexpected system behavior"
+      
+    ESCALATION_ACTIONS:
+      - "Stop autonomous execution"
+      - "Provide detailed error report"
+      - "Request human intervention"
+      - "Preserve system state for debugging"
+
+INTEGRATION_REQUIREMENTS:
+  PURPOSE: "Requirements for integrating autonomous operation into programs"
+  
+  MANDATORY_INTEGRATION:
+    PHASE_INCLUSION: "All implementation programs must include PHASE_0_5_AUTONOMOUS_PREREQUISITES"
+    VALIDATION_TIMING: "Must validate before any test execution or compilation"
+    FAILURE_HANDLING: "Must stop execution if validation fails"
+    
+  OPTIONAL_ENHANCEMENTS:
+    PROGRESS_REPORTING: "Report autonomous operation progress"
+    PERFORMANCE_MONITORING: "Track autonomous operation performance"
+    SUCCESS_METRICS: "Measure autonomous operation success rates"
+    
+  IMPORT_REQUIREMENTS:
+    STANDARD_IMPORT: |
+      IMPORTS:
+        - "core/AUTONOMOUS_OPERATION.yaml"
+      REQUIRES:
+        - AUTONOMOUS_PREREQUISITE_PHASE
+        - AUTO_APPROVAL_COMMAND_PATTERNS
+        
+    USAGE_PATTERN: |
+      # Include in program phases
+      PHASES:
+        PHASE_0_5_AUTONOMOUS_PREREQUISITES:
+          # Use template from AUTONOMOUS_OPERATION.yaml
+        PHASE_1_IMPLEMENTATION:
+          # Implementation phases can now use autonomous commands

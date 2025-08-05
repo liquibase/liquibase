@@ -11,7 +11,7 @@ OBJECT_TYPE: "Database"
 OPERATION: "CREATE"
 ESTIMATED_TIME: "6-8 hours"
 COMPLEXITY: "HIGH"
-ATTRIBUTES_COUNT: 14
+ATTRIBUTES_COUNT: 7
 PRIORITY: "READY"
 ```
 
@@ -88,44 +88,19 @@ CREATE [OR REPLACE] [TRANSIENT] DATABASE [IF NOT EXISTS] database_name
   [logging_parameters];
 ```
 
-## 📊 ATTRIBUTES QUICK REFERENCE
+## 📊 COMPREHENSIVE_ATTRIBUTE_ANALYSIS
 
-### Core Attributes (All Operations)
-| Attribute | Type | Required | Values | Constraints |
-|-----------|------|----------|--------|-----------|
-| **databaseName** | String | ✅ | Valid identifier | Primary key |
-| **orReplace** | Boolean | ❌ | true/false | Mutually exclusive with ifNotExists |
-| **ifNotExists** | Boolean | ❌ | true/false | Mutually exclusive with orReplace |
-| **transient** | Boolean | ❌ | true/false | Forces dataRetentionTimeInDays = 0 |
+### Core Attributes
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **databaseName** | String | Required | N/A | Valid identifier | Must be unique | None | HIGH | Primary database identifier |
+| **defaultDdlCollation** | String | Optional | System default | Valid collation | Must be valid | None | LOW | Default collation for objects |
+| **transient** | Boolean | Optional | false | true/false | Forces dataRetentionTimeInDays = 0 | None | MEDIUM | No Time Travel database |
+| **orReplace** | Boolean | Optional | false | true/false | None | Mutually exclusive with ifNotExists | MEDIUM | Replace existing database |
+| **ifNotExists** | Boolean | Optional | false | true/false | None | Mutually exclusive with orReplace | MEDIUM | Idempotent creation |
+| **dataRetentionTimeInDays** | Integer | Optional | 1 | 0-90 | Must be 0 if transient, ≤ maxDataExtension | None | MEDIUM | Time Travel retention period |
+| **maxDataExtensionTimeInDays** | Integer | Optional | 14 | 0-90 | ≥ dataRetention | None | LOW | Maximum Time Travel extension |
 
-### Cloning Attributes
-| Attribute | Type | Required | Values | Notes |
-|-----------|------|----------|--------|---------|
-| **cloneFrom** | String | ❌ | Existing database | Zero-copy clone |
-| **fromDatabase** | String | ❌ | Valid identifier | Alternative source |
-
-### Time Travel Attributes
-| Attribute | Type | Values | Constraint | Priority |
-|-----------|------|--------|------------|----------|
-| **dataRetentionTimeInDays** | Integer | 0-90 | Must be 0 if transient | MEDIUM |
-| **maxDataExtensionTimeInDays** | Integer | 0-90 | ≥ dataRetention | LOW |
-
-### Configuration Attributes
-| Attribute | Type | Values | Purpose | Priority |
-|-----------|------|--------|---------|----------|
-| **defaultDdlCollation** | String | Valid collation | String handling | LOW |
-| **comment** | String | ≤256 chars | Documentation | LOW |
-| **catalog** | String | Valid identifier | Catalog reference | LOW |
-| **externalVolume** | String | Valid volume | External storage | LOW |
-
-### Advanced Attributes (Low Priority)
-| Attribute | Type | Purpose |
-|-----------|------|----------|
-| **catalogSync** | String | Catalog synchronization |
-| **catalogSyncNamespaceMode** | String | Sync mode configuration |
-| **catalogSyncNamespaceFlattenDelimiter** | String | Namespace flattening |
-| **replaceInvalidCharacters** | Boolean | Character validation |
-| **storageSerializationPolicy** | String | Storage optimization |
 
 ### Mutual Exclusivity Rules
 ```yaml
@@ -186,7 +161,23 @@ CREATE DATABASE IF NOT EXISTS conditional_database;
 CREATE DATABASE cloned_database CLONE source_database;
 ```
 
-### Example 7: Advanced Database with Multiple Attributes
+### Example 7: Comprehensive Database with All Core Attributes
+```sql
+-- Complete example with all attributes
+CREATE DATABASE comprehensive_database
+  defaultDdlCollation = "utf8"
+  transient = "false"
+  orReplace = "false"
+  ifNotExists = "true"
+  dataRetentionTimeInDays = "30"
+  maxDataExtensionTimeInDays = "60"
+  DATA_RETENTION_TIME_IN_DAYS = 30
+  MAX_DATA_EXTENSION_TIME_IN_DAYS = 60
+  DEFAULT_DDL_COLLATION = 'utf8'
+  COMMENT = 'Database with comprehensive configuration';
+```
+
+### Example 8: Advanced Database with Multiple Attributes
 ```xml
 <createDatabase databaseName="advanced_database"
                 catalog="my_catalog"

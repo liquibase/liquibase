@@ -1,4 +1,5 @@
 liquibase.diff.output.DatabaseComparator
+liquibase.diff.output.FileFormatComparator
 liquibase.diff.output.SchemaComparator
 liquibase.diff.output.SequenceComparatorSnowflake
 liquibase.diff.output.TableComparatorSnowflake

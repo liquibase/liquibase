@@ -8,12 +8,12 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.TableComparatorSnowflake;
 import liquibase.snapshot.jvm.TableSnapshotGeneratorSnowflake;
 import liquibase.structure.core.Table;
+import liquibase.util.TestDatabaseConfigUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -47,21 +47,8 @@ public class TableObjectIntegrationTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        String url = System.getenv("SNOWFLAKE_URL");
-        String user = System.getenv("SNOWFLAKE_USER");
-        String password = System.getenv("SNOWFLAKE_PASSWORD");
-        
-        if (url == null || user == null || password == null) {
-            throw new RuntimeException("Snowflake connection environment variables not set");
-        }
-
-        // For integration tests, we expect the URL to point to LB_INT_SNAPSHOT_DB
-        if (!url.contains("LB_INT_SNAPSHOT_DB")) {
-            System.out.println("WARNING: URL should contain LB_INT_SNAPSHOT_DB for integration tests");
-            System.out.println("Current URL: " + url);
-        }
-
-        connection = DriverManager.getConnection(url, user, password);
+        // Use YAML configuration instead of environment variables
+        connection = TestDatabaseConfigUtil.getSnowflakeConnection();
         
         // Ensure we're using the correct schema - first check if it exists, create if not
         try {

@@ -8,6 +8,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.snowflake.CreateWarehouseStatement;
+import liquibase.util.TestDatabaseConfigUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -17,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,18 +63,9 @@ public class CreateWarehouseGeneratorSnowflakeIntegrationTest {
         // Initialize testSchemaName FIRST to prevent null cleanup issues
         testSchemaName = "TEST_WAREHOUSE_INTEGRATION";
         
-        // Follow test harness configuration pattern - check for required config
-        String url = System.getenv("SNOWFLAKE_URL");
-        String username = System.getenv("SNOWFLAKE_USER");
-        String password = System.getenv("SNOWFLAKE_PASSWORD");
-        
-        // Skip tests if not configured (like test harness does with assumeTrue)
-        Assumptions.assumeTrue(url != null && username != null && password != null, 
-                              "Snowflake test not configured");
-        
-        // Initialize database connection following DatabaseConnectionUtil pattern
+        // Initialize database connection using YAML configuration
         try {
-            rawConnection = DriverManager.getConnection(url, username, password);
+            rawConnection = TestDatabaseConfigUtil.getSnowflakeConnection();
             JdbcConnection jdbcConnection = new JdbcConnection(rawConnection);
             database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(jdbcConnection);
             

@@ -6,6 +6,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.statement.SqlStatement;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.util.TestDatabaseConfigUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.condition.EnabledIf;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
@@ -31,18 +31,18 @@ public class AlterTableLiveIntegrationTest {
     private String testTableName;
     
     public static boolean isSnowflakeAvailable() {
-        return System.getenv("SNOWFLAKE_URL") != null &&
-               System.getenv("SNOWFLAKE_USER") != null &&
-               System.getenv("SNOWFLAKE_PASSWORD") != null;
+        try {
+            TestDatabaseConfigUtil.getSnowflakeConfig();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
     
     @BeforeEach
     public void setUp() throws Exception {
-        String url = System.getenv("SNOWFLAKE_URL");
-        String user = System.getenv("SNOWFLAKE_USER");
-        String password = System.getenv("SNOWFLAKE_PASSWORD");
-        
-        connection = DriverManager.getConnection(url, user, password);
+        // Use YAML configuration instead of environment variables
+        connection = TestDatabaseConfigUtil.getSnowflakeConnection();
         database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
         
         // Create unique test table name

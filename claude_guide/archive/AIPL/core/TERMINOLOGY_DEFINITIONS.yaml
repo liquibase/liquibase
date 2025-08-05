@@ -1,0 +1,212 @@
+AIPL_VERSION: "2.0"
+DOCUMENT_TYPE: TERMINOLOGY_DEFINITIONS
+VALIDATION_MODE: STRICT
+
+PURPOSE: "Single source of truth for all AIPL behavioral terminology - referenced by all other files"
+
+BEHAVIORAL_KEYWORDS:
+  PURPOSE: "Keywords that trigger specific AI execution behaviors"
+  
+  ACCEPTANCE_CRITERIA:
+    DEFINITION: "Binary pass/fail conditions that must be met to proceed to next phase"
+    BEHAVIOR: "Triggers validation behavior - must pass to proceed"
+    AI_RESPONSE: "Validates each criterion before continuing execution"
+    SYNTAX: |
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Binary pass/fail condition"
+          VALIDATION_COMMAND: "Command to verify condition"
+          PASS_CONDITION: "What constitutes success"
+    SHORTHAND_PATTERNS:
+      FILE_EXISTS: "test -f ${FILE_PATH}"
+      COMPILES: "mvn compile -q"
+      TESTS_PASS: "mvn test -Dtest=\"${TEST_CLASS}\" -q"
+      SERVICE_REGISTERED: "grep -q '${CLASS_NAME}' ${SERVICE_FILE}"
+      PROPERTIES_COUNT: "grep -c '${PATTERN}' ${FILE}"
+    EXAMPLES:
+      - "All tests pass with exit code 0"
+      - "File exists at specified location" 
+      - "Compilation succeeds without errors"
+      
+  QUALITY_GATE:
+    DEFINITION: "Blocking checkpoint that halts execution on failure"
+    BEHAVIOR: "Triggers blocking behavior - execution stops on failure"
+    AI_RESPONSE: "Immediately halts program execution if gate fails"
+    SYNTAX: |
+      QUALITY_GATE:
+        NAME: "quality-gate-identifier"
+        TYPE: "BLOCKING|NON_BLOCKING"
+        FAILURE_ACTION: "STOP|WARN|CONTINUE"
+        ERROR_MESSAGE: "Specific failure guidance"
+    EXAMPLES:
+      - "Stop if compilation fails"
+      - "Block if required files missing"
+      - "Halt if validation commands fail"
+      
+  SUCCESS_CRITERIA:
+    DEFINITION: "Measurable conditions defining completion of a phase or operation"
+    BEHAVIOR: "Triggers completion behavior - defines what constitutes success"
+    AI_RESPONSE: "Uses criteria to determine when phase/operation is complete"
+    SYNTAX: "SUCCESS_CRITERIA: 'Measurable completion condition'"
+    EXAMPLES:
+      - "FileFormat object fully implemented with working tests"
+      - "All code compiles without warnings"
+      - "Documentation updated and validated"
+      
+  SPECIFICATIONS:
+    DEFINITION: "Detailed implementable requirements with validation commands"
+    BEHAVIOR: "Triggers implementation behavior - detailed enough for coding"
+    AI_RESPONSE: "Treats content as ready-to-implement technical requirements"
+    USAGE: "Document sections containing implementation-ready details"
+    EXAMPLES:
+      - "SQL queries with parameter binding"
+      - "Java class specifications with method signatures"
+      - "File structure definitions with validation commands"
+      
+  DELIVERABLE:
+    DEFINITION: "Tangible output artifact with defined structure and validation criteria"
+    BEHAVIOR: "Triggers output verification behavior - validates tangible results"
+    AI_RESPONSE: "Verifies each deliverable exists and meets validation criteria"
+    SYNTAX: |
+      DELIVERABLES:
+        - ARTIFACT: "What gets created/modified"
+          LOCATION: "Where to find it"
+          VALIDATION: "How to verify it exists/is correct"
+    SHORTHAND_PATTERNS:
+      JAVA_CLASS: 
+        CREATES: "src/main/java/${PACKAGE_PATH}/${CLASS_NAME}.java"
+        VALIDATES: ["FILE_EXISTS", "COMPILES"]
+      TEST_CLASS:
+        CREATES: "src/test/java/${PACKAGE_PATH}/${CLASS_NAME}Test.java"
+        VALIDATES: ["FILE_EXISTS", "TESTS_PASS"]
+      SERVICE_REGISTRATION:
+        CREATES: "Entry in META-INF/services/${SERVICE_TYPE}"
+        VALIDATES: ["SERVICE_REGISTERED"]
+    EXAMPLES:
+      - "Java source file at specific path"
+      - "Updated configuration with validation command"
+      - "Generated documentation with content checks"
+      
+  EXECUTION_STEPS:
+    DEFINITION: "Sequenced actions with specific commands and acceptance criteria"
+    BEHAVIOR: "Triggers sequential execution behavior - runs commands in order"
+    AI_RESPONSE: "Executes each step in sequence, validating before proceeding"
+    SYNTAX: |
+      EXECUTION_STEPS:
+        - ACTION: "Specific action to take"
+          COMMAND: "Copy-paste ready command (if applicable)"
+          EXPECTED_OUTPUT: "What should result"
+    EXAMPLES:
+      - "Run maven compilation with specific flags"
+      - "Execute test suite with result validation"
+      - "Generate files from templates with verification"
+
+BEHAVIORAL_MAPPING:
+  PURPOSE: "Map keywords to specific AI behavioral responses"
+  
+  BLOCKING_BEHAVIORS:
+    - QUALITY_GATE: "Stops execution immediately on failure"
+    
+  VALIDATION_BEHAVIORS:
+    - ACCEPTANCE_CRITERIA: "Must pass validation to proceed"
+    - DELIVERABLE: "Verifies output artifacts exist and are correct"
+    
+  COMPLETION_BEHAVIORS:
+    - SUCCESS_CRITERIA: "Defines what constitutes task completion"
+    
+  IMPLEMENTATION_BEHAVIORS:
+    - SPECIFICATIONS: "Treats as implementation-ready requirements"
+    - EXECUTION_STEPS: "Runs commands sequentially with validation"
+
+KEYWORD_HIERARCHY:
+  PURPOSE: "Relationship between behavioral keywords"
+  
+  PRIMARY_CONTROL_FLOW:
+    - QUALITY_GATE: "Controls execution continuation"
+    - ACCEPTANCE_CRITERIA: "Controls phase progression"
+    
+  DEFINITION_KEYWORDS:
+    - SUCCESS_CRITERIA: "Defines completion"
+    - SPECIFICATIONS: "Defines requirements"
+    
+  OUTPUT_KEYWORDS:
+    - DELIVERABLE: "Defines expected outputs"
+    - EXECUTION_STEPS: "Defines specific actions"
+
+USAGE_PATTERNS:
+  PURPOSE: "Common patterns for using behavioral keywords"
+  
+  PHASE_COMPLETION_PATTERN:
+    TEMPLATE: |
+      PHASE_NAME:
+        SUCCESS_CRITERIA: "What constitutes completion"
+        EXECUTION_STEPS:
+          - ACTION: "Specific step"
+        ACCEPTANCE_CRITERIA:
+          - CRITERION: "Pass condition"
+        DELIVERABLES:
+          - ARTIFACT: "Expected output"
+          
+  CRITICAL_VALIDATION_PATTERN:
+    TEMPLATE: |
+      CRITICAL_STEP:
+        QUALITY_GATE:
+          NAME: "critical-validation"
+          TYPE: "BLOCKING"
+          FAILURE_ACTION: "STOP"
+        ACCEPTANCE_CRITERIA:
+          - CRITERION: "Must pass to continue"
+          
+  IMPLEMENTATION_READY_PATTERN:
+    TEMPLATE: |
+      IMPLEMENTATION_SECTION:
+        SPECIFICATIONS:
+          # Detailed technical requirements
+        EXECUTION_STEPS:
+          # Step-by-step implementation
+        DELIVERABLES:
+          # Expected outputs with validation
+
+TERMINOLOGY_VALIDATION:
+  PURPOSE: "Rules for consistent terminology usage across all files"
+  
+  CONSISTENCY_RULES:
+    SINGLE_DEFINITION: "Each keyword has exactly one definition across all files"
+    BEHAVIORAL_MAPPING: "Each keyword maps to exactly one primary AI behavior"
+    SYNTAX_CONSISTENCY: "Keyword syntax must match template in all uses"
+    
+  VALIDATION_COMMANDS:
+    CHECK_CONSISTENCY:
+      COMMAND: "grep -r 'ACCEPTANCE_CRITERIA\\|QUALITY_GATE' . | grep -v 'TERMINOLOGY_DEFINITIONS.yaml'"
+      PURPOSE: "Find any redefinitions of core keywords"
+      EXPECTED: "All definitions should reference this file"
+      
+    CHECK_SYNTAX:
+      COMMAND: "grep -A 5 'ACCEPTANCE_CRITERIA:' *.yaml"
+      PURPOSE: "Verify consistent syntax usage"
+      EXPECTED: "All uses should match template syntax"
+
+IMPORT_INTERFACE:
+  PURPOSE: "How other files should reference these definitions"
+  
+  STANDARD_IMPORT:
+    SYNTAX: |
+      IMPORTS:
+        - "core/TERMINOLOGY_DEFINITIONS.yaml"
+      REQUIRES:
+        - BEHAVIORAL_KEYWORDS
+        
+  REFERENCE_PATTERN:
+    USAGE: "Reference keyword definitions instead of redefining"
+    EXAMPLE: |
+      # Instead of redefining ACCEPTANCE_CRITERIA
+      # Reference the behavior: "Use ACCEPTANCE_CRITERIA for validation"
+      
+  VALIDATION_REQUIREMENT:
+    RULE: "All files using behavioral keywords must import this file"
+    CHECK: "Files should not contain duplicate keyword definitions"
+
+VERSION_CONTROL:
+  TERMINOLOGY_VERSION: "2.0"
+  COMPATIBILITY: "All files importing this must declare compatible AIPL_VERSION"
+  CHANGE_POLICY: "Any changes to keyword definitions require version bump"
+  MIGRATION: "Provide migration guide for terminology changes"

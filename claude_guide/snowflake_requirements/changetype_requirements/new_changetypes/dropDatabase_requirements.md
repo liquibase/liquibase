@@ -82,15 +82,15 @@ DEFAULT_BEHAVIOR: "RESTRICT behavior when neither CASCADE nor RESTRICT specified
 CASE_SENSITIVITY: "Unquoted names converted to uppercase, quoted names preserved"
 ```
 
-## 📊 ATTRIBUTES QUICK REFERENCE
+## 📊 COMPREHENSIVE_ATTRIBUTE_ANALYSIS
 
 ### Core Attributes
-| Attribute | Type | Required | Values | Constraints |
-|-----------|------|----------|--------|-------------|
-| **databaseName** | String | ✅ | Valid identifier | Cannot be null/empty, not current DB |
-| **ifExists** | Boolean | ❌ | true/false | Error prevention |
-| **cascade** | Boolean | ❌ | true/false | Mutually exclusive with restrict |
-| **restrict** | Boolean | ❌ | true/false | Mutually exclusive with cascade |
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **databaseName** | String | Required | N/A | Valid identifier | Must exist | None | HIGH | Primary database identifier |
+| **cascade** | Boolean | Optional | false | true/false | None | Mutually exclusive with restrict | MEDIUM | Drop with dependent objects |
+| **ifExists** | Boolean | Optional | false | true/false | None | None | MEDIUM | Error prevention for non-existent databases |
+| **restrict** | Boolean | Optional | false | true/false | None | Mutually exclusive with cascade | MEDIUM | Fail if dependent objects exist |
 
 ### Mutual Exclusivity Rules
 ```yaml
@@ -150,6 +150,16 @@ DROP DATABASE non_existent_database;
 
 -- Success: Using IF EXISTS
 DROP DATABASE IF EXISTS non_existent_database;
+```
+
+### Complete Example with All Attributes
+```sql
+-- Complete example with all attributes
+DROP DATABASE IF EXISTS comprehensive_database CASCADE
+  databaseName = "test_db"
+  cascade = "true"
+  ifExists = "true"
+  restrict = "false";
 ```
 
 ### Validation Points

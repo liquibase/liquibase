@@ -1,4 +1,5 @@
 liquibase.snapshot.jvm.DatabaseSnapshotGeneratorSnowflake
+liquibase.snapshot.jvm.FileFormatSnapshotGeneratorSnowflake
 liquibase.snapshot.SchemaSnapshotGenerator
 liquibase.snapshot.jvm.SchemaSnapshotGeneratorSnowflake
 liquibase.snapshot.jvm.SequenceSnapshotGeneratorSnowflake

@@ -68,7 +68,11 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(tree:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(SNOWFLAKE_URL=\"jdbc:snowflake://rziymts-xbb66763.snowflakecomputing.com/?db=LB_DBEXT_INT_DB&warehouse=LTHDB_TEST_WH&schema=BASE_SCHEMA&role=LB_INT_ROLE\" SNOWFLAKE_USER=\"COMMUNITYKEVIN\" SNOWFLAKE_PASSWORD=\"uQ1lAjwVisliu8CpUTVh0UnxoTUk3\" mvn test -Dtest=\"SnapshotConnectionValidationTest\" -q)",
+      "Bash(SNOWFLAKE_URL=\"jdbc:snowflake://rziymts-xbb66763.snowflakecomputing.com/?db=LB_DBEXT_INT_DB&warehouse=LTHDB_TEST_WH&schema=BASE_SCHEMA&role=LB_INT_ROLE\" SNOWFLAKE_USER=\"COMMUNITYKEVIN\" SNOWFLAKE_PASSWORD=\"uQ1lAjwVisliu8CpUTVh0UnxoTUk3\" mvn test -Dtest=\"FileFormatObjectIntegrationTest\" -q)",
+      "Bash(timeout 90 mvn test -Dtest=\"*IntegrationTest\" -q)",
+      "Bash(timeout 60 mvn test -q)"
     ],
     "deny": []
   }

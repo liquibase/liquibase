@@ -10,7 +10,7 @@ import liquibase.servicelocator.PrioritizedService;
 import liquibase.statement.DatabaseFunction;
 import org.apache.commons.lang3.StringUtils;
 
-@DataTypeInfo(name = "geography", aliases = {"geospatial", "gis"}, minParameters = 0, maxParameters = 0, priority = PrioritizedService.PRIORITY_DATABASE)
+@DataTypeInfo(name = "geography", aliases = {"geospatial", "gis"}, minParameters = 0, maxParameters = 1, priority = PrioritizedService.PRIORITY_DATABASE)
 public class GeographyTypeSnowflake extends LiquibaseDataType {
 
     @Override
