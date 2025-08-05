@@ -50,19 +50,11 @@ SCENARIO_C_COMPLETE_INCOMPLETE:
   DESCRIPTION: "Complete incomplete snapshot/diff implementation"
   WORKFLOW: "Phase 0 → Phase 3 → Phase 4 (skip research phases)"
   DURATION: "4-6 hours"
-  AUTOMATION_AVAILABLE:
-    PROGRAM: "aipl_programs/incomplete-implementation-detection.yaml"
-    TRIGGER: "When detecting missing methods or incomplete patterns"
-    BENEFIT: "Systematic detection and template generation for missing components"
   
 SCENARIO_D_FIX_BUGS:
   DESCRIPTION: "Fix bugs in existing implementation"
   WORKFLOW: "Phase 0 → Phase 4 (focused debugging)"
   DURATION: "2-4 hours"
-  AUTOMATION_AVAILABLE:
-    PROGRAM: "aipl_programs/systematic-implementation-debugging.yaml"
-    TRIGGER: "When troubleshooting compilation or runtime errors"
-    BENEFIT: "Layer-by-layer automated diagnosis and isolation"
   
 SCENARIO_E_OPTIMIZE_PERFORMANCE:
   DESCRIPTION: "Performance optimization of existing implementation"
@@ -324,13 +316,15 @@ SQL_QUERY_IMPLEMENTATION:
 ```
 
 ### STEP 3.2: Service Registration and Testing
-
-**For automated snapshot service validation**: Use `aipl_programs/snapshot-diff-registration-validation.yaml`
-
 ```yaml
-CRITICAL_REGISTRATION:
+SERVICE_REGISTRATION:
   FILE: "src/main/resources/META-INF/services/liquibase.snapshot.SnapshotGenerator"
   ENTRY: "${PACKAGE}.${ObjectType}SnapshotGeneratorSnowflake"
+  
+UNIT_TEST_PATTERN:
+  SETUP: "Mock database and snapshot, configure mock results"
+  EXECUTE: "Call snapshotObject with example"
+  VERIFY: "Assert all properties set correctly"
 ```
 
 ## PHASE 4: DIFF IMPLEMENTATION
@@ -398,26 +392,33 @@ PROPERTY_COMPARISON_PATTERNS:
 ```
 
 ### STEP 4.2: Service Registration and Testing
-
-**For automated diff comparator validation**: Use `aipl_programs/snapshot-diff-registration-validation.yaml`
-
 ```yaml
-CRITICAL_REGISTRATION:
+SERVICE_REGISTRATION:
   FILE: "src/main/resources/META-INF/services/liquibase.diff.output.DatabaseObjectComparator"
   ENTRY: "${PACKAGE}.${ObjectType}ComparatorSnowflake"
+  
+UNIT_TEST_SCENARIOS:
+  NO_DIFFERENCES: "Identical objects should have no differences"
+  PROPERTY_DIFFERENCES: "Changed properties should create differences"
+  STATE_EXCLUSION: "State properties should not create differences"
 ```
 
 ## PHASE 5: COMPREHENSIVE TESTING AND VALIDATION
 
 ### STEP 5.1: Integration Test Implementation
-
-**For automated integration testing**: Use `aipl_programs/snapshot-diff-integration-testing.yaml`
-
 ```yaml
-INTEGRATION_TEST_ESSENTIALS:
+INTEGRATION_TEST_PATTERN:
   WORKFLOW: "Create object → Snapshot → Verify → Diff → Cleanup"
   VALIDATION: "Object found in snapshot, properties correct, diff detects changes"
-  CRITICAL_SUCCESS: "State properties excluded from diff, service registrations verified"
+  
+TEST_HARNESS_LIMITATIONS:
+  - "May not support all object types"
+  - "Some properties not testable in isolation"
+  - "Cross-database compatibility limited"
+  
+WORKAROUND_STRATEGIES:
+  - "Manual integration tests for unsupported objects"
+  - "Focus on realistic success criteria"
 ```
 
 ### STEP 5.2: Error Patterns and Debugging
@@ -426,7 +427,8 @@ COMMON_ERROR_PATTERNS:
   SERVICE_REGISTRATION_MISSING:
     SYMPTOM: "Objects not found in snapshot/diff"
     CAUSE: "Missing or incorrect META-INF/services registration"
-    SOLUTION: "Use automated validation: aipl_programs/snapshot-diff-registration-validation.yaml"
+    SOLUTION: "Verify service files contain correct class names"
+    COMMAND: "grep -r '${ObjectType}' src/main/resources/META-INF/services/"
     
   SQL_QUERY_ERRORS:
     SYMPTOM: "DatabaseException during snapshot"
@@ -610,12 +612,12 @@ echo "SELECT * FROM INFORMATION_SCHEMA.${OBJECT_TYPE}S LIMIT 1" | sqlcmd
 ```
 
 ### Implementation Validation
-
-**For automated service registration validation**: Use `aipl_programs/snapshot-diff-registration-validation.yaml`
-
 ```bash
-# Basic compilation check
+# Compile and verify service registration
 mvn compile
+
+# Check service registration
+grep -r "${ObjectType}" src/main/resources/META-INF/services/
 
 # Run specific object tests
 mvn test -Dtest="*${ObjectType}*Test"
@@ -721,14 +723,12 @@ INTEGRATION_COMPLETE:
     - "No compilation or runtime errors"
     - "Proper error handling and logging"
     - "Performance acceptable for target use cases"
-
-**For automated debugging when errors occur**: Use `aipl_programs/systematic-implementation-debugging.yaml`
 ```
 
 ## TROUBLESHOOTING QUICK REFERENCE
 
 ### Compilation Issues
-- **For service registration validation**: Use `aipl_programs/snapshot-diff-registration-validation.yaml`
+- Check service registration files
 - Verify all imports are correct
 - Ensure object model extends AbstractDatabaseObject
 - Confirm generator/comparator signatures match framework
@@ -752,32 +752,3 @@ INTEGRATION_COMPLETE:
 - Consider test harness limitations
 
 This guide provides everything needed for complete snapshot/diff implementation in a single, sequential workflow with no external dependencies or document hunting required.
-
-## DIFF_CHANGELOG_WORKFLOW_INTEGRATION
-
-### SNAPSHOT_TO_CHANGELOG_PIPELINE
-```yaml
-INTEGRATION_WORKFLOW:
-  STEP_1_SNAPSHOT: "SnapshotGenerators capture complete database state"
-  STEP_2_DIFF: "Diff comparators identify differences between states"
-  STEP_3_CHANGETYPE_GENERATION: "ChangeGenerators convert differences to changetype operations"
-  STEP_4_CHANGELOG_OUTPUT: "Liquibase core commands format and output changelog files"
-  
-CRITICAL_DEPENDENCIES:
-  SNAPSHOT_COMPLETENESS: "All object properties must be captured for accurate diff"
-  DIFF_ACCURACY: "State vs configuration property separation essential"
-  CHANGEGENERATOR_REGISTRATION: "Missing/Unexpected/Changed generators required for each object"
-  
-CROSS_REFERENCE_GUIDE: "DIFF_GENERATE_CHANGELOG_IMPLEMENTATION_GUIDE.md"
-```
-
-### END_TO_END_VALIDATION
-
-**For automated end-to-end workflow validation**: Use `aipl_programs/snapshot-diff-integration-testing.yaml`
-
-```yaml
-CRITICAL_VALIDATION_COMMANDS:
-  VERIFY_SNAPSHOT_REGISTRATION: "grep -c 'SnapshotGenerator' src/main/resources/META-INF/services/liquibase.snapshot.SnapshotGenerator"
-  VERIFY_DIFF_REGISTRATION: "grep -c 'Comparator' src/main/resources/META-INF/services/liquibase.diff.output.DatabaseObjectComparator"
-  VERIFY_CHANGEGENERATOR_REGISTRATION: "grep -c 'ChangeGenerator' src/main/resources/META-INF/services/liquibase.diff.output.changelog.ChangeGenerator"
-```
