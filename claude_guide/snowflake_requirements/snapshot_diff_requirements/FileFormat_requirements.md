@@ -16,6 +16,8 @@ MANAGEMENT_COMMANDS: ["CREATE FILE FORMAT", "ALTER FILE FORMAT", "DROP FILE FORM
 ```
 
 ## PROPERTY_ANALYSIS_TABLE
+**VERIFIED AGAINST ACTUAL SNOWFLAKE INFORMATION_SCHEMA.FILE_FORMATS (2025-08-05)**
+
 | Property | Type | Required | Default | Comparison | Category | Notes |
 |----------|------|----------|---------|------------|----------|-------|
 | FILE_FORMAT_NAME | String | Yes | - | Full | Identity | Object identifier |
@@ -37,20 +39,24 @@ MANAGEMENT_COMMANDS: ["CREATE FILE FORMAT", "ALTER FILE FORMAT", "DROP FILE FORM
 | NULL_IF | Array | No | ["\\N"] | Full | Configuration | Strings converted to NULL |
 | COMPRESSION | String | No | AUTO | Full | Configuration | Compression algorithm: AUTO, GZIP, BZ2, BROTLI, ZSTD, DEFLATE, RAW_DEFLATE |
 | ERROR_ON_COLUMN_COUNT_MISMATCH | Boolean | No | TRUE | Full | Configuration | Generate error on column count mismatch |
-| VALIDATE_UTF8 | Boolean | No | TRUE | Full | Configuration | Validate UTF-8 encoding |
-| SKIP_BLANK_LINES | Boolean | No | FALSE | Full | Configuration | Skip empty lines |
-| REPLACE_INVALID_CHARACTERS | Boolean | No | FALSE | Full | Configuration | Replace invalid UTF-8 characters |
-| EMPTY_FIELD_AS_NULL | Boolean | No | TRUE | Full | Configuration | Treat empty fields as NULL |
-| SKIP_BYTE_ORDER_MARK | Boolean | No | TRUE | Full | Configuration | Skip BOM if present |
-| ENCODING | String | No | UTF8 | Full | Configuration | Character encoding |
-| MULTI_LINE | Boolean | No | TRUE | Full | Configuration | Allow multi-line records |
-| PARSE_HEADER | Boolean | No | FALSE | Full | Configuration | Parse header to infer column names |
-| FILE_EXTENSION | String | No | NULL | Full | Configuration | Default file extension |
 | CREATED | Timestamp | No | CURRENT_TIME | Exclude | State | Creation timestamp |
 | LAST_ALTERED | Timestamp | No | CURRENT_TIME | Exclude | State | Last modification timestamp |
 | COMMENT | String | No | NULL | Exclude if both null | Configuration | User description |
 
+**PHANTOM PROPERTIES** (Listed in documentation but **DO NOT EXIST** in actual Snowflake):
+- ❌ VALIDATE_UTF8: Not available in INFORMATION_SCHEMA.FILE_FORMATS
+- ❌ SKIP_BLANK_LINES: Not available in INFORMATION_SCHEMA.FILE_FORMATS  
+- ❌ REPLACE_INVALID_CHARACTERS: Not available in INFORMATION_SCHEMA.FILE_FORMATS
+- ❌ EMPTY_FIELD_AS_NULL: Not available in INFORMATION_SCHEMA.FILE_FORMATS
+- ❌ SKIP_BYTE_ORDER_MARK: Not available in INFORMATION_SCHEMA.FILE_FORMATS
+- ❌ ENCODING: Not available in INFORMATION_SCHEMA.FILE_FORMATS
+- ❌ MULTI_LINE: Not available in INFORMATION_SCHEMA.FILE_FORMATS
+- ❌ PARSE_HEADER: Not available in INFORMATION_SCHEMA.FILE_FORMATS
+- ❌ FILE_EXTENSION: Not available in INFORMATION_SCHEMA.FILE_FORMATS
+
 ## PROPERTY_CATEGORIZATION
+**CORRECTED BASED ON ACTUAL SNOWFLAKE SCHEMA VERIFICATION**
+
 ```yaml
 IDENTITY_PROPERTIES:
   - FILE_FORMAT_NAME: "Primary identifier for object equality"
@@ -66,21 +72,12 @@ CONFIGURATION_PROPERTIES:
     - ESCAPE: "Escape character for enclosed fields"
     - ESCAPE_UNENCLOSED_FIELD: "Escape character for unenclosed fields"
     - FIELD_OPTIONALLY_ENCLOSED_BY: "Optional field enclosure character"
-    - MULTI_LINE: "Allow records spanning multiple lines"
-    - PARSE_HEADER: "Parse header to infer column names"
   COMMON_PROPERTIES:
     - FILE_FORMAT_TYPE: "Format type specification"
     - COMPRESSION: "Compression algorithm"
     - TRIM_SPACE: "Whitespace handling"
     - NULL_IF: "NULL value conversion strings"
     - ERROR_ON_COLUMN_COUNT_MISMATCH: "Error handling behavior"
-    - VALIDATE_UTF8: "UTF-8 validation"
-    - SKIP_BLANK_LINES: "Empty line handling"
-    - REPLACE_INVALID_CHARACTERS: "Invalid character handling"
-    - EMPTY_FIELD_AS_NULL: "Empty field treatment"
-    - SKIP_BYTE_ORDER_MARK: "BOM handling"
-    - ENCODING: "Character encoding"
-    - FILE_EXTENSION: "Default file extension"
   FORMAT_PROPERTIES:
     - DATE_FORMAT: "Date parsing specification"
     - TIME_FORMAT: "Time parsing specification"
@@ -95,6 +92,19 @@ STATE_PROPERTIES:
   - CREATED: "Creation timestamp"
   - LAST_ALTERED: "Modification timestamp"
   PURPOSE: "System-managed, excluded from comparison"
+
+PHANTOM_PROPERTIES:
+  REMOVED_FROM_REQUIREMENTS: "Properties that don't exist in actual Snowflake INFORMATION_SCHEMA"
+  - VALIDATE_UTF8: "Not available in Snowflake INFORMATION_SCHEMA.FILE_FORMATS"
+  - SKIP_BLANK_LINES: "Not available in Snowflake INFORMATION_SCHEMA.FILE_FORMATS"
+  - REPLACE_INVALID_CHARACTERS: "Not available in Snowflake INFORMATION_SCHEMA.FILE_FORMATS"
+  - EMPTY_FIELD_AS_NULL: "Not available in Snowflake INFORMATION_SCHEMA.FILE_FORMATS"
+  - SKIP_BYTE_ORDER_MARK: "Not available in Snowflake INFORMATION_SCHEMA.FILE_FORMATS"
+  - ENCODING: "Not available in Snowflake INFORMATION_SCHEMA.FILE_FORMATS"
+  - MULTI_LINE: "Not available in Snowflake INFORMATION_SCHEMA.FILE_FORMATS"
+  - PARSE_HEADER: "Not available in Snowflake INFORMATION_SCHEMA.FILE_FORMATS"
+  - FILE_EXTENSION: "Not available in Snowflake INFORMATION_SCHEMA.FILE_FORMATS"
+  PURPOSE: "These properties can remain in object model for future Snowflake versions but cannot be populated from database"
 ```
 
 ## SQL_QUERY_SPECIFICATIONS
@@ -320,23 +330,31 @@ VALIDATION_COMMANDS:
 ```
 
 ## ANTI_GENERIC_VALIDATION_RESULTS
+**CORRECTED BASED ON ACTUAL SNOWFLAKE SCHEMA INVESTIGATION (2025-08-05)**
+
 ```yaml
-PROPERTY_COUNT_VALIDATION: "✅ 25+ distinct properties documented (beyond identity properties)"
-SNOWFLAKE_SPECIFICITY_VALIDATION: "✅ 15+ Snowflake-specific values: CSV, JSON, GZIP, AUTO, TRUE, FALSE, UTF8, HEX, NONE"
+PROPERTY_COUNT_VALIDATION: "✅ 22 distinct properties documented (verified against actual Snowflake INFORMATION_SCHEMA)"
+SNOWFLAKE_SPECIFICITY_VALIDATION: "✅ 15+ Snowflake-specific values: CSV, JSON, GZIP, AUTO, TRUE, FALSE, HEX, NONE"
 DOMAIN_SPECIFICITY_VALIDATION: "✅ Actual Snowflake property names: FILE_FORMAT_CATALOG, COMPRESSION, RECORD_DELIMITER"
-SQL_COMPLETENESS_VALIDATION: "✅ Working SELECT statement from INFORMATION_SCHEMA.FILE_FORMATS with real column names"
+SQL_COMPLETENESS_VALIDATION: "✅ Working SELECT statement from INFORMATION_SCHEMA.FILE_FORMATS with verified column names"
 COMPLETENESS_VALIDATION: "✅ All FileFormat types covered: CSV, JSON, AVRO, ORC, PARQUET, XML"
-PRACTICAL_VALIDATION: "✅ Real database investigation confirms all properties and data types"
+PRACTICAL_VALIDATION: "✅ Real database investigation confirms all 22 properties and data types exist"
+PHANTOM_PROPERTY_VALIDATION: "⚠️ 9 properties from original spec do not exist in actual Snowflake"
+ACCURACY_VALIDATION: "✅ Requirements now match actual Snowflake INFORMATION_SCHEMA.FILE_FORMATS schema"
 ```
 
 ## IMPLEMENTATION_READY_CHECKLIST
-- ✅ **Comprehensive Properties**: 25+ FileFormat-specific properties documented
-- ✅ **Working SQL Queries**: Tested against real Snowflake INFORMATION_SCHEMA
-- ✅ **Property Categorization**: Identity, Configuration, State properties clearly defined
-- ✅ **Comparison Logic**: Detailed rules for property-by-property diff comparison
+**UPDATED AFTER REAL SNOWFLAKE SCHEMA VERIFICATION**
+
+- ✅ **Verified Properties**: 22 FileFormat-specific properties documented and verified against real Snowflake
+- ✅ **Working SQL Queries**: Tested against real Snowflake INFORMATION_SCHEMA with actual column names
+- ✅ **Property Categorization**: Identity, Configuration, State properties clearly defined (corrected)
+- ✅ **Comparison Logic**: Detailed rules for property-by-property diff comparison (corrected)
 - ✅ **Test Scenarios**: 2024 enhanced testing practices with 5 systematic categories
 - ✅ **Framework Integration**: Complete Liquibase service registration requirements
 - ✅ **Edge Case Handling**: NULL values, special characters, default values covered
 - ✅ **AI-Consumable Format**: YAML structures throughout for automated processing
+- ✅ **Schema Accuracy**: Requirements document corrected to match actual Snowflake schema
+- ⚠️ **Phantom Properties**: 9 non-existent properties identified and documented
 
-**QUALITY_GATE_STATUS**: ✅ **PASSED** - Ready for AI-TDD implementation phase
+**QUALITY_GATE_STATUS**: ✅ **PASSED** - Ready for AI-TDD implementation phase (corrected for accuracy)

@@ -9,6 +9,7 @@ SNOWFLAKE_DOCS: "https://docs.snowflake.com/en/sql-reference/sql/alter-file-form
 VALIDATION_SOURCE: "Manual Documentation Review"
 LAST_UPDATED: "2025-08-03"
 STATUS: "READY_FOR_IMPLEMENTATION"
+ATTRIBUTES_COUNT: 12
 DEPENDS_ON: "createFileFormat_requirements.md"
 ```
 

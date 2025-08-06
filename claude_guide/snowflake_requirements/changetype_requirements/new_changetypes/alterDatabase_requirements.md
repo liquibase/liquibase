@@ -11,7 +11,7 @@ OBJECT_TYPE: "Database"
 OPERATION: "ALTER"
 ESTIMATED_TIME: "8-10 hours"
 COMPLEXITY: "HIGH"
-ATTRIBUTES_COUNT: 19
+ATTRIBUTES_COUNT: 35
 OPERATION_GROUPS: 6
 PRIORITY: "READY"
 ```
@@ -66,16 +66,23 @@ ALTER DATABASE [IF EXISTS] database_name RENAME TO new_database_name;
 ALTER DATABASE [IF EXISTS] database_name SET
   [DATA_RETENTION_TIME_IN_DAYS = 0-90]
   [MAX_DATA_EXTENSION_TIME_IN_DAYS = 0-90]
+  [EXTERNAL_VOLUME = 'external_volume_name']
+  [CATALOG = 'catalog_integration_name']
+  [REPLACE_INVALID_CHARACTERS = TRUE|FALSE]
   [DEFAULT_DDL_COLLATION = 'collation_spec']
+  [DEFAULT_NOTEBOOK_COMPUTE_POOL_CPU = 'compute_pool_name']
+  [DEFAULT_NOTEBOOK_COMPUTE_POOL_GPU = 'compute_pool_name']
   [LOG_LEVEL = 'level'] [TRACE_LEVEL = 'level']
-  [SUSPEND_TASK_AFTER_NUM_FAILURES = num]
-  [TASK_AUTO_RETRY_ATTEMPTS = num]
-  [USER_TASK_MANAGED_INITIAL_WAREHOUSE_SIZE = size]
-  [USER_TASK_TIMEOUT_MS = num]
-  [USER_TASK_MINIMUM_TRIGGER_INTERVAL_IN_SECONDS = num]
-  [QUOTED_IDENTIFIERS_IGNORE_CASE = TRUE|FALSE]
-  [ENABLE_CONSOLE_OUTPUT = TRUE|FALSE]
-  [COMMENT = 'string' (≤256 chars)];
+  [STORAGE_SERIALIZATION_POLICY = COMPATIBLE|OPTIMIZED]
+  [EVENT_TABLE = 'event_table_name']
+  [CATALOG_SYNC = 'snowflake_open_catalog_integration_name']
+  [REPLICABLE_WITH_FAILOVER_GROUPS = YES|NO]
+  [BASE_LOCATION_PREFIX = 'string']
+  [DEFAULT_STREAMLIT_NOTEBOOK_WAREHOUSE = 'warehouse_name']
+  [CLASSIFICATION_PROFILE = 'profile_name']
+  [CONTACT = 'contact_info']
+  [COMMENT = 'string' (≤256 chars)]
+  ;
 ```
 
 ### Group 3: UNSET PROPERTIES (Mutually Exclusive)
@@ -135,6 +142,22 @@ SESSION_CONTEXT: "Cannot rename current database"
 | **dataRetentionTimeInDays** | Integer | Optional | Current | 0-90 | ≤ maxDataExtension | SET/UNSET operations | MEDIUM | Time Travel retention period |
 | **maxDataExtensionTimeInDays** | Integer | Optional | Current | 0-90 | ≥ dataRetention | SET/UNSET operations | MEDIUM | Maximum Time Travel extension |
 | **defaultDdlCollation** | String | Optional | Current | Valid collation | Must be valid | SET/UNSET operations | LOW | Default collation for objects |
+| **externalVolume** | String | Optional | Current | Valid volume name | Volume must exist | SET/UNSET operations | MEDIUM | External storage volume |
+| **catalog** | String | Optional | Current | Valid catalog integration | Integration must exist | SET/UNSET operations | MEDIUM | Catalog integration name |
+| **replaceInvalidCharacters** | Boolean | Optional | Current | true/false | None | SET/UNSET operations | LOW | Character replacement policy |
+| **defaultNotebookComputePoolCpu** | String | Optional | Current | Valid compute pool | Pool must exist | SET/UNSET operations | LOW | CPU compute pool for notebooks |
+| **defaultNotebookComputePoolGpu** | String | Optional | Current | Valid compute pool | Pool must exist | SET/UNSET operations | LOW | GPU compute pool for notebooks |
+| **logLevel** | String | Optional | Current | Valid log level | Must be valid level | SET/UNSET operations | LOW | Database log level |
+| **traceLevel** | String | Optional | Current | Valid trace level | Must be valid level | SET/UNSET operations | LOW | Database trace level |
+| **storageSerializationPolicy** | String | Optional | Current | COMPATIBLE/OPTIMIZED | Must be valid option | SET/UNSET operations | MEDIUM | Storage serialization policy |
+| **eventTable** | String | Optional | Current | Valid table name | Table must exist | SET/UNSET operations | MEDIUM | Event logging table |
+| **catalogSync** | String | Optional | Current | Valid integration name | Integration must exist | SET/UNSET operations | MEDIUM | Catalog sync integration |
+| **replicableWithFailoverGroups** | String | Optional | Current | YES/NO | Must be YES or NO | SET/UNSET operations | MEDIUM | Failover group replication |
+| **baseLocationPrefix** | String | Optional | Current | Valid string | None | SET/UNSET operations | LOW | Base location prefix |
+| **defaultStreamlitNotebookWarehouse** | String | Optional | Current | Valid warehouse name | Warehouse must exist | SET/UNSET operations | LOW | Default warehouse for Streamlit |
+| **classificationProfile** | String | Optional | Current | Valid profile name | Profile must exist | SET/UNSET operations | MEDIUM | Data classification profile |
+| **contact** | String | Optional | Current | Valid contact info | None | SET/UNSET operations | LOW | Database contact information |
+| **tags** | Map | Optional | Current | Key-value pairs | Valid tag names | SET/UNSET operations | LOW | Database metadata tags |
 | **comment** | String | Optional | Current | String ≤256 chars | Length limit | SET/UNSET operations | LOW | Database description |
 
 ### Group 3: UNSET Property Attributes
@@ -144,6 +167,19 @@ SESSION_CONTEXT: "Cannot rename current database"
 | **unsetComment** | Boolean | Optional | false | true/false | None | UNSET operations only | LOW | Remove comment |
 | **unsetMaxDataExtensionTimeInDays** | Boolean | Optional | false | true/false | None | UNSET operations only | MEDIUM | Remove max extension setting |
 | **unsetDefaultDdlCollation** | Boolean | Optional | false | true/false | None | UNSET operations only | LOW | Remove collation setting |
+| **unsetExternalVolume** | Boolean | Optional | false | true/false | None | UNSET operations only | MEDIUM | Remove external volume |
+| **unsetCatalog** | Boolean | Optional | false | true/false | None | UNSET operations only | MEDIUM | Remove catalog integration |
+| **unsetDefaultNotebookComputePoolCpu** | Boolean | Optional | false | true/false | None | UNSET operations only | LOW | Remove CPU compute pool |
+| **unsetDefaultNotebookComputePoolGpu** | Boolean | Optional | false | true/false | None | UNSET operations only | LOW | Remove GPU compute pool |
+| **unsetStorageSerializationPolicy** | Boolean | Optional | false | true/false | None | UNSET operations only | MEDIUM | Remove serialization policy |
+| **unsetEventTable** | Boolean | Optional | false | true/false | None | UNSET operations only | MEDIUM | Remove event table |
+| **unsetCatalogSync** | Boolean | Optional | false | true/false | None | UNSET operations only | MEDIUM | Remove catalog sync |
+| **unsetReplicableWithFailoverGroups** | Boolean | Optional | false | true/false | None | UNSET operations only | MEDIUM | Remove failover group setting |
+| **unsetBaseLocationPrefix** | Boolean | Optional | false | true/false | None | UNSET operations only | LOW | Remove base location prefix |
+| **unsetDefaultStreamlitNotebookWarehouse** | Boolean | Optional | false | true/false | None | UNSET operations only | LOW | Remove Streamlit warehouse |
+| **unsetClassificationProfile** | Boolean | Optional | false | true/false | None | UNSET operations only | MEDIUM | Remove classification profile |
+| **unsetContact** | Boolean | Optional | false | true/false | None | UNSET operations only | LOW | Remove contact information |
+| **unsetTags** | Boolean | Optional | false | true/false | None | UNSET operations only | LOW | Remove all tags |
 
 ### Group 4: REPLICATION Attributes
 | Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |

@@ -10,6 +10,7 @@ OBJECT_TYPE: "Sequence"
 OPERATION: "DROP"
 NEXT_PHASE: "Phase 3 - TDD Implementation (ai_workflow_guide.md)"
 ESTIMATED_IMPLEMENTATION_TIME: "3-4 hours"
+ATTRIBUTES_COUNT: 3
 ```
 
 # DropSequence Enhanced Requirements (Snowflake Namespace Attributes)

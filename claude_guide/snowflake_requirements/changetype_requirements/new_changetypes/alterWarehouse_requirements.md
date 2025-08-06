@@ -101,7 +101,7 @@ ALTER WAREHOUSE warehouse_name ABORT ALL QUERIES;
 
 ### Critical Constraints
 ```yaml
-CLUSTER_CONSTRAINT: "MIN_CLUSTER_COUNT <= MAX_CLUSTER_COUNT (both 1-10)"
+CLUSTER_CONSTRAINT: "MIN_CLUSTER_COUNT <= MAX_CLUSTER_COUNT (both 1-100)"
 AUTO_SUSPEND_CONSTRAINT: "0 (disabled), NULL (never), or >= 60 seconds"
 QUERY_ACCELERATION_CONSTRAINT: "Scale factor only valid when acceleration enabled"
 SIZE_VALIDATION: "Valid warehouse sizes from XSMALL to X6LARGE"

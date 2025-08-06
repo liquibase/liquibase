@@ -77,7 +77,7 @@ CREATE [ OR REPLACE ] WAREHOUSE [ IF NOT EXISTS ] <name>
   [ MAX_CONCURRENCY_LEVEL = <num> ]
   [ STATEMENT_QUEUED_TIMEOUT_IN_SECONDS = <num> ]
   [ STATEMENT_TIMEOUT_IN_SECONDS = <num> ]
-  [ [ WITH ] TAG ( <tag_name> = '<tag_value>' [, ...] ) ];
+  ;
 ```
 
 ### Parameter Dependencies and Constraints
@@ -97,10 +97,10 @@ CREATE [ OR REPLACE ] WAREHOUSE [ IF NOT EXISTS ] <name>
 | orReplace | Replace existing warehouse | Boolean | Optional | false | true/false | Cannot combine with ifNotExists | Mutually exclusive with ifNotExists | HIGH | Drops existing warehouse completely |
 | ifNotExists | Create only if doesn't exist | Boolean | Optional | false | true/false | Cannot combine with orReplace | Mutually exclusive with orReplace | HIGH | Idempotent operation support |
 | warehouseType | Type of warehouse | String | Optional | STANDARD | STANDARD, SNOWPARK-OPTIMIZED | Must be valid enum | None | MEDIUM | Affects resource constraint compatibility |
-| warehouseSize | Size of warehouse | String | Optional | XSMALL | XSMALL, SMALL, MEDIUM, LARGE, XLARGE, XXLARGE, XXXLARGE, X4LARGE, X5LARGE, X6LARGE | Must be valid size enum | None | HIGH | Directly impacts cost and performance |
+| warehouseSize | Size of warehouse | String | Optional | XSMALL (STANDARD), MEDIUM (SNOWPARK-OPTIMIZED) | XSMALL, SMALL, MEDIUM, LARGE, XLARGE, XXLARGE, XXXLARGE, X4LARGE, X5LARGE, X6LARGE | Must be valid size enum | None | HIGH | Default varies by warehouse type |
 | resourceConstraint | Resource constraint for warehouse | String | Optional | varies by provider | STANDARD_GEN_1, STANDARD_GEN_2, MEMORY_1X, MEMORY_1X_x86, MEMORY_16X, MEMORY_16X_x86, MEMORY_64X, MEMORY_64X_x86 | Must be compatible with warehouse type | Type-dependent constraints | MEDIUM | GA feature as of March 2025 |
-| maxClusterCount | Maximum clusters for multi-cluster | Integer | Optional | 1 | 1-10 | Must be ≥ minClusterCount, requires Enterprise Edition | None | MEDIUM | Enterprise Edition feature |
-| minClusterCount | Minimum clusters for multi-cluster | Integer | Optional | 1 | 1-10 | Must be ≤ maxClusterCount, requires Enterprise Edition | None | MEDIUM | Enterprise Edition feature |
+| maxClusterCount | Maximum clusters for multi-cluster | Integer | Optional | 1 | 1-100 | Must be ≥ minClusterCount, requires Enterprise Edition | None | MEDIUM | Enterprise Edition feature - range updated 2024 |
+| minClusterCount | Minimum clusters for multi-cluster | Integer | Optional | 1 | 1-100 | Must be ≤ maxClusterCount, requires Enterprise Edition | None | MEDIUM | Enterprise Edition feature - range updated 2024 |
 | scalingPolicy | How to scale clusters | String | Optional | STANDARD | STANDARD, ECONOMY | Requires Enterprise Edition for multi-cluster | None | MEDIUM | Enterprise Edition feature |
 | autoSuspend | Seconds before auto-suspend | Integer | Optional | 600 | 0, NULL, or ≥60 | Special validation for 0/NULL values | None | HIGH | 0=disabled, NULL=never, impacts cost |
 | autoResume | Auto-resume when queried | Boolean | Optional | true | true/false | None | None | HIGH | Common warehouse setting |
@@ -128,8 +128,8 @@ CREATE [ OR REPLACE ] WAREHOUSE [ IF NOT EXISTS ] <name>
 ### Enterprise Edition Attributes
 | Attribute | Type | Values | Constraints | Notes |
 |-----------|------|--------|-------------|-------|
-| **minClusterCount** | Integer | 1-10 | ≤ maxClusterCount | Enterprise only |
-| **maxClusterCount** | Integer | 1-10 | ≥ minClusterCount | Enterprise only |
+| **minClusterCount** | Integer | 1-100 | ≤ maxClusterCount | Enterprise only |
+| **maxClusterCount** | Integer | 1-100 | ≥ minClusterCount | Enterprise only |
 | **scalingPolicy** | String | STANDARD, ECONOMY | Multi-cluster required | Enterprise only |
 | **enableQueryAcceleration** | Boolean | true/false | Enterprise only | Performance feature |
 | **queryAccelerationMaxScaleFactor** | Integer | 0-100 | Requires acceleration enabled | Conditional |
@@ -336,7 +336,7 @@ CREATE OR REPLACE WAREHOUSE IF NOT EXISTS invalid_warehouse;
 - **Test 6.2**: Multi-cluster with min/max cluster counts
 - **Test 6.3**: Scaling policy configuration (STANDARD, ECONOMY)
 - **Test 6.4**: Validation: minClusterCount ≤ maxClusterCount constraint
-- **Test 6.5**: Validation: Cluster count range validation (1-10)
+- **Test 6.5**: Validation: Cluster count range validation (1-100)
 - **Test 6.6**: Edition requirement validation (Enterprise Edition)
 - **Test 6.7**: SQL Generation: Verify multi-cluster SQL format
 

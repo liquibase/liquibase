@@ -11,7 +11,7 @@ OBJECT_TYPE: "Schema"
 OPERATION: "ALTER"
 ESTIMATED_TIME: "5-6 hours"
 COMPLEXITY: "MEDIUM"
-ATTRIBUTES_COUNT: 21
+ATTRIBUTES_COUNT: 30
 OPERATION_GROUPS: 3
 PRIORITY: "READY"
 ```
@@ -34,6 +34,19 @@ VALIDATION: "Mutual exclusivity + property constraints"
 ```
 
 ## 📋 CORE IMPLEMENTATION REQUIREMENTS
+
+### 🏗️ Liquibase Architectural Mapping
+```yaml
+CRITICAL_UNDERSTANDING: "Snowflake DATABASE maps to Liquibase CATALOG"
+SNOWFLAKE_HIERARCHY: "DATABASE.SCHEMA.OBJECT"
+LIQUIBASE_HIERARCHY: "CATALOG.SCHEMA.OBJECT"
+ATTRIBUTE_MAPPING: "Use catalogName (not databaseName) for parent database context"
+```
+
+**Context Clarification**:
+- **Schema Operations**: Use `catalogName` to specify the parent database
+- **Database Operations**: Use `databaseName` to specify the database being created/modified
+- **Implementation**: Java classes use `catalogName` for consistency with Liquibase architecture
 
 ### Documentation Reference
 ```yaml
@@ -99,7 +112,7 @@ ENUM_VALIDATION: "LOG_LEVEL, TRACE_LEVEL, warehouse sizes have specific values"
 |-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
 | **schemaName** | String | Required | N/A | Valid identifier | Must exist | None | HIGH | Primary schema identifier |
 | **ifExists** | Boolean | Optional | false | true/false | None | None | MEDIUM | Error prevention for non-existent schemas |
-| **databaseName** | String | Optional | Current DB | Valid identifier | Must exist | None | MEDIUM | Schema location specification |
+| **catalogName** | String | Optional | Current DB | Valid identifier | Must exist | None | MEDIUM | Parent database name (Liquibase maps Snowflake DATABASE → CATALOG) |
 | **operationType** | String | Optional | Detected | RENAME/SET/UNSET/ACCESS | Single operation type | Mutually exclusive | HIGH | Operation type detection |
 
 ### Group 1: RENAME Attributes
@@ -176,7 +189,7 @@ ALTER SCHEMA debug_schema SET
 -- Complete example with all attributes
 ALTER SCHEMA comprehensive_schema SET
   newPipeExecutionPaused = "true"
-  databaseName = "test_db"
+  catalogName = "test_db"
   unsetDataRetentionTimeInDays = "false"
   newDataRetentionTimeInDays = "30"
   newComment = "Updated schema comment"

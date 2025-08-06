@@ -35,6 +35,19 @@ VALIDATION: "CASCADE/RESTRICT mutual exclusivity + session context validation"
 
 ## 📋 CORE IMPLEMENTATION REQUIREMENTS
 
+### 🏗️ Liquibase Architectural Mapping
+```yaml
+CRITICAL_UNDERSTANDING: "Snowflake DATABASE maps to Liquibase CATALOG"
+SNOWFLAKE_HIERARCHY: "DATABASE.SCHEMA.OBJECT"
+LIQUIBASE_HIERARCHY: "CATALOG.SCHEMA.OBJECT"
+ATTRIBUTE_MAPPING: "Use catalogName (not databaseName) for parent database context"
+```
+
+**Context Clarification**:
+- **Schema Operations**: Use `catalogName` to specify the parent database
+- **Database Operations**: Use `databaseName` to specify the database being created/modified
+- **Implementation**: Java classes use `catalogName` for consistency with Liquibase architecture
+
 ### Documentation Reference
 ```yaml
 SOURCE: "https://docs.snowflake.com/en/sql-reference/sql/drop-schema"
@@ -88,7 +101,7 @@ CASE_SENSITIVITY: "Unquoted names converted to uppercase, quoted names preserved
 | Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
 |-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
 | **schemaName** | String | Required | N/A | Valid identifier | Must exist | None | HIGH | Primary schema identifier |
-| **databaseName** | String | Optional | Current DB | Valid identifier | Must exist | None | MEDIUM | Schema location specification |
+| **catalogName** | String | Optional | Current DB | Valid identifier | Must exist | None | MEDIUM | Parent database name (Liquibase maps Snowflake DATABASE → CATALOG) |
 | **cascade** | Boolean | Optional | false | true/false | None | Mutually exclusive with restrict | MEDIUM | Drop with dependent objects |
 | **ifExists** | Boolean | Optional | false | true/false | None | None | MEDIUM | Error prevention for non-existent schemas |
 | **restrict** | Boolean | Optional | false | true/false | None | Mutually exclusive with cascade | MEDIUM | Fail if dependent objects exist |
@@ -142,7 +155,7 @@ DROP SCHEMA IF EXISTS database_name.schema_name CASCADE;
 ```sql
 -- Complete example with all attributes
 DROP SCHEMA IF EXISTS comprehensive_schema CASCADE
-  databaseName = "test_db"
+  catalogName = "test_db"
   cascade = "true"
   ifExists = "true"
   restrict = "false"

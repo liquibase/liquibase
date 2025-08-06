@@ -11,7 +11,7 @@ OBJECT_TYPE: "Schema"
 OPERATION: "CREATE"
 ESTIMATED_TIME: "5-6 hours"
 COMPLEXITY: "MEDIUM"
-ATTRIBUTES_COUNT: 18
+ATTRIBUTES_COUNT: 23
 PRIORITY: "READY"
 ```
 
@@ -34,6 +34,19 @@ VALIDATION: "Mutual exclusivity + transient constraints + cloning validation"
 ```
 
 ## 📋 CORE IMPLEMENTATION REQUIREMENTS
+
+### 🏗️ Liquibase Architectural Mapping
+```yaml
+CRITICAL_UNDERSTANDING: "Snowflake DATABASE maps to Liquibase CATALOG"
+SNOWFLAKE_HIERARCHY: "DATABASE.SCHEMA.OBJECT"
+LIQUIBASE_HIERARCHY: "CATALOG.SCHEMA.OBJECT"
+ATTRIBUTE_MAPPING: "Use catalogName (not databaseName) for parent database context"
+```
+
+**Context Clarification**:
+- **Schema Operations**: Use `catalogName` to specify the parent database
+- **Database Operations**: Use `databaseName` to specify the database being created/modified
+- **Implementation**: Java classes use `catalogName` for consistency with Liquibase architecture
 
 ### Documentation Reference
 ```yaml
@@ -96,7 +109,7 @@ CREATE [OR REPLACE] [TRANSIENT] SCHEMA [IF NOT EXISTS] schema_name
 | Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
 |-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
 | **schemaName** | String | Required | N/A | Valid identifier | Must be unique | None | HIGH | Primary schema identifier |
-| **databaseName** | String | Optional | Current DB | Valid identifier | Must exist | None | MEDIUM | Schema location specification |
+| **catalogName** | String | Optional | Current DB | Valid identifier | Must exist | None | MEDIUM | Parent database name (Liquibase maps Snowflake DATABASE → CATALOG) |
 | **orReplace** | Boolean | Optional | false | true/false | None | Mutually exclusive with ifNotExists | MEDIUM | Replace existing schema |
 | **ifNotExists** | Boolean | Optional | false | true/false | None | Mutually exclusive with orReplace | MEDIUM | Idempotent creation |
 | **transient** | Boolean | Optional | false | true/false | Forces dataRetentionTimeInDays = 0 | None | MEDIUM | No Time Travel schema |
@@ -105,6 +118,7 @@ CREATE [OR REPLACE] [TRANSIENT] SCHEMA [IF NOT EXISTS] schema_name
 | Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
 |-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
 | **cloneFrom** | String | Optional | N/A | Existing schema | Must exist | None | LOW | Zero-copy clone source |
+| **fromSchema** | String | Optional | N/A | Existing schema | Must exist | Alias for cloneFrom | LOW | Clone source (alias for cloneFrom) |
 
 ### Time Travel and Storage Attributes
 | Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
@@ -116,6 +130,7 @@ CREATE [OR REPLACE] [TRANSIENT] SCHEMA [IF NOT EXISTS] schema_name
 | Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
 |-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
 | **managedAccess** | Boolean | Optional | false | true/false | None | None | MEDIUM | Centralized privilege management |
+| **managed** | Boolean | Optional | false | true/false | None | Alias for managedAccess | MEDIUM | Managed access control (alias for managedAccess) |
 | **defaultDdlCollation** | String | Optional | Database default | Valid collation | Must be valid | None | LOW | String handling collation |
 | **comment** | String | Optional | N/A | String ≤256 chars | Length limit | None | LOW | Schema description |
 | **pipeExecutionPaused** | Boolean | Optional | false | true/false | None | None | LOW | Pipeline control |
@@ -202,10 +217,12 @@ CREATE SCHEMA enterprise_schema
 -- Complete example with all attributes
 CREATE SCHEMA comprehensive_schema WITH
   pipeExecutionPaused = "false"
-  databaseName = "test_db"
+  catalogName = "test_db"
   externalVolume = "external_vol"
   catalog = "test_catalog"
   cloneFrom = "source_schema"
+  fromSchema = "source_schema"
+  managed = "true"
   maxDataExtensionTimeInDays = "90"
   replaceInvalidCharacters = "true"
   schemaName = "test_schema"

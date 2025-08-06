@@ -13,6 +13,7 @@ OBJECT_TYPE: "Table"
 OPERATION: "DROP"
 NEXT_PHASE: "Phase 3 - TDD Implementation (ai_workflow_guide.md)"
 ESTIMATED_IMPLEMENTATION_TIME: "4-5 hours"
+ATTRIBUTES_COUNT: 4
 ```
 ---
 

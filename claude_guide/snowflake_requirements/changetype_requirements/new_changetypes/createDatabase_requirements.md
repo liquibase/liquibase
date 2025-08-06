@@ -11,7 +11,7 @@ OBJECT_TYPE: "Database"
 OPERATION: "CREATE"
 ESTIMATED_TIME: "6-8 hours"
 COMPLEXITY: "HIGH"
-ATTRIBUTES_COUNT: 7
+ATTRIBUTES_COUNT: 18
 PRIORITY: "READY"
 ```
 
@@ -20,10 +20,13 @@ PRIORITY: "READY"
 ### Core Operation Types
 | Type | SQL Pattern | Key Features | Attributes |
 |------|-------------|--------------|------------|
-| **BASIC** | `CREATE [TRANSIENT] DATABASE name` | Standard creation | 4 core attributes |
+| **BASIC** | `CREATE [TRANSIENT] DATABASE name` | Standard creation | 5 core attributes |
 | **CONDITIONAL** | `CREATE [OR REPLACE\|IF NOT EXISTS] DATABASE` | Safe operations | Mutual exclusivity |
 | **CLONE** | `CREATE DATABASE name CLONE source` | Zero-copy cloning | Point-in-time options |
-| **ADVANCED** | With retention, tasks, collation | Full configuration | 14 total attributes |
+| **FROM_SHARE** | `CREATE DATABASE name FROM SHARE provider.share` | Shared database access | Cross-account sharing |
+| **FROM_LISTING** | `CREATE DATABASE name FROM LISTING 'listing'` | Data marketplace | External data access |
+| **AS_REPLICA** | `CREATE DATABASE name AS REPLICA OF account.db` | Replication setup | Multi-account replication |
+| **ADVANCED** | With retention, catalog, external volume | Full configuration | 18 total attributes |
 
 ### Quick Implementation Pattern
 ```yaml
@@ -90,16 +93,45 @@ CREATE [OR REPLACE] [TRANSIENT] DATABASE [IF NOT EXISTS] database_name
 
 ## 📊 COMPREHENSIVE_ATTRIBUTE_ANALYSIS
 
-### Core Attributes
+### Core Attributes (All Operations)
 | Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
 |-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
 | **databaseName** | String | Required | N/A | Valid identifier | Must be unique | None | HIGH | Primary database identifier |
-| **defaultDdlCollation** | String | Optional | System default | Valid collation | Must be valid | None | LOW | Default collation for objects |
-| **transient** | Boolean | Optional | false | true/false | Forces dataRetentionTimeInDays = 0 | None | MEDIUM | No Time Travel database |
 | **orReplace** | Boolean | Optional | false | true/false | None | Mutually exclusive with ifNotExists | MEDIUM | Replace existing database |
 | **ifNotExists** | Boolean | Optional | false | true/false | None | Mutually exclusive with orReplace | MEDIUM | Idempotent creation |
+| **transient** | Boolean | Optional | false | true/false | Forces dataRetentionTimeInDays = 0 | None | MEDIUM | No Fail-safe database |
+| **comment** | String | Optional | null | String ≤256 chars | Length limit | None | LOW | Database description |
+
+### Standard Database Creation Attributes
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
 | **dataRetentionTimeInDays** | Integer | Optional | 1 | 0-90 | Must be 0 if transient, ≤ maxDataExtension | None | MEDIUM | Time Travel retention period |
 | **maxDataExtensionTimeInDays** | Integer | Optional | 14 | 0-90 | ≥ dataRetention | None | LOW | Maximum Time Travel extension |
+| **externalVolume** | String | Optional | null | Valid volume name | Volume must exist | None | MEDIUM | External storage volume |
+| **catalog** | String | Optional | null | Valid catalog integration | Integration must exist | None | MEDIUM | Catalog integration name |
+| **replaceInvalidCharacters** | Boolean | Optional | false | true/false | None | None | LOW | Character replacement policy |
+| **defaultDdlCollation** | String | Optional | System default | Valid collation | Must be valid | None | LOW | Default collation for objects |
+| **storageSerializationPolicy** | String | Optional | COMPATIBLE | COMPATIBLE/OPTIMIZED | Must be valid option | None | MEDIUM | Storage serialization policy |
+| **catalogSync** | String | Optional | null | Valid integration name | Integration must exist | None | MEDIUM | Catalog sync integration |
+| **catalogSyncNamespaceMode** | String | Optional | NEST | NEST/FLATTEN | Must be valid option | None | LOW | Namespace handling mode |
+| **catalogSyncNamespaceFlattenDelimiter** | String | Optional | null | Valid delimiter | Required if FLATTEN mode | None | LOW | Flatten delimiter |
+| **tags** | Map | Optional | empty | Key-value pairs | Valid tag names | None | LOW | Database metadata tags |
+| **contact** | Map | Optional | empty | Purpose-contact pairs | Valid contact info | None | LOW | Database contact information |
+
+### Clone Operation Attributes
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **cloneFrom** | String | Optional | null | Valid database name | Source must exist | Exclusive with share/listing/replica | MEDIUM | Source database for cloning |
+| **cloneAt** | String | Optional | null | TIMESTAMP/OFFSET/STATEMENT | Valid time travel syntax | Only with cloneFrom | LOW | Point-in-time cloning |
+| **ignoreTablesWithInsufficientDataRetention** | Boolean | Optional | false | true/false | Only with cloneFrom | Only with cloneFrom | LOW | Skip tables without retention |
+| **ignoreHybridTables** | Boolean | Optional | false | true/false | Only with cloneFrom | Only with cloneFrom | LOW | Skip hybrid tables |
+
+### Share/Listing/Replica Attributes
+| Attribute | DataType | Required/Optional | Default | ValidValues | Constraints | MutualExclusivity | Priority | Notes |
+|-----------|----------|-------------------|---------|-------------|-------------|-------------------|----------|-------|
+| **fromShare** | String | Optional | null | provider.share format | Valid share identifier | Exclusive with clone/listing/replica | MEDIUM | Shared database source |
+| **fromListing** | String | Optional | null | Valid listing name | Listing must exist | Exclusive with clone/share/replica | MEDIUM | Data marketplace listing |
+| **asReplicaOf** | String | Optional | null | account.database format | Valid account/database | Exclusive with clone/share/listing | MEDIUM | Replication source database |
 
 
 ### Mutual Exclusivity Rules

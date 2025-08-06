@@ -9,6 +9,7 @@ SNOWFLAKE_DOCS: "https://docs.snowflake.com/en/sql-reference/sql/create-file-for
 VALIDATION_SOURCE: "INFORMATION_SCHEMA.FILE_FORMATS + Manual Documentation Review"
 LAST_UPDATED: "2025-08-03"
 STATUS: "READY_FOR_IMPLEMENTATION"
+ATTRIBUTES_COUNT: 17
 ```
 
 ## QUICK_ACCESS
