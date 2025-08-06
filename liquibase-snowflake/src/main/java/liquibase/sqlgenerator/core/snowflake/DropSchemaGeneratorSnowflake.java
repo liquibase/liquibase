@@ -45,7 +45,12 @@ public class DropSchemaGeneratorSnowflake extends AbstractSqlGenerator<DropSchem
             sql.append("IF EXISTS ");
         }
         
-        sql.append(database.escapeObjectName(statement.getSchemaName(), Table.class));
+        // For schema operations, only qualify with database if catalogName is explicitly provided
+        if (statement.getCatalogName() != null && !statement.getCatalogName().isEmpty()) {
+            sql.append(database.escapeObjectName(statement.getCatalogName(), null, statement.getSchemaName(), Table.class));
+        } else {
+            sql.append(database.escapeObjectName(statement.getSchemaName(), Table.class));
+        }
         
         if (statement.getCascade() != null && statement.getCascade()) {
             sql.append(" CASCADE");

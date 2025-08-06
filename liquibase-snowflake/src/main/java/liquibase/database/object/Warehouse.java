@@ -125,15 +125,20 @@ public class Warehouse extends AbstractDatabaseObject {
 
     public void setSize(String size) {
         if (size != null) {
-            size = size.toUpperCase();
-            if (!VALID_SIZES.contains(size)) {
+            String upperSize = size.toUpperCase();
+            // Normalize for validation (remove hyphens for comparison)
+            String normalizedSize = upperSize.replace("-", "");
+            if (!VALID_SIZES.contains(normalizedSize)) {
                 throw new IllegalArgumentException(
                     "Invalid warehouse size: " + size + 
                     ". Valid sizes are: " + VALID_SIZES
                 );
             }
+            // Store the original format from Snowflake
+            this.size = upperSize;
+        } else {
+            this.size = size;
         }
-        this.size = size;
     }
 
     public Integer getMinClusterCount() {

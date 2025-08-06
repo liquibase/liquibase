@@ -20,7 +20,7 @@ public class AlterSchemaChange extends AbstractChange {
 
     private String operationType; // Enhanced: explicit operation type
     private String schemaName;
-    private String databaseName;
+    private String catalogName;
     private Boolean ifExists;
     private String newName;
     private String newDataRetentionTimeInDays;
@@ -48,14 +48,15 @@ public class AlterSchemaChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(description = "Description for databaseName")
-    public String getDatabaseName() {
-        return databaseName;
+    @DatabaseChangeProperty(description = "Catalog (database) name")
+    public String getCatalogName() {
+        return catalogName;
     }
 
-    public void setDatabaseName(String databaseName) {
-        this.databaseName = databaseName;
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
     }
+
 
     @DatabaseChangeProperty(description = "Only alter if schema exists")
     public Boolean getIfExists() {
@@ -196,7 +197,10 @@ public class AlterSchemaChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) {
         AlterSchemaStatement statement = new AlterSchemaStatement();
         statement.setSchemaName(getSchemaName());
-        statement.setDatabaseName(getDatabaseName());
+        // Use catalogName for database qualification
+        if (getCatalogName() != null) {
+            statement.setCatalog(getCatalogName());
+        }
         statement.setIfExists(getIfExists());
         statement.setNewName(getNewName());
         statement.setNewDataRetentionTimeInDays(getNewDataRetentionTimeInDays());

@@ -1,3 +1,4 @@
+liquibase.snapshot.jvm.AccountSnapshotGeneratorSnowflake
 liquibase.snapshot.jvm.DatabaseSnapshotGeneratorSnowflake
 liquibase.snapshot.jvm.FileFormatSnapshotGeneratorSnowflake
 liquibase.snapshot.SchemaSnapshotGenerator

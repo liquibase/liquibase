@@ -22,19 +22,34 @@ public class FileFormat extends AbstractDatabaseObject {
     // CSV-specific properties
     private String recordDelimiter;
     private String fieldDelimiter;
-    private String quoteCharacter;
-    private String escapeCharacter;
+    private String fieldOptionallyEnclosedBy;  // Requirements: FIELD_OPTIONALLY_ENCLOSED_BY
+    private String escape;  // Requirements: ESCAPE
+    private String escapeUnenclosedField;  // Requirements: ESCAPE_UNENCLOSED_FIELD
     private Integer skipHeader;
     private Boolean skipBlankLines;
     private Boolean trimSpace;
     private Boolean emptyFieldAsNull;
     private Boolean errorOnColumnCountMismatch;
+    private Boolean multiLine;  // Requirements: MULTI_LINE
+    private Boolean parseHeader;  // Requirements: PARSE_HEADER
     
     // Format properties
     private String dateFormat;
+    private String timeFormat;  // Requirements: TIME_FORMAT
     private String timestampFormat;
     private String binaryFormat;  // HEX, BASE64
     private String nullIf;
+    
+    // Additional properties from requirements
+    // validateUtf8 removed - not available in Snowflake INFORMATION_SCHEMA.FILE_FORMATS
+    private Boolean replaceInvalidCharacters;  // Requirements: REPLACE_INVALID_CHARACTERS
+    private Boolean skipByteOrderMark;  // Requirements: SKIP_BYTE_ORDER_MARK
+    private String encoding;  // Requirements: ENCODING
+    private String fileExtension;  // Requirements: FILE_EXTENSION
+    
+    // Backward compatibility - keep these for existing tests
+    private String quoteCharacter;  // Maps to fieldOptionallyEnclosedBy
+    private String escapeCharacter;  // Maps to escape
 
     public FileFormat() {
         super();
@@ -213,6 +228,100 @@ public class FileFormat extends AbstractDatabaseObject {
     
     public FileFormat setNullIf(String nullIf) {
         this.nullIf = nullIf;
+        return this;
+    }
+    
+    // Additional properties from requirements - getters and setters
+    
+    public String getFieldOptionallyEnclosedBy() {
+        return fieldOptionallyEnclosedBy;
+    }
+    
+    public FileFormat setFieldOptionallyEnclosedBy(String fieldOptionallyEnclosedBy) {
+        this.fieldOptionallyEnclosedBy = fieldOptionallyEnclosedBy;
+        return this;
+    }
+    
+    public String getEscape() {
+        return escape;
+    }
+    
+    public FileFormat setEscape(String escape) {
+        this.escape = escape;
+        return this;
+    }
+    
+    public String getEscapeUnenclosedField() {
+        return escapeUnenclosedField;
+    }
+    
+    public FileFormat setEscapeUnenclosedField(String escapeUnenclosedField) {
+        this.escapeUnenclosedField = escapeUnenclosedField;
+        return this;
+    }
+    
+    public Boolean getMultiLine() {
+        return multiLine;
+    }
+    
+    public FileFormat setMultiLine(Boolean multiLine) {
+        this.multiLine = multiLine;
+        return this;
+    }
+    
+    public Boolean getParseHeader() {
+        return parseHeader;
+    }
+    
+    public FileFormat setParseHeader(Boolean parseHeader) {
+        this.parseHeader = parseHeader;
+        return this;
+    }
+    
+    public String getTimeFormat() {
+        return timeFormat;
+    }
+    
+    public FileFormat setTimeFormat(String timeFormat) {
+        this.timeFormat = timeFormat;
+        return this;
+    }
+    
+    // validateUtf8 getter/setter removed - not available in Snowflake INFORMATION_SCHEMA.FILE_FORMATS
+    
+    public Boolean getReplaceInvalidCharacters() {
+        return replaceInvalidCharacters;
+    }
+    
+    public FileFormat setReplaceInvalidCharacters(Boolean replaceInvalidCharacters) {
+        this.replaceInvalidCharacters = replaceInvalidCharacters;
+        return this;
+    }
+    
+    public Boolean getSkipByteOrderMark() {
+        return skipByteOrderMark;
+    }
+    
+    public FileFormat setSkipByteOrderMark(Boolean skipByteOrderMark) {
+        this.skipByteOrderMark = skipByteOrderMark;
+        return this;
+    }
+    
+    public String getEncoding() {
+        return encoding;
+    }
+    
+    public FileFormat setEncoding(String encoding) {
+        this.encoding = encoding;
+        return this;
+    }
+    
+    public String getFileExtension() {
+        return fileExtension;
+    }
+    
+    public FileFormat setFileExtension(String fileExtension) {
+        this.fileExtension = fileExtension;
         return this;
     }
 

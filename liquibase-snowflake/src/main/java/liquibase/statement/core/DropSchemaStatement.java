@@ -5,7 +5,7 @@ import liquibase.statement.AbstractSqlStatement;
 public class DropSchemaStatement extends AbstractSqlStatement {
     
     private String schemaName;
-    private String databaseName;
+    private String catalogName;
     private Boolean ifExists;
     private Boolean cascade;
     private Boolean restrict;
@@ -18,12 +18,16 @@ public class DropSchemaStatement extends AbstractSqlStatement {
         this.schemaName = schemaName;
     }
 
-    public String getDatabaseName() {
-        return databaseName;
+    public String getCatalogName() {
+        return catalogName;
     }
 
-    public void setDatabaseName(String databaseName) {
-        this.databaseName = databaseName;
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
+
+    public void setCatalog(String catalog) {
+        this.catalogName = catalog;
     }
 
     public Boolean getIfExists() {

@@ -1,3 +1,4 @@
+liquibase.diff.output.AccountComparator
 liquibase.diff.output.DatabaseComparator
 liquibase.diff.output.FileFormatComparator
 liquibase.diff.output.SchemaComparator

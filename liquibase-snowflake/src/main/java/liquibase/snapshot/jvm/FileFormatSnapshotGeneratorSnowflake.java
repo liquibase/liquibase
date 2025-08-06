@@ -48,24 +48,30 @@ public class FileFormatSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator 
         try {
             JdbcConnection connection = (JdbcConnection) database.getConnection();
             
-            // Query INFORMATION_SCHEMA.FILE_FORMATS
+            // Query INFORMATION_SCHEMA.FILE_FORMATS - Actual columns verified against real Snowflake
             String sql = "SELECT " +
+                "FILE_FORMAT_CATALOG, " +
+                "FILE_FORMAT_SCHEMA, " +
                 "FILE_FORMAT_NAME, " +
+                "FILE_FORMAT_OWNER, " +
                 "FILE_FORMAT_TYPE, " +
                 "RECORD_DELIMITER, " +
                 "FIELD_DELIMITER, " +
-                "QUOTE_CHARACTER, " +
-                "ESCAPE_CHARACTER, " +
+                "SKIP_HEADER, " +
                 "DATE_FORMAT, " +
+                "TIME_FORMAT, " +
                 "TIMESTAMP_FORMAT, " +
                 "BINARY_FORMAT, " +
-                "COMPRESSION, " +
-                "NULL_IF, " +
-                "SKIP_HEADER, " +
-                "SKIP_BLANK_LINES, " +
+                "ESCAPE, " +
+                "ESCAPE_UNENCLOSED_FIELD, " +
                 "TRIM_SPACE, " +
+                "FIELD_OPTIONALLY_ENCLOSED_BY, " +
+                "NULL_IF, " +
+                "COMPRESSION, " +
                 "ERROR_ON_COLUMN_COUNT_MISMATCH, " +
-                "EMPTY_FIELD_AS_NULL " +
+                "CREATED, " +
+                "LAST_ALTERED, " +
+                "COMMENT " +
                 "FROM INFORMATION_SCHEMA.FILE_FORMATS " +
                 "WHERE FILE_FORMAT_NAME = ?" +
                 (schema != null ? " AND FILE_FORMAT_SCHEMA = ?" : "");
@@ -85,27 +91,25 @@ public class FileFormatSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator 
                         returnFormat.setName(rs.getString("FILE_FORMAT_NAME"));
                         returnFormat.setSchema(schema);
                         
-                        // Set all properties from INFORMATION_SCHEMA
+                        // Set all properties from INFORMATION_SCHEMA per requirements
                         returnFormat.setFormatType(rs.getString("FILE_FORMAT_TYPE"));
                         returnFormat.setRecordDelimiter(rs.getString("RECORD_DELIMITER"));
                         returnFormat.setFieldDelimiter(rs.getString("FIELD_DELIMITER"));
-                        returnFormat.setQuoteCharacter(rs.getString("QUOTE_CHARACTER"));
-                        returnFormat.setEscapeCharacter(rs.getString("ESCAPE_CHARACTER"));
                         returnFormat.setDateFormat(rs.getString("DATE_FORMAT"));
+                        returnFormat.setTimeFormat(rs.getString("TIME_FORMAT"));
                         returnFormat.setTimestampFormat(rs.getString("TIMESTAMP_FORMAT"));
                         returnFormat.setBinaryFormat(rs.getString("BINARY_FORMAT"));
                         returnFormat.setCompression(rs.getString("COMPRESSION"));
                         returnFormat.setNullIf(rs.getString("NULL_IF"));
+                        // Properties verified to exist in Snowflake INFORMATION_SCHEMA
+                        returnFormat.setEscape(rs.getString("ESCAPE"));
+                        returnFormat.setEscapeUnenclosedField(rs.getString("ESCAPE_UNENCLOSED_FIELD"));
+                        returnFormat.setFieldOptionallyEnclosedBy(rs.getString("FIELD_OPTIONALLY_ENCLOSED_BY"));
                         
                         // Handle integer and boolean fields
                         int skipHeader = rs.getInt("SKIP_HEADER");
                         if (!rs.wasNull()) {
                             returnFormat.setSkipHeader(skipHeader);
-                        }
-                        
-                        String skipBlankLines = rs.getString("SKIP_BLANK_LINES");
-                        if (skipBlankLines != null) {
-                            returnFormat.setSkipBlankLines("TRUE".equalsIgnoreCase(skipBlankLines));
                         }
                         
                         String trimSpace = rs.getString("TRIM_SPACE");
@@ -118,10 +122,10 @@ public class FileFormatSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator 
                             returnFormat.setErrorOnColumnCountMismatch("TRUE".equalsIgnoreCase(errorOnColumnCountMismatch));
                         }
                         
-                        String emptyFieldAsNull = rs.getString("EMPTY_FIELD_AS_NULL");
-                        if (emptyFieldAsNull != null) {
-                            returnFormat.setEmptyFieldAsNull("TRUE".equalsIgnoreCase(emptyFieldAsNull));
-                        }
+                        // Note: The following properties from requirements document don't exist in actual Snowflake:
+                        // VALIDATE_UTF8, SKIP_BLANK_LINES, REPLACE_INVALID_CHARACTERS, EMPTY_FIELD_AS_NULL,
+                        // SKIP_BYTE_ORDER_MARK, ENCODING, MULTI_LINE, PARSE_HEADER, FILE_EXTENSION
+                        // These remain as object properties for potential future Snowflake versions
                         
                         return returnFormat;
                     } else {
@@ -146,24 +150,30 @@ public class FileFormatSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator 
         try {
             JdbcConnection connection = (JdbcConnection) database.getConnection();
             
-            // Query all FileFormats in the schema
+            // Query all FileFormats in the schema - Using only verified columns from corrected requirements
             String sql = "SELECT " +
+                "FILE_FORMAT_CATALOG, " +
+                "FILE_FORMAT_SCHEMA, " +
                 "FILE_FORMAT_NAME, " +
+                "FILE_FORMAT_OWNER, " +
                 "FILE_FORMAT_TYPE, " +
                 "RECORD_DELIMITER, " +
                 "FIELD_DELIMITER, " +
-                "QUOTE_CHARACTER, " +
-                "ESCAPE_CHARACTER, " +
+                "SKIP_HEADER, " +
                 "DATE_FORMAT, " +
+                "TIME_FORMAT, " +
                 "TIMESTAMP_FORMAT, " +
                 "BINARY_FORMAT, " +
-                "COMPRESSION, " +
-                "NULL_IF, " +
-                "SKIP_HEADER, " +
-                "SKIP_BLANK_LINES, " +
+                "ESCAPE, " +
+                "ESCAPE_UNENCLOSED_FIELD, " +
                 "TRIM_SPACE, " +
+                "FIELD_OPTIONALLY_ENCLOSED_BY, " +
+                "NULL_IF, " +
+                "COMPRESSION, " +
                 "ERROR_ON_COLUMN_COUNT_MISMATCH, " +
-                "EMPTY_FIELD_AS_NULL " +
+                "CREATED, " +
+                "LAST_ALTERED, " +
+                "COMMENT " +
                 "FROM INFORMATION_SCHEMA.FILE_FORMATS " +
                 "WHERE FILE_FORMAT_SCHEMA = ?";
                 
@@ -177,27 +187,26 @@ public class FileFormatSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator 
                         fileFormat.setName(rs.getString("FILE_FORMAT_NAME"));
                         fileFormat.setSchema(schema);
                         
-                        // Set all properties from INFORMATION_SCHEMA
+                        // Set all properties from INFORMATION_SCHEMA - Using verified columns only
                         fileFormat.setFormatType(rs.getString("FILE_FORMAT_TYPE"));
                         fileFormat.setRecordDelimiter(rs.getString("RECORD_DELIMITER"));
                         fileFormat.setFieldDelimiter(rs.getString("FIELD_DELIMITER"));
-                        fileFormat.setQuoteCharacter(rs.getString("QUOTE_CHARACTER"));
-                        fileFormat.setEscapeCharacter(rs.getString("ESCAPE_CHARACTER"));
                         fileFormat.setDateFormat(rs.getString("DATE_FORMAT"));
+                        fileFormat.setTimeFormat(rs.getString("TIME_FORMAT"));
                         fileFormat.setTimestampFormat(rs.getString("TIMESTAMP_FORMAT"));
                         fileFormat.setBinaryFormat(rs.getString("BINARY_FORMAT"));
                         fileFormat.setCompression(rs.getString("COMPRESSION"));
                         fileFormat.setNullIf(rs.getString("NULL_IF"));
                         
+                        // Properties verified to exist in Snowflake INFORMATION_SCHEMA
+                        fileFormat.setEscape(rs.getString("ESCAPE"));
+                        fileFormat.setEscapeUnenclosedField(rs.getString("ESCAPE_UNENCLOSED_FIELD"));
+                        fileFormat.setFieldOptionallyEnclosedBy(rs.getString("FIELD_OPTIONALLY_ENCLOSED_BY"));
+                        
                         // Handle integer and boolean fields
                         int skipHeader = rs.getInt("SKIP_HEADER");
                         if (!rs.wasNull()) {
                             fileFormat.setSkipHeader(skipHeader);
-                        }
-                        
-                        String skipBlankLines = rs.getString("SKIP_BLANK_LINES");
-                        if (skipBlankLines != null) {
-                            fileFormat.setSkipBlankLines("TRUE".equalsIgnoreCase(skipBlankLines));
                         }
                         
                         String trimSpace = rs.getString("TRIM_SPACE");
@@ -210,10 +219,9 @@ public class FileFormatSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator 
                             fileFormat.setErrorOnColumnCountMismatch("TRUE".equalsIgnoreCase(errorOnColumnCountMismatch));
                         }
                         
-                        String emptyFieldAsNull = rs.getString("EMPTY_FIELD_AS_NULL");
-                        if (emptyFieldAsNull != null) {
-                            fileFormat.setEmptyFieldAsNull("TRUE".equalsIgnoreCase(emptyFieldAsNull));
-                        }
+                        // Note: The following phantom properties are not available in real Snowflake INFORMATION_SCHEMA:
+                        // SKIP_BLANK_LINES, EMPTY_FIELD_AS_NULL, QUOTE_CHARACTER, ESCAPE_CHARACTER
+                        // These remain as object properties for potential future Snowflake versions
                         
                         schema.addDatabaseObject(fileFormat);
                     }
