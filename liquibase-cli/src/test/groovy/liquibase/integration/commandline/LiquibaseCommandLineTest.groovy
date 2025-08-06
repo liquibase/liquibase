@@ -353,6 +353,13 @@ Global Options
                                environment variable:
                                'LIQUIBASE_MONITOR_PERFORMANCE')
 
+      --mssql-bytes-per-char=PARAM
+                             Number of bytes needed to store one character
+                               (depends on database's character encoding)
+                             DEFAULT: 1
+                             (defaults file: 'mssql.bytesPerChar', environment
+                               variable: 'MSSQL_BYTES_PER_CHAR')
+
       --on-missing-include-changelog=PARAM
                              If set to WARN, then liquibase will not throw
                                exception on missing changelog file, instead
