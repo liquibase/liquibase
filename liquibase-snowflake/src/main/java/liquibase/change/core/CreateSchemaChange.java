@@ -20,7 +20,7 @@ import liquibase.statement.core.CreateSchemaStatement;
 public class CreateSchemaChange extends AbstractChange {
 
     private String schemaName;
-    private String databaseName;
+    private String catalogName;
     private String comment;
     private String dataRetentionTimeInDays;
     private String maxDataExtensionTimeInDays;
@@ -45,6 +45,15 @@ public class CreateSchemaChange extends AbstractChange {
 
     public void setSchemaName(String schemaName) {
         this.schemaName = schemaName;
+    }
+
+    @DatabaseChangeProperty(description = "Catalog (database) name")
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
     }
 
     @DatabaseChangeProperty(description = "Comment for the schema")
@@ -92,6 +101,16 @@ public class CreateSchemaChange extends AbstractChange {
         this.managedAccess = managedAccess;
     }
 
+    @DatabaseChangeProperty(description = "Whether this is a managed access schema (alias for managedAccess)")
+    public Boolean getManaged() {
+        return this.managedAccess;
+    }
+
+    @DatabaseChangeProperty(description = "Whether this is a managed access schema (alias for managedAccess)")
+    public void setManaged(Boolean managed) {
+        this.managedAccess = managed;
+    }
+
     @DatabaseChangeProperty(description = "Default DDL collation")
     public String getDefaultDdlCollation() {
         return defaultDdlCollation;
@@ -128,14 +147,6 @@ public class CreateSchemaChange extends AbstractChange {
         this.ifNotExists = ifNotExists;
     }
 
-    @DatabaseChangeProperty(description = "Description for databaseName")
-    public String getDatabaseName() {
-        return databaseName;
-    }
-
-    public void setDatabaseName(String databaseName) {
-        this.databaseName = databaseName;
-    }
 
     @DatabaseChangeProperty(description = "Description for externalVolume")
     public String getExternalVolume() {
@@ -162,6 +173,16 @@ public class CreateSchemaChange extends AbstractChange {
 
     public void setCloneFrom(String cloneFrom) {
         this.cloneFrom = cloneFrom;
+    }
+
+    @DatabaseChangeProperty(description = "Schema to clone from (alias for cloneFrom)")
+    public String getFromSchema() {
+        return this.cloneFrom;
+    }
+
+    @DatabaseChangeProperty(description = "Schema to clone from (alias for cloneFrom)")
+    public void setFromSchema(String fromSchema) {
+        this.cloneFrom = fromSchema;
     }
 
     @DatabaseChangeProperty(description = "Description for classificationProfile")
@@ -204,7 +225,11 @@ public class CreateSchemaChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) {
         CreateSchemaStatement statement = new CreateSchemaStatement();
         statement.setSchemaName(getSchemaName());
-        statement.setDatabaseName(getDatabaseName());
+        
+        // Use catalogName for database qualification
+        if (getCatalogName() != null) {
+            statement.setCatalog(getCatalogName());
+        }
         statement.setComment(getComment());
         statement.setDataRetentionTimeInDays(getDataRetentionTimeInDays());
         statement.setMaxDataExtensionTimeInDays(getMaxDataExtensionTimeInDays());

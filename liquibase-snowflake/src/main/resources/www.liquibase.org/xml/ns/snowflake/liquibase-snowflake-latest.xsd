@@ -125,12 +125,14 @@
     <xsd:element name="createSchema">
         <xsd:complexType>
             <xsd:attribute name="schemaName" type="xsd:string" use="required"/>
-            <xsd:attribute name="databaseName" type="xsd:string"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
             <xsd:attribute name="cloneFrom" type="xsd:string"/>
+            <xsd:attribute name="fromSchema" type="xsd:string"/>
             <xsd:attribute name="comment" type="xsd:string"/>
             <xsd:attribute name="dataRetentionTimeInDays" type="xsd:int"/>
             <xsd:attribute name="maxDataExtensionTimeInDays" type="xsd:int"/>
             <xsd:attribute name="transient" type="xsd:boolean"/>
+            <xsd:attribute name="managed" type="xsd:boolean"/>
             <xsd:attribute name="managedAccess" type="xsd:boolean"/>
             <xsd:attribute name="defaultDdlCollation" type="xsd:string"/>
             <xsd:attribute name="tag" type="xsd:string"/>
@@ -148,7 +150,7 @@
     <xsd:element name="alterSchema">
         <xsd:complexType>
             <xsd:attribute name="schemaName" type="xsd:string" use="required"/>
-            <xsd:attribute name="databaseName" type="xsd:string"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
             <xsd:attribute name="ifExists" type="xsd:boolean"/>
             <xsd:attribute name="newName" type="xsd:string"/>
             <xsd:attribute name="newDataRetentionTimeInDays" type="xsd:string"/>
@@ -174,7 +176,7 @@
     <xsd:element name="dropSchema">
         <xsd:complexType>
             <xsd:attribute name="schemaName" type="xsd:string" use="required"/>
-            <xsd:attribute name="databaseName" type="xsd:string"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
             <xsd:attribute name="ifExists" type="xsd:boolean"/>
             <xsd:attribute name="cascade" type="xsd:boolean"/>
             <xsd:attribute name="restrict" type="xsd:boolean"/>
@@ -258,6 +260,18 @@
             <xsd:attribute name="comment" type="xsd:string"/>
             <xsd:attribute name="orReplace" type="xsd:boolean"/>
             <xsd:attribute name="ifNotExists" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="alterSequence">
+        <xsd:complexType>
+            <xsd:attribute name="sequenceName" type="xsd:string" use="required"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="incrementBy" type="xsd:string"/>
+            <xsd:attribute name="setNoOrder" type="xsd:boolean"/>
+            <xsd:attribute name="setComment" type="xsd:string"/>
+            <xsd:attribute name="unsetComment" type="xsd:boolean"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -689,15 +703,41 @@
             <xsd:attribute name="unsetTrimSpace" type="xsd:boolean"/>
             <xsd:attribute name="unsetNullIf" type="xsd:boolean"/>
             <xsd:attribute name="unsetFileExtension" type="xsd:boolean"/>
+            <xsd:attribute name="unsetReplaceInvalidCharacters" type="xsd:boolean"/>
+            
+            <!-- CSV-specific UNSET Operations -->
             <xsd:attribute name="unsetRecordDelimiter" type="xsd:boolean"/>
             <xsd:attribute name="unsetFieldDelimiter" type="xsd:boolean"/>
             <xsd:attribute name="unsetParseHeader" type="xsd:boolean"/>
             <xsd:attribute name="unsetSkipHeader" type="xsd:boolean"/>
+            <xsd:attribute name="unsetSkipBlankLines" type="xsd:boolean"/>
             <xsd:attribute name="unsetEscape" type="xsd:boolean"/>
+            <xsd:attribute name="unsetEscapeUnenclosedField" type="xsd:boolean"/>
             <xsd:attribute name="unsetFieldOptionallyEnclosedBy" type="xsd:boolean"/>
+            <xsd:attribute name="unsetErrorOnColumnCountMismatch" type="xsd:boolean"/>
+            <xsd:attribute name="unsetValidateUtf8" type="xsd:boolean"/>
+            <xsd:attribute name="unsetEmptyFieldAsNull" type="xsd:boolean"/>
+            <xsd:attribute name="unsetSkipByteOrderMark" type="xsd:boolean"/>
+            <xsd:attribute name="unsetEncoding" type="xsd:boolean"/>
+            
+            <!-- JSON-specific UNSET Operations -->
+            <xsd:attribute name="unsetEnableOctal" type="xsd:boolean"/>
+            <xsd:attribute name="unsetAllowDuplicate" type="xsd:boolean"/>
             <xsd:attribute name="unsetStripOuterArray" type="xsd:boolean"/>
             <xsd:attribute name="unsetStripNullValues" type="xsd:boolean"/>
-            <xsd:attribute name="unsetAllowDuplicate" type="xsd:boolean"/>
+            <xsd:attribute name="unsetIgnoreUtf8Errors" type="xsd:boolean"/>
+            
+            <!-- PARQUET-specific UNSET Operations -->
+            <xsd:attribute name="unsetSnappyCompression" type="xsd:boolean"/>
+            <xsd:attribute name="unsetBinaryAsText" type="xsd:boolean"/>
+            <xsd:attribute name="unsetUseLogicalType" type="xsd:boolean"/>
+            <xsd:attribute name="unsetUseVectorizedScanner" type="xsd:boolean"/>
+            
+            <!-- XML-specific UNSET Operations -->
+            <xsd:attribute name="unsetPreserveSpace" type="xsd:boolean"/>
+            <xsd:attribute name="unsetStripOuterElement" type="xsd:boolean"/>
+            <xsd:attribute name="unsetDisableSnowflakeData" type="xsd:boolean"/>
+            <xsd:attribute name="unsetDisableAutoConvert" type="xsd:boolean"/>
         </xsd:complexType>
     </xsd:element>
 
