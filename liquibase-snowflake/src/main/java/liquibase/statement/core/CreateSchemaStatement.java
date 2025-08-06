@@ -5,7 +5,7 @@ import liquibase.statement.AbstractSqlStatement;
 public class CreateSchemaStatement extends AbstractSqlStatement {
     
     private String schemaName;
-    private String databaseName;
+    private String catalogName;
     private String comment;
     private String dataRetentionTimeInDays;
     private String maxDataExtensionTimeInDays;
@@ -16,7 +16,6 @@ public class CreateSchemaStatement extends AbstractSqlStatement {
     private Boolean orReplace;
     private Boolean ifNotExists;
     private String externalVolume;
-    private String catalog;
     private String cloneFrom;
     private String classificationProfile;
     private String tag;
@@ -103,12 +102,16 @@ public class CreateSchemaStatement extends AbstractSqlStatement {
         this.ifNotExists = ifNotExists;
     }
 
-    public String getDatabaseName() {
-        return databaseName;
+    public String getCatalogName() {
+        return catalogName;
     }
 
-    public void setDatabaseName(String databaseName) {
-        this.databaseName = databaseName;
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
+
+    public void setCatalog(String catalog) {
+        this.catalogName = catalog;
     }
 
     public String getExternalVolume() {
@@ -119,13 +122,6 @@ public class CreateSchemaStatement extends AbstractSqlStatement {
         this.externalVolume = externalVolume;
     }
 
-    public String getCatalog() {
-        return catalog;
-    }
-
-    public void setCatalog(String catalog) {
-        this.catalog = catalog;
-    }
 
     public String getCloneFrom() {
         return cloneFrom;
