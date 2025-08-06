@@ -308,4 +308,134 @@ public class CreateTableGeneratorSnowflakeNamespaceTest {
         String sql = sqls[0].toSql();
         assertTrue(sql.contains("ENABLE_SCHEMA_EVOLUTION = TRUE"));
     }
+    
+    // New namespace attributes tests (completed in Phase 2)
+    
+    @Test
+    @DisplayName("Should add comment from namespace attribute")
+    void shouldAddCommentFromNamespaceAttribute() {
+        // Given
+        Map<String, String> attrs = new HashMap<>();
+        attrs.put("comment", "Table with custom comment");
+        SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
+        
+        // When
+        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        
+        // Then
+        assertEquals(1, sqls.length);
+        String sql = sqls[0].toSql();
+        assertTrue(sql.contains("COMMENT = 'Table with custom comment'"));
+    }
+    
+    @Test
+    @DisplayName("Should add tag from namespace attribute")
+    void shouldAddTagFromNamespaceAttribute() {
+        // Given
+        Map<String, String> attrs = new HashMap<>();
+        attrs.put("tag", "production");
+        SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
+        
+        // When
+        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        
+        // Then
+        assertEquals(1, sqls.length);
+        String sql = sqls[0].toSql();
+        assertTrue(sql.contains("TAG (production)"));
+    }
+    
+    @Test
+    @DisplayName("Should add stageFileFormat from namespace attribute")
+    void shouldAddStageFileFormatFromNamespaceAttribute() {
+        // Given
+        Map<String, String> attrs = new HashMap<>();
+        attrs.put("stageFileFormat", "CSV_FORMAT");
+        SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
+        
+        // When
+        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        
+        // Then
+        assertEquals(1, sqls.length);
+        String sql = sqls[0].toSql();
+        assertTrue(sql.contains("STAGE_FILE_FORMAT = CSV_FORMAT"));
+    }
+    
+    @Test
+    @DisplayName("Should add stageCopyOptions from namespace attribute")
+    void shouldAddStageCopyOptionsFromNamespaceAttribute() {
+        // Given
+        Map<String, String> attrs = new HashMap<>();
+        attrs.put("stageCopyOptions", "ON_ERROR = 'CONTINUE'");
+        SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
+        
+        // When
+        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        
+        // Then
+        assertEquals(1, sqls.length);
+        String sql = sqls[0].toSql();
+        assertTrue(sql.contains("STAGE_COPY_OPTIONS = ON_ERROR = 'CONTINUE'"));
+    }
+    
+    @Test
+    @DisplayName("Should combine all new namespace attributes")
+    void shouldCombineAllNewNamespaceAttributes() {
+        // Given
+        Map<String, String> attrs = new HashMap<>();
+        attrs.put("comment", "Production table with all features");
+        attrs.put("tag", "production");
+        attrs.put("stageFileFormat", "JSON_FORMAT");
+        attrs.put("stageCopyOptions", "ON_ERROR = 'SKIP_FILE'");
+        SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
+        
+        // When
+        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        
+        // Then
+        assertEquals(1, sqls.length);
+        String sql = sqls[0].toSql();
+        assertTrue(sql.contains("STAGE_FILE_FORMAT = JSON_FORMAT"));
+        assertTrue(sql.contains("STAGE_COPY_OPTIONS = ON_ERROR = 'SKIP_FILE'"));
+        assertTrue(sql.contains("TAG (production)"));
+        assertTrue(sql.contains("COMMENT = 'Production table with all features'"));
+    }
+    
+    @Test
+    @DisplayName("Should prefer namespace comment over statement comment")
+    void shouldPreferNamespaceCommentOverStatementComment() {
+        // Given - both namespace and statement comments
+        Map<String, String> attrs = new HashMap<>();
+        attrs.put("comment", "Namespace comment wins");
+        SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
+        
+        statement.setRemarks("Statement comment");
+        
+        // When
+        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        
+        // Then - namespace attribute should win
+        assertEquals(1, sqls.length);
+        String sql = sqls[0].toSql();
+        assertTrue(sql.contains("COMMENT = 'Namespace comment wins'"));
+        assertFalse(sql.contains("Statement comment"));
+    }
+    
+    @Test
+    @DisplayName("Should handle special characters in comment")
+    void shouldHandleSpecialCharactersInComment() {
+        // Given
+        Map<String, String> attrs = new HashMap<>();
+        attrs.put("comment", "Comment with 'single' and \"double\" quotes");
+        SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
+        
+        // When
+        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        
+        // Then
+        assertEquals(1, sqls.length);
+        String sql = sqls[0].toSql();
+        assertTrue(sql.contains("COMMENT = 'Comment with ''single'' and \"double\" quotes'"));
+    }
 }

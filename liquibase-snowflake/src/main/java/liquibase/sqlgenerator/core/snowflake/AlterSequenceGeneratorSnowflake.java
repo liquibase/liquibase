@@ -132,6 +132,12 @@ public class AlterSequenceGeneratorSnowflake extends AlterSequenceGenerator {
                 setBuilder.append("ORDER");
             } else {
                 setBuilder.append("NOORDER");
+                
+                // Add irreversibility warning for NOORDER operation
+                System.out.println("⚠️  WARNING: IRREVERSIBLE OPERATION - ALTER SEQUENCE " + statement.getSequenceName() + 
+                    " SET NOORDER cannot be undone. Once a sequence is changed to NOORDER, " +
+                    "it cannot return to ORDER mode. This operation improves concurrency " +
+                    "but permanently removes ordering guarantees.");
             }
             hasSetOperations = true;
         }
@@ -144,6 +150,12 @@ public class AlterSequenceGeneratorSnowflake extends AlterSequenceGenerator {
                 if (hasSetOperations) setBuilder.append(", ");
                 setBuilder.append("NOORDER");
                 hasSetOperations = true;
+                
+                // Add irreversibility warning for NOORDER operation
+                System.out.println("⚠️  WARNING: IRREVERSIBLE OPERATION - ALTER SEQUENCE " + statement.getSequenceName() + 
+                    " SET NOORDER cannot be undone. Once a sequence is changed to NOORDER, " +
+                    "it cannot return to ORDER mode. This operation improves concurrency " +
+                    "but permanently removes ordering guarantees.");
             }
             
             // Check for setComment

@@ -338,6 +338,14 @@ public class SnowflakeRequirementsAlignmentTest {
             return true;
         }
         
+        // Filter out tag names and placeholder values from SQL examples
+        // These appear in TAG clauses but are not Java attributes
+        if (attribute.equals("cost_center") || attribute.equals("department") || 
+            attribute.equals("tag_name") || attribute.equals("tag_value") ||
+            attribute.equals("empty") || attribute.equals("value")) {
+            return true;
+        }
+        
         return false;
     }
 }

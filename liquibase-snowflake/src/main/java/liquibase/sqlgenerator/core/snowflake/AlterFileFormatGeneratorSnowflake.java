@@ -94,9 +94,12 @@ public class AlterFileFormatGeneratorSnowflake extends AbstractSqlGenerator<Alte
         if (statement.getNewFileFormatType() != null) {
             sql.append(" TYPE = ").append(statement.getNewFileFormatType());
             hasOptions = true;
+            
+            // If format type is changing, automatically unset format-specific options
+            hasOptions = addFormatTypeChangeUnsetOptions(statement, sql, hasOptions);
         }
         
-        // Add format options
+        // Add common format options
         hasOptions = addOption(sql, hasOptions, "COMPRESSION", statement.getCompression(), false);
         hasOptions = addOption(sql, hasOptions, "DATE_FORMAT", statement.getDateFormat(), true);
         hasOptions = addOption(sql, hasOptions, "TIME_FORMAT", statement.getTimeFormat(), true);
@@ -105,12 +108,45 @@ public class AlterFileFormatGeneratorSnowflake extends AbstractSqlGenerator<Alte
         hasOptions = addOption(sql, hasOptions, "TRIM_SPACE", statement.getTrimSpace(), false);
         hasOptions = addOption(sql, hasOptions, "REPLACE_INVALID_CHARACTERS", statement.getReplaceInvalidCharacters(), false);
         hasOptions = addOption(sql, hasOptions, "FILE_EXTENSION", statement.getFileExtension(), true);
+        
+        // Add CSV-specific options
+        hasOptions = addOption(sql, hasOptions, "RECORD_DELIMITER", statement.getRecordDelimiter(), true);
         hasOptions = addOption(sql, hasOptions, "FIELD_DELIMITER", statement.getFieldDelimiter(), true);
+        hasOptions = addOption(sql, hasOptions, "PARSE_HEADER", statement.getParseHeader(), false);
         hasOptions = addOption(sql, hasOptions, "SKIP_HEADER", statement.getSkipHeader(), false);
+        hasOptions = addOption(sql, hasOptions, "SKIP_BLANK_LINES", statement.getSkipBlankLines(), false);
+        hasOptions = addOption(sql, hasOptions, "ESCAPE", statement.getEscape(), true);
+        hasOptions = addOption(sql, hasOptions, "ESCAPE_UNENCLOSED_FIELD", statement.getEscapeUnenclosedField(), true);
+        hasOptions = addOption(sql, hasOptions, "FIELD_OPTIONALLY_ENCLOSED_BY", statement.getFieldOptionallyEnclosedBy(), true);
+        hasOptions = addOption(sql, hasOptions, "ERROR_ON_COLUMN_COUNT_MISMATCH", statement.getErrorOnColumnCountMismatch(), false);
+        // VALIDATE_UTF8 removed - not available in Snowflake INFORMATION_SCHEMA.FILE_FORMATS
+        hasOptions = addOption(sql, hasOptions, "EMPTY_FIELD_AS_NULL", statement.getEmptyFieldAsNull(), false);
+        hasOptions = addOption(sql, hasOptions, "SKIP_BYTE_ORDER_MARK", statement.getSkipByteOrderMark(), false);
+        hasOptions = addOption(sql, hasOptions, "ENCODING", statement.getEncoding(), true);
+        
+        // Add JSON-specific options
+        hasOptions = addOption(sql, hasOptions, "ENABLE_OCTAL", statement.getEnableOctal(), false);
+        hasOptions = addOption(sql, hasOptions, "ALLOW_DUPLICATE", statement.getAllowDuplicate(), false);
+        hasOptions = addOption(sql, hasOptions, "STRIP_OUTER_ARRAY", statement.getStripOuterArray(), false);
+        hasOptions = addOption(sql, hasOptions, "STRIP_NULL_VALUES", statement.getStripNullValues(), false);
+        hasOptions = addOption(sql, hasOptions, "IGNORE_UTF8_ERRORS", statement.getIgnoreUtf8Errors(), false);
+        
+        // Add PARQUET-specific options
+        hasOptions = addOption(sql, hasOptions, "SNAPPY_COMPRESSION", statement.getSnappyCompression(), false);
+        hasOptions = addOption(sql, hasOptions, "BINARY_AS_TEXT", statement.getBinaryAsText(), false);
+        hasOptions = addOption(sql, hasOptions, "USE_LOGICAL_TYPE", statement.getUseLogicalType(), false);
+        hasOptions = addOption(sql, hasOptions, "USE_VECTORIZED_SCANNER", statement.getUseVectorizedScanner(), false);
+        
+        // Add XML-specific options
+        hasOptions = addOption(sql, hasOptions, "PRESERVE_SPACE", statement.getPreserveSpace(), false);
+        hasOptions = addOption(sql, hasOptions, "STRIP_OUTER_ELEMENT", statement.getStripOuterElement(), false);
+        hasOptions = addOption(sql, hasOptions, "DISABLE_SNOWFLAKE_DATA", statement.getDisableSnowflakeData(), false);
+        hasOptions = addOption(sql, hasOptions, "DISABLE_AUTO_CONVERT", statement.getDisableAutoConvert(), false);
         
         // Handle NULL_IF specially
         if (statement.getNullIf() != null) {
-            if (hasOptions) sql.append(" ");
+            if (hasOptions) sql.append(", ");
+            else sql.append(" "); // Always add space after SET
             sql.append("NULL_IF = (");
             
             String[] nullValues = statement.getNullIf().split(",");
@@ -125,7 +161,7 @@ public class AlterFileFormatGeneratorSnowflake extends AbstractSqlGenerator<Alte
         
         // Add comment last if specified
         if (statement.getNewComment() != null) {
-            if (hasOptions) sql.append(" ");
+            if (hasOptions) sql.append(", ");
             else sql.append(" "); // Always add space after SET
             sql.append("COMMENT = '").append(escapeString(statement.getNewComment())).append("'");
         }
@@ -134,66 +170,65 @@ public class AlterFileFormatGeneratorSnowflake extends AbstractSqlGenerator<Alte
     private void addUnsetOptions(AlterFileFormatStatement statement, StringBuilder sql) {
         boolean hasOptions = false;
         
-        // Add unset options
-        if (Boolean.TRUE.equals(statement.getUnsetComment())) {
-            sql.append(" COMMENT");
-            hasOptions = true;
-        }
+        // Common UNSET options
+        hasOptions = addUnsetOption(sql, hasOptions, "COMMENT", statement.getUnsetComment());
+        hasOptions = addUnsetOption(sql, hasOptions, "COMPRESSION", statement.getUnsetCompression());
+        hasOptions = addUnsetOption(sql, hasOptions, "DATE_FORMAT", statement.getUnsetDateFormat());
+        hasOptions = addUnsetOption(sql, hasOptions, "TIME_FORMAT", statement.getUnsetTimeFormat());
+        hasOptions = addUnsetOption(sql, hasOptions, "TIMESTAMP_FORMAT", statement.getUnsetTimestampFormat());
+        hasOptions = addUnsetOption(sql, hasOptions, "BINARY_FORMAT", statement.getUnsetBinaryFormat());
+        hasOptions = addUnsetOption(sql, hasOptions, "TRIM_SPACE", statement.getUnsetTrimSpace());
+        hasOptions = addUnsetOption(sql, hasOptions, "NULL_IF", statement.getUnsetNullIf());
+        hasOptions = addUnsetOption(sql, hasOptions, "FILE_EXTENSION", statement.getUnsetFileExtension());
+        hasOptions = addUnsetOption(sql, hasOptions, "REPLACE_INVALID_CHARACTERS", statement.getUnsetReplaceInvalidCharacters());
         
-        if (Boolean.TRUE.equals(statement.getUnsetCompression())) {
+        // CSV-specific UNSET options
+        hasOptions = addUnsetOption(sql, hasOptions, "RECORD_DELIMITER", statement.getUnsetRecordDelimiter());
+        hasOptions = addUnsetOption(sql, hasOptions, "FIELD_DELIMITER", statement.getUnsetFieldDelimiter());
+        hasOptions = addUnsetOption(sql, hasOptions, "PARSE_HEADER", statement.getUnsetParseHeader());
+        hasOptions = addUnsetOption(sql, hasOptions, "SKIP_HEADER", statement.getUnsetSkipHeader());
+        hasOptions = addUnsetOption(sql, hasOptions, "SKIP_BLANK_LINES", statement.getUnsetSkipBlankLines());
+        hasOptions = addUnsetOption(sql, hasOptions, "ESCAPE", statement.getUnsetEscape());
+        hasOptions = addUnsetOption(sql, hasOptions, "ESCAPE_UNENCLOSED_FIELD", statement.getUnsetEscapeUnenclosedField());
+        hasOptions = addUnsetOption(sql, hasOptions, "FIELD_OPTIONALLY_ENCLOSED_BY", statement.getUnsetFieldOptionallyEnclosedBy());
+        hasOptions = addUnsetOption(sql, hasOptions, "ERROR_ON_COLUMN_COUNT_MISMATCH", statement.getUnsetErrorOnColumnCountMismatch());
+        // VALIDATE_UTF8 UNSET removed - not available in Snowflake INFORMATION_SCHEMA.FILE_FORMATS
+        hasOptions = addUnsetOption(sql, hasOptions, "EMPTY_FIELD_AS_NULL", statement.getUnsetEmptyFieldAsNull());
+        hasOptions = addUnsetOption(sql, hasOptions, "SKIP_BYTE_ORDER_MARK", statement.getUnsetSkipByteOrderMark());
+        hasOptions = addUnsetOption(sql, hasOptions, "ENCODING", statement.getUnsetEncoding());
+        
+        // JSON-specific UNSET options
+        hasOptions = addUnsetOption(sql, hasOptions, "ENABLE_OCTAL", statement.getUnsetEnableOctal());
+        hasOptions = addUnsetOption(sql, hasOptions, "ALLOW_DUPLICATE", statement.getUnsetAllowDuplicate());
+        hasOptions = addUnsetOption(sql, hasOptions, "STRIP_OUTER_ARRAY", statement.getUnsetStripOuterArray());
+        hasOptions = addUnsetOption(sql, hasOptions, "STRIP_NULL_VALUES", statement.getUnsetStripNullValues());
+        hasOptions = addUnsetOption(sql, hasOptions, "IGNORE_UTF8_ERRORS", statement.getUnsetIgnoreUtf8Errors());
+        
+        // PARQUET-specific UNSET options
+        hasOptions = addUnsetOption(sql, hasOptions, "SNAPPY_COMPRESSION", statement.getUnsetSnappyCompression());
+        hasOptions = addUnsetOption(sql, hasOptions, "BINARY_AS_TEXT", statement.getUnsetBinaryAsText());
+        hasOptions = addUnsetOption(sql, hasOptions, "USE_LOGICAL_TYPE", statement.getUnsetUseLogicalType());
+        hasOptions = addUnsetOption(sql, hasOptions, "USE_VECTORIZED_SCANNER", statement.getUnsetUseVectorizedScanner());
+        
+        // XML-specific UNSET options
+        hasOptions = addUnsetOption(sql, hasOptions, "PRESERVE_SPACE", statement.getUnsetPreserveSpace());
+        hasOptions = addUnsetOption(sql, hasOptions, "STRIP_OUTER_ELEMENT", statement.getUnsetStripOuterElement());
+        hasOptions = addUnsetOption(sql, hasOptions, "DISABLE_SNOWFLAKE_DATA", statement.getUnsetDisableSnowflakeData());
+        hasOptions = addUnsetOption(sql, hasOptions, "DISABLE_AUTO_CONVERT", statement.getUnsetDisableAutoConvert());
+    }
+    
+    private boolean addUnsetOption(StringBuilder sql, boolean hasOptions, String optionName, Boolean unsetFlag) {
+        if (Boolean.TRUE.equals(unsetFlag)) {
             if (hasOptions) sql.append(",");
-            sql.append(" COMPRESSION");
-            hasOptions = true;
+            sql.append(" ").append(optionName);
+            return true;
         }
-        
-        if (Boolean.TRUE.equals(statement.getUnsetDateFormat())) {
-            if (hasOptions) sql.append(",");
-            sql.append(" DATE_FORMAT");
-            hasOptions = true;
-        }
-        
-        if (Boolean.TRUE.equals(statement.getUnsetTimeFormat())) {
-            if (hasOptions) sql.append(",");
-            sql.append(" TIME_FORMAT");
-            hasOptions = true;
-        }
-        
-        if (Boolean.TRUE.equals(statement.getUnsetTimestampFormat())) {
-            if (hasOptions) sql.append(",");
-            sql.append(" TIMESTAMP_FORMAT");
-            hasOptions = true;
-        }
-        
-        if (Boolean.TRUE.equals(statement.getUnsetBinaryFormat())) {
-            if (hasOptions) sql.append(",");
-            sql.append(" BINARY_FORMAT");
-            hasOptions = true;
-        }
-        
-        if (Boolean.TRUE.equals(statement.getUnsetTrimSpace())) {
-            if (hasOptions) sql.append(",");
-            sql.append(" TRIM_SPACE");
-            hasOptions = true;
-        }
-        
-        if (Boolean.TRUE.equals(statement.getUnsetNullIf())) {
-            if (hasOptions) sql.append(",");
-            sql.append(" NULL_IF");
-            hasOptions = true;
-        }
-        
-        if (Boolean.TRUE.equals(statement.getUnsetFileExtension())) {
-            if (hasOptions) sql.append(",");
-            sql.append(" FILE_EXTENSION");
-            hasOptions = true;
-        }
-        
-        // Add more unset options as needed...
+        return hasOptions;
     }
     
     private boolean addOption(StringBuilder sql, boolean hasOptions, String optionName, Object value, boolean quoted) {
         if (value != null) {
-            if (hasOptions) sql.append(" ");
+            if (hasOptions) sql.append(", ");
             else sql.append(" "); // Always add space after SET
             sql.append(optionName).append(" = ");
             
@@ -211,5 +246,72 @@ public class AlterFileFormatGeneratorSnowflake extends AbstractSqlGenerator<Alte
     private String escapeString(String value) {
         if (value == null) return null;
         return value.replace("'", "''");
+    }
+    
+    /**
+     * Automatically unset format-specific options when changing format type.
+     * This prevents invalid combinations like CSV-specific options on JSON formats.
+     */
+    private boolean addFormatTypeChangeUnsetOptions(AlterFileFormatStatement statement, StringBuilder sql, boolean hasOptions) {
+        String currentType = statement.getCurrentFileFormatType();
+        String newType = statement.getNewFileFormatType();
+        
+        // Only process if we know the current type and it's different from the new type
+        if (currentType == null || newType == null || currentType.equalsIgnoreCase(newType)) {
+            return hasOptions;
+        }
+        
+        // Unset CSV-specific options when changing FROM CSV to another format
+        if ("CSV".equalsIgnoreCase(currentType) && !"CSV".equalsIgnoreCase(newType)) {
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "RECORD_DELIMITER");
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "FIELD_DELIMITER");
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "PARSE_HEADER");
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "SKIP_HEADER");
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "SKIP_BLANK_LINES");
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "ESCAPE");
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "ESCAPE_UNENCLOSED_FIELD");
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "FIELD_OPTIONALLY_ENCLOSED_BY");
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "ERROR_ON_COLUMN_COUNT_MISMATCH");
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "EMPTY_FIELD_AS_NULL");
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "SKIP_BYTE_ORDER_MARK");
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "ENCODING");
+        }
+        
+        // Unset JSON-specific options when changing FROM JSON to another format
+        if ("JSON".equalsIgnoreCase(currentType) && !"JSON".equalsIgnoreCase(newType)) {
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "ENABLE_OCTAL");
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "ALLOW_DUPLICATE");
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "STRIP_OUTER_ARRAY");
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "STRIP_NULL_VALUES");
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "IGNORE_UTF8_ERRORS");
+        }
+        
+        // Unset PARQUET-specific options when changing FROM PARQUET to another format
+        if ("PARQUET".equalsIgnoreCase(currentType) && !"PARQUET".equalsIgnoreCase(newType)) {
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "SNAPPY_COMPRESSION");
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "BINARY_AS_TEXT");
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "USE_LOGICAL_TYPE");
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "USE_VECTORIZED_SCANNER");
+        }
+        
+        // Unset XML-specific options when changing FROM XML to another format
+        if ("XML".equalsIgnoreCase(currentType) && !"XML".equalsIgnoreCase(newType)) {
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "PRESERVE_SPACE");
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "STRIP_OUTER_ELEMENT");
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "DISABLE_SNOWFLAKE_DATA");
+            hasOptions = addFormatUnsetOption(sql, hasOptions, "DISABLE_AUTO_CONVERT");
+        }
+        
+        return hasOptions;
+    }
+    
+    /**
+     * Helper method to add UNSET options during format type changes.
+     */
+    private boolean addFormatUnsetOption(StringBuilder sql, boolean hasOptions, String optionName) {
+        if (hasOptions) sql.append(", ");
+        else sql.append(" ");
+        sql.append(optionName);
+        return true;
     }
 }

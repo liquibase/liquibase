@@ -6,9 +6,16 @@ import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.database.core.SnowflakeDatabase;
+import liquibase.database.object.FileFormat;
 import liquibase.exception.ValidationErrors;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.SnapshotControl;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.core.Catalog;
+import liquibase.CatalogAndSchema;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropFileFormatStatement;
+import liquibase.structure.core.Schema;
 
 /**
  * Drops a file format in Snowflake.
@@ -94,7 +101,77 @@ public class DropFileFormatChange extends AbstractChange {
 
     @Override
     public boolean supportsRollback(Database database) {
-        return false;
+        return database instanceof SnowflakeDatabase;
+    }
+
+    @Override
+    public SqlStatement[] generateRollbackStatements(Database database) throws RuntimeException {
+        try {
+            // Capture the file format definition before dropping it
+            Schema schema = new Schema(getCatalogName(), getSchemaName());
+            FileFormat fileFormat = new FileFormat(getFileFormatName());
+            fileFormat.setSchema(schema);
+            
+            // Create a database snapshot to capture the current state
+            SnapshotControl snapshotControl = new SnapshotControl(database, FileFormat.class);
+            DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance()
+                .createSnapshot(new CatalogAndSchema(getCatalogName(), getSchemaName()), database, snapshotControl);
+            
+            // Find the existing file format in the snapshot
+            FileFormat existingFormat = null;
+            for (FileFormat format : snapshot.get(FileFormat.class)) {
+                if (format.getName().equals(getFileFormatName())) {
+                    existingFormat = format;
+                    break;
+                }
+            }
+            
+            if (existingFormat == null) {
+                throw new RuntimeException("Cannot rollback DROP FILE FORMAT: " + 
+                    getFileFormatName() + " does not exist in database");
+            }
+            
+            // Create a CreateFileFormatChange to restore the file format
+            CreateFileFormatChange rollbackChange = new CreateFileFormatChange();
+            rollbackChange.setFileFormatName(existingFormat.getName());
+            
+            if (existingFormat.getSchema() != null) {
+                rollbackChange.setCatalogName(existingFormat.getSchema().getCatalogName());
+                rollbackChange.setSchemaName(existingFormat.getSchema().getName());
+            }
+            
+            // Copy all properties from the existing format
+            rollbackChange.setFileFormatType(existingFormat.getFormatType());
+            rollbackChange.setCompression(existingFormat.getCompression());
+            rollbackChange.setRecordDelimiter(existingFormat.getRecordDelimiter());
+            rollbackChange.setFieldDelimiter(existingFormat.getFieldDelimiter());
+            rollbackChange.setSkipHeader(existingFormat.getSkipHeader());
+            rollbackChange.setDateFormat(existingFormat.getDateFormat());
+            rollbackChange.setTimeFormat(existingFormat.getTimeFormat());
+            rollbackChange.setTimestampFormat(existingFormat.getTimestampFormat());
+            rollbackChange.setBinaryFormat(existingFormat.getBinaryFormat());
+            rollbackChange.setTrimSpace(existingFormat.getTrimSpace());
+            rollbackChange.setNullIf(existingFormat.getNullIf());
+            rollbackChange.setSkipBlankLines(existingFormat.getSkipBlankLines());
+            rollbackChange.setErrorOnColumnCountMismatch(existingFormat.getErrorOnColumnCountMismatch());
+            rollbackChange.setEmptyFieldAsNull(existingFormat.getEmptyFieldAsNull());
+            
+            // Additional properties from requirements
+            rollbackChange.setReplaceInvalidCharacters(existingFormat.getReplaceInvalidCharacters());
+            rollbackChange.setSkipByteOrderMark(existingFormat.getSkipByteOrderMark());
+            rollbackChange.setEncoding(existingFormat.getEncoding());
+            rollbackChange.setFileExtension(existingFormat.getFileExtension());
+            rollbackChange.setEscape(existingFormat.getEscape());
+            rollbackChange.setEscapeUnenclosedField(existingFormat.getEscapeUnenclosedField());
+            rollbackChange.setFieldOptionallyEnclosedBy(existingFormat.getFieldOptionallyEnclosedBy());
+            rollbackChange.setParseHeader(existingFormat.getParseHeader());
+            
+            return rollbackChange.generateStatements(database);
+            
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate rollback for DROP FILE FORMAT: " + 
+                e.getMessage(), e);
+        }
     }
 
     @Override

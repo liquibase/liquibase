@@ -104,6 +104,16 @@ public class CreateTableGeneratorSnowflake extends CreateTableGenerator {
             }
             defaultDdlCollation = namespaceAttrs.get("defaultDdlCollation");
             
+            // Process additional namespace attributes  
+            String namespaceComment = namespaceAttrs.get("comment");
+            if (namespaceComment != null) {
+                comment = namespaceComment;
+            }
+            
+            tag = namespaceAttrs.get("tag");
+            stageFileFormat = namespaceAttrs.get("stageFileFormat");
+            stageCopyOptions = namespaceAttrs.get("stageCopyOptions");
+            
             // Clean up stored attributes
             SnowflakeNamespaceAttributeStorage.removeAttributes(statement.getTableName());
         } else {

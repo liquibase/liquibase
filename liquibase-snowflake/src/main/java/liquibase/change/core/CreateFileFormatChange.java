@@ -55,7 +55,7 @@ public class CreateFileFormatChange extends AbstractChange {
     private String escapeUnenclosedField;
     private String fieldOptionallyEnclosedBy;
     private Boolean errorOnColumnCountMismatch;
-    private Boolean validateUtf8;
+    // Note: validateUtf8 is not supported by Snowflake CREATE FILE FORMAT
     private Boolean emptyFieldAsNull;
     private Boolean skipByteOrderMark;
     private String encoding;
@@ -325,14 +325,7 @@ public class CreateFileFormatChange extends AbstractChange {
         this.errorOnColumnCountMismatch = errorOnColumnCountMismatch;
     }
 
-    @DatabaseChangeProperty(description = "Validate UTF-8 encoding")
-    public Boolean getValidateUtf8() {
-        return validateUtf8;
-    }
-
-    public void setValidateUtf8(Boolean validateUtf8) {
-        this.validateUtf8 = validateUtf8;
-    }
+    // Note: validateUtf8 is not supported by Snowflake CREATE FILE FORMAT - removed
 
     @DatabaseChangeProperty(description = "Treat empty fields as NULL")
     public Boolean getEmptyFieldAsNull() {
@@ -522,7 +515,7 @@ public class CreateFileFormatChange extends AbstractChange {
         statement.setEscapeUnenclosedField(getEscapeUnenclosedField());
         statement.setFieldOptionallyEnclosedBy(getFieldOptionallyEnclosedBy());
         statement.setErrorOnColumnCountMismatch(getErrorOnColumnCountMismatch());
-        statement.setValidateUtf8(getValidateUtf8());
+        // Note: validateUtf8 removed - not supported by Snowflake
         statement.setEmptyFieldAsNull(getEmptyFieldAsNull());
         statement.setSkipByteOrderMark(getSkipByteOrderMark());
         statement.setEncoding(getEncoding());
@@ -575,7 +568,249 @@ public class CreateFileFormatChange extends AbstractChange {
             validationErrors.addError("skipHeader must be 0 or positive");
         }
 
+        // Format-specific validation
+        String formatType = getFileFormatType();
+        if (formatType != null) {
+            validateFormatSpecificOptions(formatType, validationErrors);
+        }
+        
+        // Validate NULL_IF array format
+        validateNullIfArray(validationErrors);
+
         return validationErrors;
+    }
+
+    /**
+     * Validates format-specific options based on the specified format type.
+     */
+    private void validateFormatSpecificOptions(String formatType, ValidationErrors validationErrors) {
+        formatType = formatType.toUpperCase();
+        
+        switch (formatType) {
+            case "CSV":
+                validateCsvOptions(validationErrors);
+                break;
+            case "JSON":
+                validateJsonOptions(validationErrors);
+                break;
+            case "PARQUET":
+                validateParquetOptions(validationErrors);
+                break;
+            case "XML":
+                validateXmlOptions(validationErrors);
+                break;
+            case "AVRO":
+                validateAvroOptions(validationErrors);
+                break;
+            case "ORC":
+                validateOrcOptions(validationErrors);
+                break;
+            case "CUSTOM":
+                // CUSTOM format allows most options
+                break;
+            default:
+                validationErrors.addError("Invalid file format type: " + formatType + ". Valid types are: CSV, JSON, AVRO, ORC, PARQUET, XML, CUSTOM");
+        }
+        
+        // Validate compression based on format type
+        validateCompressionForFormat(formatType, validationErrors);
+    }
+
+    private void validateCsvOptions(ValidationErrors validationErrors) {
+        // Validate CSV-specific options are not conflicting
+        if (getEscape() != null && getFieldDelimiter() != null && 
+            getEscape().equals(getFieldDelimiter())) {
+            validationErrors.addError("Escape character cannot be the same as field delimiter");
+        }
+        
+        // Validate encoding for CSV
+        if (getEncoding() != null) {
+            String encoding = getEncoding().toUpperCase();
+            if (!encoding.equals("UTF8") && !encoding.equals("ISO-8859-1") && 
+                !encoding.equals("WINDOWS-1252")) {
+                validationErrors.addError("Invalid encoding for CSV: " + getEncoding() + ". Valid encodings are: UTF8, ISO-8859-1, WINDOWS-1252");
+            }
+        }
+        
+        // Validate record delimiter
+        if (getRecordDelimiter() != null && getRecordDelimiter().isEmpty()) {
+            validationErrors.addError("Record delimiter cannot be empty string. Use 'NONE' to disable.");
+        }
+        
+        // JSON-specific options should not be used with CSV
+        if (getEnableOctal() != null || getAllowDuplicate() != null || 
+            getStripOuterArray() != null || getStripNullValues() != null) {
+            validationErrors.addError("JSON-specific options (enableOctal, allowDuplicate, stripOuterArray, stripNullValues) cannot be used with CSV format");
+        }
+        
+        // PARQUET-specific options should not be used with CSV
+        if (getSnappyCompression() != null || getBinaryAsText() != null || 
+            getUseLogicalType() != null || getUseVectorizedScanner() != null) {
+            validationErrors.addError("PARQUET-specific options (snappyCompression, binaryAsText, useLogicalType, useVectorizedScanner) cannot be used with CSV format");
+        }
+        
+        // XML-specific options should not be used with CSV
+        if (getPreserveSpace() != null || getStripOuterElement() != null || 
+            getDisableSnowflakeData() != null || getDisableAutoConvert() != null) {
+            validationErrors.addError("XML-specific options (preserveSpace, stripOuterElement, disableSnowflakeData, disableAutoConvert) cannot be used with CSV format");
+        }
+    }
+
+    private void validateJsonOptions(ValidationErrors validationErrors) {
+        // CSV-specific options should not be used with JSON
+        if (getRecordDelimiter() != null || getFieldDelimiter() != null || 
+            getParseHeader() != null || getSkipHeader() != null || 
+            getSkipBlankLines() != null || getEscape() != null || 
+            getEscapeUnenclosedField() != null || getFieldOptionallyEnclosedBy() != null || 
+            getErrorOnColumnCountMismatch() != null || 
+            getEmptyFieldAsNull() != null || getEncoding() != null) {
+            validationErrors.addError("CSV-specific options cannot be used with JSON format");
+        }
+        
+        // PARQUET-specific options should not be used with JSON
+        if (getSnappyCompression() != null || getBinaryAsText() != null || 
+            getUseLogicalType() != null || getUseVectorizedScanner() != null) {
+            validationErrors.addError("PARQUET-specific options cannot be used with JSON format");
+        }
+        
+        // XML-specific options should not be used with JSON
+        if (getPreserveSpace() != null || getStripOuterElement() != null || 
+            getDisableSnowflakeData() != null || getDisableAutoConvert() != null) {
+            validationErrors.addError("XML-specific options cannot be used with JSON format");
+        }
+    }
+
+    private void validateParquetOptions(ValidationErrors validationErrors) {
+        // CSV-specific options should not be used with PARQUET
+        if (getRecordDelimiter() != null || getFieldDelimiter() != null || 
+            getParseHeader() != null || getSkipHeader() != null || 
+            getSkipBlankLines() != null || getEscape() != null || 
+            getEscapeUnenclosedField() != null || getFieldOptionallyEnclosedBy() != null || 
+            getErrorOnColumnCountMismatch() != null || 
+            getEmptyFieldAsNull() != null || getSkipByteOrderMark() != null || 
+            getEncoding() != null) {
+            validationErrors.addError("CSV-specific options cannot be used with PARQUET format");
+        }
+        
+        // JSON-specific options should not be used with PARQUET
+        if (getEnableOctal() != null || getAllowDuplicate() != null || 
+            getStripOuterArray() != null || getStripNullValues() != null || 
+            getIgnoreUtf8Errors() != null) {
+            validationErrors.addError("JSON-specific options cannot be used with PARQUET format");
+        }
+        
+        // XML-specific options should not be used with PARQUET
+        if (getPreserveSpace() != null || getStripOuterElement() != null || 
+            getDisableSnowflakeData() != null || getDisableAutoConvert() != null) {
+            validationErrors.addError("XML-specific options cannot be used with PARQUET format");
+        }
+    }
+
+    private void validateXmlOptions(ValidationErrors validationErrors) {
+        // CSV-specific options should not be used with XML
+        if (getRecordDelimiter() != null || getFieldDelimiter() != null || 
+            getParseHeader() != null || getSkipHeader() != null || 
+            getSkipBlankLines() != null || getEscape() != null || 
+            getEscapeUnenclosedField() != null || getFieldOptionallyEnclosedBy() != null || 
+            getErrorOnColumnCountMismatch() != null || 
+            getEmptyFieldAsNull() != null || getEncoding() != null) {
+            validationErrors.addError("CSV-specific options cannot be used with XML format");
+        }
+        
+        // JSON-specific options should not be used with XML
+        if (getEnableOctal() != null || getAllowDuplicate() != null || 
+            getStripOuterArray() != null || getStripNullValues() != null) {
+            validationErrors.addError("JSON-specific options cannot be used with XML format");
+        }
+        
+        // PARQUET-specific options should not be used with XML
+        if (getSnappyCompression() != null || getBinaryAsText() != null || 
+            getUseLogicalType() != null || getUseVectorizedScanner() != null) {
+            validationErrors.addError("PARQUET-specific options cannot be used with XML format");
+        }
+    }
+
+    private void validateAvroOptions(ValidationErrors validationErrors) {
+        // AVRO only supports: compression, trimSpace, replaceInvalidCharacters, nullIf
+        if (getRecordDelimiter() != null || getFieldDelimiter() != null || 
+            getParseHeader() != null || getSkipHeader() != null || 
+            getSkipBlankLines() != null) {
+            validationErrors.addError("CSV-specific options cannot be used with AVRO format");
+        }
+        
+        if (getEnableOctal() != null || getAllowDuplicate() != null || 
+            getStripOuterArray() != null || getStripNullValues() != null || 
+            getIgnoreUtf8Errors() != null) {
+            validationErrors.addError("JSON-specific options cannot be used with AVRO format");
+        }
+        
+        if (getSnappyCompression() != null || getBinaryAsText() != null || 
+            getUseLogicalType() != null || getUseVectorizedScanner() != null) {
+            validationErrors.addError("PARQUET-specific options cannot be used with AVRO format");
+        }
+        
+        if (getPreserveSpace() != null || getStripOuterElement() != null || 
+            getDisableSnowflakeData() != null || getDisableAutoConvert() != null) {
+            validationErrors.addError("XML-specific options cannot be used with AVRO format");
+        }
+    }
+
+    private void validateOrcOptions(ValidationErrors validationErrors) {
+        // ORC only supports: trimSpace, replaceInvalidCharacters, nullIf
+        if (getRecordDelimiter() != null || getFieldDelimiter() != null || 
+            getParseHeader() != null || getSkipHeader() != null) {
+            validationErrors.addError("CSV-specific options cannot be used with ORC format");
+        }
+        
+        if (getEnableOctal() != null || getAllowDuplicate() != null || 
+            getStripOuterArray() != null || getStripNullValues() != null) {
+            validationErrors.addError("JSON-specific options cannot be used with ORC format");
+        }
+        
+        if (getSnappyCompression() != null || getBinaryAsText() != null || 
+            getUseLogicalType() != null || getUseVectorizedScanner() != null) {
+            validationErrors.addError("PARQUET-specific options cannot be used with ORC format");
+        }
+        
+        if (getPreserveSpace() != null || getStripOuterElement() != null || 
+            getDisableSnowflakeData() != null || getDisableAutoConvert() != null) {
+            validationErrors.addError("XML-specific options cannot be used with ORC format");
+        }
+    }
+
+    private void validateCompressionForFormat(String formatType, ValidationErrors validationErrors) {
+        if (getCompression() == null) return;
+        
+        String compression = getCompression().toUpperCase();
+        
+        if ("PARQUET".equals(formatType)) {
+            // PARQUET only supports: AUTO, LZO, SNAPPY, NONE
+            if (!compression.equals("AUTO") && !compression.equals("LZO") && 
+                !compression.equals("SNAPPY") && !compression.equals("NONE")) {
+                validationErrors.addError("Invalid compression for PARQUET: " + getCompression() + ". Valid compressions are: AUTO, LZO, SNAPPY, NONE");
+            }
+        } else {
+            // Other formats support full compression set
+            if (!compression.equals("AUTO") && !compression.equals("GZIP") && 
+                !compression.equals("BZ2") && !compression.equals("BROTLI") && 
+                !compression.equals("ZSTD") && !compression.equals("DEFLATE") && 
+                !compression.equals("RAW_DEFLATE") && !compression.equals("NONE")) {
+                validationErrors.addError("Invalid compression: " + getCompression() + ". Valid compressions are: AUTO, GZIP, BZ2, BROTLI, ZSTD, DEFLATE, RAW_DEFLATE, NONE");
+            }
+        }
+    }
+
+    /**
+     * Validates NULL_IF array format if specified.
+     */
+    private void validateNullIfArray(ValidationErrors validationErrors) {
+        if (getNullIf() != null && !getNullIf().trim().isEmpty()) {
+            String nullIf = getNullIf().trim();
+            // Should be in format: ('value1', 'value2', ...) or JSON array format
+            if (!nullIf.startsWith("(") && !nullIf.startsWith("[")) {
+                validationErrors.addError("NULL_IF must be in format: ('value1', 'value2') or [\"value1\", \"value2\"]");
+            }
+        }
     }
 
     @Override
