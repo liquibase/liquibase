@@ -2,9 +2,11 @@
 
 This file provides high-level guidance to Claude Code when working on the Liquibase Snowflake Extension.
 
-## 🎯 Current Focus: Enhancing the Liquibase-Snowflake Extension
+## 🎯 Current Status: 80%+ Coverage Milestone Achieved ✅
 
-The focus is on enhancing the liquibase-snowflake extension with comprehensive support for Snowflake's unique features including warehouses, file formats, advanced data types, and database operations.
+**MAJOR MILESTONE COMPLETED**: Successfully achieved 80%+ test coverage with comprehensive snapshot generator implementation, complete FileFormat operations, and robust schema operation support.
+
+The focus continues on enhancing the liquibase-snowflake extension with comprehensive support for Snowflake's unique features including warehouses, file formats, advanced data types, and database operations.
 
 ## 🏗️ Extension Architecture
 
@@ -87,12 +89,14 @@ liquibase-snowflake/
 
 ## 🔍 Common Extension Areas
 
-### Current Implementation Status
-- ✅ **Warehouses**: Full CREATE/ALTER/DROP support with advanced properties
-- ✅ **File Formats**: CSV, JSON, Parquet support with comprehensive options
+### Current Implementation Status (August 2025)
+- ✅ **Schemas**: Complete CREATE/ALTER/DROP with XML parsing, managed access, cloning (MILESTONE ACHIEVED)
+- ✅ **File Formats**: Complete CREATE/ALTER/DROP operations with comprehensive property support (MILESTONE ACHIEVED)  
+- ✅ **Warehouses**: Full CREATE/ALTER/DROP support with resource constraints and clustering (MILESTONE ACHIEVED)
+- ✅ **Snapshot Generators**: 80%+ test coverage achieved - FileFormat, Warehouse, UniqueConstraint (MILESTONE ACHIEVED)
+- ✅ **Database Objects**: Enhanced object models with comprehensive property support (MILESTONE ACHIEVED)
 - ✅ **Databases**: Multi-database management with Snowflake-specific features
-- ✅ **Schemas**: Enhanced schema operations with namespace support
-- ✅ **Tables**: Advanced table features with Snowflake-specific properties
+- ✅ **Tables**: Advanced table features with Snowflake-specific properties  
 - ✅ **Sequences**: Snowflake sequence implementation with unique features
 - ✅ **Data Types**: Comprehensive support for Snowflake's advanced types
 
@@ -117,6 +121,8 @@ liquibase-snowflake/
 - **Service Registration**: `src/main/resources/META-INF/services/` - Where components are registered
 - **XSD Schema**: `src/main/resources/www.liquibase.org/xml/ns/snowflake/` - XML schema definitions
 - **Integration Tests**: Look for `*IntegrationTest.java` files - these test against real Snowflake instances
+- **Snapshot Generators**: `src/main/java/liquibase/snapshot/jvm/` - Database introspection components
+- **Test Coverage**: 80%+ achieved with comprehensive test suites for all major components
 
 ## 📖 Implementation Guides
 

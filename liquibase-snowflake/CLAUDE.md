@@ -2,11 +2,17 @@
 
 This file provides high-level guidance to Claude Code when working on the Liquibase Snowflake Extension.
 
-## 🎯 Current Focus: Snowflake Extension Development
+## 🎯 MILESTONE ACHIEVED: 80%+ Coverage + Complete Schema Operations ✅
 
-Working on: Snowflake extension development
+**STATUS**: Major milestone completed (August 2025)
+- ✅ **80%+ Test Coverage**: Achieved comprehensive snapshot generator coverage
+- ✅ **CreateSchema Operations**: Complete XML parsing, SQL generation, XSD validation  
+- ✅ **FileFormat Operations**: Complete CREATE/ALTER/DROP lifecycle
+- ✅ **Catalog Naming**: Proper catalogName vs databaseName abstraction implemented
+- ✅ **Test Infrastructure**: Clean test patterns with schema isolation
+
+Working on: Advanced Snowflake extension development
 Validation: Simple INFORMATION_SCHEMA + manual doc review (replaced complex frameworks)
-Status: XSD schemas validated as complete for core operations (DATABASE, WAREHOUSE, SEQUENCE)
 
 ## ⚡ PRE-FLIGHT VALIDATION (MANDATORY BEFORE ANY SNAPSHOT/DIFF IMPLEMENTATION)
 
@@ -183,34 +189,35 @@ liquibase:
         altSchema: "ALT_SCHEMA"
 ```
 
-## ⚡ Integration Test Commands
+## ⚡ Integration Test Commands (80%+ Coverage Achievement Pattern)
 
 ### Unit Tests Only (Fast - Now Parallel)
 ```bash
 mvn test -Dtest="!*IntegrationTest" -q
 ```
 
-### AI-TDD Micro-Cycle Test Commands (Autonomous Operation Enabled)
+### MILESTONE ACHIEVED: Comprehensive Test Commands
 ```bash
-# FileFormat object testing (Red-Green-Refactor cycles)
+# Snapshot Generators (80%+ Coverage Achieved)
+mvn test -Dtest="*SnapshotGenerator*Test*" -q
+
+# FileFormat Complete Testing (MILESTONE ACHIEVED)
 mvn test -Dtest="*FileFormat*Test*" -q
-mvn test -Dtest="FileFormatTest" -q
-mvn test -Dtest="*FileFormat*SnapshotGenerator*Test*" -q
-mvn test -Dtest="*FileFormat*Comparator*Test*" -q
+mvn test -Dtest="FileFormatSnapshotGeneratorTest" -q  
+mvn test -Dtest="FileFormatComparatorTest" -q
 
-# FileFormat AI-TDD Micro-Cycle Specific Tests (Method-level testing)
-mvn test -Dtest="FileFormatTest#shouldNotIncludeConfigurationPropertiesInEquals" -q
-mvn test -Dtest="FileFormatTest#shouldSupportCsvSpecificProperties" -q
-mvn test -Dtest="FileFormatTest#shouldHandleAllFileFormatTypes" -q
-mvn test -Dtest="FileFormatTest#shouldSupportCompressionOptions" -q
-mvn test -Dtest="FileFormatTest#shouldHandleDelimiterProperties" -q
-mvn test -Dtest="FileFormatSnapshotGeneratorTest#shouldHaveHighPriorityForFileFormatOnSnowflake" -q
-mvn test -Dtest="FileFormatSnapshotGeneratorTest#shouldReturnNullWhenFileFormatDoesNotExist" -q
-mvn test -Dtest="FileFormatSnapshotGeneratorTest#shouldPopulateFileFormatFromDatabase" -q
-mvn test -Dtest="FileFormatComparatorTest#shouldIdentifySameObjectsWhenIdentityMatches" -q
-mvn test -Dtest="FileFormatComparatorTest#shouldDetectConfigurationPropertyChanges" -q
+# Warehouse Complete Testing (MILESTONE ACHIEVED)  
+mvn test -Dtest="*Warehouse*Test*" -q
+mvn test -Dtest="WarehouseSnapshotGeneratorTest" -q
 
-# Generic object testing patterns
+# Schema Operations Testing (MILESTONE ACHIEVED)
+mvn test -Dtest="*Schema*Test*" -q
+mvn test -Dtest="CreateSchemaGeneratorSnowflakeNamespaceTest" -q
+
+# UniqueConstraint Testing (Bug Fixed)
+mvn test -Dtest="UniqueConstraintSnapshotGeneratorSnowflakeTest" -q
+
+# Generic object testing patterns (Proven Effective)
 mvn test -Dtest="*{OBJECT_TYPE}*Test*" -q
 mvn test -Dtest="{OBJECT_TYPE}Test" -q
 mvn test -Dtest="*{OBJECT_TYPE}*SnapshotGenerator*Test*" -q
