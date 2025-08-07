@@ -3,7 +3,7 @@ Liquibase Version ${project.version}
 Introduction
 --------------------------------------------
 Thanks for downloading and installing Liquibase ${project.version} from Liquibase.
-By using the installer, you already have all the dependencies, directories, config, 
+By using the installer, you already have directories, config,
 and properties files to get started exploring the Liquibase examples provided.
 
 This is a great way to understand the core concepts with direct command-line experience.

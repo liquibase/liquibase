@@ -196,15 +196,6 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
     protected String outputFile;
 
     /**
-     * The format in which to display the diff output
-     * TXT or JSON
-     *
-     * @parameter property="liquibase.format"
-     */
-    @PropertyElement
-    protected String format;
-
-    /**
      * Sets runOnChange="true" for changesets containing solely changes of these types (e.g. createView, createProcedure, ...).
      *
      * @parameter property="liquibase.runOnChangeTypes" default-value="none"
@@ -242,17 +233,6 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
 
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
-        //
-        // Check the Pro license if --format=JSON is specified
-        //
-        if (isFormattedDiff()) {
-            if (format != null && ! format.equalsIgnoreCase("json")) {
-                String messageString =
-                        "\nWARNING: The diff command 'diff --format=" + format  + "' optional Pro parameter '--format' " +
-                                "currently supports only 'TXT' or 'JSON' as values.  (Blank defaults to 'TXT')";
-                throw new LiquibaseException(String.format(messageString));
-            }
-        }
         ClassLoader cl = null;
         ResourceAccessor resourceAccessor;
         try {
@@ -302,7 +282,6 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 PrintStream output = createPrintStream();
                 CommandScope liquibaseCommand = new CommandScope("diff");
                 liquibaseCommand.setOutput(output);
-                liquibaseCommand.addArgumentValue(DiffCommandStep.FORMAT_ARG, format);
                 liquibaseCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, db);
                 liquibaseCommand.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase);
                 liquibaseCommand.addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, diffTypes));
@@ -336,10 +315,6 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         catch (FileNotFoundException fnfe) {
             throw new LiquibaseException(fnfe);
         }
-    }
-
-    private boolean isFormattedDiff() {
-        return format != null && ! format.toUpperCase().equals("TXT");
     }
 
     @Override

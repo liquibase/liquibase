@@ -5,9 +5,9 @@ Getting Started
 --------------------------------------------
 Thanks for downloading and installing Liquibase ${project.version} from Liquibase.
 
-By using the installer, you already have all the dependencies, directories, config, 
-and properties files to get started exploring the Liquibase examples provided, which 
-is a great way to understand the core concepts with a direct command-line introductory 
+By using the installer, you already have all the directories, config,
+and properties files to get started exploring the Liquibase examples provided, which
+is a great way to understand the core concepts with a direct command-line introductory
 experience.
 
 
