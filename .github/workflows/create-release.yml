@@ -193,7 +193,7 @@ jobs:
           token: ${{ steps.get-token.outputs.token }}
 
       - name: Download liquibase-artifacts
-        uses: dawidd6/action-download-artifact@v9
+        uses: dawidd6/action-download-artifact@v11
         with:
           workflow: run-tests.yml
           run_id: ${{ needs.setup.outputs.runId }}
@@ -471,7 +471,7 @@ jobs:
           echo "$ANDROID_SDK_ROOT/build-tools/30.0.2" >> $GITHUB_PATH
           
       - name: Install DigiCert KeyLocker Client Tools
-        uses: digicert/ssm-code-signing@v1.0.1
+        uses: digicert/ssm-code-signing@v1.1.0
 
       - name: Build Unsigned Windows Installer
         env:
