@@ -28,7 +28,7 @@ public class AlterSchemaGeneratorSnowflakeTest {
     public void testSupportsSnowflake() {
         AlterSchemaStatement statement = new AlterSchemaStatement();
         assertTrue(generator.supports(statement, database), 
-                   "Generator should support Snowflake database");
+                  "Should support AlterSchemaStatement for Snowflake"); 
     }
 
     @Test
@@ -39,7 +39,7 @@ public class AlterSchemaGeneratorSnowflakeTest {
         assertTrue(errors.hasErrors(), "Should have validation errors");
         assertTrue(errors.getErrorMessages().stream()
                 .anyMatch(msg -> msg.contains("schemaName is required")), 
-                "Should require schemaName");
+                "Should contain 'schemaName is required' error message"); 
     }
 
     @Test
@@ -51,7 +51,7 @@ public class AlterSchemaGeneratorSnowflakeTest {
         assertTrue(errors.hasErrors(), "Should have validation errors");
         assertTrue(errors.getErrorMessages().stream()
                 .anyMatch(msg -> msg.contains("At least one schema property must be changed")), 
-                "Should require at least one change");
+                "Should contain 'At least one schema property must be changed' error message"); 
     }
 
     @Test
@@ -136,10 +136,10 @@ public class AlterSchemaGeneratorSnowflakeTest {
         String sql = sqlArray[0].toSql();
         
         // Should contain all SET options separated by spaces
-        assertTrue(sql.contains("ALTER SCHEMA test_schema SET"));
-        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS = 7"));
-        assertTrue(sql.contains("MAX_DATA_EXTENSION_TIME_IN_DAYS = 14"));
-        assertTrue(sql.contains("COMMENT = 'Test comment'"));
+        assertTrue(sql.startsWith("ALTER SCHEMA test_schema SET"), "SQL should start with ALTER SCHEMA SET: " + sql);
+        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS = 7"), "SQL should contain data retention clause: " + sql);
+        assertTrue(sql.contains("MAX_DATA_EXTENSION_TIME_IN_DAYS = 14"), "SQL should contain max extension time clause: " + sql);
+        assertTrue(sql.contains("COMMENT = 'Test comment'"), "SQL should contain comment clause: " + sql);
     }
 
     @Test
@@ -162,7 +162,7 @@ public class AlterSchemaGeneratorSnowflakeTest {
 
         Sql[] sqlArray = generator.generateSql(statement, database, null);
         String sql = sqlArray[0].toSql();
-        assertTrue(sql.contains("COMMENT = 'Comment with ''quotes'''"));
+        assertTrue(sql.contains("COMMENT = 'Comment with ''quotes'''"), "SQL should contain escaped comment: " + sql);
     }
 
     @Test
@@ -220,10 +220,10 @@ public class AlterSchemaGeneratorSnowflakeTest {
         Sql[] sqlArray = generator.generateSql(statement, database, null);
         String sql = sqlArray[0].toSql();
         
-        assertTrue(sql.contains("ALTER SCHEMA test_schema UNSET"));
-        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS"));
-        assertTrue(sql.contains("MAX_DATA_EXTENSION_TIME_IN_DAYS"));
-        assertTrue(sql.contains("COMMENT"));
+        assertTrue(sql.startsWith("ALTER SCHEMA test_schema UNSET"), "SQL should start with ALTER SCHEMA UNSET: " + sql);
+        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS"), "SQL should contain data retention in UNSET: " + sql);
+        assertTrue(sql.contains("MAX_DATA_EXTENSION_TIME_IN_DAYS"), "SQL should contain max extension time in UNSET: " + sql);
+        assertTrue(sql.contains("COMMENT"), "SQL should contain comment in UNSET: " + sql);
     }
 
     @Test
@@ -255,9 +255,9 @@ public class AlterSchemaGeneratorSnowflakeTest {
         String allSql = String.join(" ", java.util.Arrays.stream(sqlArray)
                 .map(sql -> sql.toSql()).toArray(String[]::new));
         
-        assertTrue(allSql.contains("ENABLE MANAGED ACCESS"));
-        assertTrue(allSql.contains("SET DATA_RETENTION_TIME_IN_DAYS = 7"));
-        assertTrue(allSql.contains("UNSET COMMENT"));
+        assertTrue(allSql.contains("ENABLE MANAGED ACCESS"), "Combined SQL should contain managed access: " + allSql);
+        assertTrue(allSql.contains("SET DATA_RETENTION_TIME_IN_DAYS = 7"), "Combined SQL should contain data retention SET: " + allSql);
+        assertTrue(allSql.contains("UNSET COMMENT"), "Combined SQL should contain comment UNSET: " + allSql);
     }
 
     @Test

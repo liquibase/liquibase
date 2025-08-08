@@ -33,7 +33,6 @@ public class AlterTableEnhancedTest {
         AlterTableStatement stmt = (AlterTableStatement) stmts[0];
         assertEquals(Integer.valueOf(30), stmt.getSetMaxDataExtensionTimeInDays());
         
-        System.out.println("✅ Max data extension property test passed");
     }
     
     @Test
@@ -48,7 +47,6 @@ public class AlterTableEnhancedTest {
         AlterTableStatement stmt = (AlterTableStatement) stmts[0];
         assertEquals("utf8_general_ci", stmt.getSetDefaultDdlCollation());
         
-        System.out.println("✅ Default DDL collation property test passed");
     }
     
     @Test
@@ -65,14 +63,13 @@ public class AlterTableEnhancedTest {
         assertTrue(sqls.length > 0);
         String sql = sqls[0].toSql();
         
-        // Should contain all three properties in SET statement
-        assertTrue(sql.contains("ALTER TABLE"));
-        assertTrue(sql.contains("SET"));
-        assertTrue(sql.contains("MAX_DATA_EXTENSION_TIME_IN_DAYS = 45"));
-        assertTrue(sql.contains("DEFAULT_DDL_COLLATION = 'en_US'"));
-        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS = 14"));
+        // Should contain all three properties in SET statement with proper structure
+        assertTrue(sql.startsWith("ALTER TABLE"), "SQL should start with ALTER TABLE: " + sql);
+        assertTrue(sql.contains("SET"), "SQL should contain SET clause: " + sql);
+        assertTrue(sql.contains("MAX_DATA_EXTENSION_TIME_IN_DAYS = 45"), "SQL should set max data extension time: " + sql);
+        assertTrue(sql.contains("DEFAULT_DDL_COLLATION = 'en_US'"), "SQL should set default DDL collation: " + sql);
+        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS = 14"), "SQL should set data retention time: " + sql);
         
-        System.out.println("✅ Enhanced SQL generation test passed: " + sql);
     }
     
     @Test
@@ -93,7 +90,6 @@ public class AlterTableEnhancedTest {
         assertTrue(errors.getErrorMessages().stream()
             .anyMatch(msg -> msg.contains("Maximum 4 columns allowed")));
         
-        System.out.println("✅ Clustering column count validation test passed");
     }
     
     @Test
@@ -131,7 +127,6 @@ public class AlterTableEnhancedTest {
             assertTrue(errors.hasErrors(), "Invalid expression should cause errors: " + expr);
         }
         
-        System.out.println("✅ Clustering expression validation test passed");
     }
     
     @Test
@@ -155,7 +150,6 @@ public class AlterTableEnhancedTest {
         errors = change.validate(new SnowflakeDatabase());
         assertTrue(errors.hasErrors(), "Extension time > 90 should cause errors");
         
-        System.out.println("✅ Data extension time validation test passed");
     }
     
     @Test
@@ -192,7 +186,6 @@ public class AlterTableEnhancedTest {
             assertTrue(errors.hasErrors(), "Invalid collation should cause errors: " + collation);
         }
         
-        System.out.println("✅ Collation validation test passed");
     }
     
     @Test
@@ -211,6 +204,5 @@ public class AlterTableEnhancedTest {
         assertTrue(message.contains("default DDL collation set to utf8_general_ci"));
         assertTrue(message.contains("data retention set to 30 days"));
         
-        System.out.println("✅ Confirmation message test passed: " + message);
     }
 }

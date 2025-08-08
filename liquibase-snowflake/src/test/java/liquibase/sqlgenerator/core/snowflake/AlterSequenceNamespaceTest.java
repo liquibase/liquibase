@@ -65,7 +65,6 @@ class AlterSequenceNamespaceTest {
         assertEquals(1, sql.length);
         String sqlText = sql[0].toSql();
         
-        System.out.println("Generated SQL: " + sqlText);
         
         assertEquals("ALTER SEQUENCE test_sequence SET INCREMENT BY 5, NOORDER", sqlText);
     }

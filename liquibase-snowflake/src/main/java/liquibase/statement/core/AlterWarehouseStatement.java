@@ -355,7 +355,15 @@ public class AlterWarehouseStatement extends AbstractSqlStatement {
     private void validateRenameOperation(ValidationResult result) {
         if (newName == null || newName.trim().isEmpty()) {
             result.addError("New warehouse name is required for RENAME operation");
+        } else if (newName.equals(warehouseName)) {
+            result.addError("New warehouse name must be different from current name: " + warehouseName);
         }
+        
+        // Validate warehouse name constraints
+        if (newName != null && (newName.length() > 255 || !newName.matches("^[A-Za-z_][A-Za-z0-9_$]*$"))) {
+            result.addError("Invalid warehouse name format. Must start with letter/underscore, contain only letters/numbers/underscores/dollar signs, max 255 characters: " + newName);
+        }
+        
         // RENAME operations should not have other properties set
         if (hasSetProperties()) {
             result.addWarning("SET properties are ignored in RENAME operations");
@@ -377,14 +385,78 @@ public class AlterWarehouseStatement extends AbstractSqlStatement {
             }
         }
         
-        // Validate auto-suspend constraints
-        if (autoSuspend != null && autoSuspend > 0 && autoSuspend < 60) {
-            result.addError("AUTO_SUSPEND must be 0 (disabled), NULL (never), or >= 60 seconds");
+        // Validate individual cluster count ranges
+        if (minClusterCount != null) {
+            if (minClusterCount < 1 || minClusterCount > 10) {
+                result.addError("MIN_CLUSTER_COUNT must be between 1 and 10, got: " + minClusterCount);
+            }
         }
         
-        // Validate query acceleration dependency
-        if (queryAccelerationMaxScaleFactor != null && !Boolean.TRUE.equals(enableQueryAcceleration)) {
-            result.addError("QUERY_ACCELERATION_MAX_SCALE_FACTOR requires ENABLE_QUERY_ACCELERATION = true");
+        if (maxClusterCount != null) {
+            if (maxClusterCount < 1 || maxClusterCount > 10) {
+                result.addError("MAX_CLUSTER_COUNT must be between 1 and 10, got: " + maxClusterCount);
+            }
+        }
+        
+        // Validate warehouse size enumeration
+        if (warehouseSize != null) {
+            String[] validSizes = {"XSMALL", "SMALL", "MEDIUM", "LARGE", "XLARGE", "XXLARGE", "XXXLARGE", "X4LARGE", "X5LARGE", "X6LARGE"};
+            boolean validSize = false;
+            for (String validSize2 : validSizes) {
+                if (validSize2.equalsIgnoreCase(warehouseSize)) {
+                    validSize = true;
+                    break;
+                }
+            }
+            if (!validSize) {
+                result.addError("Invalid warehouse size '" + warehouseSize + "'. Valid sizes: XSMALL through X6LARGE");
+            }
+        }
+        
+        // Validate warehouse type enumeration
+        if (warehouseType != null) {
+            if (!"STANDARD".equalsIgnoreCase(warehouseType) && !"SNOWPARK-OPTIMIZED".equalsIgnoreCase(warehouseType)) {
+                result.addError("Invalid warehouse type '" + warehouseType + "'. Valid types: STANDARD, SNOWPARK-OPTIMIZED");
+            }
+        }
+        
+        // Validate scaling policy enumeration
+        if (scalingPolicy != null) {
+            if (!"STANDARD".equalsIgnoreCase(scalingPolicy) && !"ECONOMY".equalsIgnoreCase(scalingPolicy)) {
+                result.addError("Invalid scaling policy '" + scalingPolicy + "'. Valid policies: STANDARD, ECONOMY");
+            }
+        }
+        
+        // Validate auto-suspend constraints with better error message
+        if (autoSuspend != null) {
+            if (autoSuspend < 0) {
+                result.addError("AUTO_SUSPEND cannot be negative, got: " + autoSuspend);
+            } else if (autoSuspend > 0 && autoSuspend < 60) {
+                result.addError("AUTO_SUSPEND must be 0 (disabled), NULL (never), or >= 60 seconds, got: " + autoSuspend);
+            }
+        }
+        
+        // Validate query acceleration dependency and range
+        if (queryAccelerationMaxScaleFactor != null) {
+            if (!Boolean.TRUE.equals(enableQueryAcceleration)) {
+                result.addError("QUERY_ACCELERATION_MAX_SCALE_FACTOR requires ENABLE_QUERY_ACCELERATION = true");
+            }
+            if (queryAccelerationMaxScaleFactor < 1 || queryAccelerationMaxScaleFactor > 100) {
+                result.addError("QUERY_ACCELERATION_MAX_SCALE_FACTOR must be between 1 and 100, got: " + queryAccelerationMaxScaleFactor);
+            }
+        }
+        
+        // Validate timeout ranges  
+        if (statementQueuedTimeoutInSeconds != null) {
+            if (statementQueuedTimeoutInSeconds < 0 || statementQueuedTimeoutInSeconds > 604800) { // 7 days max
+                result.addError("STATEMENT_QUEUED_TIMEOUT_IN_SECONDS must be between 0 and 604800 (7 days), got: " + statementQueuedTimeoutInSeconds);
+            }
+        }
+        
+        if (statementTimeoutInSeconds != null) {
+            if (statementTimeoutInSeconds < 0 || statementTimeoutInSeconds > 604800) { // 7 days max
+                result.addError("STATEMENT_TIMEOUT_IN_SECONDS must be between 0 and 604800 (7 days), got: " + statementTimeoutInSeconds);
+            }
         }
         
         // Warn about Enterprise Edition features

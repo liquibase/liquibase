@@ -40,7 +40,7 @@ public class SequenceChangeGeneratorTest {
         // Should handle Sequence objects for SnowflakeDatabase with high priority
         assertEquals(MissingSequenceChangeGeneratorSnowflake.PRIORITY_DEFAULT + MissingSequenceChangeGeneratorSnowflake.PRIORITY_DATABASE,
                     generator.getPriority(Sequence.class, database),
-                    "Should handle Sequence objects with DATABASE priority");
+                    "Should have high priority for Sequence on Snowflake");
         
         // Should not handle other objects
         assertEquals(MissingSequenceChangeGeneratorSnowflake.PRIORITY_NONE,
@@ -55,7 +55,7 @@ public class SequenceChangeGeneratorTest {
         // Should handle Sequence objects for SnowflakeDatabase with high priority
         assertEquals(UnexpectedSequenceChangeGeneratorSnowflake.PRIORITY_DEFAULT + UnexpectedSequenceChangeGeneratorSnowflake.PRIORITY_DATABASE,
                     generator.getPriority(Sequence.class, database),
-                    "Should handle Sequence objects with DATABASE priority");
+                    "Should have high priority for Sequence on Snowflake");
         
         // Should not handle other objects
         assertEquals(UnexpectedSequenceChangeGeneratorSnowflake.PRIORITY_NONE,
@@ -70,7 +70,7 @@ public class SequenceChangeGeneratorTest {
         // Should handle Sequence objects for SnowflakeDatabase with high priority
         assertEquals(ChangedSequenceChangeGeneratorSnowflake.PRIORITY_DEFAULT + ChangedSequenceChangeGeneratorSnowflake.PRIORITY_DATABASE,
                     generator.getPriority(Sequence.class, database),
-                    "Should handle Sequence objects with DATABASE priority");
+                    "Should have high priority for Sequence on Snowflake");
         
         // Should not handle other objects
         assertEquals(ChangedSequenceChangeGeneratorSnowflake.PRIORITY_NONE,

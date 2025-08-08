@@ -44,7 +44,7 @@ public class CreateDatabaseGeneratorSnowflakeIntegrationTest {
      * @return Unique database name for parallel execution
      */
     private String getUniqueDatabaseName(String methodName) {
-        return "TEST_CREATE_DB_" + methodName;
+        return "TEST_CREATE_DB_" + methodName.toUpperCase() + "_" + System.currentTimeMillis();
     }
 
     @BeforeEach
@@ -62,7 +62,6 @@ public class CreateDatabaseGeneratorSnowflakeIntegrationTest {
                 PreparedStatement dropStmt = connection.prepareStatement("DROP DATABASE IF EXISTS " + databaseName);
                 dropStmt.execute();
                 dropStmt.close();
-                System.out.println("Cleaned up database: " + databaseName);
             } catch (SQLException e) {
                 System.err.println("Failed to cleanup database " + databaseName + ": " + e.getMessage());
             }
@@ -78,7 +77,6 @@ public class CreateDatabaseGeneratorSnowflakeIntegrationTest {
         String databaseName = getUniqueDatabaseName("testBasicRequiredOnly");
         createdDatabases.add(databaseName);
 
-        System.out.println("Testing Basic Required Only: CREATE DATABASE " + databaseName);
 
         CreateDatabaseStatement statement = new CreateDatabaseStatement();
         statement.setDatabaseName(databaseName);
@@ -95,7 +93,6 @@ public class CreateDatabaseGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: Basic Required Only");
     }
 
     @Test
@@ -103,7 +100,6 @@ public class CreateDatabaseGeneratorSnowflakeIntegrationTest {
         String databaseName = getUniqueDatabaseName("testOrReplace");
         createdDatabases.add(databaseName);
 
-        System.out.println("Testing OR REPLACE: CREATE OR REPLACE DATABASE " + databaseName);
 
         // First create the database
         PreparedStatement createStmt = connection.prepareStatement("CREATE DATABASE " + databaseName);
@@ -126,7 +122,6 @@ public class CreateDatabaseGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: OR REPLACE");
     }
 
     @Test
@@ -134,7 +129,6 @@ public class CreateDatabaseGeneratorSnowflakeIntegrationTest {
         String databaseName = getUniqueDatabaseName("testIfNotExists");
         createdDatabases.add(databaseName);
 
-        System.out.println("Testing IF NOT EXISTS: CREATE DATABASE IF NOT EXISTS " + databaseName);
 
         CreateDatabaseStatement statement = new CreateDatabaseStatement();
         statement.setDatabaseName(databaseName);
@@ -157,7 +151,6 @@ public class CreateDatabaseGeneratorSnowflakeIntegrationTest {
         preparedStatement2.execute();
         preparedStatement2.close();
 
-        System.out.println("✅ SUCCESS: IF NOT EXISTS");
     }
 
     @Test
@@ -165,7 +158,6 @@ public class CreateDatabaseGeneratorSnowflakeIntegrationTest {
         String databaseName = getUniqueDatabaseName("testWithComment");
         createdDatabases.add(databaseName);
 
-        System.out.println("Testing WITH COMMENT: CREATE DATABASE " + databaseName + " COMMENT='Test database'");
 
         CreateDatabaseStatement statement = new CreateDatabaseStatement();
         statement.setDatabaseName(databaseName);
@@ -176,16 +168,15 @@ public class CreateDatabaseGeneratorSnowflakeIntegrationTest {
         assertEquals(1, sqls.length);
 
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CREATE DATABASE " + databaseName));
-        assertTrue(sql.contains("COMMENT"));
-        assertTrue(sql.contains("'Test database for integration testing'"));
+        assertTrue(sql.startsWith("CREATE DATABASE " + databaseName), "SQL should start with CREATE DATABASE: " + sql);
+        assertTrue(sql.contains("COMMENT"), "SQL should contain COMMENT clause: " + sql);
+        assertTrue(sql.contains("'Test database for integration testing'"), "SQL should contain comment text: " + sql);
 
         // Execute against live database
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: WITH COMMENT");
     }
 
     @Test
@@ -193,7 +184,6 @@ public class CreateDatabaseGeneratorSnowflakeIntegrationTest {
         String databaseName = getUniqueDatabaseName("testWithDataRetention");
         createdDatabases.add(databaseName);
 
-        System.out.println("Testing WITH DATA_RETENTION_TIME_IN_DAYS: CREATE DATABASE " + databaseName + " DATA_RETENTION_TIME_IN_DAYS=7");
 
         CreateDatabaseStatement statement = new CreateDatabaseStatement();
         statement.setDatabaseName(databaseName);
@@ -204,16 +194,15 @@ public class CreateDatabaseGeneratorSnowflakeIntegrationTest {
         assertEquals(1, sqls.length);
 
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CREATE DATABASE " + databaseName));
-        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS"));
-        assertTrue(sql.contains("7"));
+        assertTrue(sql.startsWith("CREATE DATABASE " + databaseName), "SQL should start with CREATE DATABASE: " + sql);
+        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS"), "SQL should contain data retention clause: " + sql);
+        assertTrue(sql.contains("7"), "SQL should contain retention time value: " + sql);
 
         // Execute against live database
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: WITH DATA_RETENTION_TIME_IN_DAYS");
     }
 
     @Test
@@ -221,7 +210,6 @@ public class CreateDatabaseGeneratorSnowflakeIntegrationTest {
         String databaseName = getUniqueDatabaseName("testTransientDatabase");
         createdDatabases.add(databaseName);
 
-        System.out.println("Testing TRANSIENT: CREATE TRANSIENT DATABASE " + databaseName);
 
         CreateDatabaseStatement statement = new CreateDatabaseStatement();
         statement.setDatabaseName(databaseName);
@@ -239,7 +227,6 @@ public class CreateDatabaseGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: TRANSIENT DATABASE");
     }
 
     @Test
@@ -247,7 +234,6 @@ public class CreateDatabaseGeneratorSnowflakeIntegrationTest {
         String databaseName = getUniqueDatabaseName("testWithCollation");
         createdDatabases.add(databaseName);
 
-        System.out.println("Testing WITH DEFAULT_DDL_COLLATION: CREATE DATABASE " + databaseName + " DEFAULT_DDL_COLLATION='utf8'");
 
         CreateDatabaseStatement statement = new CreateDatabaseStatement();
         statement.setDatabaseName(databaseName);
@@ -258,16 +244,15 @@ public class CreateDatabaseGeneratorSnowflakeIntegrationTest {
         assertEquals(1, sqls.length);
 
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CREATE DATABASE " + databaseName));
-        assertTrue(sql.contains("DEFAULT_DDL_COLLATION"));
-        assertTrue(sql.contains("'utf8'"));
+        assertTrue(sql.startsWith("CREATE DATABASE " + databaseName), "SQL should start with CREATE DATABASE: " + sql);
+        assertTrue(sql.contains("DEFAULT_DDL_COLLATION"), "SQL should contain collation clause: " + sql);
+        assertTrue(sql.contains("'utf8'"), "SQL should contain collation value: " + sql);
 
         // Execute against live database
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: WITH DEFAULT_DDL_COLLATION");
     }
 
     @Test
@@ -275,7 +260,6 @@ public class CreateDatabaseGeneratorSnowflakeIntegrationTest {
         String databaseName = getUniqueDatabaseName("testAllProperties");
         createdDatabases.add(databaseName);
 
-        System.out.println("Testing All Properties: CREATE DATABASE " + databaseName + " with comprehensive configuration");
 
         CreateDatabaseStatement statement = new CreateDatabaseStatement();
         statement.setDatabaseName(databaseName);
@@ -289,22 +273,21 @@ public class CreateDatabaseGeneratorSnowflakeIntegrationTest {
         assertEquals(1, sqls.length);
 
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CREATE DATABASE " + databaseName));
-        assertTrue(sql.contains("COMMENT"));
-        assertTrue(sql.contains("'Comprehensive test database'"));
-        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS"));
-        assertTrue(sql.contains("14"));
-        assertTrue(sql.contains("MAX_DATA_EXTENSION_TIME_IN_DAYS"));
-        assertTrue(sql.contains("28"));
-        assertTrue(sql.contains("DEFAULT_DDL_COLLATION"));
-        assertTrue(sql.contains("'utf8'"));
+        assertTrue(sql.startsWith("CREATE DATABASE " + databaseName), "SQL should start with CREATE DATABASE: " + sql);
+        assertTrue(sql.contains("COMMENT"), "SQL should contain COMMENT clause: " + sql);
+        assertTrue(sql.contains("'Comprehensive test database'"), "SQL should contain comment text: " + sql);
+        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS"), "SQL should contain data retention clause: " + sql);
+        assertTrue(sql.contains("14"), "SQL should contain retention time value: " + sql);
+        assertTrue(sql.contains("MAX_DATA_EXTENSION_TIME_IN_DAYS"), "SQL should contain max extension time clause: " + sql);
+        assertTrue(sql.contains("28"), "SQL should contain extension time value: " + sql);
+        assertTrue(sql.contains("DEFAULT_DDL_COLLATION"), "SQL should contain collation clause: " + sql);
+        assertTrue(sql.contains("'utf8'"), "SQL should contain collation value: " + sql);
 
         // Execute against live database
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: All Properties");
     }
 
     @Test
@@ -314,7 +297,6 @@ public class CreateDatabaseGeneratorSnowflakeIntegrationTest {
         createdDatabases.add(sourceDatabaseName);
         createdDatabases.add(cloneDatabaseName);
 
-        System.out.println("Testing CLONE: CREATE DATABASE " + cloneDatabaseName + " CLONE " + sourceDatabaseName);
 
         // First create source database
         PreparedStatement createSourceStmt = connection.prepareStatement("CREATE DATABASE " + sourceDatabaseName);
@@ -337,12 +319,10 @@ public class CreateDatabaseGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: CLONE");
     }
 
     @Test
     public void testValidationMissingDatabaseName() throws Exception {
-        System.out.println("Testing Validation: Missing database name should fail");
 
         CreateDatabaseStatement statement = new CreateDatabaseStatement();
         // Intentionally not setting databaseName
@@ -352,13 +332,11 @@ public class CreateDatabaseGeneratorSnowflakeIntegrationTest {
             fail("Expected validation error for missing database name");
         } catch (Exception e) {
             assertTrue(e.getMessage().contains("database") || e.getMessage().contains("name") || e.getMessage().contains("required"));
-            System.out.println("✅ SUCCESS: Validation correctly failed for missing database name");
         }
     }
 
     @Test
     public void testUniqueNamingStrategy() throws Exception {
-        System.out.println("Testing Unique Naming Strategy: Verifying all test databases have unique names");
 
         // Create multiple databases using the naming strategy
         String db1 = getUniqueDatabaseName("testMethod1");
@@ -373,10 +351,6 @@ public class CreateDatabaseGeneratorSnowflakeIntegrationTest {
         assertTrue(db2.startsWith("TEST_CREATE_DB_"));
         assertTrue(db3.startsWith("TEST_CREATE_DB_"));
 
-        System.out.println("Database 1: " + db1);
-        System.out.println("Database 2: " + db2);
-        System.out.println("Database 3: " + db3);
 
-        System.out.println("✅ SUCCESS: Unique Naming Strategy validated");
     }
 }

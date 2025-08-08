@@ -50,12 +50,11 @@ public class AlterTableLiveIntegrationTest {
         
         // Create test table
         PreparedStatement createStmt = connection.prepareStatement(
-            "CREATE TABLE " + testTableName + " (id INT, name VARCHAR(100), data VARCHAR(255))"
+            "CREATE TABLE " + testTableName + " (id INT, name VARCHAR(50))"
         );
         createStmt.execute();
         createStmt.close();
         
-        System.out.println("Created test table: " + testTableName);
     }
     
     @AfterEach  
@@ -65,7 +64,6 @@ public class AlterTableLiveIntegrationTest {
             PreparedStatement dropStmt = connection.prepareStatement("DROP TABLE IF EXISTS " + testTableName);
             dropStmt.execute();
             dropStmt.close();
-            System.out.println("Cleaned up test table: " + testTableName);
         } catch (Exception e) {
             System.err.println("Failed to cleanup: " + e.getMessage());
         }
@@ -96,24 +94,22 @@ public class AlterTableLiveIntegrationTest {
         assertTrue(sqls.length > 0);
         
         String sql = sqls[0].toSql();
-        System.out.println("Generated SQL: " + sql);
         
-        // Verify SQL contains all expected properties
-        assertTrue(sql.contains("ALTER TABLE"));
-        assertTrue(sql.contains(testTableName));
-        assertTrue(sql.contains("SET"));
-        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS = 30"));
-        assertTrue(sql.contains("MAX_DATA_EXTENSION_TIME_IN_DAYS = 60"));
-        assertTrue(sql.contains("DEFAULT_DDL_COLLATION = 'utf8_general_ci'"));
-        assertTrue(sql.contains("CHANGE_TRACKING = TRUE"));
-        assertTrue(sql.contains("ENABLE_SCHEMA_EVOLUTION = TRUE"));
+        // Verify SQL contains all expected properties with enhanced assertions
+        assertTrue(sql.startsWith("ALTER TABLE"), "SQL should start with ALTER TABLE: " + sql);
+        assertTrue(sql.contains(testTableName), "SQL should contain table name " + testTableName + ": " + sql);
+        assertTrue(sql.contains("SET"), "SQL should contain SET clause: " + sql);
+        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS = 30"), "SQL should set data retention time: " + sql);
+        assertTrue(sql.contains("MAX_DATA_EXTENSION_TIME_IN_DAYS = 60"), "SQL should set max data extension time: " + sql);
+        assertTrue(sql.contains("DEFAULT_DDL_COLLATION = 'utf8_general_ci'"), "SQL should set default DDL collation: " + sql);
+        assertTrue(sql.contains("CHANGE_TRACKING = TRUE"), "SQL should enable change tracking: " + sql);
+        assertTrue(sql.contains("ENABLE_SCHEMA_EVOLUTION = TRUE"), "SQL should enable schema evolution: " + sql);
         
         // Execute the SQL against live Snowflake
         PreparedStatement stmt = connection.prepareStatement(sql);
         stmt.execute();
         stmt.close();
         
-        System.out.println("✅ Enhanced properties executed successfully against live Snowflake");
         
         // Verify the changes were applied by querying table properties
         verifyTableProperties();
@@ -131,7 +127,6 @@ public class AlterTableLiveIntegrationTest {
         Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(statements[0], database);
         String clusterSql = sqls[0].toSql();
         
-        System.out.println("Clustering SQL: " + clusterSql);
         
         // Execute clustering
         PreparedStatement stmt = connection.prepareStatement(clusterSql);
@@ -147,14 +142,12 @@ public class AlterTableLiveIntegrationTest {
         sqls = SqlGeneratorFactory.getInstance().generateSql(statements[0], database);
         String dropClusterSql = sqls[0].toSql();
         
-        System.out.println("Drop clustering SQL: " + dropClusterSql);
         
         // Execute drop clustering
         stmt = connection.prepareStatement(dropClusterSql);
         stmt.execute();
         stmt.close();
         
-        System.out.println("✅ Clustering operations executed successfully against live Snowflake");
     }
     
     @Test
@@ -169,7 +162,6 @@ public class AlterTableLiveIntegrationTest {
         Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(statements[0], database);
         String searchOptSql = sqls[0].toSql();
         
-        System.out.println("Search optimization SQL: " + searchOptSql);
         assertTrue(searchOptSql.contains("ADD SEARCH OPTIMIZATION"));
         
         // Test tag operations
@@ -181,12 +173,10 @@ public class AlterTableLiveIntegrationTest {
         sqls = SqlGeneratorFactory.getInstance().generateSql(statements[0], database);
         String tagSql = sqls[0].toSql();
         
-        System.out.println("Tag SQL: " + tagSql);
         assertTrue(tagSql.contains("SET TAG"));
         
         // We can generate the SQL but won't execute against live DB since these features
         // may require specific Snowflake editions or permissions
-        System.out.println("✅ Advanced features SQL generation verified against live database context");
     }
 
     @Test
@@ -211,7 +201,6 @@ public class AlterTableLiveIntegrationTest {
         assertTrue(errors.getErrorMessages().stream()
             .anyMatch(msg -> msg.contains("Maximum 4 columns allowed")));
         
-        System.out.println("✅ Validation working correctly with live database context");
     }
     
     private void verifyTableProperties() throws Exception {
@@ -231,21 +220,14 @@ public class AlterTableLiveIntegrationTest {
             String isTransient = rs.getString("IS_TRANSIENT");
             String autoClusteringOn = rs.getString("AUTO_CLUSTERING_ON");
             
-            System.out.println("Verified table properties:");
-            System.out.println("  - Retention Time: " + retentionTime + " days");
-            System.out.println("  - Clustering Key: " + clusteringKey);
-            System.out.println("  - Is Transient: " + isTransient);
-            System.out.println("  - Auto Clustering: " + autoClusteringOn);
             
             // Verify retention time was set correctly
             if (retentionTime != null && retentionTime == 30) {
-                System.out.println("✅ Data retention time correctly set to 30 days");
             }
             
             // Note: Some properties like change tracking and collation may not be 
             // directly visible in INFORMATION_SCHEMA.TABLES but the SQL executed successfully
         } else {
-            System.out.println("⚠️ Table not found in INFORMATION_SCHEMA, but ALTER executed successfully");
         }
         
         rs.close();

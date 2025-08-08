@@ -55,7 +55,6 @@ public class AccountWarehouseSnapshotIntegrationTest {
                            "AUTO_SUSPEND = 300 " +
                            "AUTO_RESUME = TRUE " +
                            "COMMENT = 'Test warehouse for Account integration testing'");
-                System.out.println("Created test warehouse: " + testWarehouseName);
             }
             
         } catch (Exception e) {
@@ -68,7 +67,6 @@ public class AccountWarehouseSnapshotIntegrationTest {
         if (rawConnection != null && !rawConnection.isClosed()) {
             try (Statement stmt = rawConnection.createStatement()) {
                 stmt.execute("DROP WAREHOUSE IF EXISTS " + testWarehouseName);
-                System.out.println("Cleaned up test warehouse: " + testWarehouseName);
             } catch (Exception e) {
                 System.err.println("Failed to cleanup warehouse: " + e.getMessage());
             }
@@ -90,11 +88,7 @@ public class AccountWarehouseSnapshotIntegrationTest {
         assertNotNull(accounts, "Account objects should be present in snapshot");
         assertFalse(accounts.isEmpty(), "Should have at least one Account object");
         
-        System.out.println("Found " + accounts.size() + " Account objects in snapshot");
         for (Account account : accounts) {
-            System.out.println("Account: " + account.getName() + 
-                             " (Region: " + account.getRegion() + 
-                             ", Cloud: " + account.getCloud() + ")");
         }
     }
     
@@ -114,13 +108,8 @@ public class AccountWarehouseSnapshotIntegrationTest {
         boolean foundTestWarehouse = false;
         for (Account account : accounts) {
             List<Warehouse> warehouses = account.getDatabaseObjects(Warehouse.class);
-            System.out.println("Account " + account.getName() + " contains " + warehouses.size() + " warehouses");
             
             for (Warehouse warehouse : warehouses) {
-                System.out.println("  Warehouse: " + warehouse.getName() + 
-                                 " (Size: " + warehouse.getSize() + 
-                                 ", State: " + warehouse.getState() + 
-                                 ", Comment: " + warehouse.getComment() + ")");
                 
                 if (testWarehouseName.equals(warehouse.getName())) {
                     foundTestWarehouse = true;
@@ -130,8 +119,7 @@ public class AccountWarehouseSnapshotIntegrationTest {
                     assertEquals(300, warehouse.getAutoSuspend(), "Auto suspend should be 300");
                     assertEquals(Boolean.TRUE, warehouse.getAutoResume(), "Auto resume should be TRUE");
                     assertTrue(warehouse.getComment() != null && 
-                             warehouse.getComment().contains("Test warehouse for Account integration testing"),
-                             "Comment should contain expected text");
+                             warehouse.getComment().contains("Test warehouse for Account integration testing"));
                 }
             }
         }
@@ -170,35 +158,27 @@ public class AccountWarehouseSnapshotIntegrationTest {
         // Auto resume and auto suspend may be null if not explicitly set by Snowflake
         // But we can validate they are correctly typed when present
         if (testWarehouse.getAutoResume() != null) {
-            assertTrue(testWarehouse.getAutoResume() instanceof Boolean, 
-                "Auto resume should be Boolean type when present");
-        } else {
+            assertTrue(testWarehouse.getAutoResume() instanceof Boolean, "Assertion should be true");        } else {
             // If null, validate that it was created with our settings and query Snowflake directly
-            System.out.println("⚠️  Auto resume is null, querying Snowflake directly...");
             // Use direct SQL query to validate the actual value
             String sql = "SHOW WAREHOUSES LIKE '" + testWarehouseName + "'";
             try (Statement stmt = ((JdbcConnection) database.getConnection()).createStatement();
                  ResultSet rs = stmt.executeQuery(sql)) {
                 if (rs.next()) {
                     String autoResume = rs.getString("auto_resume");
-                    System.out.println("Direct query - auto_resume: '" + autoResume + "'");
                     assertNotNull(autoResume, "Direct query should return auto_resume value");
                 }
             }
         }
         
         if (testWarehouse.getAutoSuspend() != null) {
-            assertTrue(testWarehouse.getAutoSuspend() instanceof Integer,
-                "Auto suspend should be Integer type when present");
-        } else {
-            System.out.println("⚠️  Auto suspend is null, querying Snowflake directly...");
+            assertTrue(testWarehouse.getAutoSuspend() instanceof Integer, "Assertion should be true");        } else {
             String sql = "SHOW WAREHOUSES LIKE '" + testWarehouseName + "'";
             try (Statement stmt = ((JdbcConnection) database.getConnection()).createStatement();
                  ResultSet rs = stmt.executeQuery(sql)) {
                 if (rs.next()) {
                     int autoSuspend = rs.getInt("auto_suspend");
                     boolean wasNull = rs.wasNull();
-                    System.out.println("Direct query - auto_suspend: " + autoSuspend + ", wasNull: " + wasNull);
                     if (!wasNull) {
                         // If Snowflake has a value, our snapshot should capture it
                         fail("Auto suspend should not be null when Snowflake has value: " + autoSuspend);
@@ -215,13 +195,6 @@ public class AccountWarehouseSnapshotIntegrationTest {
         // Validate state properties (excluded from diffs) are captured
         assertNotNull(testWarehouse.getState(), "State should be captured");
         
-        System.out.println("Warehouse attribute validation passed:");
-        System.out.println("  Name: " + testWarehouse.getName());
-        System.out.println("  Size: " + testWarehouse.getSize());
-        System.out.println("  State: " + testWarehouse.getState());
-        System.out.println("  Auto Suspend: " + testWarehouse.getAutoSuspend());
-        System.out.println("  Auto Resume: " + testWarehouse.getAutoResume());
-        System.out.println("  Comment: " + testWarehouse.getComment());
     }
     
     @Test
@@ -237,10 +210,8 @@ public class AccountWarehouseSnapshotIntegrationTest {
         assertNotNull(foundAccounts, "Should be able to query for Account objects");
         assertFalse(foundAccounts.isEmpty(), "Should find Account objects via query");
         
-        // Test Warehouse discovery  
-        Warehouse exampleWarehouse = new Warehouse();
-        @SuppressWarnings("unchecked")
-        Set<Warehouse> foundWarehouses = (Set<Warehouse>) snapshot.get(exampleWarehouse);
+        // Test Warehouse discovery - get all warehouses via class type
+        Set<Warehouse> foundWarehouses = snapshot.get(Warehouse.class);
         assertNotNull(foundWarehouses, "Should be able to query for Warehouse objects");
         assertFalse(foundWarehouses.isEmpty(), "Should find Warehouse objects via query");
         
@@ -251,10 +222,6 @@ public class AccountWarehouseSnapshotIntegrationTest {
         assertNotNull(foundWarehouse, "Should find specific warehouse by name");
         assertEquals(testWarehouseName, foundWarehouse.getName(), "Found warehouse should match name");
         
-        System.out.println("Snapshot query validation passed:");
-        System.out.println("  Found " + foundAccounts.size() + " Account objects via query");
-        System.out.println("  Found " + foundWarehouses.size() + " Warehouse objects via query"); 
-        System.out.println("  Successfully found specific warehouse: " + foundWarehouse.getName());
     }
     
     @Test
@@ -275,7 +242,6 @@ public class AccountWarehouseSnapshotIntegrationTest {
             
             // Verify Account objects contain warehouse objects
             List<Warehouse> warehouses = account.getDatabaseObjects(Warehouse.class);
-            System.out.println("Account " + account.getName() + " independently contains " + warehouses.size() + " warehouses");
             
             // Verify warehouses are properly contained within accounts
             for (Warehouse warehouse : warehouses) {
@@ -284,6 +250,5 @@ public class AccountWarehouseSnapshotIntegrationTest {
             }
         }
         
-        System.out.println("Account independence validation passed - Account objects are peers to Catalog");
     }
 }

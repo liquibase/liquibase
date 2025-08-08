@@ -64,7 +64,6 @@ class SnowflakeParserTest {
         
         // Check if attributes were captured
         Map<String, String> attrs = SnowflakeNamespaceAttributeStorage.getAttributes("test_seq");
-        System.out.println("Captured attributes: " + attrs);
         
         assertNotNull(attrs, "Attributes should have been captured");
         assertEquals("true", attrs.get("setNoOrder"), "setNoOrder attribute should be captured");

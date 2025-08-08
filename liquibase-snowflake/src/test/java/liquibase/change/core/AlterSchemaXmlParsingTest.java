@@ -43,9 +43,6 @@ public class AlterSchemaXmlParsingTest {
         ChangeSet changeSet = changeLog.getChangeSets().get(0);
         AlterSchemaChange change = (AlterSchemaChange) changeSet.getChanges().get(0);
         
-        System.out.println("Working boolean test:");
-        System.out.println("ifExists: " + change.getIfExists());
-        System.out.println("newName: " + change.getNewName());
         
         // This should work
         assertNotNull(change.getIfExists());
@@ -74,9 +71,6 @@ public class AlterSchemaXmlParsingTest {
         ChangeSet changeSet = changeLog.getChangeSets().get(0);
         AlterSchemaChange change = (AlterSchemaChange) changeSet.getChanges().get(0);
         
-        System.out.println("UNSET boolean test:");
-        System.out.println("unsetDataRetentionTimeInDays: " + change.getUnsetDataRetentionTimeInDays());
-        System.out.println("schemaName: " + change.getSchemaName());
         
         // This is what we expect but doesn't work
         assertNotNull(change.getUnsetDataRetentionTimeInDays());

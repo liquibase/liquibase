@@ -268,10 +268,25 @@
             <xsd:attribute name="sequenceName" type="xsd:string" use="required"/>
             <xsd:attribute name="catalogName" type="xsd:string"/>
             <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="newSequenceName" type="xsd:string"/>
             <xsd:attribute name="incrementBy" type="xsd:string"/>
+            <xsd:attribute name="ordered" type="xsd:boolean"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+            <xsd:attribute name="unsetComment" type="xsd:boolean"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
             <xsd:attribute name="setNoOrder" type="xsd:boolean"/>
             <xsd:attribute name="setComment" type="xsd:string"/>
-            <xsd:attribute name="unsetComment" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="dropSequence">
+        <xsd:complexType>
+            <xsd:attribute name="sequenceName" type="xsd:string" use="required"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
+            <xsd:attribute name="cascade" type="xsd:boolean"/>
+            <xsd:attribute name="restrict" type="xsd:boolean"/>
         </xsd:complexType>
     </xsd:element>
 

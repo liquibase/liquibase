@@ -68,7 +68,6 @@ public class AlterSequenceGeneratorSnowflake extends AlterSequenceGenerator {
     public Sql[] generateSql(AlterSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         // Check for Snowflake-specific namespace attributes
         Map<String, String> attributes = SnowflakeNamespaceAttributeStorage.getAttributes(statement.getSequenceName());
-        System.out.println("DEBUG: AlterSequenceGeneratorSnowflake - sequenceName: " + statement.getSequenceName() + ", attributes: " + attributes);
         
         // Check if we need to handle comment operations separately
         boolean hasUnsetComment = attributes != null && "true".equalsIgnoreCase(attributes.get("unsetComment"));

@@ -3,11 +3,13 @@ package liquibase.sqlgenerator.core.snowflake;
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
 import liquibase.database.core.SnowflakeDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.TestDatabaseConfigUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,29 +20,21 @@ import java.sql.DriverManager;
 import java.sql.Statement;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
 
 /**
- * Direct SQL execution test to verify CREATE SCHEMA syntax works in Snowflake
+ * Direct SQL execution test to verify CREATE SCHEMA syntax works in Snowflake.
+ * Updated to use modern TestDatabaseConfigUtil with YAML configuration.
  */
-public class CreateSchemaSnowflakeSQLTest {
+public class CreateSchemaSnowflakeSQLIntegrationTest {
     
     private Connection connection;
     private Database database;
     
     @Before
     public void setUp() throws Exception {
-        // Skip if no Snowflake connection configured
-        String url = System.getProperty("snowflake.test.url");
-        String username = System.getProperty("snowflake.test.username");
-        String password = System.getProperty("snowflake.test.password");
-        
-        assumeTrue("Snowflake test not configured. Set -Dsnowflake.test.url, -Dsnowflake.test.username, -Dsnowflake.test.password",
-                   url != null && username != null && password != null);
-        
-        connection = DriverManager.getConnection(url, username, password);
-        database = new SnowflakeDatabase();
-        database.setConnection(new JdbcConnection(connection));
+        // Use YAML configuration for Snowflake connection
+        connection = TestDatabaseConfigUtil.getSnowflakeConnection();
+        database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
         
         // Clean up any existing test schemas
         try (Statement stmt = connection.createStatement()) {
@@ -112,7 +106,7 @@ public class CreateSchemaSnowflakeSQLTest {
         
         // Execute via Liquibase
         ResourceAccessor resourceAccessor = new ClassLoaderResourceAccessor();
-        Liquibase liquibase = new Liquibase(tempFile.getAbsolutePath(), 
+        Liquibase liquibase = new Liquibase(tempFile.getName(), 
                                           new liquibase.resource.DirectoryResourceAccessor(tempFile.getParentFile()), 
                                           database);
         
@@ -121,10 +115,9 @@ public class CreateSchemaSnowflakeSQLTest {
         liquibase.update("", writer);
         String generatedSql = writer.toString();
         
-        System.out.println("Generated SQL: " + generatedSql);
         
         // Verify the SQL contains the correct syntax
-        assertTrue("SQL should contain CREATE TRANSIENT SCHEMA", 
+        assertTrue("SQL should contain CREATE TRANSIENT SCHEMA",
                    generatedSql.contains("CREATE") && generatedSql.contains("TRANSIENT") && generatedSql.contains("SCHEMA"));
         
         // Now actually execute it

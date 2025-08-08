@@ -72,7 +72,6 @@ public class CreateTableGeneratorSnowflakeIntegrationTest {
             useSchemaStmt.execute();
             useSchemaStmt.close();
         } catch (SQLException e) {
-            System.out.println("Schema already exists or creation failed: " + e.getMessage());
         }
     }
 
@@ -84,7 +83,6 @@ public class CreateTableGeneratorSnowflakeIntegrationTest {
                 PreparedStatement dropStmt = connection.prepareStatement("DROP TABLE IF EXISTS " + testDatabase + "." + testSchema + "." + tableName);
                 dropStmt.execute();
                 dropStmt.close();
-                System.out.println("Cleaned up table: " + testDatabase + "." + testSchema + "." + tableName);
             } catch (SQLException e) {
                 System.err.println("Failed to cleanup table " + tableName + ": " + e.getMessage());
             }
@@ -100,7 +98,6 @@ public class CreateTableGeneratorSnowflakeIntegrationTest {
         String tableName = getUniqueTableName("testBasicTableCreation");
         createdTables.add(tableName);
 
-        System.out.println("Testing Basic Table Creation: CREATE TABLE " + tableName);
 
         CreateTableStatement statement = new CreateTableStatement(null, null, tableName);
         statement.addColumn("id", new IntType(), null, new ColumnConstraint[]{new NotNullConstraint()});
@@ -112,15 +109,12 @@ public class CreateTableGeneratorSnowflakeIntegrationTest {
         assertEquals(1, sqls.length);
 
         String sql = sqls[0].toSql();
-        System.out.println("ACTUAL SQL GENERATED: " + sql);
         assertTrue(sql.contains("CREATE TABLE") && sql.contains(tableName));
         assertTrue(sql.contains("id"));
         assertTrue(sql.contains("INT")); // Snowflake uses INT instead of INTEGER
         assertTrue(sql.contains("name"));
         assertTrue(sql.contains("VARCHAR")); // VARCHAR length may not be specified
         assertTrue(sql.contains("created_at"));
-        System.out.println("DEBUG: Checking for TIMESTAMP in SQL: " + sql.contains("TIMESTAMP"));
-        System.out.println("DEBUG: SQL converted to uppercase: " + sql.toUpperCase());
         assertTrue(sql.toUpperCase().contains("TIMESTAMP") || sql.toUpperCase().contains("TIMESTAMP_NTZ") || sql.toUpperCase().contains("DATETIME"));
 
         // Execute against live database
@@ -128,7 +122,6 @@ public class CreateTableGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: Basic Table Creation");
     }
 
     @Test
@@ -136,7 +129,6 @@ public class CreateTableGeneratorSnowflakeIntegrationTest {
         String tableName = getUniqueTableName("testTableWithNamespaceValidation");
         createdTables.add(tableName);
 
-        System.out.println("Testing Table Namespace Validation: Ensuring proper schema isolation");
 
         // Test that tables are created in the correct namespace (database.schema.table)
         CreateTableStatement statement = new CreateTableStatement(null, null, tableName);
@@ -147,7 +139,6 @@ public class CreateTableGeneratorSnowflakeIntegrationTest {
         assertEquals(1, sqls.length);
 
         String sql = sqls[0].toSql();
-        System.out.println("ACTUAL SQL GENERATED: " + sql);
         assertTrue(sql.contains("CREATE TABLE") && sql.contains(tableName));
 
         // Execute against live database
@@ -161,16 +152,13 @@ public class CreateTableGeneratorSnowflakeIntegrationTest {
         verifyStmt.setString(1, testSchema);
         verifyStmt.setString(2, tableName);
         
-        System.out.println("DEBUG: Verifying table existence with schema: " + testSchema + ", tableName: " + tableName);
         java.sql.ResultSet rs = verifyStmt.executeQuery();
         
         // Debug: show what tables actually exist
         PreparedStatement debugStmt = connection.prepareStatement("SELECT TABLE_SCHEMA, TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE UPPER(TABLE_NAME) LIKE UPPER(?)");
         debugStmt.setString(1, tableName + "%");
         java.sql.ResultSet debugRs = debugStmt.executeQuery();
-        System.out.println("DEBUG: Tables found with similar names:");
         while (debugRs.next()) {
-            System.out.println("  Schema: " + debugRs.getString("TABLE_SCHEMA") + ", Table: " + debugRs.getString("TABLE_NAME"));
         }
         debugRs.close();
         debugStmt.close();
@@ -181,7 +169,6 @@ public class CreateTableGeneratorSnowflakeIntegrationTest {
         rs.close();
         verifyStmt.close();
 
-        System.out.println("✅ SUCCESS: Table Namespace Validation - table exists in correct schema: " + testSchema);
     }
 
     @Test
@@ -193,7 +180,6 @@ public class CreateTableGeneratorSnowflakeIntegrationTest {
         createdTables.add(table2);
         createdTables.add(table3);
 
-        System.out.println("Testing Parallel Table Creation: Verifying schema isolation allows parallel execution");
 
         // Create multiple tables that could run in parallel
         String[] tables = {table1, table2, table3};
@@ -208,7 +194,6 @@ public class CreateTableGeneratorSnowflakeIntegrationTest {
             assertEquals(1, sqls.length);
 
             String sql = sqls[0].toSql();
-            System.out.println("ACTUAL SQL GENERATED: " + sql);
             assertTrue(sql.contains("CREATE TABLE") && sql.contains(tableName));
 
             // Execute against live database
@@ -216,15 +201,12 @@ public class CreateTableGeneratorSnowflakeIntegrationTest {
             preparedStatement.execute();
             preparedStatement.close();
 
-            System.out.println("Created table: " + tableName);
         }
 
-        System.out.println("✅ SUCCESS: Parallel Table Creation - all tables created successfully with unique names");
     }
 
     @Test
     public void testValidationMissingTableName() throws Exception {
-        System.out.println("Testing Validation: Missing table name should fail");
 
         CreateTableStatement statement = new CreateTableStatement(null, null, null);
         statement.addColumn("test_col", new VarcharType(), null);
@@ -234,13 +216,11 @@ public class CreateTableGeneratorSnowflakeIntegrationTest {
             fail("Expected validation error for missing table name");
         } catch (Exception e) {
             assertTrue(e.getMessage().contains("table") || e.getMessage().contains("name") || e.getMessage().contains("required"));
-            System.out.println("✅ SUCCESS: Validation correctly failed for missing table name");
         }
     }
 
     @Test
     public void testUniqueNamingStrategy() throws Exception {
-        System.out.println("Testing Unique Naming Strategy: Verifying all test tables have unique names");
 
         // Create multiple tables using the naming strategy
         String table1 = getUniqueTableName("testMethod1");
@@ -255,10 +235,6 @@ public class CreateTableGeneratorSnowflakeIntegrationTest {
         assertTrue(table2.startsWith("TEST_CREATE_TBL_"));
         assertTrue(table3.startsWith("TEST_CREATE_TBL_"));
 
-        System.out.println("Table 1: " + table1);
-        System.out.println("Table 2: " + table2);
-        System.out.println("Table 3: " + table3);
 
-        System.out.println("✅ SUCCESS: Unique Naming Strategy validated");
     }
 }

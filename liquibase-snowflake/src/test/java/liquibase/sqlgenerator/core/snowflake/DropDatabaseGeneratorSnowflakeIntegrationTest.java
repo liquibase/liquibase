@@ -39,7 +39,7 @@ public class DropDatabaseGeneratorSnowflakeIntegrationTest {
      * @return Unique database name for parallel execution
      */
     private String getUniqueDatabaseName(String methodName) {
-        return "TEST_DROP_DB_" + methodName;
+        return "TEST_DROP_DB_" + methodName.toUpperCase() + "_" + System.currentTimeMillis();
     }
 
     @BeforeEach
@@ -57,7 +57,6 @@ public class DropDatabaseGeneratorSnowflakeIntegrationTest {
                 PreparedStatement dropStmt = connection.prepareStatement("DROP DATABASE IF EXISTS " + databaseName);
                 dropStmt.execute();
                 dropStmt.close();
-                System.out.println("Backup cleanup database: " + databaseName);
             } catch (SQLException e) {
                 System.err.println("Failed to backup cleanup database " + databaseName + ": " + e.getMessage());
             }
@@ -73,7 +72,6 @@ public class DropDatabaseGeneratorSnowflakeIntegrationTest {
         String databaseName = getUniqueDatabaseName("testBasicDrop");
         createdDatabases.add(databaseName);
 
-        System.out.println("Testing Basic DROP: DROP DATABASE " + databaseName);
 
         // First create the database
         PreparedStatement createStmt = connection.prepareStatement("CREATE DATABASE " + databaseName);
@@ -95,7 +93,6 @@ public class DropDatabaseGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: Basic DROP");
     }
 
     @Test
@@ -103,7 +100,6 @@ public class DropDatabaseGeneratorSnowflakeIntegrationTest {
         String databaseName = getUniqueDatabaseName("testDropIfExists");
         createdDatabases.add(databaseName);
 
-        System.out.println("Testing DROP IF EXISTS: DROP DATABASE IF EXISTS " + databaseName);
 
         // First create the database
         PreparedStatement createStmt = connection.prepareStatement("CREATE DATABASE " + databaseName);
@@ -126,7 +122,6 @@ public class DropDatabaseGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: DROP IF EXISTS");
     }
 
     @Test
@@ -134,7 +129,6 @@ public class DropDatabaseGeneratorSnowflakeIntegrationTest {
         String databaseName = getUniqueDatabaseName("testDropIfExistsNonExistent");
         // Do NOT add to createdDatabases since it doesn't exist
 
-        System.out.println("Testing DROP IF EXISTS on non-existent database: DROP DATABASE IF EXISTS " + databaseName);
 
         DropDatabaseStatement statement = new DropDatabaseStatement();
         statement.setDatabaseName(databaseName);
@@ -152,7 +146,6 @@ public class DropDatabaseGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: DROP IF EXISTS on non-existent database");
     }
 
     @Test
@@ -160,7 +153,6 @@ public class DropDatabaseGeneratorSnowflakeIntegrationTest {
         String databaseName = getUniqueDatabaseName("testDropRestrict");
         createdDatabases.add(databaseName);
 
-        System.out.println("Testing DROP RESTRICT: DROP DATABASE " + databaseName + " RESTRICT");
 
         // First create the database
         PreparedStatement createStmt = connection.prepareStatement("CREATE DATABASE " + databaseName);
@@ -183,7 +175,6 @@ public class DropDatabaseGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: DROP RESTRICT");
     }
 
     @Test
@@ -191,7 +182,6 @@ public class DropDatabaseGeneratorSnowflakeIntegrationTest {
         String databaseName = getUniqueDatabaseName("testDropCascade");
         createdDatabases.add(databaseName);
 
-        System.out.println("Testing DROP CASCADE: DROP DATABASE " + databaseName + " CASCADE");
 
         // First create the database
         PreparedStatement createStmt = connection.prepareStatement("CREATE DATABASE " + databaseName);
@@ -214,7 +204,6 @@ public class DropDatabaseGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: DROP CASCADE");
     }
 
     @Test
@@ -222,7 +211,6 @@ public class DropDatabaseGeneratorSnowflakeIntegrationTest {
         String databaseName = getUniqueDatabaseName("testDropIfExistsRestrict");
         createdDatabases.add(databaseName);
 
-        System.out.println("Testing DROP IF EXISTS RESTRICT: DROP DATABASE IF EXISTS " + databaseName + " RESTRICT");
 
         // First create the database
         PreparedStatement createStmt = connection.prepareStatement("CREATE DATABASE " + databaseName);
@@ -246,7 +234,6 @@ public class DropDatabaseGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: DROP IF EXISTS RESTRICT");
     }
 
     @Test
@@ -254,7 +241,6 @@ public class DropDatabaseGeneratorSnowflakeIntegrationTest {
         String databaseName = getUniqueDatabaseName("testDropIfExistsCascade");
         createdDatabases.add(databaseName);
 
-        System.out.println("Testing DROP IF EXISTS CASCADE: DROP DATABASE IF EXISTS " + databaseName + " CASCADE");
 
         // First create the database
         PreparedStatement createStmt = connection.prepareStatement("CREATE DATABASE " + databaseName);
@@ -278,12 +264,10 @@ public class DropDatabaseGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: DROP IF EXISTS CASCADE");
     }
 
     @Test
     public void testValidationMissingDatabaseName() throws Exception {
-        System.out.println("Testing Validation: Missing database name should fail");
 
         DropDatabaseStatement statement = new DropDatabaseStatement();
         // Intentionally not setting databaseName
@@ -293,7 +277,6 @@ public class DropDatabaseGeneratorSnowflakeIntegrationTest {
             fail("Expected validation error for missing database name");
         } catch (Exception e) {
             assertTrue(e.getMessage().contains("database") || e.getMessage().contains("name") || e.getMessage().contains("required"));
-            System.out.println("✅ SUCCESS: Validation correctly failed for missing database name");
         }
     }
 
@@ -301,7 +284,6 @@ public class DropDatabaseGeneratorSnowflakeIntegrationTest {
     public void testValidationCascadeAndRestrict() throws Exception {
         String databaseName = getUniqueDatabaseName("testValidationCascadeAndRestrict");
 
-        System.out.println("Testing Validation: Both CASCADE and RESTRICT should fail");
 
         DropDatabaseStatement statement = new DropDatabaseStatement();
         statement.setDatabaseName(databaseName);
@@ -313,7 +295,6 @@ public class DropDatabaseGeneratorSnowflakeIntegrationTest {
             fail("Expected validation error for both CASCADE and RESTRICT");
         } catch (Exception e) {
             assertTrue(e.getMessage().toLowerCase().contains("cascade") || e.getMessage().toLowerCase().contains("restrict") || e.getMessage().toLowerCase().contains("mutual"));
-            System.out.println("✅ SUCCESS: Validation correctly failed for both CASCADE and RESTRICT");
         }
     }
 
@@ -326,7 +307,6 @@ public class DropDatabaseGeneratorSnowflakeIntegrationTest {
         createdDatabases.add(database2);
         createdDatabases.add(database3);
 
-        System.out.println("Testing Sequential DROP operations on multiple databases");
 
         // Create all databases
         PreparedStatement createStmt1 = connection.prepareStatement("CREATE DATABASE " + database1);
@@ -359,15 +339,12 @@ public class DropDatabaseGeneratorSnowflakeIntegrationTest {
             preparedStatement.execute();
             preparedStatement.close();
 
-            System.out.println("Dropped database: " + dbName);
         }
 
-        System.out.println("✅ SUCCESS: Sequential DROP operations");
     }
 
     @Test
     public void testUniqueNamingStrategy() throws Exception {
-        System.out.println("Testing Unique Naming Strategy: Verifying all test databases have unique names");
 
         // Create multiple databases using the naming strategy
         String db1 = getUniqueDatabaseName("testMethod1");
@@ -382,10 +359,6 @@ public class DropDatabaseGeneratorSnowflakeIntegrationTest {
         assertTrue(db2.startsWith("TEST_DROP_DB_"));
         assertTrue(db3.startsWith("TEST_DROP_DB_"));
 
-        System.out.println("Database 1: " + db1);
-        System.out.println("Database 2: " + db2);
-        System.out.println("Database 3: " + db3);
 
-        System.out.println("✅ SUCCESS: Unique Naming Strategy validated");
     }
 }

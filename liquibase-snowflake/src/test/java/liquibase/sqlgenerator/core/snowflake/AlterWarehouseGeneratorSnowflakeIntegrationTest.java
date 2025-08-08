@@ -1,12 +1,15 @@
 package liquibase.sqlgenerator.core.snowflake;
 
+import liquibase.change.core.CreateWarehouseChange;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.SnowflakeDatabase;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AlterWarehouseStatement;
 import liquibase.util.TestDatabaseConfigUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +50,7 @@ public class AlterWarehouseGeneratorSnowflakeIntegrationTest {
      * when running tests in parallel.
      */
     private String getUniqueWarehouseName(String methodName) {
-        return "TEST_ALTER_" + methodName;
+        return "TEST_ALTER_" + methodName.toUpperCase() + "_" + System.currentTimeMillis();
     }
     
     @Mock
@@ -93,7 +96,6 @@ public class AlterWarehouseGeneratorSnowflakeIntegrationTest {
             }
             
             // Create isolated schema (like SchemaIsolationHook does)
-            System.out.println("SchemaIsolationHook: Setting up isolated schema: " + testSchemaName);
             try (Statement stmt = rawConnection.createStatement()) {
                 stmt.execute("CREATE SCHEMA IF NOT EXISTS " + testSchemaName);
                 stmt.execute("USE SCHEMA " + testSchemaName);
@@ -101,7 +103,6 @@ public class AlterWarehouseGeneratorSnowflakeIntegrationTest {
             
             // Update database to use isolated schema (like SchemaIsolationHook does)
             database.setDefaultSchemaName(testSchemaName);
-            System.out.println("SchemaIsolationHook: New default schema: " + database.getDefaultSchemaName());
             
         } catch (Exception e) {
             throw new RuntimeException("Failed to set up isolated schema: " + testSchemaName, e);
@@ -116,7 +117,6 @@ public class AlterWarehouseGeneratorSnowflakeIntegrationTest {
                 for (String warehouseName : createdWarehouses) {
                     try {
                         stmt.execute("DROP WAREHOUSE IF EXISTS " + warehouseName);
-                        System.out.println("Cleaned up warehouse: " + warehouseName);
                     } catch (Exception e) {
                         System.err.println("Failed to cleanup warehouse " + warehouseName + ": " + e.getMessage());
                     }
@@ -126,7 +126,6 @@ public class AlterWarehouseGeneratorSnowflakeIntegrationTest {
                 if (originalSchema != null) {
                     try {
                         stmt.execute("USE SCHEMA " + originalSchema);
-                        System.out.println("SchemaIsolationHook: Switched back to original schema: " + originalSchema);
                     } catch (Exception e) {
                         System.err.println("Failed to switch back to original schema: " + e.getMessage());
                     }
@@ -135,7 +134,6 @@ public class AlterWarehouseGeneratorSnowflakeIntegrationTest {
                 // Drop test schema (like SchemaIsolationHook cleanup)
                 try {
                     stmt.execute("DROP SCHEMA IF EXISTS " + testSchemaName);
-                    System.out.println("SchemaIsolationHook: Cleaned up schema: " + testSchemaName);
                 } catch (Exception e) {
                     System.err.println("Failed to cleanup schema " + testSchemaName + ": " + e.getMessage());
                 }
@@ -145,10 +143,25 @@ public class AlterWarehouseGeneratorSnowflakeIntegrationTest {
     }
     
     private void createTestWarehouse(String warehouseName) throws Exception {
+        // Use CreateWarehouseChange instead of raw SQL with OR REPLACE to avoid "already exists" errors
+        CreateWarehouseChange createChange = new CreateWarehouseChange();
+        createChange.setWarehouseName(warehouseName);
+        createChange.setOrReplace(true); // Use CREATE OR REPLACE to avoid conflicts
+        
+        // Generate and execute SQL using our changetype
+        SqlStatement[] statements = createChange.generateStatements(database);
+        assertTrue(statements.length > 0, "CreateWarehouseChange should generate SQL statements");
+        
         try (Statement stmt = rawConnection.createStatement()) {
-            stmt.execute("CREATE WAREHOUSE " + warehouseName);
+            for (SqlStatement statement : statements) {
+                // Use SQL generator to get actual SQL string
+                Sql[] sqls = liquibase.sqlgenerator.SqlGeneratorFactory.getInstance().generateSql(statement, database);
+                for (Sql sql : sqls) {
+                    String sqlString = sql.toSql();
+                    stmt.execute(sqlString);
+                }
+            }
             createdWarehouses.add(warehouseName);
-            System.out.println("Created test warehouse: " + warehouseName);
         }
     }
     
@@ -161,10 +174,8 @@ public class AlterWarehouseGeneratorSnowflakeIntegrationTest {
         try (Statement stmt = rawConnection.createStatement()) {
             for (int i = 0; i < sqls.length; i++) {
                 String sql = sqls[i].toSql();
-                System.out.println("Testing " + testName + " [" + (i+1) + "/" + sqls.length + "]: " + sql);
                 stmt.execute(sql);
             }
-            System.out.println("✅ SUCCESS: " + testName);
         } catch (Exception e) {
             System.err.println("❌ FAILED: " + testName + " - " + e.getMessage());
             String allSql = java.util.Arrays.stream(sqls).map(s -> s.toSql()).collect(java.util.stream.Collectors.joining("; "));
@@ -273,10 +284,22 @@ public class AlterWarehouseGeneratorSnowflakeIntegrationTest {
     void testUnsetProperties() throws Exception {
         String warehouseName = getUniqueWarehouseName("testUnsetProperties");
         
-        // Create the warehouse with properties to unset
+        // Create the warehouse with properties to unset using CreateWarehouseChange
+        CreateWarehouseChange createChange = new CreateWarehouseChange();
+        createChange.setWarehouseName(warehouseName);
+        createChange.setAutoSuspend(300);
+        createChange.setComment("Test comment");
+        
+        SqlStatement[] statements = createChange.generateStatements(database);
         try (Statement stmt = rawConnection.createStatement()) {
-            stmt.execute("CREATE WAREHOUSE " + warehouseName + 
-                        " WITH AUTO_SUSPEND = 300 COMMENT = 'Test comment'");
+            for (SqlStatement statement : statements) {
+                // Use SQL generator to get actual SQL string
+                Sql[] sqls = liquibase.sqlgenerator.SqlGeneratorFactory.getInstance().generateSql(statement, database);
+                for (Sql sql : sqls) {
+                    String sqlString = sql.toSql();
+                    stmt.execute(sqlString);
+                }
+            }
             createdWarehouses.add(warehouseName);
         }
         
@@ -309,9 +332,21 @@ public class AlterWarehouseGeneratorSnowflakeIntegrationTest {
     void testResume() throws Exception {
         String warehouseName = getUniqueWarehouseName("testResume");
         
-        // Create and suspend the warehouse
+        // Create and suspend the warehouse using CreateWarehouseChange
+        CreateWarehouseChange createChange = new CreateWarehouseChange();
+        createChange.setWarehouseName(warehouseName);
+        createChange.setInitiallySuspended(true);
+        
+        SqlStatement[] statements = createChange.generateStatements(database);
         try (Statement stmt = rawConnection.createStatement()) {
-            stmt.execute("CREATE WAREHOUSE " + warehouseName + " WITH INITIALLY_SUSPENDED = true");
+            for (SqlStatement statement : statements) {
+                // Use SQL generator to get actual SQL string
+                Sql[] sqls = liquibase.sqlgenerator.SqlGeneratorFactory.getInstance().generateSql(statement, database);
+                for (Sql sql : sqls) {
+                    String sqlString = sql.toSql();
+                    stmt.execute(sqlString);
+                }
+            }
             createdWarehouses.add(warehouseName);
         }
         
@@ -327,9 +362,21 @@ public class AlterWarehouseGeneratorSnowflakeIntegrationTest {
     void testResumeIfSuspended() throws Exception {
         String warehouseName = getUniqueWarehouseName("testResumeIfSuspended");
         
-        // Create and suspend the warehouse
+        // Create and suspend the warehouse using CreateWarehouseChange
+        CreateWarehouseChange createChange = new CreateWarehouseChange();
+        createChange.setWarehouseName(warehouseName);
+        createChange.setInitiallySuspended(true);
+        
+        SqlStatement[] statements = createChange.generateStatements(database);
         try (Statement stmt = rawConnection.createStatement()) {
-            stmt.execute("CREATE WAREHOUSE " + warehouseName + " WITH INITIALLY_SUSPENDED = true");
+            for (SqlStatement statement : statements) {
+                // Use SQL generator to get actual SQL string
+                Sql[] sqls = liquibase.sqlgenerator.SqlGeneratorFactory.getInstance().generateSql(statement, database);
+                for (Sql sql : sqls) {
+                    String sqlString = sql.toSql();
+                    stmt.execute(sqlString);
+                }
+            }
             createdWarehouses.add(warehouseName);
         }
         
@@ -366,9 +413,7 @@ public class AlterWarehouseGeneratorSnowflakeIntegrationTest {
         ValidationErrors errors = generator.validate(statement, database, sqlGeneratorChain);
         
         assertTrue(errors.hasErrors(), "Should have validation errors for missing warehouse name");
-        assertTrue(errors.getErrorMessages().get(0).contains("Warehouse name is required"), 
-                  "Should specify warehouse name is required");
-    }
+        assertTrue(errors.getErrorMessages().get(0).contains("Warehouse name is required"), "Assertion should be true");    }
     
     @Test
     @DisplayName("Integration: Verify Schema Isolation")
@@ -378,7 +423,6 @@ public class AlterWarehouseGeneratorSnowflakeIntegrationTest {
             java.sql.ResultSet rs = stmt.executeQuery("SELECT CURRENT_SCHEMA()");
             if (rs.next()) {
                 String currentSchema = rs.getString(1);
-                System.out.println("Current schema: " + currentSchema);
                 assertEquals(testSchemaName, currentSchema, "Should be in isolated test schema");
             }
             rs.close();

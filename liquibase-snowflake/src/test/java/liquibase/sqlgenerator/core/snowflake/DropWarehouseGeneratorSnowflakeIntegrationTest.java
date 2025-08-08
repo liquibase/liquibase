@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core.snowflake;
 
+import liquibase.change.core.CreateWarehouseChange;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.SnowflakeDatabase;
@@ -7,6 +8,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.snowflake.DropWarehouseStatement;
 import liquibase.util.TestDatabaseConfigUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +49,7 @@ public class DropWarehouseGeneratorSnowflakeIntegrationTest {
      * when running tests in parallel.
      */
     private String getUniqueWarehouseName(String methodName) {
-        return "TEST_DROP_" + methodName;
+        return "TEST_DROP_" + methodName.toUpperCase() + "_" + System.currentTimeMillis();
     }
     
     @Mock
@@ -93,7 +95,6 @@ public class DropWarehouseGeneratorSnowflakeIntegrationTest {
             }
             
             // Create isolated schema (like SchemaIsolationHook does)
-            System.out.println("SchemaIsolationHook: Setting up isolated schema: " + testSchemaName);
             try (Statement stmt = rawConnection.createStatement()) {
                 stmt.execute("CREATE SCHEMA IF NOT EXISTS " + testSchemaName);
                 stmt.execute("USE SCHEMA " + testSchemaName);
@@ -101,7 +102,6 @@ public class DropWarehouseGeneratorSnowflakeIntegrationTest {
             
             // Update database to use isolated schema (like SchemaIsolationHook does)
             database.setDefaultSchemaName(testSchemaName);
-            System.out.println("SchemaIsolationHook: New default schema: " + database.getDefaultSchemaName());
             
         } catch (Exception e) {
             throw new RuntimeException("Failed to set up isolated schema: " + testSchemaName, e);
@@ -116,7 +116,6 @@ public class DropWarehouseGeneratorSnowflakeIntegrationTest {
                 for (String warehouseName : createdWarehouses) {
                     try {
                         stmt.execute("DROP WAREHOUSE IF EXISTS " + warehouseName);
-                        System.out.println("Cleaned up remaining warehouse: " + warehouseName);
                     } catch (Exception e) {
                         System.err.println("Failed to cleanup warehouse " + warehouseName + ": " + e.getMessage());
                     }
@@ -126,7 +125,6 @@ public class DropWarehouseGeneratorSnowflakeIntegrationTest {
                 if (originalSchema != null) {
                     try {
                         stmt.execute("USE SCHEMA " + originalSchema);
-                        System.out.println("SchemaIsolationHook: Switched back to original schema: " + originalSchema);
                     } catch (Exception e) {
                         System.err.println("Failed to switch back to original schema: " + e.getMessage());
                     }
@@ -135,7 +133,6 @@ public class DropWarehouseGeneratorSnowflakeIntegrationTest {
                 // Drop test schema (like SchemaIsolationHook cleanup)
                 try {
                     stmt.execute("DROP SCHEMA IF EXISTS " + testSchemaName);
-                    System.out.println("SchemaIsolationHook: Cleaned up schema: " + testSchemaName);
                 } catch (Exception e) {
                     System.err.println("Failed to cleanup schema " + testSchemaName + ": " + e.getMessage());
                 }
@@ -145,10 +142,24 @@ public class DropWarehouseGeneratorSnowflakeIntegrationTest {
     }
     
     private void createTestWarehouse(String warehouseName) throws Exception {
+        // Use CreateWarehouseChange instead of raw SQL
+        CreateWarehouseChange createChange = new CreateWarehouseChange();
+        createChange.setWarehouseName(warehouseName);
+        
+        // Generate and execute SQL using our changetype
+        SqlStatement[] statements = createChange.generateStatements(database);
+        assertTrue(statements.length > 0, "CreateWarehouseChange should generate SQL statements");
+        
         try (Statement stmt = rawConnection.createStatement()) {
-            stmt.execute("CREATE WAREHOUSE " + warehouseName);
+            for (SqlStatement statement : statements) {
+                // Use SQL generator to get actual SQL string
+                Sql[] sqls = liquibase.sqlgenerator.SqlGeneratorFactory.getInstance().generateSql(statement, database);
+                for (Sql sql : sqls) {
+                    String sqlString = sql.toSql();
+                    stmt.execute(sqlString);
+                }
+            }
             createdWarehouses.add(warehouseName);
-            System.out.println("Created test warehouse for dropping: " + warehouseName);
         }
     }
     
@@ -158,14 +169,12 @@ public class DropWarehouseGeneratorSnowflakeIntegrationTest {
         assertEquals(1, sqls.length, "Should generate exactly one SQL statement");
         
         String sql = sqls[0].toSql();
-        System.out.println("Testing " + testName + ": " + sql);
         
         // Execute against Snowflake using rawConnection
         try (Statement stmt = rawConnection.createStatement()) {
             stmt.execute(sql);
             // Remove from our cleanup list since it's now dropped
             createdWarehouses.remove(statement.getWarehouseName());
-            System.out.println("✅ SUCCESS: " + testName);
         } catch (Exception e) {
             System.err.println("❌ FAILED: " + testName + " - " + e.getMessage());
             throw new AssertionError("SQL execution failed for " + testName + ": " + sql, e);
@@ -235,9 +244,20 @@ public class DropWarehouseGeneratorSnowflakeIntegrationTest {
     void testDropRunningWarehouse() throws Exception {
         String warehouseName = getUniqueWarehouseName("testDropRunningWarehouse");
         
-        // Create and ensure the warehouse is running
+        // Create and ensure the warehouse is running using CreateWarehouseChange
+        CreateWarehouseChange createChange = new CreateWarehouseChange();
+        createChange.setWarehouseName(warehouseName);
+        createChange.setInitiallySuspended(false);
+        
+        SqlStatement[] statements = createChange.generateStatements(database);
         try (Statement stmt = rawConnection.createStatement()) {
-            stmt.execute("CREATE WAREHOUSE " + warehouseName + " WITH INITIALLY_SUSPENDED = false");
+            for (SqlStatement statement : statements) {
+                Sql[] sqls = liquibase.sqlgenerator.SqlGeneratorFactory.getInstance().generateSql(statement, database);
+                for (Sql sql : sqls) {
+                    String sqlString = sql.toSql();
+                    stmt.execute(sqlString);
+                }
+            }
             createdWarehouses.add(warehouseName);
         }
         
@@ -253,9 +273,20 @@ public class DropWarehouseGeneratorSnowflakeIntegrationTest {
     void testDropSuspendedWarehouse() throws Exception {
         String warehouseName = getUniqueWarehouseName("testDropSuspendedWarehouse");
         
-        // Create and ensure the warehouse is suspended
+        // Create and ensure the warehouse is suspended using CreateWarehouseChange
+        CreateWarehouseChange createChange = new CreateWarehouseChange();
+        createChange.setWarehouseName(warehouseName);
+        createChange.setInitiallySuspended(true);
+        
+        SqlStatement[] statements = createChange.generateStatements(database);
         try (Statement stmt = rawConnection.createStatement()) {
-            stmt.execute("CREATE WAREHOUSE " + warehouseName + " WITH INITIALLY_SUSPENDED = true");
+            for (SqlStatement statement : statements) {
+                Sql[] sqls = liquibase.sqlgenerator.SqlGeneratorFactory.getInstance().generateSql(statement, database);
+                for (Sql sql : sqls) {
+                    String sqlString = sql.toSql();
+                    stmt.execute(sqlString);
+                }
+            }
             createdWarehouses.add(warehouseName);
         }
         
@@ -270,13 +301,23 @@ public class DropWarehouseGeneratorSnowflakeIntegrationTest {
     void testDropWarehouseWithProperties() throws Exception {
         String warehouseName = getUniqueWarehouseName("testDropWarehouseWithProperties");
         
-        // Create warehouse with various properties
+        // Create warehouse with various properties using CreateWarehouseChange
+        CreateWarehouseChange createChange = new CreateWarehouseChange();
+        createChange.setWarehouseName(warehouseName);
+        createChange.setWarehouseSize("LARGE");
+        createChange.setAutoSuspend(300);
+        createChange.setAutoResume(true);
+        createChange.setComment("Test warehouse with properties");
+        
+        SqlStatement[] statements = createChange.generateStatements(database);
         try (Statement stmt = rawConnection.createStatement()) {
-            stmt.execute("CREATE WAREHOUSE " + warehouseName + 
-                        " WITH WAREHOUSE_SIZE = 'LARGE' " +
-                        "AUTO_SUSPEND = 300 " +
-                        "AUTO_RESUME = true " +
-                        "COMMENT = 'Test warehouse with properties'");
+            for (SqlStatement statement : statements) {
+                Sql[] sqls = liquibase.sqlgenerator.SqlGeneratorFactory.getInstance().generateSql(statement, database);
+                for (Sql sql : sqls) {
+                    String sqlString = sql.toSql();
+                    stmt.execute(sqlString);
+                }
+            }
             createdWarehouses.add(warehouseName);
         }
         
@@ -295,9 +336,7 @@ public class DropWarehouseGeneratorSnowflakeIntegrationTest {
         ValidationErrors errors = generator.validate(statement, database, sqlGeneratorChain);
         
         assertTrue(errors.hasErrors(), "Should have validation errors for missing warehouse name");
-        assertTrue(errors.getErrorMessages().get(0).contains("Warehouse name is required"), 
-                  "Should specify warehouse name is required");
-    }
+        assertTrue(errors.getErrorMessages().get(0).contains("Warehouse name is required"), "Assertion should be true");    }
     
     @Test
     @DisplayName("Integration: Error Handling - DROP Non-existent Warehouse Without IF EXISTS")
@@ -315,17 +354,15 @@ public class DropWarehouseGeneratorSnowflakeIntegrationTest {
         assertEquals(1, sqls.length, "Should generate exactly one SQL statement");
         
         String sql = sqls[0].toSql();
-        System.out.println("Testing Error Handling - DROP Non-existent: " + sql);
         
         // This should fail with an error
         try (Statement stmt = rawConnection.createStatement()) {
             Exception exception = assertThrows(Exception.class, () -> {
                 stmt.execute(sql);
             });
-            System.out.println("✅ SUCCESS: Expected error occurred - " + exception.getMessage());
             assertTrue(exception.getMessage().toLowerCase().contains("does not exist") || 
                       exception.getMessage().toLowerCase().contains("not found"),
-                      "Should get 'does not exist' or 'not found' error");
+                      "Exception should mention non-existent warehouse");
         } catch (Exception e) {
             throw new AssertionError("Unexpected error during error handling test", e);
         }
@@ -339,7 +376,6 @@ public class DropWarehouseGeneratorSnowflakeIntegrationTest {
             java.sql.ResultSet rs = stmt.executeQuery("SELECT CURRENT_SCHEMA()");
             if (rs.next()) {
                 String currentSchema = rs.getString(1);
-                System.out.println("Current schema: " + currentSchema);
                 assertEquals(testSchemaName, currentSchema, "Should be in isolated test schema");
             }
             rs.close();

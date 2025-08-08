@@ -77,8 +77,7 @@ public class SnowflakeXSDCompletenessTest {
         
         if (!missingAttributes.isEmpty()) {
             String errorMessage = "XSD Schema is incomplete. Missing attributes:\n" + 
-                String.join("\n", missingAttributes) + 
-                "\n\nTo fix: Add missing attributes to XSD elements in " + XSD_PATH;
+                String.join("\n", missingAttributes);
             fail(errorMessage);
         }
     }

@@ -30,15 +30,13 @@ public class FileFormatComprehensiveRequirementsTest {
 
     @Test
     public void testAll22RequiredPropertiesImplementedAndMapped() throws Exception {
-        System.out.println("=== TESTING ALL 22 CORRECTED REQUIREMENTS PROPERTIES ===");
         
         String testFormatName = "COMPREHENSIVE_REQ_TEST_" + System.currentTimeMillis();
         createdTestObjects.add(testFormatName);
         
         try {
             // CREATE: File format with as many properties as possible
-            try (PreparedStatement createStmt = connection.prepareStatement(
-                "CREATE FILE FORMAT " + testFormatName + " " +
+            String createSQL = "CREATE FILE FORMAT " + testFormatName + " " +
                 "TYPE = CSV " +
                 "FIELD_DELIMITER = '|' " +
                 "RECORD_DELIMITER = '\\n' " +
@@ -54,35 +52,19 @@ public class FileFormatComprehensiveRequirementsTest {
                 "NULL_IF = ('NULL', 'null', '') " +
                 "COMPRESSION = GZIP " +
                 "ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE " +
-                "COMMENT = 'Comprehensive requirements test format'"
-            )) {
-                createStmt.execute();
+                "COMMENT = 'Comprehensive requirements test format'";
+            
+            try (Statement createStmt = connection.createStatement()) {
+                createStmt.execute(createSQL);
             }
             
             // QUERY: Retrieve all 22 properties from INFORMATION_SCHEMA
-            String sql = "SELECT " +
-                "FILE_FORMAT_CATALOG, " +        // 1
-                "FILE_FORMAT_SCHEMA, " +         // 2  
-                "FILE_FORMAT_NAME, " +           // 3
-                "FILE_FORMAT_OWNER, " +          // 4
-                "FILE_FORMAT_TYPE, " +           // 5
-                "RECORD_DELIMITER, " +           // 6
-                "FIELD_DELIMITER, " +            // 7
-                "SKIP_HEADER, " +                // 8
-                "DATE_FORMAT, " +                // 9
-                "TIME_FORMAT, " +                // 10
-                "TIMESTAMP_FORMAT, " +           // 11
-                "BINARY_FORMAT, " +              // 12
-                "ESCAPE, " +                     // 13
-                "ESCAPE_UNENCLOSED_FIELD, " +    // 14
-                "TRIM_SPACE, " +                 // 15
-                "FIELD_OPTIONALLY_ENCLOSED_BY, " + // 16
-                "NULL_IF, " +                    // 17
-                "COMPRESSION, " +                // 18
-                "ERROR_ON_COLUMN_COUNT_MISMATCH, " + // 19
-                "CREATED, " +                    // 20
-                "LAST_ALTERED, " +               // 21
-                "COMMENT " +                     // 22
+            String sql = "SELECT FILE_FORMAT_CATALOG, FILE_FORMAT_SCHEMA, FILE_FORMAT_NAME, " +
+                "FILE_FORMAT_OWNER, CREATED, LAST_ALTERED, " +
+                "FILE_FORMAT_TYPE, FIELD_DELIMITER, RECORD_DELIMITER, SKIP_HEADER, " +
+                "DATE_FORMAT, TIME_FORMAT, TIMESTAMP_FORMAT, BINARY_FORMAT, " +
+                "ESCAPE, ESCAPE_UNENCLOSED_FIELD, TRIM_SPACE, FIELD_OPTIONALLY_ENCLOSED_BY, " +
+                "NULL_IF, COMPRESSION, ERROR_ON_COLUMN_COUNT_MISMATCH, COMMENT " +
                 "FROM INFORMATION_SCHEMA.FILE_FORMATS " +
                 "WHERE FILE_FORMAT_NAME = ?";
             
@@ -93,7 +75,6 @@ public class FileFormatComprehensiveRequirementsTest {
                     assertTrue(rs.next(), "Should find the created file format");
                     
                     // VERIFY: All 22 properties can be retrieved
-                    System.out.println("=== VERIFYING ALL 22 PROPERTIES ===");
                     
                     // Identity Properties (3)
                     assertNotNull(rs.getString("FILE_FORMAT_CATALOG"), "FILE_FORMAT_CATALOG should not be null");
@@ -123,7 +104,6 @@ public class FileFormatComprehensiveRequirementsTest {
                     assertEquals("false", rs.getString("ERROR_ON_COLUMN_COUNT_MISMATCH").toLowerCase(), "ERROR_ON_COLUMN_COUNT_MISMATCH should be false");
                     assertEquals("Comprehensive requirements test format", rs.getString("COMMENT"), "COMMENT should match");
                     
-                    System.out.println("✅ ALL 22 CORRECTED REQUIREMENTS PROPERTIES VERIFIED!");
                 }
             }
             
@@ -164,14 +144,12 @@ public class FileFormatComprehensiveRequirementsTest {
             assertEquals("GZIP", fileFormat.getCompression());
             assertFalse(fileFormat.getErrorOnColumnCountMismatch());
             
-            System.out.println("✅ ALL OBJECT MODEL PROPERTIES VERIFIED!");
             
         } finally {
             // Cleanup
             for (String objectName : createdTestObjects) {
                 try (PreparedStatement dropStmt = connection.prepareStatement("DROP FILE FORMAT IF EXISTS " + objectName)) {
                     dropStmt.execute();
-                    System.out.println("Cleaned up test file format: " + objectName);
                 } catch (Exception e) {
                     System.err.println("Failed to cleanup test file format " + objectName + ": " + e.getMessage());
                 }
@@ -185,7 +163,6 @@ public class FileFormatComprehensiveRequirementsTest {
     
     @Test
     public void testPhantomPropertiesDocumented() {
-        System.out.println("=== VERIFYING PHANTOM PROPERTIES ARE DOCUMENTED ===");
         
         // Verify our object model has phantom properties for future Snowflake versions
         FileFormat fileFormat = new FileFormat();
@@ -215,6 +192,5 @@ public class FileFormatComprehensiveRequirementsTest {
         fileFormat.setFileExtension(".csv");
         assertEquals(".csv", fileFormat.getFileExtension());
         
-        System.out.println("✅ ALL 9 PHANTOM PROPERTIES AVAILABLE IN OBJECT MODEL FOR FUTURE SNOWFLAKE VERSIONS!");
     }
 }

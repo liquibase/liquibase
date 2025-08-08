@@ -27,7 +27,6 @@ public class XSDCompletenessValidationTest {
 
     @Test
     public void testAlterSequenceElementInXSD() throws Exception {
-        System.out.println("=== TESTING ALTERSEQUENCE ELEMENT IN XSD ===");
         
         // Sample XML using the alterSequence element with Snowflake-specific attributes
         String xmlContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
@@ -38,7 +37,7 @@ public class XSDCompletenessValidationTest {
             "    xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog\n" +
             "                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd\n" +
             "                        http://www.liquibase.org/xml/ns/snowflake\n" +
-            "                        " + new File(XSD_PATH).toURI() + "\">\n" +
+            "                        http://www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd\">\n" +
             "    <changeSet id=\"test-alter-sequence\" author=\"xsd-test\">\n" +
             "        <snowflake:alterSequence sequenceName=\"test_seq\"\n" +
             "                               schemaName=\"BASE_SCHEMA\"\n" +
@@ -64,12 +63,10 @@ public class XSDCompletenessValidationTest {
             builder.parse(new ByteArrayInputStream(xmlContent.getBytes(StandardCharsets.UTF_8)));
         }, "alterSequence element should validate successfully against XSD schema");
 
-        System.out.println("✅ SUCCESS: alterSequence element validates correctly against XSD");
     }
 
     @Test 
     public void testMajorElementsInXSD() throws Exception {
-        System.out.println("=== TESTING MAJOR SNOWFLAKE ELEMENTS IN XSD ===");
         
         String[] majorElements = {
             "createDatabase", "alterDatabase", "dropDatabase",
@@ -98,27 +95,24 @@ public class XSDCompletenessValidationTest {
                     "    xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog\n" +
                     "                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd\n" +
                     "                        http://www.liquibase.org/xml/ns/snowflake\n" +
-                    "                        " + new File(XSD_PATH).toURI() + "\">\n" +
+                    "                        http://www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd\">\n" +
                     "    <changeSet id=\"test-" + element + "\" author=\"xsd-test\">\n" +
                     "        <snowflake:" + element + " " + getMinimalAttributes(element) + "/>\n" +
                     "    </changeSet>\n" +
                     "</databaseChangeLog>";
 
                 builder.parse(new ByteArrayInputStream(xmlContent.getBytes(StandardCharsets.UTF_8)));
-                System.out.println("✅ " + element + " - XSD validation successful");
                 validatedElements++;
                 
             } catch (Exception e) {
-                System.out.println("❌ " + element + " - XSD validation failed: " + e.getMessage());
+                // Log the exception for debugging if needed
+                System.err.println("Failed to validate element " + element + ": " + e.getMessage());
             }
         }
         
-        System.out.println("\n🎯 VALIDATION RESULTS: " + validatedElements + "/" + majorElements.length + " elements validated");
         
         // All major elements should validate successfully
-        assertEquals(majorElements.length, validatedElements, 
-            "All major Snowflake elements should be defined in XSD and validate successfully");
-    }
+        assertEquals(majorElements.length, validatedElements, "Values should be equal");    }
     
     private String getMinimalAttributes(String element) {
         if (element.equals("createDatabase") || element.equals("alterDatabase") || element.equals("dropDatabase")) {
@@ -138,16 +132,8 @@ public class XSDCompletenessValidationTest {
 
     @Test
     public void finalXSDCompletenessConfirmation() {
-        System.out.println("=== FINAL XSD COMPLETENESS CONFIRMATION ===");
         
-        System.out.println("✅ Critical Gap Fixed: alterSequence element added to XSD");
-        System.out.println("✅ Major Elements: All 15 major operations defined in XSD");
-        System.out.println("✅ Attributes Coverage: Comprehensive attribute support");
-        System.out.println("✅ Schema Validation: XSD validates XML correctly");
-        System.out.println("✅ Requirements Alignment: XSD matches requirements");
         
-        System.out.println("\n🏆 XSD COMPLETENESS: 100% for documented requirements");
-        System.out.println("📊 STATUS: XSD schema is complete and validates successfully");
         
         assertTrue(true, "XSD completeness validation achieved!");
     }

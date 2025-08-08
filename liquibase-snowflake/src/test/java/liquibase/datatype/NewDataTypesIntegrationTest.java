@@ -75,7 +75,6 @@ public class NewDataTypesIntegrationTest {
                 PreparedStatement dropStmt = connection.prepareStatement("DROP TABLE IF EXISTS " + tableName);
                 dropStmt.execute();
                 dropStmt.close();
-                System.out.println("Cleaned up table: " + tableName);
             } catch (SQLException e) {
                 System.err.println("Failed to drop table " + tableName + ": " + e.getMessage());
             }
@@ -91,7 +90,6 @@ public class NewDataTypesIntegrationTest {
         String tableName = getUniqueTableName("testVariantDataType");
         createdTables.add(tableName);
 
-        System.out.println("Testing VARIANT Data Type");
 
         CreateTableStatement statement = new CreateTableStatement(null, null, tableName);
         statement.addColumn("id", new IntType(), null, new ColumnConstraint[]{new NotNullConstraint()});
@@ -102,15 +100,14 @@ public class NewDataTypesIntegrationTest {
         assertEquals(1, sqls.length);
 
         String sql = sqls[0].toSql();
-        System.out.println("GENERATED SQL: " + sql);
-        assertTrue(sql.contains("VARIANT"), "SQL should contain VARIANT data type");
+        assertTrue(sql.contains("VARIANT"), "SQL should contain VARIANT data type: " + sql);
+        assertTrue(sql.contains("CREATE TABLE"), "SQL should be a CREATE TABLE statement: " + sql);
 
         // Execute against live database
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: VARIANT table created successfully");
     }
 
     @Test
@@ -118,7 +115,6 @@ public class NewDataTypesIntegrationTest {
         String tableName = getUniqueTableName("testArrayDataType");
         createdTables.add(tableName);
 
-        System.out.println("Testing ARRAY Data Type");
 
         CreateTableStatement statement = new CreateTableStatement(null, null, tableName);
         statement.addColumn("id", new IntType(), null, new ColumnConstraint[]{new NotNullConstraint()});
@@ -126,14 +122,13 @@ public class NewDataTypesIntegrationTest {
 
         Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(statement, database);
         String sql = sqls[0].toSql();
-        System.out.println("GENERATED SQL: " + sql);
-        assertTrue(sql.contains("ARRAY"), "SQL should contain ARRAY data type");
+        assertTrue(sql.contains("ARRAY"), "SQL should contain ARRAY data type: " + sql);
+        assertTrue(sql.contains("CREATE TABLE"), "SQL should be a CREATE TABLE statement: " + sql);
 
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: ARRAY table created successfully");
     }
 
     @Test
@@ -141,7 +136,6 @@ public class NewDataTypesIntegrationTest {
         String tableName = getUniqueTableName("testObjectDataType");
         createdTables.add(tableName);
 
-        System.out.println("Testing OBJECT Data Type");
 
         CreateTableStatement statement = new CreateTableStatement(null, null, tableName);
         statement.addColumn("id", new IntType(), null, new ColumnConstraint[]{new NotNullConstraint()});
@@ -149,14 +143,13 @@ public class NewDataTypesIntegrationTest {
 
         Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(statement, database);
         String sql = sqls[0].toSql();
-        System.out.println("GENERATED SQL: " + sql);
-        assertTrue(sql.contains("OBJECT"), "SQL should contain OBJECT data type");
+        assertTrue(sql.contains("OBJECT"), "SQL should contain OBJECT data type: " + sql);
+        assertTrue(sql.contains("CREATE TABLE"), "SQL should be a CREATE TABLE statement: " + sql);
 
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: OBJECT table created successfully");
     }
 
     @Test
@@ -164,7 +157,6 @@ public class NewDataTypesIntegrationTest {
         String tableName = getUniqueTableName("testGeographyDataType");
         createdTables.add(tableName);
 
-        System.out.println("Testing GEOGRAPHY Data Type");
 
         CreateTableStatement statement = new CreateTableStatement(null, null, tableName);
         statement.addColumn("id", new IntType(), null, new ColumnConstraint[]{new NotNullConstraint()});
@@ -172,14 +164,13 @@ public class NewDataTypesIntegrationTest {
 
         Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(statement, database);
         String sql = sqls[0].toSql();
-        System.out.println("GENERATED SQL: " + sql);
-        assertTrue(sql.contains("GEOGRAPHY"), "SQL should contain GEOGRAPHY data type");
+        assertTrue(sql.contains("GEOGRAPHY"), "SQL should contain GEOGRAPHY data type: " + sql);
+        assertTrue(sql.contains("CREATE TABLE"), "SQL should be a CREATE TABLE statement: " + sql);
 
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: GEOGRAPHY table created successfully");
     }
 
     @Test
@@ -187,7 +178,6 @@ public class NewDataTypesIntegrationTest {
         String tableName = getUniqueTableName("testGeometryDataType");
         createdTables.add(tableName);
 
-        System.out.println("Testing GEOMETRY Data Type");
 
         CreateTableStatement statement = new CreateTableStatement(null, null, tableName);
         statement.addColumn("id", new IntType(), null, new ColumnConstraint[]{new NotNullConstraint()});
@@ -195,14 +185,13 @@ public class NewDataTypesIntegrationTest {
 
         Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(statement, database);
         String sql = sqls[0].toSql();
-        System.out.println("GENERATED SQL: " + sql);
-        assertTrue(sql.contains("GEOMETRY"), "SQL should contain GEOMETRY data type");
+        assertTrue(sql.contains("GEOMETRY"), "SQL should contain GEOMETRY data type: " + sql);
+        assertTrue(sql.contains("CREATE TABLE"), "SQL should be a CREATE TABLE statement: " + sql);
 
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: GEOMETRY table created successfully");
     }
 
     @Test
@@ -210,7 +199,6 @@ public class NewDataTypesIntegrationTest {
         String tableName = getUniqueTableName("testAllNewDataTypesInOneTable");
         createdTables.add(tableName);
 
-        System.out.println("Testing ALL New Data Types in One Table");
 
         CreateTableStatement statement = new CreateTableStatement(null, null, tableName);
         statement.addColumn("id", new IntType(), null, new ColumnConstraint[]{new NotNullConstraint()});
@@ -222,20 +210,19 @@ public class NewDataTypesIntegrationTest {
 
         Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(statement, database);
         String sql = sqls[0].toSql();
-        System.out.println("GENERATED SQL: " + sql);
         
-        // Verify all data types are present
-        assertTrue(sql.contains("VARIANT"), "SQL should contain VARIANT");
-        assertTrue(sql.contains("ARRAY"), "SQL should contain ARRAY");
-        assertTrue(sql.contains("OBJECT"), "SQL should contain OBJECT");
-        assertTrue(sql.contains("GEOGRAPHY"), "SQL should contain GEOGRAPHY");
-        assertTrue(sql.contains("GEOMETRY"), "SQL should contain GEOMETRY");
+        // Verify all data types are present in CREATE TABLE statement
+        assertTrue(sql.startsWith("CREATE TABLE"), "SQL should start with CREATE TABLE: " + sql);
+        assertTrue(sql.contains("VARIANT"), "SQL should contain VARIANT data type: " + sql);
+        assertTrue(sql.contains("ARRAY"), "SQL should contain ARRAY data type: " + sql);
+        assertTrue(sql.contains("OBJECT"), "SQL should contain OBJECT data type: " + sql);
+        assertTrue(sql.contains("GEOGRAPHY"), "SQL should contain GEOGRAPHY data type: " + sql);
+        assertTrue(sql.contains("GEOMETRY"), "SQL should contain GEOMETRY data type: " + sql);
 
         // Execute against live database
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: Table with ALL new data types created successfully");
     }
 }

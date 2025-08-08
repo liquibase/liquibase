@@ -65,7 +65,6 @@ public class DropSchemaGeneratorSnowflakeIntegrationTest {
                 PreparedStatement dropStmt = connection.prepareStatement("DROP SCHEMA IF EXISTS " + testDatabase + "." + schemaName);
                 dropStmt.execute();
                 dropStmt.close();
-                System.out.println("Backup cleanup schema: " + testDatabase + "." + schemaName);
             } catch (SQLException e) {
                 System.err.println("Failed to backup cleanup schema " + schemaName + ": " + e.getMessage());
             }
@@ -81,7 +80,6 @@ public class DropSchemaGeneratorSnowflakeIntegrationTest {
         String schemaName = getUniqueSchemaName("testBasicDrop");
         createdSchemas.add(schemaName);
 
-        System.out.println("Testing Basic DROP: DROP SCHEMA " + schemaName);
 
         // First create the schema
         PreparedStatement createStmt = connection.prepareStatement("CREATE SCHEMA " + schemaName);
@@ -103,7 +101,6 @@ public class DropSchemaGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: Basic DROP");
     }
 
     @Test
@@ -111,7 +108,6 @@ public class DropSchemaGeneratorSnowflakeIntegrationTest {
         String schemaName = getUniqueSchemaName("testDropIfExists");
         createdSchemas.add(schemaName);
 
-        System.out.println("Testing DROP IF EXISTS: DROP SCHEMA IF EXISTS " + schemaName);
 
         // First create the schema
         PreparedStatement createStmt = connection.prepareStatement("CREATE SCHEMA " + schemaName);
@@ -134,7 +130,6 @@ public class DropSchemaGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: DROP IF EXISTS");
     }
 
     @Test
@@ -142,7 +137,6 @@ public class DropSchemaGeneratorSnowflakeIntegrationTest {
         String schemaName = getUniqueSchemaName("testDropIfExistsNonExistent");
         // Do NOT add to createdSchemas since it doesn't exist
 
-        System.out.println("Testing DROP IF EXISTS on non-existent schema: DROP SCHEMA IF EXISTS " + schemaName);
 
         DropSchemaStatement statement = new DropSchemaStatement();
         statement.setSchemaName(schemaName);
@@ -160,7 +154,6 @@ public class DropSchemaGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: DROP IF EXISTS on non-existent schema");
     }
 
     @Test
@@ -168,7 +161,6 @@ public class DropSchemaGeneratorSnowflakeIntegrationTest {
         String schemaName = getUniqueSchemaName("testDropRestrict");
         createdSchemas.add(schemaName);
 
-        System.out.println("Testing DROP RESTRICT: DROP SCHEMA " + schemaName + " RESTRICT");
 
         // First create the schema
         PreparedStatement createStmt = connection.prepareStatement("CREATE SCHEMA " + schemaName);
@@ -191,7 +183,6 @@ public class DropSchemaGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: DROP RESTRICT");
     }
 
     @Test
@@ -199,7 +190,6 @@ public class DropSchemaGeneratorSnowflakeIntegrationTest {
         String schemaName = getUniqueSchemaName("testDropCascade");
         createdSchemas.add(schemaName);
 
-        System.out.println("Testing DROP CASCADE: DROP SCHEMA " + schemaName + " CASCADE");
 
         // First create the schema
         PreparedStatement createStmt = connection.prepareStatement("CREATE SCHEMA " + schemaName);
@@ -222,7 +212,6 @@ public class DropSchemaGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: DROP CASCADE");
     }
 
     @Test
@@ -230,7 +219,6 @@ public class DropSchemaGeneratorSnowflakeIntegrationTest {
         String schemaName = getUniqueSchemaName("testDropIfExistsRestrict");
         createdSchemas.add(schemaName);
 
-        System.out.println("Testing DROP IF EXISTS RESTRICT: DROP SCHEMA IF EXISTS " + schemaName + " RESTRICT");
 
         // First create the schema
         PreparedStatement createStmt = connection.prepareStatement("CREATE SCHEMA " + schemaName);
@@ -254,7 +242,6 @@ public class DropSchemaGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: DROP IF EXISTS RESTRICT");
     }
 
     @Test
@@ -262,7 +249,6 @@ public class DropSchemaGeneratorSnowflakeIntegrationTest {
         String schemaName = getUniqueSchemaName("testDropIfExistsCascade");
         createdSchemas.add(schemaName);
 
-        System.out.println("Testing DROP IF EXISTS CASCADE: DROP SCHEMA IF EXISTS " + schemaName + " CASCADE");
 
         // First create the schema
         PreparedStatement createStmt = connection.prepareStatement("CREATE SCHEMA " + schemaName);
@@ -286,12 +272,10 @@ public class DropSchemaGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: DROP IF EXISTS CASCADE");
     }
 
     @Test
     public void testValidationMissingSchemaName() throws Exception {
-        System.out.println("Testing Validation: Missing schema name should fail");
 
         DropSchemaStatement statement = new DropSchemaStatement();
         // Intentionally not setting schemaName
@@ -301,7 +285,6 @@ public class DropSchemaGeneratorSnowflakeIntegrationTest {
             fail("Expected validation error for missing schema name");
         } catch (Exception e) {
             assertTrue(e.getMessage().contains("schema") || e.getMessage().contains("name") || e.getMessage().contains("required"));
-            System.out.println("✅ SUCCESS: Validation correctly failed for missing schema name");
         }
     }
 
@@ -309,7 +292,6 @@ public class DropSchemaGeneratorSnowflakeIntegrationTest {
     public void testValidationCascadeAndRestrict() throws Exception {
         String schemaName = getUniqueSchemaName("testValidationCascadeAndRestrict");
 
-        System.out.println("Testing Validation: Both CASCADE and RESTRICT should fail");
 
         DropSchemaStatement statement = new DropSchemaStatement();
         statement.setSchemaName(schemaName);
@@ -321,7 +303,6 @@ public class DropSchemaGeneratorSnowflakeIntegrationTest {
             fail("Expected validation error for both CASCADE and RESTRICT");
         } catch (Exception e) {
             assertTrue(e.getMessage().toLowerCase().contains("cascade") || e.getMessage().toLowerCase().contains("restrict") || e.getMessage().toLowerCase().contains("mutual"));
-            System.out.println("✅ SUCCESS: Validation correctly failed for both CASCADE and RESTRICT");
         }
     }
 
@@ -334,7 +315,6 @@ public class DropSchemaGeneratorSnowflakeIntegrationTest {
         createdSchemas.add(schema2);
         createdSchemas.add(schema3);
 
-        System.out.println("Testing Sequential DROP operations on multiple schemas");
 
         // Create all schemas
         PreparedStatement createStmt1 = connection.prepareStatement("CREATE SCHEMA " + schema1);
@@ -367,15 +347,12 @@ public class DropSchemaGeneratorSnowflakeIntegrationTest {
             preparedStatement.execute();
             preparedStatement.close();
 
-            System.out.println("Dropped schema: " + schName);
         }
 
-        System.out.println("✅ SUCCESS: Sequential DROP operations");
     }
 
     @Test
     public void testUniqueNamingStrategy() throws Exception {
-        System.out.println("Testing Unique Naming Strategy: Verifying all test schemas have unique names");
 
         // Create multiple schemas using the naming strategy
         String schema1 = getUniqueSchemaName("testMethod1");
@@ -390,10 +367,6 @@ public class DropSchemaGeneratorSnowflakeIntegrationTest {
         assertTrue(schema2.startsWith("TEST_DROP_SCHEMA_"));
         assertTrue(schema3.startsWith("TEST_DROP_SCHEMA_"));
 
-        System.out.println("Schema 1: " + schema1);
-        System.out.println("Schema 2: " + schema2);
-        System.out.println("Schema 3: " + schema3);
 
-        System.out.println("✅ SUCCESS: Unique Naming Strategy validated");
     }
 }

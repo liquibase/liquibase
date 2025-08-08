@@ -76,11 +76,38 @@ public class ChangedWarehouseChangeGenerator implements ChangedObjectChangeGener
         if (differences.isDifferent("comment") && !EXCLUDED_FIELDS_SET.contains("comment")) {
             change.setComment(warehouse.getComment());
         }
-        if (differences.isDifferent("enableQueryAcceleration") && !EXCLUDED_FIELDS_SET.contains("enableQueryAcceleration")) {
-            change.setEnableQueryAcceleration(warehouse.getEnableQueryAcceleration());
-        }
-        if (differences.isDifferent("queryAccelerationMaxScaleFactor") && !EXCLUDED_FIELDS_SET.contains("queryAccelerationMaxScaleFactor")) {
-            change.setQueryAccelerationMaxScaleFactor(warehouse.getQueryAccelerationMaxScaleFactor());
+        // Handle query acceleration logic - prevent invalid combinations
+        boolean hasAccelerationDiff = differences.isDifferent("enableQueryAcceleration") && !EXCLUDED_FIELDS_SET.contains("enableQueryAcceleration");
+        boolean hasScaleFactorDiff = differences.isDifferent("queryAccelerationMaxScaleFactor") && !EXCLUDED_FIELDS_SET.contains("queryAccelerationMaxScaleFactor");
+        
+        if (hasAccelerationDiff || hasScaleFactorDiff) {
+            Boolean enableAcceleration = warehouse.getEnableQueryAcceleration();
+            Integer scaleFactor = warehouse.getQueryAccelerationMaxScaleFactor();
+            
+            // Apply the same logic as AlterWarehouseChange validation to prevent conflicts
+            if (scaleFactor != null && scaleFactor > 0) {
+                // If scale factor is set, query acceleration should be enabled
+                if (Boolean.FALSE.equals(enableAcceleration)) {
+                    // Don't generate invalid combination - only set scale factor, let validation auto-enable
+                    change.setQueryAccelerationMaxScaleFactor(scaleFactor);
+                } else {
+                    // Safe to set both - acceleration is true/null 
+                    if (hasAccelerationDiff && enableAcceleration != null) {
+                        change.setEnableQueryAcceleration(enableAcceleration);
+                    }
+                    if (hasScaleFactorDiff) {
+                        change.setQueryAccelerationMaxScaleFactor(scaleFactor);
+                    }
+                }
+            } else {
+                // Scale factor is 0/null - safe to set acceleration state
+                if (hasAccelerationDiff) {
+                    change.setEnableQueryAcceleration(enableAcceleration);
+                }
+                if (hasScaleFactorDiff && scaleFactor != null) {
+                    change.setQueryAccelerationMaxScaleFactor(scaleFactor);
+                }
+            }
         }
         if (differences.isDifferent("scalingPolicy") && !EXCLUDED_FIELDS_SET.contains("scalingPolicy")) {
             change.setScalingPolicy(warehouse.getScalingPolicy());

@@ -75,7 +75,6 @@ public class FileFormatRequirementsComplianceIntegrationTest {
                 PreparedStatement dropStmt = connection.prepareStatement("DROP FILE FORMAT IF EXISTS BASE_SCHEMA." + objectName);
                 dropStmt.execute();
                 dropStmt.close();
-                System.out.println("Cleaned up test file format: " + objectName);
             } catch (Exception e) {
                 System.err.println("Failed to cleanup test file format " + objectName + ": " + e.getMessage());
             }
@@ -88,7 +87,6 @@ public class FileFormatRequirementsComplianceIntegrationTest {
 
     @Test
     public void testAddToMethodUsesOnlyVerifiedColumns() throws Exception {
-        System.out.println("=== TESTING ADDTO METHOD WITH VERIFIED COLUMNS ONLY ===");
         
         String testFormatName = "ADDTO_VERIFIED_TEST_" + System.currentTimeMillis();
         createdTestObjects.add(testFormatName);
@@ -116,7 +114,6 @@ public class FileFormatRequirementsComplianceIntegrationTest {
             assertDoesNotThrow(() -> {
                 // Test by trying to populate schema objects - this internally calls addTo
                 testSchema.getDatabaseObjects(FileFormat.class);
-                System.out.println("✅ SUCCESS: addTo method validation passed (verified columns only)");
             }, "addTo method should not throw SQLException when querying verified columns only");
             
         } finally {
@@ -126,7 +123,6 @@ public class FileFormatRequirementsComplianceIntegrationTest {
 
     @Test
     public void testSophisticatedComparisonLogic() throws Exception {
-        System.out.println("=== TESTING SOPHISTICATED COMPARISON LOGIC ===");
         
         // Test COMPARE_ALWAYS properties
         FileFormat format1 = new FileFormat("TEST_COMPARISON");
@@ -140,7 +136,6 @@ public class FileFormatRequirementsComplianceIntegrationTest {
         );
         
         assertTrue(diffs.hasDifferences(), "Should detect differences in COMPARE_ALWAYS properties");
-        System.out.println("✅ SUCCESS: COMPARE_ALWAYS logic working");
         
         // Test COMPARE_WHEN_NOT_DEFAULT properties
         FileFormat format3 = new FileFormat("TEST_DEFAULT");
@@ -163,7 +158,6 @@ public class FileFormatRequirementsComplianceIntegrationTest {
         );
         
         assertTrue(diffs3.hasDifferences(), "Should detect differences when one has non-default value");
-        System.out.println("✅ SUCCESS: COMPARE_WHEN_NOT_DEFAULT logic working");
         
         // Test COMPARE_WHEN_PRESENT properties
         FileFormat format5 = new FileFormat("TEST_PRESENT");
@@ -186,12 +180,10 @@ public class FileFormatRequirementsComplianceIntegrationTest {
         );
         
         assertFalse(diffs5.hasDifferences(), "Should compare when both properties are present and equal");
-        System.out.println("✅ SUCCESS: COMPARE_WHEN_PRESENT logic working");
     }
 
     @Test
     public void testPhantomPropertyHandling() throws Exception {
-        System.out.println("=== TESTING PHANTOM PROPERTY HANDLING ===");
         
         FileFormat format1 = new FileFormat("TEST_PHANTOM");
         FileFormat format2 = new FileFormat("TEST_PHANTOM");
@@ -219,12 +211,10 @@ public class FileFormatRequirementsComplianceIntegrationTest {
         );
         
         assertFalse(diffs2.hasDifferences(), "Should NOT compare phantom properties when one is null");
-        System.out.println("✅ SUCCESS: Phantom property logic working");
     }
 
     @Test
     public void testHashCalculationCompliance() throws Exception {
-        System.out.println("=== TESTING HASH CALCULATION COMPLIANCE ===");
         
         FileFormat format = new FileFormat("TEST_HASH");
         Catalog testCatalog = new Catalog("TEST_CATALOG");
@@ -238,54 +228,39 @@ public class FileFormatRequirementsComplianceIntegrationTest {
         assertEquals("TEST_HASH", hash[0], "First hash element should be format name");
         assertEquals("TEST_SCHEMA", hash[2], "Third hash element should be schema name");
         
-        System.out.println("✅ SUCCESS: Hash calculation follows requirements (name, catalog, schema)");
     }
 
     @Test
     public void testSnapshotGeneratorPriorityCompliance() throws Exception {
-        System.out.println("=== TESTING SNAPSHOT GENERATOR PRIORITY COMPLIANCE ===");
         
         // Test with SnowflakeDatabase
         int priority1 = generator.getPriority(FileFormat.class, new SnowflakeDatabase());
-        assertEquals(FileFormatSnapshotGeneratorSnowflake.PRIORITY_DATABASE, priority1, 
-                    "Should have DATABASE priority for FileFormat on SnowflakeDatabase");
-        
-        // Test with non-FileFormat class
+        assertEquals(FileFormatSnapshotGeneratorSnowflake.PRIORITY_DATABASE, priority1, "Values should be equal");        
+        // Test with non-FileFormat class (Schema - should return PRIORITY_ADDITIONAL since FileFormats are added to Schemas)
         int priority2 = generator.getPriority(Schema.class, new SnowflakeDatabase());
-        assertEquals(FileFormatSnapshotGeneratorSnowflake.PRIORITY_NONE, priority2,
-                    "Should have NONE priority for non-FileFormat classes");
-        
-        System.out.println("✅ SUCCESS: Priority logic compliance verified");
+        assertEquals(FileFormatSnapshotGeneratorSnowflake.PRIORITY_ADDITIONAL, priority2, "Values should be equal");        
     }
 
     @Test
     public void testComparatorPriorityCompliance() throws Exception {
-        System.out.println("=== TESTING COMPARATOR PRIORITY COMPLIANCE ===");
         
         // Test with SnowflakeDatabase and FileFormat
         int priority1 = comparator.getPriority(FileFormat.class, new SnowflakeDatabase());
-        assertEquals(FileFormatComparator.PRIORITY_TYPE, priority1,
-                    "Should have TYPE priority for FileFormat on SnowflakeDatabase");
-        
+        assertEquals(FileFormatComparator.PRIORITY_TYPE, priority1, "Values should be equal");        
         // Test with non-SnowflakeDatabase
         Database otherDb = null;
         try {
             otherDb = (Database) Class.forName("liquibase.database.core.H2Database").getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             // If H2Database not available, skip this test part
-            System.out.println("H2Database not available, skipping non-Snowflake test");
             return;
         }
         int priority2 = comparator.getPriority(FileFormat.class, otherDb);
-        assertEquals(FileFormatComparator.PRIORITY_NONE, priority2,
-                    "Should have NONE priority for FileFormat on non-SnowflakeDatabase");
-        
-        System.out.println("✅ SUCCESS: Comparator priority compliance verified");
+        assertEquals(FileFormatComparator.PRIORITY_NONE, priority2, "Values should be equal");        
     }
 
     @Test
     public void testEndToEndWorkflowWithRealSnowflake() throws Exception {
-        System.out.println("=== TESTING END-TO-END WORKFLOW WITH REAL SNOWFLAKE ===");
         
         String testFormatName = "E2E_WORKFLOW_TEST_" + System.currentTimeMillis();
         createdTestObjects.add(testFormatName);
@@ -312,7 +287,6 @@ public class FileFormatRequirementsComplianceIntegrationTest {
                 "COMMENT = 'End-to-end workflow test format'"
             )) {
                 createStmt.execute();
-                System.out.println("✅ Step 1: FileFormat created in Snowflake");
             }
             
             // Step 2: Use SnapshotGenerator to read it back (tests addTo method)
@@ -321,7 +295,6 @@ public class FileFormatRequirementsComplianceIntegrationTest {
             assertDoesNotThrow(() -> {
                 // Test addTo indirectly through schema population
                 testSchema.getDatabaseObjects(FileFormat.class);
-                System.out.println("✅ Step 2: SnapshotGenerator addTo method executed successfully");
             });
             
             // Step 3: Query the created format directly to verify all properties are accessible
@@ -352,7 +325,6 @@ public class FileFormatRequirementsComplianceIntegrationTest {
                     assertNotNull(rs.getString("NULL_IF"));
                     assertEquals("End-to-end workflow test format", rs.getString("COMMENT"));
                     
-                    System.out.println("✅ Step 3: All verified properties successfully queried");
                 }
             }
             
@@ -372,9 +344,7 @@ public class FileFormatRequirementsComplianceIntegrationTest {
             );
             
             assertTrue(diffs.hasDifferences(), "Should detect differences in sophisticated comparison");
-            System.out.println("✅ Step 4: Sophisticated comparison logic verified");
             
-            System.out.println("🎉 END-TO-END WORKFLOW COMPLETED SUCCESSFULLY!");
             
         } finally {
             cleanupTestFormat(testFormatName);
@@ -383,7 +353,6 @@ public class FileFormatRequirementsComplianceIntegrationTest {
 
     @Test 
     public void testCoverageBoostingScenarios() throws Exception {
-        System.out.println("=== TESTING COVERAGE BOOSTING SCENARIOS ===");
         
         // Test error handling paths - cannot directly call protected snapshotObject
         // Instead test through public interface behavior
@@ -392,7 +361,6 @@ public class FileFormatRequirementsComplianceIntegrationTest {
             format.setName(null);
             // Test via public methods that would internally call snapshotObject
             assertNull(format.getName(), "FileFormat with null name should have null name");
-            System.out.println("✅ Error handling path validated");
         });
         
         // Test wrong object type handling
@@ -408,7 +376,6 @@ public class FileFormatRequirementsComplianceIntegrationTest {
         assertNotNull(replaced);
         assertEquals(0, replaced.length);
         
-        System.out.println("✅ SUCCESS: Coverage boosting scenarios validated");
     }
 
     private void cleanupTestFormat(String formatName) {

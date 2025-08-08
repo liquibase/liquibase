@@ -45,9 +45,7 @@ public class ModernSnowflakeIntegrationTest {
     public void testDatabaseConnectionWorks() throws Exception {
         // Simple test to verify the configuration works
         assertNotNull(database, "Database should be initialized");
-        assertTrue(database.getConnection().getURL().contains("snowflake"), 
-                   "Should be connected to Snowflake");
-    }
+        assertTrue(database.getConnection().getURL().contains("snowflake"), "Assertion should be true");    }
 
     @Test
     public void testTableCreationAndQuery() throws Exception {
@@ -98,8 +96,7 @@ public class ModernSnowflakeIntegrationTest {
             executeSql("CREATE TABLE test_table_in_schema (id INT)");
             
             // Verify we can query the table in the schema
-            PreparedStatement stmt = connection.prepareStatement(
-                "SELECT COUNT(*) FROM test_table_in_schema");
+            PreparedStatement stmt = connection.prepareStatement("SELECT COUNT(*) FROM test_table_in_schema");
             ResultSet rs = stmt.executeQuery();
             
             assertTrue(rs.next(), "Should be able to query table in schema");

@@ -2,25 +2,69 @@ package liquibase.change.core
 
 import liquibase.change.Change
 import liquibase.database.core.SnowflakeDatabase
+import liquibase.database.DatabaseFactory
+import liquibase.database.jvm.JdbcConnection
 import liquibase.exception.DatabaseException
 import liquibase.statement.SqlStatement
-import liquibase.test.TestContext
-import spock.lang.Ignore
+import liquibase.sqlgenerator.SqlGeneratorFactory
+import liquibase.util.TestDatabaseConfigUtil
 import spock.lang.Specification
+import java.sql.Connection
+import java.sql.Statement
+import java.sql.ResultSet
 
 /**
  * Integration tests for rollback functionality in Snowflake.
  * These tests validate that rollback operations actually work in a real database.
+ * Updated to use modern TestDatabaseConfigUtil with YAML configuration.
  */
-@Ignore("Requires Snowflake database connection")
 class RollbackIntegrationTest extends Specification {
 
     SnowflakeDatabase database
-    TestContext testContext
+    Connection connection
 
     def setup() {
-        testContext = TestContext.getInstance()
-        database = testContext.getDatabase(SnowflakeDatabase) as SnowflakeDatabase
+        connection = TestDatabaseConfigUtil.getSnowflakeConnection()
+        database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection)) as SnowflakeDatabase
+        
+        // Ensure we're using the correct schema
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute("USE SCHEMA BASE_SCHEMA")
+        }
+    }
+    
+    def cleanup() {
+        if (connection != null && !connection.isClosed()) {
+            connection.close()
+        }
+    }
+    
+    private void executeSql(String sql) {
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(sql)
+        }
+    }
+    
+    private void executeSql(SqlStatement[] statements) {
+        for (SqlStatement statement : statements) {
+            // Use Liquibase's SQL generation framework to convert SqlStatement to executable SQL
+            String sql = SqlGeneratorFactory.getInstance().generateSql(statement, database)[0].toSql()
+            executeSql(sql)
+        }
+    }
+    
+    private boolean warehouseExists(String warehouseName) {
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery("SHOW WAREHOUSES LIKE '${warehouseName}'")) {
+            return rs.next()
+        }
+    }
+    
+    private boolean fileFormatExists(String formatName) {
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery("SHOW FILE FORMATS LIKE '${formatName}'")) {
+            return rs.next()
+        }
     }
 
     def "CreateWarehouseChange rollback should execute successfully"() {
@@ -31,20 +75,20 @@ class RollbackIntegrationTest extends Specification {
         
         when: "Execute the forward change"
         SqlStatement[] createStatements = createChange.generateStatements(database)
-        testContext.executeSql(createStatements)
+        executeSql(createStatements)
         
         and: "Get the rollback change"
         Change[] rollbackChanges = createChange.createInverses()
         
         and: "Execute the rollback"
         SqlStatement[] rollbackStatements = rollbackChanges[0].generateStatements(database)
-        testContext.executeSql(rollbackStatements)
+        executeSql(rollbackStatements)
         
         then: "No exceptions should be thrown"
         noExceptionThrown()
         
         and: "The warehouse should no longer exist"
-        !testContext.warehouseExists("TEST_ROLLBACK_WAREHOUSE")
+        !warehouseExists("TEST_ROLLBACK_WAREHOUSE")
     }
 
     def "CreateFileFormatChange rollback should execute successfully"() {
@@ -55,17 +99,17 @@ class RollbackIntegrationTest extends Specification {
         
         when: "Execute the forward change"
         SqlStatement[] createStatements = createChange.generateStatements(database)
-        testContext.executeSql(createStatements)
+        executeSql(createStatements)
         
         and: "Verify the file format was created"
-        boolean formatExists = testContext.fileFormatExists("TEST_ROLLBACK_FORMAT")
+        boolean formatExists = fileFormatExists("TEST_ROLLBACK_FORMAT")
         
         and: "Get the rollback change"
         Change[] rollbackChanges = createChange.createInverses()
         
         and: "Execute the rollback"
         SqlStatement[] rollbackStatements = rollbackChanges[0].generateStatements(database)
-        testContext.executeSql(rollbackStatements)
+        executeSql(rollbackStatements)
         
         then: "The file format should have been created initially"
         formatExists
@@ -74,12 +118,12 @@ class RollbackIntegrationTest extends Specification {
         noExceptionThrown()
         
         and: "The file format should no longer exist"
-        !testContext.fileFormatExists("TEST_ROLLBACK_FORMAT")
+        !fileFormatExists("TEST_ROLLBACK_FORMAT")
     }
 
     def "AlterFileFormatChange RENAME rollback should execute successfully"() {
         given: "A file format to rename"
-        testContext.executeSql("CREATE FILE FORMAT TEST_ORIGINAL_FORMAT TYPE = CSV")
+        executeSql("CREATE FILE FORMAT TEST_ORIGINAL_FORMAT TYPE = CSV")
         
         and: "An AlterFileFormatChange for RENAME operation"
         AlterFileFormatChange alterChange = new AlterFileFormatChange()
@@ -89,18 +133,18 @@ class RollbackIntegrationTest extends Specification {
         
         when: "Execute the forward change"
         SqlStatement[] alterStatements = alterChange.generateStatements(database)
-        testContext.executeSql(alterStatements)
+        executeSql(alterStatements)
         
         and: "Verify the rename occurred"
-        boolean originalExists = testContext.fileFormatExists("TEST_ORIGINAL_FORMAT")
-        boolean renamedExists = testContext.fileFormatExists("TEST_RENAMED_FORMAT")
+        boolean originalExists = fileFormatExists("TEST_ORIGINAL_FORMAT")
+        boolean renamedExists = fileFormatExists("TEST_RENAMED_FORMAT")
         
         and: "Get the rollback change"
         Change[] rollbackChanges = alterChange.createInverses()
         
         and: "Execute the rollback"
         SqlStatement[] rollbackStatements = rollbackChanges[0].generateStatements(database)
-        testContext.executeSql(rollbackStatements)
+        executeSql(rollbackStatements)
         
         then: "The original format should not exist after rename"
         !originalExists
@@ -112,14 +156,14 @@ class RollbackIntegrationTest extends Specification {
         noExceptionThrown()
         
         and: "The original name should be restored"
-        testContext.fileFormatExists("TEST_ORIGINAL_FORMAT")
+        fileFormatExists("TEST_ORIGINAL_FORMAT")
         
         and: "The renamed format should no longer exist"
-        !testContext.fileFormatExists("TEST_RENAMED_FORMAT")
+        !fileFormatExists("TEST_RENAMED_FORMAT")
         
         cleanup:
-        testContext.executeSql("DROP FILE FORMAT IF EXISTS TEST_ORIGINAL_FORMAT")
-        testContext.executeSql("DROP FILE FORMAT IF EXISTS TEST_RENAMED_FORMAT")
+        executeSql("DROP FILE FORMAT IF EXISTS TEST_ORIGINAL_FORMAT")
+        executeSql("DROP FILE FORMAT IF EXISTS TEST_RENAMED_FORMAT")
     }
 
     def "DropWarehouseChange should not support rollback"() {
@@ -152,7 +196,7 @@ class RollbackIntegrationTest extends Specification {
 
     def "AlterWarehouseChange RENAME rollback should execute successfully"() {
         given: "A warehouse to rename"
-        testContext.executeSql("CREATE WAREHOUSE TEST_ORIGINAL_WAREHOUSE WITH WAREHOUSE_SIZE = 'XSMALL'")
+        executeSql("CREATE WAREHOUSE TEST_ORIGINAL_WAREHOUSE WITH WAREHOUSE_SIZE = 'XSMALL'")
         
         and: "An AlterWarehouseChange for RENAME operation"
         AlterWarehouseChange alterChange = new AlterWarehouseChange()
@@ -161,18 +205,18 @@ class RollbackIntegrationTest extends Specification {
         
         when: "Execute the forward change"
         SqlStatement[] alterStatements = alterChange.generateStatements(database)
-        testContext.executeSql(alterStatements)
+        executeSql(alterStatements)
         
         and: "Verify the rename occurred"
-        boolean originalExists = testContext.warehouseExists("TEST_ORIGINAL_WAREHOUSE")
-        boolean renamedExists = testContext.warehouseExists("TEST_RENAMED_WAREHOUSE")
+        boolean originalExists = warehouseExists("TEST_ORIGINAL_WAREHOUSE")
+        boolean renamedExists = warehouseExists("TEST_RENAMED_WAREHOUSE")
         
         and: "Get the rollback change"
         Change[] rollbackChanges = alterChange.createInverses()
         
         and: "Execute the rollback"
         SqlStatement[] rollbackStatements = rollbackChanges[0].generateStatements(database)
-        testContext.executeSql(rollbackStatements)
+        executeSql(rollbackStatements)
         
         then: "The original warehouse should not exist after rename"
         !originalExists
@@ -184,19 +228,19 @@ class RollbackIntegrationTest extends Specification {
         noExceptionThrown()
         
         and: "The original name should be restored"
-        testContext.warehouseExists("TEST_ORIGINAL_WAREHOUSE")
+        warehouseExists("TEST_ORIGINAL_WAREHOUSE")
         
         and: "The renamed warehouse should no longer exist"
-        !testContext.warehouseExists("TEST_RENAMED_WAREHOUSE")
+        !warehouseExists("TEST_RENAMED_WAREHOUSE")
         
         cleanup:
-        testContext.executeSql("DROP WAREHOUSE IF EXISTS TEST_ORIGINAL_WAREHOUSE")
-        testContext.executeSql("DROP WAREHOUSE IF EXISTS TEST_RENAMED_WAREHOUSE")
+        executeSql("DROP WAREHOUSE IF EXISTS TEST_ORIGINAL_WAREHOUSE")
+        executeSql("DROP WAREHOUSE IF EXISTS TEST_RENAMED_WAREHOUSE")
     }
 
     def "AlterDatabaseChange RENAME rollback should execute successfully"() {
         given: "A database to rename"
-        testContext.executeSql("CREATE DATABASE TEST_ORIGINAL_DATABASE")
+        executeSql("CREATE DATABASE TEST_ORIGINAL_DATABASE")
         
         and: "An AlterDatabaseChange for RENAME operation"
         AlterDatabaseChange alterChange = new AlterDatabaseChange()
@@ -205,21 +249,21 @@ class RollbackIntegrationTest extends Specification {
         
         when: "Execute the forward change"
         SqlStatement[] alterStatements = alterChange.generateStatements(database)
-        testContext.executeSql(alterStatements)
+        executeSql(alterStatements)
         
         and: "Get the rollback change"
         Change[] rollbackChanges = alterChange.createInverses()
         
         and: "Execute the rollback"
         SqlStatement[] rollbackStatements = rollbackChanges[0].generateStatements(database)
-        testContext.executeSql(rollbackStatements)
+        executeSql(rollbackStatements)
         
         then: "No exceptions should be thrown during rollback"
         noExceptionThrown()
         
         cleanup:
-        testContext.executeSql("DROP DATABASE IF EXISTS TEST_ORIGINAL_DATABASE")
-        testContext.executeSql("DROP DATABASE IF EXISTS TEST_RENAMED_DATABASE")
+        executeSql("DROP DATABASE IF EXISTS TEST_ORIGINAL_DATABASE")
+        executeSql("DROP DATABASE IF EXISTS TEST_RENAMED_DATABASE")
     }
 
     def "AlterWarehouseChange should not support rollback for non-RENAME operations"() {

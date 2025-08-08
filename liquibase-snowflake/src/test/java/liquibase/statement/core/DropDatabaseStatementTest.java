@@ -94,4 +94,118 @@ public class DropDatabaseStatementTest {
         assertEquals(true, statement.getCascade());
         assertEquals(false, statement.getRestrict());
     }
+    
+    // ==================== Validation Tests ====================
+    
+    @Test
+    @DisplayName("Should pass validation with valid database name")
+    void shouldPassValidationWithValidDatabaseName() {
+        statement.setDatabaseName("VALID_DATABASE");
+        
+        DropDatabaseStatement.ValidationResult result = statement.validate();
+        
+        assertFalse(result.hasErrors());
+    }
+    
+    @Test
+    @DisplayName("Should fail validation when database name is null")
+    void shouldFailValidationWhenDatabaseNameIsNull() {
+        statement.setDatabaseName(null);
+        
+        DropDatabaseStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasErrors());
+        assertTrue(result.getErrors().stream()
+            .anyMatch(error -> error.contains("Database name is required")));
+    }
+    
+    @Test
+    @DisplayName("Should fail validation when database name is empty")
+    void shouldFailValidationWhenDatabaseNameIsEmpty() {
+        statement.setDatabaseName("");
+        
+        DropDatabaseStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasErrors());
+        assertTrue(result.getErrors().stream()
+            .anyMatch(error -> error.contains("Database name is required")));
+    }
+    
+    @Test
+    @DisplayName("Should fail validation when database name is whitespace")
+    void shouldFailValidationWhenDatabaseNameIsWhitespace() {
+        statement.setDatabaseName("   ");
+        
+        DropDatabaseStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasErrors());
+        assertTrue(result.getErrors().stream()
+            .anyMatch(error -> error.contains("Database name is required")));
+    }
+    
+    @Test
+    @DisplayName("Should fail validation when database name has invalid format")
+    void shouldFailValidationWhenDatabaseNameHasInvalidFormat() {
+        statement.setDatabaseName("123_INVALID"); // Cannot start with number
+        
+        DropDatabaseStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasErrors());
+        assertTrue(result.getErrors().stream()
+            .anyMatch(error -> error.contains("Invalid database name format")));
+    }
+    
+    @Test
+    @DisplayName("Should fail validation when CASCADE and RESTRICT are both true")
+    void shouldFailValidationWhenCascadeAndRestrictBothTrue() {
+        statement.setDatabaseName("TEST_DB");
+        statement.setCascade(true);
+        statement.setRestrict(true);
+        
+        DropDatabaseStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasErrors());
+        assertTrue(result.getErrors().stream()
+            .anyMatch(error -> error.contains("CASCADE and RESTRICT cannot be used together")));
+    }
+    
+    @Test
+    @DisplayName("Should generate warning when IF EXISTS is not used")
+    void shouldGenerateWarningWhenIfExistsNotUsed() {
+        statement.setDatabaseName("TEST_DB");
+        statement.setIfExists(false);
+        
+        DropDatabaseStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasWarnings());
+        assertTrue(result.getWarnings().stream()
+            .anyMatch(warning -> warning.contains("DROP DATABASE without IF EXISTS will fail if database does not exist")));
+    }
+    
+    @Test
+    @DisplayName("Should generate warning when CASCADE is used")
+    void shouldGenerateWarningWhenCascadeIsUsed() {
+        statement.setDatabaseName("TEST_DB");
+        statement.setCascade(true);
+        
+        DropDatabaseStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasWarnings());
+        assertTrue(result.getWarnings().stream()
+            .anyMatch(warning -> warning.contains("CASCADE will drop all objects within the database permanently")));
+    }
+    
+    @Test
+    @DisplayName("Should accept valid database names with underscores and dollar signs")
+    void shouldAcceptValidDatabaseNamesWithUnderscoresAndDollarSigns() {
+        String[] validNames = {"TEST_DB", "DB_WITH_UNDERSCORE", "DB$WITH$DOLLAR", "MY_TEST$DB_123"};
+        
+        for (String name : validNames) {
+            statement.setDatabaseName(name);
+            
+            DropDatabaseStatement.ValidationResult result = statement.validate();
+            
+            assertFalse(result.hasErrors(), "Database name '" + name + "' should be valid");
+        }
+    }
 }

@@ -190,4 +190,255 @@ public class AlterTableStatementTest {
         statement.setClusterBy("single_column");
         assertEquals("single_column", statement.getClusterBy());
     }
+    
+    // ==================== Validation Tests ====================
+    
+    @Test
+    @DisplayName("Should pass validation with valid table name and operation")
+    void shouldPassValidationWithValidTableNameAndOperation() {
+        AlterTableStatement statement = new AlterTableStatement(null, null, "VALID_TABLE");
+        statement.setClusterBy("col1, col2");
+        
+        AlterTableStatement.ValidationResult result = statement.validate();
+        
+        assertFalse(result.hasErrors());
+    }
+    
+    @Test
+    @DisplayName("Should fail validation when table name is null")
+    void shouldFailValidationWhenTableNameIsNull() {
+        AlterTableStatement statement = new AlterTableStatement(null, null, null);
+        statement.setClusterBy("col1");
+        
+        AlterTableStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasErrors());
+        assertTrue(result.getErrors().stream()
+            .anyMatch(error -> error.contains("Table name is required")));
+    }
+    
+    @Test
+    @DisplayName("Should fail validation when table name is empty")
+    void shouldFailValidationWhenTableNameIsEmpty() {
+        AlterTableStatement statement = new AlterTableStatement(null, null, "");
+        statement.setClusterBy("col1");
+        
+        AlterTableStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasErrors());
+        assertTrue(result.getErrors().stream()
+            .anyMatch(error -> error.contains("Table name is required")));
+    }
+    
+    @Test
+    @DisplayName("Should fail validation when table name has invalid format")
+    void shouldFailValidationWhenTableNameHasInvalidFormat() {
+        AlterTableStatement statement = new AlterTableStatement(null, null, "123_INVALID");
+        statement.setClusterBy("col1");
+        
+        AlterTableStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasErrors());
+        assertTrue(result.getErrors().stream()
+            .anyMatch(error -> error.contains("Invalid table name format")));
+    }
+    
+    @Test
+    @DisplayName("Should fail validation when multiple clustering operations specified")
+    void shouldFailValidationWhenMultipleClusteringOperationsSpecified() {
+        AlterTableStatement statement = new AlterTableStatement(null, null, "TEST_TABLE");
+        statement.setClusterBy("col1");
+        statement.setDropClusteringKey(true);
+        
+        AlterTableStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasErrors());
+        assertTrue(result.getErrors().stream()
+            .anyMatch(error -> error.contains("Clustering operations are mutually exclusive")));
+    }
+    
+    @Test
+    @DisplayName("Should fail validation when add and drop search optimization both specified")
+    void shouldFailValidationWhenAddAndDropSearchOptimizationBothSpecified() {
+        AlterTableStatement statement = new AlterTableStatement(null, null, "TEST_TABLE");
+        statement.setAddSearchOptimization("ON");
+        statement.setDropSearchOptimization(true);
+        
+        AlterTableStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasErrors());
+        assertTrue(result.getErrors().stream()
+            .anyMatch(error -> error.contains("Cannot add and drop search optimization simultaneously")));
+    }
+    
+    @Test
+    @DisplayName("Should fail validation when add and drop row access policy both specified")
+    void shouldFailValidationWhenAddAndDropRowAccessPolicyBothSpecified() {
+        AlterTableStatement statement = new AlterTableStatement(null, null, "TEST_TABLE");
+        statement.setAddRowAccessPolicy("POLICY1");
+        statement.setDropRowAccessPolicy("POLICY1");
+        
+        AlterTableStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasErrors());
+        assertTrue(result.getErrors().stream()
+            .anyMatch(error -> error.contains("Cannot add and drop row access policy simultaneously")));
+    }
+    
+    @Test
+    @DisplayName("Should fail validation when set and unset aggregation policy both specified")
+    void shouldFailValidationWhenSetAndUnsetAggregationPolicyBothSpecified() {
+        AlterTableStatement statement = new AlterTableStatement(null, null, "TEST_TABLE");
+        statement.setSetAggregationPolicy("POLICY1");
+        statement.setUnsetAggregationPolicy(true);
+        
+        AlterTableStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasErrors());
+        assertTrue(result.getErrors().stream()
+            .anyMatch(error -> error.contains("Cannot set and unset aggregation policy simultaneously")));
+    }
+    
+    @Test
+    @DisplayName("Should fail validation when set and unset projection policy both specified")
+    void shouldFailValidationWhenSetAndUnsetProjectionPolicyBothSpecified() {
+        AlterTableStatement statement = new AlterTableStatement(null, null, "TEST_TABLE");
+        statement.setSetProjectionPolicy("POLICY1");
+        statement.setUnsetProjectionPolicy(true);
+        
+        AlterTableStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasErrors());
+        assertTrue(result.getErrors().stream()
+            .anyMatch(error -> error.contains("Cannot set and unset projection policy simultaneously")));
+    }
+    
+    @Test
+    @DisplayName("Should fail validation when set and unset tags both specified")
+    void shouldFailValidationWhenSetAndUnsetTagsBothSpecified() {
+        AlterTableStatement statement = new AlterTableStatement(null, null, "TEST_TABLE");
+        statement.setSetTag("TAG1='value'");
+        statement.setUnsetTag("TAG1");
+        
+        AlterTableStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasErrors());
+        assertTrue(result.getErrors().stream()
+            .anyMatch(error -> error.contains("Cannot set and unset tags simultaneously")));
+    }
+    
+    @Test
+    @DisplayName("Should fail validation when data retention time is negative")
+    void shouldFailValidationWhenDataRetentionTimeIsNegative() {
+        AlterTableStatement statement = new AlterTableStatement(null, null, "TEST_TABLE");
+        statement.setSetDataRetentionTimeInDays(-1);
+        
+        AlterTableStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasErrors());
+        assertTrue(result.getErrors().stream()
+            .anyMatch(error -> error.contains("DATA_RETENTION_TIME_IN_DAYS cannot be negative")));
+    }
+    
+    @Test
+    @DisplayName("Should generate warning when data retention time exceeds 90 days")
+    void shouldGenerateWarningWhenDataRetentionTimeExceeds90Days() {
+        AlterTableStatement statement = new AlterTableStatement(null, null, "TEST_TABLE");
+        statement.setSetDataRetentionTimeInDays(120);
+        
+        AlterTableStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasWarnings());
+        assertTrue(result.getWarnings().stream()
+            .anyMatch(warning -> warning.contains("DATA_RETENTION_TIME_IN_DAYS > 90 days requires Snowflake Enterprise Edition")));
+    }
+    
+    @Test
+    @DisplayName("Should fail validation when max data extension time exceeds 14 days")
+    void shouldFailValidationWhenMaxDataExtensionTimeExceeds14Days() {
+        AlterTableStatement statement = new AlterTableStatement(null, null, "TEST_TABLE");
+        statement.setSetMaxDataExtensionTimeInDays(15);
+        
+        AlterTableStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasErrors());
+        assertTrue(result.getErrors().stream()
+            .anyMatch(error -> error.contains("MAX_DATA_EXTENSION_TIME_IN_DAYS cannot exceed 14 days")));
+    }
+    
+    @Test
+    @DisplayName("Should fail validation when no operations specified")
+    void shouldFailValidationWhenNoOperationsSpecified() {
+        AlterTableStatement statement = new AlterTableStatement(null, null, "TEST_TABLE");
+        // Don't set any operations
+        
+        AlterTableStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasErrors());
+        assertTrue(result.getErrors().stream()
+            .anyMatch(error -> error.contains("At least one ALTER TABLE operation must be specified")));
+    }
+    
+    @Test
+    @DisplayName("Should generate warnings for Enterprise Edition features")
+    void shouldGenerateWarningsForEnterpriseEditionFeatures() {
+        AlterTableStatement statement = new AlterTableStatement(null, null, "TEST_TABLE");
+        statement.setSetChangeTracking(true);
+        statement.setAddSearchOptimization("ON");
+        statement.setAddRowAccessPolicy("POLICY1");
+        
+        AlterTableStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasWarnings());
+        assertTrue(result.getWarnings().stream()
+            .anyMatch(warning -> warning.contains("Change tracking requires Snowflake Enterprise Edition")));
+        assertTrue(result.getWarnings().stream()
+            .anyMatch(warning -> warning.contains("Search optimization may incur additional compute and storage costs")));
+        assertTrue(result.getWarnings().stream()
+            .anyMatch(warning -> warning.contains("Security policies require Snowflake Enterprise Edition")));
+    }
+    
+    @Test
+    @DisplayName("Should accept valid table names with underscores and dollar signs")
+    void shouldAcceptValidTableNamesWithUnderscoresAndDollarSigns() {
+        String[] validNames = {"TEST_TABLE", "TABLE_WITH_UNDERSCORE", "TABLE$WITH$DOLLAR", "MY_TEST$TABLE_123"};
+        
+        for (String name : validNames) {
+            AlterTableStatement statement = new AlterTableStatement(null, null, name);
+            statement.setClusterBy("col1");
+            
+            AlterTableStatement.ValidationResult result = statement.validate();
+            
+            assertFalse(result.hasErrors(), "Table name '" + name + "' should be valid");
+        }
+    }
+    
+    @Test
+    @DisplayName("Should allow individual clustering operations")
+    void shouldAllowIndividualClusteringOperations() {
+        String[] operations = {"clusterBy", "dropClusteringKey", "suspendRecluster", "resumeRecluster"};
+        
+        for (String operation : operations) {
+            AlterTableStatement statement = new AlterTableStatement(null, null, "TEST_TABLE");
+            
+            switch (operation) {
+                case "clusterBy":
+                    statement.setClusterBy("col1");
+                    break;
+                case "dropClusteringKey":
+                    statement.setDropClusteringKey(true);
+                    break;
+                case "suspendRecluster":
+                    statement.setSuspendRecluster(true);
+                    break;
+                case "resumeRecluster":
+                    statement.setResumeRecluster(true);
+                    break;
+            }
+            
+            AlterTableStatement.ValidationResult result = statement.validate();
+            
+            assertFalse(result.hasErrors(), "Operation '" + operation + "' should be valid individually");
+        }
+    }
 }

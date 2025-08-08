@@ -24,9 +24,12 @@ public class WarehouseComparator implements DatabaseObjectComparator {
 
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
+        System.out.println("🔍 PHASE1: WarehouseComparator.getPriority() called for " + objectType.getSimpleName());
         if (Warehouse.class.isAssignableFrom(objectType) && database instanceof SnowflakeDatabase) {
+            System.out.println("✅ PHASE1: WarehouseComparator returning PRIORITY_DATABASE for Warehouse");
             return PRIORITY_DATABASE;
         }
+        System.out.println("❌ PHASE1: WarehouseComparator returning PRIORITY_NONE for " + objectType.getSimpleName());
         return PRIORITY_NONE;
     }
 
@@ -34,12 +37,18 @@ public class WarehouseComparator implements DatabaseObjectComparator {
     public String[] hash(DatabaseObject databaseObject, Database accordingTo, 
                          DatabaseObjectComparatorChain chain) {
         Warehouse warehouse = (Warehouse) databaseObject;
+        System.out.println("🔍 PHASE1: WarehouseComparator.hash() called for warehouse: " + warehouse.getName());
         return new String[] { warehouse.getName() };
     }
 
     @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, 
                                 Database accordingTo, DatabaseObjectComparatorChain chain) {
+        System.out.println("🔍 PHASE1: WarehouseComparator.isSameObject() called for: " +
+                          (databaseObject1 instanceof Warehouse ? ((Warehouse)databaseObject1).getName() : "not-warehouse") + 
+                          " vs " + 
+                          (databaseObject2 instanceof Warehouse ? ((Warehouse)databaseObject2).getName() : "not-warehouse"));
+                          
         if (!(databaseObject1 instanceof Warehouse && databaseObject2 instanceof Warehouse)) {
             return false;
         }
@@ -66,6 +75,10 @@ public class WarehouseComparator implements DatabaseObjectComparator {
     public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2,
                                            Database accordingTo, CompareControl compareControl,
                                            DatabaseObjectComparatorChain chain, Set<String> exclude) {
+        System.out.println("🔍 PHASE1: WarehouseComparator.findDifferences() called for: " +
+                          (databaseObject1 instanceof Warehouse ? ((Warehouse)databaseObject1).getName() : "not-warehouse") + 
+                          " vs " + 
+                          (databaseObject2 instanceof Warehouse ? ((Warehouse)databaseObject2).getName() : "not-warehouse"));
         
         // Add our excluded state fields to the exclusion set
         exclude = new HashSet<>(exclude);

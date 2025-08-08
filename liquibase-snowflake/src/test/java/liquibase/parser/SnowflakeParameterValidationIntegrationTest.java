@@ -17,7 +17,7 @@ import java.util.*;
  * 
  * Takes 15 minutes vs days of complex framework.
  */
-public class SnowflakeParameterValidationTest {
+public class SnowflakeParameterValidationIntegrationTest {
 
     @Test 
     @DisplayName("Validate XSD completeness against Snowflake INFORMATION_SCHEMA")
@@ -26,12 +26,9 @@ public class SnowflakeParameterValidationTest {
             // Use YAML configuration instead of environment variables
             Class.forName("net.snowflake.client.jdbc.SnowflakeDriver");
         } catch (ClassNotFoundException e) {
-            System.out.println("⚠️  Snowflake JDBC driver not available - skipping");
             return;
         }
         
-        System.out.println("🔍 SNOWFLAKE XSD VALIDATION");
-        System.out.println("=" + String.join("", Collections.nCopies(40, "=")));
         
         try (Connection conn = TestDatabaseConfigUtil.getSnowflakeConnection()) {
             
@@ -42,16 +39,12 @@ public class SnowflakeParameterValidationTest {
                 validateObjectType(conn, objectType);
             }
             
-            System.out.println("\n✅ Validation complete");
-            System.out.println("💡 For gaps: manually review Snowflake docs vs XSD schema");
             
         } catch (SQLException e) {
-            System.out.println("❌ Database connection failed: " + e.getMessage());
         }
     }
     
     private void validateObjectType(Connection conn, String objectType) {
-        System.out.println("\n📋 " + objectType + ":");
         
         String query = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
                       "WHERE TABLE_NAME = ? AND TABLE_SCHEMA = 'INFORMATION_SCHEMA' " +
@@ -70,12 +63,9 @@ public class SnowflakeParameterValidationTest {
                     }
                 }
                 
-                System.out.println("   Found " + parameters.size() + " potential DDL parameters");
-                System.out.println("   → Manual review needed: " + String.join(", ", parameters));
             }
             
         } catch (SQLException e) {
-            System.out.println("   ❌ Query failed: " + e.getMessage());
         }
     }
 }

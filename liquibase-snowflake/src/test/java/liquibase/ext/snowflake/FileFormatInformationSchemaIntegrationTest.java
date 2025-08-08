@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * Investigation test to understand INFORMATION_SCHEMA.FILE_FORMATS structure for FileFormat snapshot/diff requirements
  */
-public class FileFormatInformationSchemaTest {
+public class FileFormatInformationSchemaIntegrationTest {
     
     private Database database;
     
@@ -39,7 +39,6 @@ public class FileFormatInformationSchemaTest {
     
     @Test
     public void investigateFileFormatsInformationSchemaDetailed() throws Exception {
-        System.out.println("=== INFORMATION_SCHEMA.FILE_FORMATS Sample Record ===");
         
         List<Map<String, ?>> fileFormats = Scope.getCurrentScope().getSingleton(ExecutorService.class)
             .getExecutor("jdbc", database)
@@ -48,16 +47,13 @@ public class FileFormatInformationSchemaTest {
         if (!fileFormats.isEmpty()) {
             Map<String, ?> fileFormat = fileFormats.get(0);
             for (Map.Entry<String, ?> entry : fileFormat.entrySet()) {
-                System.out.println(String.format("%s: %s", entry.getKey(), entry.getValue()));
             }
         } else {
-            System.out.println("No file formats found in database");
         }
     }
     
     @Test
     public void investigateShowFileFormatsOutput() throws Exception {
-        System.out.println("=== SHOW FILE FORMATS Output Structure ===");
         
         List<Map<String, ?>> fileFormats = Scope.getCurrentScope().getSingleton(ExecutorService.class)
             .getExecutor("jdbc", database)
@@ -65,18 +61,14 @@ public class FileFormatInformationSchemaTest {
             
         if (!fileFormats.isEmpty()) {
             Map<String, ?> fileFormat = fileFormats.get(0);
-            System.out.println("SHOW FILE FORMATS columns:");
             for (String key : fileFormat.keySet()) {
-                System.out.println(String.format("Column: %s, Value: %s", key, fileFormat.get(key)));
             }
         } else {
-            System.out.println("No file formats found in database");
         }
     }
     
     @Test
     public void createTestFileFormatAndInvestigate() throws Exception {
-        System.out.println("=== Creating Test FileFormat ===");
         
         // Drop if exists
         Scope.getCurrentScope().getSingleton(ExecutorService.class)
@@ -98,7 +90,6 @@ public class FileFormatInformationSchemaTest {
                 "COMMENT = 'Test file format for snapshot investigation'"
             ));
             
-        System.out.println("Test file format created successfully");
         
         // Query from INFORMATION_SCHEMA.FILE_FORMATS
         List<Map<String, ?>> fileFormats = Scope.getCurrentScope().getSingleton(ExecutorService.class)
@@ -107,9 +98,7 @@ public class FileFormatInformationSchemaTest {
             
         if (!fileFormats.isEmpty()) {
             Map<String, ?> fileFormat = fileFormats.get(0);
-            System.out.println("\n=== INFORMATION_SCHEMA.FILE_FORMATS Record ===");
             for (Map.Entry<String, ?> entry : fileFormat.entrySet()) {
-                System.out.println(String.format("%s: %s", entry.getKey(), entry.getValue()));
             }
         }
         
@@ -120,9 +109,7 @@ public class FileFormatInformationSchemaTest {
             
         if (!showFileFormats.isEmpty()) {
             Map<String, ?> fileFormat = showFileFormats.get(0);
-            System.out.println("\n=== SHOW FILE FORMATS Record (for comparison) ===");
             for (Map.Entry<String, ?> entry : fileFormat.entrySet()) {
-                System.out.println(String.format("%s: %s", entry.getKey(), entry.getValue()));
             }
         }
     }

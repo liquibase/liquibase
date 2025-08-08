@@ -38,8 +38,7 @@ public class SnowflakeXMLValidationTest {
             "                dataRetentionTimeInDays=\"7\"\n" +
             "                maxDataExtensionTimeInDays=\"30\"/>";
             
-        assertDoesNotThrow(() -> validateXMLAgainstSchema(xml), 
-            "CreateDatabase element should validate successfully against Snowflake XSD");
+        assertDoesNotThrow(() -> validateXMLAgainstSchema(xml), "Schema validation should succeed"); 
     }
     
     /**

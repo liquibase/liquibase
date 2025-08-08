@@ -6,6 +6,8 @@ import liquibase.database.object.FileFormat;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.FileFormatComparator;
+import liquibase.diff.compare.DatabaseObjectComparator;
+import liquibase.snapshot.SnapshotGenerator;
 import liquibase.snapshot.jvm.FileFormatSnapshotGeneratorSnowflake;
 import liquibase.structure.core.Schema;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,13 +46,13 @@ public class FileFormatCoverageBoosterTest {
     @Test
     void testSnapshotGenerator_PriorityEdgeCases() {
         // COVERAGE TARGET: Priority method edge cases
-        assertEquals(FileFormatSnapshotGeneratorSnowflake.PRIORITY_DATABASE,
+        assertEquals(SnapshotGenerator.PRIORITY_DATABASE,
             generator.getPriority(FileFormat.class, new SnowflakeDatabase()));
         
-        assertEquals(FileFormatSnapshotGeneratorSnowflake.PRIORITY_NONE,
+        assertEquals(SnapshotGenerator.PRIORITY_ADDITIONAL,
             generator.getPriority(Schema.class, new SnowflakeDatabase()));
         
-        assertEquals(FileFormatSnapshotGeneratorSnowflake.PRIORITY_NONE,
+        assertEquals(SnapshotGenerator.PRIORITY_NONE,
             generator.getPriority(FileFormat.class, mock(Database.class)));
     }
 
@@ -110,15 +112,15 @@ public class FileFormatCoverageBoosterTest {
         Database otherDb = mock(Database.class);
         
         // Test with SnowflakeDatabase and FileFormat
-        assertEquals(FileFormatComparator.PRIORITY_TYPE, 
+        assertEquals(DatabaseObjectComparator.PRIORITY_TYPE, 
             comparator.getPriority(FileFormat.class, snowflakeDb));
         
         // Test with non-SnowflakeDatabase
-        assertEquals(FileFormatComparator.PRIORITY_NONE,
+        assertEquals(DatabaseObjectComparator.PRIORITY_NONE,
             comparator.getPriority(FileFormat.class, otherDb));
         
         // Test with non-FileFormat class
-        assertEquals(FileFormatComparator.PRIORITY_NONE,
+        assertEquals(DatabaseObjectComparator.PRIORITY_NONE,
             comparator.getPriority(Schema.class, snowflakeDb));
     }
 

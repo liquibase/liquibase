@@ -78,4 +78,101 @@ public class DropSchemaStatementTest {
         statement.setRestrict(null);
         assertNull(statement.getRestrict());
     }
+    
+    // ==================== Validation Tests ====================
+    
+    @Test
+    @DisplayName("Should pass validation with valid schema name")
+    void shouldPassValidationWithValidSchemaName() {
+        DropSchemaStatement statement = new DropSchemaStatement();
+        statement.setSchemaName("VALID_SCHEMA");
+        
+        DropSchemaStatement.ValidationResult result = statement.validate();
+        
+        assertFalse(result.hasErrors());
+    }
+    
+    @Test
+    @DisplayName("Should fail validation when schema name is null")
+    void shouldFailValidationWhenSchemaNameIsNull() {
+        DropSchemaStatement statement = new DropSchemaStatement();
+        statement.setSchemaName(null);
+        
+        DropSchemaStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasErrors());
+        assertTrue(result.getErrors().stream()
+            .anyMatch(error -> error.contains("Schema name is required")));
+    }
+    
+    @Test
+    @DisplayName("Should fail validation when schema name is empty")
+    void shouldFailValidationWhenSchemaNameIsEmpty() {
+        DropSchemaStatement statement = new DropSchemaStatement();
+        statement.setSchemaName("");
+        
+        DropSchemaStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasErrors());
+        assertTrue(result.getErrors().stream()
+            .anyMatch(error -> error.contains("Schema name is required")));
+    }
+    
+    @Test
+    @DisplayName("Should fail validation when CASCADE and RESTRICT are both true")
+    void shouldFailValidationWhenCascadeAndRestrictBothTrue() {
+        DropSchemaStatement statement = new DropSchemaStatement();
+        statement.setSchemaName("TEST_SCHEMA");
+        statement.setCascade(true);
+        statement.setRestrict(true);
+        
+        DropSchemaStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasErrors());
+        assertTrue(result.getErrors().stream()
+            .anyMatch(error -> error.contains("CASCADE and RESTRICT cannot be used together")));
+    }
+    
+    @Test
+    @DisplayName("Should generate warning when IF EXISTS is not used")
+    void shouldGenerateWarningWhenIfExistsNotUsed() {
+        DropSchemaStatement statement = new DropSchemaStatement();
+        statement.setSchemaName("TEST_SCHEMA");
+        statement.setIfExists(false);
+        
+        DropSchemaStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasWarnings());
+        assertTrue(result.getWarnings().stream()
+            .anyMatch(warning -> warning.contains("DROP SCHEMA without IF EXISTS will fail if schema does not exist")));
+    }
+    
+    @Test
+    @DisplayName("Should generate warning when CASCADE is used")
+    void shouldGenerateWarningWhenCascadeIsUsed() {
+        DropSchemaStatement statement = new DropSchemaStatement();
+        statement.setSchemaName("TEST_SCHEMA");
+        statement.setCascade(true);
+        
+        DropSchemaStatement.ValidationResult result = statement.validate();
+        
+        assertTrue(result.hasWarnings());
+        assertTrue(result.getWarnings().stream()
+            .anyMatch(warning -> warning.contains("CASCADE will drop all objects within the schema permanently")));
+    }
+    
+    @Test
+    @DisplayName("Should accept valid schema names with underscores and dollar signs")
+    void shouldAcceptValidSchemaNamesWithUnderscoresAndDollarSigns() {
+        DropSchemaStatement statement = new DropSchemaStatement();
+        String[] validNames = {"TEST_SCHEMA", "SCHEMA_WITH_UNDERSCORE", "SCHEMA$WITH$DOLLAR", "MY_TEST$SCHEMA_123"};
+        
+        for (String name : validNames) {
+            statement.setSchemaName(name);
+            
+            DropSchemaStatement.ValidationResult result = statement.validate();
+            
+            assertFalse(result.hasErrors(), "Schema name '" + name + "' should be valid");
+        }
+    }
 }

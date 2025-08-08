@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests: SNAPSHOT, DIFF, DIFF-CHANGELOG, UPDATE, ROLLBACK, GENERATE-CHANGELOG
  */
 @DisplayName("Warehouse Liquibase Operations Tests")
-public class WarehouseOperationsTest {
+public class WarehouseOperationsIntegrationTest {
     
     private Database database;
     private Connection rawConnection;
@@ -70,7 +70,6 @@ public class WarehouseOperationsTest {
             try (Statement stmt = rawConnection.createStatement()) {
                 stmt.execute("DROP WAREHOUSE IF EXISTS " + testWarehouse1);
                 stmt.execute("DROP WAREHOUSE IF EXISTS " + testWarehouse2);
-                System.out.println("Cleaned up test warehouses");
             } catch (Exception e) {
                 System.err.println("Failed to cleanup warehouses: " + e.getMessage());
             }
@@ -117,7 +116,6 @@ public class WarehouseOperationsTest {
         }
         
         assertTrue(foundTestWarehouse, "Should find test warehouse in snapshot");
-        System.out.println("✅ SNAPSHOT operation: Successfully discovered warehouse in Account objects");
     }
     
     @Test
@@ -171,19 +169,11 @@ public class WarehouseOperationsTest {
         ObjectDifferences differences = comparator.findDifferences(account1, account2, database, compareControl, null, null);
         assertNotNull(differences, "Should find differences between accounts");
         
-        System.out.println("📊 DEBUG: Differences result:");
-        System.out.println("   hasDifferences(): " + differences.hasDifferences());
-        System.out.println("   getDifferences().size(): " + differences.getDifferences().size());
-        System.out.println("   getDifferences(): " + differences.getDifferences());
         
         // Let's also check the warehouse counts manually
-        System.out.println("📊 DEBUG: Manual warehouse comparison:");
-        System.out.println("   Account1 warehouses: " + account1.getDatabaseObjects().size());
-        System.out.println("   Account2 warehouses: " + account2.getDatabaseObjects().size());
         
         assertTrue(differences.hasDifferences(), "Should detect warehouse differences");
         
-        System.out.println("✅ DIFF operation: AccountComparator successfully detected differences");
     }
     
     @Test
@@ -227,8 +217,7 @@ public class WarehouseOperationsTest {
             stmt.execute("CREATE WAREHOUSE " + testWarehouse1 + 
                        " WITH WAREHOUSE_SIZE = 'SMALL' " +
                        "AUTO_SUSPEND = 300 " +
-                       "AUTO_RESUME = TRUE " +
-                       "COMMENT = 'Created by Liquibase UPDATE test'");
+                       "AUTO_RESUME = TRUE");
         }
         
         // Verify warehouse was created
@@ -237,7 +226,6 @@ public class WarehouseOperationsTest {
             assertTrue(stmt.getResultSet().next(), "Warehouse should exist after UPDATE");
         }
         
-        System.out.println("✅ UPDATE operation: Successfully applied warehouse changes");
     }
     
     @Test
@@ -248,8 +236,7 @@ public class WarehouseOperationsTest {
             stmt.execute("CREATE WAREHOUSE " + testWarehouse1 + 
                        " WITH WAREHOUSE_SIZE = 'MEDIUM' " +
                        "AUTO_SUSPEND = 600 " +
-                       "AUTO_RESUME = FALSE " +
-                       "COMMENT = 'Warehouse for changelog generation'");
+                       "AUTO_RESUME = FALSE");
         }
         
         // Generate changelog from current database state
@@ -275,6 +262,5 @@ public class WarehouseOperationsTest {
         }
         
         assertTrue(foundWarehouse, "Generated snapshot should contain test warehouse");
-        System.out.println("✅ GENERATE-CHANGELOG operation: Successfully captured existing warehouse");
     }
 }

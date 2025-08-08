@@ -162,4 +162,151 @@ public class CreateSchemaStatement extends AbstractSqlStatement {
     public void setStorageSerializationPolicy(String storageSerializationPolicy) {
         this.storageSerializationPolicy = storageSerializationPolicy;
     }
+
+    /**
+     * Enhanced validation method that ensures the statement configuration is valid
+     * based on Snowflake CREATE SCHEMA constraints.
+     */
+    public ValidationResult validate() {
+        ValidationResult result = new ValidationResult();
+        
+        // Basic validation
+        if (schemaName == null || schemaName.trim().isEmpty()) {
+            result.addError("Schema name is required");
+        } else if (schemaName.length() > 255 || !schemaName.matches("^[A-Za-z_][A-Za-z0-9_$]*$")) {
+            result.addError("Invalid schema name format. Must start with letter/underscore, contain only letters/numbers/underscores/dollar signs, max 255 characters: " + schemaName);
+        }
+        
+        // Validate OR REPLACE vs IF NOT EXISTS mutual exclusivity
+        if (Boolean.TRUE.equals(orReplace) && Boolean.TRUE.equals(ifNotExists)) {
+            result.addError("OR REPLACE and IF NOT EXISTS cannot be used together");
+        }
+        
+        // Validate TRANSIENT vs MANAGED mutual exclusivity
+        if (Boolean.TRUE.equals(transient_) && Boolean.TRUE.equals(managed_)) {
+            result.addError("TRANSIENT and MANAGED cannot be used together");
+        }
+        
+        // Validate data retention time range (0-90 days for standard, up to 1 year for Enterprise)
+        if (dataRetentionTimeInDays != null) {
+            try {
+                int days = Integer.parseInt(dataRetentionTimeInDays);
+                if (days < 0) {
+                    result.addError("DATA_RETENTION_TIME_IN_DAYS cannot be negative, got: " + days);
+                } else if (days > 90) {
+                    result.addWarning("DATA_RETENTION_TIME_IN_DAYS > 90 days requires Snowflake Enterprise Edition, got: " + days);
+                    if (days > 365) {
+                        result.addError("DATA_RETENTION_TIME_IN_DAYS cannot exceed 365 days, got: " + days);
+                    }
+                }
+            } catch (NumberFormatException e) {
+                result.addError("DATA_RETENTION_TIME_IN_DAYS must be a valid integer, got: " + dataRetentionTimeInDays);
+            }
+        }
+        
+        // Validate max data extension time range
+        if (maxDataExtensionTimeInDays != null) {
+            try {
+                int days = Integer.parseInt(maxDataExtensionTimeInDays);
+                if (days < 0) {
+                    result.addError("MAX_DATA_EXTENSION_TIME_IN_DAYS cannot be negative, got: " + days);
+                } else if (days > 14) {
+                    result.addError("MAX_DATA_EXTENSION_TIME_IN_DAYS cannot exceed 14 days, got: " + days);
+                }
+            } catch (NumberFormatException e) {
+                result.addError("MAX_DATA_EXTENSION_TIME_IN_DAYS must be a valid integer, got: " + maxDataExtensionTimeInDays);
+            }
+        }
+        
+        // Validate pipe execution paused enumeration
+        if (pipeExecutionPaused != null) {
+            String[] validStates = {"TRUE", "FALSE"};
+            boolean validState = false;
+            for (String validSt : validStates) {
+                if (validSt.equalsIgnoreCase(pipeExecutionPaused)) {
+                    validState = true;
+                    break;
+                }
+            }
+            if (!validState) {
+                result.addError("Invalid PIPE_EXECUTION_PAUSED value '" + pipeExecutionPaused + "'. Valid values: TRUE, FALSE");
+            }
+        }
+        
+        // Validate storage serialization policy enumeration  
+        if (storageSerializationPolicy != null) {
+            String[] validPolicies = {"COMPATIBLE", "OPTIMIZED"};
+            boolean validPolicy = false;
+            for (String validPol : validPolicies) {
+                if (validPol.equalsIgnoreCase(storageSerializationPolicy)) {
+                    validPolicy = true;
+                    break;
+                }
+            }
+            if (!validPolicy) {
+                result.addError("Invalid STORAGE_SERIALIZATION_POLICY '" + storageSerializationPolicy + "'. Valid values: COMPATIBLE, OPTIMIZED");
+            }
+        }
+        
+        // Validate replaceInvalidCharacters enumeration
+        if (replaceInvalidCharacters != null) {
+            String[] validOptions = {"TRUE", "FALSE"};
+            boolean validOption = false;
+            for (String validOpt : validOptions) {
+                if (validOpt.equalsIgnoreCase(replaceInvalidCharacters)) {
+                    validOption = true;
+                    break;
+                }
+            }
+            if (!validOption) {
+                result.addError("Invalid REPLACE_INVALID_CHARACTERS value '" + replaceInvalidCharacters + "'. Valid values: TRUE, FALSE");
+            }
+        }
+        
+        // Validate clone operation constraints
+        if (cloneFrom != null) {
+            if (Boolean.TRUE.equals(transient_)) {
+                result.addError("Cannot create TRANSIENT schema from clone");
+            }
+            if (dataRetentionTimeInDays != null) {
+                result.addWarning("DATA_RETENTION_TIME_IN_DAYS is inherited from source schema when cloning");
+            }
+        }
+        
+        // Validate external volume constraints
+        if (externalVolume != null) {
+            result.addWarning("External volumes require appropriate cloud storage permissions and configuration");
+        }
+        
+        // Validate classification profile constraints
+        if (classificationProfile != null) {
+            result.addWarning("Classification profiles require Snowflake Enterprise Edition and proper data classification setup");
+        }
+        
+        // Warn about Enterprise Edition features
+        if (Boolean.TRUE.equals(managed_)) {
+            result.addWarning("Managed access schemas require Snowflake Enterprise Edition");
+        }
+        if (Boolean.TRUE.equals(transient_)) {
+            result.addWarning("TRANSIENT schemas provide cost optimization through reduced data protection");
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Simple validation result container
+     */
+    public static class ValidationResult {
+        private final java.util.List<String> errors = new java.util.ArrayList<>();
+        private final java.util.List<String> warnings = new java.util.ArrayList<>();
+        
+        public boolean hasErrors() { return !errors.isEmpty(); }
+        public boolean hasWarnings() { return !warnings.isEmpty(); }
+        public java.util.List<String> getErrors() { return errors; }
+        public java.util.List<String> getWarnings() { return warnings; }
+        
+        public void addError(String error) { errors.add(error); }
+        public void addWarning(String warning) { warnings.add(warning); }
+    }
 }

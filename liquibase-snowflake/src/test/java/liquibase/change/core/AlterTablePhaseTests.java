@@ -31,7 +31,6 @@ public class AlterTablePhaseTests {
         assertEquals(1, stmts.length);
         assertTrue(stmts[0] instanceof AlterTableStatement);
         
-        System.out.println("✅ Phase 1 PASS - Change class works");
     }
     
     @Test
@@ -41,7 +40,6 @@ public class AlterTablePhaseTests {
         stmt.setClusterBy("col1,col2");
         assertEquals("col1,col2", stmt.getClusterBy());
         assertEquals("TEST_TABLE", stmt.getTableName());
-        System.out.println("✅ Phase 2 PASS - Statement class works");
     }
     
     @Test
@@ -55,9 +53,8 @@ public class AlterTablePhaseTests {
         
         assertTrue(sqls.length > 0);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("ALTER TABLE"));
-        assertTrue(sql.contains("CLUSTER BY"));
-        System.out.println("✅ Phase 3 PASS - SQL: " + sql);
+        assertTrue(sql.startsWith("ALTER TABLE"), "SQL should start with ALTER TABLE: " + sql);
+        assertTrue(sql.contains("CLUSTER BY"), "SQL should contain CLUSTER BY clause: " + sql);
     }
     
     @Test
@@ -66,7 +63,6 @@ public class AlterTablePhaseTests {
         Change change = ChangeFactory.getInstance().create("alterTable");
         assertNotNull(change);
         assertTrue(change instanceof AlterTableChange);
-        System.out.println("✅ Phase 4 PASS - Services registered");
     }
     
     @Test
@@ -74,8 +70,7 @@ public class AlterTablePhaseTests {
     public void testPhase5_XsdParsing() {
         // Just verify XSD exists - full XML parsing tested later
         java.io.InputStream xsd = getClass().getResourceAsStream(
-            "/www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd");
+                "/www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd");
         assertNotNull(xsd);
-        System.out.println("✅ Phase 5 PASS - XSD exists");
     }
 }

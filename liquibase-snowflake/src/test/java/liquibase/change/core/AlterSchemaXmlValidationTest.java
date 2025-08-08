@@ -44,19 +44,13 @@ public class AlterSchemaXmlValidationTest {
         ChangeSet changeSet = changeLog.getChangeSets().get(0);
         AlterSchemaChange change = (AlterSchemaChange) changeSet.getChanges().get(0);
         
-        System.out.println("=== PARSED VALUES ===");
-        System.out.println("schemaName: " + change.getSchemaName());
-        System.out.println("unsetDataRetentionTimeInDays: " + change.getUnsetDataRetentionTimeInDays());
         
         // Test validation
         SnowflakeDatabase database = new SnowflakeDatabase();
         ValidationErrors errors = change.validate(database);
         
-        System.out.println("=== VALIDATION RESULTS ===");
-        System.out.println("Validation errors count: " + errors.getErrorMessages().size());
         if (errors.hasErrors()) {
             for (String error : errors.getErrorMessages()) {
-                System.out.println("ERROR: " + error);
             }
         }
         

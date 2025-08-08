@@ -63,9 +63,7 @@ public class FileFormatSnapshotGeneratorTest {
     void shouldConfigureCorrectObjectTypes() {
         // Test that the generator is configured for FileFormat objects
         assertNotNull(generator, "Generator should be instantiated");
-        assertTrue(generator instanceof liquibase.snapshot.jvm.JdbcSnapshotGenerator, 
-                  "Should extend JdbcSnapshotGenerator");
-    }
+        assertTrue(generator instanceof liquibase.snapshot.jvm.JdbcSnapshotGenerator, "Assertion should be true");    }
 
     @Test
     void shouldHandleFileFormatObjects() {
@@ -201,9 +199,7 @@ public class FileFormatSnapshotGeneratorTest {
         for (String compression : compressionTypes) {
             FileFormat format = new FileFormat("TEST_" + compression);
             format.setCompression(compression);
-            assertEquals(compression, format.getCompression(), 
-                        "Should support " + compression + " compression");
-        }
+            assertEquals(compression, format.getCompression(), "Values should be equal");        }
     }
 
     @Test
@@ -213,9 +209,7 @@ public class FileFormatSnapshotGeneratorTest {
         for (String type : formatTypes) {
             FileFormat format = new FileFormat("TEST_" + type);
             format.setFormatType(type);
-            assertEquals(type, format.getFormatType(), 
-                        "Should support " + type + " format type");
-        }
+            assertEquals(type, format.getFormatType(), "Values should be equal");        }
     }
 
     @Test

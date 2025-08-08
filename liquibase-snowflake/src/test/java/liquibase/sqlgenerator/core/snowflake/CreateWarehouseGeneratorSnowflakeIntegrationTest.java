@@ -48,7 +48,7 @@ public class CreateWarehouseGeneratorSnowflakeIntegrationTest {
      * when running tests in parallel.
      */
     private String getUniqueWarehouseName(String methodName) {
-        return "TEST_CREATE_" + methodName;
+        return "TEST_CREATE_" + methodName.toUpperCase() + "_" + System.currentTimeMillis();
     }
     
     @Mock
@@ -97,7 +97,6 @@ public class CreateWarehouseGeneratorSnowflakeIntegrationTest {
             }
             
             // Create isolated schema (like SchemaIsolationHook does)
-            System.out.println("SchemaIsolationHook: Setting up isolated schema: " + testSchemaName);
             try (Statement stmt = rawConnection.createStatement()) {
                 stmt.execute("CREATE SCHEMA IF NOT EXISTS " + testSchemaName);
                 stmt.execute("USE SCHEMA " + testSchemaName);
@@ -105,7 +104,6 @@ public class CreateWarehouseGeneratorSnowflakeIntegrationTest {
             
             // Update database to use isolated schema (like SchemaIsolationHook does)
             database.setDefaultSchemaName(testSchemaName);
-            System.out.println("SchemaIsolationHook: New default schema: " + database.getDefaultSchemaName());
             
         } catch (Exception e) {
             throw new RuntimeException("Failed to set up isolated schema: " + testSchemaName, e);
@@ -122,7 +120,6 @@ public class CreateWarehouseGeneratorSnowflakeIntegrationTest {
                 for (String warehouseName : createdWarehouses) {
                     try {
                         stmt.execute("DROP WAREHOUSE IF EXISTS " + warehouseName);
-                        System.out.println("Cleaned up warehouse: " + warehouseName);
                     } catch (Exception e) {
                         System.err.println("Failed to cleanup warehouse " + warehouseName + ": " + e.getMessage());
                     }
@@ -132,7 +129,6 @@ public class CreateWarehouseGeneratorSnowflakeIntegrationTest {
                 if (originalSchema != null) {
                     try {
                         stmt.execute("USE SCHEMA " + originalSchema);
-                        System.out.println("SchemaIsolationHook: Switched back to original schema: " + originalSchema);
                     } catch (Exception e) {
                         System.err.println("Failed to switch back to original schema: " + e.getMessage());
                     }
@@ -142,7 +138,6 @@ public class CreateWarehouseGeneratorSnowflakeIntegrationTest {
                 if (testSchemaName != null) {
                     try {
                         stmt.execute("DROP SCHEMA IF EXISTS " + testSchemaName);
-                        System.out.println("SchemaIsolationHook: Cleaned up schema: " + testSchemaName);
                     } catch (Exception e) {
                         System.err.println("Failed to cleanup schema " + testSchemaName + ": " + e.getMessage());
                     }
@@ -158,13 +153,11 @@ public class CreateWarehouseGeneratorSnowflakeIntegrationTest {
         assertEquals(1, sqls.length, "Should generate exactly one SQL statement");
         
         String sql = sqls[0].toSql();
-        System.out.println("Testing " + testName + ": " + sql);
         
         // Execute against Snowflake using rawConnection
         try (Statement stmt = rawConnection.createStatement()) {
             stmt.execute(sql);
             createdWarehouses.add(statement.getWarehouseName());
-            System.out.println("✅ SUCCESS: " + testName);
         } catch (Exception e) {
             System.err.println("❌ FAILED: " + testName + " - " + e.getMessage());
             throw new AssertionError("SQL execution failed for " + testName + ": " + sql, e);
@@ -328,9 +321,7 @@ public class CreateWarehouseGeneratorSnowflakeIntegrationTest {
         ValidationErrors errors = generator.validate(statement, database, sqlGeneratorChain);
         
         assertTrue(errors.hasErrors(), "Should have validation errors for missing warehouse name");
-        assertTrue(errors.getErrorMessages().get(0).contains("Warehouse name is required"), 
-                  "Should specify warehouse name is required");
-    }
+        assertTrue(errors.getErrorMessages().get(0).contains("Warehouse name is required"), "Assertion should be true");    }
     
     @Test
     @DisplayName("Integration: Verify Schema Isolation")
@@ -340,7 +331,6 @@ public class CreateWarehouseGeneratorSnowflakeIntegrationTest {
             java.sql.ResultSet rs = stmt.executeQuery("SELECT CURRENT_SCHEMA()");
             if (rs.next()) {
                 String currentSchema = rs.getString(1);
-                System.out.println("Current schema: " + currentSchema);
                 assertEquals(testSchemaName, currentSchema, "Should be in isolated test schema");
             }
             rs.close();

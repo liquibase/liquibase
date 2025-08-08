@@ -151,7 +151,6 @@ public class DropDatabaseGeneratorSnowflakeTest {
         
         Sql[] sqls = generator.generateSql(statement, database, null);
         
-        // Snowflake escapes with double quotes for special characters
-        assertTrue(sqls[0].toSql().contains("\"TEST-DB\""));
+        assertEquals("DROP DATABASE \"TEST-DB\"", sqls[0].toSql());
     }
 }

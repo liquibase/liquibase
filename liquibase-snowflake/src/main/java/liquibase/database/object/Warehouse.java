@@ -134,8 +134,8 @@ public class Warehouse extends AbstractDatabaseObject {
                     ". Valid sizes are: " + VALID_SIZES
                 );
             }
-            // Store the original format from Snowflake
-            this.size = upperSize;
+            // Store the normalized format for XSD compatibility
+            this.size = normalizedSize;
         } else {
             this.size = size;
         }

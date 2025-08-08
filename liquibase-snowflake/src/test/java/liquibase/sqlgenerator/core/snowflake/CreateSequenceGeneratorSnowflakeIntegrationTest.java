@@ -67,7 +67,6 @@ public class CreateSequenceGeneratorSnowflakeIntegrationTest {
             useSchemaStmt.execute();
             useSchemaStmt.close();
         } catch (SQLException e) {
-            System.out.println("Schema already exists or creation failed: " + e.getMessage());
         }
     }
 
@@ -79,7 +78,6 @@ public class CreateSequenceGeneratorSnowflakeIntegrationTest {
                 PreparedStatement dropStmt = connection.prepareStatement("DROP SEQUENCE IF EXISTS " + testDatabase + "." + testSchema + "." + sequenceName);
                 dropStmt.execute();
                 dropStmt.close();
-                System.out.println("Cleaned up sequence: " + testDatabase + "." + testSchema + "." + sequenceName);
             } catch (SQLException e) {
                 System.err.println("Failed to cleanup sequence " + sequenceName + ": " + e.getMessage());
             }
@@ -95,7 +93,6 @@ public class CreateSequenceGeneratorSnowflakeIntegrationTest {
         String sequenceName = getUniqueSequenceName("testBasicRequiredOnly");
         createdSequences.add(sequenceName);
 
-        System.out.println("Testing Basic Required Only: CREATE SEQUENCE " + sequenceName);
 
         CreateSequenceStatement statement = new CreateSequenceStatement(null, null, sequenceName);
 
@@ -111,7 +108,6 @@ public class CreateSequenceGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: Basic Required Only");
     }
 
     @Test
@@ -119,7 +115,6 @@ public class CreateSequenceGeneratorSnowflakeIntegrationTest {
         String sequenceName = getUniqueSequenceName("testSequenceWithStartValue");
         createdSequences.add(sequenceName);
 
-        System.out.println("Testing WITH START VALUE: CREATE SEQUENCE " + sequenceName + " START WITH 100");
 
         CreateSequenceStatement statement = new CreateSequenceStatement(null, null, sequenceName);
         statement.setStartValue(java.math.BigInteger.valueOf(100));
@@ -137,7 +132,6 @@ public class CreateSequenceGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: WITH START VALUE");
     }
 
     @Test
@@ -145,7 +139,6 @@ public class CreateSequenceGeneratorSnowflakeIntegrationTest {
         String sequenceName = getUniqueSequenceName("testSequenceWithIncrement");
         createdSequences.add(sequenceName);
 
-        System.out.println("Testing WITH INCREMENT: CREATE SEQUENCE " + sequenceName + " INCREMENT BY 5");
 
         CreateSequenceStatement statement = new CreateSequenceStatement(null, null, sequenceName);
         statement.setIncrementBy(java.math.BigInteger.valueOf(5));
@@ -163,14 +156,12 @@ public class CreateSequenceGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: WITH INCREMENT");
     }
 
     @Test
     public void testSequenceWithMinMaxValues() throws Exception {
         String sequenceName = getUniqueSequenceName("testSequenceWithMinMaxValues");
 
-        System.out.println("Testing MIN/MAX VALUES validation (should fail): CREATE SEQUENCE " + sequenceName + " MINVALUE 1 MAXVALUE 1000");
 
         CreateSequenceStatement statement = new CreateSequenceStatement(null, null, sequenceName);
         statement.setMinValue(java.math.BigInteger.valueOf(1));
@@ -181,17 +172,13 @@ public class CreateSequenceGeneratorSnowflakeIntegrationTest {
             Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(statement, database);
             fail("Expected validation error for unsupported MINVALUE/MAXVALUE in Snowflake");
         } catch (Exception e) {
-            assertTrue(e.getMessage().contains("minValue") || e.getMessage().contains("maxValue"), 
-                      "Expected validation error about minValue or maxValue, got: " + e.getMessage());
-            System.out.println("✅ SUCCESS: MIN/MAX VALUES correctly rejected");
-        }
+            assertTrue(e.getMessage().contains("minValue") || e.getMessage().contains("maxValue"), "Assertion should be true");        }
     }
 
     @Test
     public void testSequenceWithCycle() throws Exception {
         String sequenceName = getUniqueSequenceName("testSequenceWithCycle");
 
-        System.out.println("Testing CYCLE validation (should fail): CREATE SEQUENCE " + sequenceName + " CYCLE");
 
         CreateSequenceStatement statement = new CreateSequenceStatement(null, null, sequenceName);
         statement.setCycle(true);
@@ -201,10 +188,7 @@ public class CreateSequenceGeneratorSnowflakeIntegrationTest {
             Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(statement, database);
             fail("Expected validation error for unsupported CYCLE in Snowflake");
         } catch (Exception e) {
-            assertTrue(e.getMessage().contains("cycle"), 
-                      "Expected validation error about cycle, got: " + e.getMessage());
-            System.out.println("✅ SUCCESS: CYCLE correctly rejected");
-        }
+            assertTrue(e.getMessage().contains("cycle"), "Assertion should be true");        }
     }
 
     @Test
@@ -212,7 +196,6 @@ public class CreateSequenceGeneratorSnowflakeIntegrationTest {
         String sequenceName = getUniqueSequenceName("testSequenceWithSupportedProperties");
         createdSequences.add(sequenceName);
 
-        System.out.println("Testing Supported Properties: CREATE SEQUENCE " + sequenceName + " with START WITH and INCREMENT BY");
 
         CreateSequenceStatement statement = new CreateSequenceStatement(null, null, sequenceName);
         statement.setStartValue(java.math.BigInteger.valueOf(10));
@@ -232,12 +215,10 @@ public class CreateSequenceGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: Supported Properties");
     }
 
     @Test
     public void testValidationMissingSequenceName() throws Exception {
-        System.out.println("Testing Validation: Missing sequence name should fail");
 
         CreateSequenceStatement statement = new CreateSequenceStatement(null, null, null);
 
@@ -246,13 +227,11 @@ public class CreateSequenceGeneratorSnowflakeIntegrationTest {
             fail("Expected validation error for missing sequence name");
         } catch (Exception e) {
             assertTrue(e.getMessage().contains("sequence") || e.getMessage().contains("name") || e.getMessage().contains("required"));
-            System.out.println("✅ SUCCESS: Validation correctly failed for missing sequence name");
         }
     }
 
     @Test
     public void testUniqueNamingStrategy() throws Exception {
-        System.out.println("Testing Unique Naming Strategy: Verifying all test sequences have unique names");
 
         // Create multiple sequences using the naming strategy
         String seq1 = getUniqueSequenceName("testMethod1");
@@ -267,10 +246,6 @@ public class CreateSequenceGeneratorSnowflakeIntegrationTest {
         assertTrue(seq2.startsWith("TEST_CREATE_SEQ_"));
         assertTrue(seq3.startsWith("TEST_CREATE_SEQ_"));
 
-        System.out.println("Sequence 1: " + seq1);
-        System.out.println("Sequence 2: " + seq2);
-        System.out.println("Sequence 3: " + seq3);
 
-        System.out.println("✅ SUCCESS: Unique Naming Strategy validated");
     }
 }

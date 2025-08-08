@@ -3,7 +3,6 @@ package liquibase.sqlgenerator.core.snowflake;
 import liquibase.database.core.SnowflakeDatabase;
 import liquibase.ext.SnowflakeNamespaceAttributeStorage;
 import liquibase.sql.Sql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.datatype.core.VarcharType;
 import liquibase.datatype.core.IntType;
@@ -12,46 +11,33 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 /**
- * Unit tests for CreateTableGeneratorSnowflake namespace attribute support
+ * Pure SQL tests for CreateTableGeneratorSnowflake namespace attribute support.
+ * Tests SQL generation without mocks, focusing on actual string output validation.
  */
 @DisplayName("CreateTableGeneratorSnowflake Namespace Attributes")
 public class CreateTableGeneratorSnowflakeNamespaceTest {
     
     private CreateTableGeneratorSnowflake generator;
-    private CreateTableStatement statement;
-    
-    @Mock
     private SnowflakeDatabase database;
-    
-    @Mock
-    private SqlGeneratorChain sqlGeneratorChain;
+    private CreateTableStatement statement;
     
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         generator = new CreateTableGeneratorSnowflake();
+        database = new SnowflakeDatabase();
         statement = new CreateTableStatement("PUBLIC", "PUBLIC", "TEST_TABLE");
         
         // Add some columns
         statement.addColumn("id", new IntType());
         statement.addColumn("name", new VarcharType());
         statement.addColumn("created_at", new TimestampType());
-        
-        // Setup database mock
-        when(database.escapeTableName(anyString(), anyString(), anyString())).thenReturn("TEST_TABLE");
-        when(database.escapeColumnName(anyString(), anyString(), anyString(), anyString())).thenAnswer(i -> i.getArgument(3));
         
         // Clear storage
         SnowflakeNamespaceAttributeStorage.clear();
@@ -71,12 +57,12 @@ public class CreateTableGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CREATE TRANSIENT TABLE"));
+        assertTrue(sql.startsWith("CREATE TRANSIENT TABLE PUBLIC.PUBLIC.TEST_TABLE"), "SQL should start with CREATE TRANSIENT TABLE PUBLIC.PUBLIC.TEST_TABLE but was: " + sql);
         assertFalse(sql.contains("CREATE TABLE TABLE")); // Should not double TABLE
         
         // Verify attributes were cleaned up
@@ -92,12 +78,12 @@ public class CreateTableGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CREATE VOLATILE TABLE"));
+        assertTrue(sql.startsWith("CREATE VOLATILE TABLE PUBLIC.PUBLIC.TEST_TABLE"), "SQL should start with CREATE VOLATILE TABLE PUBLIC.PUBLIC.TEST_TABLE but was: " + sql);
     }
     
     @Test
@@ -109,12 +95,12 @@ public class CreateTableGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CREATE TEMPORARY TABLE"));
+        assertTrue(sql.startsWith("CREATE TEMPORARY TABLE PUBLIC.PUBLIC.TEST_TABLE"), "SQL should start with CREATE TEMPORARY TABLE PUBLIC.PUBLIC.TEST_TABLE but was: " + sql);
     }
     
     @Test
@@ -126,12 +112,12 @@ public class CreateTableGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CREATE LOCAL TEMPORARY TABLE"));
+        assertTrue(sql.startsWith("CREATE LOCAL TEMPORARY TABLE PUBLIC.PUBLIC.TEST_TABLE"), "SQL should start with CREATE LOCAL TEMPORARY TABLE PUBLIC.PUBLIC.TEST_TABLE but was: " + sql);
     }
     
     @Test
@@ -143,12 +129,12 @@ public class CreateTableGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CLUSTER BY (id,created_at)"));
+        assertTrue(sql.contains("CLUSTER BY (id,created_at)"), "SQL should contain cluster by clause: " + sql);
     }
     
     @Test
@@ -160,12 +146,12 @@ public class CreateTableGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS = 7"));
+        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS = 7"), "SQL should contain data retention clause: " + sql);
     }
     
     @Test
@@ -177,12 +163,12 @@ public class CreateTableGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CHANGE_TRACKING = TRUE"));
+        assertTrue(sql.contains("CHANGE_TRACKING = TRUE"), "SQL should contain change tracking clause: " + sql);
     }
     
     @Test
@@ -196,14 +182,14 @@ public class CreateTableGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CREATE TRANSIENT TABLE"));
-        assertTrue(sql.contains("CLUSTER BY (id,name)"));
-        assertTrue(sql.contains("CHANGE_TRACKING = TRUE"));
+        assertTrue(sql.startsWith("CREATE TRANSIENT TABLE PUBLIC.PUBLIC.TEST_TABLE"), "SQL should start with CREATE TRANSIENT TABLE PUBLIC.PUBLIC.TEST_TABLE but was: " + sql);
+        assertTrue(sql.contains("CLUSTER BY (id,name)"), "SQL should contain cluster by clause: " + sql);
+        assertTrue(sql.contains("CHANGE_TRACKING = TRUE"), "SQL should contain change tracking clause: " + sql);
     }
     
     @Test
@@ -216,12 +202,12 @@ public class CreateTableGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CREATE TRANSIENT TABLE"));
+        assertTrue(sql.startsWith("CREATE TRANSIENT TABLE PUBLIC.PUBLIC.TEST_TABLE"), "SQL should start with CREATE TRANSIENT TABLE PUBLIC.PUBLIC.TEST_TABLE but was: " + sql);
         assertFalse(sql.contains("DATA_RETENTION_TIME_IN_DAYS"));
     }
     
@@ -236,7 +222,7 @@ public class CreateTableGeneratorSnowflakeNamespaceTest {
         
         // When/Then
         assertThrows(RuntimeException.class, () -> 
-            generator.generateSql(statement, database, sqlGeneratorChain)
+            generator.generateSql(statement, database, null)
         );
     }
     
@@ -247,12 +233,12 @@ public class CreateTableGeneratorSnowflakeNamespaceTest {
         statement.setTablespace("transient");
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CREATE TRANSIENT TABLE"));
+        assertTrue(sql.startsWith("CREATE TRANSIENT TABLE PUBLIC.PUBLIC.TEST_TABLE"), "SQL should start with CREATE TRANSIENT TABLE PUBLIC.PUBLIC.TEST_TABLE but was: " + sql);
     }
     
     @Test
@@ -266,12 +252,12 @@ public class CreateTableGeneratorSnowflakeNamespaceTest {
         statement.setTablespace("transient"); // Legacy approach says transient
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then - namespace attribute should win
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CREATE VOLATILE TABLE"));
+        assertTrue(sql.startsWith("CREATE VOLATILE TABLE PUBLIC.PUBLIC.TEST_TABLE"), "SQL should start with CREATE VOLATILE TABLE PUBLIC.PUBLIC.TEST_TABLE but was: " + sql);
         assertFalse(sql.contains("TRANSIENT"));
     }
     
@@ -284,12 +270,12 @@ public class CreateTableGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("DEFAULT_DDL_COLLATION = 'en-ci'"));
+        assertTrue(sql.contains("DEFAULT_DDL_COLLATION = 'en-ci'"), "SQL should contain collation clause: " + sql);
     }
     
     @Test
@@ -301,12 +287,12 @@ public class CreateTableGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("ENABLE_SCHEMA_EVOLUTION = TRUE"));
+        assertTrue(sql.contains("ENABLE_SCHEMA_EVOLUTION = TRUE"), "SQL should contain schema evolution clause: " + sql);
     }
     
     // New namespace attributes tests (completed in Phase 2)
@@ -320,12 +306,12 @@ public class CreateTableGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("COMMENT = 'Table with custom comment'"));
+        assertTrue(sql.contains("COMMENT = 'Table with custom comment'"), "SQL should contain comment clause: " + sql);
     }
     
     @Test
@@ -337,12 +323,12 @@ public class CreateTableGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("TAG (production)"));
+        assertTrue(sql.contains("TAG (production)"), "SQL should contain tag clause: " + sql);
     }
     
     @Test
@@ -354,12 +340,12 @@ public class CreateTableGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("STAGE_FILE_FORMAT = CSV_FORMAT"));
+        assertTrue(sql.contains("STAGE_FILE_FORMAT = CSV_FORMAT"), "SQL should contain stage file format clause: " + sql);
     }
     
     @Test
@@ -371,12 +357,12 @@ public class CreateTableGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("STAGE_COPY_OPTIONS = ON_ERROR = 'CONTINUE'"));
+        assertTrue(sql.contains("STAGE_COPY_OPTIONS = ON_ERROR = 'CONTINUE'"), "SQL should contain stage copy options clause: " + sql);
     }
     
     @Test
@@ -391,15 +377,15 @@ public class CreateTableGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("STAGE_FILE_FORMAT = JSON_FORMAT"));
-        assertTrue(sql.contains("STAGE_COPY_OPTIONS = ON_ERROR = 'SKIP_FILE'"));
-        assertTrue(sql.contains("TAG (production)"));
-        assertTrue(sql.contains("COMMENT = 'Production table with all features'"));
+        assertTrue(sql.contains("STAGE_FILE_FORMAT = JSON_FORMAT"), "SQL should contain stage file format: " + sql);
+        assertTrue(sql.contains("STAGE_COPY_OPTIONS = ON_ERROR = 'SKIP_FILE'"), "SQL should contain stage copy options: " + sql);
+        assertTrue(sql.contains("TAG (production)"), "SQL should contain tag clause: " + sql);
+        assertTrue(sql.contains("COMMENT = 'Production table with all features'"), "SQL should contain comment clause: " + sql);
     }
     
     @Test
@@ -413,12 +399,12 @@ public class CreateTableGeneratorSnowflakeNamespaceTest {
         statement.setRemarks("Statement comment");
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then - namespace attribute should win
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("COMMENT = 'Namespace comment wins'"));
+        assertTrue(sql.contains("COMMENT = 'Namespace comment wins'"), "SQL should contain namespace comment: " + sql);
         assertFalse(sql.contains("Statement comment"));
     }
     
@@ -431,11 +417,11 @@ public class CreateTableGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("COMMENT = 'Comment with ''single'' and \"double\" quotes'"));
+        assertTrue(sql.contains("COMMENT = 'Comment with ''single'' and \"double\" quotes'"), "SQL should contain escaped comment text: " + sql);
     }
 }

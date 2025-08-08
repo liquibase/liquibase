@@ -52,7 +52,6 @@ public class DatabaseObjectIntegrationTest {
                 PreparedStatement dropStmt = connection.prepareStatement("DROP DATABASE IF EXISTS " + objectName);
                 dropStmt.execute();
                 dropStmt.close();
-                System.out.println("Cleaned up test database: " + objectName);
             } catch (Exception e) {
                 System.err.println("Failed to cleanup test database " + objectName + ": " + e.getMessage());
             }
@@ -69,7 +68,6 @@ public class DatabaseObjectIntegrationTest {
 
     @Test
     public void testDatabaseSnapshotGeneratorDirectQuery() throws Exception {
-        System.out.println("Phase 1A: Testing DatabaseSnapshotGeneratorSnowflake direct SQL queries...");
         
         String uniqueName = getUniqueTestObjectName("directQuery");
         createdTestObjects.add(uniqueName);
@@ -103,7 +101,6 @@ public class DatabaseObjectIntegrationTest {
             rs.close();
             infoStmt.close();
             
-            System.out.println("✅ SUCCESS: Direct SQL queries working for DatabaseSnapshotGeneratorSnowflake");
             
         } finally {
             // Cleanup handled in tearDown()
@@ -112,7 +109,6 @@ public class DatabaseObjectIntegrationTest {
 
     @Test
     public void testDatabaseSnapshotGeneratorObjectCreation() throws Exception {
-        System.out.println("Phase 1A: Testing DatabaseSnapshotGeneratorSnowflake object creation...");
         
         String uniqueName = getUniqueTestObjectName("objectCreation");
         createdTestObjects.add(uniqueName);
@@ -121,7 +117,7 @@ public class DatabaseObjectIntegrationTest {
             // CREATE: Set up test database with various Snowflake properties
             // Note: Transient databases have retention time constraints (0-1 days)
             PreparedStatement createStmt = connection.prepareStatement(
-                "CREATE TRANSIENT DATABASE " + uniqueName + " " +
+                "CREATE DATABASE " + uniqueName + " " +
                 "DATA_RETENTION_TIME_IN_DAYS = 1 " +
                 "COMMENT = 'Test database with Snowflake properties'"
             );
@@ -133,8 +129,7 @@ public class DatabaseObjectIntegrationTest {
             
             // Verify generator configuration
             assertEquals(DatabaseSnapshotGeneratorSnowflake.PRIORITY_DATABASE, 
-                        generator.getPriority(liquibase.database.object.Database.class, database),
-                        "Should handle Database objects with DATABASE priority");
+                        generator.getPriority(liquibase.database.object.Database.class, database));
             
             // Create a database object manually using the same pattern as our generator
             liquibase.database.object.Database databaseObject = new liquibase.database.object.Database();
@@ -151,7 +146,6 @@ public class DatabaseObjectIntegrationTest {
             assertEquals(Integer.valueOf(1), databaseObject.getDataRetentionTimeInDays(), "Retention time should be set");
             assertEquals(Boolean.TRUE, databaseObject.getTransient(), "Transient flag should be set");
             
-            System.out.println("✅ SUCCESS: DatabaseSnapshotGeneratorSnowflake object creation working");
             
         } finally {
             // Cleanup handled in tearDown()
@@ -164,7 +158,6 @@ public class DatabaseObjectIntegrationTest {
 
     @Test
     public void testDatabaseComparatorSameObjects() throws Exception {
-        System.out.println("Phase 1B: Testing DatabaseComparator - Same Objects scenario...");
         
         // Create two identical database objects
         liquibase.database.object.Database database1 = new liquibase.database.object.Database();
@@ -188,12 +181,10 @@ public class DatabaseObjectIntegrationTest {
         // VALIDATE: Should be identical
         assertFalse(differences.hasDifferences(), "Same objects should have no differences");
         
-        System.out.println("✅ SUCCESS: DatabaseComparator same objects scenario working");
     }
 
     @Test 
     public void testDatabaseComparatorDifferentObjects() throws Exception {
-        System.out.println("Phase 1B: Testing DatabaseComparator - Different Objects scenario...");
         
         // Create source database object
         liquibase.database.object.Database source = new liquibase.database.object.Database();
@@ -218,7 +209,6 @@ public class DatabaseObjectIntegrationTest {
         // VALIDATE: Should detect differences
         assertTrue(differences.hasDifferences(), "Different objects should have differences");
         
-        System.out.println("✅ SUCCESS: DatabaseComparator different objects scenario working");
     }
 
     // ===========================================
@@ -227,37 +217,29 @@ public class DatabaseObjectIntegrationTest {
 
     @Test
     public void testDatabaseSnapshotGeneratorServiceRegistration() throws Exception {
-        System.out.println("Phase 2A: Testing DatabaseSnapshotGeneratorSnowflake service registration...");
         
         // Test direct service loading
         DatabaseSnapshotGeneratorSnowflake generator = new DatabaseSnapshotGeneratorSnowflake();
         
         // Verify framework integration - priority handling
         assertEquals(DatabaseSnapshotGeneratorSnowflake.PRIORITY_DATABASE, 
-                    generator.getPriority(liquibase.database.object.Database.class, database),
-                    "Should handle Database objects with DATABASE priority");
+                    generator.getPriority(liquibase.database.object.Database.class, database));
         assertEquals(DatabaseSnapshotGeneratorSnowflake.PRIORITY_NONE, 
-                    generator.getPriority(liquibase.structure.core.Schema.class, database),
-                    "Should not handle Schema objects");
+                    generator.getPriority(liquibase.structure.core.Schema.class, database));
         
-        System.out.println("✅ SUCCESS: DatabaseSnapshotGeneratorSnowflake service registration working");
     }
 
     @Test
     public void testDatabaseComparatorServiceRegistration() throws Exception {
-        System.out.println("Phase 2B: Testing DatabaseComparator service registration...");
         
         DatabaseComparator comparator = new DatabaseComparator();
         
         // Verify framework integration - priority handling
         assertEquals(DatabaseComparator.PRIORITY_DATABASE,
-                    comparator.getPriority(liquibase.database.object.Database.class, database),
-                    "Should handle Database objects with DATABASE priority");
+                    comparator.getPriority(liquibase.database.object.Database.class, database));
         assertEquals(DatabaseComparator.PRIORITY_NONE,
-                    comparator.getPriority(liquibase.structure.core.Schema.class, database),
-                    "Should not handle Schema objects");
+                    comparator.getPriority(liquibase.structure.core.Schema.class, database));
         
-        System.out.println("✅ SUCCESS: DatabaseComparator service registration working");
     }
 
     // ===========================================
@@ -266,7 +248,6 @@ public class DatabaseObjectIntegrationTest {
 
     @Test
     public void testXSDAttributeHandling() throws Exception {
-        System.out.println("Phase 3A: Testing XSD attribute handling patterns...");
         
         String uniqueName = getUniqueTestObjectName("xsdAttributes");
         createdTestObjects.add(uniqueName);
@@ -302,7 +283,6 @@ public class DatabaseObjectIntegrationTest {
             rs.close();
             queryStmt.close();
             
-            System.out.println("✅ SUCCESS: XSD attribute handling patterns validated");
             
         } finally {
             // Cleanup handled in tearDown()
@@ -311,7 +291,6 @@ public class DatabaseObjectIntegrationTest {
 
     @Test
     public void testDatabaseIsolationPattern() throws Exception {
-        System.out.println("Phase 3B: Validating database isolation pattern for parallel execution...");
         
         // Test that our unique naming pattern prevents conflicts
         String database1 = getUniqueTestObjectName("isolation1");
@@ -328,10 +307,6 @@ public class DatabaseObjectIntegrationTest {
         assertTrue(database2.startsWith("INT_TEST_DB_"), "Should follow naming pattern");
         assertTrue(database3.startsWith("INT_TEST_DB_"), "Should follow naming pattern");
         
-        System.out.println("Database 1: " + database1);
-        System.out.println("Database 2: " + database2);
-        System.out.println("Database 3: " + database3);
         
-        System.out.println("✅ SUCCESS: Database isolation pattern validated");
     }
 }

@@ -4,47 +4,34 @@ import liquibase.database.core.SnowflakeDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.ext.SnowflakeNamespaceAttributeStorage;
 import liquibase.sql.Sql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateSchemaStatement;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 /**
- * Comprehensive unit tests for CreateSchemaGeneratorSnowflake namespace attribute support
+ * Pure SQL tests for CreateSchemaGeneratorSnowflake namespace attribute support.
+ * Tests SQL generation without mocks, focusing on actual string output validation.
  */
 @DisplayName("CreateSchemaGeneratorSnowflake Namespace Attributes")
 public class CreateSchemaGeneratorSnowflakeNamespaceTest {
     
     private CreateSchemaGeneratorSnowflake generator;
-    private CreateSchemaStatement statement;
-    
-    @Mock
     private SnowflakeDatabase database;
-    
-    @Mock
-    private SqlGeneratorChain sqlGeneratorChain;
+    private CreateSchemaStatement statement;
     
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         generator = new CreateSchemaGeneratorSnowflake();
+        database = new SnowflakeDatabase();
         statement = new CreateSchemaStatement();
         statement.setSchemaName("TEST_SCHEMA");
-        
-        // Setup database mock for schema name escaping
-        when(database.escapeObjectName("TEST_SCHEMA", liquibase.structure.core.Schema.class))
-            .thenReturn("TEST_SCHEMA");
         
         // Clear storage
         SnowflakeNamespaceAttributeStorage.clear();
@@ -66,12 +53,12 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_SCHEMA", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CREATE OR REPLACE SCHEMA"));
+        assertEquals("CREATE OR REPLACE SCHEMA TEST_SCHEMA", sql);
         
         // Verify attributes were cleaned up
         assertNull(SnowflakeNamespaceAttributeStorage.getAttributes("TEST_SCHEMA"));
@@ -86,12 +73,12 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_SCHEMA", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CREATE SCHEMA IF NOT EXISTS"));
+        assertEquals("CREATE SCHEMA IF NOT EXISTS TEST_SCHEMA", sql);
     }
     
     @Test
@@ -103,12 +90,12 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_SCHEMA", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CREATE TRANSIENT SCHEMA"));
+        assertEquals("CREATE TRANSIENT SCHEMA TEST_SCHEMA", sql);
     }
     
     @Test
@@ -120,12 +107,12 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_SCHEMA", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("WITH MANAGED ACCESS"));
+        assertEquals("CREATE SCHEMA TEST_SCHEMA WITH MANAGED ACCESS", sql);
     }
     
     @Test
@@ -136,16 +123,15 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         attrs.put("cloneFrom", "SOURCE_SCHEMA");
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_SCHEMA", attrs);
         
-        when(database.escapeObjectName("SOURCE_SCHEMA", liquibase.structure.core.Schema.class))
-            .thenReturn("SOURCE_SCHEMA");
+        // No mock needed - testing actual SQL generation
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CLONE SOURCE_SCHEMA"));
+        assertEquals("CREATE SCHEMA TEST_SCHEMA CLONE SOURCE_SCHEMA", sql);
     }
     
     // Time Travel and Storage Attributes Tests
@@ -159,12 +145,12 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_SCHEMA", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS = 30"));
+        assertEquals("CREATE SCHEMA TEST_SCHEMA DATA_RETENTION_TIME_IN_DAYS = 30", sql);
     }
     
     @Test
@@ -176,12 +162,12 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_SCHEMA", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("MAX_DATA_EXTENSION_TIME_IN_DAYS = 60"));
+        assertEquals("CREATE SCHEMA TEST_SCHEMA MAX_DATA_EXTENSION_TIME_IN_DAYS = 60", sql);
     }
     
     @Test
@@ -193,12 +179,12 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_SCHEMA", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("DEFAULT_DDL_COLLATION = 'en-ci'"));
+        assertEquals("CREATE SCHEMA TEST_SCHEMA DEFAULT_DDL_COLLATION = 'en-ci'", sql);
     }
     
     @Test
@@ -210,12 +196,12 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_SCHEMA", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("PIPE_EXECUTION_PAUSED = TRUE"));
+        assertEquals("CREATE SCHEMA TEST_SCHEMA PIPE_EXECUTION_PAUSED = TRUE", sql);
     }
     
     // Advanced Snowflake Attributes Tests
@@ -229,12 +215,12 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_SCHEMA", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("EXTERNAL_VOLUME = 'external_vol'"));
+        assertEquals("CREATE SCHEMA TEST_SCHEMA EXTERNAL_VOLUME = 'external_vol'", sql);
     }
     
     @Test
@@ -246,12 +232,12 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_SCHEMA", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CATALOG = 'test_catalog'"));
+        assertEquals("CREATE SCHEMA TEST_SCHEMA CATALOG = 'test_catalog'", sql);
     }
     
     @Test
@@ -263,12 +249,12 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_SCHEMA", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CLASSIFICATION_PROFILE = 'sensitive_profile'"));
+        assertEquals("CREATE SCHEMA TEST_SCHEMA CLASSIFICATION_PROFILE = 'sensitive_profile'", sql);
     }
     
     @Test
@@ -280,12 +266,12 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_SCHEMA", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("REPLACE_INVALID_CHARACTERS = TRUE"));
+        assertEquals("CREATE SCHEMA TEST_SCHEMA REPLACE_INVALID_CHARACTERS = TRUE", sql);
     }
     
     @Test
@@ -297,12 +283,12 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_SCHEMA", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("STORAGE_SERIALIZATION_POLICY = optimized"));
+        assertEquals("CREATE SCHEMA TEST_SCHEMA STORAGE_SERIALIZATION_POLICY = optimized", sql);
     }
     
     @Test
@@ -314,12 +300,12 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_SCHEMA", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("TAG (production)"));
+        assertEquals("CREATE SCHEMA TEST_SCHEMA TAG (production)", sql);
     }
     
     @Test
@@ -331,12 +317,12 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_SCHEMA", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("COMMENT = 'Production schema with enhanced features'"));
+        assertEquals("CREATE SCHEMA TEST_SCHEMA COMMENT = 'Production schema with enhanced features'", sql);
     }
     
     // Combined Operations Tests
@@ -354,15 +340,12 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_SCHEMA", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CREATE OR REPLACE TRANSIENT SCHEMA"));
-        assertTrue(sql.contains("WITH MANAGED ACCESS"));
-        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS = 0"));
-        assertTrue(sql.contains("COMMENT = 'Complex schema configuration'"));
+        assertEquals("CREATE OR REPLACE TRANSIENT SCHEMA TEST_SCHEMA WITH MANAGED ACCESS DATA_RETENTION_TIME_IN_DAYS = 0 COMMENT = 'Complex schema configuration'", sql);
     }
     
     @Test
@@ -375,18 +358,15 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         attrs.put("comment", "Development clone of production");
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_SCHEMA", attrs);
         
-        when(database.escapeObjectName("PROD_SCHEMA", liquibase.structure.core.Schema.class))
-            .thenReturn("PROD_SCHEMA");
+        // No mock needed - testing actual SQL generation
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("CLONE PROD_SCHEMA"));
-        assertTrue(sql.contains("WITH MANAGED ACCESS"));
-        assertTrue(sql.contains("COMMENT = 'Development clone of production'"));
+        assertEquals("CREATE SCHEMA TEST_SCHEMA CLONE PROD_SCHEMA WITH MANAGED ACCESS COMMENT = 'Development clone of production'", sql);
     }
     
     // Validation Tests
@@ -399,7 +379,7 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         statement.setIfNotExists(true);
         
         // When
-        ValidationErrors errors = generator.validate(statement, database, sqlGeneratorChain);
+        ValidationErrors errors = generator.validate(statement, database, null);
         
         // Then
         assertTrue(errors.hasErrors());
@@ -417,7 +397,7 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_SCHEMA", attrs);
         
         // When
-        ValidationErrors errors = generator.validate(statement, database, sqlGeneratorChain);
+        ValidationErrors errors = generator.validate(statement, database, null);
         
         // Then
         assertTrue(errors.hasErrors());
@@ -435,7 +415,7 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_SCHEMA", attrs);
         
         // When
-        ValidationErrors errors = generator.validate(statement, database, sqlGeneratorChain);
+        ValidationErrors errors = generator.validate(statement, database, null);
         
         // Then
         assertTrue(errors.hasErrors());
@@ -455,7 +435,7 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_SCHEMA", attrs);
         
         // When
-        ValidationErrors errors = generator.validate(statement, database, sqlGeneratorChain);
+        ValidationErrors errors = generator.validate(statement, database, null);
         
         // Then
         assertTrue(errors.hasErrors());
@@ -474,12 +454,12 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         statement.setComment("Statement comment");
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then - namespace attribute should win
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("COMMENT = 'Namespace comment'"));
+        assertEquals("CREATE SCHEMA TEST_SCHEMA COMMENT = 'Namespace comment'", sql);
         assertFalse(sql.contains("Statement comment"));
     }
     
@@ -493,12 +473,11 @@ public class CreateSchemaGeneratorSnowflakeNamespaceTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_SCHEMA", attrs);
         
         // When  
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("COMMENT = 'Schema with ''quotes'' and \"double quotes\"'"));
-        assertTrue(sql.contains("DEFAULT_DDL_COLLATION = 'en-''special''-ci'"));
+        assertEquals("CREATE SCHEMA TEST_SCHEMA DEFAULT_DDL_COLLATION = 'en-''special''-ci' COMMENT = 'Schema with ''quotes'' and \"double quotes\"'", sql);
     }
 }

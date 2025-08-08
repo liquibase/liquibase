@@ -32,7 +32,6 @@ public class AlterTableAdvancedFeaturesTest {
         AlterTableStatement stmt = (AlterTableStatement) stmts[0];
         assertEquals("GEO", stmt.getAddSearchOptimization());
         
-        System.out.println("✅ Add search optimization test passed");
     }
     
     @Test
@@ -46,7 +45,6 @@ public class AlterTableAdvancedFeaturesTest {
         AlterTableStatement stmt = (AlterTableStatement) stmts[0];
         assertEquals(Boolean.TRUE, stmt.getDropSearchOptimization());
         
-        System.out.println("✅ Drop search optimization test passed");
     }
     
     @Test
@@ -60,7 +58,6 @@ public class AlterTableAdvancedFeaturesTest {
         AlterTableStatement stmt = (AlterTableStatement) stmts[0];
         assertEquals("my_policy ON (user_id, department)", stmt.getAddRowAccessPolicy());
         
-        System.out.println("✅ Add row access policy test passed");
     }
     
     @Test
@@ -74,7 +71,6 @@ public class AlterTableAdvancedFeaturesTest {
         AlterTableStatement stmt = (AlterTableStatement) stmts[0];
         assertEquals("my_policy", stmt.getDropRowAccessPolicy());
         
-        System.out.println("✅ Drop row access policy test passed");
     }
     
     @Test
@@ -88,7 +84,6 @@ public class AlterTableAdvancedFeaturesTest {
         AlterTableStatement stmt = (AlterTableStatement) stmts[0];
         assertEquals("my_agg_policy", stmt.getSetAggregationPolicy());
         
-        System.out.println("✅ Set aggregation policy test passed");
     }
     
     @Test
@@ -104,7 +99,6 @@ public class AlterTableAdvancedFeaturesTest {
         assertEquals("my_agg_policy", stmt.getSetAggregationPolicy());
         assertEquals(Boolean.TRUE, stmt.getForceAggregationPolicy());
         
-        System.out.println("✅ Set aggregation policy with force test passed");
     }
     
     @Test
@@ -118,7 +112,6 @@ public class AlterTableAdvancedFeaturesTest {
         AlterTableStatement stmt = (AlterTableStatement) stmts[0];
         assertEquals(Boolean.TRUE, stmt.getUnsetAggregationPolicy());
         
-        System.out.println("✅ Unset aggregation policy test passed");
     }
     
     @Test
@@ -132,7 +125,6 @@ public class AlterTableAdvancedFeaturesTest {
         AlterTableStatement stmt = (AlterTableStatement) stmts[0];
         assertEquals("my_proj_policy", stmt.getSetProjectionPolicy());
         
-        System.out.println("✅ Set projection policy test passed");
     }
     
     @Test
@@ -148,7 +140,6 @@ public class AlterTableAdvancedFeaturesTest {
         assertEquals("my_proj_policy", stmt.getSetProjectionPolicy());
         assertEquals(Boolean.TRUE, stmt.getForceProjectionPolicy());
         
-        System.out.println("✅ Set projection policy with force test passed");
     }
     
     @Test
@@ -162,7 +153,6 @@ public class AlterTableAdvancedFeaturesTest {
         AlterTableStatement stmt = (AlterTableStatement) stmts[0];
         assertEquals(Boolean.TRUE, stmt.getUnsetProjectionPolicy());
         
-        System.out.println("✅ Unset projection policy test passed");
     }
     
     @Test
@@ -176,7 +166,6 @@ public class AlterTableAdvancedFeaturesTest {
         AlterTableStatement stmt = (AlterTableStatement) stmts[0];
         assertEquals("env = 'production', department = 'engineering'", stmt.getSetTag());
         
-        System.out.println("✅ Set tag test passed");
     }
     
     @Test
@@ -190,7 +179,6 @@ public class AlterTableAdvancedFeaturesTest {
         AlterTableStatement stmt = (AlterTableStatement) stmts[0];
         assertEquals("env, department, owner", stmt.getUnsetTag());
         
-        System.out.println("✅ Unset tag test passed");
     }
     
     @Test
@@ -205,10 +193,9 @@ public class AlterTableAdvancedFeaturesTest {
         assertTrue(sqls.length > 0);
         String sql = sqls[0].toSql();
         
-        assertTrue(sql.contains("ALTER TABLE"));
-        assertTrue(sql.contains("ADD SEARCH OPTIMIZATION ON GEO"));
+        assertTrue(sql.startsWith("ALTER TABLE"), "SQL should start with ALTER TABLE: " + sql);
+        assertTrue(sql.contains("ADD SEARCH OPTIMIZATION ON GEO"), "SQL should contain search optimization clause: " + sql);
         
-        System.out.println("✅ Search optimization SQL generation test passed: " + sql);
     }
     
     @Test
@@ -223,10 +210,9 @@ public class AlterTableAdvancedFeaturesTest {
         assertTrue(sqls.length > 0);
         String sql = sqls[0].toSql();
         
-        assertTrue(sql.contains("ALTER TABLE"));
-        assertTrue(sql.contains("ADD ROW ACCESS POLICY security_policy ON (user_role)"));
+        assertTrue(sql.startsWith("ALTER TABLE"), "SQL should start with ALTER TABLE: " + sql);
+        assertTrue(sql.contains("ADD ROW ACCESS POLICY security_policy ON (user_role)"), "SQL should contain row access policy clause: " + sql);
         
-        System.out.println("✅ Row access policy SQL generation test passed: " + sql);
     }
     
     @Test
@@ -242,10 +228,9 @@ public class AlterTableAdvancedFeaturesTest {
         assertTrue(sqls.length > 0);
         String sql = sqls[0].toSql();
         
-        assertTrue(sql.contains("ALTER TABLE"));
-        assertTrue(sql.contains("SET AGGREGATION POLICY data_policy FORCE"));
+        assertTrue(sql.startsWith("ALTER TABLE"), "SQL should start with ALTER TABLE: " + sql);
+        assertTrue(sql.contains("SET AGGREGATION POLICY data_policy FORCE"), "SQL should contain forced aggregation policy clause: " + sql);
         
-        System.out.println("✅ Aggregation policy with force SQL generation test passed: " + sql);
     }
     
     @Test
@@ -260,13 +245,11 @@ public class AlterTableAdvancedFeaturesTest {
         assertTrue(sqls.length > 0);
         String sql = sqls[0].toSql();
         
-        System.out.println("DEBUG: Generated SQL: " + sql);
-        assertTrue(sql.contains("ALTER TABLE"));
-        // More flexible assertion - check for key components
-        assertTrue(sql.contains("TAG") && (sql.contains("cost_center") || sql.contains("SET")), 
-                   "SQL should contain TAG operations but got: " + sql);
+        assertTrue(sql.startsWith("ALTER TABLE"), "SQL should start with ALTER TABLE: " + sql);
+        // Check for TAG SET operations with specific content
+        assertTrue(sql.contains("TAG") && sql.contains("cost_center") && sql.contains("engineering"), 
+                   "SQL should contain TAG operations with cost_center and engineering");
         
-        System.out.println("✅ Tag operations SQL generation test passed: " + sql);
     }
     
     @Test
@@ -279,7 +262,6 @@ public class AlterTableAdvancedFeaturesTest {
         ValidationErrors errors = change.validate(new SnowflakeDatabase());
         assertFalse(errors.hasErrors(), "Valid search optimization should not have errors");
         
-        System.out.println("✅ Advanced features validation test passed");
     }
     
     @Test
@@ -299,6 +281,5 @@ public class AlterTableAdvancedFeaturesTest {
         assertTrue(message.contains("tags set: env = 'test'"));
         assertTrue(message.contains("aggregation policy set to my_policy (forced)"));
         
-        System.out.println("✅ Advanced features confirmation message test passed: " + message);
     }
 }

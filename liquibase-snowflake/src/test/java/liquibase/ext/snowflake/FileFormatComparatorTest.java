@@ -92,7 +92,6 @@ public class FileFormatComparatorTest {
         );
         
         assertTrue(differences.hasDifferences(), "Should detect differences in NULL_IF arrays");
-        System.out.println("✅ Successfully tested NULL_IF array differences detection");
     }
 
     @Test
@@ -113,7 +112,6 @@ public class FileFormatComparatorTest {
         );
         
         assertTrue(differences.hasDifferences(), "Should detect differences in non-null phantom properties");
-        System.out.println("✅ Successfully tested phantom property edge cases");
     }
 
     @Test
@@ -134,7 +132,6 @@ public class FileFormatComparatorTest {
         );
         
         assertFalse(differences.hasDifferences(), "Should NOT compare phantom properties when one is null");
-        System.out.println("✅ Successfully tested phantom property null handling");
     }
 
     @Test
@@ -161,7 +158,6 @@ public class FileFormatComparatorTest {
         assertEquals("TEST_CATALOG", hash2[1], "Catalog should be correct");
         assertEquals("", hash2[2], "Schema name should be empty for null");
         
-        System.out.println("✅ Successfully tested complex hash calculation scenarios");
     }
 
     @Test
@@ -212,7 +208,6 @@ public class FileFormatComparatorTest {
         );
         
         assertTrue(differences.hasDifferences(), "Should detect the dateFormat difference");
-        System.out.println("✅ Successfully tested all comparison rule categories");
     }
     
     // Edge case tests will be added via TDD micro-cycles

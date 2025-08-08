@@ -16,9 +16,10 @@ import java.util.Map;
 /**
  * Investigation test to understand INFORMATION_SCHEMA.TABLES structure for table snapshot/diff requirements
  */
-public class TableInformationSchemaTest {
+public class TableInformationSchemaIntegrationTest {
     
     private Database database;
+    private String testSchema = "TABLE_INFO_SCHEMA_TEST";
     
     @BeforeEach
     public void setUp() throws Exception {
@@ -28,65 +29,76 @@ public class TableInformationSchemaTest {
         String password = TestDatabaseConfigUtil.getSnowflakePassword();
         
         database = DatabaseFactory.getInstance().openDatabase(url, username, password, null, null);
+        
+        // Create clean test schema using schema isolation pattern
+        Scope.getCurrentScope().getSingleton(ExecutorService.class)
+            .getExecutor("jdbc", database)
+            .execute(new RawSqlStatement("DROP SCHEMA IF EXISTS " + testSchema + " CASCADE"));
+        Scope.getCurrentScope().getSingleton(ExecutorService.class)
+            .getExecutor("jdbc", database)
+            .execute(new RawSqlStatement("CREATE SCHEMA " + testSchema));
+        Scope.getCurrentScope().getSingleton(ExecutorService.class)
+            .getExecutor("jdbc", database)
+            .execute(new RawSqlStatement("USE SCHEMA " + testSchema));
     }
     
     @AfterEach
     public void tearDown() throws Exception {
         if (database != null) {
+            // Clean up test schema using schema isolation pattern
+            try {
+                Scope.getCurrentScope().getSingleton(ExecutorService.class)
+                    .getExecutor("jdbc", database)
+                    .execute(new RawSqlStatement("DROP SCHEMA IF EXISTS " + testSchema + " CASCADE"));
+            } catch (Exception e) {
+                // Ignore cleanup errors
+            }
             database.close();
         }
     }
     
     @Test
     public void investigateTablesInformationSchemaDetailed() throws Exception {
-        System.out.println("=== INFORMATION_SCHEMA.TABLES Sample Record ===");
         
         List<Map<String, ?>> tables = Scope.getCurrentScope().getSingleton(ExecutorService.class)
             .getExecutor("jdbc", database)
-            .queryForList(new RawSqlStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'TESTHARNESS' LIMIT 1"));
+            .queryForList(new RawSqlStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '" + testSchema + "' LIMIT 1"));
             
         if (!tables.isEmpty()) {
             Map<String, ?> table = tables.get(0);
             for (Map.Entry<String, ?> entry : table.entrySet()) {
-                System.out.println(String.format("%s: %s", entry.getKey(), entry.getValue()));
             }
         } else {
-            System.out.println("No tables found in TESTHARNESS schema");
         }
     }
     
     @Test
     public void investigateShowTablesOutput() throws Exception {
-        System.out.println("=== SHOW TABLES Output Structure ===");
         
         List<Map<String, ?>> tables = Scope.getCurrentScope().getSingleton(ExecutorService.class)
             .getExecutor("jdbc", database)
-            .queryForList(new RawSqlStatement("SHOW TABLES IN SCHEMA TESTHARNESS"));
+            .queryForList(new RawSqlStatement("SHOW TABLES IN SCHEMA " + testSchema));
             
         if (!tables.isEmpty()) {
             Map<String, ?> table = tables.get(0);
-            System.out.println("SHOW TABLES columns:");
             for (String key : table.keySet()) {
-                System.out.println(String.format("Column: %s, Value: %s", key, table.get(key)));
             }
         } else {
-            System.out.println("No tables found in TESTHARNESS schema");
         }
     }
     
     @Test
     public void createTestTable() throws Exception {
-        System.out.println("=== Creating Test Table ===");
         
         // Create a test table with various Snowflake-specific attributes
         Scope.getCurrentScope().getSingleton(ExecutorService.class)
             .getExecutor("jdbc", database)
-            .execute(new RawSqlStatement("DROP TABLE IF EXISTS TESTHARNESS.SNAPSHOT_TEST_TABLE"));
+            .execute(new RawSqlStatement("DROP TABLE IF EXISTS " + testSchema + ".SNAPSHOT_TEST_TABLE"));
             
         Scope.getCurrentScope().getSingleton(ExecutorService.class)
             .getExecutor("jdbc", database)
             .execute(new RawSqlStatement(
-                "CREATE TABLE TESTHARNESS.SNAPSHOT_TEST_TABLE (" +
+                "CREATE TABLE " + testSchema + ".SNAPSHOT_TEST_TABLE (" +
                 "  ID NUMBER," +
                 "  NAME STRING," +
                 "  CREATED_DATE DATE" +
@@ -97,7 +109,6 @@ public class TableInformationSchemaTest {
                 "COMMENT = 'Test table for snapshot investigation'"
             ));
             
-        System.out.println("Test table created successfully");
         
         // Now query it from INFORMATION_SCHEMA
         List<Map<String, ?>> tables = Scope.getCurrentScope().getSingleton(ExecutorService.class)
@@ -106,22 +117,18 @@ public class TableInformationSchemaTest {
             
         if (!tables.isEmpty()) {
             Map<String, ?> table = tables.get(0);
-            System.out.println("\n=== Created Table in INFORMATION_SCHEMA ===");
             for (Map.Entry<String, ?> entry : table.entrySet()) {
-                System.out.println(String.format("%s: %s", entry.getKey(), entry.getValue()));
             }
         }
         
         // Also check SHOW TABLES output
         List<Map<String, ?>> showTables = Scope.getCurrentScope().getSingleton(ExecutorService.class)
             .getExecutor("jdbc", database)
-            .queryForList(new RawSqlStatement("SHOW TABLES LIKE 'SNAPSHOT_TEST_TABLE' IN SCHEMA TESTHARNESS"));
+            .queryForList(new RawSqlStatement("SHOW TABLES LIKE 'SNAPSHOT_TEST_TABLE' IN SCHEMA " + testSchema));
             
         if (!showTables.isEmpty()) {
             Map<String, ?> table = showTables.get(0);
-            System.out.println("\n=== Created Table in SHOW TABLES ===");
             for (Map.Entry<String, ?> entry : table.entrySet()) {
-                System.out.println(String.format("%s: %s", entry.getKey(), entry.getValue()));
             }
         }
     }

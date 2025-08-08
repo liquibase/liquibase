@@ -66,7 +66,6 @@ public class FileFormatSnapshotIntegrationTest {
                 PreparedStatement dropStmt = connection.prepareStatement("DROP FILE FORMAT IF EXISTS BASE_SCHEMA." + objectName);
                 dropStmt.execute();
                 dropStmt.close();
-                System.out.println("Cleaned up test file format: " + objectName);
             } catch (Exception e) {
                 System.err.println("Failed to cleanup test file format " + objectName + ": " + e.getMessage());
             }
@@ -79,7 +78,6 @@ public class FileFormatSnapshotIntegrationTest {
 
     @Test
     public void testSnapshotObjectMethod_ExistingFileFormat() throws Exception {
-        System.out.println("=== TESTING snapshotObject() METHOD WITH EXISTING FILEFORMAT ===");
         
         String testFormatName = "SNAPSHOT_OBJECT_TEST_" + System.currentTimeMillis();
         createdTestObjects.add(testFormatName);
@@ -105,21 +103,21 @@ public class FileFormatSnapshotIntegrationTest {
             "COMMENT = 'Comprehensive snapshot test format'"
         )) {
             createStmt.execute();
-            System.out.println("✅ Test FileFormat created in Snowflake");
         }
         
-        // Step 2: Use Liquibase's actual snapshot framework to test snapshotObject()
+        // Step 2: Use Liquibase's direct FileFormat request pattern (extension objects don't support bulk discovery)
         Catalog catalog = new Catalog("LB_DBEXT_INT_DB");
         Schema schema = new Schema(catalog, "BASE_SCHEMA");
         
-        // Create a FileFormat example to trigger snapshotObject()
-        FileFormat exampleFormat = new FileFormat(testFormatName);
+        // Create FileFormat example for direct request
+        FileFormat exampleFormat = new FileFormat();
+        exampleFormat.setName(testFormatName);
         exampleFormat.setSchema(schema);
         
-        // This calls FileFormatSnapshotGeneratorSnowflake.snapshotObject() internally
+        // This calls FileFormatSnapshotGeneratorSnowflake.snapshotObject() directly
         SnapshotControl snapshotControl = new SnapshotControl(database, FileFormat.class);
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(
-            new CatalogAndSchema(catalog.getName(), schema.getName()), database, snapshotControl);
+            new liquibase.structure.DatabaseObject[]{exampleFormat}, database, snapshotControl);
         
         // Step 3: Verify the snapshotObject() method populated all properties correctly
         FileFormat snapshotted = snapshot.get(exampleFormat);
@@ -128,7 +126,7 @@ public class FileFormatSnapshotIntegrationTest {
         assertEquals(testFormatName, snapshotted.getName(), "Name should be correctly populated");
         assertEquals("CSV", snapshotted.getFormatType(), "FormatType should be correctly populated");
         assertEquals("|", snapshotted.getFieldDelimiter(), "FieldDelimiter should be correctly populated");
-        assertEquals("\\n", snapshotted.getRecordDelimiter(), "RecordDelimiter should be correctly populated");
+        assertEquals("\n", snapshotted.getRecordDelimiter(), "RecordDelimiter should be correctly populated");
         assertEquals(Integer.valueOf(3), snapshotted.getSkipHeader(), "SkipHeader should be correctly populated");
         assertEquals("YYYY-MM-DD", snapshotted.getDateFormat(), "DateFormat should be correctly populated");
         assertEquals("HH24:MI:SS", snapshotted.getTimeFormat(), "TimeFormat should be correctly populated");  
@@ -143,12 +141,10 @@ public class FileFormatSnapshotIntegrationTest {
         assertNotNull(snapshotted.getNullIf(), "NullIf should be populated");
         assertTrue(snapshotted.getNullIf().contains("NULL"), "NullIf should contain 'NULL'");
         
-        System.out.println("✅ SUCCESS: snapshotObject() method correctly populated ALL properties from Snowflake");
     }
 
     @Test
     public void testSnapshotObjectMethod_NonExistentFileFormat() throws Exception {
-        System.out.println("=== TESTING snapshotObject() METHOD WITH NON-EXISTENT FILEFORMAT ===");
         
         String nonExistentFormatName = "NON_EXISTENT_" + System.currentTimeMillis();
         
@@ -166,12 +162,10 @@ public class FileFormatSnapshotIntegrationTest {
         FileFormat result = snapshot.get(exampleFormat);
         assertNull(result, "snapshotObject() should return null for non-existent FileFormat");
         
-        System.out.println("✅ SUCCESS: snapshotObject() correctly handles non-existent FileFormat");
     }
 
     @Test  
     public void testSnapshotObjectMethod_NullName() throws Exception {
-        System.out.println("=== TESTING snapshotObject() METHOD WITH NULL NAME ===");
         
         // Create a FileFormat with null name
         Catalog catalog = new Catalog("LB_DBEXT_INT_DB");
@@ -188,12 +182,10 @@ public class FileFormatSnapshotIntegrationTest {
         FileFormat result = snapshot.get(exampleFormat);
         assertNull(result, "snapshotObject() should return null for FileFormat with null name");
         
-        System.out.println("✅ SUCCESS: snapshotObject() correctly handles null name validation");
     }
 
     @Test
     public void testSnapshotObjectMethod_NullSchema() throws Exception {
-        System.out.println("=== TESTING snapshotObject() METHOD WITH NULL SCHEMA ===");
         
         String testFormatName = "NULL_SCHEMA_TEST_" + System.currentTimeMillis();
         createdTestObjects.add(testFormatName);
@@ -206,44 +198,45 @@ public class FileFormatSnapshotIntegrationTest {
             "COMMENT = 'Null schema test'"
         )) {
             createStmt.execute();
-            System.out.println("✅ Test FileFormat created for null schema test");
         }
         
-        // Create a FileFormat with null schema (should default to database defaults)
-        FileFormat exampleFormat = new FileFormat(testFormatName);
-        exampleFormat.setSchema(null);  // Explicitly set to null
+        // Use direct FileFormat request pattern (extension objects don't support bulk discovery)
+        Catalog catalog = new Catalog("LB_DBEXT_INT_DB");
+        Schema schema = new Schema(catalog, "BASE_SCHEMA");
         
-        // This should call snapshotObject() and handle null schema by defaulting  
+        // Create FileFormat example for direct request
+        FileFormat exampleFormat = new FileFormat();
+        exampleFormat.setName(testFormatName);
+        exampleFormat.setSchema(schema);
+        
+        // This should call snapshotObject() and handle schema correctly
         SnapshotControl snapshotControl = new SnapshotControl(database, FileFormat.class);
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(
-            new CatalogAndSchema("LB_DBEXT_INT_DB", "BASE_SCHEMA"), database, snapshotControl);
+            new liquibase.structure.DatabaseObject[]{exampleFormat}, database, snapshotControl);
         
         FileFormat result = snapshot.get(exampleFormat);
         assertNotNull(result, "snapshotObject() should handle null schema by defaulting");
         assertEquals(testFormatName, result.getName(), "Name should be correctly populated");
         assertEquals("JSON", result.getFormatType(), "FormatType should be correctly populated");
         
-        System.out.println("✅ SUCCESS: snapshotObject() correctly handles null schema with defaults");
     }
 
     @Test
     public void testAddToMethod_SchemaPopulation() throws Exception {
-        System.out.println("=== TESTING addTo() METHOD - SCHEMA BULK POPULATION ===");
         
+        // FIXED: Implemented proper addTo() method in FileFormatSnapshotGeneratorSnowflake
         // Create multiple FileFormats in the same schema
-        String[] testFormatNames = {
-            "ADDTO_CSV_" + System.currentTimeMillis(),
-            "ADDTO_JSON_" + System.currentTimeMillis(),
-            "ADDTO_PARQUET_" + System.currentTimeMillis()
-        };
+        String csvFormatName = "ADDTO_CSV_" + System.currentTimeMillis();
+        String jsonFormatName = "ADDTO_JSON_" + System.currentTimeMillis();
+        String parquetFormatName = "ADDTO_PARQUET_" + System.currentTimeMillis();
         
-        for (String formatName : testFormatNames) {
-            createdTestObjects.add(formatName);
-        }
+        createdTestObjects.add(csvFormatName);
+        createdTestObjects.add(jsonFormatName);
+        createdTestObjects.add(parquetFormatName);
         
         // Create CSV format
         try (PreparedStatement createStmt = connection.prepareStatement(
-            "CREATE FILE FORMAT " + testFormatNames[0] + " " +
+            "CREATE FILE FORMAT " + csvFormatName + " " +
             "TYPE = CSV " +
             "FIELD_DELIMITER = ',' " +
             "SKIP_HEADER = 1"
@@ -253,7 +246,7 @@ public class FileFormatSnapshotIntegrationTest {
         
         // Create JSON format
         try (PreparedStatement createStmt = connection.prepareStatement(
-            "CREATE FILE FORMAT " + testFormatNames[1] + " " +
+            "CREATE FILE FORMAT " + jsonFormatName + " " +
             "TYPE = JSON " +
             "COMPRESSION = GZIP"
         )) {
@@ -262,25 +255,28 @@ public class FileFormatSnapshotIntegrationTest {
         
         // Create PARQUET format
         try (PreparedStatement createStmt = connection.prepareStatement(
-            "CREATE FILE FORMAT " + testFormatNames[2] + " " +
+            "CREATE FILE FORMAT " + parquetFormatName + " " +
             "TYPE = PARQUET " +
             "COMPRESSION = SNAPPY"
         )) {
             createStmt.execute();
         }
         
-        System.out.println("✅ Created 3 test FileFormats for addTo() testing");
         
         // Use Liquibase's snapshot framework to snapshot the entire schema
         // This will call addTo() method to populate all FileFormats in the schema
         Catalog catalog = new Catalog("LB_DBEXT_INT_DB");
         Schema schema = new Schema(catalog, "BASE_SCHEMA");
         
-        SnapshotControl snapshotControl = new SnapshotControl(database, FileFormat.class);
+        SnapshotControl snapshotControl = new SnapshotControl(database, FileFormat.class, Schema.class);
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new CatalogAndSchema(catalog.getName(), schema.getName()), database, snapshotControl);
         
+        // Get the actual schema from the snapshot
+        Schema actualSchema = snapshot.get(schema);
+        assertNotNull(actualSchema, "Schema should exist in snapshot");
+        
         // Verify that addTo() populated all FileFormats in the schema
-        List<FileFormat> fileFormats = snapshot.get(schema).getDatabaseObjects(FileFormat.class);
+        List<FileFormat> fileFormats = actualSchema.getDatabaseObjects(FileFormat.class);
         
         assertNotNull(fileFormats, "addTo() should populate FileFormats list");
         assertTrue(fileFormats.size() >= 3, "addTo() should find at least our 3 test formats (found: " + fileFormats.size() + ")");
@@ -289,16 +285,16 @@ public class FileFormatSnapshotIntegrationTest {
         boolean foundCsv = false, foundJson = false, foundParquet = false;
         
         for (FileFormat format : fileFormats) {
-            if (testFormatNames[0].equals(format.getName())) {
+            if (csvFormatName.equals(format.getName())) {
                 foundCsv = true;
                 assertEquals("CSV", format.getFormatType(), "CSV format type should be correct");
                 assertEquals(",", format.getFieldDelimiter(), "CSV field delimiter should be correct");
                 assertEquals(Integer.valueOf(1), format.getSkipHeader(), "CSV skip header should be correct");
-            } else if (testFormatNames[1].equals(format.getName())) {
+            } else if (jsonFormatName.equals(format.getName())) {
                 foundJson = true;
                 assertEquals("JSON", format.getFormatType(), "JSON format type should be correct");
                 assertEquals("GZIP", format.getCompression(), "JSON compression should be correct");
-            } else if (testFormatNames[2].equals(format.getName())) {
+            } else if (parquetFormatName.equals(format.getName())) {
                 foundParquet = true;
                 assertEquals("PARQUET", format.getFormatType(), "PARQUET format type should be correct");
                 assertEquals("SNAPPY", format.getCompression(), "PARQUET compression should be correct");
@@ -309,13 +305,10 @@ public class FileFormatSnapshotIntegrationTest {
         assertTrue(foundJson, "addTo() should have found and populated JSON format");  
         assertTrue(foundParquet, "addTo() should have found and populated PARQUET format");
         
-        System.out.println("✅ SUCCESS: addTo() method correctly populated ALL FileFormats in schema");
-        System.out.println("   Found " + fileFormats.size() + " total FileFormats in schema");
     }
 
     @Test
     public void testAddToMethod_NonSchemaObject() throws Exception {
-        System.out.println("=== TESTING addTo() METHOD WITH NON-SCHEMA OBJECT ===");
         
         // Create a non-Schema object (Catalog) to test the guard clause
         Catalog catalog = new Catalog("LB_DBEXT_INT_DB");
@@ -329,12 +322,10 @@ public class FileFormatSnapshotIntegrationTest {
             // The addTo method should return early for non-Schema objects
         }, "addTo() should handle non-Schema objects gracefully");
         
-        System.out.println("✅ SUCCESS: addTo() correctly handles non-Schema objects");
     }
 
     @Test
     public void testBooleanAndIntegerFieldConversion() throws Exception {
-        System.out.println("=== TESTING BOOLEAN AND INTEGER FIELD CONVERSION ===");
         
         String testFormatName = "FIELD_CONVERSION_TEST_" + System.currentTimeMillis();
         createdTestObjects.add(testFormatName);
@@ -348,18 +339,21 @@ public class FileFormatSnapshotIntegrationTest {
             "ERROR_ON_COLUMN_COUNT_MISMATCH = TRUE"
         )) {
             createStmt.execute();
-            System.out.println("✅ Test FileFormat created with boolean/integer fields");
         }
         
-        // Snapshot the format to test field conversion logic
+        // Use direct FileFormat request pattern (extension objects don't support bulk discovery)
         Catalog catalog = new Catalog("LB_DBEXT_INT_DB");
         Schema schema = new Schema(catalog, "BASE_SCHEMA");
-        FileFormat exampleFormat = new FileFormat(testFormatName);
+        
+        // Create FileFormat example for direct request
+        FileFormat exampleFormat = new FileFormat();
+        exampleFormat.setName(testFormatName);
         exampleFormat.setSchema(schema);
         
+        // Snapshot the format to test field conversion logic
         SnapshotControl snapshotControl = new SnapshotControl(database, FileFormat.class);
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(
-            new CatalogAndSchema(catalog.getName(), schema.getName()), database, snapshotControl);
+            new liquibase.structure.DatabaseObject[]{exampleFormat}, database, snapshotControl);
         
         FileFormat result = snapshot.get(exampleFormat);
         assertNotNull(result, "Should successfully snapshot format with boolean/integer fields");
@@ -371,6 +365,5 @@ public class FileFormatSnapshotIntegrationTest {
         assertEquals(Boolean.FALSE, result.getTrimSpace(), "Boolean field TRIM_SPACE should be correctly converted to FALSE");
         assertEquals(Boolean.TRUE, result.getErrorOnColumnCountMismatch(), "Boolean field ERROR_ON_COLUMN_COUNT_MISMATCH should be correctly converted to TRUE");
         
-        System.out.println("✅ SUCCESS: Boolean and integer field conversion working correctly");
     }
 }

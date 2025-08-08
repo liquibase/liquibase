@@ -1,11 +1,13 @@
 package liquibase.sqlgenerator.core.snowflake;
 
+import liquibase.change.core.CreateFileFormatChange;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateFileFormatStatement;
 import liquibase.util.TestDatabaseConfigUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,7 +69,6 @@ public class CreateFileFormatGeneratorSnowflakeIntegrationTest {
         assertEquals(1, sqls.length);
         
         String sql = sqls[0].toSql();
-        System.out.println("Generated SQL: " + sql);
         
         // Execute the SQL
         try (Statement stmt = connection.createStatement()) {
@@ -98,7 +99,6 @@ public class CreateFileFormatGeneratorSnowflakeIntegrationTest {
         // Generate and execute SQL
         Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
         String sql = sqls[0].toSql();
-        System.out.println("Generated SQL: " + sql);
         
         try (Statement stmt = connection.createStatement()) {
             stmt.execute(sql);
@@ -120,9 +120,20 @@ public class CreateFileFormatGeneratorSnowflakeIntegrationTest {
     void shouldCreateFileFormatWithOrReplace() throws Exception {
         String formatName = "TEST_REPLACE_FORMAT_" + System.currentTimeMillis();
         
-        // First create a basic file format
+        // First create a basic file format using CreateFileFormatChange
+        CreateFileFormatChange createChange = new CreateFileFormatChange();
+        createChange.setFileFormatName(formatName);
+        createChange.setFileFormatType("CSV");
+        
+        SqlStatement[] statements = createChange.generateStatements(database);
         try (Statement stmt = connection.createStatement()) {
-            stmt.execute("CREATE FILE FORMAT " + formatName + " TYPE = CSV");
+            for (SqlStatement statement : statements) {
+                Sql[] sqls = liquibase.sqlgenerator.SqlGeneratorFactory.getInstance().generateSql(statement, database);
+                for (Sql sql : sqls) {
+                    String sqlString = sql.toSql();
+                    stmt.execute(sqlString);
+                }
+            }
         }
         
         // Now create with OR REPLACE
@@ -134,7 +145,6 @@ public class CreateFileFormatGeneratorSnowflakeIntegrationTest {
         
         Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
         String sql = sqls[0].toSql();
-        System.out.println("Generated OR REPLACE SQL: " + sql);
         
         assertTrue(sql.contains("CREATE OR REPLACE"));
         
@@ -163,7 +173,6 @@ public class CreateFileFormatGeneratorSnowflakeIntegrationTest {
         
         Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
         String sql = sqls[0].toSql();
-        System.out.println("Generated IF NOT EXISTS SQL: " + sql);
         
         assertTrue(sql.contains("IF NOT EXISTS"));
         
@@ -214,12 +223,10 @@ public class CreateFileFormatGeneratorSnowflakeIntegrationTest {
                     stmt.execute("DROP FILE FORMAT IF EXISTS " + formatName);
                 } catch (Exception e) {
                     // Ignore cleanup errors
-                    System.out.println("Warning: Could not clean up " + formatName + ": " + e.getMessage());
                 }
             }
         } catch (Exception e) {
             // Ignore cleanup errors
-            System.out.println("Warning: Could not perform cleanup: " + e.getMessage());
         }
     }
 }

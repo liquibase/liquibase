@@ -52,7 +52,6 @@ public class SequenceFunctionalityTest {
         assertTrue(sql.length > 0, "Should generate at least one SQL statement");
         assertTrue(sql[0].toSql().contains("CREATE SEQUENCE"), "Should generate CREATE SEQUENCE SQL");
         
-        System.out.println("✅ CreateSequence SQL: " + sql[0].toSql());
     }
 
     @Test
@@ -62,7 +61,7 @@ public class SequenceFunctionalityTest {
         statement.setStartValue(BigInteger.valueOf(100));
         statement.setIncrementBy(BigInteger.valueOf(5));
         statement.setIfNotExists(true);
-        statement.setOrdered(true); // This is the key Snowflake feature
+        statement.setOrder(true); // This is the key Snowflake feature
         statement.setComment("Test sequence with ordering");
         
         Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, database);
@@ -77,7 +76,6 @@ public class SequenceFunctionalityTest {
         assertTrue(sqlText.contains("ORDER"), "Should include ORDER keyword");
         assertTrue(sqlText.contains("COMMENT"), "Should include comment");
         
-        System.out.println("✅ CreateSequenceSnowflake SQL: " + sqlText);
     }
 
     @Test
@@ -90,7 +88,6 @@ public class SequenceFunctionalityTest {
         assertTrue(sql.length > 0, "Should generate at least one SQL statement");
         assertTrue(sql[0].toSql().contains("DROP SEQUENCE"), "Should generate DROP SEQUENCE SQL");
         
-        System.out.println("✅ DropSequence SQL: " + sql[0].toSql());
     }
 
     @Test
@@ -104,6 +101,5 @@ public class SequenceFunctionalityTest {
             SqlGeneratorFactory.getInstance().generateSql(statement, database);
         }, "Should throw validation error for OR REPLACE + IF NOT EXISTS");
         
-        System.out.println("✅ Sequence validation working correctly");
     }
 }

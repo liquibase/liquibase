@@ -17,10 +17,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Unit tests for Sequence SnapshotGenerator for Snowflake.
- * Tests snapshot functionality for Snowflake Sequence objects with comprehensive TDD coverage.
- * 
- * ADDRESSES_CORE_ISSUE: Complete TDD coverage for Sequence snapshot generation.
+ * Comprehensive unit tests for SequenceSnapshotGeneratorSnowflake.
+ * Target: Achieve 95%+ code coverage for all methods and edge cases.
+ * Follows complete SQL string assertion pattern for better test reliability.
  */
 public class SequenceSnapshotGeneratorSnowflakeTest {
 
@@ -39,6 +38,150 @@ public class SequenceSnapshotGeneratorSnowflakeTest {
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         generator = new SequenceSnapshotGeneratorSnowflake();
+    }
+
+    // ==================== Constructor and Basic Tests ====================
+
+    @Test
+    public void testConstructor() {
+        // When: Creating generator instance
+        SequenceSnapshotGeneratorSnowflake newGenerator = new SequenceSnapshotGeneratorSnowflake();
+        
+        // Then: Should create successfully
+        assertNotNull(newGenerator, "Generator should be created successfully");
+        assertTrue(newGenerator instanceof SequenceSnapshotGenerator, "Should extend SequenceSnapshotGenerator");
+        assertTrue(newGenerator instanceof JdbcSnapshotGenerator, "Should extend JdbcSnapshotGenerator");
+    }
+
+    @Test
+    public void testAddsTo() {
+        // When: Getting addsTo array
+        Class<? extends DatabaseObject>[] addsTo = generator.addsTo();
+        
+        // Then: Should return inherited behavior (sequences are added to schemas)
+        assertNotNull(addsTo, "Should return addsTo array");
+        // Note: The actual behavior is inherited from parent class
+    }
+
+    // ==================== Complete SQL String Tests (Enhanced Pattern) ====================
+
+    @Test
+    public void testGetSelectSequenceStatement_CompleteSQL_StandardCase() {
+        // Given: Standard Snowflake database with catalog and schema
+        when(snowflakeDatabase.getDefaultCatalogName()).thenReturn("TEST_CATALOG");
+        when(snowflakeDatabase.getDefaultSchemaName()).thenReturn("TEST_SCHEMA");
+        when(snowflakeDatabase.escapeObjectName("INCREMENT", liquibase.structure.core.Column.class))
+            .thenReturn("INCREMENT");
+        
+        // When: Getting select sequence statement
+        SqlStatement statement = generator.getSelectSequenceStatement(schema, snowflakeDatabase);
+        
+        // Then: Should return complete SQL with correct structure
+        assertNotNull(statement, "Should return SQL statement");
+        assertTrue(statement instanceof RawParameterizedSqlStatement, "Should be parameterized statement");
+        
+        RawParameterizedSqlStatement rawStatement = (RawParameterizedSqlStatement) statement;
+        String actualSQL = rawStatement.getSql();
+        String expectedSQL = "SELECT SEQUENCE_NAME, START_VALUE, MINIMUM_VALUE AS MIN_VALUE, MAXIMUM_VALUE AS MAX_VALUE, INCREMENT AS INCREMENT_BY, CYCLE_OPTION AS WILL_CYCLE, ORDERED, COMMENT FROM information_schema.sequences WHERE SEQUENCE_CATALOG=? AND SEQUENCE_SCHEMA=?";
+        
+        assertEquals(expectedSQL, actualSQL, "Should generate correct complete SQL");
+        
+        Object[] parameters = rawStatement.getParameters().toArray();
+        assertEquals(2, parameters.length, "Should have exactly 2 parameters");
+        assertEquals("TEST_CATALOG", parameters[0], "First parameter should be catalog");
+        assertEquals("TEST_SCHEMA", parameters[1], "Second parameter should be schema");
+    }
+
+    @Test
+    public void testGetSelectSequenceStatement_CompleteSQL_WithEscapedColumn() {
+        // Given: Database that requires column name escaping
+        when(snowflakeDatabase.getDefaultCatalogName()).thenReturn("PROD_DB");
+        when(snowflakeDatabase.getDefaultSchemaName()).thenReturn("PUBLIC");
+        when(snowflakeDatabase.escapeObjectName("INCREMENT", liquibase.structure.core.Column.class))
+            .thenReturn("\"INCREMENT\""); // Escaped with quotes
+        
+        // When: Getting select sequence statement
+        SqlStatement statement = generator.getSelectSequenceStatement(schema, snowflakeDatabase);
+        
+        // Then: Should use escaped column name in complete SQL
+        RawParameterizedSqlStatement rawStatement = (RawParameterizedSqlStatement) statement;
+        String actualSQL = rawStatement.getSql();
+        String expectedSQL = "SELECT SEQUENCE_NAME, START_VALUE, MINIMUM_VALUE AS MIN_VALUE, MAXIMUM_VALUE AS MAX_VALUE, \"INCREMENT\" AS INCREMENT_BY, CYCLE_OPTION AS WILL_CYCLE, ORDERED, COMMENT FROM information_schema.sequences WHERE SEQUENCE_CATALOG=? AND SEQUENCE_SCHEMA=?";
+        
+        assertEquals(expectedSQL, actualSQL, "Should use escaped column name in complete SQL");
+        
+        Object[] parameters = rawStatement.getParameters().toArray();
+        assertEquals("PROD_DB", parameters[0], "Should use correct catalog parameter");
+        assertEquals("PUBLIC", parameters[1], "Should use correct schema parameter");
+    }
+
+    @Test
+    public void testGetSelectSequenceStatement_CompleteSQL_WithNullCatalog() {
+        // Given: Database with null catalog
+        when(snowflakeDatabase.getDefaultCatalogName()).thenReturn(null);
+        when(snowflakeDatabase.getDefaultSchemaName()).thenReturn("ANALYTICS");
+        when(snowflakeDatabase.escapeObjectName("INCREMENT", liquibase.structure.core.Column.class))
+            .thenReturn("INCREMENT");
+        
+        // When: Getting select sequence statement
+        SqlStatement statement = generator.getSelectSequenceStatement(schema, snowflakeDatabase);
+        
+        // Then: Should handle null catalog in complete SQL
+        RawParameterizedSqlStatement rawStatement = (RawParameterizedSqlStatement) statement;
+        String actualSQL = rawStatement.getSql();
+        String expectedSQL = "SELECT SEQUENCE_NAME, START_VALUE, MINIMUM_VALUE AS MIN_VALUE, MAXIMUM_VALUE AS MAX_VALUE, INCREMENT AS INCREMENT_BY, CYCLE_OPTION AS WILL_CYCLE, ORDERED, COMMENT FROM information_schema.sequences WHERE SEQUENCE_CATALOG=? AND SEQUENCE_SCHEMA=?";
+        
+        assertEquals(expectedSQL, actualSQL, "SQL structure should remain the same with null catalog");
+        
+        Object[] parameters = rawStatement.getParameters().toArray();
+        assertNull(parameters[0], "First parameter should be null for null catalog");
+        assertEquals("ANALYTICS", parameters[1], "Second parameter should be schema");
+    }
+
+    @Test
+    public void testGetSelectSequenceStatement_CompleteSQL_WithNullSchema() {
+        // Given: Database with null schema
+        when(snowflakeDatabase.getDefaultCatalogName()).thenReturn("DEV_DB");
+        when(snowflakeDatabase.getDefaultSchemaName()).thenReturn(null);
+        when(snowflakeDatabase.escapeObjectName("INCREMENT", liquibase.structure.core.Column.class))
+            .thenReturn("INCREMENT");
+        
+        // When: Getting select sequence statement
+        SqlStatement statement = generator.getSelectSequenceStatement(schema, snowflakeDatabase);
+        
+        // Then: Should handle null schema in complete SQL
+        RawParameterizedSqlStatement rawStatement = (RawParameterizedSqlStatement) statement;
+        String actualSQL = rawStatement.getSql();
+        String expectedSQL = "SELECT SEQUENCE_NAME, START_VALUE, MINIMUM_VALUE AS MIN_VALUE, MAXIMUM_VALUE AS MAX_VALUE, INCREMENT AS INCREMENT_BY, CYCLE_OPTION AS WILL_CYCLE, ORDERED, COMMENT FROM information_schema.sequences WHERE SEQUENCE_CATALOG=? AND SEQUENCE_SCHEMA=?";
+        
+        assertEquals(expectedSQL, actualSQL, "SQL structure should remain the same with null schema");
+        
+        Object[] parameters = rawStatement.getParameters().toArray();
+        assertEquals("DEV_DB", parameters[0], "First parameter should be catalog");
+        assertNull(parameters[1], "Second parameter should be null for null schema");
+    }
+
+    @Test
+    public void testGetSelectSequenceStatement_CompleteSQL_WithBothNullCatalogAndSchema() {
+        // Given: Database with both null catalog and schema
+        when(snowflakeDatabase.getDefaultCatalogName()).thenReturn(null);
+        when(snowflakeDatabase.getDefaultSchemaName()).thenReturn(null);
+        when(snowflakeDatabase.escapeObjectName("INCREMENT", liquibase.structure.core.Column.class))
+            .thenReturn("INCREMENT");
+        
+        // When: Getting select sequence statement
+        SqlStatement statement = generator.getSelectSequenceStatement(schema, snowflakeDatabase);
+        
+        // Then: Should handle both null values in complete SQL
+        RawParameterizedSqlStatement rawStatement = (RawParameterizedSqlStatement) statement;
+        String actualSQL = rawStatement.getSql();
+        String expectedSQL = "SELECT SEQUENCE_NAME, START_VALUE, MINIMUM_VALUE AS MIN_VALUE, MAXIMUM_VALUE AS MAX_VALUE, INCREMENT AS INCREMENT_BY, CYCLE_OPTION AS WILL_CYCLE, ORDERED, COMMENT FROM information_schema.sequences WHERE SEQUENCE_CATALOG=? AND SEQUENCE_SCHEMA=?";
+        
+        assertEquals(expectedSQL, actualSQL, "SQL structure should remain the same with both null values");
+        
+        Object[] parameters = rawStatement.getParameters().toArray();
+        assertNull(parameters[0], "First parameter should be null");
+        assertNull(parameters[1], "Second parameter should be null");
     }
 
     @Test
@@ -90,15 +233,9 @@ public class SequenceSnapshotGeneratorSnowflakeTest {
         RawParameterizedSqlStatement rawStatement = (RawParameterizedSqlStatement) statement;
         String sql = rawStatement.getSql();
         
-        // Verify SQL contains expected Snowflake-specific elements
-        assertTrue(sql.contains("SELECT SEQUENCE_NAME"));
-        assertTrue(sql.contains("START_VALUE"));
-        assertTrue(sql.contains("MINIMUM_VALUE AS MIN_VALUE"));
-        assertTrue(sql.contains("MAXIMUM_VALUE AS MAX_VALUE"));
-        assertTrue(sql.contains("INCREMENT AS INCREMENT_BY"));
-        assertTrue(sql.contains("CYCLE_OPTION AS WILL_CYCLE"));
-        assertTrue(sql.contains("FROM information_schema.sequences"));
-        assertTrue(sql.contains("WHERE SEQUENCE_CATALOG=? AND SEQUENCE_SCHEMA=?"));
+        // Verify complete SQL matches expected Snowflake structure
+        String expectedSQL = "SELECT SEQUENCE_NAME, START_VALUE, MINIMUM_VALUE AS MIN_VALUE, MAXIMUM_VALUE AS MAX_VALUE, INCREMENT AS INCREMENT_BY, CYCLE_OPTION AS WILL_CYCLE, ORDERED, COMMENT FROM information_schema.sequences WHERE SEQUENCE_CATALOG=? AND SEQUENCE_SCHEMA=?";
+        assertEquals(expectedSQL, sql, "Should generate correct complete SQL for Snowflake sequences");
         
         // Verify parameters
         Object[] parameters = rawStatement.getParameters().toArray();
@@ -177,8 +314,9 @@ public class SequenceSnapshotGeneratorSnowflakeTest {
         RawParameterizedSqlStatement rawStatement = (RawParameterizedSqlStatement) statement;
         String sql = rawStatement.getSql();
         
-        // Verify that the escaped column name is used
-        assertTrue(sql.contains("\"INCREMENT\" AS INCREMENT_BY"));
+        // Verify complete SQL uses escaped column name
+        String expectedSQLWithEscaping = "SELECT SEQUENCE_NAME, START_VALUE, MINIMUM_VALUE AS MIN_VALUE, MAXIMUM_VALUE AS MAX_VALUE, \"INCREMENT\" AS INCREMENT_BY, CYCLE_OPTION AS WILL_CYCLE, ORDERED, COMMENT FROM information_schema.sequences WHERE SEQUENCE_CATALOG=? AND SEQUENCE_SCHEMA=?";
+        assertEquals(expectedSQLWithEscaping, sql, "Should use escaped column name in complete SQL");
     }
 
     @Test
@@ -193,15 +331,9 @@ public class SequenceSnapshotGeneratorSnowflakeTest {
         RawParameterizedSqlStatement rawStatement = (RawParameterizedSqlStatement) statement;
         String sql = rawStatement.getSql();
         
-        // Verify the exact SQL structure matches Snowflake requirements
-        assertTrue(sql.startsWith("SELECT SEQUENCE_NAME"));
-        assertTrue(sql.contains("START_VALUE"));
-        assertTrue(sql.contains("MINIMUM_VALUE AS MIN_VALUE"));
-        assertTrue(sql.contains("MAXIMUM_VALUE AS MAX_VALUE"));
-        assertTrue(sql.contains("INCREMENT AS INCREMENT_BY"));
-        assertTrue(sql.contains("CYCLE_OPTION AS WILL_CYCLE"));
-        assertTrue(sql.contains("FROM information_schema.sequences"));
-        assertTrue(sql.endsWith("WHERE SEQUENCE_CATALOG=? AND SEQUENCE_SCHEMA=?"));
+        // Verify complete SQL structure matches Snowflake requirements
+        String expectedSQLStructure = "SELECT SEQUENCE_NAME, START_VALUE, MINIMUM_VALUE AS MIN_VALUE, MAXIMUM_VALUE AS MAX_VALUE, INCREMENT AS INCREMENT_BY, CYCLE_OPTION AS WILL_CYCLE, ORDERED, COMMENT FROM information_schema.sequences WHERE SEQUENCE_CATALOG=? AND SEQUENCE_SCHEMA=?";
+        assertEquals(expectedSQLStructure, sql, "Should generate exact SQL structure for Snowflake sequences");
     }
 
     @Test

@@ -1,63 +1,78 @@
 package liquibase.integration;
 
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.ext.SnowflakeNamespaceAttributeStorage;
-import liquibase.database.core.SnowflakeDatabase;
 import liquibase.sqlgenerator.core.snowflake.CreateTableGeneratorSnowflake;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.datatype.core.VarcharType;
 import liquibase.datatype.core.IntType;
 import liquibase.sql.Sql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.util.TestDatabaseConfigUtil;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
+import java.sql.Connection;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 /**
- * Integration test to verify namespace attribute flow from storage to SQL generation
+ * Real integration test to verify namespace attribute flow with actual Snowflake database
  */
 @DisplayName("Snowflake Namespace Integration Test")
 public class SnowflakeNamespaceIntegrationTest {
     
     private CreateTableGeneratorSnowflake generator;
     private CreateTableStatement statement;
-    
-    @Mock
-    private SnowflakeDatabase database;
-    
-    @Mock
-    private SqlGeneratorChain sqlGeneratorChain;
+    private Database database;
+    private Connection connection;
+    private String testId = String.valueOf(System.currentTimeMillis());
+    private String testSchema = "NS_INT_TEST_" + testId;
     
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        generator = new CreateTableGeneratorSnowflake();
-        statement = new CreateTableStatement("PUBLIC", "PUBLIC", "TEST_TABLE");
-        
-        // Add some columns
-        statement.addColumn("id", new IntType());
-        statement.addColumn("name", new VarcharType());
-        
-        // Setup database mock
-        when(database.escapeTableName(anyString(), anyString(), anyString())).thenReturn("TEST_TABLE");
-        when(database.escapeColumnName(anyString(), anyString(), anyString(), anyString())).thenAnswer(i -> i.getArgument(3));
-        
-        // Clear storage
-        SnowflakeNamespaceAttributeStorage.clear();
+    void setUp() throws Exception {
+        try {
+            connection = TestDatabaseConfigUtil.getSnowflakeConnection();
+            database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
+            
+            // Create isolated test schema
+            try (Statement stmt = connection.createStatement()) {
+                stmt.execute("CREATE SCHEMA IF NOT EXISTS " + testSchema);
+                stmt.execute("USE SCHEMA " + testSchema);
+            }
+            
+            generator = new CreateTableGeneratorSnowflake();
+            statement = new CreateTableStatement(database.getDefaultCatalogName(), testSchema, "TEST_TABLE");
+            
+            // Add some columns
+            statement.addColumn("id", new IntType());
+            statement.addColumn("name", new VarcharType());
+            
+        } catch (Exception e) {
+            Assumptions.assumeTrue(false, "Cannot connect to Snowflake: " + e.getMessage());
+        }
     }
     
     @AfterEach
-    void tearDown() {
+    void tearDown() throws Exception {
+        // Clear storage after each test
         SnowflakeNamespaceAttributeStorage.clear();
+        
+        if (connection != null && !connection.isClosed()) {
+            try (Statement stmt = connection.createStatement()) {
+                stmt.execute("DROP SCHEMA IF EXISTS " + testSchema + " CASCADE");
+            } catch (Exception e) {
+                // Ignore cleanup failures
+            }
+            connection.close();
+        }
     }
     
     @Test
@@ -73,16 +88,16 @@ public class SnowflakeNamespaceIntegrationTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
         
         // When - Generator processes the statement
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then - SQL should contain namespace-based modifications
         assertEquals(1, sqls.length);
         String sql = sqls[0].toSql();
         
-        // Verify all attributes were applied
-        assertTrue(sql.contains("CREATE TRANSIENT TABLE"), "Should create transient table");
-        assertTrue(sql.contains("CLUSTER BY (id)"), "Should include cluster by");
-        assertTrue(sql.contains("CHANGE_TRACKING = TRUE"), "Should enable change tracking");
+        // Verify all attributes were applied with enhanced assertions
+        assertTrue(sql.startsWith("CREATE TRANSIENT TABLE"), "Should start with CREATE TRANSIENT TABLE: " + sql);
+        assertTrue(sql.contains("CLUSTER BY (id)"), "Should include cluster by clause: " + sql);
+        assertTrue(sql.contains("CHANGE_TRACKING = TRUE"), "Should enable change tracking: " + sql);
         assertFalse(sql.contains("DATA_RETENTION_TIME_IN_DAYS"), "Should not include retention for transient table");
         
         // Verify storage was cleaned up
@@ -111,13 +126,11 @@ public class SnowflakeNamespaceIntegrationTest {
             SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
             
             // Generate SQL
-            Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+            Sql[] sqls = generator.generateSql(statement, database, null);
             String sql = sqls[0].toSql();
             
-            // Verify
-            assertTrue(sql.contains(expectedPrefixes[i]), 
-                "Should create " + tableTypes[i] + " table: " + sql);
-        }
+            // Verify table type prefix appears correctly
+            assertTrue(sql.startsWith(expectedPrefixes[i]), "Assertion should be true");        }
     }
     
     @Test
@@ -136,17 +149,17 @@ public class SnowflakeNamespaceIntegrationTest {
         SnowflakeNamespaceAttributeStorage.storeAttributes("TEST_TABLE", attrs);
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         String sql = sqls[0].toSql();
         
-        // Then - All attributes should be present
-        assertTrue(sql.contains("CLUSTER BY (id,name)"));
-        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS = 30"));
-        assertTrue(sql.contains("MAX_DATA_EXTENSION_TIME_IN_DAYS = 90"));
-        assertTrue(sql.contains("CHANGE_TRACKING = TRUE"));
-        assertTrue(sql.contains("ENABLE_SCHEMA_EVOLUTION = TRUE"));
-        assertTrue(sql.contains("DEFAULT_DDL_COLLATION = 'en-ci'"));
-        assertTrue(sql.contains("COPY GRANTS"));
+        // Then - All attributes should be present with enhanced validation
+        assertTrue(sql.contains("CLUSTER BY (id,name)"), "Should contain cluster by with multiple columns: " + sql);
+        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS = 30"), "Should set data retention time: " + sql);
+        assertTrue(sql.contains("MAX_DATA_EXTENSION_TIME_IN_DAYS = 90"), "Should set max data extension time: " + sql);
+        assertTrue(sql.contains("CHANGE_TRACKING = TRUE"), "Should enable change tracking: " + sql);
+        assertTrue(sql.contains("ENABLE_SCHEMA_EVOLUTION = TRUE"), "Should enable schema evolution: " + sql);
+        assertTrue(sql.contains("DEFAULT_DDL_COLLATION = 'en-ci'"), "Should set default DDL collation: " + sql);
+        assertTrue(sql.contains("COPY GRANTS"), "Should include copy grants: " + sql);
     }
     
     @Test
@@ -162,12 +175,12 @@ public class SnowflakeNamespaceIntegrationTest {
         statement.setTablespace("transient");
         
         // When
-        Sql[] sqls = generator.generateSql(statement, database, sqlGeneratorChain);
+        Sql[] sqls = generator.generateSql(statement, database, null);
         String sql = sqls[0].toSql();
         
-        // Then - Namespace should win
-        assertTrue(sql.contains("CREATE VOLATILE TABLE"));
-        assertFalse(sql.contains("TRANSIENT"));
-        assertTrue(sql.contains("CLUSTER BY (id)"));
+        // Then - Namespace should win over legacy approach
+        assertTrue(sql.startsWith("CREATE VOLATILE TABLE"), "Should start with CREATE VOLATILE TABLE: " + sql);
+        assertFalse(sql.contains("TRANSIENT"), "Should not contain TRANSIENT when VOLATILE is set: " + sql);
+        assertTrue(sql.contains("CLUSTER BY (id)"), "Should contain cluster by clause: " + sql);
     }
 }

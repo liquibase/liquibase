@@ -78,7 +78,7 @@ public class SchemaIsolationTestComparison {
                 // Expected - table doesn't exist in BASE_SCHEMA
                 assertTrue(e.getMessage().contains("does not exist") || 
                           e.getMessage().contains("not found"), 
-                          "Should get 'not found' error");
+                          "Error message should indicate table not found");
             }
             
             // Test 5: Access with fully qualified name should work
@@ -165,11 +165,11 @@ public class SchemaIsolationTestComparison {
             // Both should point to same database
             assertEquals(directDatabase.getDefaultCatalogName(), 
                         yamlDatabase.getDefaultCatalogName(),
-                        "Catalogs should match");
+                        "Catalog names should match");
             
             assertEquals(directDatabase.getDefaultSchemaName(),
                         yamlDatabase.getDefaultSchemaName(), 
-                        "Default schemas should match");
+                        "Schema names should match");
             
             // Both should be able to create tables
             String testTable = "YAML_COMPARISON_" + StringUtil.randomIdentifier(6).toUpperCase();

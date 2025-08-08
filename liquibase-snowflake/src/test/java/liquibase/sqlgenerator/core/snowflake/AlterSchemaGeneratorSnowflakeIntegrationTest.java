@@ -65,7 +65,6 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
                 PreparedStatement dropStmt = connection.prepareStatement("DROP SCHEMA IF EXISTS " + testDatabase + "." + schemaName);
                 dropStmt.execute();
                 dropStmt.close();
-                System.out.println("Cleaned up schema: " + testDatabase + "." + schemaName);
             } catch (SQLException e) {
                 System.err.println("Failed to cleanup schema " + schemaName + ": " + e.getMessage());
             }
@@ -83,7 +82,6 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
         createdSchemas.add(originalName);
         createdSchemas.add(newName); // Track both names for cleanup
 
-        System.out.println("Testing RENAME: ALTER SCHEMA " + originalName + " RENAME TO " + newName);
 
         // First create the original schema
         PreparedStatement createStmt = connection.prepareStatement("CREATE SCHEMA " + originalName);
@@ -106,7 +104,6 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: RENAME SCHEMA");
     }
 
     @Test
@@ -116,7 +113,6 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
         createdSchemas.add(originalName);
         createdSchemas.add(newName);
 
-        System.out.println("Testing RENAME IF EXISTS: ALTER SCHEMA IF EXISTS " + originalName + " RENAME TO " + newName);
 
         // First create the original schema
         PreparedStatement createStmt = connection.prepareStatement("CREATE SCHEMA " + originalName);
@@ -140,7 +136,6 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: RENAME IF EXISTS");
     }
 
     @Test
@@ -148,7 +143,6 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
         String schemaName = getUniqueSchemaName("testSetDataRetention");
         createdSchemas.add(schemaName);
 
-        System.out.println("Testing SET DATA_RETENTION_TIME_IN_DAYS: ALTER SCHEMA " + schemaName + " SET DATA_RETENTION_TIME_IN_DAYS = 14");
 
         // First create the schema
         PreparedStatement createStmt = connection.prepareStatement("CREATE SCHEMA " + schemaName);
@@ -164,17 +158,14 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
         assertEquals(1, sqls.length);
 
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("ALTER SCHEMA " + schemaName));
-        assertTrue(sql.contains("SET"));
-        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS"));
-        assertTrue(sql.contains("14"));
+        String expectedSQL = "ALTER SCHEMA " + schemaName + " SET DATA_RETENTION_TIME_IN_DAYS = 14";
+        assertEquals(expectedSQL, sql);
 
         // Execute against live database
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: SET DATA_RETENTION_TIME_IN_DAYS");
     }
 
     @Test
@@ -182,7 +173,6 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
         String schemaName = getUniqueSchemaName("testSetComment");
         createdSchemas.add(schemaName);
 
-        System.out.println("Testing SET COMMENT: ALTER SCHEMA " + schemaName + " SET COMMENT = 'Updated comment'");
 
         // First create the schema
         PreparedStatement createStmt = connection.prepareStatement("CREATE SCHEMA " + schemaName);
@@ -198,17 +188,14 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
         assertEquals(1, sqls.length);
 
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("ALTER SCHEMA " + schemaName));
-        assertTrue(sql.contains("SET"));
-        assertTrue(sql.contains("COMMENT"));
-        assertTrue(sql.contains("'Updated comment for integration testing'"));
+        String expectedSQL = "ALTER SCHEMA " + schemaName + " SET COMMENT = 'Updated comment for integration testing'";
+        assertEquals(expectedSQL, sql);
 
         // Execute against live database
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: SET COMMENT");
     }
 
     @Test
@@ -216,7 +203,6 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
         String schemaName = getUniqueSchemaName("testSetMultipleProperties");
         createdSchemas.add(schemaName);
 
-        System.out.println("Testing SET Multiple Properties: ALTER SCHEMA " + schemaName + " SET multiple properties");
 
         // First create the schema
         PreparedStatement createStmt = connection.prepareStatement("CREATE SCHEMA " + schemaName);
@@ -235,23 +221,14 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
         assertEquals(1, sqls.length);
 
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("ALTER SCHEMA " + schemaName));
-        assertTrue(sql.contains("SET"));
-        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS"));
-        assertTrue(sql.contains("21"));
-        assertTrue(sql.contains("MAX_DATA_EXTENSION_TIME_IN_DAYS"));
-        assertTrue(sql.contains("28"));
-        assertTrue(sql.contains("COMMENT"));
-        assertTrue(sql.contains("'Multi-property test schema'"));
-        assertTrue(sql.contains("DEFAULT_DDL_COLLATION"));
-        assertTrue(sql.contains("'utf8'"));
+        String expectedSQL = "ALTER SCHEMA " + schemaName + " SET DATA_RETENTION_TIME_IN_DAYS = 21 MAX_DATA_EXTENSION_TIME_IN_DAYS = 28 DEFAULT_DDL_COLLATION = 'utf8' COMMENT = 'Multi-property test schema'";
+        assertEquals(expectedSQL, sql);
 
         // Execute against live database
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: SET Multiple Properties");
     }
 
     @Test
@@ -259,7 +236,6 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
         String schemaName = getUniqueSchemaName("testEnableManagedAccess");
         createdSchemas.add(schemaName);
 
-        System.out.println("Testing ENABLE MANAGED ACCESS: ALTER SCHEMA " + schemaName + " ENABLE MANAGED ACCESS");
 
         // First create the schema
         PreparedStatement createStmt = connection.prepareStatement("CREATE SCHEMA " + schemaName);
@@ -275,15 +251,14 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
         assertEquals(1, sqls.length);
 
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("ALTER SCHEMA " + schemaName));
-        assertTrue(sql.contains("ENABLE MANAGED ACCESS"));
+        String expectedSQL = "ALTER SCHEMA " + schemaName + " ENABLE MANAGED ACCESS";
+        assertEquals(expectedSQL, sql);
 
         // Execute against live database
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: ENABLE MANAGED ACCESS");
     }
 
     @Test
@@ -291,7 +266,6 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
         String schemaName = getUniqueSchemaName("testDisableManagedAccess");
         createdSchemas.add(schemaName);
 
-        System.out.println("Testing DISABLE MANAGED ACCESS: ALTER SCHEMA " + schemaName + " DISABLE MANAGED ACCESS");
 
         // First create the schema with managed access
         PreparedStatement createStmt = connection.prepareStatement("CREATE SCHEMA " + schemaName + " WITH MANAGED ACCESS");
@@ -307,15 +281,14 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
         assertEquals(1, sqls.length);
 
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("ALTER SCHEMA " + schemaName));
-        assertTrue(sql.contains("DISABLE MANAGED ACCESS"));
+        String expectedSQL = "ALTER SCHEMA " + schemaName + " DISABLE MANAGED ACCESS";
+        assertEquals(expectedSQL, sql);
 
         // Execute against live database
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: DISABLE MANAGED ACCESS");
     }
 
     @Test
@@ -323,7 +296,6 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
         String schemaName = getUniqueSchemaName("testUnsetDataRetention");
         createdSchemas.add(schemaName);
 
-        System.out.println("Testing UNSET DATA_RETENTION_TIME_IN_DAYS: ALTER SCHEMA " + schemaName + " UNSET DATA_RETENTION_TIME_IN_DAYS");
 
         // First create the schema with data retention
         PreparedStatement createStmt = connection.prepareStatement("CREATE SCHEMA " + schemaName + " DATA_RETENTION_TIME_IN_DAYS = 7");
@@ -339,16 +311,14 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
         assertEquals(1, sqls.length);
 
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("ALTER SCHEMA " + schemaName));
-        assertTrue(sql.contains("UNSET"));
-        assertTrue(sql.contains("DATA_RETENTION_TIME_IN_DAYS"));
+        String expectedSQL = "ALTER SCHEMA " + schemaName + " UNSET DATA_RETENTION_TIME_IN_DAYS";
+        assertEquals(expectedSQL, sql);
 
         // Execute against live database
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: UNSET DATA_RETENTION_TIME_IN_DAYS");
     }
 
     @Test
@@ -356,7 +326,6 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
         String schemaName = getUniqueSchemaName("testUnsetComment");
         createdSchemas.add(schemaName);
 
-        System.out.println("Testing UNSET COMMENT: ALTER SCHEMA " + schemaName + " UNSET COMMENT");
 
         // First create the schema with comment
         PreparedStatement createStmt = connection.prepareStatement("CREATE SCHEMA " + schemaName + " COMMENT = 'Initial comment'");
@@ -372,21 +341,18 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
         assertEquals(1, sqls.length);
 
         String sql = sqls[0].toSql();
-        assertTrue(sql.contains("ALTER SCHEMA " + schemaName));
-        assertTrue(sql.contains("UNSET"));
-        assertTrue(sql.contains("COMMENT"));
+        String expectedSQL = "ALTER SCHEMA " + schemaName + " UNSET COMMENT";
+        assertEquals(expectedSQL, sql);
 
         // Execute against live database
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.execute();
         preparedStatement.close();
 
-        System.out.println("✅ SUCCESS: UNSET COMMENT");
     }
 
     @Test
     public void testValidationMissingSchemaName() throws Exception {
-        System.out.println("Testing Validation: Missing schema name should fail");
 
         AlterSchemaStatement statement = new AlterSchemaStatement();
         // Intentionally not setting schemaName
@@ -397,7 +363,6 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
             fail("Expected validation error for missing schema name");
         } catch (Exception e) {
             assertTrue(e.getMessage().contains("schema") || e.getMessage().contains("name") || e.getMessage().contains("required"));
-            System.out.println("✅ SUCCESS: Validation correctly failed for missing schema name");
         }
     }
 
@@ -406,7 +371,6 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
         String schemaName = getUniqueSchemaName("testValidationNoProperties");
         createdSchemas.add(schemaName);
 
-        System.out.println("Testing Validation: No alteration properties should fail");
 
         // First create the schema
         PreparedStatement createStmt = connection.prepareStatement("CREATE SCHEMA " + schemaName);
@@ -422,13 +386,11 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
             fail("Expected validation error for no alteration properties");
         } catch (Exception e) {
             assertTrue(e.getMessage().contains("property") || e.getMessage().contains("change") || e.getMessage().contains("alteration"));
-            System.out.println("✅ SUCCESS: Validation correctly failed for no alteration properties");
         }
     }
 
     @Test
     public void testUniqueNamingStrategy() throws Exception {
-        System.out.println("Testing Unique Naming Strategy: Verifying all test schemas have unique names");
 
         // Create multiple schemas using the naming strategy
         String schema1 = getUniqueSchemaName("testMethod1");
@@ -443,10 +405,6 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
         assertTrue(schema2.startsWith("TEST_ALTER_SCHEMA_"));
         assertTrue(schema3.startsWith("TEST_ALTER_SCHEMA_"));
 
-        System.out.println("Schema 1: " + schema1);
-        System.out.println("Schema 2: " + schema2);
-        System.out.println("Schema 3: " + schema3);
 
-        System.out.println("✅ SUCCESS: Unique Naming Strategy validated");
     }
 }

@@ -382,9 +382,17 @@ public class AlterWarehouseChange extends AbstractChange {
         }
         
         // Validate queryAccelerationMaxScaleFactor
-        if (getQueryAccelerationMaxScaleFactor() != null && 
-            (getQueryAccelerationMaxScaleFactor() < 0 || getQueryAccelerationMaxScaleFactor() > 100)) {
-            errors.addError("queryAccelerationMaxScaleFactor must be between 0 and 100");
+        if (getQueryAccelerationMaxScaleFactor() != null) {
+            if (getQueryAccelerationMaxScaleFactor() < 0 || getQueryAccelerationMaxScaleFactor() > 100) {
+                errors.addError("queryAccelerationMaxScaleFactor must be between 0 and 100");
+            }
+            // Auto-enable query acceleration if scale factor is set but acceleration is not explicitly enabled
+            if (Boolean.FALSE.equals(getEnableQueryAcceleration())) {
+                errors.addError("queryAccelerationMaxScaleFactor can only be set when enableQueryAcceleration is true");
+            } else if (getEnableQueryAcceleration() == null) {
+                // Auto-enable query acceleration when scale factor is provided
+                setEnableQueryAcceleration(true);
+            }
         }
         
         // Validate mutual exclusivity

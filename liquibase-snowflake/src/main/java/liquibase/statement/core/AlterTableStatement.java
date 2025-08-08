@@ -248,4 +248,154 @@ public class AlterTableStatement extends AbstractSqlStatement {
     public void setUnsetTag(String unsetTag) {
         this.unsetTag = unsetTag;
     }
+    
+    /**
+     * Enhanced validation method that ensures the statement configuration is valid
+     * based on Snowflake ALTER TABLE constraints and operation types.
+     */
+    public ValidationResult validate() {
+        ValidationResult result = new ValidationResult();
+        
+        // Basic validation
+        if (tableName == null || tableName.trim().isEmpty()) {
+            result.addError("Table name is required");
+        } else if (tableName.length() > 255 || !tableName.matches("^[A-Za-z_][A-Za-z0-9_$]*$")) {
+            result.addError("Invalid table name format. Must start with letter/underscore, contain only letters/numbers/underscores/dollar signs, max 255 characters: " + tableName);
+        }
+        
+        // Validate clustering operations are mutually exclusive
+        int clusteringOperations = 0;
+        if (clusterBy != null) clusteringOperations++;
+        if (Boolean.TRUE.equals(dropClusteringKey)) clusteringOperations++;
+        if (Boolean.TRUE.equals(suspendRecluster)) clusteringOperations++;
+        if (Boolean.TRUE.equals(resumeRecluster)) clusteringOperations++;
+        
+        if (clusteringOperations > 1) {
+            result.addError("Clustering operations are mutually exclusive. Only one of: clusterBy, dropClusteringKey, suspendRecluster, resumeRecluster can be specified");
+        }
+        
+        // Validate search optimization operations are mutually exclusive
+        if (addSearchOptimization != null && Boolean.TRUE.equals(dropSearchOptimization)) {
+            result.addError("Cannot add and drop search optimization simultaneously");
+        }
+        
+        // Validate row access policy operations
+        if (addRowAccessPolicy != null && dropRowAccessPolicy != null) {
+            result.addError("Cannot add and drop row access policy simultaneously");
+        }
+        
+        // Validate aggregation policy operations
+        if (setAggregationPolicy != null && Boolean.TRUE.equals(unsetAggregationPolicy)) {
+            result.addError("Cannot set and unset aggregation policy simultaneously");
+        }
+        
+        // Validate projection policy operations
+        if (setProjectionPolicy != null && Boolean.TRUE.equals(unsetProjectionPolicy)) {
+            result.addError("Cannot set and unset projection policy simultaneously");
+        }
+        
+        // Validate tag operations
+        if (setTag != null && unsetTag != null) {
+            result.addError("Cannot set and unset tags simultaneously");
+        }
+        
+        // Validate data retention range
+        if (setDataRetentionTimeInDays != null) {
+            if (setDataRetentionTimeInDays < 0) {
+                result.addError("DATA_RETENTION_TIME_IN_DAYS cannot be negative, got: " + setDataRetentionTimeInDays);
+            } else if (setDataRetentionTimeInDays > 90) {
+                result.addWarning("DATA_RETENTION_TIME_IN_DAYS > 90 days requires Snowflake Enterprise Edition, got: " + setDataRetentionTimeInDays);
+                if (setDataRetentionTimeInDays > 365) {
+                    result.addError("DATA_RETENTION_TIME_IN_DAYS cannot exceed 365 days, got: " + setDataRetentionTimeInDays);
+                }
+            }
+        }
+        
+        // Validate max data extension time range  
+        if (setMaxDataExtensionTimeInDays != null) {
+            if (setMaxDataExtensionTimeInDays < 0) {
+                result.addError("MAX_DATA_EXTENSION_TIME_IN_DAYS cannot be negative, got: " + setMaxDataExtensionTimeInDays);
+            } else if (setMaxDataExtensionTimeInDays > 14) {
+                result.addError("MAX_DATA_EXTENSION_TIME_IN_DAYS cannot exceed 14 days, got: " + setMaxDataExtensionTimeInDays);
+            }
+        }
+        
+        // Warn about Enterprise Edition features
+        if (Boolean.TRUE.equals(setChangeTracking)) {
+            result.addWarning("Change tracking requires Snowflake Enterprise Edition for streams functionality");
+        }
+        
+        if (Boolean.TRUE.equals(setEnableSchemaEvolution)) {
+            result.addWarning("Schema evolution for semi-structured data requires appropriate account settings");
+        }
+        
+        if (addSearchOptimization != null) {
+            result.addWarning("Search optimization may incur additional compute and storage costs");
+        }
+        
+        if (addRowAccessPolicy != null || setAggregationPolicy != null || setProjectionPolicy != null) {
+            result.addWarning("Security policies require Snowflake Enterprise Edition and proper governance setup");
+        }
+        
+        // Validate operation count - at least one operation must be specified
+        int totalOperations = countOperations();
+        if (totalOperations == 0) {
+            result.addError("At least one ALTER TABLE operation must be specified");
+        }
+        
+        return result;
+    }
+    
+    private int countOperations() {
+        int count = 0;
+        
+        // Clustering operations
+        if (clusterBy != null) count++;
+        if (Boolean.TRUE.equals(dropClusteringKey)) count++;
+        if (Boolean.TRUE.equals(suspendRecluster)) count++;
+        if (Boolean.TRUE.equals(resumeRecluster)) count++;
+        
+        // Property settings
+        if (setDataRetentionTimeInDays != null) count++;
+        if (setChangeTracking != null) count++;
+        if (setEnableSchemaEvolution != null) count++;
+        if (setMaxDataExtensionTimeInDays != null) count++;
+        if (setDefaultDdlCollation != null) count++;
+        
+        // Search optimization
+        if (addSearchOptimization != null) count++;
+        if (Boolean.TRUE.equals(dropSearchOptimization)) count++;
+        
+        // Policy operations
+        if (addRowAccessPolicy != null) count++;
+        if (dropRowAccessPolicy != null) count++;
+        if (setAggregationPolicy != null) count++;
+        if (Boolean.TRUE.equals(unsetAggregationPolicy)) count++;
+        if (Boolean.TRUE.equals(forceAggregationPolicy)) count++;
+        if (setProjectionPolicy != null) count++;
+        if (Boolean.TRUE.equals(unsetProjectionPolicy)) count++;
+        if (Boolean.TRUE.equals(forceProjectionPolicy)) count++;
+        
+        // Tag operations
+        if (setTag != null) count++;
+        if (unsetTag != null) count++;
+        
+        return count;
+    }
+    
+    /**
+     * Simple validation result container
+     */
+    public static class ValidationResult {
+        private final java.util.List<String> errors = new java.util.ArrayList<>();
+        private final java.util.List<String> warnings = new java.util.ArrayList<>();
+        
+        public boolean hasErrors() { return !errors.isEmpty(); }
+        public boolean hasWarnings() { return !warnings.isEmpty(); }
+        public java.util.List<String> getErrors() { return errors; }
+        public java.util.List<String> getWarnings() { return warnings; }
+        
+        public void addError(String error) { errors.add(error); }
+        public void addWarning(String warning) { warnings.add(warning); }
+    }
 }

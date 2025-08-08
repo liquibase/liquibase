@@ -60,7 +60,6 @@ public class SchemaObjectIntegrationTest {
                 PreparedStatement dropStmt = connection.prepareStatement("DROP SCHEMA IF EXISTS " + objectName);
                 dropStmt.execute();
                 dropStmt.close();
-                System.out.println("Cleaned up test schema: " + objectName);
             } catch (Exception e) {
                 System.err.println("Failed to cleanup test schema " + objectName + ": " + e.getMessage());
             }
@@ -77,7 +76,6 @@ public class SchemaObjectIntegrationTest {
 
     @Test
     public void testSchemaSnapshotGeneratorDirectQuery() throws Exception {
-        System.out.println("Phase 1A: Testing SchemaSnapshotGenerator direct SQL queries...");
         
         String uniqueName = getUniqueTestObjectName("directQuery");
         createdTestObjects.add(uniqueName);
@@ -85,7 +83,8 @@ public class SchemaObjectIntegrationTest {
         try {
             // CREATE: Set up test schema in Snowflake
             PreparedStatement createStmt = connection.prepareStatement(
-                "CREATE SCHEMA " + uniqueName + " COMMENT = 'Integration test schema'"
+                "CREATE SCHEMA IF NOT EXISTS " + uniqueName + 
+                " COMMENT = 'Integration test schema'"
             );
             createStmt.execute();
             createStmt.close();
@@ -106,7 +105,6 @@ public class SchemaObjectIntegrationTest {
             rs.close();
             infoStmt.close();
             
-            System.out.println("✅ SUCCESS: Direct SQL queries working for SchemaSnapshotGenerator");
             
         } finally {
             // Cleanup handled in tearDown()
@@ -115,7 +113,6 @@ public class SchemaObjectIntegrationTest {
 
     @Test
     public void testSchemaSnapshotGeneratorObjectCreation() throws Exception {
-        System.out.println("Phase 1A: Testing SchemaSnapshotGenerator object creation...");
         
         String uniqueName = getUniqueTestObjectName("objectCreation");
         createdTestObjects.add(uniqueName);
@@ -123,8 +120,8 @@ public class SchemaObjectIntegrationTest {
         try {
             // CREATE: Set up test schema with properties
             PreparedStatement createStmt = connection.prepareStatement(
-                "CREATE SCHEMA " + uniqueName + 
-                " COMMENT = 'Test schema with properties'"
+                "CREATE SCHEMA " + uniqueName + " " +
+                "COMMENT = 'Test schema with properties'"
             );
             createStmt.execute();
             createStmt.close();
@@ -134,8 +131,7 @@ public class SchemaObjectIntegrationTest {
             
             // Verify generator configuration
             assertEquals(SchemaSnapshotGenerator.PRIORITY_DATABASE, 
-                        generator.getPriority(liquibase.database.object.Schema.class, database),
-                        "Should handle Schema objects with DATABASE priority");
+                        generator.getPriority(liquibase.database.object.Schema.class, database));
             
             // Create a schema object manually using the same pattern as our generator
             Schema schemaObject = new Schema();
@@ -146,7 +142,6 @@ public class SchemaObjectIntegrationTest {
             assertEquals(uniqueName, schemaObject.getName(), "Schema name should be set");
             assertEquals("Test schema with properties", schemaObject.getComment(), "Comment should be set");
             
-            System.out.println("✅ SUCCESS: SchemaSnapshotGenerator object creation working");
             
         } finally {
             // Cleanup handled in tearDown()
@@ -159,7 +154,6 @@ public class SchemaObjectIntegrationTest {
 
     @Test
     public void testSchemaComparatorSameObjects() throws Exception {
-        System.out.println("Phase 1B: Testing SchemaComparator - Same Objects scenario...");
         
         // Create two identical schema objects
         Schema schema1 = new Schema("TEST_SCHEMA");
@@ -179,12 +173,10 @@ public class SchemaObjectIntegrationTest {
         // VALIDATE: Should be identical
         assertFalse(differences.hasDifferences(), "Same objects should have no differences");
         
-        System.out.println("✅ SUCCESS: SchemaComparator same objects scenario working");
     }
 
     @Test 
     public void testSchemaComparatorDifferentObjects() throws Exception {
-        System.out.println("Phase 1B: Testing SchemaComparator - Different Objects scenario...");
         
         // Create source schema object
         Schema source = new Schema("TEST_SCHEMA");
@@ -205,7 +197,6 @@ public class SchemaObjectIntegrationTest {
         // VALIDATE: Should detect differences
         assertTrue(differences.hasDifferences(), "Different objects should have differences");
         
-        System.out.println("✅ SUCCESS: SchemaComparator different objects scenario working");
     }
 
     // ===========================================
@@ -214,7 +205,6 @@ public class SchemaObjectIntegrationTest {
 
     @Test
     public void testCreateSnapshotCompareWorkflow() throws Exception {
-        System.out.println("Phase 1C: Testing Create → Snapshot → Compare workflow...");
         
         String uniqueName = getUniqueTestObjectName("workflow");
         createdTestObjects.add(uniqueName);
@@ -222,7 +212,8 @@ public class SchemaObjectIntegrationTest {
         try {
             // CREATE: Set up test schema in Snowflake
             PreparedStatement createStmt = connection.prepareStatement(
-                "CREATE SCHEMA " + uniqueName + " COMMENT = 'Workflow test schema'"
+                "CREATE SCHEMA IF NOT EXISTS " + uniqueName + 
+                " COMMENT = 'Workflow test schema'"
             );
             createStmt.execute();
             createStmt.close();
@@ -264,7 +255,6 @@ public class SchemaObjectIntegrationTest {
             assertEquals(uniqueName, snapshotResult.getName(), "Name should match");
             assertEquals("Workflow test schema", snapshotResult.getComment(), "Should capture original comment");
             
-            System.out.println("✅ SUCCESS: Complete Create → Snapshot → Compare workflow working");
             
         } finally {
             // Cleanup handled in tearDown()
@@ -277,37 +267,29 @@ public class SchemaObjectIntegrationTest {
 
     @Test
     public void testSchemaSnapshotGeneratorServiceRegistration() throws Exception {
-        System.out.println("Phase 2A: Testing SchemaSnapshotGenerator service registration...");
         
         // Test direct service loading
         SchemaSnapshotGenerator generator = new SchemaSnapshotGenerator();
         
         // Verify framework integration - priority handling
         assertEquals(SchemaSnapshotGenerator.PRIORITY_DATABASE, 
-                    generator.getPriority(liquibase.database.object.Schema.class, database),
-                    "Should handle Schema objects with DATABASE priority");
+                    generator.getPriority(liquibase.database.object.Schema.class, database));
         assertEquals(SchemaSnapshotGenerator.PRIORITY_NONE, 
-                    generator.getPriority(liquibase.structure.core.Table.class, database),
-                    "Should not handle Table objects");
+                    generator.getPriority(liquibase.structure.core.Table.class, database));
         
-        System.out.println("✅ SUCCESS: SchemaSnapshotGenerator service registration working");
     }
 
     @Test
     public void testSchemaComparatorServiceRegistration() throws Exception {
-        System.out.println("Phase 2B: Testing SchemaComparator service registration...");
         
         SchemaComparator comparator = new SchemaComparator();
         
         // Verify framework integration - priority handling
         assertEquals(SchemaComparator.PRIORITY_DATABASE,
-                    comparator.getPriority(liquibase.database.object.Schema.class, database),
-                    "Should handle Schema objects with DATABASE priority");
+                    comparator.getPriority(liquibase.database.object.Schema.class, database));
         assertEquals(SchemaComparator.PRIORITY_NONE,
-                    comparator.getPriority(liquibase.structure.core.Table.class, database),
-                    "Should not handle Table objects");
+                    comparator.getPriority(liquibase.structure.core.Table.class, database));
         
-        System.out.println("✅ SUCCESS: SchemaComparator service registration working");
     }
 
     // ===========================================
@@ -316,7 +298,6 @@ public class SchemaObjectIntegrationTest {
 
     @Test
     public void testSchemaIsolationPattern() throws Exception {
-        System.out.println("Phase 3A: Validating schema isolation pattern for parallel execution...");
         
         // Test that our unique naming pattern prevents conflicts
         String schema1 = getUniqueTestObjectName("isolation1");
@@ -333,42 +314,31 @@ public class SchemaObjectIntegrationTest {
         assertTrue(schema2.startsWith("INT_TEST_SCHEMA_"), "Should follow naming pattern");
         assertTrue(schema3.startsWith("INT_TEST_SCHEMA_"), "Should follow naming pattern");
         
-        System.out.println("Schema 1: " + schema1);
-        System.out.println("Schema 2: " + schema2);
-        System.out.println("Schema 3: " + schema3);
         
-        System.out.println("✅ SUCCESS: Schema isolation pattern validated");
     }
 
     @Test
     public void testErrorHandlingPatterns() throws Exception {
-        System.out.println("Phase 3B: Testing error handling patterns...");
         
         SchemaSnapshotGenerator generator = new SchemaSnapshotGenerator();
         
         // Test generator configuration  
         assertEquals(SchemaSnapshotGenerator.PRIORITY_DATABASE, 
-                    generator.getPriority(liquibase.database.object.Schema.class, database),
-                    "Should handle Schema objects");
+                    generator.getPriority(liquibase.database.object.Schema.class, database));
         assertEquals(SchemaSnapshotGenerator.PRIORITY_NONE, 
-                    generator.getPriority(liquibase.database.object.Database.class, database),
-                    "Should not handle Database objects");
+                    generator.getPriority(liquibase.database.object.Database.class, database));
         
         // Test comparator configuration
         SchemaComparator comparator = new SchemaComparator();
         assertEquals(SchemaComparator.PRIORITY_DATABASE,
-                    comparator.getPriority(liquibase.database.object.Schema.class, database),
-                    "Should handle Schema objects");
+                    comparator.getPriority(liquibase.database.object.Schema.class, database));
         assertEquals(SchemaComparator.PRIORITY_NONE,
-                    comparator.getPriority(liquibase.database.object.Database.class, database),
-                    "Should not handle Database objects");
+                    comparator.getPriority(liquibase.database.object.Database.class, database));
         
-        System.out.println("✅ SUCCESS: Error handling patterns validated");
     }
 
     @Test
     public void testDataTypeHandlingPatterns() throws Exception {
-        System.out.println("Phase 3C: Testing data type handling patterns...");
         
         String uniqueName = getUniqueTestObjectName("dataTypes");
         createdTestObjects.add(uniqueName);
@@ -376,8 +346,8 @@ public class SchemaObjectIntegrationTest {
         try {
             // CREATE: Schema with various data types
             PreparedStatement createStmt = connection.prepareStatement(
-                "CREATE SCHEMA " + uniqueName + 
-                " COMMENT = 'Test with various data types: strings, booleans, numbers'"
+                "CREATE SCHEMA " + uniqueName + " " +
+                "COMMENT = 'Test with various data types: strings, booleans, numbers'"
             );
             createStmt.execute();
             createStmt.close();
@@ -399,7 +369,6 @@ public class SchemaObjectIntegrationTest {
             rs.close();
             queryStmt.close();
             
-            System.out.println("✅ SUCCESS: Data type handling patterns validated");
             
         } finally {
             // Cleanup handled in tearDown()

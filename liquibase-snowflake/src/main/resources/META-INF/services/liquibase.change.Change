@@ -11,3 +11,6 @@ liquibase.change.core.AlterTableChange
 liquibase.change.core.CreateFileFormatChange
 liquibase.change.core.AlterFileFormatChange
 liquibase.change.core.DropFileFormatChange
+liquibase.change.core.CreateSequenceChange
+liquibase.change.core.AlterSequenceChange
+liquibase.change.core.DropSequenceChange

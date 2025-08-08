@@ -78,7 +78,6 @@ public class FileFormatObjectIntegrationTest {
                 PreparedStatement dropStmt = connection.prepareStatement("DROP FILE FORMAT IF EXISTS BASE_SCHEMA." + objectName);
                 dropStmt.execute();
                 dropStmt.close();
-                System.out.println("Cleaned up test file format: " + objectName);
             } catch (Exception e) {
                 System.err.println("Failed to cleanup test file format " + objectName + ": " + e.getMessage());
             }
@@ -95,7 +94,6 @@ public class FileFormatObjectIntegrationTest {
 
     @Test
     public void testFileFormatSnapshotGeneratorDirectQuery() throws Exception {
-        System.out.println("Phase 1A: Testing FileFormatSnapshotGeneratorSnowflake direct SQL queries...");
         
         String uniqueName = getUniqueTestObjectName("directQuery");
         createdTestObjects.add(uniqueName);
@@ -147,7 +145,6 @@ public class FileFormatObjectIntegrationTest {
             rs.close();
             infoStmt.close();
             
-            System.out.println("✅ SUCCESS: Direct SQL queries working for FileFormatSnapshotGeneratorSnowflake");
             
         } finally {
             // Cleanup handled in tearDown()
@@ -156,7 +153,6 @@ public class FileFormatObjectIntegrationTest {
 
     @Test
     public void testFileFormatSnapshotGeneratorObjectCreation() throws Exception {
-        System.out.println("Phase 1A: Testing FileFormatSnapshotGeneratorSnowflake object creation...");
         
         String uniqueName = getUniqueTestObjectName("objectCreation");
         createdTestObjects.add(uniqueName);
@@ -179,8 +175,7 @@ public class FileFormatObjectIntegrationTest {
             
             // Verify generator configuration
             assertEquals(FileFormatSnapshotGeneratorSnowflake.PRIORITY_DATABASE, 
-                        generator.getPriority(FileFormat.class, database),
-                        "Should handle FileFormat objects with DATABASE priority");
+                        generator.getPriority(FileFormat.class, database));
             
             // Create a file format object manually using the same pattern as our generator
             FileFormat fileFormatObject = new FileFormat();
@@ -202,7 +197,6 @@ public class FileFormatObjectIntegrationTest {
             assertEquals("YYYY-MM-DD\"T\"HH24:MI:SS", fileFormatObject.getTimestampFormat(), "Timestamp format should be set");
             assertEquals("BASE64", fileFormatObject.getBinaryFormat(), "Binary format should be set");
             
-            System.out.println("✅ SUCCESS: FileFormatSnapshotGeneratorSnowflake object creation working");
             
         } finally {
             // Cleanup handled in tearDown()
@@ -215,7 +209,6 @@ public class FileFormatObjectIntegrationTest {
 
     @Test
     public void testFileFormatComparatorSameObjects() throws Exception {
-        System.out.println("Phase 1B: Testing FileFormatComparator - Same Objects scenario...");
         
         // Create two identical file format objects
         FileFormat format1 = new FileFormat();
@@ -247,12 +240,10 @@ public class FileFormatObjectIntegrationTest {
         // VALIDATE: Should be identical
         assertFalse(differences.hasDifferences(), "Same objects should have no differences");
         
-        System.out.println("✅ SUCCESS: FileFormatComparator same objects scenario working");
     }
 
     @Test 
     public void testFileFormatComparatorDifferentObjects() throws Exception {
-        System.out.println("Phase 1B: Testing FileFormatComparator - Different Objects scenario...");
         
         // Create source file format object
         FileFormat source = new FileFormat();
@@ -285,7 +276,6 @@ public class FileFormatObjectIntegrationTest {
         // VALIDATE: Should detect differences
         assertTrue(differences.hasDifferences(), "Different objects should have differences");
         
-        System.out.println("✅ SUCCESS: FileFormatComparator different objects scenario working");
     }
 
     // ===========================================
@@ -294,7 +284,6 @@ public class FileFormatObjectIntegrationTest {
 
     @Test
     public void testCreateSnapshotCompareWorkflow() throws Exception {
-        System.out.println("Phase 1C: Testing Create → Snapshot → Compare workflow...");
         
         String uniqueName = getUniqueTestObjectName("workflow");
         createdTestObjects.add(uniqueName);
@@ -378,7 +367,6 @@ public class FileFormatObjectIntegrationTest {
             assertEquals(",", snapshotResult.getFieldDelimiter(), "Field delimiter should match");
             assertEquals("GZIP", snapshotResult.getCompression(), "Compression should match");
             
-            System.out.println("✅ SUCCESS: Complete Create → Snapshot → Compare workflow working");
             
         } finally {
             // Cleanup handled in tearDown()
@@ -391,37 +379,29 @@ public class FileFormatObjectIntegrationTest {
 
     @Test
     public void testFileFormatSnapshotGeneratorServiceRegistration() throws Exception {
-        System.out.println("Phase 2A: Testing FileFormatSnapshotGeneratorSnowflake service registration...");
         
         // Test direct service loading
         FileFormatSnapshotGeneratorSnowflake generator = new FileFormatSnapshotGeneratorSnowflake();
         
         // Verify framework integration - priority handling
         assertEquals(FileFormatSnapshotGeneratorSnowflake.PRIORITY_DATABASE, 
-                    generator.getPriority(FileFormat.class, database),
-                    "Should handle FileFormat objects with DATABASE priority");
+                    generator.getPriority(FileFormat.class, database));
         assertEquals(FileFormatSnapshotGeneratorSnowflake.PRIORITY_NONE, 
-                    generator.getPriority(liquibase.database.object.Database.class, database),
-                    "Should not handle Database objects");
+                    generator.getPriority(liquibase.database.object.Database.class, database));
         
-        System.out.println("✅ SUCCESS: FileFormatSnapshotGeneratorSnowflake service registration working");
     }
 
     @Test
     public void testFileFormatComparatorServiceRegistration() throws Exception {
-        System.out.println("Phase 2B: Testing FileFormatComparator service registration...");
         
         FileFormatComparator comparator = new FileFormatComparator();
         
         // Verify framework integration - priority handling
         assertEquals(FileFormatComparator.PRIORITY_TYPE,
-                    comparator.getPriority(FileFormat.class, database),
-                    "Should handle FileFormat objects with TYPE priority");
+                    comparator.getPriority(FileFormat.class, database));
         assertEquals(FileFormatComparator.PRIORITY_NONE,
-                    comparator.getPriority(liquibase.database.object.Database.class, database),
-                    "Should not handle Database objects");
+                    comparator.getPriority(liquibase.database.object.Database.class, database));
         
-        System.out.println("✅ SUCCESS: FileFormatComparator service registration working");
     }
 
     // ===========================================
@@ -430,7 +410,6 @@ public class FileFormatObjectIntegrationTest {
 
     @Test
     public void testFileFormatIsolationPattern() throws Exception {
-        System.out.println("Phase 3A: Validating file format isolation pattern for parallel execution...");
         
         // Test that our unique naming pattern prevents conflicts
         String format1 = getUniqueTestObjectName("isolation1");
@@ -447,42 +426,31 @@ public class FileFormatObjectIntegrationTest {
         assertTrue(format2.startsWith("INT_TEST_FILEFORMAT_"), "Should follow naming pattern");
         assertTrue(format3.startsWith("INT_TEST_FILEFORMAT_"), "Should follow naming pattern");
         
-        System.out.println("Format 1: " + format1);
-        System.out.println("Format 2: " + format2);
-        System.out.println("Format 3: " + format3);
         
-        System.out.println("✅ SUCCESS: FileFormat isolation pattern validated");
     }
 
     @Test
     public void testErrorHandlingPatterns() throws Exception {
-        System.out.println("Phase 3B: Testing error handling patterns...");
         
         FileFormatSnapshotGeneratorSnowflake generator = new FileFormatSnapshotGeneratorSnowflake();
         
         // Test generator configuration  
         assertEquals(FileFormatSnapshotGeneratorSnowflake.PRIORITY_DATABASE, 
-                    generator.getPriority(FileFormat.class, database),
-                    "Should handle FileFormat objects");
+                    generator.getPriority(FileFormat.class, database));
         assertEquals(FileFormatSnapshotGeneratorSnowflake.PRIORITY_NONE, 
-                    generator.getPriority(liquibase.database.object.Database.class, database),
-                    "Should not handle Database objects");
+                    generator.getPriority(liquibase.database.object.Database.class, database));
         
         // Test comparator configuration
         FileFormatComparator comparator = new FileFormatComparator();
         assertEquals(FileFormatComparator.PRIORITY_TYPE,
-                    comparator.getPriority(FileFormat.class, database),
-                    "Should handle FileFormat objects");
+                    comparator.getPriority(FileFormat.class, database));
         assertEquals(FileFormatComparator.PRIORITY_NONE,
-                    comparator.getPriority(liquibase.database.object.Database.class, database),
-                    "Should not handle Database objects");
+                    comparator.getPriority(liquibase.database.object.Database.class, database));
         
-        System.out.println("✅ SUCCESS: Error handling patterns validated");
     }
 
     @Test
     public void testSnowflakeSpecificAttributeHandling() throws Exception {
-        System.out.println("Phase 3C: Testing Snowflake-specific attribute handling patterns...");
         
         String uniqueName = getUniqueTestObjectName("attributes");
         createdTestObjects.add(uniqueName);
@@ -516,7 +484,6 @@ public class FileFormatObjectIntegrationTest {
             rs.close();
             queryStmt.close();
             
-            System.out.println("✅ SUCCESS: Snowflake-specific attribute handling patterns validated");
             
         } finally {
             // Cleanup handled in tearDown()

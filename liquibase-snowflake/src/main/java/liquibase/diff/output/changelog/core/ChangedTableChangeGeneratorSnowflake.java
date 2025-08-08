@@ -32,14 +32,21 @@ public class ChangedTableChangeGeneratorSnowflake extends ChangedTableChangeGene
 
     @Override
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
+        if (differences == null) {
+            return null;
+        }
+        
         Table table = (Table) changedObject;
         List<Change> changes = new ArrayList<>();
 
-        // Handle remarks/comment changes with parent class implementation
-        Change[] parentChanges = super.fixChanged(changedObject, differences, control, referenceDatabase, comparisonDatabase, chain);
-        if (parentChanges != null) {
-            for (Change change : parentChanges) {
-                changes.add(change);
+        // Handle remarks/comment changes - delegate to parent class unless Snowflake-specific handling is needed
+        if (!isSnowflakeSpecificCommentHandlingNeeded(table)) {
+            // For standard comment handling, delegate to chain instead of calling super directly
+            Change[] parentChanges = chain.fixChanged(changedObject, differences, control, referenceDatabase, comparisonDatabase);
+            if (parentChanges != null) {
+                for (Change change : parentChanges) {
+                    changes.add(change);
+                }
             }
         }
 
@@ -48,8 +55,8 @@ public class ChangedTableChangeGeneratorSnowflake extends ChangedTableChangeGene
         // Handle clustering key changes
         Difference clusteringDiff = differences.getDifference("clusteringKey");
         if (clusteringDiff != null) {
-            String newClusteringKey = (String) clusteringDiff.getReferenceValue();
-            String oldClusteringKey = (String) clusteringDiff.getComparedValue();
+            String newClusteringKey = (String) clusteringDiff.getComparedValue(); // New/target value
+            String oldClusteringKey = (String) clusteringDiff.getReferenceValue(); // Old/current value
             
             if (!StringUtil.isEmpty(newClusteringKey)) {
                 // Set new clustering key
@@ -59,7 +66,7 @@ public class ChangedTableChangeGeneratorSnowflake extends ChangedTableChangeGene
             } else if (!StringUtil.isEmpty(oldClusteringKey)) {
                 // Drop existing clustering key
                 AlterTableChange change = createAlterTableChange(table, control);
-                change.setDropClusteringKey(true);
+                change.setDropClusteringKey(Boolean.TRUE);
                 changes.add(change);
             }
         }
@@ -67,7 +74,7 @@ public class ChangedTableChangeGeneratorSnowflake extends ChangedTableChangeGene
         // Handle data retention time changes
         Difference retentionDiff = differences.getDifference("retentionTime");
         if (retentionDiff != null) {
-            String retentionTimeStr = (String) retentionDiff.getReferenceValue();
+            String retentionTimeStr = (String) retentionDiff.getComparedValue(); // New/target value
             if (!StringUtil.isEmpty(retentionTimeStr) && !"null".equalsIgnoreCase(retentionTimeStr)) {
                 try {
                     int retentionDays = Integer.parseInt(retentionTimeStr);
@@ -83,7 +90,7 @@ public class ChangedTableChangeGeneratorSnowflake extends ChangedTableChangeGene
         // Handle change tracking changes
         Difference changeTrackingDiff = differences.getDifference("changeTracking");
         if (changeTrackingDiff != null) {
-            String changeTrackingStr = (String) changeTrackingDiff.getReferenceValue();
+            String changeTrackingStr = (String) changeTrackingDiff.getComparedValue(); // New/target value
             Boolean changeTracking = convertToBoolean(changeTrackingStr);
             if (changeTracking != null) {
                 AlterTableChange change = createAlterTableChange(table, control);
@@ -95,7 +102,7 @@ public class ChangedTableChangeGeneratorSnowflake extends ChangedTableChangeGene
         // Handle schema evolution changes
         Difference schemaEvolutionDiff = differences.getDifference("enableSchemaEvolution");
         if (schemaEvolutionDiff != null) {
-            String schemaEvolutionStr = (String) schemaEvolutionDiff.getReferenceValue();
+            String schemaEvolutionStr = (String) schemaEvolutionDiff.getComparedValue(); // New/target value
             Boolean enableSchemaEvolution = convertToBoolean(schemaEvolutionStr);
             if (enableSchemaEvolution != null) {
                 AlterTableChange change = createAlterTableChange(table, control);
@@ -111,7 +118,7 @@ public class ChangedTableChangeGeneratorSnowflake extends ChangedTableChangeGene
             changes.removeIf(change -> change instanceof SetTableRemarksChange);
             
             // Add Snowflake-specific comment handling if needed
-            String newComment = (String) commentDiff.getReferenceValue();
+            String newComment = (String) commentDiff.getComparedValue(); // New/target value
             SetTableRemarksChange change = new SetTableRemarksChange();
             if (control.getIncludeCatalog()) {
                 change.setCatalogName(table.getSchema().getCatalogName());

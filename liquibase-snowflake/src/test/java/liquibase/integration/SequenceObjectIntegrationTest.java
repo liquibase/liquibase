@@ -33,6 +33,7 @@ public class SequenceObjectIntegrationTest {
     private Database database;
     private Connection connection;
     private List<String> createdTestObjects = new ArrayList<>();
+    private String testSchema = "SEQUENCE_OBJECT_TEST";
     
     /**
      * CRITICAL: Generates unique test object names for schema isolation.
@@ -47,42 +48,34 @@ public class SequenceObjectIntegrationTest {
     
     @BeforeEach
     public void setUp() throws Exception {
-        // Use YAML configuration instead of environment variables
+        // Use YAML configuration and schema isolation pattern
         connection = TestDatabaseConfigUtil.getSnowflakeConnection();
+        database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
         
-        // Ensure we're using the correct schema - first check if it exists, create if not
-        try {
-            PreparedStatement useSchema = connection.prepareStatement("USE SCHEMA TESTHARNESS");
-            useSchema.execute();
-            useSchema.close();
-        } catch (Exception e) {
-            // Schema doesn't exist, create it
-            PreparedStatement createSchema = connection.prepareStatement("CREATE SCHEMA IF NOT EXISTS TESTHARNESS");
-            createSchema.execute();
-            createSchema.close();
-            
-            PreparedStatement useSchema = connection.prepareStatement("USE SCHEMA TESTHARNESS");
-            useSchema.execute();
-            useSchema.close();
+        // Create clean test schema using schema isolation pattern
+        try (PreparedStatement stmt = connection.prepareStatement("DROP SCHEMA IF EXISTS " + testSchema + " CASCADE")) {
+            stmt.execute();
+        }
+        try (PreparedStatement stmt = connection.prepareStatement("CREATE SCHEMA " + testSchema)) {
+            stmt.execute();
+        }
+        try (PreparedStatement stmt = connection.prepareStatement("USE SCHEMA " + testSchema)) {
+            stmt.execute();
         }
         
-        database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
+        // Update database to use isolated schema
+        database.setDefaultSchemaName(testSchema);
     }
     
     @AfterEach
     public void tearDown() throws Exception {
-        // MANDATORY: Cleanup all created test objects using unique names
-        for (String objectName : createdTestObjects) {
-            try {
-                Statement dropStmt = connection.createStatement();
-                dropStmt.execute("DROP SEQUENCE IF EXISTS " + objectName);
-                dropStmt.close();
+        if (connection != null && !connection.isClosed()) {
+            // Clean up test schema using schema isolation pattern
+            try (PreparedStatement stmt = connection.prepareStatement("DROP SCHEMA IF EXISTS " + testSchema + " CASCADE")) {
+                stmt.execute();
             } catch (Exception e) {
-                System.err.println("Failed to cleanup test object: " + objectName + " - " + e.getMessage());
+                // Ignore cleanup errors
             }
-        }
-        
-        if (connection != null) {
             connection.close();
         }
     }
@@ -104,9 +97,10 @@ public class SequenceObjectIntegrationTest {
         SequenceSnapshotGeneratorSnowflake generator = new SequenceSnapshotGeneratorSnowflake();
         
         // Test that the generator is properly configured for Snowflake
-        assertEquals(generator.getPriority(liquibase.structure.core.Sequence.class, database), 
-                   liquibase.snapshot.SnapshotGenerator.PRIORITY_DEFAULT + 
-                   liquibase.snapshot.SnapshotGenerator.PRIORITY_DATABASE);
+        assertEquals(liquibase.snapshot.SnapshotGenerator.PRIORITY_DEFAULT + 
+                   liquibase.snapshot.SnapshotGenerator.PRIORITY_DATABASE,
+                   generator.getPriority(liquibase.structure.core.Sequence.class, database), 
+                   "Values should be equal");
         
         // Test that it replaces the standard generator
         Class<?>[] replacedClasses = generator.replaces();
@@ -115,7 +109,6 @@ public class SequenceObjectIntegrationTest {
         
         // Note: getSelectSequenceStatement is protected, so we test indirectly through the framework
         // The SQL generation will be tested through the snapshot functionality
-        System.out.println("✅ SUCCESS: SequenceSnapshotGeneratorSnowflake component configuration verified");
     }
     
     @Test
@@ -158,9 +151,8 @@ public class SequenceObjectIntegrationTest {
             (liquibase.structure.core.Catalog) null, "TEST_SCHEMA"));
         
         assertTrue(comparator.isSameObject(seq1, seq2, database, null),
-                 "Sequence comparison should be case-insensitive");
+                "Should recognize same sequence with different case");
         
-        System.out.println("✅ SUCCESS: SequenceComparatorSnowflake functionality verified");
     }
     
     @Test
@@ -174,7 +166,7 @@ public class SequenceObjectIntegrationTest {
         // Verify it has correct priority for Snowflake
         assertTrue(generator.getPriority(liquibase.structure.core.Sequence.class, database) > 
                   liquibase.snapshot.SnapshotGenerator.PRIORITY_NONE,
-                  "Should have higher than NONE priority for Snowflake");
+                "Should have priority for Snowflake sequences");
         
         // Test SequenceComparatorSnowflake can be instantiated
         liquibase.diff.output.SequenceComparatorSnowflake comparator = 
@@ -184,8 +176,7 @@ public class SequenceObjectIntegrationTest {
         // Verify it has correct priority for Snowflake
         assertEquals(liquibase.diff.compare.DatabaseObjectComparator.PRIORITY_DATABASE,
                    comparator.getPriority(liquibase.structure.core.Sequence.class, database),
-                   "Should have DATABASE priority for Snowflake");
+                "Should have database priority for Snowflake sequences");
         
-        System.out.println("✅ SUCCESS: Service instantiation patterns verified");
     }
 }

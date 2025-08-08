@@ -31,10 +31,11 @@ public class TableChangeGeneratorSnowflakeTest {
         int standardPriority = standardGenerator.getPriority(Table.class, database);
         
         assertTrue(snowflakePriority > standardPriority, 
-            "Snowflake generator should have higher priority than standard generator");
+                   "Snowflake generator should have higher priority than standard generator");
         
         // Test that it returns PRIORITY_NONE for non-Snowflake databases
-        int nonSnowflakePriority = snowflakeGenerator.getPriority(Table.class, new liquibase.database.core.PostgresDatabase());
+        liquibase.database.core.PostgresDatabase postgresDatabase = new liquibase.database.core.PostgresDatabase();
+        int nonSnowflakePriority = snowflakeGenerator.getPriority(Table.class, postgresDatabase);
         assertEquals(-1, nonSnowflakePriority, "Should return PRIORITY_NONE for non-Snowflake databases");
     }
 
@@ -49,7 +50,7 @@ public class TableChangeGeneratorSnowflakeTest {
         int standardPriority = standardGenerator.getPriority(Table.class, database);
         
         assertTrue(snowflakePriority > standardPriority, 
-            "Snowflake generator should have higher priority than standard generator");
+                   "Snowflake generator should have higher priority than standard generator");
     }
 
     @Test
@@ -63,7 +64,7 @@ public class TableChangeGeneratorSnowflakeTest {
         int standardPriority = standardGenerator.getPriority(Table.class, database);
         
         assertTrue(snowflakePriority > standardPriority, 
-            "Snowflake generator should have higher priority than standard generator");
+                   "Snowflake generator should have higher priority than standard generator");
     }
 
     @Test

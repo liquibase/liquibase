@@ -30,13 +30,13 @@ public class WarehouseSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator {
 
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
-        System.out.println("🔍 WarehouseSnapshotGenerator.getPriority() called for " + objectType.getSimpleName() + 
-                         " on " + database.getClass().getSimpleName());
+        // System.out.println("🔍 WarehouseSnapshotGenerator.getPriority() called for " + objectType.getSimpleName() + 
+        //                  " on " + database.getClass().getSimpleName());
         
         if (database instanceof SnowflakeDatabase) {
             // Primary responsibility: Warehouse objects  
             if (Warehouse.class.isAssignableFrom(objectType)) {
-                System.out.println("✅ WarehouseSnapshotGenerator returning PRIORITY_DATABASE for Warehouse on Snowflake");
+                // System.out.println("✅ WarehouseSnapshotGenerator returning PRIORITY_DATABASE for Warehouse on Snowflake");
                 return PRIORITY_DATABASE;
             }
             
@@ -44,19 +44,20 @@ public class WarehouseSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator {
             if (addsTo() != null) {
                 for (Class<? extends DatabaseObject> addType : addsTo()) {
                     if (addType.isAssignableFrom(objectType)) {
-                        System.out.println("✅ WarehouseSnapshotGenerator returning PRIORITY_ADDITIONAL for " + objectType.getSimpleName() + " (addsTo)");
+                        // System.out.println("✅ WarehouseSnapshotGenerator returning PRIORITY_ADDITIONAL for " + objectType.getSimpleName() + " (addsTo)");
                         return PRIORITY_ADDITIONAL;
                     }
                 }
             }
         }
         
-        System.out.println("❌ WarehouseSnapshotGenerator returning PRIORITY_NONE for " + objectType.getSimpleName());
+        // System.out.println("❌ WarehouseSnapshotGenerator returning PRIORITY_NONE for " + objectType.getSimpleName());
         return PRIORITY_NONE;
     }
 
     @Override
     public Class<? extends DatabaseObject>[] addsTo() {
+        // Warehouses are stored in Account objects but also need to be accessible at top-level for diff operations
         return new Class[] { Account.class };
     }
 
@@ -117,7 +118,7 @@ public class WarehouseSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator {
             
             try {
                 System.out.println("🔧 WarehouseSnapshotGenerator: Starting bulk warehouse discovery for account");
-                addAllWarehouses(account, database);
+                addAllWarehouses(account, database, snapshot);
                 System.out.println("✅ WarehouseSnapshotGenerator: Completed warehouse discovery for account");
             } catch (SQLException e) {
                 System.out.println("❌ WarehouseSnapshotGenerator: Error discovering warehouses: " + e.getMessage());
@@ -193,13 +194,21 @@ public class WarehouseSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator {
         }
         
         String enableQueryAcceleration = rs.getString("enable_query_acceleration");
+        Boolean accelerationEnabled = null;
         if (enableQueryAcceleration != null) {
-            result.setEnableQueryAcceleration(convertYesNoToBoolean(enableQueryAcceleration));
+            accelerationEnabled = convertYesNoToBoolean(enableQueryAcceleration);
+            result.setEnableQueryAcceleration(accelerationEnabled);
         }
         
         int queryAccelerationMaxScaleFactor = rs.getInt("query_acceleration_max_scale_factor");
         if (!rs.wasNull()) {
-            result.setQueryAccelerationMaxScaleFactor(queryAccelerationMaxScaleFactor);
+            // Only capture scale factor if acceleration is enabled or not explicitly disabled
+            // This prevents capturing Snowflake defaults that would violate our validation
+            if (accelerationEnabled == null || accelerationEnabled.booleanValue()) {
+                result.setQueryAccelerationMaxScaleFactor(queryAccelerationMaxScaleFactor);
+            }
+            // If acceleration is explicitly false but scale factor > 0, don't capture the scale factor
+            // to avoid generating invalid changelogs
         }
         
         String scalingPolicy = rs.getString("scaling_policy");
@@ -238,24 +247,41 @@ public class WarehouseSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator {
             result.setIsCurrent(convertYesNoToBoolean(isCurrent));
         }
         
-        Float available = rs.getFloat("available");
-        if (!rs.wasNull()) {
-            result.setAvailable(available);
+        // Handle float columns that may contain "." instead of numeric values
+        try {
+            String availableStr = rs.getString("available");
+            if (availableStr != null && !availableStr.equals(".") && !availableStr.trim().isEmpty()) {
+                result.setAvailable(Float.parseFloat(availableStr));
+            }
+        } catch (NumberFormatException e) {
+            // Ignore invalid float values
         }
         
-        Float provisioning = rs.getFloat("provisioning");
-        if (!rs.wasNull()) {
-            result.setProvisioning(provisioning);
+        try {
+            String provisioningStr = rs.getString("provisioning");
+            if (provisioningStr != null && !provisioningStr.equals(".") && !provisioningStr.trim().isEmpty()) {
+                result.setProvisioning(Float.parseFloat(provisioningStr));
+            }
+        } catch (NumberFormatException e) {
+            // Ignore invalid float values
         }
         
-        Float quiescing = rs.getFloat("quiescing");
-        if (!rs.wasNull()) {
-            result.setQuiescing(quiescing);
+        try {
+            String quiescingStr = rs.getString("quiescing");
+            if (quiescingStr != null && !quiescingStr.equals(".") && !quiescingStr.trim().isEmpty()) {
+                result.setQuiescing(Float.parseFloat(quiescingStr));
+            }
+        } catch (NumberFormatException e) {
+            // Ignore invalid float values
         }
         
-        Float other = rs.getFloat("other");
-        if (!rs.wasNull()) {
-            result.setOther(other);
+        try {
+            String otherStr = rs.getString("other");
+            if (otherStr != null && !otherStr.equals(".") && !otherStr.trim().isEmpty()) {
+                result.setOther(Float.parseFloat(otherStr));
+            }
+        } catch (NumberFormatException e) {
+            // Ignore invalid float values
         }
         
         Timestamp createdOn = rs.getTimestamp("created_on");
@@ -292,7 +318,7 @@ public class WarehouseSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator {
     /**
      * Bulk warehouse discovery for account-level snapshots.
      */
-    private void addAllWarehouses(Account account, Database database) throws SQLException, DatabaseException {
+    private void addAllWarehouses(Account account, Database database, DatabaseSnapshot snapshot) throws SQLException, DatabaseException {
         System.out.println("🔍 WarehouseSnapshotGenerator: Executing SHOW WAREHOUSES query");
         
         Statement stmt = ((JdbcConnection) database.getConnection()).createStatement();
@@ -359,6 +385,15 @@ public class WarehouseSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator {
             
             System.out.println("✅ WarehouseSnapshotGenerator: Adding warehouse '" + warehouseName + "' to account '" + account.getName() + "'");
             account.addDatabaseObject(warehouseObject);
+            
+            // CRITICAL FIX: Also add warehouse to top-level snapshot for diff access
+            // This enables snapshot.get(Warehouse.class) to find warehouses for changelog generation
+            try {
+                System.out.println("🔧 WarehouseSnapshotGenerator: Adding warehouse '" + warehouseName + "' to top-level snapshot for diff access");
+                snapshot.include(warehouseObject);
+            } catch (InvalidExampleException e) {
+                System.out.println("⚠️ WarehouseSnapshotGenerator: Could not add warehouse to top-level snapshot: " + e.getMessage());
+            }
         }
         
         System.out.println("🔍 WarehouseSnapshotGenerator: Completed discovery - found " + warehouseCount + " warehouses");
@@ -368,16 +403,17 @@ public class WarehouseSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator {
     }
 
     /**
-     * Converts Snowflake YES/NO strings to Boolean objects.
+     * Converts Snowflake boolean-like strings to Boolean objects.
+     * Handles YES/NO, Y/N, true/false, TRUE/FALSE patterns.
      */
     private Boolean convertYesNoToBoolean(String yesNoValue) {
         if (yesNoValue == null) {
             return null;
         }
         String trimmed = yesNoValue.trim().toUpperCase();
-        if ("YES".equals(trimmed) || "Y".equals(trimmed)) {
+        if ("YES".equals(trimmed) || "Y".equals(trimmed) || "TRUE".equals(trimmed)) {
             return Boolean.TRUE;
-        } else if ("NO".equals(trimmed) || "N".equals(trimmed)) {
+        } else if ("NO".equals(trimmed) || "N".equals(trimmed) || "FALSE".equals(trimmed)) {
             return Boolean.FALSE;
         }
         return null;

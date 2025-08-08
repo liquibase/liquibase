@@ -276,8 +276,17 @@ public class CreateWarehouseChange extends AbstractChange {
         }
         
         // Validate queryAccelerationMaxScaleFactor if provided
-        if (queryAccelerationMaxScaleFactor != null && (queryAccelerationMaxScaleFactor < 0 || queryAccelerationMaxScaleFactor > 100)) {
-            errors.addError("queryAccelerationMaxScaleFactor must be between 0 and 100");
+        if (queryAccelerationMaxScaleFactor != null) {
+            if (queryAccelerationMaxScaleFactor < 0 || queryAccelerationMaxScaleFactor > 100) {
+                errors.addError("queryAccelerationMaxScaleFactor must be between 0 and 100");
+            }
+            // Auto-enable query acceleration if scale factor is set but acceleration is not explicitly enabled
+            if (Boolean.FALSE.equals(enableQueryAcceleration)) {
+                errors.addError("queryAccelerationMaxScaleFactor can only be set when enableQueryAcceleration is true");
+            } else if (enableQueryAcceleration == null) {
+                // Auto-enable query acceleration when scale factor is provided
+                this.enableQueryAcceleration = true;
+            }
         }
         
         // Validate maxClusterCount limit

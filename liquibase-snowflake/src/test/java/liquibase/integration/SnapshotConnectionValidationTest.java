@@ -59,7 +59,6 @@ public class SnapshotConnectionValidationTest {
                 PreparedStatement dropStmt = connection.prepareStatement("DROP TABLE IF EXISTS " + objectName);
                 dropStmt.execute();
                 dropStmt.close();
-                System.out.println("Cleaned up test object: " + objectName);
             } catch (Exception e) {
                 System.err.println("Failed to cleanup test object " + objectName + ": " + e.getMessage());
             }
@@ -71,7 +70,6 @@ public class SnapshotConnectionValidationTest {
 
     @Test
     public void testSnapshotEnvironmentConnection() throws Exception {
-        System.out.println("Testing connection to snapshot integration test environment...");
         
         // Verify database and connection are initialized
         assertNotNull(database, "Database should be established");
@@ -88,9 +86,6 @@ public class SnapshotConnectionValidationTest {
         String currentSchema = rs.getString(2);
         String currentRole = rs.getString(3);
         
-        System.out.println("✅ Connected to database: " + currentDatabase);
-        System.out.println("✅ Using schema: " + currentSchema);
-        System.out.println("✅ With role: " + currentRole);
         
         // Verify expected test environment (updated for current configuration)
         assertEquals("LB_DBEXT_INT_DB", currentDatabase, "Should be connected to integration test database");
@@ -100,12 +95,10 @@ public class SnapshotConnectionValidationTest {
         rs.close();
         stmt.close();
         
-        System.out.println("✅ SUCCESS: Snapshot integration test environment validated (using liquibase.sdk.local.yaml)");
     }
 
     @Test
     public void testSchemaIsolationCapability() throws Exception {
-        System.out.println("Testing schema isolation for parallel test execution...");
         
         String testTableName = getUniqueTestObjectName("schema_isolation");
         createdTestObjects.add(testTableName);
@@ -128,12 +121,10 @@ public class SnapshotConnectionValidationTest {
         rs.close();
         queryStmt.close();
         
-        System.out.println("✅ SUCCESS: Schema isolation working - can create unique test objects");
     }
 
     @Test
     public void testInformationSchemaAccess() throws Exception {
-        System.out.println("Testing INFORMATION_SCHEMA access for snapshot queries...");
         
         // Test access to key INFORMATION_SCHEMA views used by snapshot generators
         String[] requiredViews = {
@@ -153,15 +144,12 @@ public class SnapshotConnectionValidationTest {
             rs.close();
             stmt.close();
             
-            System.out.println("✅ Can access: " + view);
         }
         
-        System.out.println("✅ SUCCESS: All required INFORMATION_SCHEMA views accessible");
     }
 
     @Test
     public void testShowCommandsAccess() throws Exception {
-        System.out.println("Testing SHOW commands access for supplementary snapshot queries...");
         
         // Test access to SHOW commands used by snapshot generators
         String[] showCommands = {
@@ -181,29 +169,20 @@ public class SnapshotConnectionValidationTest {
             rs.close();
             stmt.close();
             
-            System.out.println("✅ Can execute: " + showCommand);
         }
         
-        System.out.println("✅ SUCCESS: All required SHOW commands accessible");
     }
 
     @Test
     public void testDatabaseFactory() throws Exception {
-        System.out.println("Testing Liquibase Database factory integration...");
         
         // Verify we get a Snowflake database instance
         assertNotNull(database, "Database instance should be created");
-        assertTrue(database instanceof liquibase.database.core.SnowflakeDatabase, 
-                  "Should be a SnowflakeDatabase instance");
-        
+        assertTrue(database instanceof liquibase.database.core.SnowflakeDatabase, "Assertion should be true");        
         // Verify basic database properties
         assertEquals("Snowflake", database.getDatabaseProductName(), "Product name should be Snowflake");
         assertNotNull(database.getConnection(), "Database should have connection");
         
-        System.out.println("✅ Database type: " + database.getClass().getSimpleName());
-        System.out.println("✅ Product name: " + database.getDatabaseProductName());
-        System.out.println("✅ Connection active: " + !database.getConnection().isClosed());
         
-        System.out.println("✅ SUCCESS: Liquibase Database factory working correctly");
     }
 }

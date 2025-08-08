@@ -33,8 +33,7 @@ public class TestDatabaseConfigUtil {
         
         try (InputStream is = TestDatabaseConfigUtil.class.getResourceAsStream(CONFIG_FILE)) {
             if (is == null) {
-                throw new RuntimeException("Configuration file not found: " + CONFIG_FILE + 
-                    ". Please ensure liquibase.sdk.local.yaml exists in src/test/resources/");
+                throw new RuntimeException("Configuration file not found: " + CONFIG_FILE);
             }
 
             Scanner scanner = new Scanner(is);
@@ -80,8 +79,7 @@ public class TestDatabaseConfigUtil {
         String[] requiredKeys = {"url", "username", "password"};
         for (String key : requiredKeys) {
             if (!configCache.containsKey(key) || configCache.get(key).isEmpty()) {
-                throw new RuntimeException("Missing required configuration key: " + key + 
-                    " in " + CONFIG_FILE);
+                throw new RuntimeException("Missing required configuration key: " + key);
             }
         }
 

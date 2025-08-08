@@ -85,8 +85,8 @@ public class CreateSequenceGeneratorSnowflake extends CreateSequenceGenerator{
             }
             
             // Add ORDER/NOORDER support for Snowflake (THE KEY FEATURE!)
-            if (snowflakeStatement.getOrdered() != null) {
-                if (snowflakeStatement.getOrdered()) {
+            if (snowflakeStatement.getOrder() != null) {
+                if (snowflakeStatement.getOrder()) {
                     queryStringBuilder.append(" ORDER");
                 } else {
                     queryStringBuilder.append(" NOORDER");
