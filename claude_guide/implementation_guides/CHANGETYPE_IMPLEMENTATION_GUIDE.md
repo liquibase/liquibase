@@ -1,64 +1,75 @@
 # Complete Changetype Implementation Guide
-## Ultimate Single-Source AI-Optimized Workflow
+## AI-Optimized Single-Source Workflow
 
-## EXECUTION_PROTOCOL
-```yaml
-PROTOCOL_VERSION: 2.0
-DOCUMENT_TYPE: ULTIMATE_IMPLEMENTATION_GUIDE
-EXECUTION_MODE: SEQUENTIAL_BLOCKING
-VALIDATION_MODE: STRICT
-CONSOLIDATES_ALL:
-  - "README.md (navigation)"
-  - "SIMPLE_PARAMETER_VALIDATION.md (quick validation)"
-  - "ai_architectural_compliance.md (archived)"
-  - "xsd_requirements_integration.md (archived)" 
-  - "requirements_creation.md (archived)"
-  - "changetype_patterns.md (archived)"
-  - "All implementation guides"
-RESULT: "Single source of truth - zero cognitive overhead"
+## 🎯 START HERE
+
+**Complete changetype implementation workflow** in sequential phases:
+
+```
+PHASE 0: Quick Validation (15 min) → PHASE 1: Pattern Decision → PHASE 2: Requirements Research → PHASE 3: XSD Integration → PHASE 4: Implementation → PHASE 5: Testing
 ```
 
-## START HERE
+**Core focus**: Database operations (CREATE/ALTER/DROP) with Snowflake-specific namespace attributes
+**Prerequisites**: None - this is the starting point
+**Outcome**: Working changetype with complete SQL generation and XSD integration
 
-**This is the complete changetype implementation workflow** - everything you need in one place:
-- Quick validation (15-minute health check)
-- Full implementation workflow (requirements → testing)
-- All commands, templates, and validation protocols
+## IMPLEMENTATION DECISION TREE
 
-**No other files needed.** All functionality consolidated into this single guide.
+**Choose your implementation path:**
 
-## IMPLEMENTATION SCENARIOS
+```
+Does the changetype exist in Liquibase core?
+├─ YES → NAMESPACE ATTRIBUTE EXTENSION (4-6 hours)
+│   └─ Add Snowflake-specific attributes to existing changetype
+│   └─ Phases: 0 → 1 → 2 → 3 → 4 → 5
+│
+└─ NO → NEW CHANGETYPE CREATION (6-10 hours)  
+    └─ Create completely new changetype for Snowflake-specific operation
+    └─ Phases: 0 → 1 → 2 → 3 → 4 → 5
 
-### Scenario Selection
-```yaml
-SCENARIO_A_NEW_CHANGETYPE:
-  DESCRIPTION: "Implement completely new changetype for database-specific operation"
-  WORKFLOW: "Phase 0 → Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5"
-  DURATION: "6-10 hours"
-  
-SCENARIO_B_EXTEND_EXISTING:
-  DESCRIPTION: "Add database-specific attributes to existing Liquibase changetype"
-  WORKFLOW: "Phase 0 → Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5"
-  DURATION: "4-6 hours"
-  
-SCENARIO_C_ENHANCE_GENERATOR:
-  DESCRIPTION: "Enhance existing SQL generator with additional functionality"
-  WORKFLOW: "Phase 0 → Phase 3 → Phase 4 → Phase 5"
-  DURATION: "3-5 hours"
-  
-SCENARIO_D_FIX_VALIDATION:
-  DESCRIPTION: "Fix bugs in existing changetype or validation"
-  WORKFLOW: "Phase 0 → Phase 4 → Phase 5"
-  DURATION: "2-4 hours"
+Already have working changetype but need fixes?
+├─ SQL Generation Issues → Skip to Phase 4 (3-5 hours)
+└─ Validation/XSD Issues → Skip to Phase 3 (2-4 hours)
 ```
 
-## PHASE 0: QUICK VALIDATION (OPTIONAL)
+**Most common**: Namespace attribute extension (extending existing Liquibase changetypes with Snowflake-specific attributes)
 
-### When to Use Quick Validation
-- Checking XSD completeness against Snowflake
-- Validating new changetype parameters before full implementation  
-- Quick health check of existing implementation coverage
-- 15-minute verification vs days of full implementation
+## PHASE 0: SYSTEMATIC DOCUMENTATION VALIDATION (CRITICAL)
+
+### **🚨 ESSENTIAL PATTERN: Documentation Accuracy First**
+**LEARNED**: Documentation errors cause immediate user trust loss. Must validate BEFORE user-facing documentation.
+
+### **Systematic Validation Methodology** (Learned from Session)
+```bash
+# PHASE 0A: Complete Inventory Extraction
+grep -n "snowflake:[a-zA-Z]*" docs/*.md | head -100    # Extract all XML elements
+grep -n "[a-zA-Z]*=\"[^\"]*\"" docs/*.md | head -100   # Extract all XML attributes  
+grep -n "liquibase [a-zA-Z-]*" docs/*.md               # Extract all commands
+
+# PHASE 0B: Cross-Reference Validation
+# For each XML attribute found, validate against Java @DatabaseChangeProperty:
+grep -n "@DatabaseChangeProperty.*ATTRIBUTE_NAME" src/main/java/liquibase/change/core/*.java
+```
+
+### **Critical Error Patterns to Check** (Project-Specific)
+```yaml
+ANTI_PATTERNS_TO_CATCH:
+  - "setAttributeName" instead of "attributeName" (ALTER operations)
+  - "cloneFromDatabase" instead of "cloneFrom" (non-existent attributes)
+  - 'fieldOptionallyEnclosedBy='"'"' instead of 'fieldOptionallyEnclosedBy="&quot;"' (XML syntax)
+  - "| dataRetentionTimeInDays | Integer |" when Java uses String type
+  - "autoSuspend must be 60-86400" when Java allows 0 (never suspend)
+
+VALIDATION_COMMANDS:
+  # Check for invalid "set" prefixes in ALTER examples
+  grep -n "set[A-Z][a-zA-Z]*=" docs/*.md
+  
+  # Check for data type mismatches
+  grep -n "dataRetentionTimeInDays.*Integer" docs/*.md  # Should be String
+  
+  # Check for non-existent clone attributes  
+  grep -n "cloneFromDatabase\|cloneFromSchema" docs/*.md
+```
 
 ### 3-Step Quick Validation Process
 
@@ -82,14 +93,10 @@ grep -n "createDatabase\|createWarehouse\|createSequence" /src/main/resources/ww
 - Focus on CREATE/ALTER/DROP syntax sections
 - Example: https://docs.snowflake.com/en/sql-reference/sql/create-database
 
-### Quick Validation Results (As of 2025-08-01)
-| Object Type | Total Parameters | XSD Coverage | Status |
-|-------------|------------------|--------------|---------|
-| CREATE DATABASE | 14 | 14 | 100% Complete |
-| CREATE WAREHOUSE | 17 | 17 | 100% Complete |
-| CREATE SEQUENCE | 4 | 4 | 100% Complete |
+### Quick Validation Results (As of 2025-08-07)
+**Key Finding**: All core XSD schemas complete. Unified extensibility framework operational for extension objects.
 
-**Key Finding**: All core XSD schemas are complete.
+**Reference**: See `CLAUDE.md` for unified extensibility framework details and extension object patterns.
 
 ### Quick Validation Success Criteria
 - INFORMATION_SCHEMA query runs successfully
@@ -659,4 +666,13 @@ ISSUE: "Service not registered"
 SOLUTION: "Add entry to META-INF/services/liquibase.sqlgenerator.SqlGenerator"
 ```
 
-This consolidated guide eliminates document sprawl while preserving all critical functionality for AI-driven changetype implementation.
+## 🔗 GUIDE INTEGRATION
+
+**This guide covers**: Database operations (CREATE/ALTER/DROP) and namespace attribute extensions
+
+**Related guides**:
+- **BEFORE**: Use `CLAUDE.md` for project status and quick reference commands
+- **AFTER**: Use `SNAPSHOT_DIFF_IMPLEMENTATION_GUIDE.md` for database introspection 
+- **FINALLY**: Use `DIFF_GENERATE_CHANGELOG_IMPLEMENTATION_GUIDE.md` for schema comparison
+
+**Complete workflow**: Changetype → Snapshot/Diff → Generate Changelog → Validation

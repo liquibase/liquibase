@@ -1,66 +1,107 @@
 # Complete Snapshot/Diff Implementation Guide
-## Ultimate Single-Source AI-Optimized Workflow
-
-## EXECUTION_PROTOCOL
-```yaml
-PROTOCOL_VERSION: 3.0
-DOCUMENT_TYPE: ULTIMATE_SNAPSHOT_DIFF_GUIDE
-EXECUTION_MODE: SEQUENTIAL_BLOCKING_TDD
-VALIDATION_MODE: STRICT
-CONSOLIDATES_ALL:
-  - "README.md (navigation and scenarios)"
-  - "main_guide.md (overview and patterns)"
-  - "ai_workflow_guide.md (TDD workflows)"
-  - "ai_requirements_research.md (research patterns)"
-  - "ai_requirements_writeup.md (requirements templates)"
-  - "part1_object_model.md through part5_reference_implementation.md"
-  - "error_patterns_guide.md (debugging protocols)"
-  - "requirements/ directory (4 object-specific requirement docs)"
-  - "research_findings/ directory (4 research finding docs)"
-  - "xsd_requirements_integration.md"
-RESULT: "Single source of truth - zero cognitive overhead for snapshot/diff implementation"
-```
+## AI-Optimized Single-Source Workflow
 
 ## 🎯 START HERE
 
-**This is the complete snapshot/diff implementation workflow** - everything you need in one place:
-- Quick object assessment and validation
-- Complete research and requirements patterns
-- Step-by-step TDD implementation
-- Error patterns and debugging protocols
-- Object-specific templates for all database objects
+**Complete snapshot/diff implementation workflow** with extension object patterns:
 
-**No other files needed.** All functionality consolidated into this single guide.
-
-## IMPLEMENTATION SCENARIOS
-
-### Scenario Selection
-```yaml
-SCENARIO_A_NEW_OBJECT:
-  DESCRIPTION: "Implement snapshot/diff for completely new database object"
-  WORKFLOW: "Phase 0 → Phase 1 → Phase 2 → Phase 3 → Phase 4"
-  DURATION: "8-12 hours"
-  
-SCENARIO_B_ENHANCE_EXISTING:
-  DESCRIPTION: "Enhance existing object with additional properties"
-  WORKFLOW: "Phase 0 → Phase 1 → Phase 2 → Phase 3 → Phase 4"
-  DURATION: "6-8 hours"
-  
-SCENARIO_C_COMPLETE_INCOMPLETE:
-  DESCRIPTION: "Complete incomplete snapshot/diff implementation"
-  WORKFLOW: "Phase 0 → Phase 3 → Phase 4 (skip research phases)"
-  DURATION: "4-6 hours"
-  
-SCENARIO_D_FIX_BUGS:
-  DESCRIPTION: "Fix bugs in existing implementation"
-  WORKFLOW: "Phase 0 → Phase 4 (focused debugging)"
-  DURATION: "2-4 hours"
-  
-SCENARIO_E_OPTIMIZE_PERFORMANCE:
-  DESCRIPTION: "Performance optimization of existing implementation"
-  WORKFLOW: "Phase 0 → Phase 3 → Phase 4"
-  DURATION: "3-5 hours"
 ```
+PHASE 0: Quick Assessment + Cost Analysis → PHASE 1: Requirements Research → PHASE 2: Object Model → PHASE 3: Snapshot Implementation → PHASE 4: Diff Implementation → PHASE 5: Strategic Testing
+```
+
+**Core focus**: Database introspection, schema comparison, and extension object discovery
+**Prerequisites**: Basic understanding of Liquibase object model + **Cost consciousness for Snowflake testing**
+**Critical decision**: Schema-level vs Account-level objects require different implementation patterns
+**Outcome**: Working snapshot generators and diff comparators with strategic test coverage
+
+## 💰 **COST-CONSCIOUS DEVELOPMENT (Added from Session)**
+
+### **Snowflake Integration Testing Costs Real Money**
+**LEARNED**: Every integration test execution costs Snowflake compute credits. Be strategic.
+
+### **Cost-Effective Testing Strategy**
+```yaml
+HIGH_VALUE_TESTS:
+  - "Core snapshot functionality": Essential for business logic
+  - "End-to-end diff workflows": Real user scenarios
+  - "Data type precision": Prevents data corruption
+  
+LOW_VALUE_TESTS:
+  - "Console warning capture": Unit tests sufficient
+  - "Error message formatting": Mock tests sufficient  
+  - "Edge case scenarios": Can be unit tested
+
+COST_OPTIMIZATION:
+  - "Unit test coverage > 85%": Reduce integration test dependency
+  - "Mock heavy scenarios": Avoid live database when possible
+  - "Parallel test execution": Reduce total runtime costs
+```
+
+## ⚡ CRITICAL: EXTENSION OBJECT PATTERNS
+
+### 🔑 ARCHITECTURAL DISCOVERY (Session 2025-08-07)
+**Extension objects require different patterns than core Liquibase objects.**
+
+#### Extension Object Categories
+```yaml
+SCHEMA_LEVEL_OBJECTS:
+  EXAMPLES: ["FileFormat", "Stage", "Pipe"]
+  PARENT_RELATIONSHIP: "Schema.class"
+  DISCOVERY_PATTERN: "INFORMATION_SCHEMA queries with schema parameter"
+  IMPLEMENTATION: "Standard SnapshotGenerator patterns work"
+  
+ACCOUNT_LEVEL_OBJECTS:
+  EXAMPLES: ["Warehouse", "User", "Role", "ResourceMonitor"]  
+  PARENT_RELATIONSHIP: "Account.class"
+  DISCOVERY_PATTERN: "SHOW commands (no schema parameter)"
+  IMPLEMENTATION: "Requires unified extensibility framework"
+  
+CRITICAL_LIMITATION:
+  ISSUE: "Extension → extension addsTo() relationships don't work in Liquibase core"
+  ROOT_CAUSE: "Core assumes schema-based discovery patterns"
+  SOLUTION: "SnowflakeExtensionDiffGeneratorSimple (validated working)"
+```
+
+#### 🚨 When Standard Patterns Fail
+```yaml
+SYMPTOMS:
+  - "SnapshotGenerator addTo() method never called"
+  - "Objects not discovered in snapshots despite correct priority"
+  - "snapshot.get(ObjectType.class) returns empty/null"
+  
+IMPLEMENTATION_DECISION:
+  SCHEMA_LEVEL: "Use standard SnapshotGenerator patterns"
+  ACCOUNT_LEVEL: "Use unified extensibility framework"
+  MIXED: "Combine both approaches based on object type"
+```
+
+## IMPLEMENTATION DECISION TREE
+
+**Critical first decision - determines entire implementation approach:**
+
+```
+What type of database object are you implementing?
+
+SCHEMA-LEVEL OBJECTS (8-12 hours)
+├─ Examples: FileFormat, Stage, Pipe, View, Table
+├─ Pattern: Standard SnapshotGenerator approach works
+├─ Discovery: INFORMATION_SCHEMA queries with schema parameter
+└─ Phases: 0 → 1 → 2 → 3 → 4
+
+ACCOUNT-LEVEL OBJECTS (12-16 hours)  
+├─ Examples: Warehouse, User, Role, ResourceMonitor
+├─ Pattern: Requires unified extensibility framework
+├─ Discovery: SHOW commands (no schema parameter)
+└─ Phases: 0 → Extensibility Framework → 1 → 2 → 3 → 4
+
+Already have partial implementation?
+├─ Missing snapshot only → Skip to Phase 3 (4-6 hours)
+├─ Missing diff only → Skip to Phase 4 (2-4 hours)  
+├─ Bug fixes → Skip to Phase 4 debugging (2-4 hours)
+└─ Performance issues → Phase 3 + 4 optimization (3-5 hours)
+```
+
+**Most critical**: Identifying schema-level vs account-level early prevents major rework
 
 ## PHASE 0: QUICK VALIDATION AND ASSESSMENT (OPTIONAL)
 
@@ -475,9 +516,38 @@ SERVICE_REGISTRATION:
   ENTRY: "${PACKAGE}.${ObjectType}SnapshotGeneratorSnowflake"
   
 UNIT_TEST_PATTERN:
+  CRITICAL_APPROACH: "Complete SQL String Assertions (Primary Pattern)"
   SETUP: "Mock database and snapshot, configure mock results"
   EXECUTE: "Call snapshotObject with example"
-  VERIFY: "Assert all properties set correctly"
+  VERIFY: "Assert complete SQL strings, not components"
+  
+COMPLETE_SQL_ASSERTION_PATTERN:
+  PRIMARY_APPROACH: |
+    @Test
+    void testMethod_CompleteSQL_Scenario() {
+        // Execute method that generates SQL
+        String actualSQL = generator.generateSQL(parameters);
+        
+        // Assert complete SQL string (NOT components)
+        String expectedSQL = "SELECT COLUMN1, COLUMN2 FROM INFORMATION_SCHEMA.TABLES WHERE CATALOG=? AND SCHEMA=?";
+        assertEquals(expectedSQL, actualSQL, "Should generate correct complete SQL");
+    }
+  
+  WHY_SUPERIOR:
+    - "More reliable: catches formatting and ordering issues"
+    - "Maintainable: single assertion point"
+    - "Real-world: tests actual database execution"
+    - "User feedback: 'testing the completed SQL string is a better test'"
+  
+  GOOD_EXAMPLE: |
+    String expectedSQL = "SHOW WAREHOUSES";
+    assertEquals(expectedSQL, actualSQL, "Should generate correct complete SQL");
+  
+  AVOID_PATTERN: |
+    // FRAGILE: Component-based assertions
+    assertTrue(actualSQL.contains("SHOW"));
+    assertTrue(actualSQL.contains("WAREHOUSES"));
+    // Multiple assertions miss integration issues
 ```
 
 ## PHASE 4: DIFF IMPLEMENTATION
@@ -750,6 +820,121 @@ SEQUENCE_OBJECT_PATTERN:
     - "Handle default values consistently"
 ```
 
+## 🔧 UNIFIED EXTENSIBILITY FRAMEWORK
+
+### When to Use Unified Framework
+```yaml
+USE_WHEN:
+  - "Account-level objects (Warehouse, User, Role)"
+  - "Extension → extension addsTo() relationships fail"
+  - "Standard snapshot patterns don't work"
+  - "Objects not discovered despite correct priorities"
+  
+INDICATORS_OF_NEED:
+  - "addTo() method never called (no debug output)"
+  - "snapshot.get(ObjectType.class) returns empty"
+  - "Objects exist in database but not in snapshots"
+```
+
+### Framework Components
+```yaml
+SNAPSHOT_GENERATOR_PATTERN:
+  BASE_CLASS: "ExtensionObjectSnapshotGenerator<T>"
+  LOCATION: "src/main/java/liquibase/snapshot/jvm/"
+  EXTENDS: "JdbcSnapshotGenerator"
+  
+DIFF_GENERATOR_PATTERN:
+  CLASS: "SnowflakeExtensionDiffGenerator"
+  LOCATION: "src/main/java/liquibase/diff/"
+  IMPLEMENTS: "DiffGenerator"
+  
+SERVICE_REGISTRATION:
+  SNAPSHOT: "META-INF/services/liquibase.snapshot.SnapshotGenerator"
+  DIFF: "META-INF/services/liquibase.diff.DiffGenerator"
+```
+
+### Implementation Template
+```java
+// 1. Extend unified base class
+public class WarehouseSnapshotGeneratorUnified extends ExtensionObjectSnapshotGenerator<Warehouse> {
+    
+    public WarehouseSnapshotGeneratorUnified() {
+        super(Warehouse.class);
+    }
+
+    @Override
+    protected Class<Warehouse> getObjectType() {
+        return Warehouse.class;
+    }
+
+    @Override
+    protected Class<? extends DatabaseObject>[] getParentObjectTypes() {
+        return new Class[] { Account.class };  // Account-level
+        // OR: return new Class[] { Schema.class }; // Schema-level
+    }
+
+    @Override
+    protected String getDiscoverySQL() {
+        // Account-level: SHOW commands (no parameters)
+        return "SHOW WAREHOUSES";
+        // Schema-level: INFORMATION_SCHEMA queries (? parameter)
+        // return "SELECT * FROM INFORMATION_SCHEMA.OBJECTS WHERE SCHEMA = ?";
+    }
+
+    @Override
+    protected String getObjectNameFromResultSet(ResultSet rs) throws SQLException {
+        return rs.getString("name"); // or "OBJECT_NAME"
+    }
+
+    @Override
+    protected Warehouse createObjectFromResultSet(ResultSet rs) throws SQLException, DatabaseException {
+        Warehouse warehouse = new Warehouse();
+        warehouse.setName(rs.getString("name"));
+        warehouse.setSize(rs.getString("size"));
+        // ... set all properties
+        return warehouse;
+    }
+}
+```
+
+### Debugging Framework Issues
+```yaml
+COMPILATION_ISSUES:
+  SYMPTOM: "Unreported exception DatabaseException"
+  SOLUTION: "Add throws DatabaseException to method signatures"
+  
+  SYMPTOM: "Cannot find symbol: method"
+  SOLUTION: "Check interface requirements (hash, getPriority, findDifferences)"
+  
+RUNTIME_ISSUES:
+  SYMPTOM: "Objects not discovered"
+  DEBUG: "Add System.out.println in addTo() method"
+  VERIFY: "Check service registration"
+  
+TEMPORARY_SOLUTIONS:
+  DISABLE_FILES: "mv file.java file.java.disabled"
+  SIMPLE_VERSION: "Create proof-of-concept without complex patterns"
+  A_B_TESTING: "Comment out in service registration with #"
+```
+
+### Migration Strategy
+```yaml
+PHASE_1_PROOF_OF_CONCEPT:
+  - "Create simple DiffGenerator (no base classes)"
+  - "Validate basic functionality"
+  - "Test with existing snapshot generators"
+  
+PHASE_2_UNIFIED_FRAMEWORK:
+  - "Create ExtensionObjectSnapshotGenerator base class"
+  - "Migrate existing generators to unified pattern"
+  - "Update service registrations"
+  
+PHASE_3_CLEANUP:
+  - "Remove legacy generators"
+  - "Complete unified framework"
+  - "Update documentation"
+```
+
 ## QUICK_REFERENCE_COMMANDS
 
 ### Architectural Assessment
@@ -766,8 +951,26 @@ echo "SELECT * FROM INFORMATION_SCHEMA.${OBJECT_TYPE}S LIMIT 1" | sqlcmd
 
 ### Implementation Validation
 ```bash
+# Quick compilation check (SESSION PATTERN)
+mvn compile -q
+
+# Targeted testing patterns (SESSION PATTERN)
+mvn test -Dtest="*ObjectType*Test*" -q
+mvn test -Dtest="ObjectTypeSnapshotGeneratorTest" -q
+mvn test -Dtest="*ObjectType*IntegrationTest" -q
+
+# Temporarily disable for compilation (SESSION PATTERN)
+mv file.java file.java.disabled
+mv file.java.disabled file.java
+
+# Service registration management (SESSION PATTERN)
+# Comment out with # for A/B testing
+# Add comments for maintenance:
+# # Legacy generators (will be phased out)
+# # liquibase.diff.AccountLevelDiffGenerator
+
 # Compile and verify service registration
-mvn compile
+mvn compile -q
 
 # Check service registration
 grep -r "${ObjectType}" src/main/resources/META-INF/services/
@@ -811,6 +1014,127 @@ mvn package
 
 # Lint check (if available)
 mvn checkstyle:check
+```
+
+## SYSTEMATIC_COVERAGE_ENHANCEMENT_WORKFLOW
+
+### Phase-Based Coverage Enhancement (95%+ Achievement Pattern)
+```yaml
+SYSTEMATIC_APPROACH:
+  STEP_1_ASSESSMENT:
+    COMMAND: "mvn test jacoco:report && open target/site/jacoco/index.html"
+    ACTION: "Identify lowest coverage snapshot generators"
+    TARGET: "Focus on generators with <70% coverage first"
+    
+  STEP_2_PRIORITIZATION:
+    STRATEGY: "Target impact-to-effort ratio"
+    PRIORITY_ORDER:
+      - "0% coverage generators (highest impact)"
+      - "Low coverage (<50%) complex generators"
+      - "Medium coverage (50-80%) simple generators"
+      - "High coverage (80%+) optimization only"
+      
+  STEP_3_ENHANCEMENT:
+    PRIMARY_PATTERN: "Complete SQL String Assertions"
+    COVERAGE_TARGETS:
+      - "Constructor and basic method testing"
+      - "Enhanced edge case coverage (null handling, large datasets)"
+      - "Exception scenarios with resource cleanup verification"
+      - "Advanced MockedStatic patterns for complex integrations"
+      - "Reflection-based testing for protected methods"
+      
+  STEP_4_VALIDATION:
+    COMMAND: "mvn test -Dtest=\"*{GeneratorName}*Test*\" -q"
+    VERIFICATION: "All new tests pass, coverage increased significantly"
+    TARGET: "95%+ overall package coverage"
+    
+  STEP_5_FINAL_ASSESSMENT:
+    COMMAND: "mvn test jacoco:report && open target/site/jacoco/index.html"
+    SUCCESS_CRITERIA: "95%+ snapshot package coverage achieved"
+```
+
+### TodoWrite Tool Integration for Multi-Phase Work
+```yaml
+PROGRESS_TRACKING:
+  PHASE_BREAKDOWN:
+    - "Phase 7: Create completely missing generators (0% coverage)"
+    - "Phase 8: Enhance existing low coverage generators (<50%)"
+    - "Phase 9: Optimize medium coverage generators (50-80%)"
+    - "Phase 10: Systematic enhancement of all remaining generators"
+    - "Phase 11: Final validation and 95%+ achievement"
+    
+  TODO_MANAGEMENT:
+    PATTERN: "Mark tasks in_progress before starting, completed immediately after finishing"
+    TRACKING: "Use TodoWrite tool for visibility into multi-step progress"
+    VALIDATION: "Update todos in real-time as work progresses"
+```
+
+### Advanced MockedStatic Patterns for Complex Integration Testing
+```yaml
+EXECUTORSERVICE_CHAIN_MOCKING:
+  PATTERN: |
+    try (MockedStatic<Scope> mockedScope = mockStatic(Scope.class)) {
+        // Mock the complete chain: Scope → ExecutorService → Executor
+        mockedScope.when(Scope::getCurrentScope).thenReturn(scope);
+        when(scope.getExecutorService()).thenReturn(executorService);
+        when(executorService.getExecutor(database)).thenReturn(executor);
+        when(executor.queryForList(any(RawParameterizedSql.class))).thenReturn(mockResults);
+        
+        // Execute test
+        DatabaseObject result = generator.snapshotObject(example, databaseSnapshot);
+        
+        // Verify complete integration
+        assertNotNull(result);
+    }
+    
+DUAL_SQL_QUERY_PATTERN:
+  USE_CASE: "For generators using SHOW commands + result_scan"
+  PATTERN: |
+    ArgumentCaptor<RawParameterizedSql> sqlCaptor = ArgumentCaptor.forClass(RawParameterizedSql.class);
+    when(executor.queryForList(sqlCaptor.capture())).thenReturn(showResults, selectResults);
+    
+    // Execute test
+    generator.addTo(account, snapshot);
+    
+    // Verify both SQL queries with complete string assertions
+    List<RawParameterizedSql> capturedSQLs = sqlCaptor.getAllValues();
+    assertEquals("SHOW UNIQUE KEYS IN TEST_DB.PUBLIC.TEST_TABLE", capturedSQLs.get(0).getSql());
+    assertEquals("SELECT \"column_name\" AS COLUMN_NAME FROM TABLE(result_scan(last_query_id())) WHERE \"constraint_name\"= ?", capturedSQLs.get(1).getSql());
+```
+
+### Resource Management and Exception Testing Patterns
+```yaml
+CLEANUP_VERIFICATION_PATTERN:
+  CRITICAL: "Always verify resource cleanup even in exception scenarios"
+  PATTERN: |
+    @Test
+    void testMethod_ExceptionScenario_EnsuresResourceCleanup() {
+        // Given: Setup that will throw exception
+        when(resultSet.next()).thenThrow(new SQLException("Simulated error"));
+        
+        // When: Exception occurs during processing
+        assertThrows(SQLException.class, () -> {
+            generator.getDatabaseSchemaNames(database);
+        });
+        
+        // Then: Resources should still be cleaned up
+        verify(resultSet).close(); // Critical: Verify cleanup occurred
+    }
+    
+LARGE_DATASET_TESTING:
+  PURPOSE: "Test performance/memory efficiency with realistic data volumes"
+  PATTERN: |
+    @Test
+    void testMethod_LargeDataset_HandlesEfficiently() {
+        // Mock 100+ results to test performance/memory efficiency
+        when(resultSet.next())
+            .thenReturn(true, true, true, /* ... 100 times ... */, true)
+            .thenReturn(false);
+        
+        String[] results = generator.getResults(database);
+        assertEquals(100, results.length, "Should handle large datasets");
+        verify(resultSet, times(101)).next(); // 100 results + 1 end condition
+    }
 ```
 
 ## SUCCESS_CRITERIA
@@ -904,4 +1228,59 @@ INTEGRATION_COMPLETE:
 - Verify cleanup in finally blocks
 - Consider test harness limitations
 
-This guide provides everything needed for complete snapshot/diff implementation in a single, sequential workflow with no external dependencies or document hunting required.
+## PROVEN_PATTERNS_FROM_95%_COVERAGE_ACHIEVEMENT
+
+### Complete SQL String Assertion Success Factors
+```yaml
+WHY_THIS_APPROACH_SUCCEEDED:
+  USER_FEEDBACK_INTEGRATION: "testing the completed SQL string is a better test"
+  RELIABILITY_IMPROVEMENT: "Caught subtle formatting and ordering issues missed by component testing"
+  MAINTENANCE_REDUCTION: "Single assertion point instead of multiple fragile component checks"
+  REAL_WORLD_ALIGNMENT: "Tests actual SQL executed against database"
+  
+IMPLEMENTATION_SUCCESS:
+  ADOPTION_RATE: "Immediately adopted across all subsequent test enhancements"
+  COVERAGE_IMPACT: "Enabled systematic achievement of 95%+ coverage"
+  TEST_RELIABILITY: "Dramatically reduced false positives and brittle tests"
+  DEVELOPMENT_SPEED: "Faster test writing with clearer failure diagnostics"
+```
+
+### Advanced Integration Testing Success Factors
+```yaml
+MOCKEDSTATIC_MASTERY:
+  COMPLEX_CHAINS: "Successfully mocked Scope→ExecutorService→Executor chains"
+  DUAL_QUERIES: "Handled SHOW commands + result_scan patterns effectively"
+  RESOURCE_CLEANUP: "Verified cleanup in exception scenarios"
+  
+EDGE_CASE_EXCELLENCE:
+  NULL_HANDLING: "Comprehensive null parameter and return value testing"
+  LARGE_DATASETS: "Performance testing with 100+ mock results"
+  EXCEPTION_PROPAGATION: "Verified proper exception handling throughout call chains"
+  REFLECTION_TESTING: "Full coverage of protected methods using reflection patterns"
+```
+
+### Systematic Enhancement Success Factors
+```yaml
+PHASE_BASED_APPROACH:
+  TARGET_SELECTION: "Lowest coverage first for maximum impact"
+  INCREMENTAL_PROGRESS: "Each generator enhanced individually with immediate validation"
+  REAL_TIME_TRACKING: "TodoWrite tool provided visibility and momentum"
+  
+COVERAGE_ACHIEVEMENT:
+  BASELINE: "Started at actual 50% coverage (not assumed 80%)"
+  TARGET: "Achieved 95%+ through systematic enhancement"
+  SUSTAINABILITY: "Patterns established for future generator implementations"
+```
+
+## 🔗 GUIDE INTEGRATION
+
+**This guide covers**: Database introspection, schema comparison, extension object patterns, 95%+ test coverage workflows
+
+**Related guides**:
+- **BEFORE**: Use `CHANGETYPE_IMPLEMENTATION_GUIDE.md` for database operations (CREATE/ALTER/DROP)
+- **REFERENCE**: Use `CLAUDE.md` for project status and unified framework breakthrough
+- **AFTER**: Use `DIFF_GENERATE_CHANGELOG_IMPLEMENTATION_GUIDE.md` for changelog generation
+
+**Complete workflow**: Changetype → **Snapshot/Diff** → Generate Changelog → Validation
+
+This guide provides everything needed for complete snapshot/diff implementation with proven 95%+ coverage achievement patterns.
