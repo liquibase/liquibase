@@ -612,7 +612,7 @@ jobs:
   #         event-type: oss-released-tag
 
   package:
-    uses: liquibase/build-logic/.github/workflows/package.yml@est/DAT-20612
+    uses: liquibase/build-logic/.github/workflows/package.yml@test/DAT-20612
     needs: [setup]
     secrets: inherit
     with:
