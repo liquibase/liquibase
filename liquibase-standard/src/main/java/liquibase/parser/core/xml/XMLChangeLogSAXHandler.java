@@ -74,6 +74,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     @Override
     public void startElement(String uri, String localName, String qualifiedName, Attributes attributes) throws SAXException {
         ParsedNode node = new ParsedNode(null, localName);
+        setParsedNamespace(qualifiedName, node);
         try {
             if (attributes != null) {
                 for (int i=0; i< attributes.getLength(); i++) {
@@ -99,6 +100,14 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
         } catch (ParsedNodeException e) {
             throw new SAXException(e);
         }
+    }
+
+    private static void setParsedNamespace(String qualifiedName, ParsedNode node) {
+        String parsedNamespace = null;
+        if (qualifiedName.contains(":")) {
+            parsedNamespace = qualifiedName.substring(0, qualifiedName.lastIndexOf(":"));
+        }
+        node.setParsedNamespace(parsedNamespace);
     }
 
     @Override
