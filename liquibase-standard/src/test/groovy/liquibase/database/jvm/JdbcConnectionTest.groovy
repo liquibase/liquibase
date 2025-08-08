@@ -37,6 +37,7 @@ class JdbcConnectionTest extends Specification {
         "jdbc:jtds:sqlserver://localhost:1433/proCatalog;user=my_user;"                      | "jdbc:jtds:sqlserver://localhost:1433/proCatalog;"
         "jdbc:oracle:thin:user/password@host:1521/db"                                        | "jdbc:oracle:thin:user@host:1521/db"
         "jdbc:oracle:thin:@host:1521/db"                                                     | "jdbc:oracle:thin:@host:1521/db"
+        "jdbc:databricks://databricks.azuredatabricks.net:443/default;transportMode=http;ssl=1;AuthMech=11;Auth_Flow=1;httpPath=/sql/1.0/warehouses/warehouseId;ConnCatalog=myCatalog;ConnSchema=mySchema;OAuth2ClientId=MyClientID;OAuth2Secret=MySecret;" | "jdbc:databricks://databricks.azuredatabricks.net:443/default;transportMode=http;ssl=1;AuthMech=11;Auth_Flow=1;httpPath=/sql/1.0/warehouses/warehouseId;ConnCatalog=myCatalog;ConnSchema=mySchema;OAuth2ClientId=MyClientID;"
         null                                                                                 | null
     }
 
@@ -73,6 +74,7 @@ class JdbcConnectionTest extends Specification {
         "jdbc:oracle:thin:user/password@host:1521/db"                                        | "jdbc:oracle:thin:*****/*****@host:1521/db"
         "jdbc:oracle:thin:@host:1521/db"                                                     | "jdbc:oracle:thin:@host:1521/db"
         "cosmosdb://maincosmosliquibase.documents.azure.com:t27yJICDSFdR1HN==@maincosmosliquibase.documents.azure.com:443/testdb1" | "cosmosdb://maincosmosliquibase.documents.azure.com:*****@maincosmosliquibase.documents.azure.com:443/testdb1"
+        "jdbc:databricks://databricks.azuredatabricks.net:443/default;transportMode=http;ssl=1;AuthMech=11;Auth_Flow=1;httpPath=/sql/1.0/warehouses/warehouseId;ConnCatalog=myCatalog;ConnSchema=mySchema;OAuth2ClientId=MyClientID;OAuth2Secret=MySecret;" | "jdbc:databricks://databricks.azuredatabricks.net:443/default;transportMode=http;ssl=1;AuthMech=11;Auth_Flow=1;httpPath=/sql/1.0/warehouses/warehouseId;ConnCatalog=myCatalog;ConnSchema=mySchema;OAuth2ClientId=MyClientID;OAuth2Secret=*****;"
         null                                                                                 | null
     }
 
@@ -109,6 +111,7 @@ class JdbcConnectionTest extends Specification {
         "jdbc:oracle:thin:user/password@host:1521/db"                                        | "jdbc:oracle:thin:@host:1521/db"
         "jdbc:oracle:thin:@host:1521/db"                                                     | "jdbc:oracle:thin:@host:1521/db"
         "cosmosdb://maincosmosliquibase.documents.azure.com:t27yJICDSFdR1HN==@maincosmosliquibase.documents.azure.com:443/testdb1" | "cosmosdb://maincosmosliquibase.documents.azure.com:*****@maincosmosliquibase.documents.azure.com:443/testdb1"
+        "jdbc:databricks://databricks.azuredatabricks.net:443/default;transportMode=http;ssl=1;AuthMech=11;Auth_Flow=1;httpPath=/sql/1.0/warehouses/warehouseId;ConnCatalog=myCatalog;ConnSchema=mySchema;OAuth2ClientId=MyClientID;OAuth2Secret=MySecret;" | "jdbc:databricks://databricks.azuredatabricks.net:443/default;transportMode=http;ssl=1;AuthMech=11;Auth_Flow=1;httpPath=/sql/1.0/warehouses/warehouseId;ConnCatalog=myCatalog;ConnSchema=mySchema;OAuth2ClientId=MyClientID;OAuth2Secret=*****;"
         null                                                                                 | null
     }
 }
