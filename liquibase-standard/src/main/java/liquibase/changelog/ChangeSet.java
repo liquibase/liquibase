@@ -32,9 +32,7 @@ import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sql.visitor.SqlVisitorFactory;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.util.SqlUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
@@ -624,13 +622,16 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     protected Change toChange(ParsedNode value, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         Change change = getCurrentScope().getSingleton(ChangeFactory.class).create(value.getName());
         if (change == null) {
-            if (!value.getChildren().isEmpty() && ! ChangeFactory.isNoExceptionOnUnsupportedChangeType() &&
-                ChangeLogParserConfiguration.CHANGELOG_PARSE_MODE.getCurrentValue().equals(ChangeLogParserConfiguration.ChangelogParseMode.STRICT)) {
+            if (throwChangeTypeNotFoundException(value)) {
                 String message = "";
                 if (this.getChangeLog() != null && this.getChangeLog().getPhysicalFilePath() != null) {
                     message = "Error parsing " + this.getChangeLog().getPhysicalFilePath() + ": ";
                 }
-                message += "Unknown change type '" + value.getName() + "'. Check for spelling or capitalization errors and missing extensions such as liquibase-commercial.";
+                String displayName = value.getName();
+                if (value.getParsedNamespace() != null) {
+                    displayName = value.getParsedNamespace() + ":" + displayName;
+                }
+                message += "Unknown change type '" + displayName + "'. Check for spelling or capitalization errors and missing extensions such as liquibase-commercial.";
                 throw new ParsedNodeException(message);
             }
             return null;
@@ -651,6 +652,29 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     public ExecType execute(DatabaseChangeLog databaseChangeLog, Database database) throws MigrationFailedException {
         return execute(databaseChangeLog, null, database);
+    }
+
+    /**
+     * If we could not find the change type and
+     *   either
+     *      The node had a namespace
+     *   or
+     *      The node has children AND
+     *      The "do not thrown and exception flag" is off AND
+     *      The changelog parsing mode is strict
+     *   then
+     *      throw an exception
+     *
+     * @param   value           The ParsedNode to evaluate
+     * @return  boolean         True if we should throw
+     *
+     */
+    private boolean throwChangeTypeNotFoundException(ParsedNode value) {
+        return
+            StringUtils.isNotEmpty(value.getParsedNamespace()) ||
+            (!value.getChildren().isEmpty() &&
+                ! ChangeFactory.isNoExceptionOnUnsupportedChangeType() &&
+                ChangeLogParserConfiguration.CHANGELOG_PARSE_MODE.getCurrentValue().equals(ChangeLogParserConfiguration.ChangelogParseMode.STRICT));
     }
 
     private ExecType isChangeToSkip(Change change, Database database, Logger log) {
