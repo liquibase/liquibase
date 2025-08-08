@@ -7,14 +7,16 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.SnapshotSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.SnapshotIdService;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 import liquibase.util.ISODateFormat;
-import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.Tag;
@@ -60,16 +62,33 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
                         name = ((DatabaseObject) object).getSchema().toString() + "." + name;
                     }
 
-                    Scope.getCurrentScope().getLog(YamlSnapshotSerializer.class).warning("Found a null snapshotId for " + StringUtil.lowerCaseFirst(object.getClass().getSimpleName()) + " " + name);
-                    if (objectBeingSerialized != null) {
-                        Scope.getCurrentScope().getLog(YamlSnapshotSerializer.class).warning("The object already being serialized is " + ((DatabaseObject) objectBeingSerialized).getName());
-                    }
-                    if (System.getenv("IGNORE_NULL_SNAPSHOT_ID") == null) {
-                        throw new UnexpectedLiquibaseException("Found a null snapshotId for " + StringUtil.lowerCaseFirst(object.getClass().getSimpleName()) + " " + name);
-                    }
-                    snapshotId = "NULL_SNAPSHOT_ID:" + name;
-                    objectBeingSerialized = null;
                     alreadySerializingObject = false;
+                    if (GlobalConfiguration.FAIL_ON_NULL_SNAPSHOT_ID.getCurrentValue()) {
+                        String message = "While serializing object " + ((DatabaseObject) objectBeingSerialized).getName() +
+                           " a null snapshotId for " + StringUtils.uncapitalize(object.getClass().getSimpleName()) + " " + name +
+                           "was found. To suppress this failure, set --fail-on-null-snapshot-id=false.";
+                        throw new UnexpectedLiquibaseException(message);
+                    } else {
+                        // add object to referenced objects collection
+                        // Set the relationship between parent and child here
+                        DatabaseSnapshot snapshot = Scope.getCurrentScope().get(DatabaseSnapshot.SNAPSHOT_SCOPE_KEY, DatabaseSnapshot.class);
+                        if (snapshot != null) {
+                            SnapshotIdService snapshotIdService = SnapshotIdService.getInstance();
+                            snapshotId = snapshotIdService.generateId();
+                            ((DatabaseObject) object).setSnapshotId(snapshotId);
+                            if (((DatabaseObject) objectBeingSerialized).getAttribute("table", Table.class) != null) {
+                                ((DatabaseObject) objectBeingSerialized).setAttribute("table", object);
+                            }
+                            DatabaseObjectCollection collection = snapshot.getReferencedObjects();
+                            if (!collection.contains((DatabaseObject) object, null)) {
+                                snapshot.getReferencedObjects().add((DatabaseObject) object);
+                                snapshot.getReferencedObjects().add((DatabaseObject) objectBeingSerialized);
+                                objectBeingSerialized = null;
+                                return  YamlSerializer.EMPTY_MAP_DO_NOT_SERIALIZE;
+                            }
+                        }
+                        return ((DatabaseObject) object).getClass().getName() + "#" + ((DatabaseObject) object).getName();
+                    }
                 }
                 return ((DatabaseObject) object).getClass().getName() + "#" + snapshotId;
             } else {

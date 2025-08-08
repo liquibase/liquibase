@@ -1,5 +1,6 @@
 package liquibase.serializer.core.yaml;
 
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.ConstraintsConfig;
 import liquibase.changelog.ChangeSet;
@@ -11,6 +12,7 @@ import liquibase.serializer.LiquibaseSerializer;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 import org.yaml.snakeyaml.DumperOptions;
@@ -27,10 +29,12 @@ import org.yaml.snakeyaml.resolver.Resolver;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class YamlSerializer implements LiquibaseSerializer {
 
     protected Yaml yaml;
+    public static final Map<String, Object> EMPTY_MAP_DO_NOT_SERIALIZE = new HashMap<>(0);
 
     public YamlSerializer() {
         yaml = createYaml();
@@ -94,7 +98,8 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         comparator = getComparator(object);
         Map<String, Object> objectMap = new TreeMap<>(comparator);
 
-        for (String field : getSerializableObjectFields(object)) {
+        List<String> fieldList = sortFieldList(object);
+        for (String field : fieldList) {
             Object value = object.getSerializableFieldValue(field);
             if (value != null) {
                 if (value instanceof DataType) {
@@ -150,12 +155,27 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                             if (valueAsList.isEmpty()) {
                                 continue;
                             }
+                            AtomicReference<Object> returnMap = new AtomicReference<>();
+
+                            boolean setOne = false;
                             for (int i = 0; i < valueAsList.size(); i++) {
                                 if (valueAsList.get(i) instanceof LiquibaseSerializable) {
-                                    valueAsList.set(i, toMap((LiquibaseSerializable) valueAsList.get(i)));
+                                    LiquibaseSerializable innerObject = (LiquibaseSerializable) valueAsList.get(i);
+                                    Boolean noSnapshotFound = new Boolean(false);
+                                    Scope.child("noSnapshotIdFound", noSnapshotFound, () -> {
+                                        returnMap.set(toMap(innerObject));
+                                    });
+                                    if (! keysMissing(keysWithValues((DatabaseObject)innerObject), returnMap)) {
+                                        valueAsList.set(i, returnMap);
+                                        setOne = true;
+                                    }
                                 }
                             }
-                            ((Map) value).put(key, valueAsList);
+                            if (setOne) {
+                                ((Map) value).put(key, valueAsList);
+                            } else {
+                                ((Map)value).remove(key);
+                            }
                         }
                     }
 
@@ -168,6 +188,84 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         Map<String, Object> containerMap = new HashMap<>();
         containerMap.put(object.getSerializedObjectName(), objectMap);
         return containerMap;
+    }
+
+    /**
+     *
+     * Return a list of the non-null/empty attributes
+     *
+     * @param   object                     The DatabaseObject in question
+     * @return  Set<String>                The set of non-null/empty attributes
+     *
+     */
+    private Set<String> keysWithValues(DatabaseObject object) {
+        Set<String> attributes = new HashSet<>(object.getAttributes());
+        for (String key : object.getAttributes()) {
+            Object value = object.getAttribute(key, Object.class);
+            if (value == null) {
+                attributes.remove(key);
+            } else if (value instanceof Collection && ((Collection)value).isEmpty()) {
+                attributes.remove(key);
+            }
+        }
+        attributes.remove("objects");
+        return attributes;
+    }
+
+    /**
+     *
+     * Determine if the toMap calls found a missing snapshot ID by
+     * checking to see if the non-snapshotId attribute list has changed
+     *
+     * @param   setKeys          The set of keys on the original object
+     * @param   map              The map created by toMap
+     * @return  boolean          True if any keys were removed
+     *
+     */
+    private boolean keysMissing(Set<String> setKeys, Object map) {
+        Set<String> workKeys = new HashSet<>(setKeys);
+        workKeys.remove("snapshotId");
+        Map<String, Object> containerMap = (Map<String, Object>) map;
+        Map.Entry<String, Object> innerMapEntry = containerMap.entrySet().iterator().next();
+        if (innerMapEntry == null) {
+            return false;
+        }
+        Map<String, Object> innerMap = (Map<String, Object>) innerMapEntry.getValue();
+        Map<String, Object> workMap = new HashMap<>(innerMap);
+        workMap.remove("snapshotId");
+        return workKeys.size() != workMap.size();
+    }
+
+    /**
+     *
+     * If the object has a "referencedObjects" field then
+     * we want that to sort to last in the last
+     *
+     * @param   object                 The object which fields need sorting
+     * @return  List<String>
+     *
+     */
+    private List<String> sortFieldList(LiquibaseSerializable object) {
+        Set<String> serializableObjectFields = getSerializableObjectFields(object);
+        // Convert the Set to a List for sorting
+        List<String> fieldList = new ArrayList<>(serializableObjectFields);
+        if (! fieldList.contains("referencedObjects")) {
+            return fieldList;
+        }
+        // Sort the list using a custom Comparator
+        fieldList.sort(new Comparator<String>() {
+            @Override
+            public int compare(String s1, String s2) {
+                if (s1.equals("referencedObjects")) {
+                    return 1; // s1 (specificValue) comes after s2
+                } else if (s2.equals("referencedObjects")) {
+                    return -1; // s2 (specificValue) comes after s1
+                } else {
+                    return s1.compareTo(s2); // Natural alphabetical order for other strings
+                }
+            }
+        });
+        return fieldList;
     }
 
     protected Object convertToMap(List valueAsList, int index) {
