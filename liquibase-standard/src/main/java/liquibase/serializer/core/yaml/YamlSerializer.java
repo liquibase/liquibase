@@ -11,7 +11,6 @@ import liquibase.serializer.LiquibaseSerializer;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 import org.yaml.snakeyaml.DumperOptions;
@@ -156,6 +155,12 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                                 continue;
                             }
 
+                            //
+                            // Be on the lookout for the potential for an object to
+                            // be found that did not have a snapshot ID.  In that case,
+                            // we do not want to serialize it with the rest of the objects,
+                            // but instead move it to the "referencedObjects" section of the snapshot
+                            //
                             boolean setOne = false;
                             for (int i = 0; i < valueAsList.size(); i++) {
                                 if (valueAsList.get(i) instanceof LiquibaseSerializable) {
@@ -168,6 +173,10 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                                     }
                                 }
                             }
+                            //
+                            // If there was at least one object of this type then put the list
+                            // else remove the entire key
+                            //
                             if (setOne) {
                                 ((Map) value).put(key, valueAsList);
                             } else {

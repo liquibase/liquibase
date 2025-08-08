@@ -122,13 +122,15 @@ public class SnapshotCommandStep extends AbstractCommandStep {
 
         AtomicReference<String> serializedSnapshotString = new AtomicReference<>();
         String finalFormat = format;
-        ExceptionUtil.doSilently(() -> {
+        try {
             Scope.child(DatabaseSnapshot.SNAPSHOT_SCOPE_KEY, snapshot, () -> {
                 serializedSnapshotString.set(SnapshotSerializerFactory.getInstance()
                         .getSerializer(finalFormat.toLowerCase(Locale.US))
                         .serialize(snapshot, true));
             });
-        });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         return serializedSnapshotString.get();
     }
 

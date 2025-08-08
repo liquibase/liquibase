@@ -66,7 +66,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
                     if (GlobalConfiguration.FAIL_ON_NULL_SNAPSHOT_ID.getCurrentValue()) {
                         String message = "While serializing object " + ((DatabaseObject) objectBeingSerialized).getName() +
                            " a null snapshotId for " + StringUtils.uncapitalize(object.getClass().getSimpleName()) + " " + name +
-                           "was found. To suppress this failure, set --fail-on-null-snapshot-id=false.";
+                           " was found. To suppress this failure, set --fail-on-null-snapshot-id=false.";
                         throw new UnexpectedLiquibaseException(message);
                     } else {
                         // add object to referenced objects collection
