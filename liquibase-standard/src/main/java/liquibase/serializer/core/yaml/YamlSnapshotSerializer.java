@@ -84,6 +84,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
                                 snapshot.getReferencedObjects().add((DatabaseObject) object);
                                 snapshot.getReferencedObjects().add((DatabaseObject) objectBeingSerialized);
                                 objectBeingSerialized = null;
+                                noSnapshotIdFound = true;
                                 return  YamlSerializer.EMPTY_MAP_DO_NOT_SERIALIZE;
                             }
                         }
