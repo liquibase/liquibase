@@ -1,5 +1,6 @@
 package liquibase.parser;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Labels;
 import liquibase.Scope;
 import liquibase.change.AbstractSQLChange;
@@ -330,7 +331,9 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                 if (foundHeader && changeLogPatternMatcher.matches()) {
                     String message = "Duplicate formatted SQL header at line " + count;
                     Scope.getCurrentScope().getLog(getClass()).warning(message);
-                    throw new ChangeLogParseException(message);
+                    if (GlobalConfiguration.THROW_EXCEPTION_FOR_MULTIPLE_HEADERS.getCurrentValue()) {
+                        throw new ChangeLogParseException(message);
+                    }
                 }
                 Matcher commentMatcher = COMMENT_PATTERN.matcher(line);
                 Matcher propertyPatternMatcher = PROPERTY_PATTERN.matcher(line);

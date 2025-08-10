@@ -30,6 +30,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA;
     public static final ConfigurationDefinition<Boolean> GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION;
     public static final ConfigurationDefinition<Boolean> INCLUDE_CATALOG_IN_SPECIFICATION;
+    public static final ConfigurationDefinition<Boolean> THROW_EXCEPTION_FOR_MULTIPLE_HEADERS;
     public static final ConfigurationDefinition<Boolean> SHOULD_SNAPSHOT_DATA;
     public static final ConfigurationDefinition<Boolean> INCLUDE_RELATIONS_FOR_COMPUTED_COLUMNS;
     public static final ConfigurationDefinition<Boolean> INCLUDE_SCHEMA_NAME_FOR_DEFAULT;
@@ -171,6 +172,11 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         INCLUDE_CATALOG_IN_SPECIFICATION = builder.define("includeCatalogInSpecification", Boolean.class)
                 .setDescription("Should Liquibase include the catalog name when determining equality?")
                 .setDefaultValue(false)
+                .build();
+
+        THROW_EXCEPTION_FOR_MULTIPLE_HEADERS = builder.define("throwExceptionForMultipleHeaders", Boolean.class)
+                .setDescription("Should Liquibase throw an exception for multiple formatted SQL changelog headers?")
+                .setDefaultValue(true)
                 .build();
 
         SHOULD_SNAPSHOT_DATA = builder.define("shouldSnapshotData", Boolean.class)

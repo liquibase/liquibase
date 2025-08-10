@@ -485,6 +485,15 @@ Global Options
                                environment variable:
                                'LIQUIBASE_SUPPRESS_LIQUIBASE_SQL')
 
+      --throw-exception-for-multiple-headers=PARAM
+                             Should Liquibase throw an exception for multiple
+                               formatted SQL changelog headers?
+                             DEFAULT: true
+                             (defaults file: 'liquibase.
+                               throwExceptionForMultipleHeaders', environment
+                               variable:
+                               'LIQUIBASE_THROW_EXCEPTION_FOR_MULTIPLE_HEADERS')
+
       --trim-load-data-file-header=PARAM
                              If true column headers will be trimmed in case
                                they were specified with spaces in the file.
