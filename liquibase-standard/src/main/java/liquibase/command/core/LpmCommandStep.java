@@ -308,7 +308,9 @@ public class LpmCommandStep extends AbstractCommandStep {
                 return "darwin";
             }
         } else if (osName.contains("linux")) {
-            if (osArch.contains("aarch64") || osArch.contains("arm64")) {
+            if (osArch.contains("s390") || osArch.contains("zarch")) {
+                return "s390x";
+            } else if (osArch.contains("aarch64") || osArch.contains("arm64")) {
                 return "linux-arm64";
             } else {
                 return "linux";
