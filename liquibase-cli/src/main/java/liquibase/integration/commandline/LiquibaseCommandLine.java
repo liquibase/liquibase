@@ -456,26 +456,84 @@ public class LiquibaseCommandLine {
     }
 
     /**
-     * If we find lpm command, everything after that should be treated as parameters to LPM.
+     * If we find "init lpm" command sequence, everything after that should be treated as parameters to LPM,
+     * except for known CommandArgumentDefinition flags which should be handled by the command system.
      * To handle that we use Scope.Attr.lpmArgs to store the parameters.
      */
     private String[] adjustLpmArgs(String[] strings) {
         List<String> returnArgs = new ArrayList<>();
         StringBuilder lpmArgs = null;
+        boolean foundInit = false;
+        
+        // Known flags that should not be passed to LPM binary - discovered via reflection
+        Set<String> knownFlags = discoverLpmCommandFlags();
+
         for (String arg : strings) {
             if (lpmArgs == null) {
                 returnArgs.add(arg);
-            } else {
+                
+                // Check for "init lpm" sequence
+                if ("init".equals(arg)) {
+                    foundInit = true;
+                } else if (foundInit && "lpm".equals(arg.toLowerCase())) {
+                    // Found "init lpm" sequence, start collecting LPM args
+                    lpmArgs = new StringBuilder();
+                    foundInit = false;
+                } else {
+                    foundInit = false;
+                }
+            } else if (knownFlags.stream().noneMatch(arg::startsWith)) {
+                // Collecting arguments after "init lpm", but skip known command flags
                 lpmArgs.append(arg).append(" ");
-            }
-            if ("lpm".equals(arg)) {
-                lpmArgs = new StringBuilder();
+            } else {
+                // Add known flags back to returnArgs so they're processed by the command system
+                returnArgs.add(arg);
             }
         }
+        
         if (lpmArgs != null) {
-            Scope.getCurrentScope().setLpmArgs(lpmArgs.toString());
+            Scope.getCurrentScope().setLpmArgs(lpmArgs.toString().trim());
         }
         return returnArgs.toArray(new String[0]);
+    }
+
+    /**
+     * Discovers CommandArgumentDefinition fields from LpmCommandStep using reflection
+     * and returns their names with "--" prefix.
+     */
+    private Set<String> discoverLpmCommandFlags() {
+        Set<String> flags = new HashSet<>();
+        
+        try {
+            Class<?> lpmCommandStepClass = Class.forName("liquibase.command.core.LpmCommandStep");
+            
+            // Get all static fields that are of type CommandArgumentDefinition
+            for (java.lang.reflect.Field field : lpmCommandStepClass.getDeclaredFields()) {
+                if (java.lang.reflect.Modifier.isStatic(field.getModifiers()) && 
+                    field.getType().getName().equals("liquibase.command.CommandArgumentDefinition")) {
+                    
+                    field.setAccessible(true);
+                    Object fieldValue = field.get(null);
+                    
+                    if (fieldValue != null) {
+                        // Get the name from the CommandArgumentDefinition
+                        java.lang.reflect.Method getNameMethod = fieldValue.getClass().getMethod("getName");
+                        String argumentName = (String) getNameMethod.invoke(fieldValue);
+                        
+                        if (argumentName != null) {
+                            flags.add("--" + argumentName);
+                        }
+                    }
+                }
+            }
+            
+        } catch (Exception e) {
+            // If reflection fails, fallback to hardcoded flags
+            Scope.getCurrentScope().getLog(getClass()).fine("Could not discover LPM command flags via reflection, using fallback: " + e.getMessage());
+            flags.add("--download");
+        }
+        
+        return flags;
     }
 
     private void addEmptyMdcValues() {
