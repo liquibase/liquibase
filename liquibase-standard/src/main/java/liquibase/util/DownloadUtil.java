@@ -4,8 +4,10 @@ import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.Logger;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -86,5 +88,40 @@ public class DownloadUtil {
             throw new UnexpectedLiquibaseException("Error downloading from " + url + ": " + e.getMessage(), e);
         }
         return pathAsFile.toPath();
+    }
+
+    /**
+     * Fetch the content at the given URL as a string.
+     * @param url the URL to fetch
+     * @return the content as a string
+     */
+    public static String fetchAsString(String url) {
+        final Logger log = Scope.getCurrentScope().getLog(DownloadUtil.class);
+        log.fine("Fetching content from " + url);
+        
+        try {
+            final HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(10000); // 10 seconds
+            connection.setReadTimeout(10000); // 10 seconds
+            connection.setRequestProperty("Accept", "application/vnd.github.v3+json");
+            connection.setRequestProperty("User-Agent", "Liquibase-LPM-Integration");
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode == 200) {
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        response.append(line);
+                    }
+                    return response.toString();
+                }
+            } else {
+                throw new UnexpectedLiquibaseException("HTTP request failed with response code: " + responseCode);
+            }
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException("Error fetching content from " + url + ": " + e.getMessage(), e);
+        }
     }
 }
