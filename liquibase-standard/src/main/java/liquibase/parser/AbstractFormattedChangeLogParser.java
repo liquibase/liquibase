@@ -331,7 +331,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                 if (foundHeader && changeLogPatternMatcher.matches()) {
                     String message = "Duplicate formatted SQL header at line " + count;
                     Scope.getCurrentScope().getLog(getClass()).warning(message);
-                    if (GlobalConfiguration.THROW_EXCEPTION_FOR_MULTIPLE_HEADERS.getCurrentValue()) {
+                    if (GlobalConfiguration.FAIL_ON_MULTIPLE_FORMATTED_SQL_HEADERS.getCurrentValue()) {
                         throw new ChangeLogParseException(message);
                     }
                 }

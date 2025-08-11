@@ -473,7 +473,7 @@ CREATE TABLE public.Persons (
 
     def duplicateHeaderLinesWithNoException() throws Exception {
         when:
-        Scope.child("liquibase.throwExceptionForMultipleHeaders", "false", () -> {
+        Scope.child("liquibase.failOnMultipleFormattedSqlHeaders", "false", () -> {
             new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_WITH_DUPLICATE_HEADERS).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
         })
         then:

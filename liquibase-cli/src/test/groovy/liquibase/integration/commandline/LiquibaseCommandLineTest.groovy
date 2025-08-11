@@ -180,6 +180,16 @@ Global Options
                                variable:
                                'LIQUIBASE_ERROR_ON_CIRCULAR_INCLUDE_ALL')
 
+      --fail-on-multiple-formatted-sql-headers=PARAM
+                             Should Liquibase fail on multiple formatted SQL
+                               changelog headers?
+                             DEFAULT: true
+                             (defaults file: 'liquibase.
+                               failOnMultipleFormattedSqlHeaders', environment
+                               variable:
+                               'LIQUIBASE_FAIL_ON_MULTIPLE_FORMATTED_SQL_HEADERS
+                               ')
+
       --file-encoding=PARAM  Encoding to use when reading files. Valid values
                                include: UTF-8, UTF-16, UTF-16BE, UTF-16LE,
                                US-ASCII, or OS to use the system configured
@@ -484,15 +494,6 @@ Global Options
                              (defaults file: 'liquibase.suppressLiquibaseSql',
                                environment variable:
                                'LIQUIBASE_SUPPRESS_LIQUIBASE_SQL')
-
-      --throw-exception-for-multiple-headers=PARAM
-                             Should Liquibase throw an exception for multiple
-                               formatted SQL changelog headers?
-                             DEFAULT: true
-                             (defaults file: 'liquibase.
-                               throwExceptionForMultipleHeaders', environment
-                               variable:
-                               'LIQUIBASE_THROW_EXCEPTION_FOR_MULTIPLE_HEADERS')
 
       --trim-load-data-file-header=PARAM
                              If true column headers will be trimmed in case
