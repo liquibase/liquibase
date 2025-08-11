@@ -2,6 +2,9 @@ package liquibase.parser.core.formattedsql
 
 import liquibase.Contexts
 import liquibase.LabelExpression
+import liquibase.Scope
+import liquibase.change.AbstractSQLChange
+import liquibase.change.Change
 import liquibase.change.core.EmptyChange
 import liquibase.change.core.RawSQLChange
 import liquibase.changelog.ChangeLogParameters
@@ -9,6 +12,8 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.core.MockDatabase
 import liquibase.exception.ChangeLogParseException
+import liquibase.exception.MigrationFailedException
+import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.SqlPrecondition
 import liquibase.resource.ResourceAccessor
@@ -176,6 +181,15 @@ alter table test_table add column name2 varchar(20);
 
 -- rollback changesetId:create changeSetAuthor:the_user
 
+--changeset nvoxland::4
+create table table222 (
+    id int primary key
+);
+create table table333 (
+    id int primary key
+);
+--rollback drop table table222;
+
 """.trim()
 
     private static final String VALID_CHANGELOG_WITH_IGNORE_PROP = """
@@ -191,7 +205,7 @@ create table changeSetToIgnore (
     private static final String END_DELIMITER_CHANGELOG = """
 --liquibase formatted sql
 
--- changeset abcd:1 runOnChange:true endDelimiter:/
+-- changeset abcd:1 runOnChange:true endDelimiter:/ rollbackEndDelimiter:;
 CREATE OR REPLACE PROCEDURE any_procedure_name is
 BEGIN
     DBMS_MVIEW.REFRESH('LEAD_INST_FOS_MV', method => '?', atomic_refresh => FALSE, out_of_place => true);
@@ -208,6 +222,30 @@ grant execute on any_procedure_name to ANY_USER3
 /
 -- rollback drop PROCEDURE refresh_all_fos_permission_views/
 """
+
+    private static final String ANOTHER_END_DELIMITER_CHANGELOG =
+"""
+--liquibase formatted sql
+
+--changeset jlyle:mytest stripComments:false runOnChange:true runAlways:true endDelimiter:/ rollbackEndDelimiter:;
+
+select 1 from sys.dual
+/
+
+select 1 from sys.dual
+/
+
+select 1 from sys.dual
+/
+
+begin
+    null;
+end;
+/
+
+-- rollback drop PROCEDURE refresh_all_fos_permission_views/ ;
+"""
+
     private static final String VALID_CHANGELOG_WITH_LEAD_SPACES =
 """
   --liquibase formatted sql
@@ -231,6 +269,13 @@ create table table1 (
 --rollback drop table table1;
 """
 
+    private static final String INVALID_CHANGESET_ID =
+"""
+--changeset nvoxland:: ::sid
+create table table222 (
+    id int primary key
+);
+"""
     private static final String INVALID_CHANGELOG = "select * from table1"
     private static final String INVALID_CHANGELOG_INVALID_PRECONDITION =
             "--liquibase formatted sql\n" +
@@ -368,6 +413,41 @@ create table table1 (
 );
 """.trim()
 
+    private static final String INVALID_CHANGELOG_WITH_LEXICAL_ERROR =
+"""-- liquibase formatted sql
+
+-- changeset postgres:1
+CREATE TABLE public.PersonsMe (
+    PersonID int,
+    LastName varchar(255),
+    FirstName varchar(255),
+    Address varchar(255),
+    City varchar(255)
+);
+
+-- changeset postgres:2
+CREATE TABLE public.Persons (
+    PersonID int�
+    LastName varchar(255),
+    FirstName varchar(255),
+    Address varchar(255),
+    City varchar(255)
+);"""
+
+    private static final String INVALID_CHANGELOG_WITH_DUPLICATE_HEADERS =
+"""
+--liquibase formatted sql
+
+--changeset bharath.javaji1:1-PPgrant labels:CDW-394266   contextFilter:PP
+--comment GMDR - Cleanup of Talend Metrics
+--rollback GRANT `roles/bigquery.dataViewer` ON VIEW IDW_ACQ_REPORTS.CAMP_ENCLSR_1 TO "group:app_gcp_cdwp_idw_0375_uir@schwab.com";
+
+--liquibase formatted sql
+--changeset bharath.javaji1:1-PRODgrant labels:CDW-394266   contextFilter:PRD
+--comment GMDR - Cleanup of Talend Metrics
+--rollback GRANT `roles/bigquery.dataViewer` ON VIEW IDW_ACQ_REPORTS.CAMP_ENCLSR_1 TO "group:app_gcp_cdwp_idw_0374_pir@schwab.com";
+"""
+
     def supports() throws Exception {
         expect:
         assert new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).supports("asdf.sql", new JUnitResourceAccessor())
@@ -376,9 +456,24 @@ create table table1 (
         assert new MockFormattedSqlChangeLogParser(VALID_ALL_CAPS_CHANGELOG).supports("BLAH.SQL", new JUnitResourceAccessor())
     }
 
-    def invalidPrecondition() throws Exception {
+    def invalidChangesetID() throws Exception {
         when:
         new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_INVALID_PRECONDITION).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        then:
+        thrown(ChangeLogParseException)
+    }
+
+    def duplicateHeaderLines() throws Exception {
+        when:
+        new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_WITH_DUPLICATE_HEADERS).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        then:
+        def e = thrown(ChangeLogParseException)
+        e.getMessage().equals("Duplicate formatted SQL header at line 8")
+    }
+
+    def invalidPrecondition() throws Exception {
+        when:
+        new MockFormattedSqlChangeLogParser(INVALID_CHANGESET_ID).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
         then:
         thrown(ChangeLogParseException)
     }
@@ -394,6 +489,24 @@ create table table1 (
         assert e.getMessage().contains("Unexpected formatting in formatted changelog 'asdf.sql' at line 4.")
     }
 
+    def invalidWithLexicalError() throws Exception {
+        when:
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_WITH_LEXICAL_ERROR).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        def change = changeLog.getChangeSets().get(1).getChanges().get(0)
+        Map<String, Object> scopeValues = new HashMap<>();
+        scopeValues.put(ChangeSet.CHANGE_KEY, change);
+        Scope.child(scopeValues, new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                change.generateStatements(new MockDatabase())
+            }
+        })
+
+        then:
+        def e = thrown(UnexpectedLiquibaseException.class)
+        assert e.getMessage().contains("asdf.sql::2::postgres (issue at line 14 of lines 13-19)")
+    }
+
     def parse() throws Exception {
         expect:
         ChangeLogParameters params = new ChangeLogParameters()
@@ -402,7 +515,7 @@ create table table1 (
 
         changeLog.getLogicalFilePath() == "asdf.sql"
 
-        changeLog.getChangeSets().size() == 25
+        changeLog.getChangeSets().size() == 26
 
         changeLog.getChangeSets().get(0).getAuthor() == "nvoxland"
         changeLog.getChangeSets().get(0).getId() == "1"
@@ -947,6 +1060,8 @@ not ignoreLines here
         changeLog.getLogicalFilePath() == "asdf.sql"
         changeLog.getChangeSets().size() == 1
         changeLog.getChangeSets().get(0).getChanges().size() == 1
+        AbstractSQLChange sqlChange = (AbstractSQLChange)changeLog.getChangeSets().get(0).getChanges().get(0)
+        sqlChange.getEndDelimiter() == "/"
         def statements = changeLog.getChangeSets().get(0).getChanges().get(0).generateStatements(new MockDatabase())
         statements*.toString() == [
                 "CREATE OR REPLACE PROCEDURE any_procedure_name is\nBEGIN\n" +
@@ -956,6 +1071,13 @@ not ignoreLines here
                 "grant execute on any_procedure_name to ANY_USER2",
                 "grant execute on any_procedure_name to ANY_USER3",
         ]
+
+        ChangeLogParameters rollbackParams = new ChangeLogParameters()
+        DatabaseChangeLog rollbackChangelog =
+                new MockFormattedSqlChangeLogParser(ANOTHER_END_DELIMITER_CHANGELOG).parse("asdf.sql", rollbackParams, new JUnitResourceAccessor())
+        AbstractSQLChange rollbackSqlChange =
+                (AbstractSQLChange)rollbackChangelog.getChangeSets().get(0).getRollback().getChanges().get(0)
+        rollbackSqlChange.getEndDelimiter() == ";"
     }
 
     @Unroll("#featureName: #example")

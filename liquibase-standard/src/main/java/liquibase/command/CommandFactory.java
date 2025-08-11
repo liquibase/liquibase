@@ -19,7 +19,7 @@ public class CommandFactory implements SingletonObject {
     /**
      * A cache of all found command names and their corresponding command definition.
      */
-    private final Map<String[], CommandDefinition> commandDefinitions = new ConcurrentHashMap<>();
+    private static final Map<String, CommandDefinition> COMMAND_DEFINITIONS = new ConcurrentHashMap<>();
     /**
      * A cache of all found CommandStep classes and their corresponding override CommandStep.
      */
@@ -44,13 +44,14 @@ public class CommandFactory implements SingletonObject {
      * @throws IllegalArgumentException if the commandName is not known
      */
     public CommandDefinition getCommandDefinition(String... commandName) throws IllegalArgumentException{
-        CommandDefinition commandDefinition = commandDefinitions.get(commandName);
+        String commandNameKey = StringUtil.join(commandName, " ");
+        CommandDefinition commandDefinition = COMMAND_DEFINITIONS.get(commandNameKey);
         if (commandDefinition == null) { //Check if we have already computed arguments, dependencies, pipeline and adjusted definition
             commandDefinition = new CommandDefinition(commandName);
             computePipelineForCommandDefinition(commandDefinition);
             consolidateCommandArgumentsForCommand(commandDefinition);
             adjustCommandDefinitionForSteps(commandDefinition);
-            commandDefinitions.put(commandName, commandDefinition);
+            COMMAND_DEFINITIONS.put(commandNameKey, commandDefinition);
         }
         return commandDefinition;
     }
@@ -74,7 +75,7 @@ public class CommandFactory implements SingletonObject {
             // order > 0 means is means that this CommandStep has been declared as part of this command
             if (step.getOrder(commandDefinition) > 0) {
                 Optional<CommandStep> overrideStep = getOverride(overrides, step);
-                findDependenciesForCommand(pipelineGraph, allCommandStepInstances, overrideStep.orElse(step));
+                findDependenciesForCommand(pipelineGraph, allCommandStepInstances, overrideStep.orElse(step), overrides);
             }
         }
         pipelineGraph.computeDependencies();
@@ -96,23 +97,24 @@ public class CommandFactory implements SingletonObject {
      * Given a CommandStep step this method adds to the pipelineGraph all the CommandSteps that are providing the dependencies that it requires.
      */
     private void findDependenciesForCommand(DependencyUtil.DependencyGraph<CommandStep> pipelineGraph, Collection<CommandStep> allCommandStepInstances,
-                                            CommandStep step) {
+                                            CommandStep step, Map<Class<? extends CommandStep>, CommandStep> overrides) {
         if (step.requiredDependencies() == null || step.requiredDependencies().isEmpty()) {
             pipelineGraph.add(null, step);
         } else {
             for (Class<?> d : step.requiredDependencies()) {
-                CommandStep provider = whoProvidesClass(d, allCommandStepInstances);
-                pipelineGraph.add(provider, step);
-                findDependenciesForCommand(pipelineGraph, allCommandStepInstances, provider);
+                CommandStep provider = whoProvidesClass(d, allCommandStepInstances, overrides);
+                Optional<CommandStep> override = getOverride(overrides, provider);
+                pipelineGraph.add(override.orElse(provider), step);
+                findDependenciesForCommand(pipelineGraph, allCommandStepInstances, override.orElse(provider), overrides);
             }
         }
     }
 
     /**
-     * Go through all command steps and find the step that provides the desired class.
+     * Go through all command steps and find the step that provides the desired class, ignoring the overrides.
      */
-    private CommandStep whoProvidesClass(Class<?> dependency, Collection<CommandStep> allCommandStepInstances) {
-        return allCommandStepInstances.stream().filter(cs -> cs.providedDependencies() != null && cs.providedDependencies().contains(dependency))
+    private CommandStep whoProvidesClass(Class<?> dependency, Collection<CommandStep> allCommandStepInstances, Map<Class<? extends CommandStep>, CommandStep> overrides) {
+        return allCommandStepInstances.stream().filter(cs -> cs.providedDependencies() != null && cs.providedDependencies().contains(dependency) && !overrides.containsValue(cs))
                 .reduce((a, b) -> {
                     throw new IllegalStateException(String.format("More than one CommandStep provides class %s. Steps: %s, %s",
                             dependency.getName(), a.getClass().getName(), b.getClass().getName()));
@@ -147,9 +149,12 @@ public class CommandFactory implements SingletonObject {
     }
 
     private void adjustCommandDefinitionForSteps(CommandDefinition commandDefinition) {
+        boolean allInternal = true;
         for (CommandStep step : commandDefinition.getPipeline()) {
             step.adjustCommandDefinition(commandDefinition);
+            allInternal = step.isInternal() && allInternal;
         }
+        commandDefinition.setInternal(allInternal);
     }
 
     /**
@@ -197,7 +202,14 @@ public class CommandFactory implements SingletonObject {
         if (commandArgumentDefinitions.get(commandNameKey).contains(definition)) {
            throw new IllegalArgumentException("Duplicate argument '" + definition.getName() + "' found for command '" + commandNameKey + "'");
         }
+        if (definition.isRequired() && definition.getDefaultValue() != null) {
+            throw new IllegalArgumentException("Argument '" + definition.getName() + "' for command '" + commandNameKey + "' has both a default value and the isRequired flag set to true. Arguments with default values cannot be marked as required.");
+        }
         this.commandArgumentDefinitions.get(commandNameKey).add(definition);
+        CommandDefinition commandDefinition = COMMAND_DEFINITIONS.get(commandNameKey);
+        if (commandDefinition != null){
+            commandDefinition.add(definition);
+        }
     }
 
     /**
@@ -205,7 +217,9 @@ public class CommandFactory implements SingletonObject {
      * <bNOTE:</b> package-protected method used primarily for testing and may be removed or modified in the future.
      */
     protected void unregister(String[] commandName) {
-        commandArgumentDefinitions.remove(StringUtil.join(commandName, " "));
+        String commandNameKey = StringUtil.join(commandName, " ");
+        commandArgumentDefinitions.remove(commandNameKey);
+        COMMAND_DEFINITIONS.remove(commandNameKey);
     }
 
     /**
@@ -230,6 +244,17 @@ public class CommandFactory implements SingletonObject {
             }
         }
 
+    }
+
+    /**
+     *
+     * Reset the COMMAND_DEFINITIONS cache.  Added for tests.
+     *
+     * @return
+     *
+     */
+    public void resetCommandDefinitions() {
+        COMMAND_DEFINITIONS.clear();
     }
 
     //

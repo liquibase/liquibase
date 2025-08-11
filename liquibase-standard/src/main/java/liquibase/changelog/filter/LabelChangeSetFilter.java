@@ -34,8 +34,8 @@ public class LabelChangeSetFilter implements ChangeSetFilter {
             labelExpression = new LabelExpression();
         }
 
-        Collection<Labels> inheritableLabels = changeSet.getInheritableLabels();
-        if (labelExpression.matches(changeSet.getLabels()) && LabelExpression.matchesAll(inheritableLabels, labelExpression)) {
+        String allLabels = changeSet.buildFullLabels();
+        if (labelExpression.matches(new Labels(allLabels))) {
             return new ChangeSetFilterResult(true, "Labels matches '" + labelExpression.toString() + "'", this.getClass(), getMdcName(), getDisplayName());
         }
         else {

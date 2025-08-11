@@ -113,7 +113,7 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
         } catch (IOException e) {
             //the path gets stored in the databasechangelog table, so if it gets returned incorrectly it will cause future problems.
             //so throw a breaking error now rather than wait for bigger problems down the line
-            throw new UnexpectedLiquibaseException("Cannot determine resource path for " + resource.getDescription());
+            throw new UnexpectedLiquibaseException("Cannot determine resource path for " + resource.getDescription(), e);
         }
     }
 

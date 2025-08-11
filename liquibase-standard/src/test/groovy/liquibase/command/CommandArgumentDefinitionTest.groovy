@@ -78,10 +78,10 @@ class CommandArgumentDefinitionTest extends Specification {
         arg1.defaultValue == null
 
         when:
-        def arg2 = builder.argument("arg2", String).required().defaultValue("default value").description("This is arg2").build()
+        def arg2 = builder.argument("arg2", String).defaultValue("default value").description("This is arg2").build()
         then:
         arg2.name == "arg2"
-        arg2.required
+        !arg2.required
         arg2.defaultValue == "default value"
 
         when:
@@ -90,7 +90,13 @@ class CommandArgumentDefinitionTest extends Specification {
         def e = thrown(IllegalArgumentException)
         e.message == "Invalid argument format: kabob-case"
 
+        when:
+        builder.argument("arg3", String).defaultValue("def").required().build()
         then:
-        StringUtil.join(Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition("mock").getArguments(), ", ") == "arg1=arg1, arg2=arg2 (required)"
+        def e2 = thrown(IllegalArgumentException)
+        e2.message == "Argument 'arg3' for command 'mock' has both a default value and the isRequired flag set to true. Arguments with default values cannot be marked as required."
+
+        then:
+        StringUtil.join(Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition("mock").getArguments(), ", ") == "arg1=arg1, arg2=arg2"
     }
 }

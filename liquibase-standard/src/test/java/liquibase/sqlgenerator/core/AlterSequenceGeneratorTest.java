@@ -7,6 +7,7 @@ import liquibase.database.core.PostgresDatabase;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.statement.core.AlterSequenceStatement;
+import liquibase.structure.core.Sequence;
 import liquibase.test.TestContext;
 import org.junit.Test;
 
@@ -122,6 +123,6 @@ public class AlterSequenceGeneratorTest extends AbstractSqlGeneratorTest<AlterSe
 
     @Override
     protected boolean shouldBeImplementation(Database database) {
-        return database.supportsSequences();
+        return database.supports(Sequence.class);
     }
 }

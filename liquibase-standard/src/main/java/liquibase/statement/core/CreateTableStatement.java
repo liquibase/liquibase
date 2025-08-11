@@ -9,9 +9,6 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     /** Table type used by some RDBMS (Snowflake, SAP HANA) supporting different ... types ... of tables (e.g. column- vs. row-based) */
     private String tableType;
 
-    private final String catalogName;
-    private String schemaName;
-    private final String tableName;
     private String tablespace;
     private String remarks;
     private final List<String> columns = new ArrayList<>();
@@ -29,13 +26,15 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
        they are merely a property of the column. In others, like Oracle DB, they can exist in both forms, and to be
        able to give the NN constraint a name in CREATE TABLE, we need to save both the NN property as well as the NN constraint. To make things even more complicated, you cannot just add a NN constraint after the list
        of columns, like you could do with UNIQUE, CHECK or FOREIGN KEY constraints. They must be defined
-       in line with the column (this implies that a NN constraint can always affects exactly one column). */
+       in line with the column (this implies that a NN constraint can always affect exactly one column). */
     private final HashMap<String, NotNullConstraint> notNullColumns = new HashMap<>();
 
     private final Set<UniqueConstraint> uniqueConstraints = new LinkedHashSet<>();
     private final Set<String> computedColumns = new HashSet<>();
 
     private boolean ifNotExists;
+    private boolean rowDependencies;
+    private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
 
     public CreateTableStatement(String catalogName, String schemaName, String tableName) {
         this(catalogName, schemaName, tableName, null, null);
@@ -46,9 +45,9 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     }
 
     public CreateTableStatement(String catalogName, String schemaName, String tableName, String remarks, String tableType) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
+        this.databaseTableIdentifier.setCatalogName(catalogName);
+        this.databaseTableIdentifier.setSchemaName(schemaName);
+        this.databaseTableIdentifier.setTableName(tableName);
         this.remarks = remarks;
         this.tableType = tableType;
     }
@@ -63,16 +62,26 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         this.ifNotExists = ifNotExists;
     }
 
+    public CreateTableStatement(String catalogName, String schemaName, String tableName, boolean ifNotExists, boolean rowDependencies) {
+        this(catalogName, schemaName, tableName, ifNotExists);
+        this.rowDependencies = rowDependencies;
+    }
+
+    public CreateTableStatement(String catalogName, String schemaName, String tableName, String remarks, String tableType, boolean ifNotExists, boolean rowDependencies) {
+        this(catalogName, schemaName, tableName, remarks, tableType, ifNotExists);
+        this.rowDependencies = rowDependencies;
+    }
+
     public String getCatalogName() {
-        return catalogName;
+        return databaseTableIdentifier.getCatalogName();
     }
 
     public String getSchemaName() {
-        return schemaName;
+        return databaseTableIdentifier.getSchemaName();
     }
 
     public String getTableName() {
-        return tableName;
+        return databaseTableIdentifier.getTableName();
     }
 
     public List<String> getColumns() {
@@ -278,7 +287,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
+        this.databaseTableIdentifier.setSchemaName(schemaName);
     }
 
     public void setComputed(String columnName) {
@@ -304,4 +313,13 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     public void setIfNotExists(boolean ifNotExists) {
         this.ifNotExists = ifNotExists;
     }
+
+    public boolean isRowDependencies() {
+        return rowDependencies;
+    }
+
+    public void setRowDependencies(boolean rowDependencies) {
+        this.rowDependencies = rowDependencies;
+    }
+
 }

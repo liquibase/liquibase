@@ -2,6 +2,7 @@ package liquibase.diff.compare.core;
 
 import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
@@ -10,7 +11,9 @@ import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.DataType;
 import liquibase.util.BooleanUtil;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Locale;
 import java.util.Set;
@@ -50,7 +53,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
         Column thisColumn = (Column) databaseObject1;
         Column otherColumn = (Column) databaseObject2;
 
-        //short circut chain.isSameObject for performance reasons. There can be a lot of columns in a database
+        //short circuit chain.isSameObject for performance reasons. There can be a lot of columns in a database
         if (!DefaultDatabaseObjectComparator.nameMatches(thisColumn, otherColumn, accordingTo)) {
             return false;
         }
@@ -60,6 +63,10 @@ public class ColumnComparator implements DatabaseObjectComparator {
         }
 
         if (BooleanUtil.isTrue(thisColumn.getComputed()) != BooleanUtil.isTrue(otherColumn.getComputed())) {
+            return false;
+        }
+
+        if (BooleanUtils.isTrue(thisColumn.getIncluded()) != BooleanUtils.isTrue(otherColumn.getIncluded())) {
             return false;
         }
 
@@ -79,25 +86,44 @@ public class ColumnComparator implements DatabaseObjectComparator {
 
         ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo, compareControl, exclude);
 
+        DataType type1 = ((Column) databaseObject1).getType();
+        DataType type2 = ((Column) databaseObject2).getType();
+
         differences.compare("name", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
+        compareTypes(databaseObject1, databaseObject2, accordingTo, type1, type2, differences);
+        autoIncrementCompare((Column) databaseObject1, (Column) databaseObject2, accordingTo, compareControl, differences);
+
+        return differences;
+    }
+
+    private void compareTypes(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DataType type1, DataType type2, ObjectDifferences differences) {
+        // until 4.29.1 we used to snapshot MSSQL column sizes for int columns, but now we don't as it's not necessary
+        // (they are not really sizes, but rather display widths). So we need to ignore them in comparison as old snapshots
+        // will have them and new ones won't.
+        if (accordingTo instanceof MSSQLDatabase && type1.getTypeName().equalsIgnoreCase("int") && type2.getTypeName().equalsIgnoreCase("int")) {
+            type1.setColumnSize(null);
+            type2.setColumnSize(null);
+            databaseObject1.getAttribute("type", DataType.class).setColumnSize(null);
+            databaseObject2.getAttribute("type", DataType.class).setColumnSize(null);
+        }
         differences.compare("type", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
+    }
 
-        boolean autoIncrement1 = ((Column) databaseObject1).isAutoIncrement();
-        boolean autoIncrement2 = ((Column) databaseObject2).isAutoIncrement();
+    private void autoIncrementCompare(Column databaseObject1, Column databaseObject2, Database accordingTo, CompareControl compareControl, ObjectDifferences differences) {
+        boolean autoIncrement1 = databaseObject1.isAutoIncrement();
+        boolean autoIncrement2 = databaseObject2.isAutoIncrement();
 
-        if (autoIncrement1 != autoIncrement2 && !compareControl.isSuppressedField(Column.class, "autoIncrementInformation")) { //only compare if autoIncrement or not since there are sometimes expected differences in start/increment/etc value.
+        if (autoIncrement1 != autoIncrement2 && !compareControl.isSuppressedField(Column.class, "autoIncrementInformation")) { //only compare if autoIncrement or not since there are sometimes expected differences in start/increment/etc. value.
             differences.addDifference("autoIncrement", autoIncrement1, autoIncrement2);
         }
         if (accordingTo instanceof PostgresDatabase && autoIncrement1 && autoIncrement2) {
-            String type1 = ((Column) databaseObject1).getType().getTypeName();
-            String type2 = ((Column) databaseObject2).getType().getTypeName();
-            boolean typesEquivalent = isPostgresAutoIncrementEquivalentType(type1, type2) || isPostgresAutoIncrementEquivalentType(type2, type1);
+            String type1Name = databaseObject1.getType().getTypeName();
+            String type2Name = databaseObject2.getType().getTypeName();
+            boolean typesEquivalent = isPostgresAutoIncrementEquivalentType(type1Name, type2Name) || isPostgresAutoIncrementEquivalentType(type2Name, type1Name);
             if (typesEquivalent) {
                 differences.removeDifference("type");
             }
         }
-
-        return differences;
     }
 
     /**

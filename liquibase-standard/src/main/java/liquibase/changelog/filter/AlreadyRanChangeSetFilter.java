@@ -16,7 +16,7 @@ public class AlreadyRanChangeSetFilter extends RanChangeSetFilter {
         if (getRanChangeSet(changeSet) != null) {
             return new ChangeSetFilterResult(true, "Changeset already ran", this.getClass(), getMdcName(), getDisplayName());
         } else {
-            return new ChangeSetFilterResult(false, "Changeset has not ran", this.getClass(), getMdcName(), getDisplayName());
+            return new ChangeSetFilterResult(false, "Changeset has not run", this.getClass(), getMdcName(), getDisplayName());
         }
     }
 

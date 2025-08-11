@@ -1,6 +1,5 @@
 package liquibase.changeset;
 
-import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ModifyChangeSets;
@@ -91,6 +90,20 @@ public interface ChangeSetService extends Plugin {
 
     /**
      *
+     * Create the ModifyChangeSets instance which will do the modifications
+     *
+     * @param  runWith                    The runWith value
+     * @param  runWithSpool               The runWithSpool value
+     * @param  stripComments              Remove comments from the SQL
+     * @return ModifyChangeSets           The object which will perform the modifications
+     *
+     */
+    default ModifyChangeSets createModifyChangeSets(String runWith, String runWithSpool, boolean stripComments) {
+        return new ModifyChangeSets(runWith, runWithSpool, stripComments);
+    }
+
+    /**
+     *
      * Given a change set and a ModifyChangeSets instance, perform the modifications
      *
      * @param changeSet                  The change set to modify
@@ -120,6 +133,25 @@ public interface ChangeSetService extends Plugin {
      *
      */
     default String getEndDelimiter(ChangeSet changeSet) {
+        return null;
+    }
+
+    /**
+     * Check for an override for a change-level strip comments
+     *
+     * @param stripComments The stripComments to override
+     * @return String         The override setting
+     */
+    default Boolean getOverrideStripComments(boolean stripComments) {
+        return stripComments;
+    }
+
+    /**
+     * Default implementation returns null
+     *
+     * @param changeSet Unused
+     */
+    default Boolean getStripComments(ChangeSet changeSet) {
         return null;
     }
 

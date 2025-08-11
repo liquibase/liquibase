@@ -13,6 +13,7 @@ import liquibase.exception.ChangeLogParseException
 import liquibase.exception.LiquibaseException
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.test.JUnitResourceAccessor
+import liquibase.util.LiquibaseUtil
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -173,13 +174,13 @@ class XMLChangeLogSAXParserTest extends Specification {
         XMLChangeLogSAXParser.computeSchemaVersion(buildVersion) == expected
 
         where:
-        buildVersion | expected
-        "DEV"        | "latest"
-        "4.11.0"     | "4.11"
-        "4.11.1"     | "4.11"
-        "4"          | "latest" //weird versions go to latest
-        ""           | "latest" //weird versions go to latest
-        null         | "latest" //weird versions go to latest
+        buildVersion              | expected
+        LiquibaseUtil.DEV_VERSION | "latest"
+        "4.11.0"                  | "4.11"
+        "4.11.1"                  | "4.11"
+        "4"                       | "latest" //weird versions go to latest
+        ""                        | "latest" //weird versions go to latest
+        null                      | "latest" //weird versions go to latest
     }
 
 }

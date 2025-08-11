@@ -9,6 +9,7 @@ import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
@@ -177,11 +178,18 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         alterTable += getDefaultClause(statement, database);
 
         if (!statement.isNullable()) {
+            String notNullConstraintName = null;
             for (ColumnConstraint constraint : statement.getConstraints()) {
                 if (constraint instanceof NotNullConstraint) {
                     NotNullConstraint notNullConstraint = (NotNullConstraint) constraint;
                     if (StringUtil.isNotEmpty(notNullConstraint.getConstraintName())) {
-                        alterTable += " CONSTRAINT " + database.escapeConstraintName(notNullConstraint.getConstraintName());
+                        notNullConstraintName = notNullConstraint.getConstraintName();
+                    }
+                    //
+                    // Handle non-Snowflake database
+                    //
+                    if (! database.getShortName().equalsIgnoreCase("snowflake") && StringUtil.isNotEmpty(notNullConstraintName)) {
+                        alterTable += " CONSTRAINT " + database.escapeConstraintName(notNullConstraintName);
                         break;
                     }
                 }
@@ -189,6 +197,11 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
             alterTable += " NOT NULL";
             if (database instanceof OracleDatabase) {
                 alterTable += !statement.shouldValidateNullable() ? " ENABLE NOVALIDATE " : "";
+            } else if (database.getShortName().equalsIgnoreCase("snowflake") && notNullConstraintName != null) {
+                //
+                // Snowflake syntax puts the name after the NOT NULL
+                //
+                alterTable += " CONSTRAINT " + database.escapeConstraintName(notNullConstraintName) + " UNIQUE";
             }
         } else {
             if ((database instanceof SybaseDatabase) || (database instanceof SybaseASADatabase) || (database
@@ -280,7 +293,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         String clause = "";
         Object defaultValue = statement.getDefaultValue();
         if (defaultValue != null) {
-            if ((database instanceof OracleDatabase) && defaultValue.toString().startsWith("GENERATED ALWAYS ")) {
+            if ((database instanceof OracleDatabase || database instanceof PostgresDatabase) && defaultValue.toString().startsWith("GENERATED ALWAYS ")) {
                 clause += " " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database);
             } else {
                 if (database instanceof MSSQLDatabase) {

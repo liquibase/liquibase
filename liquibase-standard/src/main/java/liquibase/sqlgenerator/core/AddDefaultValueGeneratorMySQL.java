@@ -36,7 +36,7 @@ public class AddDefaultValueGeneratorMySQL extends AddDefaultValueGenerator {
             }
         }
         catch (DatabaseException e){
-            Scope.getCurrentScope().getLog(getClass()).fine("Can't get default value");
+            Scope.getCurrentScope().getLog(getClass()).fine("Can't get default value: " + e);
         }
         return errors;
     }
@@ -55,7 +55,7 @@ public class AddDefaultValueGeneratorMySQL extends AddDefaultValueGenerator {
                 }
             }
             catch (DatabaseException e) {
-                Scope.getCurrentScope().getLog(getClass()).fine("Can't get database version");
+                Scope.getCurrentScope().getLog(getClass()).fine("Can't get database version: " + e);
             }
 
             finalDefaultValue = "("+defaultValue+")";

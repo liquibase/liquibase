@@ -4,6 +4,7 @@ import groovy.lang.Tuple2;
 import liquibase.*;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.LoadDataChange;
+import liquibase.change.custom.ExampleCustomTaskChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -19,7 +20,6 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.datatype.core.ClobType;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
@@ -51,6 +51,7 @@ import liquibase.statement.core.DropTableStatement;
 import liquibase.structure.core.*;
 import liquibase.test.DiffResultAssert;
 import liquibase.test.JUnitResourceAccessor;
+import liquibase.util.ExceptionUtil;
 import liquibase.util.RegexMatcher;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
@@ -69,6 +70,7 @@ import java.util.stream.Collectors;
 import static liquibase.test.SnapshotAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Base class for all database integration tests.  There is an AbstractIntegrationTest subclass for each supported database.
@@ -188,6 +190,7 @@ public abstract class AbstractIntegrationTest {
                     database.commit();
                 }
             } catch (SQLException e) {
+                logger.warning(String.format("Failed to drop table %s", database.getDatabaseChangeLogLockTableName()), e);
                 if (database instanceof PostgresDatabase) { // throws "current transaction is aborted" unless we roll back the connection
                     database.rollback();
                 }
@@ -202,11 +205,11 @@ public abstract class AbstractIntegrationTest {
             String altSchema = testSystem.getAltSchema();
             String altCatalog = testSystem.getAltCatalog();
 
-            if (database.supportsSchemas()) {
+            if (database.supports(Schema.class)) {
                 emptyTestSchema(null, altSchema, database);
             }
             if (supportsAltCatalogTests()) {
-                if (database.supportsSchemas() && database.supportsCatalogs()) {
+                if (database.supports(Schema.class) && database.supports(Catalog.class)) {
                     emptyTestSchema(altCatalog, altSchema, database);
                 }
             }
@@ -263,7 +266,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected boolean supportsAltCatalogTests() {
-        return database.supportsCatalogs();
+        return database.supports(Catalog.class);
     }
 
     protected Properties createProperties() {
@@ -293,6 +296,7 @@ public abstract class AbstractIntegrationTest {
             }
         }
         SnapshotGeneratorFactory.resetAll();
+        DatabaseObjectFactory.getInstance().reset();
     }
 
     protected boolean shouldRollBack() {
@@ -434,7 +438,7 @@ public abstract class AbstractIntegrationTest {
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter("loginuser", testSystem.getUsername());
-        liquibase.update(this.contexts, output);
+        liquibase.updateSql(new Contexts(this.contexts), null, output);
 
         String outputResult = output.getBuffer().toString();
         assertNotNull("generated output change log must not be empty", outputResult);
@@ -542,6 +546,7 @@ public abstract class AbstractIntegrationTest {
         liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         liquibase.update(this.contexts);
         liquibase.update(this.contexts);
+
     }
 
     @Test
@@ -566,21 +571,34 @@ public abstract class AbstractIntegrationTest {
     @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testRollbackableChangeLog() throws Exception {
         assumeNotNull(this.getDatabase());
+        Map<String, Object> initialMap =  new HashMap<>();
+        initialMap.put(ExampleCustomTaskChange.COUNT_MAP_EXECUTE_CALL_COUNT, 0);
+        initialMap.put(ExampleCustomTaskChange.COUNT_MAP_ROLLBACK_CALL_COUNT, 0);
 
-        Liquibase liquibase = createLiquibase(rollbackChangeLog);
-        clearDatabase();
+        Scope.child(ExampleCustomTaskChange.SCOPE_ATTR_CALL_COUNT_MAP, initialMap, () -> {
+            Liquibase liquibase = createLiquibase(rollbackChangeLog);
+            clearDatabase();
 
-        liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.update(this.contexts);
+            liquibase.update(this.contexts);
 
-        liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.rollback(new Date(0), this.contexts);
+            Map<String, Object> map = Scope.getCurrentScope().get(ExampleCustomTaskChange.SCOPE_ATTR_CALL_COUNT_MAP, Map.class);
+            Integer executeCallCountInteger = (Integer) map.get(ExampleCustomTaskChange.COUNT_MAP_EXECUTE_CALL_COUNT);
+            Integer rollbackCallCount = (Integer)map.get(ExampleCustomTaskChange.COUNT_MAP_ROLLBACK_CALL_COUNT);
+            // call `execute` method
+            assertEquals(1, (int)executeCallCountInteger);
+            assertEquals(0, (int)rollbackCallCount);
 
-        liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.update(this.contexts);
+            liquibase.rollback(new Date(0), this.contexts);
+            executeCallCountInteger = (Integer) map.get(ExampleCustomTaskChange.COUNT_MAP_EXECUTE_CALL_COUNT) ;
+            rollbackCallCount = (Integer)map.get(ExampleCustomTaskChange.COUNT_MAP_ROLLBACK_CALL_COUNT);
+            // call `rollback` method
+            assertEquals(1, (int)executeCallCountInteger);
+            assertEquals(1, (int)rollbackCallCount);
 
-        liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.rollback(new Date(0), this.contexts);
+            liquibase.update(this.contexts);
+
+            liquibase.rollback(new Date(0), this.contexts);
+        });
     }
 
     @Test
@@ -629,6 +647,8 @@ public abstract class AbstractIntegrationTest {
 
         liquibase.tag("Test Tag");
         assertTrue(liquibase.tagExists("Test Tag"));
+
+        clearDatabase();
     }
 
     @Test
@@ -678,13 +698,7 @@ public abstract class AbstractIntegrationTest {
                 compareControl.addSuppressedField(View.class, "name");
             }
 
-            DiffOutputControl diffOutputControl = new DiffOutputControl();
             File tempFile = tempDirectory.getRoot().createTempFile("liquibase-test", ".xml");
-
-            if (outputCsv) {
-                diffOutputControl.setDataDir(new File(tempFile.getParentFile(), "liquibase-data").getCanonicalPath().replaceFirst("\\w:",""));
-            }
-
             DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, null, compareControl);
 
 
@@ -755,7 +769,7 @@ public abstract class AbstractIntegrationTest {
         if (database.getShortName().equalsIgnoreCase("mssql")) {
             return; // not possible on MSSQL.
         }
-        if (!database.supportsSchemas()) {
+        if (!database.supports(Schema.class)) {
             return;
         }
 
@@ -783,6 +797,7 @@ public abstract class AbstractIntegrationTest {
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, null, compareControl);
 
         File tempFile = File.createTempFile("liquibase-test", ".xml");
+        tempFile.deleteOnExit();
 
         try (FileOutputStream output = new FileOutputStream(tempFile)) {
             new DiffToChangeLog(diffResult, new DiffOutputControl()).print(new PrintStream(output));
@@ -931,6 +946,8 @@ public abstract class AbstractIntegrationTest {
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         liquibase.generateDocumentation(outputDir.toAbsolutePath().toString(), this.contexts);
+
+        clearDatabase();
     }
 
     /**
@@ -946,7 +963,7 @@ public abstract class AbstractIntegrationTest {
         Liquibase liquibase = createLiquibase(encodingChangeLog);
 
         StringWriter writer=new StringWriter();
-        liquibase.update(this.contexts,writer);
+        liquibase.updateSql(new Contexts(this.contexts), null, writer);
         assertTrue("Update to SQL preserves encoding",
             new RegexMatcher(writer.toString(), new String[] {
                 //For the UTF-8 encoded cvs
@@ -992,11 +1009,13 @@ public abstract class AbstractIntegrationTest {
     public void testInvalidSqlThrowsException() throws Exception {
         assumeNotNull(this.getDatabase());
         Liquibase liquibase = createLiquibase(invalidSqlChangeLog);
+        Throwable exception = null;
         try {
             liquibase.update(new Contexts());
             fail("Did not fail with invalid SQL");
         } catch (CommandExecutionException executionException) {
-            Assert.assertTrue(executionException.getMessage().contains("this sql is not valid and should throw an exception"));
+            exception = ExceptionUtil.findExceptionInCauseChain(executionException.getCause(), DatabaseException.class);
+            Assert.assertTrue(exception.getCause() instanceof DatabaseException);
         }
 
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
@@ -1047,7 +1066,7 @@ public abstract class AbstractIntegrationTest {
         clearDatabase();
 
         liquibase = createLiquibase(includedChangeLog);
-        liquibase.update(contexts, output);
+        liquibase.updateSql(new Contexts(contexts), null, output);
 
         String outputResult = output.getBuffer().toString();
         assertNotNull("generated SQL may not be empty", outputResult);
@@ -1071,6 +1090,7 @@ public abstract class AbstractIntegrationTest {
         List<ChangeSet> changeSets = changeLogWriter.generateChangeSets();
         assertEquals("generating two change logs without any changes in between should result in an empty generated " +
                 "differential changeset.", 0, changeSets.size());
+        clearDatabase();
     }
 
     @Test
@@ -1092,7 +1112,7 @@ public abstract class AbstractIntegrationTest {
 
         CreateTableStatement clobTableCreator = new CreateTableStatement(
                 database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), "tableWithClob");
-        clobTableCreator.addColumn("clobColumn", new ClobType());
+        clobTableCreator.addColumn("clobColumn", DataTypeFactory.getInstance().fromDescription("clob", database));
         InsertExecutablePreparedStatement insertStatement = new InsertExecutablePreparedStatement(
                 database, database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(),
                 "tableWithClob", Arrays.asList(clobColumn),
@@ -1377,6 +1397,14 @@ public abstract class AbstractIntegrationTest {
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, testSystem.getPassword());
         commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changelog);
         commandScope.execute();
+    }
+
+    protected List<ChangeSet> generateChangelog() throws LiquibaseException{
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, null, new CompareControl());
+
+        DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, new DiffOutputControl(false, false, false, null));
+        List<ChangeSet> changeSets = changeLogWriter.generateChangeSets();
+        return changeSets;
     }
 
     public static final class ApplyTestChangelog {

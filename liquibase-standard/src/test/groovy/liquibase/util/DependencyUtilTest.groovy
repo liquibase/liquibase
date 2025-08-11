@@ -1,8 +1,9 @@
 package liquibase.util
 
 import org.hamcrest.CoreMatchers
-import org.junit.*
+import org.junit.Assert
 import spock.lang.Specification
+import spock.lang.Timeout
 
 class DependencyUtilTest extends Specification {
 
@@ -82,7 +83,7 @@ class DependencyUtilTest extends Specification {
     }
 
     /* negative load */
-    @Test(timeout = 3000L)
+    @Timeout(3)
     void recursionSafetyCheck_edgeCase() {
         when:
         graph.add("a", "a")
@@ -93,7 +94,7 @@ class DependencyUtilTest extends Specification {
         dependencyOrder != null
     }
 
-    @Test(timeout = 3000L)
+    @Timeout(3)
     void recursionSafetyCheck() {
         when:
         // a > B > c > d > B
@@ -107,7 +108,7 @@ class DependencyUtilTest extends Specification {
         Assert.assertThat(dependencyOrder, CoreMatchers.hasItem("a")) // we try to capture something
     }
 
-    @Test(timeout = 3000L)
+    @Timeout(3)
     void recursionSafetyCheck2() {
         when:
         //     a > B > c > d
@@ -125,7 +126,7 @@ class DependencyUtilTest extends Specification {
         Assert.assertThat(dependencyOrder, CoreMatchers.hasItem("a"))
     }
 
-    @Test(timeout = 3000L)
+    @Timeout(3)
     void recursionSafetyCheck_rand() {
         when:
         Random rand = new Random()

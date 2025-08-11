@@ -18,11 +18,12 @@ import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectCollectionComparator;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.core.ChangelogPrintService;
+import liquibase.diff.output.changelog.core.ChangelogPrintServiceFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.resource.OpenOptions;
 import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
 import liquibase.serializer.ChangeLogSerializer;
@@ -30,19 +31,17 @@ import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.statement.core.RawParameterizedSqlStatement;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.StoredDatabaseLogic;
 import liquibase.structure.core.Table;
 import liquibase.util.DependencyUtil;
-import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemProperties;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -55,6 +54,7 @@ public class DiffToChangeLog {
     public static final String ORDER_ATTRIBUTE = "order";
     public static final String DATABASE_CHANGE_LOG_CLOSING_XML_TAG = "</databaseChangeLog>";
     public static final String EXTERNAL_FILE_DIR_SCOPE_KEY = "DiffToChangeLog.externalFilesDir";
+    public static final String OBJECT_CHANGELOGS_SCOPE_KEY = "DiffToChangeLog.objectsChangelog";
     public static final String DIFF_OUTPUT_CONTROL_SCOPE_KEY = "diffOutputControl";
     public static final String DIFF_SNAPSHOT_DATABASE = "snapshotDatabase";
 
@@ -168,6 +168,8 @@ public class DiffToChangeLog {
             if (database == null) {
                 database = determineDatabase(diffResult.getComparisonSnapshot());
             }
+            ChangelogPrintServiceFactory printServiceFactory = Scope.getCurrentScope().getSingleton(ChangelogPrintServiceFactory.class);
+            ChangelogPrintService printService = printServiceFactory.getChangeLogPrintService(this);
             newScopeObjects.put(DIFF_SNAPSHOT_DATABASE, database);
             Scope.child(newScopeObjects, new Scope.ScopedRunner() {
                 @Override
@@ -175,45 +177,9 @@ public class DiffToChangeLog {
                     try {
                         if (!file.exists()) {
                             //print changeLog only if there are available changeSets to print instead of printing it always
-                            printNew(changeLogSerializer, file);
+                            printService.printNew(changeLogSerializer, file);
                         } else {
-                            StringBuilder fileContents = new StringBuilder();
-                            ByteArrayOutputStream out = new ByteArrayOutputStream();
-                            print(new PrintStream(out, true, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()), changeLogSerializer);
-
-                            String xml = new String(out.toByteArray(), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue());
-                            if (overwriteOutputFile) {
-                                // write xml contents to file
-                                Scope.getCurrentScope().getLog(getClass()).info(file.getUri() + " exists, overwriting");
-                                fileContents.append(xml);
-                            } else {
-                                // read existing file
-                                Scope.getCurrentScope().getLog(getClass()).info(file.getUri() + " exists, appending");
-                                fileContents = new StringBuilder(StreamUtil.readStreamAsString(file.openInputStream()));
-
-                                String innerXml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
-
-                                innerXml = innerXml.replaceFirst(DATABASE_CHANGE_LOG_CLOSING_XML_TAG, "");
-                                innerXml = innerXml.trim();
-                                if ("".equals(innerXml)) {
-                                    Scope.getCurrentScope().getLog(getClass()).info("No changes found, nothing to do");
-                                    return;
-                                }
-
-                                // insert new XML
-                                int endTagIndex = fileContents.indexOf(DATABASE_CHANGE_LOG_CLOSING_XML_TAG);
-                                if (endTagIndex == -1) {
-                                    fileContents.append(xml);
-                                } else {
-                                    String lineSeparator = GlobalConfiguration.OUTPUT_LINE_SEPARATOR.getCurrentValue();
-                                    String toInsert = "    " + innerXml + lineSeparator;
-                                    fileContents.insert(endTagIndex, toInsert);
-                                }
-                            }
-
-                            try (OutputStream outputStream = file.openOutputStream(new OpenOptions())) {
-                                outputStream.write(fileContents.toString().getBytes());
-                            }
+                            printService.printToExisting(changeLogSerializer, file, overwriteOutputFile);
                         }
                     } catch (Exception e) {
                         throw new RuntimeException(e);
@@ -246,33 +212,30 @@ public class DiffToChangeLog {
         DatabaseConnection connection = database.getConnection();
         if (! (connection instanceof OfflineConnection) && database instanceof PostgresDatabase) {
             return database;
+        } else {
+            DatabaseFactory databaseFactory = Scope.getCurrentScope().getSingleton(DatabaseFactory.class);
+            database = databaseFactory.getDatabase(database.getShortName());
         }
-        return null;
+        return database;
     }
 
     /**
+     *
      * Prints changeLog that would bring the target database to be the same as
-     * the reference database
+     * the reference database.  This method now delegates to the ChangelogPrintService
+     *
      */
     public void printNew(ChangeLogSerializer changeLogSerializer, Resource file) throws ParserConfigurationException, IOException, DatabaseException {
-
-        List<ChangeSet> changeSets = generateChangeSets();
-
-        Scope.getCurrentScope().getLog(getClass()).info("changeSets count: " + changeSets.size());
-        if (changeSets.isEmpty()) {
-            Scope.getCurrentScope().getLog(getClass()).info("No changesets to add to the changelog output.");
-        } else {
-            Scope.getCurrentScope().getLog(getClass()).info(file + " does not exist, creating and adding " + changeSets.size() + " changesets.");
-            try (OutputStream stream = file.openOutputStream(new OpenOptions());
-                 PrintStream out = new PrintStream(stream, true, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())) {
-                 changeLogSerializer.write(changeSets, out);
-            }
-        }
+        ChangelogPrintServiceFactory printServiceFactory = Scope.getCurrentScope().getSingleton(ChangelogPrintServiceFactory.class);
+        ChangelogPrintService printService = printServiceFactory.getChangeLogPrintService(this);
+        printService.printNew(changeLogSerializer, file);
     }
 
     /**
+     *
      * Prints changeLog that would bring the target database to be the same as
      * the reference database
+     *
      */
     public void print(final PrintStream out, final ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
         List<ChangeSet> changeSets = generateChangeSets();
@@ -282,6 +245,13 @@ public class DiffToChangeLog {
         out.flush();
     }
 
+    /**
+     *
+     * Use the DiffResult to generate change sets
+     *
+     * @return  List<ChangeSet>
+     *
+     */
     public List<ChangeSet> generateChangeSets() {
         final ChangeGeneratorFactory changeGeneratorFactory = ChangeGeneratorFactory.getInstance();
         DatabaseObjectCollectionComparator comparator = new DatabaseObjectCollectionComparator();
@@ -365,10 +335,10 @@ public class DiffToChangeLog {
     }
 
     private void setReplaceIfExistsTrueIfApplicable(Change[] changes) {
-        if(changes !=null && diffOutputControl.isReplaceIfExistsSet()) {
-            for(int i=0; i < changes.length; i++) {
-                if (changes[i] instanceof ReplaceIfExists) {
-                    ((ReplaceIfExists) changes[i]).setReplaceIfExists(true);
+        if (changes !=null && diffOutputControl.isReplaceIfExistsSet()) {
+            for (Change change : changes) {
+                if (change instanceof ReplaceIfExists) {
+                    ((ReplaceIfExists) change).setReplaceIfExists(true);
                 }
             }
         }
@@ -580,10 +550,10 @@ public class DiffToChangeLog {
         List<Map<String, ?>> rs = null;
         try {
             if (tryDbaDependencies) {
-                rs = executor.queryForList(new RawSqlStatement("select OWNER, NAME, REFERENCED_OWNER, REFERENCED_NAME from DBA_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(OWNER = REFERENCED_OWNER AND NAME = REFERENCED_NAME) AND (" + StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "OWNER='" + obj + "'"
+                rs = executor.queryForList(new RawParameterizedSqlStatement("select OWNER, NAME, REFERENCED_OWNER, REFERENCED_NAME from DBA_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(OWNER = REFERENCED_OWNER AND NAME = REFERENCED_NAME) AND (" + StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "OWNER='" + obj + "'"
                 ) + ")"));
             } else {
-                rs = executor.queryForList(new RawSqlStatement("select NAME, REFERENCED_OWNER, REFERENCED_NAME from USER_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(NAME = REFERENCED_NAME) AND (" + StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "REFERENCED_OWNER='" + obj + "'"
+                rs = executor.queryForList(new RawParameterizedSqlStatement("select NAME, REFERENCED_OWNER, REFERENCED_NAME from USER_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(NAME = REFERENCED_NAME) AND (" + StringUtil.join(schemas, " OR ", (StringUtil.StringUtilFormatter<String>) obj -> "REFERENCED_OWNER='" + obj + "'"
                 ) + ")"));
             }
         } catch (DatabaseException dbe) {
@@ -624,8 +594,8 @@ public class DiffToChangeLog {
             String sql = "select TABSCHEMA, TABNAME, BSCHEMA, BNAME from syscat.tabdep where TABSCHEMA in (" + StringUtil.join(schemas, ", ", obj -> "?") + ")";
             List<Map<String, ?>> rs = executor.queryForList(new RawParameterizedSqlStatement(sql, schemas.toArray()));
             for (Map<String, ?> row : rs) {
-                String tabName = StringUtil.trimToNull((String) row.get("TABSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("TABNAME"));
-                String bName = StringUtil.trimToNull((String) row.get("BSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("BNAME"));
+                String tabName = StringUtils.trimToNull((String) row.get("TABSCHEMA")) + "." + StringUtils.trimToNull((String) row.get("TABNAME"));
+                String bName = StringUtils.trimToNull((String) row.get("BSCHEMA")) + "." + StringUtils.trimToNull((String) row.get("BNAME"));
 
                 graph.add(bName, tabName);
             }
@@ -634,8 +604,8 @@ public class DiffToChangeLog {
             String sql = "SELECT DSCHEMA AS TABSCHEMA, DNAME AS TABNAME, BSCHEMA, BNAME FROM SYSIBM.SYSDEPENDENCIES WHERE DSCHEMA IN (" + StringUtil.join(schemas, ", ", obj -> "?") + ")";
             List<Map<String, ?>> rs = executor.queryForList(new RawParameterizedSqlStatement(sql, schemas.toArray()));
             for (Map<String, ?> row : rs) {
-                String tabName = StringUtil.trimToNull((String) row.get("TABSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("TABNAME"));
-                String bName = StringUtil.trimToNull((String) row.get("BSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("BNAME"));
+                String tabName = StringUtils.trimToNull((String) row.get("TABSCHEMA")) + "." + StringUtils.trimToNull((String) row.get("TABNAME"));
+                String bName = StringUtils.trimToNull((String) row.get("BSCHEMA")) + "." + StringUtils.trimToNull((String) row.get("BNAME"));
 
                 graph.add(bName, tabName);
             }
@@ -646,16 +616,16 @@ public class DiffToChangeLog {
                 String tabName = null;
                 if (tryDbaDependencies) {
                     tabName =
-                            StringUtil.trimToNull((String) row.get("OWNER")) + "." +
-                                    StringUtil.trimToNull((String) row.get("NAME"));
+                            StringUtils.trimToNull((String) row.get("OWNER")) + "." +
+                                    StringUtils.trimToNull((String) row.get("NAME"));
                 } else {
                     tabName =
-                            StringUtil.trimToNull((String) row.get("REFERENCED_OWNER")) + "." +
-                                    StringUtil.trimToNull((String) row.get("NAME"));
+                            StringUtils.trimToNull((String) row.get("REFERENCED_OWNER")) + "." +
+                                    StringUtils.trimToNull((String) row.get("NAME"));
                 }
                 String bName =
-                        StringUtil.trimToNull((String) row.get("REFERENCED_OWNER")) + "." +
-                                StringUtil.trimToNull((String) row.get("REFERENCED_NAME"));
+                        StringUtils.trimToNull((String) row.get("REFERENCED_OWNER")) + "." +
+                                StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
 
                 graph.add(bName, tabName);
             }
@@ -718,11 +688,11 @@ public class DiffToChangeLog {
             //get non-clustered indexes -> unique clustered indexes on views dependencies
             sql += " UNION select object_schema_name(c.object_id) as referencing_schema_name, c.name as referencing_name, object_schema_name(nc.object_id) as referenced_schema_name, nc.name as referenced_name from sys.indexes c join sys.indexes nc on c.object_id=nc.object_id JOIN sys.objects o ON c.object_id = o.object_id where  c.index_id != nc.index_id and c.type_desc='CLUSTERED' and c.is_unique='true' and (not(nc.type_desc='CLUSTERED') OR nc.is_unique='false') AND o.type_desc='VIEW' AND o.name='AR_DETAIL_OPEN'";
 
-            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(sql));
+            List<Map<String, ?>> rs = executor.queryForList(new RawParameterizedSqlStatement(sql));
             if (!rs.isEmpty()) {
                 for (Map<String, ?> row : rs) {
-                    String bName = StringUtil.trimToNull((String) row.get("REFERENCED_SCHEMA_NAME")) + "." + StringUtil.trimToNull((String) row.get("REFERENCED_NAME"));
-                    String tabName = StringUtil.trimToNull((String) row.get("REFERENCING_SCHEMA_NAME")) + "." + StringUtil.trimToNull((String) row.get("REFERENCING_NAME"));
+                    String bName = StringUtils.trimToNull((String) row.get("REFERENCED_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
+                    String tabName = StringUtils.trimToNull((String) row.get("REFERENCING_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCING_NAME"));
 
                     if (!bName.equals(tabName)) {
                         graph.add(bName, tabName);
@@ -732,13 +702,13 @@ public class DiffToChangeLog {
         } else if (database instanceof PostgresDatabase) {
             final String sql = queryForDependenciesPostgreSql(schemas);
             final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-            final List<Map<String, ?>> queryForListResult = executor.queryForList(new RawSqlStatement(sql));
+            final List<Map<String, ?>> queryForListResult = executor.queryForList(new RawParameterizedSqlStatement(sql));
 
             for (Map<String, ?> row : queryForListResult) {
-                String bName = StringUtil.trimToEmpty((String) row.get("REFERENCING_SCHEMA_NAME")) +
-                        "." + StringUtil.trimToEmpty((String)row.get("REFERENCING_NAME"));
-                String tabName = StringUtil.trimToEmpty((String)row.get("REFERENCED_SCHEMA_NAME")) +
-                        "." + StringUtil.trimToEmpty((String)row.get("REFERENCED_NAME"));
+                String bName = StringUtils.trimToEmpty((String) row.get("REFERENCING_SCHEMA_NAME")) +
+                        "." + StringUtils.trimToEmpty((String)row.get("REFERENCING_NAME"));
+                String tabName = StringUtils.trimToEmpty((String)row.get("REFERENCED_SCHEMA_NAME")) +
+                        "." + StringUtils.trimToEmpty((String)row.get("REFERENCED_NAME"));
 
                 if (!(tabName.isEmpty() || bName.isEmpty())) {
                     graph.add(bName.replace("\"", ""), tabName.replace("\"", ""));
@@ -917,8 +887,8 @@ public class DiffToChangeLog {
         if (changeSetAuthor != null) {
             return changeSetAuthor;
         }
-        String author = System.getProperty("user.name");
-        if (StringUtil.trimToNull(author) == null) {
+        String author = SystemProperties.getUserName();
+        if (StringUtils.trimToNull(author) == null) {
             return "diff-generated";
         } else {
             return author + " (generated)";

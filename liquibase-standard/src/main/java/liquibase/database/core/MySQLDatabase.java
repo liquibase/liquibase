@@ -8,18 +8,18 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.Warnings;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Sequence;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
+import java.sql.Types;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
  */
 public class MySQLDatabase extends AbstractJdbcDatabase {
     private static final String PRODUCT_NAME = "MySQL";
-    private static final Set<String> RESERVED_WORDS = createReservedWords();
+    private final Set<String> reservedWords = createReservedWords();
 
     /** Pattern used to extract function precision like 3 in CURRENT_TIMESTAMP(3) */
     private static final String  PRECISION_REGEX = "\\(\\d+\\)";
@@ -113,7 +113,6 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsSequences() {
-
         return false;
     }
 
@@ -186,6 +185,17 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Schema.class.isAssignableFrom(object)) {
+            return false;
+        }
+        if (Sequence.class.isAssignableFrom(object)) {
+            return false;
+        }
+        return super.supports(object);
+    }
+
+    @Override
     public boolean supportsSchemas() {
         return false;
     }
@@ -207,14 +217,14 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean disableForeignKeyChecks() throws DatabaseException {
-        boolean enabled = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForInt(new RawSqlStatement("SELECT @@FOREIGN_KEY_CHECKS")) == 1;
-        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=0"));
+        boolean enabled = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForInt(new RawParameterizedSqlStatement("SELECT @@FOREIGN_KEY_CHECKS")) == 1;
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(new RawParameterizedSqlStatement("SET FOREIGN_KEY_CHECKS=0"));
         return enabled;
     }
 
     @Override
     public void enableForeignKeyChecks() throws DatabaseException {
-        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=1"));
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(new RawParameterizedSqlStatement("SET FOREIGN_KEY_CHECKS=1"));
     }
 
     @Override
@@ -238,7 +248,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean isReservedWord(String string) {
-        if (RESERVED_WORDS.contains(string.toUpperCase())) {
+        if (reservedWords.contains(string.toUpperCase())) {
             return true;
         }
         return super.isReservedWord(string);
@@ -257,6 +267,16 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             return 0;
         }
 
+    }
+
+    public Integer getFSPFromTimeType(int columnSize, int jdbcType) {
+        if (jdbcType == Types.TIMESTAMP) {
+            if (columnSize > 20 && columnSize < 27) {
+                return columnSize % 10;
+            }
+        }
+
+        return 0;
     }
 
     @Override
@@ -673,4 +693,43 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
         return type.isAssignableFrom(Table.class);
     }
+
+    @Override
+    public boolean supportsDatabaseChangeLogHistory() {
+        return true;
+    }
+
+    public boolean getUseAffectedRows() throws DatabaseException {
+        return getConnection().getURL().contains("useAffectedRows=true");
+    }
+
+    @Override
+    public void addReservedWords(Collection<String> words) {
+        addMySQLVersionedReservedWords();
+        super.addReservedWords(words);
+    }
+
+    /**
+     * Adds reserved words that were introduced for a specific version of MySQL. For an overview of 
+     * changes to 8.0, please see: <a href="https://dev.mysql.com/doc/refman/8.0/en/keywords.html">
+     * Keywords and Reserved Words</a>.
+     */
+    private void addMySQLVersionedReservedWords() {
+        try {
+            // words that became reserved in 8.4
+            if(getDatabaseMajorVersion() >= 9 || (getDatabaseMajorVersion() == 8 && getDatabaseMinorVersion() >= 4)) {
+                reservedWords.add("MANUAL");
+            }
+            
+            // words that became reserved in 8.0
+            if(getDatabaseMajorVersion() >= 8){
+                reservedWords.add("FUNCTION");
+                reservedWords.add("ROW");
+                reservedWords.add("ROWS");
+            }
+        } catch (DatabaseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

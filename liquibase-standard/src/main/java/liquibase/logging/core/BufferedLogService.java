@@ -2,23 +2,24 @@ package liquibase.logging.core;
 
 import liquibase.logging.Logger;
 import liquibase.util.ISODateFormat;
+import lombok.Getter;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 
+@Getter
 @Deprecated
 public class BufferedLogService extends AbstractLogService {
     //
     // Truncate the return value at 10MB = 10,000,000 bytes
     //
     public static final int MAX_LOG_LENGTH = 10000000;
-    private final List<BufferedLogMessage> log = Collections.synchronizedList(new ArrayList<>());
+    private final List<BufferedLogMessage> log = new CopyOnWriteArrayList<>();
 
 
     @Override
@@ -31,10 +32,6 @@ public class BufferedLogService extends AbstractLogService {
         return new BufferedLogger(clazz, this);
     }
 
-
-    public List<BufferedLogMessage> getLog() {
-        return log;
-    }
 
     public String getLogAsString(Level minimumLevel) {
         StringBuilder returnLog = new StringBuilder();
@@ -70,6 +67,7 @@ public class BufferedLogService extends AbstractLogService {
         this.log.add(log);
     }
 
+    @Getter
     public static class BufferedLogMessage {
         private final Date timestamp;
         private final Level level;
@@ -85,24 +83,5 @@ public class BufferedLogService extends AbstractLogService {
             this.throwable = throwable;
         }
 
-        public Date getTimestamp() {
-            return timestamp;
-        }
-
-        public Level getLevel() {
-            return level;
-        }
-
-        public Class getLocation() {
-            return location;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public Throwable getThrowable() {
-            return throwable;
-        }
     }
 }

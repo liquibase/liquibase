@@ -8,6 +8,8 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Allows execution of arbitrary SQL. This change can be used when existing change types don't exist
@@ -18,10 +20,19 @@ import liquibase.util.StringUtil;
         priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class RawSQLChange extends AbstractSQLChange {
 
+    @Setter
     private String comment;
 
     private Boolean rerunnable;
-    
+
+    @Getter
+    @Setter
+    private Integer sqlStartLine;
+
+    @Getter
+    @Setter
+    private Integer sqlEndLine;
+
     public RawSQLChange() {
     }
 
@@ -39,10 +50,6 @@ public class RawSQLChange extends AbstractSQLChange {
         exampleValue = "What about Bob?")
     public String getComment() {
         return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
     }
 
     @Override

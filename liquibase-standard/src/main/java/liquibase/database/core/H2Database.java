@@ -25,13 +25,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -319,7 +313,7 @@ public class H2Database extends AbstractJdbcDatabase {
         try {
             return new ISODateFormat().parse(dateAsString);
         } catch (ParseException e) {
-            throw new DateParseException(dateAsString);
+            throw new DateParseException(String.format("Invalid date value '%s': %s", dateAsString, e));
         }
     }
 
@@ -585,5 +579,10 @@ public class H2Database extends AbstractJdbcDatabase {
     @Override
     public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
         return type.isAssignableFrom(Table.class);
+    }
+
+    @Override
+    public boolean supportsDatabaseChangeLogHistory() {
+        return true;
     }
 }

@@ -19,10 +19,25 @@ import java.util.stream.Collectors;
  * when the object is constructed.
  */
 public class DefaultChangeExecListener implements ChangeExecListener, ChangeLogSyncListener {
+    @Getter
     private final List<ChangeExecListener> listeners;
+    /**
+     * Get the list of ChangeSets that have been deployed during a given Liquibase command.
+     * For example: if you ran update with three ChangeSets in total and the third ChangeSet failed,
+     * this list will contain the first two ChangeSets that were executed without exception.
+     *
+     * @return the list of ChangeSets deployed during a command.
+     */
+    @Getter
     private final List<ChangeSet> deployedChangeSets = new LinkedList<>();
     @Getter
     private final List<ChangeSet> rolledBackChangeSets = new LinkedList<>();
+    /**
+     * Gets list of failed ChangeSets encountered during a given Liquibase command.
+     *
+     * @return the list of ChangeSets which have failed to deploy.
+     */
+    @Getter
     private final List<ChangeSet> failedChangeSets = new LinkedList<>();
     @Getter
     private final List<ChangeSet> failedRollbackChangeSets = new LinkedList<>();
@@ -90,26 +105,6 @@ public class DefaultChangeExecListener implements ChangeExecListener, ChangeLogS
     }
 
     /**
-     * Get the list of ChangeSets that have been deployed during a given Liquibase command.
-     * For example: if you ran update with three ChangeSets in total and the third ChangeSet failed,
-     * this list will contain the first two ChangeSets that were executed without exception.
-     *
-     * @return the list of ChangeSets deployed during a command.
-     */
-    public List<ChangeSet> getDeployedChangeSets() {
-        return deployedChangeSets;
-    }
-
-    /**
-     * Gets list of failed ChangeSets encountered during a given Liquibase command.
-     *
-     * @return the list of ChangeSets which have failed to deploy.
-     */
-    public List<ChangeSet> getFailedChangeSets() {
-        return failedChangeSets;
-    }
-
-    /**
      * Gets list of Changes deployed during the current ChangeSet execution. This list is dynamic and will update depending on where in the lifecycle this is being called.
      *
      * @param changeSet the ChangeSet to find deployed changes from.
@@ -126,11 +121,6 @@ public class DefaultChangeExecListener implements ChangeExecListener, ChangeLogS
         }
     }
 
-    /**
-     * @param changeSet
-     * @param databaseChangeLog
-     * @param database
-     */
     @Override
     public void markedRan(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
         // no-op

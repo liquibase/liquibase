@@ -13,7 +13,7 @@ import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RuntimeStatement;
-import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 @DatabaseChange(name="output", description = "Logs a message and continues execution.", priority = ChangeMetaData.PRIORITY_DEFAULT, since = "3.3")
 public class OutputChange extends AbstractChange {
@@ -34,7 +34,7 @@ public class OutputChange extends AbstractChange {
     }
 
     public void setMessage(String message) {
-        this.message = StringUtil.trimToNull(message);
+        this.message = StringUtils.trimToNull(message);
     }
 
     @DatabaseChangeProperty(description = "Target for message. Possible values: STDOUT, STDERR, FATAL, WARN, INFO, DEBUG. Default: STDERR",
@@ -47,7 +47,7 @@ public class OutputChange extends AbstractChange {
     }
 
     public void setTarget(String target) {
-        this.target = StringUtil.trimToNull(target);
+        this.target = StringUtils.trimToNull(target);
     }
 
 
@@ -56,6 +56,10 @@ public class OutputChange extends AbstractChange {
         return new SqlStatement[] { new RuntimeStatement() {
             @Override
             public Sql[] generate(Database database) {
+                if (! shouldExecuteChange(database)) {
+                    return null;
+                }
+
                 String target = getTarget();
                 if ("STDOUT".equalsIgnoreCase(target)) {
                     System.out.println(getMessage());
@@ -91,7 +95,7 @@ public class OutputChange extends AbstractChange {
     @Override
     public Object getSerializableFieldValue(String field) {
         Object value = super.getSerializableFieldValue(field);
-        if ("target".equals(field) && "".equals(value)) {
+        if ("target".equals(field) && StringUtils.isEmpty(value.toString())) {
             return null;
         }
         return value;

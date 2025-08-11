@@ -1,9 +1,11 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.command.CommandScope;
 import liquibase.command.CommonArgumentNames;
 import liquibase.exception.CommandExecutionException;
+import liquibase.exception.LiquibaseException;
 import liquibase.util.StringUtil;
 import org.liquibase.maven.property.PropertyElement;
 
@@ -19,7 +21,7 @@ import java.nio.file.Files;
 public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {
 
     /**
-     * Specifies the <i>changelog</i> file for Liquibase Quality Checks to use.
+     * Specifies the <i>changelog</i> file for Liquibase Policy Checks to use.
      *
      * @parameter property="liquibase.changeLogFile"
      */
@@ -27,7 +29,7 @@ public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {
     protected String changeLogFile;
 
     /**
-     * Specifies the <i>format</i> file for Liquibase Quality Checks to use. If not specified, the default
+     * Specifies the <i>format</i> file for Liquibase Policy Checks to use. If not specified, the default
      * format will be used.
      *
      * @parameter property="liquibase.format"
@@ -44,7 +46,7 @@ public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {
     protected String checksScope;
 
     /**
-     * Allows automatic backup and updating of liquibase.checks.conf file when new quality checks are available. Options: [on|off]
+     * Allows automatic backup and updating of liquibase.checks.conf file when new policy checks are available. Options: [on|off]
      *
      * @parameter property="liquibase.autoUpdate"
      */
@@ -90,31 +92,38 @@ public class LiquibaseChecksRunMojo extends AbstractLiquibaseChecksMojo {
 
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws CommandExecutionException {
-        CommandScope liquibaseCommand = new CommandScope("checks", "run");
-        addArgumentIfNotEmpty(liquibaseCommand, changeLogFile, CommonArgumentNames.CHANGELOG_FILE.getArgumentName());
-        addArgumentIfNotEmpty(liquibaseCommand, checksSettingsFile, "checksSettingsFile");
-        addArgumentIfNotEmpty(liquibaseCommand, format, "format");
-        addArgumentIfNotEmpty(liquibaseCommand, checksScope, "checksScope");
-        addArgumentIfNotEmpty(liquibaseCommand, autoUpdate, "autoUpdate");
-        addArgumentIfNotEmpty(liquibaseCommand, checkName, "checkName");
-        addArgumentIfNotEmpty(liquibaseCommand, username, "username");
-        addArgumentIfNotEmpty(liquibaseCommand, password, "password");
-        addArgumentIfNotEmpty(liquibaseCommand, url, "url");
-        addArgumentIfNotEmpty(liquibaseCommand, schemas, "schemas");
-        addArgumentIfNotEmpty(liquibaseCommand, defaultSchemaName, "defaultSchemaName");
-        addArgumentIfNotEmpty(liquibaseCommand, defaultCatalogName, "defaultCatalogName");
-        addArgumentIfNotEmpty(liquibaseCommand, driver, "driver");
-        addArgumentIfNotEmpty(liquibaseCommand, driverPropertiesFile, "driverPropertiesFile");
-        addArgumentIfNotEmpty(liquibaseCommand, sqlParserExceptionLogAtLevel, "sqlParserExceptionLogAtLevel");
-        if (outputFile != null) {
-            try {
-                liquibaseCommand.setOutput(Files.newOutputStream(outputFile.toPath()));
-            } catch (IOException e) {
-                throw new CommandExecutionException(e);
+        try {
+            CommandScope liquibaseCommand = new CommandScope("checks", "run");
+            if (! doesMarkerClassExist()) {
+                throw new CommandExecutionException(Scope.CHECKS_MESSAGE);
             }
+            addArgumentIfNotEmpty(liquibaseCommand, changeLogFile, CommonArgumentNames.CHANGELOG_FILE.getArgumentName());
+            addArgumentIfNotEmpty(liquibaseCommand, checksSettingsFile, "checksSettingsFile");
+            addArgumentIfNotEmpty(liquibaseCommand, format, "format");
+            addArgumentIfNotEmpty(liquibaseCommand, checksScope, "checksScope");
+            addArgumentIfNotEmpty(liquibaseCommand, autoUpdate, "autoUpdate");
+            addArgumentIfNotEmpty(liquibaseCommand, checkName, "checkName");
+            addArgumentIfNotEmpty(liquibaseCommand, username, "username");
+            addArgumentIfNotEmpty(liquibaseCommand, password, "password");
+            addArgumentIfNotEmpty(liquibaseCommand, url, "url");
+            addArgumentIfNotEmpty(liquibaseCommand, schemas, "schemas");
+            addArgumentIfNotEmpty(liquibaseCommand, defaultSchemaName, "defaultSchemaName");
+            addArgumentIfNotEmpty(liquibaseCommand, defaultCatalogName, "defaultCatalogName");
+            addArgumentIfNotEmpty(liquibaseCommand, driver, "driver");
+            addArgumentIfNotEmpty(liquibaseCommand, driverPropertiesFile, "driverPropertiesFile");
+            addArgumentIfNotEmpty(liquibaseCommand, sqlParserExceptionLogAtLevel, "sqlParserExceptionLogAtLevel");
+            if (outputFile != null) {
+                try {
+                    liquibaseCommand.setOutput(Files.newOutputStream(outputFile.toPath()));
+                } catch (IOException e) {
+                    throw new CommandExecutionException(e);
+                }
+            }
+            liquibaseCommand.addArgumentValue("checksIntegration", "maven");
+            liquibaseCommand.execute();
+        } catch (IllegalArgumentException e) {
+            throw new CommandExecutionException(Scope.CHECKS_MESSAGE);
         }
-        liquibaseCommand.addArgumentValue("checksIntegration", "maven");
-        liquibaseCommand.execute();
     }
 
     private void addArgumentIfNotEmpty(CommandScope commandScope, String argument, String name) {

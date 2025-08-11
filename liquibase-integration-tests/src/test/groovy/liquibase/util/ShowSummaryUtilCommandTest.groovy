@@ -41,12 +41,6 @@ class ShowSummaryUtilCommandTest extends Specification {
         then:
         new File(outputFile).getText("UTF-8").contains("Run:                          0")
         new File(outputFile).getText("UTF-8").contains("Filtered out:                 4")
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
-        if (h2.getConnection() != null) {
-            h2.getConnection().close()
-        }
     }
 
     def "validate update summary output is only written to LOG service"() {
@@ -86,12 +80,6 @@ class ShowSummaryUtilCommandTest extends Specification {
         logContent.contains("DBMS mismatch:                1")
 
         !outputStream.toString().contains("UPDATE SUMMARY")
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
-        if (h2.getConnection() != null) {
-            h2.getConnection().close()
-        }
     }
 
     def "validate update summary output is only written to CONSOLE"() {
@@ -133,12 +121,6 @@ class ShowSummaryUtilCommandTest extends Specification {
         streamContent.contains("DBMS mismatch:                1")
 
         !logContent.contains("UPDATE SUMMARY")
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
-        if (h2.getConnection() != null) {
-            h2.getConnection().close()
-        }
     }
 
     def "validate update summary output is written in both LOG and CONSOLE"() {
@@ -188,13 +170,79 @@ class ShowSummaryUtilCommandTest extends Specification {
         streamContent.contains("FILTERED CHANGE SETS SUMMARY")
         streamContent.contains("Label mismatch:               3")
         streamContent.contains("DBMS mismatch:                1")
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
-        if (h2.getConnection() != null) {
-            h2.getConnection().close()
-        }
     }
 
+    def "validate update summary output is correct when OS does not match"() {
 
+        when:
+        Map<String, Object> scopeValues = new HashMap<>()
+        def outputStream = new ByteArrayOutputStream()
+        def logService = new BufferedLogService()
+        scopeValues.put(Scope.Attr.logService.name(), logService)
+        Scope.child(scopeValues, new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, h2.getUsername())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, h2.getPassword())
+                commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "changelogs/pgsql/update/showSummaryWithExecuteCommand.xml")
+                commandScope.addArgumentValue(UpdateCommandStep.CONTEXTS_ARG, null)
+                commandScope.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY, UpdateSummaryEnum.VERBOSE)
+                commandScope.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY_OUTPUT, UpdateSummaryOutputEnum.ALL)
+                commandScope.setOutput(outputStream)
+                commandScope.execute()
+            }
+        })
+
+        then:
+        def logContent = logService.getLogAsString(Level.INFO);
+        def streamContent = outputStream.toString();
+
+        streamContent.contains("UPDATE SUMMARY")
+        streamContent.contains("Run:                          1")
+        streamContent.contains("Previously run:               0")
+        streamContent.contains("Filtered out:                 2")
+        streamContent.contains("-------------------------------")
+        streamContent.contains("Total change sets:            3")
+        streamContent.contains("FILTERED CHANGE SETS SUMMARY")
+        streamContent.contains("DBMS mismatch:                1")
+        streamContent.contains("OS mismatch:                  1")
+    }
+
+    def "validate update summary output is correct when a precondition has continue"() {
+
+        when:
+        Map<String, Object> scopeValues = new HashMap<>()
+        def outputStream = new ByteArrayOutputStream()
+        def logService = new BufferedLogService()
+        scopeValues.put(Scope.Attr.logService.name(), logService)
+        Scope.child(scopeValues, new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, h2.getConnectionUrl())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, h2.getUsername())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, h2.getPassword())
+                commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "changelogs/pgsql/update/showSummaryWithPreconditionContinue.sql")
+                commandScope.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY, UpdateSummaryEnum.VERBOSE)
+                commandScope.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY_OUTPUT, UpdateSummaryOutputEnum.ALL)
+                commandScope.setOutput(outputStream)
+                commandScope.execute()
+            }
+        })
+
+        then:
+        def logContent = logService.getLogAsString(Level.INFO);
+        def streamContent = outputStream.toString();
+
+        streamContent.contains("UPDATE SUMMARY")
+        streamContent.contains("Run:                          1")
+        streamContent.contains("Previously run:               0")
+        streamContent.contains("Filtered out:                 1")
+        streamContent.contains("-------------------------------")
+        streamContent.contains("Total change sets:            2")
+        streamContent.contains("FILTERED CHANGE SETS SUMMARY")
+        streamContent.contains("Preconditions:                1")
+    }
 }

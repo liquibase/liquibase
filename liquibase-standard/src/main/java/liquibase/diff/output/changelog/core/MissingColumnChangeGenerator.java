@@ -5,6 +5,9 @@ import liquibase.change.Change;
 import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.AddColumnChange;
 import liquibase.database.Database;
+import liquibase.datatype.DataTypeFactory;
+import liquibase.datatype.DatabaseDataType;
+import liquibase.datatype.LiquibaseDataType;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
@@ -63,9 +66,10 @@ public class MissingColumnChangeGenerator extends AbstractChangeGenerator implem
         AddColumnConfig columnConfig = createAddColumnConfig();
         columnConfig.setName(column.getName());
 
-        String dataType = column.getType().toString();
-
-        columnConfig.setType(dataType);
+        LiquibaseDataType ldt = DataTypeFactory.getInstance().from(column.getType(), referenceDatabase);
+        DatabaseDataType ddt = ldt.toDatabaseDataType(comparisonDatabase);
+        String typeString = ddt.toString();
+        columnConfig.setType(typeString);
 
         MissingTableChangeGenerator.setDefaultValue(columnConfig, column, comparisonDatabase);
 

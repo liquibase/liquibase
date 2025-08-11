@@ -34,7 +34,7 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
 
         String catalogName = ((Schema) example).getCatalogName();
         String schemaName = example.getName();
-        if (database.supportsSchemas()) {
+        if (database.supports(Schema.class)) {
             if (catalogName == null) {
                 catalogName = database.getDefaultCatalogName();
             }
@@ -42,7 +42,7 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
                 schemaName = database.getDefaultSchemaName();
             }
         } else {
-            if (database.supportsCatalogs()) {
+            if (database.supports(Catalog.class)) {
                 if ((catalogName == null) && (schemaName != null)) {
                     catalogName = schemaName;
                     schemaName = null;
@@ -59,7 +59,7 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
         ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
         database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
         try {
-            if (database.supportsSchemas()) {
+            if (database.supports(Schema.class)) {
                 for (String tableSchema : getDatabaseSchemaNames(database)) {
                     CatalogAndSchema schemaFromJdbcInfo = toCatalogAndSchema(tableSchema, database);
 

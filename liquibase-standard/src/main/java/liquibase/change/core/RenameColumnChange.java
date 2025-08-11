@@ -7,6 +7,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RenameColumnStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
+import lombok.Setter;
 
 /**
  * Renames an existing column.
@@ -17,6 +18,7 @@ import liquibase.structure.core.Table;
     priority = ChangeMetaData.PRIORITY_DEFAULT,
     appliesTo = "column"
 )
+@Setter
 public class RenameColumnChange extends AbstractChange {
 
     private String catalogName;
@@ -32,17 +34,9 @@ public class RenameColumnChange extends AbstractChange {
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "column.relation.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @DatabaseChangeProperty(
@@ -51,10 +45,6 @@ public class RenameColumnChange extends AbstractChange {
     )
     public String getTableName() {
         return tableName;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
     }
 
     @DatabaseChangeProperty(
@@ -66,17 +56,9 @@ public class RenameColumnChange extends AbstractChange {
         return oldColumnName;
     }
 
-    public void setOldColumnName(String oldColumnName) {
-        this.oldColumnName = oldColumnName;
-    }
-
     @DatabaseChangeProperty(description = "New name for the column", exampleValue = "full_name")
     public String getNewColumnName() {
         return newColumnName;
-    }
-
-    public void setNewColumnName(String newColumnName) {
-        this.newColumnName = newColumnName;
     }
 
     @DatabaseChangeProperty(description = "Data type of the column")
@@ -84,17 +66,9 @@ public class RenameColumnChange extends AbstractChange {
         return columnDataType;
     }
 
-    public void setColumnDataType(String columnDataType) {
-        this.columnDataType = columnDataType;
-    }
-
     @DatabaseChangeProperty(description = "A brief descriptive comment written to the column metadata")
     public String getRemarks() {
         return remarks;
-    }
-
-    public void setRemarks(String remarks) {
-        this.remarks = remarks;
     }
 
     @Override

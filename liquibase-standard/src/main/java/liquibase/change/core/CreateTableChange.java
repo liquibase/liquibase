@@ -36,6 +36,7 @@ import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
+import lombok.Setter;
 
 /**
  * Creates a new table.
@@ -45,13 +46,22 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
     private List<ColumnConfig> columns;
     /*Table type used by some RDBMS (Snowflake, SAP HANA) supporting different ... types ... of tables (e.g. column- vs. row-based) */
+    @Setter
     private String tableType;
+    @Setter
     private String catalogName;
+    @Setter
     private String schemaName;
+    @Setter
     private String tableName;
+    @Setter
     private String tablespace;
+    @Setter
     private String remarks;
+    @Setter
     private Boolean ifNotExists;
+    @Setter
+    private Boolean rowDependencies;
 
     public CreateTableChange() {
         super();
@@ -181,7 +191,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     protected CreateTableStatement generateCreateTableStatement() {
-        return new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(), getRemarks(), getTableType(), Boolean.TRUE.equals(getIfNotExists()));
+        return new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(), getRemarks(), getTableType(), Boolean.TRUE.equals(getIfNotExists()), Boolean.TRUE.equals(getRowDependencies()));
     }
 
     @Override
@@ -255,17 +265,9 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @DatabaseChangeProperty(description = "Name of the table to create")
@@ -273,17 +275,9 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         return tableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
     @DatabaseChangeProperty(description = "Tablespace to create the table in. Corresponds to file group in mssql")
     public String getTablespace() {
         return tablespace;
-    }
-
-    public void setTablespace(String tablespace) {
-        this.tablespace = tablespace;
     }
 
     @Override
@@ -294,10 +288,6 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     @DatabaseChangeProperty(description = "A brief descriptive comment to store in the table metadata")
     public String getRemarks() {
         return remarks;
-    }
-
-    public void setRemarks(String remarks) {
-        this.remarks = remarks;
     }
 
     @Override
@@ -315,23 +305,20 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         return tableType;
     }
 
-    public void setTableType(String tableType) {
-        this.tableType = tableType;
-    }
-
     @DatabaseChangeProperty(description = "If true, creates the table only if it does not already exist. Appends IF NOT EXISTS syntax to SQL query")
     public Boolean getIfNotExists() {
         return ifNotExists;
     }
 
-    public void setIfNotExists(Boolean ifNotExists) {
-        this.ifNotExists = ifNotExists;
+    @DatabaseChangeProperty(description = "When true, creates the table with ROWDEPENDENCIES", supportsDatabase = "oracle")
+    public Boolean getRowDependencies() {
+        return rowDependencies;
     }
 
     @Override
     public String[] getExcludedFieldFilters(ChecksumVersion version) {
         return new String[] {
-                "ifNotExists"
+                "ifNotExists", "rowDependencies"
         };
     }
 }

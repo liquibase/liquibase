@@ -3,6 +3,7 @@ package liquibase.configuration.core;
 import liquibase.configuration.AbstractMapConfigurationValueProvider;
 
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Searches for the configuration values in the system properties {@link System#getProperties()}.
@@ -23,6 +24,6 @@ public class SystemPropertyValueProvider extends AbstractMapConfigurationValuePr
 
     @Override
     protected Map<?, ?> getMap() {
-        return System.getProperties();
+        return (Properties) System.getProperties().clone();
     }
 }

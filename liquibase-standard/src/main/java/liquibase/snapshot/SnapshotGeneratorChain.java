@@ -3,7 +3,11 @@ package liquibase.snapshot;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.SortedSet;
 
 public class SnapshotGeneratorChain {
     private Iterator<SnapshotGenerator> snapshotGenerators;
@@ -26,6 +30,20 @@ public class SnapshotGeneratorChain {
         }
     }
 
+    /**
+     * This calls all the non-replaced {@link SnapshotGenerator} in the chain, by comparison order.
+     * <p>
+     * During the chain processing, the snapshot method returns an object that will be passed to the next generator in the chain.
+     * The object can be the same object that was passed to the generator, or a new object, given that:
+     * - the generator copies the attributes of the provided object to a new object and returns the new object (liquibase-hibernate extension does this in https://github.com/liquibase/liquibase-hibernate/blob/main/src/main/java/liquibase/ext/hibernate/snapshot/IndexSnapshotGenerator.java#L31 )
+     * - the generator returns the existing instance (they can e.g. set new attributes to it)
+     * <p>
+     * Snapshot generators that do not abide by the previous rules must be the first to be called for a given object type and there are not more than one of these per object type.
+     * Note that this can get tricky as extensions can bring their own snapshot generators to the mix breaking core generators.
+     *
+     * @return snapshot object
+     * @see SnapshotGenerator#replaces() to skip generators that do not comply to the above requireemnts
+     */
     public <T extends DatabaseObject> T snapshot(T example, DatabaseSnapshot snapshot)
             throws DatabaseException, InvalidExampleException {
         if (example == null) {
@@ -40,34 +58,27 @@ public class SnapshotGeneratorChain {
             return null;
         }
 
-        SnapshotGenerator next = getNextValidGenerator();
-
-        if (next == null) {
-            return null;
-        }
-
-        T obj = next.snapshot(example, snapshot, this);
-        if ((obj != null) && (obj.getSnapshotId() == null)) {
-            obj.setSnapshotId(snapshotIdService.generateId());
-        }
-        return obj;
-    }
-
-    public SnapshotGenerator getNextValidGenerator() {
         if (snapshotGenerators == null) {
             return null;
         }
 
-        if (!snapshotGenerators.hasNext()) {
-            return null;
-        }
-
-        SnapshotGenerator next = snapshotGenerators.next();
-        for (Class<? extends SnapshotGenerator> removedGenerator : replacedGenerators) {
-            if (removedGenerator.equals(next.getClass())) {
-                return getNextValidGenerator();
+        //Initialize objectToSnapshot as null, so if nothing is found we return null
+        T objectToSnapshot = null;
+        while (snapshotGenerators.hasNext()) {
+            SnapshotGenerator generator = snapshotGenerators.next();
+            if (replacedGenerators.contains(generator.getClass())) {
+                continue;
+            }
+            T object = generator.snapshot(objectToSnapshot == null ? example : objectToSnapshot, snapshot, this);
+            if (object != null) {
+                // don't overwrite the previous finding with null
+                objectToSnapshot = object;
+                if (object.getSnapshotId() == null) {
+                    object.setSnapshotId(snapshotIdService.generateId());
+                }
             }
         }
-        return next;
+        return objectToSnapshot;
     }
+
 }

@@ -3,7 +3,10 @@ package liquibase.command.core;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
-import liquibase.command.*;
+import liquibase.command.AbstractCommandStep;
+import liquibase.command.CommandDefinition;
+import liquibase.command.CommandResultsBuilder;
+import liquibase.command.CommandScope;
 import liquibase.database.Database;
 import liquibase.lockservice.LockService;
 
@@ -31,9 +34,10 @@ public class ClearChecksumsCommandStep extends AbstractCommandStep {
         CommandScope commandScope = resultsBuilder.getCommandScope();
         final Database database = (Database) commandScope.getDependency(Database.class);
 
-        ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+        ChangeLogHistoryService changeLogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
+        changeLogHistoryService.init();
         Scope.getCurrentScope().getLog(getClass()).info(String.format("Clearing database change log checksums for database %s", database.getShortName()));
-        changeLogService.clearAllCheckSums();
+        changeLogHistoryService.clearAllCheckSums();
     }
 
     @Override

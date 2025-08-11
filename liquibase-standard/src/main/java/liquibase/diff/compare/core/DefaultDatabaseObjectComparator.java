@@ -113,6 +113,10 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
         String object1Name = accordingTo.correctObjectName(databaseObject1.getName(), databaseObject1.getClass());
         String object2Name = accordingTo.correctObjectName(databaseObject2.getName(), databaseObject2.getClass());
 
+        return compareObjectNames(accordingTo, object1Name, object2Name);
+    }
+
+    public static boolean compareObjectNames(Database accordingTo, String object1Name, String object2Name) {
         if ((object1Name == null) && (object2Name == null)) {
             return true;
         }

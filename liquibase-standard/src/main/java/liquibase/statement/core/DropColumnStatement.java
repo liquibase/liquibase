@@ -7,17 +7,15 @@ import java.util.List;
 
 public class DropColumnStatement extends AbstractSqlStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
     private String columnName;
 
     private final List<DropColumnStatement> columns = new ArrayList<>();
+    private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
 
     public DropColumnStatement(String catalogName, String schemaName, String tableName, String columnName) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
+        this.databaseTableIdentifier.setCatalogName(catalogName);
+        this.databaseTableIdentifier.setSchemaName(schemaName);
+        this.databaseTableIdentifier.setTableName(tableName);
         this.columnName = columnName;
     }
 
@@ -34,15 +32,15 @@ public class DropColumnStatement extends AbstractSqlStatement {
     }
 
     public String getCatalogName() {
-        return catalogName;
+        return databaseTableIdentifier.getCatalogName();
     }
 
     public String getSchemaName() {
-        return schemaName;
+        return databaseTableIdentifier.getSchemaName();
     }
 
     public String getTableName() {
-        return tableName;
+        return databaseTableIdentifier.getTableName();
     }
 
     public String getColumnName() {

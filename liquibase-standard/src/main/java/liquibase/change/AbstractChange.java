@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
 
 /**
- * Standard superclass to simplify {@link Change } implementations. You can implement Change directly, this class is
+ * Standard superclass to simplify {@link Change} implementations. You can implement Change directly, this class is
  * purely for convenience but recommended.
  * <p></p>
  * By default, this base class relies on annotations such as {@link DatabaseChange} and {@link DatabaseChangeProperty}
@@ -59,7 +59,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     }
 
     /**
-     * Generate the ChangeMetaData for this class. Default implementation reads from the @{@link DatabaseChange } annotation
+     * Generate the ChangeMetaData for this class. Default implementation reads from the @{@link DatabaseChange} annotation
      * and calls out to {@link #createChangeParameterMetadata(String)} for each property.
      *
      * @throws UnexpectedLiquibaseException if no @DatabaseChange annotation on this Change class
@@ -344,7 +344,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     /**
      * Implementation delegates logic to the
      * {@link liquibase.sqlgenerator.SqlGenerator#generateStatementsIsVolatile(Database) } method on the
-     * {@link SqlStatement} objects returned by {@link #generateStatements }.
+     * {@link SqlStatement} objects returned by {@link #generateStatements}.
      * If zero or null SqlStatements are returned by generateStatements then this method returns false.
      */
     @Override
@@ -364,7 +364,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     /**
      * Implementation delegates logic to the
      * {@link liquibase.sqlgenerator.SqlGenerator#generateRollbackStatementsIsVolatile(Database) }
-     * method on the {@link SqlStatement} objects returned by {@link #generateStatements }
+     * method on the {@link SqlStatement} objects returned by {@link #generateStatements}
      * If no or null SqlStatements are returned by generateRollbackStatements then this method returns false.
      */
     @Override
@@ -387,7 +387,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     /**
      * Implementation delegates logic to the
      * {@link liquibase.sqlgenerator.SqlGenerator#supports(liquibase.statement.SqlStatement, liquibase.database.Database)}
-     * method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
+     * method on the {@link SqlStatement} objects returned by {@link #generateStatements}.
      * If no or null SqlStatements are returned by generateStatements then this method returns true.
      * If {@link #generateStatementsVolatile(liquibase.database.Database)} returns true, we cannot call generateStatements and so assume true.
      */
@@ -412,7 +412,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
      * Implementation delegates logic to the
      * {@link liquibase.sqlgenerator.SqlGenerator#warn(liquibase.statement.SqlStatement, liquibase.database.Database,
      * liquibase.sqlgenerator.SqlGeneratorChain)} method on the {@link SqlStatement} objects returned by
-     * {@link #generateStatements }.
+     * {@link #generateStatements}.
      * If a generated statement is not supported for the given database, no warning will be added since that is a
      * validation error. If no or null SqlStatements are returned by generateStatements then this method returns no
      * warnings.
@@ -447,7 +447,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
      * and also delegates logic to the
      * {@link liquibase.sqlgenerator.SqlGenerator#validate(liquibase.statement.SqlStatement,
      * liquibase.database.Database, liquibase.sqlgenerator.SqlGeneratorChain)}  method on the {@link SqlStatement}
-     * objects returned by {@link #generateStatements }.
+     * objects returned by {@link #generateStatements}.
      * If no or null SqlStatements are returned by generateStatements then this method returns no errors.
      * If there are no parameters than this method returns no errors
      */
@@ -603,6 +603,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
      * @deprecated Should get from {@link Scope}
      */
     @DatabaseChangeProperty(isChangeProperty = false)
+    @Deprecated
     public ResourceAccessor getResourceAccessor() {
         return Scope.getCurrentScope().getResourceAccessor();
     }
@@ -615,7 +616,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     /**
      * Implementation delegates logic to the
      * {@link liquibase.sqlgenerator.SqlGeneratorFactory#getAffectedDatabaseObjects(liquibase.statement.SqlStatement,
-     * liquibase.database.Database)} method on the {@link SqlStatement} objects returned by {@link #generateStatements }
+     * liquibase.database.Database)} method on the {@link SqlStatement} objects returned by {@link #generateStatements}
      * Returns empty set if change is not supported for the passed database
      */
     @Override

@@ -6,6 +6,7 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateSequenceStatement;
 import liquibase.structure.core.Sequence;
+import lombok.Setter;
 
 import java.math.BigInteger;
 
@@ -13,6 +14,7 @@ import java.math.BigInteger;
  * Creates a new sequence.
  */
 @DatabaseChange(name = "createSequence", description = "Creates a new database sequence", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@Setter
 public class CreateSequenceChange extends AbstractChange {
 
     private String catalogName;
@@ -32,17 +34,9 @@ public class CreateSequenceChange extends AbstractChange {
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @DatabaseChangeProperty(description = "Name of the sequence to create")
@@ -50,17 +44,9 @@ public class CreateSequenceChange extends AbstractChange {
         return sequenceName;
     }
 
-    public void setSequenceName(String sequenceName) {
-        this.sequenceName = sequenceName;
-    }
-
     @DatabaseChangeProperty(description = "First sequence number to be generated.", exampleValue = "5")
     public BigInteger getStartValue() {
         return startValue;
-    }
-
-    public void setStartValue(BigInteger startValue) {
-        this.startValue = startValue;
     }
 
     @DatabaseChangeProperty(description = "Interval between sequence numbers", exampleValue = "2")
@@ -68,17 +54,9 @@ public class CreateSequenceChange extends AbstractChange {
         return incrementBy;
     }
 
-    public void setIncrementBy(BigInteger incrementBy) {
-        this.incrementBy = incrementBy;
-    }
-
     @DatabaseChangeProperty(description = "Maximum value of the sequence", exampleValue = "1000")
     public BigInteger getMaxValue() {
         return maxValue;
-    }
-
-    public void setMaxValue(BigInteger maxValue) {
-        this.maxValue = maxValue;
     }
 
     @DatabaseChangeProperty(description = "Minimum value of the sequence", exampleValue = "10")
@@ -86,17 +64,9 @@ public class CreateSequenceChange extends AbstractChange {
         return minValue;
     }
 
-    public void setMinValue(BigInteger minValue) {
-        this.minValue = minValue;
-    }
-
     @DatabaseChangeProperty(description = "Whether the sequence is generated in the requested order")
     public Boolean isOrdered() {
         return ordered;
-    }
-
-    public void setOrdered(Boolean ordered) {
-        this.ordered = ordered;
     }
 
     @DatabaseChangeProperty(description = "Whether the sequence cycles when it hits its max value")
@@ -104,17 +74,9 @@ public class CreateSequenceChange extends AbstractChange {
         return cycle;
     }
 
-    public void setCycle(Boolean cycle) {
-        this.cycle = cycle;
-    }
-
     @DatabaseChangeProperty(description = "Number of values to fetch per query")
     public BigInteger getCacheSize() {
         return cacheSize;
-    }
-
-    public void setCacheSize(BigInteger cacheSize) {
-        this.cacheSize = cacheSize;
     }
 
     @DatabaseChangeProperty(description = "Data type of the sequence")
@@ -122,9 +84,6 @@ public class CreateSequenceChange extends AbstractChange {
         return dataType;
     }
 
-    public void setDataType(String dataType) {
-        this.dataType = dataType;
-    }
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] {

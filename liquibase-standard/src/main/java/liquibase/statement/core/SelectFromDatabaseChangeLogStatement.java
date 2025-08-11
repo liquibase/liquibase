@@ -1,7 +1,10 @@
 package liquibase.statement.core;
 
 import liquibase.change.ColumnConfig;
+import liquibase.database.Database;
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Data;
+import lombok.Getter;
 
 public class SelectFromDatabaseChangeLogStatement extends AbstractSqlStatement {
 
@@ -57,12 +60,19 @@ public class SelectFromDatabaseChangeLogStatement extends AbstractSqlStatement {
 
     public interface WhereClause {
 
+        String generateSql(Database database);
+
     }
 
     public static class ByNotNullCheckSum implements WhereClause {
 
+        @Override
+        public String generateSql(Database database) {
+            return String.format(" WHERE %s IS NOT NULL", database.escapeColumnName(null, null, null, "MD5SUM"));
+        }
     }
 
+    @Getter
     public static class ByTag implements WhereClause {
 
         private final String tagName;
@@ -71,8 +81,20 @@ public class SelectFromDatabaseChangeLogStatement extends AbstractSqlStatement {
             this.tagName = tagName;
         }
 
-        public String getTagName() {
-            return tagName;
+        @Override
+        public String generateSql(Database database) {
+            return String.format(" WHERE %s='%s'", database.escapeColumnName(null, null, null, "TAG"), getTagName());
+        }
+    }
+
+    @Data
+    public static class ByCheckSumNotNullAndNotLike implements WhereClause {
+        private final int notLikeCheckSumVersion;
+
+        @Override
+        public String generateSql(Database database) {
+            final String md5SUMColumnName = database.escapeColumnName(null, null, null, "MD5SUM");
+            return String.format(" WHERE %s IS NOT NULL AND %s NOT LIKE '%d:%%'", md5SUMColumnName, md5SUMColumnName, notLikeCheckSumVersion);
         }
     }
 

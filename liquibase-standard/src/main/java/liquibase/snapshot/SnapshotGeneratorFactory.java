@@ -1,32 +1,38 @@
 package liquibase.snapshot;
 
 import liquibase.CatalogAndSchema;
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.ObjectQuotingStrategy;
-import liquibase.database.OfflineConnection;
+import liquibase.SupportsMethodValidationLevelsEnum;
+import liquibase.database.*;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MariaDBDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
+import liquibase.structure.core.*;
+import liquibase.util.LiquibaseUtil;
 
 import java.util.*;
+
+import static liquibase.snapshot.SnapshotGenerator.PRIORITY_NONE;
 
 public class SnapshotGeneratorFactory {
 
     private static SnapshotGeneratorFactory instance;
 
     private final List<SnapshotGenerator> generators = new ArrayList<>();
+    protected static final String SUPPORTS_METHOD_REQUIRED_MESSAGE = "%s class does not properly implement the 'getPriority(Class<? extends DatabaseObject>, Database)' method and may incorrectly override other snapshot generators causing unexpected behavior. Please report this to the Liquibase developers or if you are developing this change please fix it ;)";
 
     protected SnapshotGeneratorFactory() {
         try {
             for (SnapshotGenerator generator : Scope.getCurrentScope().getServiceLocator().findInstances(SnapshotGenerator.class)) {
+                verifyPriorityMethodImplementedCorrectly(generator);
                 register(generator);
             }
 
@@ -34,6 +40,40 @@ public class SnapshotGeneratorFactory {
             throw new UnexpectedLiquibaseException(e);
         }
 
+    }
+
+    /**
+     * Ensure that the getPriority method returns PRIORITY_NONE when an unexpected database is supplied to the method.
+     * This ensures that no snapshot generator accidentally returns PRIORITY_SPECIALIZED for all databases, instead of
+     * only for the database that it is supposed to work with.
+     * @param generator
+     */
+    private void verifyPriorityMethodImplementedCorrectly(SnapshotGenerator generator) {
+        if (GlobalConfiguration.SUPPORTS_METHOD_VALIDATION_LEVEL.getCurrentValue().equals(SupportsMethodValidationLevelsEnum.OFF)) {
+            return;
+        }
+
+        try {
+            int priority = generator.getPriority(null, new MockDatabase());
+            if (priority != PRIORITY_NONE) {
+                if (LiquibaseUtil.isDevVersion()) {
+                    throw new UnexpectedLiquibaseException(String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, generator.getClass().getName()));
+                }
+                switch (GlobalConfiguration.SUPPORTS_METHOD_VALIDATION_LEVEL.getCurrentValue()) {
+                    case WARN:
+                        Scope.getCurrentScope().getLog(getClass()).warning(String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, generator.getClass().getName()));
+                        break;
+                    case FAIL:
+                        throw new UnexpectedLiquibaseException(String.format(SUPPORTS_METHOD_REQUIRED_MESSAGE, generator.getClass().getName()));
+                    default:
+                        break;
+                }
+            }
+        } catch (UnexpectedLiquibaseException ue) {
+            throw ue;
+        } catch (Exception e) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Failed to check validity of getPriority method in " + generator.getClass().getSimpleName() + " snapshot generator.", e);
+        }
     }
 
     /**
@@ -89,66 +129,135 @@ public class SnapshotGeneratorFactory {
     }
 
     /**
-     * Checks if a specific object is present in a database
-     * @param example The DatabaseObject to check for existence
-     * @param database The DBMS in which the object might exist
-     * @return true if object existence can be confirmed, false otherwise
-     * @throws DatabaseException If a problem occurs in the DBMS-specific code
-     * @throws InvalidExampleException If the object cannot be checked properly, e.g. if the object name is ambiguous
+     * Initialize the types to use for the snapshot
+     *
+     * @param example the example object to search for
+     * @param database the database to snapshot
+     * @return the Database Object types to search for
      */
-    public boolean has(DatabaseObject example, Database database) throws DatabaseException, InvalidExampleException {
-        // @todo I have seen duplicates in types - maybe convert the List into a Set? Need to understand it more thoroughly.
-        List<Class<? extends DatabaseObject>> types = new ArrayList<>(getContainerTypes(example.getClass(), database));
+    private Set<Class<? extends DatabaseObject>> initializeSnapshotTypes(DatabaseObject example, Database database) {
+        Set<Class<? extends DatabaseObject>> types = new HashSet<>(getContainerTypes(example.getClass(), database));
         types.add(example.getClass());
+        return types;
+    }
 
-        /*
-         * Does the query concern the DATABASECHANGELOG / DATABASECHANGELOGLOCK table? If so, we do a quick & dirty
-         * SELECT COUNT(*) on that table. If that works, we count that as confirmation of existence.
-         */
-        // @todo Actually, there may be extreme cases (distorted table statistics etc.) where a COUNT(*) might not be so cheap. Maybe SELECT a dummy constant is the better way?
-        if ((example instanceof Table) && (example.getName().equals(database.getDatabaseChangeLogTableName()) ||
-            example.getName().equals(database.getDatabaseChangeLogLockTableName()))) {
+    /**
+     * Check if the example object is a liquibase managed table
+     *
+     * @param example the database object to search for
+     * @param database the database to search
+     * @param liquibaseTableNames the list of liquibase table names
+     * @return true if the table exists, false otherwise
+     * @throws DatabaseException if there was an exception encountered when rolling back the postgres database
+     */
+    private boolean checkLiquibaseTablesExistence(DatabaseObject example, Database database, List<String> liquibaseTableNames) throws DatabaseException {
+        if (example instanceof Table && liquibaseTableNames.contains(example.getName())) {
             try {
+                if (database instanceof MariaDBDatabase) {
+                    // Handle MariaDB differently to avoid the
+                    // Error: 1146-42S02: Table 'intuser_db.DATABASECHANGELOGLOCK' doesn't exist
+                    String sql = "select table_name from information_schema.TABLES where TABLE_SCHEMA = ? and TABLE_NAME = ?;";
+                    List<Map<String, ?>> res = Scope.getCurrentScope().getSingleton(ExecutorService.class)
+                            .getExecutor("jdbc", database)
+                            .queryForList(new RawParameterizedSqlStatement(sql, database.getLiquibaseCatalogName(), example.getName()));
+                    return !res.isEmpty();
+                }
+                // Does the query concern the DATABASECHANGELOG / DATABASECHANGELOGLOCK table? If so, we do a quick & dirty
+                // SELECT COUNT(*) on that table. If that works, we count that as confirmation of existence.
+                // @todo Actually, there may be extreme cases (distorted table statistics etc.) where a COUNT(*) might not be so cheap. Maybe SELECT a dummy constant is the better way?
                 Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForInt(
-                        new RawSqlStatement("SELECT COUNT(*) FROM " +
+                        new RawParameterizedSqlStatement(String.format("SELECT COUNT(*) FROM %s",
                                 database.escapeObjectName(database.getLiquibaseCatalogName(),
-                                        database.getLiquibaseSchemaName(), example.getName(), Table.class)));
+                                        database.getLiquibaseSchemaName(), example.getName(), Table.class))));
                 return true;
             } catch (DatabaseException e) {
-                if (database instanceof PostgresDatabase) { // throws "current transaction is aborted" unless we roll back the connection
-                    database.rollback();
+                if (database instanceof PostgresDatabase) {
+                    database.rollback(); // throws "current transaction is aborted" unless we roll back the connection
                 }
                 return false;
             }
         }
+        return false;
+    }
 
-        /*
-          * If the query is about another object, try to create a snapshot of the of the object (or used the cached
-          * snapshot. If that works, we count that as confirmation of existence.
-          */
-
-        SnapshotControl snapshotControl = (new SnapshotControl(database, false, types.toArray(new Class[0])));
-        snapshotControl.setWarnIfObjectNotFound(false);
-
-        if (createSnapshot(example, database,snapshotControl) != null) {
+    /**
+     * Create and search the database snapshot for the example object.
+     *
+     * @param example The DatabaseObject to check for existence
+     * @param database The DBMS in which the object might exist
+     * @param snapshotControl the snapshot configuration to use
+     * @return true if the example object exists, false otherwise
+     * @throws DatabaseException if there was a problem searching the DBMS
+     * @throws InvalidExampleException if provided an invalid example DatabaseObject
+     */
+    private boolean createAndCheckSnapshot(DatabaseObject example, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
+        if (createSnapshot(example, database, snapshotControl) != null) {
             return true;
         }
-        CatalogAndSchema catalogAndSchema;
-        if (example.getSchema() == null) {
-            catalogAndSchema = database.getDefaultSchema();
-        } else {
-            catalogAndSchema = example.getSchema().toCatalogAndSchema();
-        }
-        DatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database,
-            new SnapshotControl(database, false, example.getClass()).setWarnIfObjectNotFound(false)
-        );
-
+        CatalogAndSchema catalogAndSchema = example.getSchema() == null ? database.getDefaultSchema() : example.getSchema().toCatalogAndSchema();
+        SnapshotControl replacedSnapshotControl = new SnapshotControl(database, false, example.getClass());
+        replacedSnapshotControl.setWarnIfObjectNotFound(false);
+        replacedSnapshotControl.setSearchNestedObjects(snapshotControl.shouldSearchNestedObjects());
+        DatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database, replacedSnapshotControl);
         for (DatabaseObject obj : snapshot.get(example.getClass())) {
             if (DatabaseObjectComparatorFactory.getInstance().isSameObject(example, obj, null, database)) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Checks if a specific object is present in a database
+     *
+     * @param example  The DatabaseObject to check for existence
+     * @param database The DBMS in which the object might exist
+     * @return true if object exists, false otherwise
+     * @throws DatabaseException       If a problem occurs in the DBMS-specific code
+     * @throws InvalidExampleException If the object cannot be checked properly, e.g. if the object name is ambiguous
+     */
+    public boolean has(DatabaseObject example, Database database) throws DatabaseException, InvalidExampleException {
+        return checkExistence(example, database, true);
+    }
+
+    /**
+     * Checks if a specific object is present in a database. When using this method the database snapshot will
+     * NOT search through nested objects.
+     *
+     * @param example  The DatabaseObject to check for existence
+     * @param database The DBMS in which the object might exist
+     * @return true if object exists, false otherwise
+     * @throws DatabaseException       If a problem occurs in the DBMS-specific code
+     * @throws InvalidExampleException If the object cannot be checked properly, e.g. if the object name is ambiguous
+     */
+    public boolean hasIgnoreNested(DatabaseObject example, Database database) throws DatabaseException, InvalidExampleException {
+        return checkExistence(example, database, false);
+    }
+
+    /**
+     * Common method to check if a specific object is present in a database
+     *
+     * @param example   The DatabaseObject to check for existence
+     * @param database  The DBMS in which the object might exist
+     * @param searchNestedObjects Whether to use fast check
+     * @return true if object existence can be confirmed, false otherwise
+     * @throws DatabaseException       If a problem occurs in the DBMS-specific code
+     * @throws InvalidExampleException If the object cannot be checked properly, e.g. if the object name is ambiguous
+     */
+    private boolean checkExistence(DatabaseObject example, Database database, boolean searchNestedObjects) throws DatabaseException, InvalidExampleException {
+        Set<Class<? extends DatabaseObject>> types = initializeSnapshotTypes(example, database);
+        LiquibaseTableNamesFactory liquibaseTableNamesFactory = Scope.getCurrentScope().getSingleton(LiquibaseTableNamesFactory.class);
+        List<String> liquibaseTableNames = liquibaseTableNamesFactory.getLiquibaseTableNames(database);
+
+        if (checkLiquibaseTablesExistence(example, database, liquibaseTableNames)) {
+            return true;
+        }
+
+        SnapshotControl snapshotControl = new SnapshotControl(database, false, types.toArray(new Class[0]));
+        snapshotControl.setWarnIfObjectNotFound(false);
+        snapshotControl.setSearchNestedObjects(searchNestedObjects);
+
+        return createAndCheckSnapshot(example, database, snapshotControl);
     }
 
     public DatabaseSnapshot createSnapshot(CatalogAndSchema example, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
@@ -181,12 +290,30 @@ public class SnapshotGeneratorFactory {
         for (int i = 0; i< schemas.length; i++) {
             examples[i] = examples[i].customize(database);
             schemas[i] = new Schema(examples[i].getCatalogName(), examples[i].getSchemaName());
-
-
         }
 
         Scope.getCurrentScope().getLog(SnapshotGeneratorFactory.class).info("Creating snapshot");
-        return createSnapshot(schemas, database, snapshotControl);
+        DatabaseSnapshot snapshot = createSnapshot(schemas, database, snapshotControl);
+
+        //
+        // For SQL Server, try to set the backing index for primary key and
+        // unique constraints to the index that is created automatically
+        //
+        if (database instanceof MSSQLDatabase) {
+            Set<PrimaryKey> primaryKeys = snapshot.get(PrimaryKey.class);
+            primaryKeys.forEach(pk -> {
+                if (pk != null) {
+                    syncBackingIndex(pk, Index.class, snapshot);
+                }
+            });
+            Set<UniqueConstraint> uniqueConstraints = snapshot.get(UniqueConstraint.class);
+            uniqueConstraints.forEach(uc -> {
+                if (uc != null) {
+                    syncBackingIndex(uc, Index.class, snapshot);
+                }
+            });
+        }
+        return snapshot;
     }
 
     /**
@@ -337,5 +464,21 @@ public class SnapshotGeneratorFactory {
             }
         }
 
+    }
+
+    private void syncBackingIndex(DatabaseObject databaseObject, Class<? extends DatabaseObject> clazz, DatabaseSnapshot snapshot) {
+        if (!(databaseObject instanceof PrimaryKey) && !(databaseObject instanceof UniqueConstraint)) {
+            return;
+        }
+        Set<Index> indices = (Set<Index>)snapshot.get(clazz);
+        indices.forEach(index -> {
+            final Index backingIndex = databaseObject.getAttribute("backingIndex", Index.class);
+            if (backingIndex.getName().equals(index.getName()) && index != backingIndex) {
+                databaseObject.setAttribute("backingIndex", index);
+                List<Column> columns = (List<Column>)databaseObject.getAttribute("columns", List.class);
+                columns.clear();
+                columns.addAll(index.getColumns());
+            }
+        });
     }
 }

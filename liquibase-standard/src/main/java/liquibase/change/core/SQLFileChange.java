@@ -6,6 +6,7 @@ import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.database.Database;
+import liquibase.database.DatabaseList;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -118,24 +119,27 @@ public class SQLFileChange extends AbstractSQLChange {
     @Override
     public ValidationErrors validate(Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
+        if(getDbms() != null) {
+            DatabaseList.validateDefinitions(getDbms(), validationErrors);
+        }
         if (StringUtil.trimToNull(getPath()) == null) {
             validationErrors.addError("'path' is required");
         } else {
             try {
                 Resource resource = getResource();
                 if (!resource.exists()) {
-                    alertOnNonExistantSqlFile(validationErrors);
+                    alertOnNonExistentSqlFile(validationErrors);
                 }
             } catch (IOException e) {
                 Scope.getCurrentScope().getLog(getClass()).warning("Failed to obtain sqlFile resource at path '" + path + "'while attempting to validate the existence of the sqlFile.", e);
-                alertOnNonExistantSqlFile(validationErrors);
+                alertOnNonExistentSqlFile(validationErrors);
             }
         }
 
         return validationErrors;
     }
 
-    private void alertOnNonExistantSqlFile(ValidationErrors validationErrors) {
+    private void alertOnNonExistentSqlFile(ValidationErrors validationErrors) {
         if (ChangeLogParserConfiguration.ON_MISSING_SQL_FILE.getCurrentValue().equals(ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN)) {
             validationErrors.addWarning(FileUtil.getFileNotFoundMessage(path));
         } else {

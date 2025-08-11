@@ -119,4 +119,6 @@ public class MdcKey {
     public static final String PRIMARY_EXCEPTION_SOURCE = "primaryExceptionSource";
     public static final String QUALITY_CHECKS = "qualityChecks";
     public static final String DUPLICATE_CHANGESETS = "duplicateChangesets";
+    public static final String OPERATION_OUTCOME = "operationOutcome";
+    public static final String DBCL_HISTORY = "dbclHistory";
 }

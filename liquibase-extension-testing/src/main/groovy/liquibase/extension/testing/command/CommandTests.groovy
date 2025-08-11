@@ -32,13 +32,16 @@ import liquibase.util.StreamUtil
 import liquibase.util.StringUtil
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.junit.Assert
-import org.junit.Assume
 import org.junit.ComparisonFailure
+import org.junit.Test
+import org.junit.jupiter.api.Assumptions
+import org.opentest4j.TestAbortedException
 import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.OperatingSystem
 
 import java.util.logging.Level
+import java.util.regex.Matcher
 import java.util.regex.Pattern
 import java.util.stream.Collectors
 
@@ -101,8 +104,16 @@ class CommandTests extends Specification {
         def commandDefinition = Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition(commandTestDefinition.getCommand() as String[])
         assert commandDefinition != null: "Cannot find specified command ${commandTestDefinition.getCommand()}"
 
-        assert commandTestDefinition.testFile.name == commandTestDefinition.getCommand().join("") + ".test.groovy": "Incorrect test file name"
 
+        def patternString = ".*?-(.*)?.test.groovy"
+        Pattern pattern = Pattern.compile(patternString)
+        Matcher m = pattern.matcher(commandTestDefinition.testFile.name)
+        if (! m.matches()) {
+            assert commandTestDefinition.testFile.name == commandTestDefinition.getCommand().join("") + ".test.groovy": "Incorrect test file name"
+        } else {
+            assert commandTestDefinition.testFile.name ==
+               String.format("%s-%s.test.groovy", commandTestDefinition.getCommand().join(""), m.group(1)): "Incorrect test file name"
+        }
         assert commandDefinition.getShortDescription() == null || commandDefinition.getShortDescription() != commandDefinition.getLongDescription() : "Short and long description should not be identical. If there is nothing more to say in the long description, return null"
 
         for (def runTest : commandTestDefinition.runTests) {
@@ -156,6 +167,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             }
             foundRequired = true
             signature.println "  ${argDef.name} (${argDef.dataType.simpleName}) ${argDef.description ?: "MISSING DESCRIPTION"}"
+            if (!argDef.forcePrintedAliases.isEmpty()) {
+                signature.println "    Force-printed aliases: ${argDef.forcePrintedAliases}"
+            }
             if (argDef.valueObfuscator != null) {
                 signature.println("    OBFUSCATED")
             }
@@ -174,6 +188,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             foundOptional = true
             signature.println "  ${argDef.name} (${argDef.dataType.simpleName}) ${argDef.description ?:  "MISSING DESCRIPTION"}"
             signature.println "    Default: ${argDef.defaultValueDescription}"
+            if (!argDef.forcePrintedAliases.isEmpty()) {
+                signature.println "    Force-printed aliases: ${argDef.forcePrintedAliases}"
+            }
             if (argDef.valueObfuscator != null) {
                 signature.println("    OBFUSCATED")
             }
@@ -199,8 +216,8 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     @Unroll("Run {db:#permutation.databaseName,command:#permutation.definition.commandTestDefinition.joinedCommand} #permutation.definition.description")
     def "run"() {
         setup:
-        Main.runningFromNewCli = true
-        Assume.assumeTrue("Skipping test: " + permutation.testSetupEnvironment.errorMessage, permutation.testSetupEnvironment.connection != null)
+        Main.setRunningFromNewCli(true)
+        Assumptions.assumeTrue(permutation.testSetupEnvironment.connection != null, "Skipping test: " + permutation.testSetupEnvironment.errorMessage)
 
         def testDef = permutation.definition
 
@@ -222,10 +239,12 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             altDatabase.dropDatabaseObjects(altCatalogAndSchemas[0])
         }
 
+        Scope.getCurrentScope().getMdcManager().clear()
+
         when:
         if (testDef.supportedOs != null) {
             def currentOs = OperatingSystem.getCurrent()
-            Assume.assumeTrue("The current operating system (" + currentOs.name + ") does not support this test.", testDef.supportedOs.contains(currentOs))
+            Assumptions.assumeTrue(testDef.supportedOs.contains(currentOs), "The current operating system (" + currentOs.name + ") does not support this test.")
         }
         def commandScope
         try {
@@ -327,13 +346,18 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         def results = Scope.child(scopeSettings, {
             try {
                 if (testDef.commandTestDefinition.beforeMethodInvocation != null) {
-                    testDef.commandTestDefinition.beforeMethodInvocation.call()
+                    try {
+                        testDef.commandTestDefinition.beforeMethodInvocation.call()
+                    } catch (TestDisabled ignore) {
+                        Assumptions.abort("Skipping disabled test " + testDef.description)
+                    }
                 }
                 def returnValue = commandScope.execute()
                 assert testDef.expectedException == null : "An exception was expected but the command completed successfully"
                 return returnValue
             }
             catch (Exception e) {
+                Assumptions.assumeFalse(e instanceof TestAbortedException)
                 savedException = e
                 if (testDef.expectedException == null) {
                     if (testDef.setup != null) {
@@ -387,6 +411,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                 if (!testDef.expectedResults.isEmpty()) {
                     for (def returnedResult : results.getResults().entrySet()) {
                         def expectedResult = testDef.expectedResults.get(returnedResult.getKey())
+                        if (expectedResult == null) {
+                            // No expected result in the map so just skip this one
+                            continue
+                        }
                         def expectedValue = expectedResult instanceof Closure ? expectedResult.call() : String.valueOf(expectedResult)
                         def seenValue = String.valueOf(returnedResult.getValue())
 
@@ -536,6 +564,27 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
                     int count = (actual.split(Pattern.quote(edited), -1).length) - 1
                     assert count == occurrences: "$actual does not contain '$substring' $occurrences times.  It appears $count times"
                 }
+            }
+
+            @Override
+            String getExpected() {
+                return substring
+            }
+
+            @Override
+            String getCheckedOutput() {
+                return this.actualContents
+            }
+        }
+    }
+
+    static OutputCheck assertEquals(String substring) {
+        return new OutputCheck() {
+            String actualContents
+            @Override
+            def check(String actual) throws AssertionError {
+                actualContents = actual
+                assert actual == substring
             }
 
             @Override
@@ -836,7 +885,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         private Map<String, ?> arguments = new HashMap<>()
         private Map<String, ?> expectedFileContent = new HashMap<>()
         private Map<String, Object> expectedDatabaseContent = new HashMap<>()
-        private Closure<Void> expectations = null;
+        private Closure<Void> expectations = null
 
         private List<TestSetup> setup
 
@@ -909,7 +958,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         }
 
         def setSupportedOs(ArrayList<OperatingSystem> supportedOs) {
-            this.supportedOs = supportedOs;
+            this.supportedOs = supportedOs
         }
 
         def setExpectedFileContent(Map<String, Object> content) {
@@ -917,7 +966,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         }
 
         def setExpectations(Closure<Void> expectations) {
-            this.expectations = expectations;
+            this.expectations = expectations
         }
 
         def setExpectedDatabaseContent(Map<String, Object> content) {
@@ -1039,6 +1088,12 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         }
     }
 
+    static class TestDisabled extends RuntimeException {
+        TestDisabled(String message) {
+            super(message)
+        }
+    }
+
     static class FileContent {
         String path
         List<Object> strings
@@ -1078,6 +1133,10 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
          */
         void runChangelog(String changeLogPath) {
             runChangelog(changeLogPath, null)
+        }
+
+        static void setSystemProperty(String key, String value) {
+            System.setProperty(key, value)
         }
 
         /**
@@ -1180,6 +1239,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.setups.add(new SetupCleanResources(cleanOnSetup, filesToDelete))
         }
 
+        void cleanResources(CleanupMode cleanupMode, File resourceDirectory) {
+            this.setups.add(new SetupCleanResources(cleanupMode, resourceDirectory))
+        }
         /**
          * Mark the changeSets within a changelog as ran without actually running them
          */
@@ -1225,7 +1287,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
     }
 
     public static String createRandomFilePath(String suffix) {
-        String rand = "target/test-classes/" + StringUtil.randomIdentifer(10) + "." + suffix
+        String rand = "target/test-classes/" + StringUtil.randomIdentifier(10) + "." + suffix
         rand
     }
 
@@ -1257,7 +1319,7 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         List<Resource> getAll(String path) throws IOException {
             def list = super.getAll(path)
             if (list != null && !list.isEmpty()) {
-                return list;
+                return list
             }
 
             return super.getAll(new File(path).getName())
@@ -1382,13 +1444,13 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         void sendErrorMessage(String message, Throwable exception) {
             errorOutput.println(message)
             if (exception != null) {
-                exception.printStackTrace(errorOutput)
+                exception.printStackTrace(new PrintWriter(errorOutput))
             }
         }
 
         @Override
         def <T> T prompt(String prompt, T valueIfNoEntry, InputHandler<T> inputHandler, Class<T> type) {
-            this.sendMessage(prompt + ": ");
+            this.sendMessage(prompt + ": ")
             return valueIfNoEntry
         }
 

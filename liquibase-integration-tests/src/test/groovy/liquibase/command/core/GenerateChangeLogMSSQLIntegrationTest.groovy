@@ -1,11 +1,16 @@
 package liquibase.command.core
 
 import liquibase.Scope
+import liquibase.command.CommandScope
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.command.util.CommandUtil
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
+import liquibase.resource.SearchPathResourceAccessor
 import liquibase.util.FileUtil
+import liquibase.util.StringUtil
+import org.apache.commons.io.FileUtils
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -16,7 +21,6 @@ class GenerateChangeLogMSSQLIntegrationTest extends Specification {
 
     def "Should generate table comments, view comments, table column comments, view column comments and be able to use the generated sql changelog"() {
         given:
-        CommandUtil.runDropAll(mssql)
         CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/generate.changelog.table.view.comments.sql')
 
         when:
@@ -40,13 +44,11 @@ class GenerateChangeLogMSSQLIntegrationTest extends Specification {
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(mssql)
         outputFile.delete()
     }
 
     def "Should generate table comments, view comments, table column comments, view column comments and be able to use the generated xml/json/yml changelog"(String fileType) {
         given:
-        CommandUtil.runDropAll(mssql)
         CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/generate.changelog.table.view.comments.sql')
 
         when:
@@ -65,10 +67,94 @@ class GenerateChangeLogMSSQLIntegrationTest extends Specification {
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(mssql)
         outputFile.delete()
 
         where:
         fileType << ['xml', 'json', 'yml']
+    }
+
+    def "Should include schema when generating changelog with view and using 'use-or-replace-option'"() {
+        when:
+        String changelogFile = "target/test-classes/changelogs/" + StringUtil.randomIdentifer(10) + "/formatted.mssql.sql"
+        String updateChangelogFile = "target/test-classes/changelogs/" + StringUtil.randomIdentifer(10) + "/formatted.sql"
+
+        def contents =
+                """
+-- liquibase formatted sql
+  
+-- changeset liquibase:1 label:basic
+CREATE TABLE Employees (
+    EmployeeID INT,
+    FirstName NVARCHAR(50)
+);
+-- rollback drop table Employees
+
+--changeset wesley:1575473414720-9 splitStatements:false
+CREATE VIEW employees_view AS SELECT FirstName FROM [dbo].Employees;
+
+"""
+        File f = new File(updateChangelogFile)
+        f.getParentFile().mkdirs()
+        f.write(contents + "\n")
+
+        CommandScope updateCommandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+        updateCommandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, updateChangelogFile)
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, mssql.getUsername())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, mssql.getPassword())
+        updateCommandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, mssql.getConnectionUrl())
+
+        CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, changelogFile)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, mssql.getUsername())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, mssql.getPassword())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, mssql.getConnectionUrl())
+        commandScope.addArgumentValue(GenerateChangelogCommandStep.USE_OR_REPLACE_OPTION, true);
+        OutputStream outputStream = new ByteArrayOutputStream()
+        commandScope.setOutput(outputStream)
+        Map<String, Object> scopeValues = new HashMap<>()
+        outputStream.flush()
+
+        scopeValues.put("liquibase.pro.sql.inline", true)
+        scopeValues.put(Scope.Attr.resourceAccessor.name(), new SearchPathResourceAccessor("."))
+        Scope.child(scopeValues, new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                updateCommandScope.execute()
+                commandScope.execute()
+            }
+        })
+        def generatedChangelog = new File(changelogFile)
+        def generatedChangelogContents = FileUtil.getContents(generatedChangelog)
+
+        then:
+        noExceptionThrown()
+        generatedChangelogContents.contains("N'CREATE VIEW [employees_view] AS SELECT '")
+
+        cleanup:
+        FileUtils.deleteQuietly(generatedChangelog)
+    }
+
+    def "Should not add size to user defined types"() {
+        when:
+        CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/user.defined.types.sql')
+        CommandUtil.runGenerateChangelog(mssql, 'test.mssql.sql')
+        then:
+        def outputFile = new File('test.mssql.sql')
+        FileUtil.getContents(outputFile).contains("CREATE TABLE udt_test (flag Flag NOT NULL)")
+        cleanup:
+        outputFile.delete()
+    }
+
+    def "Should generate decimal sequence without overflow"() {
+        when:
+        CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/decimal.sequence.sql')
+        CommandUtil.runGenerateChangelog(mssql, 'sequence.mssql.sql')
+        then:
+        def outputFile = new File('sequence.mssql.sql')
+        FileUtil.getContents(outputFile).contains("CREATE SEQUENCE big AS decimal(19) START WITH 100000000000 INCREMENT BY 1 MINVALUE -9999999999999999999 MAXVALUE 9999999999999999999;")
+        FileUtil.getContents(outputFile).contains("CREATE SEQUENCE small START WITH 1 INCREMENT BY 1 MINVALUE 0 MAXVALUE 20")
+
+        cleanup:
+        outputFile.delete()
     }
 }

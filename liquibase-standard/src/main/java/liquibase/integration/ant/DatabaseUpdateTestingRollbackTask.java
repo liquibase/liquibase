@@ -3,11 +3,15 @@ package liquibase.integration.ant;
 import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.tools.ant.BuildException;
 
 /**
  * Ant task for migrating a database forward testing rollback.
  */
+@Getter
+@Setter
 public class DatabaseUpdateTestingRollbackTask extends AbstractChangeLogBasedTask {
     private boolean dropFirst;
 
@@ -24,11 +28,4 @@ public class DatabaseUpdateTestingRollbackTask extends AbstractChangeLogBasedTas
         }
     }
 
-    public boolean isDropFirst() {
-        return dropFirst;
-    }
-
-    public void setDropFirst(boolean dropFirst) {
-        this.dropFirst = dropFirst;
-    }
 }

@@ -17,6 +17,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.util.BooleanUtil;
 import liquibase.util.StringUtil;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,12 +61,19 @@ public class AddNotNullConstraintChange extends AbstractChange {
     }
 
 
+    @Setter
     private String catalogName;
+    @Setter
     private String schemaName;
+    @Setter
     private String tableName;
+    @Setter
     private String columnName;
+    @Setter
     private String defaultNullValue;
+    @Setter
     private String columnDataType;
+    @Setter
     private String constraintName;
     private Boolean shouldValidate;
 
@@ -74,17 +82,9 @@ public class AddNotNullConstraintChange extends AbstractChange {
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @DatabaseChangeProperty(description = "Name of the table to add a NOT NULL constraint to.",
@@ -93,18 +93,10 @@ public class AddNotNullConstraintChange extends AbstractChange {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
     @DatabaseChangeProperty(description = "Name of the column to add the constraint to",
         mustEqualExisting = "column.relation.column")
     public String getColumnName() {
         return columnName;
-    }
-
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
     }
 
     @DatabaseChangeProperty(description = "Value to set all currently null values to. " +
@@ -113,26 +105,14 @@ public class AddNotNullConstraintChange extends AbstractChange {
         return defaultNullValue;
     }
 
-    public void setDefaultNullValue(String defaultNullValue) {
-        this.defaultNullValue = defaultNullValue;
-    }
-
     @DatabaseChangeProperty(description = "Current data type of the column")
     public String getColumnDataType() {
         return columnDataType;
     }
 
-    public void setColumnDataType(String columnDataType) {
-        this.columnDataType = columnDataType;
-    }
-
     @DatabaseChangeProperty(description = "Name of the constraint to add (if database supports names for NOT NULL constraints)")
     public String getConstraintName() {
         return constraintName;
-    }
-
-    public void setConstraintName(String constraintName) {
-        this.constraintName = constraintName;
     }
 
     @Override

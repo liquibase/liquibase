@@ -8,6 +8,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropUniqueConstraintStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.UniqueConstraint;
+import lombok.Setter;
 
 /**
  * Removes an existing unique constraint.
@@ -18,6 +19,7 @@ import liquibase.structure.core.UniqueConstraint;
     priority = ChangeMetaData.PRIORITY_DEFAULT,
     appliesTo = "uniqueConstraint"
 )
+@Setter
 public class DropUniqueConstraintChange extends AbstractChange {
     private String catalogName;
     private String schemaName;
@@ -34,17 +36,9 @@ public class DropUniqueConstraintChange extends AbstractChange {
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting ="uniqueConstraint.table.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @DatabaseChangeProperty(
@@ -55,17 +49,9 @@ public class DropUniqueConstraintChange extends AbstractChange {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
     @DatabaseChangeProperty(description = "Name of the unique constraint to drop", mustEqualExisting = "uniqueConstraint")
     public String getConstraintName() {
         return constraintName;
-    }
-
-    public void setConstraintName(String constraintName) {
-        this.constraintName = constraintName;
     }
 
     @DatabaseChangeProperty(exampleValue = "name",
@@ -73,10 +59,6 @@ public class DropUniqueConstraintChange extends AbstractChange {
         supportsDatabase = "sybase")
     public String getUniqueColumns() {
         return uniqueColumns;
-    }
-
-    public void setUniqueColumns(String uniqueColumns) {
-        this.uniqueColumns = uniqueColumns;
     }
 
     @Override

@@ -25,7 +25,7 @@ public class SequenceNextValueFunction extends DatabaseFunction {
     }
 
     /**
-     * @deprecated use {@link #getSchemaName()}
+     * @deprecated use {@link #setSchemaName(String)}
      */
     public void setSequenceSchemaName(String sequenceSchemaName) {
         super.setSchemaName(sequenceSchemaName);

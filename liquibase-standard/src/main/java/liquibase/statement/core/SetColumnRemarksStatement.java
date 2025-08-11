@@ -5,13 +5,11 @@ import liquibase.util.ColumnParentType;
 
 public class SetColumnRemarksStatement extends AbstractSqlStatement {
 
-    private final String catalogName;
-    private final String schemaName;
-    private final String tableName;
     private final String columnName;
     private final String remarks;
     private final String columnDataType;
     private String columnParentType;
+    private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
 
     public SetColumnRemarksStatement(String catalogName, String schemaName, String tableName, String columnName, String remarks) {
         this(catalogName, schemaName, tableName, columnName, remarks, null);
@@ -23,9 +21,9 @@ public class SetColumnRemarksStatement extends AbstractSqlStatement {
                                      String columnName,
                                      String remarks,
                                      String columnDataType) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
+        this.databaseTableIdentifier.setCatalogName(catalogName);
+        this.databaseTableIdentifier.setSchemaName(schemaName);
+        this.databaseTableIdentifier.setTableName(tableName);
         this.columnName = columnName;
         this.remarks = remarks;
         this.columnDataType = columnDataType;
@@ -38,9 +36,9 @@ public class SetColumnRemarksStatement extends AbstractSqlStatement {
                                      String remarks,
                                      String columnDataType,
                                      String columnParentType) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
+        this.databaseTableIdentifier.setCatalogName(catalogName);
+        this.databaseTableIdentifier.setSchemaName(schemaName);
+        this.databaseTableIdentifier.setTableName(tableName);
         this.columnName = columnName;
         this.remarks = remarks;
         this.columnDataType = columnDataType;
@@ -52,15 +50,15 @@ public class SetColumnRemarksStatement extends AbstractSqlStatement {
     }
 
     public String getCatalogName() {
-        return catalogName;
+        return databaseTableIdentifier.getCatalogName();
     }
 
     public String getSchemaName() {
-        return schemaName;
+        return databaseTableIdentifier.getSchemaName();
     }
 
     public String getTableName() {
-        return tableName;
+        return databaseTableIdentifier.getTableName();
     }
 
     public String getColumnName() {

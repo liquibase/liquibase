@@ -94,6 +94,7 @@
             <xsd:attribute name="labels" type="xsd:string"/>
             <xsd:attribute name="ignore" type="xsd:string"/>
             <xsd:attribute name="created" type="xsd:string"/>
+            <xsd:attribute name="logicalFilePath" type="xsd:string"/>
             <xsd:anyAttribute namespace="##other" processContents="lax"/>
         </xsd:complexType>
     </xsd:element>
@@ -112,12 +113,18 @@
             <xsd:attribute name="minDepth" type="integerExp"/>
             <xsd:attribute name="maxDepth" type="integerExp"/>
             <xsd:attribute name="endsWithFilter" type="xsd:string"/>
+            <xsd:attribute name="ignore" type="xsd:string"/>
+            <xsd:attribute name="logicalFilePath" type="xsd:string"/>
             <xsd:anyAttribute namespace="##other" processContents="lax"/>
         </xsd:complexType>
     </xsd:element>
 
     <!-- This is the main (root) part of the xsd -->
     <xsd:element name="databaseChangeLog">
+        <xsd:annotation>
+            <xsd:documentation>The root element of the
+                <a href='https://docs.liquibase.com/concepts/changelogs/home.html'>changelog</a></xsd:documentation>
+        </xsd:annotation>
         <xsd:complexType>
             <xsd:sequence>
                 <xsd:element name="removeChangeSetProperty" minOccurs="0" maxOccurs="unbounded">
@@ -240,6 +247,8 @@
                             <xsd:attribute name="runWith" type="xsd:string" />
                             <xsd:attribute name="runWithSpoolFile" type="xsd:string" />
                             <xsd:attribute name="endDelimiter" type="xsd:string" />
+                            <xsd:attribute name="stripComments" type="xsd:boolean" />
+                            <xsd:attribute name="failOnError" type="xsd:boolean" />
                         </xsd:complexType>
                     </xsd:element>
                 </xsd:choice>
@@ -340,6 +349,7 @@
 
     <xsd:attributeGroup name="column">
         <xsd:attribute name="name" type="xsd:string" use="required"/>
+        <xsd:attribute name="included" type="booleanExp"/>
         <xsd:attribute name="computed" type="booleanExp"/>
         <xsd:attribute name="descending" type="booleanExp"/>
         <xsd:attribute name="type" type="xsd:string"/>
@@ -482,6 +492,7 @@
         <xsd:attribute name="unique" type="booleanExp"/>
         <xsd:attribute name="clustered" type="booleanExp"/>
         <xsd:attribute name="tablespace" type="xsd:string"/>
+        <xsd:attribute name="using" type="xsd:string"/>
         <xsd:anyAttribute namespace="##other" processContents="lax"/>
     </xsd:attributeGroup>
 
@@ -643,6 +654,7 @@
                         <xsd:attribute name="header" type="xsd:string"/>
                         <xsd:attribute name="name" type="xsd:string"/>
                         <xsd:attribute name="type" type="xsd:string"/>
+                        <xsd:attribute name="nullPlaceholder" type="xsd:string"/>
                         <xsd:attributeGroup ref="defaultValueAttributes"/>
                     </xsd:complexType>
                 </xsd:element>
@@ -1018,6 +1030,7 @@
             <xsd:attribute name="tableType" type="xsd:string"/>
             <xsd:attribute name="remarks" type="xsd:string"/>
             <xsd:attribute name="ifNotExists" type="xsd:boolean"/>
+            <xsd:attribute name="rowDependencies" type="xsd:boolean" default="false"/>
             <xsd:anyAttribute namespace="##other" processContents="lax"/>
         </xsd:complexType>
     </xsd:element>
@@ -1186,6 +1199,7 @@
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attribute name="tag" type="xsd:string" use="required"/>
+            <xsd:attribute name="keepTagOnRollback" type="booleanExp" />
             <xsd:anyAttribute namespace="##other"  processContents="lax"/>
         </xsd:complexType>
     </xsd:element>

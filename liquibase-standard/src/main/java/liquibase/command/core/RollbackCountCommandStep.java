@@ -39,9 +39,8 @@ public class RollbackCountCommandStep extends AbstractRollbackCommandStep {
         resultsBuilder.addResult("rollbackReport", rollbackReportParameters);
 
         Database database = (Database) commandScope.getDependency(Database.class);
-        rollbackReportParameters.getDatabaseInfo().setDatabaseType(database.getDatabaseProductName());
-        rollbackReportParameters.getDatabaseInfo().setVersion(database.getDatabaseProductVersion());
-        rollbackReportParameters.setJdbcUrl(database.getConnection().getURL());
+        rollbackReportParameters.setupDatabaseInfo(database);
+        rollbackReportParameters.setRollbackCount(changesToRollback);
 
         List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
 

@@ -1,8 +1,6 @@
 package liquibase.snapshot
 
-import com.example.liquibase.change.CreateTableExampleChange
-import com.example.liquibase.change.KeyColumnConfig
-import com.example.liquibase.change.PrimaryKeyConfig
+
 import liquibase.CatalogAndSchema
 import liquibase.Scope
 import liquibase.change.ColumnConfig
@@ -16,17 +14,15 @@ import liquibase.executor.Executor
 import liquibase.executor.ExecutorService
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
+import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.serializer.core.json.JsonSnapshotSerializer
-import liquibase.structure.DatabaseObject
-import liquibase.structure.core.Column
-import liquibase.structure.core.Schema
-import liquibase.structure.core.Table
-import org.junit.Rule
+import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@LiquibaseIntegrationTest
 class JdbcSnapshotSerializerIntegrationTest extends Specification {
-    @Rule
+    @Shared
     public DatabaseTestSystem h2 = Scope.currentScope.getSingleton(TestSystemFactory).getTestSystem("h2")
 
     @Unroll

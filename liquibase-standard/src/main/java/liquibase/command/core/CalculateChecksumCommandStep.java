@@ -22,13 +22,14 @@ import liquibase.exception.LiquibaseException;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
 
 public class CalculateChecksumCommandStep extends AbstractCommandStep {
 
-    protected static final String[] COMMAND_NAME = {"calculateChecksum"};
+    public static final String[] COMMAND_NAME = {"calculateChecksum"};
 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> CHANGESET_PATH_ARG;
@@ -129,11 +130,11 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
         ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
         RanChangeSet ranChangeSet = changeLogService.getRanChangeSet(changeSet);
 
-        sendMessages(resultsBuilder, changeSet.generateCheckSum(
-                             ranChangeSet != null && ranChangeSet.getLastCheckSum() != null ?
-                                     ChecksumVersion.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion()) : ChecksumVersion.latest()
-                     )
-        );
+        CheckSum checkSum = changeSet.generateCheckSum(
+                ranChangeSet != null && ranChangeSet.getLastCheckSum() != null ?
+                        ChecksumVersion.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion()) : ChecksumVersion.latest());
+        handleOutput(resultsBuilder, checkSum.toString() + System.lineSeparator());
+        resultsBuilder.addResult(CHECKSUM_RESULT, checkSum);
     }
 
     private void validateIdentifierParameters(CommandScope commandScope, String changeSetIdentifier) throws LiquibaseException {
@@ -157,15 +158,15 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
                     "If --changeset-identifier is not provided than --changeset-id, --changeset-author and --changeset-path must be specified. " +
                     "Missing argument: ";
 
-            if (StringUtil.isEmpty(commandScope.getArgumentValue(CHANGESET_ID_ARG))) {
+            if (StringUtils.isEmpty(commandScope.getArgumentValue(CHANGESET_ID_ARG))) {
                 errorMessage = errorMessage + " '--changeset-id',";
             }
 
-            if (StringUtil.isEmpty(commandScope.getArgumentValue(CHANGESET_AUTHOR_ARG))) {
+            if (StringUtils.isEmpty(commandScope.getArgumentValue(CHANGESET_AUTHOR_ARG))) {
                 errorMessage = errorMessage + " '--changeset-author',";
             }
 
-            if (StringUtil.isEmpty(commandScope.getArgumentValue(CHANGESET_PATH_ARG))) {
+            if (StringUtils.isEmpty(commandScope.getArgumentValue(CHANGESET_PATH_ARG))) {
                 errorMessage = errorMessage + " '--changeset-path',";
             }
 
@@ -176,11 +177,11 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
     }
 
     private List<String> validateAndExtractParts(String changeSetIdentifier, String changeLogFile) throws LiquibaseException {
-        if (StringUtil.isEmpty(changeSetIdentifier)) {
+        if (StringUtils.isEmpty(changeSetIdentifier)) {
             throw new LiquibaseException(new IllegalArgumentException(CHANGESET_IDENTIFIER_ARG.getName()));
         }
 
-        if (StringUtil.isEmpty(changeLogFile)) {
+        if (StringUtils.isEmpty(changeLogFile)) {
             throw new LiquibaseException(new IllegalArgumentException(CHANGELOG_FILE_ARG.getName()));
         }
 
@@ -191,11 +192,6 @@ public class CalculateChecksumCommandStep extends AbstractCommandStep {
             );
         }
         return parts;
-    }
-
-    private static void sendMessages(CommandResultsBuilder resultsBuilder, CheckSum checkSum) {
-        resultsBuilder.addResult(CHECKSUM_RESULT, checkSum);
-        Scope.getCurrentScope().getUI().sendMessage(checkSum.toString());
     }
 
     @Override

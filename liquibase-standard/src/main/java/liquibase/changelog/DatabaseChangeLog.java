@@ -7,6 +7,8 @@ import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.filter.LabelChangeSetFilter;
 import liquibase.changelog.visitor.ValidatingVisitor;
+import liquibase.changelog.visitor.ValidatingVisitorGenerator;
+import liquibase.changelog.visitor.ValidatingVisitorGeneratorFactory;
 import liquibase.changeset.ChangeSetService;
 import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.database.Database;
@@ -23,17 +25,27 @@ import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
+import liquibase.parser.core.ParserSupportedFileExtension;
+import liquibase.parser.core.sql.SqlChangeLogParser;
 import liquibase.precondition.Conditional;
-import liquibase.precondition.Precondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
+import liquibase.util.ExceptionUtil;
 import liquibase.util.FileUtil;
+import liquibase.util.LiquibaseLauncherSettings;
 import liquibase.util.StringUtil;
+import lombok.Getter;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -50,30 +62,85 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private static final Pattern SLASH_PATTERN = Pattern.compile("^/");
     private static final Pattern DOUBLE_BACK_SLASH_PATTERN = Pattern.compile("\\\\");
     private static final Pattern NO_LETTER_PATTERN = Pattern.compile("^[a-zA-Z]:");
+    private static final String CLASSPATH_PROTOCOL = "classpath:";
     public static final String SEEN_CHANGELOGS_PATHS_SCOPE_KEY = "SEEN_CHANGELOG_PATHS";
+    public static final String FILE = "file";
+    public static final String CONTEXT_FILTER = "contextFilter";
+    public static final String CONTEXT = "context";
+    public static final String LABELS = "labels";
+    public static final String IGNORE = "ignore";
+    public static final String RELATIVE_TO_CHANGELOG_FILE = "relativeToChangelogFile";
+
+    public static final String LOGICAL_FILE_PATH = "logicalFilePath";
+    public static final String ERROR_IF_MISSING = "errorIfMissing";
+    public static final String MODIFY_CHANGE_SETS = "modifyChangeSets";
+    public static final String PATH = "path";
+    public static final String FILTER = "filter";
+    public static final String RESOURCE_FILTER = "resourceFilter";
+    public static final String RESOURCE_COMPARATOR = "resourceComparator";
+    public static final String MIN_DEPTH = "minDepth";
+    public static final String MAX_DEPTH = "maxDepth";
+    public static final String ENDS_WITH_FILTER = "endsWithFilter";
+    public static final String ERROR_IF_MISSING_OR_EMPTY = "errorIfMissingOrEmpty";
+    public static final String CHANGE_SET = "changeSet";
+    public static final String DBMS = "dbms";
+    public static final String INCLUDE_CHANGELOG = "include";
+    public static final String INCLUDE_ALL_CHANGELOGS = "includeAll";
+    public static final String PRE_CONDITIONS = "preConditions";
+    public static final String REMOVE_CHANGE_SET_PROPERTY = "removeChangeSetProperty";
+    public static final String PROPERTY = "property";
+    public static final String NAME = "name";
+    public static final String VALUE = "value";
+    public static final String GLOBAL = "global";
 
     private final PreconditionContainer preconditionContainer = new GlobalPreconditionContainer();
+
+    @Getter
     private String physicalFilePath;
     private String logicalFilePath;
+
+    @Getter
     private ObjectQuotingStrategy objectQuotingStrategy;
 
-    private List<ChangeVisitor> changeVisitors = new ArrayList<>();
+    @Getter
+    private final List<ChangeVisitor> changeVisitors = new ArrayList<>();
+
+    @Getter
     private final List<ChangeSet> changeSets = new ArrayList<>();
+    @Getter
     private final List<ChangeSet> skippedChangeSets = new ArrayList<>();
+    @Getter
+    private final List<ChangeSet> skippedBecauseOfOsMismatchChangeSets = new ArrayList<>();
+    @Getter
+    private final List<ChangeSet> skippedBecauseOfLicenseChangeSets = new ArrayList<>();
+    @Getter
+    private final List<ChangeSet> skippedBecauseOfPreconditionsChangeSets = new ArrayList<>();
+
+    @Getter
     private ChangeLogParameters changeLogParameters;
 
+    @Getter
     private RuntimeEnvironment runtimeEnvironment;
 
     private DatabaseChangeLog rootChangeLog = ROOT_CHANGE_LOG.get();
 
+    @Getter
     private DatabaseChangeLog parentChangeLog = PARENT_CHANGE_LOG.get();
 
+    @Getter
     private ContextExpression contextFilter;
 
+    @Getter
     private ContextExpression includeContextFilter;
 
+    @Getter
     private Labels includeLabels;
+
+    @Getter
     private boolean includeIgnore;
+
+    @Getter
+    private ParsedNode currentlyLoadedChangeSetNode;
 
     public DatabaseChangeLog() {
     }
@@ -94,14 +161,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         this.parentChangeLog = parentChangeLog;
     }
 
-    public DatabaseChangeLog getParentChangeLog() {
-        return parentChangeLog;
-    }
-
-    public RuntimeEnvironment getRuntimeEnvironment() {
-        return runtimeEnvironment;
-    }
-
     public void setRuntimeEnvironment(RuntimeEnvironment runtimeEnvironment) {
         this.runtimeEnvironment = runtimeEnvironment;
     }
@@ -112,25 +171,21 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     @Override
-    public void setPreconditions(PreconditionContainer precond) {
-        this.preconditionContainer.addNestedPrecondition(precond);
+    public void setPreconditions(PreconditionContainer precondition) {
+        this.preconditionContainer.addNestedPrecondition(precondition);
     }
 
-
-    public ChangeLogParameters getChangeLogParameters() {
-        return changeLogParameters;
-    }
 
     public void setChangeLogParameters(ChangeLogParameters changeLogParameters) {
         this.changeLogParameters = changeLogParameters;
     }
 
-    public String getPhysicalFilePath() {
-        return physicalFilePath;
-    }
-
     public void setPhysicalFilePath(String physicalFilePath) {
         this.physicalFilePath = physicalFilePath;
+    }
+
+    public String getRawLogicalFilePath() {
+        return logicalFilePath;
     }
 
     public String getLogicalFilePath() {
@@ -157,10 +212,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
     }
 
-    public ObjectQuotingStrategy getObjectQuotingStrategy() {
-        return objectQuotingStrategy;
-    }
-
     public void setObjectQuotingStrategy(ObjectQuotingStrategy objectQuotingStrategy) {
         this.objectQuotingStrategy = objectQuotingStrategy;
     }
@@ -168,6 +219,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     /**
      * @deprecated use {@link #getContextFilter()}
      */
+    @Deprecated
     public ContextExpression getContexts() {
         return getContextFilter();
     }
@@ -175,25 +227,21 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     /**
      * @deprecated use {@link #setContextFilter(ContextExpression)}
      */
+    @Deprecated
     public void setContexts(ContextExpression contexts) {
         setContextFilter(contexts);
-    }
-
-    public ContextExpression getContextFilter() {
-        return contextFilter;
     }
 
     public void setContextFilter(ContextExpression contextFilter) {
         this.contextFilter = contextFilter;
     }
 
-    public ContextExpression getIncludeContextFilter() {
-        return includeContextFilter;
-    }
-
     /**
      * @deprecated Correct version is {@link #setIncludeLabels(Labels)}. Kept for backwards compatibility.
      */
+
+
+    @Deprecated
     public void setIncludeLabels(LabelExpression labels) {
         this.includeLabels = new Labels(labels.toString());
     }
@@ -202,21 +250,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         this.includeLabels = labels;
     }
 
-    public Labels getIncludeLabels() {
-        return includeLabels;
-    }
-
     public void setIncludeIgnore(boolean ignore) {
         this.includeIgnore = ignore;
-    }
-
-    public boolean isIncludeIgnore() {
-        return this.includeIgnore;
     }
 
     /**
      * @deprecated use {@link #setIncludeContextFilter(ContextExpression)}
      */
+    @Deprecated
     public void setIncludeContexts(ContextExpression includeContexts) {
         setIncludeContextFilter(includeContexts);
     }
@@ -235,9 +276,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return getFilePath().compareTo(o.getFilePath());
     }
 
-    public List<ChangeVisitor> getChangeVisitors(){
-        return changeVisitors;
-    }
     public ChangeSet getChangeSet(String path, String author, String id) {
         final List<ChangeSet> possibleChangeSets = getChangeSets(path, author, id);
         if (possibleChangeSets.isEmpty()) {
@@ -260,14 +298,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
         }
         return changeSetsToReturn;
-    }
-
-    public List<ChangeSet> getChangeSets() {
-        return changeSets;
-    }
-
-    public List<ChangeSet> getSkippedChangeSets() {
-        return skippedChangeSets;
     }
 
     public void addChangeSet(ChangeSet changeSet) {
@@ -341,7 +371,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 new LabelChangeSetFilter(labelExpression)
         );
 
-        ValidatingVisitor validatingVisitor = new ValidatingVisitor(database.getRanChangeSetList());
+        ValidatingVisitorGeneratorFactory validatingVisitorGeneratorFactory = Scope.getCurrentScope().getSingleton(ValidatingVisitorGeneratorFactory.class);
+        ValidatingVisitorGenerator generator = validatingVisitorGeneratorFactory.getValidatingVisitorGenerator();
+        ValidatingVisitor validatingVisitor = generator.generateValidatingVisitor(database.getRanChangeSetList());
         validatingVisitor.validate(database, this);
         logIterator.run(validatingVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
@@ -374,11 +406,21 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
-        setLogicalFilePath(parsedNode.getChildValue(null, "logicalFilePath", String.class));
+        ExceptionUtil.doSilently(() -> {
+            String physicalFilePathLowerCase = this.physicalFilePath.toLowerCase();
+            if (ParserSupportedFileExtension.JSON_SUPPORTED_EXTENSIONS.stream().anyMatch(physicalFilePathLowerCase::endsWith)) {
+                Scope.getCurrentScope().getAnalyticsEvent().incrementJsonChangelogCount();
+            } else if (ParserSupportedFileExtension.XML_SUPPORTED_EXTENSIONS.stream().anyMatch(physicalFilePathLowerCase::endsWith)) {
+                Scope.getCurrentScope().getAnalyticsEvent().incrementXmlChangelogCount();
+            } else if (ParserSupportedFileExtension.YAML_SUPPORTED_EXTENSIONS.stream().anyMatch(physicalFilePathLowerCase::endsWith)) {
+                Scope.getCurrentScope().getAnalyticsEvent().incrementYamlChangelogCount();
+            }
+        });
+        setLogicalFilePath(parsedNode.getChildValue(null, LOGICAL_FILE_PATH, String.class));
 
-        String context = parsedNode.getChildValue(null, "contextFilter", String.class);
+        String context = parsedNode.getChildValue(null, CONTEXT_FILTER, String.class);
         if (context == null) {
-            context = parsedNode.getChildValue(null, "context", String.class);
+            context = parsedNode.getChildValue(null, CONTEXT, String.class);
         }
 
         setContextFilter(new ContextExpression(context));
@@ -387,8 +429,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             setObjectQuotingStrategy(ObjectQuotingStrategy.valueOf(nodeObjectQuotingStrategy));
         }
         for (ParsedNode childNode : parsedNode.getChildren()) {
+            if (childNode.getName().equals((new ChangeSet(null)).getSerializedObjectName())) {
+                this.currentlyLoadedChangeSetNode = childNode;
+            }
             handleChildNode(childNode, resourceAccessor, new HashMap<>());
         }
+        this.currentlyLoadedChangeSetNode = null;
     }
 
     protected void expandExpressions(ParsedNode parsedNode) throws UnknownChangeLogParameterException {
@@ -419,202 +465,245 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     protected void handleChildNode(ParsedNode node, ResourceAccessor resourceAccessor, Map<String, Object> nodeScratch)
             throws ParsedNodeException, SetupException {
+        handleChildNodeHelper(node, resourceAccessor, nodeScratch);
+    }
+
+    public void handleChildNodeHelper(ParsedNode node, ResourceAccessor resourceAccessor, Map<String, Object> nodeScratch)
+            throws ParsedNodeException, SetupException {
         expandExpressions(node);
         String nodeName = node.getName();
         switch (nodeName) {
-            case "changeSet":
-                if (isDbmsMatch(node.getChildValue(null, "dbms", String.class))) {
-                    this.addChangeSet(createChangeSet(node, resourceAccessor));
-                } else {
-                    handleSkippedChangeSet(node);
-                }
+            case CHANGE_SET:
+                handleDbmsAttribute(node, resourceAccessor);
                 break;
-            case "modifyChangeSets":
-                ModifyChangeSets modifyChangeSets = createModifyChangeSets(node);
-                nodeScratch = new HashMap<>();
-                nodeScratch.put("modifyChangeSets", modifyChangeSets);
-                for (ParsedNode modifyChildNode : node.getChildren()) {
-                    handleChildNode(modifyChildNode, resourceAccessor, nodeScratch);
-                }
-                nodeScratch.remove("modifyChangeSets");
+            case MODIFY_CHANGE_SETS:
+                handleModifyChangeSets(node, resourceAccessor);
                 break;
-            case "include": {
-                String path = node.getChildValue(null, "file", String.class);
-                if (path == null) {
-                    throw new UnexpectedLiquibaseException("No 'file' attribute on 'include'");
-                }
-                path = path.replace('\\', '/');
-                Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, path);
-                ContextExpression includeContextFilter = new ContextExpression(node.getChildValue(null, "contextFilter", String.class));
-                if (includeContextFilter.isEmpty()) {
-                    includeContextFilter = new ContextExpression(node.getChildValue(null, "context", String.class));
-                }
-                Labels labels = new Labels(node.getChildValue(null, "labels", String.class));
-                Boolean ignore = node.getChildValue(null, "ignore", Boolean.class);
-                try {
-                    include(path,
-                            node.getChildValue(null, "relativeToChangelogFile", false),
-                            node.getChildValue(null, "errorIfMissing", true),
-                            resourceAccessor,
-                            includeContextFilter,
-                            labels,
-                            ignore,
-                            OnUnknownFileFormat.FAIL,
-                            (ModifyChangeSets) nodeScratch.get("modifyChangeSets"));
-                } catch (LiquibaseException e) {
-                    throw new SetupException(e);
-                }
+            case INCLUDE_CHANGELOG: {
+                handleInclude(node, resourceAccessor, nodeScratch);
                 break;
             }
-            case "includeAll": {
-                String path = node.getChildValue(null, "path", String.class);
-                String resourceFilterDef = node.getChildValue(null, "filter", String.class);
-                if (resourceFilterDef == null) {
-                    resourceFilterDef = node.getChildValue(null, "resourceFilter", String.class);
-                }
-                IncludeAllFilter resourceFilter = null;
-                if (resourceFilterDef != null) {
-                    try {
-                        resourceFilter = (IncludeAllFilter) Class.forName(resourceFilterDef).getConstructor().newInstance();
-                    } catch (ReflectiveOperationException e) {
-                        throw new SetupException(e);
-                    }
-                }
-
-                String resourceComparatorDef = node.getChildValue(null, "resourceComparator", String.class);
-                Comparator<String> resourceComparator = null;
-                if (resourceComparatorDef == null) {
-                    resourceComparator = getStandardChangeLogComparator();
-                } else {
-                    try {
-                        resourceComparator = (Comparator<String>) Class.forName(resourceComparatorDef).getConstructor().newInstance();
-                    } catch (ReflectiveOperationException e) {
-                        //take default comparator
-                        Scope.getCurrentScope().getLog(getClass()).info("no resourceComparator defined - taking default " +
-                                "implementation");
-                        resourceComparator = getStandardChangeLogComparator();
-                    }
-                }
-
-                ContextExpression includeContextFilter = new ContextExpression(node.getChildValue(null, "contextFilter", String.class));
-                if (includeContextFilter.isEmpty()) {
-                    includeContextFilter = new ContextExpression(node.getChildValue(null, "context", String.class));
-                }
-                Labels labels = new Labels(node.getChildValue(null, "labels", String.class));
-                Boolean ignore = node.getChildValue(null, "ignore", Boolean.class);
-                if (ignore == null) {
-                    ignore = false;
-                }
-                includeAll(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceFilter,
-                        node.getChildValue(null, "errorIfMissingOrEmpty", true),
-                        resourceComparator,
-                        resourceAccessor,
-                        includeContextFilter,
-                        labels,
-                        ignore,
-                        node.getChildValue(null, "minDepth", 1),
-                        node.getChildValue(null, "maxDepth", Integer.MAX_VALUE),
-                        node.getChildValue(null, "endsWithFilter", ""),
-                        (ModifyChangeSets) nodeScratch.get("modifyChangeSets"));
+            case INCLUDE_ALL_CHANGELOGS: {
+                handleIncludeAll(node, resourceAccessor, nodeScratch);
                 break;
             }
-            case "preConditions": {
-                PreconditionContainer parsedContainer = new PreconditionContainer();
-                parsedContainer.load(node, resourceAccessor);
-                this.preconditionContainer.addNestedPrecondition(parsedContainer);
-
+            case PRE_CONDITIONS: {
+                handlePrecondition(node, resourceAccessor);
                 break;
             }
-            case "removeChangeSetProperty": {
-                List<ParsedNode> childNodes = node.getChildren();
-                Optional<ParsedNode> changeNode = childNodes.stream().filter(n -> n.getName().equalsIgnoreCase("change")).findFirst();
-                if(changeNode.isPresent()){
-                    ChangeVisitor changeVisitor = ChangeVisitorFactory.getInstance().create((String) changeNode.get().getValue());
-                    if(changeVisitor != null){
-                        changeVisitor.load(node, resourceAccessor);
-                        if(DatabaseList.definitionMatches(changeVisitor.getDbms(), changeLogParameters.getDatabase(), false)) {
-                            //add changeVisitor to this changeLog only if the running database matches with one of the removeChangeSetProperty's dbms
-                            getChangeVisitors().add(changeVisitor);
-                        }
-                    }
-                }
-
+            case REMOVE_CHANGE_SET_PROPERTY: {
+                handleRemoveChangeSet(node, resourceAccessor);
                 break;
             }
-            case "property": {
-                try {
-                    String contextFilter = node.getChildValue(null, "contextFilter", String.class);
-                    if (StringUtil.isEmpty(contextFilter)) {
-                        contextFilter = node.getChildValue(null, "context", String.class);
-                    }
-                    String dbms = node.getChildValue(null, "dbms", String.class);
-                    String labels = node.getChildValue(null, "labels", String.class);
-                    Boolean global = node.getChildValue(null, "global", Boolean.class);
-                    if (global == null) {
-                        // okay behave like liquibase < 3.4 and set global == true
-                        global = true;
-                    }
-
-                    String file = node.getChildValue(null, "file", String.class);
-                    Boolean relativeToChangelogFile = node.getChildValue(null, "relativeToChangelogFile", Boolean.FALSE);
-                    Boolean errorIfMissing = node.getChildValue(null, "errorIfMissing", Boolean.TRUE);
-                    Resource resource;
-
-                    if (file == null) {
-                        // direct referenced property, no file
-                        String name = node.getChildValue(null, "name", String.class);
-                        String value = node.getChildValue(null, "value", String.class);
-
-                        this.changeLogParameters.set(name, value, contextFilter, labels, dbms, global, this);
-                    } else {
-                        // get relative path if specified
-                        if (relativeToChangelogFile) {
-                            resource = resourceAccessor.get(this.getPhysicalFilePath()).resolveSibling(file);
-                        } else {
-                            resource = resourceAccessor.get(file);
-                        }
-
-                        // read properties from the file
-                        Properties props = new Properties();
-                        if (!resource.exists()) {
-                            if (errorIfMissing) {
-                                throw new UnexpectedLiquibaseException(FileUtil.getFileNotFoundMessage(file));
-                            } else {
-                                Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(file));
-                            }
-                        } else {
-                            try (InputStream propertiesStream = resource.openInputStream()) {
-                                props.load(propertiesStream);
-
-                                for (Map.Entry<Object, Object> entry : props.entrySet()) {
-                                    this.changeLogParameters.set(
-                                            entry.getKey().toString(),
-                                            entry.getValue().toString(),
-                                            contextFilter,
-                                            labels,
-                                            dbms,
-                                            global,
-                                            this
-                                    );
-                                }
-                            }
-                        }
-                    }
-                } catch (IOException e) {
-                    throw new ParsedNodeException(e);
-                }
-
+            case PROPERTY: {
+                handleProperty(node, resourceAccessor);
                 break;
             }
             default:
                 // we want to exclude child nodes that are not changesets or the other things
                 // and avoid failing when encountering "child" nodes of the databaseChangeLog which are just
-                // XML node attributes (like schemaLocation). If you don't understand, remove the if and run the tests
+                // XML node attributes (like schemaLocation). If you don't understand, remove the if-condition and run the tests
                 // and look at the error output or review the "node" object here with a debugger.
                 if (node.getChildren() != null && !node.getChildren().isEmpty()) {
                     throw new ParsedNodeException("Unexpected node found under databaseChangeLog: " + nodeName);
                 }
         }
+    }
+
+    private void handlePrecondition(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        PreconditionContainer parsedContainer = new PreconditionContainer();
+        parsedContainer.load(node, resourceAccessor);
+        this.preconditionContainer.addNestedPrecondition(parsedContainer);
+    }
+
+    private void handleProperty(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        try {
+            String propertyContextFilter = node.getChildValue(null, CONTEXT_FILTER, String.class);
+            if (StringUtil.isEmpty(propertyContextFilter)) {
+                propertyContextFilter = node.getChildValue(null, CONTEXT, String.class);
+            }
+            String dbms = node.getChildValue(null, DBMS, String.class);
+            String labels = node.getChildValue(null, LABELS, String.class);
+            Boolean global = node.getChildValue(null, GLOBAL, Boolean.class);
+            if (global == null) {
+                // okay behave like liquibase < 3.4 and set global == true
+                global = true;
+            }
+
+            String file = node.getChildValue(null, FILE, String.class);
+            Boolean relativeToChangelogFile = node.getChildValue(null, RELATIVE_TO_CHANGELOG_FILE, Boolean.FALSE);
+            Boolean errorIfMissing = node.getChildValue(null, ERROR_IF_MISSING, Boolean.TRUE);
+            Resource resource;
+
+            if (file == null) {
+                // direct referenced property, no file
+                String name = node.getChildValue(null, NAME, String.class);
+                String value = node.getChildValue(null, VALUE, String.class);
+
+                this.changeLogParameters.set(name, value, propertyContextFilter, labels, dbms, global, this);
+            } else {
+                // get relative path if specified
+                if (relativeToChangelogFile) {
+                    resource = resourceAccessor.get(this.getPhysicalFilePath()).resolveSibling(file);
+                } else {
+                    resource = resourceAccessor.get(file);
+                }
+
+                // read properties from the file
+                Properties props = new Properties();
+                if (!resource.exists()) {
+                    if (errorIfMissing) {
+                        throw new UnexpectedLiquibaseException(FileUtil.getFileNotFoundMessage(file));
+                    } else {
+                        Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(file));
+                    }
+                } else {
+                    try (InputStream propertiesStream = resource.openInputStream()) {
+                        props.load(propertiesStream);
+
+                        for (Map.Entry<Object, Object> entry : props.entrySet()) {
+                            this.changeLogParameters.set(
+                                    entry.getKey().toString(),
+                                    entry.getValue().toString(),
+                                    propertyContextFilter,
+                                    labels,
+                                    dbms,
+                                    global,
+                                    this
+                            );
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new ParsedNodeException(e);
+        }
+    }
+
+    private void handleRemoveChangeSet(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        List<ParsedNode> childNodes = node.getChildren();
+        Optional<ParsedNode> changeNode = childNodes.stream().filter(n -> n.getName().equalsIgnoreCase("change")).findFirst();
+        if(changeNode.isPresent()){
+            ChangeVisitor changeVisitor = ChangeVisitorFactory.getInstance().create((String) changeNode.get().getValue());
+            if(changeVisitor != null){
+                changeVisitor.load(node, resourceAccessor);
+                if(DatabaseList.definitionMatches(changeVisitor.getDbms(), changeLogParameters.getDatabase(), false)) {
+                    //add changeVisitor to this changeLog only if the running database matches with one of the removeChangeSetProperty's dbms
+                    getChangeVisitors().add(changeVisitor);
+                }
+            }
+        }
+    }
+
+    private void handleIncludeAll(ParsedNode node, ResourceAccessor resourceAccessor, Map<String, Object> nodeScratch)
+            throws ParsedNodeException, SetupException {
+        String path = node.getChildValue(null, PATH, String.class);
+        String resourceFilterDef = node.getChildValue(null, FILTER, String.class);
+        if (resourceFilterDef == null) {
+            resourceFilterDef = node.getChildValue(null, RESOURCE_FILTER, String.class);
+        }
+        IncludeAllFilter resourceFilter = null;
+        if (resourceFilterDef != null) {
+            try {
+                resourceFilter = (IncludeAllFilter) Class.forName(resourceFilterDef).getConstructor().newInstance();
+            } catch (ReflectiveOperationException e) {
+                throw new SetupException(e);
+            }
+        }
+
+        String resourceComparatorDef = node.getChildValue(null, RESOURCE_COMPARATOR, String.class);
+        Comparator<String> resourceComparator = determineResourceComparator(resourceComparatorDef);
+
+        ContextExpression includeAllNodeContextFilter = determineContextExpression(node);
+        Labels labels = new Labels(node.getChildValue(null, LABELS, String.class));
+        Boolean ignore = node.getChildValue(null, IGNORE, Boolean.class);
+        if (ignore == null) {
+            ignore = false;
+        }
+        includeAll(path,
+                node.getChildValue(null, RELATIVE_TO_CHANGELOG_FILE, false), resourceFilter,
+                node.getChildValue(null, ERROR_IF_MISSING_OR_EMPTY, true),
+                resourceComparator,
+                resourceAccessor,
+                includeAllNodeContextFilter,
+                labels,
+                ignore,
+                node.getChildValue(null, LOGICAL_FILE_PATH, String.class),
+                node.getChildValue(null, MIN_DEPTH, 0),
+                node.getChildValue(null, MAX_DEPTH, Integer.MAX_VALUE),
+                node.getChildValue(null, ENDS_WITH_FILTER, ""),
+                (ModifyChangeSets) nodeScratch.get(MODIFY_CHANGE_SETS));
+    }
+
+    private void handleInclude(ParsedNode node, ResourceAccessor resourceAccessor, Map<String, Object> nodeScratch)
+            throws ParsedNodeException, SetupException {
+        String path = node.getChildValue(null, FILE, String.class);
+        if (path == null) {
+            throw new UnexpectedLiquibaseException("No 'file' attribute on 'include'");
+        }
+        path = path.replace('\\', '/');
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, path);
+        ContextExpression includeNodeContextFilter = determineContextExpression(node);
+        Labels labels = new Labels(node.getChildValue(null, LABELS, String.class));
+        Boolean ignore = node.getChildValue(null, IGNORE, Boolean.class);
+        try {
+            include(path,
+                    node.getChildValue(null, RELATIVE_TO_CHANGELOG_FILE, false),
+                    node.getChildValue(null, ERROR_IF_MISSING, true),
+                    resourceAccessor,
+                    includeNodeContextFilter,
+                    labels,
+                    ignore,
+                    node.getChildValue(null, LOGICAL_FILE_PATH, String.class),
+                    OnUnknownFileFormat.FAIL,
+                    (ModifyChangeSets) nodeScratch.get(MODIFY_CHANGE_SETS));
+        } catch (LiquibaseException e) {
+            throw new SetupException(e);
+        }
+    }
+
+    private static ContextExpression determineContextExpression(ParsedNode node) throws ParsedNodeException {
+        ContextExpression includeNodeContextFilter = new ContextExpression(node.getChildValue(null, CONTEXT_FILTER, String.class));
+        if (includeNodeContextFilter.isEmpty()) {
+            includeNodeContextFilter = new ContextExpression(node.getChildValue(null, CONTEXT, String.class));
+        }
+        return includeNodeContextFilter;
+    }
+
+    private void handleModifyChangeSets(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+        Map<String, Object> nodeScratch;
+        ModifyChangeSets modifyChangeSets = createModifyChangeSets(node);
+        nodeScratch = new HashMap<>();
+        nodeScratch.put(MODIFY_CHANGE_SETS, modifyChangeSets);
+        for (ParsedNode modifyChildNode : node.getChildren()) {
+            handleChildNode(modifyChildNode, resourceAccessor, nodeScratch);
+        }
+        nodeScratch.remove(MODIFY_CHANGE_SETS);
+    }
+
+    private void handleDbmsAttribute(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        if (isDbmsMatch(node.getChildValue(null, DBMS, String.class))) {
+            this.addChangeSet(createChangeSet(node, resourceAccessor));
+        } else {
+            handleSkippedChangeSet(node);
+        }
+    }
+
+    public Comparator<String> determineResourceComparator(String resourceComparatorDef) {
+        Comparator<String> resourceComparator;
+        if (resourceComparatorDef == null) {
+            resourceComparator = getStandardChangeLogComparator();
+        } else {
+            try {
+                resourceComparator = (Comparator<String>) Class.forName(resourceComparatorDef).getConstructor().newInstance();
+            } catch (ReflectiveOperationException e) {
+                //take default comparator
+                Scope.getCurrentScope().getLog(getClass()).info("no resourceComparator defined - taking default " +
+                        "implementation", e);
+                resourceComparator = getStandardChangeLogComparator();
+            }
+        }
+        return resourceComparator;
     }
 
     private ModifyChangeSets createModifyChangeSets(ParsedNode node) throws ParsedNodeException {
@@ -627,18 +716,18 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     // Handle a mismatched DBMS attribute, if necessary
     //
     private void handleSkippedChangeSet(ParsedNode node) throws ParsedNodeException {
-        if (node.getChildValue(null, "dbms", String.class) == null) {
+        if (node.getChildValue(null, DBMS, String.class) == null) {
             return;
         }
         String id = node.getChildValue(null, "id", String.class);
         String author = node.getChildValue(null, "author", String.class);
-        String filePath = StringUtil.trimToNull(node.getChildValue(null, "logicalFilePath", String.class));
+        String filePath = StringUtil.trimToNull(node.getChildValue(null, LOGICAL_FILE_PATH, String.class));
         if (filePath == null) {
             filePath = getFilePath();
         } else {
             filePath = filePath.replace("\\\\", "/").replaceFirst("^/", "");
         }
-        String dbmsList = node.getChildValue(null, "dbms", String.class);
+        String dbmsList = node.getChildValue(null, DBMS, String.class);
         ChangeSet skippedChangeSet =
                 new ChangeSet(id, author, false, false, filePath, null, dbmsList, this);
         skippedChangeSets.add(skippedChangeSet);
@@ -656,7 +745,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     /**
-     * @deprecated use {@link DatabaseChangeLog#includeAll(String, boolean, IncludeAllFilter, boolean, Comparator, ResourceAccessor, ContextExpression, Labels, boolean, int, int)}
+     * @deprecated use {@link DatabaseChangeLog#includeAll(String, boolean, IncludeAllFilter, boolean, Comparator, ResourceAccessor, ContextExpression, Labels, boolean, String, int, int)}
      */
     @Deprecated
     public void includeAll(String pathName,
@@ -682,6 +771,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 includeContextFilter,
                 labels,
                 ignore,
+                null,
                 0,
                 Integer.MAX_VALUE);
     }
@@ -695,13 +785,21 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            ContextExpression includeContextFilter,
                            Labels labels,
                            boolean ignore,
+                           String logicalFilePath,
                            int minDepth,
                            int maxDepth)
             throws SetupException {
+        ChangeSetService changeSetService = ChangeSetServiceFactory.getInstance().createChangeSetService();
+        ModifyChangeSets modifyChangeSets = changeSetService.createModifyChangeSets(null, null, false);
         includeAll(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator,
-                   resourceAccessor, includeContextFilter, labels, ignore, minDepth, maxDepth, "", new ModifyChangeSets(null, null));
+                   resourceAccessor, includeContextFilter, labels, ignore, logicalFilePath, minDepth, maxDepth, "", modifyChangeSets);
     }
 
+    /**
+     *
+     * @deprecated use {@link DatabaseChangeLog#includeAll(String, boolean, IncludeAllFilter, boolean, Comparator, ResourceAccessor, ContextExpression, Labels, boolean, String, int, int, String, ModifyChangeSets) throws SetupException}
+     *
+     */
     @Deprecated
     public void includeAll(String pathName,
                            boolean isRelativeToChangelogFile,
@@ -717,7 +815,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            ModifyChangeSets modifyChangeSets)
             throws SetupException {
         includeAll(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator,
-                resourceAccessor, includeContextFilter, labels, ignore, minDepth, maxDepth, "", modifyChangeSets);
+                resourceAccessor, includeContextFilter, labels, ignore, null, minDepth, maxDepth, "", modifyChangeSets);
     }
 
     public void includeAll(String pathName,
@@ -729,6 +827,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            ContextExpression includeContextFilter,
                            Labels labels,
                            boolean ignore,
+                           String logicalFilePath,
                            int minDepth,
                            int maxDepth,
                            String endsWithFilter,
@@ -749,7 +848,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 for (Resource resource : resources) {
                     Scope.getCurrentScope().getLog(getClass()).info("Reading resource: " + resource);
                     include(resource.getPath(), false, errorIfMissingOrEmpty, resourceAccessor, includeContextFilter,
-                            labels, ignore, OnUnknownFileFormat.WARN, modifyChangeSets);
+                            labels, ignore, logicalFilePath, OnUnknownFileFormat.WARN, modifyChangeSets);
                 }
             });
         } catch (Exception e) {
@@ -757,6 +856,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
     }
 
+    /**
+     *
+     * @deprecated use {@link DatabaseChangeLog#include(String, boolean, boolean, ResourceAccessor, ContextExpression, Labels, Boolean, String, OnUnknownFileFormat)}
+     *
+     */
     @Deprecated
     public SortedSet<Resource> findResources(
             String pathName,
@@ -767,7 +871,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             ResourceAccessor resourceAccessor,
             int minDepth,
             int maxDepth) throws SetupException {
-        return this.findResources(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator,
+        return findResources(pathName, isRelativeToChangelogFile, resourceFilter, errorIfMissingOrEmpty, resourceComparator,
                 resourceAccessor, minDepth, maxDepth, "");
     }
 
@@ -795,29 +899,17 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             ResourceAccessor.SearchOptions searchOptions = initializeAndSetMinAndMaxDepth(minDepth, maxDepth);
             searchOptions.setTrimmedEndsWithFilter(endsWithFilter);
 
-            List<Resource> unsortedResources = null;
             Set<String> seenChangelogPaths = Scope.getCurrentScope().get(SEEN_CHANGELOGS_PATHS_SCOPE_KEY, new HashSet<>());
-            try {
-                String path = fixPath(pathName, resourceAccessor, relativeTo);
-
-                if (Boolean.TRUE.equals(ChangeLogParserConfiguration.ERROR_ON_CIRCULAR_INCLUDE_ALL.getCurrentValue())) {
-                    if (seenChangelogPaths.contains(path)) {
-                        throw new SetupException("Circular reference detected in '" + path + "'. Set " + ChangeLogParserConfiguration.ERROR_ON_CIRCULAR_INCLUDE_ALL.getKey() + " if you'd like to ignore this error.");
-                    }
-                }
-                seenChangelogPaths.add(path);
-                LOG.fine("includeAll for " + pathName);
-                LOG.fine("Using file opener for includeAll: " + resourceAccessor.toString());
-
-                unsortedResources = resourceAccessor.search(path, searchOptions);
-            } catch (IOException e) {
-                if (errorIfMissingOrEmpty) {
-                    throw new IOException(String.format("Could not find/read changelogs from %s directory", pathName));
-                }
-            }
+            List<Resource> unsortedResources = getUnsortedResources(pathName, errorIfMissingOrEmpty, resourceAccessor, relativeTo, seenChangelogPaths, searchOptions);
             SortedSet<Resource> resources = new TreeSet<>((o1, o2) -> resourceComparator.compare(o1.getPath(), o2.getPath()));
             if (unsortedResources != null) {
+                URI liquibaseHomeInternalUri = getLiquibaseHomeInternalUri();
                 for (Resource resourcePath : unsortedResources) {
+                    // if the resource is inside a jar located in liquibaseHomeUri/internal, we don't want to include it
+                    if (liquibaseHomeInternalUri != null && resourcePath.getUri().toString().startsWith("jar:" + liquibaseHomeInternalUri.toString())) {
+                        Scope.getCurrentScope().getLog(getClass()).info("Skipping resource from jar file in liquibase home internal: " + resourcePath);
+                        continue;
+                    }
                     if ((resourceFilter == null) || resourceFilter.include(resourcePath.getPath())) {
                         resources.add(resourcePath);
                     }
@@ -832,6 +924,42 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         } catch (IOException e) {
             throw new SetupException(e);
         }
+    }
+
+    private URI getLiquibaseHomeInternalUri() {
+        String liquibaseHome = LiquibaseLauncherSettings.getSetting(LiquibaseLauncherSettings.LiquibaseLauncherSetting.LIQUIBASE_HOME);
+        URI liquibaseHomeUri = null;
+        if (liquibaseHome != null) {
+            try {
+                liquibaseHomeUri = Paths.get(liquibaseHome + File.separator + "internal").toUri();
+            } catch (InvalidPathException e) {
+                Scope.getCurrentScope().getLog(DatabaseChangeLog.class).warning("Invalid LIQUIBASE_HOME path: " + liquibaseHome, e);
+            }
+        }
+        return liquibaseHomeUri;
+    }
+
+    private List<Resource> getUnsortedResources(String pathName, boolean errorIfMissingOrEmpty, ResourceAccessor resourceAccessor, String relativeTo, Set<String> seenChangelogPaths, ResourceAccessor.SearchOptions searchOptions) throws SetupException, IOException {
+        List<Resource> unsortedResources = null;
+        try {
+            String path = fixPath(pathName, resourceAccessor, relativeTo);
+
+            if (Boolean.TRUE.equals(ChangeLogParserConfiguration.ERROR_ON_CIRCULAR_INCLUDE_ALL.getCurrentValue())) {
+                if (seenChangelogPaths.contains(path)) {
+                    throw new SetupException("Circular reference detected in '" + path + "'. Set " + ChangeLogParserConfiguration.ERROR_ON_CIRCULAR_INCLUDE_ALL.getKey() + " if you'd like to ignore this error.");
+                }
+            }
+            seenChangelogPaths.add(path);
+            LOG.fine("includeAll for " + pathName);
+            LOG.fine("Using file opener for includeAll: " + resourceAccessor.toString());
+
+            unsortedResources = resourceAccessor.search(path, searchOptions);
+        } catch (IOException e) {
+            if (errorIfMissingOrEmpty) {
+                throw new IOException(String.format("Could not find/read changelogs from %s directory", pathName), e);
+            }
+        }
+        return unsortedResources;
     }
 
     private String fixPath(String pathName, ResourceAccessor resourceAccessor, String relativeTo) throws IOException {
@@ -853,7 +981,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     /**
-     * @deprecated use {@link DatabaseChangeLog#include(String, boolean, boolean, ResourceAccessor, ContextExpression, Labels, Boolean, OnUnknownFileFormat)}
+     * @deprecated use {@link DatabaseChangeLog#include(String, boolean, boolean, ResourceAccessor, ContextExpression, Labels, Boolean, String, OnUnknownFileFormat)}
      */
     @Deprecated
     public boolean include(String fileName,
@@ -881,8 +1009,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     /**
-     * @deprecated use {@link DatabaseChangeLog#include(String, boolean, boolean, ResourceAccessor, ContextExpression, Labels, Boolean, OnUnknownFileFormat)}
+     * @deprecated use {@link DatabaseChangeLog#include(String, boolean, boolean, ResourceAccessor, ContextExpression, Labels, Boolean, String, OnUnknownFileFormat)}
      */
+    @Deprecated
     public boolean include(String fileName,
                            boolean isRelativePath,
                            boolean errorIfMissing,
@@ -892,9 +1021,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            Boolean ignore,
                            boolean logEveryUnknownFileFormat)
             throws LiquibaseException {
-        return include(fileName, isRelativePath, errorIfMissing, resourceAccessor, includeContextFilter, labels, ignore, logEveryUnknownFileFormat ? OnUnknownFileFormat.WARN : OnUnknownFileFormat.SKIP);
+        return include(fileName, isRelativePath, errorIfMissing, resourceAccessor, includeContextFilter, labels, ignore, null, logEveryUnknownFileFormat ? OnUnknownFileFormat.WARN : OnUnknownFileFormat.SKIP);
     }
 
+    /**
+     * @deprecated use {@link DatabaseChangeLog#include(String, boolean, boolean, ResourceAccessor, ContextExpression, Labels, Boolean, String, OnUnknownFileFormat)}
+     */
     public boolean include(String fileName,
                            boolean isRelativePath,
                            boolean errorIfMissing,
@@ -904,7 +1036,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            Boolean ignore,
                            OnUnknownFileFormat onUnknownFileFormat)
             throws LiquibaseException {
-        return include(fileName, isRelativePath, errorIfMissing, resourceAccessor, includeContextFilter, labels, ignore, onUnknownFileFormat, new ModifyChangeSets(null, null));
+        return include(fileName, isRelativePath, errorIfMissing, resourceAccessor, includeContextFilter, labels, ignore, null, onUnknownFileFormat, new ModifyChangeSets(null, null));
     }
 
     public boolean include(String fileName,
@@ -914,6 +1046,20 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            ContextExpression includeContextFilter,
                            Labels labels,
                            Boolean ignore,
+                           String logicalFilePath,
+                           OnUnknownFileFormat onUnknownFileFormat)
+            throws LiquibaseException {
+        return include(fileName, isRelativePath, errorIfMissing, resourceAccessor, includeContextFilter, labels, ignore, logicalFilePath, onUnknownFileFormat, new ModifyChangeSets(null, null, false));
+    }
+
+    public boolean include(String fileName,
+                           boolean isRelativePath,
+                           boolean errorIfMissing,
+                           ResourceAccessor resourceAccessor,
+                           ContextExpression includeContextFilter,
+                           Labels labels,
+                           Boolean ignore,
+                           String logicalFilePath,
                            OnUnknownFileFormat onUnknownFileFormat,
                            ModifyChangeSets modifyChangeSets)
             throws LiquibaseException {
@@ -924,42 +1070,53 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         if (isRelativePath) {
             try {
                 fileName = resourceAccessor.get(this.getPhysicalFilePath()).resolveSibling(fileName).getPath();
-                fileName = normalizePath(Paths.get(fileName).toString());
+                fileName = normalizePath(normalizePathViaPaths(fileName, false));
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
         }
+        final String normalizedFilePath = fileName;
+
+        ChangeLogParser parser = null;
         DatabaseChangeLog changeLog;
         try {
-            DatabaseChangeLog rootChangeLog = ROOT_CHANGE_LOG.get();
-            if (rootChangeLog == null) {
+            DatabaseChangeLog rootChangeLogInstance = ROOT_CHANGE_LOG.get();
+            if (rootChangeLogInstance == null) {
                 ROOT_CHANGE_LOG.set(this);
             }
-            DatabaseChangeLog parentChangeLog = PARENT_CHANGE_LOG.get();
+            DatabaseChangeLog parentChangeLogInstance = PARENT_CHANGE_LOG.get();
             PARENT_CHANGE_LOG.set(this);
             try {
-                if (!resourceAccessor.get(fileName).exists()) {
+                if (!resourceAccessor.get(normalizedFilePath).exists()) {
                     if (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getCurrentValue().equals(ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN)
                             || !errorIfMissing) {
-                        Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(fileName));
+                        Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(normalizedFilePath));
                         return false;
                     } else {
-                        throw new ChangeLogParseException(FileUtil.getFileNotFoundMessage(fileName));
+                        throw new ChangeLogParseException(FileUtil.getFileNotFoundMessage(normalizedFilePath));
                     }
                 }
-                ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor);
-                changeLog = parser.parse(fileName, changeLogParameters, resourceAccessor);
+                parser = ChangeLogParserFactory.getInstance().getParser(normalizedFilePath, resourceAccessor);
+
+                if (modifyChangeSets != null) {
+                    // Some parser need to know it's not a top level changelog, in modifyChangeSets flow 'runWith' attributes are added later on
+                    ChangeLogParser finalParser = parser;
+                    changeLog = Scope.child(Collections.singletonMap(MODIFY_CHANGE_SETS, true),
+                            () -> finalParser.parse(normalizedFilePath, changeLogParameters, resourceAccessor));
+                } else {
+                    changeLog = parser.parse(normalizedFilePath, changeLogParameters, resourceAccessor);
+                }
                 changeLog.setIncludeContextFilter(includeContextFilter);
                 changeLog.setIncludeLabels(labels);
-                changeLog.setIncludeIgnore(ignore != null ? ignore.booleanValue() : false);
+                changeLog.setIncludeIgnore(ignore != null && ignore);
             } finally {
-                if (rootChangeLog == null) {
+                if (rootChangeLogInstance == null) {
                     ROOT_CHANGE_LOG.remove();
                 }
-                if (parentChangeLog == null) {
+                if (parentChangeLogInstance == null) {
                     PARENT_CHANGE_LOG.remove();
                 } else {
-                    PARENT_CHANGE_LOG.set(parentChangeLog);
+                    PARENT_CHANGE_LOG.set(parentChangeLogInstance);
                 }
             }
         } catch (UnknownChangelogFormatException e) {
@@ -967,14 +1124,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 throw e;
             }
             // This matches only an extension, but filename can be a full path, too. Is it right?
-            boolean matchesFileExtension = StringUtil.trimToEmpty(fileName).matches("\\.\\w+$");
+            boolean matchesFileExtension = StringUtil.trimToEmpty(normalizedFilePath).matches("\\.\\w+$");
             if (matchesFileExtension || onUnknownFileFormat == OnUnknownFileFormat.WARN) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
-                        "included file " + fileName + "/" + fileName + " is not a recognized file type"
+                        "included file " + normalizedFilePath + "/" + normalizedFilePath + " is not a recognized file type", e
                 );
             }
             return false;
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new LiquibaseException(e.getMessage(), e);
         }
         PreconditionContainer preconditions = changeLog.getPreconditions();
@@ -984,15 +1141,74 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
             this.getPreconditions().addNestedPrecondition(preconditions);
         }
+
+        List<RanChangeSet> ranChangeSets = new ArrayList<>();
+        Database database = Scope.getCurrentScope().getDatabase();
+        if (database != null && database.getConnection() != null) {
+            Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).init();
+            ranChangeSets = database.getRanChangeSetList();
+        }
+
+        String actualLogicalFilePath = getActualLogicalFilePath(logicalFilePath, changeLog);
+
         for (ChangeSet changeSet : changeLog.getChangeSets()) {
             if (modifyChangeSets != null) {
                 modifyChangeSets(modifyChangeSets, changeSet);
+            }
+
+            //
+            // Do not update the logical file path if the change set has
+            // already been executed because this would cause the addition
+            // of another DBCL entry.  Also, skip setting the logical file
+            // path for raw SQL change sets
+            //
+            if (actualLogicalFilePath != null && changeSet.getLogicalFilePath() == null &&
+                ! (parser instanceof SqlChangeLogParser) && ! ranChangeSetExists(changeSet, ranChangeSets)) {
+                changeSet.setLogicalFilePath(actualLogicalFilePath);
+                if (StringUtils.isNotEmpty(actualLogicalFilePath)) {
+                    changeSet.setFilePath(actualLogicalFilePath);
+                }
             }
             addChangeSet(changeSet);
         }
         skippedChangeSets.addAll(changeLog.getSkippedChangeSets());
 
         return true;
+    }
+
+    /**
+     * Search for the closest logicalfilePath for this changelog
+     */
+    private String getActualLogicalFilePath(String logicalFilePath, DatabaseChangeLog changeLog) {
+        DatabaseChangeLog currentChangeLog = changeLog;
+        do {
+            if (StringUtils.isNotBlank(currentChangeLog.getRawLogicalFilePath())) {
+                return currentChangeLog.getRawLogicalFilePath();
+            }
+        } while ((currentChangeLog = currentChangeLog.getParentChangeLog()) != null);
+
+        if (StringUtils.isNotBlank(this.getRawLogicalFilePath())) {
+            return this.getRawLogicalFilePath();
+        }
+        return logicalFilePath;
+    }
+
+    /**
+     *
+     * Return true if there is a RanChangeSet instance for the change set
+     *
+     * @param  changeSet                 The ChangeSet in question
+     * @param  ranChangeSets             The list of RanChangeSet to iterate
+     * @return boolean
+     *
+     */
+    private boolean ranChangeSetExists(ChangeSet changeSet, List<RanChangeSet> ranChangeSets) {
+        Optional<RanChangeSet> ranChangeSet =
+            ranChangeSets.stream().filter( rc ->
+                rc.getId().equals(changeSet.getId()) &&
+                rc.getAuthor().equals(changeSet.getAuthor()) &&
+                rc.getStoredChangeLog().equals(changeSet.getFilePath())).findFirst();
+        return ranChangeSet.isPresent();
     }
 
     private void modifyChangeSets(ModifyChangeSets modifyChangeSets, ChangeSet changeSet) {
@@ -1019,7 +1235,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             return null;
         }
 
-        if (filePath.startsWith("classpath:")) {
+        if (!GlobalConfiguration.PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS.getCurrentValue() && filePath.startsWith(CLASSPATH_PROTOCOL)) {
             filePath = filePath.substring("classpath:".length());
         }
 
@@ -1027,27 +1243,49 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             filePath = filePath.replace("\\", "/");
         }
 
-        while (filePath.contains("//")) {
-            filePath = filePath.replace("//", "/");
-        }
-
-        if (filePath.contains("/./")) {
-            filePath = filePath.replace("/./", "/");
-        }
-
         if (filePath.indexOf(":") == 1) {
             filePath = NO_LETTER_PATTERN.matcher(filePath).replaceFirst("");
-        }
-
-        if (filePath.startsWith("./")) {
-            filePath = filePath.substring(1);
         }
 
         if (filePath.startsWith("/")) {
             filePath = filePath.substring(1);
         }
 
+        String normalized = FilenameUtils.normalizeNoEndSeparator(filePath);
+        /*
+        Commons IO will return null if the double dot has no parent path segment to work with. In this case,
+        we fall back to path normalization using Paths.get(), which might fail on Windows.
+         */
+        if (normalized == null) {
+            normalized = normalizePathViaPaths(filePath, true);
+        }
+        
+        if (normalized == null) {
+            return null;
+        }
+
+        filePath = normalized;
+
+        if (filePath.contains("\\")) {
+            filePath = filePath.replace("\\", "/");
+        }
+
         return filePath;
+    }
+
+    private static String normalizePathViaPaths(String filePath, boolean normalizePath) {
+        if (filePath == null) {
+            return null;
+        }
+
+        // preserve URL protocol when normalizing the path
+        boolean classpathUrl = filePath.startsWith(CLASSPATH_PROTOCOL);
+        Path path = classpathUrl
+                ? Paths.get(filePath.substring(CLASSPATH_PROTOCOL.length()))
+                : Paths.get(filePath);
+
+        Path normalizedPath = normalizePath ? path.normalize() : path;
+        return classpathUrl ? CLASSPATH_PROTOCOL + normalizedPath : normalizedPath.toString();
     }
 
     public void clearCheckSums() {
@@ -1068,11 +1306,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         @Override
         public OnSqlOutputOption getOnSqlOutput() {
             return OnSqlOutputOption.TEST;
-        }
-
-        @Override
-        public void addNestedPrecondition(Precondition precondition) {
-            super.addNestedPrecondition(precondition);
         }
     }
 
@@ -1098,12 +1331,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     /**
+     *
      * Initialize and set min/max depth values validating maxDepth cannot be a lower value than minDepth
      *
-     * @param minDepth
-     * @param maxDepth
+     * @param minDepth            The minDepth for searches
+     * @param maxDepth            The maxDepth for searches
      * @return ResourceAccessor.SearchOptions
      * @throws SetupException in case maxDepth is less than minDepth
+     *
      */
     private ResourceAccessor.SearchOptions initializeAndSetMinAndMaxDepth(int minDepth, int maxDepth) throws SetupException {
         ResourceAccessor.SearchOptions searchOptions = new ResourceAccessor.SearchOptions();

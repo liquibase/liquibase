@@ -1,8 +1,8 @@
 package liquibase.command.core;
 
-import liquibase.Scope;
 import liquibase.UpdateSummaryEnum;
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.*;
@@ -85,18 +85,13 @@ public class UpdateCommandStep extends AbstractUpdateCommandStep implements Clea
     }
 
     @Override
-    public void postUpdateLog(int rowsAffected) {
-        if (rowsAffected > -1) {
-            Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("update.successful.with.row.count"), rowsAffected));
-        } else {
-            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.successful"));
-        }
+    public void postUpdateLog(int rowsAffected, List<ChangeSet> exceptionChangeSets) {
+        postUpdateLogForActualUpdate(rowsAffected, exceptionChangeSets, coreBundle.getString("update.successful.with.row.count"), coreBundle.getString("update.successful"));
     }
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        List<Class<?>> deps = Arrays.asList(Database.class, DatabaseChangeLog.class, ChangeExecListener.class, ChangeLogParameters.class, UpdateSummaryEnum.class);
-        return deps;
+        return Arrays.asList(Database.class, DatabaseChangeLog.class, ChangeExecListener.class, ChangeLogParameters.class, UpdateSummaryEnum.class);
     }
 
     @Override

@@ -3,38 +3,36 @@ package liquibase.statement.core;
 import liquibase.statement.AbstractSqlStatement;
 
 public class ModifyDataTypeStatement extends AbstractSqlStatement {
-    private final String catalogName;
-    private String schemaName;
-    private String tableName;
     private String columnName;
     private String newDataType;
+    private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
 
     public ModifyDataTypeStatement(String catalogName, String schemaName, String tableName, String columnName, String newDataType) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
+        this.databaseTableIdentifier.setCatalogName(catalogName);
+        this.databaseTableIdentifier.setSchemaName(schemaName);
+        this.databaseTableIdentifier.setTableName(tableName);
         this.columnName = columnName;
         this.newDataType = newDataType;
     }
 
     public String getCatalogName() {
-        return catalogName;
+        return databaseTableIdentifier.getCatalogName();
     }
 
     public String getSchemaName() {
-        return schemaName;
+        return databaseTableIdentifier.getSchemaName();
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
+        this.databaseTableIdentifier.setSchemaName(schemaName);
     }
 
     public String getTableName() {
-        return tableName;
+        return databaseTableIdentifier.getTableName();
     }
 
     public void setTableName(String tableName) {
-        this.tableName = tableName;
+        this.databaseTableIdentifier.setTableName(tableName);
     }
 
     public String getColumnName() {

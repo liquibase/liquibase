@@ -38,7 +38,7 @@ public interface CustomChange {
 
     /**
      * Tests that the change is configured correctly before attempting to execute it.
-     * @param database The database the change will be ran against
+     * @param database The database the change will be run against
      */
     ValidationErrors validate(Database database);
 

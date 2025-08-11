@@ -14,6 +14,7 @@ import liquibase.statement.core.CreateTableStatement;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -141,11 +142,11 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
             buffer.append(StringUtil.join(primaryKeyColumns, ", "));
             buffer.append(")");
 
-            if (!StringUtil.isEmpty(pkConstraint.getConstraintName())) {
+            if (!StringUtils.isEmpty(pkConstraint.getConstraintName())) {
                 buffer.append(" CONSTRAINT ");
                 buffer.append(database.escapeConstraintName(pkConstraint.getConstraintName()));
             }
-            // Setting up table space for PK's index if it exist
+            // Setting up table space for PK's index if it exists
             buffer.append(",");
         }
 

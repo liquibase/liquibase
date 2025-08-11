@@ -182,9 +182,10 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         // Handle both negative and positive numbers
         json = json.replaceAll("!!int \"(-?\\d+)\"", "$1");
         json = json.replaceAll("!!bool \"(\\w+)\"", "$1");
-        json = json.replaceAll("!!timestamp \"([^\"]*)\"", "$1");
+        json = json.replaceAll("!!timestamp \"([^\"]*)\"", "\"$1\"");
         json = json.replaceAll("!!float \"([^\"]*)\"", "$1");
         json = json.replaceAll("!!liquibase.[^\\s]+ (\"\\w+\")", "$1");
+        json = json.replace("!!null \"null\"", "\"null\"");
         return json;
     }
 
@@ -204,19 +205,19 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         @Override
         protected Set<Property> getProperties(Class<? extends Object> type) {
             Set<Property> returnSet = new HashSet<>();
-            LiquibaseSerializable serialzableType = null;
+            LiquibaseSerializable serializableType = null;
             try {
                 if (type.equals(ChangeSet.class)) {
-                    serialzableType = new ChangeSet("x", "y", false, false, null, null, null, null);
+                    serializableType = new ChangeSet("x", "y", false, false, null, null, null, null);
                 } else if (LiquibaseSerializable.class.isAssignableFrom(type)) {
-                    serialzableType = (LiquibaseSerializable) type.getConstructor().newInstance();
+                    serializableType = (LiquibaseSerializable) type.getConstructor().newInstance();
                 } else {
                     return super.getProperties(type);
                 }
             } catch (ReflectiveOperationException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
-            for (String property : serialzableType.getSerializableFields()) {
+            for (String property : serializableType.getSerializableFields()) {
                 returnSet.add(new LiquibaseProperty(property, String.class, String.class));
             }
             return returnSet;

@@ -203,18 +203,17 @@ public class DataTypeFactory {
                 }
             } while ((database != null) && !liquibaseDataType.supports(database) && iterator.hasNext());
         }
+        //
+        // We can assert that liquibaseDataType will be non-null at this point
+        //
         if ((database != null) && !liquibaseDataType.supports(database)) {
-            throw new UnexpectedLiquibaseException("Could not find type for " + liquibaseDataType +
-                    " for DBMS "+database.getShortName());
-        }
-        if (liquibaseDataType == null) {
             liquibaseDataType = new UnknownType(dataTypeName);
         }
         liquibaseDataType.setAdditionalInformation(additionalInfo);
 
         // Does the type string have the form "some_data_type(additional,info,separated,by,commas)"?
         // If so, process these as additional data type parameters.
-        if (dataTypeDefinition.matches(".+\\s*\\(.*")) {
+        if (dataTypeDefinition.matches(".+\\s*\\(.*\\).*")) {
             // Cut out the part between the first ()
             String paramStrings = dataTypeDefinition.replaceFirst(".*?\\(", "").replaceFirst("\\).*", "");
             String[] params = paramStrings.split(",");

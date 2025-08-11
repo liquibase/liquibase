@@ -19,6 +19,7 @@ import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -294,7 +295,7 @@ public class OfflineConnection implements DatabaseConnection {
     }
 
     public void setConnectionUserName(String connectionUserName) {
-        this.connectionUserName = StringUtil.isEmpty(connectionUserName) ? null : connectionUserName;
+        this.connectionUserName = StringUtils.isEmpty(connectionUserName) ? null : connectionUserName;
     }
 
     @Override

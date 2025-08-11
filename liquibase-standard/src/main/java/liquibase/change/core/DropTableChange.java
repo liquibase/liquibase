@@ -6,12 +6,14 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.structure.core.Table;
+import lombok.Setter;
 
 /**
  * Drops an existing table.
  */
 @DatabaseChange(name = "dropTable", description = "Drops an existing table", priority = ChangeMetaData.PRIORITY_DEFAULT,
     appliesTo = "table")
+@Setter
 public class DropTableChange extends AbstractChange {
 
     private String catalogName;
@@ -24,17 +26,9 @@ public class DropTableChange extends AbstractChange {
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting ="table.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @DatabaseChangeProperty(mustEqualExisting = "table", description = "Name of the table to drop")
@@ -42,17 +36,9 @@ public class DropTableChange extends AbstractChange {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
     @DatabaseChangeProperty(description = "Whether to add CASCADE CONSTRAINTS to the SQL statement")
     public Boolean isCascadeConstraints() {
         return cascadeConstraints;
-    }
-
-    public void setCascadeConstraints(Boolean cascadeConstraints) {
-        this.cascadeConstraints = cascadeConstraints;
     }
 
     @Override

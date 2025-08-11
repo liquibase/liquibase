@@ -4,6 +4,7 @@ import liquibase.*;
 import liquibase.change.Change;
 import liquibase.change.CheckSum;
 import liquibase.change.ColumnConfig;
+import liquibase.command.core.TagCommandStep;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.MSSQLDatabase;
@@ -34,6 +35,8 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+
+import static liquibase.executor.jvm.JdbcExecutor.SHOULD_UPDATE_ROWS_AFFECTED_SCOPE_KEY;
 
 public class StandardChangeLogHistoryService extends AbstractChangeLogHistoryService {
 
@@ -116,6 +119,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
         List<SqlStatement> statementsToExecute = new ArrayList<>();
 
+        String databaseChangeLogTableName = getDatabase().escapeTableName(getLiquibaseCatalogName(),
+                        getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
         boolean changeLogCreateAttempted = false;
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor( "jdbc", getDatabase());
         if (changeLogTable != null) {
@@ -143,7 +148,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     Integer columnSize = type.getColumnSize();
                     checksumNotRightSize = (columnSize != null) && (columnSize < 35);
                 } else {
-                    liquibaseColumnNotRightSize = false;
+                    checksumNotRightSize = false;
                 }
             }
             boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
@@ -237,7 +242,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             if (!hasDeploymentIdColumn) {
                 executor.comment("Adding missing databasechangelog.deployment_id column");
                 statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
-                    getDatabaseChangeLogTableName(), "DEPLOYMENT_ID", "VARCHAR(10)", null));
+                    getDatabaseChangeLogTableName(), "DEPLOYMENT_ID", charTypeName + "(10)", null));
                 if (database instanceof DB2Database) {
                     statementsToExecute.add(new ReorganizeTableStatement(getLiquibaseCatalogName(),
                         getLiquibaseSchemaName(), getDatabaseChangeLogTableName()));
@@ -245,46 +250,54 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             }
 
             SqlStatement databaseChangeLogStatement = new SelectFromDatabaseChangeLogStatement(
-                    new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(),
+                    new SelectFromDatabaseChangeLogStatement.ByCheckSumNotNullAndNotLike(ChecksumVersion.latest().getVersion()),
                     new ColumnConfig().setName("MD5SUM"));
             List<Map<String, ?>> md5sumRS = ChangelogJdbcMdcListener.query(getDatabase(), ex -> ex.queryForList(databaseChangeLogStatement));
 
-            if (!md5sumRS.isEmpty()) {
-                //check if any checksum is not using the current version
-                databaseChecksumsCompatible = md5sumRS.stream().allMatch(m -> m.get("MD5SUM").toString().startsWith(ChecksumVersion.latest().getVersion() + ":"));
-            }
+            //check if any checksum is not using the current version
+            databaseChecksumsCompatible = md5sumRS.isEmpty();
 
 
         } else if (!changeLogCreateAttempted) {
             executor.comment("Create Database Change Log Table");
             SqlStatement createTableStatement = new CreateDatabaseChangeLogTableStatement();
             if (!canCreateChangeLogTable()) {
-                throw new DatabaseException("Cannot create " + getDatabase().escapeTableName(getLiquibaseCatalogName
-                    (), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " table for your getDatabase()" +
-                    ".\n\n" +
+                throw new DatabaseException("Cannot create " + databaseChangeLogTableName + " table for your " + database.getDatabaseProductName() +
+                    "database.\n\n" +
                         "Please construct it manually using the following SQL as a base and re-run Liquibase:\n\n" +
                         createTableStatement);
             }
             // If there is no table in the database for recording change history create one.
             statementsToExecute.add(createTableStatement);
-            Scope.getCurrentScope().getLog(getClass()).info("Creating database history table with name: " +
-                getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
-                    getDatabaseChangeLogTableName()));
+            Scope.getCurrentScope().getLog(getClass()).info("Creating database changelog table with name: " + databaseChangeLogTableName);
         }
 
         for (SqlStatement sql : statementsToExecute) {
             if (SqlGeneratorFactory.getInstance().supports(sql, database)) {
-                ChangelogJdbcMdcListener.execute(getDatabase(), ex -> ex.execute(sql));
-                getDatabase().commit();
+                try {
+                    ChangelogJdbcMdcListener.execute(getDatabase(), ex -> ex.execute(sql));
+                    getDatabase().commit();
+                } catch (Exception e) {
+                    //
+                    // Trap for an exception here so we can add a message with more information.
+                    // If the user does not have read permission, we can end up here because the
+                    // presence of the DBCL was not detected earlier.
+                    //
+                    String message = "An error occurred while attempting to create the database changelog table.  Please make sure that you " +
+                                "have both read and write permissions for the '" + databaseChangeLogTableName + "' table.";
+                    throw new DatabaseException(message, e);
+                }
             } else {
                 Scope.getCurrentScope().getLog(getClass()).info("Cannot run " + sql.getClass().getSimpleName() + " on" +
-                    " " + getDatabase().getShortName() + " when checking databasechangelog table");
+                        " " + getDatabase().getShortName() + " when checking database changelog table");
             }
         }
 
         if (!statementsToExecute.isEmpty()) {
-            //reset the cache if there was a change to the table. Especially catches things like md5 changes which might have been updated but would still be wrong in the cache
+            //reset the cache if there was a change to the table. Especially catches things like md5 changes
+            // which might have been updated but would still be wrong in the cache
             this.ranChangeSetList = null;
+            Scope.getCurrentScope().getSingleton(FastCheckService.class).clearCache();
         }
         serviceInitialized = true;
     }
@@ -304,7 +317,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         if (this.ranChangeSetList == null) {
             Database database = getDatabase();
             String databaseChangeLogTableName = getDatabase().escapeTableName(getLiquibaseCatalogName(),
-                getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
+                    getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
             List<RanChangeSet> ranChangeSets = new ArrayList<>();
             if (hasDatabaseChangeLogTable()) {
                 Scope.getCurrentScope().getLog(getClass()).info("Reading from " + databaseChangeLogTableName);
@@ -318,19 +331,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     String description = (rs.get("DESCRIPTION") == null) ? null : rs.get("DESCRIPTION").toString();
                     String comments = (rs.get("COMMENTS") == null) ? null : rs.get("COMMENTS").toString();
                     Object tmpDateExecuted = rs.get("DATEEXECUTED");
-                    Date dateExecuted = null;
-                    if (tmpDateExecuted instanceof Date) {
-                        dateExecuted = (Date) tmpDateExecuted;
-                    } else if (tmpDateExecuted instanceof LocalDateTime) {
-                        dateExecuted = Date.from(((LocalDateTime) tmpDateExecuted).atZone(ZoneId.systemDefault()).toInstant());
-                    } else {
-                        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                        try {
-                            dateExecuted = df.parse((String) tmpDateExecuted);
-                        } catch (ParseException e) {
-                            // Ignore ParseException and assume dateExecuted == null instead of aborting.
-                        }
-                    }
+                    Date dateExecuted = convertDate(tmpDateExecuted);
                     String tmpOrderExecuted = rs.get("ORDEREXECUTED").toString();
                     Integer orderExecuted = ((tmpOrderExecuted == null) ? null : Integer.valueOf(tmpOrderExecuted));
                     String tag = (rs.get("TAG") == null) ? null : rs.get("TAG").toString();
@@ -360,6 +361,23 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         return Collections.unmodifiableList(ranChangeSetList);
     }
 
+    public static Date convertDate(Object tmpDateExecuted) {
+        Date dateExecuted = null;
+        if (tmpDateExecuted instanceof Date) {
+            dateExecuted = (Date) tmpDateExecuted;
+        } else if (tmpDateExecuted instanceof LocalDateTime) {
+            dateExecuted = Date.from(((LocalDateTime) tmpDateExecuted).atZone(ZoneId.systemDefault()).toInstant());
+        } else {
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            try {
+                dateExecuted = df.parse((String) tmpDateExecuted);
+            } catch (ParseException e) {
+                // Ignore ParseException and assume dateExecuted == null instead of aborting.
+            }
+        }
+        return dateExecuted;
+    }
+
     public List<Map<String, ?>> queryDatabaseChangeLogTable(Database database) throws DatabaseException {
         SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement(new ColumnConfig()
             .setName("*").setComputed(true)).setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
@@ -378,8 +396,14 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     @Override
     public void setExecType(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException {
         SqlStatement markChangeSetRanStatement = new MarkChangeSetRanStatement(changeSet, execType);
-        ChangelogJdbcMdcListener.execute(getDatabase(), executor -> executor.execute(markChangeSetRanStatement));
-        getDatabase().commit();
+        try {
+            Scope.child(Collections.singletonMap(SHOULD_UPDATE_ROWS_AFFECTED_SCOPE_KEY, false), () -> {
+                ChangelogJdbcMdcListener.execute(getDatabase(), executor -> executor.execute(markChangeSetRanStatement));
+                getDatabase().commit();
+            });
+        } catch (Exception e) {
+            throw new DatabaseException(e);
+        }
         if (this.ranChangeSetList != null) {
             this.ranChangeSetList.add(new RanChangeSet(changeSet, execType, null, null));
         }
@@ -419,9 +443,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         SqlStatement totalRowsStatement = new SelectFromDatabaseChangeLogStatement(new ColumnConfig().setName("COUNT(*)", true));
         int totalRows = ChangelogJdbcMdcListener.query(getDatabase(), executor -> executor.queryForInt(totalRowsStatement));
         if (totalRows == 0) {
-            ChangeSet emptyChangeSet = new ChangeSet(String.valueOf(new Date().getTime()), "liquibase",
-                false,false, "liquibase-internal", null, null,
-                getDatabase().getObjectQuotingStrategy(), null);
+            ChangeSet emptyChangeSet = TagCommandStep.getEmptyTagChangeSet(getDatabase());
             this.setExecType(emptyChangeSet, ChangeSet.ExecType.EXECUTED);
         }
         SqlStatement tagStatement = new TagDatabaseStatement(tagString);

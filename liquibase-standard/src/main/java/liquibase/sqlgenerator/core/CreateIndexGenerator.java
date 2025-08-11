@@ -23,6 +23,7 @@ import liquibase.util.StringUtil;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.LinkedList;
 
 public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatement> {
 
@@ -48,6 +49,9 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
             if ((createIndexStatement.isClustered() != null) && createIndexStatement.isClustered()) {
                 warnings.addWarning("Creating clustered index not supported with "+database);
             }
+        }
+        if (!(database instanceof PostgresDatabase) && createIndexStatement.getUsing() != null) {
+            warnings.addWarning("USING clause not supported with " + database);
         }
 
         return warnings;
@@ -120,6 +124,22 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
         }
 	    buffer.append(database.escapeTableName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName())).append("(");
 	    Iterator<AddColumnConfig> iterator = Arrays.asList(statement.getColumns()).iterator();
+        List <AddColumnConfig> includedColumns = new LinkedList<>();
+	    if(database instanceof MSSQLDatabase) {
+	        List <AddColumnConfig> normalColumns = new LinkedList<>();
+	        while(iterator.hasNext()){
+	            AddColumnConfig curr = iterator.next();
+	            if(curr.getIncluded() != null && curr.getIncluded()){
+	                includedColumns.add(curr);
+	            }
+	            else{
+	                normalColumns.add(curr);
+	            }
+	        }
+	        iterator =normalColumns.iterator();
+	    }
+
+
 	    while (iterator.hasNext()) {
             AddColumnConfig column = iterator.next();
             if (column.getComputed() == null) {
@@ -139,6 +159,28 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 		    }
 	    }
 	    buffer.append(")");
+
+        //support for include statements.
+        if (includedColumns.size()>0){
+            buffer.append(" Include (");
+	        Iterator<AddColumnConfig> includerator = includedColumns.iterator();
+	        while (includerator.hasNext()) {
+                AddColumnConfig column = includerator.next();
+                if (column.getComputed() == null) {
+                    buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column.getName()));
+                } else {
+                    if (column.getComputed()) {
+                        buffer.append(column.getName());
+                    } else {
+                        buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column.getName()));
+                    }
+                }
+                if (includerator.hasNext()) {
+			        buffer.append(", ");
+    		    }
+	        }
+	        buffer.append(")");
+        }
 
 	    if ((StringUtil.trimToNull(statement.getTablespace()) != null) && database.supportsTablespaces()) {
 		    if ((database instanceof MSSQLDatabase) || (database instanceof SybaseASADatabase)) {

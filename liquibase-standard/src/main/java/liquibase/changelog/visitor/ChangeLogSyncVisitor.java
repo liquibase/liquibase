@@ -40,29 +40,36 @@ public class ChangeLogSyncVisitor implements ChangeSetVisitor {
         try {
             preRunMdc(changeSet);
             this.database.markChangeSetExecStatus(changeSet, ChangeSet.ExecType.EXECUTED);
+            postRunMdc(changeSet);
             if(listener != null) {
                 listener.markedRan(changeSet, databaseChangeLog, database);
             }
-            postRunMdc();
         } catch (Exception e) {
-            try (MdcObject stopTime = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, new ISODateFormat().format(new Date()));
+            Date stop = new Date();
+            changeSet.setOperationStopTime(stop);
+            try (MdcObject stopTime = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, new ISODateFormat().format(stop));
                  MdcObject changelogSyncOutcome = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SYNC_OUTCOME, MdcValue.COMMAND_FAILED)) {
                 Scope.getCurrentScope().getLog(getClass()).fine("Failed syncing changeset");
+            }
+            if (listener != null) {
+                listener.markedRanFailed(changeSet, databaseChangeLog, database, e);
             }
         }
 
     }
 
     private void preRunMdc(ChangeSet changeSet) {
-        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, new ISODateFormat().format(new Date()));
+        Date start = new Date();
+        Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_START_TIME, new ISODateFormat().format(start));
+        changeSet.setOperationStartTime(start);
         logMdcData(changeSet);
         changeSet.addChangeSetMdcProperties();
     }
 
-    private void postRunMdc() {
+    private void postRunMdc(ChangeSet changeSet) {
         try {
             ChangeLogHistoryServiceFactory instance = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class);
-            String deploymentId = instance.getChangeLogService(database).getDeploymentId();
+            String deploymentId = Scope.getCurrentScope().getDeploymentId();
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, deploymentId);
         } catch (Exception e) {
             Scope.getCurrentScope().getLog(getClass()).fine("Failed to retrieve deployment ID for MDC", e);
@@ -72,7 +79,9 @@ public class ChangeLogSyncVisitor implements ChangeSetVisitor {
         if (changesetCount != null) {
             changesetCount.getAndIncrement();
         }
-        try (MdcObject stopTime = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, new ISODateFormat().format(new Date()));
+        Date stop = new Date();
+        changeSet.setOperationStopTime(stop);
+        try (MdcObject stopTime = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_OPERATION_STOP_TIME, new ISODateFormat().format(stop));
              MdcObject changelogSyncOutcome = Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SYNC_OUTCOME, MdcValue.COMMAND_SUCCESSFUL)) {
             Scope.getCurrentScope().getLog(getClass()).fine("Finished syncing changeset");
         }

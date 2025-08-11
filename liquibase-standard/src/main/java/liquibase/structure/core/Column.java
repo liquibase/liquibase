@@ -25,6 +25,7 @@ public class Column extends AbstractDatabaseObject {
     private Boolean computed;
     private Boolean descending;
     private boolean forIndex;
+    private Boolean included;
 
     public Column() {
     }
@@ -45,6 +46,7 @@ public class Column extends AbstractDatabaseObject {
     public Column(ColumnConfig columnConfig) {
         setName(columnConfig.getName());
         setDescending(columnConfig.getDescending());
+        setIncluded(columnConfig.getIncluded());
         setType(new DataType(columnConfig.getType()));
 
         if (columnConfig.getDefaultValueObject() != null) {
@@ -191,6 +193,17 @@ public class Column extends AbstractDatabaseObject {
         return descending;
     }
 
+    public Boolean getIncluded() {
+        return included;
+    }
+
+    public Column setIncluded(Boolean included) {
+        this.included = included;
+        setAttribute("included", included);
+
+        return this;
+    }
+
     public Column setDescending(Boolean descending) {
         this.descending = descending;
         setAttribute("descending", descending);
@@ -199,7 +212,7 @@ public class Column extends AbstractDatabaseObject {
     }
 
     /**
-     * VALIDATE keyword defines whether a all constraints on a column in a table
+     * VALIDATE keyword defines whether all constraints on a column in a table
      * should be checked if it refers to a valid row or not.
      * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
      */

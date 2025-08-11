@@ -9,6 +9,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateIndexStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,18 +24,28 @@ import java.util.List;
     appliesTo = "index")
 public class CreateIndexChange extends AbstractChange implements ChangeWithColumns<AddColumnConfig> {
 
+    @Setter
     private String catalogName;
+    @Setter
     private String schemaName;
+    @Setter
     private String tableName;
+    @Setter
     private String indexName;
+    @Setter
     private Boolean unique;
+    @Setter
     private String tablespace;
     private List<AddColumnConfig> columns;
 
     // Contain associations of index
     // for example: foreignKey, primaryKey or uniqueConstraint
+    @Setter
     private String associatedWith;
+    @Setter
     private Boolean clustered;
+    @Setter
+    private String using;
 
 
     public CreateIndexChange() {
@@ -46,17 +57,9 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         return indexName;
     }
 
-    public void setIndexName(String indexName) {
-        this.indexName = indexName;
-    }
-
     @DatabaseChangeProperty(since = "3.0", description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
     }
 
     @DatabaseChangeProperty(mustEqualExisting ="index.schema", description = "Name of the database schema")
@@ -64,18 +67,10 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         return schemaName;
     }
 
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "index.table", description = "Name of the table to add the index on",
         exampleValue = "person")
     public String getTableName() {
         return tableName;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
     }
 
     @Override
@@ -104,10 +99,6 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         return tablespace;
     }
 
-    public void setTablespace(String tablespace) {
-        this.tablespace = tablespace;
-    }
-
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[]{
@@ -118,6 +109,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
                         getTableName(),
                         this.isUnique(),
                         getAssociatedWith(),
+                        getUsing(),
                         getColumns().toArray(new AddColumnConfig[0]))
                         .setTablespace(getTablespace())
                         .setClustered(getClustered())
@@ -174,13 +166,6 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     }
 
     /**
-     * @param isUnique the isUnique to set
-     */
-    public void setUnique(Boolean isUnique) {
-        this.unique = isUnique;
-    }
-
-    /**
      * @return Index associations. Valid values:<br>
      * <li>primaryKey</li>
      * <li>foreignKey</li>
@@ -192,17 +177,14 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         return associatedWith;
     }
 
-    public void setAssociatedWith(String associatedWith) {
-        this.associatedWith = associatedWith;
-    }
-
     @DatabaseChangeProperty(description = "Whether to create a clustered index")
     public Boolean getClustered() {
         return clustered;
     }
 
-    public void setClustered(Boolean clustered) {
-        this.clustered = clustered;
+    @DatabaseChangeProperty(description = "The index type to use. For example, 'btree' or 'gin'")
+    public String getUsing() {
+        return using;
     }
 
     @Override
@@ -248,7 +230,8 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     @Override
     public String[] getExcludedFieldFilters(ChecksumVersion version) {
         return new String[]{
-                "associatedWith"
+                "associatedWith",
+                "using"
         };
     }
 }

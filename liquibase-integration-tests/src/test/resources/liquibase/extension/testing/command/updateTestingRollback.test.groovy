@@ -33,6 +33,8 @@ Optional Args:
   password (String) Password to use to connect to the database
     Default: null
     OBFUSCATED
+  tag (String) The tag to update to
+    Default: null
   username (String) Username to use to connect to the database
     Default: null
 """

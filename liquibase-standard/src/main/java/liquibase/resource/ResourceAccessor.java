@@ -153,15 +153,15 @@ public interface ResourceAccessor extends AutoCloseable {
         String endsWithFilter = searchOptions.getEndsWithFilter();
 
         for (Resource res: CollectionUtil.createIfNull(recursiveResourceList)) {
-            String relativePath = res.getPath();
-            int depth = (int) relativePath.chars().filter(ch -> ch == '/').count();
+            String resourcePath = res.getPath();
+            int depth = ((int) resourcePath.chars().filter(ch -> ch == '/').count()) - ((int) path.chars().filter(ch -> ch == '/').count()) + 1 ;
 
             if (depth < minDepth || depth > maxDepth) {
                 continue;
             }
 
             if (endsWithFilterIsSet) {
-                if (!relativePath.toLowerCase().endsWith(endsWithFilter.toLowerCase())) {
+                if (!resourcePath.toLowerCase().endsWith(endsWithFilter.toLowerCase())) {
                     continue;
                 }
             }
@@ -225,7 +225,7 @@ public interface ResourceAccessor extends AutoCloseable {
     }
 
     /**
-     * Finds a single specific {@link }. If multiple files match the given path, handle based on the {@link GlobalConfiguration#DUPLICATE_FILE_MODE} setting.
+     * Finds a single specific {@link Resource}. If multiple files match the given path, handle based on the {@link GlobalConfiguration#DUPLICATE_FILE_MODE} setting.
      * Default implementation calls {@link #getAll(String)}.
      *
      * @return a Resource even if the path does not exist
@@ -249,20 +249,47 @@ public interface ResourceAccessor extends AutoCloseable {
             message.append("  You can limit the search path to remove duplicates with the liquibase.searchPath setting.");
 
             final GlobalConfiguration.DuplicateFileMode mode = GlobalConfiguration.DUPLICATE_FILE_MODE.getCurrentValue();
-            final Logger log = Scope.getCurrentScope().getLog(getClass());
 
             if (mode == GlobalConfiguration.DuplicateFileMode.ERROR) {
                 throw new IOException(message + " Or, if you KNOW these are the exact same file you can set liquibase.duplicateFileMode=WARN.");
-            } else if (mode == GlobalConfiguration.DuplicateFileMode.WARN) {
-                Resource resource = resources.iterator().next();
-                final String warnMessage = message + System.lineSeparator() +
-                        "  To fail when duplicates are found, set liquibase.duplicateFileMode=ERROR" + System.lineSeparator() +
-                        "  Choosing: " + resource.getUri();
-                Scope.getCurrentScope().getUI().sendMessage(warnMessage);
-                log.warning(warnMessage);
+            } else if (mode == GlobalConfiguration.DuplicateFileMode.SILENT) {
+                return resources.iterator().next();
             }
 
-            return resources.iterator().next();
+            Resource resource = resources.iterator().next();
+            handleDuplicateFileModeLogging(message, mode, resource);
+            return resource;
+        }
+    }
+
+    /**
+     * Handles logging based on the {@link GlobalConfiguration.DuplicateFileMode} setting when duplicate files are found.
+     * This method logs a message at the appropriate log level and sends a message to the UI.
+     *
+     * @param message The base message to log and display in the UI.
+     * @param mode The duplicate file mode that determines the log level.
+     * @param resource The resource that was selected from the duplicates.
+     * @throws IllegalStateException if the provided mode is not expected.
+     */
+    default void handleDuplicateFileModeLogging(StringBuilder message, GlobalConfiguration.DuplicateFileMode mode, Resource resource) {
+        final Logger log = Scope.getCurrentScope().getLog(getClass());
+        final String logMessage = message + System.lineSeparator() +
+                "  To fail when duplicates are found, set liquibase.duplicateFileMode=ERROR" + System.lineSeparator() +
+                "  Choosing: " + resource.getUri();
+        Scope.getCurrentScope().getUI().sendMessage(logMessage);
+
+        switch (mode) {
+            case WARN:
+                log.warning(logMessage);
+                break;
+            case INFO:
+                log.info(logMessage);
+                break;
+            case DEBUG:
+                log.fine(logMessage);
+                break;
+            default:
+                throw new IllegalStateException("Unexpected DUPLICATE_FILE_MODE: " + mode);
         }
     }
 
@@ -271,7 +298,7 @@ public interface ResourceAccessor extends AutoCloseable {
      */
     List<String> describeLocations();
 
-    class NotFoundResource extends AbstractResource {
+    public class NotFoundResource extends AbstractResource {
         private final ResourceAccessor resourceAccessor;
 
         public NotFoundResource(String path, ResourceAccessor resourceAccessor) {

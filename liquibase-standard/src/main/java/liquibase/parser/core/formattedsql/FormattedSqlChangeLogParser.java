@@ -1,5 +1,6 @@
 package liquibase.parser.core.formattedsql;
 
+import liquibase.Scope;
 import liquibase.change.AbstractSQLChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeLogParameters;
@@ -23,6 +24,21 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
 
     private static final String ON_SQL_OUTPUT_REGEX = ".*onSqlOutput:(\\w+).*";
     private static final Pattern ON_SQL_OUTPUT_PATTERN = Pattern.compile(ON_SQL_OUTPUT_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String ON_FAIL = "onFail";
+    public static final String ON_ERROR = "onError";
+    public static final String ON_SQL_OUTPUT = "onSqlOutput";
+    public static final String ON_UPDATE = "onUpdate";
+    public static final String SQL_CHECK = "sql-check";
+    public static final String TABLE_EXISTS = "table-exists";
+    public static final String VIEW_EXISTS = "view-exists";
+
+    protected static boolean isFirstSqlLine(StringBuilder currentSequence, AbstractSQLChange change) {
+        String currentSequenceString = currentSequence.toString();
+        if (! currentSequenceString.isEmpty()) {
+            currentSequenceString = currentSequenceString.trim();
+        }
+        return change instanceof RawSQLChange && ((RawSQLChange) change).getSqlStartLine() == null && ! currentSequenceString.isEmpty();
+    }
 
 
     @Override
@@ -57,6 +73,7 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
             throw new ChangeLogParseException("\n" + message);
         }
         if (preconditionsMatcher.groupCount() == 1) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Matched preconditions");
             String body = preconditionsMatcher.group(1);
             Matcher onFailMatcher = ON_FAIL_PATTERN.matcher(body);
             Matcher onErrorMatcher = ON_ERROR_PATTERN.matcher(body);
@@ -64,17 +81,17 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
             Matcher onSqlOutputMatcher = ON_SQL_OUTPUT_PATTERN.matcher(body);
 
             PreconditionContainer pc = new PreconditionContainer();
-            pc.setOnFail(StringUtil.trimToNull(parseString(onFailMatcher)));
-            pc.setOnError(StringUtil.trimToNull(parseString(onErrorMatcher)));
+            pc.setOnFail(StringUtil.trimToNull(parseString(onFailMatcher, ON_FAIL)));
+            pc.setOnError(StringUtil.trimToNull(parseString(onErrorMatcher, ON_ERROR)));
 
             if (onSqlOutputMatcher.matches() && onUpdateSqlMatcher.matches()) {
                 throw new IllegalArgumentException("Please modify the changelog to have preconditions set with either " +
                         "'onUpdateSql' or 'onSqlOutput', and not with both.");
             }
             if (onSqlOutputMatcher.matches()) {
-                pc.setOnSqlOutput(StringUtil.trimToNull(parseString(onSqlOutputMatcher)));
+                pc.setOnSqlOutput(StringUtil.trimToNull(parseString(onSqlOutputMatcher, ON_SQL_OUTPUT)));
             } else {
-                pc.setOnSqlOutput(StringUtil.trimToNull(parseString(onUpdateSqlMatcher)));
+                pc.setOnSqlOutput(StringUtil.trimToNull(parseString(onUpdateSqlMatcher, ON_UPDATE)));
             }
             changeSet.setPreconditions(pc);
         }
@@ -90,20 +107,27 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
             String name = StringUtil.trimToNull(preconditionMatcher.group(1));
             if (name != null) {
                 String body = preconditionMatcher.group(2).trim();
-                if ("sql-check".equals(name)) {
-                    changeSet.getPreconditions().addNestedPrecondition(
-                            parseSqlCheckCondition(changeLogParameters.expandExpressions(StringUtil.trimToNull(body), changeSet.getChangeLog()))
-                    );
-                } else if ("table-exists".equals(name)) {
-                    changeSet.getPreconditions().addNestedPrecondition(
-                            parseTableExistsCondition(changeLogParameters.expandExpressions(StringUtil.trimToNull(body), changeSet.getChangeLog()))
-                    );
-                } else if ("view-exists".equals(name)) {
-                    changeSet.getPreconditions().addNestedPrecondition(
-                            parseViewExistsCondition(changeLogParameters.expandExpressions(StringUtil.trimToNull(body), changeSet.getChangeLog()))
-                    );
-                } else {
-                    throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
+                switch (name) {
+                    case SQL_CHECK:
+                        Scope.getCurrentScope().getLog(getClass()).fine("Matched sql-check precondition");
+                        changeSet.getPreconditions().addNestedPrecondition(
+                                parseSqlCheckCondition(changeLogParameters.expandExpressions(StringUtil.trimToNull(body), changeSet.getChangeLog()))
+                        );
+                        break;
+                    case TABLE_EXISTS:
+                        Scope.getCurrentScope().getLog(getClass()).fine("Matched table-exists precondition");
+                        changeSet.getPreconditions().addNestedPrecondition(
+                                parseTableExistsCondition(changeLogParameters.expandExpressions(StringUtil.trimToNull(body), changeSet.getChangeLog()))
+                        );
+                        break;
+                    case VIEW_EXISTS:
+                        Scope.getCurrentScope().getLog(getClass()).fine("Matched view-exists precondition");
+                        changeSet.getPreconditions().addNestedPrecondition(
+                                parseViewExistsCondition(changeLogParameters.expandExpressions(StringUtil.trimToNull(body), changeSet.getChangeLog()))
+                        );
+                        break;
+                    default:
+                        throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
                 }
             }
         }
@@ -147,14 +171,15 @@ public class FormattedSqlChangeLogParser extends AbstractFormattedChangeLogParse
         if (preconditionMatcher.groupCount() == 1) {
             String name = StringUtil.trimToNull(preconditionMatcher.group(1));
             if (name != null) {
-                if ("sql-check".equals(name)) {
-                    throw new ChangeLogParseException("Precondition sql check failed because of missing required expectedResult and sql parameters.");
-                } else if ("table-exists".equals(name)) {
-                    throw new ChangeLogParseException("Precondition table exists failed because of missing required table name parameter.");
-                } else if ("view-exists".equals(name)) {
-                    throw new ChangeLogParseException("Precondition view exists failed because of missing required view name parameter.");
-                } else {
-                    throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
+                switch (name) {
+                    case SQL_CHECK:
+                        throw new ChangeLogParseException("Precondition sql check failed because of missing required expectedResult and sql parameters.");
+                    case TABLE_EXISTS:
+                        throw new ChangeLogParseException("Precondition table exists failed because of missing required table name parameter.");
+                    case VIEW_EXISTS:
+                        throw new ChangeLogParseException("Precondition view exists failed because of missing required view name parameter.");
+                    default:
+                        throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
                 }
             }
         }

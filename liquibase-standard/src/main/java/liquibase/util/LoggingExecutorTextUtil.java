@@ -7,7 +7,7 @@ import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.core.Catalog;
 
 import java.text.DateFormat;
@@ -39,9 +39,9 @@ public class LoggingExecutorTextUtil {
         );
 
         if ((database instanceof MSSQLDatabase) && (database.getDefaultCatalogName() != null)) {
-            executor.execute(new RawSqlStatement("USE " +
-                    database.escapeObjectName(database.getDefaultCatalogName(), Catalog.class) + ";")
-            );
+            executor.execute(new RawParameterizedSqlStatement(String.format("USE %s;",
+                    database.escapeObjectName(database.getDefaultCatalogName(), Catalog.class))
+            ));
         }
     }
 }

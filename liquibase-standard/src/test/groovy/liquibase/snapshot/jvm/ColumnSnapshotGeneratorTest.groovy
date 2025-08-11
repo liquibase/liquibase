@@ -1,6 +1,7 @@
 package liquibase.snapshot.jvm
 
 import liquibase.database.core.MSSQLDatabase
+import liquibase.database.core.MySQLDatabase
 import liquibase.database.core.PostgresDatabase
 import liquibase.snapshot.CachedRow
 import liquibase.statement.DatabaseFunction
@@ -47,6 +48,22 @@ class ColumnSnapshotGeneratorTest extends Specification {
         then:
         dataType.getColumnSize() == 100
         dataType.getTypeName() == "varchar"
+    }
+
+    def "ReadDataType specifies column size for mysql datetime data fsp"() {
+        given:
+        def columnMetadata = new HashMap<String, Object>()
+        columnMetadata.put("TYPE_NAME", "datetime")
+        columnMetadata.put("DATA_TYPE", 93)
+        columnMetadata.put("COLUMN_SIZE", 25)
+
+        when:
+        def dataType = columnSnapshotGenerator
+                .readDataType(new CachedRow(columnMetadata), new Column(), new MySQLDatabase())
+
+        then:
+        dataType.getColumnSize() == 5
+        dataType.getTypeName() == "datetime"
     }
 
     @Unroll

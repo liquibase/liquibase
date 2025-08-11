@@ -1,10 +1,14 @@
 package liquibase.license; 
 
+import liquibase.configuration.ConfiguredValue;
 import liquibase.plugin.Plugin;
+import liquibase.util.StringUtil;
 
 import java.util.Date;
 
 public interface LicenseService extends Plugin {
+  static final String TRIAL_LICENSE_URL = "https://liquibase.com/trial";
+  static final String BASE_INVALID_LICENSE_MESSAGE = "Using '%s' requires a valid Liquibase Pro or Labs license. Get a free license key at " + TRIAL_LICENSE_URL + ".";
 
   /**
    *
@@ -96,4 +100,11 @@ public interface LicenseService extends Plugin {
     return null;
   }
 
+  default String getInvalidLicenseMessage(String[] commandNames) {
+    return String.format(BASE_INVALID_LICENSE_MESSAGE + " Add liquibase.licenseKey=<yourKey> into your defaults file or use --license-key=<yourKey> before your command in the CLI.", StringUtil.join(commandNames, " "));
+  }
+
+  default ConfiguredValue<String> getLicenseKey() {
+    return null;
+  }
 }

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <preConditions>
+            <dbms type="mssql"/>
+    </preConditions>
+
+    <changeSet author="satwell" id="nvarcharDefaultValue">
+        <createTable tableName="featureIndexInclude">
+            <column name="id" type="java.sql.Types.BIGINT" defaultValue="NULL"/>
+            <column defaultValue="" name="name" type="nvarchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="" name="name2" type="nchar(32)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="indexIncludeTest" author="satwell">
+        <createIndex indexName="idx_include_test" tableName="featureIndexInclude">
+            <column name="name"/>
+            <column name="name2" included="true"/>
+        </createIndex>
+    </changeSet>
+
+
+</databaseChangeLog>

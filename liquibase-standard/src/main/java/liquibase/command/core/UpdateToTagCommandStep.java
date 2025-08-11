@@ -1,15 +1,15 @@
 package liquibase.command.core;
 
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.Scope;
-import liquibase.UpdateSummaryEnum;
+import liquibase.*;
+import liquibase.change.Change;
 import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.command.*;
 import liquibase.database.Database;
+import liquibase.exception.ChangeNotFoundException;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.logging.mdc.MdcKey;
 
 import java.util.ArrayList;
@@ -46,6 +46,7 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        warningMessageShown = false;
         this.setFastCheckEnabled(false);
         super.run(resultsBuilder);
     }
@@ -87,13 +88,13 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
     }
 
     @Override
-    public ChangeLogIterator getStandardChangelogIterator(CommandScope commandScope, Database database, Contexts contexts, LabelExpression labelExpression, DatabaseChangeLog changeLog) throws DatabaseException {
+    public ChangeLogIterator getStandardChangelogIterator(CommandScope commandScope, Database database, Contexts contexts, LabelExpression labelExpression, DatabaseChangeLog changeLog) throws LiquibaseException {
         List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
         String tag = commandScope.getArgumentValue(TAG_ARG);
 
         UpToTagChangeSetFilter upToTagChangeSetFilter = getUpToTagChangeSetFilter(tag, ranChangeSetList);
         if (! warningMessageShown && ! upToTagChangeSetFilter.isSeenTag()) {
-            checkForTagExists(changeLog, tag);
+            checkForTagExists(changeLog, tag, database);
         }
 
         List<ChangeSetFilter> changesetFilters = this.getStandardChangelogIteratorFilters(database, contexts, labelExpression);
@@ -101,14 +102,12 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
         return new ChangeLogIterator(changeLog, changesetFilters.toArray(new ChangeSetFilter[0]));
     }
 
-    private void checkForTagExists(DatabaseChangeLog changeLog, String tag) {
-        boolean found =
-            changeLog.getChangeSets().stream().anyMatch(cs ->
-                cs.getChanges().stream().anyMatch(ch ->
-                    ch instanceof TagDatabaseChange && ((TagDatabaseChange) ch).getTag().equals(tag)
-                )
-            );
-        if (! found) {
+    private void checkForTagExists(DatabaseChangeLog changeLog, String tag, Database database) throws LiquibaseException {
+        List<TagDatabaseChange> tagDatabaseChangesList = getTagDatabaseChange(changeLog.getChangeSets());
+        boolean thereIsTagDatabaseChange = !tagDatabaseChangesList.isEmpty();
+        boolean thereIsTagDatabaseChangeMatching = isThereTagDatabaseChangeMatching(tagDatabaseChangesList, tag);
+
+        if (!(thereIsTagDatabaseChange && thereIsTagDatabaseChangeMatching) && !GlobalConfiguration.STRICT.getCurrentValue()) {
             String message = String.format(
                     "The tag '%s' was not found in the changelog '%s'. All changesets in the changelog were deployed.%nLearn about options for undoing these changes at https://docs.liquibase.com.",
                     tag, changeLog.getPhysicalFilePath());
@@ -116,6 +115,33 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
             Scope.getCurrentScope().getUI().sendMessage("WARNING:  " + message);
             warningMessageShown = true;
         }
+
+        if(GlobalConfiguration.STRICT.getCurrentValue()) {
+            if(!thereIsTagDatabaseChange) {
+                throw new ChangeNotFoundException("TagDatabaseChange", database);
+            }
+            else {
+                if(!thereIsTagDatabaseChangeMatching) {
+                    throw new LiquibaseException(String.format("Command execution tag %s does not match with any changeSet tag", tag));
+                }
+            }
+        }
+    }
+
+    private List<TagDatabaseChange> getTagDatabaseChange(List<ChangeSet> changeSetList) {
+        List<TagDatabaseChange> listTagDatabaseChanges = new ArrayList<>();
+        for(ChangeSet changeSet : changeSetList){
+            for(Change change : changeSet.getChanges()) {
+                if(change instanceof TagDatabaseChange) {
+                    listTagDatabaseChanges.add((TagDatabaseChange) change);
+                }
+            }
+        }
+        return listTagDatabaseChanges;
+    }
+
+    private boolean isThereTagDatabaseChangeMatching(List<TagDatabaseChange> tagDatabaseChange, String tag) {
+        return tagDatabaseChange.stream().anyMatch(tagDatabaseChange1 -> tagDatabaseChange1.getTag().equals(tag));
     }
 
     private UpToTagChangeSetFilter getUpToTagChangeSetFilter(String tag, List<RanChangeSet> ranChangeSetList) {
@@ -148,11 +174,7 @@ public class UpdateToTagCommandStep extends AbstractUpdateCommandStep {
     }
 
     @Override
-    public void postUpdateLog(int rowsAffected) {
-        if (rowsAffected > -1) {
-            Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("update.to.tag.successful.with.row.count"), rowsAffected));
-        } else {
-            Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("update.to.tag.successful"));
-        }
+    public void postUpdateLog(int rowsAffected, List<ChangeSet> exceptionChangeSets) {
+        this.postUpdateLogForActualUpdate(rowsAffected, exceptionChangeSets, coreBundle.getString("update.to.tag.successful.with.row.count"), coreBundle.getString("update.to.tag.successful"));
     }
 }

@@ -79,11 +79,11 @@ jobs:
     - name: Generate Security Report
       uses: rsdmike/github-security-report-action@v3.0.4
       with:
-        token: ${{ secrets.BOT_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         outputDir: ./reports/
 
     - name: Upload Security Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: security-report
         path: ./reports/summary.pdf

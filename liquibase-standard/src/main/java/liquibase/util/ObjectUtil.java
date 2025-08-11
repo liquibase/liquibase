@@ -1,9 +1,17 @@
 package liquibase.util;
 
+import liquibase.GlobalConfiguration;
+import liquibase.Scope;
+import liquibase.command.core.DiffCommandStep;
+import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.DataType;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -17,6 +25,8 @@ import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.logging.Level;
 
 /**
  * Various methods that make it easier to read and write object properties using the propertyName, instead of having
@@ -25,11 +35,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ObjectUtil {
 
     private static final List<BeanIntrospector> introspectors = new ArrayList<>(Arrays.asList(new DefaultBeanIntrospector(), new FluentPropertyBeanIntrospector()));
-    
+
     /**
      * Cache for the methods of classes that we have been queried about so far.
      */
-    private static final Map<Class<?>, Method[]> methodCache = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, ObjectMethods> methodCache = new ConcurrentHashMap<>();
+
+    public static String ARGUMENT_KEY = "key";
 
     /**
      * For a given object, try to find the appropriate reader method and return the value, if set
@@ -151,10 +163,11 @@ public class ObjectUtil {
             throw new UnexpectedLiquibaseException(e);
         } catch (IllegalArgumentException e) {
             if (finalValue != null) {
-                throw new UnexpectedLiquibaseException("Cannot call " + method
-                        + " with value of type " + finalValue.getClass().getName());
+                String message = "Cannot call " + method
+                        + " with value of type " + finalValue.getClass().getName();
+                throw new UnexpectedLiquibaseException(message, e);
             } else {
-                throw new UnexpectedLiquibaseException("Cannot call " + method + " with a null argument");
+                throw new UnexpectedLiquibaseException("Cannot call " + method + " with a null argument", e);
             }
         }
     }
@@ -175,6 +188,12 @@ public class ObjectUtil {
                 ));
         }
 
+        if (Boolean.TRUE.equals(Scope.getCurrentScope().get(Database.IGNORE_MISSING_REFERENCES_KEY, Boolean.class))) {
+            Class<?>[] parameterTypes = method.getParameterTypes();
+            if (propertyValue instanceof String && !parameterTypes[0].isAssignableFrom(String.class)) {
+                return;
+            }
+        }
         try {
             if (propertyValue == null) {
                 setProperty(object, propertyName, null);
@@ -190,7 +209,7 @@ public class ObjectUtil {
             throw new UnexpectedLiquibaseException(e);
         } catch (IllegalArgumentException e) {
             throw new UnexpectedLiquibaseException("Cannot call " + method + " with value of type "
-                + (propertyValue == null ? "null" : propertyValue.getClass().getName()));
+                + (propertyValue == null ? "null" : propertyValue.getClass().getName()), e);
         }
     }
 
@@ -201,20 +220,7 @@ public class ObjectUtil {
      * @return the {@link Method} if found, null in all other cases.
      */
     private static Method getReadMethod(Object object, String propertyName) {
-        String getMethodName = "get" + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH)
-            + propertyName.substring(1);
-        String isMethodName = "is" + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH)
-            + propertyName.substring(1);
-
-        Method[] methods = getMethods(object);
-
-        for (Method method : methods) {
-            if ((method.getName().equals(getMethodName) || method.getName().equals(isMethodName)) && (method
-                .getParameterTypes().length == 0)) {
-                return method;
-            }
-        }
-        return null;
+      return getMethods(object).getReadMethod(propertyName);
     }
 
     /**
@@ -224,16 +230,7 @@ public class ObjectUtil {
      * @return the {@link Method} if found, null in all other cases.
      */
     private static Method getWriteMethod(Object object, String propertyName) {
-        String methodName = "set"
-            + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH) + propertyName.substring(1);
-        Method[] methods = getMethods(object);
-
-        for (Method method : methods) {
-            if (method.getName().equals(methodName) && (method.getParameterTypes().length == 1)) {
-                return method;
-            }
-        }
-        return null;
+      return getMethods(object).getWriteMethod(propertyName);
     }
 
     /**
@@ -242,14 +239,23 @@ public class ObjectUtil {
      * @param object the object to examine
      * @return array of {@link Method} belonging to the class of the object
      */
-    private static Method[] getMethods(Object object) {
-        return methodCache.computeIfAbsent(object.getClass(), k -> object.getClass().getMethods());
+    private static ObjectMethods getMethods(Object object) {
+        return methodCache.computeIfAbsent(object.getClass(), k -> new ObjectMethods(object.getClass()));
     }
 
-      /**
-     * Converts the given object to the targetClass
-     */
+    /**
+    * Converts the given object to the targetClass
+    */
     public static <T> T convert(Object object, Class<T> targetClass) throws IllegalArgumentException {
+        return convert(object, targetClass, null);
+    }
+
+    /**
+     * Converts the given object to the targetClass
+     * @param name The name of the argument being converted, which can be used in error messages for more descriptiveness.
+     *             If null, the name will not be used in any error messages.
+     */
+    public static <T> T convert(Object object, Class<T> targetClass, String name) throws IllegalArgumentException {
         if (object == null) {
             return null;
         }
@@ -266,7 +272,13 @@ public class ObjectUtil {
                     for (Enum value : ((Class<Enum>) targetClass).getEnumConstants()) {
                         values.add(value.name());
                     }
-                    throw new IllegalArgumentException("Invalid value "+object+". Acceptable values are "+StringUtil.join(values, ", "));
+                    String exceptionMessage;
+                    if (StringUtils.isEmpty(name)) {
+                        exceptionMessage = "Invalid value '"+object+"'.";
+                    } else {
+                        exceptionMessage = "The " + name.toLowerCase() + " value '" + object + "' is not valid.";
+                    }
+                    throw new IllegalArgumentException(exceptionMessage + " Acceptable values are '"+StringUtil.join(values, "', '") +"'");
                 }
             } else if (Number.class.isAssignableFrom(targetClass)) {
                 if (object instanceof Number) {
@@ -275,19 +287,19 @@ public class ObjectUtil {
                     numberAsString = numberAsString.replaceFirst("\\.0+$", ""); //remove zero decimal so int/long/etc. can parse it correctly.
 
                     if (targetClass.equals(Byte.class)) {
-                        long value = Long.valueOf(numberAsString);
+                        long value = Long.parseLong(numberAsString);
                         if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
                             raiseOverflowException(number, targetClass);
                         }
                         return (T) (Byte) number.byteValue();
                     } else if (targetClass.equals(Short.class)) {
-                        long value = Long.valueOf(numberAsString);
+                        long value = Long.parseLong(numberAsString);
                         if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) {
                             raiseOverflowException(number, targetClass);
                         }
                         return (T) (Short) number.shortValue();
                     } else if (targetClass.equals(Integer.class)) {
-                        long value = Long.valueOf(numberAsString);
+                        long value = Long.parseLong(numberAsString);
                         if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
                             raiseOverflowException(number, targetClass);
                         }
@@ -339,7 +351,26 @@ public class ObjectUtil {
                 }
             } else if (targetClass.isAssignableFrom(Boolean.class)) {
                 String lowerCase = object.toString().toLowerCase();
-                return (T) (Boolean) (lowerCase.equals("true") || lowerCase.equals("t") || lowerCase.equals("1") || lowerCase.equals("1.0") || lowerCase.equals("yes"));
+                boolean isTruthy = Arrays.asList("true", "t", "1", "1.0", "yes", "y", "on").contains(lowerCase);
+                boolean isFalsy = Arrays.asList("false", "f", "0", "0.0", "no", "n", "off").contains(lowerCase);
+
+                if (!isTruthy && !isFalsy) {
+                    String key = Scope.getCurrentScope().get(ARGUMENT_KEY, String.class);
+                    String messageString;
+                    if (key != null) {
+                        messageString = "\nWARNING:  The input for '" + key + "' is '" + object + "', which is not valid.  " +
+                                "Options: 'true' or 'false'.";
+                    } else {
+                        messageString = "\nWARNING:  The input '" + object + "' is not valid.  Options: 'true' or 'false'.";
+                    }
+                    throw new IllegalArgumentException(messageString);
+                }
+
+                if (isTruthy) {
+                    return (T) Boolean.TRUE;
+                } else {
+                    return (T) Boolean.FALSE;
+                }
             } else if (targetClass.isAssignableFrom(String.class)) {
                 return (T) object.toString();
             } else if (targetClass.isAssignableFrom(List.class)) {
@@ -366,12 +397,12 @@ public class ObjectUtil {
                 return (T) UUID.fromString(object.toString());
             } else if (Date.class.isAssignableFrom(targetClass)) {
                 return (T) new ISODateFormat().parse(object.toString());
+            } else if (Level.class.isAssignableFrom(targetClass)) {
+                return (T) Level.parse(object.toString().toUpperCase());
             }
 
             return (T) object;
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(e);
-        } catch (ParseException e) {
+        } catch (NumberFormatException | ParseException e) {
             throw new IllegalArgumentException(e);
         }
     }
@@ -386,12 +417,27 @@ public class ObjectUtil {
 
     /**
      * Return the defaultValue if the passed value is null. Otherwise, return the original value.
+     * @deprecated use {@link ObjectUtils#defaultIfNull(Object, Object)} instead
      */
+    @Deprecated
     public static <T> T defaultIfNull(T value, T defaultValue) {
-        if (value == null) {
+        return ObjectUtils.defaultIfNull(value, defaultValue);
+    }
+
+    /**
+     * Return the defaultValue if the object is null. Otherwise, call the getter on the supplied object and return that
+     * value. This is essentially equivalent to the ternary operation:
+     * <code>
+     *     return object == null ? defaultValue : getter.apply(object)
+     * </code>
+     * @param <T> the return type
+     * @param <U> the type of the object upon which a null check is conducted
+     */
+    public static <T, U> T defaultIfNull(U object, T defaultValue, Function<U, T> getter) {
+        if (object == null) {
             return defaultValue;
         } else {
-            return value;
+            return getter.apply(object);
         }
     }
 

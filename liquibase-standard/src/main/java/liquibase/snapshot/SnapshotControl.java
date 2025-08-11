@@ -1,6 +1,7 @@
 package liquibase.snapshot;
 
 import liquibase.database.Database;
+import liquibase.database.core.FirebirdDatabase;
 import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
@@ -8,9 +9,13 @@ import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.DatabaseObjectFactory;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Allows the class user to influence various aspects of the database object snapshot generation, e.g.
@@ -22,6 +27,8 @@ public class SnapshotControl implements LiquibaseSerializable {
     private ObjectChangeFilter objectChangeFilter;
     private SnapshotListener snapshotListener;
     private boolean warnIfObjectNotFound = true;
+    @Setter
+    private boolean searchNestedObjects = true;
     
     
     /**
@@ -92,11 +99,11 @@ public class SnapshotControl implements LiquibaseSerializable {
     @Override
     public Object getSerializableFieldValue(String field) {
         if ("includedType".equals(field)) {
-            SortedSet<String> types = new TreeSet<>();
+            SortedSet<String> typesNames = new TreeSet<>();
             for (Class type : this.getTypesToInclude()) {
-                types.add(type.getName());
+                typesNames.add(type.getName());
             }
-            return types;
+            return typesNames;
         } else {
             throw new UnexpectedLiquibaseException("Unknown field "+field);
         }
@@ -123,9 +130,13 @@ public class SnapshotControl implements LiquibaseSerializable {
 
     private void setTypes(Set<Class<? extends DatabaseObject>> types, Database database) {
         this.types = new HashSet<>();
-        for (Class<? extends DatabaseObject> type : types) {
-            addType(type, database);
+        Stream<Class<? extends DatabaseObject>> objectStream = types.stream();
+        if (database != null) {
+            // Firebird does not support catalogs, but we need to include them in the snapshot for it as it has a catalog name
+            // Something incorrectly implemented in the FirebirdDatabase class that we work around here
+            objectStream = objectStream.filter(t -> (database.supports(t) || (database instanceof FirebirdDatabase && t.equals(Catalog.class))));
         }
+        objectStream.forEach(type -> addType(type, database));
     }
     
     /**
@@ -177,6 +188,15 @@ public class SnapshotControl implements LiquibaseSerializable {
      */
     public boolean isWarnIfObjectNotFound() {
         return warnIfObjectNotFound;
+    }
+
+    /**
+     * When searchNestedObjects is false this indicates to stop searching the snapshot the moment
+     * an example object has been found. With this disabled we will not search for nested objects.
+     * @return the search nested objects configuration
+     */
+    public boolean shouldSearchNestedObjects() {
+        return searchNestedObjects;
     }
     
     /**

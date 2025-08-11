@@ -6,6 +6,7 @@ import liquibase.RuntimeEnvironment;
 import liquibase.Scope;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
+import liquibase.changelog.visitor.ChangeLogSyncListener;
 import liquibase.changelog.visitor.ChangeLogSyncVisitor;
 import liquibase.changelog.visitor.DefaultChangeExecListener;
 import liquibase.command.*;
@@ -59,14 +60,13 @@ public class ChangelogSyncCommandStep extends AbstractCommandStep {
         final ChangeLogParameters changeLogParameters = (ChangeLogParameters) commandScope.getDependency(ChangeLogParameters.class);
         final ChangeLogHistoryService changeLogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
         changeLogHistoryService.init();
-        changeLogHistoryService.generateDeploymentId();
         try {
             ChangeLogIterator runChangeLogIterator = buildChangeLogIterator(tag, changeLog, changeLogParameters.getContexts(), changeLogParameters.getLabels(), database);
             AtomicInteger changesetCount = new AtomicInteger(0);
             Map<String, Object> scopeVars = new HashMap<>(1);
             scopeVars.put("changesetCount", changesetCount);
             Scope.child(scopeVars, () ->
-                    runChangeLogIterator.run(new ChangeLogSyncVisitor(database, new DefaultChangeExecListener()),
+                    runChangeLogIterator.run(new ChangeLogSyncVisitor(database, getChangeExecListener()),
                     new RuntimeEnvironment(database, changeLogParameters.getContexts(), changeLogParameters.getLabels())));
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGESET_SYNC_COUNT, changesetCount.toString());
 
@@ -81,6 +81,10 @@ public class ChangelogSyncCommandStep extends AbstractCommandStep {
             }
             throw e;
         }
+    }
+
+    public ChangeLogSyncListener getChangeExecListener() {
+        return new DefaultChangeExecListener();
     }
 
     private void addChangelogToMdc(String changelogFile, DatabaseChangeLog changeLog) {

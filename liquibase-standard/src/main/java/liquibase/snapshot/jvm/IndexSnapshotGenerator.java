@@ -15,10 +15,7 @@ import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 
 import java.sql.DatabaseMetaData;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Analyses the properties of a database index and creates an object representation ("snapshot").
@@ -30,7 +27,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        if (!snapshot.getSnapshotControl().shouldInclude(Index.class)) {
+        if (!snapshot.getSnapshotControl().shouldInclude(Index.class) || !snapshot.getDatabase().supports(Index.class)) {
             return;
         }
 
@@ -84,10 +81,22 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     } else {
                         ascOrDesc = row.getString("ASC_OR_DESC");
                     }
+                    if (database instanceof PostgresDatabase) {
+                        String indexType = row.getString("INDEX_TYPE");
+                        index.setUsing(indexType);
+                    }
                     Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : ("A".equals(ascOrDesc) ? Boolean
                             .FALSE : null);
-                    index.addColumn(new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getRelation()));
+                    if (database instanceof MSSQLDatabase) {
+                        Boolean included = row.getBoolean("IS_INCLUDED_COLUMN");
+                        Column c = new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getRelation()).setIncluded(included);
+                        index.addColumn(c);
+                    	
+                    }else {
+                    	index.addColumn(new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getRelation()));
+                    }
                 }
+
 
                 //add clustered indexes first, than all others in case there is a clustered and non-clustered version of the same index. Prefer the clustered version
                 List<Index> stillToAdd = new ArrayList<>();
@@ -154,7 +163,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             exampleName = database.correctObjectName(exampleName, Index.class);
         }
 
-        Map<String, Index> foundIndexes = new HashMap<>();
+        Map<String, Index> foundIndexes = new LinkedHashMap <>();
         JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = null;
         List<CachedRow> rs = null;
         try {
@@ -238,6 +247,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     returnIndex.setRelation(relation.setName(row.getString("TABLE_NAME")).setSchema(schema));
                     returnIndex.setName(indexName);
                     returnIndex.setUnique(!nonUnique);
+                    returnIndex.setUsing(row.getString("INDEX_TYPE"));
 
                     String tablespaceName = row.getString("TABLESPACE_NAME");
                     if ((tablespaceName != null) && database.supportsTablespaces()) {
@@ -333,7 +343,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
             }
             if (!nonClusteredIndexes.isEmpty()) {
-                return finalizeIndex(schema, tableName, nonClusteredIndexes.get(0), snapshot);
+                return finalizeIndex(schema, tableName, nonClusteredIndexes.get(0), snapshot); // why 0?
             }
             return null;
         }

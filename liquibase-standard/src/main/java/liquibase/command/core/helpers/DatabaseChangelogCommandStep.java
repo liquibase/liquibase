@@ -9,9 +9,6 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.*;
-import liquibase.configuration.ConfigurationValueProvider;
-import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.lockservice.LockServiceFactory;
@@ -20,19 +17,19 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This helper class provides two objects: a valid and verified DatabaseChangeLog and the ChangeLogParameters
  * object used to instantiate it.
  */
 public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep implements CleanUpCommandStep {
-    protected static final String[] COMMAND_NAME = {"changelogCommandStep"};
+    public static final String[] COMMAND_NAME = {"changelogCommandStep"};
 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<DatabaseChangeLog> CHANGELOG_ARG;
@@ -99,17 +96,33 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         ChangeLogParameters changeLogParameters = commandScope.getArgumentValue(CHANGELOG_PARAMETERS);
         if (changeLogParameters == null) {
             changeLogParameters = new ChangeLogParameters(database);
-            addJavaProperties(changeLogParameters);
-            addDefaultFileProperties(changeLogParameters);
+            changeLogParameters.addJavaProperties();
+            changeLogParameters.addDefaultFileProperties();
         }
+        extractContextAndLabels(commandScope, changeLogParameters);
+        return changeLogParameters;
+    }
+
+    /**
+     * Extracts contexts and labels from the command scope and if present sets them in the changeLogParameters.
+     * Contexts and labels from dedicated parameters have priority over the values from the changeLogParameters.
+     */
+    private void extractContextAndLabels(CommandScope commandScope, ChangeLogParameters changeLogParameters) {
         Contexts contexts = new Contexts(commandScope.getArgumentValue(CONTEXTS_ARG));
-        changeLogParameters.setContexts(contexts);
+        if (contexts.isEmpty()) {
+            contexts = changeLogParameters.getContexts();
+        } else {
+            changeLogParameters.setContexts(contexts);
+        }
         commandScope.provideDependency(Contexts.class, contexts);
         LabelExpression labels = new LabelExpression(commandScope.getArgumentValue(LABEL_FILTER_ARG));
-        changeLogParameters.setLabels(labels);
+        if (labels.isEmpty()) {
+            labels = changeLogParameters.getLabels();
+        } else {
+            changeLogParameters.setLabels(labels);
+        }
         commandScope.provideDependency(LabelExpression.class, labels);
         addCommandFiltersMdc(labels, contexts);
-        return changeLogParameters;
     }
 
     public static void addCommandFiltersMdc(LabelExpression labelExpression, Contexts contexts) {
@@ -121,18 +134,20 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
 
     public static DatabaseChangeLog getDatabaseChangeLog(String changeLogFile, ChangeLogParameters changeLogParameters, Database database) throws Exception {
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-        ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
-        if (parser instanceof XMLChangeLogSAXParser) {
-            ((XMLChangeLogSAXParser) parser).setShouldWarnOnMismatchedXsdVersion(false);
-        }
-        DatabaseChangeLog changelog = Scope.child(Collections.singletonMap(Scope.Attr.database.name(), database),
-                () -> parser.parse(changeLogFile, changeLogParameters, resourceAccessor));
-        if (StringUtil.isNotEmpty(changelog.getLogicalFilePath())) {
-            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changelog.getLogicalFilePath());
+        AtomicReference<DatabaseChangeLog> changelog = new AtomicReference<>();
+        Scope.child(Scope.Attr.database, database, () -> {
+            ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
+            if (parser instanceof XMLChangeLogSAXParser) {
+                ((XMLChangeLogSAXParser) parser).setShouldWarnOnMismatchedXsdVersion(false);
+            }
+            changelog.set(parser.parse(changeLogFile, changeLogParameters, resourceAccessor));
+        });
+        if (StringUtils.isNotEmpty(changelog.get().getLogicalFilePath())) {
+            Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changelog.get().getLogicalFilePath());
         } else {
             Scope.getCurrentScope().addMdcValue(MdcKey.CHANGELOG_FILE, changeLogFile);
         }
-        return changelog;
+        return changelog.get();
     }
 
     private void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog,
@@ -140,7 +155,12 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
         ChangeLogHistoryService changeLogHistoryService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
         changeLogHistoryService.init();
         if (updateExistingNullChecksums) {
-            changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
+            try {
+                Scope.child(Collections.singletonMap(Scope.Attr.database.name(), database),
+                    () ->changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression));
+            } catch (Exception e) {
+                throw new LiquibaseException(e);
+            }
         }
         LockServiceFactory.getInstance().getLockService(database).init();
     }
@@ -157,29 +177,11 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
 
     /**
      * Add java property arguments to changelog parameters
+     * @deprecated use {@link ChangeLogParameters#addJavaProperties()} instead.
      * @param changeLogParameters the changelog parameters to update
      */
+    @Deprecated
     public void addJavaProperties(ChangeLogParameters changeLogParameters) {
-        HashMap javaProperties = Scope.getCurrentScope().get("javaProperties", HashMap.class);
-        if (javaProperties != null) {
-            javaProperties.forEach((key, value) -> changeLogParameters.set((String) key, value));
-        }
+        changeLogParameters.addJavaProperties();
     }
-
-    /**
-     * Add default-file properties to changelog parameters
-     * @param changeLogParameters the changelog parameters to update
-     */
-    private void addDefaultFileProperties(ChangeLogParameters changeLogParameters) {
-        final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
-        for (ConfigurationValueProvider cvp : liquibaseConfiguration.getProviders()) {
-            if (cvp instanceof DefaultsFileValueProvider) {
-                DefaultsFileValueProvider dfvp = (DefaultsFileValueProvider)  cvp;
-                dfvp.getMap().entrySet().stream()
-                        .filter(entry -> ((String) entry.getKey()).startsWith("parameter."))
-                        .forEach(entry -> changeLogParameters.set(((String) entry.getKey()).replaceFirst("^parameter.", ""), entry.getValue()));
-            }
-        }
-    }
-
 }

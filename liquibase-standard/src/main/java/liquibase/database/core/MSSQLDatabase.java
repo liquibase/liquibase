@@ -18,11 +18,12 @@ import liquibase.sql.visitor.AppendSqlIfNotPresentVisitor;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
@@ -115,14 +116,24 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors) throws LiquibaseException {
-        super.executeStatements(change, changeLog, addSqlVisitors(sqlVisitors));
+        if (change instanceof AbstractSQLChange) {
+            String endDelimiter = StringUtil.trimToNull(((AbstractSQLChange) change).getEndDelimiter());
+            if (endDelimiter != null && !endDelimiter.contentEquals(";")) {
+                super.executeStatements(change, changeLog, sqlVisitors);
+            } else {
+                super.executeStatements(change, changeLog, addSqlVisitors(sqlVisitors));
+            }
+        }
+        else {
+                super.executeStatements(change, changeLog, addSqlVisitors(sqlVisitors));
+            }
     }
 
     //
     //  Setup up an appending SQL visitor if this is not an AbstractSQLChange or
     //  if there is no end delimiter
     //
-    private List<SqlVisitor> addSqlVisitors(List<SqlVisitor> sqlVisitors) {
+    protected static List<SqlVisitor> addSqlVisitors(List<SqlVisitor> sqlVisitors) {
         List<SqlVisitor> sqlChangeVisitors = new ArrayList<>(sqlVisitors);
         AppendSqlIfNotPresentVisitor appendVisitor = new AppendSqlIfNotPresentVisitor();
         appendVisitor.setValue(";");
@@ -186,15 +197,24 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Sequence.class.isAssignableFrom(object)) {
+            try {
+                return isAzureDb() || this.getDatabaseMajorVersion() >= MSSQL_SERVER_VERSIONS.MSSQL2012;
+            } catch (DatabaseException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+        }
+        return super.supports(object);
+    }
+
+    @Override
     public boolean supportsSequences() {
         try {
-            if (isAzureDb() || this.getDatabaseMajorVersion() >= MSSQL_SERVER_VERSIONS.MSSQL2012) {
-                return true;
-            }
+            return isAzureDb() || this.getDatabaseMajorVersion() >= MSSQL_SERVER_VERSIONS.MSSQL2012;
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
-        return false;
     }
 
     @Override
@@ -264,7 +284,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected SqlStatement getConnectionSchemaNameCallStatement() {
-        return new RawSqlStatement("select schema_name()");
+        return new RawParameterizedSqlStatement("select schema_name()");
     }
 
     @Override
@@ -406,10 +426,10 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             return super.escapeObjectName(catalogName, schemaName, objectName, objectType);
         } else {
             String name = this.escapeObjectName(objectName, objectType);
-            if (StringUtil.isEmpty(schemaName)) {
+            if (StringUtils.isEmpty(schemaName)) {
                 schemaName = this.getDefaultSchemaName();
             }
-            if ((!StringUtil.isEmpty(schemaName) && (!schemaName.equals(getConnectionSchemaName())))) {
+            if ((!StringUtils.isEmpty(schemaName) && (!schemaName.equals(getConnectionSchemaName())))) {
                 name = this.escapeObjectName(schemaName, Schema.class)+"."+name;
             }
             return name;
@@ -431,11 +451,9 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             try {
                 if (getConnection() instanceof JdbcConnection) {
                     String catalog = getConnection().getCatalog();
-                    String sql =
-                        "SELECT CONVERT([sysname], DATABASEPROPERTYEX(N'" + escapeStringForDatabase(catalog) +
-                            "', 'Collation'))";
+                    String sql = String.format("SELECT CONVERT([sysname], DATABASEPROPERTYEX(N'%s', 'Collation'))", escapeStringForDatabase(catalog));
                     String collation = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this)
-                        .queryForObject(new RawSqlStatement(sql), String.class);
+                        .queryForObject(new RawParameterizedSqlStatement(sql), String.class);
                     caseSensitive = (collation != null) && !collation.contains("_CI_");
                 } else if (getConnection() instanceof OfflineConnection) {
                     caseSensitive = ((OfflineConnection) getConnection()).isCaseSensitive();
@@ -619,7 +637,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                     "         ELSE 'Unknown'\n" +
                     "       END";
                 return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this)
-                    .queryForObject(new RawSqlStatement(sql), String.class);
+                    .queryForObject(new RawParameterizedSqlStatement(sql), String.class);
             }
         } catch (DatabaseException e) {
             Scope.getCurrentScope().getLog(getClass()).warning("Could not determine engine edition", e);
@@ -685,5 +703,10 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                 "UNION", "UNIQUE", "UNPIVOT", "UPDATE", "UPDATETEXT", "USE", "USER",
                 "VALUES", "VARYING", "VIEW",
                 "WAITFOR", "WHEN", "WHERE", "WHILE", "WITH", "WITHIN GROUP", "WRITETEXT");
+    }
+
+    @Override
+    public boolean supportsDatabaseChangeLogHistory() {
+        return true;
     }
 }

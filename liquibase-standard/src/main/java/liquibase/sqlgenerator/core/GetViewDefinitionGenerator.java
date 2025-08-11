@@ -9,6 +9,8 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 import liquibase.structure.core.View;
 
 public class GetViewDefinitionGenerator extends AbstractSqlGenerator<GetViewDefinitionStatement> {
@@ -34,7 +36,7 @@ public class GetViewDefinitionGenerator extends AbstractSqlGenerator<GetViewDefi
             sql += " and table_schema='" + schema.getCatalogName() + "'";
         } else {
 
-            if (database.supportsSchemas()) {
+            if (database.supports(Schema.class)) {
                 String schemaName = schema.getSchemaName();
                 if (schemaName != null) {
                 	if (database instanceof MSSQLDatabase)
@@ -44,7 +46,7 @@ public class GetViewDefinitionGenerator extends AbstractSqlGenerator<GetViewDefi
                 }
             }
 
-            if (database.supportsCatalogs()) {
+            if (database.supports(Catalog.class)) {
                 String catalogName = schema.getCatalogName();
                 if (catalogName != null) {
                 	if (database instanceof MSSQLDatabase)

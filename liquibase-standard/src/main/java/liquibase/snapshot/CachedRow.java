@@ -3,29 +3,27 @@ package liquibase.snapshot;
 import java.util.Map;
 
 public class CachedRow {
-    private final Map row;
+    private final Map<String, Object> row;
 
-    public CachedRow(Map row) {
+    public CachedRow(Map<String, Object> row) {
         this.row = row;
     }
 
-
-
-    public Object get(String columnName) {
-        return row.get(columnName);
+    @SuppressWarnings("unchecked")
+    public <T> T get(String columnName) {
+        return (T) row.get(columnName);
     }
 
     public void set(String columnName, Object value) {
         row.put(columnName, value);
     }
 
-
     public boolean containsColumn(String columnName) {
         return row.containsKey(columnName);
     }
 
     public String getString(String columnName) {
-        return (String) row.get(columnName);
+        return get(columnName);
     }
 
     public Integer getInt(String columnName) {
@@ -36,7 +34,7 @@ public class CachedRow {
             return Integer.valueOf((String) o);
         } else if (o instanceof byte[]) {
             //
-            // Added this condition after finding that Clustrix (MariadDB/MySQL)
+            // Added this condition after finding that Clustrix (MariaDB/MySQL)
             // returns the size value as a byte[] that contains the ASCII values
             // of the numbers
             //

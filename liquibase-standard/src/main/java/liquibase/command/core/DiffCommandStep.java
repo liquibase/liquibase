@@ -3,6 +3,7 @@ package liquibase.command.core;
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.command.*;
+import liquibase.command.core.helpers.DiffArgumentsCommandStep;
 import liquibase.command.core.helpers.PreCompareCommandStep;
 import liquibase.command.providers.ReferenceDatabase;
 import liquibase.database.Database;
@@ -15,9 +16,11 @@ import liquibase.diff.output.report.DiffToReport;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcValue;
+import liquibase.logging.mdc.customobjects.DiffResultsSummary;
 import liquibase.snapshot.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.DatabaseObjectFactory;
+import liquibase.structure.core.Schema;
 import liquibase.util.StringUtil;
 
 import java.io.PrintStream;
@@ -43,11 +46,12 @@ public class DiffCommandStep extends AbstractCommandStep {
         TARGET_SNAPSHOT_CONTROL_ARG = builder.argument("targetSnapshotControl", SnapshotControl.class).hidden().build();
         FORMAT_ARG = builder.argument("format", String.class).description("Output format. Default: TXT").hidden().build();
         DIFF_RESULT = builder.result("diffResult", DiffResult.class).description("Databases diff result").build();
+
     }
 
     @Override
     public List<Class<?>> requiredDependencies() {
-        return Arrays.asList(CompareControl.class, ReferenceDatabase.class);
+        return Arrays.asList(CompareControl.class, ReferenceDatabase.class, DiffArgumentsCommandStep.class);
     }
 
     @Override
@@ -113,8 +117,9 @@ public class DiffCommandStep extends AbstractCommandStep {
         DatabaseSnapshot referenceSnapshot = createReferenceSnapshot(resultsBuilder);
         DatabaseSnapshot targetSnapshot = getTargetSnapshot(resultsBuilder);
         final CompareControl compareControl = (CompareControl) resultsBuilder.getResult(PreCompareCommandStep.COMPARE_CONTROL_RESULT.getName());
-
-        return DiffGeneratorFactory.getInstance().compare(referenceSnapshot, targetSnapshot, compareControl);
+        DiffResult result = DiffGeneratorFactory.getInstance().compare(referenceSnapshot, targetSnapshot, compareControl);
+        Scope.getCurrentScope().getMdcManager().put(MdcKey.DIFF_RESULTS_SUMMARY, new DiffResultsSummary(result));
+        return result;
     }
 
     protected DatabaseSnapshot getTargetSnapshot(CommandResultsBuilder resultsBuilder) throws DatabaseException, InvalidExampleException {
@@ -134,7 +139,7 @@ public class DiffCommandStep extends AbstractCommandStep {
             int i = 0;
             for (CompareControl.SchemaComparison comparison : compareControl.getSchemaComparisons()) {
                 CatalogAndSchema schema;
-                if (targetDatabase.supportsSchemas()) {
+                if (targetDatabase.supports(Schema.class)) {
                     schema = new CatalogAndSchema(targetDatabase.getDefaultCatalogName(), comparison.getComparisonSchema().getSchemaName());
                 } else {
                     schema = new CatalogAndSchema(comparison.getComparisonSchema().getSchemaName(), comparison.getComparisonSchema().getSchemaName());
@@ -175,7 +180,7 @@ public class DiffCommandStep extends AbstractCommandStep {
             int i = 0;
             for (CompareControl.SchemaComparison comparison : compareControl.getSchemaComparisons()) {
                 CatalogAndSchema schema;
-                if (referenceDatabase.supportsSchemas()) {
+                if (referenceDatabase.supports(Schema.class)) {
                     schema = new CatalogAndSchema(referenceDatabase.getDefaultCatalogName(), comparison.getReferenceSchema().getSchemaName());
                 } else {
                     schema = new CatalogAndSchema(comparison.getReferenceSchema().getSchemaName(), comparison.getReferenceSchema().getSchemaName());

@@ -108,6 +108,7 @@ public class StatusCommandStep extends AbstractCommandStep {
             Scope.getCurrentScope().getLog(getClass()).fine("Status");
         }
 
+        resultsBuilder.addResult("status", new SimpleStatus(message, database.getConnection().getURL(), unrunChangeSets));
         out.flush();
     }
 

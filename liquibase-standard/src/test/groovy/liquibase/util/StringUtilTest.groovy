@@ -40,7 +40,8 @@ class StringUtilTest extends Specification {
         true          | true            | null         | "CREATE OR REPLACE PACKAGE emp_actions AS BEGIN\n statement 1;\nanother statement;here; END;"                                                                                                       | ["CREATE OR REPLACE PACKAGE emp_actions AS BEGIN\n statement 1;\nanother statement;here; END"]
         true          | true            | null         | "CREATE OR REPLACE PACKAGE emp_actions AS BEGIN\n statement 1;\nBEGIN a nested statement;here; END; END;"                                                                                           | ["CREATE OR REPLACE PACKAGE emp_actions AS BEGIN\n statement 1;\nBEGIN a nested statement;here; END; END"]
         true          | true            | null         | "BEGIN TRANSACTION; statement 1; end transaction;"                                                                                                                                                  | ["BEGIN TRANSACTION", "statement 1", "end transaction"]
-
+        true          | true            | null         | "create procedure my_proc(@begin int) as select 1\n\nGO\n\ncreate table test(col int)"                                                                                                              | ["create procedure my_proc(@begin int) as select 1", "create table test(col int)"]
+        true          | true            | null         | "create table #begin(@col int)\n\nGO\n\ncreate table test(col int)"                                                                                                                                 | ["create table #begin(@col int)", "create table test(col int)"]
     }
 
     @Unroll
@@ -532,10 +533,10 @@ class StringUtilTest extends Specification {
         "abcdefghij" | 5      | "ab..."
     }
 
-    def randomIdentifer() {
+    def randomIdentifier() {
         expect:
-        StringUtil.randomIdentifer(5).length() == 5
-        StringUtil.randomIdentifer(5) != StringUtil.randomIdentifer(5)
+        StringUtil.randomIdentifier(5).length() == 5
+        StringUtil.randomIdentifier(5) != StringUtil.randomIdentifier(5)
     }
 
     @Unroll
@@ -601,6 +602,7 @@ class StringUtilTest extends Specification {
         "select * from x"                      | null
         "select * from /* a comment here */ x" | null
         "select * from /* a comment here */"   | "/* a comment here */"
+        "/*CREATE PROC... */"                  | "/*CREATE PROC... */"
     }
 
     @Unroll

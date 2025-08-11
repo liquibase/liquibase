@@ -57,46 +57,38 @@ public class CollectionUtil {
      * Returns passed currentValue if it is not null and creates a new ArrayList if it is null.
      * <br><br>
      * Example: values = createIfNull(values)
+     * @deprecated use {@link org.apache.commons.collections4.CollectionUtils} instead
      */
+    @Deprecated
     public static <T> List<T> createIfNull(List<T> currentValue) {
-        if (currentValue == null) {
-            return new ArrayList<>();
-        } else {
-            return currentValue;
-        }
+        return ObjectUtil.defaultIfNull(currentValue, new ArrayList<>());
     }
 
     /**
      * Returns a new empty array if the passed array is null.
+     * @deprecated use {@link org.apache.commons.collections4.CollectionUtils} instead
      */
+    @Deprecated
     public static <T> T[] createIfNull(T[] arguments) {
-        if (arguments == null) {
-            return (T[]) new Object[0];
-        } else {
-            return arguments;
-        }
+        return ObjectUtil.defaultIfNull(arguments, (T[]) new Object[0]);
     }
 
     /**
      * Returns a new empty set if the passed set is null.
+     * @deprecated use {@link org.apache.commons.collections4.CollectionUtils} instead
      */
+    @Deprecated
     public static <T> Set<T> createIfNull(Set<T> currentValue) {
-        if (currentValue == null) {
-            return new HashSet<>();
-        } else {
-            return currentValue;
-        }
+        return ObjectUtil.defaultIfNull(currentValue, new HashSet<>());
     }
 
     /**
      * Returns a new empty map if the passed map is null.
+     * @deprecated use {@link org.apache.commons.collections4.CollectionUtils} instead
      */
+    @Deprecated
     public static <T, E> Map<T, E> createIfNull(Map<T, E> currentValue) {
-        if (currentValue == null) {
-            return new HashMap<>();
-        } else {
-            return currentValue;
-        }
+        return ObjectUtil.defaultIfNull(currentValue, new HashMap<>());
     }
 
     /**

@@ -20,6 +20,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.structure.core.Schema;
 import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -93,7 +94,7 @@ public class CommandLineUtils {
             Database database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver,
                     databaseClass, driverPropertiesFile, propertyProviderClass, resourceAccessor);
 
-            if (!database.supportsSchemas()) {
+            if (!database.supports(Schema.class)) {
                 if ((defaultSchemaName != null) && (defaultCatalogName == null)) {
                     defaultCatalogName = defaultSchemaName;
                 }
@@ -256,6 +257,8 @@ public class CommandLineUtils {
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_CATALOG_ARG, diffOutputControl.getIncludeCatalog())
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, diffOutputControl.getIncludeSchema())
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_TABLESPACE_ARG, diffOutputControl.getIncludeTablespace())
+                .addArgumentValue(DiffOutputControlCommandStep.EXCLUDE_OBJECTS, diffOutputControl.getExcludeObjects())
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_OBJECTS, diffOutputControl.getIncludeObjects())
                 .addArgumentValue(DiffChangelogCommandStep.AUTHOR_ARG, author)
                 .addArgumentValue(DiffChangelogCommandStep.RUN_ON_CHANGE_TYPES_ARG, runOnChangeTypes)
                 .addArgumentValue(DiffChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG, replaceIfExistsTypes);
@@ -340,10 +343,13 @@ public class CommandLineUtils {
                 .addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, originalDatabase)
                 .addArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(snapshotTypes))
                 .addArgumentValue(PreCompareCommandStep.COMPARE_CONTROL_ARG, compareControl)
+                .addArgumentValue(PreCompareCommandStep.OBJECT_CHANGE_FILTER_ARG, diffOutputControl.getObjectChangeFilter())
                 .addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_CATALOG_ARG, diffOutputControl.getIncludeCatalog())
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_SCHEMA_ARG, diffOutputControl.getIncludeSchema())
                 .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_TABLESPACE_ARG, diffOutputControl.getIncludeTablespace())
+                .addArgumentValue(DiffOutputControlCommandStep.EXCLUDE_OBJECTS, diffOutputControl.getExcludeObjects())
+                .addArgumentValue(DiffOutputControlCommandStep.INCLUDE_OBJECTS, diffOutputControl.getIncludeObjects())
                 .addArgumentValue(GenerateChangelogCommandStep.AUTHOR_ARG, author)
                 .addArgumentValue(GenerateChangelogCommandStep.CONTEXT_ARG, context)
                 .addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, overwriteOutputFile)
@@ -351,7 +357,7 @@ public class CommandLineUtils {
                 .addArgumentValue(GenerateChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG, replaceIfExistsTypes);
 
 
-        if(diffOutputControl.isReplaceIfExistsSet()) {
+        if (diffOutputControl.isReplaceIfExistsSet()) {
             command.addArgumentValue(GenerateChangelogCommandStep.USE_OR_REPLACE_OPTION, true);
         }
         command.setOutput(System.out);

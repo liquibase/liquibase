@@ -22,6 +22,7 @@ import liquibase.statement.core.CreateSequenceStatement;
 import liquibase.statement.core.SetNullableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
+import lombok.Setter;
 
 /**
  * Makes an existing column into an auto-increment column.
@@ -35,6 +36,7 @@ import liquibase.structure.core.Table;
         database = "sqlite", notes = "If the column type is not INTEGER it is converted to INTEGER"
     )}
 )
+@Setter
 public class AddAutoIncrementChange extends AbstractChange {
 
     private String catalogName;
@@ -52,17 +54,9 @@ public class AddAutoIncrementChange extends AbstractChange {
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "column.relation.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table")
@@ -70,17 +64,9 @@ public class AddAutoIncrementChange extends AbstractChange {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "column", description = "Name of the column")
     public String getColumnName() {
         return columnName;
-    }
-
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
     }
 
     @DatabaseChangeProperty(exampleValue = "int", description = "Current data type of the column to make auto-increment")
@@ -88,26 +74,14 @@ public class AddAutoIncrementChange extends AbstractChange {
         return columnDataType;
     }
 
-    public void setColumnDataType(String columnDataType) {
-        this.columnDataType = columnDataType;
-    }
-
     @DatabaseChangeProperty(exampleValue = "100", description = "Initial value of the increment")
     public BigInteger getStartWith() {
         return startWith;
     }
 
-    public void setStartWith(BigInteger startWith) {
-        this.startWith = startWith;
-    }
-
     @DatabaseChangeProperty(exampleValue = "1", description = "Amount to increment by at each call")
     public BigInteger getIncrementBy() {
         return incrementBy;
-    }
-
-    public void setIncrementBy(BigInteger incrementBy) {
-        this.incrementBy = incrementBy;
     }
 
     @DatabaseChangeProperty(exampleValue = "true", since = "3.6",
@@ -117,18 +91,10 @@ public class AddAutoIncrementChange extends AbstractChange {
         return defaultOnNull;
     }
 
-    public void setDefaultOnNull(Boolean defaultOnNull) {
-        this.defaultOnNull = defaultOnNull;
-    }
-
     @DatabaseChangeProperty(exampleValue = "ALWAYS", since = "3.6",
         description = "Type of the generation in \"GENERATED %s AS IDENTITY\". Default: \"|\".")
     public String getGenerationType() {
         return generationType;
-    }
-
-    public void setGenerationType(String generationType) {
-        this.generationType = generationType;
     }
 
     @Override

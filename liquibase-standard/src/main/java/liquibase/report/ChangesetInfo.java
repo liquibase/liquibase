@@ -40,10 +40,15 @@ public class ChangesetInfo {
                     changesetOutcome = ChangeSet.ExecType.FAILED.value;
                     success = false;
                 }
+                // This list assumes that the generated sql is only related to the current operation's generated sql.
                 List<String> generatedSql = deployedChangeSet.getGeneratedSql()
                         .stream()
                         .filter(sql -> sql != null && !sql.isEmpty())
                         .collect(Collectors.toList());
+                String contentType = "Generated SQL";
+                if (! generatedSql.isEmpty() && generatedSql.get(0).startsWith("//")) {
+                    contentType = "JCL Script";
+                }
                 changesetInfoList.add(new IndividualChangesetInfo(
                         changesetInfoList.size() + 1,
                         deployedChangeSet.getAuthor(),
@@ -56,7 +61,8 @@ public class ChangesetInfo {
                         deployedChangeSet.getLabels() == null ? null : deployedChangeSet.getLabels().toString(),
                         deployedChangeSet.getContextFilter() == null ? null : deployedChangeSet.getContextFilter().getOriginalString(),
                         buildAttributesString(deployedChangeSet),
-                        generatedSql
+                        generatedSql,
+                        contentType
                 ));
             }
         }
@@ -111,6 +117,13 @@ public class ChangesetInfo {
                         changeSet);
                 pendingChangesetInfoList.add(pendingChangesetInfo);
             });
+        }
+    }
+
+    public void suppressSql() {
+        for (IndividualChangesetInfo individualChangesetInfo : this.changesetInfoList) {
+            individualChangesetInfo.getGeneratedSql().clear();
+            individualChangesetInfo.getGeneratedSql().add("SQL Suppressed");
         }
     }
 }

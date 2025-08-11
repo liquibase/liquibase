@@ -132,5 +132,11 @@
         </customChange>
 
     </changeSet>    
+    <changeSet id="indexIncludeTest" author="satwell">
+        <createIndex indexName="idx_include_test" tableName="page">
+            <column name="id"/>
+            <column name="text" included="true"/>
+        </createIndex>
+    </changeSet>
 
 </databaseChangeLog>

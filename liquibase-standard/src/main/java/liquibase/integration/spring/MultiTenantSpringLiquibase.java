@@ -110,6 +110,14 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 
     @Getter
     @Setter
+    protected String licenseKey = null;
+
+    @Getter
+    @Setter
+    protected Boolean analyticsEnabled = null;
+
+    @Getter
+    @Setter
     private boolean shouldRun = true;
 
     @Getter
@@ -127,7 +135,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
             } else if (dataSource != null) {
                 log.info("Schema based multitenancy enabled");
                 if ((schemas == null) || schemas.isEmpty()) {
-                    log.warning("Schemas not defined, using defaultSchema only");
+                    log.info("Schemas not defined, using defaultSchema only");
                     schemas = new ArrayList<>();
                     schemas.add(defaultSchema);
                 }
@@ -203,6 +211,8 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
         liquibase.setLabelFilter(labelFilter);
         liquibase.setDropFirst(dropFirst);
         liquibase.setClearCheckSums(clearCheckSums);
+        liquibase.setLicenseKey(licenseKey);
+        liquibase.setAnalyticsEnabled(analyticsEnabled);
         liquibase.setShouldRun(shouldRun);
         liquibase.setRollbackFile(rollbackFile);
         liquibase.setResourceLoader(resourceLoader);
@@ -218,6 +228,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
     /**
      * @deprecated use {@link #getLabelFilter()}
      */
+    @Deprecated
     public String getLabels() {
         return getLabelFilter();
     }
@@ -225,6 +236,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
     /**
      * @deprecated use {@link #setLabelFilter(String)}
      */
+    @Deprecated
     public void setLabels(String labels) {
         setLabelFilter(labels);
     }

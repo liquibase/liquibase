@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.change.core.CreateProcedureChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
@@ -15,7 +16,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateProcedureStatement;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.StoredProcedure;
 import liquibase.util.StringClauses;
@@ -36,7 +37,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("procedureText", statement.getProcedureText());
         if (statement.getReplaceIfExists() != null) {
-            if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase || database instanceof DB2Database || database instanceof Db2zDatabase) {
+            if (CreateProcedureChange.databaseSupportsReplaceIfExists(database)) {
                 if (statement.getReplaceIfExists() && (statement.getProcedureName() == null)) {
                     validationErrors.addError("procedureName is required if replaceIfExists = true");
                 }
@@ -149,7 +150,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
                 String originalSearchPath = null;
                 if (executor instanceof JdbcExecutor) {
                     try {
-                        originalSearchPath = executor.queryForObject(new RawSqlStatement("SHOW SEARCH_PATH"), String.class);
+                        originalSearchPath = executor.queryForObject(new RawParameterizedSqlStatement("SHOW SEARCH_PATH"), String.class);
                     } catch (Throwable e) {
                         Scope.getCurrentScope().getLog(CreateProcedureGenerator.class).warning("Cannot get search_path", e);
                     }

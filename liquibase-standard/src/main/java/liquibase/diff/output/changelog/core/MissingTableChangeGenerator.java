@@ -135,7 +135,7 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
         }
 
         if (referenceDatabase instanceof OracleDatabase && missingTable.getAttribute("temporary", "no").equals("GLOBAL")) {
-                change.setTableType("TEMPORARY GLOBAL");
+                change.setTableType("GLOBAL TEMPORARY");
         }
 
         for (Column column : missingTable.getColumns()) {

@@ -34,7 +34,8 @@ public class RollbackToDateCommandStep extends AbstractRollbackCommandStep {
         CommandScope commandScope = resultsBuilder.getCommandScope();
         Date dateToRollBackTo = commandScope.getArgumentValue(DATE_ARG);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
-        Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_TO_DATE, formatter.format(dateToRollBackTo));
+        String stringDateToRollbackTo = formatter.format(dateToRollBackTo);
+        Scope.getCurrentScope().addMdcValue(MdcKey.ROLLBACK_TO_DATE, stringDateToRollbackTo);
 
         RollbackReportParameters rollbackReportParameters = new RollbackReportParameters();
         rollbackReportParameters.setCommandTitle(
@@ -43,9 +44,8 @@ public class RollbackToDateCommandStep extends AbstractRollbackCommandStep {
         resultsBuilder.addResult("rollbackReport", rollbackReportParameters);
 
         Database database = (Database) commandScope.getDependency(Database.class);
-        rollbackReportParameters.getDatabaseInfo().setDatabaseType(database.getDatabaseProductName());
-        rollbackReportParameters.getDatabaseInfo().setVersion(database.getDatabaseProductVersion());
-        rollbackReportParameters.setJdbcUrl(database.getConnection().getURL());
+        rollbackReportParameters.setupDatabaseInfo(database);
+        rollbackReportParameters.setRollbackDate(stringDateToRollbackTo);
 
         List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
         Scope.child(Collections.singletonMap("rollbackReport", rollbackReportParameters), () -> this.doRollback(resultsBuilder, ranChangeSetList, new ExecutedAfterChangeSetFilter(dateToRollBackTo, ranChangeSetList), rollbackReportParameters));

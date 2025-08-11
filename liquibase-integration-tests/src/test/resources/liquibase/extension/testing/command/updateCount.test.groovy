@@ -221,26 +221,24 @@ Optional Args:
         outputFile = new File("target/test-classes/mismatchedDBMS.txt")
         expectedFileContent = [ "target/test-classes/mismatchedDBMS.txt":
                  [
-                   "UPDATE SUMMARY",
-                   "Run:                          1",
-                   "Previously run:               0",
-                   "Filtered out:                 2",
-                   "-------------------------------",
-                   "Total change sets:            3",
-                   "FILTERED CHANGE SETS SUMMARY",
-                   "After count:                  1",
-                   "DBMS mismatch:                1",
-                   "+--------------------------------------------------------------+--------------------------------+",
-                   "| Changeset Info                                               | Reason Skipped                 |",
-                   "+--------------------------------------------------------------+--------------------------------+",
-                   "|                                                              | mismatched DBMS value of 'foo' |",
-                   "| changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvox |                                |",
-                   "| land                                                         |                                |",
-                   "+--------------------------------------------------------------+--------------------------------+",
-                   "|                                                              | Only running 1 changeset       |",
-                   "| changelogs/h2/complete/mismatchedDbms.changelog.xml::13.1::t |                                |",
-                   "| estuser                                                      |                                |",
-                   "+--------------------------------------------------------------+--------------------------------+"
+                   """UPDATE SUMMARY
+                   Run:                          1
+                   Previously run:               0
+                   Filtered out:                 2
+                   -------------------------------
+                   Total change sets:            3
+                   FILTERED CHANGE SETS SUMMARY
+                   After count:                  1
+                   DBMS mismatch:                1
+                   +--------------------------------------------------------------+--------------------------------+
+                   | Changeset Info                                               | Reason Skipped                 |
+                   +--------------------------------------------------------------+--------------------------------+
+                   | changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvox | mismatched DBMS value of 'foo' |
+                   | land                                                         |                                |
+                   +--------------------------------------------------------------+--------------------------------+
+                   | changelogs/h2/complete/mismatchedDbms.changelog.xml::13.1::t | Only running 1 changeset       |
+                   | estuser                                                      |                                |
+                   +--------------------------------------------------------------+--------------------------------+"""
                  ]
         ]
     }

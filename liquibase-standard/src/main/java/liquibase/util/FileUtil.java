@@ -1,10 +1,11 @@
 package liquibase.util;
 
-import liquibase.Scope;
 import liquibase.GlobalConfiguration;
+import liquibase.Scope;
+import org.apache.commons.io.FileUtils;
 
-import java.io.*;
-import java.nio.file.Files;
+import java.io.File;
+import java.io.IOException;
 
 public class FileUtil {
     
@@ -16,31 +17,19 @@ public class FileUtil {
         if (!file.exists()) {
             return null;
         }
-        try (
-                InputStream fileInputStream = Files.newInputStream(file.toPath())
-        ) {
-            
-            return StreamUtil.readStreamAsString(fileInputStream);
-        } catch (FileNotFoundException e) {
-            return null;
-        }
+        return FileUtils.readFileToString(file);
     }
 
     public static void write(String contents, File file) throws IOException {
         write(contents, file, false);
     }
 
+    /**
+     * @deprecated use {@link FileUtils#write(File, CharSequence, String, boolean)}
+     */
+    @Deprecated
     public static void write(String contents, File file, boolean append) throws IOException {
-        if (file.getParentFile() != null) {
-            file.getParentFile().mkdirs();
-        }
-
-        try (
-                FileOutputStream output = new FileOutputStream(file, append)
-        ){
-            StreamUtil.copy(new ByteArrayInputStream(contents.getBytes(GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue())), output);
-        }
-
+        FileUtils.write(file, contents, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue(), append);
     }
 
     public static String getFileNotFoundMessage(String physicalChangeLogLocation) {

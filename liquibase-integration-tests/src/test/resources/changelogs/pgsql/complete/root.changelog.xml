@@ -469,4 +469,81 @@
         <renameSequence oldSequenceName="serial_sequence_test_id_seq" newSequenceName="new_test_id_seq"/>
     </changeSet>
 
+    <changeSet author="mallod" id="test-column-def-with-autoincrement-and-startWith"
+               logicalFilePath="empty">
+        <createTable tableName="test_col_def_autoIncrement_and_startWith">
+            <column name="id" type="integer" autoIncrement="true" startWith="100" incrementBy="5"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="davidecavestro" id="uppercase-sequence-exists-create-prefixed">
+        <!--
+            Create a new sequence using an uppercase name
+            just to check its existence check has no false positives
+        --> 
+        <createSequence sequenceName="PREFIX_SQ_TEST_UPPERCASE"/>
+    </changeSet>
+
+    <changeSet author="davidecavestro" id="uppercase-sequence-exists-assert-prefixed">
+        <!--
+            This precondition should fail
+            as it checks for sequence existence
+            using an uppercase name lacking the prefix
+            (definitely another name)
+        --> 
+        <preConditions onFail="MARK_RAN">
+            <sequenceExists sequenceName="SQ_TEST_UPPERCASE"/>
+        </preConditions>
+        <!--
+            If the sequence created above with a prefix
+            is detected as false positive
+            then the following statement will fail
+            as it cannot drop a sequence that doesn't exist
+        --> 
+        <dropSequence sequenceName="SQ_TEST_UPPERCASE"/>
+    </changeSet>
+
+    <changeSet author="davidecavestro" id="uppercase-sequence-exists-create">
+        <!--
+            Create a new sequence using an uppercase name
+            Postgres by default will convert it to lowercase
+
+            The next changeset will assert it exists
+        --> 
+        <createSequence sequenceName="SQ_TEST_UPPERCASE"/>
+    </changeSet>
+
+    <changeSet author="davidecavestro" id="uppercase-sequence-exists-assert">
+        <!--
+            This precondition should fail
+            as it check for sequence NOT existing
+            using the same uppercase name
+            just passed to create it
+        --> 
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="SQ_TEST_UPPERCASE"/>
+            </not>
+        </preConditions>
+        <!--
+            If the sequence created above is not detected by the precondition
+            the following statement will fail, as the sequence already exists
+        --> 
+        <createSequence sequenceName="SQ_TEST_UPPERCASE"/>
+    </changeSet>
+
+    <changeSet id="createTableWithTimestampWithTimeZoneColumn" author="mallod">
+        <createTable tableName="TEST_TABLE_WITH_TIMEZONE_COLUMN">
+            <column name="ID" type="bigint"/>
+            <column name="CREATED" type="TIMESTAMP(6) WITH TIME ZONE"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="insertDateWithTimeZoneValue" author="mallod">
+        <insert tableName="TEST_TABLE_WITH_TIMEZONE_COLUMN">
+            <column name="ID" value="9000"/>
+            <column name="CREATED" valueDate="2024-01-14T00:00:00+02:00"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

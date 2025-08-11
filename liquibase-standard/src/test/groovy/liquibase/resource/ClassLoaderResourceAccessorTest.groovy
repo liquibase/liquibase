@@ -80,7 +80,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
                                 "com/example/jar/file-in-jar.txt",
                                 "com/example/liquibase/change/ChangeWithPrimitiveFields.class",
                                 "com/example/file-in-zip.txt",
-                                "com/example/liquibase/change/ColumnConfig.class",
+                                "com/example/liquibase/change/ColumnConfigExample.class",
                                 "com/example/liquibase/change/ComputedConfig.class",
                                 "com/example/liquibase/change/CreateTableExampleChange.class",
                                 "com/example/liquibase/change/DefaultConstraintConfig.class",

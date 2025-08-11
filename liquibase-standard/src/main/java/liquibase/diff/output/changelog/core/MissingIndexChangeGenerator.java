@@ -61,13 +61,21 @@ public class MissingIndexChangeGenerator extends AbstractChangeGenerator impleme
         change.setIndexName(index.getName());
         change.setUnique(((index.isUnique() != null) && index.isUnique()) ? Boolean.TRUE : null);
         change.setClustered(((index.getClustered() != null) && index.getClustered()) ? Boolean.TRUE : null);
+        change.setUsing(index.getUsing());
 
         if (referenceDatabase.createsIndexesForForeignKeys()) {
             change.setAssociatedWith(index.getAssociatedWithAsString());
         }
 
         for (Column column : index.getColumns()) {
-            change.addColumn(new AddColumnConfig(column));
+        	change.addColumn(new AddColumnConfig(column));
+        }
+        if (comparisonDatabase instanceof MSSQLDatabase) { 
+        	for (String column : index.getIncludedColumns()) {
+        		AddColumnConfig c = new AddColumnConfig(new Column(column));
+        		c.setIncluded(true);
+        		change.addColumn(c);
+        	}
         }
 
         return new Change[] { change };

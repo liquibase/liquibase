@@ -1,10 +1,18 @@
 # Name of the GitHub Action workflow
 name: FOSSA License Compliance and Security Check
 
+# Permissions needed for this workflow
+permissions:
+  contents: read
+  id-token: write
+  packages: read
+
 # Event triggers for the workflow
 on:
   workflow_dispatch:  # Run this action manually from the GitHub Actions tab
-
+  release:
+   types: [published] # Run this action when a release is published
+   
 # Define the jobs in the workflow
 jobs:
   fossa-scan:
@@ -16,16 +24,143 @@ jobs:
     # Checkout the code to the GitHub runner
     - name: Checkout Code
       uses: actions/checkout@v4
+      
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+    
+        #look for dependencies in maven
+    - name: maven-settings-xml-action
+      uses: whelk-io/maven-settings-xml-action@v22
+      with:
+        repositories: |
+          [
+            {
+              "id": "liquibase",
+              "url": "https://maven.pkg.github.com/liquibase/liquibase",
+              "releases": {
+                "enabled": "false"
+              },
+              "snapshots": {
+                "enabled": "true",
+                "updatePolicy": "always"
+              }
+            },
+            {
+              "id": "liquibase-pro",
+              "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
+              "releases": {
+                "enabled": "false"
+              },
+              "snapshots": {
+                "enabled": "true",
+                "updatePolicy": "always"
+              }
+            }
+          ]
+        servers: |
+          [
+            {
+              "id": "liquibase-pro",
+              "username": "liquibot",
+              "password": "${{ secrets.GITHUB_TOKEN }}"
+            },
+            {
+              "id": "liquibase",
+              "username": "liquibot",
+              "password": "${{ secrets.GITHUB_TOKEN }}"
+            }
+          ]
 
-    # Run FOSSA Scan
-    - name: Run FOSSA Scan
+    - name: Install Maven dependencies (excluding test scope)
+      run: mvn clean install -DskipTests
+      
+    - name: Configure AWS credentials for vault access
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+        aws-region: us-east-1
+
+    - name: Get secrets from vault
+      id: vault-secrets
+      uses: aws-actions/aws-secretsmanager-get-secrets@v2
+      with:
+        secret-ids: |
+          ,/vault/liquibase
+        parse-json-secrets: true
+
+    - name: run FOSSA CLI
       uses: fossas/fossa-action@main
       with:
-        api-key: ${{secrets.FOSSA_API_KEY}}  # Set this secret in your GitHub repo settings
+        api-key: ${{ env.FOSSA_API_KEY }}
+        branch: ${{ github.ref }}
 
-    # Run FOSSA Tests
-    - name: Run FOSSA Tests
-      uses: fossas/fossa-action@main
+    - name: Get the commit sha
+      id: get_commit_sha_oss
+      run: |
+        commit_sha_lb=`(git rev-parse HEAD)`
+        echo "commit_sha_lb=${commit_sha_lb}" >> $GITHUB_OUTPUT
+
+      # from the below curl commands we output the fossa report with the headers we need. Following this documentation : https://docs.fossa.com/docs/download-fossa-project-attribution-reports
+    - name: Set the dependency metadata information
+      run: |
+        mkdir /home/runner/fossa_reports
+        curl --location --request PUT 'https://app.fossa.com/api/projects/git+github.com/liquibase/liquibase' \
+        --header 'Authorization: Bearer ${{ env.FOSSA_API_KEY }}' \
+        --header 'Content-Type: application/x-www-form-urlencoded' \
+          --data-urlencode 'bom_column_settings%5B%5D=Title' \
+          --data-urlencode 'bom_column_settings%5B%5D=Version' \
+          --data-urlencode 'bom_column_settings%5B%5D=Authors' \
+          --data-urlencode 'bom_column_settings%5B%5D=DeclaredLicense' \
+          --data-urlencode 'bom_column_settings%5B%5D=PackageHomepage' \
+        
+
+        curl --location 'https://app.fossa.com/api/revisions/git%2Bgithub.com%2Fliquibase%2Fliquibase%24${{ steps.get_commit_sha_oss.outputs.commit_sha_lb }}/attribution/download?format=CSV&includeDeepDependencies=true&download=true' \
+        --header 'Authorization: Bearer ${{ env.FOSSA_API_KEY }}' -o /home/runner/fossa_reports/liquibase.csv
+
+      # Upload to build page for the team to check the csv file contents.
+    - name: Upload to build page
+      uses: actions/upload-artifact@v4
       with:
-        api-key: ${{secrets.FOSSA_API_KEY}}  # Set this secret in your GitHub repo settings
-        run-tests: true  # Run FOSSA tests for policy checks
+        name: fossa-reports
+        path: /home/runner/fossa_reports/liquibase.csv
+
+    - name: Configure AWS credentials for vault access
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+        aws-region: us-east-1
+
+    - name: Get secrets from vault
+      id: vault-secrets
+      uses: aws-actions/aws-secretsmanager-get-secrets@v2
+      with:
+        secret-ids: |
+          ,/vault/liquibase
+        parse-json-secrets: true
+
+    - name: Configure AWS credentials for prod account access
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
+        aws-region: us-east-1
+
+      # Upload report to S3
+    - name: Upload report to S3
+      if: always()
+      run: aws s3 cp /home/runner/fossa_reports/liquibase.csv s3://liquibaseorg-origin/fossa_reports_liquibase-pro/
+
+  # trigger a job in liquibase-pro for the fossa-scan report generation and merging of OSS and PRO reports 
+  run-pro-fossa-report:
+    runs-on: ubuntu-latest
+    needs: [ fossa-scan ]
+    steps:
+      - name: Dispatch event to PRO repository
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: liquibase/liquibase-pro
+          event-type: FOSSA_Scan_PRO
+          client-payload: '{"repository": "${{ github.repository }}", "branch": "${{ github.ref }}", "sha": "${{ github.sha }}", "server_url": "${{ github.server_url }}", "run_id": "${{ github.run_id }}"}'

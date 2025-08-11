@@ -13,7 +13,7 @@ public class RenameSequenceGenerator extends AbstractSqlGenerator<RenameSequence
 
     @Override
     public boolean supports(RenameSequenceStatement statement, Database database) {
-        return database.supportsSequences() 
+        return database.supports(Sequence.class)
             // TODO: following are not implemented/tested currently
             && !(database instanceof AbstractDb2Database)
             && !(database instanceof FirebirdDatabase)

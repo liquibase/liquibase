@@ -7,6 +7,7 @@ import liquibase.util.StringUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,13 +25,13 @@ import java.util.regex.Pattern;
  * It is not up to this class to determine what should be storedCheckSum-ed, it simply hashes what is passed to it.
  */
 @NoArgsConstructor
+@Getter
 @Setter
 public final class CheckSum {
     /**
      * -- GETTER --
      *  Return the Checksum Algorithm version for this CheckSum
      */
-    @Getter
     private int version;
     private String storedCheckSum;
 
@@ -53,7 +54,7 @@ public final class CheckSum {
      * Parse the given storedCheckSum string value and return a new CheckSum object.
      */
     public static CheckSum parse(String checksumValue) {
-        if (StringUtil.isEmpty(checksumValue)) {
+        if (StringUtils.isEmpty(checksumValue)) {
             return null;
         }
         // The general layout of a checksum is:

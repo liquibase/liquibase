@@ -1,6 +1,7 @@
 package liquibase.integration.spring;
 
 import liquibase.*;
+import liquibase.analytics.configuration.AnalyticsArgs;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -10,10 +11,12 @@ import liquibase.database.core.DerbyDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.integration.IntegrationDetails;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 import liquibase.ui.UIServiceEnum;
 import liquibase.util.StringUtil;
 import lombok.Getter;
@@ -28,6 +31,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -110,6 +114,14 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     @Setter
     protected boolean clearCheckSums;
 
+    @Getter
+    @Setter
+    protected String licenseKey = null;
+
+    @Getter
+    @Setter
+    protected Boolean analyticsEnabled = null;
+
     @Setter
     protected boolean shouldRun = true;
 
@@ -124,6 +136,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     @Getter
     protected UIServiceEnum uiService = UIServiceEnum.LOGGER;
+
+    @Getter
+    @Setter
+    protected Customizer<Liquibase> customizer;
 
     public SpringLiquibase() {
         super();
@@ -192,6 +208,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     /**
      * @deprecated use {@link #getLabelFilter()}
      */
+    @Deprecated
     public String getLabels() {
         return getLabelFilter();
     }
@@ -199,6 +216,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     /**
      * @deprecated use {@link #setLabelFilter(String)}
      */
+    @Deprecated
     public void setLabels(String labels) {
         setLabelFilter(labels);
     }
@@ -238,8 +256,20 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         }
 
         try {
+            Map<String, Object> scopeVars = new HashMap<>();
+            scopeVars.put(Scope.Attr.ui.name(), this.uiService.getUiServiceClass().getDeclaredConstructor().newInstance());
+            scopeVars.put(Scope.Attr.integrationDetails.name(), new IntegrationDetails("spring"));
+            if (this.analyticsEnabled != null) {
+                scopeVars.put(AnalyticsArgs.ENABLED.getKey(), this.analyticsEnabled);
+            }
+            scopeVars.put(Scope.Attr.maxAnalyticsCacheSize.name(), 10);
 
-            Scope.child(Scope.Attr.ui.name(), this.uiService.getUiServiceClass().getDeclaredConstructor().newInstance(),
+            if (this.licenseKey != null) {
+                log.fine("Using PRO licenseKey.");
+                scopeVars.put("liquibase.licenseKey", licenseKey);
+            }
+
+            Scope.child(scopeVars,
                     () -> {
                         Liquibase liquibase = null;
                         try {
@@ -256,7 +286,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                         }
                     });
         } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
+            throw new LiquibaseException(e);
         }
     }
 
@@ -320,6 +350,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             ((DerbyDatabase) liquibase.getDatabase()).setShutdownEmbeddedDerby(false);
         }
 
+        if (customizer != null) {
+            customizer.customize(liquibase);
+        }
+
         return liquibase;
     }
 
@@ -342,17 +376,17 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         }
 
         Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(liquibaseConnection);
-        if (StringUtil.trimToNull(this.defaultSchema) != null) {
-            if (database.supportsSchemas()) {
+		if (StringUtil.trimToNull(this.defaultSchema) != null) {
+            if (database.supports(Schema.class)) {
                 database.setDefaultSchemaName(this.defaultSchema);
-            } else if (database.supportsCatalogs()) {
+            } else if (database.supports(Catalog.class)) {
                 database.setDefaultCatalogName(this.defaultSchema);
             }
         }
         if (StringUtil.trimToNull(this.liquibaseSchema) != null) {
-            if (database.supportsSchemas()) {
+            if (database.supports(Schema.class)) {
                 database.setLiquibaseSchemaName(this.liquibaseSchema);
-            } else if (database.supportsCatalogs()) {
+            } else if (database.supports(Catalog.class)) {
                 database.setLiquibaseCatalogName(this.liquibaseSchema);
             }
         }
@@ -412,7 +446,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     @Override
     public String toString() {
-        return getClass().getName() + "(" + this.getResourceLoader().toString() + ")";
+        return getClass().getName() + "(" + this.getResourceLoader() + ")";
     }
 
 }

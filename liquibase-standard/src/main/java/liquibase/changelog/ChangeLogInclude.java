@@ -2,11 +2,15 @@ package liquibase.changelog;
 
 import liquibase.ContextExpression;
 import liquibase.serializer.AbstractLiquibaseSerializable;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+@Getter
+@Setter
 public class ChangeLogInclude extends AbstractLiquibaseSerializable implements ChangeLogChild {
     private String file;
     private Boolean relativeToChangelogFile;
@@ -28,35 +32,4 @@ public class ChangeLogInclude extends AbstractLiquibaseSerializable implements C
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
-    public String getFile() {
-        return file;
-    }
-
-    public void setFile(String file) {
-        this.file = file;
-    }
-
-    public Boolean getRelativeToChangelogFile() {
-        return relativeToChangelogFile;
-    }
-
-    public void setRelativeToChangelogFile(Boolean relativeToChangelogFile) {
-        this.relativeToChangelogFile = relativeToChangelogFile;
-    }
-
-    public Boolean getErrorIfMissing() {
-        return errorIfMissing;
-    }
-
-    public void setErrorIfMissing(Boolean errorIfMissing) {
-        this.errorIfMissing = errorIfMissing;
-    }
-
-    public ContextExpression getContext() {
-        return context;
-    }
-
-    public void setContext(ContextExpression context) {
-        this.context = context;
-    }
 }

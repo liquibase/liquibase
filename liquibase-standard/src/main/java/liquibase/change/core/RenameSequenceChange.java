@@ -4,6 +4,7 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RenameSequenceStatement;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
  */
 @DatabaseChange(name = "renameSequence", description = "Renames an existing sequence", priority = ChangeMetaData.PRIORITY_DEFAULT,
     appliesTo = "sequence")
+@Setter
 public class RenameSequenceChange extends AbstractChange {
 
     private String catalogName;
@@ -29,17 +31,9 @@ public class RenameSequenceChange extends AbstractChange {
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "sequence.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @DatabaseChangeProperty(mustEqualExisting = "sequence", description = "Name of the existing sequence to rename")
@@ -47,19 +41,11 @@ public class RenameSequenceChange extends AbstractChange {
         return oldSequenceName;
     }
 
-    public void setOldSequenceName(String oldSequenceName) {
-        this.oldSequenceName = oldSequenceName;
-    }
-    
     @DatabaseChangeProperty(description = "New name for the sequence")
     public String getNewSequenceName() {
         return newSequenceName;
     }
 
-    public void setNewSequenceName(String newSequenceName) {
-        this.newSequenceName = newSequenceName;
-    }
-    
     @Override
     public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> statements = new ArrayList<>();

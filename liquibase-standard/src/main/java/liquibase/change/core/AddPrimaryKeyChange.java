@@ -15,6 +15,7 @@ import liquibase.statement.core.AddPrimaryKeyStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
+import lombok.Setter;
 
 /**
  * Creates a primary key out of an existing column or set of columns.
@@ -25,15 +26,25 @@ import liquibase.structure.core.PrimaryKey;
     appliesTo = "column")
 public class AddPrimaryKeyChange extends AbstractChange {
 
+    @Setter
     private String catalogName;
+    @Setter
     private String schemaName;
+    @Setter
     private String tableName;
+    @Setter
     private String tablespace;
+    @Setter
     private String columnNames;
+    @Setter
     private String constraintName;
+    @Setter
     private Boolean clustered;
+    @Setter
     private String forIndexName;
+    @Setter
     private String forIndexSchemaName;
+    @Setter
     private String forIndexCatalogName;
     private Boolean shouldValidate;
 
@@ -42,26 +53,14 @@ public class AddPrimaryKeyChange extends AbstractChange {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0", description = "Name of the database catalog")
     public String getCatalogName() {
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @DatabaseChangeProperty(mustEqualExisting = "column",
@@ -70,17 +69,9 @@ public class AddPrimaryKeyChange extends AbstractChange {
         return columnNames;
     }
 
-    public void setColumnNames(String columnNames) {
-        this.columnNames = columnNames;
-    }
-
     @DatabaseChangeProperty(description = "Name of primary key constraint", exampleValue = "pk_person")
     public String getConstraintName() {
         return constraintName;
-    }
-
-    public void setConstraintName(String constraintName) {
-        this.constraintName = constraintName;
     }
 
     @DatabaseChangeProperty(description = "Name of the index to associate with the primary key")
@@ -88,17 +79,9 @@ public class AddPrimaryKeyChange extends AbstractChange {
         return forIndexName;
     }
 
-    public void setForIndexName(String forIndexName) {
-        this.forIndexName = forIndexName;
-    }
-
     @DatabaseChangeProperty(description = "Name of the database schema of the index to associate with the primary key")
     public String getForIndexSchemaName() {
         return forIndexSchemaName;
-    }
-
-    public void setForIndexSchemaName(String forIndexSchemaName) {
-        this.forIndexSchemaName = forIndexSchemaName;
     }
 
     @DatabaseChangeProperty(description = "Name of the database catalog of the index to associate with the primary key")
@@ -106,26 +89,14 @@ public class AddPrimaryKeyChange extends AbstractChange {
         return forIndexCatalogName;
     }
 
-    public void setForIndexCatalogName(String forIndexCatalogName) {
-        this.forIndexCatalogName = forIndexCatalogName;
-    }
-
     @DatabaseChangeProperty(description = "Tablespace to create the primary key in. Corresponds to file group in mssql")
     public String getTablespace() {
         return tablespace;
     }
 
-    public void setTablespace(String tablespace) {
-        this.tablespace = tablespace;
-    }
-
     @DatabaseChangeProperty(description = "Whether to create a clustered index")
     public Boolean getClustered() {
         return clustered;
-    }
-
-    public void setClustered(Boolean clustered) {
-        this.clustered = clustered;
     }
 
     /**

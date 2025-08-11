@@ -6,9 +6,10 @@ import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +21,7 @@ import java.util.List;
 @DatabaseChange(name = "mergeColumns",
     description = "Concatenates the values in two columns, joins them with a string, and stores the resulting value in a new column.",
     priority = ChangeMetaData.PRIORITY_DEFAULT)
+@Setter
 public class MergeColumnChange extends AbstractChange {
 
     private String catalogName;
@@ -41,17 +43,9 @@ public class MergeColumnChange extends AbstractChange {
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @DatabaseChangeProperty(description = "Name of the table containing the columns to join")
@@ -59,26 +53,14 @@ public class MergeColumnChange extends AbstractChange {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
     @DatabaseChangeProperty(description = "Name of the column containing the first half of the data", exampleValue = "first_name")
     public String getColumn1Name() {
         return column1Name;
     }
 
-    public void setColumn1Name(String column1Name) {
-        this.column1Name = column1Name;
-    }
-
     @DatabaseChangeProperty(description = "Name of the column containing the second half of the data", exampleValue = "last_name")
     public String getColumn2Name() {
         return column2Name;
-    }
-
-    public void setColumn2Name(String column2Name) {
-        this.column2Name = column2Name;
     }
 
     @DatabaseChangeProperty(description = "String to place between the values from column1 and column2 (may be empty)",
@@ -87,26 +69,14 @@ public class MergeColumnChange extends AbstractChange {
         return joinString;
     }
 
-    public void setJoinString(String joinString) {
-        this.joinString = joinString;
-    }
-
     @DatabaseChangeProperty(description = "Name of the column to create", exampleValue = "full_name")
     public String getFinalColumnName() {
         return finalColumnName;
     }
 
-    public void setFinalColumnName(String finalColumnName) {
-        this.finalColumnName = finalColumnName;
-    }
-
     @DatabaseChangeProperty(description = "Data type of the column to create", exampleValue = "varchar(255)")
     public String getFinalColumnType() {
         return finalColumnType;
-    }
-
-    public void setFinalColumnType(String finalColumnType) {
-        this.finalColumnType = finalColumnType;
     }
 
     @Override
@@ -126,19 +96,19 @@ public class MergeColumnChange extends AbstractChange {
         addNewColumnChange.addColumn(columnConfig);
         List<SqlStatement> statements = new ArrayList<>(Arrays.asList(addNewColumnChange.generateStatements(database)));
 
-        String updateStatement = "";
+        StringBuilder updateStatement;
         if (database instanceof MySQLDatabase || database instanceof MariaDBDatabase) {
-            updateStatement = "UPDATE " + database.escapeTableName(getCatalogName(), getSchemaName(), getTableName()) +
-                    " SET " + database.escapeObjectName(getFinalColumnName(), Column.class)
-                    + " = " + database.getConcatSql("'" + getJoinString() + "'"
-                    , database.escapeObjectName(getColumn1Name(), Column.class), database.escapeObjectName(getColumn2Name(), Column.class));
+            updateStatement = new StringBuilder(String.format("UPDATE %s", database.escapeTableName(getCatalogName(), getSchemaName(), getTableName())))
+                    .append(String.format(" SET %s", database.escapeObjectName(getFinalColumnName(), Column.class)))
+                    .append(String.format(" = %s", database.getConcatSql("'" + getJoinString() + "'"
+                            , database.escapeObjectName(getColumn1Name(), Column.class), database.escapeObjectName(getColumn2Name(), Column.class))));
         } else {
-            updateStatement = "UPDATE " + database.escapeTableName(getCatalogName(), getSchemaName(), getTableName()) +
-                    " SET " + database.escapeObjectName(getFinalColumnName(), Column.class)
-                    + " = " + database.getConcatSql(database.escapeObjectName(getColumn1Name(), Column.class)
-                    , "'" + getJoinString() + "'", database.escapeObjectName(getColumn2Name(), Column.class));
+            updateStatement = new StringBuilder(String.format("UPDATE %s", database.escapeTableName(getCatalogName(), getSchemaName(), getTableName())))
+                    .append(String.format(" SET %s", database.escapeObjectName(getFinalColumnName(), Column.class)))
+                    .append(String.format(" = %s", database.getConcatSql(database.escapeObjectName(getColumn1Name(), Column.class)
+                            , "'" + getJoinString() + "'", database.escapeObjectName(getColumn2Name(), Column.class))));
         }
-        statements.add(new RawSqlStatement(updateStatement));
+        statements.add(new RawParameterizedSqlStatement(updateStatement.toString()));
         
         if (database instanceof SQLiteDatabase) {
            /* nolgpl: implement */

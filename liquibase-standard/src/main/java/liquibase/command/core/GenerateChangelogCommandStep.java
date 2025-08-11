@@ -1,9 +1,15 @@
 package liquibase.command.core;
 
 import liquibase.Scope;
-import liquibase.command.*;
+import liquibase.command.CommandArgumentDefinition;
+import liquibase.command.CommandBuilder;
+import liquibase.command.CommandDefinition;
+import liquibase.command.CommandResultsBuilder;
+import liquibase.command.CommandScope;
+import liquibase.command.CommonArgumentNames;
 import liquibase.command.core.helpers.AbstractChangelogCommandStep;
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
+import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
 import liquibase.command.core.helpers.DiffOutputControlCommandStep;
 import liquibase.command.core.helpers.ReferenceDbUrlConnectionCommandStep;
 import liquibase.command.providers.ReferenceDatabase;
@@ -16,8 +22,11 @@ import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.CommandValidationException;
 import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
-import liquibase.util.StringUtil;
-import liquibase.util.ValueHandlerUtil;
+
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -36,7 +45,6 @@ public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
     public static final CommandArgumentDefinition<String> CONTEXT_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
     public static final CommandArgumentDefinition<String> LABEL_FILTER_ARG;
-    public static final CommandArgumentDefinition<String> DATA_OUTPUT_DIR_ARG;
     public static final CommandArgumentDefinition<Boolean> OVERWRITE_OUTPUT_FILE_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_URL_ARG;
@@ -69,8 +77,6 @@ public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
                 .addAlias("contexts")
                 .description("Changeset contexts to generate")
                 .build();
-        DATA_OUTPUT_DIR_ARG = builder.argument("dataOutputDirectory", String.class)
-                .description("Directory to write table data to").build();
         OVERWRITE_OUTPUT_FILE_ARG = builder.argument("overwriteOutputFile", Boolean.class)
                 .defaultValue(false).description("Flag to allow overwriting of output changelog file. Default: false").build();
 
@@ -94,7 +100,6 @@ public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
         USE_OR_REPLACE_OPTION = builder.argument("useOrReplaceOption", Boolean.class)
                 .description("If true, will add 'OR REPLACE' option to the create view change object")
                 .defaultValue(false)
-                .setValueHandler(ValueHandlerUtil::booleanValueHandler)
                 .build();
         builder.addArgument(AbstractChangelogCommandStep.RUN_ON_CHANGE_TYPES_ARG).build();
         builder.addArgument(AbstractChangelogCommandStep.REPLACE_IF_EXISTS_TYPES_ARG).build();
@@ -114,19 +119,19 @@ public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         CommandScope commandScope = resultsBuilder.getCommandScope();
+        String changeLogFile = StringUtils.trimToNull(commandScope.getArgumentValue(CHANGELOG_FILE_ARG));
 
-        String changeLogFile = StringUtil.trimToNull(commandScope.getArgumentValue(CHANGELOG_FILE_ARG));
         if (changeLogFile != null && changeLogFile.toLowerCase().endsWith(".sql")) {
             Scope.getCurrentScope().getUI().sendMessage("\n" + INFO_MESSAGE + "\n");
             Scope.getCurrentScope().getLog(getClass()).info("\n" + INFO_MESSAGE + "\n");
         }
 
         final Database referenceDatabase = (Database) commandScope.getDependency(ReferenceDatabase.class);
+        DbUrlConnectionCommandStep.logMdc(referenceDatabase.getConnection().getURL(), referenceDatabase);
         DiffOutputControl diffOutputControl = (DiffOutputControl) resultsBuilder.getResult(DiffOutputControlCommandStep.DIFF_OUTPUT_CONTROL.getName());
-        diffOutputControl.setDataDir(commandScope.getArgumentValue(DATA_OUTPUT_DIR_ARG));
         referenceDatabase.setOutputDefaultSchema(diffOutputControl.getIncludeSchema());
 
-        if(commandScope.getArgumentValue(GenerateChangelogCommandStep.USE_OR_REPLACE_OPTION).booleanValue()) {
+        if (commandScope.getArgumentValue(GenerateChangelogCommandStep.USE_OR_REPLACE_OPTION)) {
             diffOutputControl.setReplaceIfExistsSet(true);
         }
 
@@ -152,7 +157,7 @@ public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
         ObjectQuotingStrategy originalStrategy = referenceDatabase.getObjectQuotingStrategy();
         try {
             referenceDatabase.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
-            if (StringUtil.trimToNull(changeLogFile) != null) {
+            if (StringUtils.trimToNull(changeLogFile) != null) {
                 Boolean overwriteOutputFile = commandScope.getArgumentValue(OVERWRITE_OUTPUT_FILE_ARG);
                 changeLogWriter.print(changeLogFile, overwriteOutputFile);
             } else {
@@ -160,12 +165,39 @@ public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
                     changeLogWriter.print(outputStream);
                 }
             }
-            if (StringUtil.trimToNull(changeLogFile) != null) {
+            if (!areThereChangeObjectsToWrite(diffResult)) {
+                Scope.getCurrentScope().getUI().sendMessage(String.format("Changelog not generated. There are no changesets to write to %s changelog", changeLogFile));
+            }
+            else {
                 Scope.getCurrentScope().getUI().sendMessage("Generated changelog written to " + changeLogFile);
             }
         } finally {
             referenceDatabase.setObjectQuotingStrategy(originalStrategy);
         }
+    }
+
+    private boolean areThereChangeObjectsToWrite(DiffResult diffResult) {
+        // diffResult always includes catalog and schema as missing objects
+        // in this context, they are not counted as effective changes
+        return hasMissingObjects(diffResult) ||
+               !diffResult.getUnexpectedObjects().isEmpty() ||
+               !diffResult.getChangedObjects().isEmpty();
+    }
+
+    /**
+     *
+     * Check for conditions that indicate that there are missing objects
+     *
+     * @param   diffResult       The DiffResult object
+     * @return  boolean          True if there are missing objects to write out False if not
+     *
+     */
+    private static boolean hasMissingObjects(DiffResult diffResult) {
+        if (diffResult.getMissingObjects().size() > 2) {
+            return true;
+        }
+        DatabaseObject next = diffResult.getMissingObjects().iterator().next();
+        return diffResult.getMissingObjects().size() == 1 && !(next instanceof Schema || next instanceof Catalog);
     }
 
     @Override
@@ -190,7 +222,7 @@ public class GenerateChangelogCommandStep extends AbstractChangelogCommandStep {
      * If the changelog file already exists, validate if overwriteOutputFile is true. Otherwise, throws an exception
      */
     private static void validateConditionsToOverwriteChangelogFile(CommandScope commandScope) throws CommandValidationException {
-        String changeLogFile = StringUtil.trimToNull(commandScope.getArgumentValue(CHANGELOG_FILE_ARG));
+        String changeLogFile = StringUtils.trimToNull(commandScope.getArgumentValue(CHANGELOG_FILE_ARG));
         if (changeLogFile != null) {
             final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
             Resource file;

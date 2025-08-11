@@ -6,6 +6,8 @@ import liquibase.change.core.LoadDataChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
+import liquibase.database.core.MariaDBDatabase;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.datatype.DataTypeFactory;
@@ -16,6 +18,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.listener.SqlListener;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
+import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.SqlConfiguration;
 import liquibase.sql.visitor.SqlVisitor;
@@ -24,12 +27,14 @@ import liquibase.structure.core.Table;
 import liquibase.util.FilenameUtil;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StreamUtil;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.sql.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -56,11 +61,11 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     //Ideally the creation of the prepared statements would happen at the spot where we know we should be re-using it and that code can close it.
     // But that will have to wait for a refactoring of this code.
     // So for now we're trading leaving at most one prepared statement unclosed at the end of the liquibase run for better re-using statements to avoid overhead
-    private static PreparedStatement lastPreparedStatement;
-    private static String lastPreparedStatementSql;
+    private static final ThreadLocal<PreparedStatement> LAST_PREPARED_STATEMENT = new ThreadLocal<>();
+    private static final ThreadLocal<String> LAST_PREPARED_STATEMENT_SQL = new ThreadLocal<>();
 
     //Cache the executeWithFlags method to avoid reflection overhead
-    private static Method executeWithFlagsMethod;
+    private static final ThreadLocal<Method> EXECUTE_WITH_FLAGS_METHOD = new ThreadLocal<>();
 
     private final Map<String, Object> snapshotScratchPad = new HashMap<>();
 
@@ -103,8 +108,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             // create prepared statement
             stmt = factory.create(sql);
 
-            lastPreparedStatement = stmt;
-            lastPreparedStatementSql = sql;
+            LAST_PREPARED_STATEMENT.set(stmt);
+            LAST_PREPARED_STATEMENT_SQL.set(sql);
         } else {
             try {
                 stmt.clearParameters();
@@ -142,18 +147,18 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     }
 
     protected PreparedStatement getCachedStatement(String sql) {
-        if (lastPreparedStatement == null || lastPreparedStatementSql == null) {
+        if (LAST_PREPARED_STATEMENT.get() == null || LAST_PREPARED_STATEMENT_SQL.get() == null) {
             return null;
         }
 
         boolean statementIsValid = true;
-        if (lastPreparedStatementSql.equals(sql)) {
+        if (LAST_PREPARED_STATEMENT_SQL.get().equals(sql)) {
             try {
-                if (lastPreparedStatement.isClosed()) {
+                if (LAST_PREPARED_STATEMENT.get().isClosed()) {
                     statementIsValid = false;
                 }
                 if (statementIsValid) {
-                    final Connection connection = lastPreparedStatement.getConnection();
+                    final Connection connection = LAST_PREPARED_STATEMENT.get().getConnection();
                     if (connection == null || connection.isClosed()) {
                         statementIsValid = false;
                     }
@@ -167,24 +172,26 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
 
         if (!statementIsValid) {
-            JdbcUtil.closeStatement(lastPreparedStatement);
-            lastPreparedStatement = null;
-            lastPreparedStatementSql = null;
+            JdbcUtil.closeStatement(LAST_PREPARED_STATEMENT.get());
+            LAST_PREPARED_STATEMENT.remove();
+            LAST_PREPARED_STATEMENT_SQL.remove();
+            EXECUTE_WITH_FLAGS_METHOD.remove();
         }
 
-        return lastPreparedStatement;
+        return LAST_PREPARED_STATEMENT.get();
     }
 
     protected void executePreparedStatement(PreparedStatement stmt) throws SQLException {
         if (database instanceof PostgresDatabase) {
             //postgresql's default prepared statement setup is slow for normal liquibase usage. Calling with QUERY_ONESHOT seems faster, even when we keep re-calling the same prepared statement for many rows in loadData
             try {
-                if (executeWithFlagsMethod == null) {
-                    executeWithFlagsMethod = stmt.getClass().getMethod("executeWithFlags", int.class);
-                    executeWithFlagsMethod.setAccessible(true);
+                if (EXECUTE_WITH_FLAGS_METHOD.get() == null) {
+                    Method executeWithFlags = stmt.getClass().getMethod("executeWithFlags", int.class);
+                    executeWithFlags.setAccessible(true);
+                    EXECUTE_WITH_FLAGS_METHOD.set(executeWithFlags);
                 }
 
-                executeWithFlagsMethod.invoke(stmt, 1); //QueryExecutor.QUERY_ONESHOT
+                EXECUTE_WITH_FLAGS_METHOD.get().invoke(stmt, 1); //QueryExecutor.QUERY_ONESHOT
             } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 stmt.execute();
             }
@@ -237,7 +244,11 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         if (col.getValue() != null) {
             LOG.fine("value is string/UUID/blob = " + col.getValue());
             if (col.getType() != null && col.getType().equalsIgnoreCase(LoadDataChange.LOAD_DATA_TYPE.UUID.name())) {
-                stmt.setObject(i, UUID.fromString(col.getValue()));
+                if (database instanceof MySQLDatabase && !(database instanceof MariaDBDatabase))  {
+                    stmt.setString(i, col.getValue());
+                } else {
+                    stmt.setObject(i, UUID.fromString(col.getValue()));
+                }
             } else if (col.getType() != null && col.getType().equalsIgnoreCase(LoadDataChange.LOAD_DATA_TYPE.OTHER.name())) {
                 stmt.setObject(i, col.getValue(), Types.OTHER);
             } else if (LoadDataChange.LOAD_DATA_TYPE.BLOB.name().equalsIgnoreCase(col.getType())) {
@@ -309,7 +320,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                     Column snapshot = (Column) this.getScratchData(snapshotKeyName);
                     if (snapshot == null) {
                         snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(
-                                new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), col.getName()), database);
+                                new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), col.getName()),
+                                database, new SnapshotControl(database, false, Column.class));
                         this.setScratchData(snapshotKeyName, snapshot);
                     }
 
@@ -328,11 +340,12 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                     stmt.setBlob(i, lob.content, lob.length);
                 }
             } catch (IOException | LiquibaseException e) {
-                throw new DatabaseException(e.getMessage(), e); // wrap
+                String message = handleLOBExceptionMessage("blob", e, col.getValueBlobFile());
+                throw new DatabaseException(message, e); // wrap the exception
             }
         } else if (col.getValueClobFile() != null) {
             try {
-                LOG.fine("value is clob = " + col.getValueClobFile());
+                LOG.fine(String.format("Loading clob file: %s", col.getValueClobFile()));
                 LOBContent<Reader> lob = toCharacterStream(col.getValueClobFile(), col.getEncoding());
                 if (lob.length <= Integer.MAX_VALUE) {
                     stmt.setCharacterStream(i, lob.content, (int) lob.length);
@@ -340,7 +353,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                     stmt.setCharacterStream(i, lob.content, lob.length);
                 }
             } catch (IOException | LiquibaseException e) {
-                throw new DatabaseException(e.getMessage(), e); // wrap
+                String message = handleLOBExceptionMessage("clob", e, col.getValueClobFile());
+                throw new DatabaseException(message, e); // wrap the exception
             }
         } else {
             // NULL values might intentionally be set into a change, we must also add them to the prepared statement
@@ -560,4 +574,13 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
     }
 
+    private String handleLOBExceptionMessage(String type, Exception exception, String missingFile) throws DatabaseException {
+        String message = exception.getMessage();
+        if (ExceptionUtils.hasCause(exception, FileNotFoundException.class)) {
+            message = String.format("Could not find %s file: %s! Make sure the value of the %s " +
+                    "is a valid path to a file containing the %s's actual value to be loaded.", type, missingFile, type, type);
+            Scope.getCurrentScope().getLog(getClass()).severe(message);
+        }
+        return message;
+    }
 }

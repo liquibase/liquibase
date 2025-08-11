@@ -2,11 +2,13 @@ package liquibase.integration.commandline
 
 import liquibase.Scope
 import liquibase.command.CommandBuilder
+import liquibase.command.CommandFactory
 import liquibase.configuration.ConfigurationDefinition
 import liquibase.exception.LiquibaseException
 import liquibase.logging.core.BufferedLogService
 import liquibase.ui.ConsoleUIService
 import liquibase.util.StringUtil
+import org.junit.jupiter.api.Assumptions
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -47,6 +49,14 @@ Global Options
                                alwaysOverrideStoredLogicSchema', environment
                                variable:
                                'LIQUIBASE_ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA')
+
+      --analytics-enabled=PARAM
+                             Enable or disable sending product usage data and
+                               analytics to Liquibase. Learn more at https:
+                               //docs.liquibase.com/analytics.
+                             (defaults file: 'liquibase.analytics.enabled',
+                               environment variable:
+                               'LIQUIBASE_ANALYTICS_ENABLED')
 
       --auto-reorg=PARAM     Should Liquibase automatically include REORG TABLE
                                commands when needed?
@@ -151,8 +161,10 @@ Global Options
       --duplicate-file-mode=PARAM
                              How to handle multiple files being found in the
                                search path that have duplicate paths. Options
-                               are WARN (log warning and choose one at random)
-                               or ERROR (fail current operation)
+                               are SILENT (do not log and choose one at
+                               random), DEBUG, INFO, WARN (log at the given
+                               level and choose one at random), or ERROR (fail
+                               current operation).
                              DEFAULT: ERROR
                              (defaults file: 'liquibase.duplicateFileMode',
                                environment variable:
@@ -204,7 +216,7 @@ Global Options
 
   -h, --help                 Show this help message and exit
 
-      --headless=PARAM       Force liquibase to think it has no access to a
+      --headless=PARAM       Force Liquibase to think it has no access to a
                                keyboard
                              DEFAULT: false
                              (defaults file: 'liquibase.headless', environment
@@ -229,6 +241,15 @@ Global Options
                                variable:
                                'LIQUIBASE_INCLUDE_RELATIONS_FOR_COMPUTED_COLUMNS
                                ')
+
+      --include-schema-name-for-default=PARAM
+                             If true, the schema name is included for the
+                               default schema when loading a snapshot
+                             DEFAULT: false
+                             (defaults file: 'liquibase.
+                               includeSchemaNameForDefault', environment
+                               variable:
+                               'LIQUIBASE_INCLUDE_SCHEMA_NAME_FOR_DEFAULT')
 
       --include-system-classpath=PARAM
                              Include the system classpath when resolving
@@ -264,7 +285,9 @@ Global Options
                              (defaults file: 'liquibase.logChannels',
                                environment variable: 'LIQUIBASE_LOG_CHANNELS')
 
-      --log-file=PARAM       (defaults file: 'liquibase.logFile', environment
+      --log-file=PARAM       Users can use .gz file extension to enable log
+                               files compression.
+                             (defaults file: 'liquibase.logFile', environment
                                variable: 'LIQUIBASE_LOG_FILE')
 
       --log-format=PARAM     Sets the format of log output to console or log
@@ -350,9 +373,21 @@ Global Options
                                environment variable:
                                'LIQUIBASE_OUTPUT_LINE_SEPARATOR')
 
+      --preserve-classpath-prefix-in-normalized-paths=PARAM
+                             If true 'classpath:' prefix will be preserved in
+                               normalized paths, allowing to resolve
+                               hierarchical resources under a classpath-based
+                               root.
+                             DEFAULT: false
+                             (defaults file: 'liquibase.
+                               preserveClasspathPrefixInNormalizedPaths',
+                               environment variable:
+                               'LIQUIBASE_PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZE
+                               D_PATHS')
+
       --preserve-schema-case=PARAM
-                             Should liquibase treat schema and catalog names as
-                               case sensitive?
+                             If true, Liquibase treats schema and catalog names
+                               as case sensitive
                              DEFAULT: false
                              (defaults file: 'liquibase.preserveSchemaCase',
                                environment variable:
@@ -416,8 +451,8 @@ Global Options
                                environment variable:
                                'LIQUIBASE_SQL_SHOW_SQL_WARNINGS')
 
-      --strict=PARAM         Be stricter on allowed Liquibase configuration and
-                               setup?
+      --strict=PARAM         If true, Liquibase enforces certain best practices
+                               and proactively looks for common errors
                              DEFAULT: false
                              (defaults file: 'liquibase.strict', environment
                                variable: 'LIQUIBASE_STRICT')
@@ -429,6 +464,34 @@ Global Options
                              (defaults file: 'liquibase.
                                supportPropertyEscaping', environment variable:
                                'LIQUIBASE_SUPPORT_PROPERTY_ESCAPING')
+
+      --supports-method-validation-level=PARAM
+                             Controls the level of validation performed on the
+                               supports method of Change classes. Options are
+                               OFF, WARN, FAIL.
+                             DEFAULT: WARN
+                             (defaults file: 'liquibase.
+                               supportsMethodValidationLevel', environment
+                               variable:
+                               'LIQUIBASE_SUPPORTS_METHOD_VALIDATION_LEVEL')
+
+      --suppress-liquibase-sql=PARAM
+                             When set to true, this global property prevents
+                               DBCL and DBCLH sql from being present in console
+                               and logs during *-sql commands, such as
+                               update-sql, rollback-sql, etc.
+                             DEFAULT: false
+                             (defaults file: 'liquibase.suppressLiquibaseSql',
+                               environment variable:
+                               'LIQUIBASE_SUPPRESS_LIQUIBASE_SQL')
+
+      --trim-load-data-file-header=PARAM
+                             If true column headers will be trimmed in case
+                               they were specified with spaces in the file.
+                             DEFAULT: false
+                             (defaults file: 'liquibase.
+                               trimLoadDataFileHeader', environment variable:
+                               'LIQUIBASE_TRIM_LOAD_DATA_FILE_HEADER')
 
       --ui-service=PARAM     Changes the default UI Service Logger used by
                                Liquibase. Options are CONSOLE or LOGGER.
@@ -448,9 +511,9 @@ Global Options
   -v, --version              Print version information and exit
 
       --validate-xml-changelog-files=PARAM
-                             Will perform xsd validation of XML changelog
+                             Will perform XSD validation of XML changelog
                                files. When many XML changelog files are
-                               included this validation may impact Liquibase
+                               included, this validation may impact Liquibase
                                performance. Defaults to true.
                              DEFAULT: true
                              (defaults file: 'liquibase.
@@ -593,7 +656,11 @@ https://docs.liquibase.com
     @Unroll
     def "toArgNames for command arguments"() {
         expect:
-        LiquibaseCommandLine.toArgNames(new CommandBuilder(["argTest"] as String[][]).argument(argName, String).build()).join(", ") == expected
+        LiquibaseCommandLine.toArgNames(new CommandBuilder([["argTest"]] as String[][]).argument(argName, String).build()).join(", ") == expected
+
+        cleanup:
+        final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
+        commandFactory.unregister(["argTest"] as String[])
 
         where:
         argName          | expected
@@ -630,6 +697,10 @@ https://docs.liquibase.com
     def "toArgNames for command arguments and aliases"() {
         expect:
         LiquibaseCommandLine.toArgNames(new CommandBuilder([["argCommand"]] as String[][]).argument(argName, String).addAlias(alias).build()).join(", ") == expected
+
+        cleanup:
+        final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
+        commandFactory.unregister(["argCommand"] as String[])
 
         where:
         prefix          | argName          | alias                 | expected
@@ -715,6 +786,7 @@ https://docs.liquibase.com
 
     def "help output" () {
         when:
+        Assumptions.assumeTrue(System.getProperty("skipHelpTests") == null, "Skipping help test")
         def oldOut = System.out
         def bytes = new ByteArrayOutputStream()
         def newOut = new PrintStream(bytes)

@@ -10,9 +10,11 @@ import liquibase.database.core.Db2zDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.ModifyDataTypeStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
+import lombok.Setter;
 
 @DatabaseChange(name = "modifyDataType", description = "Modify the data type of a column", priority = ChangeMetaData.PRIORITY_DEFAULT,
     appliesTo = "column")
+@Setter
 public class ModifyDataTypeChange extends AbstractChange {
 
     private String catalogName;
@@ -51,17 +53,9 @@ public class ModifyDataTypeChange extends AbstractChange {
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema", description = "Name of the database schema")
     public String getSchemaName() {
         return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @DatabaseChangeProperty(mustEqualExisting = "column.relation",
@@ -70,27 +64,15 @@ public class ModifyDataTypeChange extends AbstractChange {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "column")
     public String getColumnName() {
         return columnName;
-    }
-
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
     }
 
     @DatabaseChangeProperty(
         description = "Data type to convert the column to. Only modifies the data type itself and cannot define constraints")
     public String getNewDataType() {
         return newDataType;
-    }
-
-    public void setNewDataType(String newDataType) {
-        this.newDataType = newDataType;
     }
 
     @Override

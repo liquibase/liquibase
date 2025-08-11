@@ -5,6 +5,7 @@ import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.changelog.visitor.SkippedChangeSetVisitor;
+import liquibase.changelog.visitor.UpdateVisitor;
 import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -14,6 +15,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.util.BooleanUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.*;
 
@@ -86,65 +88,67 @@ public class ChangeLogIterator {
     public void run(ChangeSetVisitor visitor, RuntimeEnvironment env) throws LiquibaseException {
         databaseChangeLog.setRuntimeEnvironment(env);
         try {
-            Scope.child(Scope.Attr.databaseChangeLog, databaseChangeLog, new Scope.ScopedRunner() {
-                @Override
-                public void run() throws Exception {
+            Scope.child(Scope.Attr.databaseChangeLog, databaseChangeLog, () -> {
 
-                    List<ChangeSet> changeSetList = new ArrayList<>(databaseChangeLog.getChangeSets());
-                    if (visitor.getDirection().equals(ChangeSetVisitor.Direction.REVERSE)) {
-                        Collections.reverse(changeSetList);
-                    }
-                    for (int i = 0; i < changeSetList.size(); i++) {
-                        ChangeSet changeSet = changeSetList.get(i);
-                        boolean shouldVisit = true;
-                        Set<ChangeSetFilterResult> reasonsAccepted = new HashSet<>();
-                        Set<ChangeSetFilterResult> reasonsDenied = new HashSet<>();
-                        if (changeSetFilters != null) {
-                            for (ChangeSetFilter filter : changeSetFilters) {
-                                ChangeSetFilterResult acceptsResult = filter.accepts(changeSet);
-                                if (acceptsResult.isAccepted()) {
-                                    reasonsAccepted.add(acceptsResult);
-                                } else {
-                                    shouldVisit = false;
-                                    reasonsDenied.add(acceptsResult);
-                                    break;
-                                }
+                List<ChangeSet> changeSetList = new ArrayList<>(databaseChangeLog.getChangeSets());
+                if (visitor.getDirection().equals(ChangeSetVisitor.Direction.REVERSE)) {
+                    Collections.reverse(changeSetList);
+                }
+                for (int i = 0; i < changeSetList.size(); i++) {
+                    ChangeSet changeSet = changeSetList.get(i);
+                    boolean shouldVisit = true;
+                    Set<ChangeSetFilterResult> reasonsAccepted = new HashSet<>();
+                    Set<ChangeSetFilterResult> reasonsDenied = new HashSet<>();
+                    if (changeSetFilters != null) {
+                        for (ChangeSetFilter filter : changeSetFilters) {
+                            ChangeSetFilterResult acceptsResult = filter.accepts(changeSet);
+                            if (acceptsResult.isAccepted()) {
+                                reasonsAccepted.add(acceptsResult);
+                            } else {
+                                shouldVisit = false;
+                                reasonsDenied.add(acceptsResult);
+                                break;
                             }
                         }
-
-                        boolean finalShouldVisit = shouldVisit;
-
-                        Map<String, Object> scopeValues = new HashMap<>();
-                        scopeValues.put(Scope.Attr.changeSet.name(), changeSet);
-                        scopeValues.put(Scope.Attr.database.name(), env.getTargetDatabase());
-
-                        int finalI = i;
-                        Scope.child(scopeValues, () -> {
-                            if (finalShouldVisit && !alreadySaw(changeSet)) {
-                                //
-                                // Go validate any changesets with an Executor if
-                                // we are using a ValidatingVisitor
-                                //
-                                if (visitor instanceof ValidatingVisitor) {
-                                    validateChangeSetExecutor(changeSet, env);
-                                }
-
-                                try {
-                                    visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
-                                } catch (Exception e) {
-                                    exceptionChangeSets.add(changeSet);
-                                    skippedDueToExceptionChangeSets.addAll(changeSetList.subList(finalI + 1, changeSetList.size()));
-
-                                    throw e;
-                                }
-                                markSeen(changeSet);
-                            } else {
-                                if (visitor instanceof SkippedChangeSetVisitor) {
-                                    ((SkippedChangeSetVisitor) visitor).skipped(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsDenied);
-                                }
-                            }
-                        });
                     }
+
+                    boolean finalShouldVisit = shouldVisit;
+
+                    Map<String, Object> scopeValues = new HashMap<>();
+                    scopeValues.put(Scope.Attr.changeSet.name(), changeSet);
+                    scopeValues.put(Scope.Attr.database.name(), env.getTargetDatabase());
+
+                    int finalI = i;
+                    Scope.child(scopeValues, () -> {
+                        if (finalShouldVisit && !alreadySaw(changeSet)) {
+                            //
+                            // Go validate any changesets with an Executor if
+                            // we are using a ValidatingVisitor
+                            //
+                            if (visitor instanceof ValidatingVisitor) {
+                                validateChangeSetExecutor(changeSet, env);
+                            }
+
+                            try {
+                                visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
+                                if (visitor instanceof UpdateVisitor &&
+                                    ChangeSet.ExecType.FAILED.equals(changeSet.getExecType()) &&
+                                    BooleanUtils.isFalse(changeSet.getFailOnError())) {
+                                    exceptionChangeSets.add(changeSet);
+                                }
+                            } catch (Exception e) {
+                                exceptionChangeSets.add(changeSet);
+                                skippedDueToExceptionChangeSets.addAll(changeSetList.subList(finalI + 1, changeSetList.size()));
+
+                                throw e;
+                            }
+                            markSeen(changeSet);
+                        } else {
+                            if (visitor instanceof SkippedChangeSetVisitor) {
+                                ((SkippedChangeSetVisitor) visitor).skipped(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsDenied);
+                            }
+                        }
+                    });
                 }
             });
         } catch (Exception e) {
@@ -177,7 +181,7 @@ public class ChangeLogIterator {
         catch (UnexpectedLiquibaseException ule) {
             String message = String.format(MSG_COULD_NOT_FIND_EXECUTOR, executorName, changeSet);
             Scope.getCurrentScope().getLog(getClass()).severe(message);
-            throw new LiquibaseException(message);
+            throw new LiquibaseException(message, ule);
         }
         //
         // ASSERT: the Executor is valid

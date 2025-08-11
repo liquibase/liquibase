@@ -12,12 +12,13 @@ import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.BooleanUtil;
 import liquibase.util.SqlUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.sql.*;
 import java.util.*;
@@ -140,7 +141,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     private static boolean hasValidObjectName(String objectName) {
-        if (StringUtil.isEmpty(objectName)) {
+        if (StringUtils.isEmpty(objectName)) {
             return false;
         }
         return !objectName.startsWith("SYS_") && !objectName.startsWith("BIN$");
@@ -148,7 +149,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException {
-        if (!snapshot.getSnapshotControl().shouldInclude(Column.class)) {
+        if (!snapshot.getSnapshotControl().shouldInclude(Column.class) || !snapshot.getDatabase().supports(Column.class)) {
             return;
         }
         if (foundObject instanceof Relation) {
@@ -372,6 +373,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     || "time".equalsIgnoreCase(columnTypeName)) {
                 columnMetadataResultSet.set("COLUMN_SIZE", columnMetadataResultSet.getInt("DECIMAL_DIGITS"));
                 columnMetadataResultSet.set("DECIMAL_DIGITS", null);
+            } else if ("int".equalsIgnoreCase(columnTypeName) || "integer".equalsIgnoreCase(columnTypeName)) {
+                // mssql int type sometimes does not have a size
+                // NOTE:  I am commenting this line out currently to fix an issue with older snapshots
+                // columnMetadataResultSet.set("COLUMN_SIZE", null);
             }
         } else if (database instanceof PostgresDatabase) {
             columnTypeName = database.unescapeDataTypeName(columnTypeName);
@@ -398,12 +403,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 (columnTypeName))) {
             try {
 
+                StringBuilder sql = new StringBuilder("SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS\n")
+                        .append("WHERE TABLE_SCHEMA = ?\n")
+                        .append("AND TABLE_NAME = ?\n")
+                        .append("AND COLUMN_NAME = ?");
                 String enumValue = Scope.getCurrentScope().getSingleton(ExecutorService.class)
                         .getExecutor("jdbc", database)
-                        .queryForObject(new RawSqlStatement("SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS\n" +
-                                "WHERE TABLE_SCHEMA = '" + column.getSchema().getName() + "'\n" +
-                                "AND TABLE_NAME = '" + column.getRelation().getName() + "'\n" +
-                                "AND COLUMN_NAME = '" + column.getName() + "'"), String.class);
+                        .queryForObject(new RawParameterizedSqlStatement(sql.toString(), column.getSchema().getName(), column.getRelation().getName(), column.getName()), String.class);
 
                 enumValue = enumValue.replace("enum(", "ENUM(");
                 enumValue = enumValue.replace("set(", "SET(");
@@ -500,6 +506,14 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 );
             }
 
+            if (database instanceof MySQLDatabase) {
+                if (columnSize != null) {
+                    type.setColumnSize(((MySQLDatabase) database).getFSPFromTimeType(columnSize, Types.TIMESTAMP));
+                } else {
+                    type.setColumnSize(0);
+                }
+            }
+
             type.setDecimalDigits(null);
         } else {
             type.setColumnSize(columnSize);
@@ -569,19 +583,19 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         if (database instanceof SybaseASADatabase) {
             String defaultValue = (String) columnMetadataResultSet.get(COLUMN_DEF_COL);
+            if (defaultValue != null) {
+                // SQL Anywhere returns `CURRENT DATE` (without underscore), which no other RDBMS would understand
+               defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+DATE\\b", "{fn CURDATE()}");
 
-           // SQL Anywhere returns `CURRENT DATE` (without underscore), which no other RDBMS would understand
-           defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+DATE\\b", "{fn CURDATE()}");
+               // SQL Anywhere returns `CURRENT TIME` (without underscore), which no other RDBMS would understand
+               defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+TIME\\b", "{fn CURTIME()}");
 
-           // SQL Anywhere returns `CURRENT TIME` (without underscore), which no other RDBMS would understand
-           defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+TIME\\b", "{fn CURTIME()}");
+               // SQL Anywhere returns `CURRENT TIMESTAMP` (without underscore), which no other RDBMS would understand
+               defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+TIMESTAMP\\b", "{fn NOW()}");
 
-           // SQL Anywhere returns `CURRENT TIMESTAMP` (without underscore), which no other RDBMS would understand
-           defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+TIMESTAMP\\b", "{fn NOW()}");
-
-           // SQL Anywhere returns `CURRENT USER` (without underscore), which no other RDBMS would understand
-           defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+USER\\b", "{fn USER()}");
-
+               // SQL Anywhere returns `CURRENT USER` (without underscore), which no other RDBMS would understand
+               defaultValue = defaultValue.replaceAll("(?i)\\bCURRENT\\s+USER\\b", "{fn USER()}");
+           }
            columnMetadataResultSet.set(COLUMN_DEF_COL, defaultValue);
 
            if (YES_VALUE.equals(columnMetadataResultSet.get(IS_GENERATED_COLUMN))) {
@@ -597,12 +611,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     private void readDefaultValueForMysqlDatabase(CachedRow columnMetadataResultSet, Column column, Database database) {
         try {
+            StringBuilder selectQuery = new StringBuilder("SELECT EXTRA FROM INFORMATION_SCHEMA.COLUMNS\n")
+                    .append("WHERE TABLE_SCHEMA = ?\n")
+                    .append("AND TABLE_NAME = ?\n")
+                    .append( "AND COLUMN_NAME = ?");
             String extraValue = Scope.getCurrentScope().getSingleton(ExecutorService.class)
                     .getExecutor("jdbc", database)
-                    .queryForObject(new RawSqlStatement("SELECT EXTRA FROM INFORMATION_SCHEMA.COLUMNS\n" +
-                            "WHERE TABLE_SCHEMA = '" + column.getSchema().getName() + "'\n" +
-                            "AND TABLE_NAME = '" + column.getRelation().getName() + "'\n" +
-                            "AND COLUMN_NAME = '" + column.getName() + "'"), String.class);
+                    .queryForObject(new RawParameterizedSqlStatement(selectQuery.toString(), column.getSchema().getName(), column.getRelation().getName(), column.getName()), String.class);
             if (extraValue != null && !extraValue.isEmpty() &&
                 (extraValue.startsWith(MYSQL_DEFAULT_GENERATED + " ") || extraValue.toLowerCase(Locale.ENGLISH).contains("on update"))
             ) {
@@ -647,7 +662,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     /**
      * {@link IndexSnapshotGenerator} fails to differentiate computed and non-computed column's for {@link PostgresDatabase}
-     * assume that if COLUMN_NAME contains parentesised expression -- its function reference.
+     * assume that if COLUMN_NAME contains parenthesized expression -- its function reference.
      * should handle cases like:
      * - ((name)::text)
      * - lower/upper((name)::text)

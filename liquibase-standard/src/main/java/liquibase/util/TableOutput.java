@@ -302,10 +302,14 @@ public class TableOutput {
             runningWidth = runningWidth % maxWidth;
         }
         int spaceWidth = runningWidth > 0 ? 1 : 0;
-        if (runningWidth + (part.length() + spaceWidth) > maxWidth) {
+
+        boolean lineNotFilled = runningWidth != maxWidth;
+        if (runningWidth + (part.length() + spaceWidth) > maxWidth
+                && runningWidth > 0 // If runningWidth is 0, then no need to add a space before the part because it is the first part of the line.
+                && lineNotFilled) { // If runningWidth is not equal to maxWidth, then no need to add a space before the part because the next part will be written to the next line.
             runningWidth = fillLineWithSpaces(runningWidth, maxWidth, result);
         }
-        if (runningWidth > 0) {
+        if (runningWidth > 0 && lineNotFilled) {
             result.append(" ");
             runningWidth++;
         }
@@ -322,7 +326,7 @@ public class TableOutput {
      * @return the new current running width (which is always 0, since the line has been filled to the end with spaces)
      */
     private static int fillLineWithSpaces(int runningWidth, int maxWidth, StringBuilder result) {
-        for (int i=0; i < (maxWidth - runningWidth); i++) {
+        for (int i=0; i < (maxWidth - (runningWidth % maxWidth)); i++) {
             result.append(" ");
         }
         return 0;

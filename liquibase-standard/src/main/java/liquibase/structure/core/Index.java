@@ -107,11 +107,16 @@ public class Index extends AbstractDatabaseObject {
     public List<Column> getColumns() {
         return getAttribute("columns", List.class);
     }
+    
+    public List<String> getIncludedColumns() {
+    	List<String> toRet =  getAttribute("includedColumns", List.class);
+    	return (toRet==null)?Collections.EMPTY_LIST:toRet;
+    }
 
     public Index addColumn(Column column) {
-        column.setRelation(getRelation());
+    	column.setRelation(getRelation());
         getColumns().add(column);
-
+        
         return this;
     }
 
@@ -226,6 +231,14 @@ public class Index extends AbstractDatabaseObject {
 
     public Index setClustered(Boolean clustered) {
         return (Index) setAttribute("clustered", clustered);
+    }
+
+    public String getUsing() {
+        return getAttribute("using", String.class);
+    }
+
+    public Index setUsing(String using) {
+        return (Index) setAttribute("using", using);
     }
 
     @Override

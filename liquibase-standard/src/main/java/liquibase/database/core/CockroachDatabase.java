@@ -5,7 +5,7 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtil;
@@ -110,7 +110,7 @@ public class CockroachDatabase extends PostgresDatabase {
         if (conn instanceof JdbcConnection) {
             try {
                 String version = Scope.getCurrentScope().getSingleton(ExecutorService.class).
-                        getExecutor("jdbc", this).queryForObject(new RawSqlStatement("SELECT version()"), String.class);
+                        getExecutor("jdbc", this).queryForObject(new RawParameterizedSqlStatement("SELECT version()"), String.class);
 
                 final Matcher versionMatcher = VERSION_NUMBER_PATTERN.matcher(version);
                 if (versionMatcher.find()) {

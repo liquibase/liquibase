@@ -1,5 +1,6 @@
 package liquibase.util;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.core.Column;
@@ -28,7 +29,7 @@ public abstract class JdbcUtil {
                 stmt.close();
             } catch (Throwable ex) {
                 // We don't trust the JDBC driver: It might throw RuntimeException or Error.
-//                logger.debug("Unexpected exception on closing JDBC Statement", ex);
+                Scope.getCurrentScope().getLog(JdbcUtil.class).fine("Unexpected exception on closing JDBC Statement", ex);
             }
         }
     }
@@ -45,7 +46,7 @@ public abstract class JdbcUtil {
                 rs.close();
             } catch (Throwable ex) {
                 // We don't trust the JDBC driver: It might throw RuntimeException or Error.
-//                logger.debug("Unexpected exception on closing JDBC ResultSet", ex);
+                Scope.getCurrentScope().getLog(JdbcUtil.class).fine("Unexpected exception on closing JDBC ResultSet", ex);
             }
         }
     }

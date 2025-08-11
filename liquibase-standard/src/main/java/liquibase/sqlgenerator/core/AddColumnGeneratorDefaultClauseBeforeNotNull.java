@@ -16,6 +16,7 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGenerator {
     @Override
@@ -81,11 +82,11 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
             }
         }
 
-        if (!StringUtil.isEmpty(statement.getAddBeforeColumn())) {
+        if (!StringUtils.isEmpty(statement.getAddBeforeColumn())) {
             alterTable += " BEFORE " + database.escapeColumnName(statement.getSchemaName(), statement.getSchemaName(), statement.getTableName(), statement.getAddBeforeColumn()) + " ";
         }
 
-        if (!StringUtil.isEmpty(statement.getAddAfterColumn())) {
+        if (!StringUtils.isEmpty(statement.getAddAfterColumn())) {
             alterTable += " AFTER " + database.escapeColumnName(statement.getSchemaName(), statement.getSchemaName(), statement.getTableName(), statement.getAddAfterColumn());
         }
 

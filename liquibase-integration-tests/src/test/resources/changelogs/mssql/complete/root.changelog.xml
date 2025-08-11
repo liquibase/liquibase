@@ -352,6 +352,26 @@
     <changeSet id="tranKeywordTest" author="mallod">
         <sqlFile path="changelogs/mssql/issues/transaction.test.sql" endDelimiter="GO"/>
     </changeSet>
+    <changeSet id="indexIncludeTest" author="satwell">
+        <createIndex indexName="idx_include_test" tableName="TestChange2">
+            <column name="name"/>
+            <column name="name2" included="true"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="createTableWithTimestampWithTimeZoneColumn" author="mallod">
+        <createTable tableName="TEST_TABLE_WITH_TIMEZONE_COLUMN">
+            <column name="ID" type="bigint"/>
+            <column name="CREATED" type="DATETIMEOFFSET(0)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="insertDateWithTimeZoneValue" author="mallod">
+        <insert tableName="TEST_TABLE_WITH_TIMEZONE_COLUMN">
+            <column name="ID" value="9000"/>
+            <column name="CREATED" valueDate="2024-01-14T00:00:00+02:00"/>
+        </insert>
+    </changeSet>
 
 
 </databaseChangeLog>

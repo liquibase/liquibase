@@ -1,22 +1,17 @@
 package liquibase.sql.visitor;
 
 import liquibase.database.Database;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class AppendSqlVisitor extends AbstractSqlVisitor{
     private String value;
-
 
     @Override
     public String getName() {
         return "append";
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
     }
 
     @Override

@@ -1,0 +1,2 @@
+exists,doesnt,string,invalid,empty
+change/core/SQLFileTestData.sql,nothing.txt,sample text,/dev/null/foo:a,

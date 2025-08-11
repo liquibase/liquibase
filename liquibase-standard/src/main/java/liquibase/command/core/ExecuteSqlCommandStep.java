@@ -1,7 +1,7 @@
 package liquibase.command.core;
 
-import liquibase.GlobalConfiguration;
 import liquibase.Scope;
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.changeset.ChangeSetService;
 import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.command.*;
@@ -13,14 +13,12 @@ import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockService;
 import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -32,6 +30,7 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> SQL_ARG;
     public static final CommandArgumentDefinition<String> SQLFILE_ARG;
     public static final CommandArgumentDefinition<String> DELIMITER_ARG;
+    public static final String STRIP_COMMENTS_KEY = "stripCommentsKey";
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -67,16 +66,19 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
         final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         final String sqlText = getSqlScript(sql, sqlFile);
         final StringBuilder out = new StringBuilder();
-        final String[] sqlStrings = StringUtil.processMultiLineSQL(sqlText, true, true, determineEndDelimiter(commandScope), null);
+        final boolean stripComments = Scope.getCurrentScope().get(STRIP_COMMENTS_KEY, true);
+        final String[] sqlStrings = StringUtil.processMultiLineSQL(sqlText, stripComments, true, determineEndDelimiter(commandScope), null);
 
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters(database);
         for (String sqlString : sqlStrings) {
-            if (sqlString.toLowerCase().matches("\\s*select .*")) {
+            sqlString = changeLogParameters.expandExpressions(sqlString, null);
+            if (sqlString.toLowerCase().matches("(?s)\\s*select\\s+.*")) {
                 out.append(handleSelect(sqlString, executor));
             } else {
-                executor.execute(new RawSqlStatement(sqlString));
-                out.append("Successfully Executed: ").append(sqlString).append("\n");
+                executor.execute(new RawParameterizedSqlStatement(sqlString));
+                out.append("Successfully Executed: ").append(System.lineSeparator()).append(sqlString).append(System.lineSeparator());
             }
-            out.append("\n");
+            out.append(System.lineSeparator());
         }
 
         database.commit();
@@ -86,6 +88,10 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
 
     protected static String determineEndDelimiter(CommandScope commandScope) {
         String delimiter = commandScope.getArgumentValue(DELIMITER_ARG);
+        return getEndDelimiter(delimiter);
+    }
+
+    public static String getEndDelimiter(String delimiter) {
         if (delimiter == null) {
             ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
             delimiter = service.getEndDelimiter(null);
@@ -93,29 +99,25 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
         return delimiter;
     }
 
-    protected void handleOutput(CommandResultsBuilder resultsBuilder, String output) throws IOException {
-        String charsetName = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
-        Writer outputWriter = new OutputStreamWriter(resultsBuilder.getOutputStream(), charsetName);
-        outputWriter.write(output);
-        outputWriter.flush();
+    protected String getSqlScript(String sql, String sqlFile) throws IOException, LiquibaseException {
+        return getSqlFromSource(sql, sqlFile);
     }
 
-    protected String getSqlScript(String sql, String sqlFile) throws IOException, LiquibaseException {
+    public static String getSqlFromSource(String sql, String sqlFile) throws IOException, LiquibaseException {
         if (sqlFile == null) {
             return sql;
-        } else {
-            final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-            Resource resource = pathHandlerFactory.getResource(sqlFile);
-            if (!resource.exists()) {
-                throw new LiquibaseException(FileUtil.getFileNotFoundMessage(sqlFile));
-            }
-            return StreamUtil.readStreamAsString(resource.openInputStream());
+        } 
+        final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
+        Resource resource = pathHandlerFactory.getResource(sqlFile);
+        if (!resource.exists()) {
+            throw new LiquibaseException(FileUtil.getFileNotFoundMessage(sqlFile));
         }
+        return StreamUtil.readStreamAsString(resource.openInputStream());
     }
 
     private String handleSelect(String sqlString, Executor executor) throws DatabaseException {
         StringBuilder out = new StringBuilder();
-        List<Map<String, ?>> rows = executor.queryForList(new RawSqlStatement(sqlString));
+        List<Map<String, ?>> rows = executor.queryForList(new RawParameterizedSqlStatement(sqlString));
         out.append("Output of ").append(sqlString).append(":\n");
         if (rows.isEmpty()) {
             out.append("-- Empty Resultset --\n");

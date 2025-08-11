@@ -125,10 +125,15 @@ public class InternalSnapshotCommandStep extends AbstractCommandStep {
                     || database instanceof MySQLDatabase
                     || database instanceof DB2Database
                     || database instanceof PostgresDatabase
+                    || database.getShortName().equalsIgnoreCase("bigquery")
                     || database.getShortName().equalsIgnoreCase("snowflake"))) { //TODO: Update to use SnowflakeDatabase once the liquibase-snowflake module is fully integrated into liquibase-core
                 Scope.getCurrentScope().getUI().sendMessage("INFO This command might not yet capture Liquibase Pro additional object types on " + database.getShortName());
             }
         }
     }
 
+    @Override
+    public boolean isInternal() {
+        return true;
+    }
 }

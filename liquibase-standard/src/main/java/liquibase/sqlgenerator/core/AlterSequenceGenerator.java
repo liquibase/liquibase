@@ -15,7 +15,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
 
     @Override
     public boolean supports(AlterSequenceStatement statement, Database database) {
-        return database.supportsSequences();
+        return database.supports(Sequence.class);
     }
 
     @Override
@@ -74,11 +74,22 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
             }
         }
 
-        if ((statement.getCacheSize() != null) && (database instanceof OracleDatabase || database instanceof PostgresDatabase || database instanceof MariaDBDatabase)) {
-            if (statement.getCacheSize().equals(BigInteger.ZERO)) {
-                buffer.append(" NOCACHE ");
-            } else {
-                buffer.append(" CACHE ").append(statement.getCacheSize());
+        if (statement.getCacheSize() != null) {
+            if (database instanceof OracleDatabase || database instanceof AbstractDb2Database || database instanceof PostgresDatabase
+                    || database instanceof MariaDBDatabase || database instanceof SybaseASADatabase || database instanceof MSSQLDatabase) {
+                if (BigInteger.ZERO.equals(statement.getCacheSize())) {
+                    if (database instanceof OracleDatabase) {
+                        buffer.append(" NOCACHE");
+                    } else if (database instanceof SybaseASADatabase || database instanceof AbstractDb2Database || database instanceof MSSQLDatabase) {
+                        buffer.append(" NO CACHE");
+                    } else if (database instanceof MariaDBDatabase) {
+                        buffer.append(" CACHE 0");
+                    } else if (database instanceof PostgresDatabase) {
+                        buffer.append(" CACHE 1");
+                    }
+                } else {
+                    buffer.append(" CACHE ").append(statement.getCacheSize());
+                }
             }
         }
 

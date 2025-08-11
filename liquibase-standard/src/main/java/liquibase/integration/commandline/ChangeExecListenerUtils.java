@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.Properties;
 
 public final class ChangeExecListenerUtils {
@@ -67,6 +68,9 @@ public final class ChangeExecListenerUtils {
         try {
             return clazz.getConstructor(params);
         } catch (Exception e) {
+            Logger logger = Scope.getCurrentScope().getLog(ChangeExecListenerUtils.class);
+            logger.warning("Failed to get constructor of " + clazz.getName() + " with arguments " + Arrays.toString(params));
+            // TODO Throw exception instead of returning null (which obviously causes NPE anyway)
             return null;
         }
     }

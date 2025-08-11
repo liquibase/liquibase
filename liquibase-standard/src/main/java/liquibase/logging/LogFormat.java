@@ -1,5 +1,8 @@
 package liquibase.logging;
 
+import lombok.Getter;
+
+@Getter
 public enum LogFormat {
     TEXT(false),
     JSON(true),
@@ -11,7 +14,4 @@ public enum LogFormat {
         this.useScopeLoggerInMaven = useScopeLoggerInMaven;
     }
 
-    public boolean isUseScopeLoggerInMaven() {
-        return useScopeLoggerInMaven;
-    }
 }

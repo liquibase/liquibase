@@ -6,7 +6,9 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.core.MariaDBDatabase;
 import liquibase.database.core.MockDatabase;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.UnsupportedDatabase;
 import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -16,12 +18,15 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.extension.testing.testsystem.TestSystemFactory;
+import liquibase.extension.testing.testsystem.core.MariaDBTestSystem;
+import liquibase.extension.testing.testsystem.core.MySQLTestSystem;
 import liquibase.listener.SqlListener;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
+import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.test.TestContext;
 import org.junit.After;
@@ -72,6 +77,29 @@ public abstract class AbstractExecuteTest {
     protected final void assertCorrect(String expectedSql, Class<? extends Database>... includeDatabases) throws
         Exception {
         assertCorrect(new String[]{expectedSql}, includeDatabases);
+    }
+
+    /**
+     *
+     * Make the assertion if the included database is under test
+     *
+     * @param   expectedSql
+     * @param   includeDatabases
+     * @throws  Exception
+     *
+     */
+    @SafeVarargs
+    protected final void assertCorrectUnderTest(String expectedSql, Class<? extends Database>... includeDatabases) throws
+            Exception {
+        List<Class<? extends Database>> includeDatabasesList = Arrays.asList(includeDatabases);
+        List<DatabaseTestSystem> underTest =  Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getAvailable(DatabaseTestSystem.class);
+        for (DatabaseTestSystem databaseTestSystem : underTest) {
+            Database database = databaseTestSystem.getDatabaseFromFactory();
+            if (includeDatabasesList.contains(database.getClass())) {
+                assertCorrect(expectedSql, database.getClass());
+                break;
+            }
+        }
     }
 
     @SafeVarargs
@@ -231,7 +259,7 @@ public abstract class AbstractExecuteTest {
             }
             connection.commit();
 
-            if (database.supportsSchemas()) {
+            if (database.supports(Schema.class)) {
                 try {
                 database.dropDatabaseObjects(new CatalogAndSchema(null, testSystem.getAltSchema()));
                 } catch (DatabaseException e) {

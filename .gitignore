@@ -18,6 +18,7 @@ release.properties
 **/liquibase.sdk.local.yml
 derby.log
 .idea
+.vscode
 *.iml
 .DS_Store
 /tmp
@@ -37,3 +38,6 @@ original-pom.xml
 **/logback-test.xml
 **/*.swp
 **/dependency-reduced-pom.xml
+
+/liquibase-integration-tests/var
+/liquibase-standard/var

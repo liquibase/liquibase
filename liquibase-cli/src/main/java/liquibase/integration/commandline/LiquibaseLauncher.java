@@ -4,16 +4,20 @@ import liquibase.Scope;
 import liquibase.util.StringUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static liquibase.integration.commandline.LiquibaseLauncherSettings.LiquibaseLauncherSetting.*;
-import static liquibase.integration.commandline.LiquibaseLauncherSettings.getSetting;
+import static liquibase.integration.commandline.util.ParameterUtil.getParameter;
+import static liquibase.util.LiquibaseLauncherSettings.LiquibaseLauncherSetting.*;
+import static liquibase.util.LiquibaseLauncherSettings.getSetting;
 
 /**
  * Launcher which builds up the classpath needed to run Liquibase, then calls {@link LiquibaseCommandLine#main(String[])}.
@@ -61,9 +65,13 @@ public class LiquibaseLauncher {
 
     private static final String LIQUIBASE_CORE_JAR_PATTERN = ".*?/liquibase-core([-0-9.])*.jar";
     private static final String LIQUIBASE_COMMERCIAL_JAR_PATTERN = ".*?/liquibase-commercial([-0-9.])*.jar";
+    private static final String LIQUIBASE_S3_JAR_PATTERN = ".*?/liquibase-s3-extension([-0-9.])*.jar";
+    private static final String LIQUIBASE_DYNAMO_JAR_PATTERN = ".*?/liquibase-commercial-dynamodb([-0-9.])*.jar";
+    private static final String LIQUIBASE_SECRETS_JAR_PATTERN = ".*?/liquibase-aws-secrets-manager([-0-9.])*.jar";
+    private static final String LIQUIBASE_AWS_JAR_PATTERN = ".*?/liquibase-aws-extension([-0-9.])*(-RC[0-9])*.jar"; // This pattern is different to match the RC1 release on Maven central.
     private static final String LIQUIBASE_CORE_MESSAGE = "Liquibase Core";
     private static final String LIQUIBASE_COMMERCIAL_MESSAGE = "Liquibase Commercial";
-    private static final String DEPENDENCY_JAR_VERSION_PATTERN = "(.*?)-([0-9.]*).jar";
+    private static final String DEPENDENCY_JAR_VERSION_PATTERN = "(.*?)-?[0-9.]*.jar";
     private static boolean debug = false;
 
     public static void main(final String[] args) throws Exception {
@@ -90,7 +98,6 @@ public class LiquibaseLauncher {
         File liquibaseHome = new File(liquibaseHomeEnv);
 
         List<URL> libUrls = getLibUrls(liquibaseHome);
-        checkForDuplicatedJars(libUrls);
 
         if (debug) {
             debug("Final Classpath:");
@@ -99,21 +106,58 @@ public class LiquibaseLauncher {
             }
         }
 
-        ClassLoader parentLoader = getClassLoader(parentLoaderSetting);
+        Thread.currentThread().setContextClassLoader(configureClassLoader(getClassLoader(parentLoaderSetting), args, libUrls));
 
-        final URLClassLoader classloader = new URLClassLoader(libUrls.toArray(new URL[0]), parentLoader);
-        Thread.currentThread().setContextClassLoader(classloader);
-
-        Class<?> cli = null;
+        Class<?> cli;
         try {
-            cli = classloader.loadClass(LiquibaseCommandLine.class.getName());
+            cli = Thread.currentThread().getContextClassLoader().loadClass(LiquibaseCommandLine.class.getName());
         } catch (ClassNotFoundException classNotFoundException) {
             throw new RuntimeException(
-                String.format("Unable to find Liquibase classes in the configured home: '%s'.", liquibaseHome)
+                String.format("Unable to find Liquibase classes in the configured home: '%s'.", liquibaseHome), classNotFoundException
             );
         }
 
         cli.getMethod("main", String[].class).invoke(null, new Object[]{args});
+    }
+
+    protected static ClassLoader configureClassLoader(ClassLoader parentLoader, String[] args, List<URL> libUrls) throws IllegalArgumentException, IOException {
+
+        String classpath = getParameter(LIQUIBASE_CLASSPATH, "classpath", args, true);
+
+        final List<URL> urls = new ArrayList<>(libUrls);
+        if (classpath != null) {
+            String[] classpathSoFar;
+            if (System.getProperties().getProperty("os.name").toLowerCase().startsWith("windows")) {
+                classpathSoFar = classpath.split(";");
+            } else {
+                classpathSoFar = classpath.split(":");
+            }
+
+            for (String classpathEntry : classpathSoFar) {
+                File classPathFile = new File(classpathEntry);
+                if (!classPathFile.exists()) {
+                    throw new IllegalArgumentException(classPathFile.getAbsolutePath() + " does not exist");
+                }
+
+                try {
+                    URL newUrl = new File(classpathEntry).toURI().toURL();
+                    debug(newUrl.toExternalForm() + " added to class loader");
+                    urls.add(newUrl);
+                } catch (MalformedURLException e) {
+                    throw new IllegalArgumentException(e);
+                }
+            }
+        }
+        checkForDuplicatedJars(urls);
+        removeIncompatibleAwsExtensions(urls);
+
+        final ClassLoader classLoader;
+        if (!"false".equals(getSetting(LIQUIBASE_INCLUDE_SYSTEM_CLASSPATH))) {
+            classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), parentLoader));
+        } else {
+            classLoader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> new URLClassLoader(urls.toArray(new URL[0]), null));
+        }
+        return classLoader;
     }
 
     private static ClassLoader getClassLoader(String parentLoaderSetting) {
@@ -128,6 +172,46 @@ public class LiquibaseLauncher {
         } else {
             throw new RuntimeException("Unknown liquibase launcher parent classloader value: "+ parentLoaderSetting);
         }
+    }
+
+    /**
+     * The liquibase-aws-extension contains S3, dynamo and secrets, and thus, if the liquibase-aws-extension is on the
+     * classpath, the other three extensions will be ignored.
+     * @param libUrls the list of libs
+     * @return the list of libs, minus S3, dynamo and secrets, if necessary
+     */
+    private static void removeIncompatibleAwsExtensions(List<URL> libUrls) {
+        boolean awsJarExists = doesJarExist(libUrls, LIQUIBASE_AWS_JAR_PATTERN);
+        List<String> removedJars = new ArrayList<>();
+
+        if (awsJarExists) {
+            for (Iterator<URL> iterator = libUrls.iterator(); iterator.hasNext(); ) {
+                URL libUrl = iterator.next();
+                String file = libUrl.getFile();
+                if (file.matches(LIQUIBASE_SECRETS_JAR_PATTERN)
+                        || file.matches(LIQUIBASE_DYNAMO_JAR_PATTERN)
+                        || file.matches(LIQUIBASE_S3_JAR_PATTERN)) {
+                    removedJars.add(file);
+                    iterator.remove();
+                }
+            }
+        }
+
+        if (!removedJars.isEmpty()) {
+            String plural = removedJars.size() > 1 ? "s" : "";
+            String message = "WARNING: Deprecated stand-alone AWS extension(s) are ignored when Liquibase-AWS " +
+                    "extension is present. To suppress this message, remove the following stand-alone AWS extension" +
+                    plural + " from the classpath: " + StringUtil.join(removedJars, ", ")
+                    + ". Learn more at https://docs.liquibase.com/pro-extensions";
+            System.out.println(message);
+        }
+    }
+
+    private static boolean doesJarExist(List<URL> libUrls, String jarFilenamePattern) {
+        return libUrls
+                .stream()
+                .map(URL::getFile)
+                .anyMatch(file -> file.matches(jarFilenamePattern));
     }
 
     /**
@@ -170,7 +254,17 @@ public class LiquibaseLauncher {
                 new File("./liquibase_libs"),
                 new File(liquibaseHome, "lib"),
                 new File(liquibaseHome, "internal/lib"),
+                new File(liquibaseHome, "internal/extensions"),
         };
+
+        // We released libraries containing the version in the file name,
+        // and we want to ignore them in the classpath as the installer/zip/tgz is
+        // not able to update them .
+        List<File> libsToIgnoreInClasspath = Arrays.asList(
+                new File(liquibaseHome, "internal/extensions/liquibase-commercial-bigquery-4.29.0.jar"),
+                new File(liquibaseHome, "internal/extensions/liquibase-commercial-bigquery-4.29.1.jar")
+        );
+
 
         for (File libDirFile : libDirs) {
             debug("Looking for libraries in " + libDirFile.getAbsolutePath());
@@ -188,6 +282,11 @@ public class LiquibaseLauncher {
             for (File lib : files) {
                 if (lib.getName().toLowerCase(Locale.US).endsWith(".jar") && !lib.getName().toLowerCase(Locale.US).equals("liquibase-core.jar")) {
                     try {
+                        if (libsToIgnoreInClasspath.stream().anyMatch(l -> l.getAbsoluteFile().equals(lib.getAbsoluteFile()))) {
+                            debug("Ignoring " + lib.getAbsolutePath() + " in classpath");
+                            continue; // skip the file if it is in the ignore list
+                        }
+
                         urls.add(lib.toURI().toURL());
                         debug("Added " + lib.getAbsolutePath() + " to classpath");
                     } catch (Exception e) {

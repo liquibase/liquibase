@@ -17,6 +17,7 @@
         <maven.deploy.skip>false</maven.deploy.skip>
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <sonar.coverage.jacoco.xmlReportPaths>../target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <surefire.failIfNoTests>false</surefire.failIfNoTests>
     </properties>
 
     <description>Liquibase is a tool for managing and executing database changes.</description>
@@ -38,7 +39,7 @@
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
-            <version>4.7.5</version>
+            <version>4.7.7</version>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -57,6 +58,17 @@
             <artifactId>liquibase-snowflake</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -64,13 +76,13 @@
             <plugin>
                 <groupId>org.liquibase.ext</groupId>
                 <artifactId>liquibase-sdk-maven-plugin</artifactId>
-                <version>0.10.23</version>
+                <version>0.10.25</version>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.3.1</version>
                 <configuration>
                     <!-- sources.jar from this module is the shaded sources of others  -->
                     <skipSource>true</skipSource>
@@ -86,7 +98,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.2</version>
+                <version>3.6.0</version>
                 <dependencies>
                     <dependency>
                         <groupId>com.github.marcosemiao.maven.plugins.shade.resource</groupId>
@@ -138,7 +150,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.6.0</version>
+                <version>1.7.2</version>
                 <configuration>
                     <outputDirectory>${project.build.directory}/classes/META-INF/maven/org.liquibase/liquibase-core/</outputDirectory>
                     <flattenedPomFilename>pom.xml</flattenedPomFilename>
@@ -167,7 +179,7 @@
                         </goals>
                         <configuration>
                             <target>
-                                <jar destfile="${project.build.directory}/${build.finalName}.jar"
+                                <jar destfile="${project.build.directory}/${project.build.finalName}.jar"
                                      update="true"
                                      basedir="${project.build.directory}/classes"
                                      includes="**/pom.xml"
@@ -180,7 +192,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.6.1</version>
                 <executions>
                     <execution>
                         <id>timestamp-property</id>

@@ -16,6 +16,7 @@ import liquibase.statement.core.DeleteStatement;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.InsertStatement;
 import liquibase.util.StringUtil;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,7 @@ import static liquibase.change.ChangeParameterMetaData.ALL;
                 "A value of NULL in a cell will be converted to a database NULL rather than the string 'NULL'",
         priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table", since = "2.0")
 public class LoadUpdateDataChange extends LoadDataChange {
+    @Setter
     private String primaryKey;
     private Boolean onlyUpdate = Boolean.FALSE;
 
@@ -40,10 +42,6 @@ public class LoadUpdateDataChange extends LoadDataChange {
     @DatabaseChangeProperty(description = "Name of the table to insert or update data in", requiredForDatabase = ALL)
     public String getTableName() {
         return super.getTableName();
-    }
-
-    public void setPrimaryKey(String primaryKey) {
-        this.primaryKey = primaryKey;
     }
 
     @DatabaseChangeProperty(description = "Comma-delimited list of columns for the primary key",

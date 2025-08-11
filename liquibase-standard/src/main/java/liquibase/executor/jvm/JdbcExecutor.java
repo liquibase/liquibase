@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Class to simplify execution of SqlStatements.  Based heavily on <a href="http://static.springframework.org/spring/docs/2.0.x/reference/jdbc.html">Spring's JdbcTemplate</a>.
@@ -38,6 +40,9 @@ import java.util.logging.Level;
  * <b>Note: This class is currently intended for Liquibase-internal use only and may change without notice in the future</b>
  */
 public class JdbcExecutor extends AbstractExecutor {
+
+    public static final String SHOULD_UPDATE_ROWS_AFFECTED_SCOPE_KEY = "shouldUpdateRowsAffected";
+    public static final String ROWS_AFFECTED_SCOPE_KEY = "rowsAffected";
 
     /**
      * Return the name of the Executor
@@ -72,18 +77,21 @@ public class JdbcExecutor extends AbstractExecutor {
                 throw new DatabaseException("Cannot execute commands against an offline database");
             }
             stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement();
+            if (database instanceof OracleDatabase && Boolean.TRUE.equals(SqlConfiguration.ALWAYS_SET_FETCH_SIZE.getCurrentValue())) {
+                stmt.setFetchSize(database.getFetchSize());
+            }
             Statement stmtToUse = stmt;
 
             Object object = action.doInStatement(stmtToUse);
             if (stmtToUse.getWarnings() != null) {
-                showSqlWarnings(stmtToUse);
+                showSqlWarnings(stmtToUse, action);
             }
             return object;
         } catch (SQLException ex) {
             // Release Connection early, to avoid potential connection pool deadlock
             // in the case when the exception translator hasn't been initialized yet.
             try {
-                showSqlWarnings(stmt);
+                showSqlWarnings(stmt, action);
             } catch (SQLException sqle) {
                 Scope.getCurrentScope().getLog(JdbcExecutor.class).warning(String.format("Unable to access SQL warning: %s", sqle.getMessage()));
             }
@@ -101,15 +109,16 @@ public class JdbcExecutor extends AbstractExecutor {
         }
     }
 
-    private void showSqlWarnings(Statement stmtToUse) throws SQLException {
-        if (Boolean.TRUE.equals(! SqlConfiguration.SHOW_SQL_WARNING_MESSAGES.getCurrentValue() ||
-            stmtToUse == null) ||
-            stmtToUse.getWarnings() == null) {
+    protected void showSqlWarnings(Statement stmtToUse, StatementCallback action)
+            throws SQLException, DatabaseException {
+        if (!SqlConfiguration.SHOW_SQL_WARNING_MESSAGES.getCurrentValue() ||
+                stmtToUse == null ||
+                stmtToUse.getWarnings() == null) {
             return;
         }
         SQLWarning sqlWarning = stmtToUse.getWarnings();
         do {
-            Scope.getCurrentScope().getLog(JdbcExecutor.class).warning(sqlWarning.getMessage());
+            Scope.getCurrentScope().getUI().sendMessage(sqlWarning.getMessage());
             sqlWarning = sqlWarning.getNextWarning();
         } while (sqlWarning != null);
     }
@@ -182,7 +191,28 @@ public class JdbcExecutor extends AbstractExecutor {
     private void setParameters(final PreparedStatement pstmt, final RawParameterizedSqlStatement sql) throws SQLException {
         final List<Object> parameters = sql.getParameters();
         for (int i = 0; i < parameters.size(); i++) {
-            pstmt.setObject(i + 1, parameters.get(i));
+            Object parameter = parameters.get(i);
+            if(parameter instanceof ArrayList){
+                int finalI = i;
+                ((ArrayList<?>) parameter).forEach(param -> {
+                    try {
+                        setParameter(pstmt, finalI, param);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+            else {
+                setParameter(pstmt, i, parameter);
+            }
+        }
+    }
+
+    private static void setParameter(PreparedStatement pstmt, int parameterIndex, Object parameter) throws SQLException {
+        if (parameter instanceof String) {
+            pstmt.setString(parameterIndex + 1, (String) parameter);
+        } else {
+            pstmt.setObject(parameterIndex + 1, parameter);
         }
     }
 
@@ -211,7 +241,9 @@ public class JdbcExecutor extends AbstractExecutor {
 
             try (PreparedStatement pstmt = factory.create(finalSql)) {
                 setParameters(pstmt, (RawParameterizedSqlStatement) sql);
-                return rse.extractData(pstmt.executeQuery());
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    return rse.extractData(rs);
+                }
             } catch (SQLException e) {
                 throw new DatabaseException(e);
             }
@@ -437,6 +469,22 @@ public class JdbcExecutor extends AbstractExecutor {
             this.sqlVisitors = sqlVisitors;
         }
 
+        private void addUpdateCountToScope(int updateCount) {
+            if (updateCount > -1) {
+                AtomicInteger scopeRowsAffected = Scope.getCurrentScope().get(ROWS_AFFECTED_SCOPE_KEY, AtomicInteger.class);
+                Boolean shouldUpdateRowsAffected = Scope.getCurrentScope().get(SHOULD_UPDATE_ROWS_AFFECTED_SCOPE_KEY, true);
+                if (scopeRowsAffected != null && Boolean.TRUE.equals(shouldUpdateRowsAffected)) {
+                    scopeRowsAffected.addAndGet(updateCount);
+                }
+            }
+        }
+
+        private boolean isDML(String statement) {
+            Pattern dmlPattern = Pattern.compile("^\\s*?(SELECT\\s|INSERT\\s|UPDATE\\s|DELETE\\s|MERGE\\s)(.*)");
+            Matcher m = dmlPattern.matcher(statement);
+            return m.matches();
+        }
+
         @Override
         public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
             Logger log = Scope.getCurrentScope().getLog(getClass());
@@ -454,7 +502,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
                 Level sqlLogLevel = SqlConfiguration.SHOW_AT_LOG_LEVEL.getCurrentValue();
 
-                log.log(sqlLogLevel, statement, null);
+                log.log(sqlLogLevel, System.lineSeparator() + statement, null);
                 if (statement.contains("?")) {
                     stmt.setEscapeProcessing(false);
                 }
@@ -464,7 +512,9 @@ public class JdbcExecutor extends AbstractExecutor {
                     if (!stmt.execute(statement)) {
                         int updateCount = stmt.getUpdateCount();
                         addUpdateCountToScope(updateCount);
-                        log.log(sqlLogLevel, updateCount + " row(s) affected", null);
+                        if (isDML(statement)) {
+                            log.log(sqlLogLevel, updateCount + " row(s) affected", null);
+                        }
                     }
                 } catch (Throwable e) {
                     throw new DatabaseException(e.getMessage() + " [Failed SQL: " + getErrorCode(e) + statement + "]", e);
@@ -494,14 +544,6 @@ public class JdbcExecutor extends AbstractExecutor {
         }
     }
 
-    private void addUpdateCountToScope(int updateCount) {
-        if (updateCount > -1) {
-            AtomicInteger scopeRowsAffected = Scope.getCurrentScope().get("rowsAffected", AtomicInteger.class);
-            if (scopeRowsAffected != null) {
-                scopeRowsAffected.addAndGet(updateCount);
-            }
-        }
-    }
 
     private class QueryStatementCallback implements StatementCallback {
 

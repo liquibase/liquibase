@@ -12,7 +12,8 @@ import liquibase.extension.testing.testsystem.TestSystem;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.structure.core.DatabaseObjectFactory;
-import org.junit.Assume;
+import liquibase.util.StringUtil;
+import org.junit.jupiter.api.Assumptions;
 import org.spockframework.runtime.extension.AbstractMethodInterceptor;
 import org.spockframework.runtime.extension.IMethodInvocation;
 import org.spockframework.runtime.model.FieldInfo;
@@ -64,13 +65,13 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
     public void interceptSetupSpecMethod(IMethodInvocation invocation) throws Throwable {
         final List<FieldInfo> containers = findAllContainers();
         startContainers(containers, invocation);
-        dropAllDatabases();
+        dropAllDatabases(invocation);
         invocation.proceed();
     }
 
     @Override
     public void interceptSetupMethod(IMethodInvocation invocation) throws Throwable {
-        dropAllDatabases();
+        dropAllDatabases(invocation);
         invocation.proceed();
     }
 
@@ -89,7 +90,7 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
         for (FieldInfo field : containers) {
             TestSystem testSystem = readContainerFromField(field, invocation);
 
-            Assume.assumeTrue("Not running test against " + testSystem.getDefinition() + ": liquibase.sdk.testSystem.test is " + configuredTestSystems + " and liquibase.sdk.testSystem.skip is " + skippedTestSystems, testSystem.shouldTest());
+            Assumptions.assumeTrue(testSystem.shouldTest(), "Not running test against " + testSystem.getDefinition() + ": liquibase.sdk.testSystem.test is " + configuredTestSystems + " and liquibase.sdk.testSystem.skip is " + skippedTestSystems);
 
             testSystem.start();
             startedTestSystems.add(testSystem);
@@ -108,14 +109,18 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
             try {
                 testSystem.stop();
             } catch (Exception e) {
-                Scope.getCurrentScope().getLog(getClass()).warning("Cannot stop "+testSystem.getDefinition());
+                Scope.getCurrentScope().getLog(getClass()).warning("Cannot stop " + testSystem.getDefinition(), e);
             }
 
         }
     }
 
     private static TestSystem readContainerFromField(FieldInfo f, IMethodInvocation invocation) {
-        return (TestSystem) f.readValue(invocation.getInstance());
+        TestSystem testSystem = (TestSystem) f.readValue(invocation.getInstance());
+        if (testSystem == null) {
+            testSystem = (TestSystem) f.readValue(invocation.getSharedInstance());
+        }
+        return testSystem;
     }
 
     /**
@@ -125,14 +130,22 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
      */
     @Override
     public void interceptCleanupSpecMethod(IMethodInvocation invocation) throws Throwable {
-        dropAllDatabases();
+        dropAllDatabases(invocation);
         invocation.proceed();
     }
 
-    private static void dropAllDatabases() throws Exception {
+    private void dropAllDatabases(IMethodInvocation invocation) throws Exception {
         for (TestSystem startedTestSystem : startedTestSystems) {
             if (startedTestSystem instanceof DatabaseTestSystem) {
-                runDropAll(((DatabaseTestSystem) startedTestSystem));
+                // Only drop the database if it was used in this test.
+                final List<FieldInfo> containers = findAllContainers();
+                for (FieldInfo field : containers) {
+                    TestSystem testSystem = readContainerFromField(field, invocation);
+                    if (testSystem == startedTestSystem) {
+                        runDropAll(((DatabaseTestSystem) startedTestSystem));
+                        runDropAll(((DatabaseTestSystem) startedTestSystem), ((DatabaseTestSystem) startedTestSystem).getAltSchema());
+                    }
+                }
             }
         }
         // Start tests from a clean slate, otherwise the MDC will be polluted with info about the dropAll command.
@@ -142,18 +155,28 @@ public class LiquibaseIntegrationMethodInterceptor extends AbstractMethodInterce
 
     @Override
     public void interceptCleanupMethod(IMethodInvocation invocation) throws Throwable {
-        dropAllDatabases();
+        dropAllDatabases(invocation);
         invocation.proceed();
     }
 
-    private static void runDropAll(DatabaseTestSystem db) throws Exception {
-        LockService lockService = LockServiceFactory.getInstance().getLockService(db.getDatabaseFromFactory());
-        lockService.releaseLock();
-        CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME);
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl());
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername());
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword());
-        commandScope.setOutput(new ByteArrayOutputStream());
-        commandScope.execute();
+    private static void runDropAll(DatabaseTestSystem db, String... schemas) throws Exception {
+        Map<String, Object> scopeValues = new HashMap<>();
+        scopeValues.put("liquibase.compatibility.check.enableCompatibilityCheck", false);
+        Scope.child(scopeValues, () -> {
+            LockService lockService = LockServiceFactory.getInstance().getLockService(db.getDatabaseFromFactory());
+            lockService.releaseLock();
+            CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME);
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl());
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername());
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword());
+            // this is a pro only argument, but is added here because there is no mechanism for adding the argument from the pro tests
+            commandScope.addArgumentValue("dropDbclhistory", true);
+            if (schemas != null) {
+                commandScope.addArgumentValue(DropAllCommandStep.SCHEMAS_ARG, StringUtil.join(schemas, ","));
+            }
+            commandScope.setOutput(new ByteArrayOutputStream());
+            commandScope.execute();
+        });
+
     }
 }

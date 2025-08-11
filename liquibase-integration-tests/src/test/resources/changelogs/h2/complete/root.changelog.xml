@@ -36,7 +36,7 @@
         <preConditions>
             <or>
                 <dbms type="h2"/>
-                <sqlCheck expectedResult="3">INVALID SQL HERE, SHOULD NOT HIT DUE TO SHORT CIRCUT</sqlCheck>
+                <sqlCheck expectedResult="3">INVALID SQL HERE, SHOULD NOT HIT DUE TO SHORT CIRCUIT</sqlCheck>
             </or>
         </preConditions>
         <createSequence sequenceName="seq_person"/>
@@ -417,6 +417,20 @@
             </column>
             <column name="booleanFlag" type="boolean(1)"/>
         </createTable>
+    </changeSet>
+
+    <changeSet id="createTableWithTimestampWithTimeZoneColumn" author="mallod">
+        <createTable tableName="TEST_TABLE_WITH_TIMEZONE_COLUMN">
+            <column name="ID" type="bigint"/>
+            <column name="CREATED" type="TIMESTAMP(6) WITH TIME ZONE"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="insertDateWithTimeZoneValue" author="mallod">
+        <insert tableName="TEST_TABLE_WITH_TIMEZONE_COLUMN">
+            <column name="ID" value="9000"/>
+            <column name="CREATED" valueDate="2024-01-14T00:00:00+02:00"/>
+        </insert>
     </changeSet>
 
 </databaseChangeLog>

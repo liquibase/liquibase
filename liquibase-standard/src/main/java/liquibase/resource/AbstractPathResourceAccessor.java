@@ -113,7 +113,7 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
             }
 
             private boolean meetsSearchCriteria(Path file) {
-                final int depth = file.getParent().getNameCount() - rootPath.getNameCount();
+                final int depth = file.getParent().getNameCount() - basePath.getNameCount() + 1;
 
                 if (depth < minDepth) {
                     return false;

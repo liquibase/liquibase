@@ -8,7 +8,17 @@ import lombok.Getter;
 @AllArgsConstructor
 public class TableIsEmptyStatement extends AbstractSqlStatement {
 
-    private final String catalogName;
-    private final String schemaName;
-    private final String tableName;
+    private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
+
+    public String getCatalogName() {
+        return databaseTableIdentifier.getCatalogName();
+    }
+
+    public String getSchemaName() {
+        return databaseTableIdentifier.getSchemaName();
+    }
+
+    public String getTableName() {
+        return databaseTableIdentifier.getTableName();
+    }
 }

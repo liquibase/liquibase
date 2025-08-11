@@ -33,7 +33,7 @@ public class CatalogComparator extends CommonCatalogSchemaComparator {
             return false;
         }
 
-        if (!accordingTo.supportsCatalogs()) {
+        if (!accordingTo.supports(Catalog.class)) {
             return true;
         }
 

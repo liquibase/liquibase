@@ -15,14 +15,12 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.RawCallStatement;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Index;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Schema;
+import liquibase.structure.core.*;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
 import java.sql.*;
@@ -244,7 +242,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getAutoIncrementClause(final String generationType, final Boolean defaultOnNull) {
-        if (StringUtil.isEmpty(generationType)) {
+        if (StringUtils.isEmpty(generationType)) {
             return super.getAutoIncrementClause();
         }
 
@@ -258,12 +256,12 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String generatePrimaryKeyName(String tableName) {
-        if (tableName.length() > 27) {
-            //noinspection HardCodedStringLiteral
-            return "PK_" + tableName.toUpperCase(Locale.US).substring(0, 27);
+        int maximumLength = getIdentifierMaximumLength();
+        String primaryKeyName = "PK_" + tableName.toUpperCase(Locale.US);
+        if (primaryKeyName.length() > maximumLength) {
+            return primaryKeyName.substring(0, maximumLength);
         } else {
-            //noinspection HardCodedStringLiteral
-            return "PK_" + tableName.toUpperCase(Locale.US);
+            return primaryKeyName;
         }
     }
 
@@ -280,6 +278,14 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsSequences() {
         return true;
+    }
+
+    @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Schema.class.isAssignableFrom(object)) {
+            return false;
+        }
+        return super.supports(object);
     }
 
     /**
@@ -527,10 +533,10 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 try {
                     try {
                         //noinspection HardCodedStringLiteral
-                        userDefinedTypes.addAll(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForList(new RawSqlStatement("SELECT DISTINCT TYPE_NAME FROM ALL_TYPES"), String.class));
+                        userDefinedTypes.addAll(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForList(new RawParameterizedSqlStatement("SELECT DISTINCT TYPE_NAME FROM ALL_TYPES"), String.class));
                     } catch (DatabaseException e) { //fall back to USER_TYPES if the user cannot see ALL_TYPES
                         //noinspection HardCodedStringLiteral
-                        userDefinedTypes.addAll(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForList(new RawSqlStatement("SELECT TYPE_NAME FROM USER_TYPES"), String.class));
+                        userDefinedTypes.addAll(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForList(new RawParameterizedSqlStatement("SELECT TYPE_NAME FROM USER_TYPES"), String.class));
                     }
                 } catch (DatabaseException e) {
                     //ignore error
@@ -671,4 +677,17 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     }
 
+    @Override
+    public boolean supportsDatabaseChangeLogHistory() {
+        return true;
+    }
+
+    @Override
+    public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        // Internally Oracle converts int/integer to number, so when we need to extract and compare it we need number too
+        if (objectType.equals(Column.class) && StringUtils.startsWithIgnoreCase(objectName, "int")) {
+            return "NUMBER(*, 0)";
+        }
+        return super.correctObjectName(objectName, objectType);
+    }
 }

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="1" author="mallod">
+        <sqlFile endDelimiter="\nGO" encoding="cp1250" path="src/test/resources/changelogs/mssql/issues/create.procedure.examples.with.begin.end.block.sql" splitStatements="true"/>
+    </changeSet>
+
+    <changeSet id="2" author="mallod">
+        <sql>
+            CREATE TABLE TestCommitTable(id int, name varchar(255));
+
+            BEGIN TRANSACTION;
+            DELETE FROM TestCommitTable
+            COMMIT;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

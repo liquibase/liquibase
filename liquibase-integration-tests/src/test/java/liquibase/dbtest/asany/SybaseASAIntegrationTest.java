@@ -7,7 +7,7 @@ import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.executor.ExecutorService;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -35,7 +35,7 @@ public class SybaseASAIntegrationTest extends AbstractIntegrationTest {
         clearDatabase();
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                 .execute(
-                        new RawSqlStatement("CREATE TABLE generated_test (height_cm numeric, height_stored numeric COMPUTE (height_cm / 2.54))"));
+                        new RawParameterizedSqlStatement("CREATE TABLE generated_test (height_cm numeric, height_stored numeric COMPUTE (height_cm / 2.54))"));
 
         // when
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

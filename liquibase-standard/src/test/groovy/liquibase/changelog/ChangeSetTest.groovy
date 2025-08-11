@@ -3,7 +3,11 @@ package liquibase.changelog
 
 import liquibase.Scope
 import liquibase.change.CheckSum
+import liquibase.change.ColumnConfig
 import liquibase.change.core.*
+import liquibase.changelog.visitor.ChangeExecListener
+import liquibase.changelog.visitor.DefaultChangeExecListener
+import liquibase.database.core.H2Database
 import liquibase.database.core.MockDatabase
 import liquibase.parser.ChangeLogParserConfiguration
 import liquibase.parser.core.ParsedNode
@@ -13,6 +17,7 @@ import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.serializer.core.xml.XMLChangeLogSerializer
 import liquibase.serializer.core.yaml.YamlChangeLogSerializer
 import liquibase.sql.visitor.ReplaceSqlVisitor
+import liquibase.structure.core.Column
 import liquibase.util.FileUtil
 import org.hamcrest.Matchers
 import spock.lang.Shared
@@ -206,6 +211,22 @@ class ChangeSetTest extends Specification {
         then:
         def e = thrown(ParsedNodeException)
         e.message == "Error parsing com/example/test.xml: Unknown change type 'invalid'. Check for spelling or capitalization errors and missing extensions such as liquibase-commercial."
+    }
+
+    def "load node with unknown change types unrecognized namespace"() {
+        when:
+        def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
+        def node = new ParsedNode(null, "changeSet")
+                .addChildren([id: "1", author: "nvoxland"])
+                .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1"))
+                .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_2"))
+        def nodeToEdit = node.getChildren()
+        nodeToEdit.get(0).setParsedNamespace("foo")
+        changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+
+        then:
+        def e = thrown(ParsedNodeException)
+        e.message == "Error parsing com/example/test.xml: Unknown change type 'foo:id'. Check for spelling or capitalization errors and missing extensions such as liquibase-commercial."
     }
 
     def "load node with unknown change types and lax parsing"() {
@@ -628,6 +649,61 @@ class ChangeSetTest extends Specification {
         changeSet.isInheritableIgnore()
     }
 
+    def "execute returns a EXECUTED state when at least one change executes"() {
+        when:
+        DatabaseChangeLog databaseChangeLog = new DatabaseChangeLog("com/example/test.xml")
+        def changeSet =
+           new ChangeSet("testId", "testAuthor", false, false, null, null, null, databaseChangeLog)
+        def change1 = new CreateTableChange()
+        change1.addColumn(new ColumnConfig(new Column("column1")))
+        def change2 = new RawSQLChange("ALTER TABLE pendingEmails ALTER COLUMN createdAt datetime2 NOT NULL;")
+        change2.setDbms("mssql")
+        changeSet.addChange(change1)
+        changeSet.addChange(change2)
+        databaseChangeLog.addChangeSet(changeSet)
+        ChangeExecListener listener = new DefaultChangeExecListener()
+
+        then:
+        changeSet.execute(databaseChangeLog, listener, new MockDatabase()) == ChangeSet.ExecType.EXECUTED
+        listener.getDeployedChanges(changeSet).size() == 1
+
+        when:
+        databaseChangeLog = new DatabaseChangeLog("com/example/test.xml")
+        changeSet =
+                new ChangeSet("testId", "testAuthor", false, false, null, null, null, databaseChangeLog)
+        change1 = new CreateTableChange()
+        change1.addColumn(new ColumnConfig(new Column("column1")))
+        change2 = new RawSQLChange("ALTER TABLE pendingEmails ALTER COLUMN createdAt datetime2 NOT NULL;")
+        change2.setDbms("mssql")
+        changeSet.addChange(change2)
+        changeSet.addChange(change1)
+        databaseChangeLog.addChangeSet(changeSet)
+        listener = new DefaultChangeExecListener()
+
+        then:
+        changeSet.execute(databaseChangeLog, listener, new MockDatabase()) == ChangeSet.ExecType.EXECUTED
+        listener.getDeployedChanges(changeSet).size() == 1
+
+        when:
+        databaseChangeLog = new DatabaseChangeLog("com/example/test.xml")
+
+        changeSet =
+                new ChangeSet("testId", "testAuthor", false, false, null, null, null, databaseChangeLog)
+        change1 = new CreateTableChange()
+        change1.addColumn(new ColumnConfig(new Column("column1")))
+        change2 = new RawSQLChange("ALTER TABLE pendingEmails ALTER COLUMN createdAt datetime2 NOT NULL;")
+        change2.setDbms("mssql")
+        changeSet.addChange(change2)
+        changeSet.addChange(change1)
+        databaseChangeLog.addChangeSet(changeSet)
+        listener = new DefaultChangeExecListener()
+
+        then:
+        changeSet.execute(databaseChangeLog, listener, new MockDatabase()) == ChangeSet.ExecType.EXECUTED
+        listener.getDeployedChanges(changeSet).size() == 1
+
+    }
+
     def "execute returns a MARK_RAN state when changeSet is set with validation failed as true"() {
         when:
         DatabaseChangeLog databaseChangeLog = new DatabaseChangeLog("com/example/test.xml")
@@ -686,8 +762,8 @@ class ChangeSetTest extends Specification {
         contents.contains(expectKeys)
 
         cleanup:
-        outputFile.delete()
         outputStream.close()
+        outputFile.delete()
     }
 
     def "validate rollback serialization doesn't duplicate rollback key on a XML changelog format"() {
@@ -708,8 +784,8 @@ class ChangeSetTest extends Specification {
         contents.contains(expectedKeys)
 
         cleanup:
-        outputFile.delete()
         outputStream.close()
+        outputFile.delete()
     }
 
     def "validate rollback serialization works as expected when having to rollback a SQLFile change"() {
@@ -734,8 +810,8 @@ class ChangeSetTest extends Specification {
         contents.contains(expectedKeys)
 
         cleanup:
-        outputFile.delete()
         outputStream.close()
+        outputFile.delete()
     }
 
 }

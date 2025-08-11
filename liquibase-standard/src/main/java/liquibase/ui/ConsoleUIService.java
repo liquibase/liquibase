@@ -82,7 +82,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
         final ConsoleWrapper console = getConsole();
 
         if (!console.supportsInput()) {
-            log.fine("No console attached. Skipping interactive prompt: '" + prompt + "'. Using default value '" + valueIfNoEntry + "'");
+            Scope.getCurrentScope().getUI().sendMessage("No interactive environment detected. Skipping interactive prompt: '" + prompt + "'. Using default value '" + valueIfNoEntry + "'");
             return valueIfNoEntry;
         }
 

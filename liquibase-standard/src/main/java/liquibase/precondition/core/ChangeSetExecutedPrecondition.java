@@ -11,7 +11,11 @@ import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.precondition.AbstractPrecondition;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class ChangeSetExecutedPrecondition extends AbstractPrecondition {
 
     private String changeLogFile;
@@ -21,30 +25,6 @@ public class ChangeSetExecutedPrecondition extends AbstractPrecondition {
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
-    }
-
-    public String getChangeLogFile() {
-        return changeLogFile;
-    }
-
-    public void setChangeLogFile(String changeLogFile) {
-        this.changeLogFile = changeLogFile;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
     }
 
     @Override

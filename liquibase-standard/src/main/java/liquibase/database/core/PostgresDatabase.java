@@ -9,14 +9,18 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
 import liquibase.logging.Logger;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigInteger;
 import java.nio.charset.Charset;
@@ -31,8 +35,8 @@ import java.util.*;
 public class PostgresDatabase extends AbstractJdbcDatabase {
     private static final String dbFullVersion = null;
     public static final String PRODUCT_NAME = "PostgreSQL";
-    public static final int MINIMUM_DBMS_MAJOR_VERSION = 9;
-    public static final int MINIMUM_DBMS_MINOR_VERSION = 2;
+    public static final int MINIMUM_DBMS_MAJOR_VERSION = 12;
+    public static final int MINIMUM_DBMS_MINOR_VERSION = 20;
     /**
      * The data type names which are valid for auto-increment columns.
      */
@@ -72,6 +76,9 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         super.sequenceCurrentValueFunction = "currval('%s')";
         super.unmodifiableDataTypes.addAll(Arrays.asList("bool", "int4", "int8", "float4", "float8", "bigserial", "serial", "oid", "bytea", "date", "timestamptz", "text", "int2[]", "int4[]", "int8[]", "float4[]", "float8[]", "bool[]", "varchar[]", "text[]", "numeric[]"));
         super.unquotedObjectsAreUppercased = false;
+
+        systemTablesAndViews.add("pg_stat_statements");
+        systemTablesAndViews.add("pg_stat_statements_info");
     }
 
     @Override
@@ -248,7 +255,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             return "";
         }
 
-        if (StringUtil.isEmpty(generationType)) {
+        if (StringUtils.isEmpty(generationType)) {
             return super.getAutoIncrementClause();
         }
 
@@ -298,6 +305,10 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         // Check preserve case flag for schema
         //
         if (objectType.equals(Schema.class) && Boolean.TRUE.equals(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue())) {
+            return objectName;
+        }
+
+        if(objectType.equals(Catalog.class) && !StringUtil.hasLowerCase(objectName)) {
             return objectName;
         }
 
@@ -400,8 +411,13 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     public void rollback() throws DatabaseException {
         super.rollback();
 
-        //Rollback in postgresql resets the search path. Need to put it back to the defaults
-        DatabaseUtils.initializeDatabase(getDefaultCatalogName(), getDefaultSchemaName(), this);
+        // Rollback in postgresql resets the search path. Need to put it back to the defaults
+        // Prevent resetting the search path if we are running in a mode that does not update the database to avoid spurious 
+        // SET SEARCH_PATH SQL statements
+        final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this);
+        if(executor.updatesDatabase()) {
+            DatabaseUtils.initializeDatabase(getDefaultCatalogName(), getDefaultSchemaName(), this);
+        }
     }
 
     @Override
@@ -415,5 +431,10 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsCreateIfNotExists(Class<? extends DatabaseObject> type) {
         return type.isAssignableFrom(Table.class);
+    }
+
+    @Override
+    public boolean supportsDatabaseChangeLogHistory() {
+        return true;
     }
 }

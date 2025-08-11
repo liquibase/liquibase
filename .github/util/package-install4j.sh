@@ -1,59 +1,43 @@
 #!/usr/bin/env bash
 
 ###################################################################
-## This script creates the installer files given an unzipped directory
+## This script installs Install4j and configures it for creating 
+## unsigned installers
 ###################################################################
 
 set -e
-#set -x
 
-if [ -z ${1+x} ]; then
-  echo "This script requires the version to be passed to it. Example: package-install4j.sh 4.5.0";
-  exit 1;
+# Check required arguments and environment variables
+if [ -z "${1+x}" ]; then
+    echo "Error: Version argument required. Usage: package-install4j.sh <version>"
+    exit 1
 fi
 version=$1
 
-if [ -z ${INSTALL4J_10_LICENSE+x} ]; then
-  echo "INSTALL4J_10_LICENSE must be set";
-  exit 1
+if [ -z "${INSTALL4J_LICENSE_KEY+x}" ]; then
+    echo "Error: INSTALL4J_LICENSE_KEY must be set"
+    exit 1
 fi
 
+# Define constants
+INSTALL4J_VERSION="10_0_9"
+INSTALL4J_CACHE="$HOME/.install4j10"
+install4jc="/usr/local/bin/install4jc"
 
-mkdir -p ~/.install4j10
-export INSTALL4J_CACHE=$HOME/.install4j10
+# Create cache directory
+mkdir -p "$INSTALL4J_CACHE"
 
-# install4jc="/usr/local/bin/install4jc"
-install4jc="/Applications/install4j.app/Contents/Resources/app/bin/install4jc"
-
+# Install Install4j if not present
 if [ -f "$install4jc" ]; then
-    echo "$install4jc already exists"
+    echo "Install4j is already installed at $install4jc"
 else
-  echo "$install4jc does not exist. Installing..."
-
-  # installer automation for ubuntu-latest; replaced
-  # wget -nv --directory-prefix=$INSTALL4J_CACHE -nc https://download.ej-technologies.com/install4j/install4j_linux-x64_10_0_6.deb
-  # sudo apt install -y $INSTALL4J_CACHE/install4j_linux-x64_10_0_6.deb
-
-  # installer automation for macos-latest; macos needed for apple notarizing
-  wget -nv --directory-prefix=$INSTALL4J_CACHE -nc https://download.ej-technologies.com/install4j/install4j_macos_10_0_6.dmg
-  sleep 5
-  hdiutil attach /Users/runner/.install4j10/install4j_macos_10_0_6.dmg
-  sleep 5
-  cp -rf /Volumes/install4j/install4j.app /Applications
-  sleep 5
-  hdiutil detach /Volumes/install4j
-
+    echo "Installing Install4j..."
+    INSTALL4J_URL="https://download.ej-technologies.com/install4j/install4j_linux-x64_${INSTALL4J_VERSION}.deb"
+    wget -nv --directory-prefix="$INSTALL4J_CACHE" -nc "$INSTALL4J_URL"
+    sudo apt install -y "$INSTALL4J_CACHE/install4j_linux-x64_${INSTALL4J_VERSION}.deb"
+    rm -f "$INSTALL4J_CACHE/install4j_linux-x64_${INSTALL4J_VERSION}.deb"
 fi
 
-INSTALL4J_ARGS="$INSTALL4J_ARGS --release=$version -D liquibaseVersion=$version -D install4j.logToStderr=true"
-
-if [ ! -e target/keys ]; then
-  echo "WARNING: not signing installer because target/keys directory does not exist."
-  INSTALL4J_ARGS="$INSTALL4J_ARGS --disable-signing"
-else
-  INSTALL4J_ARGS="$INSTALL4J_ARGS --win-keystore-password=$INSTALL4J_WINDOWS_KEY_PASSWORD --mac-keystore-password=$INSTALL4J_APPLE_KEY_PASSWORD --apple-id=$INSTALL4J_APPLE_ID --apple-id-password=$INSTALL4J_APPLE_ID_PASSWORD"
-fi
-
-"$install4jc" --license=$INSTALL4J_10_LICENSE
+# Configure and run Install4j
+INSTALL4J_ARGS="-L $INSTALL4J_LICENSE_KEY --release=$version -D liquibaseVersion=$version -D install4j.logToStderr=true --disable-signing"
 "$install4jc" $INSTALL4J_ARGS src/main/install4j/liquibase.install4j
-

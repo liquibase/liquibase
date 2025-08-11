@@ -14,7 +14,7 @@ import java.util.logging.Level;
  */
 public class LiquibaseCommandLineConfiguration implements AutoloadedConfigurations {
 
-    public static final ConfigurationDefinition<Class> DRIVER;
+    public static final ConfigurationDefinition<String> DRIVER;
     public static final ConfigurationDefinition<Class> DATABASE_CLASS;
     public static final ConfigurationDefinition<String> CLASSPATH;
     public static final ConfigurationDefinition<String> DRIVER_PROPERTIES_FILE;
@@ -35,11 +35,13 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
     public static final ConfigurationDefinition<Boolean> SHOW_HIDDEN_ARGS;
     public static final ConfigurationDefinition<Boolean> INCLUDE_MATCHING_TAG_IN_ROLLBACK_OLDEST;
     public static final ConfigurationDefinition<Boolean> WORKAROUND_ORACLE_CLOB_CHARACTER_LIMIT;
+    public static final ConfigurationDefinition<Boolean> SUPPRESS_LIQUIBASE_SQL;
+    public static final ConfigurationDefinition<String> INTEGRATION_NAME;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
 
-        DRIVER = builder.define("driver", Class.class).setDescription("Database driver class").build();
+        DRIVER = builder.define("driver", String.class).setDescription("Database driver class").build();
         DATABASE_CLASS = builder.define("databaseClass", Class.class).setDescription("Class to use for Database implementation").build();
         CLASSPATH = builder.define("classpath", String.class).setDescription("Additional classpath entries to use").build();
         DRIVER_PROPERTIES_FILE = builder.define("driverPropertiesFile", String.class)
@@ -74,7 +76,9 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                 .setDefaultValue("liquibase", "Controls which log channels have their level set by the liquibase.logLevel setting. Comma separate multiple values. To set the level of all channels, use 'all'. Example: liquibase,org.mariadb.jdbc")
                 .build();
 
-        LOG_FILE = builder.define("logFile", String.class).build();
+        LOG_FILE = builder.define("logFile", String.class)
+                .setDescription("Users can use .gz file extension to enable log files compression.")
+                .build();
         MIRROR_CONSOLE_MESSAGES_TO_LOG = builder.define("mirrorConsoleMessagesToLog", Boolean.class)
                 .setDefaultValue(Boolean.TRUE)
                 .setDescription("When set to true, the console messages are mirrored to the logs as [liquibase.ui] to provide a more complete picture of liquibase operations to log analysis tools. Set to false to change this behavior.")
@@ -139,6 +143,17 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
         WORKAROUND_ORACLE_CLOB_CHARACTER_LIMIT = builder.define("workaroundOracleClobCharacterLimit", Boolean.class)
                 .setDescription("If true, long strings in Oracle will be chunked at 4000 characters when an insert statement is run, to avoid running afoul of Oracle's 4000 character limit for insert statements to clob type columns (which appears as 'ORA-01704: string literal too long.')")
                 .setDefaultValue(true)
+                .setHidden(true)
+                .build();
+
+        SUPPRESS_LIQUIBASE_SQL = builder.define("suppressLiquibaseSql", Boolean.class)
+                .setDescription("When set to true, this global property prevents DBCL and DBCLH sql from being present in console and logs during *-sql commands, such as update-sql, rollback-sql, etc.")
+                .setDefaultValue(false)
+                .build();
+
+        INTEGRATION_NAME = builder.define("integrationName", String.class)
+                .setDefaultValue("cli")
+                .setDescription("The name of the integration used to invoke Liquibase, for example, cli, or JavaAPI. It is not required to specify this value. This is primarily used by wrappers around Liquibase (like Gradle), so that analytics can be differentiated for those integrations.")
                 .setHidden(true)
                 .build();
    }

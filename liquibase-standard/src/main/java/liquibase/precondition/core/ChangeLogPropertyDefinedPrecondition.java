@@ -10,7 +10,9 @@ import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.precondition.AbstractPrecondition;
+import lombok.Getter;
 
+@Getter
 public class ChangeLogPropertyDefinedPrecondition extends AbstractPrecondition {
 
     private String property;
@@ -26,16 +28,8 @@ public class ChangeLogPropertyDefinedPrecondition extends AbstractPrecondition {
         return "changeLogPropertyDefined";
     }
 
-    public String getProperty() {
-        return property;
-    }
-
     public void setProperty(String property) {
         this.property = property;
-    }
-
-    public String getValue() {
-        return value;
     }
 
     public void setValue(String value) {
@@ -61,7 +55,10 @@ public class ChangeLogPropertyDefinedPrecondition extends AbstractPrecondition {
         }
         Object propertyValue = changeLogParameters.getValue(property, changeLog);
         if (propertyValue == null) {
-            throw new PreconditionFailedException("Changelog property '"+ property +"' was not set", changeLog, this);
+            propertyValue = changeLogParameters.getLocalValue(property, changeSet);
+            if (null == propertyValue) {
+                throw new PreconditionFailedException("Changelog property '"+ property +"' was not set", changeLog, this);
+            }
         }
         if ((value != null) && !propertyValue.toString().equals(value)) {
             throw new PreconditionFailedException("Expected changelog property '"+ property +"' to have a value of '"+value+"'.  Got '"+propertyValue+"'", changeLog, this);

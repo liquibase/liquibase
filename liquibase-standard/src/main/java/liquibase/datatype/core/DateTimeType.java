@@ -8,7 +8,7 @@ import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
-import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -25,7 +25,7 @@ public class DateTimeType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
+        String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
 
         if ((database instanceof DerbyDatabase) || (database instanceof FirebirdDatabase) || (database instanceof
             H2Database) || (database instanceof HsqlDatabase)) {
@@ -192,7 +192,7 @@ public class DateTimeType extends LiquibaseDataType {
         } catch (ParseException e) {
             String[] genericFormats = new String[] {"yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd'T'HH:mm:ss.SSS", "yyyy-MM-dd'T'HH:mm:ss" };
 
-            //regexp can't handle millisenconds beyond three digits
+            //regexp can't handle milliseconds beyond three digits
             String shortenedValue = value.replaceFirst("(\\.\\d{3})\\d+", "$1");
 
             for (String format : genericFormats) {
@@ -217,7 +217,7 @@ public class DateTimeType extends LiquibaseDataType {
     }
 
     private boolean zeroTime(String stringVal) {
-        return "".equals(stringVal.replace("-", "").replace(":", "").replace(" ", "").replace("0", ""));
+        return (stringVal.replace("-", "").replace(":", "").replace(" ", "").replace("0", "")).isEmpty();
     }
 
     protected DateFormat getDateTimeFormat(Database database) {

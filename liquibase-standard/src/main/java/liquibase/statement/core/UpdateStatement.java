@@ -5,32 +5,30 @@ import liquibase.statement.AbstractSqlStatement;
 import java.util.*;
 
 public class UpdateStatement extends AbstractSqlStatement {
-    private final String catalogName;
-    private final String schemaName;
-    private final String tableName;
     private final SortedMap<String, Object> newColumnValues = new TreeMap<>();
     private String whereClause;
 
     private final List<String> whereColumnNames = new ArrayList<>();
     private final List<Object> whereParameters = new ArrayList<>();
+    private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
 
 
     public UpdateStatement(String catalogName, String schemaName, String tableName) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
+        this.databaseTableIdentifier.setCatalogName(catalogName);
+        this.databaseTableIdentifier.setSchemaName(schemaName);
+        this.databaseTableIdentifier.setTableName(tableName);
     }
 
     public String getCatalogName() {
-        return catalogName;
+        return databaseTableIdentifier.getCatalogName();
     }
 
     public String getSchemaName() {
-        return schemaName;
+        return databaseTableIdentifier.getSchemaName();
     }
 
     public String getTableName() {
-        return tableName;
+        return databaseTableIdentifier.getTableName();
     }
 
     public UpdateStatement addNewColumnValue(String columnName, Object newValue) {

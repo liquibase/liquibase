@@ -5,15 +5,17 @@ import liquibase.change.ChangeFactory;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.logging.Logger;
+import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.PreconditionFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.sql.visitor.SqlVisitorFactory;
-import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import java.util.Stack;
@@ -72,6 +74,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     @Override
     public void startElement(String uri, String localName, String qualifiedName, Attributes attributes) throws SAXException {
         ParsedNode node = new ParsedNode(null, localName);
+        setParsedNamespace(qualifiedName, node);
         try {
             if (attributes != null) {
                 for (int i=0; i< attributes.getLength(); i++) {
@@ -86,7 +89,11 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 nodeStack.peek().addChild(node);
             }
             if (nodeStack.isEmpty()) {
+                if(!node.getName().equals(ChangeLogParser.DATABASE_CHANGE_LOG)) {
+                    throw new SAXParseException(String.format("\"%s\" expected as root element", ChangeLogParser.DATABASE_CHANGE_LOG), null);
+                }
                 databaseChangeLogTree = node;
+
             }
             nodeStack.push(node);
             textStack.push(new StringBuilder());
@@ -95,12 +102,20 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
         }
     }
 
+    private static void setParsedNamespace(String qualifiedName, ParsedNode node) {
+        String parsedNamespace = null;
+        if (qualifiedName.contains(":")) {
+            parsedNamespace = qualifiedName.substring(0, qualifiedName.lastIndexOf(":"));
+        }
+        node.setParsedNamespace(parsedNamespace);
+    }
+
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         ParsedNode node = nodeStack.pop();
         try {
             String seenText = this.textStack.pop().toString();
-            if (!"".equals(StringUtil.trimToEmpty(seenText))) {
+            if (!StringUtils.trimToEmpty(seenText).isEmpty()) {
                 node.setValue(seenText.trim());
             }
         } catch (ParsedNodeException e) {

@@ -12,6 +12,8 @@ import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.core.*;
 import liquibase.util.*;
+import lombok.Getter;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.math.BigInteger;
 import java.text.NumberFormat;
@@ -57,6 +59,14 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     private BigInteger incrementBy;
     private String remarks;
     private Boolean descending;
+    private Boolean included;
+
+    /**
+     * The raw date value as it was passed in, before any parsing or processing.
+     * This is useful for extensions that need to know the original value passed in, such as Neo4j extension
+     */
+    @Getter
+    private String rawDateValue;
 
     /**
      * Create a ColumnConfig object based on a {@link Column} snapshot.
@@ -66,6 +76,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         setName(columnSnapshot.getName());
         setComputed(BooleanUtil.isTrue(columnSnapshot.getComputed()) ? Boolean.TRUE : null);
         setDescending(BooleanUtil.isTrue(columnSnapshot.getDescending()) ? Boolean.TRUE : null);
+        setIncluded(BooleanUtils.isTrue(columnSnapshot.getIncluded()) ? Boolean.TRUE : null);
         if (columnSnapshot.getType() != null) {
             setType(columnSnapshot.getType().toString());
         }
@@ -340,7 +351,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * Return the function this column should be set from.
      * @see #setValue(String)
      */
-
     public DatabaseFunction getValueComputed() {
         return valueComputed;
     }
@@ -387,6 +397,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * @throws DateParseException if the columnType isn't supported for "now" or "today" values.
      */
     public ColumnConfig setValueDate(String valueDate) throws DateParseException {
+        this.rawDateValue = valueDate;
         if ((valueDate == null) || "null".equalsIgnoreCase(valueDate)) {
             this.valueDate = null;
         } else if (NowAndTodayUtil.isNowOrTodayFormat(valueDate)) {
@@ -721,8 +732,17 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return descending;
     }
 
+    public Boolean getIncluded() {
+        return included;
+    }
+
     public ColumnConfig setDescending(Boolean descending) {
         this.descending = descending;
+        return this;
+    }
+
+    public ColumnConfig setIncluded(Boolean included) {
+        this.included = included;
         return this;
     }
 
@@ -795,6 +815,8 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         incrementBy = parsedNode.getChildValue(null, "incrementBy", BigInteger.class);
         remarks = parsedNode.getChildValue(null, "remarks", String.class);
         descending = parsedNode.getChildValue(null, "descending", Boolean.class);
+        included= parsedNode.getChildValue(null, "included", Boolean.class);
+
 
 
         value = parsedNode.getChildValue(null, "value", String.class);
@@ -805,9 +827,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         setValueNumeric(parsedNode.getChildValue(null, "valueNumeric", String.class));
 
         try {
+            this.rawDateValue = parsedNode.getChildValue(null, "valueDate", String.class);
             valueDate = parsedNode.getChildValue(null, "valueDate", Date.class);
         } catch (ParsedNodeException e) {
-            valueComputed = new DatabaseFunction(parsedNode.getChildValue(null, "valueDate", String.class));
+            valueComputed = new DatabaseFunction(this.rawDateValue);
         }
         valueBoolean = parsedNode.getChildValue(null, "valueBoolean", Boolean.class);
         valueBlobFile = parsedNode.getChildValue(null, "valueBlobFile", String.class);
@@ -886,6 +909,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     public static class ValueNumeric extends Number {
         private static final long serialVersionUID = 1381154777956917462L;
 
+        @Getter
         private final Number delegate;
         private final String value;
 
@@ -942,16 +966,15 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             return this.toString().hashCode();
         }
 
-        public Number getDelegate() {
-            return delegate;
-        }
     }
 
     @Override
     public Object getSerializableFieldValue(String field) {
         Object o = ReflectionSerializer.getInstance().getValue(this, field);
         if (field.equals("valueDate") || field.equals("defaultValueDate")) {
-            return new ISODateFormat().format((Date)o);
+            return new ISODateFormat().format((Date) o);
+        } if (field.equals("rawDateValue")) { // this field should not be used for checksum purposes
+            return null;
         } else {
             return o;
         }

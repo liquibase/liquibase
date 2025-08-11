@@ -6,6 +6,8 @@ import liquibase.configuration.ConfigurationValueObfuscator;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.ArrayList;
+import java.util.List;
 
 public class StartH2CommandStep extends AbstractCommandStep {
 
@@ -17,6 +19,12 @@ public class StartH2CommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<String> USERNAME_ARG;
     public static final CommandArgumentDefinition<String> PASSWORD_ARG;
     public static final CommandArgumentDefinition<Boolean> LAUNCH_BROWSER_ARG;
+
+    private static final CommandArgumentDefinition<Boolean> DETACHED;
+    /**
+     * List of threads that are running the H2 database. Used to stop them when the stopH2 command is run.
+     */
+    public static final List<Thread> RUNNING_THREADS = new ArrayList<>();
 
     static {
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
@@ -50,6 +58,11 @@ public class StartH2CommandStep extends AbstractCommandStep {
                 .description("Whether to open a browser to the database's web interface")
                 .defaultValue(true)
                 .build();
+
+        DETACHED = builder.argument("detached", Boolean.class)
+                .description("When set to true, Liquibase initiates the H2 database in a new thread without blocking, allowing use within the flow command. Regardless of the parameter setting, data stored in the H2 database is cleared when the JVM exits, such as at the end of the flow command.")
+                .defaultValue(false)
+                .build();
     }
 
     @Override
@@ -74,39 +87,51 @@ public class StartH2CommandStep extends AbstractCommandStep {
         final String password = commandScope.getConfiguredValue(PASSWORD_ARG).getValue();
         final Integer dbPort = commandScope.getConfiguredValue(DB_PORT_ARG).getValue();
         final Integer webPort = commandScope.getConfiguredValue(WEB_PORT_ARG).getValue();
+        final Boolean detached = commandScope.getConfiguredValue(DETACHED).getValue();
 
-        try (Connection devConnection = DriverManager.getConnection("jdbc:h2:mem:dev", username, password);
-             Connection intConnection = DriverManager.getConnection("jdbc:h2:mem:integration", username, password)) {
+        Thread thread = new Thread(() -> {
+            try (Connection devConnection = DriverManager.getConnection("jdbc:h2:mem:dev", username, password);
+                 Connection intConnection = DriverManager.getConnection("jdbc:h2:mem:integration", username, password)) {
 
-            startTcpServer(dbPort);
+                startTcpServer(dbPort);
 
-            Object webServer = startWebServer(webPort);
-            String devUrl = createWebSession(devConnection, webServer, commandScope.getConfiguredValue(LAUNCH_BROWSER_ARG).getValue());
-            String intUrl = createWebSession(intConnection, webServer, false);
+                Object webServer = startWebServer(webPort);
+                String devUrl = createWebSession(devConnection, webServer, commandScope.getConfiguredValue(LAUNCH_BROWSER_ARG).getValue());
+                String intUrl = createWebSession(intConnection, webServer, false);
 
-            System.out.println("Connection Information:" + System.lineSeparator() +
-                    "  Dev database: " + System.lineSeparator() +
-                    "    JDBC URL: jdbc:h2:tcp://localhost:" + dbPort + "/mem:dev" + System.lineSeparator() +
-                    "    Username: " + username + System.lineSeparator() +
-                    "    Password: " + password + System.lineSeparator() +
-                    "  Integration database: " + System.lineSeparator() +
-                    "    JDBC URL: jdbc:h2:tcp://localhost:" + dbPort + "/mem:integration" + System.lineSeparator() +
-                    "    Username: " + username + System.lineSeparator() +
-                    "    Password: " + password + System.lineSeparator() +
-                    "" + System.lineSeparator() +
-                    "Opening Database Console in Browser..." + System.lineSeparator() +
-                    "  Dev Web URL: " + devUrl + System.lineSeparator() +
-                    "  Integration Web URL: " + intUrl + System.lineSeparator());
+                System.out.println("Connection Information:" + System.lineSeparator() +
+                        "  Dev database: " + System.lineSeparator() +
+                        "    JDBC URL: jdbc:h2:tcp://localhost:" + dbPort + "/mem:dev" + System.lineSeparator() +
+                        "    Username: " + username + System.lineSeparator() +
+                        "    Password: " + password + System.lineSeparator() +
+                        "  Integration database: " + System.lineSeparator() +
+                        "    JDBC URL: jdbc:h2:tcp://localhost:" + dbPort + "/mem:integration" + System.lineSeparator() +
+                        "    Username: " + username + System.lineSeparator() +
+                        "    Password: " + password + System.lineSeparator() +
+                        "" + System.lineSeparator() +
+                        "Opening Database Console in Browser..." + System.lineSeparator() +
+                        "  Dev Web URL: " + devUrl + System.lineSeparator() +
+                        "  Integration Web URL: " + intUrl + System.lineSeparator());
 
 
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> Scope.getCurrentScope().getUI().sendMessage("Shutting down H2 database...")));
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    Scope.getCurrentScope().getUI().sendMessage("Shutting down H2 database...");
+                }));
 
-            Thread.sleep(Long.MAX_VALUE);
-        } catch (InterruptedException e) {
-            throw e;
-        } catch (Throwable e) {
-            e.printStackTrace();
-            System.exit(-1);
+                Thread.sleep(Long.MAX_VALUE);
+            } catch (Throwable e) {
+                e.printStackTrace();
+                Thread.currentThread().interrupt();
+                System.exit(-1);
+            }
+        });
+
+        RUNNING_THREADS.add(thread);
+        thread.start();
+
+        if (Boolean.FALSE.equals(detached)) {
+            thread.join();
+            RUNNING_THREADS.remove(thread);
         }
 
         resultsBuilder.addResult("statusCode", 0);

@@ -44,7 +44,7 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
         List<Resource> returnList = new ArrayList<>();
         for (String file : contentByFileName.keySet()) {
             if (file.startsWith(path)) {
-                if (!recursive && file.split("/").length > 2) {
+                if (!recursive && (file.split("/").length) - (path.split("/").length) > 2) {
                     continue;
                 }
                 returnList.add(new MockResource(file, contentByFileName.get(file)));

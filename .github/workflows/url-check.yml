@@ -33,7 +33,7 @@ jobs:
         if: ${{ failure() }}
         uses: rtCamp/action-slack-notify@v2
         env:
-          SLACK_CHANNEL: team-liquibase
+          SLACK_CHANNEL: team-liquibase-foundation
           SLACK_COLOR: ${{ job.status }} # or a specific color like 'good' or '#ff00ff'
           SLACK_MESSAGE: "${{ github.job }}: ${{ job.status }} @here"
           SLACK_USERNAME: "liquibot"
@@ -41,3 +41,4 @@ jobs:
           MSG_MINIMAL: actions url
           SLACK_ICON_EMOJI: ':liquibase:'
           SLACK_LINK_NAMES: true
+          

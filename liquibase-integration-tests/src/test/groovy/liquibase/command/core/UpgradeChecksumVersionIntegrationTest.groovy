@@ -17,7 +17,7 @@ import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.statement.SqlStatement
 import liquibase.statement.core.MarkChangeSetRanStatement
-import liquibase.statement.core.RawSqlStatement
+import liquibase.statement.core.RawParameterizedSqlStatement
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -34,7 +34,7 @@ class UpgradeChecksumVersionIntegrationTest extends Specification{
     }
 
     private insertDbclRecord(String changelogfile) {
-        h2.execute(new RawSqlStatement("""
+        h2.execute(new RawParameterizedSqlStatement("""
 INSERT INTO DATABASECHANGELOG
 (ID, AUTHOR, FILENAME, DATEEXECUTED, ORDEREXECUTED, EXECTYPE, MD5SUM, DESCRIPTION, COMMENTS, TAG, LIQUIBASE, CONTEXTS, LABELS, DEPLOYMENT_ID)
 VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUTED', '8:d925207397a5bb8863a41d513a65afd1', 'sql', 'example comment', NULL, 'DEV', 'example-context1', 'example-label', '5561619071');
@@ -67,9 +67,6 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         then:
         ranChangeSets.size() == 2
         ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 9 })
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
 
         where:
         storedFilepathPrefix | _
@@ -104,9 +101,6 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.size() == 2
         ranChangeSets.get(0).getLastCheckSum().getVersion() == 8
         ranChangeSets.get(1).getLastCheckSum().getVersion() == 9
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     def "update-to-tag" () {
@@ -137,9 +131,6 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.get(0).getLastCheckSum().getVersion() == 9
         ranChangeSets.get(1).getLastCheckSum().getVersion() == 9
         ranChangeSets.get(2).getLastCheckSum().getVersion() == 9
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     def "update-count"() {
@@ -163,9 +154,6 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         ranChangeSets.size() == 2
         ranChangeSets.get(0).getLastCheckSum().getVersion() == 8
         ranChangeSets.get(1).getLastCheckSum().getVersion() == 9
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
 
@@ -195,9 +183,6 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         then:
         ranChangeSets.size() == 2
         ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 9 })
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
 
@@ -226,9 +211,6 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         then:
         ranChangeSets.size() == 1
         ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     def "update-count-sql calculates checksum but does not update DBCL"() {
@@ -257,9 +239,6 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         then:
         ranChangeSets.size() == 1
         ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     def "update-to-tag-sql calculates checksum but does not update DBCL"() {
@@ -288,9 +267,6 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         then:
         ranChangeSets.size() == 1
         ranChangeSets.forEach({ rcs -> assert rcs.getLastCheckSum().getVersion() == 8 })
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 
     @Unroll
@@ -298,12 +274,12 @@ VALUES('1', 'your.name', '$changelogfile', '2023-05-31 14:33:39.108', 1, 'EXECUT
         def changesetFilepath = "changelogs/h2/checksum/dbms-filter-changelog.xml"
         final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(h2.getDatabaseFromFactory())
         changeLogService.init()
-        h2.execute(new RawSqlStatement("""
+        h2.execute(new RawParameterizedSqlStatement("""
 INSERT INTO DATABASECHANGELOG
 (ID, AUTHOR, FILENAME, DATEEXECUTED, ORDEREXECUTED, EXECTYPE, MD5SUM, DESCRIPTION, COMMENTS, TAG, LIQUIBASE, CONTEXTS, LABELS, DEPLOYMENT_ID)
 VALUES('1', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.108', 1, 'EXECUTED', '8:0a36c7b201a287dd3348e8dd19e44be7', 'sql', 'example comment', NULL, 'DEV', 'example-context1', 'example-label', '5561619071');
 """))
-        h2.execute(new RawSqlStatement("""
+        h2.execute(new RawParameterizedSqlStatement("""
 INSERT INTO DATABASECHANGELOG
 (ID, AUTHOR, FILENAME, DATEEXECUTED, ORDEREXECUTED, EXECTYPE, MD5SUM, DESCRIPTION, COMMENTS, TAG, LIQUIBASE, CONTEXTS, LABELS, DEPLOYMENT_ID)
 VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED', '8:a6a54dbc65048ebf1388da78c31ef1a9', 'sqlFile; sqlFile', '', NULL, 'DEV', 'example-context1', 'example-label', '5561619071');
@@ -330,10 +306,6 @@ VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED'
         ranChangeSets.get(0).getLastCheckSum().toString() == "9:d41d8cd98f00b204e9800998ecf8427e"
         ranChangeSets.get(1).getLastCheckSum().toString() == "9:62336a615e62e89c9d86128d1ca60ecf"
         ranChangeSets.get(2).getLastCheckSum().toString() == "9:3b78b9910981c62ca27148640fad7bc2"
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
-
     }
 
 
@@ -342,12 +314,12 @@ VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED'
         def changesetFilepath = "changelogs/h2/checksum/dbms-filter-changelog.xml"
         final ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(h2.getDatabaseFromFactory())
         changeLogService.init()
-        h2.execute(new RawSqlStatement("""
+        h2.execute(new RawParameterizedSqlStatement("""
 INSERT INTO DATABASECHANGELOG
 (ID, AUTHOR, FILENAME, DATEEXECUTED, ORDEREXECUTED, EXECTYPE, MD5SUM, DESCRIPTION, COMMENTS, TAG, LIQUIBASE, CONTEXTS, LABELS, DEPLOYMENT_ID)
 VALUES('1', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.108', 1, 'EXECUTED', '8:0a36c7b201a287dd3348e8dd19e44be7', 'sql', 'example comment', NULL, 'DEV', 'example-context1', 'example-label', '5561619071');
 """))
-        h2.execute(new RawSqlStatement("""
+        h2.execute(new RawParameterizedSqlStatement("""
 INSERT INTO DATABASECHANGELOG
 (ID, AUTHOR, FILENAME, DATEEXECUTED, ORDEREXECUTED, EXECTYPE, MD5SUM, DESCRIPTION, COMMENTS, TAG, LIQUIBASE, CONTEXTS, LABELS, DEPLOYMENT_ID)
 VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED', '8:a6a54dbc65048ebf1388da78c31ef1a9', 'sqlFile; sqlFile', '', NULL, 'DEV', 'example-context1', 'example-label', '5561619071');
@@ -380,10 +352,6 @@ VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED'
         ranChangeSets.get(0).getLastCheckSum().toString() == "8:0a36c7b201a287dd3348e8dd19e44be7"
         ranChangeSets.get(1).getLastCheckSum().toString() == "8:a6a54dbc65048ebf1388da78c31ef1a9"
         ranChangeSets.get(2).getLastCheckSum().toString() == "8:551a6b5455d661ce7101a063b818ca3e"
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
-
     }
 
     @Unroll
@@ -417,8 +385,5 @@ VALUES('2', 'fl', '$changesetFilepath', '2023-09-29 14:33:39.112', 2, 'EXECUTED'
         def ranChangeSets = changeLogService.getRanChangeSets()
         ranChangeSets.size() == 1
         ranChangeSets.get(0).getLastCheckSum().toString() == "7:72c7eea8dda3c3582e3cfb39eec12033"
-
-        cleanup:
-        CommandUtil.runDropAll(h2)
     }
 }

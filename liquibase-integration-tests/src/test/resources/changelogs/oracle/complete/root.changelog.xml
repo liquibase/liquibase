@@ -457,4 +457,29 @@ END testSP;
         <dropNotNullConstraint tableName="unnamed_constraint" columnName="id"/>
     </changeSet>
 
+    <changeSet id="create-table-with-rowdependencies" author="matheusviegas">
+        <createTable tableName="test_rowdeps" rowDependencies="true">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="description" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="createTableWithTimestampWithTimeZoneColumn" author="mallod">
+        <createTable tableName="TEST_TABLE_WITH_TIMEZONE_COLUMN">
+            <column name="ID" type="bigint"/>
+            <column name="CREATED" type="TIMESTAMP(6) WITH TIME ZONE"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="insertDateWithTimeZoneValue" author="mallod">
+        <insert tableName="TEST_TABLE_WITH_TIMEZONE_COLUMN">
+            <column name="ID" value="9000"/>
+            <column name="CREATED" valueDate="2024-01-14T00:00:00+02:00"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

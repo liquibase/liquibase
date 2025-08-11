@@ -11,19 +11,16 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
+import liquibase.statement.core.UpdateChangeSetFilenameStatement;
+import lombok.Getter;
 
-import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 
 public abstract class AbstractChangeLogHistoryService implements ChangeLogHistoryService {
 
+    @Getter
     private Database database;
-    private String deploymentId;
-
-    public Database getDatabase() {
-        return database;
-    }
 
     @Override
     public void setDatabase(Database database) {
@@ -32,7 +29,6 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
 
     @Override
     public void reset() {
-
     }
 
     @Override
@@ -130,25 +126,36 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
     }
 
     @Override
-    public String getDeploymentId() {
-        return this.deploymentId;
+    public void replaceFilePath(ChangeSet changeSet, String oldPath) throws DatabaseException {
+        String idBeingReplaced = DatabaseChangeLog.normalizePath(oldPath) + "::" + changeSet.getId() + "::" + changeSet.getAuthor();
+         Scope.getCurrentScope().getLog(AbstractChangeLogHistoryService.class)
+                 .warning("Replacing path in databasechangelog table for changeset [" + idBeingReplaced + "] by [" + changeSet.getFilePath()+ "]");
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new UpdateChangeSetFilenameStatement
+                (changeSet, oldPath));
+        getDatabase().commit();
+        reset();
     }
 
+    /**
+     * @deprecated use {@link Scope#getDeploymentId()}
+     */
     @Override
-    public void resetDeploymentId() {
-        this.deploymentId = null;
-    }
+    @Deprecated
+    public String getDeploymentId() { return Scope.getCurrentScope().getDeploymentId(); }
 
+    /**
+     * @deprecated This is now handled automatically by the root scope
+     */
     @Override
-    public void generateDeploymentId() {
-        if (this.deploymentId == null) {
-            long time = (new Date()).getTime();
-            String dateString = String.valueOf(time);
-            DecimalFormat decimalFormat = new DecimalFormat("0000000000");
-            this.deploymentId = dateString.length() > 9 ? dateString.substring(dateString.length() - 10) :
-                    decimalFormat.format(time);
-        }
-    }
+    @Deprecated
+    public void resetDeploymentId() {}
+
+    /**
+     * @deprecated This is now handled automatically by the root scope
+     */
+    @Override
+    @Deprecated
+    public void generateDeploymentId() {}
 
 
 }

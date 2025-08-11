@@ -90,12 +90,16 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
     private void checkUsingSnapshot(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
         Column example = new Column();
         if (StringUtil.trimToNull(getTableName()) != null) {
-            example.setRelation(new Table().setName(database.correctObjectName(getTableName(), Table.class)).setSchema(new Schema(getCatalogName(), getSchemaName())));
+            String schemaName = getSchemaName();
+            if (schemaName == null) {
+                schemaName = database.getDefaultSchemaName();
+            }
+            example.setRelation(new Table().setName(database.correctObjectName(getTableName(), Table.class)).setSchema(new Schema(getCatalogName(), schemaName)));
         }
         example.setName(database.correctObjectName(getColumnName(), Column.class));
 
         try {
-            if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
+            if (!SnapshotGeneratorFactory.getInstance().hasIgnoreNested(example, database)) {
                 throw new PreconditionFailedException("Column '" + database.escapeColumnName(catalogName, schemaName, getTableName(), getColumnName()) + "' does not exist", changeLog, this);
             }
         } catch (LiquibaseException e) {
@@ -162,7 +166,7 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
             // column or table does not exist
             throw new PreconditionFailedException(format(
                     "Column %s.%s.%s does not exist", schemaName,
-                    tableName, columnName), changeLog, this);
+                    tableName, columnName), changeLog, this, e);
         }
     }
 

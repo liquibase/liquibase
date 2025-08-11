@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Calendar;
 
+import liquibase.Scope;
+
 /**
  * Utility methods for PreparedStatementSetter/Creator and CallableStatementCreator
  * implementations, providing sophisticated parameter management (including support
@@ -77,10 +79,10 @@ abstract class StatementCreatorUtils {
             if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
                 boolean useSetObject = false;
                 try {
-                    useSetObject = (ps.getConnection().getMetaData().getDatabaseProductName().indexOf("Informix") != -1);
+                    useSetObject = (ps.getConnection().getMetaData().getDatabaseProductName().contains("Informix"));
                 }
                 catch (Throwable ex) {
-//                    logger.debug("Could not check database product name", ex);
+                    Scope.getCurrentScope().getLog(StatementCreatorUtils.class).fine("Could not check database product name", ex);
                 }
                 if (useSetObject) {
                     ps.setObject(paramIndex, null);

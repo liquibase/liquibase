@@ -10,6 +10,9 @@ import java.util.List;
 
 public class PrimaryKey extends AbstractDatabaseObject {
 
+    public static final String VALIDATE_ATRIBUTE = "validate";
+    public static final String CLUSTERED_ATTRIBUTE = "clustered";
+
     public PrimaryKey() {
         setAttribute("columns", new ArrayList<>());
     }
@@ -58,7 +61,7 @@ public class PrimaryKey extends AbstractDatabaseObject {
     }
 
     public String getColumnNames() {
-        return StringUtil.join(getColumns(), ", ", obj -> ((Column) obj).toString(false));
+        return StringUtil.join(getColumns(), ", ", obj -> ((Column) obj).getName());
     }
 
     /**
@@ -191,7 +194,7 @@ public class PrimaryKey extends AbstractDatabaseObject {
      * have 'ENABLE VALIDATE' set.
      */
     public PrimaryKey setShouldValidate(boolean shouldValidate) {
-        this.setAttribute("validate", shouldValidate);
+        this.setAttribute(VALIDATE_ATRIBUTE, shouldValidate);
         return this;
     }
 }

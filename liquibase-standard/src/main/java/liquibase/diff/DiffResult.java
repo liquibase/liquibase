@@ -173,7 +173,7 @@ public class DiffResult {
         if ((obj instanceof Catalog) || (obj instanceof Schema)) {
             if ((differences.getSchemaComparisons() != null) && (differences.getDifferences().size() == 1) &&
                 (differences.getDifference("name") != null)) {
-                if ((obj instanceof Catalog) && this.getReferenceSnapshot().getDatabase().supportsSchemas()) { //still save name
+                if ((obj instanceof Catalog) && this.getReferenceSnapshot().getDatabase().supports(Schema.class)) { //still save name
                     changedObjects.put(obj, differences);
                     return;
                 } else {

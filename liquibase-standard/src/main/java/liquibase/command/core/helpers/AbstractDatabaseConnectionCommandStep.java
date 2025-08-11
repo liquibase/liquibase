@@ -10,6 +10,7 @@ import liquibase.database.core.DatabaseUtils;
 import liquibase.exception.DatabaseException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.resource.ResourceAccessor;
+import liquibase.structure.core.Schema;
 import liquibase.util.StringUtil;
 
 import java.util.ResourceBundle;
@@ -21,7 +22,7 @@ import static java.util.ResourceBundle.getBundle;
  */
 public abstract class AbstractDatabaseConnectionCommandStep extends AbstractHelperCommandStep implements CleanUpCommandStep {
 
-    protected static final String[] COMMAND_NAME = {"abstractDatabaseConnectionCommandStep"};
+    public static final String[] COMMAND_NAME = {"abstractDatabaseConnectionCommandStep"};
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     private Database database;
@@ -73,7 +74,7 @@ public abstract class AbstractDatabaseConnectionCommandStep extends AbstractHelp
             database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver,
                     databaseClassName, driverPropertiesFile, propertyProviderClass, resourceAccessor);
 
-            if (!database.supportsSchemas()) {
+            if (!database.supports(Schema.class)) {
                 if ((defaultSchemaName != null) && (defaultCatalogName == null)) {
                     defaultCatalogName = defaultSchemaName;
                 }

@@ -52,6 +52,14 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
     }
 
     @Override
+    public boolean supports(Class<? extends DatabaseObject> object) {
+        if (Schema.class.isAssignableFrom(object)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public boolean supportsSchemas() {
         return false;
     }
@@ -173,7 +181,7 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
                 }
             }
         } catch (ParseException e) {
-            throw new DateParseException(dateAsString);
+            throw new DateParseException(String.format("Invalid date value '%s': %s", dateAsString, e));
         }
     }
 
@@ -248,7 +256,7 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
 				return MAX_DB2_TIMESTAMP_FRACTIONAL_DIGITS;
 			} else {
 				return super.getMaxFractionalDigitsForTimestamp();
-			} 
+			}
 		} catch (Exception e) {
 			return super.getMaxFractionalDigitsForTimestamp();
 		}

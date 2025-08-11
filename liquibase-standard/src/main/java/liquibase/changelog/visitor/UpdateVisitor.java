@@ -2,6 +2,7 @@ package liquibase.changelog.visitor;
 
 import liquibase.ChecksumVersion;
 import liquibase.Scope;
+import liquibase.change.Change;
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
@@ -21,6 +22,7 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -62,7 +64,8 @@ public class UpdateVisitor implements ChangeSetVisitor {
         logMdcData(changeSet);
 
         // if we don't have shouldRunChangeSetFilter go on with the old behavior assuming that it has been validated before
-        boolean isAccepted = this.shouldRunChangeSetFilter == null || this.shouldRunChangeSetFilter.accepts(changeSet).isAccepted();
+        boolean isAccepted = !changeSetInSkippedBecauseOfLicenseList(changeSet) &&
+                (this.shouldRunChangeSetFilter == null || this.shouldRunChangeSetFilter.accepts(changeSet).isAccepted());
         CheckSum oldChecksum = updateCheckSumIfRequired(changeSet);
         if (isAccepted) {
             executeAcceptedChange(changeSet, databaseChangeLog, database);
@@ -71,6 +74,11 @@ public class UpdateVisitor implements ChangeSetVisitor {
             upgradeCheckSumVersionForAlreadyExecutedOrNullChange(changeSet, database, oldChecksum);
             this.database.commit();
         }
+    }
+
+    private static boolean changeSetInSkippedBecauseOfLicenseList(ChangeSet changeSet) {
+        List<ChangeSet> skippedChangeSets = changeSet.getChangeLog().getSkippedBecauseOfLicenseChangeSets();
+        return skippedChangeSets.stream().anyMatch(c -> c == changeSet);
     }
 
     /**
@@ -107,7 +115,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
     private void executeAcceptedChange(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database)
             throws DatabaseException, DatabaseHistoryException, MigrationFailedException {
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-        if (!(executor instanceof LoggingExecutor)) {
+        if (!(executor instanceof LoggingExecutor) && allChangeSetsShouldRun(changeSet)) {
             Scope.getCurrentScope().getUI().sendMessage("Running Changeset: " + changeSet);
         }
         RunStatus runStatus = this.database.getRunStatus(changeSet);
@@ -122,14 +130,21 @@ public class UpdateVisitor implements ChangeSetVisitor {
             fireRunFailed(changeSet, databaseChangeLog, database, e);
             throw e;
         }
-        if (!Objects.equals(runStatus, RunStatus.NOT_RAN) && Objects.equals(execType, ExecType.EXECUTED)) {
+        if (!Objects.equals(runStatus, RunStatus.NOT_RAN)
+                && (Objects.equals(execType, ExecType.EXECUTED) || Objects.equals(execType, ExecType.MARK_RAN))) {
             execType = ExecType.RERAN;
         }
-        fireRan(changeSet, databaseChangeLog, database, execType);
         addAttributesForMdc(changeSet, execType);
         // reset object quoting strategy after running changeset
         this.database.setObjectQuotingStrategy(previousStr);
-        this.database.markChangeSetExecStatus(changeSet, execType);
+        if (execType != ExecType.SKIPPED) {
+            this.database.markChangeSetExecStatus(changeSet, execType);
+            fireRan(changeSet, databaseChangeLog, database, execType);
+        }
+    }
+
+    private boolean allChangeSetsShouldRun(ChangeSet changeSet) {
+        return changeSet.getChanges().stream().allMatch(Change::shouldRunOnOs);
     }
 
     protected void fireRunFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, MigrationFailedException e) {
@@ -152,9 +167,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
 
     private void addAttributesForMdc(ChangeSet changeSet, ExecType execType) {
         changeSet.setAttribute("updateExecType", execType);
-        ChangeLogHistoryService changelogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
-        String deploymentId = changelogService.getDeploymentId();
-        changeSet.setAttribute("deploymentId", deploymentId);
+        changeSet.setAttribute("deploymentId", Scope.getCurrentScope().getDeploymentId());
     }
 }
 

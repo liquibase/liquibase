@@ -3,6 +3,7 @@ package liquibase.logging.mdc;
 import liquibase.plugin.Plugin;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,6 +27,11 @@ public class NoOpMdcManager implements MdcManager {
 
     @Override
     public MdcObject put(String key, Map<String, Object> values, boolean removeWhenScopeExits) {
+        return new MdcObject(key, values);
+    }
+
+    @Override
+    public MdcObject put(String key, List<? extends CustomMdcObject> values) {
         return new MdcObject(key, values);
     }
 

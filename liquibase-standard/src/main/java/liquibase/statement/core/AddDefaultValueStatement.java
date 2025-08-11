@@ -1,59 +1,40 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
 public class AddDefaultValueStatement extends AbstractSqlStatement {
-    private final String catalogName;
-    private final String schemaName;
-    private final String tableName;
     private final String columnName;
     private final String columnDataType;
     private final Object defaultValue;
 
+    @Setter
     private String defaultValueConstraintName;
+    private DatabaseTableIdentifier databaseTableIdentifier = new DatabaseTableIdentifier(null, null, null);
 
     public AddDefaultValueStatement(String catalogName, String schemaName, String tableName, String columnName, String columnDataType) {
         this(catalogName, schemaName, tableName, columnName, columnDataType, null);
     }
 
     public AddDefaultValueStatement(String catalogName, String schemaName, String tableName, String columnName, String columnDataType, Object defaultValue) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
+        this.databaseTableIdentifier.setCatalogName(catalogName);
+        this.databaseTableIdentifier.setSchemaName(schemaName);
+        this.databaseTableIdentifier.setTableName(tableName);
         this.columnName = columnName;
         this.columnDataType = columnDataType;
         this.defaultValue = defaultValue;
     }
 
-    public String getColumnName() {
-        return columnName;
-    }
-    
-    public String getColumnDataType() {
-        return columnDataType;
-    }
-
     public String getCatalogName() {
-        return catalogName;
+        return databaseTableIdentifier.getCatalogName();
     }
-
     public String getSchemaName() {
-        return schemaName;
+        return databaseTableIdentifier.getSchemaName();
     }
-
     public String getTableName() {
-        return tableName;
+        return databaseTableIdentifier.getTableName();
     }
 
-    public Object getDefaultValue() {
-        return defaultValue;
-    }
-
-    public String getDefaultValueConstraintName() {
-        return defaultValueConstraintName;
-    }
-
-    public void setDefaultValueConstraintName(String defaultValueConstraintName) {
-        this.defaultValueConstraintName = defaultValueConstraintName;
-    }
 }

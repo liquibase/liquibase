@@ -1,7 +1,10 @@
 package liquibase.statement;
 
+import lombok.Getter;
+
 import java.math.BigInteger;
 
+@Getter
 public class AutoIncrementConstraint implements ColumnConstraint {
     private String columnName;
     private BigInteger startWith;
@@ -30,44 +33,24 @@ public class AutoIncrementConstraint implements ColumnConstraint {
         setDefaultOnNull(defaultOnNull);
     }
 
-    public String getColumnName() {
-        return columnName;
-    }
-
     public AutoIncrementConstraint setColumnName(String columnName) {
         this.columnName = columnName;
         return this;
     }
 
-    public BigInteger getStartWith() {
-        return startWith;
-    }
-    
     public AutoIncrementConstraint setStartWith(BigInteger startWith) {
         this.startWith = startWith;
         return this;
     }
-    
-    public BigInteger getIncrementBy() {
-        return incrementBy;
-    }
-    
+
     public AutoIncrementConstraint setIncrementBy(BigInteger incrementBy) {
         this.incrementBy = incrementBy;
         return this;
     }
 
-    public String getGenerationType() {
-        return generationType;
-    }
-
     public AutoIncrementConstraint setGenerationType(String generationType) {
         this.generationType = generationType;
         return this;
-    }
-
-    public Boolean getDefaultOnNull() {
-        return defaultOnNull;
     }
 
     public AutoIncrementConstraint setDefaultOnNull(Boolean defaultOnNull) {

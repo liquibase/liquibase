@@ -9,13 +9,16 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
 
 public class DiffToChangeLogTest {
+
     @Test
+    @SuppressWarnings("unchecked")
     public void getOrderedOutputTypes_isConsistent() throws Exception {
         MySQLDatabase database = new MySQLDatabase();
         DiffToChangeLog obj = new DiffToChangeLog(new DiffResult(new EmptyDatabaseSnapshot(database), new EmptyDatabaseSnapshot(database), new CompareControl()), null);
@@ -31,25 +34,33 @@ public class DiffToChangeLogTest {
     @Test
     public void getOrderedOutputTypes_hasDependencies() throws Exception {
         MySQLDatabase database = new MySQLDatabase();
-        Class<? extends DatabaseObject>[] typesArray = new Class[5];
-        typesArray[0] = Schema.class;
-        typesArray[1] = View.class;
-        typesArray[2] = Catalog.class;
-        typesArray[3] = Table.class;
-        typesArray[4] = Column.class;
-        SnapshotControl control = new SnapshotControl(database, typesArray);
+        // note: MySQL does not support schemas, so Schema won't be included
+        SnapshotControl control = new SnapshotControl(database, Schema.class, Catalog.class, Table.class, View.class, Column.class);
         EmptyDatabaseSnapshot emptyDatabaseSnapshot = new EmptyDatabaseSnapshot(database, control);
+
         DiffToChangeLog obj = new DiffToChangeLog(new DiffResult(emptyDatabaseSnapshot, emptyDatabaseSnapshot, new CompareControl()), null);
 
-        for (Class<? extends ChangeGenerator> type : new Class[] {UnexpectedObjectChangeGenerator.class, MissingObjectChangeGenerator.class, ChangedObjectChangeGenerator.class}) {
-            List<Class<? extends DatabaseObject>> orderedOutputTypes = obj.getOrderedOutputTypes(type);
-            assertThat("There should be some types", orderedOutputTypes, hasSize(greaterThan(5)));
-        }
-        List<Class<? extends DatabaseObject>> unexpectedOrderedOutputTypes = obj.getOrderedOutputTypes(UnexpectedObjectChangeGenerator.class);
-        assertThat("There should be some types", unexpectedOrderedOutputTypes, hasSize(7));
-        List<Class<? extends DatabaseObject>> missingOrderedOutputTypes = obj.getOrderedOutputTypes(MissingObjectChangeGenerator.class);
-        assertThat("There should be some types", missingOrderedOutputTypes, hasSize(6));
-        List<Class<? extends DatabaseObject>> changedOrderedOutputTypes = obj.getOrderedOutputTypes(ChangedObjectChangeGenerator.class);
-        assertThat("There should be some types", changedOrderedOutputTypes, hasSize(6));
+        assertThat("There should be some types", obj.getOrderedOutputTypes(UnexpectedObjectChangeGenerator.class), equalTo(Arrays.asList(
+                Catalog.class,
+                ForeignKey.class,
+                View.class,
+                Table.class,
+                PrimaryKey.class,
+                Column.class
+        )));
+        assertThat("There should be some types", obj.getOrderedOutputTypes(MissingObjectChangeGenerator.class), equalTo(Arrays.asList(
+                Catalog.class,
+                Table.class,
+                Column.class,
+                PrimaryKey.class,
+                View.class
+        )));
+        assertThat("There should be some types", obj.getOrderedOutputTypes(ChangedObjectChangeGenerator.class), equalTo(Arrays.asList(
+                Catalog.class,
+                Table.class,
+                Column.class,
+                PrimaryKey.class,
+                View.class
+        )));
     }
 }

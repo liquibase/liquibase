@@ -1,6 +1,8 @@
 package liquibase.executor.jvm;
 
 import java.util.List;
+
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -40,6 +42,7 @@ public class AlternateConnectionExecutor extends JdbcExecutor {
             super.execute(change, sqlVisitors);
             database.commit();
         } catch (Exception e) {
+            Scope.getCurrentScope().getLog(getClass()).severe("Error executing change " + change, e);
             database.rollback();
         }
     }

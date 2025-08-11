@@ -20,7 +20,6 @@ class GenerateChangeLogMySQLIntegrationTest extends Specification {
     private DatabaseTestSystem mysql = (DatabaseTestSystem) Scope.getCurrentScope().getSingleton(TestSystemFactory.class).getTestSystem("mysql")
 
     def setup() {
-        CommandUtil.runDropAll(mysql)
         def sql = """
 create table str4 (
     col1 int ,
@@ -29,14 +28,10 @@ create table str4 (
     primary key(col2, col1)
 )
 """
-        def updateChangelogFile = "target/test-classes/create-table-" + StringUtil.randomIdentifer(10) + ".sql"
+        def updateChangelogFile = "target/test-classes/create-table-" + StringUtil.randomIdentifier(10) + ".sql"
         File updateFile = new File(updateChangelogFile)
         updateFile.write(sql.toString())
         CommandUtil.runUpdate(mysql, updateChangelogFile)
-    }
-
-    def cleanupSpec() {
-        CommandUtil.runDropAll(mysql)
     }
 
     def "Ensure that MySQL generated changelog puts primary keys in as part of the create table change, even if the primary key is in a different order than the columns in the table" () {
@@ -111,7 +106,6 @@ create table str4 (
 
         cleanup:
         outputFile.delete()
-        CommandUtil.runDropAll(mysql)
 
     }
 
@@ -134,9 +128,6 @@ create table str4 (
         def outputContent = outputStream.toString();
         outputContent.contains(" runOnChange=\"true\">")
         outputContent.contains(" replaceIfExists=\"true\"")
-
-        cleanup:
-        CommandUtil.runDropAll(mysql)
     }
 
     def "Ensure generated changelog SQL format contains 'OR REPLACE' instruction for a view when USE_OR_REPLACE_OPTION is set as true"() {
@@ -156,7 +147,6 @@ create table str4 (
 
         cleanup:
         outputFile.delete()
-        CommandUtil.runDropAll(mysql)
     }
 
     def "Ensure generated changelog SQL format does NOT contain 'OR REPLACE' instruction for a view when USE_OR_REPLACE_OPTION is set as false"() {
@@ -177,7 +167,6 @@ create table str4 (
 
         cleanup:
         outputFile.delete()
-        CommandUtil.runDropAll(mysql)
     }
 
     static void runGenerateChangelog(DatabaseTestSystem db, String outputFile, boolean useOrReplaceOption) throws CommandExecutionException {

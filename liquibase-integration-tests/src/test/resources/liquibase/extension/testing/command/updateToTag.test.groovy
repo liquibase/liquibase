@@ -189,21 +189,20 @@ Optional Args:
 
         expectedFileContent = [ "target/test-classes/mismatchedDBMS.txt":
             [
-              "UPDATE SUMMARY",
-              "Run:                          2",
-              "Previously run:               0",
-              "Filtered out:                 1",
-              "-------------------------------",
-              "Total change sets:            3",
-              "FILTERED CHANGE SETS SUMMARY",
-              "DBMS mismatch:                1",
-              "+--------------------------------------------------------------+--------------------------------+",
-              "| Changeset Info                                               | Reason Skipped                 |",
-              "+--------------------------------------------------------------+--------------------------------+",
-              "|                                                              | mismatched DBMS value of 'foo' |",
-              "| changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvox |                                |",
-              "| land                                                         |                                |",
-              "+--------------------------------------------------------------+--------------------------------+"
+              """UPDATE SUMMARY
+              Run:                          2
+              Previously run:               0
+              Filtered out:                 1
+              -------------------------------
+              Total change sets:            3
+              FILTERED CHANGE SETS SUMMARY
+              DBMS mismatch:                1
+              +--------------------------------------------------------------+--------------------------------+
+              | Changeset Info                                               | Reason Skipped                 |
+              +--------------------------------------------------------------+--------------------------------+
+              | changelogs/h2/complete/mismatchedDbms.changelog.xml::1::nvox | mismatched DBMS value of 'foo' |
+              | land                                                         |                                |
+              +--------------------------------------------------------------+--------------------------------+"""
             ]
         ]
     }

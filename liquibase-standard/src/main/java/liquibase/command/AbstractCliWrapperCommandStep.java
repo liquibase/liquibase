@@ -13,6 +13,7 @@ import java.util.*;
  *
  * @deprecated
  */
+@Deprecated
 public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep {
 
     @Override
@@ -56,7 +57,7 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
 
     /**
      * Collects the values from commandScope into an argument array to pass to {@link Main}.
-     * All arguments will values in commandScope will be passed as global arguments EXCEPT for ones listed in the commandArguments.
+     * All arguments with values in commandScope will be passed as global arguments EXCEPT for ones listed in the commandArguments.
      * If main takes a "positional argument" like `liquibase tag tagName`, specify the commandScope argument that should be converted to a positional argument in "positionalArgumentName".
      *
      * @see #removeArgumentValues(String[], String...) If any arguments should not have a value (like a --verbose flag), see

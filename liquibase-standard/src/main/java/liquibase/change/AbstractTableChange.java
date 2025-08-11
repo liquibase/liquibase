@@ -1,5 +1,8 @@
 package liquibase.change;
 
+import lombok.Setter;
+
+@Setter
 public abstract class AbstractTableChange extends AbstractChange {
     protected String catalogName;
     protected String schemaName;
@@ -10,17 +13,9 @@ public abstract class AbstractTableChange extends AbstractChange {
         return catalogName;
     }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting ="table.schema")
     public String getSchemaName() {
         return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
     }
 
     @DatabaseChangeProperty(
@@ -30,7 +25,4 @@ public abstract class AbstractTableChange extends AbstractChange {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
 }
