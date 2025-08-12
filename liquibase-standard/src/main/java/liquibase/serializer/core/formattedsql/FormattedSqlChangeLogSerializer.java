@@ -45,8 +45,9 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
             //
             ChangeSet changeSet = (ChangeSet) object;
             Database database = Scope.getCurrentScope().get(DiffToChangeLog.DIFF_SNAPSHOT_DATABASE, Database.class);
-            if (database == null) {
-                database = getTargetDatabase(changeSet);
+            Database targetDatabase = getTargetDatabase(changeSet);
+            if (database == null || ! database.getShortName().equals(targetDatabase.getShortName())) {
+                database = targetDatabase;
             }
 
             StringBuilder builder = new StringBuilder();
@@ -148,7 +149,9 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
     @Override
     public <T extends ChangeLogChild> void write(List<T> children, OutputStream out) throws IOException {
         StringBuilder builder = new StringBuilder();
-        builder.append("-- liquibase formatted sql\n\n");
+        if (Scope.getCurrentScope().get(DiffToChangeLog.ADD_FORMATTED_SQL_HEADER, true)) {
+            builder.append("-- liquibase formatted sql\n\n");
+        }
 
         for (T child : children) {
             builder.append(serialize(child, true));
