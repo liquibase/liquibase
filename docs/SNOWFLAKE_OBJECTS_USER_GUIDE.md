@@ -5,11 +5,11 @@
 The Liquibase Snowflake Extension provides comprehensive support for Snowflake's unique database features, with **168+ test classes including 40 integration tests** providing robust support for Snowflake-specific objects, data types, and operations.
 
 ### Key Features
-- **Complete Object Support**: Warehouses, File Formats, Enhanced Schemas, Databases, Tables, Sequences
+- **Complete Object Support**: Warehouses, Stages, File Formats, Enhanced Schemas, Databases, Tables, Sequences
 - **Advanced Data Types**: Semi-structured (VARIANT, OBJECT, ARRAY), Geospatial (GEOGRAPHY, GEOMETRY)
 - **Full Lifecycle**: CREATE, ALTER, DROP operations with comprehensive property support
 - **Schema Evolution**: Snapshot generation and diff detection for all Snowflake objects
-- **Validation**: XSD schema validation with format-specific rules
+- **Validation**: XSD schema validation with format-specific rules and mutual exclusivity enforcement
 
 ## Quick Reference: Supported Operations
 
@@ -18,6 +18,7 @@ The Liquibase Snowflake Extension provides comprehensive support for Snowflake's
 | Object Type | CREATE | ALTER | DROP | Clone | Snapshot | Diff | Auto Rollback | Generate Changelog |
 |-------------|--------|-------|------|-------|----------|------|---------------|-------------------|
 | **Warehouse** | ✅ | ✅ | ✅ | – | ✅ | ✅ | ✅ | ✅ |
+| **Stage** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **FileFormat** | ✅ | ✅ | ✅ | – | ✅ | ✅ | ✅ | ✅ |  
 | **Schema** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Database** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
@@ -35,6 +36,7 @@ The Liquibase Snowflake Extension provides comprehensive support for Snowflake's
 | Object Type | CREATE | ALTER | DROP | CLONE |
 |-------------|--------|-------|------|-------|
 | **Warehouse** | Full property specification with size, clustering, auto-suspend, scaling policy | Size, cluster count, auto-suspend, scaling policy modifications | With optional `IF EXISTS` | Not supported (infrastructure objects) |
+| **Stage** | Internal/external stages with cloud credentials, file formats, directory tables | SET/UNSET operations for properties, encryption, credentials | With optional `IF EXISTS` | Full cloning support with time travel options |
 | **FileFormat** | Complete format configuration for CSV/JSON/Parquet/XML/Avro/ORC | SET/UNSET operations by property type and format | With optional `IF EXISTS` | Not supported (configuration objects) |
 | **Schema** | Basic, managed access, data retention, collation settings | RENAME, SET, UNSET, ENABLE/DISABLE_MANAGED_ACCESS | With optional `IF EXISTS`, `CASCADE`, `RESTRICT` | Basic cloning support (`cloneFrom`, `fromSchema`) |
 | **Database** | Standard, transient, Iceberg-enabled, data retention | Property modifications, retention settings | With optional `IF EXISTS` | Basic cloning support (`cloneFrom`, `fromDatabase`) |
@@ -77,8 +79,16 @@ The Liquibase Snowflake Extension supports all standard Liquibase changelog form
                                managedAccess="true"/>
     </changeSet>
     
-    <!-- FileFormat -->
+    <!-- Stage -->
     <changeSet id="4" author="admin">
+        <snowflake:createStage stageName="EXTERNAL_STAGE"
+                              url="s3://my-bucket/data/"
+                              storageIntegration="S3_INTEGRATION"
+                              fileFormat="CSV_FORMAT"/>
+    </changeSet>
+    
+    <!-- FileFormat -->
+    <changeSet id="5" author="admin">
         <snowflake:createFileFormat fileFormatName="CSV_FORMAT"
                                    fileFormatType="CSV"
                                    fieldDelimiter=","
@@ -86,14 +96,14 @@ The Liquibase Snowflake Extension supports all standard Liquibase changelog form
     </changeSet>
     
     <!-- Sequence -->
-    <changeSet id="5" author="admin">
+    <changeSet id="6" author="admin">
         <snowflake:createSequence sequenceName="ORDER_ID_SEQ"
                                  startValue="1000"
                                  incrementBy="1"/>
     </changeSet>
     
     <!-- Table with Snowflake attributes -->
-    <changeSet id="6" author="admin">
+    <changeSet id="7" author="admin">
         <createTable tableName="EVENTS" 
                      snowflake:clusterBy="(EVENT_DATE)"
                      snowflake:changeTracking="true">
@@ -169,7 +179,166 @@ The Liquibase Snowflake Extension supports all standard Liquibase changelog form
 
 ---
 
-### 1.2 File Format
+### 1.2 Stage
+
+**Purpose**: Named locations for storing data files (internal Snowflake storage or external cloud storage) with comprehensive authentication, file format, and directory table support.
+
+#### Properties
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `stageName` | String | ✅ | - | Stage identifier |
+| `url` | String | – | - | External stage URL (s3://, gcs://, azure://, https://) |
+| `storageIntegration` | String | – | - | Named storage integration for authentication |
+| `orReplace` | Boolean | – | `false` | Replace if exists |
+| `ifNotExists` | Boolean | – | `false` | Create only if not exists |
+| `temporary` | Boolean | – | `false` | Create temporary stage |
+| `comment` | String | – | - | Stage description |
+
+#### Cloud Authentication Properties
+| Property | Type | Description |
+|----------|------|-------------|
+| `awsKeyId` | String | AWS access key ID |
+| `awsSecretKey` | String | AWS secret access key |
+| `awsToken` | String | AWS session token |
+| `awsRole` | String | AWS IAM role ARN |
+| `gcsServiceAccountKey` | String | GCS service account key |
+| `azureAccountName` | String | Azure storage account name |
+| `azureAccountKey` | String | Azure storage account key |
+| `azureSasToken` | String | Azure SAS token |
+
+#### File Format Properties  
+| Property | Type | Description |
+|----------|------|-------------|
+| `fileFormat` | String | Named file format reference |
+| `fileFormatType` | Enum | `CSV`, `JSON`, `PARQUET`, `AVRO`, `ORC`, `XML`, `CUSTOM` |
+| `compression` | Enum | Compression type (format-specific) |
+| `fieldDelimiter` | String | CSV field separator |
+| `recordDelimiter` | String | CSV record separator |
+| `skipHeader` | Integer | Number of header rows to skip |
+| `dateFormat` | String | Date parsing format |
+| `timeFormat` | String | Time parsing format |
+| `timestampFormat` | String | Timestamp parsing format |
+| `binaryFormat` | Enum | `HEX`, `BASE64` |
+| `nullIf` | String | String representing NULL values |
+
+#### Directory Table Properties
+| Property | Type | Description |
+|----------|------|-------------|
+| `directoryEnable` | Boolean | Enable directory table (external stages only) |
+| `autoRefresh` | Boolean | Automatically refresh directory table |
+| `refreshOnCreate` | Boolean | Refresh directory table on creation |
+| `notificationIntegration` | String | Cloud notification integration name |
+
+#### Encryption Properties
+| Property | Type | Description |
+|----------|------|-------------|
+| `encryption` | String | Encryption configuration |
+| `encryptionType` | Enum | `SNOWFLAKE_FULL`, `SNOWFLAKE_SSE`, `AWS_SSE_S3`, `AWS_SSE_KMS`, `AWS_CSE`, `GCS_SSE_KMS`, `AZURE_CSE`, `NONE` |
+| `kmsKeyId` | String | KMS key identifier |
+| `masterKey` | String | Client-side encryption master key |
+
+#### Clone Properties
+| Property | Type | Description |
+|----------|------|-------------|
+| `cloneFromStage` | String | Source stage for cloning |
+| `timeTravelType` | Enum | `TIMESTAMP`, `OFFSET`, `STATEMENT` |
+| `timeTravelValue` | String | Time travel value |
+
+#### Usage Examples
+```xml
+<!-- Internal stage (simple) -->
+<snowflake:createStage stageName="INTERNAL_STAGE"
+                      fileFormat="CSV_FORMAT"
+                      comment="Internal data staging area"/>
+
+<!-- External S3 stage with storage integration -->
+<snowflake:createStage stageName="S3_STAGE"
+                      url="s3://my-bucket/data/"
+                      storageIntegration="S3_INTEGRATION"
+                      fileFormat="JSON_FORMAT"
+                      directoryEnable="true"
+                      autoRefresh="true"/>
+
+<!-- External stage with AWS credentials -->
+<snowflake:createStage stageName="AWS_STAGE"
+                      url="s3://data-bucket/raw/"
+                      awsKeyId="AKIAIOSFODNN7EXAMPLE"
+                      awsSecretKey="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+                      fileFormatType="CSV"
+                      compression="GZIP"
+                      skipHeader="1"/>
+
+<!-- Azure stage with SAS token -->
+<snowflake:createStage stageName="AZURE_STAGE"
+                      url="azure://myaccount.blob.core.windows.net/container/"
+                      azureAccountName="myaccount"
+                      azureSasToken="?sv=2020-08-04&ss=b&srt=sco&sp=rwdlacup&se=..."
+                      encryptionType="AZURE_CSE"/>
+
+<!-- GCS stage with service account -->
+<snowflake:createStage stageName="GCS_STAGE"
+                      url="gcs://my-bucket/path/"
+                      gcsServiceAccountKey="{ \"type\": \"service_account\", ... }"
+                      fileFormat="PARQUET_FORMAT"/>
+
+<!-- Clone stage with time travel -->
+<snowflake:createStage stageName="STAGE_BACKUP"
+                      cloneFromStage="PRODUCTION_STAGE"
+                      timeTravelType="TIMESTAMP"
+                      timeTravelValue="2024-01-01 12:00:00"/>
+
+<!-- Alter stage properties -->
+<snowflake:alterStage stageName="S3_STAGE"
+                     directoryEnable="false"
+                     comment="Updated stage configuration"/>
+
+<!-- Alter stage with credentials -->
+<snowflake:alterStage stageName="DATA_STAGE"
+                     url="s3://new-bucket/data/"
+                     awsKeyId="AKIAIOSFODNN7EXAMPLE"
+                     awsSecretKey="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"/>
+
+<!-- Unset stage properties -->
+<snowflake:alterStage stageName="TEMP_STAGE"
+                     unsetUrl="true"
+                     unsetCredentials="true"/>
+
+<!-- Rename stage -->
+<snowflake:alterStage stageName="OLD_STAGE_NAME"
+                     renameTo="NEW_STAGE_NAME"/>
+
+<!-- Drop stage -->
+<snowflake:dropStage stageName="OLD_STAGE" ifExists="true"/>
+```
+
+#### Validation Rules
+- **Mutual Exclusivity**: `orReplace` and `ifNotExists` cannot both be true
+- **Authentication**: External stages require either `storageIntegration` or cloud credentials
+- **Internal Stages**: Cannot specify `url`, `storageIntegration`, or cloud credentials
+- **Directory Tables**: Only supported on external stages with `url`
+- **Temporary Stages**: Cannot enable directory tables
+- **CLONE Operations**: Cannot combine with `orReplace` or `ifNotExists`
+- **Encryption**: KMS encryption types require `kmsKeyId`
+- **Compression**: Format-specific validation (e.g., PARQUET supports SNAPPY, GZIP, LZO)
+- **Cloud Credentials**: AWS requires `awsKeyId` + `awsSecretKey`, Azure requires account name + (key OR SAS token)
+
+#### Stage Types
+
+**Internal Stages**
+- **Purpose**: Use Snowflake's internal storage
+- **Authentication**: None required (managed by Snowflake)
+- **Features**: File format configuration, basic file operations
+- **Example**: `<snowflake:createStage stageName="INTERNAL_DATA"/>`
+
+**External Stages**  
+- **Purpose**: Reference cloud storage (S3, GCS, Azure)
+- **Authentication**: Storage integration (recommended) or direct credentials
+- **Features**: Directory tables, auto-refresh, cloud-specific encryption
+- **URL Formats**: `s3://bucket/path/`, `gcs://bucket/path/`, `azure://account.blob.core.windows.net/container/`
+
+---
+
+### 1.3 File Format
 
 **Purpose**: Define data loading formats for CSV, JSON, Parquet, XML, Avro, ORC, and custom formats.
 
@@ -277,7 +446,7 @@ The Liquibase Snowflake Extension supports all standard Liquibase changelog form
 
 ---
 
-### 1.3 Enhanced Schema
+### 1.4 Enhanced Schema
 
 **Purpose**: Snowflake schemas with managed access, data retention, and cloning capabilities.
 
@@ -342,7 +511,7 @@ The Liquibase Snowflake Extension supports all standard Liquibase changelog form
 
 ---
 
-### 1.4 Database
+### 1.5 Database
 
 **Purpose**: Top-level database containers with Time Travel, transient options, and Iceberg support.
 
@@ -396,7 +565,7 @@ The Liquibase Snowflake Extension supports all standard Liquibase changelog form
 
 ---
 
-### 1.5 Sequence
+### 1.6 Sequence
 
 **Purpose**: Snowflake sequences with enhanced ordering and caching features.
 
@@ -439,7 +608,7 @@ The Liquibase Snowflake Extension supports all standard Liquibase changelog form
 
 ---
 
-### 1.6 Table (Enhanced with Snowflake Attributes)
+### 1.7 Table (Enhanced with Snowflake Attributes)
 
 **Purpose**: Standard Liquibase tables enhanced with Snowflake-specific features via namespace attributes.
 
