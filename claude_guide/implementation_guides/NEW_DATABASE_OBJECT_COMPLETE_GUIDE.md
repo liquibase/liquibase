@@ -20,6 +20,19 @@ Phase 4: Diff-Changelog/Generate-Changelog Implementation & Testing (2-3 hours)
 
 ---
 
+## 🚨 **CRITICAL: Professional Implementation Philosophy** 
+
+**LEARNED FROM LIQUIBASE TEAM REVIEW + USER EXPERIENCE DECISION**: After evaluating both approaches, we've adopted a **hybrid pattern** that combines the best of both worlds.
+
+### **Key Principles: Developer Experience + Maintainability + Consistency**
+- **Optimal Pattern**: Type-safe explicit methods backed by generic storage (hybrid approach)
+- **Developer Experience**: "I prefer the previous way -- nicer experience" (explicit methods provide IntelliSense, type safety, autocomplete)
+- **Maintainability**: Generic backend storage provides easy extensibility without code changes
+- **Data Access Strategy**: Use INFORMATION_SCHEMA queries for all object types (both schema-level and account-level)
+- **Best of Both Worlds**: Explicit API for developers, generic implementation for maintainability, consistent data access patterns
+
+---
+
 ## 📋 Template Configuration (Complete This First)
 
 **AUTONOMOUS_CHECKPOINT_0**: Template Configuration
@@ -58,6 +71,39 @@ echo "Proceed only if template values are defined above"
 **AUTONOMOUS_CHECKPOINT_1**: Requirements Development
 **PROGRESS_INDICATOR**: [██░░░] 1/4 Phases In Progress
 **PREREQUISITE_CHECK**: Template Configuration Complete ✅
+
+### 🚨 **DECISION_TREE_PHASE_1_CRITICAL**: Inheritance vs New Implementation
+
+**LEARNED FROM LIQUIBASE TEAM REVIEW**: "CreateSequenceChange is extending AbstractChange instead of liquibase.change.core.CreateSequenceChange - so it's redeclaring minValue, maxValue, etc."
+
+```yaml
+INHERITANCE_DECISION:
+  QUESTION: "Does Liquibase already have a base class for your object type?"
+  
+  EXISTING_LIQUIBASE_CLASS:
+    INDICATORS:
+      - "liquibase.change.core.Create{OBJECT_TYPE}Change exists"
+      - "Similar objects already implemented in core Liquibase"
+      - "Properties like minValue, maxValue already defined"
+    ACTION: "EXTEND existing Liquibase class (professional approach)"
+    EXAMPLE: "extends liquibase.change.core.CreateSequenceChange"
+    ANTI_PATTERN: "extends AbstractChange (causes code duplication)"
+    TIME_SAVED: "Hours of redeclaration avoided"
+    
+  NO_EXISTING_CLASS:
+    INDICATORS:
+      - "Snowflake-specific object not in core Liquibase"
+      - "Unique properties not found in existing classes"
+    ACTION: "Create new class extending AbstractChange"
+    VALIDATION: "Double-check - search core Liquibase first"
+```
+
+**VALIDATION_COMMAND_INHERITANCE**:
+```bash
+# Search for existing Liquibase base classes
+find ~/.m2/repository/org/liquibase -name "*.jar" -exec jar tf {} \; | grep -i "{OBJECT_TYPE_LOWER}" | grep Change
+grep -r "class.*{OBJECT_TYPE}" ~/.m2/repository/org/liquibase/ 2>/dev/null || echo "No existing base class found"
+```
 
 ### DECISION_TREE_PHASE_1: Requirements Source Selection
 
@@ -267,7 +313,7 @@ TEST_SCENARIOS:
 
 **Core Philosophy**: Follow exact patterns that achieved 95%+ coverage in liquibase-snowflake
 **Key Insight**: "Complete SQL string assertions are superior to component testing" - User Feedback
-**Proven Workflow**: Unit Tests (90%+) → MockedStatic Integration → Real Database Validation
+**Proven Workflow**: Unit Tests (Business Logic) → Integration Tests (Real Database) → End-to-End Validation
 
 ### Step 1: Database Object Model (45 minutes)
 
@@ -617,7 +663,55 @@ public ValidationErrors validate(Database database) {
 
 ### Step 2: Change Implementation Templates (90 minutes)
 
-**DECISION_TREE_2_2**: Change Type Selection
+**🚨 DECISION_TREE_2_2_CRITICAL**: Implementation Approach Selection
+
+**LEARNED FROM LIQUIBASE TEAM REVIEW**: "I prefer interop version, as we don't need to worry with new properties and it's almost 1/5 of the size."
+
+```yaml
+IMPLEMENTATION_APPROACH_DECISION:
+  QUESTION: "How many configurable properties does your object type have?"
+  
+  HIGH_PROPERTY_COUNT (10+ properties):
+    INDICATORS:
+      - "FileFormat-like objects with format-specific properties"
+      - "Properties that depend on other property values"
+      - "Many properties that may be added in future Snowflake versions"
+    PROFESSIONAL_APPROACH: "Generic Property Storage Pattern"
+    CODE_SIZE_TARGET: "75-100 LOC (reference: Interop team FileFormat)"
+    BENEFITS:
+      - "Zero maintenance for new Snowflake properties"
+      - "Forces developer to read documentation (honest approach)"
+      - "Self-documenting format-specific context"
+    XSD_APPROACH: "Minimal - structural validation only"
+    
+  LOW_PROPERTY_COUNT (< 10 properties):
+    INDICATORS:
+      - "Simple objects with stable property set"
+      - "Properties that are unlikely to change"
+      - "Clear, non-conditional property relationships"
+    ACCEPTABLE_APPROACH: "Explicit Property Mapping"
+    CODE_SIZE_TARGET: "100-150 LOC maximum"
+    VALIDATION_REQUIRED: "Ensure no existing Liquibase base class"
+    XSD_APPROACH: "Full validation appropriate"
+```
+
+**ANTI-PATTERNS TO AVOID**:
+```yaml
+VERBOSE_OVERENGINEERING:
+  WARNING: "354 LOC vs 75 LOC (5x larger)"
+  SYMPTOMS:
+    - "Explicit getters/setters for every possible property"
+    - "Complex conditional validation in Java code"
+    - "XSD with 50+ attributes"
+  MAINTENANCE_COST: "Code changes required for every new Snowflake property"
+  
+INHERITANCE_DUPLICATION:
+  WARNING: "Redeclaring minValue, maxValue, etc."
+  SYMPTOM: "extends AbstractChange instead of liquibase.change.core.CreateSequenceChange"
+  IMPACT: "Code duplication and maintenance burden"
+```
+
+**DECISION_TREE_2_3**: Change Type Selection
 ```yaml
 CHANGE_TYPE_DECISION:
   QUESTION: "What change operations does your object type support?"
@@ -645,7 +739,114 @@ CHANGE_TYPE_DECISION:
     TIME_ESTIMATE: "90 minutes"
 ```
 
-**TEMPLATE: CREATE_CHANGE_CLASS**
+**🏆 TEMPLATE: PROFESSIONAL_GENERIC_PROPERTY_STORAGE** (For 10+ Properties)
+
+**APPROACH**: Generic property storage - proven concise and maintainable
+
+```java
+// FILE: src/main/java/liquibase/change/core/Create{OBJECT_TYPE}Change.java
+package liquibase.change.core;
+
+import liquibase.change.*;
+import liquibase.database.Database;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.Create{OBJECT_TYPE}Statement;
+import java.util.Map;
+import java.util.HashMap;
+
+@DatabaseChange(
+    name = "create{OBJECT_TYPE}",
+    description = "Creates a {OBJECT_TYPE_LOWER} object",
+    priority = ChangeMetaData.PRIORITY_DEFAULT
+)
+public class Create{OBJECT_TYPE}Change extends AbstractChange {
+    
+    // REQUIRED: Primary identifier (always explicit)
+    private String {PRIMARY_IDENTIFIER};
+    
+    // HYBRID PATTERN: Generic backend storage for maintainability
+    private Map<String, String> objectProperties = new HashMap<>();
+    
+    // REQUIRED: Primary identifier (always explicit)
+    @DatabaseChangeProperty(requiredForDatabase = "snowflake")
+    public String get{PRIMARY_IDENTIFIER}() { 
+        return {PRIMARY_IDENTIFIER}; 
+    }
+    
+    public void set{PRIMARY_IDENTIFIER}(String {PRIMARY_IDENTIFIER}) { 
+        this.{PRIMARY_IDENTIFIER} = {PRIMARY_IDENTIFIER}; 
+    }
+    
+    // DEVELOPER EXPERIENCE: Type-safe explicit methods for common properties
+    @DatabaseChangeProperty(description = "Example property with type safety and IntelliSense")
+    public String get{EXAMPLE_PROPERTY_1}() {
+        return getObjectProperty("{EXAMPLE_PROPERTY_1}");
+    }
+    
+    public void set{EXAMPLE_PROPERTY_1}(String value) {
+        setObjectProperty("{EXAMPLE_PROPERTY_1}", value);
+    }
+    
+    @DatabaseChangeProperty(description = "Another example property")
+    public String get{EXAMPLE_PROPERTY_2}() {
+        return getObjectProperty("{EXAMPLE_PROPERTY_2}");
+    }
+    
+    public void set{EXAMPLE_PROPERTY_2}(String value) {
+        setObjectProperty("{EXAMPLE_PROPERTY_2}", value);
+    }
+    
+    // MAINTAINABILITY: Generic property methods (backend implementation)
+    public void setObjectProperty(String propertyName, String propertyValue) {
+        if (propertyValue != null) {
+            objectProperties.put(propertyName, propertyValue);
+        }
+    }
+    
+    public String getObjectProperty(String propertyName) {
+        return objectProperties.get(propertyName);
+    }
+    
+    public Map<String, String> getObjectProperties() {
+        return new HashMap<>(objectProperties);
+    }
+    
+    // REQUIRED: Generate SQL statements
+    @Override
+    public SqlStatement[] generateStatements(Database database) {
+        Create{OBJECT_TYPE}Statement statement = new Create{OBJECT_TYPE}Statement();
+        statement.set{PRIMARY_IDENTIFIER}({PRIMARY_IDENTIFIER});
+        statement.setObjectProperties(objectProperties);
+        
+        return new SqlStatement[]{statement};
+    }
+    
+    // REQUIRED: Minimal validation (business rules handled by Snowflake)
+    @Override
+    public ValidationErrors validate(Database database) {
+        ValidationErrors errors = super.validate(database);
+        
+        if ({PRIMARY_IDENTIFIER} == null || {PRIMARY_IDENTIFIER}.trim().isEmpty()) {
+            errors.addError("{PRIMARY_IDENTIFIER} is required");
+        }
+        
+        // Let Snowflake handle property-specific validation
+        // This forces developers to understand Snowflake semantics (honest approach)
+        
+        return errors;
+    }
+    
+    @Override
+    public String getConfirmationMessage() {
+        return "Created {OBJECT_TYPE_LOWER} " + get{PRIMARY_IDENTIFIER}();
+    }
+}
+```
+
+**🔧 TEMPLATE: EXPLICIT_PROPERTY_STORAGE** (For < 10 Properties Only)
+
+**WARNING**: Only use for simple objects with stable, few properties
+
 ```java
 // FILE: src/main/java/liquibase/change/core/Create{OBJECT_TYPE}Change.java
 package liquibase.change.core;
@@ -662,99 +863,57 @@ import liquibase.statement.core.Create{OBJECT_TYPE}Statement;
 )
 public class Create{OBJECT_TYPE}Change extends AbstractChange {
     
-    // REQUIRED: Primary identifier property
+    // VALIDATION REQUIRED: Check for existing Liquibase base class first!
+    // extends liquibase.change.core.Create{OBJECT_TYPE}Change if it exists
+    
     private String {PRIMARY_IDENTIFIER};
-    
-    // TEMPLATE_EXPANSION: Add your configurable properties
-    private String {EXAMPLE_PROPERTY_1};
-    private String {EXAMPLE_PROPERTY_2};
-    
-    // TEMPLATE_EXPANSION: Add conditional properties if needed
+    private String {EXAMPLE_PROPERTY_1};  // Only if truly stable
     private Boolean orReplace;
     private Boolean ifNotExists;
     
-    // REQUIRED: Primary identifier getter/setter with validation
     @DatabaseChangeProperty(requiredForDatabase = "snowflake")
-    public String get{PRIMARY_IDENTIFIER}() { 
-        return {PRIMARY_IDENTIFIER}; 
-    }
-    
-    public void set{PRIMARY_IDENTIFIER}(String {PRIMARY_IDENTIFIER}) { 
-        this.{PRIMARY_IDENTIFIER} = {PRIMARY_IDENTIFIER}; 
-    }
-    
-    // TEMPLATE_EXPANSION: Add property getters/setters
-    @DatabaseChangeProperty
-    public String get{EXAMPLE_PROPERTY_1}() { 
-        return {EXAMPLE_PROPERTY_1}; 
-    }
-    
-    public void set{EXAMPLE_PROPERTY_1}(String {EXAMPLE_PROPERTY_1}) { 
-        this.{EXAMPLE_PROPERTY_1} = {EXAMPLE_PROPERTY_1}; 
-    }
+    public String get{PRIMARY_IDENTIFIER}() { return {PRIMARY_IDENTIFIER}; }
+    public void set{PRIMARY_IDENTIFIER}(String {PRIMARY_IDENTIFIER}) { this.{PRIMARY_IDENTIFIER} = {PRIMARY_IDENTIFIER}; }
     
     @DatabaseChangeProperty
-    public String get{EXAMPLE_PROPERTY_2}() { 
-        return {EXAMPLE_PROPERTY_2}; 
-    }
+    public String get{EXAMPLE_PROPERTY_1}() { return {EXAMPLE_PROPERTY_1}; }
+    public void set{EXAMPLE_PROPERTY_1}(String {EXAMPLE_PROPERTY_1}) { this.{EXAMPLE_PROPERTY_1} = {EXAMPLE_PROPERTY_1}; }
     
-    public void set{EXAMPLE_PROPERTY_2}(String {EXAMPLE_PROPERTY_2}) { 
-        this.{EXAMPLE_PROPERTY_2} = {EXAMPLE_PROPERTY_2}; 
-    }
-    
-    // TEMPLATE_EXPANSION: Add conditional property getters/setters if needed
+    // Conditional properties
     @DatabaseChangeProperty
-    public Boolean getOrReplace() { 
-        return orReplace; 
-    }
-    
-    public void setOrReplace(Boolean orReplace) { 
-        this.orReplace = orReplace; 
-    }
+    public Boolean getOrReplace() { return orReplace; }
+    public void setOrReplace(Boolean orReplace) { this.orReplace = orReplace; }
     
     @DatabaseChangeProperty
-    public Boolean getIfNotExists() { 
-        return ifNotExists; 
-    }
+    public Boolean getIfNotExists() { return ifNotExists; }
+    public void setIfNotExists(Boolean ifNotExists) { this.ifNotExists = ifNotExists; }
     
-    public void setIfNotExists(Boolean ifNotExists) { 
-        this.ifNotExists = ifNotExists; 
-    }
-    
-    // REQUIRED: Generate SQL statements
     @Override
     public SqlStatement[] generateStatements(Database database) {
         Create{OBJECT_TYPE}Statement statement = new Create{OBJECT_TYPE}Statement();
         statement.set{PRIMARY_IDENTIFIER}({PRIMARY_IDENTIFIER});
         statement.set{EXAMPLE_PROPERTY_1}({EXAMPLE_PROPERTY_1});
-        statement.set{EXAMPLE_PROPERTY_2}({EXAMPLE_PROPERTY_2});
         statement.setOrReplace(orReplace);
         statement.setIfNotExists(ifNotExists);
         
         return new SqlStatement[]{statement};
     }
     
-    // REQUIRED: Validation with mutual exclusivity rules
     @Override
     public ValidationErrors validate(Database database) {
         ValidationErrors errors = super.validate(database);
         
-        // Validate required properties
         if ({PRIMARY_IDENTIFIER} == null || {PRIMARY_IDENTIFIER}.trim().isEmpty()) {
             errors.addError("{PRIMARY_IDENTIFIER} is required");
         }
         
-        // TEMPLATE_EXPANSION: Add mutual exclusivity validation
         if (Boolean.TRUE.equals(orReplace) && Boolean.TRUE.equals(ifNotExists)) {
             errors.addError("Cannot use both OR REPLACE and IF NOT EXISTS");
         }
         
-        // TEMPLATE_EXPANSION: Add custom validation rules
-        
         return errors;
     }
     
-    // REQUIRED: Confirmation message
     @Override
     public String getConfirmationMessage() {
         return "Created {OBJECT_TYPE_LOWER} " + get{PRIMARY_IDENTIFIER}();
@@ -1219,7 +1378,103 @@ void testGenerateSQL_InvalidMutualExclusivity_ThrowsException() {
 }
 ```
 
-### Step 4: Service Registration & XSD Integration (30 minutes)
+### Step 4: Professional Development Practices (30 minutes)
+
+**🚨 CRITICAL**: Fix anti-patterns identified in Liquibase team review
+
+#### **4A: Proper Logging (Not System.out.println)**
+
+**ANTI-PATTERN IDENTIFIED**: "it used a lot of println for debug with emojis instead of loggers"
+
+**PROFESSIONAL PATTERN**:
+```java
+// WRONG: Console debugging with emojis
+System.out.println("🔧 CORE: discoverRootLevelExtensionObjects() called");
+System.out.println("⚡ DEBUG: Processing " + objects.size() + " objects");
+
+// RIGHT: Proper Liquibase logging
+import liquibase.Scope;
+
+public class Your{OBJECT_TYPE}Class {
+    private static final Logger logger = Scope.getCurrentScope().getLog(Your{OBJECT_TYPE}Class.class);
+    
+    public void someMethod() {
+        logger.info("Processing {OBJECT_TYPE_LOWER} discovery");
+        logger.debug("Found " + objects.size() + " objects");
+        
+        if (logger.isDebugEnabled()) {
+            logger.debug("Object details: " + objects.toString());
+        }
+    }
+}
+```
+
+**VALIDATION_COMMAND_LOGGING**:
+```bash
+# Find and fix System.out.println usage
+grep -r "System\.out\.println" src/main/java/ | wc -l  # Should be 0
+grep -r "println.*emoji" src/main/java/ && echo "❌ Found emoji debugging" || echo "✅ Clean logging"
+```
+
+#### **4B: Security - Credential Validation**
+
+**SECURITY ISSUE IDENTIFIED**: "Claude also included Kevin's credentials in the testing configurations"
+
+**VALIDATION_COMMANDS_SECURITY**:
+```bash
+# Scan for hardcoded credentials
+grep -r -i "password.*=" src/ | grep -v "example\|placeholder" && echo "❌ Found credentials" || echo "✅ No credentials"
+grep -r -i "jdbc:.*@" src/ && echo "❌ Found connection strings with credentials" || echo "✅ Clean connections"
+grep -r "COMMUNITYKEVIN\|uQ1lAjwVisliu8CpUTVh0UnxoTUk3" src/ && echo "❌ Found actual credentials" || echo "✅ No real credentials"
+```
+
+**PROFESSIONAL PATTERN**:
+```yaml
+# Use configuration files (not hardcoded)
+# File: src/test/resources/liquibase.sdk.local.yaml
+liquibase:
+  sdk:
+    testSystem:
+      snowflake:
+        url: "${SNOWFLAKE_URL:jdbc:snowflake://example.com/}"
+        username: "${SNOWFLAKE_USER:test_user}"
+        password: "${SNOWFLAKE_PASSWORD:placeholder}"
+```
+
+#### **4C: Modular PR Strategy**
+
+**FEEDBACK**: "I would also ask to break it into 4 or 5 different PRs, one for each functionality"
+
+**PROFESSIONAL PR BREAKDOWN**:
+```yaml
+PR_STRATEGY:
+  PR_1_FOUNDATION:
+    SCOPE: "Database object model + basic change classes"
+    FILES: "database/object/, change/core/Create*Change.java"
+    SIZE: "100-200 LOC"
+    
+  PR_2_SQL_GENERATION:
+    SCOPE: "SQL statement classes + generators"
+    FILES: "statement/core/, sqlgenerator/"
+    DEPENDENCIES: "PR_1_FOUNDATION"
+    
+  PR_3_SNAPSHOT_DIFF:
+    SCOPE: "Database introspection + comparison"
+    FILES: "snapshot/jvm/, diff/output/"
+    DEPENDENCIES: "PR_1_FOUNDATION"
+    
+  PR_4_CHANGELOG_GENERATION:
+    SCOPE: "Diff-to-changelog generation"
+    FILES: "change/core/*ChangeGenerator"
+    DEPENDENCIES: "PR_2_SQL_GENERATION, PR_3_SNAPSHOT_DIFF"
+    
+  PR_5_TESTING_INTEGRATION:
+    SCOPE: "Comprehensive test suite"
+    FILES: "src/test/java/**/*Test.java"
+    DEPENDENCIES: "All previous PRs"
+```
+
+### Step 5: Service Registration & XSD Integration (30 minutes)
 
 **PROVEN PATTERN: Service Registration Template**
 ```bash
@@ -1290,7 +1545,7 @@ public class Create{OBJECT_TYPE}ChangeTest {
     @BeforeEach
     void setUp() {
         change = new Create{OBJECT_TYPE}Change();
-        database = mock(SnowflakeDatabase.class);
+        database = mock(SnowflakeDatabase.class); // ✅ CORRECT: Change classes don't access database
     }
     
     // ==================== Basic Functionality Tests ====================
@@ -1384,7 +1639,7 @@ public class Create{OBJECT_TYPE}GeneratorSnowflakeTest {
     @BeforeEach
     void setUp() {
         generator = new Create{OBJECT_TYPE}GeneratorSnowflake();
-        database = mock(SnowflakeDatabase.class);
+        database = mock(SnowflakeDatabase.class); // ✅ CORRECT: SQL Generators only generate SQL strings
         when(database.escapeObjectName(anyString(), any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
     
@@ -1599,25 +1854,36 @@ SNAPSHOT_SOURCE_DECISION:
   INFORMATION_SCHEMA:
     INDICATORS:
       - "SELECT * FROM INFORMATION_SCHEMA.{INFORMATION_SCHEMA_TABLE}"
-      - "Schema-level objects typically use this"
+      - "Both schema-level and account-level objects can use this"
       - "Supports parameterized queries"
-    ACTION: "Use INFORMATION_SCHEMA template"
+      - "Consistent interface across all object types"
+    ACTION: "Use INFORMATION_SCHEMA template (RECOMMENDED)"
     SQL_PATTERN: "SELECT * FROM INFORMATION_SCHEMA.{INFORMATION_SCHEMA_TABLE} WHERE SCHEMA_NAME = ?"
+    ADVANTAGES:
+      - "Standard SQL patterns familiar to developers"
+      - "Reliable and well-tested approach"
+      - "Consistent interface across all Snowflake objects"
+      - "Supports complex filtering and parameterization"
     
   SHOW_COMMAND:
+    STATUS: "ALTERNATIVE (NOT RECOMMENDED)"
     INDICATORS:
       - "SHOW {OBJECT_TYPE_UPPER}S command works"
-      - "Account-level objects typically use this"
+      - "Some account-level objects traditionally use this"
       - "No parameterization possible"
-    ACTION: "Use SHOW command template"
+    ACTION: "Avoid unless INFORMATION_SCHEMA unavailable"
     SQL_PATTERN: "SHOW {OBJECT_TYPE_UPPER}S"
-    WARNING: "Requires unified extensibility framework"
+    DISADVANTAGES: 
+      - "Less consistent interface"
+      - "Requires unified extensibility framework"
+      - "More complex to implement and maintain"
     
   CUSTOM_QUERY:
+    STATUS: "LAST RESORT"
     INDICATORS:
-      - "Neither INFORMATION_SCHEMA nor SHOW works"
+      - "INFORMATION_SCHEMA table doesn't exist for object type"
       - "Requires custom SQL or system functions"
-    ACTION: "Use custom query template"
+    ACTION: "Use custom query template only when necessary"
     SQL_PATTERN: "Custom implementation required"
     COMPLEXITY: "HIGH"
 ```
@@ -1655,53 +1921,92 @@ public class YourObjectSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator 
 }
 ```
 
-**PROVEN MICRO-CYCLE 8: Single Object Snapshot with MockedStatic Pattern** 🏆
+**CORRECTED APPROACH: Integration Tests for Database Snapshot Generators** 🏆
 
-**CRITICAL**: Use the exact MockedStatic pattern that achieved 95%+ coverage
+**CRITICAL PRINCIPLE**: Database interactions must NOT be mocked in Liquibase testing
+
+### **Unit Tests (No Database Interaction)**
+Focus on business logic only - no database mocking:
 
 ```java
-// RED: Test single object snapshot with proven ExecutorService mocking
+// ❌ WRONG: Do NOT mock database interactions
+// ✅ CORRECT: Test business logic only
+
 @Test
-void testSnapshotObject_ValidExample_ReturnsPopulatedObject() throws Exception {
-    // Given - Object example setup
+void testPriorityForSnowflakeDatabase() {
+    // Test business logic without database calls
+    assertEquals(PRIORITY_DATABASE, generator.getPriority({OBJECT_TYPE}.class, snowflakeDatabase));
+    assertEquals(PRIORITY_NONE, generator.getPriority({OBJECT_TYPE}.class, nonSnowflakeDatabase));
+}
+
+@Test
+void testHashGeneration() {
+    // Test hash logic without database calls
+    {OBJECT_TYPE} object = new {OBJECT_TYPE}();
+    object.set{PRIMARY_IDENTIFIER}("TEST_OBJECT");
+    
+    String[] hash = generator.hash(object, database, chain);
+    assertEquals("TEST_OBJECT", hash[0]);
+}
+
+@Test  
+void testNullObjectHandling() {
+    // Test null handling without database calls
+    assertNull(generator.snapshotObject(null, databaseSnapshot));
+    
+    {OBJECT_TYPE} emptyObject = new {OBJECT_TYPE}();
+    assertNull(generator.snapshotObject(emptyObject, databaseSnapshot));
+}
+```
+
+### **Integration Tests (Real Database Required)**
+All database snapshot logic must use real Snowflake connections:
+
+```java
+// ✅ CORRECT: Integration test with real database
+@Test
+@IntegrationTest
+void testSnapshotObject_RealDatabase_ValidObject() throws Exception {
+    // Given - Real database setup
     {OBJECT_TYPE} example = new {OBJECT_TYPE}();
     example.set{PRIMARY_IDENTIFIER}("TEST_OBJECT");
     
-    // PROVEN PATTERN: ExecutorService static mocking chain
-    try (MockedStatic<Scope> scopeMock = mockStatic(Scope.class)) {
-        when(Scope.getCurrentScope()).thenReturn(mock(liquibase.Scope.class));
-        when(Scope.getCurrentScope().getSingleton(ExecutorService.class)).thenReturn(executorService);
-        when(executorService.getExecutor("jdbc", database)).thenReturn(executor);
-        
-        // Mock database results
-        Map<String, Object> row = new HashMap<>();
-        row.put("{PRIMARY_IDENTIFIER_UPPER}", "TEST_OBJECT");
-        row.put("{EXAMPLE_PROPERTY_1_UPPER}", "value1");
-        row.put("{EXAMPLE_PROPERTY_2_UPPER}", "value2");
-        when(executor.queryForList(any(RawParameterizedSqlStatement.class))).thenReturn(Arrays.asList(row));
-        
-        // When - Execute snapshot
-        {OBJECT_TYPE} result = ({OBJECT_TYPE}) generator.snapshotObject(example, databaseSnapshot);
-        
-        // Then - Complete verification
-        assertNotNull(result);
-        assertEquals("TEST_OBJECT", result.get{PRIMARY_IDENTIFIER}());
-        assertEquals("value1", result.get{EXAMPLE_PROPERTY_1}());
-        assertEquals("value2", result.get{EXAMPLE_PROPERTY_2}());
-        
-        // PROVEN PATTERN: Verify complete SQL string with ArgumentCaptor
-        ArgumentCaptor<RawParameterizedSqlStatement> sqlCaptor = ArgumentCaptor.forClass(RawParameterizedSqlStatement.class);
-        verify(executor).queryForList(sqlCaptor.capture());
-        
-        String actualSQL = sqlCaptor.getValue().getSql();
-        String expectedSQL = "SELECT {PRIMARY_IDENTIFIER_UPPER}, {EXAMPLE_PROPERTY_1_UPPER}, {EXAMPLE_PROPERTY_2_UPPER} " +
-                            "FROM {INFORMATION_SCHEMA_TABLE} " +
-                            "WHERE {PRIMARY_IDENTIFIER_UPPER} = ?";
-        assertEquals(expectedSQL, actualSQL);
-    }
+    // Setup real test object in database
+    createTestObjectInDatabase("TEST_OBJECT");
+    
+    // When - Execute with real database
+    {OBJECT_TYPE} result = ({OBJECT_TYPE}) generator.snapshotObject(example, realDatabaseSnapshot);
+    
+    // Then - Verify real data
+    assertNotNull(result);
+    assertEquals("TEST_OBJECT", result.get{PRIMARY_IDENTIFIER}());
+    
+    // Cleanup
+    dropTestObjectFromDatabase("TEST_OBJECT");
 }
 
-// GREEN: Implement snapshot with proven pattern
+@Test
+@IntegrationTest  
+void testAddTo_RealDatabase_DiscoversBulkObjects() throws Exception {
+    // Given - Real schema with test objects
+    Schema schema = setupTestSchema();
+    createMultipleTestObjects(schema);
+    
+    // When - Execute bulk discovery with real database
+    generator.addTo(schema, realDatabaseSnapshot);
+    
+    // Then - Verify real objects discovered
+    Set<{OBJECT_TYPE}> objects = schema.getDatabaseObjects({OBJECT_TYPE}.class);
+    assertTrue(objects.size() >= 2);
+    
+    // Cleanup
+    cleanupTestObjects();
+}
+```
+
+### **Implementation Pattern (Real Database Access)**
+
+```java
 @Override
 protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) 
         throws DatabaseException, InvalidExampleException {
@@ -1716,17 +2021,15 @@ protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot
     
     Database database = snapshot.getDatabase();
     
-    // SCHEMA-LEVEL OBJECTS: Use INFORMATION_SCHEMA with parameters
+    // ✅ CORRECT: Direct database access (no mocking)
     String sql = "SELECT {PRIMARY_IDENTIFIER_UPPER}, {EXAMPLE_PROPERTY_1_UPPER}, {EXAMPLE_PROPERTY_2_UPPER} " +
                 "FROM {INFORMATION_SCHEMA_TABLE} " +
                 "WHERE {PRIMARY_IDENTIFIER_UPPER} = ?";
     
-    // ACCOUNT-LEVEL OBJECTS: Use SHOW commands (requires different pattern)
-    // String sql = "SHOW {OBJECT_TYPE_UPPER}S LIKE ?";
-    
     List<String> parameters = Arrays.asList({OBJECT_TYPE_LOWER}.get{PRIMARY_IDENTIFIER}());
     RawParameterizedSqlStatement rawSql = new RawParameterizedSqlStatement(sql, parameters.toArray());
     
+    // ✅ CORRECT: Real ExecutorService call (no mocking)
     List<Map<String, Object>> results = Scope.getCurrentScope()
         .getSingleton(ExecutorService.class)
         .getExecutor("jdbc", database)
@@ -1744,108 +2047,30 @@ protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot
     
     return result;
 }
-```
 
-**PROVEN MICRO-CYCLE 9: Bulk Object Discovery with Resource Cleanup** 🏆
-
-**CRITICAL**: Use proven pattern with explicit resource cleanup verification
-
-```java
-// RED: Test bulk discovery with proven MockedStatic pattern
-@Test
-void testAddTo_Schema{OBJECT_TYPE}_DiscoversAllObjects() throws Exception {
-    // Given - Schema setup
-    Schema schema = new Schema("TEST_SCHEMA");
-    schema.setName("TEST_SCHEMA");
-    
-    // PROVEN PATTERN: ExecutorService mocking with multiple results
-    try (MockedStatic<Scope> scopeMock = mockStatic(Scope.class)) {
-        when(Scope.getCurrentScope()).thenReturn(mock(liquibase.Scope.class));
-        when(Scope.getCurrentScope().getSingleton(ExecutorService.class)).thenReturn(executorService);
-        when(executorService.getExecutor("jdbc", database)).thenReturn(executor);
-        
-        // Mock multiple database results
-        List<Map<String, Object>> results = Arrays.asList(
-            createRowMap("OBJECT1", "value1", "value2"),
-            createRowMap("OBJECT2", "valueA", "valueB"),
-            createRowMap("OBJECT3", "valueX", "valueY")
-        );
-        when(executor.queryForList(any(RawParameterizedSqlStatement.class))).thenReturn(results);
-        
-        // When - Execute bulk discovery
-        generator.addTo(schema, databaseSnapshot);
-        
-        // Then - Verify objects added to schema
-        Set<{OBJECT_TYPE}> objects = schema.getDatabaseObjects({OBJECT_TYPE}.class);
-        assertEquals(3, objects.size());
-        
-        // Verify objects also added to top-level snapshot (CRITICAL for diff)
-        Set<{OBJECT_TYPE}> topLevelObjects = databaseSnapshot.get({OBJECT_TYPE}.class);
-        assertEquals(3, topLevelObjects.size());
-        
-        // PROVEN PATTERN: Verify complete SQL string
-        ArgumentCaptor<RawParameterizedSqlStatement> sqlCaptor = ArgumentCaptor.forClass(RawParameterizedSqlStatement.class);
-        verify(executor).queryForList(sqlCaptor.capture());
-        
-        String actualSQL = sqlCaptor.getValue().getSql();
-        String expectedSQL = "SELECT {PRIMARY_IDENTIFIER_UPPER}, {EXAMPLE_PROPERTY_1_UPPER}, {EXAMPLE_PROPERTY_2_UPPER} " +
-                            "FROM {INFORMATION_SCHEMA_TABLE} " +
-                            "WHERE SCHEMA_NAME = ? AND CATALOG_NAME = ?";
-        assertEquals(expectedSQL, actualSQL);
-    }
-}
-
-// RED: Test resource cleanup on exception (proven pattern)
-@Test
-void testAddTo_DatabaseException_EnsuresResourceCleanup() throws Exception {
-    Schema schema = new Schema("TEST_SCHEMA");
-    
-    try (MockedStatic<Scope> scopeMock = mockStatic(Scope.class)) {
-        when(Scope.getCurrentScope()).thenReturn(mock(liquibase.Scope.class));
-        when(Scope.getCurrentScope().getSingleton(ExecutorService.class)).thenReturn(executorService);
-        when(executorService.getExecutor("jdbc", database)).thenReturn(executor);
-        
-        // Given: Exception during query execution
-        when(executor.queryForList(any(RawParameterizedSqlStatement.class)))
-            .thenThrow(new DatabaseException("Test exception"));
-        
-        // When: Exception occurs
-        assertThrows(DatabaseException.class, () -> {
-            generator.addTo(schema, databaseSnapshot);
-        });
-        
-        // Then: Verify cleanup attempts were made
-        // Note: Implementation should handle exceptions gracefully
-    }
-}
-
-// GREEN: Implement bulk discovery with proven patterns
 @Override
 protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) 
         throws DatabaseException, InvalidExampleException {
     
-    if (foundObject instanceof Schema) { // Schema-level objects
+    if (foundObject instanceof Schema) {
         Schema schema = (Schema) foundObject;
         Database database = snapshot.getDatabase();
         
-        // PROVEN PATTERN: INFORMATION_SCHEMA query with parameters
+        // ✅ CORRECT: Real INFORMATION_SCHEMA query
         String sql = "SELECT {PRIMARY_IDENTIFIER_UPPER}, {EXAMPLE_PROPERTY_1_UPPER}, {EXAMPLE_PROPERTY_2_UPPER} " +
                     "FROM {INFORMATION_SCHEMA_TABLE} " +
                     "WHERE SCHEMA_NAME = ? AND CATALOG_NAME = ?";
         
-        List<String> parameters = Arrays.asList(
-            schema.getName(),
-            schema.getCatalogName()
-        );
+        List<String> parameters = Arrays.asList(schema.getName(), schema.getCatalogName());
         RawParameterizedSqlStatement rawSql = new RawParameterizedSqlStatement(sql, parameters.toArray());
         
         try {
+            // ✅ CORRECT: Real database execution
             List<Map<String, Object>> results = Scope.getCurrentScope()
                 .getSingleton(ExecutorService.class)
                 .getExecutor("jdbc", database)
                 .queryForList(rawSql);
             
-            // Process all results
             for (Map<String, Object> row : results) {
                 {OBJECT_TYPE} object = new {OBJECT_TYPE}();
                 object.set{PRIMARY_IDENTIFIER}((String) row.get("{PRIMARY_IDENTIFIER_UPPER}"));
@@ -1853,46 +2078,38 @@ protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot)
                 object.set{EXAMPLE_PROPERTY_2}((String) row.get("{EXAMPLE_PROPERTY_2_UPPER}"));
                 object.setSchema(schema);
                 
-                // Add to schema
                 schema.addDatabaseObject(object);
                 
-                // CRITICAL: Also add to top-level snapshot for diff access
                 try {
                     snapshot.include(object);
                 } catch (InvalidExampleException e) {
-                    // Log but continue processing other objects
                     Scope.getCurrentScope().getLog(getClass()).warning(
                         "Could not include {OBJECT_TYPE_LOWER} " + object.get{PRIMARY_IDENTIFIER}() + " in snapshot", e);
                 }
             }
         } catch (DatabaseException e) {
-            // Rethrow with context
             throw new DatabaseException("Failed to discover {OBJECT_TYPE_LOWER} objects in schema " + schema.getName(), e);
         }
     }
-    
-    // ACCOUNT-LEVEL OBJECTS: Different pattern (requires unified framework)
-    if (foundObject instanceof Account) {
-        Account account = (Account) foundObject;
-        Database database = snapshot.getDatabase();
-        
-        // SHOW command pattern (no parameters)
-        String sql = "SHOW {OBJECT_TYPE_UPPER}S";
-        RawParameterizedSqlStatement rawSql = new RawParameterizedSqlStatement(sql);
-        
-        // Similar processing but without schema context
-        // ... implementation follows same pattern
-    }
-}
-
-private Map<String, Object> createRowMap(String identifier, String prop1, String prop2) {
-    Map<String, Object> row = new HashMap<>();
-    row.put("{PRIMARY_IDENTIFIER_UPPER}", identifier);
-    row.put("{EXAMPLE_PROPERTY_1_UPPER}", prop1);
-    row.put("{EXAMPLE_PROPERTY_2_UPPER}", prop2);
-    return row;
 }
 ```
+
+### **Testing Strategy Summary**
+
+**✅ CORRECT: Mock Database Object (No DB Access Needed)**
+- **Change Classes**: Mock Database for validation/statement generation tests
+- **SQL Generators**: Mock Database for SQL string generation tests  
+- **Comparators**: Mock Database for object comparison logic tests
+
+**❌ WRONG: Mock Database Interactions (Real DB Access Required)**  
+- **Snapshot Generators**: Must use real Snowflake connections - NO mocking
+- **Integration Tests**: Must use real database for end-to-end validation
+- **Database Query Logic**: Must test against actual INFORMATION_SCHEMA tables
+
+**Summary:**
+1. **Business Logic**: Mock Database objects when no real DB access needed
+2. **Database Operations**: Use real Snowflake connections - never mock DB interactions  
+3. **Focus**: Test SQL generation logic vs real database introspection separately
 
 ### Step 3: Comparator Implementation (1 hour)
 
@@ -2335,7 +2552,7 @@ grep -n "{[A-Z_]*}" src/test/java/**/*{OBJECT_TYPE}*Test.java
 grep -n "@BeforeEach\|@Before" src/test/java/**/*{OBJECT_TYPE}*Test.java
 
 # Step 4: Check database mock setup
-grep -n "when(\|mock(\|@Mock" src/test/java/**/*{OBJECT_TYPE}*Test.java
+grep -n "@IntegrationTest\|createTest.*InDatabase\|realDatabase" src/test/java/**/*{OBJECT_TYPE}*Test.java
 
 # Step 5: Run with debugging
 mvn test -Dtest="FailingTestClass" -Dmaven.surefire.debug=true
@@ -2387,8 +2604,8 @@ echo "Test SQL manually in Snowflake console with test credentials"
 echo "Validate query syntax:"
 grep -n "SELECT.*FROM INFORMATION_SCHEMA" src/main/java/**/*{OBJECT_TYPE}*SnapshotGenerator*.java
 
-# Step 2: Check result set mocking
-grep -n "when(resultSet" src/test/java/**/*{OBJECT_TYPE}*SnapshotGenerator*Test.java
+# Step 2: Check integration test setup
+grep -n "@IntegrationTest\|realDatabase\|createTest.*InDatabase" src/test/java/**/*{OBJECT_TYPE}*SnapshotGenerator*Test.java
 
 # Step 3: Validate object construction
 grep -n "new {OBJECT_TYPE}" src/main/java/**/*{OBJECT_TYPE}*SnapshotGenerator*.java

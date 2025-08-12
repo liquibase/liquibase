@@ -148,6 +148,360 @@ SHOW STAGES [ LIKE '<pattern>' ] [ IN { ACCOUNT | DATABASE | SCHEMA } ]
 DESCRIBE STAGE <stage_name>
 ```
 
+## TECHNICAL_DESIGN
+**LIQUIBASE CHANGESET IMPLEMENTATION DESIGN FOR SNOWFLAKE STAGE OBJECTS**
+
+### CHANGESET_SYNTAX_EXAMPLES
+**Complete XML changeset examples following liquibase-snowflake extension patterns**
+
+#### CREATE STAGE Examples
+
+##### 1. Basic Internal Stage
+```xml
+<changeSet id="create-internal-stage" author="data-engineer">
+    <snowflake:createStage
+        stageName="my_internal_stage"
+        schemaName="staging"
+        catalogName="data_warehouse"
+        comment="Internal stage for data processing"
+        encryption="SNOWFLAKE_FULL"
+        ifNotExists="true">
+        
+        <!-- File Format Configuration -->
+        <fileFormat
+            type="CSV"
+            compression="GZIP"
+            recordDelimiter="\n"
+            fieldDelimiter=","
+            skipHeader="1"
+            trimSpace="true"
+            errorOnColumnCountMismatch="true"/>
+            
+        <!-- Tags -->
+        <tags>
+            <tag name="environment" value="production"/>
+            <tag name="department" value="data_engineering"/>
+        </tags>
+    </snowflake:createStage>
+</changeSet>
+```
+
+##### 2. External Stage with Storage Integration
+```xml
+<changeSet id="create-s3-stage-with-integration" author="data-engineer">
+    <snowflake:createStage
+        stageName="s3_data_lake_stage"
+        schemaName="raw_data"
+        catalogName="data_warehouse"
+        url="s3://my-data-lake/raw-data/"
+        storageIntegration="aws_s3_integration"
+        comment="External S3 stage with storage integration">
+        
+        <!-- Directory Table Configuration -->
+        <directory
+            enable="true"
+            autoRefresh="true"
+            refreshOnCreate="false"
+            notificationIntegration="s3_notification_integration"/>
+            
+        <!-- File Format for Parquet -->
+        <fileFormat
+            type="PARQUET"
+            compression="SNAPPY"
+            binaryFormat="BASE64"/>
+            
+        <!-- Tags for governance -->
+        <tags>
+            <tag name="data_source" value="external"/>
+            <tag name="cloud_provider" value="aws"/>
+            <tag name="cost_center" value="data_platform"/>
+        </tags>
+    </snowflake:createStage>
+</changeSet>
+```
+
+##### 3. External Stage with Direct Credentials (AWS)
+```xml
+<changeSet id="create-s3-stage-direct-creds" author="data-engineer">
+    <snowflake:createStage
+        stageName="s3_direct_access_stage"
+        schemaName="external_data"
+        url="s3://external-vendor-bucket/data/">
+        
+        <!-- AWS Direct Credentials -->
+        <awsCredentials
+            keyId="${AWS_ACCESS_KEY_ID}"
+            secretKey="${AWS_SECRET_ACCESS_KEY}"
+            token="${AWS_SESSION_TOKEN}"
+            role="arn:aws:iam::123456789012:role/SnowflakeDataAccess"/>
+            
+        <!-- AWS S3 Server-Side Encryption -->
+        <encryption
+            type="AWS_SSE_KMS"
+            kmsKeyId="arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012"/>
+            
+        <!-- JSON File Format -->
+        <fileFormat
+            type="JSON"
+            compression="GZIP"
+            stripOuterArray="true"
+            stripNullValues="false"
+            dateFormat="YYYY-MM-DD"
+            timestampFormat="YYYY-MM-DD HH24:MI:SS.FF3"/>
+    </snowflake:createStage>
+</changeSet>
+```
+
+##### 4. Clone Stage Operation
+```xml
+<changeSet id="clone-stage-with-time-travel" author="data-engineer">
+    <snowflake:createStage
+        stageName="cloned_production_stage"
+        schemaName="dev_environment"
+        cloneFromStage="production_stage"
+        cloneFromSchema="production"
+        cloneFromCatalog="prod_warehouse">
+        
+        <!-- Time Travel Configuration -->
+        <timeTravel
+            type="TIMESTAMP"
+            value="2025-01-01 12:00:00.000"/>
+    </snowflake:createStage>
+</changeSet>
+```
+
+##### 5. Comprehensive External Stage (GCS)
+```xml
+<changeSet id="create-comprehensive-gcs-stage" author="data-engineer">
+    <snowflake:createStage
+        stageName="comprehensive_gcs_stage"
+        schemaName="analytics"
+        catalogName="data_lake"
+        url="gcs://analytics-data-bucket/processed/"
+        storageIntegration="gcp_storage_integration"
+        usePrivatelinkEndpoint="true"
+        comment="Comprehensive GCS stage with all configuration options"
+        orReplace="false"
+        ifNotExists="true">
+        
+        <!-- Directory Table with Full Configuration -->
+        <directory
+            enable="true"
+            autoRefresh="true"
+            refreshOnCreate="true"
+            notificationIntegration="gcp_pubsub_integration"/>
+            
+        <!-- Complete File Format Configuration -->
+        <fileFormat
+            type="JSON"
+            compression="GZIP"
+            dateFormat="YYYY-MM-DD"
+            timeFormat="HH24:MI:SS"
+            timestampFormat="YYYY-MM-DD HH24:MI:SS.FF6"
+            binaryFormat="BASE64"
+            trimSpace="true"
+            nullIf="['NULL', 'null', '']"
+            replaceInvalidCharacters="true"
+            stripOuterArray="true"
+            stripNullValues="false"
+            allowDuplicate="false"
+            ignoreUtf8Errors="false"/>
+            
+        <!-- Comprehensive Tags -->
+        <tags>
+            <tag name="environment" value="production"/>
+            <tag name="department" value="analytics"/>
+            <tag name="cost_center" value="data_platform"/>
+            <tag name="data_classification" value="internal"/>
+            <tag name="backup_required" value="true"/>
+        </tags>
+    </snowflake:createStage>
+</changeSet>
+```
+
+#### ALTER STAGE Examples
+
+##### 6. Rename Stage
+```xml
+<changeSet id="rename-stage" author="data-engineer">
+    <snowflake:alterStage
+        stageName="old_stage_name"
+        schemaName="staging"
+        catalogName="data_warehouse"
+        renameTo="new_stage_name"
+        ifExists="true"/>
+</changeSet>
+```
+
+##### 7. Modify Stage Properties
+```xml
+<changeSet id="modify-stage-properties" author="data-engineer">
+    <snowflake:alterStage
+        stageName="external_data_stage"
+        schemaName="raw_data">
+        
+        <!-- Set Operations -->
+        <setUrl>s3://new-data-bucket/updated-path/</setUrl>
+        <setStorageIntegration>updated_s3_integration</setStorageIntegration>
+        <setComment>Updated stage configuration for new data source</setComment>
+        
+        <!-- Enable Directory Table -->
+        <setDirectory enable="true"/>
+        
+        <!-- Update File Format -->
+        <setFileFormat
+            type="PARQUET"
+            compression="SNAPPY"
+            binaryFormat="BASE64"/>
+            
+        <!-- Update Tags -->
+        <setTags>
+            <tag name="updated_date" value="2025-01-01"/>
+            <tag name="data_source" value="vendor_v2"/>
+        </setTags>
+    </snowflake:alterStage>
+</changeSet>
+```
+
+##### 8. Unset Stage Properties and Directory Operations
+```xml
+<changeSet id="unset-properties-and-refresh" author="data-engineer">
+    <snowflake:alterStage
+        stageName="cleanup_stage"
+        schemaName="temporary_data">
+        
+        <!-- Unset Operations -->
+        <unsetStorageIntegration/>
+        <unsetCredentials/>
+        <unsetEncryption/>
+        <unsetFileFormat/>
+        <unsetComment/>
+        
+        <!-- Unset Specific Tags -->
+        <unsetTags>
+            <tag>temporary</tag>
+            <tag>experimental</tag>
+        </unsetTags>
+        
+        <!-- Refresh Directory Table -->
+        <refreshDirectory subPath="year=2025/month=01/"/>
+    </snowflake:alterStage>
+</changeSet>
+```
+
+#### DROP STAGE Example
+
+##### 9. Drop Stage
+```xml
+<changeSet id="drop-stage" author="data-engineer">
+    <snowflake:dropStage
+        stageName="obsolete_stage"
+        schemaName="deprecated"
+        catalogName="old_warehouse"
+        ifExists="true"/>
+</changeSet>
+```
+
+### KEY_DESIGN_DECISIONS
+**Rationale for Liquibase changeset XML structure and validation approach**
+
+```yaml
+DESIGN_DECISIONS:
+  1_PROPERTY_ORGANIZATION:
+    APPROACH: "Hybrid: Core properties as attributes, complex objects as nested elements"
+    RATIONALE: 
+      - "Core stage properties (stageName, url, storageIntegration) as direct XML attributes for readability"
+      - "Complex configuration objects (fileFormat, directory, credentials, encryption, tags) as nested elements"
+      - "Follows established pattern from CreateFileFormatChange and CreateWarehouseChange"
+    EXAMPLES:
+      CORE_ATTRIBUTES: "stageName='my_stage' url='s3://bucket/path/'"
+      NESTED_ELEMENTS: "<fileFormat type='CSV' compression='GZIP'/>, <directory enable='true'/>"
+      
+  2_MUTUAL_EXCLUSIVITY_HANDLING:
+    APPROACH: "ValidationErrors in Change.validate() method with detailed error messages"
+    RATIONALE:
+      - "Consistent with existing CreateWarehouseChange.validate() patterns"
+      - "Provides clear error messages at changeset validation time"
+      - "Prevents invalid SQL generation before execution"
+    VALIDATION_RULES:
+      - "orReplace && ifNotExists → Cannot use both OR REPLACE and IF NOT EXISTS"
+      - "cloneFromStage && (orReplace || ifNotExists) → CLONE cannot be combined with OR REPLACE or IF NOT EXISTS"
+      - "storageIntegration && credentials → Cannot specify both STORAGE_INTEGRATION and CREDENTIALS"
+      - "temporary && directoryEnable → Temporary stages cannot enable directory tables"
+      
+  3_SECURITY_CONSIDERATIONS:
+    APPROACH: "Environment variable substitution with ${VARIABLE_NAME} pattern"
+    RATIONALE:
+      - "Prevents hardcoded credentials in changeset files"
+      - "Follows Liquibase best practices for sensitive data"
+      - "Consistent with existing liquibase-snowflake credential handling"
+    EXAMPLES:
+      AWS_CREDENTIALS: "keyId='${AWS_ACCESS_KEY_ID}' secretKey='${AWS_SECRET_ACCESS_KEY}'"
+      ENCRYPTION_KEYS: "kmsKeyId='${KMS_KEY_ARN}' masterKey='${MASTER_KEY}'"
+      
+  4_SNOWFLAKE_SPECIFIC_FEATURES:
+    APPROACH: "Full support for Snowflake-native capabilities via specialized elements"
+    RATIONALE:
+      - "Time travel support via <timeTravel> element for CLONE operations"
+      - "Directory table configuration via <directory> element with all properties"
+      - "Multi-cloud support via provider-specific credential elements (awsCredentials, gcpCredentials, azureCredentials)"
+      - "Preview features support (usePrivatelinkEndpoint)"
+    IMPLEMENTATION:
+      TIME_TRAVEL: "Support TIMESTAMP, OFFSET, STATEMENT with value attribute"
+      DIRECTORY_TABLES: "Full configuration: enable, autoRefresh, refreshOnCreate, notificationIntegration"
+      MULTI_CLOUD: "Provider-specific credential and encryption elements"
+      
+  5_FORMAT_SPECIFIC_OPTIONS:
+    APPROACH: "Single fileFormat element with type-based validation in Change.validate()"
+    RATIONALE:
+      - "Mimics Snowflake DDL FILE_FORMAT = (...) syntax structure"
+      - "Validation logic prevents invalid combinations (e.g., CSV options with PARQUET type)"
+      - "Consistent with CreateFileFormatChange format-specific validation patterns"
+    VALIDATION_STRATEGY:
+      - "Format type determines valid compression options (PARQUET → SNAPPY/LZO/NONE)"
+      - "CSV-specific options (recordDelimiter, fieldDelimiter) only valid with CSV type"
+      - "JSON-specific options (stripOuterArray, allowDuplicate) only valid with JSON type"
+      
+  6_ALIGNMENT_WITH_EXISTING_PATTERNS:
+    APPROACH: "Consistent naming and structure with CreateWarehouseChange and CreateFileFormatChange"
+    RATIONALE:
+      - "stageName attribute (consistent with warehouseName, fileFormatName patterns)"
+      - "Boolean properties use same true/false handling as existing changes"
+      - "catalogName/schemaName attributes follow established database object patterns"
+      - "validate() method structure mirrors existing validation patterns"
+      - "generateStatements() returns SqlStatement[] following framework conventions"
+    CONSISTENCY_EXAMPLES:
+      NAMING: "stageName vs warehouseName vs fileFormatName"
+      BOOLEAN_HANDLING: "orReplace='true' vs orReplace='false'"
+      VALIDATION: "ValidationErrors.addError() pattern for constraint violations"
+```
+
+### VALIDATION_STRATEGY
+**Cross-reference with existing requirement sections for comprehensive validation**
+
+```yaml
+VALIDATION_APPROACH:
+  MUTUAL_EXCLUSIVITY_VALIDATION:
+    REFERENCE: "Cross-references MUTUAL_EXCLUSIVITY_RULES section (lines 651-693)"
+    IMPLEMENTATION: "All 10+ mutual exclusivity rules implemented in Change.validate()"
+    ERROR_HANDLING: "Detailed error messages matching Snowflake DDL constraint documentation"
+    
+  FORMAT_SPECIFIC_VALIDATION:
+    REFERENCE: "Aligns with DDL_SYNTAX_SPECIFICATIONS file format options (lines 51-73)"
+    APPROACH: "Dynamic validation based on fileFormat.type attribute"
+    COMPRESSION_VALIDATION: "PARQUET supports LIMITED set vs CSV/JSON support FULL set"
+    
+  SECURITY_VALIDATION:
+    CREDENTIAL_HANDLING: "Either storageIntegration OR credentials, never both"
+    ENVIRONMENT_VARIABLES: "Validation ensures ${VAR} substitution variables are resolved"
+    SENSITIVE_DATA_PROTECTION: "No hardcoded credentials validation in changeset content"
+    
+  CROSS_REFERENCE_VALIDATION:
+    PROPERTY_ANALYSIS: "All changeset attributes map to PROPERTY_ANALYSIS_TABLE documented properties"
+    DDL_ALIGNMENT: "Changeset structure mirrors DDL_SYNTAX_SPECIFICATIONS exactly"
+    PHANTOM_PROPERTIES: "Validation warnings for properties that cannot be queried after creation"
+```
+
 ## PROPERTY_ANALYSIS_TABLE
 **CRITICAL: INFORMATION_SCHEMA.STAGES LIMITATION ANALYSIS (2025-08-11)**
 
