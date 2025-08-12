@@ -817,5 +817,183 @@
         </xsd:restriction>
     </xsd:simpleType>
 
+    <!-- Stage Operations -->
+    <xsd:element name="createStage">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="fileFormat" type="stageFileFormatType" minOccurs="0"/>
+                <xsd:element name="directory" type="directoryTableType" minOccurs="0"/>
+                <xsd:element name="awsCredentials" type="awsCredentialsType" minOccurs="0"/>
+                <xsd:element name="gcpCredentials" type="gcpCredentialsType" minOccurs="0"/>
+                <xsd:element name="azureCredentials" type="azureCredentialsType" minOccurs="0"/>
+                <xsd:element name="encryption" type="stageEncryptionType" minOccurs="0"/>
+                <xsd:element name="tags" type="stageTagsType" minOccurs="0"/>
+                <xsd:element name="timeTravel" type="timeTravelType" minOccurs="0"/>
+            </xsd:sequence>
+            <!-- Core Stage attributes -->
+            <xsd:attribute name="stageName" type="xsd:string" use="required"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="url" type="xsd:string"/>
+            <xsd:attribute name="storageIntegration" type="xsd:string"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+            <xsd:attribute name="orReplace" type="xsd:boolean"/>
+            <xsd:attribute name="ifNotExists" type="xsd:boolean"/>
+            <xsd:attribute name="temporary" type="xsd:boolean"/>
+            <xsd:attribute name="usePrivatelinkEndpoint" type="xsd:boolean"/>
+            <!-- Clone attributes -->
+            <xsd:attribute name="cloneFromStage" type="xsd:string"/>
+            <xsd:attribute name="cloneFromSchema" type="xsd:string"/>
+            <xsd:attribute name="cloneFromCatalog" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="alterStage">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="setFileFormat" type="stageFileFormatType" minOccurs="0"/>
+                <xsd:element name="setDirectory" type="directoryTableType" minOccurs="0"/>
+                <xsd:element name="setTags" type="stageTagsType" minOccurs="0"/>
+                <xsd:element name="unsetTags" type="unsetTagsType" minOccurs="0"/>
+                <xsd:element name="refreshDirectory" type="refreshDirectoryType" minOccurs="0"/>
+            </xsd:sequence>
+            <!-- Core ALTER attributes -->
+            <xsd:attribute name="stageName" type="xsd:string" use="required"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
+            <xsd:attribute name="renameTo" type="xsd:string"/>
+            <!-- SET operations -->
+            <xsd:attribute name="setUrl" type="xsd:string"/>
+            <xsd:attribute name="setStorageIntegration" type="xsd:string"/>
+            <xsd:attribute name="setComment" type="xsd:string"/>
+            <!-- UNSET operations -->
+            <xsd:attribute name="unsetUrl" type="xsd:boolean"/>
+            <xsd:attribute name="unsetStorageIntegration" type="xsd:boolean"/>
+            <xsd:attribute name="unsetCredentials" type="xsd:boolean"/>
+            <xsd:attribute name="unsetEncryption" type="xsd:boolean"/>
+            <xsd:attribute name="unsetFileFormat" type="xsd:boolean"/>
+            <xsd:attribute name="unsetComment" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="dropStage">
+        <xsd:complexType>
+            <xsd:attribute name="stageName" type="xsd:string" use="required"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <!-- Stage Complex Types -->
+    <xsd:complexType name="stageFileFormatType">
+        <xsd:attribute name="type" type="fileFormatType"/>
+        <xsd:attribute name="compression" type="compressionType"/>
+        <!-- CSV-specific options -->
+        <xsd:attribute name="recordDelimiter" type="xsd:string"/>
+        <xsd:attribute name="fieldDelimiter" type="xsd:string"/>
+        <xsd:attribute name="fieldOptionallyEnclosedBy" type="xsd:string"/>
+        <xsd:attribute name="escape" type="xsd:string"/>
+        <xsd:attribute name="escapeUnenclosedField" type="xsd:string"/>
+        <xsd:attribute name="skipHeader" type="xsd:int"/>
+        <xsd:attribute name="skipBlankLines" type="xsd:boolean"/>
+        <xsd:attribute name="trimSpace" type="xsd:boolean"/>
+        <xsd:attribute name="errorOnColumnCountMismatch" type="xsd:boolean"/>
+        <xsd:attribute name="emptyFieldAsNull" type="xsd:boolean"/>
+        <xsd:attribute name="skipByteOrderMark" type="xsd:boolean"/>
+        <xsd:attribute name="encoding" type="encodingType"/>
+        <!-- JSON-specific options -->
+        <xsd:attribute name="stripOuterArray" type="xsd:boolean"/>
+        <xsd:attribute name="stripNullValues" type="xsd:boolean"/>
+        <xsd:attribute name="allowDuplicate" type="xsd:boolean"/>
+        <xsd:attribute name="ignoreUtf8Errors" type="xsd:boolean"/>
+        <!-- Universal format options -->
+        <xsd:attribute name="dateFormat" type="xsd:string"/>
+        <xsd:attribute name="timeFormat" type="xsd:string"/>
+        <xsd:attribute name="timestampFormat" type="xsd:string"/>
+        <xsd:attribute name="binaryFormat" type="binaryFormatType"/>
+        <xsd:attribute name="nullIf" type="xsd:string"/>
+        <xsd:attribute name="replaceInvalidCharacters" type="xsd:boolean"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="directoryTableType">
+        <xsd:attribute name="enable" type="xsd:boolean" use="required"/>
+        <xsd:attribute name="autoRefresh" type="xsd:boolean"/>
+        <xsd:attribute name="refreshOnCreate" type="xsd:boolean"/>
+        <xsd:attribute name="notificationIntegration" type="xsd:string"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="awsCredentialsType">
+        <xsd:attribute name="keyId" type="xsd:string" use="required"/>
+        <xsd:attribute name="secretKey" type="xsd:string" use="required"/>
+        <xsd:attribute name="token" type="xsd:string"/>
+        <xsd:attribute name="role" type="xsd:string"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="gcpCredentialsType">
+        <xsd:attribute name="serviceAccountKey" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="azureCredentialsType">
+        <xsd:attribute name="accountName" type="xsd:string" use="required"/>
+        <xsd:attribute name="accountKey" type="xsd:string"/>
+        <xsd:attribute name="sasToken" type="xsd:string"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="stageEncryptionType">
+        <xsd:attribute name="type" type="encryptionTypeEnum" use="required"/>
+        <xsd:attribute name="kmsKeyId" type="xsd:string"/>
+        <xsd:attribute name="masterKey" type="xsd:string"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="stageTagsType">
+        <xsd:sequence>
+            <xsd:element name="tag" type="tagType" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="tagType">
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
+        <xsd:attribute name="value" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="unsetTagsType">
+        <xsd:sequence>
+            <xsd:element name="tag" type="xsd:string" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="timeTravelType">
+        <xsd:attribute name="type" type="timeTravelTypeEnum" use="required"/>
+        <xsd:attribute name="value" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="refreshDirectoryType">
+        <xsd:attribute name="subPath" type="xsd:string"/>
+    </xsd:complexType>
+
+    <!-- Stage Enumeration Types -->
+    <xsd:simpleType name="encryptionTypeEnum">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="SNOWFLAKE_FULL"/>
+            <xsd:enumeration value="SNOWFLAKE_SSE"/>
+            <xsd:enumeration value="AWS_SSE_S3"/>
+            <xsd:enumeration value="AWS_SSE_KMS"/>
+            <xsd:enumeration value="AWS_CSE"/>
+            <xsd:enumeration value="GCS_SSE_KMS"/>
+            <xsd:enumeration value="AZURE_CSE"/>
+            <xsd:enumeration value="NONE"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="timeTravelTypeEnum">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="TIMESTAMP"/>
+            <xsd:enumeration value="OFFSET"/>
+            <xsd:enumeration value="STATEMENT"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
 
 </xsd:schema>

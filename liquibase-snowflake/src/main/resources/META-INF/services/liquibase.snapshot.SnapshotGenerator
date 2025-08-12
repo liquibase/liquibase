@@ -14,3 +14,4 @@ liquibase.snapshot.jvm.UniqueConstraintSnapshotGeneratorSnowflake
 # Legacy generators (active for testing)
 liquibase.snapshot.jvm.FileFormatSnapshotGeneratorSnowflake
 liquibase.snapshot.jvm.WarehouseSnapshotGeneratorSnowflake
+liquibase.snapshot.jvm.StageSnapshotGeneratorSnowflake

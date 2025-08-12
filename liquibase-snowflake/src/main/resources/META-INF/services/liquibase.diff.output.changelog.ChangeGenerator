@@ -16,3 +16,6 @@ liquibase.diff.output.changelog.core.ChangedWarehouseChangeGenerator
 liquibase.diff.output.changelog.core.MissingFileFormatChangeGenerator
 liquibase.diff.output.changelog.core.UnexpectedFileFormatChangeGenerator
 liquibase.diff.output.changelog.core.ChangedFileFormatChangeGenerator
+liquibase.diff.output.changelog.core.MissingStageChangeGenerator
+liquibase.diff.output.changelog.core.UnexpectedStageChangeGenerator
+liquibase.diff.output.changelog.core.ChangedStageChangeGenerator
