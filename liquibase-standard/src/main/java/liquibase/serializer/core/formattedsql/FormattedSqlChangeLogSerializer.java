@@ -48,7 +48,7 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
             ChangeSet changeSet = (ChangeSet) object;
             Database database = Scope.getCurrentScope().get(DiffToChangeLog.DIFF_SNAPSHOT_DATABASE, Database.class);
             Database targetDatabase = getTargetDatabase(changeSet);
-            if (database == null || ! database.getShortName().equals(targetDatabase.getShortName())) {
+            if (database == null) {
                 database = targetDatabase;
             }
 
