@@ -42,6 +42,8 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
         if (object instanceof ChangeSet) {
             //
             // If there is a Database object in the current scope, then use it for serialization
+            // Also, handle the case where the target database specified by the changelog file name
+            // differs from the database in scope
             //
             ChangeSet changeSet = (ChangeSet) object;
             Database database = Scope.getCurrentScope().get(DiffToChangeLog.DIFF_SNAPSHOT_DATABASE, Database.class);
