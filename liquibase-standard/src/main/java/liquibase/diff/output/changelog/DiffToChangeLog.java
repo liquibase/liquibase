@@ -212,22 +212,13 @@ public class DiffToChangeLog {
     // Return the Database from this snapshot
     // if it is not offline
     //
-    private Database determineDatabase(DatabaseSnapshot snapshot) throws DatabaseException {
-        Database snapshotDatabase = snapshot.getDatabase();
-        DatabaseConnection connection = snapshotDatabase.getConnection();
-        if (! (connection instanceof OfflineConnection) && snapshotDatabase instanceof PostgresDatabase) {
-            return snapshotDatabase;
+    private Database determineDatabase(DatabaseSnapshot snapshot) {
+        Database database = snapshot.getDatabase();
+        DatabaseConnection connection = database.getConnection();
+        if (! (connection instanceof OfflineConnection) && database instanceof PostgresDatabase) {
+            return database;
         }
-        //
-        // The factory created Database needs to have the same catalog and schema as the snapshot
-        //
-        DatabaseFactory databaseFactory = Scope.getCurrentScope().getSingleton(DatabaseFactory.class);
-        Database database = databaseFactory.getDatabase(snapshotDatabase.getShortName());
-        database.setDefaultCatalogName(snapshotDatabase.getDefaultCatalogName());
-        if (! (snapshotDatabase instanceof MSSQLDatabase)) {
-            database.setDefaultSchemaName(snapshotDatabase.getDefaultSchemaName());
-        }
-        return database;
+        return null;
     }
 
     /**
