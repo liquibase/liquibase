@@ -94,7 +94,8 @@ public class DropFileFormatChange extends AbstractChange {
 
     @Override
     public boolean supportsRollback(Database database) {
-        return database instanceof SnowflakeDatabase;
+        // DROP operations cannot be rolled back - once deleted, the file format cannot be recovered
+        return false;
     }
 
     @Override

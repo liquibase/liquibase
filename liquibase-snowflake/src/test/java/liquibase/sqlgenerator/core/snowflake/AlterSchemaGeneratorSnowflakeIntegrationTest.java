@@ -41,7 +41,7 @@ public class AlterSchemaGeneratorSnowflakeIntegrationTest {
      * @return Unique schema name for parallel execution
      */
     private String getUniqueSchemaName(String methodName) {
-        return "TEST_ALTER_SCHEMA_" + methodName;
+        return "TEST_ALTER_SCHEMA_" + methodName.toUpperCase() + "_" + System.currentTimeMillis();
     }
 
     @BeforeEach

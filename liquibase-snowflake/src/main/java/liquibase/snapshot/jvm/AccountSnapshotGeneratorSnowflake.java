@@ -9,6 +9,8 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
+import liquibase.Scope;
+import liquibase.logging.Logger;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,20 +23,22 @@ import java.sql.SQLException;
  */
 public class AccountSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator {
 
+    private static final Logger logger = Scope.getCurrentScope().getLog(AccountSnapshotGeneratorSnowflake.class);
+
     public AccountSnapshotGeneratorSnowflake() {
         super(Account.class, new Class[]{});
     }
 
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
-        System.out.println("🔍 AccountSnapshotGenerator.getPriority() called for " + objectType.getSimpleName() + 
-                         " on " + database.getClass().getSimpleName());
+        logger.fine("AccountSnapshotGenerator.getPriority() called for " + objectType.getSimpleName() + 
+                   " on " + database.getClass().getSimpleName());
         
         if (Account.class.isAssignableFrom(objectType) && database instanceof SnowflakeDatabase) {
-            System.out.println("✅ AccountSnapshotGenerator returning PRIORITY_DATABASE for Account on Snowflake");
+            logger.fine("AccountSnapshotGenerator returning PRIORITY_DATABASE for Account on Snowflake");
             return PRIORITY_DATABASE;
         }
-        System.out.println("❌ AccountSnapshotGenerator returning PRIORITY_NONE for " + objectType.getSimpleName());
+        logger.fine("AccountSnapshotGenerator returning PRIORITY_NONE for " + objectType.getSimpleName());
         return PRIORITY_NONE;
     }
 
@@ -48,55 +52,55 @@ public class AccountSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator {
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) 
             throws DatabaseException, InvalidExampleException {
         
-        System.out.println("🔍 AccountSnapshotGenerator.snapshotObject() called with example: " + 
-                         (example != null ? example.getClass().getSimpleName() + " name=" + 
-                          (example instanceof Account ? ((Account)example).getName() : "N/A") : "null"));
+        logger.fine("AccountSnapshotGenerator.snapshotObject() called with example: " + 
+                   (example != null ? example.getClass().getSimpleName() + " name=" + 
+                    (example instanceof Account ? ((Account)example).getName() : "N/A") : "null"));
         
         if (example == null) {
-            System.out.println("❌ AccountSnapshotGenerator: example is null");
+            logger.fine("AccountSnapshotGenerator: example is null");
             return null;
         }
         
         if (!(example instanceof Account)) {
-            System.out.println("❌ AccountSnapshotGenerator: example is not Account (" + example.getClass().getSimpleName() + ")");
+            logger.fine("AccountSnapshotGenerator: example is not Account (" + example.getClass().getSimpleName() + ")");
             return null;
         }
         
         Account exampleAccount = (Account) example;
         String accountName = exampleAccount.getName();
         
-        System.out.println("🔍 AccountSnapshotGenerator: Account example name = '" + accountName + "'");
+        logger.fine("AccountSnapshotGenerator: Account example name = '" + accountName + "'");
         
         if (snapshot == null) {
-            System.out.println("❌ AccountSnapshotGenerator: snapshot is null");
+            logger.fine("AccountSnapshotGenerator: snapshot is null");
             return null;
         }
         
         Database database = snapshot.getDatabase();
         if (!(database instanceof SnowflakeDatabase)) {
-            System.out.println("❌ AccountSnapshotGenerator: database is not Snowflake (" + database.getClass().getSimpleName() + ")");
+            logger.fine("AccountSnapshotGenerator: database is not Snowflake (" + database.getClass().getSimpleName() + ")");
             return null;
         }
         
         // CRITICAL FIX: If no account name provided, create account from connection
         if (accountName == null) {
-            System.out.println("🔧 AccountSnapshotGenerator: No account name provided, creating from connection");
+            logger.fine("AccountSnapshotGenerator: No account name provided, creating from connection");
             try {
                 Account account = createAccountContainer(database);
-                System.out.println("✅ AccountSnapshotGenerator: Created account from connection: " + (account != null ? account.getName() : "null"));
+                logger.fine("AccountSnapshotGenerator: Created account from connection: " + (account != null ? account.getName() : "null"));
                 return account;
             } catch (SQLException e) {
-                System.out.println("❌ AccountSnapshotGenerator: Failed to create account from connection: " + e.getMessage());
+                logger.warning("AccountSnapshotGenerator: Failed to create account from connection: " + e.getMessage());
                 throw new DatabaseException("Error creating account from connection: " + e.getMessage(), e);
             }
         }
         
         try {
             Account account = snapshotSingleAccount(accountName, database);
-            System.out.println("✅ AccountSnapshotGenerator: Successfully snapshotted account: " + (account != null ? account.getName() : "null"));
+            logger.fine("AccountSnapshotGenerator: Successfully snapshotted account: " + (account != null ? account.getName() : "null"));
             return account;
         } catch (SQLException e) {
-            System.out.println("❌ AccountSnapshotGenerator: Error querying account " + accountName + ": " + e.getMessage());
+            logger.warning("AccountSnapshotGenerator: Error querying account " + accountName + ": " + e.getMessage());
             throw new DatabaseException("Error querying account information for " + accountName + ": " + e.getMessage(), e);
         }
     }
@@ -105,8 +109,8 @@ public class AccountSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator {
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) 
             throws DatabaseException, InvalidExampleException {
         
-        System.out.println("🔍 AccountSnapshotGenerator.addTo() called with foundObject: " + 
-                         (foundObject != null ? foundObject.getClass().getSimpleName() : "null"));
+        logger.fine("AccountSnapshotGenerator.addTo() called with foundObject: " + 
+                   (foundObject != null ? foundObject.getClass().getSimpleName() : "null"));
         
         // Account objects are root-level objects, peers to Catalog
         // They don't get added TO other objects - the framework handles discovery through snapshotObject()

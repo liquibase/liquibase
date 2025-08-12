@@ -8,12 +8,16 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.core.AbstractSqlGenerator;
 import liquibase.statement.core.snowflake.DropSequenceStatementSnowflake;
+import liquibase.Scope;
+import liquibase.logging.Logger;
 
 /**
  * SQL generator for DROP SEQUENCE operations in Snowflake.
  * Supports IF EXISTS, CASCADE, and RESTRICT options.
  */
 public class DropSequenceGeneratorSnowflake extends AbstractSqlGenerator<DropSequenceStatementSnowflake> {
+    
+    private static final Logger logger = Scope.getCurrentScope().getLog(DropSequenceGeneratorSnowflake.class);
 
     @Override
     public int getPriority() {
@@ -61,13 +65,13 @@ public class DropSequenceGeneratorSnowflake extends AbstractSqlGenerator<DropSeq
         if (Boolean.TRUE.equals(statement.getCascade())) {
             sql.append(" CASCADE");
             // ℹ️ INFO: CASCADE is non-functional in Snowflake
-            System.out.println("ℹ️ INFO: CASCADE keyword is non-functional in Snowflake - " +
+            logger.fine("CASCADE keyword is non-functional in Snowflake - " +
                 "sequence '" + statement.getSequenceName() + "' will be dropped but dependent objects will NOT be affected. " +
                 "This provides syntax consistency only. Manual dependency management required.");
         } else if (Boolean.TRUE.equals(statement.getRestrict())) {
             sql.append(" RESTRICT");
             // ℹ️ INFO: RESTRICT is non-functional in Snowflake
-            System.out.println("ℹ️ INFO: RESTRICT keyword is non-functional in Snowflake - " +
+            logger.fine("RESTRICT keyword is non-functional in Snowflake - " +
                 "sequence '" + statement.getSequenceName() + "' will be dropped without dependency checking. " +
                 "This provides syntax consistency only. Manual dependency verification recommended.");
         }

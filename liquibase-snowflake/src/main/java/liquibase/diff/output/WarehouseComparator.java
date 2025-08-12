@@ -8,12 +8,16 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.structure.DatabaseObject;
+import liquibase.Scope;
+import liquibase.logging.Logger;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 public class WarehouseComparator implements DatabaseObjectComparator {
+    
+    private static final Logger logger = Scope.getCurrentScope().getLog(WarehouseComparator.class);
     
     // State properties that should be excluded from differences (runtime state)
     private static final String[] EXCLUDED_STATE_FIELDS = {
@@ -24,12 +28,12 @@ public class WarehouseComparator implements DatabaseObjectComparator {
 
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
-        System.out.println("🔍 PHASE1: WarehouseComparator.getPriority() called for " + objectType.getSimpleName());
+        logger.fine("WarehouseComparator.getPriority() called for " + objectType.getSimpleName());
         if (Warehouse.class.isAssignableFrom(objectType) && database instanceof SnowflakeDatabase) {
-            System.out.println("✅ PHASE1: WarehouseComparator returning PRIORITY_DATABASE for Warehouse");
+            logger.fine("WarehouseComparator returning PRIORITY_DATABASE for Warehouse");
             return PRIORITY_DATABASE;
         }
-        System.out.println("❌ PHASE1: WarehouseComparator returning PRIORITY_NONE for " + objectType.getSimpleName());
+        logger.fine("WarehouseComparator returning PRIORITY_NONE for " + objectType.getSimpleName());
         return PRIORITY_NONE;
     }
 

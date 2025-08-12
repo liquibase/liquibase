@@ -60,45 +60,32 @@ ADDRESSES_CORE_ISSUE: "ALL integration tests for all changetypes parallel execut
 2. **Database/Schema**: A database and schema where you can create and drop warehouses
 3. **Warehouse**: An existing warehouse to connect through
 
-### Environment Variables
+### Test Infrastructure Configuration
 
-Set the following environment variables before running the integration tests:
+**✅ NO ENVIRONMENT VARIABLES REQUIRED**
 
-```bash
-export SNOWFLAKE_URL="jdbc:snowflake://your-account.snowflakecomputing.com/"
-export SNOWFLAKE_USER="your_username"
-export SNOWFLAKE_PASSWORD="your_password"
-export SNOWFLAKE_DATABASE="your_database"
-export SNOWFLAKE_SCHEMA="your_schema"
-export SNOWFLAKE_WAREHOUSE="your_warehouse"
+Integration tests are automatically configured through the test infrastructure using:
+- **YAML Configuration**: `src/test/resources/liquibase.sdk.local.yaml`
+- **Automatic Connection**: Tests read configuration directly from the YAML file
+- **No Manual Setup**: Environment variables are not needed and should not be set
+
+**Configuration File Location:**
+```yaml
+# File: src/test/resources/liquibase.sdk.local.yaml
+liquibase:
+  sdk:
+    testSystem:
+      snowflake:
+        url: "jdbc:snowflake://[configured-automatically]"
+        username: "[configured-automatically]"  
+        password: "[configured-automatically]"
 ```
 
-## 🚨 CRITICAL: Live Database Credentials (AI Reference)
-
-**⚠️ SECURITY NOTE: These credentials are for the Liquibase test harness account only**
-
-For running integration tests against the live Snowflake test harness database, use these EXACT values:
-
-```bash
-# COPY-PASTE THESE COMMANDS (do not modify):
-export SNOWFLAKE_URL="jdbc:snowflake://rziymts-xbb66763.snowflakecomputing.com/?db=LB_DBEXT_INT_DB&warehouse=LTHDB_TEST_WH&schema=BASE_SCHEMA&role=LB_INT_ROLE"
-export SNOWFLAKE_USER="COMMUNITYKEVIN"
-export SNOWFLAKE_PASSWORD="uQ1lAjwVisliu8CpUTVh0UnxoTUk3"
-```
-
-**Verification Commands:**
-```bash
-# Verify environment variables are set correctly:
-echo "URL: $SNOWFLAKE_URL"
-echo "USER: $SNOWFLAKE_USER"
-echo "PASSWORD: $SNOWFLAKE_PASSWORD"
-```
-
-**Account Lockout Prevention:**
-- Use EXACT credentials above - any typos will cause lockout
-- Don't retry failed connections immediately  
-- Wait 15+ minutes if account gets temporarily locked
-- Check CLAUDE.md for troubleshooting if connection fails
+**Important Notes:**
+- **DO NOT** set SNOWFLAKE_* environment variables
+- **DO NOT** modify the YAML configuration file
+- Tests automatically use the pre-configured test infrastructure
+- Connection details are managed by the test system
 
 ### Running the Tests
 
@@ -318,12 +305,12 @@ SYSTEMATIC_SOLUTION:
 
 **Issue: "Incorrect username or password was specified"**
 ```yaml
-ROOT_CAUSE: "Wrong credentials or environment variables not set"
+ROOT_CAUSE: "Test infrastructure configuration issue or network connectivity"
 SYSTEMATIC_SOLUTION:
-  1. "Copy-paste EXACT credentials from CLAUDE.md or this file"
-  2. "Verify environment variables: echo $SNOWFLAKE_URL $SNOWFLAKE_USER $SNOWFLAKE_PASSWORD"
-  3. "Check for typos in export commands"
-  4. "Ensure no extra spaces or characters in credential values"
+  1. "Check YAML configuration file exists: src/test/resources/liquibase.sdk.local.yaml"
+  2. "Verify network connectivity to Snowflake"
+  3. "Run simple connection test: mvn test -Dtest=SnowflakeParameterValidationTest -q"
+  4. "Check for firewall or proxy issues blocking Snowflake connections"
 ```
 
 **Issue: "Your user account has been temporarily locked"**
@@ -331,32 +318,33 @@ SYSTEMATIC_SOLUTION:
 ROOT_CAUSE: "Too many failed authentication attempts"
 SYSTEMATIC_SOLUTION:
   1. "Wait 15-30 minutes before retrying"
-  2. "Verify credentials are EXACTLY as specified in this file"
+  2. "Check YAML configuration is not corrupted"
   3. "Use single test execution first: mvn test -Dtest='CreateSequenceGeneratorSnowflakeIntegrationTest'"
   4. "Do not retry immediately after failed attempts"
 ```
 
 **Issue: "No suitable driver found"**
 ```yaml
-ROOT_CAUSE: "Missing jdbc:snowflake:// prefix in URL"
+ROOT_CAUSE: "Missing Snowflake JDBC driver or configuration error"
 SYSTEMATIC_SOLUTION:
-  1. "Ensure URL starts with 'jdbc:snowflake://'"
-  2. "Use EXACT URL from credentials section above"
-  3. "Check Maven has Snowflake JDBC driver dependency"
+  1. "Verify Maven dependencies include Snowflake JDBC driver"
+  2. "Check YAML configuration uses proper jdbc:snowflake:// URL format"
+  3. "Run 'mvn dependency:tree' to verify JDBC driver is present"
 ```
 
-**Issue: "Runtime Snowflake connection environment variables not set"**
+**Issue: "Connection configuration not found"**
 ```yaml
-ROOT_CAUSE: "Environment variables not exported in current shell session"
+ROOT_CAUSE: "Test infrastructure YAML file missing or incorrect"
 SYSTEMATIC_SOLUTION:
-  1. "Re-run export commands in same terminal session"
-  2. "Verify with: env | grep SNOWFLAKE"
-  3. "Run tests in same terminal where export commands were executed"
+  1. "Verify file exists: src/test/resources/liquibase.sdk.local.yaml"
+  2. "Check YAML syntax is valid (no tabs, proper indentation)"
+  3. "Ensure 'snowflake' test system is configured in YAML"
+  4. "Do NOT use environment variables - they interfere with YAML configuration"
 ```
 
 #### Sequential Execution Issues
-1. **Connection Issues**: Verify environment variables and network connectivity
-2. **Permission Errors**: Ensure user has CREATE WAREHOUSE and DROP WAREHOUSE privileges
+1. **Connection Issues**: Verify YAML configuration and network connectivity to Snowflake
+2. **Permission Errors**: Ensure test account has CREATE WAREHOUSE and DROP WAREHOUSE privileges
 3. **Enterprise Features**: Some tests may fail on Standard Edition (expected behavior)
 4. **Resource Limits**: Account may have limits on number of warehouses
 

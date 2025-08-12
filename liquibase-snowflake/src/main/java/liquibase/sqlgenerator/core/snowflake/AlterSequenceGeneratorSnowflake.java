@@ -9,6 +9,8 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.core.AlterSequenceGenerator;
 import liquibase.statement.core.AlterSequenceStatement;
 import liquibase.ext.SnowflakeNamespaceAttributeStorage;
+import liquibase.Scope;
+import liquibase.logging.Logger;
 
 import java.util.Map;
 
@@ -17,6 +19,8 @@ import java.util.Map;
  * for Snowflake-specific sequence operations like setNoOrder.
  */
 public class AlterSequenceGeneratorSnowflake extends AlterSequenceGenerator {
+    
+    private static final Logger logger = Scope.getCurrentScope().getLog(AlterSequenceGeneratorSnowflake.class);
 
     @Override
     public int getPriority() {
@@ -133,7 +137,7 @@ public class AlterSequenceGeneratorSnowflake extends AlterSequenceGenerator {
                 setBuilder.append("NOORDER");
                 
                 // Add irreversibility warning for NOORDER operation
-                System.out.println("⚠️  WARNING: IRREVERSIBLE OPERATION - ALTER SEQUENCE " + statement.getSequenceName() + 
+                logger.warning("IRREVERSIBLE OPERATION - ALTER SEQUENCE " + statement.getSequenceName() + 
                     " SET NOORDER cannot be undone. Once a sequence is changed to NOORDER, " +
                     "it cannot return to ORDER mode. This operation improves concurrency " +
                     "but permanently removes ordering guarantees.");
@@ -151,7 +155,7 @@ public class AlterSequenceGeneratorSnowflake extends AlterSequenceGenerator {
                 hasSetOperations = true;
                 
                 // Add irreversibility warning for NOORDER operation
-                System.out.println("⚠️  WARNING: IRREVERSIBLE OPERATION - ALTER SEQUENCE " + statement.getSequenceName() + 
+                logger.warning("IRREVERSIBLE OPERATION - ALTER SEQUENCE " + statement.getSequenceName() + 
                     " SET NOORDER cannot be undone. Once a sequence is changed to NOORDER, " +
                     "it cannot return to ORDER mode. This operation improves concurrency " +
                     "but permanently removes ordering guarantees.");

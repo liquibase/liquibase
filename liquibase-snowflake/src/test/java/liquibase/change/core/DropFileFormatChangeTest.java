@@ -265,9 +265,9 @@ public class DropFileFormatChangeTest {
     // ==================== Rollback Support Tests ====================
     
     @Test
-    @DisplayName("Should support rollback for Snowflake database")
+    @DisplayName("Should not support rollback for Snowflake database (DROP operations cannot be rolled back)")
     void testSupportsRollbackForSnowflake() {
-        assertTrue(change.supportsRollback(snowflakeDatabase));
+        assertFalse(change.supportsRollback(snowflakeDatabase));
     }
     
     @Test

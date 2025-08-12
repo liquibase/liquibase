@@ -2,6 +2,8 @@ package liquibase.ext;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import liquibase.Scope;
+import liquibase.logging.Logger;
 
 /**
  * Thread-safe storage for Snowflake namespace attributes.
@@ -9,6 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * and retrieve them during SQL generation.
  */
 public class SnowflakeNamespaceAttributeStorage {
+    
+    private static final Logger logger = Scope.getCurrentScope().getLog(SnowflakeNamespaceAttributeStorage.class);
+    
     private static final ConcurrentHashMap<String, Map<String, String>> storage = 
         new ConcurrentHashMap<>();
     
@@ -21,8 +26,8 @@ public class SnowflakeNamespaceAttributeStorage {
     public static void storeAttributes(String objectName, Map<String, String> attributes) {
         if (objectName != null && attributes != null && !attributes.isEmpty()) {
             storage.put(objectName, new ConcurrentHashMap<>(attributes));
-            System.out.println("DEBUG: SnowflakeNamespaceAttributeStorage.storeAttributes - stored for '" + objectName + "': " + attributes);
-            System.out.println("DEBUG: Storage now contains: " + storage);
+            logger.fine("DEBUG: SnowflakeNamespaceAttributeStorage.storeAttributes - stored for '" + objectName + "': " + attributes);
+            logger.fine("DEBUG: Storage now contains: " + storage);
         }
     }
     
@@ -37,8 +42,8 @@ public class SnowflakeNamespaceAttributeStorage {
             return null;
         }
         Map<String, String> result = storage.get(objectName);
-        System.out.println("DEBUG: SnowflakeNamespaceAttributeStorage.getAttributes - requested for '" + objectName + "', found: " + result);
-        System.out.println("DEBUG: Storage currently contains: " + storage);
+        logger.fine("DEBUG: SnowflakeNamespaceAttributeStorage.getAttributes - requested for '" + objectName + "', found: " + result);
+        logger.fine("DEBUG: Storage currently contains: " + storage);
         return result;
     }
     

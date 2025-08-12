@@ -10,6 +10,8 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGenerator;
 import liquibase.structure.DatabaseObject;
+import liquibase.Scope;
+import liquibase.logging.Logger;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -23,6 +25,8 @@ import java.util.Date;
  * Creates proper Warehouse objects within Account containers.
  */
 public class WarehouseSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator {
+
+    private static final Logger logger = Scope.getCurrentScope().getLog(WarehouseSnapshotGeneratorSnowflake.class);
 
     public WarehouseSnapshotGeneratorSnowflake() {
         super(Warehouse.class, new Class[]{});
@@ -96,12 +100,12 @@ public class WarehouseSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator {
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) 
             throws DatabaseException, InvalidExampleException {
         
-        System.out.println("🔍 WarehouseSnapshotGenerator.addTo() called with foundObject: " + 
-                         (foundObject != null ? foundObject.getClass().getSimpleName() + 
-                          " name=" + (foundObject instanceof Account ? ((Account)foundObject).getName() : "N/A") : "null"));
+        logger.fine("WarehouseSnapshotGenerator.addTo() called with foundObject: " + 
+                   (foundObject != null ? foundObject.getClass().getSimpleName() + 
+                    " name=" + (foundObject instanceof Account ? ((Account)foundObject).getName() : "N/A") : "null"));
         
         if (!snapshot.getSnapshotControl().shouldInclude(Warehouse.class)) {
-            System.out.println("❌ WarehouseSnapshotGenerator: Warehouse class not included in snapshot control");
+            logger.fine("WarehouseSnapshotGenerator: Warehouse class not included in snapshot control");
             return;
         }
 
@@ -109,23 +113,23 @@ public class WarehouseSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator {
             Account account = (Account) foundObject;
             Database database = snapshot.getDatabase();
             
-            System.out.println("🔍 WarehouseSnapshotGenerator: Processing Account '" + account.getName() + "' for warehouse discovery");
+            logger.fine("WarehouseSnapshotGenerator: Processing Account '" + account.getName() + "' for warehouse discovery");
             
             if (!(database instanceof SnowflakeDatabase)) {
-                System.out.println("❌ WarehouseSnapshotGenerator: Database is not Snowflake");
+                logger.fine("WarehouseSnapshotGenerator: Database is not Snowflake");
                 return;
             }
             
             try {
-                System.out.println("🔧 WarehouseSnapshotGenerator: Starting bulk warehouse discovery for account");
+                logger.fine("WarehouseSnapshotGenerator: Starting bulk warehouse discovery for account");
                 addAllWarehouses(account, database, snapshot);
-                System.out.println("✅ WarehouseSnapshotGenerator: Completed warehouse discovery for account");
+                logger.fine("WarehouseSnapshotGenerator: Completed warehouse discovery for account");
             } catch (SQLException e) {
-                System.out.println("❌ WarehouseSnapshotGenerator: Error discovering warehouses: " + e.getMessage());
+                logger.warning("WarehouseSnapshotGenerator: Error discovering warehouses: " + e.getMessage());
                 throw new DatabaseException("Error discovering warehouses: " + e.getMessage(), e);
             }
         } else {
-            System.out.println("❌ WarehouseSnapshotGenerator: foundObject is not Account (" + 
+            logger.fine("WarehouseSnapshotGenerator: foundObject is not Account (" + 
                              (foundObject != null ? foundObject.getClass().getSimpleName() : "null") + ")");
         }
     }
@@ -319,7 +323,7 @@ public class WarehouseSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator {
      * Bulk warehouse discovery for account-level snapshots.
      */
     private void addAllWarehouses(Account account, Database database, DatabaseSnapshot snapshot) throws SQLException, DatabaseException {
-        System.out.println("🔍 WarehouseSnapshotGenerator: Executing SHOW WAREHOUSES query");
+        logger.fine("WarehouseSnapshotGenerator: Executing SHOW WAREHOUSES query");
         
         Statement stmt = ((JdbcConnection) database.getConnection()).createStatement();
         ResultSet rs = stmt.executeQuery("SHOW WAREHOUSES");
@@ -329,7 +333,7 @@ public class WarehouseSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator {
             String warehouseName = rs.getString("name");
             warehouseCount++;
             
-            System.out.println("🔍 WarehouseSnapshotGenerator: Found warehouse #" + warehouseCount + ": " + warehouseName);
+            logger.fine("WarehouseSnapshotGenerator: Found warehouse #" + warehouseCount + ": " + warehouseName);
             
             // Create warehouse object for each discovered warehouse
             Warehouse warehouseObject = new Warehouse();
@@ -383,20 +387,20 @@ public class WarehouseSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator {
                 warehouseObject.setComment(comment);
             }
             
-            System.out.println("✅ WarehouseSnapshotGenerator: Adding warehouse '" + warehouseName + "' to account '" + account.getName() + "'");
+            logger.fine("WarehouseSnapshotGenerator: Adding warehouse '" + warehouseName + "' to account '" + account.getName() + "'");
             account.addDatabaseObject(warehouseObject);
             
             // CRITICAL FIX: Also add warehouse to top-level snapshot for diff access
             // This enables snapshot.get(Warehouse.class) to find warehouses for changelog generation
             try {
-                System.out.println("🔧 WarehouseSnapshotGenerator: Adding warehouse '" + warehouseName + "' to top-level snapshot for diff access");
+                logger.fine("WarehouseSnapshotGenerator: Adding warehouse '" + warehouseName + "' to top-level snapshot for diff access");
                 snapshot.include(warehouseObject);
             } catch (InvalidExampleException e) {
-                System.out.println("⚠️ WarehouseSnapshotGenerator: Could not add warehouse to top-level snapshot: " + e.getMessage());
+                logger.warning("WarehouseSnapshotGenerator: Could not add warehouse to top-level snapshot: " + e.getMessage());
             }
         }
         
-        System.out.println("🔍 WarehouseSnapshotGenerator: Completed discovery - found " + warehouseCount + " warehouses");
+        logger.fine("WarehouseSnapshotGenerator: Completed discovery - found " + warehouseCount + " warehouses");
         
         rs.close();
         stmt.close();

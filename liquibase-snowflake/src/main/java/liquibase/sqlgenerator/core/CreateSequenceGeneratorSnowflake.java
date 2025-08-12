@@ -76,13 +76,8 @@ public class CreateSequenceGeneratorSnowflake extends CreateSequenceGenerator{
             
             queryStringBuilder.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
             
-            // Add all Snowflake sequence parameters
-            if (statement.getStartValue() != null) {
-                queryStringBuilder.append(" START WITH ").append(statement.getStartValue());
-            }
-            if (statement.getIncrementBy() != null) {
-                queryStringBuilder.append(" INCREMENT BY ").append(statement.getIncrementBy());
-            }
+            // Add standard sequence parameters using helper method
+            addSequenceParameters(queryStringBuilder, statement);
             
             // Add ORDER/NOORDER support for Snowflake (THE KEY FEATURE!)
             if (snowflakeStatement.getOrder() != null) {
@@ -103,12 +98,8 @@ public class CreateSequenceGeneratorSnowflake extends CreateSequenceGenerator{
             queryStringBuilder.append("CREATE SEQUENCE ");
             queryStringBuilder.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
             
-            if (statement.getStartValue() != null) {
-                queryStringBuilder.append(" START WITH ").append(statement.getStartValue());
-            }
-            if (statement.getIncrementBy() != null) {
-                queryStringBuilder.append(" INCREMENT BY ").append(statement.getIncrementBy());
-            }
+            // Add standard sequence parameters using helper method
+            addSequenceParameters(queryStringBuilder, statement);
             
             // Add ORDER/NOORDER support for standard sequences too!
             if (statement.getOrdered() != null) {
@@ -121,5 +112,15 @@ public class CreateSequenceGeneratorSnowflake extends CreateSequenceGenerator{
         }
         
         return new Sql[]{new UnparsedSql(queryStringBuilder.toString(), getAffectedSequence(statement))};
+    }
+    
+    // Helper method to reduce code duplication
+    private void addSequenceParameters(StringBuilder queryStringBuilder, CreateSequenceStatement statement) {
+        if (statement.getStartValue() != null) {
+            queryStringBuilder.append(" START WITH ").append(statement.getStartValue());
+        }
+        if (statement.getIncrementBy() != null) {
+            queryStringBuilder.append(" INCREMENT BY ").append(statement.getIncrementBy());
+        }
     }
 }

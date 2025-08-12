@@ -11,17 +11,29 @@ import liquibase.snapshot.SnapshotGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
+import liquibase.Scope;
+import liquibase.logging.Logger;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * Snowflake-specific FileFormat snapshot generator.
  * Queries Snowflake INFORMATION_SCHEMA for FileFormat objects.
  */
 public class FileFormatSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator {
+    
+    private static final Logger logger = Scope.getCurrentScope().getLog(FileFormatSnapshotGeneratorSnowflake.class);
+    
+    // Cache for FileFormats within a single snapshot operation to avoid repeated queries
+    private final Map<String, Set<FileFormat>> schemaFileFormatsCache = new ConcurrentHashMap<>();
 
     public FileFormatSnapshotGeneratorSnowflake() {
         super(FileFormat.class, new Class[]{Schema.class});
@@ -142,12 +154,12 @@ public class FileFormatSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         
-        System.out.println("🔍 FileFormatSnapshotGenerator.addTo() called with foundObject: " + 
+        logger.fine("FileFormatSnapshotGenerator.addTo() called with foundObject: " + 
                          (foundObject != null ? foundObject.getClass().getSimpleName() + 
                           " name=" + (foundObject instanceof Schema ? ((Schema)foundObject).getName() : "N/A") : "null"));
         
         if (!snapshot.getSnapshotControl().shouldInclude(FileFormat.class)) {
-            System.out.println("❌ FileFormatSnapshotGenerator: FileFormat class not included in snapshot control");
+            logger.fine("FileFormatSnapshotGenerator: FileFormat class not included in snapshot control");
             return;
         }
 
@@ -155,32 +167,36 @@ public class FileFormatSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator 
             Schema schema = (Schema) foundObject;
             Database database = snapshot.getDatabase();
             
-            System.out.println("🔍 FileFormatSnapshotGenerator: Processing Schema '" + schema.getName() + "' for FileFormat discovery");
+            logger.fine("FileFormatSnapshotGenerator: Processing Schema '" + schema.getName() + "' for FileFormat discovery");
             
             if (!(database instanceof SnowflakeDatabase)) {
-                System.out.println("❌ FileFormatSnapshotGenerator: Database is not Snowflake");
+                logger.fine("FileFormatSnapshotGenerator: Database is not Snowflake");
                 return;
             }
             
             try {
-                System.out.println("🔧 FileFormatSnapshotGenerator: Starting bulk FileFormat discovery for schema");
+                logger.fine("FileFormatSnapshotGenerator: Starting bulk FileFormat discovery for schema");
                 addAllFileFormats(schema, database, snapshot);
-                System.out.println("✅ FileFormatSnapshotGenerator: Completed FileFormat discovery for schema");
+                logger.fine("FileFormatSnapshotGenerator: Completed FileFormat discovery for schema");
             } catch (SQLException e) {
-                System.out.println("❌ FileFormatSnapshotGenerator: Error discovering FileFormats: " + e.getMessage());
+                logger.warning("FileFormatSnapshotGenerator: Error discovering FileFormats: " + e.getMessage());
                 throw new DatabaseException("Error discovering FileFormats: " + e.getMessage(), e);
             }
         } else {
-            System.out.println("❌ FileFormatSnapshotGenerator: foundObject is not Schema (" + 
+            logger.fine("FileFormatSnapshotGenerator: foundObject is not Schema (" + 
                              (foundObject != null ? foundObject.getClass().getSimpleName() : "null") + ")");
         }
     }
 
     private void addAllFileFormats(Schema schema, Database database, DatabaseSnapshot snapshot) throws SQLException, DatabaseException {
-        System.out.println("🔍 FileFormatSnapshotGenerator: Executing INFORMATION_SCHEMA.FILE_FORMATS query for schema: " + schema.getName());
+        logger.fine("FileFormatSnapshotGenerator: Executing INFORMATION_SCHEMA.FILE_FORMATS query for schema: " + schema.getName());
         
         String schemaName = schema.getName();
         String catalogName = schema.getCatalogName();
+        
+        // Initialize variables for caching and tracking
+        String schemaKey = catalogName + "." + schemaName;
+        Set<FileFormat> discoveredFileFormats = new HashSet<>();
         
         // Query INFORMATION_SCHEMA.FILE_FORMATS for all FileFormats in this schema
         String sql = "SELECT " +
@@ -218,7 +234,7 @@ public class FileFormatSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator 
             String fileFormatName = rs.getString("FILE_FORMAT_NAME");
             fileFormatCount++;
             
-            System.out.println("🔍 FileFormatSnapshotGenerator: Found FileFormat #" + fileFormatCount + ": " + fileFormatName);
+            logger.fine("FileFormatSnapshotGenerator: Found FileFormat #" + fileFormatCount + ": " + fileFormatName);
             
             // Create FileFormat object for each discovered file format
             FileFormat fileFormatObject = new FileFormat();
@@ -306,23 +322,40 @@ public class FileFormatSnapshotGeneratorSnowflake extends JdbcSnapshotGenerator 
             // String comment = rs.getString("COMMENT");
             // This would need to be added to FileFormat class if needed for bulk discovery
             
-            System.out.println("✅ FileFormatSnapshotGenerator: Adding FileFormat '" + fileFormatName + "' to schema '" + schema.getName() + "'");
+            logger.fine("FileFormatSnapshotGenerator: Adding FileFormat '" + fileFormatName + "' to schema '" + schema.getName() + "'");
+            
+            // Add to discovered set for caching and to schema
+            discoveredFileFormats.add(fileFormatObject);
             schema.addDatabaseObject(fileFormatObject);
             
             // CRITICAL FIX: Also add FileFormat to top-level snapshot for diff access
             // This enables snapshot.get(FileFormat.class) to find FileFormats for changelog generation
             try {
-                System.out.println("🔧 FileFormatSnapshotGenerator: Adding FileFormat '" + fileFormatName + "' to top-level snapshot for diff access");
+                logger.fine("FileFormatSnapshotGenerator: Adding FileFormat '" + fileFormatName + "' to top-level snapshot for diff access");
                 snapshot.include(fileFormatObject);
             } catch (InvalidExampleException e) {
-                System.out.println("⚠️ FileFormatSnapshotGenerator: Could not add FileFormat to top-level snapshot: " + e.getMessage());
+                logger.warning("FileFormatSnapshotGenerator: Could not add FileFormat to top-level snapshot: " + e.getMessage());
             }
         }
         
         rs.close();
         stmt.close();
         
-        System.out.println("✅ FileFormatSnapshotGenerator: Discovered " + fileFormatCount + " FileFormats in schema " + schema.getName());
+        // Cache the results for future queries within this snapshot session
+        schemaFileFormatsCache.put(schemaKey, discoveredFileFormats);
+        logger.fine("FileFormatSnapshotGenerator: Discovered " + fileFormatCount + " FileFormats in schema " + schema.getName());
+    }
+    
+    // Helper method to reduce verbosity when setting properties
+    private void setIfNotNull(Consumer<String> setter, String value) {
+        if (value != null) {
+            setter.accept(value);
+        }
+    }
+    
+    // Clear cache when snapshot completes
+    public void clearCache() {
+        schemaFileFormatsCache.clear();
     }
     
     private Boolean convertYesNoToBoolean(String value) {

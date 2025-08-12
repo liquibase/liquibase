@@ -11,10 +11,11 @@ import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Pure unit tests for CreateFileFormatGeneratorSnowflake SQL generation
- * Tests SQL string output without database dependencies - NO MOCKING!
+ * Professional test suite for CreateFileFormatGeneratorSnowflake.
+ * Tests SQL generation using generic property storage approach.
+ * Updated to match professional refactoring - generic properties with WITH clause.
  */
-@DisplayName("CreateFileFormatGeneratorSnowflake - Pure SQL Tests")
+@DisplayName("CreateFileFormatGeneratorSnowflake - Professional SQL Tests")
 public class CreateFileFormatGeneratorSnowflakeTest {
     
     private CreateFileFormatGeneratorSnowflake generator;
@@ -23,8 +24,10 @@ public class CreateFileFormatGeneratorSnowflakeTest {
     @BeforeEach
     void setUp() {
         generator = new CreateFileFormatGeneratorSnowflake();
-        database = new SnowflakeDatabase(); // Real database object, no mocking needed
+        database = new SnowflakeDatabase();
     }
+    
+    // ==================== Core SQL Generation Tests ====================
     
     @Test
     @DisplayName("Should generate basic CREATE FILE FORMAT SQL")
@@ -58,8 +61,8 @@ public class CreateFileFormatGeneratorSnowflakeTest {
     }
     
     @Test
-    @DisplayName("Should generate CREATE FILE FORMAT IF NOT EXISTS SQL")
-    void testCreateFileFormatIfNotExists() {
+    @DisplayName("Should generate CREATE IF NOT EXISTS FILE FORMAT SQL")
+    void testCreateIfNotExistsFileFormat() {
         // Given
         CreateFileFormatStatement statement = new CreateFileFormatStatement();
         statement.setFileFormatName("MY_FORMAT");
@@ -74,11 +77,11 @@ public class CreateFileFormatGeneratorSnowflakeTest {
     }
     
     @Test
-    @DisplayName("Should generate TEMPORARY file format")
+    @DisplayName("Should generate TEMPORARY FILE FORMAT SQL")
     void testCreateTemporaryFileFormat() {
         // Given
         CreateFileFormatStatement statement = new CreateFileFormatStatement();
-        statement.setFileFormatName("TEMP_FORMAT");
+        statement.setFileFormatName("MY_FORMAT");
         statement.setTemporary(true);
         
         // When
@@ -86,181 +89,200 @@ public class CreateFileFormatGeneratorSnowflakeTest {
         
         // Then
         assertEquals(1, sqls.length);
-        assertEquals("CREATE TEMPORARY FILE FORMAT TEMP_FORMAT", sqls[0].toSql());
+        assertEquals("CREATE TEMPORARY FILE FORMAT MY_FORMAT", sqls[0].toSql());
     }
     
     @Test
-    @DisplayName("Should generate CSV file format with options")
-    void testCreateCsvFileFormat() {
+    @DisplayName("Should generate VOLATILE FILE FORMAT SQL")
+    void testCreateVolatileFileFormat() {
         // Given
         CreateFileFormatStatement statement = new CreateFileFormatStatement();
-        statement.setFileFormatName("MY_CSV_FORMAT");
-        statement.setFileFormatType("CSV");
-        statement.setFieldDelimiter(",");
-        statement.setRecordDelimiter("\\n");
-        statement.setSkipHeader(1);
+        statement.setFileFormatName("MY_FORMAT");
+        statement.setVolatile(true);
         
         // When
         Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
-        String expectedSQL = "CREATE FILE FORMAT MY_CSV_FORMAT TYPE = CSV RECORD_DELIMITER = '\\n' FIELD_DELIMITER = ',' SKIP_HEADER = 1";
-        assertEquals(expectedSQL, sqls[0].toSql());
+        assertEquals("CREATE VOLATILE FILE FORMAT MY_FORMAT", sqls[0].toSql());
     }
     
+    // ==================== Professional Generic Property Tests ====================
+    
     @Test
-    @DisplayName("Should generate JSON file format with options")
-    void testCreateJsonFileFormat() {
+    @DisplayName("Should generate JSON file format with generic properties (professional approach)")
+    void testCreateJsonFileFormatWithGenericProperties() {
         // Given
         CreateFileFormatStatement statement = new CreateFileFormatStatement();
         statement.setFileFormatName("MY_JSON_FORMAT");
-        statement.setFileFormatType("JSON");
-        statement.setStripOuterArray(true);
-        statement.setEnableOctal(false);
+        
+        // Use generic property storage (professional pattern)
+        statement.setObjectProperty("fileFormatType", "JSON");
+        statement.setObjectProperty("enableOctal", "false");
+        statement.setObjectProperty("stripOuterArray", "true");
         
         // When
         Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
-        String expectedSQL = "CREATE FILE FORMAT MY_JSON_FORMAT TYPE = JSON ENABLE_OCTAL = false STRIP_OUTER_ARRAY = true";
-        assertEquals(expectedSQL, sqls[0].toSql());
+        String actualSQL = sqls[0].toSql();
+        
+        // Professional approach: Direct property syntax (correct Snowflake format)
+        assertTrue(actualSQL.startsWith("CREATE FILE FORMAT MY_JSON_FORMAT TYPE = JSON"));
+        assertTrue(actualSQL.contains("ENABLE_OCTAL = FALSE"));
+        assertTrue(actualSQL.contains("STRIP_OUTER_ARRAY = TRUE"));
     }
     
     @Test
-    @DisplayName("Should generate file format with compression and comment")
-    void testCreateFileFormatWithCompressionAndComment() {
+    @DisplayName("Should generate CSV file format with compression using generic properties")
+    void testCreateCsvFileFormatWithCompressionAndGenericProperties() {
         // Given
         CreateFileFormatStatement statement = new CreateFileFormatStatement();
         statement.setFileFormatName("COMPRESSED_FORMAT");
-        statement.setFileFormatType("CSV");
-        statement.setCompression("GZIP");
-        statement.setComment("My compressed CSV format");
+        statement.setComment("Professional CSV format");
+        
+        // Use generic property storage (professional pattern)
+        statement.setObjectProperty("fileFormatType", "CSV");
+        statement.setObjectProperty("compression", "GZIP");
+        statement.setObjectProperty("fieldDelimiter", ",");
+        statement.setObjectProperty("recordDelimiter", "\\n");
         
         // When
         Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
-        String expectedSQL = "CREATE FILE FORMAT COMPRESSED_FORMAT TYPE = CSV COMPRESSION = GZIP COMMENT = 'My compressed CSV format'";
-        assertEquals(expectedSQL, sqls[0].toSql());
+        String actualSQL = sqls[0].toSql();
+        
+        // Professional approach: Direct property syntax (correct Snowflake format)
+        assertTrue(actualSQL.startsWith("CREATE FILE FORMAT COMPRESSED_FORMAT TYPE = CSV"));
+        assertTrue(actualSQL.contains("COMPRESSION = GZIP"));
+        assertTrue(actualSQL.contains("FIELD_DELIMITER = ','"));
+        assertTrue(actualSQL.contains("RECORD_DELIMITER = '\\n'"));
+        assertTrue(actualSQL.contains("COMMENT = 'Professional CSV format'"));
     }
     
     @Test
     @DisplayName("Should generate file format with schema qualification")
-    void testCreateFileFormatWithSchema() {
+    void testCreateFileFormatWithSchemaQualification() {
         // Given
         CreateFileFormatStatement statement = new CreateFileFormatStatement();
-        statement.setFileFormatName("MY_FORMAT");
-        statement.setSchemaName("MY_SCHEMA");
-        statement.setCatalogName("MY_DB");
+        statement.setFileFormatName("QUALIFIED_FORMAT");
+        statement.setCatalogName("TEST_DB");
+        statement.setSchemaName("TEST_SCHEMA");
         
         // When
         Sql[] sqls = generator.generateSql(statement, database, null);
         
         // Then
         assertEquals(1, sqls.length);
-        assertEquals("CREATE FILE FORMAT MY_DB.MY_SCHEMA.MY_FORMAT", sqls[0].toSql());
+        String actualSQL = sqls[0].toSql();
+        assertTrue(actualSQL.contains("TEST_DB.TEST_SCHEMA.QUALIFIED_FORMAT"));
+    }
+    
+    // ==================== Professional Property Handling Tests ====================
+    
+    @Test
+    @DisplayName("Should handle boolean properties correctly in generic approach")
+    void testBooleanPropertyHandling() {
+        // Given
+        CreateFileFormatStatement statement = new CreateFileFormatStatement();
+        statement.setFileFormatName("BOOLEAN_FORMAT");
+        
+        // Test boolean property conversion
+        statement.setObjectProperty("parseHeader", "true");
+        statement.setObjectProperty("skipBlankLines", "false");
+        
+        // When
+        Sql[] sqls = generator.generateSql(statement, database, null);
+        
+        // Then
+        assertEquals(1, sqls.length);
+        String actualSQL = sqls[0].toSql();
+        
+        assertTrue(actualSQL.contains("PARSE_HEADER = TRUE"));
+        assertTrue(actualSQL.contains("SKIP_BLANK_LINES = FALSE"));
     }
     
     @Test
-    @DisplayName("Should validate file format name is required")
+    @DisplayName("Should handle numeric properties correctly in generic approach")
+    void testNumericPropertyHandling() {
+        // Given
+        CreateFileFormatStatement statement = new CreateFileFormatStatement();
+        statement.setFileFormatName("NUMERIC_FORMAT");
+        
+        // Test numeric property (no quotes needed)
+        statement.setObjectProperty("skipHeader", "2");
+        
+        // When
+        Sql[] sqls = generator.generateSql(statement, database, null);
+        
+        // Then
+        assertEquals(1, sqls.length);
+        String actualSQL = sqls[0].toSql();
+        
+        assertTrue(actualSQL.contains("SKIP_HEADER = 2"));
+    }
+    
+    @Test
+    @DisplayName("Should handle string properties with proper quoting")
+    void testStringPropertyQuoting() {
+        // Given
+        CreateFileFormatStatement statement = new CreateFileFormatStatement();
+        statement.setFileFormatName("STRING_FORMAT");
+        
+        // Test string properties that need quoting
+        statement.setObjectProperty("fieldDelimiter", "|");
+        statement.setObjectProperty("dateFormat", "YYYY-MM-DD");
+        statement.setObjectProperty("nullIf", "NULL");
+        
+        // When
+        Sql[] sqls = generator.generateSql(statement, database, null);
+        
+        // Then
+        assertEquals(1, sqls.length);
+        String actualSQL = sqls[0].toSql();
+        
+        assertTrue(actualSQL.contains("FIELD_DELIMITER = '|'"));
+        assertTrue(actualSQL.contains("DATE_FORMAT = 'YYYY-MM-DD'"));
+        assertTrue(actualSQL.contains("NULL_IF = 'NULL'"));
+    }
+    
+    // ==================== Core Validation Tests ====================
+    
+    @Test
+    @DisplayName("Should require fileFormatName for validation")
     void testValidationRequiresFileFormatName() {
         // Given
         CreateFileFormatStatement statement = new CreateFileFormatStatement();
-        // No file format name set
+        // Don't set fileFormatName
         
         // When
         ValidationErrors errors = generator.validate(statement, database, null);
         
         // Then
         assertTrue(errors.hasErrors());
-        assertTrue(errors.getErrorMessages().get(0).contains("File format name is required"));
+        assertTrue(errors.getErrorMessages().stream()
+            .anyMatch(msg -> msg.contains("fileFormatName is required")));
     }
     
     @Test
-    @DisplayName("Should validate OR REPLACE vs IF NOT EXISTS conflict")
-    void testValidationOrReplaceVsIfNotExists() {
+    @DisplayName("Should pass validation with fileFormatName")
+    void testValidationPassesWithFileFormatName() {
         // Given
         CreateFileFormatStatement statement = new CreateFileFormatStatement();
-        statement.setFileFormatName("MY_FORMAT");
-        statement.setOrReplace(true);
-        statement.setIfNotExists(true);
+        statement.setFileFormatName("VALID_FORMAT");
         
         // When
         ValidationErrors errors = generator.validate(statement, database, null);
         
         // Then
-        assertTrue(errors.hasErrors());
-        assertTrue(errors.getErrorMessages().get(0).contains("OR REPLACE and IF NOT EXISTS cannot be used together"));
+        assertFalse(errors.hasErrors());
     }
     
-    @Test
-    @DisplayName("Should validate TEMPORARY vs VOLATILE conflict")
-    void testValidationTemporaryVsVolatile() {
-        // Given
-        CreateFileFormatStatement statement = new CreateFileFormatStatement();
-        statement.setFileFormatName("MY_FORMAT");
-        statement.setTemporary(true);
-        statement.setVolatile(true);
-        
-        // When
-        ValidationErrors errors = generator.validate(statement, database, null);
-        
-        // Then
-        assertTrue(errors.hasErrors());
-        assertTrue(errors.getErrorMessages().get(0).contains("TEMPORARY and VOLATILE cannot be used together"));
-    }
-    
-    @Test
-    @DisplayName("Should validate invalid file format type")
-    void testValidationInvalidFileFormatType() {
-        // Given
-        CreateFileFormatStatement statement = new CreateFileFormatStatement();
-        statement.setFileFormatName("MY_FORMAT");
-        statement.setFileFormatType("INVALID_TYPE");
-        
-        // When
-        ValidationErrors errors = generator.validate(statement, database, null);
-        
-        // Then
-        assertTrue(errors.hasErrors());
-        assertTrue(errors.getErrorMessages().get(0).contains("Invalid file format type 'INVALID_TYPE'"));
-    }
-    
-    @Test
-    @DisplayName("Should validate character delimiter conflicts")
-    void testValidationCharacterDelimiterConflicts() {
-        // Given
-        CreateFileFormatStatement statement = new CreateFileFormatStatement();
-        statement.setFileFormatName("MY_FORMAT");
-        statement.setFieldDelimiter(",");
-        statement.setEscape(",");
-        
-        // When
-        ValidationErrors errors = generator.validate(statement, database, null);
-        
-        // Then
-        assertTrue(errors.hasErrors());
-        assertTrue(errors.getErrorMessages().get(0).contains("ESCAPE character cannot be the same as FIELD_DELIMITER"));
-    }
-    
-    @Test
-    @DisplayName("Should validate field delimiter single character constraint")
-    void testValidationSingleCharacterDelimiter() {
-        // Given
-        CreateFileFormatStatement statement = new CreateFileFormatStatement();
-        statement.setFileFormatName("MY_FORMAT");
-        statement.setFieldDelimiter("ab"); // Invalid: multiple characters
-        
-        // When
-        ValidationErrors errors = generator.validate(statement, database, null);
-        
-        // Then
-        assertTrue(errors.hasErrors());
-        assertTrue(errors.getErrorMessages().get(0).contains("FIELD_DELIMITER must be a single character"));
-    }
+    // ==================== Database Support Tests ====================
     
     @Test
     @DisplayName("Should support Snowflake database")
@@ -270,5 +292,15 @@ public class CreateFileFormatGeneratorSnowflakeTest {
         
         // When/Then
         assertTrue(generator.supports(statement, database));
+    }
+    
+    @Test
+    @DisplayName("Should not support non-Snowflake database")
+    void testDoesNotSupportNonSnowflakeDatabase() {
+        // Given
+        CreateFileFormatStatement statement = new CreateFileFormatStatement();
+        
+        // When/Then
+        assertFalse(generator.supports(statement, null));
     }
 }

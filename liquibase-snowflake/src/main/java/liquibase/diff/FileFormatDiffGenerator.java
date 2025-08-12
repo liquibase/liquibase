@@ -11,6 +11,8 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Schema;
+import liquibase.Scope;
+import liquibase.logging.Logger;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -26,6 +28,8 @@ import java.util.Set;
  */
 public class FileFormatDiffGenerator implements DiffGenerator {
     
+    private static final Logger logger = Scope.getCurrentScope().getLog(FileFormatDiffGenerator.class);
+    
     @Override
     public int getPriority() {
         return PRIORITY_DATABASE;  // High priority for Snowflake FileFormat objects
@@ -40,7 +44,7 @@ public class FileFormatDiffGenerator implements DiffGenerator {
     public DiffResult compare(DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, 
                             CompareControl compareControl) throws DatabaseException {
         
-        System.out.println("🔧 PHASE2: FileFormatDiffGenerator.compare() called");
+        logger.fine("PHASE2: FileFormatDiffGenerator.compare() called");
         
         // Create base diff result
         DiffResult diffResult = new DiffResult(referenceSnapshot, comparisonSnapshot, compareControl);
@@ -54,14 +58,14 @@ public class FileFormatDiffGenerator implements DiffGenerator {
     private void compareFileFormats(DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot,
                                    CompareControl compareControl, DiffResult diffResult) throws DatabaseException {
         
-        System.out.println("🔧 PHASE2: Comparing FileFormats directly...");
+        logger.fine("PHASE2: Comparing FileFormats directly...");
         
         // Discover FileFormats from both snapshots using explicit requests
         Set<FileFormat> referenceFileFormats = discoverFileFormats(referenceSnapshot);
         Set<FileFormat> comparisonFileFormats = discoverFileFormats(comparisonSnapshot);
         
-        System.out.println("🔧 PHASE2: Reference FileFormats: " + (referenceFileFormats != null ? referenceFileFormats.size() : "null"));
-        System.out.println("🔧 PHASE2: Comparison FileFormats: " + (comparisonFileFormats != null ? comparisonFileFormats.size() : "null"));
+        logger.fine("PHASE2: Reference FileFormats: " + (referenceFileFormats != null ? referenceFileFormats.size() : "null"));
+        logger.fine("PHASE2: Comparison FileFormats: " + (comparisonFileFormats != null ? comparisonFileFormats.size() : "null"));
         
         if (referenceFileFormats == null) referenceFileFormats = new HashSet<>();
         if (comparisonFileFormats == null) comparisonFileFormats = new HashSet<>();
@@ -79,7 +83,7 @@ public class FileFormatDiffGenerator implements DiffGenerator {
                 }
             }
             if (!found) {
-                System.out.println("🔧 PHASE2: Found missing FileFormat: " + refFileFormat.getName());
+                logger.fine("PHASE2: Found missing FileFormat: " + refFileFormat.getName());
                 diffResult.addMissingObject(refFileFormat);
             }
         }

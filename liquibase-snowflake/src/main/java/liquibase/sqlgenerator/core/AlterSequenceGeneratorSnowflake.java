@@ -8,12 +8,16 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.core.AbstractSqlGenerator;
 import liquibase.statement.core.snowflake.AlterSequenceStatementSnowflake;
+import liquibase.Scope;
+import liquibase.logging.Logger;
 
 /**
  * SQL generator for ALTER SEQUENCE operations in Snowflake.
  * Supports rename, increment changes, ordering modifications, and comment management.
  */
 public class AlterSequenceGeneratorSnowflake extends AbstractSqlGenerator<AlterSequenceStatementSnowflake> {
+    
+    private static final Logger logger = Scope.getCurrentScope().getLog(AlterSequenceGeneratorSnowflake.class);
 
     @Override
     public int getPriority() {
@@ -116,7 +120,7 @@ public class AlterSequenceGeneratorSnowflake extends AbstractSqlGenerator<AlterS
             } else {
                 sql.append(" NOORDER");
                 // ⚠️ CRITICAL WARNING: NOORDER is irreversible in Snowflake
-                System.out.println("⚠️ CRITICAL: ALTER SEQUENCE SET NOORDER is IRREVERSIBLE - " +
+                logger.warning("CRITICAL: ALTER SEQUENCE SET NOORDER is IRREVERSIBLE - " +
                     "sequence '" + statement.getSequenceName() + "' cannot be changed back to ORDER behavior. " +
                     "This provides better performance but eliminates ordering guarantees permanently.");
             }

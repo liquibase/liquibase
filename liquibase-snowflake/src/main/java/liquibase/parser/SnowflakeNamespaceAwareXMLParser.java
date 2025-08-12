@@ -7,6 +7,8 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.resource.Resource;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.ext.SnowflakeNamespaceAttributeStorage;
+import liquibase.Scope;
+import liquibase.logging.Logger;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -24,6 +26,8 @@ import java.util.Map;
  * for later use by SQL generators.
  */
 public class SnowflakeNamespaceAwareXMLParser extends XMLChangeLogSAXParser {
+    
+    private static final Logger logger = Scope.getCurrentScope().getLog(SnowflakeNamespaceAwareXMLParser.class);
     
     @Override
     public int getPriority() {
@@ -49,7 +53,7 @@ public class SnowflakeNamespaceAwareXMLParser extends XMLChangeLogSAXParser {
     
     private void captureNamespaceAttributes(String location, ResourceAccessor resourceAccessor) 
             throws Exception {
-        System.out.println("[SnowflakeNamespaceAwareXMLParser] Parsing " + location);
+        logger.fine("[SnowflakeNamespaceAwareXMLParser] Parsing " + location);
         
         List<Resource> resources = resourceAccessor.getAll(location);
         if (resources == null || resources.isEmpty()) {
@@ -75,23 +79,23 @@ public class SnowflakeNamespaceAwareXMLParser extends XMLChangeLogSAXParser {
             
             // Check for the change types we're extending
             if (isTargetChangeType(localName)) {
-                System.out.println("[SnowflakeNamespaceAwareXMLParser] Found " + localName + ": " + getObjectName(localName, attributes));
+                logger.fine("[SnowflakeNamespaceAwareXMLParser] Found " + localName + ": " + getObjectName(localName, attributes));
                 String objectName = getObjectName(localName, attributes);
                 
                 // Look for namespace attributes
                 Map<String, String> namespaceAttrs = new HashMap<>();
                 
                 for (int i = 0; i < attributes.getLength(); i++) {
-                    System.out.println("[SnowflakeNamespaceAwareXMLParser]   Checking attribute: " + attributes.getLocalName(i) + " (uri: " + attributes.getURI(i) + ", localName: " + attributes.getLocalName(i) + ")");
+                    logger.fine("[SnowflakeNamespaceAwareXMLParser]   Checking attribute: " + attributes.getLocalName(i) + " (uri: " + attributes.getURI(i) + ", localName: " + attributes.getLocalName(i) + ")");
                     if (SNOWFLAKE_NS.equals(attributes.getURI(i))) {
-                        System.out.println("[SnowflakeNamespaceAwareXMLParser]   FOUND snowflake namespace attribute: " + attributes.getLocalName(i) + " = " + attributes.getValue(i));
+                        logger.fine("[SnowflakeNamespaceAwareXMLParser]   FOUND snowflake namespace attribute: " + attributes.getLocalName(i) + " = " + attributes.getValue(i));
                         namespaceAttrs.put(attributes.getLocalName(i), 
                                          attributes.getValue(i));
                     }
                 }
                 
                 if (!namespaceAttrs.isEmpty() && objectName != null) {
-                    System.out.println("DEBUG: Storing namespace attributes for " + objectName + ": " + namespaceAttrs);
+                    logger.fine("DEBUG: Storing namespace attributes for " + objectName + ": " + namespaceAttrs);
                     SnowflakeNamespaceAttributeStorage.storeAttributes(objectName, namespaceAttrs);
                 }
             }
