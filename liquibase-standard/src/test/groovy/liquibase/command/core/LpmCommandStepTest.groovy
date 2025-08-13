@@ -59,6 +59,9 @@ class LpmCommandStepTest extends Specification {
     def "should determine platform correctly for Linux"() {
         given:
         LpmCommandStep lpmCommand = new LpmCommandStep()
+        //backup original properties
+        String originalOsName = System.getProperty("os.name")
+        String originalOsArch = System.getProperty("os.arch")
         
         when:
         System.setProperty("os.name", "Linux")
@@ -67,11 +70,18 @@ class LpmCommandStepTest extends Specification {
         
         then:
         platform == "linux"
+        //restore original properties
+        System.setProperty("os.name", originalOsName)
+        System.setProperty("os.arch", originalOsArch)
+
     }
 
     def "should determine platform correctly for Linux ARM"() {
         given:
         LpmCommandStep lpmCommand = new LpmCommandStep()
+        //backup original properties
+        String originalOsName = System.getProperty("os.name")
+        String originalOsArch = System.getProperty("os.arch")
         
         when:
         System.setProperty("os.name", "Linux")
@@ -80,9 +90,14 @@ class LpmCommandStepTest extends Specification {
         
         then:
         platform == "linux-arm64"
+
+        //restore original properties
+        System.setProperty("os.name", originalOsName)
+        System.setProperty("os.arch", originalOsArch)
+
     }
 
-    def "should throw exception when liquibase.home is not configured"() {
+    def "should throw exception when LPM home is not configured"() {
         given:
         LpmCommandStep lpmCommand = new LpmCommandStep()
         
@@ -91,7 +106,7 @@ class LpmCommandStepTest extends Specification {
         
         then:
         UnexpectedLiquibaseException ex = thrown()
-        ex.message.contains("liquibase.home is not configured")
+        ex.message.contains("LPM home directory is not configured")
     }
 
     def "should have no dependencies"() {
@@ -185,9 +200,10 @@ class LpmCommandStepTest extends Specification {
         }
         
         then:
-        // Should find the DOWNLOAD_ARG field
-        argumentDefinitionFields.size() >= 1
+        // Should find the DOWNLOAD_ARG and LPM_HOME_ARG fields
+        argumentDefinitionFields.size() >= 2
         argumentDefinitionFields.any { it.name == "DOWNLOAD_ARG" }
+        argumentDefinitionFields.any { it.name == "LPM_HOME_ARG" }
     }
 
     def "should use DownloadUtil for fetching version information"() {
