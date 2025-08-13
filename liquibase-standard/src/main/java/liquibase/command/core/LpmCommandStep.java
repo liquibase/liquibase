@@ -2,6 +2,7 @@ package liquibase.command.core;
 
 import liquibase.Scope;
 import liquibase.command.*;
+import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueConverter;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -11,6 +12,7 @@ import liquibase.util.DownloadUtil;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,12 +29,40 @@ public class LpmCommandStep extends AbstractCommandStep {
     public static final String[] COMMAND_NAME = {"init", "lpm"};
     
     public static final CommandArgumentDefinition<Boolean> DOWNLOAD_ARG;
+    public static final CommandArgumentDefinition<String> LPM_HOME_ARG;
+    
+    // Configuration definition for LPM_HOME
+    public static final ConfigurationDefinition<String> LPM_HOME;
+    
+    // Constants
+    private static final String LPM_BINARY_NAME = "lpm";
+    private static final String DOCS_URL = "http://docs.liquibase.com/LPM";
+    private static final String LPM_ERROR_PREFIX = "ERROR: Liquibase Package Manager (LPM)";
     
     static {
+        // Define LPM_HOME configuration property
+        ConfigurationDefinition.Builder configBuilder = new ConfigurationDefinition.Builder("liquibase.lpm");
+        LPM_HOME = configBuilder.define("home", String.class)
+                .setDescription("Directory where LPM (Liquibase Package Manager) is installed. Defaults to LIQUIBASE_HOME.")
+                .setValueHandler(value -> {
+                    if (value == null || value.toString().trim().isEmpty()) {
+                        // Fall back to liquibase.home
+                        ConfiguredValue<String> liquibaseHome = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class)
+                                .getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.home");
+                        return liquibaseHome.getValue();
+                    }
+                    return value.toString();
+                })
+                .build();
+        
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         DOWNLOAD_ARG = builder.argument("download", Boolean.class)
                 .description("Download and install LPM binary")
                 .defaultValue(false)
+                .build();
+        
+        LPM_HOME_ARG = builder.argument("lpmHome", String.class)
+                .description("Directory where LPM is installed")
                 .build();
     }
 
@@ -54,9 +84,10 @@ public class LpmCommandStep extends AbstractCommandStep {
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        final String lpmHome = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class)
-                .getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.home").getValue();
-        final String lpmExecutable = lpmHome + File.separator + "lpm" + (System.getProperty("os.name").toLowerCase().contains("win") ? ".exe" : "");
+        // Resolve and validate LPM_HOME path
+        String lpmHome = validateAndResolveLpmHome(resultsBuilder);
+        
+        final String lpmExecutable = buildLpmExecutablePath(lpmHome);
         
         boolean download = resultsBuilder.getCommandScope().getArgumentValue(DOWNLOAD_ARG);
         // If --download is specified, check for updates and install/upgrade LPM
@@ -111,9 +142,7 @@ public class LpmCommandStep extends AbstractCommandStep {
      * Downloads LPM or upgrades to the latest version if a newer one is available.
      */
     private void downloadOrUpgradeLpm(String lpmHome, String lpmExecutable) {
-        if (lpmHome == null || lpmHome.trim().isEmpty()) {
-            throw new UnexpectedLiquibaseException("liquibase.home is not configured. Cannot determine where to install LPM.");
-        }
+        validateLpmHomeNotEmpty(lpmHome);
         
         String latestVersion = getLatestLpmVersion();
         File lpmExecutableFile = new File(lpmExecutable);
@@ -133,12 +162,7 @@ public class LpmCommandStep extends AbstractCommandStep {
             Scope.getCurrentScope().getUI().sendMessage("Installing LPM version " + latestVersion + "...");
             
             // Ensure lpmHome directory exists
-            File lpmHomeDir = new File(lpmHome);
-            if (!lpmHomeDir.exists()) {
-                throw new UnexpectedLiquibaseException("Cannot find liquibase home directory: " + lpmHome);
-            } else if (!lpmHomeDir.canWrite()) {
-                throw new UnexpectedLiquibaseException("Unable to write to liquibase home directory: " + lpmHome);
-            }
+            ensureDirectoryExists(lpmHome);
             
             this.installLpm(lpmHome, latestVersion);
             Scope.getCurrentScope().getUI().sendMessage("LPM has been installed successfully (version " + latestVersion + ").");
@@ -193,10 +217,120 @@ public class LpmCommandStep extends AbstractCommandStep {
         return false; // versions are equal
     }
 
-    private void checkForLpmInstallation(String lpmHome, String lpmExecutable) {
+    /**
+     * Resolves and validates the LPM_HOME directory path from various configuration sources.
+     * 
+     * @param resultsBuilder The command results builder containing CLI arguments
+     * @return The validated and resolved LPM_HOME path
+     * @throws UnexpectedLiquibaseException if the path is invalid or inaccessible
+     */
+    private String validateAndResolveLpmHome(CommandResultsBuilder resultsBuilder) {
+        LpmHomeResolution resolution = resolveLpmHomeFromSources(resultsBuilder);
+        return validateLpmHomePath(resolution.path, resolution.configuredValue);
+    }
+    
+    /**
+     * Resolves the LPM_HOME path from various configuration sources in priority order.
+     */
+    private LpmHomeResolution resolveLpmHomeFromSources(CommandResultsBuilder resultsBuilder) {
+        // Get LPM_HOME from CLI argument first (highest priority)
+        String lpmHome = resultsBuilder.getCommandScope().getArgumentValue(LPM_HOME_ARG);
+        ConfiguredValue<String> configuredValue = null;
+        
         if (lpmHome == null || lpmHome.trim().isEmpty()) {
-            throw new UnexpectedLiquibaseException("liquibase.home is not configured. Cannot determine where to install LPM.");
+            // Try to get from configuration (env vars, properties, etc.)
+            configuredValue = LPM_HOME.getCurrentConfiguredValue();
+            lpmHome = configuredValue.getValue();
+            
+            // If still null, fall back to liquibase.home
+            if (lpmHome == null || lpmHome.trim().isEmpty()) {
+                configuredValue = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class)
+                        .getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.home");
+                lpmHome = configuredValue.getValue();
+            }
         }
+        
+        if (lpmHome == null || lpmHome.trim().isEmpty()) {
+            throw new UnexpectedLiquibaseException("LPM home directory is not configured. Cannot determine where to install LPM.");
+        }
+        
+        return new LpmHomeResolution(lpmHome, configuredValue);
+    }
+    
+    /**
+     * Validates that the resolved LPM_HOME path is accessible and usable.
+     */
+    private String validateLpmHomePath(String lpmHome, ConfiguredValue<String> configuredValue) {
+        Path lpmHomePath = Paths.get(lpmHome).toAbsolutePath();
+        File lpmHomeDir = lpmHomePath.toFile();
+        
+        if (lpmHomeDir.exists()) {
+            validateExistingDirectory(lpmHomePath, lpmHomeDir, configuredValue);
+        }
+        // Directory doesn't exist yet, but that's OK - we'll create it when needed
+        
+        return lpmHomePath.toString();
+    }
+    
+    /**
+     * Validates that an existing directory is accessible and writable.
+     */
+    private void validateExistingDirectory(Path lpmHomePath, File lpmHomeDir, ConfiguredValue<String> configuredValue) {
+        if (!lpmHomeDir.isDirectory()) {
+            String source = getConfigurationSource(configuredValue);
+            throw new UnexpectedLiquibaseException(
+                formatLpmErrorMessage("path '%s' set by %s is not a directory", lpmHomePath, source)
+            );
+        }
+        if (!lpmHomeDir.canRead() || !lpmHomeDir.canWrite()) {
+            String source = getConfigurationSource(configuredValue);
+            throw new UnexpectedLiquibaseException(
+                formatLpmErrorMessage("was not installed at path of '%s' set by %s", lpmHomePath, source)
+            );
+        }
+    }
+    
+    /**
+     * Simple data holder for LPM home resolution result.
+     */
+    private static class LpmHomeResolution {
+        final String path;
+        final ConfiguredValue<String> configuredValue;
+        
+        LpmHomeResolution(String path, ConfiguredValue<String> configuredValue) {
+            this.path = path;
+            this.configuredValue = configuredValue;
+        }
+    }
+    
+    /**
+     * Gets a human-readable description of where a configuration value came from.
+     */
+    private String getConfigurationSource(ConfiguredValue<String> configuredValue) {
+        if (configuredValue == null || configuredValue.getProvidedValue() == null) {
+            return "default configuration";
+        }
+        
+        String provider = configuredValue.getProvidedValue().getProvider().getClass().getSimpleName();
+        
+        // Map provider class names to user-friendly descriptions
+        if (provider.contains("Environment")) {
+            return "LIQUIBASE_LPM_HOME environment variable";
+        } else if (provider.contains("SystemProperty")) {
+            return "liquibase.lpm.home system property";
+        } else if (provider.contains("CommandLine")) {
+            return "--lpm-home command line argument";
+        } else if (provider.contains("PropertiesFile")) {
+            return "liquibase.lpm.home in properties file";
+        } else if (provider.contains("Default")) {
+            return "default configuration";
+        }
+        
+        return "configuration";
+    }
+
+    private void checkForLpmInstallation(String lpmHome, String lpmExecutable) {
+        validateLpmHomeNotEmpty(lpmHome);
         
         Scope.getCurrentScope().getLog(getClass()).fine("Checking for LPM at " + lpmExecutable);
         File lpmExecutableFile = new File(lpmExecutable);
@@ -205,10 +339,7 @@ public class LpmCommandStep extends AbstractCommandStep {
             Scope.getCurrentScope().getUI().sendMessage("LPM not found at '" + lpmExecutable + "'. Installing LPM automatically...");
             
             // Ensure lpmHome directory exists
-            File lpmHomeDir = new File(lpmHome);
-            if (!lpmHomeDir.exists() && !lpmHomeDir.mkdirs()) {
-                throw new UnexpectedLiquibaseException("Cannot create liquibase home directory: " + lpmHome);
-            }
+            ensureDirectoryExists(lpmHome);
             
             this.installLpm(lpmHome);
         } else {
@@ -386,5 +517,45 @@ public class LpmCommandStep extends AbstractCommandStep {
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException("Failed to extract LPM archive: " + e.getMessage(), e);
         }
+    }
+    
+    // Helper methods for code reuse
+    
+    /**
+     * Builds the full path to the LPM executable based on the home directory.
+     */
+    private String buildLpmExecutablePath(String lpmHome) {
+        String extension = System.getProperty("os.name").toLowerCase().contains("win") ? ".exe" : "";
+        return lpmHome + File.separator + LPM_BINARY_NAME + extension;
+    }
+    
+    /**
+     * Validates that LPM home is not null or empty.
+     */
+    private void validateLpmHomeNotEmpty(String lpmHome) {
+        if (lpmHome == null || lpmHome.trim().isEmpty()) {
+            throw new UnexpectedLiquibaseException("LPM home directory is not configured. Cannot determine where to install LPM.");
+        }
+    }
+    
+    /**
+     * Ensures that a directory exists and is writable, creating it if necessary.
+     */
+    private void ensureDirectoryExists(String directoryPath) {
+        File directory = new File(directoryPath);
+        if (!directory.exists() && !directory.mkdirs()) {
+            throw new UnexpectedLiquibaseException("Cannot create LPM home directory: " + directoryPath);
+        } else if (directory.exists() && !directory.canWrite()) {
+            throw new UnexpectedLiquibaseException("Unable to write to LPM home directory: " + directoryPath);
+        }
+    }
+    
+    /**
+     * Formats standardized LPM error messages.
+     */
+    private String formatLpmErrorMessage(String messageTemplate, Object... args) {
+        String message = String.format(messageTemplate, args);
+        return String.format("%s %s. Please check this path for access, or edit your property value. Learn more at %s",
+                LPM_ERROR_PREFIX, message, DOCS_URL);
     }
 }
