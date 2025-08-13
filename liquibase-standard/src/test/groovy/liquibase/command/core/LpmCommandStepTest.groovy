@@ -21,6 +21,8 @@ class LpmCommandStepTest extends Specification {
     def "should determine platform correctly for Windows"() {
         given:
         LpmCommandStep lpmCommand = new LpmCommandStep()
+        //backup original properties
+        String originalOsName = System.getProperty("os.name")
         
         when:
         System.setProperty("os.name", "Windows 10")
@@ -28,11 +30,16 @@ class LpmCommandStepTest extends Specification {
         
         then:
         platform == "windows"
+        //restore original properties
+        System.setProperty("os.name", originalOsName)
     }
 
     def "should determine platform correctly for macOS Intel"() {
         given:
         LpmCommandStep lpmCommand = new LpmCommandStep()
+        //backup original properties
+        String originalOsName = System.getProperty("os.name")
+        String originalOsArch = System.getProperty("os.arch")
         
         when:
         System.setProperty("os.name", "Mac OS X")
@@ -41,11 +48,17 @@ class LpmCommandStepTest extends Specification {
         
         then:
         platform == "darwin"
+        //restore original properties
+        System.setProperty("os.name", originalOsName)
+        System.setProperty("os.arch", originalOsArch)
     }
 
     def "should determine platform correctly for macOS ARM"() {
         given:
         LpmCommandStep lpmCommand = new LpmCommandStep()
+        //backup original properties
+        String originalOsName = System.getProperty("os.name")
+        String originalOsArch = System.getProperty("os.arch")
         
         when:
         System.setProperty("os.name", "Mac OS X")
@@ -54,6 +67,9 @@ class LpmCommandStepTest extends Specification {
         
         then:
         platform == "darwin-arm64"
+        //restore original properties
+        System.setProperty("os.name", originalOsName)
+        System.setProperty("os.arch", originalOsArch)
     }
 
     def "should determine platform correctly for Linux"() {
