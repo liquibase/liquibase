@@ -2,6 +2,7 @@ package liquibase.command.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
+import liquibase.Scope;
 import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
@@ -9,10 +10,7 @@ import liquibase.serializer.SnapshotSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Index;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.util.StringUtil;
+import liquibase.util.ExceptionUtil;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -20,6 +18,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Getter
 public class SnapshotCommandStep extends AbstractCommandStep {
@@ -120,9 +120,18 @@ public class SnapshotCommandStep extends AbstractCommandStep {
             format = "txt";
         }
 
-        return SnapshotSerializerFactory.getInstance()
-                                        .getSerializer(format.toLowerCase(Locale.US))
-                                        .serialize(snapshot, true);
+        AtomicReference<String> serializedSnapshotString = new AtomicReference<>();
+        String finalFormat = format;
+        try {
+            Scope.child(DatabaseSnapshot.SNAPSHOT_SCOPE_KEY, snapshot, () -> {
+                serializedSnapshotString.set(SnapshotSerializerFactory.getInstance()
+                        .getSerializer(finalFormat.toLowerCase(Locale.US))
+                        .serialize(snapshot, true));
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return serializedSnapshotString.get();
     }
 
 }

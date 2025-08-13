@@ -41,3 +41,5 @@ original-pom.xml
 
 /liquibase-integration-tests/var
 /liquibase-standard/var
+
+CLAUDE.md
