@@ -39,7 +39,7 @@ class DiffChangelogIntegrationTest extends Specification {
 
     def "auto increment on varchar column" () {
         when:
-        def changelogfile = StringUtil.randomIdentifier(10) + ".sql"
+        def changelogfile = StringUtil.randomIdentifier(10) + ".postgresql.sql"
         def sequenceName = "customer_customer_id_seq"
         def tableName = StringUtil.randomIdentifier(10)
         def sql = """
@@ -119,7 +119,7 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
 
     def "should include view comments"() {
         when:
-        def changelogfile = StringUtil.randomIdentifier(10) + ".sql"
+        def changelogfile = StringUtil.randomIdentifier(10) + ".postgresql.sql"
         def viewName = StringUtil.randomIdentifier(10)
         def columnName = StringUtil.randomIdentifier(10)
         def viewComment = "some insightful comment"
