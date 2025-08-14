@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DatabaseFactory implements SingletonObject {
     private static final Logger LOG = Scope.getCurrentScope().getLog(DatabaseFactory.class);
@@ -230,6 +232,18 @@ public class DatabaseFactory implements SingletonObject {
 
             if(selectedDriverClass.contains("oracle")) {
               driverProperties.put("remarksReporting", "true");
+                // Try to split a pair CONNECT_USER[PROXY_USER] into two and store them in their properties
+                String userValue = driverProperties.getProperty("user");
+                if (userValue != null) {
+                    Pattern PROXY_USER_PATTERN = Pattern.compile("^([^\\[]+)\\[([^\\]]+)\\]$");
+                    Matcher matcher = PROXY_USER_PATTERN.matcher(userValue);
+                    if (matcher.matches()) {
+                        String username2 = matcher.group(1);
+                        String proxyUser = matcher.group(2);
+                        driverProperties.setProperty("user", username2);
+                        driverProperties.setProperty("PROXY_USER_NAME", proxyUser);
+                    }
+                }
             } else if(selectedDriverClass.contains("mysql")) {
               driverProperties.put("useInformationSchema", "true");
             }
