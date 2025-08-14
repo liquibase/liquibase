@@ -26,6 +26,7 @@ import liquibase.report.UpdateReportParameters;
 import liquibase.util.ShowSummaryUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.UpdateSummaryDetails;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -363,7 +364,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         return Arrays.stream(commandName)
                 .filter(Objects::nonNull)
                 .map(camelCaseName -> StringUtil.join(StringUtil.splitCamelCase(camelCaseName), " "))
-                .map(StringUtil::upperCaseFirst)
+                .map(uc -> uc.equalsIgnoreCase("sql") ? "SQL" : StringUtils.capitalize(uc))
                 .collect(Collectors.joining(" "));
     }
 }
