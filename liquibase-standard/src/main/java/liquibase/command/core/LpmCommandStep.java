@@ -26,7 +26,7 @@ import java.util.zip.ZipInputStream;
  */
 public class LpmCommandStep extends AbstractCommandStep {
 
-    public static final String[] COMMAND_NAME = {"init", "lpm"};
+    public static final String[] COMMAND_NAME = {"lpm"};
     
     public static final CommandArgumentDefinition<Boolean> DOWNLOAD_ARG;
     public static final CommandArgumentDefinition<String> LPM_HOME_ARG;

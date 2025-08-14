@@ -15,7 +15,7 @@ class LpmCommandStepTest extends Specification {
 
         then:
         commandNames.length == 1
-        commandNames[0] == ["init", "lpm"]
+        commandNames[0] == ["lpm"]
     }
 
     def "should determine platform correctly for Windows"() {
