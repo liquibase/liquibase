@@ -20,9 +20,10 @@ import java.util.regex.Pattern;
  */
 public class JdbcConnection implements DatabaseConnection {
     private java.sql.Connection con;
-    private static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
+    // Oracle External Authentication is passwordless
+    private static final Pattern ORA_EXTERNAL_AUTH = Pattern.compile(".*(?:thin|oci)\\:(.*)/@.*");
     private String originalUrl; // Store the original URL for OAuth validation
-
+    private Properties originalProperties;
     private static final List<ConnectionPatterns> JDBC_CONNECTION_PATTERNS = Scope.getCurrentScope().getServiceLocator().findInstances(ConnectionPatterns.class);
 
     public JdbcConnection() {
@@ -40,6 +41,7 @@ public class JdbcConnection implements DatabaseConnection {
 
     @Override
     public void open(String url, Driver driverObject, Properties driverProperties) throws DatabaseException {
+        this.originalProperties = driverProperties;
         String driverClassName = driverObject.getClass().getName();
         String errorMessage = "Connection could not be created to " + sanitizeUrl(url) + " with driver " + driverClassName;
         try {
@@ -116,6 +118,14 @@ public class JdbcConnection implements DatabaseConnection {
     }
 
     /**
+     * Return properties used to create this connection. There still can be some usefull information in it
+     * @return sproperties used to create this connection.
+     */
+    public Properties getConnectionProperties() {
+        return originalProperties;
+    }
+
+    /**
      * Remove any secure information from the URL. Used for logging purposes
      * Strips off the <code>;password=</code> property from string.
      *
@@ -146,9 +156,10 @@ public class JdbcConnection implements DatabaseConnection {
         }
 
         //
-        // Do not try to strip passwords from a proxy URL
+        // Do not try to strip passwords from external auth JDBC URL:
+        // This covers (Kerberos, Token, Certificate) where no username nor password is provided
         //
-        Matcher m = PROXY_USER.matcher(jdbcUrl);
+        Matcher m = ORA_EXTERNAL_AUTH.matcher(jdbcUrl);
         if (m.matches()) {
             return jdbcUrl;
         }
@@ -211,9 +222,10 @@ public class JdbcConnection implements DatabaseConnection {
         }
 
         //
-        // Do not try to strip passwords from a proxy URL
+        // Do not try to strip passwords from external auth JDBC URL:
+        // This covers (Kerberos, Token, Certificate) where no username nor password is provided
         //
-        Matcher m = PROXY_USER.matcher(jdbcUrl);
+        Matcher m = ORA_EXTERNAL_AUTH.matcher(jdbcUrl);
         if (m.matches()) {
             return jdbcUrl;
         }
