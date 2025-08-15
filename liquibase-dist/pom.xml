@@ -143,6 +143,24 @@
             <version>${oracle.version}</version>
             <optional>true</optional>
         </dependency>
+	<dependency>
+	  <groupId>com.oracle.database.security</groupId>
+	  <artifactId>oraclepki</artifactId>
+          <version>${oracle.version}</version>
+          <optional>true</optional>
+	</dependency>
+	<dependency>
+	  <groupId>com.oracle.database.security</groupId>
+	  <artifactId>osdt_core</artifactId>
+          <version>${oracle.version}</version>
+          <optional>true</optional>
+	</dependency>
+	<dependency>
+	  <groupId>com.oracle.database.security</groupId>
+	  <artifactId>osdt_cert</artifactId>
+          <version>${oracle.version}</version>
+          <optional>true</optional>
+	</dependency>
 
         <dependency>
             <groupId>org.xerial</groupId>

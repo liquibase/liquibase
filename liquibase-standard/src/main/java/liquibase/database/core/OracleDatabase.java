@@ -35,7 +35,8 @@ import static java.util.ResourceBundle.getBundle;
  */
 public class OracleDatabase extends AbstractJdbcDatabase {
 
-    private static final String PROXY_USER_REGEX = ".*(?:thin|oci)\\:(.+)/@.*";
+    // Try to match something like: "jdbc:oracle:thin:SESSION_USER[PROXY_USER]/pwd@host:1521/service"
+    private static final String PROXY_USER_REGEX = ".*(?:thin|oci)\\:([^\\[]*)\\[([^\\]]+)\\]/?.*@.*";
 	public static final Pattern PROXY_USER_PATTERN = Pattern.compile(PROXY_USER_REGEX);
 
     private static final String VERSION_REGEX = "(\\d+)\\.(\\d+)\\..*";
@@ -55,6 +56,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     private Boolean canAccessDbaRecycleBin;
     private Integer databaseMajorVersion;
     private Integer databaseMinorVersion;
+
+    private Properties connectionProperties;
 
     /**
      * Default constructor for an object that represents the Oracle Database DBMS.
@@ -81,18 +84,30 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         return PRIORITY_DEFAULT;
     }
 
-    private void tryProxySession(final String url, final Connection con) {
+    private void tryProxySession(final JdbcConnection jdbcConnection) {
+        String url = jdbcConnection.getURL();
+        Properties connectionProperties = jdbcConnection.getConnectionProperties();
+        Connection con = jdbcConnection.getWrappedConnection();
+        // 1st this fetch proxy username from --username parameter
+        String proxyUserName = connectionProperties.getProperty("PROXY_USER_NAME");
+        // 2nd try to extract proxyUserName from JDBC url
         Matcher m = PROXY_USER_PATTERN.matcher(url);
-        if (m.matches()) {
-            Properties props = new Properties();
-            props.put("PROXY_USER_NAME", m.group(1));
+        if (proxyUserName == null && m.matches()) {
+            // Remove optional brackets around proxy username
+            proxyUserName = m.group(2);
+            if (proxyUserName.startsWith("[") && proxyUserName.endsWith("]")) {
+                proxyUserName = proxyUserName.substring(1, proxyUserName.length() - 1);
+            }
+        }
+        if (proxyUserName != null) {
             try {
+                Properties props = new Properties();
+                props.put("PROXY_USER_NAME", proxyUserName);
                 Method method = con.getClass().getMethod("openProxySession", int.class, Properties.class);
                 method.setAccessible(true);
                 method.invoke(con, 1, props);
             } catch (Exception e) {
                 Scope.getCurrentScope().getLog(getClass()).info("Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
-                return;
             }
             try {
                 Method method = con.getClass().getMethod("isProxySession");
@@ -104,6 +119,31 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             } catch (Exception e) {
                 Scope.getCurrentScope().getLog(getClass()).info("Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
             }
+        }
+        Statement statement = null;
+        String sql = "select" +
+                " sys_context( 'userenv', 'current_schema' ) as current_schema " +
+                ",sys_context( 'userenv', 'session_user' )   as session_user " +
+                ",sys_context( 'userenv', 'current_user' )   as current_user " +
+                ",sys_context( 'userenv', 'proxy_user' )     as proxy_user " +
+                "from dual";
+        try {
+            statement = con.createStatement();
+            ResultSet resultSet = statement.executeQuery(sql);
+            while (resultSet.next()) {
+                String currentSchema = resultSet.getString(1);
+                String sessionUser = resultSet.getString(2);
+                String currentUser = resultSet.getString(3);
+                String proxyUser = resultSet.getString(4);
+                if (!java.util.Objects.equals(proxyUser, currentUser)) {
+                    Scope.getCurrentScope().getLog(getClass()).info("Proxy session switched from: " + proxyUser + " to: " + currentUser);
+                }
+            }
+            resultSet.close();
+        } catch (SQLException e) {
+            Scope.getCurrentScope().getLog(getClass()).warning("Proxy session - error executing whoami: " + e.getMessage());
+        } finally {
+            JdbcUtil.closeStatement(statement);
         }
     }
 
@@ -123,13 +163,13 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                  */
                 if (conn instanceof JdbcConnection) {
                     sqlConn = ((JdbcConnection) conn).getWrappedConnection();
+                    tryProxySession((JdbcConnection) conn);
                 }
             } catch (Exception e) {
                 throw new UnexpectedLiquibaseException(e);
             }
 
             if (sqlConn != null) {
-                tryProxySession(conn.getURL(), sqlConn);
 
                 try {
                     //noinspection HardCodedStringLiteral
