@@ -9,6 +9,7 @@ import liquibase.datatype.LiquibaseDataType;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.regex.Matcher;
 
 @DataTypeInfo(name="varchar", aliases = {"java.sql.Types.VARCHAR", "java.lang.String", "varchar2", "character varying"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class VarcharType extends CharType {
@@ -25,10 +26,17 @@ public class VarcharType extends CharType {
         }
 
         if (database instanceof MSSQLDatabase) {
+            final MSSQLDatabase mssqlDatabase = (MSSQLDatabase) database;
             Object[] parameters = getParameters();
             if (parameters.length > 0) {
-                // MSSQL only supports (n) syntax but not (n CHAR) syntax, so we need to remove CHAR.
-                final String param1 = parameters[0].toString().replaceFirst("(?<=\\d+)\\s*(?i)CHAR$", "");
+                // MSSQL only supports (n) syntax but not (n CHAR) syntax, so we need to remove CHAR and apply bytes-per-char factor
+                String param1 = parameters[0].toString();
+                final Matcher matcher = MSSQLDatabase.CHAR_PATTERN.matcher(param1);
+                if (matcher.find()) {
+                    final int characterCount = Integer.parseInt(matcher.group(1));
+                    final int byteCount = mssqlDatabase.byteSize(characterCount);
+                    param1 = String.valueOf(byteCount);
+                }
                 parameters[0] =  param1;
                 if (!param1.matches("\\d+") || (new BigInteger(param1).compareTo(BigInteger.valueOf(8000L)) > 0)) {
 

@@ -6,6 +6,8 @@ import liquibase.Scope;
 import liquibase.change.AbstractSQLChange;
 import liquibase.change.Change;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.configuration.AutoloadedConfigurations;
+import liquibase.configuration.ConfigurationDefinition;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
@@ -49,6 +51,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             throw new IllegalStateException("this class is not expected to be instantiated.");
         }
     }
+
+    public static final Pattern CHAR_PATTERN = Pattern.compile("^(\\d+)\\s*(?i)CHAR$");
 
     private final HashMap<String, Integer> defaultDataTypeParameters = new HashMap<>();
 
@@ -708,5 +712,23 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsDatabaseChangeLogHistory() {
         return true;
+    }
+
+    /**
+     * Calculates the number of bytes needed to hold the given number of characters.
+     *
+     * @param charCount The number of characters to hold.
+     * @return The number of bytes needed to hold the given number of characters.
+     */
+    public int byteSize(final int charCount) {
+        return charCount * SpecificConfiguration.BYTES_PER_CHAR.getCurrentValue();
+    }
+
+    public static class SpecificConfiguration implements AutoloadedConfigurations {
+        public static final ConfigurationDefinition<Integer> BYTES_PER_CHAR = new ConfigurationDefinition.Builder("mssql")
+                .define("bytesPerChar", Integer.class)
+                .setDefaultValue(1)
+                .setDescription("Number of bytes needed to store one character (depends on database's character encoding)")
+                .build();
     }
 }
