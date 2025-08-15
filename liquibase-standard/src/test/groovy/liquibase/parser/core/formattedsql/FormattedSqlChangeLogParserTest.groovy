@@ -4,7 +4,6 @@ import liquibase.Contexts
 import liquibase.LabelExpression
 import liquibase.Scope
 import liquibase.change.AbstractSQLChange
-import liquibase.change.Change
 import liquibase.change.core.EmptyChange
 import liquibase.change.core.RawSQLChange
 import liquibase.changelog.ChangeLogParameters
@@ -12,8 +11,8 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.core.MockDatabase
 import liquibase.exception.ChangeLogParseException
-import liquibase.exception.MigrationFailedException
 import liquibase.exception.UnexpectedLiquibaseException
+import liquibase.logging.core.BufferedLogService
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.SqlPrecondition
 import liquibase.resource.ResourceAccessor
@@ -23,6 +22,8 @@ import liquibase.util.StringUtil
 import org.hamcrest.Matchers
 import spock.lang.Specification
 import spock.lang.Unroll
+
+import java.util.logging.Level
 
 import static spock.util.matcher.HamcrestSupport.that
 
@@ -448,6 +449,19 @@ CREATE TABLE public.Persons (
 --rollback GRANT `roles/bigquery.dataViewer` ON VIEW IDW_ACQ_REPORTS.CAMP_ENCLSR_1 TO "group:app_gcp_cdwp_idw_0374_pir@schwab.com";
 """
 
+    private static final String CHANGESET_WITH_NO_SQL =
+            """
+--liquibase formatted sql
+
+--changeset bharath.javaji1:1-PPgrant labels:CDW-394266   contextFilter:PP
+--comment GMDR - Cleanup of Talend Metrics
+--rollback GRANT `roles/bigquery.dataViewer` ON VIEW IDW_ACQ_REPORTS.CAMP_ENCLSR_1 TO "group:app_gcp_cdwp_idw_0375_uir@schwab.com";
+
+--changeset bharath.javaji1:1-PRODgrant labels:CDW-394266   contextFilter:PRD
+--comment GMDR - Cleanup of Talend Metrics
+--rollback GRANT `roles/bigquery.dataViewer` ON VIEW IDW_ACQ_REPORTS.CAMP_ENCLSR_1 TO "group:app_gcp_cdwp_idw_0374_pir@schwab.com";
+"""
+
     def supports() throws Exception {
         expect:
         assert new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).supports("asdf.sql", new JUnitResourceAccessor())
@@ -465,10 +479,20 @@ CREATE TABLE public.Persons (
 
     def duplicateHeaderLines() throws Exception {
         when:
-        new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_WITH_DUPLICATE_HEADERS).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        def bufferedLog = new BufferedLogService()
+        Scope.child(Scope.Attr.logService.name(), bufferedLog, () -> {
+            new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_WITH_DUPLICATE_HEADERS).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        })
         then:
-        def e = thrown(ChangeLogParseException)
-        e.getMessage().equals("Duplicate formatted SQL header at line 8")
+        noExceptionThrown()
+        bufferedLog.getLogAsString(Level.INFO).contains("An additional formatted SQL header line was discovered for changeset asdf.sql::1-PPgrant::bharath.javaji1 and will be treated as a comment")
+    }
+
+    def changeSetWithNoSQLFound() throws Exception {
+        when:
+        new MockFormattedSqlChangeLogParser(CHANGESET_WITH_NO_SQL).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        then:
+        thrown(ChangeLogParseException.class)
     }
 
     def invalidPrecondition() throws Exception {

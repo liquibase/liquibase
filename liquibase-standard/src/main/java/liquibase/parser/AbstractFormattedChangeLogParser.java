@@ -323,15 +323,9 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
             int count = 0;
             String line;
-            boolean foundHeader = false;
             while ((line = reader.readLine()) != null) {
                 count++;
                 Matcher changeLogPatternMatcher = FIRST_LINE_PATTERN.matcher(line);
-                if (foundHeader && changeLogPatternMatcher.matches()) {
-                    String message = "Duplicate formatted SQL header at line " + count;
-                    Scope.getCurrentScope().getLog(getClass()).warning(message);
-                    throw new ChangeLogParseException(message);
-                }
                 Matcher commentMatcher = COMMENT_PATTERN.matcher(line);
                 Matcher propertyPatternMatcher = PROPERTY_PATTERN.matcher(line);
                 Matcher altPropertyPatternMatcher = ALT_PROPERTY_ONE_CHARACTER_PATTERN.matcher(line);
@@ -341,9 +335,6 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                 } else if (altPropertyPatternMatcher.matches()) {
                     String message = String.format(EXCEPTION_MESSAGE, physicalChangeLogLocation, count, getSequenceName(), "--property name=<property name> value=<property value>", getDocumentationLink());
                     throw new ChangeLogParseException("\n" + message);
-                }
-                if (! foundHeader && changeLogPatternMatcher.matches()) {
-                    foundHeader = true;
                 }
 
                 setLogicalFilePath(changeLog, line, changeLogPatternMatcher);
@@ -393,6 +384,12 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     if (changeSet != null) {
                         if (finalCurrentSequence == null) {
                             throw new ChangeLogParseException(String.format("No %s for changeset %s", getSequenceName(), changeSet.toString(false)));
+                        } else {
+                            Matcher finalMatcher = FIRST_LINE_PATTERN.matcher(finalCurrentSequence);
+                            if (finalMatcher.matches()) {
+                                Scope.getCurrentScope().getLog(AbstractFormattedChangeLogParser.class)
+                                        .info(String.format("An additional formatted SQL header line was discovered for changeset %s and will be treated as a comment", changeSet.toString(false)));
+                            }
                         }
 
                         setChangeSequence(change, finalCurrentSequence);
