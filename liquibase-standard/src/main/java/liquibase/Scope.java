@@ -87,7 +87,8 @@ public class Scope {
          * The maximum number of analytics events that should be cached in memory before sent in a batch.
          */
         maxAnalyticsCacheSize,
-        licenseTrackList
+        licenseTrackList,
+        lpmArgs
     }
 
     public static final String JAVA_PROPERTIES = "javaProperties";
@@ -554,6 +555,10 @@ public class Scope {
         DecimalFormat decimalFormat = new DecimalFormat("0000000000");
         return dateString.length() > 9 ? dateString.substring(dateString.length() - 10) :
                 decimalFormat.format(time);
+    }
+
+    public void setLpmArgs(String args) {
+        this.values.put(Attr.lpmArgs.name(), args);
     }
 
     @Override
