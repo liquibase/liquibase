@@ -131,8 +131,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             statement = con.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);
             while (resultSet.next()) {
-                String currentSchema = resultSet.getString(1);
-                String sessionUser = resultSet.getString(2);
+                //String currentSchema = resultSet.getString(1);
+                //String sessionUser = resultSet.getString(2);
                 String currentUser = resultSet.getString(3);
                 String proxyUser = resultSet.getString(4);
                 if (!java.util.Objects.equals(proxyUser, currentUser)) {
