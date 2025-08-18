@@ -8,6 +8,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.yaml.YamlParser;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.LiquibaseSerializer;
+import liquibase.serializer.UnwrappedLiquibaseSerializable;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
@@ -101,14 +102,8 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         for (String field : fieldList) {
             Object value = object.getSerializableFieldValue(field);
             if (value != null) {
-                if (value instanceof DataType) {
-                    value = ((Map) toMap((DataType) value)).values().iterator().next();
-                }
-                if (value instanceof Column.AutoIncrementInformation) {
-                    value = ((Map) toMap((Column.AutoIncrementInformation) value)).values().iterator().next();
-                }
-                if (value instanceof ConstraintsConfig) {
-                    value = ((Map) toMap((ConstraintsConfig) value)).values().iterator().next();
+                if (value instanceof UnwrappedLiquibaseSerializable) {
+                    value = ((Map) toMap((LiquibaseSerializable) value)).values().iterator().next();
                 }
                 if (value instanceof LiquibaseSerializable) {
                     if(value instanceof RollbackContainer) {

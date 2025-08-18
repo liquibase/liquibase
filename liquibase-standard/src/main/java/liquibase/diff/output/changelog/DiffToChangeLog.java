@@ -28,6 +28,7 @@ import liquibase.resource.PathHandlerFactory;
 import liquibase.resource.Resource;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
+import liquibase.serializer.core.formattedsql.FormattedSqlChangeLogSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.statement.core.RawParameterizedSqlStatement;
@@ -57,6 +58,7 @@ public class DiffToChangeLog {
     public static final String OBJECT_CHANGELOGS_SCOPE_KEY = "DiffToChangeLog.objectsChangelog";
     public static final String DIFF_OUTPUT_CONTROL_SCOPE_KEY = "diffOutputControl";
     public static final String DIFF_SNAPSHOT_DATABASE = "snapshotDatabase";
+    public static final String ADD_FORMATTED_SQL_HEADER = "addFormattedSqlHeader";
 
     private String idRoot = String.valueOf(new Date().getTime());
     private boolean overriddenIdRoot;
@@ -171,6 +173,9 @@ public class DiffToChangeLog {
             ChangelogPrintServiceFactory printServiceFactory = Scope.getCurrentScope().getSingleton(ChangelogPrintServiceFactory.class);
             ChangelogPrintService printService = printServiceFactory.getChangeLogPrintService(this);
             newScopeObjects.put(DIFF_SNAPSHOT_DATABASE, database);
+            if (file.exists() && changeLogSerializer instanceof FormattedSqlChangeLogSerializer) {
+                newScopeObjects.put(ADD_FORMATTED_SQL_HEADER, false);
+            }
             Scope.child(newScopeObjects, new Scope.ScopedRunner() {
                 @Override
                 public void run() {
@@ -212,11 +217,8 @@ public class DiffToChangeLog {
         DatabaseConnection connection = database.getConnection();
         if (! (connection instanceof OfflineConnection) && database instanceof PostgresDatabase) {
             return database;
-        } else {
-            DatabaseFactory databaseFactory = Scope.getCurrentScope().getSingleton(DatabaseFactory.class);
-            database = databaseFactory.getDatabase(database.getShortName());
         }
-        return database;
+        return null;
     }
 
     /**
