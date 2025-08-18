@@ -44,6 +44,29 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.7.2</version>
+                <configuration>
+                    <pomElements>
+                        <name />
+                        <description />
+                        <developers />
+                    </pomElements>
+                    <outputDirectory>${project.build.directory}/</outputDirectory>
+<!--                    <flattenedPomFilename>pom-flattened.xml</flattenedPomFilename>-->
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.4.2</version>
