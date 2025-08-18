@@ -180,6 +180,16 @@ Global Options
                                variable:
                                'LIQUIBASE_ERROR_ON_CIRCULAR_INCLUDE_ALL')
 
+      --fail-on-multiple-formatted-sql-headers=PARAM
+                             Should Liquibase fail on multiple formatted SQL
+                               changelog headers?
+                             DEFAULT: true
+                             (defaults file: 'liquibase.
+                               failOnMultipleFormattedSqlHeaders', environment
+                               variable:
+                               'LIQUIBASE_FAIL_ON_MULTIPLE_FORMATTED_SQL_HEADERS
+                               ')
+
       --file-encoding=PARAM  Encoding to use when reading files. Valid values
                                include: UTF-8, UTF-16, UTF-16BE, UTF-16LE,
                                US-ASCII, or OS to use the system configured

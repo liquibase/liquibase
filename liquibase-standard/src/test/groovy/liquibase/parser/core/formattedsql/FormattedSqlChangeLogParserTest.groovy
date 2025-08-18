@@ -471,6 +471,15 @@ CREATE TABLE public.Persons (
         e.getMessage().equals("Duplicate formatted SQL header at line 8")
     }
 
+    def duplicateHeaderLinesWithNoException() throws Exception {
+        when:
+        Scope.child("liquibase.failOnMultipleFormattedSqlHeaders", "false", () -> {
+            new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_WITH_DUPLICATE_HEADERS).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        })
+        then:
+        noExceptionThrown()
+    }
+
     def invalidPrecondition() throws Exception {
         when:
         new MockFormattedSqlChangeLogParser(INVALID_CHANGESET_ID).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
