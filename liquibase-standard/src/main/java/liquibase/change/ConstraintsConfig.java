@@ -5,6 +5,7 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
+import liquibase.serializer.UnwrappedLiquibaseSerializable;
 import liquibase.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,7 +13,7 @@ import lombok.Setter;
 /**
  * The standard configuration used by Change classes to represent a constraints on a column.
  */
-public class ConstraintsConfig extends AbstractLiquibaseSerializable {
+public class ConstraintsConfig extends AbstractLiquibaseSerializable implements UnwrappedLiquibaseSerializable {
 
     private Boolean nullable;
     private String notNullConstraintName;

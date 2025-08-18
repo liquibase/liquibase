@@ -50,6 +50,7 @@ public class History implements CustomMdcObject {
         private String changelogPath;
         private String changesetAuthor;
         private String changesetId;
+        private String tag;
 
         public Changeset() {
         }
@@ -60,6 +61,7 @@ public class History implements CustomMdcObject {
             this.changelogPath = ranChangeSet.getChangeLog();
             this.changesetAuthor = ranChangeSet.getAuthor();
             this.changesetId = ranChangeSet.getId();
+            this.tag = ranChangeSet.getTag();
         }
 
         public String getDeploymentId() {
@@ -100,6 +102,14 @@ public class History implements CustomMdcObject {
 
         public void setChangesetId(String changesetId) {
             this.changesetId = changesetId;
+        }
+
+        public String getTag() {
+            return tag;
+        }
+
+        public void setTag(String tag) {
+            this.tag = tag;
         }
     }
 
