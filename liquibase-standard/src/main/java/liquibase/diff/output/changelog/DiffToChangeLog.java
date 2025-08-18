@@ -173,7 +173,7 @@ public class DiffToChangeLog {
             ChangelogPrintServiceFactory printServiceFactory = Scope.getCurrentScope().getSingleton(ChangelogPrintServiceFactory.class);
             ChangelogPrintService printService = printServiceFactory.getChangeLogPrintService(this);
             newScopeObjects.put(DIFF_SNAPSHOT_DATABASE, database);
-            if (file.exists() && changeLogSerializer instanceof FormattedSqlChangeLogSerializer) {
+            if (file.exists() && !overwriteOutputFile && changeLogSerializer instanceof FormattedSqlChangeLogSerializer) {
                 newScopeObjects.put(ADD_FORMATTED_SQL_HEADER, false);
             }
             Scope.child(newScopeObjects, new Scope.ScopedRunner() {
