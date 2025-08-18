@@ -9,6 +9,7 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
+import liquibase.serializer.UnwrappedLiquibaseSerializable;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.BooleanUtil;
@@ -420,7 +421,7 @@ public class Column extends AbstractDatabaseObject {
         }
     }
 
-    public static class AutoIncrementInformation extends AbstractLiquibaseSerializable {
+    public static class AutoIncrementInformation extends AbstractLiquibaseSerializable implements UnwrappedLiquibaseSerializable {
         private BigInteger startWith;
         private BigInteger incrementBy;
         private Boolean defaultOnNull;
