@@ -113,7 +113,7 @@ jobs:
           fi
 
       - name: Checkout the determined branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ steps.ref-branch.outputs.branch }}
           fetch-depth: 0
@@ -337,7 +337,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [setup, manual_trigger_deployment]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Java for publishing to GitHub Repository
         uses: actions/setup-java@v4
         with:
@@ -371,7 +371,7 @@ jobs:
       version: ${{ needs.setup.outputs.version }}
     steps:
       - name: Download liquibase xsd
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           # Relative path under $GITHUB_WORKSPACE to place the repository
           path: liquibase-core-repo
@@ -402,7 +402,7 @@ jobs:
           permission-contents: read
           
       - name: Download liquibase-pro xsd
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: "${{ needs.setup.outputs.ref_branch }}"
           token: ${{ steps.get-token.outputs.token }}
@@ -658,7 +658,7 @@ jobs:
           permission-actions: write
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: liquibase/liquibase
           ref: "${{ needs.setup.outputs.ref_branch }}"
