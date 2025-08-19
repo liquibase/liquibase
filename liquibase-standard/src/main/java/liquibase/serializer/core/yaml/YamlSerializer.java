@@ -8,6 +8,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.yaml.YamlParser;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.LiquibaseSerializer;
+import liquibase.serializer.UnwrappedLiquibaseSerializable;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
@@ -31,6 +32,9 @@ import java.util.*;
 public abstract class YamlSerializer implements LiquibaseSerializer {
 
     protected Yaml yaml;
+    public static final Map<String, Object> EMPTY_MAP_DO_NOT_SERIALIZE = new HashMap<>(0);
+
+    protected boolean noSnapshotIdFound = false;
 
     public YamlSerializer() {
         yaml = createYaml();
@@ -94,17 +98,12 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         comparator = getComparator(object);
         Map<String, Object> objectMap = new TreeMap<>(comparator);
 
-        for (String field : getSerializableObjectFields(object)) {
+        List<String> fieldList = sortFieldList(object);
+        for (String field : fieldList) {
             Object value = object.getSerializableFieldValue(field);
             if (value != null) {
-                if (value instanceof DataType) {
-                    value = ((Map) toMap((DataType) value)).values().iterator().next();
-                }
-                if (value instanceof Column.AutoIncrementInformation) {
-                    value = ((Map) toMap((Column.AutoIncrementInformation) value)).values().iterator().next();
-                }
-                if (value instanceof ConstraintsConfig) {
-                    value = ((Map) toMap((ConstraintsConfig) value)).values().iterator().next();
+                if (value instanceof UnwrappedLiquibaseSerializable) {
+                    value = ((Map) toMap((LiquibaseSerializable) value)).values().iterator().next();
                 }
                 if (value instanceof LiquibaseSerializable) {
                     if(value instanceof RollbackContainer) {
@@ -150,12 +149,34 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                             if (valueAsList.isEmpty()) {
                                 continue;
                             }
+
+                            //
+                            // Be on the lookout for the potential for an object to
+                            // be found that did not have a snapshot ID.  In that case,
+                            // we do not want to serialize it with the rest of the objects,
+                            // but instead move it to the "referencedObjects" section of the snapshot
+                            //
+                            boolean setOne = false;
                             for (int i = 0; i < valueAsList.size(); i++) {
                                 if (valueAsList.get(i) instanceof LiquibaseSerializable) {
-                                    valueAsList.set(i, toMap((LiquibaseSerializable) valueAsList.get(i)));
+                                    LiquibaseSerializable innerObject = (LiquibaseSerializable) valueAsList.get(i);
+                                    noSnapshotIdFound = false;
+                                    Object returnMap = toMap(innerObject);
+                                    if (!noSnapshotIdFound) {
+                                        valueAsList.set(i, returnMap);
+                                        setOne = true;
+                                    }
                                 }
                             }
-                            ((Map) value).put(key, valueAsList);
+                            //
+                            // If there was at least one object of this type then put the list
+                            // else remove the entire key
+                            //
+                            if (setOne) {
+                                ((Map) value).put(key, valueAsList);
+                            } else {
+                                ((Map)value).remove(key);
+                            }
                         }
                     }
 
@@ -168,6 +189,38 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         Map<String, Object> containerMap = new HashMap<>();
         containerMap.put(object.getSerializedObjectName(), objectMap);
         return containerMap;
+    }
+
+    /**
+     *
+     * If the object has a "referencedObjects" field then
+     * we want that to sort to last in the last
+     *
+     * @param   object                 The object which fields need sorting
+     * @return  List<String>
+     *
+     */
+    private List<String> sortFieldList(LiquibaseSerializable object) {
+        Set<String> serializableObjectFields = getSerializableObjectFields(object);
+        // Convert the Set to a List for sorting
+        List<String> fieldList = new ArrayList<>(serializableObjectFields);
+        if (! fieldList.contains("referencedObjects")) {
+            return fieldList;
+        }
+        // Sort the list using a custom Comparator
+        fieldList.sort(new Comparator<String>() {
+            @Override
+            public int compare(String s1, String s2) {
+                if (s1.equals("referencedObjects")) {
+                    return 1; // s1 (specificValue) comes after s2
+                } else if (s2.equals("referencedObjects")) {
+                    return -1; // s2 (specificValue) comes after s1
+                } else {
+                    return s1.compareTo(s2); // Natural alphabetical order for other strings
+                }
+            }
+        });
+        return fieldList;
     }
 
     protected Object convertToMap(List valueAsList, int index) {
