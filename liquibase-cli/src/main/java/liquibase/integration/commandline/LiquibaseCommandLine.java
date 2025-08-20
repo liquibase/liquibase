@@ -463,8 +463,7 @@ public class LiquibaseCommandLine {
     private String[] adjustLpmArgs(String[] strings) {
         List<String> returnArgs = new ArrayList<>();
         StringBuilder lpmArgs = null;
-        boolean foundInit = false;
-        
+
         // Known flags that should not be passed to LPM binary - discovered via reflection
         Set<String> knownFlags = discoverLpmCommandFlags();
 
@@ -473,7 +472,6 @@ public class LiquibaseCommandLine {
                 returnArgs.add(arg);
                 
                 if ("lpm".equals(arg.toLowerCase())) {
-                    foundInit = true;
                     lpmArgs = new StringBuilder();
                 }
             } else if (knownFlags.stream().noneMatch(arg::startsWith)) {
