@@ -316,11 +316,6 @@ Global Options
                              (defaults file: 'liquibase.logLevel', environment
                                variable: 'LIQUIBASE_LOG_LEVEL')
 
-      --lpm-home=PARAM       Directory where LPM (Liquibase Package Manager) is
-                               installed. Defaults to LIQUIBASE_HOME.
-                             (defaults file: 'liquibase.lpm.home', environment
-                               variable: 'LIQUIBASE_LPM_HOME')
-
       --mirror-console-messages-to-log=PARAM
                              When set to true, the console messages are
                                mirrored to the logs as [liquibase.ui] to
@@ -585,6 +580,9 @@ Commands
 
   list-locks                    List the hostname, IP address, and timestamp of
                                   the Liquibase lock record
+
+  lpm                           Initialize and update Liquibase Package Manager
+                                  (LPM)
 
   mark-next-changeset-ran       Marks the next change you apply as executed in
                                   your database
