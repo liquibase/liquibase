@@ -3,9 +3,12 @@ package liquibase.serializer.core.formattedsql;
 import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.change.core.AddAutoIncrementChange;
+import liquibase.change.core.CreateTableChange;
+import liquibase.change.AddColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.core.H2Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -14,6 +17,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class FormattedSqlChangeLogSerializerTest {
 
@@ -96,6 +101,76 @@ public class FormattedSqlChangeLogSerializerTest {
 
         String serialized = serializer.serialize(changeSet, true);
         assertEquals(expectedSql, serialized);
+    }
+
+    @Test
+    public void cleanSqlServerQuoting_removesBracketsFromQuotedIdentifiers() {
+        // Test the private method via reflection to verify regex works correctly
+        String inputSql = "CREATE TABLE \"[MyTable]\" (\"[Column1]\" INT, \"[Column2]\" VARCHAR(50));";
+        String expectedSql = "CREATE TABLE [MyTable] ([Column1] INT, [Column2] VARCHAR(50));";
+        
+        // Use a SQL Server database and changeset to trigger the cleaning logic
+        ChangeSet sqlServerChangeSet = new ChangeSet("1", "testAuthor", false, false, "path/to/changeLogFile.mssql.sql", null, null, null);
+        MSSQLDatabase sqlServerDatabase = new MSSQLDatabase();
+        
+        CreateTableChange change = new CreateTableChange();
+        change.setTableName("[TestTable]");
+        AddColumnConfig column = new AddColumnConfig();
+        column.setName("[TestColumn]");
+        column.setType("int");
+        change.addColumn(column);
+        sqlServerChangeSet.addChange(change);
+        
+        String serialized = serializer.serialize(sqlServerChangeSet, true);
+        
+        // Verify that the output doesn't contain quoted brackets
+        assertFalse("SQL should not contain quoted brackets", serialized.contains("\"["));
+        assertFalse("SQL should not contain quoted brackets", serialized.contains("]\""));
+    }
+
+    @Test
+    public void serialize_sqlServerChangeSetWithBracketedNames() {
+        ChangeSet sqlServerChangeSet = new ChangeSet("1", "testAuthor", false, false, "path/to/changeLogFile.mssql.sql", null, null, null);
+        
+        CreateTableChange change = new CreateTableChange();
+        change.setTableName("[BracketedTable]");
+        AddColumnConfig column = new AddColumnConfig();
+        column.setName("[BracketedColumn]");
+        column.setType("int");
+        change.addColumn(column);
+        sqlServerChangeSet.addChange(change);
+        
+        String serialized = serializer.serialize(sqlServerChangeSet, true);
+        
+        // Verify the changeset header is correct
+        assertTrue("Should contain changeset header", serialized.startsWith("-- changeset testAuthor:1"));
+        
+        // Verify that brackets are preserved without additional quotes
+        assertTrue("Should contain bracketed table name", serialized.contains("[BracketedTable]"));
+        assertTrue("Should contain bracketed column name", serialized.contains("[BracketedColumn]"));
+        
+        // Verify no double quoting
+        assertFalse("Should not contain quoted brackets", serialized.contains("\"[BracketedTable]\""));
+        assertFalse("Should not contain quoted brackets", serialized.contains("\"[BracketedColumn]\""));
+    }
+
+    @Test
+    public void serialize_nonSqlServerDatabaseUnaffected() {
+        // Test that non-SQL Server databases are not affected by the bracket cleaning
+        ChangeSet h2ChangeSet = new ChangeSet("1", "testAuthor", false, false, "path/to/changeLogFile.h2.sql", null, null, null);
+        
+        AddAutoIncrementChange change = new AddAutoIncrementChange();
+        change.setTableName("RegularTable");
+        change.setColumnName("RegularColumn");
+        change.setColumnDataType("int");
+        h2ChangeSet.addChange(change);
+        
+        String serialized = serializer.serialize(h2ChangeSet, true);
+        
+        // Verify normal behavior for non-SQL Server databases
+        assertTrue("Should contain changeset header", serialized.startsWith("-- changeset testAuthor:1"));
+        assertTrue("Should contain table name", serialized.contains("RegularTable"));
+        assertTrue("Should contain column name", serialized.contains("RegularColumn"));
     }
 
 }
