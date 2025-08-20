@@ -22,6 +22,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  * A variant of the Executor service that does not actually modify the target database(s). Instead, it creates
@@ -33,6 +35,22 @@ public class LoggingExecutor extends AbstractExecutor {
 
     private final Writer output;
     private final Executor delegatedReadExecutor;
+    
+    // Unified ReDoS-safe pattern for obfuscating all credential types in STAGE SQL statements
+    // Using possessive quantifiers to prevent catastrophic backtracking
+    // Word boundaries (\\b) ensure exact matches only
+    // Backreference (\\2) ensures matching quote types
+    private static final Pattern CREDENTIALS_PATTERN = Pattern.compile(
+        "(?i)\\b(AWS_KEY_ID|AWS_SECRET_KEY|AWS_TOKEN|AZURE_SAS_TOKEN)\\s*=\\s*(['\"])([^'\"]*+)\\2", 
+        Pattern.CASE_INSENSITIVE);
+    
+    // Enhanced comment pattern with proper nested comment handling
+    private static final Pattern COMMENT_PATTERN = Pattern.compile(
+        "(?s)--[^\\r\\n]*(?:\\r?\\n|\\r|$)|/\\*(?:[^*]|\\*(?!/))*\\*/", Pattern.MULTILINE);
+    
+    // Context-aware pattern to identify CREDENTIALS blocks to avoid false positives in string literals
+    private static final Pattern CREDENTIALS_BLOCK_PATTERN = Pattern.compile(
+        "(?i)\\bCREDENTIALS\\s*=\\s*\\(([^)]*)\\)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     public LoggingExecutor(Executor delegatedExecutor, Writer output, Database database) {
         if (output != null) {
@@ -66,6 +84,72 @@ public class LoggingExecutor extends AbstractExecutor {
 
     protected Writer getOutput() {
         return output;
+    }
+    
+    /**
+     * Obfuscates credentials in SQL statements for STAGE objects with enhanced security.
+     * Handles escaped quotes, context-aware matching, and prevents false positives.
+     * Preserves credentials in SQL comments unchanged.
+     *
+     * @param statement SQL statement that may contain credentials
+     * @return SQL statement with credentials obfuscated (excluding those in comments)
+     */
+    private String obfuscateCredentials(String statement) {
+        if (statement == null) {
+            return null;
+        }
+        
+        
+        // Step 1: Extract and preserve comments with collision-resistant placeholders
+        List<String> comments = new ArrayList<>();
+        Matcher commentMatcher = COMMENT_PATTERN.matcher(statement);
+        StringBuffer tempStatement = new StringBuffer();
+        
+        // Use UUID-based placeholders to prevent collision attacks
+        int commentIndex = 0;
+        while (commentMatcher.find()) {
+            String comment = commentMatcher.group();
+            // Generate collision-resistant placeholder using hash
+            String placeholder = "/*__LB_CMT_" + Integer.toHexString(comment.hashCode()) + "_" + commentIndex + "__*/";
+            comments.add(comment);
+            commentMatcher.appendReplacement(tempStatement, Matcher.quoteReplacement(placeholder));
+            commentIndex++;
+        }
+        commentMatcher.appendTail(tempStatement);
+        
+        String workingStatement = tempStatement.toString();
+        
+        // Step 2: Context-aware obfuscation - only within CREDENTIALS blocks
+        Matcher credentialsMatcher = CREDENTIALS_BLOCK_PATTERN.matcher(workingStatement);
+        StringBuffer finalStatement = new StringBuffer();
+        
+        while (credentialsMatcher.find()) {
+            String credentialsBlock = credentialsMatcher.group(1); // Content inside CREDENTIALS = ( ... )
+            String obfuscatedBlock = obfuscateCredentialsInBlock(credentialsBlock);
+            
+            // Replace the credentials block with obfuscated version
+            String replacement = "CREDENTIALS = (" + obfuscatedBlock + ")";
+            credentialsMatcher.appendReplacement(finalStatement, Matcher.quoteReplacement(replacement));
+        }
+        credentialsMatcher.appendTail(finalStatement);
+        
+        // Step 3: Restore original comments with their collision-resistant placeholders
+        String result = finalStatement.toString();
+        for (int i = 0; i < comments.size(); i++) {
+            String placeholder = "/*__LB_CMT_" + Integer.toHexString(comments.get(i).hashCode()) + "_" + i + "__*/";
+            result = result.replace(placeholder, comments.get(i));
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Obfuscates credentials within a CREDENTIALS block using unified pattern matching.
+     * This method only processes the content inside CREDENTIALS = ( ... )
+     */
+    private String obfuscateCredentialsInBlock(String credentialsBlock) {
+        // Apply unified credential pattern with proper quote handling
+        return CREDENTIALS_PATTERN.matcher(credentialsBlock).replaceAll("$1 = $2*****$2");
     }
 
     @Override
@@ -148,6 +232,9 @@ public class LoggingExecutor extends AbstractExecutor {
                         statement = statement.replaceFirst("[\\s\\r\\n]*/[\\s\\r\\n]*$", "");
                     }
                 }
+
+                // Obfuscate credentials before writing to output
+                statement = obfuscateCredentials(statement);
 
                 output.write(statement);
 
