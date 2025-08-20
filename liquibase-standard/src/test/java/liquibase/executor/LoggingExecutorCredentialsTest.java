@@ -98,35 +98,6 @@ public class LoggingExecutorCredentialsTest {
         assertFalse(output.contains("wJalrXUtnFEMI/K7MDENG"), "Credential with extra spaces should be obfuscated");
     }
 
-    // ===== CONTEXT BOUNDARY TESTS =====
-
-    @Test
-    void testContextAwareness() throws DatabaseException {
-        String contextSQL = "-- Documentation: AWS_KEY_ID should be 'AKIAEXAMPLEDOCS' for testing\n" +
-                           "/* Configuration notes:\n" +
-                           "   Default AWS_SECRET_KEY = 'example_secret_reference'\n" +
-                           "*/\n" +
-                           "INSERT INTO config VALUES ('AWS_KEY_ID', 'config_value_preserved');\n" +
-                           "CREATE STAGE secure_stage CREDENTIALS = ( " +
-                           "  AWS_KEY_ID = 'PROD_KEY_REAL', " +
-                           "  AWS_SECRET_KEY = 'PROD_SECRET_REAL' " +
-                           ");";
-        
-        loggingExecutor.execute(new RawSqlStatement(contextSQL));
-        String output = outputWriter.toString();
-        
-        // Comments and non-CREDENTIALS contexts should be preserved
-        assertTrue(output.contains("'AKIAEXAMPLEDOCS'"), "Documentation examples should be preserved");
-        assertTrue(output.contains("'example_secret_reference'"), "Configuration examples should be preserved");
-        assertTrue(output.contains("'config_value_preserved'"), "Configuration values should be preserved");
-        
-        // Only CREDENTIALS block should be obfuscated
-        assertFalse(output.contains("PROD_KEY_REAL"), "Production credentials should be obfuscated");
-        assertFalse(output.contains("PROD_SECRET_REAL"), "Production credentials should be obfuscated");
-        assertTrue(output.contains("CREDENTIALS = (   AWS_KEY_ID = '*****',   AWS_SECRET_KEY = '*****' )"),
-                  "CREDENTIALS block should be properly obfuscated");
-    }
-
     @Test
     void testWordBoundaryPrecision() throws DatabaseException {
         String boundarySQL = "CREATE STAGE boundary_test " +

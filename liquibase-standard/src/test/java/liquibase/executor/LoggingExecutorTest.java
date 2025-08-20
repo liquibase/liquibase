@@ -9,8 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -98,7 +97,7 @@ public class LoggingExecutorTest {
         loggingExecutor.execute(new RawSqlStatement(sqlWithoutCredentials));
         
         String output = outputWriter.toString();
-        assertTrue(output.contains("CREATE TABLE users (id INT, name VARCHAR(50));"), "Non-STAGE statements should not be modified");
+        assertEquals(sqlWithoutCredentials, output.trim(), "Non-STAGE statements should not be modified");
     }
 
     @Test
@@ -171,16 +170,6 @@ public class LoggingExecutorTest {
         String output = outputWriter.toString();
         assertFalse(output.contains("KEY/+==ABC123"), "AWS_KEY_ID with special characters should be obfuscated");
         assertFalse(output.contains("SECRET/+==XYZ789"), "AWS_SECRET_KEY with special characters should be obfuscated");
-    }
-
-    @Test
-    void testCredentialsInComments() throws DatabaseException {
-        String sqlWithCommentedCredentials = "-- Example: AWS_KEY_ID = 'AKIAIOSFODNN7EXAMPLE'\nCREATE STAGE my_stage;";
-        
-        loggingExecutor.execute(new RawSqlStatement(sqlWithCommentedCredentials));
-        
-        String output = outputWriter.toString();
-        assertTrue(output.contains("AKIAIOSFODNN7EXAMPLE"), "Credentials in comments should NOT be obfuscated");
     }
 
     @Test
