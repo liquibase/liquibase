@@ -472,15 +472,9 @@ public class LiquibaseCommandLine {
             if (lpmArgs == null) {
                 returnArgs.add(arg);
                 
-                // Check for "init lpm" sequence
-                if ("init".equals(arg)) {
+                if ("lpm".equals(arg.toLowerCase())) {
                     foundInit = true;
-                } else if (foundInit && "lpm".equals(arg.toLowerCase())) {
-                    // Found "init lpm" sequence, start collecting LPM args
                     lpmArgs = new StringBuilder();
-                    foundInit = false;
-                } else {
-                    foundInit = false;
                 }
             } else if (knownFlags.stream().noneMatch(arg::startsWith)) {
                 // Collecting arguments after "init lpm", but skip known command flags
