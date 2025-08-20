@@ -104,7 +104,11 @@ jobs:
       matrix:
         os: [ ubuntu-22.04, macos-13, windows-latest ]
         java: [ 17, 21 ]
-
+        exclude:
+          - os: windows-latest
+            java: 17
+          - os: macos-13
+            java: 17
     runs-on: ${{ matrix.os }}
     env:
       OS_TYPE: ${{ matrix.os }}
@@ -429,7 +433,6 @@ jobs:
         run: |
           echo $TEST_COUNT_SECRET | gh auth login --with-token
           repository='${{ github.repository }}'
-          gh variable set TEST_COUNT_JAVA_11_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_11_ubuntu }}"
           gh variable set TEST_COUNT_JAVA_17_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_17_ubuntu }}"
           gh variable set TEST_COUNT_JAVA_21_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_21_ubuntu }}"
           gh variable set TEST_COUNT_JAVA_MACOS --body "${{ needs.build_tests.outputs.test_count_unit_test_java_macos }}"

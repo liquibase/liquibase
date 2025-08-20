@@ -37,7 +37,7 @@ rem Check Java version
 call :check_java_version "%JAVA_PATH%"
 if errorlevel 1 exit /b 1
 
-"%JAVA_PATH%" %JAVA_OPTS% -jar "%LIQUIBASE_HOME%\internal\lib\liquibase-pro.jar" %*
+"%JAVA_PATH%" %JAVA_OPTS% -jar "%LIQUIBASE_HOME%\internal\lib\liquibase-core.jar" %*
 goto :eof
 
 :check_java_version
