@@ -19,7 +19,7 @@ check_version() {
     JAVA_MAJOR_VERSION=$(echo "$JAVA_VERSION" | cut -d'.' -f2)
   fi
 
-  # Example of conditional logic based on major version
+  # Check the major version
   if [[ "$JAVA_MAJOR_VERSION" -lt 17 ]]; then
     echo "ERROR: The JVM version is $JAVA_MAJOR_VERSION. Liquibase requires a Java version of 17 or higher"
     echo "Please install Java 17 or higher, or set JAVA_HOME to a Java 17 or higher installation."
@@ -82,4 +82,4 @@ JAVA_OPTS="${JAVA_OPTS-}"
 check_version $JAVA_PATH
 
 export LIQUIBASE_HOME
-"${JAVA_PATH}" $JAVA_OPTS -jar "$LIQUIBASE_HOME/internal/lib/liquibase-pro.jar" ${1+"$@"}
+"${JAVA_PATH}" $JAVA_OPTS -jar "$LIQUIBASE_HOME/internal/lib/liquibase-core.jar" ${1+"$@"}
