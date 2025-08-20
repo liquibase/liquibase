@@ -105,14 +105,9 @@ public class FormattedSqlChangeLogSerializerTest {
 
     @Test
     public void cleanSqlServerQuoting_removesBracketsFromQuotedIdentifiers() {
-        // Test the private method via reflection to verify regex works correctly
-        String inputSql = "CREATE TABLE \"[MyTable]\" (\"[Column1]\" INT, \"[Column2]\" VARCHAR(50));";
-        String expectedSql = "CREATE TABLE [MyTable] ([Column1] INT, [Column2] VARCHAR(50));";
-        
         // Use a SQL Server database and changeset to trigger the cleaning logic
         ChangeSet sqlServerChangeSet = new ChangeSet("1", "testAuthor", false, false, "path/to/changeLogFile.mssql.sql", null, null, null);
-        MSSQLDatabase sqlServerDatabase = new MSSQLDatabase();
-        
+
         CreateTableChange change = new CreateTableChange();
         change.setTableName("[TestTable]");
         AddColumnConfig column = new AddColumnConfig();
