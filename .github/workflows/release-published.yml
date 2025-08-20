@@ -195,7 +195,7 @@ jobs:
       - name: Set up Java for publishing to Maven Central Repository
         uses: actions/setup-java@v4
         with:
-          java-version: "11"
+          java-version: "17"
           distribution: "adopt"
           server-id: sonatype-nexus-staging
           server-username: MAVEN_USERNAME
@@ -734,7 +734,7 @@ jobs:
       - name: Set up Java for publishing to Maven Central Repository
         uses: actions/setup-java@v4
         with:
-          java-version: "11"
+          java-version: "17"
           distribution: "adopt"
           server-id: dry-run-sonatype-nexus-staging
           server-username: MAVEN_USERNAME
