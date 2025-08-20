@@ -230,4 +230,22 @@ public class LoggingExecutorCredentialsTest {
         assertTrue(output.contains("AWS_SECRET_KEY = '*****'"), "Should show obfuscation marker");
         assertTrue(output.contains("AZURE_SAS_TOKEN = '*****'"), "Should show obfuscation marker");
     }
+
+    @Test
+    void testEncryptionBlockObfuscation() throws DatabaseException {
+        String sqlWithEncryption = "CREATE STAGE encrypted_stage " +
+                                  "CREDENTIALS = ( AWS_KEY_ID = 'aws_credential' ) " +
+                                  "ENCRYPTION = ( MASTER_KEY = 'super_secret_master_key_123' );";
+        
+        loggingExecutor.execute(new RawSqlStatement(sqlWithEncryption));
+        String output = outputWriter.toString();
+        
+        // Both credentials and encryption should be obfuscated
+        assertFalse(output.contains("aws_credential"), "AWS credential should be obfuscated");
+        assertFalse(output.contains("super_secret_master_key_123"), "Master key should be obfuscated");
+        
+        // Proper obfuscation markers should be present
+        assertTrue(output.contains("CREDENTIALS = ( AWS_KEY_ID = '*****' )"), "CREDENTIALS block should be obfuscated");
+        assertTrue(output.contains("ENCRYPTION = ( MASTER_KEY = '*****' )"), "ENCRYPTION block should be obfuscated");
+    }
 }

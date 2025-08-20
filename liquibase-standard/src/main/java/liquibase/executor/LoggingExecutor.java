@@ -37,12 +37,12 @@ public class LoggingExecutor extends AbstractExecutor {
     private final Executor delegatedReadExecutor;
     
     private static final Pattern SNOWFLAKE_STAGE_CREDENTIALS_PATTERN = Pattern.compile(
-        "(?i)\\b(AWS_KEY_ID|AWS_SECRET_KEY|AWS_TOKEN|AZURE_SAS_TOKEN)\\s*=\\s*(['\"])([^'\"]*+)\\2", 
+        "(?i)\\b(AWS_KEY_ID|AWS_SECRET_KEY|AWS_TOKEN|AZURE_SAS_TOKEN|MASTER_KEY)\\s*=\\s*(['\"])([^'\"]*+)\\2", 
         Pattern.CASE_INSENSITIVE);
     
-    // Context-aware pattern to identify CREDENTIALS blocks to avoid false positives in string literals
+    // Context-aware pattern to identify CREDENTIALS and ENCRYPTION blocks to avoid false positives in string literals
     private static final Pattern SNOWFLAKE_STAGE_CREDENTIALS_BLOCK_PATTERN = Pattern.compile(
-        "(?i)\\bCREDENTIALS\\s*=\\s*\\(([^)]*)\\)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        "(?i)\\b(CREDENTIALS|ENCRYPTION)\\s*=\\s*\\(([^)]*)\\)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     public LoggingExecutor(Executor delegatedExecutor, Writer output, Database database) {
         if (output != null) {
@@ -79,7 +79,8 @@ public class LoggingExecutor extends AbstractExecutor {
     }
     
     /**
-     * Obfuscates credentials in SQL statements. Initially create for Snowflake STAGE objects.
+     * Obfuscates credentials in SQL statements for Snowflake STAGE objects.
+     * Handles both CREDENTIALS and ENCRYPTION blocks.
      *
      * @param statement SQL statement that may contain credentials
      * @return SQL statement with credentials obfuscated
@@ -93,10 +94,11 @@ public class LoggingExecutor extends AbstractExecutor {
         StringBuffer obfuscatedStatement = new StringBuffer();
         
         while (credentialsMatcher.find()) {
-            String credentialsBlock = credentialsMatcher.group(1); // Content inside CREDENTIALS = ( ... )
-            String obfuscatedBlock = obfuscateCredentialsInBlock(credentialsBlock);
-            // Replace the credentials block with obfuscated version
-            String replacement = "CREDENTIALS = (" + obfuscatedBlock + ")";
+            String blockType = credentialsMatcher.group(1); // CREDENTIALS or ENCRYPTION
+            String blockContent = credentialsMatcher.group(2); // Content inside the parentheses
+            String obfuscatedBlock = obfuscateCredentialsInBlock(blockContent);
+            // Replace the block with obfuscated version, preserving the original block type
+            String replacement = blockType + " = (" + obfuscatedBlock + ")";
             credentialsMatcher.appendReplacement(obfuscatedStatement, Matcher.quoteReplacement(replacement));
         }
 
@@ -106,7 +108,8 @@ public class LoggingExecutor extends AbstractExecutor {
     }
     
     /**
-     * Obfuscates credentials within a CREDENTIALS block. This method only processes the content inside CREDENTIALS = ( ... )
+     * Obfuscates credentials within CREDENTIALS or ENCRYPTION blocks. 
+     * This method only processes the content inside the parentheses.
      */
     private String obfuscateCredentialsInBlock(String credentialsBlock) {
         return SNOWFLAKE_STAGE_CREDENTIALS_PATTERN.matcher(credentialsBlock).replaceAll("$1 = $2*****$2");
