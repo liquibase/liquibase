@@ -528,9 +528,7 @@ public class LiquibaseCommandLine {
             }
             
         } catch (Exception e) {
-            // If reflection fails, fallback to hardcoded flags
-            Scope.getCurrentScope().getLog(getClass()).fine("Could not discover LPM command flags via reflection, using fallback: " + e.getMessage());
-            flags.add("--download");
+            Scope.getCurrentScope().getLog(getClass()).fine("Could not discover LPM command flags via reflection: " + e.getMessage());
         }
         
         return flags;
