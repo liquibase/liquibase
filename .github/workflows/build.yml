@@ -32,7 +32,7 @@ jobs:
       unmodifiedBranchName: ${{ steps.get-branch-name.outputs.unmodifiedBranchName }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       - name: Get Latest Merge Commit SHA
@@ -89,7 +89,7 @@ jobs:
           permission-contents: read
 
       - name: Checkout PRO Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: liquibase/liquibase-pro
           token: ${{ steps.get-token.outputs.token }}
@@ -130,7 +130,7 @@ jobs:
     runs-on: macos-latest
     needs: [setup]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build

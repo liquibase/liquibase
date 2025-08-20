@@ -116,3 +116,6 @@ updates:
       # Ignore H2 updates as it requires Java 11, project uses Java 8
       - dependency-name: "com.h2database:h2"
         versions: [ ">= 2.2.224" ]
+      # Ignore Mockito 5.x updates (requires Java 11, project uses Java 8)
+      - dependency-name: "org.mockito:mockito-core"
+        versions: [">= 5.0.0"]

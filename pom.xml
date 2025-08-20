@@ -91,6 +91,7 @@
         <sonar.coverage.jacoco.xmlReportPaths>target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <surefire.failIfNoTests>true</surefire.failIfNoTests>
         <opencsv.version>5.12.0</opencsv.version>
+        <mockito.version>4.11.0</mockito.version>
     </properties>
 
     <!-- comment -->
@@ -198,7 +199,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>4.11.0</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -306,7 +307,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.25.1</version>
+            <version>3.26.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -490,7 +491,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.11.2</version>
+                <version>3.11.3</version>
                 <configuration>
                     <attach>true</attach>
                     <author>false</author>
@@ -587,7 +588,7 @@
                 <dependency>
                     <groupId>org.mockito</groupId>
                     <artifactId>mockito-core</artifactId>
-                    <version>5.8.0</version>
+                    <version>${mockito.version}</version>
                     <scope>test</scope>
                 </dependency>
             </dependencies>

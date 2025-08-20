@@ -140,7 +140,7 @@ jobs:
           repositories: liquibase-checks
           permission-contents: write
           
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           repository: liquibase/liquibase-checks
           token: ${{ steps.get-token.outputs.token }}
@@ -182,9 +182,9 @@ jobs:
           repositories: liquibase-pro
           permission-contents: write
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         name: Checkout liquibase-pro
         with:
           repository: liquibase/liquibase-pro
@@ -376,7 +376,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Configure AWS credentials for vault access
         uses: aws-actions/configure-aws-credentials@v4
