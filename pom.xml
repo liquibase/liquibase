@@ -53,8 +53,8 @@
     </scm>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <maven.enforcer.requireMavenVersion>3.6</maven.enforcer.requireMavenVersion>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mmZ</maven.build.timestamp.format>
         <maven.deploy.skip>true</maven.deploy.skip>
@@ -581,7 +581,7 @@
                 <jdk>!1.8</jdk>
             </activation>
             <properties>
-                <maven.compiler.release>8</maven.compiler.release>
+                <maven.compiler.release>17</maven.compiler.release>
                 <net.bytebuddy.experimental>true</net.bytebuddy.experimental>
             </properties>
             <dependencies>
