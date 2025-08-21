@@ -12,7 +12,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.extension.testing.testsystem.wrapper.DatabaseWrapper;
 import liquibase.extension.testing.testsystem.wrapper.JdbcDatabaseWrapper;
-import liquibase.util.DownloadUtil;
+import liquibase.extension.testing.util.DownloadUtil;
 import liquibase.logging.Logger;
 import liquibase.statement.SqlStatement;
 import liquibase.util.CollectionUtil;
