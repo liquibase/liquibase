@@ -490,37 +490,26 @@ public class LiquibaseCommandLine {
     }
 
     /**
-     * Discovers CommandArgumentDefinition fields from LpmCommandStep using reflection
-     * and returns their names with "--" prefix.
+     * Discovers CommandArgumentDefinition names from LpmCommandStep using the CommandFactory
+     * and returns their names with "--" prefix. Uses existing factory methods instead of reflection.
      */
     private Set<String> discoverLpmCommandFlags() {
         Set<String> flags = new HashSet<>();
         
         try {
-            Class<?> lpmCommandStepClass = Class.forName("liquibase.command.core.LpmCommandStep");
+            final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
+            CommandDefinition lpmCommandDefinition = commandFactory.getCommandDefinition("lpm");
             
-            // Get all static fields that are of type CommandArgumentDefinition
-            for (java.lang.reflect.Field field : lpmCommandStepClass.getDeclaredFields()) {
-                if (java.lang.reflect.Modifier.isStatic(field.getModifiers()) && 
-                    field.getType().getName().equals("liquibase.command.CommandArgumentDefinition")) {
-                    
-                    field.setAccessible(true);
-                    Object fieldValue = field.get(null);
-                    
-                    if (fieldValue != null) {
-                        // Get the name from the CommandArgumentDefinition
-                        java.lang.reflect.Method getNameMethod = fieldValue.getClass().getMethod("getName");
-                        String argumentName = (String) getNameMethod.invoke(fieldValue);
-                        
-                        if (argumentName != null) {
-                            flags.add("--" + argumentName);
-                        }
+            if (lpmCommandDefinition != null) {
+                for (CommandArgumentDefinition<?> argumentDefinition : lpmCommandDefinition.getArguments().values()) {
+                    String argumentName = argumentDefinition.getName();
+                    if (argumentName != null) {
+                        flags.add("--" + argumentName);
                     }
                 }
             }
-            
         } catch (Exception e) {
-            Scope.getCurrentScope().getLog(getClass()).fine("Could not discover LPM command flags via reflection: " + e.getMessage());
+            Scope.getCurrentScope().getLog(getClass()).fine("Could not discover LPM command flags using CommandFactory: " + e.getMessage());
         }
         
         return flags;

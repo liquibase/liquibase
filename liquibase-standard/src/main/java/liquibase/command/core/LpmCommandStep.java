@@ -7,9 +7,13 @@ import liquibase.configuration.ConfigurationValueConverter;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.util.DownloadUtil;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 import java.io.*;
+import java.net.URI;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,6 +42,8 @@ public class LpmCommandStep extends AbstractCommandStep {
     private static final String LPM_BINARY_NAME = "lpm";
     private static final String DOCS_URL = "http://docs.liquibase.com/LPM";
     private static final String LPM_ERROR_PREFIX = "ERROR: Liquibase Package Manager (LPM)";
+
+    private static final String LPM_DOWNLOAD_PAGE_URL = "https://api.github.com/repos/liquibase/liquibase-package-manager/releases/latest";
     
     static {
         // Define LPM_HOME configuration property
@@ -121,10 +127,9 @@ public class LpmCommandStep extends AbstractCommandStep {
         try {
             Scope.getCurrentScope().getLog(getClass()).fine("Executing LPM command: " + String.join(" ", lpmExecArgs));
             final Process process = new ProcessBuilder(lpmExecArgs).redirectErrorStream(true).start();
-            InputStream stdOut = process.getInputStream();
-            try (BufferedReader stdOutReader = new BufferedReader(new InputStreamReader(stdOut))) {
-                String line;
-                while ((line = stdOutReader.readLine()) != null) {
+            try (InputStream stdOut = process.getInputStream()) {
+                List<String> lines = IOUtils.readLines(stdOut, StandardCharsets.UTF_8);
+                for (String line : lines) {
                     Scope.getCurrentScope().getUI().sendMessage(line);
                 }
             }
@@ -175,9 +180,9 @@ public class LpmCommandStep extends AbstractCommandStep {
     private String getCurrentLpmVersion(String lpmExecutable) {
         try {
             Process process = new ProcessBuilder(lpmExecutable, "--version").start();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String output = reader.readLine();
-                if (output != null) {
+            try (InputStream inputStream = process.getInputStream()) {
+                String output = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+                if (output != null && !output.trim().isEmpty()) {
                     // Extract version number from output like "lpm version 0.2.10" or "0.2.10"
                     Pattern versionPattern = Pattern.compile("(?:version\\s+)?v?(\\d+\\.\\d+\\.\\d+(?:\\.\\d+)?)");
                     Matcher matcher = versionPattern.matcher(output);
@@ -195,26 +200,34 @@ public class LpmCommandStep extends AbstractCommandStep {
     
     /**
      * Compares two version strings to determine if the first is newer than the second.
-     * Assumes semantic versioning (e.g., "1.2.3").
      */
     boolean isNewerVersion(String version1, String version2) {
         if (version1 == null || version2 == null) {
             return version1 != null;
         }
         
-        String[] parts1 = version1.split("\\.");
-        String[] parts2 = version2.split("\\.");
-        int maxLength = Math.max(parts1.length, parts2.length);
-        
-        for (int i = 0; i < maxLength; i++) {
-            int v1 = i < parts1.length ? Integer.parseInt(parts1[i]) : 0;
-            int v2 = i < parts2.length ? Integer.parseInt(parts2[i]) : 0;
-            
-            if (v1 > v2) return true;
-            if (v1 < v2) return false;
+        try {
+            // Clean versions first to handle prefixes like "v" or suffixes like "-alpha"
+            String cleanVersion1 = cleanVersionString(version1);
+            String cleanVersion2 = cleanVersionString(version2);
+            java.lang.module.ModuleDescriptor.Version v1 = java.lang.module.ModuleDescriptor.Version.parse(cleanVersion1);
+            java.lang.module.ModuleDescriptor.Version v2 = java.lang.module.ModuleDescriptor.Version.parse(cleanVersion2);
+            return v1.compareTo(v2) > 0;
+        } catch (IllegalArgumentException e) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Failed to parse versions: " + e.getMessage());
+            return false; // Assume not newer if parsing fails
         }
-        
-        return false; // versions are equal
+    }
+    
+    /**
+     * Cleans version string by extracting only the numeric part with dots.
+     * Handles formats like "v1.2.3-alpha" -> "1.2.3"
+     */
+    private String cleanVersionString(String version) {
+        if (version == null) return "0";
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(\\d+(?:\\.\\d+)*)");
+        java.util.regex.Matcher matcher = pattern.matcher(version);
+        return matcher.find() ? matcher.group(1) : "0";
     }
 
     /**
@@ -361,21 +374,26 @@ public class LpmCommandStep extends AbstractCommandStep {
         // Determine platform for download URL
         String platform = determinePlatform();
         final String lpmUrl = String.format("https://github.com/liquibase/liquibase-package-manager/releases/download/v%s/lpm-%s-%s.zip", version, version, platform);
-        final String lpmZip = String.format("%s%slpm.zip", lpmHome, File.separator);
         
         Scope.getCurrentScope().getUI().sendMessage("Downloading LPM version " + version + " for " + platform + " from " + lpmUrl);
         
+        Path tempFile = null;
         try {
-            Path downloadedFilePath = DownloadUtil.downloadToFile(lpmUrl, new File(lpmZip));
-            this.unzipLpm(downloadedFilePath, lpmHome);
-            try {
-                Files.delete(downloadedFilePath);
-            } catch (IOException e) {
-                Scope.getCurrentScope().getLog(getClass()).warning("Could not delete lpm installer " + downloadedFilePath);
-            }
+            tempFile = Files.createTempFile("lpm-download-", ".zip");
+            FileUtils.copyURLToFile(new URL(lpmUrl), tempFile.toFile());
+            this.unzipLpm(tempFile, lpmHome);
             Scope.getCurrentScope().getUI().sendMessage("LPM installation completed successfully.");
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException("Failed to download or install LPM: " + e.getMessage(), e);
+        } finally {
+            // Clean up temporary file
+            if (tempFile != null) {
+                try {
+                    Files.deleteIfExists(tempFile);
+                } catch (IOException e) {
+                    Scope.getCurrentScope().getLog(getClass()).warning("Could not delete temporary LPM installer: " + tempFile);
+                }
+            }
         }
     }
     
@@ -383,14 +401,13 @@ public class LpmCommandStep extends AbstractCommandStep {
      * Fetches the latest LPM version from GitHub releases API.
      * Falls back to hardcoded version if API call fails.
      */
-    String getLatestLpmVersion() {
-        final String fallbackVersion = "0.2.4";
-        final String apiUrl = "https://api.github.com/repos/liquibase/liquibase-package-manager/releases/latest";
+    private String getLatestLpmVersion() {
+        final String fallbackVersion = "0.2.10";
         
         try {
             Scope.getCurrentScope().getLog(getClass()).fine("Fetching latest LPM version from GitHub API");
             
-            String response = DownloadUtil.fetchAsString(apiUrl);
+            String response = IOUtils.toString(new URI(LPM_DOWNLOAD_PAGE_URL), StandardCharsets.UTF_8);
             String version = parseVersionFromGitHubResponse(response);
             if (version != null) {
                 Scope.getCurrentScope().getLog(getClass()).info("Using latest LPM version: " + version);
@@ -408,7 +425,7 @@ public class LpmCommandStep extends AbstractCommandStep {
      * Parses the version from GitHub API JSON response using simple regex.
      * Looks for "tag_name": "v1.2.3" pattern and extracts the version number.
      */
-    String parseVersionFromGitHubResponse(String jsonResponse) {
+    private String parseVersionFromGitHubResponse(String jsonResponse) {
         // Simple regex to extract tag_name value from JSON
         // Matches "tag_name": "v1.2.3" or "tag_name":"v1.2.3" (with or without spaces)
         Pattern pattern = Pattern.compile("\"tag_name\"\\s*:\\s*\"v?([^\"]+)\"");
@@ -416,7 +433,6 @@ public class LpmCommandStep extends AbstractCommandStep {
         
         if (matcher.find()) {
             String version = matcher.group(1);
-            // Remove 'v' prefix if present
             if (version.startsWith("v")) {
                 version = version.substring(1);
             }
@@ -491,16 +507,11 @@ public class LpmCommandStep extends AbstractCommandStep {
                 if (parentDir != null && !parentDir.exists() && !parentDir.mkdirs()) {
                     throw new UnexpectedLiquibaseException("Could not create directory: " + parentDir.getAbsolutePath());
                 }
-                
-                // Extract file
-                try (FileOutputStream fos = new FileOutputStream(newFile)) {
-                    int len;
-                    while ((len = zis.read(buffer)) > 0) {
-                        fos.write(buffer, 0, len);
-                    }
+
+                try (var fos = new FileOutputStream(newFile)) {
+                    zis.transferTo(fos);
                 }
-                
-                // Make executable if it's the LPM binary
+
                 if (fileName.toLowerCase().contains("lpm") && !fileName.contains(".") || fileName.endsWith(".exe")) {
                     newFile.setExecutable(true);
                     foundExecutable = true;
@@ -518,8 +529,6 @@ public class LpmCommandStep extends AbstractCommandStep {
             throw new UnexpectedLiquibaseException("Failed to extract LPM archive: " + e.getMessage(), e);
         }
     }
-    
-    // Helper methods for code reuse
     
     /**
      * Builds the full path to the LPM executable based on the home directory.
