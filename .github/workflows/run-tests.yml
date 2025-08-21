@@ -60,7 +60,7 @@ jobs:
       thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
       setupSuccessful: "true"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
@@ -125,7 +125,7 @@ jobs:
       OS_TYPE: ${{ matrix.os }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
@@ -341,7 +341,7 @@ jobs:
     needs: build_tests
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
@@ -473,7 +473,7 @@ jobs:
           parse-json-secrets: true
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Set GitHub Secret for Test Count
         env:
           TEST_COUNT_SECRET: ${{ env.TEST_COUNT_SECRET }}
