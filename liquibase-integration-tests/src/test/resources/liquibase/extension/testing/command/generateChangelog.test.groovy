@@ -158,6 +158,49 @@ Optional Args:
         ]
     }
 
+    run "File already exists and overwrite parameter is provided for formatted SQL", {
+        arguments = [
+                url     : { it.url },
+                username: { it.username },
+                password: { it.password },
+                changelogFile: "target/test-classes/changelog-test2.h2.sql",
+                overwriteOutputFile: true
+        ]
+        setup {
+            copyResource("changelogs/update.changelog.sql", "changelog-test2.h2.sql")
+            cleanResources("changelog-test2.xml")
+            database = [
+                    new CreateTableChange(
+                            tableName: "FirstTable",
+                            columns: [
+                                    ColumnConfig.fromName("FirstColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new CreateTableChange(
+                            tableName: "SecondTable",
+                            columns: [
+                                    ColumnConfig.fromName("SecondColumn")
+                                            .setType("VARCHAR(255)")
+                            ]
+                    ),
+                    new TagDatabaseChange(
+                            tag: "version_2.0"
+                    ),
+                    new CreateTableChange(
+                            tableName: "liquibaseRunInfo",
+                            columns: [
+                                    ColumnConfig.fromName("timesRan")
+                                            .setType("INT")
+                            ]
+                    ),
+            ]
+        }
+        expectedFileContent = [
+                "target/test-classes/changelog-test2.h2.sql" : [CommandTests.assertContains("-- liquibase formatted sql", 1)]
+        ]
+    }
+
     run "File already exists and no overwrite parameter provided", {
         arguments = [
             url     : { it.url },
