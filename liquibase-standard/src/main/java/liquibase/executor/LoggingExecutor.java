@@ -37,7 +37,7 @@ public class LoggingExecutor extends AbstractExecutor {
     private final Executor delegatedReadExecutor;
     
     private static final Pattern SNOWFLAKE_STAGE_CREDENTIALS_PATTERN = Pattern.compile(
-        "(?i)\\b(AWS_KEY_ID|AWS_SECRET_KEY|AWS_TOKEN|AZURE_SAS_TOKEN|MASTER_KEY)\\s*=\\s*(['\"])([^'\"]*+)\\2", 
+        "(?i)\\b(AWS_KEY_ID|AWS_SECRET_KEY|AWS_TOKEN|AZURE_SAS_TOKEN|MASTER_KEY|KMS_KEY_ID)\\s*=\\s*(['\"])([^'\"]*+)\\2",
         Pattern.CASE_INSENSITIVE);
     
     // Context-aware pattern to identify CREDENTIALS and ENCRYPTION blocks to avoid false positives in string literals
