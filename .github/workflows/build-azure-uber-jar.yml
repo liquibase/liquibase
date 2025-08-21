@@ -62,7 +62,7 @@ jobs:
           owner: ${{ github.repository_owner }}
           
       - name: Checkout liquibase-pro
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: liquibase/liquibase-pro
           ref: ${{ inputs.branch }}
