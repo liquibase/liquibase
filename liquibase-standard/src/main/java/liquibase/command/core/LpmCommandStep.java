@@ -11,6 +11,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
+import java.lang.module.ModuleDescriptor;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -210,8 +211,8 @@ public class LpmCommandStep extends AbstractCommandStep {
             // Clean versions first to handle prefixes like "v" or suffixes like "-alpha"
             String cleanVersion1 = cleanVersionString(version1);
             String cleanVersion2 = cleanVersionString(version2);
-            java.lang.module.ModuleDescriptor.Version v1 = java.lang.module.ModuleDescriptor.Version.parse(cleanVersion1);
-            java.lang.module.ModuleDescriptor.Version v2 = java.lang.module.ModuleDescriptor.Version.parse(cleanVersion2);
+            var v1 = ModuleDescriptor.Version.parse(cleanVersion1);
+            var v2 = ModuleDescriptor.Version.parse(cleanVersion2);
             return v1.compareTo(v2) > 0;
         } catch (IllegalArgumentException e) {
             Scope.getCurrentScope().getLog(getClass()).fine("Failed to parse versions: " + e.getMessage());
