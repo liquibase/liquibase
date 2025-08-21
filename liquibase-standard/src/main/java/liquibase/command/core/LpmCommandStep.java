@@ -481,7 +481,6 @@ public class LpmCommandStep extends AbstractCommandStep {
              ZipInputStream zis = new ZipInputStream(fis)) {
             
             ZipEntry ze;
-            byte[] buffer = new byte[1024];
             boolean foundExecutable = false;
             
             while ((ze = zis.getNextEntry()) != null) {
