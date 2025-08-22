@@ -623,6 +623,8 @@ jobs:
       dry_run_zip_url: ${{ inputs.dry_run_zip_url || '' }}
       dry_run_tar_gz_url: ${{ inputs.dry_run_tar_gz_url || '' }}
       dry_run_release_id: ${{ inputs.dry_run_release_id || '' }}
+      formula_name: "liquibase"
+      download_base_url: "https://github.com/liquibase/liquibase/releases/download"
 
   update-docs-oss-pro-version:
     if: ${{ inputs.dry_run == false }}
