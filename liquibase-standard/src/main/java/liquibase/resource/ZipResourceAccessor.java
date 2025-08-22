@@ -2,6 +2,8 @@ package liquibase.resource;
 
 import liquibase.Scope;
 
+import java.lang.ClassLoader;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URI;
@@ -56,7 +58,7 @@ public class ZipResourceAccessor extends AbstractPathResourceAccessor {
             for (String embeddedPath : embeddedPaths) {
                 Path innerPath = fileSystem.getPath(embeddedPath);
                 try {
-                    this.fileSystem = FileSystems.newFileSystem(innerPath, (ClassLoader) null);
+                    this.fileSystem = FileSystems.newFileSystem(innerPath, (ClassLoader)null);
                 } catch (FileSystemNotFoundException e) {
                     this.fileSystem = FileSystems.newFileSystem(innerPath, Scope.getCurrentScope().getClassLoader());
                 }
