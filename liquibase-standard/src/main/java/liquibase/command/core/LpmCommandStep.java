@@ -2,7 +2,6 @@ package liquibase.command.core;
 
 import liquibase.Scope;
 import liquibase.command.*;
-import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueConverter;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -36,9 +35,6 @@ public class LpmCommandStep extends AbstractCommandStep {
     public static final CommandArgumentDefinition<Boolean> DOWNLOAD_ARG;
     public static final CommandArgumentDefinition<String> LPM_HOME_ARG;
     
-    // Configuration definition for LPM_HOME
-    public static final ConfigurationDefinition<String> LPM_HOME;
-    
     // Constants
     private static final String LPM_BINARY_NAME = "lpm";
     private static final String DOCS_URL = "http://docs.liquibase.com/LPM";
@@ -47,21 +43,6 @@ public class LpmCommandStep extends AbstractCommandStep {
     private static final String LPM_DOWNLOAD_PAGE_URL = "https://api.github.com/repos/liquibase/liquibase-package-manager/releases/latest";
     
     static {
-        // Define LPM_HOME configuration property
-        ConfigurationDefinition.Builder configBuilder = new ConfigurationDefinition.Builder("liquibase.lpm");
-        LPM_HOME = configBuilder.define("home", String.class)
-                .setDescription("Directory where LPM (Liquibase Package Manager) is installed. Defaults to LIQUIBASE_HOME.")
-                .setValueHandler(value -> {
-                    if (value == null || value.toString().trim().isEmpty()) {
-                        // Fall back to liquibase.home
-                        ConfiguredValue<String> liquibaseHome = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class)
-                                .getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.home");
-                        return liquibaseHome.getValue();
-                    }
-                    return value.toString();
-                })
-                .build();
-        
         CommandBuilder builder = new CommandBuilder(COMMAND_NAME);
         DOWNLOAD_ARG = builder.argument("download", Boolean.class)
                 .description("Download and install LPM binary")
@@ -91,9 +72,7 @@ public class LpmCommandStep extends AbstractCommandStep {
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        // Resolve and validate LPM_HOME path
         String lpmHome = validateAndResolveLpmHome(resultsBuilder);
-        
         final String lpmExecutable = buildLpmExecutablePath(lpmHome);
         
         boolean download = resultsBuilder.getCommandScope().getArgumentValue(DOWNLOAD_ARG);
@@ -252,16 +231,9 @@ public class LpmCommandStep extends AbstractCommandStep {
         ConfiguredValue<String> configuredValue = null;
         
         if (lpmHome == null || lpmHome.trim().isEmpty()) {
-            // Try to get from configuration (env vars, properties, etc.)
-            configuredValue = LPM_HOME.getCurrentConfiguredValue();
+            configuredValue = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class)
+                    .getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.home");
             lpmHome = configuredValue.getValue();
-            
-            // If still null, fall back to liquibase.home
-            if (lpmHome == null || lpmHome.trim().isEmpty()) {
-                configuredValue = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class)
-                        .getCurrentConfiguredValue(ConfigurationValueConverter.STRING, null, "liquibase.home");
-                lpmHome = configuredValue.getValue();
-            }
         }
         
         if (lpmHome == null || lpmHome.trim().isEmpty()) {

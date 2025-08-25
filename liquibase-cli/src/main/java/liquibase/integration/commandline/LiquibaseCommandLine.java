@@ -505,6 +505,9 @@ public class LiquibaseCommandLine {
                     String argumentName = argumentDefinition.getName();
                     if (argumentName != null) {
                         flags.add("--" + argumentName);
+                        if (!argumentName.equals(StringUtil.toKabobCase(argumentName))) {
+                            flags.add("--" + StringUtil.toKabobCase(argumentName));
+                        }
                     }
                 }
             }
