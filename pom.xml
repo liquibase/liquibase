@@ -75,7 +75,7 @@
         <commons-text.version>1.14.0</commons-text.version>
         <ant.version>1.10.15</ant.version>
         <junit-jupiter.version>5.13.4</junit-jupiter.version>
-        <groovy.version>4.0.28</groovy.version>
+        <groovy.version>5.0.0</groovy.version>
         <spock.version>2.3-groovy-4.0</spock.version>
         <spring.version>5.3.39</spring.version>
         <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
