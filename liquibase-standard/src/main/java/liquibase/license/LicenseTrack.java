@@ -17,9 +17,11 @@ public class LicenseTrack {
     private String schema;
     private String catalog;
     private String databaseName;
+    private boolean reference;
+    private boolean target;
     private List<User> users;
 
-    public LicenseTrack(String jdbcUrl, String schema, String catalog, String databaseName) {
+    public LicenseTrack(String jdbcUrl, String schema, String catalog, String databaseName, boolean reference, boolean target) {
         LicenseServiceFactory licenseServiceFactory = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class);
         if (licenseServiceFactory != null) {
             LicenseService licenseService = licenseServiceFactory.getLicenseService();
@@ -34,6 +36,8 @@ public class LicenseTrack {
         this.schema = schema;
         this.catalog = catalog;
         this.databaseName = databaseName;
+        this.reference = reference;
+        this.target = target;
         ConfiguredValue<String> userCurrentConfiguredValue = LicenseTrackingArgs.TRACKING_ID.getCurrentConfiguredValue();
         if (userCurrentConfiguredValue.found()) {
             this.users = Collections.singletonList(new User(userCurrentConfiguredValue.getValue()));
