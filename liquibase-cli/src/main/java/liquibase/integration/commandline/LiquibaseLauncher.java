@@ -97,7 +97,7 @@ public class LiquibaseLauncher {
         }
         File liquibaseHome = new File(liquibaseHomeEnv);
 
-        List<URL> libUrls = getLibUrls(liquibaseHome);
+        List<URL> libUrls = getLibUrls(liquibaseHome, detectLpmRemoveTargets(args));
 
         if (debug) {
             debug("Final Classpath:");
@@ -246,16 +246,26 @@ public class LiquibaseLauncher {
         });
     }
 
-    private static List<URL> getLibUrls(File liquibaseHome) throws MalformedURLException {
+    private static List<URL> getLibUrls(File liquibaseHome, boolean isLpmRemove) throws MalformedURLException {
         List<URL> urls = new ArrayList<>();
         urls.add(new File(liquibaseHome, "internal/lib/liquibase-core.jar").toURI().toURL()); //make sure liquibase-core.jar is first in the list
 
-        File[] libDirs = new File[]{
-                new File("./liquibase_libs"),
-                new File(liquibaseHome, "lib"),
-                new File(liquibaseHome, "internal/lib"),
-                new File(liquibaseHome, "internal/extensions"),
-        };
+        File[] libDirs;
+        if (isLpmRemove) {
+            // For LPM remove operations, only load JARs from internal/lib to prevent file locking
+            debug("LPM remove detected - loading only JARs from internal/lib");
+            libDirs = new File[]{
+                    new File(liquibaseHome, "internal/lib")
+            };
+        } else {
+            // Normal operation - load from all directories
+            libDirs = new File[]{
+                    new File("./liquibase_libs"),
+                    new File(liquibaseHome, "lib"),
+                    new File(liquibaseHome, "internal/lib"),
+                    new File(liquibaseHome, "internal/extensions"),
+            };
+        }
 
         // We released libraries containing the version in the file name,
         // and we want to ignore them in the classpath as the installer/zip/tgz is
@@ -304,6 +314,32 @@ public class LiquibaseLauncher {
             }
         }
         return urls;
+    }
+
+    /**
+     * Pre-parse command line arguments to detect LPM remove operations.
+     * This prevents file locking issues on Windows by only loading JARs from internal/lib.
+     */
+    private static boolean detectLpmRemoveTargets(String[] args) {
+        if (args == null || args.length == 0) {
+            return false;
+        }
+        
+        // Look for "lpm remove" pattern
+        boolean foundLpmCommand = false;
+        
+        for (int i = 0; i < args.length; i++) {
+            String arg = args[i].toLowerCase();
+            
+            if ("lpm".equals(arg)) {
+                foundLpmCommand = true;
+            } else if (foundLpmCommand && "remove".equals(arg)) {
+                debug("Detected LPM remove command - will load only internal/lib JARs");
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     //
