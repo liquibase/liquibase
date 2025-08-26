@@ -42,7 +42,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     private static final String DATABASE_UP_TO_DATE_MESSAGE = "Database is up to date, no changesets to execute";
     private boolean isFastCheckEnabled = true;
 
-    private boolean isDBLocked = true;
+    private final ThreadLocal<Boolean> isDBLocked = ThreadLocal.withInitial(() -> true);
 
     public abstract String getChangelogFileArg(CommandScope commandScope);
 
@@ -97,9 +97,9 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
                 updateReportParameters.getOperationInfo().setUpdateSummaryMsg(DATABASE_UP_TO_DATE_MESSAGE);
                 return;
             }
-            if (!isDBLocked) {
+            if (!isDBLocked.get()) {
                 LockServiceFactory.getInstance().getLockService(database).waitForLock();
-                isDBLocked = true;
+                isDBLocked.set(true);
             }
 
             Scope.getCurrentScope().addMdcValue(MdcKey.DEPLOYMENT_ID, scope.getDeploymentId());
@@ -140,7 +140,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
             resultsBuilder.addResult("statusCode", 1);
             throw e;
         } finally {
-            if (isDBLocked) {
+            if (isDBLocked.get()) {
                 try {
                     LockServiceFactory.getInstance().getLockService(database).releaseLock();
                 } catch (LockException e) {
@@ -352,7 +352,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
     }
 
     protected void setDBLock(boolean locked) {
-        isDBLocked = locked;
+        isDBLocked.set(locked);
     }
 
     /**
