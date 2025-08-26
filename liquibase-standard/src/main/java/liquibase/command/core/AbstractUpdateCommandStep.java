@@ -193,6 +193,7 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
 
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
+        isDBLocked.remove();
         LockServiceFactory.getInstance().resetAll();
         Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).resetAll();
         Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
