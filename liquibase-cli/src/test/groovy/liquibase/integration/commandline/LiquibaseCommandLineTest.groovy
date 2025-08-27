@@ -551,7 +551,7 @@ Commands
                                   existing database and changelogs
 
   diff                          Outputs a description of differences.  If you
-                                  have a Liquibase Pro key, you can output the
+                                  have a Liquibase License Key, you can output the
                                   differences as JSON using the --format=JSON
                                   option
 
