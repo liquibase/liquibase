@@ -688,14 +688,6 @@ jobs:
           event-type: oss-released-version
           client-payload: '{"latest_version": "${{ steps.get_latest_oss_version.outputs.latest_version }}", "previous_version": "${{ steps.get_latest_oss_version.outputs.previous_version }}"}'
 
-      # dispatch an event to `liquibase-aws-license-service` repository to update pom.xml with latest OSS Release
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ steps.get-token.outputs.token }}
-          repository: liquibase/liquibase-aws-license-service
-          event-type: oss-released-version
-
   dry_run_deploy_maven:
     if: ${{ inputs.dry_run == true }}
     name: Deploy to Maven Central Repository
