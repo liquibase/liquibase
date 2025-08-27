@@ -333,7 +333,7 @@ public class LiquibaseLauncher {
             
             if ("lpm".equals(arg)) {
                 foundLpmCommand = true;
-            } else if (foundLpmCommand && "remove".equals(arg)) {
+            } else if (foundLpmCommand && ("remove".equals(arg) || "rm".equals(arg))) {
                 debug("Detected LPM remove command - will load only internal/lib JARs");
                 return true;
             }
