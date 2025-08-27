@@ -247,7 +247,7 @@ You can also post questions to the Liquibase forum: https://forum.liquibase.org
 
 Liquibase Documentation: https://docs.liquibase.com
 
-Need Liquibase Support? Get customer support by upgrading to Liquibase Pro here: 
+Need Liquibase Support? Get customer support by upgrading to Liquibase Secure here: 
 https://liquibase.com/pricing
 
 
