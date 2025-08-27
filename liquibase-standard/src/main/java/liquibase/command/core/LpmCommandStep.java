@@ -96,6 +96,10 @@ public class LpmCommandStep extends AbstractCommandStep {
             lpmCommand.add("--help");
         }
 
+        if ((lpmCommand.contains("--help") || lpmCommand.contains("--h")) && lpmCommand.size() == 1) {
+            printHelpMessage();
+        }
+
         this.runLpmWithCommands(lpmExecutable, lpmCommand);
     }
 
@@ -538,5 +542,37 @@ public class LpmCommandStep extends AbstractCommandStep {
         String message = String.format(messageTemplate, args);
         return String.format("%s %s. Please check this path for access, or edit your property value. Learn more at %s",
                 LPM_ERROR_PREFIX, message, DOCS_URL);
+    }
+
+
+    /**
+     * Prints the help message for the LPM command. It's hardcoded here as we are not able to call picocli help and lpm help at the same time.
+     */
+    private void printHelpMessage() {
+        Scope.getCurrentScope().getUI().sendMessage("""
+                Initialize and update Liquibase Package Manager (LPM)
+                Usage: liquibase lpm [OPTIONS]
+                Download, install, and manage Liquibase packages using the Liquibase Package
+                Manager (LPM)
+                      --download[=PARAM]   Download and install LPM binary
+                                           DEFAULT: false
+                                           (defaults file: 'liquibase.command.download' OR
+                                             'liquibase.command.lpm.download' , environment
+                                             variable: 'LIQUIBASE_COMMAND_DOWNLOAD' OR
+                                             'LIQUIBASE_COMMAND_LPM_DOWNLOAD')
+                  -h, --help               Show this help message and exit
+                      --lpm-home=PARAM     Directory where LPM is installed
+                                           (defaults file: 'liquibase.command.lpmHome' OR
+                                             'liquibase.command.lpm.lpmHome' , environment
+                                             variable: 'LIQUIBASE_COMMAND_LPM_HOME' OR
+                                             'LIQUIBASE_COMMAND_LPM_LPM_HOME')
+                Each argument contains the corresponding 'configuration key' in parentheses. As
+                an alternative to passing values on the command line, these keys can be used as
+                a basis for configuration settings in other locations.
+                Available configuration locations, in order of priority:
+                - Command line arguments (argument name in --help)
+                - Java system properties (configuration key listed above)
+                - Environment values (env variable listed above)
+                - Defaults file (configuration key OR argument name)""");
     }
 }
