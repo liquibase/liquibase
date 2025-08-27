@@ -193,7 +193,7 @@ jobs:
           } >> $GITHUB_ENV
 
       - name: Set up Java for publishing to Maven Central Repository
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: "11"
           distribution: "adopt"
@@ -339,7 +339,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Set up Java for publishing to GitHub Repository
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: "17"
           distribution: "temurin"
@@ -623,6 +623,8 @@ jobs:
       dry_run_zip_url: ${{ inputs.dry_run_zip_url || '' }}
       dry_run_tar_gz_url: ${{ inputs.dry_run_tar_gz_url || '' }}
       dry_run_release_id: ${{ inputs.dry_run_release_id || '' }}
+      distribution: "liquibase"
+      download_base_url: "https://github.com/liquibase/liquibase/releases/download"
 
   update-docs-oss-pro-version:
     if: ${{ inputs.dry_run == false }}
@@ -724,7 +726,7 @@ jobs:
           } >> $GITHUB_ENV
 
       - name: Set up Java for publishing to Maven Central Repository
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: "11"
           distribution: "adopt"
