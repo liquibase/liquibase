@@ -21,11 +21,11 @@
         <postgresql.version>42.7.7</postgresql.version>
         <mssql.version>12.10.1.jre8</mssql.version>
         <mysql.version>9.2.0</mysql.version>
-        <mariadb.version>3.5.4</mariadb.version>
-        <oracle.version>19.27.0.0</oracle.version>
+        <mariadb.version>3.5.5</mariadb.version>
+        <oracle.version>19.28.0.0</oracle.version>
         <sqlite.version>3.50.3.0</sqlite.version>
         <db2.version>11.5.9.0</db2.version>
-        <firebird.version>5.0.8.java8</firebird.version>
+        <firebird.version>5.0.9.java8</firebird.version>
         <slf4j.version>2.0.17</slf4j.version>
         <liquibase-pro.version>master-SNAPSHOT</liquibase-pro.version>
         <liquibase-checks.version>0-SNAPSHOT</liquibase-checks.version>
@@ -63,7 +63,7 @@
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.11.2</version>
+            <version>${opencsv.version}</version>
             <scope>compile</scope>
             <exclusions>
                 <!-- not used by liquibase code -->
@@ -114,7 +114,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.25.1</version>
+            <version>3.26.0</version>
         </dependency>
 
         <!--        CANNOT INCLUDE MYSQL FOR LICENSING REASONS -->
@@ -209,7 +209,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.27.1</version>
+            <version>1.28.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

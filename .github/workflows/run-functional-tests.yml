@@ -34,7 +34,7 @@ jobs:
           echo "github.event.pull_request.merged: ${{ github.event.pull_request.merged }}"
           echo "github.event_name: ${{ github.event_name }}"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} # get the sha of the commit or the new commit created when branch is merged to master
 
@@ -43,7 +43,7 @@ jobs:
     needs: [ functional-tests-build ]
     name: Trigger Functional Tests
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set environment variables for PR branch and SHA
         run: |

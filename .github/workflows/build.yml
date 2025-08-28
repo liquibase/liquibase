@@ -32,7 +32,7 @@ jobs:
       unmodifiedBranchName: ${{ steps.get-branch-name.outputs.unmodifiedBranchName }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       - name: Get Latest Merge Commit SHA
@@ -89,7 +89,7 @@ jobs:
           permission-contents: read
 
       - name: Checkout PRO Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: liquibase/liquibase-pro
           token: ${{ steps.get-token.outputs.token }}
@@ -130,18 +130,18 @@ jobs:
     runs-on: macos-latest
     needs: [setup]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
       - name: Download Artifacts for build.yml
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: temp-artifact
 
       ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
       - name: Install4j Cache
-        uses: actions/cache@v4.2.3
+        uses: actions/cache@v4.2.4
         with:
           key: install4j-A${{ hashFiles('liquibase-dist/src/main/install4j/liquibase.install4j') }}
           path: ~/.install4j8/**
@@ -170,7 +170,7 @@ jobs:
           } >> $GITHUB_ENV
 
       - name: Set up JDK 11
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: "11"
           distribution: "temurin"

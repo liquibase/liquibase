@@ -9,6 +9,8 @@ public class JdbcConnectionPatterns extends ConnectionPatterns {
     private static final String FILTER_CREDS_USER_TO_BLANK = "(?i)[?&:;]user(.*?)=(.+)[^;&]";
     @SuppressWarnings("squid:S2068")
     private static final String FILTER_CREDS_PRIVATE_KEY_TO_BLANK = "(?i)[?&:;]private_key_file(.*?)=[^;&]*";
+    @SuppressWarnings("squid:S2068")
+    private static final String FILTER_CREDS_OAUTH2_SECRET_TO_BLANK = "(?i)[?&:;]OAuth2Secret=[^;&]*";
 
     @SuppressWarnings("squid:S2068")
     private static final String FILTER_CREDS_PASSWORD = "(?i)(.+?)password=([^;&?]+)[;&]*?(.*?)$";
@@ -23,6 +25,9 @@ public class JdbcConnectionPatterns extends ConnectionPatterns {
 
     @SuppressWarnings("squid:S2068")
     private static final String FILTER_CREDS_PRIVATE_KEY_FILE_PWD = "(?i)(.+?)private_key_file_pwd=([^;&?]+)[;&]*?(.*?)$";
+
+    @SuppressWarnings("squid:S2068")
+    private static final String FILTER_CREDS_OAUTH2_SECRET = "(?i)(.+?)OAuth2Secret=([^;&?]+)[;&]*?(.*?)$";
 
     private static final String FILTER_CREDS = "(?i)/(.*)((?=@))";
 
@@ -41,6 +46,7 @@ public class JdbcConnectionPatterns extends ConnectionPatterns {
         addJdbcBlankPatterns(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_PW_TO_BLANK)));
         addJdbcBlankPatterns(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_USER_TO_BLANK)));
         addJdbcBlankPatterns(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_PRIVATE_KEY_TO_BLANK)));
+        addJdbcBlankPatterns(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_OAUTH2_SECRET_TO_BLANK)));
         addJdbcBlankPatterns(PatternPair.of(Pattern.compile(oracleThinMatcherRegex), Pattern.compile(FILTER_CREDS)));
         addJdbcBlankPatterns(PatternPair.of(Pattern.compile(mysqlMatcherRegex), Pattern.compile(FILTER_CREDS)));
         addJdbcBlankPatterns(PatternPair.of(Pattern.compile(mariadbMatcherRegex), Pattern.compile(FILTER_CREDS)));
@@ -53,6 +59,7 @@ public class JdbcConnectionPatterns extends ConnectionPatterns {
         addJdbcObfuscatePatterns(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_USER)));
         addJdbcObfuscatePatterns(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_PRIVATE_KEY_FILE)));
         addJdbcObfuscatePatterns(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_PRIVATE_KEY_FILE_PWD)));
+        addJdbcObfuscatePatterns(PatternPair.of(Pattern.compile("(?i)(.*)"), Pattern.compile(FILTER_CREDS_OAUTH2_SECRET)));
         addJdbcObfuscatePatterns(PatternPair.of(Pattern.compile("(?i)^cosmosdb:\\/\\/.*"), Pattern.compile(FILTER_ACCOUNT_KEY)));
 
         addJdbcBlankToObfuscatePatternsReplaceWithEmpty(PatternPair.of(Pattern.compile(oracleThinMatcherRegex), Pattern.compile(FILTER_CREDS_ORACLE_TO_OBFUSCATE_EMPTY)));

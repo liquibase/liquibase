@@ -213,6 +213,22 @@ class ChangeSetTest extends Specification {
         e.message == "Error parsing com/example/test.xml: Unknown change type 'invalid'. Check for spelling or capitalization errors and missing extensions such as liquibase-commercial."
     }
 
+    def "load node with unknown change types unrecognized namespace"() {
+        when:
+        def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
+        def node = new ParsedNode(null, "changeSet")
+                .addChildren([id: "1", author: "nvoxland"])
+                .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1"))
+                .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_2"))
+        def nodeToEdit = node.getChildren()
+        nodeToEdit.get(0).setParsedNamespace("foo")
+        changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+
+        then:
+        def e = thrown(ParsedNodeException)
+        e.message == "Error parsing com/example/test.xml: Unknown change type 'foo:id'. Check for spelling or capitalization errors and missing extensions such as liquibase-commercial."
+    }
+
     def "load node with unknown change types and lax parsing"() {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))

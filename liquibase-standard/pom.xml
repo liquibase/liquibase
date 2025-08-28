@@ -119,7 +119,7 @@
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.11.2</version>
+            <version>${opencsv.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-beanutils</groupId>
@@ -407,6 +407,7 @@
                         <param>liquibase.analytics.configuration.AnalyticsConfiguration</param>
                         <param>liquibase.command.CommandStep</param>
                         <param>liquibase.command.copy.ProjectCopier</param>
+                        <param>liquibase.diff.output.changelog.core.ChangelogPrintService</param>
                     </services>
                 </configuration>
                 <executions>
