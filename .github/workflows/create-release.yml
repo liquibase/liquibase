@@ -274,11 +274,11 @@ jobs:
             echo "GPG_EOF"
           } >> $GITHUB_ENV
 
-      - name: Set up JDK
-        uses: actions/setup-java@v5
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
-          java-version: "8"
-          distribution: "adopt"
+          java-version: "17"
+          distribution: "temurin"
           gpg-private-key: ${{ env.GPG_KEY_CONTENT }}
           gpg-passphrase: GPG_PASSPHRASE
         env:
@@ -413,7 +413,6 @@ jobs:
         with:
           java-version: |
             17
-            8
           distribution: "adopt"
           gpg-private-key: ${{ env.GPG_KEY_CONTENT }}
           gpg-passphrase: GPG_PASSPHRASE
