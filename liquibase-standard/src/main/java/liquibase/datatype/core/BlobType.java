@@ -128,8 +128,6 @@ public class BlobType extends LiquibaseDataType {
                 return new DatabaseDataType("VARBINARY", getParameters());
             } else if (originalDefinition.toLowerCase(Locale.US).startsWith("binary")) {
                 return new DatabaseDataType("BINARY", getParameters());
-            } else {
-                return new DatabaseDataType("BLOB");
             }
         }
 
