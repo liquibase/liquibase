@@ -56,7 +56,7 @@ public class ZipResourceAccessor extends AbstractPathResourceAccessor {
             for (String embeddedPath : embeddedPaths) {
                 Path innerPath = fileSystem.getPath(embeddedPath);
                 try {
-                    this.fileSystem = FileSystems.newFileSystem(innerPath, null);
+                    this.fileSystem = FileSystems.newFileSystem(innerPath, (ClassLoader) null);
                 } catch (FileSystemNotFoundException e) {
                     this.fileSystem = FileSystems.newFileSystem(innerPath, Scope.getCurrentScope().getClassLoader());
                 }
