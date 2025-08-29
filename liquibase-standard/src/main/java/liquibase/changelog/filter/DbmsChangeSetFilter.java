@@ -1,7 +1,5 @@
 package liquibase.changelog.filter;
 
-import liquibase.change.Change;
-import liquibase.change.DbmsTargetedChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
