@@ -377,7 +377,7 @@ public class LiquibaseCommandLine {
 
     public int execute(String[] args) {
         try {
-            final String[] finalArgs = adjustLegacyArgs(args);
+            final String[] finalArgs = adjustLpmArgs(adjustLegacyArgs(args));
 
             configureLogging(Level.OFF, null);
 
@@ -453,6 +453,69 @@ public class LiquibaseCommandLine {
         } finally {
             cleanup();
         }
+    }
+
+    /**
+     * If we find "init lpm" command sequence, everything after that should be treated as parameters to LPM,
+     * except for known CommandArgumentDefinition flags which should be handled by the command system.
+     * To handle that we use Scope.Attr.lpmArgs to store the parameters.
+     */
+    private String[] adjustLpmArgs(String[] strings) {
+        List<String> returnArgs = new ArrayList<>();
+        StringBuilder lpmArgs = null;
+
+        // Known flags that should not be passed to LPM binary - discovered via reflection
+        Set<String> knownFlags = discoverLpmCommandFlags();
+
+        for (String arg : strings) {
+            if (lpmArgs == null) {
+                returnArgs.add(arg);
+                
+                if ("lpm".equals(arg.toLowerCase())) {
+                    lpmArgs = new StringBuilder();
+                }
+            } else if (knownFlags.stream().noneMatch(arg::startsWith)) {
+                // Collecting arguments after "init lpm", but skip known command flags
+                lpmArgs.append(arg).append(" ");
+            } else {
+                // Add known flags back to returnArgs so they're processed by the command system
+                returnArgs.add(arg);
+            }
+        }
+        
+        if (lpmArgs != null) {
+            Scope.getCurrentScope().setLpmArgs(lpmArgs.toString().trim());
+        }
+        return returnArgs.toArray(new String[0]);
+    }
+
+    /**
+     * Discovers CommandArgumentDefinition names from LpmCommandStep using the CommandFactory
+     * and returns their names with "--" prefix. Uses existing factory methods instead of reflection.
+     */
+    private Set<String> discoverLpmCommandFlags() {
+        Set<String> flags = new HashSet<>();
+        
+        try {
+            final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
+            CommandDefinition lpmCommandDefinition = commandFactory.getCommandDefinition("lpm");
+            
+            if (lpmCommandDefinition != null) {
+                for (CommandArgumentDefinition<?> argumentDefinition : lpmCommandDefinition.getArguments().values()) {
+                    String argumentName = argumentDefinition.getName();
+                    if (argumentName != null) {
+                        flags.add("--" + argumentName);
+                        if (!argumentName.equals(StringUtil.toKabobCase(argumentName))) {
+                            flags.add("--" + StringUtil.toKabobCase(argumentName));
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Could not discover LPM command flags using CommandFactory: " + e.getMessage());
+        }
+        
+        return flags;
     }
 
     private void addEmptyMdcValues() {
