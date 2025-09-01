@@ -649,6 +649,43 @@ class ChangeSetTest extends Specification {
         changeSet.isInheritableIgnore()
     }
 
+    def "execute returns a SKIPPED state when at all changes are skipped"() {
+        when:
+        DatabaseChangeLog databaseChangeLog = new DatabaseChangeLog("com/example/test.xml")
+        def changeSet =
+                new ChangeSet("testId", "testAuthor", false, false, null, null, null, databaseChangeLog)
+        def change1 = new RawSQLChange("CREATE TABLE pendingEmails (createdAt datetime2)")
+        change1.setDbms("foo")
+        def change2 = new RawSQLChange("ALTER TABLE pendingEmails ALTER COLUMN createdAt datetime2 NOT NULL;")
+        change2.setDbms("foo")
+        changeSet.addChange(change1)
+        changeSet.addChange(change2)
+        databaseChangeLog.addChangeSet(changeSet)
+        ChangeExecListener listener = new DefaultChangeExecListener()
+
+        then:
+        changeSet.execute(databaseChangeLog, listener, new MockDatabase()) == ChangeSet.ExecType.SKIPPED
+        listener.getDeployedChanges(changeSet).size() == 0
+    }
+
+    def "execute returns an EXECUTED state when at least one SQL change executes"() {
+        when:
+        DatabaseChangeLog databaseChangeLog = new DatabaseChangeLog("com/example/test.xml")
+        def changeSet =
+                new ChangeSet("testId", "testAuthor", false, false, null, null, null, databaseChangeLog)
+        def change1 = new RawSQLChange("CREATE TABLE pendingEmails (createdAt datetime2)")
+        def change2 = new RawSQLChange("ALTER TABLE pendingEmails ALTER COLUMN createdAt datetime2 NOT NULL;")
+        change2.setDbms("foo")
+        changeSet.addChange(change1)
+        changeSet.addChange(change2)
+        databaseChangeLog.addChangeSet(changeSet)
+        ChangeExecListener listener = new DefaultChangeExecListener()
+
+        then:
+        changeSet.execute(databaseChangeLog, listener, new MockDatabase()) == ChangeSet.ExecType.EXECUTED
+        listener.getDeployedChanges(changeSet).size() == 1
+    }
+
     def "execute returns a EXECUTED state when at least one change executes"() {
         when:
         DatabaseChangeLog databaseChangeLog = new DatabaseChangeLog("com/example/test.xml")
