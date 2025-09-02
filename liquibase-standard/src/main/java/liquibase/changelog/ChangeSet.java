@@ -654,13 +654,24 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return execute(databaseChangeLog, null, database);
     }
 
+    private void addSkippedChangesToSummary(DatabaseChangeLog databaseChangeLog, Database database) {
+        for (Change change : changes) {
+            if (isSkipExecChange(change) && ! databaseChangeLog.getSkippedBecauseOfOsMismatchChangeSets().contains(this)) {
+                databaseChangeLog.getSkippedBecauseOfOsMismatchChangeSets().add(this);
+            }
+            if (isSkipChangeForDbms(change, database) && ! databaseChangeLog.getSkippedBecauseOfChangeDbmsChangeSets().contains(this)) {
+                databaseChangeLog.getSkippedBecauseOfChangeDbmsChangeSets().add(this);
+            }
+        }
+    }
+
     /**
      * If we could not find the change type and
      *   either
      *      The node had a namespace
      *   or
      *      The node has children AND
-     *      The "do not thrown and exception flag" is off AND
+     *      The "do not throw an exception flag" is off AND
      *      The changelog parsing mode is strict
      *   then
      *      throw an exception
@@ -678,21 +689,29 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     private ExecType isChangeToSkip(Change change, Database database, Logger log) {
-        boolean skipChangeForDbms =
-           (change instanceof DbmsTargetedChange &&
-              ! DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true));
-        boolean skipExecChange = ! change.shouldRunOnOs();
+        boolean skipChangeForDbms = isSkipChangeForDbms(change, database);
+        boolean skipExecChange = isSkipExecChange(change);
         if (skipChangeForDbms) {
             log.fine("Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
         }
         if (skipExecChange) {
             log.fine("Change " + change.getSerializedObjectName() + " not included: " + change.getConfirmationMessage());
-            change.getChangeSet().getChangeLog().getSkippedBecauseOfOsMismatchChangeSets().add(change.getChangeSet());
         }
         if (skipChangeForDbms || skipExecChange) {
             return ExecType.SKIPPED;
         }
         return null;
+    }
+
+    private static boolean isSkipExecChange(Change change) {
+        return !change.shouldRunOnOs();
+    }
+
+    private static boolean isSkipChangeForDbms(Change change, Database database) {
+        boolean skipChangeForDbms =
+           (change instanceof DbmsTargetedChange &&
+              ! DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true));
+        return skipChangeForDbms;
     }
 
     private void setStopTime() {
@@ -824,9 +843,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 }
 
                 log.fine("Reading ChangeSet: " + this);
-                boolean skippedAtLeastOneChange = false;
+                boolean skippedAllChanges = !changes.isEmpty();
                 for (Change change : changes) {
                     if (isChangeToSkip(change, database, log) != ExecType.SKIPPED) {
+                        skippedAllChanges = false;
                         if (listener != null) {
                             listener.willRun(change, this, changeLog, database);
                         }
@@ -842,16 +862,16 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                         if (listener != null) {
                             listener.ran(change, this, changeLog, database);
                         }
-                    } else {
-                        skippedAtLeastOneChange = true;
                     }
                 }
 
                 if (runInTransaction) {
                     database.commit();
                 }
-                if (skippedAtLeastOneChange && changes.size() == 1) {
+                if (skippedAllChanges) {
                     execType = ExecType.SKIPPED;
+                    addSkippedChangesToSummary(databaseChangeLog, database);
+                    log.fine("All changes have been skipped");
                 }
                 if (execType == null) {
                     execType = ExecType.EXECUTED;
