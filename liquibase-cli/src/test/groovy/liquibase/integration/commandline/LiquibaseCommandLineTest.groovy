@@ -588,6 +588,9 @@ Commands
   list-locks                    List the hostname, IP address, and timestamp of
                                   the Liquibase lock record
 
+  lpm                           Initialize and update Liquibase Package Manager
+                                  (LPM)
+
   mark-next-changeset-ran       Marks the next change you apply as executed in
                                   your database
 
