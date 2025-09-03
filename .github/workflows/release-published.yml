@@ -170,7 +170,7 @@ jobs:
           out-file-path: "."
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -297,7 +297,7 @@ jobs:
           out-file-path: "."
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -311,7 +311,7 @@ jobs:
           parse-json-secrets: true
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
           aws-region: us-east-1
@@ -378,7 +378,7 @@ jobs:
           repository: "liquibase/liquibase"
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -411,7 +411,7 @@ jobs:
           repository: "liquibase/liquibase-pro"
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
           aws-region: us-east-1
@@ -492,7 +492,7 @@ jobs:
     steps:
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -539,7 +539,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -581,7 +581,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -636,7 +636,7 @@ jobs:
       previous_version: ${{ steps.get_latest_oss_version.outputs.previous_version }}
     steps:
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -703,7 +703,7 @@ jobs:
           out-file-path: "."
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -834,7 +834,7 @@ jobs:
         run: echo "timestamp=$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -848,7 +848,7 @@ jobs:
           parse-json-secrets: true
           
       - name: Configure AWS credentials for prod account access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
           aws-region: us-east-1

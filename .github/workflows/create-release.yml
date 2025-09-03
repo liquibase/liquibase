@@ -117,7 +117,7 @@ jobs:
     steps:
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -159,7 +159,7 @@ jobs:
     steps:
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -275,7 +275,7 @@ jobs:
           } >> $GITHUB_ENV
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: "17"
           distribution: "temurin"
@@ -379,7 +379,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -470,7 +470,7 @@ jobs:
           echo "$ANDROID_SDK_ROOT/build-tools/30.0.2" >> $GITHUB_PATH
           
       - name: Install DigiCert KeyLocker Client Tools
-        uses: digicert/ssm-code-signing@v1.1.0
+        uses: digicert/ssm-code-signing@v1.1.1
 
       - name: Build Unsigned Windows Installer
         env:
@@ -573,7 +573,7 @@ jobs:
     steps:
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -593,7 +593,7 @@ jobs:
           path: re-version/s3-minimal
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ env.AWS_IO_DEV_GITHUB_OIDC_ROLE_ARN_LIQUIBASE }}
           aws-region: us-east-2
