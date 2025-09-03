@@ -2,6 +2,8 @@ package liquibase.resource;
 
 import liquibase.Scope;
 
+import java.lang.ClassLoader;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URI;
