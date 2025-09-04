@@ -335,6 +335,7 @@
 
     <build>
         <plugins>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -472,6 +473,27 @@
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>3.1.4</version>
             </plugin>
+
+	    <plugin>
+	        <groupId>org.codehaus.mojo</groupId>
+		  <artifactId>exec-maven-plugin</artifactId>
+		  <version>3.5.0</version>
+		  <executions>
+		    <execution>
+		      <id>run-bash-on-package</id>
+		      <phase>package</phase>
+		      <goals>
+		        <goal>exec</goal>
+		      </goals>
+		      <configuration>
+		        <executable>bash</executable>
+		        <arguments>
+		          <argument>${project.basedir}/scripts/my-package-script.sh</argument>
+		        </arguments>
+		      </configuration>
+		    </execution>
+		  </executions>
+	    </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
