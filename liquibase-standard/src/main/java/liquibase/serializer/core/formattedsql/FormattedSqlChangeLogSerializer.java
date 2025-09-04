@@ -9,6 +9,7 @@ import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -67,7 +68,14 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
                         builder = new StringBuilder(builder.toString().replace(" splitStatements:false", ""));
                     }
                     for (Sql sql : sqls) {
-                        builder.append(sql.toSql().endsWith(sql.getEndDelimiter()) ? sql.toSql() : sql.toSql() + sql.getEndDelimiter()).append("\n");
+                        String sqlText = sql.toSql();
+                        
+                        // Handle SQL Server bracket quoting issue - remove quotes around bracketed identifiers
+                        if (database instanceof MSSQLDatabase) {
+                            sqlText = cleanSqlServerQuoting(sqlText);
+                        }
+                        
+                        builder.append(sqlText.endsWith(sql.getEndDelimiter()) ? sqlText : sqlText + sql.getEndDelimiter()).append("\n");
                     }
                 }
             }
@@ -146,6 +154,19 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
             throw new UnexpectedLiquibaseException("Serializing changelog as sql requires a file name in the format *.databaseType.sql. Example: changelog.h2.sql. Passed: "+filePath);
         }
         return matcher.replaceFirst("$1");
+    }
+
+    /**
+     * Remove unnecessary double quotes around SQL Server bracketed identifiers.
+     * Converts "\"[TableName]\"" to "[TableName]"
+     *
+     * @param sql the SQL string to clean
+     * @return the cleaned SQL string with proper SQL Server bracket formatting
+     */
+    private String cleanSqlServerQuoting(String sql) {
+        // Pattern to match quoted bracketed identifiers: "\"[identifier]\""
+        // Replace with just the bracketed identifier: "[identifier]"
+        return sql.replaceAll("\"\\[(.*?)\\]\"", "[$1]");
     }
 
     @Override
