@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -94,7 +94,7 @@ jobs:
           mv pkcs11properties.cfg $(pwd)/.github/util/
 
       - name: Install DigiCert KeyLocker Client Tools
-        uses: digicert/ssm-code-signing@v1.1.0
+        uses: digicert/ssm-code-signing@v1.1.1
 
       - name: Set branch variable
         run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV

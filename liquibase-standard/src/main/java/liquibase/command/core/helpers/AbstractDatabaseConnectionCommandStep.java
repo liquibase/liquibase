@@ -148,9 +148,9 @@ public abstract class AbstractDatabaseConnectionCommandStep extends AbstractHelp
     private static String removeQueryParameters(String jdbcUrl) throws URISyntaxException {
         String jdbcPrefix = "jdbc:";
         boolean startsWithJdbc = jdbcUrl.startsWith(jdbcPrefix);
-        URI uri = new URI(jdbcUrl.replaceFirst(jdbcPrefix, StringUtils.EMPTY));
-        String cleanedUri = uri.toString();
+        String cleanedUri = jdbcUrl.replaceFirst(jdbcPrefix, StringUtils.EMPTY);
         try {
+            URI uri = new URI(cleanedUri);
             // This the more robust (IMO) way of stripping parameters, but doesn't work for all path formats.
             cleanedUri = new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), null, uri.getFragment()).toString();
         } catch (Exception e) {
