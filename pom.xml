@@ -91,7 +91,7 @@
         <sonar.coverage.jacoco.xmlReportPaths>target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <surefire.failIfNoTests>true</surefire.failIfNoTests>
         <opencsv.version>5.12.0</opencsv.version>
-        <mockito.version>4.11.0</mockito.version>
+        <mockito.version>5.19.0</mockito.version>
     </properties>
 
     <!-- comment -->
