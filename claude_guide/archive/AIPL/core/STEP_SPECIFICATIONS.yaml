@@ -1,0 +1,311 @@
+AIPL_VERSION: "2.0"
+DOCUMENT_TYPE: STEP_SPECIFICATIONS
+VALIDATION_MODE: STRICT
+
+IMPORTS:
+  - "TERMINOLOGY_DEFINITIONS.yaml"
+
+REQUIRES:
+  - BEHAVIORAL_KEYWORDS
+
+PURPOSE: "Universal step patterns and classifications - referenced by all implementation approaches"
+
+STEP_CLASSIFICATION:
+  PURPOSE: "Classify all steps by execution pattern for standardized specifications"
+  
+  STEP_CATEGORIES:
+    RESEARCH_STEP:
+      DEFINITION: "Gather information from external sources"
+      EXECUTION_PATTERN: "Input sources → Search commands → Validation checks"
+      TYPICAL_DURATION: "5-30 minutes"
+      REQUIRED_SECTIONS: [INPUT_REQUIREMENTS, EXECUTION_STEPS, ACCEPTANCE_CRITERIA, DELIVERABLES]
+      BEHAVIORAL_KEYWORDS: [ACCEPTANCE_CRITERIA, DELIVERABLE, EXECUTION_STEPS]
+      EXAMPLES:
+        - "Domain documentation research"
+        - "API documentation analysis"
+        - "Existing code pattern investigation"
+        
+    PROCESSING_STEP:
+      DEFINITION: "Transform/analyze gathered information"
+      EXECUTION_PATTERN: "Input data → Processing logic → Output structure"
+      TYPICAL_DURATION: "2-15 minutes"
+      REQUIRED_SECTIONS: [INPUT_REQUIREMENTS, EXECUTION_STEPS, ACCEPTANCE_CRITERIA, DELIVERABLES]
+      BEHAVIORAL_KEYWORDS: [ACCEPTANCE_CRITERIA, DELIVERABLE, EXECUTION_STEPS]
+      EXAMPLES:
+        - "Property categorization analysis"
+        - "Data structure transformation"
+        - "Requirements document parsing"
+        
+    CREATION_STEP:
+      DEFINITION: "Generate artifacts (documents, code, files)"
+      EXECUTION_PATTERN: "Templates → Generation logic → Quality gates"
+      TYPICAL_DURATION: "1-10 minutes"
+      REQUIRED_SECTIONS: [INPUT_REQUIREMENTS, EXECUTION_STEPS, ACCEPTANCE_CRITERIA, QUALITY_GATE, DELIVERABLES]
+      BEHAVIORAL_KEYWORDS: [ACCEPTANCE_CRITERIA, QUALITY_GATE, DELIVERABLE, EXECUTION_STEPS]
+      SHORTHAND_TEMPLATE:
+        PURPOSE: "${CREATION_OBJECTIVE}"
+        CREATES: "${ARTIFACT_PATH}" 
+        VALIDATES: ["FILE_EXISTS", "COMPILES"]
+        QUALITY_GATE: "STOP_ON_FAILURE"
+      EXAMPLES:
+        - "Java class file generation"
+        - "Configuration file creation"
+        - "Documentation generation"
+        
+    VALIDATION_STEP:
+      DEFINITION: "Verify quality/completeness before proceeding"
+      EXECUTION_PATTERN: "Quality checks → Pass/fail decisions → Blocking behavior"
+      TYPICAL_DURATION: "30 seconds - 5 minutes"
+      REQUIRED_SECTIONS: [INPUT_REQUIREMENTS, QUALITY_GATE, DELIVERABLES]
+      BEHAVIORAL_KEYWORDS: [QUALITY_GATE, ACCEPTANCE_CRITERIA]
+      EXAMPLES:
+        - "Compilation verification"
+        - "Test execution validation"
+        - "Requirements completeness check"
+        
+    EXECUTION_STEP:
+      DEFINITION: "Run commands or perform operations"
+      EXECUTION_PATTERN: "Commands → Success criteria → Error handling"
+      TYPICAL_DURATION: "10 seconds - 10 minutes"
+      REQUIRED_SECTIONS: [INPUT_REQUIREMENTS, EXECUTION_STEPS, ACCEPTANCE_CRITERIA, DELIVERABLES]
+      BEHAVIORAL_KEYWORDS: [EXECUTION_STEPS, ACCEPTANCE_CRITERIA, DELIVERABLE]
+      EXAMPLES:
+        - "Maven compilation execution"
+        - "Test suite execution"
+        - "File system operations"
+
+UNIVERSAL_STEP_TEMPLATE:
+  PURPOSE: "Complete specification pattern that every step should follow"
+  
+  TEMPLATE_STRUCTURE: |
+    STEP_X_Y_NAME:
+      STEP_TYPE: "RESEARCH|PROCESSING|CREATION|VALIDATION|EXECUTION"
+      PURPOSE: "What this step accomplishes"
+      
+      INPUT_REQUIREMENTS:
+        - "What must exist before this step can execute"
+        - "Prerequisites and dependencies"
+        - "Required tools or environment setup"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Specific action to take"
+          COMMAND: "Copy-paste ready command (if applicable)"
+          EXPECTED_OUTPUT: "What should result from this action"
+          TIMEOUT: "Maximum execution time (optional)"
+          
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Binary pass/fail condition"
+          VALIDATION_COMMAND: "Command to verify the condition"
+          PASS_CONDITION: "Specific condition that constitutes success"
+          FAILURE_HANDLING: "What to do if this criterion fails"
+          
+      QUALITY_GATE:         # Required for CREATION and VALIDATION steps
+        NAME: "quality-gate-identifier"
+        TYPE: "BLOCKING|NON_BLOCKING"
+        FAILURE_ACTION: "STOP|WARN|CONTINUE"
+        ERROR_MESSAGE: "Specific failure guidance for user"
+        RECOVERY_STEPS: "How to fix the failure (optional)"
+        
+      DELIVERABLES:
+        - ARTIFACT: "What gets created, modified, or validated"
+          LOCATION: "Where to find it (file path, URL, etc.)"
+          VALIDATION: "How to verify it exists and is correct"
+          FORMAT: "Expected format or structure (optional)"
+          
+      ERROR_HANDLING:       # Optional section
+        COMMON_FAILURES:
+          - ERROR_PATTERN: "Pattern to match error"
+            RESOLUTION: "How to fix this error"
+            
+      PERFORMANCE:          # Optional section
+        EXPECTED_DURATION: "Typical execution time"
+        OPTIMIZATION_NOTES: "How to make this step faster"
+
+STEP_COMPOSITION_PATTERNS:
+  PURPOSE: "Common patterns for combining steps into workflows"
+  
+  SEQUENTIAL_PATTERN:
+    DESCRIPTION: "Steps that must execute in order"
+    TEMPLATE: |
+      PHASE_NAME:
+        STEPS:
+          - STEP_A: { DEPENDS_ON: [] }
+          - STEP_B: { DEPENDS_ON: [STEP_A] }
+          - STEP_C: { DEPENDS_ON: [STEP_B] }
+          
+  PARALLEL_PATTERN:
+    DESCRIPTION: "Steps that can execute concurrently"
+    TEMPLATE: |
+      PHASE_NAME:
+        PARALLEL_STEPS:
+          - STEP_A: { EXECUTION_TYPE: "CONCURRENT" }
+          - STEP_B: { EXECUTION_TYPE: "CONCURRENT" }
+        SYNCHRONIZATION_POINT: "Wait for all parallel steps"
+        
+  CONDITIONAL_PATTERN:
+    DESCRIPTION: "Steps that execute based on conditions"
+    TEMPLATE: |
+      CONDITIONAL_STEP:
+        CONDITION:
+          TYPE: "FILE_EXISTS|COMMAND_SUCCESS|CUSTOM"
+          TARGET: "${CONDITION_TARGET}"
+        THEN_STEPS:
+          - STEP_IF_TRUE
+        ELSE_STEPS:
+          - STEP_IF_FALSE
+          
+  RETRY_PATTERN:
+    DESCRIPTION: "Steps that may need multiple attempts"
+    TEMPLATE: |
+      RETRY_STEP:
+        MAX_ATTEMPTS: 3
+        RETRY_DELAY: 5
+        BACKOFF_MULTIPLIER: 2
+        STEP:
+          # Step definition here
+        RETRY_CONDITIONS:
+          - "Network timeout"
+          - "Temporary file lock"
+
+STEP_VALIDATION_RULES:
+  PURPOSE: "Rules for validating step specifications"
+  
+  COMPLETENESS_VALIDATION:
+    REQUIRED_SECTIONS:
+      ALL_STEPS: [STEP_TYPE, PURPOSE, INPUT_REQUIREMENTS, DELIVERABLES]
+      RESEARCH_STEPS: [EXECUTION_STEPS, ACCEPTANCE_CRITERIA]
+      PROCESSING_STEPS: [EXECUTION_STEPS, ACCEPTANCE_CRITERIA]
+      CREATION_STEPS: [EXECUTION_STEPS, ACCEPTANCE_CRITERIA, QUALITY_GATE]
+      VALIDATION_STEPS: [QUALITY_GATE]
+      EXECUTION_STEPS: [EXECUTION_STEPS, ACCEPTANCE_CRITERIA]
+      
+  CONSISTENCY_VALIDATION:
+    BEHAVIORAL_KEYWORDS: "Must use keywords from TERMINOLOGY_DEFINITIONS.yaml"
+    STEP_TYPES: "Must be one of the five defined categories"
+    SYNTAX_CONFORMANCE: "Must follow UNIVERSAL_STEP_TEMPLATE structure"
+    
+  VALIDATION_COMMANDS:
+    CHECK_STEP_COMPLETENESS:
+      COMMAND: |
+        grep -A 20 "STEP_TYPE:" ${FILE} | 
+        grep -c "PURPOSE:\\|INPUT_REQUIREMENTS:\\|DELIVERABLES:"
+      EXPECTED: "Count matches number of steps × 3"
+      
+    CHECK_KEYWORD_USAGE:
+      COMMAND: |
+        grep -E "ACCEPTANCE_CRITERIA|QUALITY_GATE|DELIVERABLE" ${FILE} |
+        grep -v "TERMINOLOGY_DEFINITIONS.yaml reference"
+      PURPOSE: "Ensure keywords are used correctly"
+
+STEP_LIBRARY_PATTERNS:
+  PURPOSE: "Reusable step patterns for common operations"
+  
+  COMPILATION_STEP_PATTERN:
+    STEP_TYPE: "EXECUTION"
+    TEMPLATE: |
+      COMPILE_${COMPONENT}:
+        STEP_TYPE: "EXECUTION"
+        PURPOSE: "Compile ${COMPONENT} component"
+        INPUT_REQUIREMENTS:
+          - "Source code exists at ${SOURCE_PATH}"
+          - "Build system configured (Maven/Gradle)"
+        EXECUTION_STEPS:
+          - ACTION: "Execute compilation"
+            COMMAND: "${BUILD_COMMAND}"
+            EXPECTED_OUTPUT: "BUILD SUCCESS message"
+        ACCEPTANCE_CRITERIA:
+          - CRITERION: "Compilation succeeds"
+            VALIDATION_COMMAND: "echo $?"
+            PASS_CONDITION: "Exit code 0"
+        DELIVERABLES:
+          - ARTIFACT: "Compiled classes"
+            LOCATION: "${OUTPUT_PATH}"
+            VALIDATION: "ls ${OUTPUT_PATH}/*.class | wc -l > 0"
+            
+  TEST_EXECUTION_PATTERN:
+    STEP_TYPE: "VALIDATION"
+    TEMPLATE: |
+      TEST_${COMPONENT}:
+        STEP_TYPE: "VALIDATION"
+        PURPOSE: "Execute tests for ${COMPONENT}"
+        INPUT_REQUIREMENTS:
+          - "Compiled code available"
+          - "Test framework configured"
+        QUALITY_GATE:
+          NAME: "test-execution-gate"
+          TYPE: "BLOCKING"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Tests failed - fix issues before proceeding"
+        DELIVERABLES:
+          - ARTIFACT: "Test results"
+            LOCATION: "${TEST_REPORT_PATH}"
+            VALIDATION: "grep -c 'Tests run:.*Failures: 0' ${TEST_REPORT_PATH}"
+            
+  FILE_GENERATION_PATTERN:
+    STEP_TYPE: "CREATION"
+    TEMPLATE: |
+      GENERATE_${FILE_TYPE}:
+        STEP_TYPE: "CREATION"
+        PURPOSE: "Generate ${FILE_TYPE} from template"
+        INPUT_REQUIREMENTS:
+          - "Template exists at ${TEMPLATE_PATH}"
+          - "Variables defined for substitution"
+        EXECUTION_STEPS:
+          - ACTION: "Generate file from template"
+            COMMAND: "Process template with variables"
+            EXPECTED_OUTPUT: "File created successfully"
+        ACCEPTANCE_CRITERIA:
+          - CRITERION: "Generated file is valid"
+            VALIDATION_COMMAND: "${VALIDATION_COMMAND}"
+            PASS_CONDITION: "Validation passes"
+        QUALITY_GATE:
+          NAME: "file-generation-gate"
+          TYPE: "BLOCKING"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "File generation failed"
+        DELIVERABLES:
+          - ARTIFACT: "Generated ${FILE_TYPE}"
+            LOCATION: "${OUTPUT_PATH}"
+            VALIDATION: "test -f ${OUTPUT_PATH} && ${CONTENT_VALIDATION}"
+
+STEP_OPTIMIZATION_GUIDELINES:
+  PURPOSE: "Guidelines for creating efficient, reliable steps"
+  
+  PERFORMANCE_OPTIMIZATION:
+    COMMAND_EFFICIENCY: "Use specific commands over generic ones"
+    PARALLEL_EXECUTION: "Identify steps that can run concurrently"
+    CACHING: "Cache expensive operations when possible"
+    INCREMENTAL_PROCESSING: "Process only changed components when possible"
+    
+  RELIABILITY_OPTIMIZATION:
+    ERROR_HANDLING: "Anticipate and handle common failure modes"
+    IDEMPOTENCY: "Steps should be safe to run multiple times"
+    VALIDATION: "Include validation at each critical point"
+    RECOVERY: "Provide clear recovery steps for failures"
+    
+  MAINTAINABILITY_OPTIMIZATION:
+    CLEAR_NAMING: "Use descriptive step and variable names"
+    DOCUMENTATION: "Include purpose and context for complex steps"
+    MODULARITY: "Break complex operations into smaller steps"
+    CONSISTENCY: "Follow established patterns and conventions"
+
+IMPORT_INTERFACE:
+  PURPOSE: "How other files should use these step specifications"
+  
+  STANDARD_IMPORT:
+    SYNTAX: |
+      IMPORTS:
+        - "core/STEP_SPECIFICATIONS.yaml"
+      REQUIRES:
+        - STEP_CLASSIFICATION
+        - UNIVERSAL_STEP_TEMPLATE
+        
+  USAGE_PATTERNS:
+    STEP_CREATION: "Use UNIVERSAL_STEP_TEMPLATE for all new steps"
+    CLASSIFICATION: "Classify each step using STEP_CATEGORIES"
+    VALIDATION: "Validate steps against STEP_VALIDATION_RULES"
+    
+  EXTENSION_POINTS:
+    CUSTOM_PATTERNS: "Domain-specific libraries can extend STEP_LIBRARY_PATTERNS"
+    VALIDATION_RULES: "Libraries can add domain-specific validation rules"
+    OPTIMIZATION: "Libraries can provide domain-specific optimization guidelines"

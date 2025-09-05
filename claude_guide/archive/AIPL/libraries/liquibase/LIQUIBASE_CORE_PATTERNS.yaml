@@ -1,0 +1,313 @@
+LIBRARY_NAME: "liquibase-core-patterns"
+LIBRARY_VERSION: "1.0"
+DESCRIPTION: "Core Liquibase implementation patterns and architectural compliance"
+
+PROVIDES:
+  VALIDATION_TYPES:
+    ARCHITECTURAL_COMPLIANCE:
+      PURPOSE: "Validate Liquibase architectural patterns"
+      IMPLEMENTATION: |
+        ARCHITECTURAL_COMPLIANCE:
+          NAME: "${VALIDATION_NAME}"
+          VIOLATION_PATTERNS:
+            CHANGETYPE_SNOWFLAKE_CLASSES:
+              PATTERN: "*ChangeSnowflake.java"
+              SEARCH_PATH: "*/change/core/*"
+              VIOLATION_TYPE: "FORBIDDEN_CLASS_NAMING"
+              ERROR_MESSAGE: "ChangeSnowflake classes forbidden for existing changetypes"
+            DIRECT_CORE_MODIFICATION:
+              PATTERN: "Modified liquibase-core classes"
+              SEARCH_PATH: "*/liquibase-core/*"
+              VIOLATION_TYPE: "CORE_MODIFICATION"
+              ERROR_MESSAGE: "Direct modification of Liquibase core classes forbidden"
+          COMPLIANCE_CHECKS:
+            - VALIDATE:
+                NAME: "check-no-changetype-snowflake-violations"
+                TYPE: "COMMAND_SUCCESS"
+                COMMAND: "find . -name '*ChangeSnowflake.java' -path '*/change/core/*' | wc -l | grep '^0$'"
+                FAILURE_ACTION: "STOP"
+                ERROR_MESSAGE: "Architectural violation: ChangeSnowflake classes found in change/core"
+
+    SERVICE_REGISTRATION_COMPLETE:
+      PURPOSE: "Validate complete Liquibase service registration"
+      IMPLEMENTATION: |
+        SERVICE_REGISTRATION_COMPLETE:
+          NAME: "${VALIDATION_NAME}"
+          SERVICE_INVENTORY:
+            NAMESPACE_DETAILS:
+              FILE: "src/main/resources/META-INF/services/liquibase.parser.NamespaceDetails"
+              PURPOSE: "Maps XML namespace to XSD schema file"
+              REQUIRED_CONTENT: "${PACKAGE_BASE}.parser.${DATABASE}NamespaceDetails"
+            CHANGE_TYPES:
+              FILE: "src/main/resources/META-INF/services/liquibase.change.Change"
+              PURPOSE: "Registers database-specific change types"
+              REQUIRED_CONTENT: "${PACKAGE_BASE}.change.Create${OBJECT_TYPE}Change"
+            DATABASE_INTEGRATION:
+              FILE: "src/main/resources/META-INF/services/liquibase.database.Database"
+              PURPOSE: "Registers database class for connection recognition"
+              REQUIRED_CONTENT: "${PACKAGE_BASE}.database.${DATABASE}Database"
+            DATA_TYPE_MAPPINGS:
+              FILE: "src/main/resources/META-INF/services/liquibase.datatype.LiquibaseDataType"
+              PURPOSE: "Registers database-specific data type mappings"
+              REQUIRED_CONTENT: "${PACKAGE_BASE}.datatype.${TYPE}Type${DATABASE}"
+            SQL_GENERATORS:
+              FILE: "src/main/resources/META-INF/services/liquibase.sqlgenerator.SqlGenerator"
+              PURPOSE: "Registers SQL generators for database-specific syntax"
+              REQUIRED_CONTENT: "${PACKAGE_BASE}.sqlgenerator.${OBJECT_TYPE}Generator"
+            DATABASE_OBJECTS:
+              FILE: "src/main/resources/META-INF/services/liquibase.structure.DatabaseObject"
+              PURPOSE: "CRITICAL - Registers custom objects for snapshot inclusion"
+              REQUIRED_CONTENT: "${PACKAGE_BASE}.structure.${OBJECT_TYPE}"
+          VALIDATION_STEPS:
+            - VALIDATE:
+                NAME: "check-all-service-files-exist"
+                TYPE: "COMMAND_SUCCESS"
+                COMMAND: "ls src/main/resources/META-INF/services/liquibase.*.* | wc -l | awk '$1>=6'"
+                FAILURE_ACTION: "STOP"
+                ERROR_MESSAGE: "Missing service registration files - require all 6 service types"
+
+    GENERATOR_PRIORITY_COMPLIANCE:
+      PURPOSE: "Validate SQL generator priority and selection"
+      IMPLEMENTATION: |
+        GENERATOR_PRIORITY_COMPLIANCE:
+          NAME: "${VALIDATION_NAME}"
+          GENERATOR_CLASS: "${GENERATOR_CLASS}"
+          EXPECTED_PRIORITY: "${PRIORITY_LEVEL}"
+          VALIDATION_STEPS:
+            - VALIDATE:
+                NAME: "verify-priority-correct"
+                TYPE: "CONTAINS_TEXT"
+                TARGET: "${GENERATOR_FILE}"
+                PATTERN: "return PRIORITY_${EXPECTED_PRIORITY}"
+                FAILURE_ACTION: "STOP"
+                ERROR_MESSAGE: "Generator priority mismatch: expected PRIORITY_${EXPECTED_PRIORITY}"
+            - VALIDATE:
+                NAME: "verify-supports-method"
+                TYPE: "CONTAINS_TEXT"
+                TARGET: "${GENERATOR_FILE}"
+                PATTERN: "instanceof ${DATABASE}Database"
+                FAILURE_ACTION: "STOP"
+                ERROR_MESSAGE: "Generator must check for ${DATABASE}Database instance"
+
+  STEP_TYPES:
+    LIQUIBASE_COMPILE_AND_VALIDATE:
+      PURPOSE: "Compile Liquibase project with validation"
+      IMPLEMENTATION: |
+        LIQUIBASE_COMPILE_AND_VALIDATE:
+          NAME: "${STEP_NAME}"
+          STEPS:
+            - COMMAND:
+                NAME: "compile-project"
+                EXECUTE: "mvn compile"
+            - VALIDATE:
+                NAME: "verify-compilation-success"
+                TYPE: "COMMAND_SUCCESS"
+                COMMAND: "mvn compile"
+                FAILURE_ACTION: "STOP"
+                ERROR_MESSAGE: "Liquibase project compilation failed"
+
+    SERVICE_DISCOVERY_VALIDATE:
+      PURPOSE: "Comprehensive service registration validation"
+      IMPLEMENTATION: |
+        SERVICE_DISCOVERY_VALIDATE:
+          NAME: "${STEP_NAME}"
+          STEPS:
+            - LOOP:
+                NAME: "validate-each-service-type"
+                ITERATE_OVER:
+                  TYPE: "LIST"
+                  VALUES: ["NamespaceDetails", "Change", "Database", "LiquibaseDataType", "SqlGenerator", "DatabaseObject"]
+                VARIABLE: "service_type"
+                STEPS:
+                  - VALIDATE:
+                      NAME: "verify-${service_type}-registration"
+                      TYPE: "FILE_EXISTS"
+                      TARGET: "src/main/resources/META-INF/services/liquibase.${service_type}"
+                      FAILURE_ACTION: "STOP"
+                      ERROR_MESSAGE: "Missing service registration: liquibase.${service_type}"
+
+  TEMPLATES:
+    LIQUIBASE_GENERATOR_TEMPLATE: |
+      package ${PACKAGE_BASE}.sqlgenerator;
+      
+      import liquibase.database.Database;
+      import liquibase.database.core.${DATABASE}Database;
+      import liquibase.sql.Sql;
+      import liquibase.sql.UnparsedSql;
+      import liquibase.sqlgenerator.SqlGeneratorChain;
+      import liquibase.sqlgenerator.core.AbstractSqlGenerator;
+      import liquibase.statement.core.${CHANGETYPE}Statement;
+      
+      public class ${CHANGETYPE}Generator${DATABASE} extends AbstractSqlGenerator<${CHANGETYPE}Statement> {
+          
+          @Override
+          public int getPriority() {
+              return PRIORITY_${PRIORITY_LEVEL};
+          }
+          
+          @Override
+          public boolean supports(${CHANGETYPE}Statement statement, Database database) {
+              return database instanceof ${DATABASE}Database;
+          }
+          
+          @Override
+          public Sql[] generateSql(${CHANGETYPE}Statement statement, Database database, SqlGeneratorChain chain) {
+              StringBuilder sql = new StringBuilder();
+              sql.append("${SQL_PREFIX} ");
+              sql.append(database.escapeObjectName(statement.get${OBJECT_TYPE}Name(), null));
+              
+              ${ADDITIONAL_SQL_LOGIC}
+              
+              return new Sql[]{new UnparsedSql(sql.toString())};
+          }
+      }
+
+    LIQUIBASE_CHANGE_CLASS_TEMPLATE: |
+      package ${PACKAGE_BASE}.change;
+      
+      import liquibase.change.AbstractChange;
+      import liquibase.change.DatabaseChange;
+      import liquibase.change.ChangeMetaData;
+      import liquibase.database.Database;
+      import liquibase.statement.SqlStatement;
+      import liquibase.statement.core.${CHANGETYPE}Statement;
+      
+      @DatabaseChange(name="${CHANGETYPE_LOWERCASE}", description = "${DESCRIPTION}", priority = ChangeMetaData.PRIORITY_DEFAULT)
+      public class ${CHANGETYPE}Change extends AbstractChange {
+          
+          private String ${OBJECT_TYPE_LOWERCASE}Name;
+          ${ADDITIONAL_PROPERTIES}
+          
+          @Override
+          public String getConfirmationMessage() {
+              return "${CHANGETYPE} " + ${OBJECT_TYPE_LOWERCASE}Name + " created";
+          }
+          
+          @Override
+          public SqlStatement[] generateStatements(Database database) {
+              ${CHANGETYPE}Statement statement = new ${CHANGETYPE}Statement();
+              statement.set${OBJECT_TYPE}Name(${OBJECT_TYPE_LOWERCASE}Name);
+              ${SET_ADDITIONAL_PROPERTIES}
+              return new SqlStatement[]{statement};
+          }
+          
+          // Getters and setters
+          public String get${OBJECT_TYPE}Name() { return ${OBJECT_TYPE_LOWERCASE}Name; }
+          public void set${OBJECT_TYPE}Name(String ${OBJECT_TYPE_LOWERCASE}Name) { this.${OBJECT_TYPE_LOWERCASE}Name = ${OBJECT_TYPE_LOWERCASE}Name; }
+          ${ADDITIONAL_GETTERS_SETTERS}
+      }
+
+    LIQUIBASE_STATEMENT_TEMPLATE: |
+      package ${PACKAGE_BASE}.statement;
+      
+      import liquibase.statement.AbstractSqlStatement;
+      
+      public class ${CHANGETYPE}Statement extends AbstractSqlStatement {
+          
+          private String ${OBJECT_TYPE_LOWERCASE}Name;
+          ${ADDITIONAL_PROPERTIES}
+          
+          public ${CHANGETYPE}Statement() {}
+          
+          public ${CHANGETYPE}Statement(String ${OBJECT_TYPE_LOWERCASE}Name) {
+              this.${OBJECT_TYPE_LOWERCASE}Name = ${OBJECT_TYPE_LOWERCASE}Name;
+          }
+          
+          // Getters and setters
+          public String get${OBJECT_TYPE}Name() { return ${OBJECT_TYPE_LOWERCASE}Name; }
+          public void set${OBJECT_TYPE}Name(String ${OBJECT_TYPE_LOWERCASE}Name) { this.${OBJECT_TYPE_LOWERCASE}Name = ${OBJECT_TYPE_LOWERCASE}Name; }
+          ${ADDITIONAL_GETTERS_SETTERS}
+      }
+
+    LIQUIBASE_UNIT_TEST_TEMPLATE: |
+      package ${PACKAGE_BASE}.sqlgenerator;
+      
+      import liquibase.database.core.${DATABASE}Database;
+      import liquibase.sql.Sql;
+      import liquibase.statement.core.${CHANGETYPE}Statement;
+      import org.junit.jupiter.api.Test;
+      import static org.junit.jupiter.api.Assertions.*;
+      
+      public class ${CHANGETYPE}Generator${DATABASE}Test {
+          
+          @Test
+          public void testSupports() {
+              ${CHANGETYPE}Generator${DATABASE} generator = new ${CHANGETYPE}Generator${DATABASE}();
+              ${CHANGETYPE}Statement statement = new ${CHANGETYPE}Statement();
+              ${DATABASE}Database database = new ${DATABASE}Database();
+              
+              assertTrue(generator.supports(statement, database));
+          }
+          
+          @Test
+          public void testGenerateSql() {
+              ${CHANGETYPE}Generator${DATABASE} generator = new ${CHANGETYPE}Generator${DATABASE}();
+              ${CHANGETYPE}Statement statement = new ${CHANGETYPE}Statement();
+              statement.set${OBJECT_TYPE}Name("TEST_${OBJECT_TYPE}");
+              ${DATABASE}Database database = new ${DATABASE}Database();
+              
+              Sql[] sql = generator.generateSql(statement, database, null);
+              
+              assertNotNull(sql);
+              assertEquals(1, sql.length);
+              assertTrue(sql[0].toSql().contains("${SQL_PREFIX} TEST_${OBJECT_TYPE}"));
+          }
+          
+          ${ADDITIONAL_TEST_METHODS}
+      }
+
+    SERVICE_REGISTRATION_TEMPLATE: |
+      ${PACKAGE_BASE}.sqlgenerator.${CHANGETYPE}Generator${DATABASE}
+
+  PATTERNS:
+    ARCHITECTURAL_DECISION_PATTERN:
+      PURPOSE: "Determine correct implementation pattern for Liquibase extensions"
+      STEPS:
+        - CAPTURE:
+            NAME: "check-core-changetype-exists"
+            COMMAND: "find . -name '*${CHANGETYPE}*Change*.java' -path '*/liquibase-core/*'"
+            STORE_AS: "CORE_CHANGETYPE_EXISTS"
+        - CONDITIONAL:
+            NAME: "determine-implementation-pattern"
+            CONDITION:
+              TYPE: "NOT_EQUALS"
+              LEFT: "${CORE_CHANGETYPE_EXISTS}"
+              RIGHT: ""
+            THEN:
+              - CAPTURE:
+                  COMMAND: "echo 'NAMESPACE_ATTRIBUTE_EXTENSION'"
+                  STORE_AS: "IMPLEMENTATION_PATTERN"
+            ELSE:
+              - CAPTURE:
+                  COMMAND: "echo 'NEW_CHANGETYPE_CREATION'"
+                  STORE_AS: "IMPLEMENTATION_PATTERN"
+        - VALIDATE:
+            NAME: "check-no-architectural-violations"
+            TYPE: "ARCHITECTURAL_COMPLIANCE"
+            FAILURE_ACTION: "STOP"
+
+    LIQUIBASE_BUILD_AND_TEST_PATTERN:
+      PURPOSE: "Standard Liquibase build and test cycle"
+      STEPS:
+        - LIQUIBASE_COMPILE_AND_VALIDATE:
+            NAME: "compile-and-validate"
+        - COMMAND:
+            NAME: "run-unit-tests"
+            EXECUTE: "mvn test -Dtest='*${COMPONENT}*Test'"
+        - COMMAND:
+            NAME: "package-build"
+            EXECUTE: "mvn package -DskipTests"
+        - VALIDATE:
+            NAME: "verify-service-registration"
+            TYPE: "SERVICE_REGISTRATION_COMPLETE"
+
+COMMON_VARIABLES:
+  PACKAGE_BASE: "com.liquibase.ext"
+  PRIORITY_LEVEL: "10"
+  DATABASE: "Generic"
+  
+USAGE_NOTES:
+  IMPORT_INSTRUCTION: "Import this library to access Liquibase-specific patterns and validations"
+  TEMPLATE_USAGE: "Use LIQUIBASE_GENERATOR_TEMPLATE for standard SQL generator implementation"
+  VALIDATION_USAGE: "Use ARCHITECTURAL_COMPLIANCE validation to enforce Liquibase patterns"
+  PATTERN_USAGE: "Use ARCHITECTURAL_DECISION_PATTERN to determine correct implementation approach"

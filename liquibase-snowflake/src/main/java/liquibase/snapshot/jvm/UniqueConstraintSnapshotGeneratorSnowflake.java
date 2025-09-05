@@ -24,7 +24,7 @@ public class UniqueConstraintSnapshotGeneratorSnowflake extends UniqueConstraint
 
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
-        if (database instanceof SnowflakeDatabase) {
+        if (database instanceof SnowflakeDatabase && UniqueConstraint.class.isAssignableFrom(objectType)) {
             return PRIORITY_DATABASE;
         } else {
             return PRIORITY_NONE;

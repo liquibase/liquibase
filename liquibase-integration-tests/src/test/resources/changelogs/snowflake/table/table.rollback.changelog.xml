@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.33.xsd">
+
+    <!-- Test Rollback Scenarios for Tables -->
+    
+    <!-- Create table that can be rolled back -->
+    <changeSet author="liquibase-test" id="rollback-table-1">
+        <createTable tableName="LB_ROLLBACK_TEST_TABLE">
+            <column name="id" type="INTEGER">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)"/>
+            <column name="created_date" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+        <rollback>
+            <dropTable tableName="LB_ROLLBACK_TEST_TABLE"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Add clustering to table -->
+    <changeSet author="liquibase-test" id="rollback-table-2">
+        <sql>
+            ALTER TABLE LB_ROLLBACK_TEST_TABLE 
+            ADD COLUMN category VARCHAR(50)
+        </sql>
+        <sql>
+            ALTER TABLE LB_ROLLBACK_TEST_TABLE 
+            CLUSTER BY (category)
+        </sql>
+        <rollback>
+            <sql>
+                ALTER TABLE LB_ROLLBACK_TEST_TABLE 
+                DROP CLUSTER KEY
+            </sql>
+            <dropColumn tableName="LB_ROLLBACK_TEST_TABLE" columnName="category"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Set data retention on table -->
+    <changeSet author="liquibase-test" id="rollback-table-3">
+        <sql>
+            ALTER TABLE LB_ROLLBACK_TEST_TABLE 
+            SET DATA_RETENTION_TIME_IN_DAYS = 21
+        </sql>
+        <rollback>
+            <sql>
+                ALTER TABLE LB_ROLLBACK_TEST_TABLE 
+                UNSET DATA_RETENTION_TIME_IN_DAYS
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Add comment to table -->
+    <changeSet author="liquibase-test" id="rollback-table-4">
+        <sql>
+            ALTER TABLE LB_ROLLBACK_TEST_TABLE 
+            SET COMMENT = 'Modified for rollback test'
+        </sql>
+        <rollback>
+            <sql>
+                ALTER TABLE LB_ROLLBACK_TEST_TABLE 
+                UNSET COMMENT
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Add change tracking to table -->
+    <changeSet author="liquibase-test" id="rollback-table-5">
+        <sql>
+            ALTER TABLE LB_ROLLBACK_TEST_TABLE 
+            SET CHANGE_TRACKING = TRUE
+        </sql>
+        <rollback>
+            <sql>
+                ALTER TABLE LB_ROLLBACK_TEST_TABLE 
+                SET CHANGE_TRACKING = FALSE
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Insert test data -->
+    <changeSet author="liquibase-test" id="rollback-table-6">
+        <insert tableName="LB_ROLLBACK_TEST_TABLE">
+            <column name="id" value="1"/>
+            <column name="name" value="Test Record 1"/>
+            <column name="category" value="CAT1"/>
+        </insert>
+        <insert tableName="LB_ROLLBACK_TEST_TABLE">
+            <column name="id" value="2"/>
+            <column name="name" value="Test Record 2"/>
+            <column name="category" value="CAT2"/>
+        </insert>
+        <rollback>
+            <delete tableName="LB_ROLLBACK_TEST_TABLE">
+                <where>id IN (1, 2)</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+    <!-- Add index to table -->
+    <changeSet author="liquibase-test" id="rollback-table-7">
+        <createIndex tableName="LB_ROLLBACK_TEST_TABLE" indexName="idx_rollback_test_name">
+            <column name="name"/>
+        </createIndex>
+        <rollback>
+            <dropIndex tableName="LB_ROLLBACK_TEST_TABLE" indexName="idx_rollback_test_name"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Test tag for rollback point -->
+    <changeSet author="liquibase-test" id="rollback-tag">
+        <tagDatabase tag="before-table-drop"/>
+    </changeSet>
+
+    <!-- Drop table - this should be rollback-able -->
+    <changeSet author="liquibase-test" id="rollback-table-drop">
+        <dropTable tableName="LB_ROLLBACK_TEST_TABLE"/>
+        <rollback>
+            <!-- Recreate the table as it was -->
+            <createTable tableName="LB_ROLLBACK_TEST_TABLE">
+                <column name="id" type="INTEGER">
+                    <constraints primaryKey="true" nullable="false"/>
+                </column>
+                <column name="name" type="VARCHAR(100)"/>
+                <column name="created_date" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+                <column name="category" type="VARCHAR(50)"/>
+            </createTable>
+            <sql>
+                ALTER TABLE LB_ROLLBACK_TEST_TABLE 
+                CLUSTER BY (category)
+            </sql>
+            <sql>
+                ALTER TABLE LB_ROLLBACK_TEST_TABLE 
+                SET DATA_RETENTION_TIME_IN_DAYS = 21
+            </sql>
+            <sql>
+                ALTER TABLE LB_ROLLBACK_TEST_TABLE 
+                SET COMMENT = 'Modified for rollback test'
+            </sql>
+            <sql>
+                ALTER TABLE LB_ROLLBACK_TEST_TABLE 
+                SET CHANGE_TRACKING = TRUE
+            </sql>
+            <insert tableName="LB_ROLLBACK_TEST_TABLE">
+                <column name="id" value="1"/>
+                <column name="name" value="Test Record 1"/>
+                <column name="category" value="CAT1"/>
+            </insert>
+            <insert tableName="LB_ROLLBACK_TEST_TABLE">
+                <column name="id" value="2"/>
+                <column name="name" value="Test Record 2"/>
+                <column name="category" value="CAT2"/>
+            </insert>
+            <createIndex tableName="LB_ROLLBACK_TEST_TABLE" indexName="idx_rollback_test_name">
+                <column name="name"/>
+            </createIndex>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

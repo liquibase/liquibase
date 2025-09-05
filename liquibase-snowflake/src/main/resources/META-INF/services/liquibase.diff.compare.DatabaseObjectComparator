@@ -1,0 +1,8 @@
+liquibase.diff.output.AccountComparator
+liquibase.diff.output.DatabaseComparator
+liquibase.diff.output.FileFormatComparator
+liquibase.diff.output.SchemaComparator
+liquibase.diff.output.SequenceComparatorSnowflake
+liquibase.diff.output.StageComparator
+liquibase.diff.output.TableComparatorSnowflake
+liquibase.diff.output.WarehouseComparator

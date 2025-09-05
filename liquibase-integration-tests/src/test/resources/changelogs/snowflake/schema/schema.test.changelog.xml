@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.33.xsd">
+
+    <!-- Test Basic Schema Creation -->
+    <changeSet author="liquibase-test" id="schema-1">
+        <sql>CREATE SCHEMA LB_TEST_SCHEMA_BASIC</sql>
+        <rollback>
+            <sql>DROP SCHEMA IF EXISTS LB_TEST_SCHEMA_BASIC</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Schema with Comment -->
+    <changeSet author="liquibase-test" id="schema-2">
+        <sql>
+            CREATE SCHEMA LB_TEST_SCHEMA_COMMENT 
+            COMMENT = 'Basic test schema with comment'
+        </sql>
+        <rollback>
+            <sql>DROP SCHEMA IF EXISTS LB_TEST_SCHEMA_COMMENT</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Transient Schema -->
+    <changeSet author="liquibase-test" id="schema-3">
+        <sql>
+            CREATE TRANSIENT SCHEMA LB_TEST_SCHEMA_TRANSIENT
+            COMMENT = 'Transient test schema'
+        </sql>
+        <rollback>
+            <sql>DROP SCHEMA IF EXISTS LB_TEST_SCHEMA_TRANSIENT</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Schema with Managed Access -->
+    <changeSet author="liquibase-test" id="schema-4">
+        <sql>
+            CREATE SCHEMA LB_TEST_SCHEMA_MANAGED 
+            WITH MANAGED ACCESS
+            COMMENT = 'Managed access test schema'
+        </sql>
+        <rollback>
+            <sql>DROP SCHEMA IF EXISTS LB_TEST_SCHEMA_MANAGED</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Schema with Data Retention -->
+    <changeSet author="liquibase-test" id="schema-5">
+        <sql>
+            CREATE SCHEMA LB_TEST_SCHEMA_RETENTION 
+            DATA_RETENTION_TIME_IN_DAYS = 7
+            COMMENT = 'Schema with 7 day retention'
+        </sql>
+        <rollback>
+            <sql>DROP SCHEMA IF EXISTS LB_TEST_SCHEMA_RETENTION</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Schema with All Features -->
+    <changeSet author="liquibase-test" id="schema-6">
+        <sql>
+            CREATE TRANSIENT SCHEMA LB_TEST_SCHEMA_FULL 
+            WITH MANAGED ACCESS
+            DATA_RETENTION_TIME_IN_DAYS = 14
+            COMMENT = 'Full featured test schema'
+        </sql>
+        <rollback>
+            <sql>DROP SCHEMA IF EXISTS LB_TEST_SCHEMA_FULL</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Schema Alteration -->
+    <changeSet author="liquibase-test" id="schema-7">
+        <sql>
+            ALTER SCHEMA LB_TEST_SCHEMA_BASIC 
+            SET COMMENT = 'Updated basic schema comment'
+        </sql>
+        <rollback>
+            <sql>
+                ALTER SCHEMA LB_TEST_SCHEMA_BASIC 
+                UNSET COMMENT
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Schema Data Retention Update -->
+    <changeSet author="liquibase-test" id="schema-8">
+        <sql>
+            ALTER SCHEMA LB_TEST_SCHEMA_RETENTION 
+            SET DATA_RETENTION_TIME_IN_DAYS = 21
+        </sql>
+        <rollback>
+            <sql>
+                ALTER SCHEMA LB_TEST_SCHEMA_RETENTION 
+                SET DATA_RETENTION_TIME_IN_DAYS = 7
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Schema with Objects -->
+    <changeSet author="liquibase-test" id="schema-9">
+        <sql>
+            CREATE TABLE LB_TEST_SCHEMA_BASIC.test_table (
+                id INTEGER,
+                name VARCHAR(100),
+                created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        </sql>
+        <sql>
+            CREATE SEQUENCE LB_TEST_SCHEMA_BASIC.test_sequence 
+            START = 1 INCREMENT = 1
+        </sql>
+        <rollback>
+            <sql>DROP SEQUENCE IF EXISTS LB_TEST_SCHEMA_BASIC.test_sequence</sql>
+            <sql>DROP TABLE IF EXISTS LB_TEST_SCHEMA_BASIC.test_table</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Schema Rename -->
+    <changeSet author="liquibase-test" id="schema-10">
+        <sql>
+            CREATE SCHEMA LB_TEST_SCHEMA_RENAME_SOURCE
+            COMMENT = 'Schema to be renamed'
+        </sql>
+        <sql>
+            ALTER SCHEMA LB_TEST_SCHEMA_RENAME_SOURCE 
+            RENAME TO LB_TEST_SCHEMA_RENAME_TARGET
+        </sql>
+        <rollback>
+            <sql>
+                ALTER SCHEMA LB_TEST_SCHEMA_RENAME_TARGET 
+                RENAME TO LB_TEST_SCHEMA_RENAME_SOURCE
+            </sql>
+            <sql>DROP SCHEMA IF EXISTS LB_TEST_SCHEMA_RENAME_SOURCE</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Cross-Schema Operations -->
+    <changeSet author="liquibase-test" id="schema-11">
+        <sql>
+            CREATE SCHEMA LB_TEST_SCHEMA_CROSS_A
+        </sql>
+        <sql>
+            CREATE SCHEMA LB_TEST_SCHEMA_CROSS_B
+        </sql>
+        <sql>
+            CREATE TABLE LB_TEST_SCHEMA_CROSS_A.source_table (
+                id INTEGER,
+                data VARCHAR(100)
+            )
+        </sql>
+        <sql>
+            CREATE VIEW LB_TEST_SCHEMA_CROSS_B.cross_view AS 
+            SELECT * FROM LB_TEST_SCHEMA_CROSS_A.source_table
+        </sql>
+        <rollback>
+            <sql>DROP VIEW IF EXISTS LB_TEST_SCHEMA_CROSS_B.cross_view</sql>
+            <sql>DROP TABLE IF EXISTS LB_TEST_SCHEMA_CROSS_A.source_table</sql>
+            <sql>DROP SCHEMA IF EXISTS LB_TEST_SCHEMA_CROSS_B</sql>
+            <sql>DROP SCHEMA IF EXISTS LB_TEST_SCHEMA_CROSS_A</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Schema Cleanup -->
+    <changeSet author="liquibase-test" id="schema-cleanup">
+        <sql>DROP SCHEMA IF EXISTS LB_TEST_SCHEMA_BASIC CASCADE</sql>
+        <sql>DROP SCHEMA IF EXISTS LB_TEST_SCHEMA_COMMENT</sql>
+        <sql>DROP SCHEMA IF EXISTS LB_TEST_SCHEMA_TRANSIENT</sql>
+        <sql>DROP SCHEMA IF EXISTS LB_TEST_SCHEMA_MANAGED</sql>
+        <sql>DROP SCHEMA IF EXISTS LB_TEST_SCHEMA_RETENTION</sql>
+        <sql>DROP SCHEMA IF EXISTS LB_TEST_SCHEMA_FULL</sql>
+        <sql>DROP SCHEMA IF EXISTS LB_TEST_SCHEMA_RENAME_TARGET</sql>
+        <sql>DROP SCHEMA IF EXISTS LB_TEST_SCHEMA_CROSS_A CASCADE</sql>
+        <sql>DROP SCHEMA IF EXISTS LB_TEST_SCHEMA_CROSS_B CASCADE</sql>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,10 @@
+# Unified Extension Object Framework (NEW)
+# Using simple version for testing
+liquibase.diff.SnowflakeExtensionDiffGeneratorSimple
+
+# Full unified framework (has compilation issues, for future use)
+# liquibase.diff.SnowflakeExtensionDiffGenerator
+
+# Legacy generators (will be phased out)
+# liquibase.diff.AccountLevelDiffGenerator
+liquibase.diff.FileFormatDiffGenerator

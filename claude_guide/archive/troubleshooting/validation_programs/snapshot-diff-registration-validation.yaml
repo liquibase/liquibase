@@ -1,0 +1,366 @@
+AIPL_VERSION: "1.0"
+PROGRAM_NAME: "snapshot-diff-registration-validation"
+DESCRIPTION: "Specialized service registration validation for snapshot and diff components"
+
+VARIABLES:
+  EXTENSION_PATH: "${LIQUIBASE_EXTENSION_ROOT}"
+  OBJECT_TYPE: "${OBJECT_TYPE}"
+  PACKAGE_BASE: "${PACKAGE_BASE}"
+  SNAPSHOT_GENERATOR_CLASS: "${SNAPSHOT_GENERATOR_CLASS}"
+  COMPARATOR_CLASS: "${COMPARATOR_CLASS}"
+  DATABASE_OBJECT_CLASS: "${DATABASE_OBJECT_CLASS}"
+
+PHASES:
+  VALIDATE_SNAPSHOT_DIFF_SERVICES:
+    DESCRIPTION: "Verify snapshot and diff specific service registrations"
+    STEPS:
+      - VALIDATE:
+          NAME: "snapshot-generator-service-exists"
+          TYPE: "FILE_EXISTS"
+          TARGET: "${EXTENSION_PATH}/src/main/resources/META-INF/services/liquibase.snapshot.SnapshotGenerator"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "SnapshotGenerator service file missing - critical for object discovery"
+          
+      - VALIDATE:
+          NAME: "diff-comparator-service-exists"
+          TYPE: "FILE_EXISTS"
+          TARGET: "${EXTENSION_PATH}/src/main/resources/META-INF/services/liquibase.diff.output.DatabaseObjectComparator"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "DatabaseObjectComparator service file missing - critical for diff functionality"
+          
+      - VALIDATE:
+          NAME: "database-object-service-exists"
+          TYPE: "FILE_EXISTS"
+          TARGET: "${EXTENSION_PATH}/src/main/resources/META-INF/services/liquibase.structure.DatabaseObject"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "DatabaseObject service file missing - objects will not appear in snapshots"
+
+  VALIDATE_SNAPSHOT_GENERATOR_REGISTRATION:
+    DESCRIPTION: "Verify snapshot generator is properly registered"
+    STEPS:
+      - COMMAND:
+          NAME: "list-snapshot-generators"
+          EXECUTE: "cat ${EXTENSION_PATH}/src/main/resources/META-INF/services/liquibase.snapshot.SnapshotGenerator"
+          
+      - VALIDATE:
+          NAME: "snapshot-generator-registered"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/resources/META-INF/services/liquibase.snapshot.SnapshotGenerator"
+          PATTERN: "${SNAPSHOT_GENERATOR_CLASS}"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "SnapshotGenerator class not registered in service file"
+          
+      - COMMAND:
+          NAME: "verify-snapshot-generator-class-exists"
+          EXECUTE: "find ${EXTENSION_PATH} -name '*${OBJECT_TYPE}*SnapshotGenerator*.java'"
+          
+      - VALIDATE:
+          NAME: "snapshot-generator-class-exists"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "find ${EXTENSION_PATH} -name '*${OBJECT_TYPE}*SnapshotGenerator*.java' | grep -q ."
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "SnapshotGenerator class file not found"
+
+  VALIDATE_DIFF_COMPARATOR_REGISTRATION:
+    DESCRIPTION: "Verify diff comparator is properly registered"
+    STEPS:
+      - COMMAND:
+          NAME: "list-diff-comparators"
+          EXECUTE: "cat ${EXTENSION_PATH}/src/main/resources/META-INF/services/liquibase.diff.output.DatabaseObjectComparator"
+          
+      - VALIDATE:
+          NAME: "diff-comparator-registered"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/resources/META-INF/services/liquibase.diff.output.DatabaseObjectComparator"
+          PATTERN: "${COMPARATOR_CLASS}"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "DatabaseObjectComparator class not registered in service file"
+          
+      - COMMAND:
+          NAME: "verify-comparator-class-exists"
+          EXECUTE: "find ${EXTENSION_PATH} -name '*${OBJECT_TYPE}*Comparator*.java'"
+          
+      - VALIDATE:
+          NAME: "comparator-class-exists"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "find ${EXTENSION_PATH} -name '*${OBJECT_TYPE}*Comparator*.java' | grep -q ."
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "DatabaseObjectComparator class file not found"
+
+  VALIDATE_DATABASE_OBJECT_REGISTRATION:
+    DESCRIPTION: "Critical validation for snapshot inclusion"
+    STEPS:
+      - COMMAND:
+          NAME: "list-database-objects"
+          EXECUTE: "cat ${EXTENSION_PATH}/src/main/resources/META-INF/services/liquibase.structure.DatabaseObject"
+          
+      - VALIDATE:
+          NAME: "database-object-registered"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/resources/META-INF/services/liquibase.structure.DatabaseObject"
+          PATTERN: "${DATABASE_OBJECT_CLASS}"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "DatabaseObject class not registered - object will not appear in snapshots"
+          
+      - COMMAND:
+          NAME: "verify-database-object-class-exists"
+          EXECUTE: "find ${EXTENSION_PATH} -name '*${OBJECT_TYPE}.java' -path '*/structure/*'"
+          
+      - VALIDATE:
+          NAME: "database-object-class-exists"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "find ${EXTENSION_PATH} -name '*${OBJECT_TYPE}.java' -path '*/structure/*' | grep -q ."
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "DatabaseObject class file not found in structure package"
+
+  VALIDATE_CLASS_IMPLEMENTATIONS:
+    DESCRIPTION: "Verify registered classes implement required interfaces and methods"
+    STEPS:
+      - VALIDATE:
+          NAME: "snapshot-generator-extends-base"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/java/**/snapshot/*${OBJECT_TYPE}*SnapshotGenerator*.java"
+          PATTERN: "extends SnapshotGenerator"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "SnapshotGenerator must extend SnapshotGenerator base class"
+          
+      - VALIDATE:
+          NAME: "snapshot-generator-has-snapshot-method"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/java/**/snapshot/*${OBJECT_TYPE}*SnapshotGenerator*.java"
+          PATTERN: "snapshotObject"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "SnapshotGenerator must implement snapshotObject method"
+          
+      - VALIDATE:
+          NAME: "comparator-extends-base"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/java/**/diff/*${OBJECT_TYPE}*Comparator*.java"
+          PATTERN: "extends DatabaseObjectComparator"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Comparator must extend DatabaseObjectComparator base class"
+          
+      - VALIDATE:
+          NAME: "comparator-has-compare-method"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/java/**/diff/*${OBJECT_TYPE}*Comparator*.java"
+          PATTERN: "compare.*ObjectDifferences"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Comparator must implement compare method returning ObjectDifferences"
+          
+      - VALIDATE:
+          NAME: "database-object-extends-base"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/java/**/structure/*${OBJECT_TYPE}.java"
+          PATTERN: "extends AbstractDatabaseObject"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "DatabaseObject must extend AbstractDatabaseObject"
+
+  RUN_SNAPSHOT_DIFF_VALIDATION_TESTS:
+    DESCRIPTION: "Execute tests to verify service discovery works correctly"
+    STEPS:
+      - COMMAND:
+          NAME: "compile-project"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn compile"
+          
+      - VALIDATE:
+          NAME: "compilation-succeeds"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "cd ${EXTENSION_PATH} && mvn compile -q"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Compilation failed - fix errors before testing service registration"
+          
+      - COMMAND:
+          NAME: "test-snapshot-generator-discovery"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn test -Dtest='*${OBJECT_TYPE}*SnapshotTest' -q"
+          
+      - COMMAND:
+          NAME: "test-comparator-discovery"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn test -Dtest='*${OBJECT_TYPE}*ComparatorTest' -q"
+          
+      - COMMAND:
+          NAME: "test-integration-workflow"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn test -Dtest='*${OBJECT_TYPE}*IntegrationTest' -q"
+
+  DIAGNOSE_SERVICE_DISCOVERY_ISSUES:
+    DESCRIPTION: "Troubleshoot common service registration problems"
+    STEPS:
+      - COMMAND:
+          NAME: "check-jar-service-files"
+          EXECUTE: "jar -tf ${EXTENSION_PATH}/target/*.jar | grep META-INF/services"
+          
+      - COMMAND:
+          NAME: "verify-service-content-in-jar"
+          EXECUTE: "jar -tf ${EXTENSION_PATH}/target/*.jar | grep -E '(SnapshotGenerator|DatabaseObjectComparator|DatabaseObject)'"
+          
+      - COMMAND:
+          NAME: "check-classpath-registration"
+          EXECUTE: "mvn dependency:build-classpath -q | tr ':' '\\n' | grep -E '(liquibase|snowflake)'"
+          
+      - CONDITIONAL:
+          NAME: "check-service-file-encoding"
+          CONDITION:
+            TYPE: "COMMAND_SUCCESS"
+            COMMAND: "file ${EXTENSION_PATH}/src/main/resources/META-INF/services/* | grep -v ASCII"
+          THEN:
+            - COMMAND:
+                EXECUTE: "echo 'WARNING: Service files may have encoding issues - ensure UTF-8'"
+          ELSE:
+            - CONTINUE
+
+  GENERATE_REGISTRATION_FIXES:
+    DESCRIPTION: "Generate templates for missing or incorrect service registrations"
+    STEPS:
+      - CONDITIONAL:
+          NAME: "fix-missing-snapshot-generator"
+          CONDITION:
+            TYPE: "NOT_CONTAINS_TEXT"
+            TARGET: "${EXTENSION_PATH}/src/main/resources/META-INF/services/liquibase.snapshot.SnapshotGenerator"
+            PATTERN: "${SNAPSHOT_GENERATOR_CLASS}"
+          THEN:
+            - CREATE_FILE:
+                NAME: "snapshot-generator-fix"
+                TEMPLATE: "SNAPSHOT_GENERATOR_REGISTRATION_FIX"
+                OUTPUT: "${EXTENSION_PATH}/temp/snapshot_generator_fix.txt"
+          ELSE:
+            - CONTINUE
+            
+      - CONDITIONAL:
+          NAME: "fix-missing-comparator"
+          CONDITION:
+            TYPE: "NOT_CONTAINS_TEXT"
+            TARGET: "${EXTENSION_PATH}/src/main/resources/META-INF/services/liquibase.diff.output.DatabaseObjectComparator"
+            PATTERN: "${COMPARATOR_CLASS}"
+          THEN:
+            - CREATE_FILE:
+                NAME: "comparator-fix"
+                TEMPLATE: "COMPARATOR_REGISTRATION_FIX"
+                OUTPUT: "${EXTENSION_PATH}/temp/comparator_fix.txt"
+          ELSE:
+            - CONTINUE
+            
+      - CONDITIONAL:
+          NAME: "fix-missing-database-object"
+          CONDITION:
+            TYPE: "NOT_CONTAINS_TEXT"
+            TARGET: "${EXTENSION_PATH}/src/main/resources/META-INF/services/liquibase.structure.DatabaseObject"
+            PATTERN: "${DATABASE_OBJECT_CLASS}"
+          THEN:
+            - CREATE_FILE:
+                NAME: "database-object-fix"
+                TEMPLATE: "DATABASE_OBJECT_REGISTRATION_FIX"
+                OUTPUT: "${EXTENSION_PATH}/temp/database_object_fix.txt"
+          ELSE:
+            - CONTINUE
+
+TEMPLATES:
+  SNAPSHOT_GENERATOR_REGISTRATION_FIX: |
+    # Add to src/main/resources/META-INF/services/liquibase.snapshot.SnapshotGenerator
+    ${SNAPSHOT_GENERATOR_CLASS}
+
+  COMPARATOR_REGISTRATION_FIX: |
+    # Add to src/main/resources/META-INF/services/liquibase.diff.output.DatabaseObjectComparator
+    ${COMPARATOR_CLASS}
+
+  DATABASE_OBJECT_REGISTRATION_FIX: |
+    # Add to src/main/resources/META-INF/services/liquibase.structure.DatabaseObject
+    ${DATABASE_OBJECT_CLASS}
+
+  COMPLETE_SERVICE_REGISTRATION_TEMPLATE: |
+    # Complete service registration for ${OBJECT_TYPE} snapshot/diff implementation
+    
+    # File: src/main/resources/META-INF/services/liquibase.snapshot.SnapshotGenerator
+    ${PACKAGE_BASE}.snapshot.${OBJECT_TYPE}SnapshotGeneratorSnowflake
+    
+    # File: src/main/resources/META-INF/services/liquibase.diff.output.DatabaseObjectComparator
+    ${PACKAGE_BASE}.diff.${OBJECT_TYPE}ComparatorSnowflake
+    
+    # File: src/main/resources/META-INF/services/liquibase.structure.DatabaseObject
+    ${PACKAGE_BASE}.structure.${OBJECT_TYPE}
+
+SNAPSHOT_DIFF_SERVICE_REQUIREMENTS:
+  SNAPSHOT_GENERATOR_SERVICE:
+    FILE: "src/main/resources/META-INF/services/liquibase.snapshot.SnapshotGenerator"
+    PURPOSE: "Registers SnapshotGenerator for object discovery during snapshot operations"
+    CONTENT_PATTERN: "${PACKAGE}.${OBJECT_TYPE}SnapshotGeneratorSnowflake"
+    CRITICAL: "Without registration, objects will not be discovered in snapshots"
+    
+  DIFF_COMPARATOR_SERVICE:
+    FILE: "src/main/resources/META-INF/services/liquibase.diff.output.DatabaseObjectComparator"
+    PURPOSE: "Registers DatabaseObjectComparator for object comparison during diff operations"
+    CONTENT_PATTERN: "${PACKAGE}.${OBJECT_TYPE}ComparatorSnowflake"
+    CRITICAL: "Without registration, object differences will not be detected"
+    
+  DATABASE_OBJECT_SERVICE:
+    FILE: "src/main/resources/META-INF/services/liquibase.structure.DatabaseObject"
+    PURPOSE: "Registers DatabaseObject for inclusion in snapshot scope"
+    CONTENT_PATTERN: "${PACKAGE}.${OBJECT_TYPE}"
+    CRITICAL: "Without registration, objects will not appear in any snapshots"
+
+COMMON_REGISTRATION_ERRORS:
+  SNAPSHOT_OBJECTS_NOT_FOUND:
+    SYMPTOM: "Objects exist in database but not found in snapshot"
+    ROOT_CAUSE: "SnapshotGenerator or DatabaseObject service registration missing"
+    DIAGNOSIS: "Check both service files exist and contain correct class names"
+    SOLUTION: "Add entries to both liquibase.snapshot.SnapshotGenerator and liquibase.structure.DatabaseObject"
+    
+  DIFF_SHOWS_NO_DIFFERENCES:
+    SYMPTOM: "Identical objects or no differences detected for changed objects"
+    ROOT_CAUSE: "DatabaseObjectComparator service registration missing"
+    DIAGNOSIS: "Check liquibase.diff.output.DatabaseObjectComparator service file"
+    SOLUTION: "Add comparator class entry to service file"
+    
+  CLASSPATH_ISSUES:
+    SYMPTOM: "Service registration appears correct but objects still not discovered"
+    ROOT_CAUSE: "JAR not on classpath or service files not in JAR"
+    DIAGNOSIS: "Check JAR contents and classpath configuration"
+    SOLUTION: "Verify mvn package includes service files in JAR"
+
+VALIDATION_COMMANDS:
+  CHECK_SNAPSHOT_REGISTRATION: "grep -c '${OBJECT_TYPE}.*SnapshotGenerator' src/main/resources/META-INF/services/liquibase.snapshot.SnapshotGenerator"
+  CHECK_COMPARATOR_REGISTRATION: "grep -c '${OBJECT_TYPE}.*Comparator' src/main/resources/META-INF/services/liquibase.diff.output.DatabaseObjectComparator"
+  CHECK_DATABASE_OBJECT_REGISTRATION: "grep -c '${OBJECT_TYPE}' src/main/resources/META-INF/services/liquibase.structure.DatabaseObject"
+  VERIFY_JAR_SERVICES: "jar -tf target/*.jar | grep META-INF/services"
+  TEST_SERVICE_DISCOVERY: "mvn test -Dtest='*${OBJECT_TYPE}*Test' -q"
+
+SNAPSHOT_INCLUSION_CRITICAL_PATH:
+  STEP_1_DATABASE_OBJECT_REGISTRATION:
+    REQUIREMENT: "DatabaseObject must be registered in liquibase.structure.DatabaseObject"
+    IMPACT: "Without this, object type is not included in snapshot scope"
+    VALIDATION: "Object appears in DatabaseSnapshot.get(ObjectType.class)"
+    
+  STEP_2_SNAPSHOT_GENERATOR_REGISTRATION:
+    REQUIREMENT: "SnapshotGenerator must be registered in liquibase.snapshot.SnapshotGenerator"
+    IMPACT: "Without this, object instances are not populated with data"
+    VALIDATION: "Object properties are correctly populated from database"
+    
+  STEP_3_COMPARATOR_REGISTRATION:
+    REQUIREMENT: "DatabaseObjectComparator must be registered in liquibase.diff.output.DatabaseObjectComparator"
+    IMPACT: "Without this, object differences are not detected or compared"
+    VALIDATION: "Diff operations correctly identify object changes"
+
+TROUBLESHOOTING_CHECKLIST:
+  SERVICE_FILE_VALIDATION:
+    - "Service files exist at correct paths"
+    - "Service files contain exact class names (no typos)"
+    - "Service files use UTF-8 encoding"
+    - "No extra spaces or special characters in service files"
+    
+  CLASS_VALIDATION:
+    - "Registered classes exist and compile successfully"
+    - "Classes implement required interfaces correctly"
+    - "Classes are in correct packages matching service registration"
+    - "Classes have proper method signatures"
+    
+  BUILD_VALIDATION:
+    - "Service files are included in JAR build"
+    - "JAR is on classpath during test execution"
+    - "No conflicting service registrations from other JARs"
+    - "Maven build includes resources directory"
+
+ERROR_HANDLING:
+  GLOBAL_FAILURE_ACTION: "STOP"
+  CLEANUP_ON_FAILURE:
+    - COMMAND:
+        EXECUTE: "rm -f ${EXTENSION_PATH}/temp/*_fix.txt"
+        CONTINUE_ON_ERROR: true

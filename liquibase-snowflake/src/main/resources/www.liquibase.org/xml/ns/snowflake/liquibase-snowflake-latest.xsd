@@ -1,0 +1,982 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://www.liquibase.org/xml/ns/snowflake"
+            xmlns="http://www.liquibase.org/xml/ns/snowflake"
+            elementFormDefault="qualified">
+
+
+    <!-- Warehouse Operations -->
+    <xsd:element name="createWarehouse">
+        <xsd:complexType>
+            <xsd:attribute name="warehouseName" type="xsd:string" use="required"/>
+            <xsd:attribute name="warehouseSize" type="warehouseSize"/>
+            <xsd:attribute name="warehouseType" type="warehouseType"/>
+            <xsd:attribute name="maxClusterCount" type="xsd:int"/>
+            <xsd:attribute name="minClusterCount" type="xsd:int"/>
+            <xsd:attribute name="scalingPolicy" type="scalingPolicy"/>
+            <xsd:attribute name="autoSuspend" type="xsd:int"/>
+            <xsd:attribute name="autoResume" type="xsd:boolean"/>
+            <xsd:attribute name="initiallySuspended" type="xsd:boolean"/>
+            <xsd:attribute name="resourceMonitor" type="xsd:string"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+            <xsd:attribute name="enableQueryAcceleration" type="xsd:boolean"/>
+            <xsd:attribute name="queryAccelerationMaxScaleFactor" type="xsd:int"/>
+            <xsd:attribute name="maxConcurrencyLevel" type="xsd:int"/>
+            <xsd:attribute name="statementQueuedTimeoutInSeconds" type="xsd:int"/>
+            <xsd:attribute name="statementTimeoutInSeconds" type="xsd:int"/>
+            <xsd:attribute name="resourceConstraint" type="xsd:string"/>
+            <xsd:attribute name="ifNotExists" type="xsd:boolean"/>
+            <xsd:attribute name="orReplace" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="alterWarehouse">
+        <xsd:complexType>
+            <xsd:attribute name="warehouseName" type="xsd:string" use="required"/>
+            <xsd:attribute name="newWarehouseName" type="xsd:string"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
+            <xsd:attribute name="warehouseSize" type="warehouseSize"/>
+            <xsd:attribute name="warehouseType" type="warehouseType"/>
+            <xsd:attribute name="maxClusterCount" type="xsd:int"/>
+            <xsd:attribute name="minClusterCount" type="xsd:int"/>
+            <xsd:attribute name="scalingPolicy" type="scalingPolicy"/>
+            <xsd:attribute name="autoSuspend" type="xsd:int"/>
+            <xsd:attribute name="autoResume" type="xsd:boolean"/>
+            <xsd:attribute name="resourceMonitor" type="xsd:string"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+            <xsd:attribute name="enableQueryAcceleration" type="xsd:boolean"/>
+            <xsd:attribute name="queryAccelerationMaxScaleFactor" type="xsd:int"/>
+            <xsd:attribute name="maxConcurrencyLevel" type="xsd:int"/>
+            <xsd:attribute name="statementQueuedTimeoutInSeconds" type="xsd:int"/>
+            <xsd:attribute name="statementTimeoutInSeconds" type="xsd:int"/>
+            <xsd:attribute name="action" type="warehouseAction"/>
+            <xsd:attribute name="unsetResourceMonitor" type="xsd:boolean"/>
+            <xsd:attribute name="unsetComment" type="xsd:boolean"/>
+            <xsd:attribute name="operationType" type="xsd:string"/>
+            <xsd:attribute name="warehouseTag" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="dropWarehouse">
+        <xsd:complexType>
+            <xsd:attribute name="warehouseName" type="xsd:string" use="required"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <!-- Database Operations -->
+    <xsd:element name="createDatabase">
+        <xsd:complexType>
+            <xsd:attribute name="databaseName" type="xsd:string" use="required"/>
+            <xsd:attribute name="cloneFrom" type="xsd:string"/>
+            <xsd:attribute name="fromDatabase" type="xsd:string"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+            <xsd:attribute name="dataRetentionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="maxDataExtensionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="transient" type="xsd:boolean"/>
+            <xsd:attribute name="defaultDdlCollation" type="xsd:string"/>
+            <xsd:attribute name="tag" type="xsd:string"/>
+            <xsd:attribute name="orReplace" type="xsd:boolean"/>
+            <xsd:attribute name="ifNotExists" type="xsd:boolean"/>
+            <xsd:attribute name="externalVolume" type="xsd:string"/>
+            <xsd:attribute name="catalog" type="xsd:string"/>
+            <xsd:attribute name="replaceInvalidCharacters" type="xsd:boolean"/>
+            <xsd:attribute name="storageSerializationPolicy" type="xsd:string"/>
+            <xsd:attribute name="catalogSync" type="xsd:string"/>
+            <xsd:attribute name="catalogSyncNamespaceMode" type="xsd:string"/>
+            <xsd:attribute name="catalogSyncNamespaceFlattenDelimiter" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="alterDatabase">
+        <xsd:complexType>
+            <xsd:attribute name="databaseName" type="xsd:string" use="required"/>
+            <xsd:attribute name="newDatabaseName" type="xsd:string"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+            <xsd:attribute name="dataRetentionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="maxDataExtensionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="defaultDdlCollation" type="xsd:string"/>
+            <xsd:attribute name="unsetDataRetentionTimeInDays" type="xsd:boolean"/>
+            <xsd:attribute name="unsetMaxDataExtensionTimeInDays" type="xsd:boolean"/>
+            <xsd:attribute name="unsetDefaultDdlCollation" type="xsd:boolean"/>
+            <xsd:attribute name="unsetComment" type="xsd:boolean"/>
+            <xsd:attribute name="enableReplication" type="xsd:boolean"/>
+            <xsd:attribute name="replicationAccounts" type="xsd:string"/>
+            <xsd:attribute name="swapWith" type="xsd:string"/>
+            <xsd:attribute name="replaceComment" type="xsd:boolean"/>
+            <xsd:attribute name="newDefaultDdlCollation" type="xsd:string"/>
+            <xsd:attribute name="dropComment" type="xsd:boolean"/>
+            <xsd:attribute name="operationType" type="xsd:string"/>
+            <xsd:attribute name="newMaxDataExtensionTimeInDays" type="xsd:int"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="dropDatabase">
+        <xsd:complexType>
+            <xsd:attribute name="databaseName" type="xsd:string" use="required"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
+            <xsd:attribute name="cascade" type="xsd:boolean"/>
+            <xsd:attribute name="restrict" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <!-- Schema Operations -->
+    <xsd:element name="createSchema">
+        <xsd:complexType>
+            <xsd:attribute name="schemaName" type="xsd:string" use="required"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="cloneFrom" type="xsd:string"/>
+            <xsd:attribute name="fromSchema" type="xsd:string"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+            <xsd:attribute name="dataRetentionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="maxDataExtensionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="transient" type="xsd:boolean"/>
+            <xsd:attribute name="managed" type="xsd:boolean"/>
+            <xsd:attribute name="managedAccess" type="xsd:boolean"/>
+            <xsd:attribute name="defaultDdlCollation" type="xsd:string"/>
+            <xsd:attribute name="tag" type="xsd:string"/>
+            <xsd:attribute name="orReplace" type="xsd:boolean"/>
+            <xsd:attribute name="ifNotExists" type="xsd:boolean"/>
+            <xsd:attribute name="pipeExecutionPaused" type="xsd:boolean"/>
+            <xsd:attribute name="externalVolume" type="xsd:string"/>
+            <xsd:attribute name="catalog" type="xsd:string"/>
+            <xsd:attribute name="replaceInvalidCharacters" type="xsd:boolean"/>
+            <xsd:attribute name="classificationProfile" type="xsd:string"/>
+            <xsd:attribute name="storageSerializationPolicy" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="alterSchema">
+        <xsd:complexType>
+            <xsd:attribute name="schemaName" type="xsd:string" use="required"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
+            <xsd:attribute name="newName" type="xsd:string"/>
+            <xsd:attribute name="newDataRetentionTimeInDays" type="xsd:string"/>
+            <xsd:attribute name="newMaxDataExtensionTimeInDays" type="xsd:string"/>
+            <xsd:attribute name="newDefaultDdlCollation" type="xsd:string"/>
+            <xsd:attribute name="newComment" type="xsd:string"/>
+            <xsd:attribute name="dropComment" type="xsd:boolean"/>
+            <xsd:attribute name="newPipeExecutionPaused" type="xsd:string"/>
+            <xsd:attribute name="enableManagedAccess" type="xsd:boolean"/>
+            <xsd:attribute name="disableManagedAccess" type="xsd:boolean"/>
+            <xsd:attribute name="unsetDataRetentionTimeInDays" type="xsd:boolean"/>
+            <xsd:attribute name="unsetMaxDataExtensionTimeInDays" type="xsd:boolean"/>
+            <xsd:attribute name="unsetDefaultDdlCollation" type="xsd:boolean"/>
+            <xsd:attribute name="unsetPipeExecutionPaused" type="xsd:boolean"/>
+            <xsd:attribute name="unsetComment" type="xsd:boolean"/>
+            <xsd:attribute name="dataRetentionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+            <xsd:attribute name="operationType" type="xsd:string"/>
+            <xsd:attribute name="managedAccess" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="dropSchema">
+        <xsd:complexType>
+            <xsd:attribute name="schemaName" type="xsd:string" use="required"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
+            <xsd:attribute name="cascade" type="xsd:boolean"/>
+            <xsd:attribute name="restrict" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <!-- Table Operations -->
+    <xsd:element name="alterTable">
+        <xsd:complexType>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="tableName" type="xsd:string" use="required"/>
+            <!-- Clustering operations (mutually exclusive) -->
+            <xsd:attribute name="clusterBy" type="xsd:string"/>
+            <xsd:attribute name="dropClusteringKey" type="xsd:boolean"/>
+            <xsd:attribute name="suspendRecluster" type="xsd:boolean"/>
+            <xsd:attribute name="resumeRecluster" type="xsd:boolean"/>
+            <!-- Property settings (can be combined) -->
+            <xsd:attribute name="setDataRetentionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="setMaxDataExtensionTimeInDays" type="xsd:int"/>
+            <xsd:attribute name="setDefaultDdlCollation" type="xsd:string"/>
+            <xsd:attribute name="setChangeTracking" type="xsd:boolean"/>
+            <xsd:attribute name="setEnableSchemaEvolution" type="xsd:boolean"/>
+            <!-- Search optimization operations -->
+            <xsd:attribute name="addSearchOptimization" type="xsd:string"/>
+            <xsd:attribute name="dropSearchOptimization" type="xsd:boolean"/>
+            <!-- Row access policy operations -->
+            <xsd:attribute name="addRowAccessPolicy" type="xsd:string"/>
+            <xsd:attribute name="dropRowAccessPolicy" type="xsd:string"/>
+            <!-- Aggregation policy operations -->
+            <xsd:attribute name="setAggregationPolicy" type="xsd:string"/>
+            <xsd:attribute name="unsetAggregationPolicy" type="xsd:boolean"/>
+            <xsd:attribute name="forceAggregationPolicy" type="xsd:boolean"/>
+            <!-- Projection policy operations -->
+            <xsd:attribute name="setProjectionPolicy" type="xsd:string"/>
+            <xsd:attribute name="unsetProjectionPolicy" type="xsd:boolean"/>
+            <xsd:attribute name="forceProjectionPolicy" type="xsd:boolean"/>
+            <!-- Tag operations -->
+            <xsd:attribute name="setTag" type="xsd:string"/>
+            <xsd:attribute name="unsetTag" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <!-- Table Operations -->
+    <!-- Snowflake table attributes are defined as namespace-prefixed attributes on standard createTable elements -->
+    <xsd:attributeGroup name="snowflakeTableAttributes">
+        <xsd:attribute name="transient" type="xsd:boolean"/>
+        <xsd:attribute name="temporary" type="xsd:boolean"/>
+        <xsd:attribute name="clusterBy" type="xsd:string"/>
+        <xsd:attribute name="dataRetentionTimeInDays" type="xsd:int"/>
+        <xsd:attribute name="maxDataExtensionTimeInDays" type="xsd:int"/>
+        <xsd:attribute name="changeTracking" type="xsd:boolean"/>
+        <xsd:attribute name="copyGrants" type="xsd:boolean"/>
+        <xsd:attribute name="enableSchemaEvolution" type="xsd:boolean"/>
+        <xsd:attribute name="cloneFrom" type="xsd:string"/>
+        <xsd:attribute name="likeTable" type="xsd:string"/>
+        <xsd:attribute name="stageFileFormat" type="xsd:string"/>
+        <xsd:attribute name="stageCopyOptions" type="xsd:string"/>
+        <xsd:attribute name="defaultDdlCollation" type="xsd:string"/>
+        <xsd:attribute name="tag" type="xsd:string"/>
+        <xsd:attribute name="rowAccessPolicy" type="xsd:string"/>
+        <xsd:attribute name="aggregationPolicy" type="xsd:string"/>
+        <xsd:attribute name="projectionPolicy" type="xsd:string"/>
+    </xsd:attributeGroup>
+
+    <!-- Sequence Operations (Snowflake-specific) -->
+    <xsd:element name="createSequence">
+        <xsd:complexType>
+            <xsd:attribute name="sequenceName" type="xsd:string" use="required"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="startValue" type="xsd:string"/>
+            <xsd:attribute name="incrementBy" type="xsd:string"/>
+            <xsd:attribute name="minValue" type="xsd:string"/>
+            <xsd:attribute name="maxValue" type="xsd:string"/>
+            <xsd:attribute name="cycle" type="xsd:boolean"/>
+            <xsd:attribute name="cacheSize" type="xsd:string"/>
+            <xsd:attribute name="dataType" type="xsd:string"/>
+            <xsd:attribute name="order" type="xsd:boolean"/>
+            <xsd:attribute name="ordered" type="xsd:boolean"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+            <xsd:attribute name="orReplace" type="xsd:boolean"/>
+            <xsd:attribute name="ifNotExists" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="alterSequence">
+        <xsd:complexType>
+            <xsd:attribute name="sequenceName" type="xsd:string" use="required"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="newSequenceName" type="xsd:string"/>
+            <xsd:attribute name="incrementBy" type="xsd:string"/>
+            <xsd:attribute name="ordered" type="xsd:boolean"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+            <xsd:attribute name="unsetComment" type="xsd:boolean"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
+            <xsd:attribute name="setNoOrder" type="xsd:boolean"/>
+            <xsd:attribute name="setComment" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="dropSequence">
+        <xsd:complexType>
+            <xsd:attribute name="sequenceName" type="xsd:string" use="required"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
+            <xsd:attribute name="cascade" type="xsd:boolean"/>
+            <xsd:attribute name="restrict" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <!-- AlterSequence-specific namespace attributes -->
+    <xsd:attribute name="setNoOrder" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Set sequence to NOORDER (one-way operation - cannot be undone)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="setComment" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Set a comment on the sequence</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="unsetComment" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Remove the comment from the sequence (mutually exclusive with setComment)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <!-- Sequence namespace attributes (for use on standard createSequence) -->
+    <xsd:attribute name="order" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Whether to maintain order in sequence values (ORDER) or not (NOORDER). Default is NOORDER.</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="orReplace" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Use CREATE OR REPLACE SEQUENCE instead of CREATE SEQUENCE</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="ifNotExists" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Use CREATE SEQUENCE IF NOT EXISTS instead of CREATE SEQUENCE</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+
+    <!-- Table namespace attributes (for use on standard createTable) -->
+    <xsd:attribute name="transient" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Creates a transient table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="volatile" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Creates a volatile table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="temporary" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Creates a temporary table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="localTemporary" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Creates a local temporary table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="globalTemporary" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Creates a global temporary table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="clusterBy" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Comma-separated list of columns to cluster by</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="dataRetentionTimeInDays" type="xsd:int">
+        <xsd:annotation>
+            <xsd:documentation>Time Travel retention period in days (0-90 for permanent tables)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="maxDataExtensionTimeInDays" type="xsd:int">
+        <xsd:annotation>
+            <xsd:documentation>Maximum Time Travel extension period in days</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="changeTracking" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Enable change tracking on the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="copyGrants" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Copy grants from replaced table (only valid with OR REPLACE)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="enableSchemaEvolution" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Enable automatic schema evolution</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="defaultDdlCollation" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Default collation specification for the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+
+    <!-- AlterTable-specific namespace attributes -->
+    <xsd:attribute name="dropClusteringKey" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Drop the clustering key from the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="suspendRecluster" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Suspend automatic reclustering for the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="resumeRecluster" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Resume automatic reclustering for the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="setEnableSchemaEvolution" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Enable or disable schema evolution for the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="setDataRetentionTimeInDays" type="xsd:int">
+        <xsd:annotation>
+            <xsd:documentation>Set Time Travel retention period in days (0-90)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="setMaxDataExtensionTimeInDays" type="xsd:int">
+        <xsd:annotation>
+            <xsd:documentation>Set maximum Time Travel extension period in days (0-90)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="setChangeTracking" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Enable or disable change tracking for the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="setDefaultDdlCollation" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Set default DDL collation specification for the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="addSearchOptimization" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Add search optimization to the table (empty for default, or specific method)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="dropSearchOptimization" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Drop search optimization from the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="addRowAccessPolicy" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Add row access policy (format: "policy_name ON (col1, col2)")</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="dropRowAccessPolicy" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Drop row access policy (policy name or "ALL" for all policies)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="setAggregationPolicy" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Set aggregation policy for the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="unsetAggregationPolicy" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Remove aggregation policy from the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="forceAggregationPolicy" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Force setting aggregation policy (use with setAggregationPolicy)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="setProjectionPolicy" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Set projection policy for the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="unsetProjectionPolicy" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Remove projection policy from the table</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="forceProjectionPolicy" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Force setting projection policy (use with setProjectionPolicy)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="setTag" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Set tags on the table (format: "tag1 = 'value1', tag2 = 'value2'")</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="unsetTag" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>Unset tags from the table (format: "tag1, tag2, tag3")</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+
+    <!-- RenameTable-specific namespace attributes -->
+    <xsd:attribute name="preserveClusterBy" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Preserve clustering key during table rename (default: true, automatically preserved by Snowflake)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="preserveAttributes" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Preserve table attributes during rename (default: true, automatically preserved by Snowflake)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+
+    <!-- DropTable-specific namespace attributes -->
+    <xsd:attribute name="cascade" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Force drop table even with foreign key references (DROP TABLE ... CASCADE)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="restrict" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>Prevent drop if foreign key references exist (DROP TABLE ... RESTRICT)</xsd:documentation>
+        </xsd:annotation>
+    </xsd:attribute>
+
+    <!-- DropSequence-specific namespace attributes -->
+    <!-- Note: cascade and restrict attributes are reused from DropTable for consistency -->
+
+    <!-- Type Definitions -->
+
+    <xsd:simpleType name="warehouseSize">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="XSMALL"/>
+            <xsd:enumeration value="SMALL"/>
+            <xsd:enumeration value="MEDIUM"/>
+            <xsd:enumeration value="LARGE"/>
+            <xsd:enumeration value="XLARGE"/>
+            <xsd:enumeration value="XXLARGE"/>
+            <xsd:enumeration value="XXXLARGE"/>
+            <xsd:enumeration value="X4LARGE"/>
+            <xsd:enumeration value="X5LARGE"/>
+            <xsd:enumeration value="X6LARGE"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="warehouseType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="STANDARD"/>
+            <xsd:enumeration value="SNOWPARK-OPTIMIZED"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="scalingPolicy">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="STANDARD"/>
+            <xsd:enumeration value="ECONOMY"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="warehouseAction">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="SUSPEND"/>
+            <xsd:enumeration value="RESUME"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="constraintType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="PRIMARY KEY"/>
+            <xsd:enumeration value="FOREIGN KEY"/>
+            <xsd:enumeration value="UNIQUE"/>
+            <xsd:enumeration value="CHECK"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!-- File Format Operations -->
+    <xsd:element name="createFileFormat">
+        <xsd:complexType>
+            <xsd:attribute name="fileFormatName" type="xsd:string" use="required"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="fileFormatType" type="fileFormatType"/>
+            <xsd:attribute name="orReplace" type="xsd:boolean"/>
+            <xsd:attribute name="ifNotExists" type="xsd:boolean"/>
+            <xsd:attribute name="temporary" type="xsd:boolean"/>
+            <xsd:attribute name="volatile" type="xsd:boolean"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+            
+            <!-- Common Format Options -->
+            <xsd:attribute name="compression" type="compressionType"/>
+            <xsd:attribute name="dateFormat" type="xsd:string"/>
+            <xsd:attribute name="timeFormat" type="xsd:string"/>
+            <xsd:attribute name="timestampFormat" type="xsd:string"/>
+            <xsd:attribute name="binaryFormat" type="binaryFormatType"/>
+            <xsd:attribute name="trimSpace" type="xsd:boolean"/>
+            <xsd:attribute name="nullIf" type="xsd:string"/>
+            <xsd:attribute name="replaceInvalidCharacters" type="xsd:boolean"/>
+            <xsd:attribute name="fileExtension" type="xsd:string"/>
+            
+            <!-- CSV-Specific Options -->
+            <xsd:attribute name="recordDelimiter" type="xsd:string"/>
+            <xsd:attribute name="fieldDelimiter" type="xsd:string"/>
+            <xsd:attribute name="parseHeader" type="xsd:boolean"/>
+            <xsd:attribute name="skipHeader" type="xsd:int"/>
+            <xsd:attribute name="skipBlankLines" type="xsd:boolean"/>
+            <xsd:attribute name="escape" type="xsd:string"/>
+            <xsd:attribute name="escapeUnenclosedField" type="xsd:string"/>
+            <xsd:attribute name="fieldOptionallyEnclosedBy" type="xsd:string"/>
+            <xsd:attribute name="errorOnColumnCountMismatch" type="xsd:boolean"/>
+            <xsd:attribute name="validateUtf8" type="xsd:boolean"/>
+            <xsd:attribute name="emptyFieldAsNull" type="xsd:boolean"/>
+            <xsd:attribute name="skipByteOrderMark" type="xsd:boolean"/>
+            <xsd:attribute name="encoding" type="encodingType"/>
+            
+            <!-- JSON-Specific Options -->
+            <xsd:attribute name="enableOctal" type="xsd:boolean"/>
+            <xsd:attribute name="allowDuplicate" type="xsd:boolean"/>
+            <xsd:attribute name="stripOuterArray" type="xsd:boolean"/>
+            <xsd:attribute name="stripNullValues" type="xsd:boolean"/>
+            <xsd:attribute name="ignoreUtf8Errors" type="xsd:boolean"/>
+            
+            <!-- Parquet-Specific Options -->
+            <xsd:attribute name="snappyCompression" type="xsd:boolean"/>
+            <xsd:attribute name="binaryAsText" type="xsd:boolean"/>
+            <xsd:attribute name="useLogicalType" type="xsd:boolean"/>
+            <xsd:attribute name="useVectorizedScanner" type="xsd:boolean"/>
+            
+            <!-- XML-Specific Options -->
+            <xsd:attribute name="preserveSpace" type="xsd:boolean"/>
+            <xsd:attribute name="stripOuterElement" type="xsd:boolean"/>
+            <xsd:attribute name="disableSnowflakeData" type="xsd:boolean"/>
+            <xsd:attribute name="disableAutoConvert" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="alterFileFormat">
+        <xsd:complexType>
+            <xsd:attribute name="fileFormatName" type="xsd:string" use="required"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
+            <xsd:attribute name="newFileFormatName" type="xsd:string"/>
+            <xsd:attribute name="operationType" type="alterFileFormatOperationType"/>
+            
+            <!-- SET Operations -->
+            <xsd:attribute name="newFileFormatType" type="fileFormatType"/>
+            <xsd:attribute name="newComment" type="xsd:string"/>
+            
+            <!-- All format options from CREATE for SET operations -->
+            <xsd:attribute name="compression" type="compressionType"/>
+            <xsd:attribute name="dateFormat" type="xsd:string"/>
+            <xsd:attribute name="timeFormat" type="xsd:string"/>
+            <xsd:attribute name="timestampFormat" type="xsd:string"/>
+            <xsd:attribute name="binaryFormat" type="binaryFormatType"/>
+            <xsd:attribute name="trimSpace" type="xsd:boolean"/>
+            <xsd:attribute name="nullIf" type="xsd:string"/>
+            <xsd:attribute name="replaceInvalidCharacters" type="xsd:boolean"/>
+            <xsd:attribute name="fileExtension" type="xsd:string"/>
+            <xsd:attribute name="recordDelimiter" type="xsd:string"/>
+            <xsd:attribute name="fieldDelimiter" type="xsd:string"/>
+            <xsd:attribute name="parseHeader" type="xsd:boolean"/>
+            <xsd:attribute name="skipHeader" type="xsd:int"/>
+            <xsd:attribute name="skipBlankLines" type="xsd:boolean"/>
+            <xsd:attribute name="escape" type="xsd:string"/>
+            <xsd:attribute name="escapeUnenclosedField" type="xsd:string"/>
+            <xsd:attribute name="fieldOptionallyEnclosedBy" type="xsd:string"/>
+            <xsd:attribute name="errorOnColumnCountMismatch" type="xsd:boolean"/>
+            <xsd:attribute name="validateUtf8" type="xsd:boolean"/>
+            <xsd:attribute name="emptyFieldAsNull" type="xsd:boolean"/>
+            <xsd:attribute name="skipByteOrderMark" type="xsd:boolean"/>
+            <xsd:attribute name="encoding" type="encodingType"/>
+            <xsd:attribute name="enableOctal" type="xsd:boolean"/>
+            <xsd:attribute name="allowDuplicate" type="xsd:boolean"/>
+            <xsd:attribute name="stripOuterArray" type="xsd:boolean"/>
+            <xsd:attribute name="stripNullValues" type="xsd:boolean"/>
+            <xsd:attribute name="ignoreUtf8Errors" type="xsd:boolean"/>
+            <xsd:attribute name="snappyCompression" type="xsd:boolean"/>
+            <xsd:attribute name="binaryAsText" type="xsd:boolean"/>
+            <xsd:attribute name="useLogicalType" type="xsd:boolean"/>
+            <xsd:attribute name="useVectorizedScanner" type="xsd:boolean"/>
+            <xsd:attribute name="preserveSpace" type="xsd:boolean"/>
+            <xsd:attribute name="stripOuterElement" type="xsd:boolean"/>
+            <xsd:attribute name="disableSnowflakeData" type="xsd:boolean"/>
+            <xsd:attribute name="disableAutoConvert" type="xsd:boolean"/>
+            
+            <!-- UNSET Operations -->
+            <xsd:attribute name="unsetComment" type="xsd:boolean"/>
+            <xsd:attribute name="unsetCompression" type="xsd:boolean"/>
+            <xsd:attribute name="unsetDateFormat" type="xsd:boolean"/>
+            <xsd:attribute name="unsetTimeFormat" type="xsd:boolean"/>
+            <xsd:attribute name="unsetTimestampFormat" type="xsd:boolean"/>
+            <xsd:attribute name="unsetBinaryFormat" type="xsd:boolean"/>
+            <xsd:attribute name="unsetTrimSpace" type="xsd:boolean"/>
+            <xsd:attribute name="unsetNullIf" type="xsd:boolean"/>
+            <xsd:attribute name="unsetFileExtension" type="xsd:boolean"/>
+            <xsd:attribute name="unsetReplaceInvalidCharacters" type="xsd:boolean"/>
+            
+            <!-- CSV-specific UNSET Operations -->
+            <xsd:attribute name="unsetRecordDelimiter" type="xsd:boolean"/>
+            <xsd:attribute name="unsetFieldDelimiter" type="xsd:boolean"/>
+            <xsd:attribute name="unsetParseHeader" type="xsd:boolean"/>
+            <xsd:attribute name="unsetSkipHeader" type="xsd:boolean"/>
+            <xsd:attribute name="unsetSkipBlankLines" type="xsd:boolean"/>
+            <xsd:attribute name="unsetEscape" type="xsd:boolean"/>
+            <xsd:attribute name="unsetEscapeUnenclosedField" type="xsd:boolean"/>
+            <xsd:attribute name="unsetFieldOptionallyEnclosedBy" type="xsd:boolean"/>
+            <xsd:attribute name="unsetErrorOnColumnCountMismatch" type="xsd:boolean"/>
+            <xsd:attribute name="unsetValidateUtf8" type="xsd:boolean"/>
+            <xsd:attribute name="unsetEmptyFieldAsNull" type="xsd:boolean"/>
+            <xsd:attribute name="unsetSkipByteOrderMark" type="xsd:boolean"/>
+            <xsd:attribute name="unsetEncoding" type="xsd:boolean"/>
+            
+            <!-- JSON-specific UNSET Operations -->
+            <xsd:attribute name="unsetEnableOctal" type="xsd:boolean"/>
+            <xsd:attribute name="unsetAllowDuplicate" type="xsd:boolean"/>
+            <xsd:attribute name="unsetStripOuterArray" type="xsd:boolean"/>
+            <xsd:attribute name="unsetStripNullValues" type="xsd:boolean"/>
+            <xsd:attribute name="unsetIgnoreUtf8Errors" type="xsd:boolean"/>
+            
+            <!-- PARQUET-specific UNSET Operations -->
+            <xsd:attribute name="unsetSnappyCompression" type="xsd:boolean"/>
+            <xsd:attribute name="unsetBinaryAsText" type="xsd:boolean"/>
+            <xsd:attribute name="unsetUseLogicalType" type="xsd:boolean"/>
+            <xsd:attribute name="unsetUseVectorizedScanner" type="xsd:boolean"/>
+            
+            <!-- XML-specific UNSET Operations -->
+            <xsd:attribute name="unsetPreserveSpace" type="xsd:boolean"/>
+            <xsd:attribute name="unsetStripOuterElement" type="xsd:boolean"/>
+            <xsd:attribute name="unsetDisableSnowflakeData" type="xsd:boolean"/>
+            <xsd:attribute name="unsetDisableAutoConvert" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="dropFileFormat">
+        <xsd:complexType>
+            <xsd:attribute name="fileFormatName" type="xsd:string" use="required"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <!-- File Format Type Definitions -->
+    <xsd:simpleType name="fileFormatType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="CSV"/>
+            <xsd:enumeration value="JSON"/>
+            <xsd:enumeration value="AVRO"/>
+            <xsd:enumeration value="ORC"/>
+            <xsd:enumeration value="PARQUET"/>
+            <xsd:enumeration value="XML"/>
+            <xsd:enumeration value="CUSTOM"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="compressionType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="AUTO"/>
+            <xsd:enumeration value="GZIP"/>
+            <xsd:enumeration value="BZ2"/>
+            <xsd:enumeration value="BROTLI"/>
+            <xsd:enumeration value="ZSTD"/>
+            <xsd:enumeration value="DEFLATE"/>
+            <xsd:enumeration value="RAW_DEFLATE"/>
+            <xsd:enumeration value="NONE"/>
+            <xsd:enumeration value="LZO"/>
+            <xsd:enumeration value="SNAPPY"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="binaryFormatType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="HEX"/>
+            <xsd:enumeration value="BASE64"/>
+            <xsd:enumeration value="UTF8"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="encodingType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="UTF8"/>
+            <xsd:enumeration value="ISO-8859-1"/>
+            <xsd:enumeration value="WINDOWS-1252"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="alterFileFormatOperationType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="SET"/>
+            <xsd:enumeration value="RENAME"/>
+            <xsd:enumeration value="UNSET"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!-- Stage Operations -->
+    <xsd:element name="createStage">
+        <xsd:complexType>
+            <!-- Core Stage attributes -->
+            <xsd:attribute name="stageName" type="xsd:string" use="required"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="url" type="xsd:string"/>
+            <xsd:attribute name="storageIntegration" type="xsd:string"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+            <xsd:attribute name="orReplace" type="xsd:boolean"/>
+            <xsd:attribute name="ifNotExists" type="xsd:boolean"/>
+            <xsd:attribute name="temporary" type="xsd:boolean"/>
+            <xsd:attribute name="encryption" type="xsd:string"/>
+            <xsd:attribute name="usePrivatelinkEndpoint" type="xsd:boolean"/>
+            
+            <!-- AWS Credentials -->
+            <xsd:attribute name="awsKeyId" type="xsd:string"/>
+            <xsd:attribute name="awsSecretKey" type="xsd:string"/>
+            <xsd:attribute name="awsToken" type="xsd:string"/>
+            <xsd:attribute name="awsRole" type="xsd:string"/>
+            
+            <!-- GCP Credentials -->
+            <xsd:attribute name="gcsServiceAccountKey" type="xsd:string"/>
+            
+            <!-- Azure Credentials -->
+            <xsd:attribute name="azureAccountName" type="xsd:string"/>
+            <xsd:attribute name="azureAccountKey" type="xsd:string"/>
+            <xsd:attribute name="azureSasToken" type="xsd:string"/>
+            
+            <!-- Directory Table Configuration -->
+            <xsd:attribute name="directoryEnable" type="xsd:boolean"/>
+            <xsd:attribute name="autoRefresh" type="xsd:boolean"/>
+            <xsd:attribute name="refreshOnCreate" type="xsd:boolean"/>
+            <xsd:attribute name="notificationIntegration" type="xsd:string"/>
+            
+            <!-- File Format Configuration -->
+            <xsd:attribute name="fileFormat" type="xsd:string"/>
+            <xsd:attribute name="fileFormatType" type="fileFormatType"/>
+            <xsd:attribute name="compression" type="compressionType"/>
+            
+            <!-- CSV-specific file format options -->
+            <xsd:attribute name="recordDelimiter" type="xsd:string"/>
+            <xsd:attribute name="fieldDelimiter" type="xsd:string"/>
+            <xsd:attribute name="fieldOptionallyEnclosedBy" type="xsd:string"/>
+            <xsd:attribute name="escape" type="xsd:string"/>
+            <xsd:attribute name="escapeUnenclosedField" type="xsd:string"/>
+            <xsd:attribute name="skipHeader" type="xsd:int"/>
+            <xsd:attribute name="skipBlankLines" type="xsd:boolean"/>
+            <xsd:attribute name="trimSpace" type="xsd:boolean"/>
+            <xsd:attribute name="errorOnColumnCountMismatch" type="xsd:boolean"/>
+            <xsd:attribute name="emptyFieldAsNull" type="xsd:boolean"/>
+            <xsd:attribute name="skipByteOrderMark" type="xsd:boolean"/>
+            <xsd:attribute name="encoding" type="encodingType"/>
+            
+            <!-- JSON-specific file format options -->
+            <xsd:attribute name="stripOuterArray" type="xsd:boolean"/>
+            <xsd:attribute name="stripNullValues" type="xsd:boolean"/>
+            <xsd:attribute name="allowDuplicate" type="xsd:boolean"/>
+            <xsd:attribute name="ignoreUtf8Errors" type="xsd:boolean"/>
+            
+            <!-- Universal file format options -->
+            <xsd:attribute name="dateFormat" type="xsd:string"/>
+            <xsd:attribute name="timeFormat" type="xsd:string"/>
+            <xsd:attribute name="timestampFormat" type="xsd:string"/>
+            <xsd:attribute name="binaryFormat" type="binaryFormatType"/>
+            <xsd:attribute name="nullIf" type="xsd:string"/>
+            <xsd:attribute name="replaceInvalidCharacters" type="xsd:boolean"/>
+            
+            <!-- Advanced encryption options -->
+            <xsd:attribute name="kmsKeyId" type="xsd:string"/>
+            <xsd:attribute name="masterKey" type="xsd:string"/>
+            <xsd:attribute name="encryptionType" type="encryptionTypeEnum"/>
+            
+            <!-- Clone attributes -->
+            <xsd:attribute name="cloneFromStage" type="xsd:string"/>
+            <xsd:attribute name="cloneFromSchema" type="xsd:string"/>
+            <xsd:attribute name="cloneFromCatalog" type="xsd:string"/>
+            <xsd:attribute name="timeTravelType" type="timeTravelTypeEnum"/>
+            <xsd:attribute name="timeTravelValue" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="alterStage">
+        <xsd:complexType>
+            <!-- Core ALTER attributes -->
+            <xsd:attribute name="stageName" type="xsd:string" use="required"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
+            <xsd:attribute name="renameTo" type="xsd:string"/>
+            
+            <!-- SET operations -->
+            <xsd:attribute name="url" type="xsd:string"/>
+            <xsd:attribute name="storageIntegration" type="xsd:string"/>
+            <xsd:attribute name="comment" type="xsd:string"/>
+            <xsd:attribute name="encryption" type="xsd:string"/>
+            <xsd:attribute name="fileFormat" type="xsd:string"/>
+            <xsd:attribute name="directoryEnable" type="xsd:boolean"/>
+            
+            <!-- SET cloud credentials operations -->
+            <xsd:attribute name="awsKeyId" type="xsd:string"/>
+            <xsd:attribute name="awsSecretKey" type="xsd:string"/>
+            <xsd:attribute name="awsToken" type="xsd:string"/>
+            <xsd:attribute name="awsRole" type="xsd:string"/>
+            <xsd:attribute name="gcsServiceAccountKey" type="xsd:string"/>
+            <xsd:attribute name="azureAccountName" type="xsd:string"/>
+            <xsd:attribute name="azureAccountKey" type="xsd:string"/>
+            <xsd:attribute name="azureSasToken" type="xsd:string"/>
+            
+            <!-- SET tag operations -->
+            <xsd:attribute name="tagName" type="xsd:string"/>
+            <xsd:attribute name="tagValue" type="xsd:string"/>
+            
+            <!-- UNSET operations -->
+            <xsd:attribute name="unsetUrl" type="xsd:boolean"/>
+            <xsd:attribute name="unsetStorageIntegration" type="xsd:boolean"/>
+            <xsd:attribute name="unsetCredentials" type="xsd:boolean"/>
+            <xsd:attribute name="unsetEncryption" type="xsd:boolean"/>
+            <xsd:attribute name="unsetFileFormat" type="xsd:boolean"/>
+            <xsd:attribute name="unsetComment" type="xsd:boolean"/>
+            <xsd:attribute name="unsetTagName" type="xsd:string"/>
+            
+            <!-- REFRESH operations -->
+            <xsd:attribute name="refreshDirectory" type="xsd:boolean"/>
+            <xsd:attribute name="refreshSubpath" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="dropStage">
+        <xsd:complexType>
+            <xsd:attribute name="stageName" type="xsd:string" use="required"/>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="ifExists" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
+
+    <!-- Stage Enumeration Types -->
+    <xsd:simpleType name="encryptionTypeEnum">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="SNOWFLAKE_FULL"/>
+            <xsd:enumeration value="SNOWFLAKE_SSE"/>
+            <xsd:enumeration value="AWS_SSE_S3"/>
+            <xsd:enumeration value="AWS_SSE_KMS"/>
+            <xsd:enumeration value="AWS_CSE"/>
+            <xsd:enumeration value="GCS_SSE_KMS"/>
+            <xsd:enumeration value="AZURE_CSE"/>
+            <xsd:enumeration value="NONE"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="timeTravelTypeEnum">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="TIMESTAMP"/>
+            <xsd:enumeration value="OFFSET"/>
+            <xsd:enumeration value="STATEMENT"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+
+</xsd:schema>

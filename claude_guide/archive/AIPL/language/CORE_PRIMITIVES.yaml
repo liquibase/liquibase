@@ -1,0 +1,382 @@
+AIPL_VERSION: "2.0"
+DOCUMENT_TYPE: CORE_LANGUAGE_PRIMITIVES
+VALIDATION_MODE: STRICT
+
+IMPORTS:
+  - "../core/TERMINOLOGY_DEFINITIONS.yaml"
+
+REQUIRES:
+  - BEHAVIORAL_KEYWORDS
+
+PURPOSE: "Domain-agnostic execution primitives - the fundamental building blocks of AIPL programs"
+
+CORE_LANGUAGE_PRINCIPLES:
+  DOMAIN_AGNOSTIC: "No technology-specific knowledge in core primitives"
+  COMPOSABLE: "Primitives combine to create complex workflows"
+  EXECUTABLE: "All constructs immediately actionable by AI"
+  DETERMINISTIC: "Boolean conditions with clear branching logic"
+  PARAMETERIZED: "Variable substitution throughout all constructs"
+  BEHAVIORAL_ALIGNED: "Uses BEHAVIORAL_KEYWORDS for consistent AI responses"
+
+EXECUTION_PRIMITIVES:
+  PURPOSE: "Basic execution constructs available in all AIPL programs"
+  
+  COMMAND:
+    PURPOSE: "Execute shell command with validation and error handling"
+    SYNTAX: |
+      COMMAND:
+        NAME: "command-identifier"
+        EXECUTE: "shell command with ${VARIABLES}"
+        WORKING_DIR: "${PATH}" # Optional
+        TIMEOUT: 120 # Optional, seconds
+        EXPECTED_EXIT_CODE: 0 # Optional
+        CAPTURE_OUTPUT: true # Optional
+        ENVIRONMENT: # Optional
+          KEY: "value"
+    BEHAVIORAL_INTEGRATION:
+      EXECUTION_STEPS: "Commands are EXECUTION_STEPS with validation"
+      ACCEPTANCE_CRITERIA: "Success validated by exit code and output"
+    EXAMPLES:
+      - "mvn compile -q"
+      - "find . -name '*.java' -type f"
+      - "grep -r 'pattern' src/"
+      
+  VALIDATE:
+    PURPOSE: "Assert condition and block execution on failure"
+    SYNTAX: |
+      VALIDATE:
+        NAME: "validation-identifier"
+        TYPE: "VALIDATION_TYPE"
+        TARGET: "${CHECK_TARGET}"
+        FAILURE_ACTION: "STOP|WARN|CONTINUE"
+        ERROR_MESSAGE: "Descriptive failure message"
+        RECOVERY_STEPS: ["How to fix"] # Optional
+    BEHAVIORAL_INTEGRATION:
+      QUALITY_GATE: "Validations are QUALITY_GATE checkpoints"
+      ACCEPTANCE_CRITERIA: "Conditions must pass to proceed"
+    VALIDATION_TYPES:
+      FILE_EXISTS: "Assert file exists at path"
+      COMMAND_SUCCESS: "Assert command exits with code 0"
+      CONTAINS_TEXT: "Assert file contains pattern"
+      NOT_CONTAINS_TEXT: "Assert file does not contain pattern"
+      EQUALS: "Assert two values are equal"
+      NOT_EQUALS: "Assert two values are not equal"
+      DIRECTORY_EXISTS: "Assert directory exists"
+      PROCESS_RUNNING: "Assert process is running"
+      
+  CREATE_FILE:
+    PURPOSE: "Generate file from template with variable substitution"
+    SYNTAX: |
+      CREATE_FILE:
+        NAME: "file-creation-identifier"
+        TEMPLATE: "TEMPLATE_NAME"
+        OUTPUT: "${OUTPUT_PATH}"
+        MODE: "WRITE|APPEND|CREATE_NEW"
+        PERMISSIONS: "644" # Optional
+        VARIABLES: # Optional override
+          KEY: "${VALUE}"
+    BEHAVIORAL_INTEGRATION:
+      DELIVERABLE: "Created files are DELIVERABLES with validation"
+      EXECUTION_STEPS: "File creation is specific action"
+    VALIDATION:
+      POST_CREATION: "Automatically validates file was created"
+      CONTENT_VALIDATION: "Can include content validation commands"
+      
+  CONDITIONAL:
+    PURPOSE: "Branch execution based on boolean condition"
+    SYNTAX: |
+      CONDITIONAL:
+        NAME: "decision-point-identifier"
+        CONDITION:
+          TYPE: "CONDITION_TYPE"
+          LEFT: "${COMPARISON_VALUE_1}"
+          RIGHT: "${COMPARISON_VALUE_2}"
+          TARGET: "${CHECK_TARGET}" # For single-value conditions
+        THEN:
+          - STEP_IF_TRUE
+        ELSE:
+          - STEP_IF_FALSE
+    CONDITION_TYPES:
+      FILE_EXISTS: "Check if file exists"
+      COMMAND_SUCCESS: "Check if command succeeds"
+      EQUALS: "Check if two values are equal"
+      CONTAINS: "Check if text contains pattern"
+      GREATER_THAN: "Numeric comparison"
+      LESS_THAN: "Numeric comparison"
+      
+  LOOP:
+    PURPOSE: "Iterate over collection with variable binding"
+    SYNTAX: |
+      LOOP:
+        NAME: "iteration-identifier"
+        ITERATE_OVER:
+          TYPE: "ITERATION_TYPE"
+          SOURCE: "${DATA_SOURCE}"
+          SPLIT_ON: "\n" # Optional
+        VARIABLE: "loop_variable_name"
+        STEPS:
+          - LOOP_STEP_1
+          - LOOP_STEP_2
+    ITERATION_TYPES:
+      COMMAND_OUTPUT: "Iterate over command output lines"
+      FILE_LINES: "Iterate over file lines"
+      DIRECTORY_CONTENTS: "Iterate over directory contents"
+      VARIABLE_LIST: "Iterate over variable values"
+      
+  PARALLEL:
+    PURPOSE: "Execute multiple steps concurrently"
+    SYNTAX: |
+      PARALLEL:
+        NAME: "concurrent-identifier"
+        WAIT_FOR_ALL: true
+        TIMEOUT: 300 # Optional, seconds
+        MAX_CONCURRENT: 4 # Optional
+        TASKS:
+          - CONCURRENT_STEP_1
+          - CONCURRENT_STEP_2
+    BEHAVIORAL_INTEGRATION:
+      EXECUTION_STEPS: "Parallel tasks are concurrent execution steps"
+      ACCEPTANCE_CRITERIA: "All tasks must complete successfully"
+      
+  RETRY:
+    PURPOSE: "Re-attempt step with backoff strategy"
+    SYNTAX: |
+      RETRY:
+        NAME: "retry-identifier"
+        MAX_ATTEMPTS: 3
+        DELAY: 5 # seconds
+        BACKOFF_MULTIPLIER: 2
+        RETRY_CONDITIONS: ["error_pattern_1", "error_pattern_2"]
+        STEP:
+          # Nested step to retry
+        ON_FINAL_FAILURE: "STOP|CONTINUE|ESCALATE"
+    BEHAVIORAL_INTEGRATION:
+      QUALITY_GATE: "Final failure can trigger quality gate"
+      EXECUTION_STEPS: "Retry is resilient execution pattern"
+      
+  CAPTURE:
+    PURPOSE: "Store command output or file content in variable"
+    SYNTAX: |
+      CAPTURE:
+        NAME: "capture-identifier"
+        SOURCE:
+          TYPE: "COMMAND|FILE|EXPRESSION"
+          VALUE: "command or file path or expression"
+        STORE_AS: "VARIABLE_NAME"
+        TRANSFORM: "sed|awk|grep expression" # Optional
+    BEHAVIORAL_INTEGRATION:
+      EXECUTION_STEPS: "Capture is data gathering execution step"
+      DELIVERABLE: "Captured data is intermediate deliverable"
+
+VARIABLE_SYSTEM:
+  PURPOSE: "Variable declaration, substitution, and manipulation"
+  
+  VARIABLE_SYNTAX:
+    DECLARATION: "VARIABLE_NAME: \"${SUBSTITUTION_VALUE}\""
+    SUBSTITUTION: "${VARIABLE_NAME}"
+    NESTED_SUBSTITUTION: "${BASE_PATH}/${SUB_PATH}"
+    COMPUTED_VALUES: "${PREFIX}_${SUFFIX}"
+    DEFAULT_VALUES: "${VARIABLE_NAME:-default_value}"
+    
+  BUILT_IN_FUNCTIONS:
+    STRING_OPERATIONS:
+      UPPER: "upper(${TEXT})"
+      LOWER: "lower(${TEXT})"
+      REPLACE: "replace(${TEXT}, ${OLD}, ${NEW})"
+      SUBSTRING: "substring(${TEXT}, ${START}, ${LENGTH})"
+      TRIM: "trim(${TEXT})"
+      
+    PATH_OPERATIONS:
+      DIRNAME: "dirname(${PATH})"
+      BASENAME: "basename(${PATH})"
+      JOIN_PATH: "join_path(${PATH1}, ${PATH2})"
+      ABSOLUTE_PATH: "absolute_path(${RELATIVE_PATH})"
+      
+    DATE_TIME_OPERATIONS:
+      CURRENT_DATE: "current_date(${FORMAT})"
+      CURRENT_TIME: "current_time(${FORMAT})"
+      DATE_ADD: "date_add(${DATE}, ${DAYS})"
+      
+    UTILITY_FUNCTIONS:
+      RANDOM_STRING: "random_string(${LENGTH})"
+      HASH: "hash(${TEXT}, ${ALGORITHM})"
+      ENCODE: "encode(${TEXT}, ${ENCODING})"
+
+CONTROL_FLOW_CONSTRUCTS:
+  PURPOSE: "Program flow control and dependency management"
+  
+  PHASE_SYSTEM:
+    PHASE_DEFINITION: |
+      PHASES:
+        PHASE_NAME:
+          DESCRIPTION: "What this phase accomplishes"
+          DEPENDS_ON: ["PREREQUISITE_PHASE"] # Optional
+          TIMEOUT: 600 # Optional, seconds
+          STEPS:
+            - STEP_1
+            - STEP_2
+    PHASE_EXECUTION:
+      SEQUENTIAL: "Phases execute in declared order"
+      DEPENDENCY_RESOLUTION: "DEPENDS_ON enforces prerequisites"
+      FAILURE_ISOLATION: "Phase failure doesn't affect other phases unless dependent"
+      
+  STEP_DEPENDENCIES:
+    STEP_ORDERING: |
+      STEPS:
+        - STEP_A: 
+            DEPENDS_ON: []
+        - STEP_B:
+            DEPENDS_ON: [STEP_A]
+        - STEP_C:
+            DEPENDS_ON: [STEP_A, STEP_B]
+    DEPENDENCY_VALIDATION:
+      CIRCULAR_DETECTION: "Error on circular step dependencies"
+      MISSING_DEPENDENCIES: "Error if dependency not found"
+      
+  ERROR_PROPAGATION:
+    STEP_FAILURE: "Step failure triggers step-level error handler"
+    PHASE_FAILURE: "Phase failure triggers phase-level error handler"
+    GLOBAL_FAILURE: "Unhandled failures trigger global error handler"
+    ESCALATION_CHAIN: "Clear escalation from step → phase → global"
+
+TEMPLATE_SYSTEM:
+  PURPOSE: "Code generation and content templating"
+  
+  TEMPLATE_DEFINITION:
+    SYNTAX: |
+      TEMPLATES:
+        TEMPLATE_NAME: |
+          Content with ${VARIABLE_SUBSTITUTION}
+          Fixed text content
+          More ${VARIABLES}
+    VARIABLE_SCOPE: "All program and imported variables available"
+    NESTED_TEMPLATES: "Templates can reference other templates"
+    
+  TEMPLATE_USAGE:
+    CREATE_FILE_INTEGRATION: |
+      CREATE_FILE:
+        TEMPLATE: "TEMPLATE_NAME"
+        VARIABLES:
+          VARIABLE_SUBSTITUTION: "replacement_value"
+    INLINE_USAGE: "Templates can be used in any string context"
+    
+  TEMPLATE_PROCESSING:
+    VARIABLE_RESOLUTION: "All ${VARIABLE} patterns replaced before use"
+    NESTED_SUBSTITUTION: "Variables can reference other variables"
+    UNDEFINED_VARIABLE_ERROR: "Error on undefined variables"
+    CONDITIONAL_CONTENT: "Templates can include conditional sections"
+
+ERROR_HANDLING_SYSTEM:
+  PURPOSE: "Comprehensive error handling and recovery"
+  
+  FAILURE_ACTIONS:
+    STOP: "Halt execution immediately, no further steps"
+    CONTINUE: "Log error but continue with next step"
+    RETRY: "Re-attempt current step with backoff"
+    SKIP_PHASE: "Skip remainder of current phase"
+    ESCALATE: "Pass error to higher-level handler"
+    
+  ERROR_HANDLER_HIERARCHY:
+    STEP_LEVEL: |
+      STEP_NAME:
+        ERROR_HANDLING:
+          FAILURE_ACTION: "CONTINUE"
+          ON_ERROR:
+            - LOG: "Step failed but continuing"
+    PHASE_LEVEL: |
+      PHASE_NAME:
+        ERROR_HANDLING:
+          FAILURE_ACTION: "RETRY"
+          MAX_ATTEMPTS: 2
+          ON_FINAL_FAILURE:
+            - ESCALATE: "Phase retry exhausted"
+    GLOBAL_LEVEL: |
+      ERROR_HANDLING:
+        GLOBAL_FAILURE_ACTION: "STOP"
+        CLEANUP_ON_FAILURE:
+          - COMMAND: "cleanup_command"
+            
+  CLEANUP_SYSTEM:
+    AUTOMATIC_CLEANUP: "Cleanup actions run on any failure"
+    RESOURCE_CLEANUP: "File handles, processes, temporary resources"
+    STATE_RESTORATION: "Restore system state before program execution"
+
+VALIDATION_SYSTEM:
+  PURPOSE: "Built-in validation for program correctness"
+  
+  SYNTAX_VALIDATION:
+    YAML_SYNTAX: "Programs must be valid YAML"
+    STRUCTURE_VALIDATION: "Required sections must be present"
+    PRIMITIVE_USAGE: "All primitives must follow correct syntax"
+    
+  SEMANTIC_VALIDATION:
+    VARIABLE_RESOLUTION: "All variable references must be resolvable"
+    TEMPLATE_VALIDATION: "All template references must exist"
+    DEPENDENCY_VALIDATION: "Phase/step dependencies must form acyclic graph"
+    BEHAVIORAL_KEYWORD_VALIDATION: "Keywords must be used correctly"
+    
+  RUNTIME_VALIDATION:
+    COMMAND_VALIDATION: "Commands must be executable"
+    FILE_PATH_VALIDATION: "File paths must be accessible"
+    PERMISSION_VALIDATION: "Required permissions must be available"
+
+EXTENSION_POINTS:
+  PURPOSE: "How domain libraries can extend core primitives"
+  
+  CUSTOM_VALIDATION_TYPES:
+    DEFINITION: "Domain libraries can define new VALIDATION_TYPE values"
+    IMPLEMENTATION: "Must provide validation logic"
+    REGISTRATION: "Register in library VALIDATION_TYPES section"
+    
+  CUSTOM_STEP_TYPES:
+    DEFINITION: "Domain libraries can define new step types"
+    IMPLEMENTATION: "Must provide execution logic"
+    INTEGRATION: "Must follow UNIVERSAL_STEP_TEMPLATE"
+    
+  CUSTOM_FUNCTIONS:
+    DEFINITION: "Domain libraries can define new built-in functions"
+    SCOPE: "Available in variable expressions"
+    NAMING: "Must follow domain_function_name convention"
+    
+  CUSTOM_TEMPLATES:
+    DEFINITION: "Domain libraries provide domain-specific templates"
+    AVAILABILITY: "Imported templates available to programs"
+    NAMESPACE: "Library templates share program template namespace"
+
+CORE_CONSTRAINTS:
+  PURPOSE: "Constraints ensuring core language remains domain-agnostic"
+  
+  PROHIBITED_CONTENT:
+    NO_DOMAIN_KNOWLEDGE: "Core contains no technology-specific information"
+    NO_HARD_CODED_PATHS: "All paths must be parameterized with variables"
+    NO_TOOL_SPECIFIC_COMMANDS: "All commands must be parameterized and templated"
+    NO_BUSINESS_LOGIC: "Core provides execution primitives only"
+    
+  VALIDATION_RULES:
+    DOMAIN_AGNOSTIC_CHECK: "Scan for technology-specific terms"
+    PARAMETERIZATION_CHECK: "Verify all content is parameterized"
+    PRIMITIVE_PURITY: "Ensure primitives contain only execution logic"
+    
+  EXTENSION_BOUNDARIES:
+    SAFE_EXTENSIONS: "Validation types, step types, functions"
+    PROHIBITED_EXTENSIONS: "Core primitive modification"
+    COMPATIBILITY_REQUIREMENTS: "Extensions must maintain backward compatibility"
+
+IMPORT_AND_USAGE:
+  PURPOSE: "How other files use these core primitives"
+  
+  STANDARD_USAGE:
+    BASIC_PROGRAMS: "Use primitives directly in program phases"
+    ADVANCED_PROGRAMS: "Combine primitives with imported library patterns"
+    LIBRARY_IMPLEMENTATION: "Libraries implement patterns using these primitives"
+    
+  BEHAVIORAL_INTEGRATION:
+    TERMINOLOGY_USAGE: "Always use BEHAVIORAL_KEYWORDS from TERMINOLOGY_DEFINITIONS"
+    STEP_CLASSIFICATION: "Classify primitive usage according to STEP_SPECIFICATIONS"
+    AUTONOMOUS_COMPLIANCE: "Ensure primitive usage supports autonomous operation"
+    
+  QUALITY_REQUIREMENTS:
+    SYNTAX_COMPLIANCE: "Follow primitive syntax exactly"
+    BEHAVIORAL_CONSISTENCY: "Use appropriate behavioral keywords"
+    ERROR_HANDLING: "Include appropriate error handling for each primitive"
+    VALIDATION_COVERAGE: "Validate critical operations using VALIDATE primitive"

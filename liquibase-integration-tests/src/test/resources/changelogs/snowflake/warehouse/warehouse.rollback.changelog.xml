@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.33.xsd">
+
+    <!-- Test Rollback Scenarios for Warehouses -->
+    
+    <!-- Create warehouse that can be rolled back -->
+    <changeSet author="liquibase-test" id="rollback-warehouse-1">
+        <createWarehouse warehouseName="LB_ROLLBACK_TEST_WH"
+                        warehouseSize="XSMALL"
+                        autoSuspend="60"
+                        autoResume="true"
+                        comment="Rollback test warehouse"/>
+        <rollback>
+            <dropWarehouse warehouseName="LB_ROLLBACK_TEST_WH"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Modify warehouse properties -->
+    <changeSet author="liquibase-test" id="rollback-warehouse-2">
+        <alterWarehouse warehouseName="LB_ROLLBACK_TEST_WH"
+                       newWarehouseSize="SMALL"
+                       newComment="Modified for rollback test"/>
+        <rollback>
+            <alterWarehouse warehouseName="LB_ROLLBACK_TEST_WH"
+                           newWarehouseSize="XSMALL"
+                           newComment="Rollback test warehouse"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Add clustering -->
+    <changeSet author="liquibase-test" id="rollback-warehouse-3">
+        <alterWarehouse warehouseName="LB_ROLLBACK_TEST_WH"
+                       newWarehouseType="STANDARD"
+                       newMinClusterCount="1"
+                       newMaxClusterCount="2"/>
+        <rollback>
+            <!-- Note: Snowflake doesn't support rolling back clustering changes easily -->
+            <!-- This would require recreating the warehouse -->
+            <dropWarehouse warehouseName="LB_ROLLBACK_TEST_WH"/>
+            <createWarehouse warehouseName="LB_ROLLBACK_TEST_WH"
+                            warehouseSize="SMALL"
+                            autoSuspend="60"
+                            autoResume="true"
+                            comment="Modified for rollback test"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Test tag for rollback point -->
+    <changeSet author="liquibase-test" id="rollback-tag">
+        <tagDatabase tag="before-warehouse-drop"/>
+    </changeSet>
+
+    <!-- Drop warehouse - this should be rollback-able -->
+    <changeSet author="liquibase-test" id="rollback-warehouse-drop">
+        <dropWarehouse warehouseName="LB_ROLLBACK_TEST_WH"/>
+        <rollback>
+            <!-- Recreate the warehouse as it was -->
+            <createWarehouse warehouseName="LB_ROLLBACK_TEST_WH"
+                            warehouseSize="SMALL"
+                            warehouseType="STANDARD"
+                            minClusterCount="1"
+                            maxClusterCount="2"
+                            autoSuspend="60"
+                            autoResume="true"
+                            comment="Modified for rollback test"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

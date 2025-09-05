@@ -1,0 +1,209 @@
+AIPL_VERSION: "1.0"
+PROGRAM_NAME: "architectural-compliance-validation"
+DESCRIPTION: "Automated validation of architectural compliance for Liquibase extension implementations"
+
+VARIABLES:
+  EXTENSION_PATH: "${LIQUIBASE_EXTENSION_ROOT}"
+  CHANGE_TYPE: "${CHANGE_TYPE_NAME}"
+  NEW_ATTRIBUTE: "${NEW_ATTRIBUTE_NAME}"
+  CHANGETYPE_NAME: "${CHANGETYPE_NAME}"
+
+PHASES:
+  VALIDATE_ARCHITECTURAL_PATTERNS:
+    DESCRIPTION: "Check for architectural compliance violations"
+    STEPS:
+      - COMMAND:
+          NAME: "check-forbidden-change-classes"
+          EXECUTE: "find ${EXTENSION_PATH} -name '*ChangeSnowflake.java' -path '*/change/core/*'"
+          
+      - VALIDATE:
+          NAME: "no-database-specific-change-classes"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "test $(find ${EXTENSION_PATH} -name '*ChangeSnowflake.java' -path '*/change/core/*' | wc -l) -eq 0"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Database-specific change classes found - use namespace attributes instead"
+          
+      - COMMAND:
+          NAME: "verify-parser-support"
+          EXECUTE: "grep -n '${CHANGETYPE_NAME}' ${EXTENSION_PATH}/src/main/java/liquibase/parser/SnowflakeNamespaceAwareXMLParser.java"
+          
+      - VALIDATE:
+          NAME: "parser-supports-changetype"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/java/liquibase/parser/SnowflakeNamespaceAwareXMLParser.java"
+          PATTERN: "${CHANGETYPE_NAME}"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Parser does not support changetype - add to SnowflakeNamespaceAwareXMLParser"
+
+  VALIDATE_XSD_COMPLIANCE:
+    DESCRIPTION: "Verify XSD schema attributes are properly defined"
+    STEPS:
+      - COMMAND:
+          NAME: "check-xsd-attributes"
+          EXECUTE: "grep -A 5 -B 1 'xsd:attribute.*name=\"${NEW_ATTRIBUTE}\"' ${EXTENSION_PATH}/src/main/resources/*.xsd"
+          
+      - VALIDATE:
+          NAME: "xsd-attribute-defined"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/resources/www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd"
+          PATTERN: "name=\"${NEW_ATTRIBUTE}\""
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "XSD attribute definition missing for new attribute"
+          
+      - COMMAND:
+          NAME: "validate-xsd-syntax"
+          EXECUTE: "xmllint --schema xsd-validation.xsd --noout ${EXTENSION_PATH}/src/main/resources/*.xsd"
+
+  VALIDATE_GENERATOR_PATTERNS:
+    DESCRIPTION: "Check SQL generator compliance with namespace patterns"
+    STEPS:
+      - COMMAND:
+          NAME: "check-namespace-storage-usage"
+          EXECUTE: "grep -l 'SnowflakeNamespaceAttributeStorage' ${EXTENSION_PATH}/src/main/java/liquibase/sqlgenerator/core/*.java"
+          
+      - VALIDATE:
+          NAME: "generators-use-namespace-storage"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "grep -q 'SnowflakeNamespaceAttributeStorage' ${EXTENSION_PATH}/src/main/java/liquibase/sqlgenerator/core/*${CHANGE_TYPE}*Generator*.java"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "SQL generators must use SnowflakeNamespaceAttributeStorage for attribute access"
+          
+      - COMMAND:
+          NAME: "verify-generator-priority"
+          EXECUTE: "grep -n 'getPriority' ${EXTENSION_PATH}/src/main/java/liquibase/sqlgenerator/core/*${CHANGE_TYPE}*Generator*.java"
+
+  RUN_BUILD_VALIDATION:
+    DESCRIPTION: "Execute comprehensive build and test validation"
+    STEPS:
+      - COMMAND:
+          NAME: "compile-project"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn compile"
+          
+      - VALIDATE:
+          NAME: "compilation-succeeds"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "cd ${EXTENSION_PATH} && mvn compile -q"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Compilation failed - fix compile errors before proceeding"
+          
+      - COMMAND:
+          NAME: "run-unit-tests"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn test -Dtest='*${CHANGE_TYPE}*Test'"
+          
+      - COMMAND:
+          NAME: "run-integration-tests"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn test -Dtest='*${CHANGE_TYPE}*IntegrationTest'"
+          
+      - COMMAND:
+          NAME: "package-project"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn package -DskipTests"
+          
+      - VALIDATE:
+          NAME: "packaging-succeeds"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "cd ${EXTENSION_PATH} && mvn package -DskipTests -q"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Packaging failed - check build configuration"
+
+  RUN_CODE_QUALITY_CHECKS:
+    DESCRIPTION: "Execute code quality and style validation"
+    STEPS:
+      - COMMAND:
+          NAME: "run-checkstyle"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn checkstyle:check"
+          
+      - VALIDATE:
+          NAME: "checkstyle-passes"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "cd ${EXTENSION_PATH} && mvn checkstyle:check -q"
+          FAILURE_ACTION: "CONTINUE"
+          ERROR_MESSAGE: "Checkstyle violations found - review and fix style issues"
+          
+      - COMMAND:
+          NAME: "check-test-coverage"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn test -Dtest='*${CHANGE_TYPE}*' jacoco:report"
+
+  GENERATE_COMPLIANCE_REPORT:
+    DESCRIPTION: "Generate architectural compliance report"
+    STEPS:
+      - CREATE_FILE:
+          NAME: "create-compliance-report"
+          TEMPLATE: "ARCHITECTURAL_COMPLIANCE_REPORT"
+          OUTPUT: "${EXTENSION_PATH}/temp/architectural_compliance_report.txt"
+          
+      - COMMAND:
+          NAME: "display-compliance-report"
+          EXECUTE: "cat ${EXTENSION_PATH}/temp/architectural_compliance_report.txt"
+
+TEMPLATES:
+  ARCHITECTURAL_COMPLIANCE_REPORT: |
+    ARCHITECTURAL COMPLIANCE REPORT
+    ===============================
+    Change Type: ${CHANGE_TYPE}
+    Validation Date: $(date)
+    
+    ARCHITECTURAL PATTERN COMPLIANCE:
+    - Database-specific change classes: $(find ${EXTENSION_PATH} -name '*ChangeSnowflake.java' -path '*/change/core/*' | wc -l) (should be 0)
+    - Parser support verified: $(grep -c '${CHANGETYPE_NAME}' ${EXTENSION_PATH}/src/main/java/liquibase/parser/SnowflakeNamespaceAwareXMLParser.java)
+    - XSD attribute definition: $(grep -c 'name="${NEW_ATTRIBUTE}"' ${EXTENSION_PATH}/src/main/resources/*.xsd)
+    - Namespace storage usage: $(grep -c 'SnowflakeNamespaceAttributeStorage' ${EXTENSION_PATH}/src/main/java/liquibase/sqlgenerator/core/*${CHANGE_TYPE}*Generator*.java)
+    
+    BUILD VALIDATION:
+    - Compilation: $(cd ${EXTENSION_PATH} && mvn compile -q > /dev/null 2>&1 && echo "PASS" || echo "FAIL")
+    - Unit tests: $(cd ${EXTENSION_PATH} && mvn test -Dtest='*${CHANGE_TYPE}*Test' -q > /dev/null 2>&1 && echo "PASS" || echo "FAIL")
+    - Packaging: $(cd ${EXTENSION_PATH} && mvn package -DskipTests -q > /dev/null 2>&1 && echo "PASS" || echo "FAIL")
+    - Checkstyle: $(cd ${EXTENSION_PATH} && mvn checkstyle:check -q > /dev/null 2>&1 && echo "PASS" || echo "FAIL")
+    
+    OVERALL COMPLIANCE: $(if [ $(find ${EXTENSION_PATH} -name '*ChangeSnowflake.java' -path '*/change/core/*' | wc -l) -eq 0 ]; then echo "COMPLIANT"; else echo "NON-COMPLIANT"; fi)
+
+VALIDATION_COMMANDS:
+  ARCHITECTURAL_COMPLIANCE:
+    CHECK_VIOLATIONS: "find . -name '*ChangeSnowflake.java' -path '*/change/core/*'"
+    VERIFY_PARSER_SUPPORT: "grep -n '${CHANGETYPE_NAME}' src/main/java/liquibase/parser/SnowflakeNamespaceAwareXMLParser.java"
+    VALIDATE_XSD_ATTRIBUTES: "grep -A 5 -B 1 'xsd:attribute.*name=\"${NEW_ATTRIBUTE}\"' src/main/resources/*.xsd"
+    CHECK_GENERATOR_PATTERN: "grep -l 'SnowflakeNamespaceAttributeStorage' src/main/java/liquibase/sqlgenerator/core/*.java"
+    
+  TEST_EXECUTION:
+    UNIT_TESTS: "mvn test -Dtest='*${CHANGE_TYPE}*Test'"
+    INTEGRATION_TESTS: "mvn test -Dtest='*${CHANGE_TYPE}*IntegrationTest'"
+    FULL_SUITE: "mvn test"
+    
+  BUILD_VALIDATION:
+    COMPILE: "mvn compile"
+    PACKAGE: "mvn package -DskipTests"
+    LINT_CHECK: "mvn checkstyle:check"
+
+ARCHITECTURAL_REQUIREMENTS:
+  FORBIDDEN_PATTERNS:
+    DATABASE_SPECIFIC_CHANGES: "No *ChangeSnowflake.java classes in change/core/"
+    DIRECT_ATTRIBUTE_ACCESS: "Use SnowflakeNamespaceAttributeStorage instead of direct attributes"
+    MISSING_PARSER_SUPPORT: "All changetypes must be registered in SnowflakeNamespaceAwareXMLParser"
+    
+  REQUIRED_PATTERNS:
+    NAMESPACE_ATTRIBUTE_EXTENSION: "Extend existing Liquibase changetypes with namespace attributes"
+    XSD_SCHEMA_DEFINITION: "Define all attributes in XSD schema file"
+    SERVICE_REGISTRATION: "Register all components in META-INF/services files"
+    GENERATOR_COMPLIANCE: "SQL generators must use namespace storage and proper priority"
+
+COMMON_VIOLATIONS:
+  DATABASE_SPECIFIC_CHANGE_CLASSES:
+    VIOLATION: "Creating ChangeSnowflake classes instead of extending standard ones"
+    DETECTION: "find . -name '*ChangeSnowflake.java' -path '*/change/core/*'"
+    SOLUTION: "Use namespace attributes and extend existing Change classes"
+    
+  MISSING_SERVICE_REGISTRATION:
+    VIOLATION: "Components not discoverable due to missing service registration"
+    DETECTION: "mvn test failures with 'No suitable generator found'"
+    SOLUTION: "Add entry to META-INF/services/liquibase.sqlgenerator.SqlGenerator"
+    
+  PARSER_INTEGRATION_MISSING:
+    VIOLATION: "Changetype not recognized in XML parsing"
+    DETECTION: "XML validation errors or namespace resolution failures"
+    SOLUTION: "Add changetype support to SnowflakeNamespaceAwareXMLParser"
+
+ERROR_HANDLING:
+  GLOBAL_FAILURE_ACTION: "CONTINUE"
+  CLEANUP_ON_FAILURE:
+    - COMMAND:
+        EXECUTE: "rm -f ${EXTENSION_PATH}/temp/architectural_compliance_report.txt"
+        CONTINUE_ON_ERROR: true

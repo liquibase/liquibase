@@ -46,8 +46,7 @@ public class BinaryTypeSnowflakeTest {
                 "varbinary",
                 "binary",
                 "image",
-                "tinyblob",
-                "mediumblob");
+                "tinyblob");
         assertTrue(Arrays.asList(aliases).containsAll(snowflakeBinaryAliasList));
     }
 

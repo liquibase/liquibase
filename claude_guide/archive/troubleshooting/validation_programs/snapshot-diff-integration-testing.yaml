@@ -1,0 +1,469 @@
+AIPL_VERSION: "1.0"
+PROGRAM_NAME: "snapshot-diff-integration-testing"
+DESCRIPTION: "Comprehensive integration testing workflow for snapshot and diff implementations"
+
+VARIABLES:
+  EXTENSION_PATH: "${LIQUIBASE_EXTENSION_ROOT}"
+  OBJECT_TYPE: "${OBJECT_TYPE}"
+  OBJECT_NAME: "${TEST_OBJECT_NAME}"
+  DATABASE_TYPE: "${DATABASE_TYPE}"
+  TEST_METHOD_NAME: "${TEST_METHOD_NAME}"
+  CATALOG_NAME: "${CATALOG_NAME}"
+  SCHEMA_NAME: "${SCHEMA_NAME}"
+
+PHASES:
+  VALIDATE_INTEGRATION_TEST_SETUP:
+    DESCRIPTION: "Verify integration test environment and prerequisites"
+    STEPS:
+      - VALIDATE:
+          NAME: "check-database-connectivity"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "echo 'SELECT 1' | sqlcmd"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Database connectivity failed - check connection settings"
+          
+      - VALIDATE:
+          NAME: "verify-object-creation-permissions"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "echo 'CREATE ${OBJECT_TYPE} test_validation_temp' | sqlcmd && echo 'DROP ${OBJECT_TYPE} test_validation_temp' | sqlcmd"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Object creation/deletion permissions insufficient"
+          
+      - VALIDATE:
+          NAME: "check-information-schema-access"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "echo 'SELECT * FROM INFORMATION_SCHEMA.${OBJECT_TYPE}S LIMIT 1' | sqlcmd"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "INFORMATION_SCHEMA access denied or object type not supported"
+
+  VALIDATE_SERVICE_REGISTRATIONS:
+    DESCRIPTION: "Verify all required service registrations are present"
+    STEPS:
+      - VALIDATE:
+          NAME: "snapshot-generator-registered"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/resources/META-INF/services/liquibase.snapshot.SnapshotGenerator"
+          PATTERN: "${OBJECT_TYPE}SnapshotGenerator"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "SnapshotGenerator service registration missing"
+          
+      - VALIDATE:
+          NAME: "comparator-registered"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/resources/META-INF/services/liquibase.diff.output.DatabaseObjectComparator"
+          PATTERN: "${OBJECT_TYPE}Comparator"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "DatabaseObjectComparator service registration missing"
+          
+      - VALIDATE:
+          NAME: "database-object-registered"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/resources/META-INF/services/liquibase.structure.DatabaseObject"
+          PATTERN: "${OBJECT_TYPE}"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "DatabaseObject service registration missing - critical for snapshot inclusion"
+
+  RUN_SNAPSHOT_INTEGRATION_TESTS:
+    DESCRIPTION: "Execute comprehensive snapshot integration testing workflow"
+    STEPS:
+      - COMMAND:
+          NAME: "create-test-object"
+          EXECUTE: "echo 'CREATE ${OBJECT_TYPE} ${OBJECT_NAME}_${TEST_METHOD_NAME}' | sqlcmd"
+          
+      - COMMAND:
+          NAME: "run-snapshot-tests"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn test -Dtest='*${OBJECT_TYPE}*SnapshotTest'"
+          
+      - VALIDATE:
+          NAME: "snapshot-tests-pass"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "cd ${EXTENSION_PATH} && mvn test -Dtest='*${OBJECT_TYPE}*SnapshotTest' -q"
+          FAILURE_ACTION: "CONTINUE"
+          ERROR_MESSAGE: "Snapshot tests failed - check object discovery and property mapping"
+          
+      - COMMAND:
+          NAME: "verify-object-in-snapshot"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn test -Dtest='*${OBJECT_TYPE}*IntegrationTest#testObjectFoundInSnapshot'"
+          
+      - COMMAND:
+          NAME: "cleanup-test-object"
+          EXECUTE: "echo 'DROP ${OBJECT_TYPE} IF EXISTS ${OBJECT_NAME}_${TEST_METHOD_NAME}' | sqlcmd"
+
+  RUN_DIFF_INTEGRATION_TESTS:
+    DESCRIPTION: "Execute comprehensive diff integration testing workflow"
+    STEPS:
+      - COMMAND:
+          NAME: "create-baseline-object"
+          EXECUTE: "echo 'CREATE ${OBJECT_TYPE} ${OBJECT_NAME}_baseline' | sqlcmd"
+          
+      - COMMAND:
+          NAME: "create-modified-object"
+          EXECUTE: "echo 'CREATE ${OBJECT_TYPE} ${OBJECT_NAME}_modified' | sqlcmd"
+          
+      - COMMAND:
+          NAME: "run-diff-tests"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn test -Dtest='*${OBJECT_TYPE}*ComparatorTest'"
+          
+      - VALIDATE:
+          NAME: "diff-tests-pass"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "cd ${EXTENSION_PATH} && mvn test -Dtest='*${OBJECT_TYPE}*ComparatorTest' -q"
+          FAILURE_ACTION: "CONTINUE"
+          ERROR_MESSAGE: "Diff tests failed - check property comparison logic"
+          
+      - COMMAND:
+          NAME: "test-identical-objects"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn test -Dtest='*${OBJECT_TYPE}*IntegrationTest#testNoDifferencesForIdenticalObjects'"
+          
+      - COMMAND:
+          NAME: "test-property-differences"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn test -Dtest='*${OBJECT_TYPE}*IntegrationTest#testDetectsPropertyDifferences'"
+          
+      - COMMAND:
+          NAME: "cleanup-diff-objects"
+          EXECUTE: "echo 'DROP ${OBJECT_TYPE} IF EXISTS ${OBJECT_NAME}_baseline; DROP ${OBJECT_TYPE} IF EXISTS ${OBJECT_NAME}_modified' | sqlcmd"
+
+  VALIDATE_END_TO_END_WORKFLOW:
+    DESCRIPTION: "Test complete snapshot-to-diff-to-changelog pipeline"
+    STEPS:
+      - COMMAND:
+          NAME: "create-complete-test-scenario"
+          EXECUTE: "echo 'CREATE ${OBJECT_TYPE} ${OBJECT_NAME}_e2e_test' | sqlcmd"
+          
+      - COMMAND:
+          NAME: "generate-baseline-snapshot"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn exec:java -Dexec.mainClass='liquibase.integration.commandline.Main' -Dexec.args='--url=${DATABASE_URL} --username=${DATABASE_USER} --password=${DATABASE_PASSWORD} snapshot --snapshotFormat=json' > baseline_snapshot.json"
+          
+      - COMMAND:
+          NAME: "modify-test-object"
+          EXECUTE: "echo 'ALTER ${OBJECT_TYPE} ${OBJECT_NAME}_e2e_test SET COMMENT = \"Modified for diff testing\"' | sqlcmd"
+          
+      - COMMAND:
+          NAME: "generate-modified-snapshot"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn exec:java -Dexec.mainClass='liquibase.integration.commandline.Main' -Dexec.args='--url=${DATABASE_URL} --username=${DATABASE_USER} --password=${DATABASE_PASSWORD} snapshot --snapshotFormat=json' > modified_snapshot.json"
+          
+      - COMMAND:
+          NAME: "generate-diff-changelog"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn exec:java -Dexec.mainClass='liquibase.integration.commandline.Main' -Dexec.args='--referenceUrl=offline:${DATABASE_TYPE}?snapshot=baseline_snapshot.json --url=${DATABASE_URL} --username=${DATABASE_USER} --password=${DATABASE_PASSWORD} diff-changelog --changelogFile=test_diff.xml'"
+          
+      - VALIDATE:
+          NAME: "diff-changelog-contains-object"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/test_diff.xml"
+          PATTERN: "${OBJECT_NAME}_e2e_test"
+          FAILURE_ACTION: "CONTINUE"
+          ERROR_MESSAGE: "Object not found in generated diff changelog - check changetype generator registration"
+          
+      - COMMAND:
+          NAME: "cleanup-e2e-test"
+          EXECUTE: "echo 'DROP ${OBJECT_TYPE} IF EXISTS ${OBJECT_NAME}_e2e_test' | sqlcmd && rm -f baseline_snapshot.json modified_snapshot.json test_diff.xml"
+
+  VALIDATE_ERROR_HANDLING:
+    DESCRIPTION: "Test error scenarios and edge cases"
+    STEPS:
+      - COMMAND:
+          NAME: "test-nonexistent-object-snapshot"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn test -Dtest='*${OBJECT_TYPE}*IntegrationTest#testSnapshotNonexistentObject'"
+          
+      - COMMAND:
+          NAME: "test-case-sensitivity-handling"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn test -Dtest='*${OBJECT_TYPE}*IntegrationTest#testCaseSensitivityHandling'"
+          
+      - COMMAND:
+          NAME: "test-null-property-handling"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn test -Dtest='*${OBJECT_TYPE}*IntegrationTest#testNullPropertyHandling'"
+          
+      - COMMAND:
+          NAME: "test-state-property-exclusion"
+          EXECUTE: "cd ${EXTENSION_PATH} && mvn test -Dtest='*${OBJECT_TYPE}*ComparatorTest#testStatePropertiesExcluded'"
+
+  GENERATE_INTEGRATION_TEST_TEMPLATES:
+    DESCRIPTION: "Generate test templates for comprehensive integration validation"
+    STEPS:
+      - CREATE_FILE:
+          NAME: "snapshot-integration-test"
+          TEMPLATE: "SNAPSHOT_INTEGRATION_TEST_TEMPLATE"
+          OUTPUT: "${EXTENSION_PATH}/temp/snapshot_integration_test.java"
+          
+      - CREATE_FILE:
+          NAME: "diff-integration-test"
+          TEMPLATE: "DIFF_INTEGRATION_TEST_TEMPLATE"
+          OUTPUT: "${EXTENSION_PATH}/temp/diff_integration_test.java"
+          
+      - CREATE_FILE:
+          NAME: "end-to-end-test"
+          TEMPLATE: "END_TO_END_TEST_TEMPLATE"
+          OUTPUT: "${EXTENSION_PATH}/temp/end_to_end_test.java"
+
+TEMPLATES:
+  SNAPSHOT_INTEGRATION_TEST_TEMPLATE: |
+    @Test
+    void testObjectFoundInSnapshot() throws Exception {
+        // Create test object
+        String objectName = getUniqueObjectName("snapshot");
+        database.execute("CREATE ${OBJECT_TYPE} " + objectName);
+        
+        try {
+            // Generate snapshot
+            DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance()
+                .createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
+            
+            // Verify object in snapshot
+            Set<${OBJECT_TYPE}> objects = snapshot.get(${OBJECT_TYPE}.class);
+            Optional<${OBJECT_TYPE}> foundObject = objects.stream()
+                .filter(obj -> obj.getName().equals(objectName))
+                .findFirst();
+            
+            assertTrue(foundObject.isPresent(), "Object should be found in snapshot");
+            
+            // Verify properties
+            ${OBJECT_TYPE} obj = foundObject.get();
+            assertEquals(objectName, obj.getName());
+            assertNotNull(obj.getCatalogName());
+            assertNotNull(obj.getSchemaName());
+            
+        } finally {
+            database.execute("DROP ${OBJECT_TYPE} IF EXISTS " + objectName);
+        }
+    }
+    
+    @Test
+    void testSnapshotHandlesNullProperties() throws Exception {
+        String objectName = getUniqueObjectName("nullProps");
+        database.execute("CREATE ${OBJECT_TYPE} " + objectName);
+        
+        try {
+            DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance()
+                .createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
+            
+            Set<${OBJECT_TYPE}> objects = snapshot.get(${OBJECT_TYPE}.class);
+            Optional<${OBJECT_TYPE}> foundObject = objects.stream()
+                .filter(obj -> obj.getName().equals(objectName))
+                .findFirst();
+            
+            assertTrue(foundObject.isPresent());
+            ${OBJECT_TYPE} obj = foundObject.get();
+            
+            // Verify null handling (adjust properties as needed)
+            // assertTrue(obj.getComment() == null || obj.getComment().isEmpty());
+            
+        } finally {
+            database.execute("DROP ${OBJECT_TYPE} IF EXISTS " + objectName);
+        }
+    }
+
+  DIFF_INTEGRATION_TEST_TEMPLATE: |
+    @Test
+    void testNoDifferencesForIdenticalObjects() throws Exception {
+        String objectName = getUniqueObjectName("identical");
+        
+        // Create identical objects in both schemas
+        database.execute("CREATE ${OBJECT_TYPE} " + objectName);
+        
+        try {
+            // Create snapshots of both
+            DatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance()
+                .createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
+            DatabaseSnapshot comparisonSnapshot = SnapshotGeneratorFactory.getInstance()
+                .createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
+            
+            // Compare
+            DiffResult diff = DiffGeneratorFactory.getInstance()
+                .compare(referenceSnapshot, comparisonSnapshot, new CompareControl());
+            
+            // Verify no differences for our object
+            Set<${OBJECT_TYPE}> missingObjects = diff.getMissingObjects(${OBJECT_TYPE}.class);
+            Set<${OBJECT_TYPE}> unexpectedObjects = diff.getUnexpectedObjects(${OBJECT_TYPE}.class);
+            Set<${OBJECT_TYPE}> changedObjects = diff.getChangedObjects(${OBJECT_TYPE}.class);
+            
+            assertTrue(missingObjects.isEmpty(), "Should have no missing objects");
+            assertTrue(unexpectedObjects.isEmpty(), "Should have no unexpected objects");
+            assertTrue(changedObjects.isEmpty(), "Should have no changed objects");
+            
+        } finally {
+            database.execute("DROP ${OBJECT_TYPE} IF EXISTS " + objectName);
+        }
+    }
+    
+    @Test
+    void testDetectsPropertyDifferences() throws Exception {
+        String objectName = getUniqueObjectName("different");
+        
+        // Create object with initial properties
+        database.execute("CREATE ${OBJECT_TYPE} " + objectName);
+        
+        try {
+            // Take baseline snapshot
+            DatabaseSnapshot baselineSnapshot = SnapshotGeneratorFactory.getInstance()
+                .createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
+            
+            // Modify object properties
+            database.execute("ALTER ${OBJECT_TYPE} " + objectName + " SET COMMENT = 'Modified comment'");
+            
+            // Take modified snapshot
+            DatabaseSnapshot modifiedSnapshot = SnapshotGeneratorFactory.getInstance()
+                .createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
+            
+            // Compare
+            DiffResult diff = DiffGeneratorFactory.getInstance()
+                .compare(baselineSnapshot, modifiedSnapshot, new CompareControl());
+            
+            // Verify differences detected
+            Set<${OBJECT_TYPE}> changedObjects = diff.getChangedObjects(${OBJECT_TYPE}.class);
+            assertFalse(changedObjects.isEmpty(), "Should detect changed object");
+            
+            // Find our specific object
+            Optional<${OBJECT_TYPE}> changedObject = changedObjects.stream()
+                .filter(obj -> obj.getName().equals(objectName))
+                .findFirst();
+            
+            assertTrue(changedObject.isPresent(), "Our object should be in changed objects");
+            
+        } finally {
+            database.execute("DROP ${OBJECT_TYPE} IF EXISTS " + objectName);
+        }
+    }
+
+  END_TO_END_TEST_TEMPLATE: |
+    @Test
+    void testCompleteSnapshotDiffChangelogWorkflow() throws Exception {
+        String objectName = getUniqueObjectName("e2e");
+        
+        // Create baseline object
+        database.execute("CREATE ${OBJECT_TYPE} " + objectName);
+        
+        try {
+            // Generate baseline snapshot
+            DatabaseSnapshot baselineSnapshot = SnapshotGeneratorFactory.getInstance()
+                .createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
+            
+            // Modify object
+            database.execute("ALTER ${OBJECT_TYPE} " + objectName + " SET COMMENT = 'E2E test modification'");
+            
+            // Generate modified snapshot
+            DatabaseSnapshot modifiedSnapshot = SnapshotGeneratorFactory.getInstance()
+                .createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
+            
+            // Generate diff
+            DiffResult diff = DiffGeneratorFactory.getInstance()
+                .compare(baselineSnapshot, modifiedSnapshot, new CompareControl());
+            
+            // Generate changelog
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            PrintStream printStream = new PrintStream(outputStream);
+            
+            DiffToChangeLog changeLogWriter = new DiffToChangeLog(diff, new DiffOutputControl());
+            changeLogWriter.setChangeSetAuthor("integration-test");
+            changeLogWriter.print(printStream);
+            
+            String changelogContent = outputStream.toString();
+            
+            // Verify changelog contains our object changes
+            assertTrue(changelogContent.contains(objectName), 
+                      "Changelog should contain modified object: " + objectName);
+            assertTrue(changelogContent.contains("E2E test modification"), 
+                      "Changelog should contain comment modification");
+            
+        } finally {
+            database.execute("DROP ${OBJECT_TYPE} IF EXISTS " + objectName);
+        }
+    }
+    
+    private String getUniqueObjectName(String prefix) {
+        return "TEST_" + prefix.toUpperCase() + "_" + System.currentTimeMillis();
+    }
+
+  INTEGRATION_TEST_HELPER_TEMPLATE: |
+    protected void cleanupTestObjects(String... objectNames) {
+        for (String objectName : objectNames) {
+            try {
+                database.execute("DROP ${OBJECT_TYPE} IF EXISTS " + objectName);
+            } catch (Exception e) {
+                // Log but don't fail test
+                System.err.println("Failed to cleanup " + objectName + ": " + e.getMessage());
+            }
+        }
+    }
+    
+    protected void assertObjectSnapshot(${OBJECT_TYPE} object, String expectedName) {
+        assertNotNull(object, "Object should not be null");
+        assertEquals(expectedName, object.getName(), "Object name should match");
+        assertNotNull(object.getCatalogName(), "Catalog name should not be null");
+        assertNotNull(object.getSchemaName(), "Schema name should not be null");
+    }
+
+INTEGRATION_TEST_WORKFLOW:
+  STEP_1_SETUP:
+    PURPOSE: "Create test objects in database"
+    APPROACH: "Use unique naming pattern: TEST_${OBJECT_TYPE}_${methodName}_${timestamp}"
+    ISOLATION: "Each test method uses different object names"
+    
+  STEP_2_SNAPSHOT:
+    PURPOSE: "Execute snapshot and verify object discovery"
+    VALIDATION: "Object found in snapshot with correct properties"
+    EDGE_CASES: "Null properties, case sensitivity, state vs config properties"
+    
+  STEP_3_DIFF:
+    PURPOSE: "Execute diff comparison and verify change detection"
+    VALIDATION: "Identical objects show no differences, modified objects show correct differences"
+    CRITICAL: "State properties must be excluded from comparison"
+    
+  STEP_4_CLEANUP:
+    PURPOSE: "Remove test objects to prevent interference"
+    APPROACH: "Always use try-finally or @AfterEach"
+    SAFETY: "Use IF EXISTS to handle cleanup failures gracefully"
+
+VALIDATION_COMMANDS:
+  VERIFY_SNAPSHOT_REGISTRATION: "grep -c 'SnapshotGenerator' src/main/resources/META-INF/services/liquibase.snapshot.SnapshotGenerator"
+  VERIFY_DIFF_REGISTRATION: "grep -c 'Comparator' src/main/resources/META-INF/services/liquibase.diff.output.DatabaseObjectComparator"
+  VERIFY_CHANGEGENERATOR_REGISTRATION: "grep -c 'ChangeGenerator' src/main/resources/META-INF/services/liquibase.diff.output.changelog.ChangeGenerator"
+  RUN_INTEGRATION_TESTS: "mvn test -Dtest='*${OBJECT_TYPE}*IntegrationTest'"
+  RUN_SNAPSHOT_TESTS: "mvn test -Dtest='*${OBJECT_TYPE}*SnapshotTest'"
+  RUN_DIFF_TESTS: "mvn test -Dtest='*${OBJECT_TYPE}*ComparatorTest'"
+
+COMMON_INTEGRATION_ISSUES:
+  OBJECT_NOT_FOUND_IN_SNAPSHOT:
+    CAUSE: "SnapshotGenerator not registered or SQL query incorrect"
+    DIAGNOSIS: "Test SQL query manually, check service registration"
+    SOLUTION: "Verify META-INF/services file and query syntax"
+    
+  UNEXPECTED_DIFFERENCES:
+    CAUSE: "State properties being compared or normalization inconsistency"
+    DIAGNOSIS: "Check which properties are showing differences"
+    SOLUTION: "Exclude state properties, implement consistent normalization"
+    
+  CASE_SENSITIVITY_ISSUES:
+    CAUSE: "Database case handling differs from expectations"
+    DIAGNOSIS: "Test with UPPER() and mixed case object names"
+    SOLUTION: "Use database-specific case handling in SQL queries"
+    
+  SERVICE_REGISTRATION_MISSING:
+    CAUSE: "Service files missing or contain incorrect class names"
+    DIAGNOSIS: "Check all three service registration files"
+    SOLUTION: "Add correct fully-qualified class names to service files"
+
+PERFORMANCE_CONSIDERATIONS:
+  OBJECT_NAMING_STRATEGY:
+    PATTERN: "TEST_${OBJECT_TYPE}_${methodName}_${timestamp}"
+    BENEFIT: "Avoids conflicts between parallel test runs"
+    CLEANUP: "Use timestamp-based cleanup for old test objects"
+    
+  DATABASE_CONNECTION_REUSE:
+    PATTERN: "Share database connection across test methods in same class"
+    BENEFIT: "Reduces connection overhead"
+    LIMITATION: "Requires careful transaction management"
+    
+  SNAPSHOT_SCOPE_OPTIMIZATION:
+    PATTERN: "Use targeted snapshots when possible"
+    BENEFIT: "Faster execution for large databases"
+    IMPLEMENTATION: "Specify object names in snapshot examples"
+
+ERROR_HANDLING:
+  GLOBAL_FAILURE_ACTION: "CONTINUE"
+  CLEANUP_ON_FAILURE:
+    - COMMAND:
+        EXECUTE: "rm -f ${EXTENSION_PATH}/temp/*_test.java"
+        CONTINUE_ON_ERROR: true
+    - COMMAND:
+        EXECUTE: "echo 'DROP ${OBJECT_TYPE} IF EXISTS ${OBJECT_NAME}_*' | sqlcmd"
+        CONTINUE_ON_ERROR: true

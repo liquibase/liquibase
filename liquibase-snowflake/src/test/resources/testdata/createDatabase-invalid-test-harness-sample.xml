@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:snowflake="http://www.liquibase.org/xml/ns/snowflake"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                      http://www.liquibase.org/xml/ns/snowflake
+                      http://www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd">
+
+    <!-- These tests are expected to FAIL due to validation errors -->
+
+    <!-- Invalid Test 1: Both OR REPLACE and IF NOT EXISTS -->
+    <changeSet id="invalid-1-both-modifiers" author="test-harness">
+        <!-- This should fail validation -->
+        <snowflake:createDatabase databaseName="INVALID_BOTH_MODIFIERS"
+                                  orReplace="true"
+                                  ifNotExists="true"/>
+    </changeSet>
+
+    <!-- Invalid Test 2: Transient database with retention > 0 -->
+    <changeSet id="invalid-2-transient-retention" author="test-harness">
+        <!-- This should fail validation -->
+        <snowflake:createDatabase databaseName="INVALID_TRANSIENT_RETENTION"
+                                  transient="true"
+                                  dataRetentionTimeInDays="7"/>
+    </changeSet>
+
+    <!-- Invalid Test 3: Missing required databaseName -->
+    <changeSet id="invalid-3-missing-name" author="test-harness">
+        <!-- This should fail validation -->
+        <snowflake:createDatabase comment="Database without name"/>
+    </changeSet>
+
+</databaseChangeLog>

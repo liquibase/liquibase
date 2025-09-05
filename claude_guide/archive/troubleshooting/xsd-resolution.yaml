@@ -1,0 +1,173 @@
+AIPL_VERSION: "1.0"
+PROGRAM_NAME: "xsd-resolution-troubleshooting"
+DESCRIPTION: "Diagnose and resolve XSD resolution failures that block XML validation"
+
+VARIABLES:
+  EXTENSION_PATH: "${LIQUIBASE_EXTENSION_ROOT}"
+  NAMESPACE_CLASS: "${NAMESPACE_CLASS_NAME}"
+  JAR_NAME_PATTERN: "${JAR_NAME_PATTERN}"
+  XSD_FILE_PATH: "${XSD_FILE_PATH}"
+
+PHASES:
+  VALIDATE_XSD_RESOLUTION:
+    DESCRIPTION: "Verify XSD entity resolution is working correctly"
+    STEPS:
+      - VALIDATE:
+          NAME: "check-no-resolution-errors"
+          TYPE: "NOT_CONTAINS_TEXT"
+          TARGET: "/tmp/test_output.log"
+          PATTERN: "Unable to resolve xml entity"
+          FAILURE_ACTION: "CONTINUE"
+          ERROR_MESSAGE: "XSD resolution failures detected"
+
+  DIAGNOSE_CLASSPATH_ISSUES:
+    DESCRIPTION: "Check JAR presence and XSD file location"
+    STEPS:
+      - COMMAND:
+          NAME: "check-jar-exists"
+          EXECUTE: "ls -la ${EXTENSION_PATH}/target/${JAR_NAME_PATTERN}"
+          
+      - COMMAND:
+          NAME: "verify-xsd-in-jar"
+          EXECUTE: "jar -tf ${EXTENSION_PATH}/target/${JAR_NAME_PATTERN} | grep ${XSD_FILE_PATH}"
+          
+      - VALIDATE:
+          NAME: "confirm-xsd-present"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "jar -tf ${EXTENSION_PATH}/target/${JAR_NAME_PATTERN} | grep -q ${XSD_FILE_PATH}"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "XSD file not found in JAR at expected path"
+
+  DIAGNOSE_SERVICE_REGISTRATION:
+    DESCRIPTION: "Verify NamespaceDetails service registration"
+    STEPS:
+      - COMMAND:
+          NAME: "check-service-file"
+          EXECUTE: "cat ${EXTENSION_PATH}/src/main/resources/META-INF/services/liquibase.parser.NamespaceDetails"
+          
+      - VALIDATE:
+          NAME: "verify-service-content"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/resources/META-INF/services/liquibase.parser.NamespaceDetails"
+          PATTERN: "${NAMESPACE_CLASS}"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "NamespaceDetails service registration missing or incorrect"
+          
+      - COMMAND:
+          NAME: "verify-class-exists"
+          EXECUTE: "find ${EXTENSION_PATH} -name 'SnowflakeNamespaceDetails.java'"
+          
+      - VALIDATE:
+          NAME: "confirm-class-file"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "find ${EXTENSION_PATH} -name 'SnowflakeNamespaceDetails.java' | grep -q ."
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "SnowflakeNamespaceDetails class file not found"
+
+  VALIDATE_NAMESPACE_IMPLEMENTATION:
+    DESCRIPTION: "Check NamespaceDetails implementation correctness"
+    STEPS:
+      - VALIDATE:
+          NAME: "check-implements-interface"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/java/com/liquibase/ext/snowflake/parser/SnowflakeNamespaceDetails.java"
+          PATTERN: "implements NamespaceDetails"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "SnowflakeNamespaceDetails must implement NamespaceDetails interface"
+          
+      - VALIDATE:
+          NAME: "check-namespace-url-method"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/java/com/liquibase/ext/snowflake/parser/SnowflakeNamespaceDetails.java"
+          PATTERN: "getNamespaceUrl()"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "getNamespaceUrl() method missing"
+          
+      - VALIDATE:
+          NAME: "check-schema-url-method"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${EXTENSION_PATH}/src/main/java/com/liquibase/ext/snowflake/parser/SnowflakeNamespaceDetails.java"
+          PATTERN: "getLocalSchemaUrl()"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "getLocalSchemaUrl() method missing"
+
+  GENERATE_FIXES:
+    DESCRIPTION: "Generate fix templates for common XSD resolution issues"
+    STEPS:
+      - CONDITIONAL:
+          NAME: "fix-missing-service-registration"
+          CONDITION:
+            TYPE: "NOT_CONTAINS_TEXT"
+            TARGET: "${EXTENSION_PATH}/src/main/resources/META-INF/services/liquibase.parser.NamespaceDetails"
+            PATTERN: "${NAMESPACE_CLASS}"
+          THEN:
+            - CREATE_FILE:
+                NAME: "create-service-registration"
+                TEMPLATE: "SERVICE_REGISTRATION_FIX"
+                OUTPUT: "${EXTENSION_PATH}/temp/namespace_service_fix.txt"
+          ELSE:
+            - CONDITIONAL:
+                NAME: "fix-missing-class"
+                CONDITION:
+                  TYPE: "COMMAND_SUCCESS"
+                  COMMAND: "find ${EXTENSION_PATH} -name 'SnowflakeNamespaceDetails.java' | grep -q ."
+                THEN:
+                  - CONTINUE
+                ELSE:
+                  - CREATE_FILE:
+                      NAME: "create-namespace-class"
+                      TEMPLATE: "NAMESPACE_DETAILS_CLASS_TEMPLATE"
+                      OUTPUT: "${EXTENSION_PATH}/temp/namespace_class_fix.java"
+
+TEMPLATES:
+  SERVICE_REGISTRATION_FIX: |
+    # Add this line to src/main/resources/META-INF/services/liquibase.parser.NamespaceDetails:
+    ${NAMESPACE_CLASS}
+
+  NAMESPACE_DETAILS_CLASS_TEMPLATE: |
+    package com.liquibase.ext.snowflake.parser;
+    
+    import liquibase.parser.NamespaceDetails;
+    
+    public class SnowflakeNamespaceDetails implements NamespaceDetails {
+        @Override
+        public String getNamespaceUrl() {
+            return "http://www.liquibase.org/xml/ns/dbchangelog-ext/snowflake";
+        }
+        
+        @Override
+        public String getLocalSchemaUrl() {
+            return "/www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd";
+        }
+    }
+
+  XSD_RESOLUTION_PROCESS_EXPLANATION: |
+    XSD Resolution Process:
+    1. XML parser encounters snowflake namespace
+    2. Uses SnowflakeNamespaceDetails to map namespace URL to XSD location  
+    3. Loads XSD from classpath at exact path: ${XSD_FILE_PATH}
+    4. Validates XML against XSD schema
+
+COMMON_ERROR_PATTERNS:
+  UNABLE_TO_RESOLVE_ENTITY:
+    ERROR_MESSAGE: "Unable to resolve xml entity http://www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd"
+    ROOT_CAUSES:
+      - "liquibase-snowflake JAR not on classpath"
+      - "SnowflakeNamespaceDetails not registered in service file"
+      - "XSD file missing from JAR at expected path"
+      - "Typos in namespace URL or XSD path"
+
+TROUBLESHOOTING_CHECKLIST:
+  VERIFICATION_STEPS:
+    - "SnowflakeNamespaceDetails class exists and implements interface correctly"
+    - "Service registration file exists with correct class name"
+    - "XSD file at exact path in JAR: /www.liquibase.org/xml/ns/snowflake/liquibase-snowflake-latest.xsd"
+    - "liquibase-snowflake JAR on test classpath"
+    - "No typos in namespace URL or XSD path"
+
+ERROR_HANDLING:
+  GLOBAL_FAILURE_ACTION: "STOP"
+  CLEANUP_ON_FAILURE:
+    - COMMAND:
+        EXECUTE: "rm -f ${EXTENSION_PATH}/temp/namespace_*"
+        CONTINUE_ON_ERROR: true

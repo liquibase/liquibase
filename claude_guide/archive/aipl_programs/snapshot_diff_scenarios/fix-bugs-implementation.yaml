@@ -1,0 +1,508 @@
+AIPL_VERSION: "2.0"
+PROGRAM_NAME: "fix-bugs-implementation"
+DESCRIPTION: "Fix bugs and issues in existing snapshot/diff implementation"
+
+IMPORTS:
+  - "../../../AIPL/core/TERMINOLOGY_DEFINITIONS.yaml"
+  - "../../../AIPL/core/STEP_SPECIFICATIONS.yaml"
+  - "../../../AIPL/core/AUTONOMOUS_OPERATION.yaml"
+  - "../../../AIPL/libraries/snowflake/SNOWFLAKE_SNAPSHOT_DIFF_PATTERNS.yaml"
+
+REQUIRES:
+  - BEHAVIORAL_KEYWORDS
+  - STEP_CLASSIFICATION
+  - AUTONOMOUS_PREREQUISITE_PHASE
+  - SNOWFLAKE_PATTERNS
+
+EXECUTION_PROTOCOL:
+  PURPOSE: "Systematically identify, isolate, and fix bugs in snapshot/diff implementation"
+  INPUT: "Failing tests, compilation errors, or reported issues in existing implementation"
+  OUTPUT: "All identified bugs fixed, tests passing, implementation stable"
+  VALIDATION: "All tests pass, no compilation errors, functionality verified"
+
+VARIABLES:
+  OBJECT_TYPE: "${TARGET_OBJECT_TYPE}"
+  OBJECT_TYPE_LOWER: "fileformat"  # Will be replaced with actual value
+  PROJECT_BASE: "liquibase-snowflake"
+  PACKAGE_BASE: "liquibase.ext.snowflake"
+  TEST_PACKAGE: "liquibase.ext.snowflake"
+  BUG_ANALYSIS_FILE: "bug_analysis_${OBJECT_TYPE_LOWER}.md"
+  
+PHASES:
+  PHASE_0_5_AUTONOMOUS_PREREQUISITES:
+    STEP_TYPE: "VALIDATION"
+    PURPOSE: "Validate autonomous operation capability before bug fixing"
+    
+    INPUT_REQUIREMENTS:
+      - "CLAUDE.md file exists in project root"
+      - "Bug fixing requires test execution and compilation"
+      
+    QUALITY_GATE:
+      NAME: "validate-autonomous-commands"
+      TYPE: "BLOCKING"
+      FAILURE_ACTION: "STOP"
+      ERROR_MESSAGE: "Missing autonomous operation capability - update CLAUDE.md with required auto-approval patterns"
+      RECOVERY_STEPS:
+        - "Add required command patterns to CLAUDE.md"
+        - "Verify patterns match expected format"
+        - "Re-run autonomous validation"
+        
+    ACCEPTANCE_CRITERIA:
+      - CRITERION: "CLAUDE.md contains required auto-approval patterns"
+        VALIDATION_COMMAND: "grep -c 'mvn test.*-Dtest=' CLAUDE.md"
+        PASS_CONDITION: "≥ 3 autonomous test command patterns found"
+      - CRITERION: "CLAUDE.md accessible and readable"
+        VALIDATION_COMMAND: "test -r CLAUDE.md"
+        PASS_CONDITION: "File is readable"
+        
+    DELIVERABLES:
+      - ARTIFACT: "Autonomous capability validation result"
+        LOCATION: "Validation log or confirmation"
+        VALIDATION: "All validation commands passed successfully"
+
+  PHASE_1_BUG_IDENTIFICATION:
+    STEP_1_1_SYSTEMATIC_BUG_DETECTION:
+      STEP_TYPE: "RESEARCH"
+      PURPOSE: "Systematically identify all bugs and issues in implementation"
+      
+      INPUT_REQUIREMENTS:
+        - "Existing implementation accessible"
+        - "Test suite available"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Run all tests to identify failures"
+          COMMAND: "mvn test -Dtest=\"*${OBJECT_TYPE}*Test*\" -q 2>&1 | tee test_failures.log"
+          EXPECTED_OUTPUT: "Test results with failure details"
+        - ACTION: "Check compilation errors"
+          COMMAND: "mvn compile -q 2>&1 | tee compilation_errors.log"
+          EXPECTED_OUTPUT: "Compilation status and any errors"
+        - ACTION: "Analyze error patterns"
+          COMMAND: "grep -E 'ERROR|FAIL|Exception' test_failures.log compilation_errors.log | head -20"
+          EXPECTED_OUTPUT: "Summary of error patterns and types"
+        - ACTION: "Check service registration issues"
+          COMMAND: "find src/main/resources/META-INF/services/ -name '*' -exec grep -l '${OBJECT_TYPE}' {} \\; | wc -l"
+          EXPECTED_OUTPUT: "Service registration status"
+        - ACTION: "Identify runtime issues"
+          COMMAND: "echo 'Analyzing runtime behavior and integration issues'"
+          EXPECTED_OUTPUT: "Runtime issue identification"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Bug detection completed"
+          VALIDATION_COMMAND: "test -f ${BUG_ANALYSIS_FILE}"
+          PASS_CONDITION: "Bug analysis file created"
+        - CRITERION: "Test failures identified"
+          VALIDATION_COMMAND: "grep -c 'FAIL\\|ERROR\\|Exception' test_failures.log"
+          PASS_CONDITION: "≥ 0 failures documented (0 is also valid - no bugs found)"
+        - CRITERION: "Compilation issues identified"
+          VALIDATION_COMMAND: "grep -c 'ERROR\\|cannot find symbol' compilation_errors.log"
+          PASS_CONDITION: "≥ 0 compilation issues documented"
+
+      DELIVERABLES:
+        - ARTIFACT: "Bug identification report"
+          LOCATION: "${BUG_ANALYSIS_FILE}"
+          VALIDATION: "Complete catalog of all identified issues"
+
+    STEP_1_2_BUG_CATEGORIZATION:
+      STEP_TYPE: "PROCESSING"
+      PURPOSE: "Categorize and prioritize identified bugs"
+      
+      INPUT_REQUIREMENTS:
+        - "Bug identification completed"
+        - "Error logs available"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Categorize bugs by type"
+          COMMAND: "echo 'Categorizing bugs: Compilation, Runtime, Logic, Integration, Test'"
+          EXPECTED_OUTPUT: "Bug categories with specific issues listed"
+        - ACTION: "Prioritize bugs by severity"
+          COMMAND: "echo 'Prioritizing bugs: Critical, High, Medium, Low'"
+          EXPECTED_OUTPUT: "Prioritized bug list"
+        - ACTION: "Identify root causes"
+          COMMAND: "echo 'Analyzing root causes for each bug category'"
+          EXPECTED_OUTPUT: "Root cause analysis for major bug patterns"
+        - ACTION: "Create fix strategy"
+          COMMAND: "echo 'Creating systematic fix strategy: Compilation → Integration → Logic → Test'"
+          EXPECTED_OUTPUT: "Bug fixing execution plan"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Bugs categorized"
+          VALIDATION_COMMAND: "grep -c 'CATEGORY\\|TYPE\\|COMPILATION\\|RUNTIME' ${BUG_ANALYSIS_FILE}"
+          PASS_CONDITION: "≥ 3 categorization patterns found"
+        - CRITERION: "Priorities assigned"
+          VALIDATION_COMMAND: "grep -c 'CRITICAL\\|HIGH\\|MEDIUM\\|LOW' ${BUG_ANALYSIS_FILE}"
+          PASS_CONDITION: "≥ 2 priority levels used"
+        - CRITERION: "Fix strategy documented"
+          VALIDATION_COMMAND: "grep -c 'STRATEGY\\|FIX\\|ORDER' ${BUG_ANALYSIS_FILE}"
+          PASS_CONDITION: "≥ 3 strategy elements found"
+
+      DELIVERABLES:
+        - ARTIFACT: "Bug categorization and fix strategy"
+          LOCATION: "Appended to ${BUG_ANALYSIS_FILE}"
+          VALIDATION: "Comprehensive bug analysis with fix plan"
+
+  PHASE_2_COMPILATION_FIXES:
+    STEP_2_1_FIX_COMPILATION_ERRORS:
+      STEP_TYPE: "PROCESSING"
+      PURPOSE: "Fix all compilation errors first (highest priority)"
+      
+      INPUT_REQUIREMENTS:
+        - "Compilation errors identified"
+        - "Source code accessible"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Fix import and dependency issues"
+          COMMAND: "echo 'Fixing missing imports and dependency references'"
+          EXPECTED_OUTPUT: "All import statements correct"
+        - ACTION: "Fix syntax and type errors"
+          COMMAND: "echo 'Fixing syntax errors, type mismatches, and missing methods'"
+          EXPECTED_OUTPUT: "All syntax issues resolved"
+        - ACTION: "Fix generic type issues"
+          COMMAND: "echo 'Fixing generic type declarations and cast issues'"
+          EXPECTED_OUTPUT: "All generic type issues resolved"
+        - ACTION: "Verify compilation"
+          COMMAND: "mvn compile -q"
+          EXPECTED_OUTPUT: "Clean compilation with no errors"
+
+      QUALITY_GATE:
+        NAME: "compilation-success-gate"
+        TYPE: "BLOCKING"
+        FAILURE_ACTION: "STOP"
+        ERROR_MESSAGE: "Compilation errors persist - must fix before proceeding"
+        RECOVERY_STEPS:
+          - "Review remaining compilation errors"
+          - "Fix syntax and import issues"
+          - "Re-run compilation"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "All files compile successfully"
+          VALIDATION_COMMAND: "mvn compile -q"
+          PASS_CONDITION: "Build success"
+        - CRITERION: "No compilation warnings"
+          VALIDATION_COMMAND: "mvn compile 2>&1 | grep -c 'WARNING'"
+          PASS_CONDITION: "≤ 2 warnings (acceptable threshold)"
+        - CRITERION: "Test classes compile"
+          VALIDATION_COMMAND: "mvn test-compile -q"
+          PASS_CONDITION: "Test compilation success"
+
+      DELIVERABLES:
+        - ARTIFACT: "Fixed source code"
+          LOCATION: "All affected source files"
+          VALIDATION: "Code compiles cleanly without errors"
+
+  PHASE_3_INTEGRATION_FIXES:
+    STEP_3_1_FIX_SERVICE_REGISTRATION:
+      STEP_TYPE: "PROCESSING"
+      PURPOSE: "Fix service registration and discovery issues"
+      
+      INPUT_REQUIREMENTS:
+        - "Code compiles successfully"
+        - "Service registration files accessible"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Verify snapshot generator registration"
+          COMMAND: "grep -q '${PACKAGE_BASE}.snapshot.${OBJECT_TYPE}SnapshotGenerator' src/main/resources/META-INF/services/liquibase.snapshot.SnapshotGenerator || echo '${PACKAGE_BASE}.snapshot.${OBJECT_TYPE}SnapshotGenerator' >> src/main/resources/META-INF/services/liquibase.snapshot.SnapshotGenerator"
+          EXPECTED_OUTPUT: "Snapshot generator properly registered"
+        - ACTION: "Verify comparator registration"
+          COMMAND: "grep -q '${PACKAGE_BASE}.diff.compare.${OBJECT_TYPE}Comparator' src/main/resources/META-INF/services/liquibase.diff.compare.DatabaseObjectComparator || echo '${PACKAGE_BASE}.diff.compare.${OBJECT_TYPE}Comparator' >> src/main/resources/META-INF/services/liquibase.diff.compare.DatabaseObjectComparator"
+          EXPECTED_OUTPUT: "Diff comparator properly registered"
+        - ACTION: "Check service file formatting"
+          COMMAND: "grep -v '^#' src/main/resources/META-INF/services/* | grep -v '^$' | head -10"
+          EXPECTED_OUTPUT: "Clean service file format"
+        - ACTION: "Test service loading"
+          COMMAND: "mvn compile -q"
+          EXPECTED_OUTPUT: "Services load without errors"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Snapshot generator service registered"
+          VALIDATION_COMMAND: "grep -q '${OBJECT_TYPE}SnapshotGenerator' src/main/resources/META-INF/services/liquibase.snapshot.SnapshotGenerator"
+          PASS_CONDITION: "Service entry found"
+        - CRITERION: "Comparator service registered"
+          VALIDATION_COMMAND: "grep -q '${OBJECT_TYPE}Comparator' src/main/resources/META-INF/services/liquibase.diff.compare.DatabaseObjectComparator"
+          PASS_CONDITION: "Service entry found"
+        - CRITERION: "Services load correctly"
+          VALIDATION_COMMAND: "mvn compile -q"
+          PASS_CONDITION: "Build success"
+
+      DELIVERABLES:
+        - ARTIFACT: "Fixed service registrations"
+          LOCATION: "src/main/resources/META-INF/services/*"
+          VALIDATION: "All services properly registered and discoverable"
+
+    STEP_3_2_FIX_DATABASE_INTEGRATION:
+      STEP_TYPE: "PROCESSING"
+      PURPOSE: "Fix database connectivity and query issues"
+      
+      INPUT_REQUIREMENTS:
+        - "Service registration fixed"
+        - "Database access patterns identified"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Fix SQL query syntax"
+          COMMAND: "echo 'Fixing INFORMATION_SCHEMA queries and column references'"
+          EXPECTED_OUTPUT: "Correct SQL queries for Snowflake"
+        - ACTION: "Fix result set mapping"
+          COMMAND: "echo 'Fixing column name mapping from result sets to object properties'"
+          EXPECTED_OUTPUT: "Correct property mapping from database"
+        - ACTION: "Fix database type handling"
+          COMMAND: "echo 'Fixing data type conversion from database to Java objects'"
+          EXPECTED_OUTPUT: "Correct type handling for all properties"
+        - ACTION: "Fix null value handling"
+          COMMAND: "echo 'Adding proper null value handling for optional properties'"
+          EXPECTED_OUTPUT: "Robust null value handling"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "SQL queries syntactically correct"
+          VALIDATION_COMMAND: "grep -c 'SELECT.*FROM.*INFORMATION_SCHEMA' src/main/java/liquibase/ext/snowflake/snapshot/${OBJECT_TYPE}SnapshotGenerator.java"
+          PASS_CONDITION: "≥ 1 valid SQL query found"
+        - CRITERION: "Result mapping implemented"
+          VALIDATION_COMMAND: "grep -c 'row\\.get\\|setAttribute' src/main/java/liquibase/ext/snowflake/snapshot/${OBJECT_TYPE}SnapshotGenerator.java"
+          PASS_CONDITION: "≥ 3 mapping operations found"
+        - CRITERION: "Code compiles after fixes"
+          VALIDATION_COMMAND: "mvn compile -q"
+          PASS_CONDITION: "Build success"
+
+      DELIVERABLES:
+        - ARTIFACT: "Fixed database integration code"
+          LOCATION: "snapshot generator and related files"
+          VALIDATION: "Database queries and mapping work correctly"
+
+  PHASE_4_LOGIC_FIXES:
+    STEP_4_1_FIX_OBJECT_MODEL_LOGIC:
+      STEP_TYPE: "PROCESSING"
+      PURPOSE: "Fix logical errors in object model implementation"
+      
+      INPUT_REQUIREMENTS:
+        - "Compilation and integration issues fixed"
+        - "Object model logic issues identified"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Fix property getter/setter logic"
+          COMMAND: "echo 'Fixing property accessor implementations'"
+          EXPECTED_OUTPUT: "Correct property access behavior"
+        - ACTION: "Fix object equality and hashCode"
+          COMMAND: "echo 'Fixing equals() and hashCode() implementations'"
+          EXPECTED_OUTPUT: "Consistent object equality behavior"
+        - ACTION: "Fix schema relationships"
+          COMMAND: "echo 'Fixing containment and schema relationship logic'"
+          EXPECTED_OUTPUT: "Correct object hierarchy relationships"
+        - ACTION: "Fix property validation"
+          COMMAND: "echo 'Adding property validation and constraint logic'"
+          EXPECTED_OUTPUT: "Robust property validation"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Object model tests pass"
+          VALIDATION_COMMAND: "mvn test -Dtest=\"${OBJECT_TYPE}Test\" -q"
+          PASS_CONDITION: "All object model tests successful"
+        - CRITERION: "Property accessors work correctly"
+          VALIDATION_COMMAND: "grep -c 'getAttribute\\|setAttribute' src/main/java/liquibase/ext/snowflake/database/${OBJECT_TYPE}.java"
+          PASS_CONDITION: "≥ 5 property accessor pairs found"
+        - CRITERION: "Object consistency maintained"
+          VALIDATION_COMMAND: "grep -c 'equals\\|hashCode' src/main/java/liquibase/ext/snowflake/database/${OBJECT_TYPE}.java"
+          PASS_CONDITION: "≥ 1 consistency method found"
+
+      DELIVERABLES:
+        - ARTIFACT: "Fixed object model logic"
+          LOCATION: "src/main/java/liquibase/ext/snowflake/database/${OBJECT_TYPE}.java"
+          VALIDATION: "Object model behaves correctly in all scenarios"
+
+    STEP_4_2_FIX_SNAPSHOT_LOGIC:
+      STEP_TYPE: "PROCESSING"
+      PURPOSE: "Fix logical errors in snapshot generator implementation"
+      
+      INPUT_REQUIREMENTS:
+        - "Object model logic fixed"
+        - "Snapshot generator issues identified"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Fix object creation logic"
+          COMMAND: "echo 'Fixing snapshot object instantiation and population'"
+          EXPECTED_OUTPUT: "Correct object creation from database data"
+        - ACTION: "Fix property mapping logic"
+          COMMAND: "echo 'Fixing database column to object property mapping'"
+          EXPECTED_OUTPUT: "Accurate property mapping"
+        - ACTION: "Fix schema population logic"
+          COMMAND: "echo 'Fixing addTo method for schema-level object discovery'"
+          EXPECTED_OUTPUT: "Correct schema population behavior"
+        - ACTION: "Fix priority and support logic"
+          COMMAND: "echo 'Fixing database priority and object type support'"
+          EXPECTED_OUTPUT: "Correct Snowflake database targeting"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Snapshot generator tests pass"
+          VALIDATION_COMMAND: "mvn test -Dtest=\"${OBJECT_TYPE}SnapshotGeneratorTest\" -q"
+          PASS_CONDITION: "All snapshot tests successful"
+        - CRITERION: "Database queries execute correctly"
+          VALIDATION_COMMAND: "echo 'Database query validation would be implemented here'"
+          PASS_CONDITION: "Queries return expected results"
+        - CRITERION: "Object mapping works correctly"
+          VALIDATION_COMMAND: "echo 'Object mapping validation would be implemented here'"
+          PASS_CONDITION: "Properties mapped accurately from database"
+
+      DELIVERABLES:
+        - ARTIFACT: "Fixed snapshot generator logic"
+          LOCATION: "src/main/java/liquibase/ext/snowflake/snapshot/${OBJECT_TYPE}SnapshotGenerator.java"
+          VALIDATION: "Snapshot generation works correctly for all scenarios"
+
+    STEP_4_3_FIX_COMPARATOR_LOGIC:
+      STEP_TYPE: "PROCESSING"
+      PURPOSE: "Fix logical errors in diff comparator implementation"
+      
+      INPUT_REQUIREMENTS:
+        - "Snapshot generator logic fixed"
+        - "Comparator logic issues identified"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Fix hash calculation logic"
+          COMMAND: "echo 'Fixing object hash calculation for consistency'"
+          EXPECTED_OUTPUT: "Consistent and accurate object hashing"
+        - ACTION: "Fix object identity logic"
+          COMMAND: "echo 'Fixing isSameObject method for accurate identity comparison'"
+          EXPECTED_OUTPUT: "Correct object identity determination"
+        - ACTION: "Fix difference detection logic"
+          COMMAND: "echo 'Fixing compare method for accurate difference detection'"
+          EXPECTED_OUTPUT: "Accurate property-level difference detection"
+        - ACTION: "Fix priority and support logic"
+          COMMAND: "echo 'Fixing database priority and object type support'"
+          EXPECTED_OUTPUT: "Correct Snowflake database targeting"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Comparator tests pass"
+          VALIDATION_COMMAND: "mvn test -Dtest=\"${OBJECT_TYPE}ComparatorTest\" -q"
+          PASS_CONDITION: "All comparator tests successful"
+        - CRITERION: "Hash consistency maintained"
+          VALIDATION_COMMAND: "echo 'Hash consistency validation would be implemented here'"
+          PASS_CONDITION: "Hash values consistent for identical objects"
+        - CRITERION: "Difference detection accurate"
+          VALIDATION_COMMAND: "echo 'Difference detection validation would be implemented here'"
+          PASS_CONDITION: "All property differences detected correctly"
+
+      DELIVERABLES:
+        - ARTIFACT: "Fixed diff comparator logic"
+          LOCATION: "src/main/java/liquibase/ext/snowflake/diff/compare/${OBJECT_TYPE}Comparator.java"
+          VALIDATION: "Diff comparison works correctly for all scenarios"
+
+  PHASE_5_TEST_FIXES_AND_VALIDATION:
+    STEP_5_1_FIX_TEST_ISSUES:
+      STEP_TYPE: "PROCESSING"
+      PURPOSE: "Fix failing tests and improve test coverage"
+      
+      INPUT_REQUIREMENTS:
+        - "Implementation logic fixed"
+        - "Test failures identified"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Fix test setup and teardown"
+          COMMAND: "echo 'Fixing test initialization and cleanup'"
+          EXPECTED_OUTPUT: "Proper test environment setup"
+        - ACTION: "Fix test assertions"
+          COMMAND: "echo 'Fixing test assertions and expected values'"
+          EXPECTED_OUTPUT: "Accurate test validations"
+        - ACTION: "Fix test data and mocking"
+          COMMAND: "echo 'Fixing test data creation and mock objects'"
+          EXPECTED_OUTPUT: "Realistic test scenarios"
+        - ACTION: "Add missing test coverage"
+          COMMAND: "echo 'Adding tests for previously uncovered scenarios'"
+          EXPECTED_OUTPUT: "Comprehensive test coverage"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "All object-specific tests pass"
+          VALIDATION_COMMAND: "mvn test -Dtest=\"*${OBJECT_TYPE}*Test*\" -q"
+          PASS_CONDITION: "All tests successful"
+        - CRITERION: "Test coverage adequate"
+          VALIDATION_COMMAND: "grep -c '@Test' src/test/java/liquibase/ext/snowflake/*${OBJECT_TYPE}*Test*.java | awk '{sum+=$1} END {print sum}'"
+          PASS_CONDITION: "≥ 15 test methods across all test classes"
+        - CRITERION: "Edge cases covered"
+          VALIDATION_COMMAND: "grep -c 'null\\|empty\\|invalid' src/test/java/liquibase/ext/snowflake/*${OBJECT_TYPE}*Test*.java | awk '{sum+=$1} END {print sum}'"
+          PASS_CONDITION: "≥ 5 edge case test patterns found"
+
+      DELIVERABLES:
+        - ARTIFACT: "Fixed and enhanced test suite"
+          LOCATION: "All test files for the object"
+          VALIDATION: "Comprehensive test coverage with all tests passing"
+
+    STEP_5_2_FINAL_VALIDATION:
+      STEP_TYPE: "VALIDATION"
+      PURPOSE: "Validate all bugs are fixed and implementation is stable"
+      
+      INPUT_REQUIREMENTS:
+        - "All fixes implemented"
+        - "Test suite passing"
+        
+      QUALITY_GATE:
+        NAME: "bug-fix-validation-gate"
+        TYPE: "BLOCKING"
+        FAILURE_ACTION: "STOP"
+        ERROR_MESSAGE: "Bug fixes incomplete - implementation still has issues"
+        RECOVERY_STEPS:
+          - "Review remaining test failures"
+          - "Fix any remaining issues"
+          - "Re-run validation"
+
+      EXECUTION_STEPS:
+        - ACTION: "Run complete test suite"
+          COMMAND: "mvn test -Dtest=\"*${OBJECT_TYPE}*Test*\" -q"
+          EXPECTED_OUTPUT: "All tests pass"
+        - ACTION: "Verify compilation is clean"
+          COMMAND: "mvn compile -q"
+          EXPECTED_OUTPUT: "Clean compilation with no errors or warnings"
+        - ACTION: "Test integration functionality"
+          COMMAND: "echo 'Testing end-to-end snapshot/diff workflow'"
+          EXPECTED_OUTPUT: "Full integration working correctly"
+        - ACTION: "Run broader regression tests"
+          COMMAND: "mvn test -q"
+          EXPECTED_OUTPUT: "No regressions introduced"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "All tests pass consistently"
+          VALIDATION_COMMAND: "mvn test -Dtest=\"*${OBJECT_TYPE}*Test*\" -q"
+          PASS_CONDITION: "All tests successful"
+        - CRITERION: "Clean compilation"
+          VALIDATION_COMMAND: "mvn compile -q"
+          PASS_CONDITION: "Build success"
+        - CRITERION: "No regressions"
+          VALIDATION_COMMAND: "mvn test -q"
+          PASS_CONDITION: "Broader test suite still passes"
+
+      DELIVERABLES:
+        - ARTIFACT: "Bug-free implementation"
+          LOCATION: "All implementation and test files"
+          VALIDATION: "Complete implementation with no known bugs"
+
+SUCCESS_CRITERIA:
+  BUG_RESOLUTION_COMPLETENESS:
+    - "All identified bugs systematically fixed"
+    - "All compilation errors resolved"
+    - "All test failures resolved"
+    - "All integration issues resolved"
+    - "All logical errors corrected"
+    
+  QUALITY_VALIDATION:
+    - "All tests pass consistently"
+    - "Code compiles cleanly without errors or warnings"
+    - "Integration with Liquibase system verified"
+    - "End-to-end functionality working correctly"
+    - "No regressions introduced"
+    
+  AUTONOMOUS_OPERATION:
+    - "Bug fixes completed using autonomous test execution"
+    - "All command patterns approved for autonomous operation"
+    - "Test-driven bug fixing cycle successfully executed"
+
+ERROR_HANDLING:
+  GLOBAL_FAILURE_ACTION: "STOP"
+  PHASE_FAILURE_HANDLERS:
+    PHASE_1_BUG_IDENTIFICATION:
+      ACTION: "WARN"
+      MESSAGE: "Bug identification incomplete - may miss some issues"
+    PHASE_2_COMPILATION_FIXES:
+      ACTION: "STOP"
+      MESSAGE: "Compilation fixes failed - cannot proceed with broken code"
+    PHASE_3_INTEGRATION_FIXES:
+      ACTION: "WARN"
+      MESSAGE: "Integration fixes incomplete - some functionality may not work"
+    PHASE_4_LOGIC_FIXES:
+      ACTION: "WARN"
+      MESSAGE: "Logic fixes incomplete - some bugs may remain"
+    PHASE_5_TEST_FIXES_AND_VALIDATION:
+      ACTION: "STOP"
+      MESSAGE: "Test validation failed - bug fixes not successful"

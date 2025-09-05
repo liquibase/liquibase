@@ -1,0 +1,365 @@
+AIPL_VERSION: "2.0"
+DOCUMENT_TYPE: ADVANCED_APPROACH_SPECIFICATION
+VALIDATION_MODE: STRICT
+
+IMPORTS:
+  - "../core/TERMINOLOGY_DEFINITIONS.yaml"
+  - "../core/STEP_SPECIFICATIONS.yaml"
+  - "../core/AUTONOMOUS_OPERATION.yaml"
+
+REQUIRES:
+  - BEHAVIORAL_KEYWORDS
+  - STEP_CLASSIFICATION
+  - AUTONOMOUS_PREREQUISITE_PHASE
+
+PURPOSE: "Advanced library-based approach for composable, domain-separated AIPL programs with reusable expertise"
+
+APPROACH_OVERVIEW:
+  APPROACH_NAME: "Advanced Library-Based AIPL"
+  COMPLEXITY_LEVEL: "Complex"
+  TARGET_AUDIENCE: "Large teams, enterprise scale, long-term maintenance"
+  PROGRAM_STRUCTURE: "Core language + domain libraries + concrete programs"
+  MAINTENANCE_MODEL: "Modular libraries with shared domain expertise"
+
+WHEN_TO_USE_ADVANCED_APPROACH:
+  IDEAL_SCENARIOS:
+    - "Multi-domain workflows spanning multiple technologies"
+    - "Reusable patterns used across multiple programs"
+    - "Large teams (4+ developers) working with shared domain expertise"
+    - "Enterprise-scale automation with hundreds of programs"
+    - "Long-term maintenance scenarios"
+    - "Complex workflows with 15+ steps"
+    - "Domain expertise sharing across teams"
+    
+  CLEAR_BENEFITS:
+    - "Eliminates duplication of domain knowledge"
+    - "Enables composition of different domain expertises"
+    - "Provides centralized updates to domain patterns"
+    - "Scales to enterprise-level automation"
+    - "Supports team specialization and expertise sharing"
+    
+  MIGRATION_INDICATORS:
+    - "Basic programs showing significant pattern duplication"
+    - "Need to combine multiple technology domains"
+    - "Team size growing beyond 3-4 developers"
+    - "Maintenance overhead becoming problematic"
+
+LAYERED_ARCHITECTURE:
+  PURPOSE: "Clean separation between execution logic and domain expertise"
+  
+  LAYER_1_CORE_LANGUAGE:
+    PURPOSE: "Generic execution primitives and control flow"
+    LOCATION: "../language/CORE_PRIMITIVES.yaml"
+    CONTENT: "Domain-agnostic step types, validation types, control structures"
+    CONSTRAINTS: "NO domain-specific knowledge allowed"
+    
+  LAYER_2_DOMAIN_LIBRARIES:
+    PURPOSE: "Technology-specific templates, patterns, and validation rules"
+    LOCATION: "libraries/domain/DOMAIN_PATTERNS.yaml"
+    CONTENT: "Reusable domain expertise organized by technology"
+    STRUCTURE: "libraries/{domain}/{DOMAIN}_PATTERNS.yaml"
+    EXAMPLES: ["libraries/liquibase/", "libraries/snowflake/", "libraries/maven/", "libraries/java/"]
+    
+  LAYER_3_CONCRETE_PROGRAMS:
+    PURPOSE: "Executable workflows combining core language + domain libraries"
+    CONTENT: "Specific implementations using generic AIPL + imported expertise"
+    IMPORT_SYNTAX: "IMPORTS: [library paths]"
+    COMPOSITION: "Reference imported templates, patterns, validation types"
+
+ADVANCED_PROGRAM_STRUCTURE:
+  PURPOSE: "Structure for programs using library-based composition"
+  
+  REQUIRED_SECTIONS:
+    PROGRAM_HEADER:
+      AIPL_VERSION: "2.0"
+      PROGRAM_NAME: "kebab-case-identifier"
+      DESCRIPTION: "Single line purpose statement"
+      
+    IMPORTS_SECTION:
+      PURPOSE: "List of domain library files to include"
+      SYNTAX: |
+        IMPORTS:
+          - "libraries/domain/DOMAIN_PATTERNS.yaml"
+          - "libraries/tools/TOOL_PATTERNS.yaml"
+      RESOLUTION: "Paths resolved relative to program location"
+      
+    VARIABLES_SECTION:
+      PURPOSE: "Program-specific variables (library variables inherited)"
+      SCOPE: "Merged with imported library variables"
+      PRECEDENCE: "Program variables override library variables"
+      
+    PHASES_SECTION:
+      PURPOSE: "Execution workflow using imported patterns"
+      COMPOSITION: "Combines core primitives with domain library patterns"
+      PATTERN_USAGE: "Reference imported patterns via USE_PATTERN"
+      
+  OPTIONAL_SECTIONS:
+    PROGRAM_TEMPLATES:
+      PURPOSE: "Program-specific templates (supplementing imported)"
+      SCOPE: "Available in addition to library templates"
+      
+    PROGRAM_ERROR_HANDLING:
+      PURPOSE: "Program-specific error handling (extends library handling)"
+      INHERITANCE: "Inherits library error handling patterns"
+
+IMPORT_SYSTEM:
+  PURPOSE: "How programs import and compose domain libraries"
+  
+  IMPORT_SYNTAX:
+    BASIC_IMPORT: |
+      IMPORTS:
+        - "libraries/liquibase/LIQUIBASE_CORE_PATTERNS.yaml"
+        - "libraries/snowflake/SNOWFLAKE_SQL_PATTERNS.yaml"
+        
+    SCOPED_IMPORT: |
+      IMPORTS:
+        - path: "libraries/maven/MAVEN_BUILD_PATTERNS.yaml"
+          scope: "BUILD_"
+          # All imported items prefixed with BUILD_
+          
+    SELECTIVE_IMPORT: |
+      IMPORTS:
+        - path: "libraries/java/JAVA_PATTERNS.yaml"
+          include: ["JAVA_CLASS_TEMPLATE", "VALIDATION_PATTERNS"]
+          # Only import specific items
+          
+  RESOLUTION_RULES:
+    PATH_RESOLUTION: "Relative paths resolved from program location"
+    TEMPLATE_MERGING: "Imported templates available in program namespace"
+    VARIABLE_INHERITANCE: "Imported variables available for substitution"
+    PATTERN_AVAILABILITY: "Imported patterns usable in phases"
+    CONFLICT_RESOLUTION: "Later imports override earlier imports"
+    
+  DEPENDENCY_MANAGEMENT:
+    LIBRARY_DEPENDENCIES: "Libraries can import other libraries"
+    CIRCULAR_DETECTION: "Error on circular dependencies"
+    VERSION_COMPATIBILITY: "Compatible AIPL_VERSION required"
+
+DOMAIN_LIBRARY_STRUCTURE:
+  PURPOSE: "Standard structure for reusable domain libraries"
+  
+  LIBRARY_TEMPLATE: |
+    AIPL_VERSION: "2.0"
+    LIBRARY_NAME: "domain-library-name"
+    LIBRARY_VERSION: "1.0"
+    DESCRIPTION: "Domain expertise for [technology/framework]"
+    
+    IMPORTS:
+      # Libraries can import other libraries
+      - "libraries/core/COMMON_PATTERNS.yaml"
+      
+    DOMAIN_EXPERTISE:
+      # Technology-specific knowledge
+      TECHNOLOGY_OVERVIEW: "Description of domain"
+      COMMON_PATTERNS: "Frequently used patterns"
+      BEST_PRACTICES: "Domain-specific best practices"
+      
+    TEMPLATES:
+      # Reusable code templates
+      TEMPLATE_NAME: |
+        Template content with ${VARIABLES}
+        
+    PATTERNS:
+      # Reusable workflow patterns
+      PATTERN_NAME:
+        DESCRIPTION: "What this pattern accomplishes"
+        VARIABLES: ["Required variables"]
+        STEPS: "Pattern implementation using core primitives"
+        
+    VALIDATION_TYPES:
+      # Domain-specific validation rules
+      CUSTOM_VALIDATION:
+        TYPE: "DOMAIN_SPECIFIC_CHECK"
+        IMPLEMENTATION: "Validation logic"
+        
+    STEP_EXTENSIONS:
+      # Domain-specific step types
+      CUSTOM_STEP:
+        TYPE: "DOMAIN_OPERATION"
+        IMPLEMENTATION: "Step execution logic"
+
+PROGRAM_COMPOSITION_PATTERNS:
+  PURPOSE: "Common patterns for composing programs from libraries"
+  
+  MULTI_DOMAIN_COMPOSITION:
+    DESCRIPTION: "Programs spanning multiple technology domains"
+    EXAMPLE: |
+      IMPORTS:
+        - "libraries/liquibase/LIQUIBASE_CORE_PATTERNS.yaml"
+        - "libraries/snowflake/SNOWFLAKE_SQL_PATTERNS.yaml"
+        - "libraries/maven/MAVEN_BUILD_PATTERNS.yaml"
+        
+      PHASES:
+        PHASE_1_ARCHITECTURE:
+          STEPS:
+            - USE_PATTERN: "LIQUIBASE_ARCHITECTURAL_DECISION"
+              
+        PHASE_2_SQL_GENERATION:
+          STEPS:
+            - USE_TEMPLATE: "SNOWFLAKE_GENERATOR_TEMPLATE"
+            - USE_VALIDATION: "SNOWFLAKE_SQL_VALIDATION"
+            
+        PHASE_3_BUILD:
+          STEPS:
+            - USE_PATTERN: "MAVEN_BUILD_CYCLE"
+            
+  LIBRARY_SPECIALIZATION:
+    DESCRIPTION: "Programs that specialize library patterns"
+    EXAMPLE: |
+      IMPORTS:
+        - "libraries/java/JAVA_PATTERNS.yaml"
+        
+      PHASES:
+        CUSTOMIZED_JAVA_GENERATION:
+          STEPS:
+            - USE_TEMPLATE: "JAVA_CLASS_TEMPLATE"
+              CUSTOMIZATIONS:
+                PACKAGE_STRUCTURE: "Custom package organization"
+                ANNOTATION_PATTERNS: "Specific annotation usage"
+                
+  LIBRARY_EXTENSION:
+    DESCRIPTION: "Programs that extend library capabilities"
+    EXAMPLE: |
+      IMPORTS:
+        - "libraries/testing/TEST_PATTERNS.yaml"
+        
+      EXTENDED_PATTERNS:
+        ENHANCED_TEST_PATTERN:
+          EXTENDS: "BASIC_TEST_PATTERN"
+          ADDITIONAL_STEPS:
+            - "Performance validation"
+            - "Security testing"
+
+ADVANCED_VALIDATION_RULES:
+  PURPOSE: "Validation specific to advanced library-based programs"
+  
+  LIBRARY_VALIDATION:
+    DOMAIN_PURITY:
+      CHECK: "Libraries contain only domain-specific content"
+      VALIDATION: "No generic execution primitives in domain libraries"
+      ERROR_MESSAGE: "Generic primitives belong in core language"
+      
+    IMPORT_CONSISTENCY:
+      CHECK: "All imported libraries are accessible and compatible"
+      VALIDATION: "Library versions compatible with program AIPL_VERSION"
+      ERROR_MESSAGE: "Library version mismatch detected"
+      
+    PATTERN_USAGE:
+      CHECK: "All USE_PATTERN references resolve to imported patterns"
+      VALIDATION: "Pattern names match library exports"
+      ERROR_MESSAGE: "Undefined pattern reference"
+      
+  COMPOSITION_VALIDATION:
+    DOMAIN_SEPARATION:
+      CHECK: "Clean separation between different domain concerns"
+      VALIDATION: "No mixing of unrelated domain knowledge"
+      ERROR_MESSAGE: "Domain separation violation detected"
+      
+    DEPENDENCY_CYCLES:
+      CHECK: "No circular dependencies between libraries"
+      VALIDATION: "Library dependency graph is acyclic"
+      ERROR_MESSAGE: "Circular dependency detected"
+      
+    TEMPLATE_CONFLICTS:
+      CHECK: "No conflicting template names across imports"
+      VALIDATION: "Template namespace conflicts resolved"
+      ERROR_MESSAGE: "Template name conflict requires resolution"
+
+LIBRARY_DEVELOPMENT_GUIDELINES:
+  PURPOSE: "Guidelines for creating high-quality domain libraries"
+  
+  DOMAIN_EXPERTISE_CAPTURE:
+    COMPREHENSIVE_COVERAGE: "Cover all common patterns in domain"
+    BEST_PRACTICES: "Embed domain best practices in patterns"
+    ERROR_PATTERNS: "Include common error scenarios and handling"
+    VALIDATION_RULES: "Provide domain-specific validation"
+    
+  REUSABILITY_DESIGN:
+    PARAMETERIZATION: "Extensive use of variables for customization"
+    MODULARITY: "Break complex patterns into composable pieces"
+    DOCUMENTATION: "Clear documentation for pattern usage"
+    EXAMPLES: "Provide usage examples for complex patterns"
+    
+  MAINTAINABILITY:
+    VERSION_MANAGEMENT: "Clear versioning strategy for libraries"
+    BACKWARD_COMPATIBILITY: "Maintain compatibility across versions"
+    DEPRECATION_POLICY: "Clear deprecation path for obsolete patterns"
+    TESTING: "Test library patterns independently"
+
+ADVANCED_SUCCESS_CRITERIA:
+  PURPOSE: "Success criteria specific to advanced approach programs"
+  
+  ARCHITECTURAL_QUALITY:
+    CLEAN_SEPARATION: "Clear separation between core language and domain expertise"
+    COMPOSITION_CLARITY: "Clear understanding of which domains are combined"
+    DEPENDENCY_MANAGEMENT: "Well-managed library dependencies"
+    REUSABILITY_ACHIEVED: "Patterns effectively reused across programs"
+    
+  EXECUTION_QUALITY:
+    IMPORT_RESOLUTION: "All imports resolve correctly"
+    PATTERN_COMPOSITION: "Patterns compose correctly without conflicts"
+    BEHAVIORAL_CONSISTENCY: "Consistent use of BEHAVIORAL_KEYWORDS"
+    AUTONOMOUS_COMPLIANCE: "Autonomous operation validation included"
+    
+  MAINTENANCE_QUALITY:
+    LIBRARY_MODULARITY: "Domain expertise properly modularized"
+    UPDATE_EFFICIENCY: "Changes to libraries propagate correctly"
+    TEAM_COLLABORATION: "Multiple teams can work with shared libraries"
+    SCALING_CAPABILITY: "Architecture scales to enterprise needs"
+
+MIGRATION_FROM_BASIC:
+  PURPOSE: "How to migrate from basic approach to advanced approach"
+  
+  MIGRATION_PROCESS:
+    STEP_1_IDENTIFY_PATTERNS:
+      ACTION: "Identify repeated patterns across basic programs"
+      TOOLS: "Pattern analysis, code similarity detection"
+      OUTPUT: "List of candidate patterns for library extraction"
+      
+    STEP_2_EXTRACT_DOMAIN_KNOWLEDGE:
+      ACTION: "Extract domain-specific knowledge to libraries"
+      PROCESS: "Create domain library structure"
+      VALIDATION: "Ensure library patterns work independently"
+      
+    STEP_3_REFACTOR_PROGRAMS:
+      ACTION: "Convert basic programs to use library imports"
+      APPROACH: "Gradual conversion, program by program"
+      TESTING: "Ensure functional equivalence"
+      
+    STEP_4_CONSOLIDATE_LIBRARIES:
+      ACTION: "Merge similar domain libraries"
+      OPTIMIZATION: "Eliminate redundancy across libraries"
+      STANDARDIZATION: "Establish consistent library patterns"
+      
+  MIGRATION_TIMELINE:
+    PHASE_1: "Pattern identification and initial library creation (2-4 weeks)"
+    PHASE_2: "Pilot program conversion (1-2 weeks)"
+    PHASE_3: "Bulk program migration (4-8 weeks)"
+    PHASE_4: "Library consolidation and optimization (2-4 weeks)"
+    
+  SUCCESS_METRICS:
+    DUPLICATION_REDUCTION: "Measure reduction in duplicated domain knowledge"
+    DEVELOPMENT_SPEED: "Measure improvement in new program development time"
+    MAINTENANCE_EFFICIENCY: "Measure reduction in maintenance overhead"
+    REUSE_METRICS: "Measure library pattern reuse across programs"
+
+IMPORT_AND_USAGE:
+  PURPOSE: "How to use this specification in practice"
+  
+  ADOPTING_ADVANCED_APPROACH:
+    READINESS_ASSESSMENT: "Evaluate if team/project ready for advanced approach"
+    MIGRATION_PLANNING: "Plan migration from basic approach if applicable"
+    LIBRARY_STRATEGY: "Develop domain library creation strategy"
+    TEAM_TRAINING: "Train team on library-based composition"
+    
+  IMPLEMENTATION_WORKFLOW:
+    PROGRAM_CREATION: "Use advanced program structure template"
+    LIBRARY_USAGE: "Follow import system rules for composition"
+    VALIDATION: "Apply advanced validation rules"
+    QUALITY_ASSURANCE: "Use advanced success criteria for evaluation"
+    
+  ORGANIZATIONAL_INTEGRATION:
+    LIBRARY_GOVERNANCE: "Establish library ownership and maintenance"
+    COLLABORATION_PATTERNS: "Define team collaboration around shared libraries"
+    KNOWLEDGE_SHARING: "Create processes for sharing domain expertise"
+    CONTINUOUS_IMPROVEMENT: "Establish feedback loops for library enhancement"

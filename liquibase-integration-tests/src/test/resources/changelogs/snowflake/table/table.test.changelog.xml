@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.33.xsd">
+
+    <!-- Test Basic Table Creation -->
+    <changeSet author="liquibase-test" id="table-1">
+        <createTable tableName="LB_TEST_TABLE_BASIC">
+            <column name="id" type="INTEGER"/>
+            <column name="name" type="VARCHAR(100)"/>
+            <column name="created_date" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+        <rollback>
+            <dropTable tableName="LB_TEST_TABLE_BASIC"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Transient Table Creation using SQL -->
+    <changeSet author="liquibase-test" id="table-2">
+        <sql>
+            CREATE TRANSIENT TABLE LB_TEST_TABLE_TRANSIENT (
+                id INTEGER,
+                data VARCHAR(200),
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        </sql>
+        <rollback>
+            <sql>DROP TABLE IF EXISTS LB_TEST_TABLE_TRANSIENT</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Table with Clustering -->
+    <changeSet author="liquibase-test" id="table-3">
+        <sql>
+            CREATE TABLE LB_TEST_TABLE_CLUSTER (
+                id INTEGER,
+                category VARCHAR(50),
+                subcategory VARCHAR(50),
+                data VARCHAR(200),
+                created_date DATE
+            ) CLUSTER BY (category, subcategory)
+        </sql>
+        <rollback>
+            <sql>DROP TABLE IF EXISTS LB_TEST_TABLE_CLUSTER</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Table with Data Retention -->
+    <changeSet author="liquibase-test" id="table-4">
+        <sql>
+            CREATE TABLE LB_TEST_TABLE_RETENTION (
+                id INTEGER,
+                data VARCHAR(200),
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) DATA_RETENTION_TIME_IN_DAYS = 7
+        </sql>
+        <rollback>
+            <sql>DROP TABLE IF EXISTS LB_TEST_TABLE_RETENTION</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Table with Comment -->
+    <changeSet author="liquibase-test" id="table-5">
+        <createTable tableName="LB_TEST_TABLE_COMMENT">
+            <column name="id" type="INTEGER"/>
+            <column name="name" type="VARCHAR(100)"/>
+        </createTable>
+        <sql>
+            ALTER TABLE LB_TEST_TABLE_COMMENT 
+            SET COMMENT = 'Test table with comment'
+        </sql>
+        <rollback>
+            <dropTable tableName="LB_TEST_TABLE_COMMENT"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Table with All Snowflake Features -->
+    <changeSet author="liquibase-test" id="table-6">
+        <sql>
+            CREATE TRANSIENT TABLE LB_TEST_TABLE_FULL (
+                id INTEGER,
+                category VARCHAR(50),
+                data VARCHAR(500),
+                created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) 
+            CLUSTER BY (category)
+            DATA_RETENTION_TIME_IN_DAYS = 14
+            COMMENT = 'Full featured Snowflake table'
+        </sql>
+        <rollback>
+            <sql>DROP TABLE IF EXISTS LB_TEST_TABLE_FULL</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Table with Change Tracking -->
+    <changeSet author="liquibase-test" id="table-7">
+        <sql>
+            CREATE TABLE LB_TEST_TABLE_CHANGE_TRACKING (
+                id INTEGER,
+                data VARCHAR(200),
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) CHANGE_TRACKING = TRUE
+        </sql>
+        <rollback>
+            <sql>DROP TABLE IF EXISTS LB_TEST_TABLE_CHANGE_TRACKING</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Table with Complex Data Types -->
+    <changeSet author="liquibase-test" id="table-8">
+        <sql>
+            CREATE TABLE LB_TEST_TABLE_COMPLEX_TYPES (
+                id INTEGER,
+                json_data VARIANT,
+                array_data ARRAY,
+                object_data OBJECT,
+                geography_data GEOGRAPHY,
+                binary_data BINARY(100),
+                created_date TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP
+            )
+        </sql>
+        <rollback>
+            <sql>DROP TABLE IF EXISTS LB_TEST_TABLE_COMPLEX_TYPES</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Table Alteration for Clustering -->
+    <changeSet author="liquibase-test" id="table-9">
+        <createTable tableName="LB_TEST_TABLE_ALTER_CLUSTER">
+            <column name="id" type="INTEGER"/>
+            <column name="category" type="VARCHAR(50)"/>
+            <column name="data" type="VARCHAR(200)"/>
+        </createTable>
+        <sql>
+            ALTER TABLE LB_TEST_TABLE_ALTER_CLUSTER 
+            CLUSTER BY (category)
+        </sql>
+        <rollback>
+            <dropTable tableName="LB_TEST_TABLE_ALTER_CLUSTER"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Table Alteration for Data Retention -->
+    <changeSet author="liquibase-test" id="table-10">
+        <createTable tableName="LB_TEST_TABLE_ALTER_RETENTION">
+            <column name="id" type="INTEGER"/>
+            <column name="data" type="VARCHAR(200)"/>
+        </createTable>
+        <sql>
+            ALTER TABLE LB_TEST_TABLE_ALTER_RETENTION 
+            SET DATA_RETENTION_TIME_IN_DAYS = 30
+        </sql>
+        <rollback>
+            <dropTable tableName="LB_TEST_TABLE_ALTER_RETENTION"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Table with Automatic Clustering -->
+    <changeSet author="liquibase-test" id="table-11">
+        <sql>
+            CREATE TABLE LB_TEST_TABLE_AUTO_CLUSTER (
+                id INTEGER,
+                category VARCHAR(50),
+                data VARCHAR(200)
+            ) CLUSTER BY (category)
+        </sql>
+        <sql>
+            ALTER TABLE LB_TEST_TABLE_AUTO_CLUSTER 
+            RESUME RECLUSTER
+        </sql>
+        <rollback>
+            <sql>DROP TABLE IF EXISTS LB_TEST_TABLE_AUTO_CLUSTER</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Table Performance with Data -->
+    <changeSet author="liquibase-test" id="table-12">
+        <sql>
+            CREATE TABLE LB_TEST_TABLE_PERFORMANCE (
+                id INTEGER,
+                category VARCHAR(50),
+                data VARCHAR(200),
+                created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) CLUSTER BY (category)
+        </sql>
+        <!-- Insert test data -->
+        <sql>
+            INSERT INTO LB_TEST_TABLE_PERFORMANCE (id, category, data) 
+            SELECT 
+                seq4() as id,
+                'CAT' || (seq4() % 10) as category,
+                'Test data ' || seq4() as data
+            FROM table(generator(rowcount=>100))
+        </sql>
+        <rollback>
+            <sql>DROP TABLE IF EXISTS LB_TEST_TABLE_PERFORMANCE</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Table with Constraints -->
+    <changeSet author="liquibase-test" id="table-13">
+        <createTable tableName="LB_TEST_TABLE_CONSTRAINTS">
+            <column name="id" type="INTEGER">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="age" type="INTEGER">
+                <constraints checkConstraint="age >= 0 AND age <= 150"/>
+            </column>
+        </createTable>
+        <rollback>
+            <dropTable tableName="LB_TEST_TABLE_CONSTRAINTS"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Table with Foreign Key -->
+    <changeSet author="liquibase-test" id="table-14">
+        <createTable tableName="LB_TEST_TABLE_PARENT">
+            <column name="id" type="INTEGER">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)"/>
+        </createTable>
+        <createTable tableName="LB_TEST_TABLE_CHILD">
+            <column name="id" type="INTEGER">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="parent_id" type="INTEGER"/>
+            <column name="data" type="VARCHAR(200)"/>
+        </createTable>
+        <addForeignKeyConstraint 
+            baseTableName="LB_TEST_TABLE_CHILD" 
+            baseColumnNames="parent_id"
+            referencedTableName="LB_TEST_TABLE_PARENT" 
+            referencedColumnNames="id"
+            constraintName="fk_child_parent"/>
+        <rollback>
+            <dropTable tableName="LB_TEST_TABLE_CHILD"/>
+            <dropTable tableName="LB_TEST_TABLE_PARENT"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Test Table Cleanup -->
+    <changeSet author="liquibase-test" id="table-cleanup">
+        <dropTable tableName="LB_TEST_TABLE_BASIC"/>
+        <sql>DROP TABLE IF EXISTS LB_TEST_TABLE_TRANSIENT</sql>
+        <sql>DROP TABLE IF EXISTS LB_TEST_TABLE_CLUSTER</sql>
+        <sql>DROP TABLE IF EXISTS LB_TEST_TABLE_RETENTION</sql>
+        <dropTable tableName="LB_TEST_TABLE_COMMENT"/>
+        <sql>DROP TABLE IF EXISTS LB_TEST_TABLE_FULL</sql>
+        <sql>DROP TABLE IF EXISTS LB_TEST_TABLE_CHANGE_TRACKING</sql>
+        <sql>DROP TABLE IF EXISTS LB_TEST_TABLE_COMPLEX_TYPES</sql>
+        <dropTable tableName="LB_TEST_TABLE_ALTER_CLUSTER"/>
+        <dropTable tableName="LB_TEST_TABLE_ALTER_RETENTION"/>
+        <sql>DROP TABLE IF EXISTS LB_TEST_TABLE_AUTO_CLUSTER</sql>
+        <sql>DROP TABLE IF EXISTS LB_TEST_TABLE_PERFORMANCE</sql>
+        <dropTable tableName="LB_TEST_TABLE_CONSTRAINTS"/>
+        <dropTable tableName="LB_TEST_TABLE_CHILD"/>
+        <dropTable tableName="LB_TEST_TABLE_PARENT"/>
+    </changeSet>
+
+</databaseChangeLog>

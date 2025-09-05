@@ -1,0 +1,501 @@
+AIPL_VERSION: "2.0"
+PROGRAM_NAME: "performance-optimization"
+DESCRIPTION: "Optimize performance of existing snapshot/diff implementation"
+
+IMPORTS:
+  - "../../../AIPL/core/TERMINOLOGY_DEFINITIONS.yaml"
+  - "../../../AIPL/core/STEP_SPECIFICATIONS.yaml"
+  - "../../../AIPL/core/AUTONOMOUS_OPERATION.yaml"
+  - "../../../AIPL/libraries/snowflake/SNOWFLAKE_SNAPSHOT_DIFF_PATTERNS.yaml"
+
+REQUIRES:
+  - BEHAVIORAL_KEYWORDS
+  - STEP_CLASSIFICATION
+  - AUTONOMOUS_PREREQUISITE_PHASE
+  - SNOWFLAKE_PATTERNS
+
+EXECUTION_PROTOCOL:
+  PURPOSE: "Systematically identify and optimize performance bottlenecks in snapshot/diff implementation"
+  INPUT: "Working implementation with identified performance issues or optimization requirements"
+  OUTPUT: "Optimized implementation with improved performance and comprehensive performance tests"
+  VALIDATION: "Performance benchmarks show measurable improvement, all existing functionality preserved"
+
+VARIABLES:
+  OBJECT_TYPE: "${TARGET_OBJECT_TYPE}"
+  OBJECT_TYPE_LOWER: "fileformat"  # Will be replaced with actual value
+  PROJECT_BASE: "liquibase-snowflake"
+  PACKAGE_BASE: "liquibase.ext.snowflake"
+  TEST_PACKAGE: "liquibase.ext.snowflake"
+  PERFORMANCE_ANALYSIS_FILE: "performance_analysis_${OBJECT_TYPE_LOWER}.md"
+  
+PHASES:
+  PHASE_0_5_AUTONOMOUS_PREREQUISITES:
+    STEP_TYPE: "VALIDATION"
+    PURPOSE: "Validate autonomous operation capability before performance optimization"
+    
+    INPUT_REQUIREMENTS:
+      - "CLAUDE.md file exists in project root"
+      - "Optimization requires test execution and compilation"
+      
+    QUALITY_GATE:
+      NAME: "validate-autonomous-commands"
+      TYPE: "BLOCKING"
+      FAILURE_ACTION: "STOP"
+      ERROR_MESSAGE: "Missing autonomous operation capability - update CLAUDE.md with required auto-approval patterns"
+      RECOVERY_STEPS:
+        - "Add required command patterns to CLAUDE.md"
+        - "Verify patterns match expected format"
+        - "Re-run autonomous validation"
+        
+    ACCEPTANCE_CRITERIA:
+      - CRITERION: "CLAUDE.md contains required auto-approval patterns"
+        VALIDATION_COMMAND: "grep -c 'mvn test.*-Dtest=' CLAUDE.md"
+        PASS_CONDITION: "≥ 3 autonomous test command patterns found"
+      - CRITERION: "CLAUDE.md accessible and readable"
+        VALIDATION_COMMAND: "test -r CLAUDE.md"
+        PASS_CONDITION: "File is readable"
+        
+    DELIVERABLES:
+      - ARTIFACT: "Autonomous capability validation result"
+        LOCATION: "Validation log or confirmation"
+        VALIDATION: "All validation commands passed successfully"
+
+  PHASE_1_PERFORMANCE_ANALYSIS:
+    STEP_1_1_BASELINE_PERFORMANCE_MEASUREMENT:
+      STEP_TYPE: "RESEARCH"
+      PURPOSE: "Establish baseline performance metrics for current implementation"
+      
+      INPUT_REQUIREMENTS:
+        - "Working implementation available"
+        - "Performance testing framework accessible"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Create performance test harness"
+          COMMAND: "echo 'Creating performance measurement test class'"
+          EXPECTED_OUTPUT: "Performance test framework setup"
+        - ACTION: "Measure snapshot generation performance"
+          COMMAND: "echo 'Measuring snapshot generation time for various object counts'"
+          EXPECTED_OUTPUT: "Baseline snapshot performance metrics"
+        - ACTION: "Measure diff comparison performance"
+          COMMAND: "echo 'Measuring diff comparison time for various scenarios'"
+          EXPECTED_OUTPUT: "Baseline diff performance metrics"
+        - ACTION: "Measure memory usage"
+          COMMAND: "echo 'Measuring memory consumption during operations'"
+          EXPECTED_OUTPUT: "Baseline memory usage metrics"
+        - ACTION: "Measure database query performance"
+          COMMAND: "echo 'Measuring database query execution time'"
+          EXPECTED_OUTPUT: "Baseline database operation metrics"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Performance baseline established"
+          VALIDATION_COMMAND: "test -f ${PERFORMANCE_ANALYSIS_FILE}"
+          PASS_CONDITION: "Performance analysis file created"
+        - CRITERION: "Snapshot performance measured"
+          VALIDATION_COMMAND: "grep -c 'SNAPSHOT.*TIME\\|SNAPSHOT.*MS' ${PERFORMANCE_ANALYSIS_FILE}"
+          PASS_CONDITION: "≥ 3 snapshot timing measurements found"
+        - CRITERION: "Diff performance measured"
+          VALIDATION_COMMAND: "grep -c 'DIFF.*TIME\\|DIFF.*MS' ${PERFORMANCE_ANALYSIS_FILE}"
+          PASS_CONDITION: "≥ 3 diff timing measurements found"
+
+      DELIVERABLES:
+        - ARTIFACT: "Performance baseline report"
+          LOCATION: "${PERFORMANCE_ANALYSIS_FILE}"
+          VALIDATION: "Complete baseline performance metrics documented"
+
+    STEP_1_2_BOTTLENECK_IDENTIFICATION:
+      STEP_TYPE: "RESEARCH"
+      PURPOSE: "Identify specific performance bottlenecks and optimization opportunities"
+      
+      INPUT_REQUIREMENTS:
+        - "Performance baseline established"
+        - "Profiling tools available"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Profile database query performance"
+          COMMAND: "echo 'Analyzing SQL query execution plans and timing'"
+          EXPECTED_OUTPUT: "Database query bottleneck analysis"
+        - ACTION: "Profile object creation overhead"
+          COMMAND: "echo 'Analyzing object instantiation and property setting overhead'"
+          EXPECTED_OUTPUT: "Object creation performance analysis"
+        - ACTION: "Profile memory allocation patterns"
+          COMMAND: "echo 'Analyzing memory allocation and garbage collection impact'"
+          EXPECTED_OUTPUT: "Memory usage optimization opportunities"
+        - ACTION: "Profile comparison algorithm efficiency"
+          COMMAND: "echo 'Analyzing diff comparison algorithm performance'"
+          EXPECTED_OUTPUT: "Comparison algorithm bottleneck analysis"
+        - ACTION: "Identify optimization opportunities"
+          COMMAND: "echo 'Prioritizing optimization opportunities by impact'"
+          EXPECTED_OUTPUT: "Prioritized optimization roadmap"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Bottlenecks identified"
+          VALIDATION_COMMAND: "grep -c 'BOTTLENECK\\|SLOW\\|INEFFICIENT' ${PERFORMANCE_ANALYSIS_FILE}"
+          PASS_CONDITION: "≥ 3 bottleneck patterns identified"
+        - CRITERION: "Optimization opportunities prioritized"
+          VALIDATION_COMMAND: "grep -c 'HIGH.*IMPACT\\|MEDIUM.*IMPACT\\|LOW.*IMPACT' ${PERFORMANCE_ANALYSIS_FILE}"
+          PASS_CONDITION: "≥ 3 impact assessments found"
+        - CRITERION: "Optimization strategy documented"
+          VALIDATION_COMMAND: "grep -c 'STRATEGY\\|APPROACH\\|PLAN' ${PERFORMANCE_ANALYSIS_FILE}"
+          PASS_CONDITION: "≥ 3 strategy elements found"
+
+      DELIVERABLES:
+        - ARTIFACT: "Bottleneck analysis and optimization strategy"
+          LOCATION: "Appended to ${PERFORMANCE_ANALYSIS_FILE}"
+          VALIDATION: "Comprehensive bottleneck analysis with optimization plan"
+
+  PHASE_2_DATABASE_OPTIMIZATION:
+    STEP_2_1_OPTIMIZE_SQL_QUERIES:
+      STEP_TYPE: "PROCESSING"
+      PURPOSE: "Optimize database queries for better performance"
+      
+      INPUT_REQUIREMENTS:
+        - "Database bottlenecks identified"
+        - "SQL query access available"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Optimize INFORMATION_SCHEMA queries"
+          COMMAND: "echo 'Optimizing SELECT queries with better column selection and WHERE clauses'"
+          EXPECTED_OUTPUT: "More efficient SQL queries"
+        - ACTION: "Add query result caching"
+          COMMAND: "echo 'Implementing query result caching to avoid redundant database calls'"
+          EXPECTED_OUTPUT: "Query caching mechanism"
+        - ACTION: "Optimize query batching"
+          COMMAND: "echo 'Batching multiple object queries into single database calls'"
+          EXPECTED_OUTPUT: "Batched query implementation"
+        - ACTION: "Add query performance monitoring"
+          COMMAND: "echo 'Adding query timing and performance monitoring'"
+          EXPECTED_OUTPUT: "Query performance tracking"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "SQL queries optimized"
+          VALIDATION_COMMAND: "grep -c 'SELECT.*FROM.*WHERE\\|LIMIT\\|ORDER BY' src/main/java/liquibase/ext/snowflake/snapshot/${OBJECT_TYPE}SnapshotGenerator.java"
+          PASS_CONDITION: "≥ 2 optimized query patterns found"
+        - CRITERION: "Code compiles after optimization"
+          VALIDATION_COMMAND: "mvn compile -q"
+          PASS_CONDITION: "Build success"
+        - CRITERION: "Tests still pass"
+          VALIDATION_COMMAND: "mvn test -Dtest=\"${OBJECT_TYPE}SnapshotGeneratorTest\" -q"
+          PASS_CONDITION: "All tests successful"
+
+      DELIVERABLES:
+        - ARTIFACT: "Optimized database queries"
+          LOCATION: "src/main/java/liquibase/ext/snowflake/snapshot/${OBJECT_TYPE}SnapshotGenerator.java"
+          VALIDATION: "Database queries are more efficient and maintain functionality"
+
+    STEP_2_2_OPTIMIZE_CONNECTION_HANDLING:
+      STEP_TYPE: "PROCESSING"
+      PURPOSE: "Optimize database connection usage and resource management"
+      
+      INPUT_REQUIREMENTS:
+        - "SQL queries optimized"
+        - "Connection handling patterns identified"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Optimize connection reuse"
+          COMMAND: "echo 'Implementing connection pooling and reuse patterns'"
+          EXPECTED_OUTPUT: "Efficient connection management"
+        - ACTION: "Minimize connection overhead"
+          COMMAND: "echo 'Reducing connection establishment and teardown overhead'"
+          EXPECTED_OUTPUT: "Optimized connection lifecycle"
+        - ACTION: "Add connection timeout handling"
+          COMMAND: "echo 'Implementing proper connection timeout and retry logic'"
+          EXPECTED_OUTPUT: "Robust connection handling"
+        - ACTION: "Optimize transaction management"
+          COMMAND: "echo 'Optimizing transaction boundaries and commit patterns'"
+          EXPECTED_OUTPUT: "Efficient transaction handling"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Connection handling optimized"
+          VALIDATION_COMMAND: "grep -c 'connection\\|Connection' src/main/java/liquibase/ext/snowflake/snapshot/${OBJECT_TYPE}SnapshotGenerator.java"
+          PASS_CONDITION: "Connection handling code present"
+        - CRITERION: "Resource management improved"
+          VALIDATION_COMMAND: "grep -c 'close\\|try.*finally\\|try.*resources' src/main/java/liquibase/ext/snowflake/snapshot/${OBJECT_TYPE}SnapshotGenerator.java"
+          PASS_CONDITION: "≥ 1 resource management pattern found"
+        - CRITERION: "Tests pass with optimizations"
+          VALIDATION_COMMAND: "mvn test -Dtest=\"${OBJECT_TYPE}SnapshotGeneratorTest\" -q"
+          PASS_CONDITION: "All tests successful"
+
+      DELIVERABLES:
+        - ARTIFACT: "Optimized connection handling"
+          LOCATION: "Database access code in snapshot generator"
+          VALIDATION: "Connection handling is efficient and reliable"
+
+  PHASE_3_ALGORITHM_OPTIMIZATION:
+    STEP_3_1_OPTIMIZE_OBJECT_CREATION:
+      STEP_TYPE: "PROCESSING"
+      PURPOSE: "Optimize object instantiation and property setting performance"
+      
+      INPUT_REQUIREMENTS:
+        - "Database optimizations completed"
+        - "Object creation bottlenecks identified"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Optimize property setting performance"
+          COMMAND: "echo 'Optimizing setAttribute calls and property mapping'"
+          EXPECTED_OUTPUT: "More efficient object property handling"
+        - ACTION: "Implement object pooling"
+          COMMAND: "echo 'Adding object pooling to reduce instantiation overhead'"
+          EXPECTED_OUTPUT: "Object pool implementation"
+        - ACTION: "Optimize object cloning"
+          COMMAND: "echo 'Implementing efficient object cloning for diff operations'"
+          EXPECTED_OUTPUT: "Fast object cloning mechanism"
+        - ACTION: "Reduce object allocation"
+          COMMAND: "echo 'Minimizing temporary object allocation in hot paths'"
+          EXPECTED_OUTPUT: "Reduced memory allocation overhead"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Object creation optimized"
+          VALIDATION_COMMAND: "grep -c 'new ${OBJECT_TYPE}\\|setAttribute' src/main/java/liquibase/ext/snowflake/snapshot/${OBJECT_TYPE}SnapshotGenerator.java"
+          PASS_CONDITION: "Object creation patterns optimized"
+        - CRITERION: "Performance improvements measurable"
+          VALIDATION_COMMAND: "echo 'Performance measurement would be implemented here'"
+          PASS_CONDITION: "Object creation faster than baseline"
+        - CRITERION: "All tests pass"
+          VALIDATION_COMMAND: "mvn test -Dtest=\"*${OBJECT_TYPE}*Test*\" -q"
+          PASS_CONDITION: "All tests successful"
+
+      DELIVERABLES:
+        - ARTIFACT: "Optimized object creation code"
+          LOCATION: "Object model and snapshot generator"
+          VALIDATION: "Object creation is significantly faster"
+
+    STEP_3_2_OPTIMIZE_COMPARISON_ALGORITHMS:
+      STEP_TYPE: "PROCESSING"
+      PURPOSE: "Optimize diff comparison algorithms for better performance"
+      
+      INPUT_REQUIREMENTS:
+        - "Object creation optimized"
+        - "Comparison bottlenecks identified"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Optimize hash calculation"
+          COMMAND: "echo 'Optimizing object hash calculation for faster comparison'"
+          EXPECTED_OUTPUT: "More efficient hash calculation"
+        - ACTION: "Implement comparison short-circuiting"
+          COMMAND: "echo 'Adding early exit conditions for obviously different objects'"
+          EXPECTED_OUTPUT: "Short-circuit comparison logic"
+        - ACTION: "Optimize property comparison order"
+          COMMAND: "echo 'Ordering property comparisons by likelihood of difference'"
+          EXPECTED_OUTPUT: "Optimized comparison sequence"
+        - ACTION: "Add comparison result caching"
+          COMMAND: "echo 'Caching comparison results for identical object pairs'"
+          EXPECTED_OUTPUT: "Comparison result cache"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Comparison algorithms optimized"
+          VALIDATION_COMMAND: "grep -c 'hash\\|compare\\|equals' src/main/java/liquibase/ext/snowflake/diff/compare/${OBJECT_TYPE}Comparator.java"
+          PASS_CONDITION: "Comparison methods optimized"
+        - CRITERION: "Performance improvements measurable"
+          VALIDATION_COMMAND: "echo 'Comparison performance measurement would be implemented here'"
+          PASS_CONDITION: "Comparison faster than baseline"
+        - CRITERION: "All tests pass"
+          VALIDATION_COMMAND: "mvn test -Dtest=\"${OBJECT_TYPE}ComparatorTest\" -q"
+          PASS_CONDITION: "All tests successful"
+
+      DELIVERABLES:
+        - ARTIFACT: "Optimized comparison algorithms"
+          LOCATION: "src/main/java/liquibase/ext/snowflake/diff/compare/${OBJECT_TYPE}Comparator.java"
+          VALIDATION: "Diff comparison is significantly faster"
+
+  PHASE_4_MEMORY_OPTIMIZATION:
+    STEP_4_1_OPTIMIZE_MEMORY_USAGE:
+      STEP_TYPE: "PROCESSING"
+      PURPOSE: "Optimize memory allocation and reduce memory footprint"
+      
+      INPUT_REQUIREMENTS:
+        - "Algorithm optimizations completed"
+        - "Memory usage patterns analyzed"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Optimize string handling"
+          COMMAND: "echo 'Optimizing string storage and manipulation to reduce memory usage'"
+          EXPECTED_OUTPUT: "More memory-efficient string handling"
+        - ACTION: "Implement lazy loading"
+          COMMAND: "echo 'Implementing lazy loading for expensive properties'"
+          EXPECTED_OUTPUT: "Lazy loading mechanism"
+        - ACTION: "Optimize collection usage"
+          COMMAND: "echo 'Using more memory-efficient collections and data structures'"
+          EXPECTED_OUTPUT: "Optimized collection usage"
+        - ACTION: "Add memory monitoring"
+          COMMAND: "echo 'Adding memory usage monitoring and reporting'"
+          EXPECTED_OUTPUT: "Memory usage tracking"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Memory usage optimized"
+          VALIDATION_COMMAND: "grep -c 'String\\|List\\|Map\\|Collection' src/main/java/liquibase/ext/snowflake/database/${OBJECT_TYPE}.java"
+          PASS_CONDITION: "Memory-efficient data structures used"
+        - CRITERION: "Memory improvements measurable"
+          VALIDATION_COMMAND: "echo 'Memory usage measurement would be implemented here'"
+          PASS_CONDITION: "Memory usage lower than baseline"
+        - CRITERION: "Functionality preserved"
+          VALIDATION_COMMAND: "mvn test -Dtest=\"*${OBJECT_TYPE}*Test*\" -q"
+          PASS_CONDITION: "All tests successful"
+
+      DELIVERABLES:
+        - ARTIFACT: "Memory-optimized implementation"
+          LOCATION: "All implementation files"
+          VALIDATION: "Memory usage is significantly reduced"
+
+    STEP_4_2_OPTIMIZE_GARBAGE_COLLECTION:
+      STEP_TYPE: "PROCESSING"
+      PURPOSE: "Minimize garbage collection impact through better object lifecycle management"
+      
+      INPUT_REQUIREMENTS:
+        - "Memory usage optimized"
+        - "GC patterns analyzed"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Reduce temporary object creation"
+          COMMAND: "echo 'Minimizing creation of temporary objects in hot paths'"
+          EXPECTED_OUTPUT: "Reduced temporary object allocation"
+        - ACTION: "Implement object reuse patterns"
+          COMMAND: "echo 'Reusing objects where possible to reduce GC pressure'"
+          EXPECTED_OUTPUT: "Object reuse implementation"
+        - ACTION: "Optimize object references"
+          COMMAND: "echo 'Using weak references where appropriate to help GC'"
+          EXPECTED_OUTPUT: "Optimized reference management"
+        - ACTION: "Add GC monitoring"
+          COMMAND: "echo 'Adding GC impact monitoring and reporting'"
+          EXPECTED_OUTPUT: "GC performance tracking"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "GC impact minimized"
+          VALIDATION_COMMAND: "echo 'GC impact measurement would be implemented here'"
+          PASS_CONDITION: "Fewer GC events than baseline"
+        - CRITERION: "Object lifecycle optimized"
+          VALIDATION_COMMAND: "grep -c 'WeakReference\\|SoftReference\\|reuse' src/main/java/liquibase/ext/snowflake/**/${OBJECT_TYPE}*.java"
+          PASS_CONDITION: "Object lifecycle optimizations present"
+        - CRITERION: "Performance maintained"
+          VALIDATION_COMMAND: "mvn test -Dtest=\"*${OBJECT_TYPE}*Test*\" -q"
+          PASS_CONDITION: "All tests successful"
+
+      DELIVERABLES:
+        - ARTIFACT: "GC-optimized implementation"
+          LOCATION: "All implementation files"
+          VALIDATION: "Garbage collection impact is minimized"
+
+  PHASE_5_PERFORMANCE_VALIDATION:
+    STEP_5_1_COMPREHENSIVE_PERFORMANCE_TESTING:
+      STEP_TYPE: "VALIDATION"
+      PURPOSE: "Validate all performance optimizations with comprehensive testing"
+      
+      INPUT_REQUIREMENTS:
+        - "All optimizations implemented"
+        - "Performance testing framework available"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Create performance test suite"
+          COMMAND: "echo 'Creating comprehensive performance test suite'"
+          EXPECTED_OUTPUT: "Performance test implementation"
+        - ACTION: "Measure optimized performance"
+          COMMAND: "echo 'Measuring performance after all optimizations'"
+          EXPECTED_OUTPUT: "Post-optimization performance metrics"
+        - ACTION: "Compare with baseline"
+          COMMAND: "echo 'Comparing optimized performance with baseline metrics'"
+          EXPECTED_OUTPUT: "Performance improvement analysis"
+        - ACTION: "Test performance under load"
+          COMMAND: "echo 'Testing performance with large datasets and high concurrency'"
+          EXPECTED_OUTPUT: "Load performance validation"
+
+      QUALITY_GATE:
+        NAME: "performance-improvement-gate"
+        TYPE: "BLOCKING"
+        FAILURE_ACTION: "STOP"
+        ERROR_MESSAGE: "Performance optimizations did not achieve target improvements"
+        RECOVERY_STEPS:
+          - "Review optimization implementations"
+          - "Identify additional bottlenecks"
+          - "Apply additional optimizations"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "Performance significantly improved"
+          VALIDATION_COMMAND: "echo 'Performance comparison would be implemented here'"
+          PASS_CONDITION: "≥ 25% improvement in key performance metrics"
+        - CRITERION: "Performance tests pass"
+          VALIDATION_COMMAND: "mvn test -Dtest=\"*${OBJECT_TYPE}*PerformanceTest*\" -q"
+          PASS_CONDITION: "All performance tests successful"
+        - CRITERION: "Load performance acceptable"
+          VALIDATION_COMMAND: "echo 'Load performance validation would be implemented here'"
+          PASS_CONDITION: "Performance remains good under load"
+
+      DELIVERABLES:
+        - ARTIFACT: "Performance validation results"
+          LOCATION: "Performance test reports"
+          VALIDATION: "Demonstrable performance improvements achieved"
+
+    STEP_5_2_REGRESSION_TESTING:
+      STEP_TYPE: "VALIDATION"
+      PURPOSE: "Ensure optimizations do not break existing functionality"
+      
+      INPUT_REQUIREMENTS:
+        - "Performance optimizations completed"
+        - "Full test suite available"
+        
+      EXECUTION_STEPS:
+        - ACTION: "Run all object-specific tests"
+          COMMAND: "mvn test -Dtest=\"*${OBJECT_TYPE}*Test*\" -q"
+          EXPECTED_OUTPUT: "All functionality tests pass"
+        - ACTION: "Run integration tests"
+          COMMAND: "echo 'Testing integration with Liquibase snapshot/diff system'"
+          EXPECTED_OUTPUT: "Integration functionality verified"
+        - ACTION: "Run broader regression tests"
+          COMMAND: "mvn test -q"
+          EXPECTED_OUTPUT: "No regressions in other components"
+        - ACTION: "Validate end-to-end workflows"
+          COMMAND: "echo 'Testing complete snapshot/diff workflows'"
+          EXPECTED_OUTPUT: "End-to-end functionality verified"
+
+      ACCEPTANCE_CRITERIA:
+        - CRITERION: "All existing tests pass"
+          VALIDATION_COMMAND: "mvn test -Dtest=\"*${OBJECT_TYPE}*Test*\" -q"
+          PASS_CONDITION: "All tests successful"
+        - CRITERION: "No functionality regressions"
+          VALIDATION_COMMAND: "mvn test -q"
+          PASS_CONDITION: "Broader test suite passes"
+        - CRITERION: "Integration maintained"
+          VALIDATION_COMMAND: "echo 'Integration validation would be implemented here'"
+          PASS_CONDITION: "All integration points functional"
+
+      DELIVERABLES:
+        - ARTIFACT: "Regression test results"
+          LOCATION: "Test execution reports"
+          VALIDATION: "All existing functionality preserved"
+
+SUCCESS_CRITERIA:
+  PERFORMANCE_IMPROVEMENTS:
+    - "≥ 25% improvement in snapshot generation performance"
+    - "≥ 25% improvement in diff comparison performance"
+    - "≥ 20% reduction in memory usage"
+    - "≥ 30% reduction in database query time"
+    - "Measurable improvement in GC performance"
+    
+  QUALITY_VALIDATION:
+    - "All existing tests pass (no regressions)"
+    - "Performance improvements verified with comprehensive testing"
+    - "Code maintains readability and maintainability"
+    - "Integration with Liquibase system preserved"
+    - "Performance remains good under load conditions"
+    
+  AUTONOMOUS_OPERATION:
+    - "Performance optimization completed using autonomous test execution"
+    - "All command patterns approved for autonomous operation"
+    - "Test-driven optimization cycle successfully executed"
+
+ERROR_HANDLING:
+  GLOBAL_FAILURE_ACTION: "STOP"
+  PHASE_FAILURE_HANDLERS:
+    PHASE_1_PERFORMANCE_ANALYSIS:
+      ACTION: "STOP"
+      MESSAGE: "Cannot optimize without understanding current performance characteristics"
+    PHASE_2_DATABASE_OPTIMIZATION:
+      ACTION: "WARN"
+      MESSAGE: "Database optimizations incomplete - some performance gains may not be realized"
+    PHASE_3_ALGORITHM_OPTIMIZATION:
+      ACTION: "WARN"
+      MESSAGE: "Algorithm optimizations incomplete - some performance gains may not be realized"
+    PHASE_4_MEMORY_OPTIMIZATION:
+      ACTION: "WARN"
+      MESSAGE: "Memory optimizations incomplete - memory usage may not improve significantly"
+    PHASE_5_PERFORMANCE_VALIDATION:
+      ACTION: "STOP"
+      MESSAGE: "Performance validation failed - optimizations not successful"

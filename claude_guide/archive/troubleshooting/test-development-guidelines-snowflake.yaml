@@ -1,0 +1,297 @@
+AIPL_VERSION: "1.0"
+PROGRAM_NAME: "test-development-guidelines-snowflake"
+DESCRIPTION: "Snowflake-specific test development patterns and troubleshooting"
+
+VARIABLES:
+  EXTENSION_PATH: "${LIQUIBASE_EXTENSION_ROOT}"
+  TEST_HARNESS_PATH: "${LIQUIBASE_TEST_HARNESS_ROOT}"
+  CHANGETYPE: "${CHANGETYPE_NAME}"
+  OBJECT_TYPE: "${OBJECT_TYPE}"
+  TEST_OBJECT_NAME: "${TEST_OBJECT_NAME}"
+  NEW_OBJECT_NAME: "${NEW_OBJECT_NAME}"
+  CHANGE_CLASS_FILE: "${CHANGE_CLASS_FILE}"
+
+PHASES:
+  VALIDATE_SNOWFLAKE_SQL_FORMAT:
+    DESCRIPTION: "Verify SQL generation follows Snowflake format expectations"
+    STEPS:
+      - VALIDATE:
+          NAME: "check-boolean-format"
+          TYPE: "NOT_CONTAINS_TEXT"
+          TARGET: "/tmp/generated_sql.log"
+          PATTERN: "'TRUE'"
+          FAILURE_ACTION: "CONTINUE"
+          ERROR_MESSAGE: "Boolean values should not have quotes - use true not 'TRUE'"
+          
+      - VALIDATE:
+          NAME: "check-enum-format"
+          TYPE: "NOT_CONTAINS_TEXT"
+          TARGET: "/tmp/generated_sql.log"
+          PATTERN: "'XSMALL'"
+          FAILURE_ACTION: "CONTINUE"
+          ERROR_MESSAGE: "Enum values should not have quotes - use XSMALL not 'XSMALL'"
+          
+      - VALIDATE:
+          NAME: "check-null-format"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "/tmp/generated_sql.log"
+          PATTERN: "NULL"
+          FAILURE_ACTION: "CONTINUE"
+          ERROR_MESSAGE: "NULL values should be uppercase, not lowercase"
+          
+      - VALIDATE:
+          NAME: "check-string-literals"
+          TYPE: "NOT_CONTAINS_TEXT"
+          TARGET: "/tmp/generated_sql.log"
+          PATTERN: "COMMENT [a-zA-Z]"
+          FAILURE_ACTION: "CONTINUE"
+          ERROR_MESSAGE: "String literals should have single quotes"
+
+  VALIDATE_TEST_HARNESS_INTEGRATION:
+    DESCRIPTION: "Verify test harness dependency and configuration"
+    STEPS:
+      - VALIDATE:
+          NAME: "check-snowflake-dependency"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${TEST_HARNESS_PATH}/pom.xml"
+          PATTERN: "liquibase-snowflake"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "liquibase-snowflake dependency missing from test classpath"
+          
+      - VALIDATE:
+          NAME: "verify-test-scope"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${TEST_HARNESS_PATH}/pom.xml"
+          PATTERN: "<scope>test</scope>"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Test scope required for XSD resolution"
+
+  CONFIGURE_ROLLBACK_STRATEGY:
+    DESCRIPTION: "Set appropriate rollback strategy for Snowflake"
+    STEPS:
+      - COMMAND:
+          NAME: "test-rollback-by-tag"
+          EXECUTE: "cd ${TEST_HARNESS_PATH} && mvn test -DrollbackStrategy=rollbackByTag -DdbName=snowflake -Dtest=${CHANGETYPE}Test"
+          
+      - VALIDATE:
+          NAME: "verify-rollback-success"
+          TYPE: "COMMAND_SUCCESS"
+          COMMAND: "cd ${TEST_HARNESS_PATH} && mvn test -DrollbackStrategy=rollbackByTag -DdbName=snowflake -Dtest=${CHANGETYPE}Test -q"
+          FAILURE_ACTION: "CONTINUE"
+          ERROR_MESSAGE: "Rollback by tag strategy failed - try rollbackToDate"
+          
+      - CONDITIONAL:
+          NAME: "fallback-to-date-strategy"
+          CONDITION:
+            TYPE: "COMMAND_SUCCESS"
+            COMMAND: "cd ${TEST_HARNESS_PATH} && mvn test -DrollbackStrategy=rollbackByTag -DdbName=snowflake -Dtest=${CHANGETYPE}Test -q"
+          THEN:
+            - CONTINUE
+          ELSE:
+            - COMMAND:
+                NAME: "test-rollback-by-date"
+                EXECUTE: "cd ${TEST_HARNESS_PATH} && mvn test -DrollbackStrategy=rollbackToDate -DdbName=snowflake -Dtest=${CHANGETYPE}Test"
+
+  GENERATE_ROLLBACK_UNIT_TESTS:
+    DESCRIPTION: "Create unit test templates for rollback validation"
+    STEPS:
+      - CREATE_FILE:
+          NAME: "supports-rollback-test"
+          TEMPLATE: "SUPPORTS_ROLLBACK_TEST_TEMPLATE"
+          OUTPUT: "${EXTENSION_PATH}/temp/supports_rollback_test.java"
+          
+      - CREATE_FILE:
+          NAME: "inverse-creation-test"
+          TEMPLATE: "INVERSE_CREATION_TEST_TEMPLATE"
+          OUTPUT: "${EXTENSION_PATH}/temp/inverse_creation_test.java"
+          
+      - CONDITIONAL:
+          NAME: "conditional-rollback-tests"
+          CONDITION:
+            TYPE: "CONTAINS_TEXT"
+            TARGET: "${CHANGE_CLASS_FILE}"
+            PATTERN: "operationType"
+          THEN:
+            - CREATE_FILE:
+                NAME: "conditional-rollback-test"
+                TEMPLATE: "CONDITIONAL_ROLLBACK_TEST_TEMPLATE"
+                OUTPUT: "${EXTENSION_PATH}/temp/conditional_rollback_test.java"
+          ELSE:
+            - CONTINUE
+
+  VALIDATE_ROLLBACK_IMPLEMENTATION:
+    DESCRIPTION: "Check for common rollback implementation pitfalls"
+    STEPS:
+      - VALIDATE:
+          NAME: "no-null-database-in-createinverses"
+          TYPE: "NOT_CONTAINS_TEXT"
+          TARGET: "${CHANGE_CLASS_FILE}"
+          PATTERN: "supportsRollback(null)"
+          FAILURE_ACTION: "STOP"
+          ERROR_MESSAGE: "Never call supportsRollback(null) in createInverses() - use direct conditions"
+          
+      - VALIDATE:
+          NAME: "rollback-consistency"
+          TYPE: "CONTAINS_TEXT"
+          TARGET: "${CHANGE_CLASS_FILE}"
+          PATTERN: "supportsRollback.*database"
+          FAILURE_ACTION: "CONTINUE"
+          ERROR_MESSAGE: "Verify supportsRollback uses database parameter consistently"
+
+  RESOLVE_OBJECT_CONFLICTS:
+    DESCRIPTION: "Handle object naming conflicts between test phases"
+    STEPS:
+      - COMMAND:
+          NAME: "check-unique-naming"
+          EXECUTE: "grep -c 'TEST_.*\\${' ${TEST_HARNESS_PATH}/src/main/resources/liquibase/harness/change/changelogs/snowflake/${CHANGETYPE}.xml"
+          
+      - CONDITIONAL:
+          NAME: "recommend-unique-naming"
+          CONDITION:
+            TYPE: "COMMAND_SUCCESS"
+            COMMAND: "test $(grep -c 'TEST_.*\\${' ${TEST_HARNESS_PATH}/src/main/resources/liquibase/harness/change/changelogs/snowflake/${CHANGETYPE}.xml) -eq 0"
+          THEN:
+            - COMMAND:
+                EXECUTE: "echo 'RECOMMENDATION: Use unique object names like TEST_WAREHOUSE_\\${TIMESTAMP} to avoid conflicts'"
+          ELSE:
+            - CONTINUE
+
+TEMPLATES:
+  SUPPORTS_ROLLBACK_TEST_TEMPLATE: |
+    @Test
+    void shouldSupportRollback() {
+        assertTrue(change.supportsRollback(database));
+    }
+
+  INVERSE_CREATION_TEST_TEMPLATE: |
+    @Test
+    void shouldCreateCorrectInverse() {
+        // Setup change with test data
+        change.setObjectName("${TEST_OBJECT_NAME}");
+        
+        // Create inverse
+        Change[] inverses = change.createInverses();
+        
+        // Validate inverse properties
+        assertNotNull(inverses);
+        assertEquals(1, inverses.length);
+        assertTrue(inverses[0] instanceof ExpectedInverseType);
+    }
+
+  CONDITIONAL_ROLLBACK_TEST_TEMPLATE: |
+    @Test
+    void shouldSupportRollbackForRename() {
+        change.setOperationType("RENAME");
+        change.setNew${OBJECT_TYPE}Name("${NEW_OBJECT_NAME}");
+        
+        assertTrue(change.supportsRollback(database));
+    }
+    
+    @Test
+    void shouldNotSupportRollbackForSet() {
+        change.setOperationType("SET");
+        
+        assertFalse(change.supportsRollback(database));
+    }
+
+  ROLLBACK_INTEGRATION_TEST_TEMPLATE: |
+    def "${CHANGETYPE} rollback should execute successfully"() {
+        given: "A ${OBJECT_TYPE} to modify"
+        testContext.executeSql("CREATE ${OBJECT_TYPE} ${TEST_OBJECT_NAME}")
+        
+        and: "A ${CHANGETYPE} for operation"
+        ${CHANGETYPE} change = new ${CHANGETYPE}()
+        change.set${OBJECT_TYPE}Name("${TEST_OBJECT_NAME}")
+        change.setNew${OBJECT_TYPE}Name("${NEW_OBJECT_NAME}")
+        
+        when: "Execute forward and rollback"
+        testContext.executeSql(change.generateStatements(database))
+        testContext.executeSql(change.createInverses()[0].generateStatements(database))
+        
+        then: "Original state restored"
+        testContext.${OBJECT_TYPE}Exists("${TEST_OBJECT_NAME}")
+        !testContext.${OBJECT_TYPE}Exists("${NEW_OBJECT_NAME}")
+        
+        cleanup:
+        testContext.executeSql("DROP ${OBJECT_TYPE} IF EXISTS ${TEST_OBJECT_NAME}")
+        testContext.executeSql("DROP ${OBJECT_TYPE} IF EXISTS ${NEW_OBJECT_NAME}")
+    }
+
+  OBJECT_EXISTENCE_HELPER_TEMPLATE: |
+    boolean ${OBJECT_TYPE}Exists(String ${OBJECT_TYPE}Name) {
+        try {
+            String sql = "SHOW ${OBJECT_TYPE}S LIKE '" + ${OBJECT_TYPE}Name + "'"
+            def result = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql))
+            return !result.isEmpty()
+        } catch (Exception e) {
+            return false
+        }
+    }
+
+  DATABASE_CLEANUP_PATTERN_TEMPLATE: |
+    <changeSet id="cleanup-${OBJECT_TYPE}s" author="test-harness" runAlways="true">
+        <sql>DROP ${OBJECT_TYPE} IF EXISTS ${TEST_OBJECT_NAME};</sql>
+    </changeSet>
+
+SNOWFLAKE_SQL_FORMAT_RULES:
+  BOOLEAN_VALUES:
+    CORRECT: "true"
+    INCORRECT: "'TRUE'"
+    RULE: "Boolean values without quotes"
+    
+  ENUM_VALUES:
+    CORRECT: "XSMALL"
+    INCORRECT: "'XSMALL'"
+    RULE: "Enum values without quotes"
+    
+  STRING_LITERALS:
+    CORRECT: "'actual string'"
+    INCORRECT: "actual string"
+    RULE: "String literals with single quotes"
+    
+  NULL_VALUES:
+    CORRECT: "NULL"
+    INCORRECT: "null"
+    RULE: "NULL uppercase, not lowercase"
+
+TEST_PHASE_WORKFLOW:
+  PHASE_1_UPDATESQL:
+    PURPOSE: "Generate SQL without executing"
+    BEHAVIOR: "SQL generation and validation only"
+    CONFLICTS: "Object name conflicts can occur"
+    
+  PHASE_2_UPDATE:
+    PURPOSE: "Execute generated SQL against database"
+    BEHAVIOR: "Actual database state changes"
+    DEPENDENCY: "Requires working database connection"
+
+ROLLBACK_STRATEGIES:
+  ROLLBACK_BY_TAG:
+    USAGE: "mvn test -DrollbackStrategy=rollbackByTag -DdbName=snowflake"
+    RECOMMENDED_FOR: "Cloud databases like Snowflake"
+    BEHAVIOR: "Tags database state, rolls back to tag"
+    ADVANTAGE: "More reliable for cloud environments"
+    
+  ROLLBACK_TO_DATE:
+    USAGE: "mvn test -DrollbackStrategy=rollbackToDate -DdbName=snowflake"
+    DEFAULT: "true"
+    BEHAVIOR: "Records timestamp, rolls back changes after time"
+    LIMITATION: "Can be less reliable in cloud environments"
+
+COMMON_PITFALLS:
+  NULL_DATABASE_ISSUE:
+    PROBLEM: "Calling supportsRollback(null) in createInverses()"
+    SOLUTION: "Use direct condition check instead"
+    DETECTION: "Search for 'supportsRollback(null)' in change classes"
+    
+  OBJECT_NAMING_CONFLICTS:
+    PROBLEM: "Tests fail due to object naming conflicts between phases"
+    SOLUTION: "Use unique object names or proper cleanup between phases"
+    EXAMPLE: "TEST_WAREHOUSE_${TIMESTAMP} vs TEST_WAREHOUSE"
+
+ERROR_HANDLING:
+  GLOBAL_FAILURE_ACTION: "CONTINUE"
+  CLEANUP_ON_FAILURE:
+    - COMMAND:
+        EXECUTE: "rm -f ${EXTENSION_PATH}/temp/*_test.java"
+        CONTINUE_ON_ERROR: true

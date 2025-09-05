@@ -1,3 +1,17 @@
+# Core Snowflake generators
+liquibase.snapshot.jvm.AccountSnapshotGeneratorSnowflake
+liquibase.snapshot.jvm.DatabaseSnapshotGeneratorSnowflake
+liquibase.snapshot.SchemaSnapshotGenerator
 liquibase.snapshot.jvm.SchemaSnapshotGeneratorSnowflake
 liquibase.snapshot.jvm.SequenceSnapshotGeneratorSnowflake
+liquibase.snapshot.jvm.TableSnapshotGeneratorSnowflake
 liquibase.snapshot.jvm.UniqueConstraintSnapshotGeneratorSnowflake
+
+# Unified Extension Object Framework (NEW) - temporarily disabled due to compilation issues
+# liquibase.snapshot.jvm.FileFormatSnapshotGeneratorSnowflakeUnified
+# liquibase.snapshot.jvm.WarehouseSnapshotGeneratorSnowflakeUnified
+
+# Legacy generators (active for testing)
+liquibase.snapshot.jvm.FileFormatSnapshotGeneratorSnowflake
+liquibase.snapshot.jvm.WarehouseSnapshotGeneratorSnowflake
+liquibase.snapshot.jvm.StageSnapshotGeneratorSnowflake

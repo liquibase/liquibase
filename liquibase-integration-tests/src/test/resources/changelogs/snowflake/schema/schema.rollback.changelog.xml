@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.33.xsd">
+
+    <!-- Test Rollback Scenarios for Schemas -->
+    
+    <!-- Create schema that can be rolled back -->
+    <changeSet author="liquibase-test" id="rollback-schema-1">
+        <sql>
+            CREATE SCHEMA LB_ROLLBACK_TEST_SCHEMA
+            COMMENT = 'Rollback test schema'
+        </sql>
+        <rollback>
+            <sql>DROP SCHEMA IF EXISTS LB_ROLLBACK_TEST_SCHEMA</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Add objects to schema -->
+    <changeSet author="liquibase-test" id="rollback-schema-2">
+        <sql>
+            CREATE TABLE LB_ROLLBACK_TEST_SCHEMA.test_table (
+                id INTEGER,
+                name VARCHAR(100)
+            )
+        </sql>
+        <sql>
+            CREATE SEQUENCE LB_ROLLBACK_TEST_SCHEMA.test_sequence 
+            START = 1 INCREMENT = 1
+        </sql>
+        <rollback>
+            <sql>DROP SEQUENCE IF EXISTS LB_ROLLBACK_TEST_SCHEMA.test_sequence</sql>
+            <sql>DROP TABLE IF EXISTS LB_ROLLBACK_TEST_SCHEMA.test_table</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Modify schema properties -->
+    <changeSet author="liquibase-test" id="rollback-schema-3">
+        <sql>
+            ALTER SCHEMA LB_ROLLBACK_TEST_SCHEMA 
+            SET COMMENT = 'Modified for rollback test'
+        </sql>
+        <sql>
+            ALTER SCHEMA LB_ROLLBACK_TEST_SCHEMA 
+            SET DATA_RETENTION_TIME_IN_DAYS = 14
+        </sql>
+        <rollback>
+            <sql>
+                ALTER SCHEMA LB_ROLLBACK_TEST_SCHEMA 
+                UNSET DATA_RETENTION_TIME_IN_DAYS
+            </sql>
+            <sql>
+                ALTER SCHEMA LB_ROLLBACK_TEST_SCHEMA 
+                SET COMMENT = 'Rollback test schema'
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Add more complex objects -->
+    <changeSet author="liquibase-test" id="rollback-schema-4">
+        <sql>
+            CREATE VIEW LB_ROLLBACK_TEST_SCHEMA.test_view AS 
+            SELECT id, name FROM LB_ROLLBACK_TEST_SCHEMA.test_table
+        </sql>
+        <rollback>
+            <sql>DROP VIEW IF EXISTS LB_ROLLBACK_TEST_SCHEMA.test_view</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Test tag for rollback point -->
+    <changeSet author="liquibase-test" id="rollback-tag">
+        <tagDatabase tag="before-schema-drop"/>
+    </changeSet>
+
+    <!-- Drop schema - this should be rollback-able -->
+    <changeSet author="liquibase-test" id="rollback-schema-drop">
+        <sql>DROP SCHEMA IF EXISTS LB_ROLLBACK_TEST_SCHEMA CASCADE</sql>
+        <rollback>
+            <!-- Recreate the schema as it was -->
+            <sql>
+                CREATE SCHEMA LB_ROLLBACK_TEST_SCHEMA
+                DATA_RETENTION_TIME_IN_DAYS = 14
+                COMMENT = 'Modified for rollback test'
+            </sql>
+            <sql>
+                CREATE TABLE LB_ROLLBACK_TEST_SCHEMA.test_table (
+                    id INTEGER,
+                    name VARCHAR(100)
+                )
+            </sql>
+            <sql>
+                CREATE SEQUENCE LB_ROLLBACK_TEST_SCHEMA.test_sequence 
+                START = 1 INCREMENT = 1
+            </sql>
+            <sql>
+                CREATE VIEW LB_ROLLBACK_TEST_SCHEMA.test_view AS 
+                SELECT id, name FROM LB_ROLLBACK_TEST_SCHEMA.test_table
+            </sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

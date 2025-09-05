@@ -1,0 +1,706 @@
+AIPL_VERSION: "2.0"
+PROGRAM_NAME: "enhanced-new-object-implementation"
+DESCRIPTION: "Complete snapshot/diff implementation for new Snowflake database object - enhanced with comprehensive methodology from implementation guide"
+
+IMPORTS:
+  - "../../../AIPL/core/TERMINOLOGY_DEFINITIONS.yaml"
+  - "../../../AIPL/core/STEP_SPECIFICATIONS.yaml"
+  - "../../../AIPL/core/AUTONOMOUS_OPERATION.yaml"
+  - "../../../AIPL/libraries/snowflake/SNOWFLAKE_SNAPSHOT_DIFF_PATTERNS.yaml"
+
+REQUIRES:
+  - BEHAVIORAL_KEYWORDS
+  - STEP_CLASSIFICATION
+  - AUTONOMOUS_PREREQUISITE_PHASE
+  - SNOWFLAKE_PATTERNS
+  - AI_TDD_MICRO_CYCLES
+  - ENHANCED_TESTING_INTEGRATION
+
+EXECUTION_PROTOCOL:
+  PURPOSE: "Implement complete snapshot and diff capability for new Snowflake database object using comprehensive AI-TDD methodology"
+  INPUT: "Target object type (e.g., FileFormat, Warehouse, Stage)"
+  OUTPUT: "Complete object model, snapshot generator, diff comparator with comprehensive tests and documentation"
+  VALIDATION: "All tests pass, object integrates with Liquibase snapshot/diff system, comprehensive requirements document generated"
+  METHODOLOGY: "45-minute domain research + 8-12 AI-TDD micro-cycles with enhanced 2024 testing practices"
+
+VARIABLES:
+  OBJECT_TYPE: "${TARGET_OBJECT_TYPE}"
+  OBJECT_TYPE_LOWER: "fileformat"  # Will be replaced with actual value
+  OBJECT_TYPE_PLURAL: "fileformats"  # Will be replaced with actual value
+  PACKAGE_BASE: "liquibase.ext.snowflake"
+  PACKAGE_PATH: "liquibase/ext/snowflake"
+  INFORMATION_SCHEMA_TABLE: "INFORMATION_SCHEMA.${OBJECT_TYPE}S"
+
+PHASES:
+  PHASE_0_5_AUTONOMOUS_PREREQUISITES:
+    PURPOSE: "Validate autonomous operation capability and TDD enforcement system"
+    VALIDATES: 
+      - "FILE_EXISTS:CLAUDE.md"
+      - "PROPERTIES_COUNT:CLAUDE.md:mvn test.*-Dtest=:3"
+      - "COMMAND_SUCCESS:.scripts/tdd_workflow.sh status"
+      - "COMMAND_SUCCESS:mvn --version"
+      - "COMMAND_SUCCESS:mvn compile -q"
+    QUALITY_GATE: "STOP_ON_FAILURE"
+    AUTO_APPROVAL: "ENABLED"
+
+  PHASE_0_QUICK_VALIDATION:
+    PURPOSE: "15-minute assessment before full implementation"
+    
+    VALIDATE_DATABASE_CONNECTIVITY:
+      USE_PATTERN: "DATABASE_VALIDATION_PATTERN"
+      PURPOSE: "Test database connectivity and object queryability"
+      COMMAND: "echo 'SELECT * FROM ${INFORMATION_SCHEMA_TABLE} LIMIT 1' | sqlcmd"
+      VALIDATES: ["DATABASE_CONNECTION", "INFORMATION_SCHEMA_ACCESS"]
+      QUALITY_GATE: "STOP_ON_FAILURE"
+      
+    CHECK_EXISTING_IMPLEMENTATION:
+      PURPOSE: "Check if snapshot/diff already implemented"
+      COMMANDS:
+        - "find . -name '*${OBJECT_TYPE}*' -path '*/snapshot/*' -o -path '*/diff/*'"
+        - "find . -name '*${OBJECT_TYPE}*.java' -path '*/liquibase-core/*'"
+        - "find . -name '*${OBJECT_TYPE}*SnapshotGenerator*'"
+        - "find . -name '*${OBJECT_TYPE}*Comparator*'"
+      VALIDATES: ["SCOPE_ASSESSMENT_COMPLETE"]
+      
+    VERIFY_OBJECT_PERMISSIONS:
+      PURPOSE: "Verify object creation permissions"
+      COMMANDS:
+        - "echo 'CREATE ${OBJECT_TYPE} test_validation_temp' | sqlcmd"
+        - "echo 'DROP ${OBJECT_TYPE} test_validation_temp' | sqlcmd"
+      VALIDATES: ["OBJECT_CREATION_PERMISSIONS"]
+
+  PHASE_1_COMPREHENSIVE_DOMAIN_RESEARCH:
+    PURPOSE: "45-minute comprehensive domain requirements research with AI-consumable output"
+    MINIMUM_DURATION: "45 minutes"
+    CRITICAL_WARNING: "Rushing through research creates generic, incomplete requirements documents that cause implementation failure"
+    
+    COMPREHENSIVE_DOMAIN_RESEARCH:
+      USE_PATTERN: "DOMAIN_RESEARCH_PATTERN"
+      PURPOSE: "Document complete syntax, behavior, and ALL properties from vendor documentation"
+      MINIMUM_TIME: "30 minutes of dedicated research"
+      RESEARCH_SOURCES:
+        - "Database vendor official SQL reference (primary source)"
+        - "CREATE/ALTER/DROP/SHOW command documentation" 
+        - "INFORMATION_SCHEMA documentation"
+        - "System catalog documentation"
+        - "Admin guides and best practices documentation"
+        - "Version history and deprecated features"
+      RESEARCH_COMMANDS:
+        FIND_CREATE_SYNTAX: "Search 'Snowflake CREATE ${OBJECT_TYPE} syntax'"
+        FIND_ALTER_SYNTAX: "Search 'Snowflake ALTER ${OBJECT_TYPE} syntax'"
+        FIND_SHOW_SYNTAX: "Search 'Snowflake SHOW ${OBJECT_TYPE}S syntax'"
+        FIND_SYSTEM_VIEWS: "Search 'Snowflake ${OBJECT_TYPE} system views'"
+        FIND_INFORMATION_SCHEMA: "Search 'Snowflake INFORMATION_SCHEMA ${OBJECT_TYPE}'"
+        FIND_ALL_PROPERTIES: "Search 'Snowflake ${OBJECT_TYPE} parameters properties options'"
+        FIND_EXAMPLES: "Search 'Snowflake CREATE ${OBJECT_TYPE} examples'"
+      CREATES: "research_notes_${OBJECT_TYPE_LOWER}.md"
+      VALIDATES: 
+        - "PROPERTIES_COUNT:research_notes_${OBJECT_TYPE_LOWER}.md:property|parameter|option:15"
+        - "FILE_SIZE:research_notes_${OBJECT_TYPE_LOWER}.md:>5000"
+        
+    PROPERTY_ANALYSIS_CATEGORIZATION:
+      PURPOSE: "Categorize all properties for implementation strategy"
+      PROPERTY_CATEGORIES:
+        IDENTITY_PROPERTIES:
+          DEFINITION: "Used in equals/hashCode, comparison identity"
+          SNAPSHOT_REQUIREMENT: "Must be captured in snapshot"
+          DIFF_REQUIREMENT: "Used to determine object identity"
+        CONFIGURATION_PROPERTIES:
+          DEFINITION: "User-settable, can be changed by user"
+          SNAPSHOT_REQUIREMENT: "Capture when non-default"
+          DIFF_REQUIREMENT: "Compare for differences"
+        STATE_PROPERTIES:
+          DEFINITION: "Runtime information, read-only"
+          SNAPSHOT_REQUIREMENT: "Capture for reference only"
+          DIFF_REQUIREMENT: "EXCLUDE from comparison"
+        SYSTEM_METADATA:
+          DEFINITION: "Database-managed timestamps, IDs"
+          SNAPSHOT_REQUIREMENT: "Usually exclude"
+          DIFF_REQUIREMENT: "EXCLUDE from comparison"
+      CREATES: "property_analysis_${OBJECT_TYPE_LOWER}.yaml"
+      VALIDATES: ["PROPERTIES_CATEGORIZED:>20"]
+      
+    SQL_QUERY_DEVELOPMENT:
+      PURPOSE: "Develop complete snapshot query with parameter binding"
+      BASE_QUERY_PATTERN: |
+        SELECT 
+            object_name,
+            property1,
+            property2,
+            CASE WHEN property3 = 'DEFAULT' THEN NULL ELSE property3 END as property3
+        FROM ${INFORMATION_SCHEMA_TABLE}
+        WHERE object_catalog = ? 
+        AND object_schema = ?
+        [AND object_name = ?]
+      OPTIMIZATION_PATTERNS:
+        NULL_HANDLING: "Use CASE statements for default value normalization"
+        TYPE_CONVERSION: "Convert database types to Java types"
+        FILTERING: "Include WHERE clauses for scope limitation"
+        ORDERING: "Use ORDER BY for consistent results"
+      CREATES: "snapshot_query_${OBJECT_TYPE_LOWER}.sql"
+      VALIDATES: ["SQL_SYNTAX_VALID", "PARAMETER_BINDING_COMPLETE"]
+      
+    AI_CONSUMABLE_REQUIREMENTS_DOCUMENT:
+      PURPOSE: "Create comprehensive AI-consumable requirements document"
+      FORMAT: "AI_CONTENT_RULES_BASIC.yaml compatible"
+      DOCUMENT_TYPE: "STRUCTURED_OBJECT_SPECIFICATIONS"
+      
+      ANTI_GENERIC_VALIDATION_CHECKLIST:
+        PROPERTY_COUNT_VALIDATION:
+          MINIMUM_PROPERTIES: "15+ distinct properties (not including identity properties)"
+          SPECIFIC_EXAMPLES: "Must include actual Snowflake property names, not generic placeholders"
+          TYPE_SPECIFIC_VALIDATION: "FileFormat must include CSV_COMPRESSION, JSON_STRIP_OUTER_ARRAY, PARQUET_COMPRESSION, etc."
+        DOMAIN_SPECIFICITY_VALIDATION:
+          DATABASE_SPECIFIC_VALUES: "Must include actual Snowflake enums/values (GZIP, BROTLI, AUTO, etc.)"
+          SQL_QUERY_VALIDATION: "Must query actual INFORMATION_SCHEMA tables with real column names"
+          REAL_PROPERTY_EXAMPLES: "No generic 'property1', 'property2' - use actual Snowflake properties"
+        COMPLETENESS_VALIDATION:
+          ALL_OBJECT_VARIATIONS: "For FileFormat: CSV, JSON, AVRO, ORC, PARQUET, XML - each with specific properties"
+          COMPREHENSIVE_PARAMETERS: "Must document 40+ parameters across all object types"
+          DEFAULT_VALUES: "Must include actual Snowflake defaults, not placeholder values"
+        PRACTICAL_VALIDATION:
+          WORKING_SQL_QUERIES: "Queries must be tested against actual Snowflake INFORMATION_SCHEMA"
+          REAL_EXAMPLES: "Property examples must be valid Snowflake syntax"
+          IMPLEMENTATION_READY: "Document must be sufficient for implementation without additional research"
+          
+      MANDATORY_SECTIONS:
+        OBJECT_OVERVIEW:
+          PURPOSE: "Business context and technical purpose"
+          STRUCTURE: "YAML block with PURPOSE, BUSINESS_VALUE, DATABASE_CONTEXT"
+        PROPERTY_ANALYSIS_TABLE:
+          PURPOSE: "Complete property categorization for implementation"
+          STRUCTURE: "Structured table with categorization rules"
+          TEMPLATE: |
+            | Property | Type | Required | Default | Comparison | Category | Notes |
+            |----------|------|----------|---------|------------|----------|-------|
+            | name | String | Yes | - | Full | Identity | Object identifier |
+            | catalogName | String | Yes | - | Full | Identity | Database name |
+            | schemaName | String | Yes | - | Full | Identity | Schema name |
+            | comment | String | No | NULL | Exclude if both null | Configuration | User description |
+            | createdOn | Timestamp | No | CURRENT_TIME | Exclude | State | System metadata |
+        SQL_QUERY_SPECIFICATIONS:
+          PURPOSE: "Complete snapshot query with parameter binding"
+          STRUCTURE: "Executable SQL with parameter placeholders and result mapping"
+          REQUIRED_ELEMENTS:
+            - "BASE_QUERY: Complete SELECT statement"
+            - "PARAMETER_MAPPING: Numbered parameters with descriptions"
+            - "RESULT_SET_MAPPING: Database columns to object properties"
+            - "NULL_HANDLING: CASE statements for default value normalization"
+        COMPARISON_LOGIC_REQUIREMENTS:
+          PURPOSE: "Property-by-property diff comparison rules"
+          STRUCTURE: "Categorized comparison rules with edge case handling"
+          REQUIRED_RULES:
+            - "PROPERTY_COMPARISON_RULES: Which properties to compare"
+            - "OBJECT_IDENTITY_LOGIC: How to determine same object"
+            - "EDGE_CASES: Null handling, case sensitivity, default values"
+        SYSTEMATIC_TEST_SCENARIOS:
+          PURPOSE: "2024 best practices test categorization"
+          STRUCTURE: "Comprehensive test framework with specific scenarios"
+          CATEGORIES:
+            POSITIVE_TESTING:
+              - "Happy path scenarios with valid inputs"
+              - "Expected behavior validation"
+              - "Successful object creation and retrieval scenarios"
+            NEGATIVE_TESTING:
+              - "Invalid input handling"
+              - "Error condition responses"
+              - "Permission and access denial scenarios"
+            BOUNDARY_VALUE_ANALYSIS:
+              - "Null, empty, and maximum value testing"
+              - "Edge cases at data type limits"
+              - "Boundary conditions for numeric and string properties"
+            EDGE_CASES:
+              - "Case sensitivity scenarios"
+              - "Special character handling"
+              - "SQL injection protection validation"
+            INTEGRATION_SCENARIOS:
+              - "Mock database testing"
+              - "Lightweight database integration"
+              - "Full Snowflake database validation"
+        FRAMEWORK_INTEGRATION_REQUIREMENTS:
+          PURPOSE: "Service registration and Liquibase framework integration"
+          STRUCTURE: "Complete integration checklist with validation commands"
+          
+      CREATES: "/Users/kevinchappell/Documents/GitHub/liquibase/claude_guide/snowflake_requirements/snapshot_diff_requirements/${OBJECT_TYPE}_requirements.md"
+      VALIDATES: 
+        - "FILE_SIZE:/Users/kevinchappell/Documents/GitHub/liquibase/claude_guide/snowflake_requirements/snapshot_diff_requirements/${OBJECT_TYPE}_requirements.md:>8000"
+        - "PROPERTIES_COUNT:/Users/kevinchappell/Documents/GitHub/liquibase/claude_guide/snowflake_requirements/snapshot_diff_requirements/${OBJECT_TYPE}_requirements.md:property|parameter:20"
+        - "SNOWFLAKE_SPECIFICITY:/Users/kevinchappell/Documents/GitHub/liquibase/claude_guide/snowflake_requirements/snapshot_diff_requirements/${OBJECT_TYPE}_requirements.md:CSV|JSON|PARQUET|GZIP|BROTLI|AUTO|TRUE|FALSE:15"
+        
+    SPECIFICATIONS_QUALITY_GATE:
+      PURPOSE: "Mandatory validation before proceeding to implementation"
+      CRITICAL_WARNING: "Generic specifications documents cause implementation failure. Better to spend extra time in research than to implement based on incomplete specifications."
+      
+      MANDATORY_VALIDATIONS:
+        PROPERTY_COUNT_CHECK:
+          COMMAND: "grep -c 'NAME:' /Users/kevinchappell/Documents/GitHub/liquibase/claude_guide/snowflake_requirements/snapshot_diff_requirements/${OBJECT_TYPE}_requirements.md"
+          MINIMUM_EXPECTED: "20+ properties (beyond identity properties)"
+          FAILURE_ACTION: "Return to COMPREHENSIVE_DOMAIN_RESEARCH for more comprehensive research"
+        SPECIFICITY_CHECK:
+          GENERIC_PROPERTIES: "grep -c 'property[0-9]\\|PROPERTY[0-9]\\|genericProperty' /Users/kevinchappell/Documents/GitHub/liquibase/claude_guide/snowflake_requirements/snapshot_diff_requirements/${OBJECT_TYPE}_requirements.md"
+          MAXIMUM_ALLOWED: "0 (zero generic properties)"
+          FAILURE_ACTION: "Replace all generic properties with actual Snowflake properties"
+        SNOWFLAKE_SPECIFICITY_CHECK:
+          SNOWFLAKE_VALUES: "grep -c 'CSV\\|JSON\\|PARQUET\\|GZIP\\|BROTLI\\|AUTO\\|TRUE\\|FALSE' /Users/kevinchappell/Documents/GitHub/liquibase/claude_guide/snowflake_requirements/snapshot_diff_requirements/${OBJECT_TYPE}_requirements.md"
+          MINIMUM_EXPECTED: "15+ Snowflake-specific values"
+          FAILURE_ACTION: "Add more domain-specific Snowflake values and enums"
+        SQL_COMPLETENESS_CHECK:
+          SQL_QUERY_VALIDATION: "Document must contain working SELECT statement from ${INFORMATION_SCHEMA_TABLE}"
+          COLUMN_MAPPING_VALIDATION: "All SQL columns must map to specific object properties"
+          FAILURE_ACTION: "Complete SQL query development with actual column names"
+          
+      QUALITY_GATE_DECISION:
+        PASS_CRITERIA: "ALL validations pass"
+        PASS_ACTION: "Proceed to PHASE_2_AI_TDD_IMPLEMENTATION"
+        FAIL_ACTION: "Return to COMPREHENSIVE_DOMAIN_RESEARCH - do NOT proceed without comprehensive specifications"
+      QUALITY_GATE: "STOP_ON_FAILURE"
+
+  PHASE_2_AI_TDD_IMPLEMENTATION:
+    PURPOSE: "AI-TDD micro-cycles implementation (2-4 hours) using enhanced 2024 testing practices"
+    
+    AI_TDD_PRINCIPLES:
+      MICRO_CYCLE_DURATION: "2-3 minutes per Red→Green→Refactor cycle"
+      TEST_FIRST_ALWAYS: "Write failing test before any implementation"
+      MINIMAL_IMPLEMENTATION: "Write only code needed to make test pass"
+      IMMEDIATE_FEEDBACK: "Run tests after every change"
+      INCREMENTAL_DESIGN: "Let tests drive object model decisions"
+      PROVEN_RESULTS: "FileFormat implementation: 8 micro-cycles, 30 minutes active development"
+      
+    AUTONOMOUS_MICRO_CYCLE_TEMPLATE:
+      DURATION: "2-3 minutes"
+      AUTONOMOUS_EXECUTION: "ENABLED"
+      AUTO_APPROVAL_COMMANDS:
+        - "mvn test -Dtest=${OBJECT_TYPE}Test#${TEST_METHOD} -q"
+        - "mvn test -Dtest=${OBJECT_TYPE}Test -q"
+        - "mvn compile -q"
+        
+      RED_PHASE:
+        SUCCESS_CRITERIA: "Create failing test that defines required behavior"
+        COMMAND: "mvn test -Dtest=${OBJECT_TYPE}Test#${TEST_METHOD} -q"
+        ACCEPTANCE_CRITERIA: "Test failure with specific assertion message"
+        AUTO_EXECUTE: "true"
+        QUALITY_GATE:
+          TYPE: "COMMAND_FAILURE_EXPECTED"
+          FAILURE_ACTION: "STOP"
+          
+      GREEN_PHASE:
+        SUCCESS_CRITERIA: "Write minimal code to make test pass"
+        COMMAND: "mvn test -Dtest=${OBJECT_TYPE}Test#${TEST_METHOD} -q"
+        ACCEPTANCE_CRITERIA: "Test passes"
+        AUTO_EXECUTE: "true"
+        QUALITY_GATE:
+          TYPE: "COMMAND_SUCCESS"
+          FAILURE_ACTION: "STOP"
+          
+      REFACTOR_PHASE:
+        SUCCESS_CRITERIA: "Improve code without changing behavior"
+        COMMAND: "mvn test -Dtest=${OBJECT_TYPE}Test -q"
+        ACCEPTANCE_CRITERIA: "All tests pass"
+        AUTO_EXECUTE: "true"
+        QUALITY_GATE:
+          TYPE: "COMMAND_SUCCESS"
+          FAILURE_ACTION: "STOP"
+          
+    ENHANCED_TESTING_INTEGRATION:
+      SYSTEMATIC_TEST_CREATION:
+        POSITIVE_TEST_TEMPLATE: |
+          @Test
+          void should${ExpectedBehavior}When${ValidInput}() {
+              // Arrange: Setup valid test data
+              ${OBJECT_TYPE} ${OBJECT_TYPE_LOWER} = new ${OBJECT_TYPE}();
+              ${OBJECT_TYPE_LOWER}.setName("VALID_NAME");
+              
+              // Act: Execute the operation
+              ${ResultType} result = ${methodUnderTest}(${OBJECT_TYPE_LOWER});
+              
+              // Assert: Verify expected behavior
+              assertNotNull(result);
+              assertEquals("VALID_NAME", result.getName());
+          }
+        NEGATIVE_TEST_TEMPLATE: |
+          @Test
+          void should${ErrorBehavior}When${InvalidInput}() {
+              // Arrange: Setup invalid test data
+              ${OBJECT_TYPE} ${OBJECT_TYPE_LOWER} = new ${OBJECT_TYPE}();
+              ${OBJECT_TYPE_LOWER}.setName(null); // Invalid input
+              
+              // Act & Assert: Verify error handling
+              assertThrows(${ExpectedException}.class, () -> {
+                  ${methodUnderTest}(${OBJECT_TYPE_LOWER});
+              });
+          }
+        BOUNDARY_TEST_TEMPLATE: |
+          @Test
+          void should${BehaviorAtBoundary}When${BoundaryCondition}() {
+              // Arrange: Setup boundary condition
+              ${OBJECT_TYPE} ${OBJECT_TYPE_LOWER} = new ${OBJECT_TYPE}();
+              ${OBJECT_TYPE_LOWER}.setName(""); // Empty string boundary
+              
+              // Act: Execute the operation
+              ${ResultType} result = ${methodUnderTest}(${OBJECT_TYPE_LOWER});
+              
+              // Assert: Verify boundary handling
+              ${boundaryAssertion}(result);
+          }
+        EDGE_CASE_TEST_TEMPLATE: |
+          @Test
+          void should${EdgeCaseBehavior}When${SpecialScenario}() {
+              // Arrange: Setup edge case scenario
+              ${OBJECT_TYPE} obj1 = new ${OBJECT_TYPE}();
+              obj1.setName("Test_Object");
+              ${OBJECT_TYPE} obj2 = new ${OBJECT_TYPE}();
+              obj2.setName("TEST_OBJECT"); // Case sensitivity edge case
+              
+              // Act: Execute comparison operation
+              boolean result = ${comparisonMethod}(obj1, obj2);
+              
+              // Assert: Verify edge case handling
+              ${edgeCaseAssertion}(result);
+          }
+    
+    MICRO_CYCLES_1_3_OBJECT_MODEL:
+      PURPOSE: "Create test-driven object model with identity and configuration properties"
+      
+      MICRO_CYCLE_1_OBJECT_IDENTITY:
+        OBJECTIVE: "Create object with identity properties and equals/hashCode"
+        RED_PHASE_TEST: |
+          @Test
+          void shouldIdentifyObjectsByNameCatalogSchema() {
+              ${OBJECT_TYPE} obj1 = new ${OBJECT_TYPE}();
+              obj1.setName("TEST_OBJ");
+              obj1.setCatalogName("TEST_DB"); 
+              obj1.setSchemaName("TEST_SCHEMA");
+              
+              ${OBJECT_TYPE} obj2 = new ${OBJECT_TYPE}();
+              obj2.setName("TEST_OBJ");
+              obj2.setCatalogName("TEST_DB");
+              obj2.setSchemaName("TEST_SCHEMA");
+              
+              assertEquals(obj1, obj2);
+              assertEquals(obj1.hashCode(), obj2.hashCode());
+          }
+        GREEN_PHASE_IMPLEMENTATION: |
+          public class ${OBJECT_TYPE} extends AbstractDatabaseObject {
+              private String name;
+              private String catalogName;
+              private String schemaName;
+              
+              // Getters and setters
+              @Override
+              public boolean equals(Object obj) {
+                  if (!(obj instanceof ${OBJECT_TYPE})) return false;
+                  ${OBJECT_TYPE} other = (${OBJECT_TYPE}) obj;
+                  return Objects.equals(this.name, other.name) &&
+                         Objects.equals(this.catalogName, other.catalogName) &&
+                         Objects.equals(this.schemaName, other.schemaName);
+              }
+              
+              @Override
+              public int hashCode() {
+                  return Objects.hash(name, catalogName, schemaName);
+              }
+          }
+        CREATES: "src/main/java/${PACKAGE_PATH}/database/${OBJECT_TYPE}.java"
+        VALIDATES: ["FILE_EXISTS", "COMPILES", "TESTS_PASS:${OBJECT_TYPE}Test#shouldIdentifyObjectsByNameCatalogSchema"]
+        
+      MICRO_CYCLE_2_CONFIGURATION_PROPERTIES:
+        OBJECTIVE: "Add configuration properties that DON'T affect identity"
+        RED_PHASE_TEST: |
+          @Test
+          void shouldNotIncludeConfigurationPropertiesInEquals() {
+              ${OBJECT_TYPE} obj1 = new ${OBJECT_TYPE}();
+              obj1.setName("TEST_OBJ");
+              obj1.setCatalogName("TEST_DB");
+              obj1.setSchemaName("TEST_SCHEMA");
+              obj1.setConfigProperty("VALUE1");
+              
+              ${OBJECT_TYPE} obj2 = new ${OBJECT_TYPE}();
+              obj2.setName("TEST_OBJ"); 
+              obj2.setCatalogName("TEST_DB");
+              obj2.setSchemaName("TEST_SCHEMA");
+              obj2.setConfigProperty("VALUE2"); // Different config
+              
+              assertEquals(obj1, obj2); // Should still be equal
+          }
+        GREEN_PHASE_IMPLEMENTATION: |
+          // Add configuration properties to class:
+          private String configProperty;
+          private String anotherConfigProperty;
+          
+          // DO NOT modify equals/hashCode - test proves this is correct
+        VALIDATES: ["TESTS_PASS:${OBJECT_TYPE}Test#shouldNotIncludeConfigurationPropertiesInEquals"]
+        
+      MICRO_CYCLE_3_FRAMEWORK_INTEGRATION:
+        OBJECTIVE: "Implement required AbstractDatabaseObject methods"
+        RED_PHASE_TEST: |
+          @Test
+          void shouldReturnCorrectObjectTypeName() {
+              ${OBJECT_TYPE} obj = new ${OBJECT_TYPE}();
+              assertEquals("${OBJECT_TYPE_LOWER}", obj.getObjectTypeName());
+          }
+        GREEN_PHASE_IMPLEMENTATION: |
+          @Override
+          public String getObjectTypeName() {
+              return "${OBJECT_TYPE_LOWER}";
+          }
+        VALIDATES: ["TESTS_PASS:${OBJECT_TYPE}Test#shouldReturnCorrectObjectTypeName"]
+        
+      CREATE_OBJECT_TESTS:
+        PURPOSE: "Create comprehensive ${OBJECT_TYPE} unit tests"
+        CREATES: "src/test/java/${PACKAGE_PATH}/${OBJECT_TYPE}Test.java"
+        VALIDATES: ["FILE_EXISTS", "TESTS_PASS:${OBJECT_TYPE}Test", "PROPERTIES_COUNT:@Test:5"]
+
+    MICRO_CYCLES_4_6_SNAPSHOT_GENERATOR:
+      PURPOSE: "Create test-driven snapshot generator with database introspection"
+      
+      MICRO_CYCLE_4_PRIORITY_LOGIC:
+        OBJECTIVE: "Create snapshot generator with correct priority"
+        RED_PHASE_TEST: |
+          @Test
+          void shouldHaveHighPriorityForObjectOnSnowflake() {
+              ${OBJECT_TYPE}SnapshotGeneratorSnowflake generator = 
+                  new ${OBJECT_TYPE}SnapshotGeneratorSnowflake();
+              SnowflakeDatabase database = mock(SnowflakeDatabase.class);
+              
+              int priority = generator.getPriority(${OBJECT_TYPE}.class, database);
+              assertTrue(priority > 0);
+          }
+        GREEN_PHASE_IMPLEMENTATION: |
+          public class ${OBJECT_TYPE}SnapshotGeneratorSnowflake extends JdbcSnapshotGenerator {
+              public ${OBJECT_TYPE}SnapshotGeneratorSnowflake() {
+                  super(${OBJECT_TYPE}.class, new Class[]{Schema.class});
+              }
+              
+              @Override
+              public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
+                  if (database instanceof SnowflakeDatabase && ${OBJECT_TYPE}.class.isAssignableFrom(objectType)) {
+                      return PRIORITY_DATABASE;
+                  }
+                  return PRIORITY_NONE;
+              }
+          }
+        CREATES: "src/main/java/${PACKAGE_PATH}/snapshot/${OBJECT_TYPE}SnapshotGeneratorSnowflake.java"
+        VALIDATES: ["FILE_EXISTS", "COMPILES", "TESTS_PASS:${OBJECT_TYPE}SnapshotGeneratorTest#shouldHaveHighPriorityForObjectOnSnowflake"]
+        
+      MICRO_CYCLE_5_DATABASE_QUERYING:
+        OBJECTIVE: "Query database to populate object from INFORMATION_SCHEMA"
+        RED_PHASE_TEST: |
+          @Test
+          void shouldReturnNullWhenObjectDoesNotExist() throws Exception {
+              // Mock database connection returning empty result set
+              // (Full mocking setup as shown in reference implementation patterns)
+              
+              ${OBJECT_TYPE} example = new ${OBJECT_TYPE}();
+              example.setName("NON_EXISTENT");
+              
+              ${OBJECT_TYPE} result = (${OBJECT_TYPE}) generator.snapshotObject(example, snapshot);
+              assertNull(result);
+          }
+        GREEN_PHASE_IMPLEMENTATION: |
+          @Override
+          protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) 
+                  throws DatabaseException, InvalidExampleException {
+              if (!(example instanceof ${OBJECT_TYPE})) return null;
+              
+              ${OBJECT_TYPE} obj = (${OBJECT_TYPE}) example;
+              Database database = snapshot.getDatabase();
+              
+              try {
+                  String sql = "SELECT OBJECT_NAME, PROPERTY1, PROPERTY2 " +
+                              "FROM ${INFORMATION_SCHEMA_TABLE} " +
+                              "WHERE OBJECT_SCHEMA = ? AND OBJECT_NAME = ?";
+                              
+                  PreparedStatement stmt = ((JdbcConnection) database.getConnection())
+                      .getUnderlyingConnection().prepareStatement(sql);
+                  stmt.setString(1, obj.getSchemaName());
+                  stmt.setString(2, obj.getName());
+                  
+                  ResultSet rs = stmt.executeQuery();
+                  if (rs.next()) {
+                      ${OBJECT_TYPE} result = new ${OBJECT_TYPE}();
+                      result.setName(rs.getString("OBJECT_NAME"));
+                      result.setProperty1(rs.getString("PROPERTY1"));
+                      result.setProperty2(rs.getString("PROPERTY2"));
+                      rs.close();
+                      stmt.close();
+                      return result;
+                  } else {
+                      rs.close();
+                      stmt.close();
+                      return null;
+                  }
+              } catch (Exception e) {
+                  throw new DatabaseException("Error querying ${OBJECT_TYPE_LOWER}: " + obj.getName(), e);
+              }
+          }
+        VALIDATES: ["TESTS_PASS:${OBJECT_TYPE}SnapshotGeneratorTest#shouldReturnNullWhenObjectDoesNotExist"]
+        
+      MICRO_CYCLE_6_SERVICE_REGISTRATION:
+        OBJECTIVE: "Register snapshot generator for runtime discovery"
+        RED_PHASE_TEST: |
+          @Test
+          void shouldBeRegisteredInServiceFile() {
+              // This test verifies the META-INF/services registration
+              // Implementation: Add entry to liquibase.snapshot.SnapshotGenerator
+          }
+        GREEN_PHASE_IMPLEMENTATION: |
+          # Add to src/main/resources/META-INF/services/liquibase.snapshot.SnapshotGenerator:
+          liquibase.snapshot.jvm.${OBJECT_TYPE}SnapshotGeneratorSnowflake
+        VALIDATES: ["SERVICE_REGISTERED:${OBJECT_TYPE}SnapshotGeneratorSnowflake"]
+        
+      CREATE_SNAPSHOT_TESTS:
+        PURPOSE: "Create comprehensive ${OBJECT_TYPE}SnapshotGenerator tests"
+        CREATES: "src/test/java/${PACKAGE_PATH}/${OBJECT_TYPE}SnapshotGeneratorTest.java"
+        VALIDATES: ["FILE_EXISTS", "TESTS_PASS:${OBJECT_TYPE}SnapshotGeneratorTest"]
+
+    MICRO_CYCLES_7_8_DIFF_COMPARATOR:
+      PURPOSE: "Create test-driven diff comparator with property comparison logic"
+      
+      MICRO_CYCLE_7_COMPARATOR_PRIORITY:
+        OBJECTIVE: "Create diff comparator with identity and priority logic"
+        RED_PHASE_TEST: |
+          @Test
+          void shouldIdentifySameObjectsWhenIdentityMatches() {
+              ${OBJECT_TYPE}ComparatorSnowflake comparator = new ${OBJECT_TYPE}ComparatorSnowflake();
+              
+              ${OBJECT_TYPE} obj1 = new ${OBJECT_TYPE}();
+              obj1.setName("TEST_OBJ");
+              obj1.setCatalogName("TEST_DB");
+              obj1.setSchemaName("TEST_SCHEMA");
+              
+              ${OBJECT_TYPE} obj2 = new ${OBJECT_TYPE}();
+              obj2.setName("TEST_OBJ");
+              obj2.setCatalogName("TEST_DB");
+              obj2.setSchemaName("TEST_SCHEMA");
+              
+              assertTrue(comparator.isSameObject(obj1, obj2));
+          }
+        GREEN_PHASE_IMPLEMENTATION: |
+          public class ${OBJECT_TYPE}ComparatorSnowflake implements DatabaseObjectComparator {
+              @Override
+              public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
+                  if (database instanceof SnowflakeDatabase && ${OBJECT_TYPE}.class.isAssignableFrom(objectType)) {
+                      return PRIORITY_TYPE;
+                  }
+                  return PRIORITY_NONE;
+              }
+              
+              @Override
+              public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, 
+                      Database accordingTo) {
+                  if (!(databaseObject1 instanceof ${OBJECT_TYPE}) || !(databaseObject2 instanceof ${OBJECT_TYPE})) {
+                      return false;
+                  }
+                  return databaseObject1.equals(databaseObject2);
+              }
+          }
+        CREATES: "src/main/java/${PACKAGE_PATH}/diff/compare/${OBJECT_TYPE}ComparatorSnowflake.java"
+        VALIDATES: ["FILE_EXISTS", "COMPILES", "TESTS_PASS:${OBJECT_TYPE}ComparatorTest#shouldIdentifySameObjectsWhenIdentityMatches"]
+        
+      MICRO_CYCLE_8_PROPERTY_COMPARISON:
+        OBJECTIVE: "Implement property-by-property comparison logic"
+        RED_PHASE_TEST: |
+          @Test
+          void shouldDetectConfigurationPropertyChanges() {
+              ${OBJECT_TYPE}ComparatorSnowflake comparator = new ${OBJECT_TYPE}ComparatorSnowflake();
+              
+              ${OBJECT_TYPE} reference = new ${OBJECT_TYPE}();
+              reference.setName("TEST_OBJ");
+              reference.setConfigProperty("VALUE1");
+              
+              ${OBJECT_TYPE} snapshot = new ${OBJECT_TYPE}();
+              snapshot.setName("TEST_OBJ");
+              snapshot.setConfigProperty("VALUE2");
+              
+              ObjectDifferences diffs = new ObjectDifferences();
+              diffs = comparator.compare(reference, snapshot, database);
+              
+              assertFalse(diffs.areEqual());
+              assertTrue(diffs.hasDifference("configProperty"));
+          }
+        GREEN_PHASE_IMPLEMENTATION: |
+          @Override
+          public ObjectDifferences compare(DatabaseObject reference, DatabaseObject snapshot, Database database) {
+              ObjectDifferences differences = new ObjectDifferences();
+              differences.compare("configProperty", reference, snapshot, new ObjectDifferences.DatabaseObjectNameCompareFunction(${OBJECT_TYPE}.class, database));
+              return differences;
+          }
+        VALIDATES: ["TESTS_PASS:${OBJECT_TYPE}ComparatorTest#shouldDetectConfigurationPropertyChanges"]
+        
+      CREATE_COMPARATOR_TESTS:
+        PURPOSE: "Create comprehensive ${OBJECT_TYPE}Comparator tests"
+        CREATES: "src/test/java/${PACKAGE_PATH}/${OBJECT_TYPE}ComparatorTest.java"
+        VALIDATES: ["FILE_EXISTS", "TESTS_PASS:${OBJECT_TYPE}ComparatorTest"]
+
+  PHASE_5_INTEGRATION_AND_VALIDATION:
+    PURPOSE: "Complete integration, service registration, and comprehensive testing"
+    
+    REGISTER_SERVICES:
+      PURPOSE: "Register services with Liquibase"
+      CREATES:
+        - "Entry in META-INF/services/liquibase.snapshot.SnapshotGenerator"
+        - "Entry in META-INF/services/liquibase.diff.compare.DatabaseObjectComparator"
+      VALIDATES: 
+        - "SERVICE_REGISTERED:${OBJECT_TYPE}SnapshotGeneratorSnowflake"
+        - "SERVICE_REGISTERED:${OBJECT_TYPE}ComparatorSnowflake"
+        
+    COMPREHENSIVE_TEST_EXECUTION:
+      PURPOSE: "Execute all test categories with enhanced 2024 practices"
+      TEST_CATEGORIES:
+        POSITIVE_TESTING:
+          COMMAND: "mvn test -Dtest='*${OBJECT_TYPE}*Test*' -Dgroups='positive' -q"
+          VALIDATES: ["POSITIVE_TESTS_PASS"]
+        NEGATIVE_TESTING:
+          COMMAND: "mvn test -Dtest='*${OBJECT_TYPE}*Test*' -Dgroups='negative' -q"
+          VALIDATES: ["NEGATIVE_TESTS_PASS"]
+        BOUNDARY_VALUE_ANALYSIS:
+          COMMAND: "mvn test -Dtest='*${OBJECT_TYPE}*Test*' -Dgroups='boundary' -q"
+          VALIDATES: ["BOUNDARY_TESTS_PASS"]
+        EDGE_CASES:
+          COMMAND: "mvn test -Dtest='*${OBJECT_TYPE}*Test*' -Dgroups='edge' -q"
+          VALIDATES: ["EDGE_CASE_TESTS_PASS"]
+        INTEGRATION_SCENARIOS:
+          COMMAND: "mvn test -Dtest='*${OBJECT_TYPE}*Test*' -Dgroups='integration' -q"
+          VALIDATES: ["INTEGRATION_TESTS_PASS"]
+          
+    FINAL_INTEGRATION_TEST:
+      PURPOSE: "Execute comprehensive integration tests"
+      VALIDATES: 
+        - "TESTS_PASS:*${OBJECT_TYPE}*Test*"
+        - "COMPILES"
+        - "SERVICE_REGISTRATION_COMPLETE"
+      QUALITY_GATE: "STOP_ON_FAILURE"
+
+SUCCESS_CRITERIA:
+  - "Complete object model with all required properties from domain research"
+  - "Functional snapshot generator with database introspection using researched SQL queries"
+  - "Working diff comparator with property-by-property comparison logic"
+  - "All tests pass consistently across positive, negative, boundary, edge case, and integration scenarios"
+  - "Services properly registered with Liquibase framework"
+  - "Comprehensive requirements document created with 20+ domain-specific properties"
+  - "AI-consumable specifications document generated for future reference"
+  - "Enhanced 2024 testing practices implemented with systematic test categorization"
+
+ERROR_HANDLING:
+  GLOBAL_FAILURE_ACTION: "STOP"
+  CRITICAL_PHASES: 
+    - "PHASE_1_COMPREHENSIVE_DOMAIN_RESEARCH"
+    - "PHASE_2_AI_TDD_IMPLEMENTATION"
+    - "PHASE_5_INTEGRATION_AND_VALIDATION"
+  DEBUGGING_PROTOCOLS:
+    LAYER_BY_LAYER_DIAGNOSIS: "Test each component in isolation"
+    SYSTEMATIC_VALIDATION: "Use TDD micro-cycles to isolate and fix issues"
+    QUALITY_GATE_ENFORCEMENT: "Stop on first failure and resolve before proceeding"
+
+DOCUMENTATION_OUTPUTS:
+  - "research_notes_${OBJECT_TYPE_LOWER}.md: Comprehensive domain research notes"
+  - "property_analysis_${OBJECT_TYPE_LOWER}.yaml: Categorized property analysis"
+  - "snapshot_query_${OBJECT_TYPE_LOWER}.sql: Complete snapshot SQL query"
+  - "/Users/kevinchappell/Documents/GitHub/liquibase/claude_guide/snowflake_requirements/snapshot_diff_requirements/${OBJECT_TYPE}_requirements.md: AI-consumable requirements document"
+  - "implementation_log_${OBJECT_TYPE_LOWER}.md: Complete implementation log with micro-cycle details"
+
+PROVEN_RESULTS:
+  FILEFORMAT_REFERENCE: "8 micro-cycles, 30 minutes active development, zero rework"
+  SUPERIOR_DESIGN: "Tests drove correct equals/hashCode semantics"
+  COMPLETE_COVERAGE: "100% test coverage by design with enhanced 2024 practices"
+  UNIVERSAL_APPLICABILITY: "Template works for any Snowflake database object"
