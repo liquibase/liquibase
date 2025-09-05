@@ -607,7 +607,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         IncludeAllFilter resourceFilter = null;
         if (resourceFilterDef != null) {
             try {
-                resourceFilter = (IncludeAllFilter) Class.forName(resourceFilterDef).getConstructor().newInstance();
+                resourceFilter = (IncludeAllFilter) Class.forName(resourceFilterDef, true, Thread.currentThread().getContextClassLoader()).getConstructor().newInstance();
             } catch (ReflectiveOperationException e) {
                 throw new SetupException(e);
             }
@@ -697,7 +697,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             resourceComparator = getStandardChangeLogComparator();
         } else {
             try {
-                resourceComparator = (Comparator<String>) Class.forName(resourceComparatorDef).getConstructor().newInstance();
+                resourceComparator = (Comparator<String>) Class.forName(resourceComparatorDef, true, Thread.currentThread().getContextClassLoader()).getConstructor().newInstance();
             } catch (ReflectiveOperationException e) {
                 //take default comparator
                 Scope.getCurrentScope().getLog(getClass()).info("no resourceComparator defined - taking default " +
