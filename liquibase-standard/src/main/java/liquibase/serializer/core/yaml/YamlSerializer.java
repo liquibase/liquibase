@@ -1,7 +1,7 @@
 package liquibase.serializer.core.yaml;
 
 import liquibase.change.Change;
-import liquibase.change.ConstraintsConfig;
+import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RollbackContainer;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -12,8 +12,6 @@ import liquibase.serializer.UnwrappedLiquibaseSerializable;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.DataType;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
@@ -35,9 +33,14 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
     public static final Map<String, Object> EMPTY_MAP_DO_NOT_SERIALIZE = new HashMap<>(0);
 
     protected boolean noSnapshotIdFound = false;
+    protected boolean preserveNullValues = true;
 
     public YamlSerializer() {
         yaml = createYaml();
+    }
+
+    public void preserveNullValues(boolean preserveNullValues) {
+        this.preserveNullValues = preserveNullValues;
     }
 
     protected DumperOptions createDumperOptions() {
@@ -124,6 +127,12 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                     }
                     for (int i = 0; i < valueAsList.size(); i++) {
                         if (valueAsList.get(i) instanceof LiquibaseSerializable) {
+                            if (!preserveNullValues && valueAsList.get(i) instanceof ColumnConfig) {
+                                ColumnConfig columnConfig = (ColumnConfig) valueAsList.get(i);
+                                if (columnConfig.isNull()) {
+                                    continue;
+                                }
+                            }
                             Object m = convertToMap(valueAsList, i);
                             valueAsList.set(i, m);
                         }
