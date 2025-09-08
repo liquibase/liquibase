@@ -101,7 +101,7 @@ jobs:
       # if the value of branchExistsInBoth = true then set liquibaseProVersionPrefix = thisBranchName else $currentBranch as PRO also has replacement logic for / with _
       - name: Check branch existence
         id: check-branch
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ steps.get-token.outputs.token }}
           script: |

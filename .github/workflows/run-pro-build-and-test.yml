@@ -109,7 +109,7 @@ jobs:
           echo ${{steps.return_dispatch.outputs.run_url}}
 
       - name: Report PRO Build & Tests Run URL
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const targetURL = "https://github.com/liquibase/liquibase-pro/actions/runs/${{ steps.return_dispatch.outputs.run_id }}"
