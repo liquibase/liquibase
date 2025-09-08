@@ -80,7 +80,7 @@ jobs:
     steps:
       - name: Collect Data
         id: collect-data
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             let tag;
