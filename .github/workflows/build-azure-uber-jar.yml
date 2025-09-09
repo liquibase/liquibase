@@ -40,7 +40,7 @@ jobs:
     steps:
       
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -62,7 +62,7 @@ jobs:
           owner: ${{ github.repository_owner }}
           
       - name: Checkout liquibase-pro
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: liquibase/liquibase-pro
           ref: ${{ inputs.branch }}
@@ -70,7 +70,7 @@ jobs:
           path: liquibase-pro
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: 17
           distribution: 'temurin'

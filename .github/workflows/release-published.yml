@@ -75,10 +75,12 @@ jobs:
       version: ${{ steps.collect-data.outputs.version }}
       ref_branch: ${{ steps.ref-branch.outputs.branch }}
       dry_run_branch_name: ${{ inputs.dry_run_branch_name }}
+      latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
+      timeStamp: ${{ steps.get-timestamp.outputs.timeStamp }}
     steps:
       - name: Collect Data
         id: collect-data
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             let tag;
@@ -109,6 +111,24 @@ jobs:
           else
             echo "branch=${{ inputs.dry_run_branch_name }}" >> $GITHUB_OUTPUT
           fi
+
+      - name: Checkout the determined branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.ref-branch.outputs.branch }}
+          fetch-depth: 0
+
+      - name: Get Latest Merge Commit SHA
+        id: get-sha
+        run: |
+          latest_merge_sha=`(git rev-parse --short HEAD)`
+          echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
+
+      - name: Get Timestamp
+        id: get-timestamp
+        run: |
+          timestamp=`(date +'%Y-%m-%d %H:%M:%S %Z')`
+          echo "timeStamp=${timestamp}" >> $GITHUB_OUTPUT
 
   manual_trigger_deployment:
     if: ${{ inputs.dry_run == false }}
@@ -150,7 +170,7 @@ jobs:
           out-file-path: "."
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -173,9 +193,9 @@ jobs:
           } >> $GITHUB_ENV
 
       - name: Set up Java for publishing to Maven Central Repository
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
-          java-version: "11"
+          java-version: "17"
           distribution: "adopt"
           server-id: sonatype-nexus-staging
           server-username: MAVEN_USERNAME
@@ -277,7 +297,7 @@ jobs:
           out-file-path: "."
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -291,7 +311,7 @@ jobs:
           parse-json-secrets: true
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
           aws-region: us-east-1
@@ -316,16 +336,16 @@ jobs:
     name: Publish artifacts to Github Packages
     runs-on: ubuntu-22.04
     needs: [setup, manual_trigger_deployment]
-
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Java for publishing to GitHub Repository
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: "17"
           distribution: "temurin"
           cache: "maven"
           server-id: liquibase
+
       - name: Set up Maven
         uses: stCarolas/setup-maven@v5
         with:
@@ -336,10 +356,10 @@ jobs:
 
       # Publish to GitHub Packages
       - name: Publish package to Github
-        run: mvn -B clean deploy -DskipTests=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TARGET_ARTIFACT_REPOSITORY: liquibase
+        run: mvn -B clean deploy -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.version }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
 
   deploy_xsd:
     if: ${{ inputs.dry_run == false }}
@@ -351,14 +371,14 @@ jobs:
       version: ${{ needs.setup.outputs.version }}
     steps:
       - name: Download liquibase xsd
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           # Relative path under $GITHUB_WORKSPACE to place the repository
           path: liquibase-core-repo
           repository: "liquibase/liquibase"
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -382,7 +402,7 @@ jobs:
           permission-contents: read
           
       - name: Download liquibase-pro xsd
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: "${{ needs.setup.outputs.ref_branch }}"
           token: ${{ steps.get-token.outputs.token }}
@@ -391,7 +411,7 @@ jobs:
           repository: "liquibase/liquibase-pro"
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
           aws-region: us-east-1
@@ -472,7 +492,7 @@ jobs:
     steps:
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -519,7 +539,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -561,7 +581,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -603,6 +623,8 @@ jobs:
       dry_run_zip_url: ${{ inputs.dry_run_zip_url || '' }}
       dry_run_tar_gz_url: ${{ inputs.dry_run_tar_gz_url || '' }}
       dry_run_release_id: ${{ inputs.dry_run_release_id || '' }}
+      distribution: "liquibase"
+      download_base_url: "https://github.com/liquibase/liquibase/releases/download"
 
   update-docs-oss-pro-version:
     if: ${{ inputs.dry_run == false }}
@@ -614,7 +636,7 @@ jobs:
       previous_version: ${{ steps.get_latest_oss_version.outputs.previous_version }}
     steps:
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -638,7 +660,7 @@ jobs:
           permission-actions: write
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: liquibase/liquibase
           ref: "${{ needs.setup.outputs.ref_branch }}"
@@ -666,15 +688,6 @@ jobs:
           event-type: oss-released-version
           client-payload: '{"latest_version": "${{ steps.get_latest_oss_version.outputs.latest_version }}", "previous_version": "${{ steps.get_latest_oss_version.outputs.previous_version }}"}'
 
-      # dispatch an event to `liquibase-aws-license-service` repository to update pom.xml with latest OSS Release
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ steps.get-token.outputs.token }}
-          repository: liquibase/liquibase-aws-license-service
-          event-type: oss-released-version
-
-
   dry_run_deploy_maven:
     if: ${{ inputs.dry_run == true }}
     name: Deploy to Maven Central Repository
@@ -690,7 +703,7 @@ jobs:
           out-file-path: "."
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -713,9 +726,9 @@ jobs:
           } >> $GITHUB_ENV
 
       - name: Set up Java for publishing to Maven Central Repository
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
-          java-version: "11"
+          java-version: "17"
           distribution: "adopt"
           server-id: dry-run-sonatype-nexus-staging
           server-username: MAVEN_USERNAME
@@ -821,7 +834,7 @@ jobs:
         run: echo "timestamp=$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -835,7 +848,7 @@ jobs:
           parse-json-secrets: true
           
       - name: Configure AWS credentials for prod account access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
           aws-region: us-east-1

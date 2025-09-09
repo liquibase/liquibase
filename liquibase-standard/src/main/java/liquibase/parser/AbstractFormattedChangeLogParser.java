@@ -321,16 +321,19 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
             boolean rollbackSplitStatements = true;
             String rollbackEndDelimiter = null;
 
+            boolean foundHeader = false;
+            boolean foundAdditionalHeader = false;
             int count = 0;
             String line;
-            boolean foundHeader = false;
             while ((line = reader.readLine()) != null) {
                 count++;
                 Matcher changeLogPatternMatcher = FIRST_LINE_PATTERN.matcher(line);
-                if (foundHeader && changeLogPatternMatcher.matches()) {
-                    String message = "Duplicate formatted SQL header at line " + count;
-                    Scope.getCurrentScope().getLog(getClass()).warning(message);
-                    throw new ChangeLogParseException(message);
+                if (changeLogPatternMatcher.matches()) {
+                    if (! foundHeader) {
+                        foundHeader = true;
+                    } else {
+                        foundAdditionalHeader = true;
+                    }
                 }
                 Matcher commentMatcher = COMMENT_PATTERN.matcher(line);
                 Matcher propertyPatternMatcher = PROPERTY_PATTERN.matcher(line);
@@ -341,9 +344,6 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                 } else if (altPropertyPatternMatcher.matches()) {
                     String message = String.format(EXCEPTION_MESSAGE, physicalChangeLogLocation, count, getSequenceName(), "--property name=<property name> value=<property value>", getDocumentationLink());
                     throw new ChangeLogParseException("\n" + message);
-                }
-                if (! foundHeader && changeLogPatternMatcher.matches()) {
-                    foundHeader = true;
                 }
 
                 setLogicalFilePath(changeLog, line, changeLogPatternMatcher);
@@ -393,6 +393,12 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     if (changeSet != null) {
                         if (finalCurrentSequence == null) {
                             throw new ChangeLogParseException(String.format("No %s for changeset %s", getSequenceName(), changeSet.toString(false)));
+                        } else {
+                            if (foundAdditionalHeader) {
+                                Scope.getCurrentScope().getLog(AbstractFormattedChangeLogParser.class)
+                                        .info(String.format("An additional formatted SQL header line was discovered for changeset %s and will be treated as a comment", changeSet.toString(false)));
+                                foundAdditionalHeader = false;
+                            }
                         }
 
                         setChangeSequence(change, finalCurrentSequence);
@@ -422,7 +428,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     boolean runOnChange = parseBoolean(runOnChangePatternMatcher, changeSet, false, "runOnChange");
                     boolean runAlways = parseBoolean(runAlwaysPatternMatcher, changeSet, false, "runAlways");
                     boolean runInTransaction = parseBoolean(runInTransactionPatternMatcher, changeSet, true, "runInTransaction");
-                    boolean failOnError = parseBoolean(failOnErrorPatternMatcher, changeSet, true, "failOnError");
+                    Boolean failOnError = parseBooleanObject(failOnErrorPatternMatcher, changeSet, null, "failOnError");
 
                     String runWith = parseString(runWithMatcher, RUN_WITH);
                     if (runWith != null) {
@@ -724,7 +730,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     }
 
     protected ChangeSet configureChangeSet(DatabaseChangeLog changeLog, boolean runOnChange, boolean runAlways,
-                                           boolean runInTransaction, boolean failOnError, String runWith,
+                                           boolean runInTransaction, Boolean failOnError, String runWith,
                                            String runWithSpoolFile, String context, String labels, String logicalFilePath,
                                            String dbms, String ignore, String changeSetId, String changeSetAuthor) {
         ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
@@ -741,7 +747,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     }
 
     protected void setLogicalFilePath(DatabaseChangeLog changeLog, String line, Matcher changeLogPatternMatcher) {
-        if (changeLogPatternMatcher.matches()) {
+        if (changeLog.getLogicalFilePath() == null && changeLogPatternMatcher.matches()) {
             Matcher logicalFilePathMatcher = LOGICAL_FILE_PATH_PATTERN.matcher(line);
             changeLog.setLogicalFilePath(parseString(logicalFilePathMatcher, LOGICAL_FILE_PATH));
         }
@@ -947,6 +953,24 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
     protected boolean parseBoolean(Matcher matcher, ChangeSet changeSet, boolean defaultValue) throws ChangeLogParseException {
         return parseBoolean(matcher, changeSet, defaultValue, null);
+    }
+
+    protected Boolean parseBooleanObject(Matcher matcher, ChangeSet changeSet, Boolean defaultValue, String description)
+            throws ChangeLogParseException {
+        Boolean booleanMatch = defaultValue;
+        if (matcher.matches()) {
+            try {
+                booleanMatch = Boolean.parseBoolean(matcher.group(1));
+                logMatch(description, String.valueOf(booleanMatch), getClass());
+            } catch (Exception e) {
+                if (changeSet != null) {
+                    throw new ChangeLogParseException("Cannot parse " + changeSet + " " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
+                } else {
+                    throw new ChangeLogParseException("Cannot parse pattern " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
+                }
+            }
+        }
+        return booleanMatch;
     }
 
     protected boolean parseBoolean(Matcher matcher, ChangeSet changeSet, boolean defaultValue, String description)
