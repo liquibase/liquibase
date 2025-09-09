@@ -53,8 +53,8 @@
     </scm>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <maven.enforcer.requireMavenVersion>3.6</maven.enforcer.requireMavenVersion>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mmZ</maven.build.timestamp.format>
         <maven.deploy.skip>true</maven.deploy.skip>
@@ -91,6 +91,7 @@
         <sonar.coverage.jacoco.xmlReportPaths>target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <surefire.failIfNoTests>true</surefire.failIfNoTests>
         <opencsv.version>5.12.0</opencsv.version>
+        <mockito.version>4.11.0</mockito.version>
     </properties>
 
     <!-- comment -->
@@ -198,7 +199,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>5.19.0</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -244,7 +245,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>2.2.224</version>
+            <version>2.3.232</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -306,14 +307,14 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.26.0</version>
+            <version>3.26.1</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.firebirdsql.jdbc</groupId>
             <artifactId>jaybird</artifactId>
-            <version>5.0.8.java8</version>
+            <version>5.0.9.java8</version>
             <scope>test</scope>
         </dependency>
 
@@ -456,7 +457,7 @@
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
-                <version>5.1.0.4751</version>
+                <version>5.2.0.4988</version>
                 <executions>
                     <execution>
                         <id>sonar</id>
@@ -490,7 +491,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.11.2</version>
+                <version>3.11.3</version>
                 <configuration>
                     <attach>true</attach>
                     <author>false</author>
@@ -580,14 +581,14 @@
                 <jdk>!1.8</jdk>
             </activation>
             <properties>
-                <maven.compiler.release>8</maven.compiler.release>
+                <maven.compiler.release>17</maven.compiler.release>
                 <net.bytebuddy.experimental>true</net.bytebuddy.experimental>
             </properties>
             <dependencies>
                 <dependency>
                     <groupId>org.mockito</groupId>
                     <artifactId>mockito-core</artifactId>
-                    <version>5.19.0</version>
+                    <version>${mockito.version}</version>
                     <scope>test</scope>
                 </dependency>
             </dependencies>

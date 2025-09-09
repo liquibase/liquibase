@@ -180,6 +180,14 @@ Global Options
                                variable:
                                'LIQUIBASE_ERROR_ON_CIRCULAR_INCLUDE_ALL')
 
+      --fail-on-null-snapshot-id=PARAM
+                             If true, referenced objects which do not have a
+                               snapshot ID will cause snapshot failure
+                             DEFAULT: true
+                             (defaults file: 'liquibase.failOnNullSnapshotId',
+                               environment variable:
+                               'LIQUIBASE_FAIL_ON_NULL_SNAPSHOT_ID')
+
       --file-encoding=PARAM  Encoding to use when reading files. Valid values
                                include: UTF-8, UTF-16, UTF-16BE, UTF-16LE,
                                US-ASCII, or OS to use the system configured
@@ -344,6 +352,13 @@ Global Options
                              (defaults file: 'liquibase.monitorPerformance',
                                environment variable:
                                'LIQUIBASE_MONITOR_PERFORMANCE')
+
+      --mssql-bytes-per-char=PARAM
+                             Number of bytes needed to store one character
+                               (depends on database's character encoding)
+                             DEFAULT: 1
+                             (defaults file: 'mssql.bytesPerChar', environment
+                               variable: 'MSSQL_BYTES_PER_CHAR')
 
       --on-missing-include-changelog=PARAM
                              If set to WARN, then liquibase will not throw
@@ -572,6 +587,9 @@ Commands
 
   list-locks                    List the hostname, IP address, and timestamp of
                                   the Liquibase lock record
+
+  lpm                           Initialize and update Liquibase Package Manager
+                                  (LPM)
 
   mark-next-changeset-ran       Marks the next change you apply as executed in
                                   your database

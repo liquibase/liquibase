@@ -34,7 +34,7 @@ jobs:
           echo "github.event.pull_request.merged: ${{ github.event.pull_request.merged }}"
           echo "github.event_name: ${{ github.event_name }}"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} # get the sha of the commit or the new commit created when branch is merged to master
 
@@ -43,7 +43,7 @@ jobs:
     needs: [ functional-tests-build ]
     name: Trigger Functional Tests
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set environment variables for PR branch and SHA
         run: |
@@ -63,7 +63,7 @@ jobs:
           echo "ossWorkflowUrl=${ossWorkflowUrl}" >> $GITHUB_ENV
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -105,7 +105,7 @@ jobs:
         run: echo ${{ steps.return_dispatch.outputs.run_id }}
 
       - name: Report PRO-Tests Run URL
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const targetURL = "https://github.com/liquibase/liquibase-pro-tests/actions/runs/${{ steps.return_dispatch.outputs.run_id }}"
