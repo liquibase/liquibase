@@ -34,7 +34,6 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
     private static final Logger LOGGER = Scope.getCurrentScope().getLog(DatabaseSnapshot.class);
     public static final String ALL_CATALOGS_STRING_SCRATCH_KEY = "DatabaseSnapshot.allCatalogsString";
-    public static final String SNAPSHOT_SCOPE_KEY = "DatabaseSnapshot.snapshotScope";
 
     private final DatabaseObject[] originalExamples;
     private final HashSet<String> serializableFields;
@@ -78,10 +77,6 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         this(examples, database, new SnapshotControl(database));
     }
 
-    public DatabaseObjectCollection getReferencedObjects() {
-        return referencedObjects;
-    }
-
     protected void init(DatabaseObject[] examples) throws DatabaseException, InvalidExampleException {
         if (examples != null) {
             Set<Catalog> catalogs = new HashSet<>();
@@ -116,7 +111,73 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
                 include(obj);
             }
+            
+            // Discover root-level extension objects (peers to Catalog) 
+            // This enables extensions to add objects at the root level of the database hierarchy
+            discoverRootLevelExtensionObjects();
         }
+    }
+
+    /**
+     * Discovers and includes root-level extension objects (objects that are peers to Catalog).
+     * This method enables database extensions to add objects at the root level of the database hierarchy.
+     * 
+     * Root-level objects are identified by snapshot generators that return an empty array from addsTo(),
+     * indicating they are not contained within other objects but are peers to standard root objects like Catalog.
+     */
+    private void discoverRootLevelExtensionObjects() throws DatabaseException, InvalidExampleException {
+//        System.out.println("🔧 CORE: discoverRootLevelExtensionObjects() called");
+        
+        // Get all snapshot generators for this database
+        SnapshotGeneratorFactory factory = SnapshotGeneratorFactory.getInstance();
+        
+        Set<Class<? extends DatabaseObject>> typesToInclude = snapshotControl.getTypesToInclude();
+//        System.out.println("🔧 CORE: Types to include: " + typesToInclude.size());
+        
+        // Find generators that create root-level objects (addsTo returns empty array)
+        for (Class<? extends DatabaseObject> type : typesToInclude) {
+            if (type == null) continue;
+            
+//            System.out.println("🔧 CORE: Checking type: " + type.getSimpleName());
+            
+            // Get generators for this type
+            SortedSet<SnapshotGenerator> generators = factory.getGenerators(type, database);
+//            System.out.println("🔧 CORE: Found " + generators.size() + " generators for " + type.getSimpleName());
+            
+            for (SnapshotGenerator generator : generators) {
+                // Check if this is a root-level generator (doesn't add to other objects)
+                Class<? extends DatabaseObject>[] addsTo = generator.addsTo();
+                
+    //            System.out.println("🔧 CORE: Generator " + generator.getClass().getSimpleName() + 
+                                 " addsTo: " + (addsTo != null ? addsTo.length + " types" : "null"));
+                
+                if (addsTo != null && addsTo.length == 0) {
+        //            System.out.println("✅ CORE: Found root-level generator: " + generator.getClass().getSimpleName());
+                    
+                    // This is a root-level generator - create an example object and include it
+                    try {
+                        // Create a minimal example object of this type
+                        DatabaseObject example = type.getDeclaredConstructor().newInstance();
+            //            System.out.println("🔧 CORE: Created example object: " + example.getClass().getSimpleName());
+                        
+                        // Use include() to properly discover and add the object
+                        // This will call the generator's snapshotObject method if the object exists
+                        DatabaseObject result = include(example);
+            //            System.out.println("🔧 CORE: Include result: " + (result != null ? result.getClass().getSimpleName() : "null"));
+                        
+                    } catch (Exception e) {
+            //            System.out.println("❌ CORE: Error with root-level object " + type.getSimpleName() + ": " + e.getMessage());
+                        e.printStackTrace();
+                        // Log but don't fail the entire snapshot for extension issues
+                        Scope.getCurrentScope().getLog(DatabaseSnapshot.class)
+                            .warning("Error discovering root-level objects of type " + 
+                                   type.getSimpleName() + ": " + e.getMessage(), e);
+                    }
+                }
+            }
+        }
+        
+//        System.out.println("🔧 CORE: discoverRootLevelExtensionObjects() completed");
     }
 
     /**
@@ -286,7 +347,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
      * if the object does not exist in the database. If the same object was returned by an earlier include() call,
      * the same object instance will be returned.
      */
-    protected <T extends DatabaseObject> T include(T example) throws DatabaseException, InvalidExampleException {
+    public <T extends DatabaseObject> T include(T example) throws DatabaseException, InvalidExampleException {
         if (example == null) {
             return null;
         }
@@ -336,13 +397,23 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             }
 
         } else {
+//            System.out.println("🔧 CORE: Adding object to snapshot: " + object.getClass().getSimpleName());
             allFound.add(object);
-            if (snapshotControl.shouldSearchNestedObjects()) {
+            
+            boolean shouldSearchNested = snapshotControl.shouldSearchNestedObjects();
+//            System.out.println("🔧 CORE: shouldSearchNestedObjects() = " + shouldSearchNested);
+            
+            if (shouldSearchNested) {
                 try {
+        //            System.out.println("🔧 CORE: Calling includeNestedObjects() for " + object.getClass().getSimpleName());
                     includeNestedObjects(object);
+        //            System.out.println("🔧 CORE: Completed includeNestedObjects() for " + object.getClass().getSimpleName());
                 } catch (ReflectiveOperationException e) {
+        //            System.out.println("❌ CORE: Error in includeNestedObjects(): " + e.getMessage());
                     throw new UnexpectedLiquibaseException(e);
                 }
+            } else {
+    //            System.out.println("❌ CORE: Skipping nested object search - disabled by SnapshotControl");
             }
         }
 
