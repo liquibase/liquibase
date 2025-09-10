@@ -34,6 +34,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
     private static final Logger LOGGER = Scope.getCurrentScope().getLog(DatabaseSnapshot.class);
     public static final String ALL_CATALOGS_STRING_SCRATCH_KEY = "DatabaseSnapshot.allCatalogsString";
+    public static final String SNAPSHOT_SCOPE_KEY = "DatabaseSnapshot.snapshotScope";
 
     private final DatabaseObject[] originalExamples;
     private final HashSet<String> serializableFields;
@@ -75,6 +76,10 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
     public DatabaseSnapshot(DatabaseObject[] examples, Database database) throws DatabaseException, InvalidExampleException {
         this(examples, database, new SnapshotControl(database));
+    }
+
+    public DatabaseObjectCollection getReferencedObjects() {
+        return referencedObjects;
     }
 
     protected void init(DatabaseObject[] examples) throws DatabaseException, InvalidExampleException {
@@ -149,7 +154,6 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 Class<? extends DatabaseObject>[] addsTo = generator.addsTo();
                 
 
-                                 " addsTo: " + (addsTo != null ? addsTo.length + " types" : "null"));
                 
                 if (addsTo != null && addsTo.length == 0) {
 
