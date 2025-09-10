@@ -43,3 +43,4 @@ original-pom.xml
 /liquibase-standard/var
 
 CLAUDE.md
+liquibase-snowflake-with-new-objects-archive/
