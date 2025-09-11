@@ -5,5 +5,5 @@ Confidential Information with a third party except (a) in accordance with
 (Confidentiality) of this license, or (b) to the extent the Usage Data is
 aggregated and anonymized such that Customer’s Users cannot be identified.
 “Usage Data” means usage data in connection with the Customer’s use of the
-Service, such as Liquibase commands used (e.g. update, rollback, checks run)
+Service, such as Liquibase commands used (e.g. update, rollback)
 and metadata (e.g. timestamp, Liquibase version, database type).

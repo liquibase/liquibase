@@ -10,6 +10,7 @@ import liquibase.resource.Resource;
 import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.net.URI;
@@ -456,11 +457,17 @@ public class InitProjectUtil {
                     continue;
                 }
 
+                if (!Files.exists(Paths.get(pathToExample))) {
+                    String message = "Example flow file '" + fileName + "' does not exist at path '" + pathToExample + "'. Skipping example generation.";
+                    Scope.getCurrentScope().getLog(InitProjectUtil.class).info(message);
+                    continue;
+                }
+
                 try (InputStream resourceAsStream = InitProjectUtil.class.getClassLoader().getResourceAsStream(pathToExample)) {
                     contents = StreamUtil.readStreamAsString(resourceAsStream);
                 }
 
-                if (StringUtil.isEmpty(contents)) {
+                if (StringUtils.isEmpty(contents)) {
                     throw new CommandExecutionException("Unable to read the example flow file resource.");
                 }
 
@@ -495,11 +502,17 @@ public class InitProjectUtil {
                 return;
             }
 
+            if (!Files.exists(Paths.get(buildChecksPackagePath(format)))) {
+                String message = "Example checks package file '" + fileName + "' does not exist at path '" + buildChecksPackagePath(format) + "'. Skipping example generation.";
+                Scope.getCurrentScope().getLog(InitProjectUtil.class).info(message);
+                return;
+            }
+
             try (InputStream resourceAsStream = InitProjectUtil.class.getClassLoader().getResourceAsStream(buildChecksPackagePath(format))) {
                 contents = StreamUtil.readStreamAsString(resourceAsStream);
             }
 
-            if (StringUtil.isEmpty(contents)) {
+            if (StringUtils.isEmpty(contents)) {
                 throw new CommandExecutionException("Unable to read the example checks package resource.");
             }
 

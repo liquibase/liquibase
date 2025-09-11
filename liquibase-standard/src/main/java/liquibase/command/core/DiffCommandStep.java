@@ -66,7 +66,7 @@ public class DiffCommandStep extends AbstractCommandStep {
 
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        commandDefinition.setShortDescription("Outputs a description of differences.  If you have a Liquibase Pro key, you can output the differences as JSON using the --format=JSON option");
+        commandDefinition.setShortDescription("Outputs a description of differences.  If you have a Liquibase License Key, you can output the differences as JSON using the --format=JSON option");
     }
 
     public static Class<? extends DatabaseObject>[] parseSnapshotTypes(String... snapshotTypes) {

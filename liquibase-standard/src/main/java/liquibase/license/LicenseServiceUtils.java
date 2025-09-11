@@ -2,6 +2,7 @@ package liquibase.license;
 
 import liquibase.Scope;
 import liquibase.exception.CommandValidationException;
+import liquibase.util.StringUtil;
 
 /**
  *
@@ -36,6 +37,10 @@ public class LicenseServiceUtils {
     if (!isProLicenseValid()) {
       LicenseServiceFactory licenseServiceFactory = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class);
       LicenseService licenseService = licenseServiceFactory.getLicenseService();
+      if (licenseService == null) {
+          // use default message from core
+          throw new CommandValidationException(String.format(LicenseService.BASE_INVALID_LICENSE_MESSAGE + LicenseService.END_INVALID_LICENSE_MESSAGE, StringUtil.join(commandNames, " ")));
+      }
       throw new CommandValidationException(licenseService.getInvalidLicenseMessage(commandNames));
     }
   }
