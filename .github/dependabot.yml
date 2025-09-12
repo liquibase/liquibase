@@ -109,7 +109,7 @@ updates:
         update-types:
           - "minor"
           - "patch"
-        ignore:
-          - dependency-name: "org.springframework:*"
-            update-types: ["version-update:semver-major"]
+    ignore:
+      - dependency-name: "org.springframework:*"
+        update-types: ["version-update:semver-major"]
 
