@@ -28,13 +28,11 @@ import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import static java.util.Optional.ofNullable;
 import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
 import static liquibase.change.ChangeParameterMetaData.ALL;
 import static liquibase.change.ChangeParameterMetaData.NONE;
-
+import static liquibase.util.ObjectUtil.cast;
 /**
  * A common parent for all raw SQL related changes regardless of where the sql was sourced from.
  * <p>
@@ -137,6 +135,10 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         ValidationErrors validationErrors = new ValidationErrors();
         if (StringUtils.trimToNull(sql) == null) {
             validationErrors.addError("'sql' is required");
+        }
+        if(resultIn != null &&
+            getChangeSet().getChangeLog().getChangeLogParameters().hasValue(resultIn, null)) {
+            validationErrors.addError(String.format("Property '%s' is already defined! Cannot set new runtime value", resultIn));
         }
         return validationErrors;
     }
@@ -249,7 +251,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
     protected String resultIn;
 
-    @DatabaseChangeProperty(description = "The name of the property to return the value into DURING RUNTIME",
+    @DatabaseChangeProperty(description = "The name of the property to return the value into DURING RUNTIME EXECUTION",
             exampleValue = "newId", requiredForDatabase = NONE, supportsDatabase = ALL)
     public String getResultIn() {
         return resultIn;
@@ -307,10 +309,6 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             }
         }
     }
-
-     static <T> Optional<T> cast(  Object o, Class<T> cls) {
-         return ofNullable(cls.isInstance(o) ? cls.cast(o) : null);
-      }
 
     void addReturnIn( List<SqlStatement> returnStatements) {
         if(getResultIn() != null) {

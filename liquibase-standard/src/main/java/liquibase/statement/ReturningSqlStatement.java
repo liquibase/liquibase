@@ -2,7 +2,10 @@ package liquibase.statement;
 
 import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.sql.visitor.InjectRuntimeVariablesVisitor;
+
+import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 
@@ -20,11 +23,15 @@ public abstract class ReturningSqlStatement extends AbstractSqlStatement {
     }
 
     public void setResult(String sResult) {
-        InjectRuntimeVariablesVisitor.get().params.set(resultIn, sResult); // Global
-        ofNullable( changeSet )
-                .flatMap( cs -> ofNullable(cs.getChangeLog()))
-                .ifPresent( cl -> cl.getChangeLogParameters().set(resultIn, sResult));
-        Scope.getCurrentScope().getLog(getClass()).fine(String.format("runtime property '%s' set: '%s'", resultIn, sResult));
+        if(InjectRuntimeVariablesVisitor.get().params.hasValue(resultIn,null)) {
+            Scope.getCurrentScope().getLog(getClass())
+                  .warning(String.format("Property '%s' is already set! Cannot set new runtime value in %s!", resultIn, location()));
+        } else {
+            InjectRuntimeVariablesVisitor.get().params.set(resultIn, sResult); // Global
+            getChangeLog().ifPresent(cl -> cl.getChangeLogParameters().set(resultIn, sResult));
+            Scope.getCurrentScope().getLog(getClass())
+                  .fine(String.format("Property '%s' set runtime: '%s' in %s", resultIn, sResult, location()));
+        }
     }
 
     /** Set the resultIn property and the changeset */
@@ -32,5 +39,13 @@ public abstract class ReturningSqlStatement extends AbstractSqlStatement {
         this.resultIn = resultIn;
         this.changeSet = cs;
         return this;
+    }
+
+    Optional<DatabaseChangeLog> getChangeLog() {
+        return ofNullable( changeSet ).flatMap( cs -> ofNullable(cs.getChangeLog()));
+    }
+
+    String location() {
+        return null != changeSet ? changeSet.toString() : "";
     }
 }
