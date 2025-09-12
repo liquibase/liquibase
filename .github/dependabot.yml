@@ -109,3 +109,8 @@ updates:
         update-types:
           - "minor"
           - "patch"
+        ignore:
+          - # we want to ignore org.springframework: version upgrades for spring >= 6.0.0
+          - dependency-name: "org.springframework:*"
+            update-types: ["version-update:semver-major"]
+
