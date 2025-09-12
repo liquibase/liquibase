@@ -15,12 +15,10 @@ import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.CallableSql;
 import liquibase.sql.Sql;
 import liquibase.sql.SqlConfiguration;
+import liquibase.sql.visitor.InjectRuntimeVariablesVisitor;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.CallableSqlStatement;
-import liquibase.statement.CompoundStatement;
-import liquibase.statement.ExecutablePreparedStatement;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.*;
 import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.util.JdbcUtil;
 import liquibase.util.StringUtil;
@@ -173,7 +171,6 @@ public class JdbcExecutor extends AbstractExecutor {
             }
         }
 
-
         if (sql instanceof ExecutablePreparedStatement) {
             ((ExecutablePreparedStatement) sql).execute(new PreparedStatementFactory((JdbcConnection) database.getConnection()));
             return;
@@ -184,8 +181,13 @@ public class JdbcExecutor extends AbstractExecutor {
                 return;
             }
         }
-
-        execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
+        if (sql instanceof ReturningSqlStatement && ((ReturningSqlStatement) sql).getResultIn() != null) {
+            ReturningSqlStatement stmt = (ReturningSqlStatement) sql;
+            String sResult = queryForObject(sql, String.class, sqlVisitors);
+            stmt.setResult(sResult);
+        } else {
+             execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
+        }
     }
 
     private void setParameters(final PreparedStatement pstmt, final RawParameterizedSqlStatement sql) throws SQLException {
@@ -225,9 +227,21 @@ public class JdbcExecutor extends AbstractExecutor {
                 }
             }
         }
+        InjectRuntimeVariablesVisitor v = InjectRuntimeVariablesVisitor.getInstance(); // Required for SsqlPrecondition
+        if(v != null) {
+             finalSql = v.modifySql(finalSql, database);
+        }
         return finalSql;
     }
 
+    @Override
+    protected String[] applyVisitors(SqlStatement statement, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+        InjectRuntimeVariablesVisitor v = InjectRuntimeVariablesVisitor.getInstance();
+        if(null != v && !sqlVisitors.contains(v)) {
+            sqlVisitors.add(v);
+        }
+        return super.applyVisitors(statement, sqlVisitors);
+    }
 
     public Object query(final SqlStatement sql, final ResultSetExtractor rse) throws DatabaseException {
         return query(sql, rse, new ArrayList<>());
@@ -543,7 +557,6 @@ public class JdbcExecutor extends AbstractExecutor {
             return sql;
         }
     }
-
 
     private class QueryStatementCallback implements StatementCallback {
 
