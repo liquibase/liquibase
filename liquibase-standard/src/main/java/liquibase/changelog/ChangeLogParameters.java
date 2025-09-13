@@ -413,7 +413,7 @@ public class ChangeLogParameters {
 
         @Override
         public String toString() {
-            return getKey() + ":" + getValue();
+            return getValue().toString();
         }
     }
 
