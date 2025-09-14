@@ -78,7 +78,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
     }
 
     @Override
-    protected ParsedNode parseToNode(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
+    public ParsedNode parseToNode(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
         try {
             Resource resource = resourceAccessor.get(physicalChangeLogLocation);
             SAXParser parser = saxParserFactory.newSAXParser();
@@ -113,17 +113,6 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
                 }
             });
 
-            if (!resource.exists()) {
-                if (physicalChangeLogLocation.startsWith("WEB-INF/classes/")) {
-                    // Correct physicalChangeLogLocation and try again.
-                    return parseToNode(
-                            physicalChangeLogLocation.replaceFirst("WEB-INF/classes/", ""),
-                            changeLogParameters, resourceAccessor);
-                } else {
-                    throw new ChangeLogParseException(FileUtil.getFileNotFoundMessage(physicalChangeLogLocation));
-                }
-            }
-
             XMLChangeLogSAXHandler contentHandler = new XMLChangeLogSAXHandler(physicalChangeLogLocation, resourceAccessor, changeLogParameters);
             xmlReader.setContentHandler(contentHandler);
             try (InputStream stream = resource.openInputStream()) {
@@ -131,8 +120,6 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
             }
 
             return contentHandler.getDatabaseChangeLogTree();
-        } catch (ChangeLogParseException e) {
-            throw e;
         } catch (IOException e) {
             throw new ChangeLogParseException("Error Reading Changelog File: " + e.getMessage(), e);
         } catch (SAXParseException e) {
