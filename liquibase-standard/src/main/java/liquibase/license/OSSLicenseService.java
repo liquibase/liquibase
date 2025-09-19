@@ -30,7 +30,7 @@ public class OSSLicenseService implements LicenseService {
 
     @Override
     public String getLicenseInfo() {
-        return "OSS License - No commercial license installed";
+        return "";
     }
 
     @Override
