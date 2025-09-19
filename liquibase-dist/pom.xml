@@ -18,7 +18,7 @@
         <deploy.url>https://maven.pkg.github.com/liquibase/liquibase</deploy.url>
         <h2.version>2.3.232</h2.version>
         <hsqldb.version>2.7.4</hsqldb.version>
-        <postgresql.version>42.7.7</postgresql.version>
+        <postgresql.version>42.7.8</postgresql.version>
         <mssql.version>12.10.1.jre8</mssql.version>
         <mysql.version>9.2.0</mysql.version>
         <mariadb.version>3.5.6</mariadb.version>
