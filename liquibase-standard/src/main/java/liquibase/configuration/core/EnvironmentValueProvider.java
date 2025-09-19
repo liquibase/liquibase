@@ -99,7 +99,7 @@ public class EnvironmentValueProvider extends AbstractMapConfigurationValueProvi
         Boolean strict = GlobalConfiguration.STRICT.getCurrentValue();
         if (!unknownVariables.isEmpty()) {
             String message = System.lineSeparator() + System.lineSeparator() +
-                    "Liquibase detected the following invalid LIQUIBASE_* environment variables:" + System.lineSeparator() + System.lineSeparator() +
+                    "Liquibase detected the following invalid Community LIQUIBASE_* environment variables:" + System.lineSeparator() + System.lineSeparator() +
                     StringUtil.join(unknownVariables, System.lineSeparator(), true) + System.lineSeparator() + System.lineSeparator();
             if (strict) {
                 message += "Please rename them and run your command again, or set liquibase.strict=FALSE or LIQUIBASE_STRICT=FALSE." + System.lineSeparator();

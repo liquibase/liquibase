@@ -26,13 +26,6 @@ public class LiquibaseDropAll extends AbstractLiquibaseMojo {
     @PropertyElement
     protected String schemas;
 
-    /**
-     * If true, the database changelog history table will be dropped. Requires pro license.
-     *
-     * @parameter property="liquibase.dropDbclhistory"
-     */
-    @PropertyElement
-    protected Boolean dropDbclhistory;
 
     protected String catalog;
 
@@ -43,9 +36,9 @@ public class LiquibaseDropAll extends AbstractLiquibaseMojo {
             for (String name : schemas.split(",")) {
                 schemaObjs.add(new CatalogAndSchema(catalog, name));
             }
-            liquibase.dropAll(dropDbclhistory, schemaObjs.toArray(new CatalogAndSchema[0]));
+            liquibase.dropAll(schemaObjs.toArray(new CatalogAndSchema[0]));
         } else {
-            liquibase.dropAll(dropDbclhistory);
+            liquibase.dropAll();
         }
     }
 
