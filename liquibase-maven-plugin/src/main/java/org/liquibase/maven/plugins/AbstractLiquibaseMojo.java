@@ -745,10 +745,24 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected Boolean licenseUtilityEnabled;
 
     /**
+     * Enable or disable sending license usage data.
+     *
+     * @parameter property="liquibase.licenseTrackingEnabled"
+     */
+    @PropertyElement(key = "liquibase.licenseTracking.enabled")
+    protected Boolean licenseTrackingEnabled;
+
+    /**
      * @parameter property="liquibase.licenseUtilityUrl"
      */
     @PropertyElement(key = "liquibase.licenseUtility.url")
     protected String licenseUtilityUrl;
+
+    /**
+     * @parameter property="liquibase.licenseTrackingUrl"
+     */
+    @PropertyElement(key = "liquibase.licenseTracking.url")
+    protected String licenseTrackingUrl;
 
     /**
      * Specifies an identifier (e.g., team name, pipeline ID, or environment) to track and analyze Liquibase license
@@ -758,6 +772,15 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     @PropertyElement(key = "liquibase.licenseUtility.trackingId")
     protected String licenseUtilityTrackingId;
+
+    /**
+     * Specifies an identifier (e.g., team name, pipeline ID, or environment) to track and analyze Liquibase license
+     * usage. If not provided, the hostname and user is used for identification.
+     *
+     * @parameter property="liquibase.licenseTrackingTrackingId"
+     */
+    @PropertyElement(key = "liquibase.licenseTracking.trackingId")
+    protected String licenseTrackingTrackingId;
 
     /**
      * Specifies the vault URL
@@ -817,6 +840,39 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             return liquibaseLicenseKey;
         } else {
             return liquibaseProLicenseKey;
+        }
+    }
+
+    /**
+     * Get the license tracking enabled flag.
+     */
+    protected Boolean getLicenseTrackingEnabled() {
+        if (licenseTrackingEnabled != null) {
+            return licenseTrackingEnabled;
+        } else {
+            return licenseUtilityEnabled;
+        }
+    }
+
+    /**
+     * Get the license tracking url.
+     */
+    protected String getLicenseTrackingUrl() {
+        if (StringUtil.isNotEmpty(licenseTrackingUrl)) {
+            return licenseTrackingUrl;
+        } else {
+            return licenseUtilityUrl;
+        }
+    }
+
+    /**
+     * Get the license tracking tracking ID.
+     */
+    protected String getLicenseTrackingTrackingId() {
+        if (StringUtil.isNotEmpty(licenseTrackingTrackingId)) {
+            return licenseTrackingTrackingId;
+        } else {
+            return licenseUtilityTrackingId;
         }
     }
 
@@ -951,14 +1007,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 if (analyticsEnabled != null) {
                     scopeValues.put(AnalyticsArgs.ENABLED.getKey(), analyticsEnabled);
                 }
-                if (licenseUtilityEnabled != null) {
-                    scopeValues.put(LicenseTrackingArgs.ENABLED.getKey(), licenseUtilityEnabled);
+                if (getLicenseTrackingEnabled() != null) {
+                    scopeValues.put(LicenseTrackingArgs.ENABLED.getKey(), getLicenseTrackingEnabled());
                 }
-                if (licenseUtilityUrl != null) {
-                    scopeValues.put(LicenseTrackingArgs.URL.getKey(), licenseUtilityUrl);
+                if (getLicenseTrackingUrl() != null) {
+                    scopeValues.put(LicenseTrackingArgs.URL.getKey(), getLicenseTrackingUrl());
                 }
-                if (licenseUtilityTrackingId != null) {
-                    scopeValues.put(LicenseTrackingArgs.TRACKING_ID.getKey(), licenseUtilityTrackingId);
+                if (getLicenseTrackingTrackingId() != null) {
+                    scopeValues.put(LicenseTrackingArgs.TRACKING_ID.getKey(), getLicenseTrackingTrackingId());
                 }
                 handleVaultProperties(scopeValues);
 
