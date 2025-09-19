@@ -1241,6 +1241,9 @@
     <!-- dropTable -->
     <xsd:element name="dropTable">
         <xsd:complexType>
+            <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:choice>
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attributeGroup ref="dropTableAttributes"/>
             <xsd:anyAttribute namespace="##other" processContents="lax"/>
@@ -1302,6 +1305,9 @@
 
     <xsd:element name="createSequence">
         <xsd:complexType>
+            <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:choice>
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attributeGroup ref="sequenceAttributes"/>
             <xsd:anyAttribute namespace="##other" processContents="lax"/>
@@ -1310,6 +1316,9 @@
 
     <xsd:element name="alterSequence">
         <xsd:complexType>
+            <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:choice>
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attributeGroup ref="sequenceAttributes"/>
             <xsd:anyAttribute namespace="##other" processContents="lax"/>
@@ -1318,6 +1327,9 @@
 
     <xsd:element name="dropSequence">
         <xsd:complexType>
+            <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:choice>
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attributeGroup ref="sequenceAttributes"/>
             <xsd:anyAttribute namespace="##other" processContents="lax"/>
