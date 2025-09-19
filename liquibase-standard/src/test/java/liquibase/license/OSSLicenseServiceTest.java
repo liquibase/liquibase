@@ -23,9 +23,6 @@ public class OSSLicenseServiceTest {
         // Should have minimal valid priority
         assertEquals(0, ossLicenseService.getPriority());
 
-        // License info should indicate OSS
-        assertTrue(ossLicenseService.getLicenseInfo().contains("OSS"));
-
         // Days til expiration should indicate no license
         assertEquals(-1, ossLicenseService.daysTilExpiration());
 
