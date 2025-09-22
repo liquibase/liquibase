@@ -626,68 +626,6 @@ jobs:
       distribution: "liquibase"
       download_base_url: "https://github.com/liquibase/liquibase/releases/download"
 
-  update-docs-oss-pro-version:
-    if: ${{ inputs.dry_run == false }}
-    name: Update OSS and PRO tags based on OSS release
-    needs: [setup]
-    runs-on: ubuntu-latest
-    outputs:
-      latest_version: ${{ steps.get_latest_oss_version.outputs.latest_version }}
-      previous_version: ${{ steps.get_latest_oss_version.outputs.previous_version }}
-    steps:
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v5
-        with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
-          aws-region: us-east-1
-
-      - name: Get secrets from vault
-        id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
-        with:
-          secret-ids: |
-            ,/vault/liquibase
-          parse-json-secrets: true
-
-      - name: Get GitHub App token
-        id: get-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          permission-contents: write
-          permission-actions: write
-
-      - name: Checkout repository
-        uses: actions/checkout@v5
-        with:
-          repository: liquibase/liquibase
-          ref: "${{ needs.setup.outputs.ref_branch }}"
-          fetch-depth: 0
-
-      - name: Get the oss release version
-        id: get_latest_oss_version
-        run: |
-          # Fetch all tags from the remote
-          git fetch --tags
-          # Get the latest semver tag, strip 'v'
-          latest_tag=$(git tag --sort=-creatordate | grep -E '^v?[0-9]' | head -n1 | sed 's/^v//')
-          # Get the second latest tag
-          previous_tag=$(git tag --sort=-creatordate | grep -E '^v?[0-9]' | sed 's/^v//' | head -n2 | tail -n1)
-          echo "latest_version=$latest_tag" >> $GITHUB_OUTPUT
-          echo "previous_version=$previous_tag" >> $GITHUB_OUTPUT
-          echo "Latest Version: $latest_tag"
-          echo "Previous Version: $previous_tag"
-
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ steps.get-token.outputs.token }}
-          repository: liquibase/liquibase-docs
-          event-type: oss-released-version
-          client-payload: '{"latest_version": "${{ steps.get_latest_oss_version.outputs.latest_version }}", "previous_version": "${{ steps.get_latest_oss_version.outputs.previous_version }}"}'
-
   dry_run_deploy_maven:
     if: ${{ inputs.dry_run == true }}
     name: Deploy to Maven Central Repository
