@@ -1,8 +1,8 @@
-Liquibase Community 5.0
+Liquibase Community ${project.version}
 
 Introduction
 --------------------------------------------
-Thanks for installing Liquibase Community 5.0. 
+Thanks for installing Liquibase Community ${project.version}.
 
 The open source Liquibase product ships without extensions, drivers, and many other packages and dependencies. This change provides a much lighter, modular, and customizable Liquibase experience for Community users. Importantly, this flexibility both allows and requires users to manage their Liquibase dependencies for their specific needs.
 
@@ -76,5 +76,5 @@ For questions regarding Liquibase, you can:
 --------------------------------------------
 The program is subject to the license agreement, copyright, trademark,
 patent, and other laws.
-Copyright © 2025 Liquibase, Inc. All rights reserved.
+Copyright © ${current.year} Liquibase, Inc. All rights reserved.
 

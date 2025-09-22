@@ -1,10 +1,10 @@
-Liquibase Version <VERSION_NUMBER> - Getting Started
+Liquibase Version ${project.version} - Getting Started
 
 Visit the always-current docs to learn more about Getting Started at https://docs.liquibase.com/oss/get-started)
 
 Getting Started
 --------------------------------------------
-Thanks for downloading and installing Liquibase Community <VERSION_NUMBER> from Liquibase.
+Thanks for downloading and installing Liquibase Community ${project.version} from Liquibase.
 
 The open source Liquibase Community 5.0+ ships without extensions, drivers, and many other packages and dependencies. This change provides a much lighter, modular, and customizable Liquibase experience for Community users. Importantly, this flexibility both allows and requires users to manage their Liquibase dependencies for their specific needs.
 
@@ -250,10 +250,10 @@ You can also post questions to the Liquibase forum: https://forum.liquibase.org
 
 Liquibase Documentation: https://docs.liquibase.com
 
-Need Liquibase Support? Get customer support by upgrading to Liquibase Pro here: 
+Need Liquibase Support? Get customer support by upgrading to Liquibase Secure here:
 https://liquibase.com/pricing
 
 
-Copyright 2025 Liquibase, Inc. All rights reserved. The program is subject to the
+Copyright ${current.year} Liquibase, Inc. All rights reserved. The program is subject to the
 license agreement, copyright, trademark, patent, and other laws.
 
