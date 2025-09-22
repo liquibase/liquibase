@@ -378,11 +378,9 @@
         <xsd:attribute name="remarks" type="xsd:string"/>
         <xsd:attribute name="encoding" type="xsd:string">
             <xsd:annotation>
-                <xsd:appinfo>
-                    <xsd:documentation>
-                        Used with valueClobFile to specify file encoding explicitly.
-                    </xsd:documentation>
-                </xsd:appinfo>
+                <xsd:documentation>
+                    Used with valueClobFile to specify file encoding explicitly.
+                </xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
         <xsd:anyAttribute namespace="##other" processContents="lax"/>
@@ -1134,17 +1132,42 @@
     <!-- comment  -->
     <xsd:element name="comment" type="xsd:string"/>
 
+    <xsd:attributeGroup name="sqlAttributes">
+        <xsd:attribute name="stripComments" type="booleanExp">
+            <xsd:annotation>
+                <xsd:documentation>When true, any comments are removed in the statement before executing on the database. Default: true.</xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+
+        <xsd:attribute name="splitStatements" type="booleanExp">
+            <xsd:annotation>
+                <xsd:documentation>When true, Liquibase splits statements on @endDelimiter and executes them separately. Default: true.</xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+
+        <xsd:attribute name="endDelimiter" type="xsd:string">
+            <xsd:annotation>
+                <xsd:documentation>The delimiter to separate raw SQL statements. The default value is `;`
+                    See: https://docs.liquibase.com/change-types/enddelimiter-sql.html</xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="dbms" type="xsd:string"/>
+        <xsd:attribute name="resultIn" type="nonEmptyString">
+            <xsd:annotation>
+                <xsd:documentation>Name of the property set from the result of this sql's statement(s).
+                    The last statement has to return a single row with the first column containing the new value of the property</xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attributeGroup ref="changeAttributes"/>
+    </xsd:attributeGroup>
+
     <!-- sql -->
     <xsd:element name="sql">
         <xsd:complexType mixed="true">
             <xsd:sequence>
                 <xsd:element ref="comment" minOccurs="0" maxOccurs="1"/>
             </xsd:sequence>
-            <xsd:attributeGroup ref="changeAttributes"/>
-            <xsd:attribute name="stripComments" type="booleanExp"/>
-            <xsd:attribute name="splitStatements" type="booleanExp"/>
-            <xsd:attribute name="endDelimiter" type="xsd:string"/>
-            <xsd:attribute name="dbms" type="xsd:string"/>
+            <xsd:attributeGroup ref="sqlAttributes"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -1183,15 +1206,14 @@
 
     <xsd:element name="sqlFile">
         <xsd:complexType>
-            <xsd:attributeGroup ref="changeAttributes"/>
-            <xsd:attribute name="path" type="xsd:string" use="required"/>
-            <xsd:attribute name="stripComments" type="booleanExp"/>
-            <xsd:attribute name="splitStatements" type="booleanExp"/>
-            <xsd:attribute name="encoding" type="xsd:string"/>
-            <xsd:attribute name="endDelimiter" type="xsd:string"/>
+            <xsd:attribute name="path" type="nonEmptyString" use="required">
+                <xsd:annotation>
+                    <xsd:documentation>Name of the file containing the SQL statements to execute</xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
             <xsd:attribute name="relativeToChangelogFile" type="booleanExp"/>
-            <xsd:attribute name="dbms" type="xsd:string"/>
-            <xsd:anyAttribute namespace="##other" processContents="lax"/>
+            <xsd:attributeGroup ref="sqlAttributes"/>
+            <xsd:attribute name="encoding" type="xsd:string" default="UTF-8"/>
         </xsd:complexType>
     </xsd:element>
 
