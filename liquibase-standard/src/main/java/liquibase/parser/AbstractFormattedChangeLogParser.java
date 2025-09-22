@@ -511,6 +511,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                         throw new ChangeLogParseException("\n" + message);
                     }
                     if (changeSet != null) {
+                        InvalidFormattedSqlPatternsForOssUtil.interruptIfIsProCommandAndNoLicenseIsPresent(line);
                         AtomicBoolean changeSetFinished = new AtomicBoolean(false);
                         configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher, resourceAccessor, changeLog, change, rollbackSplitStatementsPatternMatcher, rollbackSplitStatements, rollbackEndDelimiter, changeSetFinished);
                         if (changeSetFinished.get()) {
