@@ -106,7 +106,7 @@ public class DiffCommandStep extends AbstractCommandStep {
                 new DiffToReport(diffResult, printStream).print();
                 printStream.flush();
             } else if ((printResult.equalsIgnoreCase("JSON") || printResult.equalsIgnoreCase("JSON_PRETTY")) && !LicenseServiceUtils.isProLicenseValid()) {
-                throw new CommandExecutionException("Using '--format=JSON|JSON_PRETTY' requires a valid Liquibase Pro license. Get a free Liquibase Pro trial at https://liquibase.com/trial.");
+                throw new CommandExecutionException("Using '--format=JSON|JSON_PRETTY' requires a valid Liquibase license key. Get a Liquibase license key and free trial at https://liquibase.com/trial");
             }
             Scope.getCurrentScope().addMdcValue(MdcKey.DIFF_OUTCOME, MdcValue.COMMAND_SUCCESSFUL);
             Scope.getCurrentScope().getLog(getClass()).info("Diff command completed");
