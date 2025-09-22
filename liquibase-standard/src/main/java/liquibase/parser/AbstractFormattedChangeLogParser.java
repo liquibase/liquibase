@@ -789,7 +789,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
     protected boolean handleAdditionalLines(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, String line, StringBuilder currentSequence)
             throws ChangeLogParseException {
-        InvalidFormattedSqlPatternsForOssUtil.showWarnIfIsProCommandAndNoLicenseIsPresent(line);
+        InvalidFormattedSqlPatternsForOssUtil.interruptIfIsProCommandAndNoLicenseIsPresent(line);
         // by default calls the deprecated method , otherwise old code may break.
         return handleAdditionalLines(changeLog, resourceAccessor, line);
     }

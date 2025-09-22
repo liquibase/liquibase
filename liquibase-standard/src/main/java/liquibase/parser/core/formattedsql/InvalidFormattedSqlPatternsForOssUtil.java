@@ -1,6 +1,6 @@
 package liquibase.parser.core.formattedsql;
 
-import liquibase.Scope;
+import liquibase.exception.ChangeLogParseException;
 import liquibase.license.LicenseServiceUtils;
 
 import java.util.regex.Pattern;
@@ -11,6 +11,8 @@ import java.util.regex.Pattern;
 public class InvalidFormattedSqlPatternsForOssUtil {
 
     private static String SINGLE_LINE_COMMENT_SEQUENCE = "\\-\\-";
+
+    private static String ERROR_MESSAGE = "Error parsing command line: Using '%s in Formatted SQL changelog' requires a valid Liquibase license key. Get a Liquibase license key and free trial at https://liquibase.com/trial.";
 
     // FIXME those regex are duplicated in Liquibase PRO
     protected static final String ROLLBACK_SQL_FILE_REGEX = String.format("\\s*%s[\\s]*rollbackSqlFile[\\s]+(.*)", SINGLE_LINE_COMMENT_SEQUENCE);
@@ -26,28 +28,25 @@ public class InvalidFormattedSqlPatternsForOssUtil {
     }
 
     /**
-     * Displays a warning message if a Pro-only command is detected and no valid Liquibase Pro license is present.
+     * Raise an exception if a Pro-only command is detected and no valid Liquibase Pro license is present.
      * This method checks the given line for specific patterns associated with Pro-only commands and,
      * if matched, informs the user that the command is not supported in the Liquibase Community Edition.
      *
      * @param line a string representing the command or input line to be checked for Pro-only patterns
      */
-    public static void showWarnIfIsProCommandAndNoLicenseIsPresent(String line) {
+    public static void interruptIfIsProCommandAndNoLicenseIsPresent(String line) throws ChangeLogParseException {
         if (!LicenseServiceUtils.isProLicenseValid()) {
             if (ROLLBACK_SQL_FILE_PATTERN.matcher(line).matches()) {
-                Scope.getCurrentScope().getUI().sendErrorMessage("rollbackSqlFile command is not supported in Liquibase Community Edition");
-                return;
+                throw new ChangeLogParseException(String.format(ERROR_MESSAGE, "rollbackSqlFile"));
             }
             if (TAG_DATABASE_PATTERN.matcher(line).matches()) {
-                Scope.getCurrentScope().getUI().sendErrorMessage("tagDatabase command is not supported in Liquibase Community Edition");
-                return;
+                throw new ChangeLogParseException(String.format(ERROR_MESSAGE, "tagDatabase"));
             }
             if (INCLUDE_PATTERN.matcher(line).matches()) {
-                Scope.getCurrentScope().getUI().sendErrorMessage("include command is not supported in Liquibase Community Edition");
-                return;
+                throw new ChangeLogParseException(String.format(ERROR_MESSAGE, "include"));
             }
             if (INCLUDE_ALL_PATTERN.matcher(line).matches()) {
-                Scope.getCurrentScope().getUI().sendErrorMessage("includeAll command is not supported in Liquibase Community Edition");
+                throw new ChangeLogParseException(String.format(ERROR_MESSAGE, "includeAll"));
             }
         }
 
