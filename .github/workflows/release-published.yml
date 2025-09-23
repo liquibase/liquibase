@@ -574,43 +574,6 @@ jobs:
           wait-for-completion: true
           workflow-logs: json-output
 
-  generate-PRO-tag:
-    if: ${{ inputs.dry_run == false }}
-    name: Generate PRO tags based on OSS release
-    needs: [setup]
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v5
-        with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
-          aws-region: us-east-1
-
-      - name: Get secrets from vault
-        id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
-        with:
-          secret-ids: |
-            ,/vault/liquibase
-          parse-json-secrets: true
-
-      - name: Get GitHub App token
-        id: get-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          permission-contents: write
-          permission-actions: write
-
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ steps.get-token.outputs.token }}
-          repository: liquibase/liquibase-pro
-          event-type: oss-released-tag
-
   package:
     uses: liquibase/build-logic/.github/workflows/package.yml@main
     needs: [setup]
