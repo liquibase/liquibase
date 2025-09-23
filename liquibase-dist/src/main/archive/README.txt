@@ -76,5 +76,5 @@ For questions regarding Liquibase, you can:
 --------------------------------------------
 The program is subject to the license agreement, copyright, trademark,
 patent, and other laws.
-Copyright © ${current.year} Liquibase, Inc. All rights reserved.
+Copyright © 2007-${current.year} Liquibase, Inc. All rights reserved.
 

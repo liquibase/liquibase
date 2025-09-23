@@ -254,6 +254,6 @@ Need Liquibase Support? Get customer support by upgrading to Liquibase Secure he
 https://liquibase.com/pricing
 
 
-Copyright ${current.year} Liquibase, Inc. All rights reserved. The program is subject to the
+Copyright 2007-${current.year} Liquibase, Inc. All rights reserved. The program is subject to the
 license agreement, copyright, trademark, patent, and other laws.
 
