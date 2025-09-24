@@ -11,6 +11,10 @@ import liquibase.util.StringUtil;
  */
 public class LicenseServiceUtils {
 
+  private LicenseServiceUtils() {
+    // Utility class
+  }
+
   /**
    * Check for a Liquibase Pro License.
    * @return true if licensed, or the installed license also permits access to Liquibase Pro features, false if not
