@@ -5,6 +5,8 @@ FSL-1.1-ALv2
 
 Notice
 
+Copyright © ${current.year} Liquibase Inc.
+
 Terms and Conditions
 
 Licensor ("We")
