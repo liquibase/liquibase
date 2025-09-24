@@ -203,6 +203,24 @@ jobs:
             exit 1
           fi
           echo "test_count_unit_test_java_${{ matrix.java }}_ubuntu=$TEST_COUNT" >> $GITHUB_OUTPUT
+          
+
+      - name: Check Test Count for macos-13
+        id: check-test-counts-java-macos
+        if: matrix.os == 'macos-13'
+        shell: bash
+        run: |
+          TEST_COUNT=$(grep -r -o -E 'Tests run: [0-9]+' . | awk -F: '{s+=$NF} END {print s}')
+          echo "Total Unit tests run: $TEST_COUNT"
+          if [ -z "$TEST_COUNT" ] || [ "$TEST_COUNT" -eq 0 ]; then
+            echo "No test result files found or test count is zero."
+            exit 1
+          fi
+          if [[ $TEST_COUNT -lt $((${{ vars.TEST_COUNT_JAVA_MACOS }} - (${{ vars.TEST_COUNT_JAVA_MACOS }} / 100))) ]] ; then
+            echo "MacOS Unit Test count is below the acceptable range of - 1% of the expected count. Expected ${{ vars.TEST_COUNT_JAVA_MACOS }}. Actual $TEST_COUNT."
+            exit 1
+          fi
+          echo "test_count_unit_test_java_macos=$TEST_COUNT" >> $GITHUB_OUTPUT
 
       - name: Check Test Count for windows-latest
         id: check-test-counts-java-windows
