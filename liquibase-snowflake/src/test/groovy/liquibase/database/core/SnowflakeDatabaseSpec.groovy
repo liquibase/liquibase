@@ -39,4 +39,25 @@ class SnowflakeDatabaseSpec extends Specification {
         QUOTE_ALL_OBJECTS         || 'Col1'           | Column     || 'Col1'           | '"Col1"'
         QUOTE_ALL_OBJECTS         || 'col with space' | Column     || 'col with space' | '"col with space"'
     }
+
+    @Unroll()
+    def "should return a properly escaped string for the database"() {
+        given:
+        def database = new SnowflakeDatabase()
+
+        expect:
+        database.escapeStringForDatabase(unescapedString) == escapedString
+
+        where:
+        unescapedString || escapedString
+        null            || null
+        "'col'name'"    || "\\'col\\'name\\'"
+        "'col\\'name'"  || "\\'col\\'name\\'"
+        "\\'col'name'"  || "\\'col\\'name\\'"
+        "'col'name\\'"  || "\\'col\\'name\\'"
+        "col 'name"     || "col \\'name"
+        "it's a col"    || "it\\'s a col"
+        "\\'col'"       || "\\'col\\'"
+        "''"            || "\\'\\'"
+    }
 }
