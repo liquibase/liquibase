@@ -1,5 +1,138 @@
 Liquibase Core Changelog
 ===========================================
+Changes in version 5.0.0 (2025.09.30)
+
+# Liquibase Community 5.0 is a major release
+See the [Liquibase Community 5.0 Release Notes](https://docs.liquibase.com/release-notes) for the complete set of release information.
+
+## ⚠️ MAJOR CHANGES IN COMMUNITY AND COMMERCIAL DISTRIBUTIONS
+
+Liquibase is evolving to better serve both open-source contributors and enterprise customers by introducing a clearer separation between its open source Community and the commercial Secure offering. This change is designed to ensure that each distribution is optimized for its respective users: providing open-source Community users with flexibility and control, while delivering scalability, reliability, and governance for Secure enterprise teams. The changes provide Liquibase Secure customers:
+- **Developer Productivity.** Enable developers with autonomy and guardrails built directly into their daily workflow.
+- **Secure Automation.** Embed governance, security, and compliance into every change automatically.
+- **Change Insights.** Deliver audit-ready visibility so every change is trusted, explainable, and observable.
+
+The new structure enables Liquibase to more effectively support developers at all stages—from experimentation and community collaboration to mission-critical deployments. Therefore, starting with this Liquibase 5.0 release, only the open source Community distribution is available at the traditional Github, Docker, and Maven access channels.
+If you need the Secure commercial offering, please visit [Liquibase.com](https://docs.liquibase.com/release-notes)
+* Learn more [Liquibase 5.0](https://www.liquibase.com/blog/liquibase-5-0-release)
+
+### Liquibase Community Licensing Change
+Additionally, Liquibase Community is now licensed under the Functional Source License (FSL). See LICENSE file at the root of the distribution for details. Starting with Liquibase 5.0, contributors will be asked to sign a one-time **Contributor License Agreement (CLA)**. This is handled automatically by CLA Assistant when you open your first pull request.
+
+
+## Liquibase 5.0 Community Release Notable Changes
+
+### Liquibase Package Manager (LPM) integrated to enable users to install, update, and manage their dependencies
+- The open source Liquibase Community 5.0 ships without extensions, drivers, and many other packages and dependencies. This change provides a much lighter, modular, and customizable Liquibase experience for Community users. Importantly, this flexibility both allows and requires users to manage their Liquibase dependencies for their specific needs.
+- Liquibase Package Manager is now integrated and available for use directly from within the Community CLI experience with a new `liquibase lpm` command as the preferred method for managing dependencies.
+- Learn more at the [LPM README](https://github.com/liquibase/liquibase-package-manager)
+
+### Liquibase Community 5.0+ ships with the Functional Source License (FSL)
+- "The Functional Source License (FSL) is a Fair Source license that converts to Apache 2.0 or MIT after two years. It is designed for SaaS companies that value both user freedom and developer sustainability. FSL provides everything a developer needs to use and learn from your software without harmful free-riding."
+- Learn more at https://fsl.software/
+
+### SnowFlake JDBC Driver CVE Fix
+- Liquibase 5.0 patches a vulnerability found in Snowflake JDBC driver (CVE-2025-24789) and resolves issue with logicalfilepath reported in 4.31.0. Note: Neither open source Community nor the commercial Secure products were affected by this CVE.
+
+### Java 8 and Java 11 support is deprecated
+- The minimal Java dependency for Liquibase 5.0+ is Java 17. This update enables Liquiabase to build, test, and ship with modern and more secure dependencies.
+
+### ValueDate Checksum bug fix
+- In the last release, an issue was introduced by a change in how valueDate was calculated and incorporated into the checksum calculations. This issue has been fixed by ensuring that rawDatevalue is excluded from checksum calculations.
+- (#7101) fix: prevent rawDateValue from being used for checksum calculations @filipelautert
+
+## Changelog of Community PRs
+
+## 🚀 New Features
+- (#7286) Allow anyAttribute in dbchangelog-latest.xsd complex types @filipelautert
+- (#7190) Create LPM command (DAT-20511) @filipelautert
+- (#7216) Deprecate Java 8/11 @wwillard7800
+- (#7187) Fixed: #7186 - Liquibase creates too short VARCHAR and CHAR fields on MS SQL databases using multi-byte encodings, effectively leading to data truncation eventually @mkarg
+- (#7230) DAT-16042: Add test cases for SQL injection and HTML content pattern validation in `SimpleSqlGrammarTest` and `StringUtilTest` @filipelautert
+- (#7214) INT-1414 - Implement credential obfuscation in SQL statements for Snowflake STAGE objects @filipelautert
+- (#7202) INT-1416: refactored Unwrapping of DatabaseObject's inner objects while snapshot serialization @SvampX
+- (#7199) Make Update Sql be Update SQL in command title @wwillard7800
+- (#7177) [7176]: Mapped tag in History.Changeset @hemanthsridhar
+- (#7144) Refactored to allow creation of a ChangelogPrintService for use by generateChangeLog and diffChangeLog operations @wwillard7800
+- (#7104) Parameters for update SQL command @wwillard7800
+- (#7118) Honor strip comments flag passed in scope in executeSql command DAT-20417 @wwillard7800
+
+## 🐛 Bug Fixes 🛠
+- (#7269) INT-1392: add get/setArguments and get/setProcedureName methods into … @HorbatenkoYehor
+- (#7274) Fixed errors in tests on Windows 11 + git-bash cygwin @b-gyula
+- (#7264) Back out change to ignore nested objects in TableExistsPreCondition @wwillard7800
+- (#7257) INT-1416: Updated handling of complex UnwrappedLiquibaseSerializables @SvampX
+- (#7233) Comparator resoluition should work in non-flat classloaders @gastaldi
+- (#7227) #7220: Thread-safety issue when running Liquibase in a multithreaded and multitenant environment @galovics
+- (#7231) fix sqlite JDBC URL parsing failure when tracking licenses (DAT-20124) @StevenMassaro
+- (#7187) Fixed: #7186 - Liquibase creates too short VARCHAR and CHAR fields on MS SQL databases using multi-byte encodings, effectively leading to data truncation eventually @mkarg
+- (#7154) Only mark changeset as SKIPPED if all changes are skipped GH issue 7153 @wwillard7800
+- (#7200) Remove duplicate header check for formatted SQL and add log message @wwillard7800
+- (#7208) Handle overwrite flag for formatted SQL correctly in generateChangelog @wwillard7800
+- (#7155) Option to allow snapshot to continue after finding null snapshot ID  DAT-20436 @wwillard7800
+- (#7182) Fix OAuth2Secret credential exposure in update-sql command @filipelautert
+- (#7192) Fixes for regressions in DAT-20619, DAT-20620, and DAT-20621 @wwillard7800
+- (#7178) Throw exception if a change type has a namespace and cannot be found @wwillard7800
+- (#7168) Use missing objects instead of changed objects in test DAT-20536 @wwillard7800
+- (#7158) Handle situation that occurs when generateChangeLog is run with diffTypes=data @wwillard7800
+- (#7165) Fix rename column generator test @wwillard7800
+- (#6920) fix: Change the rename column query for mysql v8 and later using rename column to @quangdutran
+- (#7141) Rollback OpenCSV version to 5.10 and address CSV loading issue @filipelautert
+- (#7140) NullPointerException in SpringLiquibase.toString() @tweimer
+- (#7152) fix updateSQL command ignoring endDelimiter for some statements #7148 @ponziani
+- (#7108) Fix the version check for the MySQL FILTER\_CONDITION to handle minor version > 0 DAT-20441 @wwillard7800
+- (#7101) fix: prevent rawDateValue from being used for checksum calculations @filipelautert
+- (#7079) feat: add logic to exclude resources from liquibaseHomeUri/internal in resource processing for includeAll @filipelautert
+
+## DevOps
+- (#7084) DAT-20288: fill in details for root's liquibase.build.properties file @sayaliM0412
+- (#7219) DAT-20673 Secure: Create new package locations @jandroav
+
+## 🤖 Security, Driver and Other Updates
+<details>
+<summary>39 changes</summary>
+- (#7292) Remove update-docs-oss-pro-version job @sayaliM0412
+- (#7291) chore(deps): bump the build-tools group with 3 updates @dependabot[bot]
+- (#7284) chore(deps-dev): bump org.postgresql:postgresql from 42.7.7 to 42.7.8 in the build-tools group @dependabot[bot]
+- (#7283) chore(deps-dev): bump org.assertj:assertj-core from 3.27.4 to 3.27.5 in the test-deps group @dependabot[bot]
+- (#7281) chore(deps): bump org.projectlombok:lombok from 1.18.40 to 1.18.42 @dependabot[bot]
+- (#7277) chore(deps): bump the build-tools group with 3 updates @dependabot[bot]
+- (#7266) chore(deps-dev): bump org.mariadb.jdbc:mariadb-java-client from 3.5.5 to 3.5.6 in the build-tools group @dependabot[bot]
+- (#7251) chore(deps): bump org.projectlombok:lombok from 1.18.38 to 1.18.40 @dependabot[bot]
+- (#7252) chore(deps): bump actions/github-script from 7 to 8 in the github-actions group @dependabot[bot]
+- (#7242) chore(deps): bump the github-actions group across 1 directory with 3 updates @dependabot[bot]
+- (#7241) chore(deps-dev): bump the build-tools group across 1 directory with 2 updates @dependabot[bot]
+- (#7236) chore(deps): bump org.yaml:snakeyaml from 2.4 to 2.5 @dependabot[bot]
+- (#7234) chore(deps): bump org.sonarsource.scanner.maven:sonar-maven-plugin from 5.1.0.4751 to 5.2.0.4988 in the build-tools group @dependabot[bot]
+- (#7223) chore(deps-dev): bump org.firebirdsql.jdbc:jaybird from 5.0.8.java8 to 5.0.9.java8 in the build-tools group @dependabot[bot]
+- (#7225) chore(deps): bump actions/setup-java from 4 to 5 in the github-actions group @dependabot[bot]
+- (#7207) chore(deps): bump org.apache.maven.plugins:maven-javadoc-plugin from 3.11.2 to 3.11.3 in the build-tools group @dependabot[bot]
+- (#7206) chore(deps): bump actions/checkout from 4 to 5 in the github-actions group @dependabot[bot]
+- (#7203) chore(deps): bump org.mockito:mockito-core from 4.11.0 to 5.19.0 @dependabot[bot]
+- (#7198) chore(deps-dev): bump net.snowflake:snowflake-jdbc from 3.25.1 to 3.26.0 in the build-tools group @dependabot[bot]
+- (#7195) chore(deps): bump org.firebirdsql:firebird-testcontainers-java from 1.5.1 to 1.6.0 @dependabot[bot]
+- (#7189) chore(deps): bump the github-actions group with 2 updates @dependabot[bot]
+- (#7188) chore(deps-dev): bump org.mariadb.jdbc:mariadb-java-client from 3.5.4 to 3.5.5 in the build-tools group @dependabot[bot]
+- (#7185) chore(deps-dev): bump org.assertj:assertj-core from 3.27.3 to 3.27.4 in the test-deps group @dependabot[bot]
+- (#7160) chore(deps-dev): bump org.apache.commons:commons-compress from 1.27.1 to 1.28.0 in the production-deps group @dependabot[bot]
+- (#7164) chore(deps-dev): bump the build-tools group across 1 directory with 2 updates @dependabot[bot]
+- (#7157) chore(deps): bump com.opencsv:opencsv from 5.10 to 5.12.0 @dependabot[bot]
+- (#7135) chore(deps): bump commons-io:commons-io from 2.19.0 to 2.20.0 @dependabot[bot]
+- (#7156) chore(deps): bump org.codehaus.mojo:flatten-maven-plugin from 1.7.1 to 1.7.2 in the build-tools group @dependabot[bot]
+- (#7132) chore(deps): bump the github-actions group with 2 updates @dependabot[bot]
+- (#7150) chore(deps): bump org.apache.commons:commons-text from 1.13.1 to 1.14.0 in the production-deps group @dependabot[bot]
+- (#7139) chore(deps-dev): bump the build-tools group across 1 directory with 2 updates @dependabot[bot]
+- (#7142) chore(deps): bump the test-deps group across 1 directory with 7 updates @dependabot[bot]
+- (#7127) chore(deps): bump the build-tools group across 1 directory with 3 updates @dependabot[bot]
+- (#7115) chore(deps): bump the test-deps group with 5 updates @dependabot[bot]
+- (#7120) chore(deps): bump the production-deps group with 2 updates @dependabot[bot]
+- (#7121) chore(deps): bump targetMavenVersion from 3.9.10 to 3.9.11 @dependabot[bot]
+- (#7119) Fix dependabot.yml version syntax error @jnewton03
+- (#7117) Add Spring Framework 6.x to dependabot ignore list @jnewton03
+- (#7106) Reduce dependabot PR overload through strategic grouping and automation @jnewton03
+</details>
+
+### Full Changelog: [https://github.com/liquibase/liquibase/compare/v4.33.0...v5.0.0](https://github.com/liquibase/liquibase/compare/v4.33.0...v5.0.0)
 
 Changes in version 4.33.0 (2025.07.09)
 
