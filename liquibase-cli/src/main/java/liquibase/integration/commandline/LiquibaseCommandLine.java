@@ -89,19 +89,6 @@ public class LiquibaseCommandLine {
         System.setProperty("org.fusesource.jansi.Ansi.disable", "true");
 
         //
-        // Do not allow any checks commands if the extension JAR is not present
-        //
-        if (args.length > 1 && args[0].equalsIgnoreCase("checks")) {
-            try {
-                Class.forName("com.datical.liquibase.ext.command.checks.ChecksRunCommandStep");
-            } catch (ClassNotFoundException ignored) {
-                System.out.println(Scope.CHECKS_MESSAGE);
-                Scope.getCurrentScope().getLog(LiquibaseCommandLine.class).severe(Scope.CHECKS_MESSAGE);
-                System.exit(1);
-            }
-        }
-
-        //
         // Check for arguments which contain azure-storage and get out
         //
         if (args.length > 1 && azureArgumentIsPresent(args)) {
