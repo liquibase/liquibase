@@ -349,7 +349,7 @@ public class Main {
                         if (licenseService != null) {
                             if (main.liquibaseProLicenseKey == null) {
                                 if (!isRunningFromNewCli()) {
-                                    Scope.getCurrentScope().getLog(getClass()).info("No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
+                                    Scope.getCurrentScope().getLog(getClass()).info("No Liquibase license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
                                 }
                             } else {
                                 Location licenseKeyLocation = new Location("property liquibaseProLicenseKey", main.liquibaseProLicenseKey);

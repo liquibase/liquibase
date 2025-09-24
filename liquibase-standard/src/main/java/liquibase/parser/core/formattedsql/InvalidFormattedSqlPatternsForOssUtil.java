@@ -28,7 +28,7 @@ public class InvalidFormattedSqlPatternsForOssUtil {
     }
 
     /**
-     * Raise an exception if a Pro-only command is detected and no valid Liquibase Pro license is present.
+     * Raise an exception if a Pro-only command is detected and no valid Liquibase license is present.
      * This method checks the given line for specific patterns associated with Pro-only commands and,
      * if matched, informs the user that the command is not supported in the Liquibase Community Edition.
      *
