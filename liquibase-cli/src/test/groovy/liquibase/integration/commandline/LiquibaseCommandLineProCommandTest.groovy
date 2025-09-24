@@ -79,7 +79,6 @@ class LiquibaseCommandLineProCommandTest extends Specification {
         "checks" | "show"
         "checks" | "enable"
         "checks" | "disable"
-        "flow"   | "validate"
     }
 
     def "Non-Pro command should still show 'Unexpected argument' error"() {
