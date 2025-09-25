@@ -25,6 +25,7 @@ The following software was installed:
     * Latest LTS AdoptOpenJDK Java version (https://adoptopenjdk.net)
 
 Liquibase makes use of the following directories:
+    * liquibase/internal
     * liquibase/lib
     * liquibase/licenses
     * liquibase/jre
@@ -33,17 +34,18 @@ Liquibase makes use of the following directories:
     * liquibase/examples/json
     * liquibase/examples/yaml
 
-
 **Note:** JRE install location for Mac users is:
 liquibase/.install4j/jre.bundle/Contents/Home/bin/java
 
 Files are:
     * liquibase/ABOUT.txt
+    * liquibase/changelog.txt
     * liquibase/LICENSE.txt
     * liquibase/liquibase.sh
     * liquibase/liquibase.bat
     * liquibase/README.txt
     * liquibase/GETTING_STARTED.txt
+    * liquibase/UNINSTALL.txt
     * liquibase/examples/start-h2
     * liquibase/examples/start-h2.bat
 
