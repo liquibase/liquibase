@@ -16,7 +16,7 @@
     <properties>
         <deploy.repositoryId>liquibase</deploy.repositoryId>
         <deploy.url>https://maven.pkg.github.com/liquibase/liquibase</deploy.url>
-        <h2.version>2.3.232</h2.version>
+        <h2.version>2.4.240</h2.version>
         <assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
         <maven.deploy.skip>true</maven.deploy.skip>
         <maven.install.skip>true</maven.install.skip>

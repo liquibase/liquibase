@@ -67,7 +67,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <trimStackTrace>false</trimStackTrace>
-        <commons-lang3.version>3.18.0</commons-lang3.version>
+        <commons-lang3.version>3.19.0</commons-lang3.version>
         <commons-io.version>2.20.0</commons-io.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
         <commons-text.version>1.14.0</commons-text.version>
@@ -243,7 +243,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>2.3.232</version>
+            <version>2.4.240</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -312,7 +312,7 @@
         <dependency>
             <groupId>org.firebirdsql.jdbc</groupId>
             <artifactId>jaybird</artifactId>
-            <version>5.0.9.java8</version>
+            <version>5.0.10.java8</version>
             <scope>test</scope>
         </dependency>
 
