@@ -44,9 +44,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Scope {
 
-    public static final String CHECKS_MESSAGE =
-            "The Liquibase Checks Extension 2.0.0 or higher is required to execute checks commands. " +
-                    "Visit https://docs.liquibase.com/pro-extensions to acquire the Checks Extension.";
     public static final String AZURE_MESSAGE =
             "The Liquibase Azure Extension 1.0.0 or higher is required to use Azure Storage. " +
                     "Visit https://docs.liquibase.com/pro-extensions to acquire the Azure Extension.";

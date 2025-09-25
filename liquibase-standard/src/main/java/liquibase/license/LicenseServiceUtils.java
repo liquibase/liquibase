@@ -16,7 +16,7 @@ public class LicenseServiceUtils {
   }
 
   /**
-   * Check for a Liquibase Pro License.
+   * Check for a Liquibase License.
    * @return true if licensed, or the installed license also permits access to Liquibase Pro features, false if not
    */
   public static boolean isProLicenseValid() {
@@ -33,7 +33,7 @@ public class LicenseServiceUtils {
   }
 
   /**
-   * Throw an exception if there is no valid pro license.
+   * Throw an exception if there is no valid license.
    * @param commandNames the name of the command; each element of the array will be joined by spaces
    * @throws CommandValidationException the exception thrown if the license is not valid
    */
