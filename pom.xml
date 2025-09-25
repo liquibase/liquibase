@@ -245,7 +245,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>2.3.232</version>
+            <version>2.4.240</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -314,7 +314,7 @@
         <dependency>
             <groupId>org.firebirdsql.jdbc</groupId>
             <artifactId>jaybird</artifactId>
-            <version>5.0.9.java8</version>
+            <version>5.0.10.java8</version>
             <scope>test</scope>
         </dependency>
 
