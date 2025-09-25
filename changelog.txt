@@ -3,7 +3,7 @@ Liquibase Core Changelog
 Changes in version 5.0.0 (2025.09.30)
 
 # Liquibase Community 5.0 is a major release
-See the [Liquibase Community 5.0 Release Notes](https://docs.liquibase.com/release-notes) for the complete set of release information.
+See the [Liquibase Community 5.0 Release Notes](https://docs.liquibase.com/community/release-notes/5-0) for the complete set of release information.
 
 ## MAJOR CHANGES IN COMMUNITY AND COMMERCIAL DISTRIBUTIONS
 
@@ -13,7 +13,7 @@ Liquibase is evolving to better serve both open-source contributors and enterpri
 - **Change Insights.** Deliver audit-ready visibility so every change is trusted, explainable, and observable.
 
 The new structure enables Liquibase to more effectively support developers at all stages—from experimentation and community collaboration to mission-critical deployments. Therefore, starting with this Liquibase 5.0 release, only the open source Community distribution is available at the traditional Github, Docker, and Maven access channels.
-If you need the Secure commercial offering, please visit [Liquibase.com](https://docs.liquibase.com/release-notes)
+If you need the Secure commercial offering, please visit [Liquibase.com](https://docs.liquibase.com/secure/release-notes/5-0)
 * Learn more [Liquibase 5.0](https://www.liquibase.com/blog/liquibase-5-0-release)
 
 ### Liquibase Community Licensing Change
