@@ -5,7 +5,7 @@ Changes in version 5.0.0 (2025.09.30)
 # Liquibase Community 5.0 is a major release
 See the [Liquibase Community 5.0 Release Notes](https://docs.liquibase.com/release-notes) for the complete set of release information.
 
-## ⚠️ MAJOR CHANGES IN COMMUNITY AND COMMERCIAL DISTRIBUTIONS
+## MAJOR CHANGES IN COMMUNITY AND COMMERCIAL DISTRIBUTIONS
 
 Liquibase is evolving to better serve both open-source contributors and enterprise customers by introducing a clearer separation between its open source Community and the commercial Secure offering. This change is designed to ensure that each distribution is optimized for its respective users: providing open-source Community users with flexibility and control, while delivering scalability, reliability, and governance for Secure enterprise teams. The changes provide Liquibase Secure customers:
 - **Developer Productivity.** Enable developers with autonomy and guardrails built directly into their daily workflow.
@@ -43,7 +43,7 @@ Additionally, Liquibase Community is now licensed under the Functional Source Li
 
 ## Changelog of Community PRs
 
-## 🚀 New Features
+## New Features
 - (#7286) Allow anyAttribute in dbchangelog-latest.xsd complex types @filipelautert
 - (#7190) Create LPM command (DAT-20511) @filipelautert
 - (#7216) Deprecate Java 8/11 @wwillard7800
@@ -57,7 +57,7 @@ Additionally, Liquibase Community is now licensed under the Functional Source Li
 - (#7104) Parameters for update SQL command @wwillard7800
 - (#7118) Honor strip comments flag passed in scope in executeSql command DAT-20417 @wwillard7800
 
-## 🐛 Bug Fixes 🛠
+## Bug Fixes
 - (#7269) INT-1392: add get/setArguments and get/setProcedureName methods into … @HorbatenkoYehor
 - (#7274) Fixed errors in tests on Windows 11 + git-bash cygwin @b-gyula
 - (#7264) Back out change to ignore nested objects in TableExistsPreCondition @wwillard7800
@@ -88,7 +88,7 @@ Additionally, Liquibase Community is now licensed under the Functional Source Li
 - (#7084) DAT-20288: fill in details for root's liquibase.build.properties file @sayaliM0412
 - (#7219) DAT-20673 Secure: Create new package locations @jandroav
 
-## 🤖 Security, Driver and Other Updates
+## Security, Driver and Other Updates
 <details>
 <summary>39 changes</summary>
 - (#7292) Remove update-docs-oss-pro-version job @sayaliM0412
