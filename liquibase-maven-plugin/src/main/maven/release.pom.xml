@@ -39,11 +39,5 @@
             <version>0-SNAPSHOT</version>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-commercial</artifactId>
-            <version>0-SNAPSHOT</version>
-            <scope>runtime</scope>
-        </dependency>
     </dependencies>
 </project>

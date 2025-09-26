@@ -90,14 +90,14 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
                             warningMessage =
                                     "\nThe current MariaDB user does not have permissions to access view definitions needed for this Liquibase command.\n" +
                                             "Please search the changelog for '[CANNOT READ VIEW DEFINITION]' to locate inaccessible objects. " +
-                                            "Learn more about altering permissions with suggested MariaDB GRANTs at https://docs.liquibase.com/workflows/liquibase-pro/mariadbgrants.html\n";
+                                            "Learn more about altering permissions with suggested MariaDB GRANTs at https://docs.liquibase.com/pro/integration-guide/liquibase-pro-and-mariadb-grant-best-practices\n";
 
                         } else if (database instanceof MySQLDatabase) {
                             warningMessage =
                                     "\nThe current MySQL user does not have permissions to access view definitions needed for this Liquibase command.\n" +
                                     "Please search the changelog for '[CANNOT READ VIEW DEFINITION]' to locate inaccessible objects. This is\n" +
                                     "potentially due to a known MySQL bug https://bugs.mysql.com/bug.php?id=22763. Learn more about altering\n" +
-                                    "permissions with suggested MySQL GRANTs at https://docs.liquibase.com/workflows/liquibase-pro/mysqlgrants.html\n";
+                                    "permissions with suggested MySQL GRANTs at https://docs.liquibase.com/pro/integration-guide/best-practices-liquibase-pro-and-mysql-grant\n";
                         }
                         if (warningMessage != null) {
                             Scope.getCurrentScope().getUI().sendMessage("WARNING: " + warningMessage);

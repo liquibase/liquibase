@@ -75,12 +75,7 @@ Optional Args:
                     new File(InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()+".backup.01").getAbsolutePath(),
                     new File(InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()).getAbsolutePath())
             cleanResources(SetupCleanResources.CleanupMode.CLEAN_ON_BOTH,
-                    "example-changelog.sql",
-                    "liquibase.flowvariables.yaml",
-                    "liquibase.flowfile.yaml",
-                    "liquibase.advanced.flowfile.yaml",
-                    "liquibase.endstage.flow",
-                    "liquibase.checks-package.yaml")
+                    "example-changelog.sql")
         }
         arguments = [
                 projectDir: projectDir,
@@ -126,12 +121,7 @@ Optional Args:
                     "target/examples/sql/example-changelog.sql",
                     "target/examples/sql/liquibase.properties",
                     "example-changelog.sql",
-                    new File(InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()).getAbsolutePath(),
-                    "liquibase.flowvariables.yaml",
-                    "liquibase.flowfile.yaml",
-                    "liquibase.advanced.flowfile.yaml",
-                    "liquibase.endstage.flow",
-                    "liquibase.checks-package.yaml")
+                    new File(InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()).getAbsolutePath())
         }
         arguments = [
                 projectDir: projectDir,
@@ -175,12 +165,7 @@ Optional Args:
                     "target/examples/sql/example-changelog.sql",
                     "target/examples/sql/liquibase.properties",
                     "example-changelog.sql",
-                    new File(InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()).getAbsolutePath(),
-                    "liquibase.flowvariables.yaml",
-                    "liquibase.flowfile.yaml",
-                    "liquibase.advanced.flowfile.yaml",
-                    "liquibase.endstage.flow",
-                    "liquibase.checks-package.yaml")
+                    new File(InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()).getAbsolutePath(),)
         }
         arguments = [
                 projectDir: projectDir,
@@ -223,12 +208,7 @@ Optional Args:
                     "target/examples/sql/example-changelog.sql",
                     "target/examples/sql/liquibase.properties",
                     "example-changelog.sql",
-                    new File(InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()).getAbsolutePath(),
-                    "liquibase.flowvariables.yaml",
-                    "liquibase.flowfile.yaml",
-                    "liquibase.advanced.flowfile.yaml",
-                    "liquibase.endstage.flow",
-                    "liquibase.checks-package.yaml")
+                    new File(InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()).getAbsolutePath())
             def add = [ LIQUIBASE_STRICT:"true", LIQUIBASE_HEADLESS:"true" ]
             String[] remove = [:]
             run(
@@ -787,12 +767,7 @@ Enter password to connect to JDBC url [letmein]: """,
         setup {
             createTempResource("changelogs/init/example-changelog.sql", "examples/sql/example-changelog.sql")
             createTempResource("liquibase.yaml.properties", "examples/sql/liquibase.properties")
-            cleanResources("target/examples/sql/example-changelog.sql", "target/examples/sql/liquibase.properties", "example-changelog.sql", projectsDefaultsFile, new File(InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()).getAbsolutePath(),
-                    "liquibase.flowvariables.yaml",
-                    "liquibase.flowfile.yaml",
-                    "liquibase.advanced.flowfile.yaml",
-                    "liquibase.endstage.flow",
-                    "liquibase.checks-package.yaml")
+            cleanResources("target/examples/sql/example-changelog.sql", "target/examples/sql/liquibase.properties", "example-changelog.sql", projectsDefaultsFile, new File(InitProjectCommandStep.INIT_DEFAULTS_FILE_ARG.getDefaultValue()).getAbsolutePath())
         }
         testUI = new CommandTests.TestUIWithAnswers(["y"] as String[])
         expectedUI = [
@@ -943,12 +918,7 @@ Setting up new Liquibase project in '""","newdir",
                     "target/examples/xml/example-changelog.xml",
                     "target/examples/sql/liquibase.properties",
                     new File(defaultsFile).getAbsolutePath(),
-                    new File("hello.changelog.sql").getAbsolutePath(),
-                    "liquibase.flowvariables.yaml",
-                    "liquibase.flowfile.yaml",
-                    "liquibase.advanced.flowfile.yaml",
-                    "liquibase.endstage.flow",
-                    "liquibase.checks-package.yaml")
+                    new File("hello.changelog.sql").getAbsolutePath())
         }
         testUI = new CommandTests.TestUIWithAnswers(["c","", "hello.changelog.sql",  defaultsFile, "jdbcurl", "username", "password"] as String[])
         expectedUI = [
@@ -1447,23 +1417,12 @@ For more details, visit the Getting Started Guide at https://docs.liquibase.com/
         testUI = new CommandTests.TestUIWithAnswers(["y"] as String[])
         expectedUI = [
                 "Setup new liquibase.properties, flowfile, and sample changelog? Enter (Y)es with defaults, yes with (C)ustomization, or (N)o. [Y]:",
-                "liquibase.flowvariables.yaml",
-                "liquibase.flowfile.yaml",
-                "liquibase.advanced.flowfile.yaml",
-                "liquibase.endstage.flow",
-                "liquibase.checks-package.yaml",
         ]
         expectedResults = [
                 statusCode   : 0,
                 changelogFile: Paths.get(projectDirectory, "my-changelog.sql").toString().replace('\\', '/'),
                 usedH2: true,
                 projectDefaultsFile: Paths.get(projectDirectory, defaultsFile)
-        ]
-        expectedFileContent = [
-                (projectDirectory + "/liquibase.flowvariables.yaml") : [CommandTests.assertContains("This example yaml file of key:value variables")],
-                (projectDirectory + "/liquibase.flowfile.yaml") : [CommandTests.assertContains("Any command which fails in any stage below result in the command stopping")],
-                (projectDirectory + "/liquibase.advanced.flowfile.yaml") : [CommandTests.assertContains("Advanced options show in this file include")],
-                (projectDirectory + "/liquibase.endstage.flow") : [CommandTests.assertContains("The endStage ALWAYS RUNS")],
         ]
     }
 
@@ -1490,23 +1449,12 @@ Enter the JDBC url without username or password to be used (What is a JDBC url? 
 Enter username to connect to JDBC url [dbuser]: 
 Enter password to connect to JDBC url [letmein]: 
 Setting up new Liquibase project in """,
-                "liquibase.flowvariables.yaml",
-                "liquibase.flowfile.yaml",
-                "liquibase.advanced.flowfile.yaml",
-                "liquibase.endstage.flow",
-                "liquibase.checks-package.yaml",
         ]
         expectedResults = [
                 statusCode   : 0,
                 changelogFile: Paths.get(projectDirectory, "hello.changelog.yml").toString().replace('\\', '/'),
                 usedH2: false,
                 projectDefaultsFile: Paths.get(projectDirectory, defaultsFile)
-        ]
-        expectedFileContent = [
-                (projectDirectory + "/liquibase.flowvariables.yaml") : [CommandTests.assertContains("This example yaml file of key:value variables")],
-                (projectDirectory + "/liquibase.flowfile.yaml") : [CommandTests.assertContains("Any command which fails in any stage below result in the command stopping")],
-                (projectDirectory + "/liquibase.advanced.flowfile.yaml") : [CommandTests.assertContains("Advanced options show in this file include")],
-                (projectDirectory + "/liquibase.endstage.flow") : [CommandTests.assertContains("The endStage ALWAYS RUNS")],
         ]
     }
 }

@@ -1,202 +1,218 @@
+SOFTWARE LICENSE SUBSCRIPTION AND SUPPORT AGREEMENT
 
-                                 Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
+PLEASE READ THIS AGREEMENT CAREFULLY BEFORE USING THIS SERVICE.
 
-   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+BY USING THE SOFTWARE OR CLICKING AGREE, CUSTOMER IS AGREEING TO BE BOUND BY 
+THIS AGREEMENT. IF YOU ARE AGREEING TO THIS AGREEMENT ON BEHALF OF OR FOR THE 
+BENEFIT OF YOUR EMPLOYER OR A THIRD PARTY, THEN YOU REPRESENT AND WARRANT THAT 
+YOU HAVE THE NECESSARY AUTHORITY TO AGREE TO THIS AGREEMENT ON YOUR EMPLOYER'S 
+OR THAT THIRD PARTY'S BEHALF.
 
-   1. Definitions.
+This agreement is between Liquibase, Inc. a Delaware corporation (Liquibase) and
+you, the customer entering into this agreement (Customer). The Liquibase Secure
+software, updates, documentation and license keys provided to Customer
+(Software) are licensed and are not sold.
 
-      "License" shall mean the terms and conditions for use, reproduction,
-      and distribution as defined by Sections 1 through 9 of this document.
+SCOPE. This agreement describes the licensing of the Software and support
+provided to Customer under an order. Third party contractors and majority owned
+affiliates of Customer can use and access the Software under the terms of this
+agreement, and Customer is responsible for each of their compliance with such
+terms.
 
-      "Licensor" shall mean the copyright owner or entity authorized by
-      the copyright owner that is granting the License.
+1. LICENSE. Subject to the other terms of this agreement, Liquibase grants
+Customer, under an order, a term based non-exclusive, non-transferable license
+up to the license capacity purchased to use the Software only in Customer’s
+internal business operations. Third party licenses delivered with the Software
+may be subject to additional license rights and restrictions a set forth at
+https://liquibase.com/licenses.
 
-      "Legal Entity" shall mean the union of the acting entity and all
-      other entities that control, are controlled by, or are under common
-      control with that entity. For the purposes of this definition,
-      "control" means (i) the power, direct or indirect, to cause the
-      direction or management of such entity, whether by contract or
-      otherwise, or (ii) ownership of fifty percent (50%) or more of the
-      outstanding shares, or (iii) beneficial ownership of such entity.
+2. RESTRICTIONS. Customer may not:
+a. Transfer, assign, sublicense, rent the Software, create derivative works of
+the Software, or use it in any type of service provider environment;
+b. Reverse engineer, decompile, disassemble, or translate the Software; or
+c. Evaluate the Software for the purpose of competing with Liquibase Secure or
+operate the Software other than in accordance with its technical documentation.
 
-      "You" (or "Your") shall mean an individual or Legal Entity
-      exercising permissions granted by this License.
+3. PROPRIETARY RIGHTS AND MUTUAL CONFIDENTIALITY.
+a. Proprietary Rights. The Software, workflow processes, user interface,
+designs and other technologies provided by Liquibase as part of the Software are
+the proprietary property of Liquibase and its licensors, and all right, title and
+interest in and to such items, including all associated intellectual property
+rights, remain only with Liquibase and its licensors. The Software is protected
+by copyright and other intellectual property laws. Customer may not remove any
+product identification, copyright, trademark or other notice from the Software.
+Liquibase reserves all rights not expressly granted.
 
-      "Source" form shall mean the preferred form for making modifications,
-      including but not limited to software source code, documentation
-      source, and configuration files.
+b. Usage Data. Notwithstanding anything to the contrary in this Agreement,
+Liquibase may collect and use Usage Data to develop, improve, support, and
+operate its products and services. Liquibase may not share any Usage Data
+that includes Customer’s Confidential Information with a third party except
+(a) in accordance with Section 3 (Confidentiality) of this Agreement, or
+(b) to the extent the Usage Data is aggregated and anonymized such that
+Customer’s Users cannot be identified.  “Usage Data” means usage data in
+connection with the Customer’s use of the Service, such as Liquibase commands
+sed (e.g. update, rollback, checks run) and metadata (e.g. timestamp,
+Liquibase version, database type).
 
-      "Object" form shall mean any form resulting from mechanical
-      transformation or translation of a Source form, including but
-      not limited to compiled object code, generated documentation,
-      and conversions to other media types.
+c. Mutual Confidentiality. Recipient may not disclose Confidential Information
+of Discloser to any third party or use the Confidential Information in
+violation of this agreement.
+Confidential Information means all information that is disclosed to the
+recipient (Recipient) by the discloser (Discloser), and includes, among other
+things:
+ * any and all information relating to products or services provided by a
+Discloser, software code, flow charts, techniques, specifications, development
+and marketing plans, strategies, and forecasts;
+ * as to Liquibase, the Software and the terms of this agreement, including
+without limitation, all pricing information.
+Confidential Information excludes information that:
+ * was rightfully in Recipient's possession without any obligation of
+confidentiality before receipt from the Discloser;
+ * is or becomes a matter of public knowledge through no fault of Recipient;
+ * is rightfully received by Recipient from a third party without violation of
+a duty of confidentiality; or
+ * is independently developed by or for Recipient without use or access to the
+Confidential Information.
 
-      "Work" shall mean the work of authorship, whether in Source or
-      Object form, made available under the License, as indicated by a
-      copyright notice that is included in or attached to the work
-      (an example is provided in the Appendix below).
+Recipient may disclose Confidential Information if required by law, but it will
+attempt to provide notice to the Discloser in advance so it may seek a
+protective order. Each party acknowledges that any misuse of the other party’s
+Confidential Information may cause irreparable harm for which there is no
+adequate remedy at law. Either party may seek immediate injunctive relief in
+such event.
 
-      "Derivative Works" shall mean any work, whether in Source or Object
-      form, that is based on (or derived from) the Work and for which the
-      editorial revisions, annotations, elaborations, or other modifications
-      represent, as a whole, an original work of authorship. For the purposes
-      of this License, Derivative Works shall not include works that remain
-      separable from, or merely link (or bind by name) to the interfaces of,
-      the Work and Derivative Works thereof.
+4. WARRANTY, REMEDY and DISCLAIMER. For new license purchases, Liquibase warrants
+that the Software will perform in substantial accordance with its accompanying
+technical documentation for a period of 60 days from the date of the order.
+This warranty will not apply to any problems caused by software not licensed to
+Customer by Liquibase, use other than in accordance with the technical
+documentation, or misuse of the Software. The warranty only covers problems
+reported to Liquibase during the warranty period or 30 days after. Customer will
+cooperate with Liquibase in resolving any warranty claim.
+A. EXCLUSIVE REMEDY AND SOLE LIABILITY. Liquibase will use commercially
+reasonable efforts to remedy covered warranty claims within a reasonable period
+of time or replace the Software, or if Liquibase cannot do so it will refund to
+Customer the license fee paid. THIS REMEDY IS CUSTOMER’S EXCLUSIVE REMEDY, AND
+LIQUIBASE’S SOLE LIABILITY FOR THESE WARRANTY CLAIMS.
+B. DISCLAIMER OF WARRANTIES. LIQUIBASE DISCLAIMS ALL OTHER EXPRESS AND IMPLIED
+WARRANTIES, INCLUDING WITHOUT LIMITATION THE IMPLIED WARRANTY OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. CUSTOMER UNDERSTANDS THAT
+THE SOFTWARE MAY NOT BE ERROR FREE, AND USE MAY BE INTERRUPTED.
 
-      "Contribution" shall mean any work of authorship, including
-      the original version of the Work and any modifications or additions
-      to that Work or Derivative Works thereof, that is intentionally
-      submitted to Licensor for inclusion in the Work by the copyright owner
-      or by an individual or Legal Entity authorized to submit on behalf of
-      the copyright owner. For the purposes of this definition, "submitted"
-      means any form of electronic, verbal, or written communication sent
-      to the Licensor or its representatives, including but not limited to
-      communication on electronic mailing lists, source code control systems,
-      and issue tracking systems that are managed by, or on behalf of, the
-      Licensor for the purpose of discussing and improving the Work, but
-      excluding communication that is conspicuously marked or otherwise
-      designated in writing by the copyright owner as "Not a Contribution."
+5. TERMINATION. This agreement expires at the end of the license period
+specified. Either party may terminate this agreement upon a material breach of
+the other party after a 30 days’ notice/cure period, if the breach is not cured
+during such time period. Upon termination of this agreement or a license,
+Customer must discontinue using the Software, de-install and destroy or return
+the Software and all copies, within 5 days. Upon Liquibase's request, Customer
+will provide written certification of such compliance.
 
-      "Contributor" shall mean Licensor and any individual or Legal Entity
-      on behalf of whom a Contribution has been received by Licensor and
-      subsequently incorporated within the Work.
+6. SUPPORT. Liquibase’s technical support and maintenance services (Support) is
+included with the license fees. Customer will receive best efforts e-mail
+response for support within two business days from receipt of issue. Liquibase
+may change its Support terms, but Support will not materially degrade during
+any Support term.
 
-   2. Grant of Copyright License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
+7. LIMIT ON LIABILITY. There may be situations in which (as a result of
+material breach or other liability) Customer is entitled to make a claim
+against Liquibase. In each situation (regardless of the form of the legal action
+(e.g. contract or tort claims)), Liquibase is not responsible for any damage and
+does not have any liability beyond the greater of the amount paid or payable by
+Customer to Liquibase within the 12 months prior to the event that gave rise to
+the claim and in no event is Liquibase responsible for any: loss of data or
+information; lost profits, revenue, or productivity; or other special,
+consequential, incidental or indirect damages.
 
-   3. Grant of Patent License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      (except as stated in this section) patent license to make, have made,
-      use, offer to sell, sell, import, and otherwise transfer the Work,
-      where such license applies only to those patent claims licensable
-      by such Contributor that are necessarily infringed by their
-      Contribution(s) alone or by combination of their Contribution(s)
-      with the Work to which such Contribution(s) was submitted. If You
-      institute patent litigation against any entity (including a
-      cross-claim or counterclaim in a lawsuit) alleging that the Work
-      or a Contribution incorporated within the Work constitutes direct
-      or contributory patent infringement, then any patent licenses
-      granted to You under this License for that Work shall terminate
-      as of the date such litigation is filed.
+8. INTELLECTUAL PROPERTY INDEMNITY
+a. Defense of Third Party Claims. Liquibase will defend or settle any third party
+claim against Customer to the extent that such claim alleges that the Software
+violates a copyright, patent, trademark or other intellectual property right,
+if Customer, promptly notifies Liquibase of the claim in writing, cooperates with
+Liquibase in the defense, and allows Liquibase to solely control the defense or
+settlement of the claim. Costs. Liquibase will pay infringement claim defense
+costs incurred as part of its obligations above, and Liquibase negotiated
+settlement amounts, and court awarded damages. Process. If such a claim appears
+likely, then Liquibase may modify the Software, procure the necessary rights, or
+replace it with the functional equivalent. If Liquibase determines that none of
+these are reasonably available, then Liquibase may terminate the Software and
+refund any prepaid and unused fees. Exclusions. Liquibase has no obligation for
+any claim arising from: Liquibase’s compliance with Customer’s specifications; A
+combination of the Software with other technology where the infringement would
+not occur but for the combination; or Technology not provided by Liquibase. THIS
+SECTION CONTAINS CUSTOMER’S EXCLUSIVE REMEDIES AND LIQUIBASE’S SOLE LIABILITY FOR
+INTELLECTUAL PROPERTY INFRINGEMENT CLAIMS.
 
-   4. Redistribution. You may reproduce and distribute copies of the
-      Work or Derivative Works thereof in any medium, with or without
-      modifications, and in Source or Object form, provided that You
-      meet the following conditions:
+9. GOVERNING LAW AND EXCLUSIVE FORUM. This agreement is governed by the laws of
+the State of Delaware (without regard to conflicts of law principles) for any
+dispute between the parties or relating in any way to the subject matter of
+this agreement. Any suit or legal proceeding must be exclusively brought in the
+federal or state courts for Travis County, Texas, and Customer submits to this
+personal jurisdiction and venue. Nothing in this agreement prevents either
+party from seeking injunctive relief in a court of competent jurisdiction. The
+prevailing party in litigation is entitled to recover its attorneys’ fees and
+costs from the other party.
 
-      (a) You must give any other recipients of the Work or
-          Derivative Works a copy of this License; and
+10. OTHER TERMS.
+a. Entire Agreement. This agreement and the order constitute the entire
+agreement between the parties and supersede any prior or contemporaneous
+negotiations or agreements, whether oral or written, related to this subject
+matter. Customer is not relying on any representation concerning this subject
+matter, oral or written, not included in this agreement. No representation,
+promise or inducement not included in this agreement is binding.
 
-      (b) You must cause any modified files to carry prominent notices
-          stating that You changed the files; and
+b. Usage Reporting. Customer agrees to support usage by generating or providing
+reports and other information related to the customers installation of, access to,
+and use of the Software to support compliance with terms of this agreement.
+Liquibase provides tools to create these reports. Customer shall maintain Customer
+Records during the term of this agreement and for two (2) years thereafter.
 
-      (c) You must retain, in the Source form of any Derivative Works
-          that You distribute, all copyright, patent, trademark, and
-          attribution notices from the Source form of the Work,
-          excluding those notices that do not pertain to any part of
-          the Derivative Works; and
+c. Marketing Support. Neither party may publicly announce this Agreement except
+with the other party’s prior consent or as required by law. However, Liquibase may
+include reference to Customer and its trademarks and logo in Liquibase’s customer
+lists, but will cease this use at Customer’s written request.  Customer agrees to
+allow Liquibase to write and publish a case study, including the use of the
+Customer’s name and logo, and the name and likeness of Customer’s personnel who
+participate in the case study during the first 6 months.  Customer agrees to
+complete the case study within 12 months of the Effective Date.
 
-      (d) If the Work includes a "NOTICE" text file as part of its
-          distribution, then any Derivative Works that You distribute must
-          include a readable copy of the attribution notices contained
-          within such NOTICE file, excluding those notices that do not
-          pertain to any part of the Derivative Works, in at least one
-          of the following places: within a NOTICE text file distributed
-          as part of the Derivative Works; within the Source form or
-          documentation, if provided along with the Derivative Works; or,
-          within a display generated by the Derivative Works, if and
-          wherever such third-party notices normally appear. The contents
-          of the NOTICE file are for informational purposes only and
-          do not modify the License. You may add Your own attribution
-          notices within Derivative Works that You distribute, alongside
-          or as an addendum to the NOTICE text from the Work, provided
-          that such additional attribution notices cannot be construed
-          as modifying the License.
+d. Non-Assignment. Neither party may assign or transfer this agreement to a
+third party, nor delegate any duty, except that the agreement and all orders
+may be assigned, without the consent of the other party, as part of a merger,
+or sale of all or substantially all of the business or assets, of a party.
 
-      You may add Your own copyright statement to Your modifications and
-      may provide additional or different license terms and conditions
-      for use, reproduction, or distribution of Your modifications, or
-      for any such Derivative Works as a whole, provided Your use,
-      reproduction, and distribution of the Work otherwise complies with
-      the conditions stated in this License.
+e. Independent Contractors. The parties are independent contractors with
+respect to each other.
 
-   5. Submission of Contributions. Unless You explicitly state otherwise,
-      any Contribution intentionally submitted for inclusion in the Work
-      by You to the Licensor shall be under the terms and conditions of
-      this License, without any additional terms or conditions.
-      Notwithstanding the above, nothing herein shall supersede or modify
-      the terms of any separate license agreement you may have executed
-      with Licensor regarding such Contributions.
+f. Enforceability. If any term of this agreement is invalid or unenforceable,
+the other terms remain in effect.
 
-   6. Trademarks. This License does not grant permission to use the trade
-      names, trademarks, service marks, or product names of the Licensor,
-      except as required for reasonable and customary use in describing the
-      origin of the Work and reproducing the content of the NOTICE file.
+g. Survival of Terms and Force Majeure. All terms that by their nature survive
+termination of this agreement for each party to receive the benefits and
+protections of this agreement, will survive. Neither party is liable for events
+beyond its reasonable control, including, without limitation force majeure
+events.
 
-   7. Disclaimer of Warranty. Unless required by applicable law or
-      agreed to in writing, Licensor provides the Work (and each
-      Contributor provides its Contributions) on an "AS IS" BASIS,
-      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-      implied, including, without limitation, any warranties or conditions
-      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
-      PARTICULAR PURPOSE. You are solely responsible for determining the
-      appropriateness of using or redistributing the Work and assume any
-      risks associated with Your exercise of permissions under this License.
+h. Modification Only in Writing. No modification or waiver of any term of this
+agreement is effective unless signed by both parties.
 
-   8. Limitation of Liability. In no event and under no legal theory,
-      whether in tort (including negligence), contract, or otherwise,
-      unless required by applicable law (such as deliberate and grossly
-      negligent acts) or agreed to in writing, shall any Contributor be
-      liable to You for damages, including any direct, indirect, special,
-      incidental, or consequential damages of any character arising as a
-      result of this License or out of the use or inability to use the
-      Work (including but not limited to damages for loss of goodwill,
-      work stoppage, computer failure or malfunction, or any and all
-      other commercial damages or losses), even if such Contributor
-      has been advised of the possibility of such damages.
+i. Export Compliance. Customer must comply with all applicable export control
+laws of the United States, foreign jurisdictions and other applicable laws and
+regulations.
 
-   9. Accepting Warranty or Additional Liability. While redistributing
-      the Work or Derivative Works thereof, You may choose to offer,
-      and charge a fee for, acceptance of support, warranty, indemnity,
-      or other liability obligations and/or rights consistent with this
-      License. However, in accepting such obligations, You may act only
-      on Your own behalf and on Your sole responsibility, not on behalf
-      of any other Contributor, and only if You agree to indemnify,
-      defend, and hold each Contributor harmless for any liability
-      incurred by, or claims asserted against, such Contributor by reason
-      of your accepting any such warranty or additional liability.
+j. US GOVERNMENT RESTRICTED RIGHTS. If Customer is a United States government
+agency or acquired the license to the Software hereunder pursuant to a
+government contract or with government funds, then as defined in FAR §2.101,
+DFAR §252.227-7014(a)(1) and DFAR §252.227-7014(a)(5) or otherwise, all
+Software provided in connection with this agreement are “commercial items,”
+“commercial computer software” or “commercial computer software documentation.”
+Consistent with DFAR §227.7202 and FAR §12.212, any use, modification,
+reproduction, release, performance, display, disclosure or distribution by or
+for the United States government is governed solely by the terms of this
+agreement and is prohibited except to the extent permitted by the terms of this
+agreement.
 
-   END OF TERMS AND CONDITIONS
+k. No PO Terms. Liquibase rejects conflicting terms of a Customer’s
+form-purchasing document.
 
-   APPENDIX: How to apply the Apache License to your work.
-
-      To apply the Apache License to your work, attach the following
-      boilerplate notice, with the fields enclosed by brackets "[]"
-      replaced with your own identifying information. (Don't include
-      the brackets!)  The text should be enclosed in the appropriate
-      comment syntax for the file format. We also recommend that a
-      file or class name and description of purpose be included on the
-      same "printed page" as the copyright notice for easier
-      identification within third-party archives.
-
-   Copyright ${current.year} Liquibase Inc.
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+l. Order of Precedence. If there is an inconsistency between this agreement and
+an order, the order prevails.

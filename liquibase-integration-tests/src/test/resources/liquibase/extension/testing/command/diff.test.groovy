@@ -12,7 +12,7 @@ final int PATTERN_FLAGS = Pattern.MULTILINE|Pattern.DOTALL|Pattern.CASE_INSENSIT
 CommandTests.define {
     command = ["diff"]
     signature = """
-Short Description: Outputs a description of differences.  If you have a Liquibase Pro key, you can output the differences as JSON using the --format=JSON option
+Short Description: Outputs a description of differences.  If you have a Liquibase License Key, you can output the differences as JSON using the --format=JSON option
 Long Description: NOT SET
 Required Args:
   referenceUrl (String) The JDBC reference database connection URL
