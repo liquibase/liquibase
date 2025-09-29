@@ -9,10 +9,18 @@ Liquibase ships with a Usage data agreement:
 
 Liquibase ships with 3rd party components using the following licenses:
 
-Liquibase Secure also ships with 3rd party components distributed under the following licenses:
+Liquibase Community also ships with 3rd party components distributed under the following licenses:
 - Apache 2.0 License - https://opensource.org/licenses/Apache-2.0
-- Eclipse Public License 1.0 (EPL) - https://www.eclipse.org/legal/epl-v10.html
 - Eclipse Public License 2.0 (EPL) - https://www.eclipse.org/legal/epl-2.0/
+- GNU General Public License, Version 2, with Classpath Exception - https://openjdk.java.net/legal/gplv2+ce.html
+  - Liquibase software complies with the Classpath Exception requirements:
+    - Using without modification - We only link to these libraries without modifying their source code
+    - Preserving notices - All original copyright notices and license texts are retained
+    - Source availability - The original library source code is available at:
+      * OpenJDK: https://github.com/openjdk/jdk
+      * GraalVM Tools: https://github.com/oracle/graal
+    - Independent work - Our code is an independent module that only uses the libraries' public APIs
+  - Our proprietary code remains separately licensed and is not affected by GPL requirements due to the Classpath Exception.
 
 Libraries and their licenses:
 
@@ -48,16 +56,12 @@ org.yaml:snakeyaml:2.5
   Copyright (c) 2008, SnakeYAML
 
 
-Eclipse Public License 1.0 (EPL)
-================================
+GNU General Public License, Version 2, with Classpath Exception
+===============================================================
 
-h2?
-
-
-Eclipse Public License 2.0 (EPL)
-================================
-
-Adoptium JDK
+Eclipse Adoptium project's JDK
+Java Development Kit for running and compiling Java applications
+Copyright (C) Eclipse Foundation. All Rights Reserved.
 
 
 Mozilla Public License 2.0 (MPL)
