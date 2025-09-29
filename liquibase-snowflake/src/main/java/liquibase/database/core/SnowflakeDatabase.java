@@ -321,4 +321,9 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
                 "The Snowflake driver does not report on schema issues, " +
                 "and therefore users should manually confirm Snowflake schemas for accuracy.";
     }
+
+    @Override
+    public String escapeStringForDatabase(String string) {
+        return string == null ? null : string.replaceAll("((?<!\\\\)')", "\\\\'");
+    }
 }

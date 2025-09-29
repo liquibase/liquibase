@@ -1,8 +1,5 @@
 package liquibase.serializer.core.formattedsql;
 
-import liquibase.*;
-import liquibase.change.AbstractChange;
-import liquibase.change.AbstractSQLChange;
 import liquibase.ContextExpression;
 import liquibase.GlobalConfiguration;
 import liquibase.Labels;
@@ -19,7 +16,6 @@ import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import org.apache.tools.ant.taskdefs.condition.Or;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,11 +42,14 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
         if (object instanceof ChangeSet) {
             //
             // If there is a Database object in the current scope, then use it for serialization
+            // Also, handle the case where the target database specified by the changelog file name
+            // differs from the database in scope
             //
             ChangeSet changeSet = (ChangeSet) object;
             Database database = Scope.getCurrentScope().get(DiffToChangeLog.DIFF_SNAPSHOT_DATABASE, Database.class);
+            Database targetDatabase = getTargetDatabase(changeSet);
             if (database == null) {
-                database = getTargetDatabase(changeSet);
+                database = targetDatabase;
             }
 
             StringBuilder builder = new StringBuilder();
@@ -152,7 +151,9 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
     @Override
     public <T extends ChangeLogChild> void write(List<T> children, OutputStream out) throws IOException {
         StringBuilder builder = new StringBuilder();
-        builder.append("-- liquibase formatted sql\n\n");
+        if (Scope.getCurrentScope().get(DiffToChangeLog.ADD_FORMATTED_SQL_HEADER, true)) {
+            builder.append("-- liquibase formatted sql\n\n");
+        }
 
         for (T child : children) {
             builder.append(serialize(child, true));

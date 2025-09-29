@@ -427,7 +427,12 @@ public class ShowSummaryUtil {
         int filtered = filterDenied.size();
         int totalAccepted = calculateAccepted(statusVisitor, changeExecListener, runChangeLogIterator);
         int totalPreviouslyRun = calculatePreviouslyRun(statusVisitor);
-        int totalInChangelog = CollectionUtil.createIfNull(changeLog.getChangeSets()).size() + CollectionUtil.createIfNull(changeLog.getSkippedChangeSets()).size();
+        // We have to remove the total change sets that were skipped due to the Change DBMS
+        // because they are included in the change set total from the changelog.  They are
+        // not excluded at load time like those with the changeSet DBMS attribute.
+        int totalInChangelog = CollectionUtil.createIfNull(changeLog.getChangeSets()).size() +
+                CollectionUtil.createIfNull(changeLog.getSkippedChangeSets()).size() -
+                CollectionUtil.createIfNull(changeLog.getSkippedBecauseOfChangeDbmsChangeSets()).size();
         UpdateSummary updateSummaryMdc = new UpdateSummary(null, totalAccepted, totalPreviouslyRun, null, totalInChangelog);
 
         String message = "UPDATE SUMMARY";
