@@ -7,8 +7,6 @@ Liquibase ships with a Usage data agreement:
 
 - Liquibase Usage Data Agreement - usage-data.txt
 
-Liquibase ships with 3rd party components using the following licenses:
-
 Liquibase Community also ships with 3rd party components distributed under the following licenses:
 - Apache 2.0 License - https://opensource.org/licenses/Apache-2.0
 - Eclipse Public License 2.0 (EPL) - https://www.eclipse.org/legal/epl-2.0/
