@@ -239,21 +239,21 @@ jobs:
 
           # Create Maven repository layout structure for the bundle
           mkdir -p "bundle/org/liquibase"
-          
+
           # Copy all artifacts to proper Maven repository layout
           for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
             mkdir -p "bundle/org/liquibase/$i/${version}"
             cp $i-${version}* "bundle/org/liquibase/$i/${version}/"
           done
-          
+
           # Create the bundle zip file
           cd bundle
           zip -r ../central-bundle.zip .
           cd ..
-          
+
           # Create base64 encoded credentials for Bearer auth
           AUTH_HEADER=$(printf "%s:%s" "${MAVEN_USERNAME}" "${MAVEN_PASSWORD}" | base64 -w 0)
-          
+
           # Upload bundle to Central Portal with AUTOMATIC publishing
           echo "Uploading bundle to Central Portal for liquibase-${version}..."
           UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" \
@@ -261,20 +261,20 @@ jobs:
             -H "Authorization: Bearer ${AUTH_HEADER}" \
             -F "bundle=@central-bundle.zip" \
             "https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC&name=liquibase-${version}")
-          
+
           # Parse response
           HTTP_CODE=$(echo "$UPLOAD_RESPONSE" | tail -n1)
           DEPLOYMENT_ID=$(echo "$UPLOAD_RESPONSE" | head -n1)
-          
+
           echo "HTTP Status: $HTTP_CODE"
           echo "Deployment ID: $DEPLOYMENT_ID"
-          
+
           if [ "$HTTP_CODE" != "201" ]; then
             echo "Upload failed with HTTP status $HTTP_CODE"
             echo "Response: $DEPLOYMENT_ID"
             exit 1
           fi
-          
+
           echo "Bundle uploaded successfully to Central Portal"
           echo "Deployment ID: $DEPLOYMENT_ID"
           echo "Automatic publishing initiated for liquibase-${version}"
@@ -374,6 +374,20 @@ jobs:
           path: liquibase-core-repo
           repository: "liquibase/liquibase"
 
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v5
         with:
@@ -428,7 +442,6 @@ jobs:
     needs: [setup, manual_trigger_deployment]
     runs-on: ubuntu-22.04
     steps:
-
       - name: Configure AWS credentials for vault access
         uses: aws-actions/configure-aws-credentials@v5
         with:
@@ -611,21 +624,21 @@ jobs:
 
           # Create Maven repository layout structure for the bundle
           mkdir -p "bundle/org/liquibase"
-          
+
           # Copy all artifacts to proper Maven repository layout
           for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
             mkdir -p "bundle/org/liquibase/$i/${version}"
             cp $i-${version}* "bundle/org/liquibase/$i/${version}/"
           done
-          
+
           # Create the bundle zip file
           cd bundle
           zip -r ../central-bundle.zip .
           cd ..
-          
+
           # Create base64 encoded credentials for Bearer auth
           AUTH_HEADER=$(printf "%s:%s" "${MAVEN_USERNAME}" "${MAVEN_PASSWORD}" | base64 -w 0)
-          
+
           # Upload bundle to Central Portal with USER_MANAGED publishing (dry run)
           echo "Uploading bundle to Central Portal for dry-run liquibase-${version}..."
           UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" \
@@ -633,20 +646,20 @@ jobs:
             -H "Authorization: Bearer ${AUTH_HEADER}" \
             -F "bundle=@central-bundle.zip" \
             "https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED&name=liquibase-${version}-dry-run")
-          
+
           # Parse response
           HTTP_CODE=$(echo "$UPLOAD_RESPONSE" | tail -n1)
           DEPLOYMENT_ID=$(echo "$UPLOAD_RESPONSE" | head -n1)
-          
+
           echo "HTTP Status: $HTTP_CODE"
           echo "Deployment ID: $DEPLOYMENT_ID"
-          
+
           if [ "$HTTP_CODE" != "201" ]; then
             echo "Upload failed with HTTP status $HTTP_CODE"
             echo "Response: $DEPLOYMENT_ID"
             exit 1
           fi
-          
+
           echo "Bundle uploaded successfully to Central Portal for dry-run"
           echo "Deployment ID: $DEPLOYMENT_ID"
           echo "Manual publishing required - visit https://central.sonatype.com/publishing/deployments to review and publish"
