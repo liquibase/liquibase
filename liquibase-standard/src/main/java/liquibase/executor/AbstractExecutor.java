@@ -23,6 +23,7 @@ import java.util.List;
 public abstract class AbstractExecutor implements Executor {
     protected Database database;
     protected ResourceAccessor resourceAccessor;
+    protected static final long TIMEOUT_MILLIS=2000;//2 sec timeout
 
     /**
      *
@@ -131,6 +132,29 @@ public abstract class AbstractExecutor implements Executor {
 
     @Override
     public void execute(Change change, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+                /*
+        for function-> liquibase.executor.AbstractExecutor.execute(liquibase.change.Change, java.util.List<liquibase.sql.visitor.SqlVisitor>)
+        1)sql statements are derived from the change and executed one by one,
+        2)here we will maintain a timer and if the time passes , the timeout exception is thrown
+        3)while handling exceptions externally in the calling class, database.rollback() is triggered, hence partial
+         changes of a changeset will be rolled back
+
+
+         1)we can add a accessible KeyStore in a scope which is cleaned up after exiting scope, just like MDCObject map.
+         2)we can use this tag feature to add a tag in caller function(where we call this function specifically for triggering change-set while executing changelog).
+         3)If this function is called internally via different functionalities, we only want a timeout in a specific liquibase command(eg update),then gis tag feature can help us.
+         4)For now , we make an assumption (which is true for now) that this function is called only when changeset has to be executed and nowhere else.
+         5)Timeout statically declared, but we will move that in the parameter parsing.
+         6)the timeout will be approximately applied since the execution happens in main thread only, and if the per-statement function i.e. execute(statement, sqlVisitors);
+         is running, while timeout passes, then we will wait till this execution completes, and timeout will happen when the time check is visited again.
+         This can be mitigated in two ways
+         a)Use multithreading, and whenever a statement is executed, we trigger it in one thread and the other thread checks the timer, there is a way to cancel
+         PreparedStatement in this manner, and it can give us better resolution, but complex changes
+         b)add a statement timeout(query level timeout= Ts), so even if the slowest query is causing the transaction timeout to occur, the timeout will be delayed by atmost Ts time
+         c)close the connection when timeout happens
+
+         */
+        long startTime=System.currentTimeMillis();
         SqlStatement[] sqlStatements = change.generateStatements(database);
         if (sqlStatements != null) {
             for (SqlStatement statement : sqlStatements) {
@@ -145,6 +169,8 @@ public abstract class AbstractExecutor implements Executor {
                             System.lineSeparator() + statement);
                 }
                 try {
+                    if(System.currentTimeMillis()-startTime>TIMEOUT_MILLIS)
+                        throw new DatabaseException("Timeout Exception");
                     execute(statement, sqlVisitors);
                 } catch (DatabaseException e) {
                     if (statement.continueOnError()) {
