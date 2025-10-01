@@ -161,3 +161,4 @@ jobs:
       dry_run_release_id: ${{ inputs.dry_run_release_id || '' }}
       distribution: "liquibase"
       download_base_url: "https://github.com/liquibase/liquibase/releases/download"
+      
