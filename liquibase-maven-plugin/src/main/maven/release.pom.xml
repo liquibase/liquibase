@@ -11,8 +11,8 @@
     <url>http://www.liquibase.org/liquibase-maven-plugin</url>
     <licenses>
         <license>
-            <name>Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            <name>Functional Source License, Version 1.1, ALv2 Future License</name>
+            <url>https://fsl.software/FSL-1.1-ALv2.template.md</url>
         </license>
     </licenses>
     <developers>
