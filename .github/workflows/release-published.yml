@@ -148,7 +148,7 @@ jobs:
           additional-denied-words: "stop,error,failed,fail,broken,:x:,👎"
 
   package:
-    uses: liquibase/build-logic/.github/workflows/package.yml@DAT-20878-test
+    uses: liquibase/build-logic/.github/workflows/package.yml@DAT-20878
     needs: [setup]
     secrets: inherit
     with:
