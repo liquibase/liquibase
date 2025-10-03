@@ -1,5 +1,20 @@
 Liquibase Core Changelog
 ===========================================
+
+Changes in version 5.0.0 (2025.10.03)
+
+# Liquibase Community 5.0.1 is a minor patch release
+See the [Liquibase Community 5.0.1 Release Notes](https://docs.liquibase.com/community/community-release-notes/liquibase-community-501-release-notes) for the complete set of release information.
+
+### License corrections for Maven
+The license block for Maven users has been corrected to use the Functional Source License (FSL).
+- Name: Functional Source License, Version 1.1, ALv2 Future License
+- URL: https://fsl.software/FSL-1.1-ALv2.template.md
+
+## Changelog
+-(#7350) Update licensing and documentation for OSS distribution by @filipelautert
+
+
 Changes in version 5.0.0 (2025.09.30)
 
 # Liquibase Community 5.0 is a major release
