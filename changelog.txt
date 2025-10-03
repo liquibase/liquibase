@@ -1,7 +1,7 @@
 Liquibase Core Changelog
 ===========================================
 
-Changes in version 5.0.0 (2025.10.03)
+Changes in version 5.0.1 (2025.10.03)
 
 # Liquibase Community 5.0.1 is a minor patch release
 See the [Liquibase Community 5.0.1 Release Notes](https://docs.liquibase.com/community/community-release-notes/liquibase-community-501-release-notes) for the complete set of release information.
