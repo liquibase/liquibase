@@ -19,6 +19,11 @@ on:
         description: 'If set to true, the unit and integration test results will be archived to the build artifacts page.'
         required: false
         default: 'false'
+      skip_tests:
+        description: 'If set to true, the build_tests and integration-test jobs will be skipped.'
+        required: false
+        type: boolean
+        default: false
   push:
     branches:
       - master
@@ -88,6 +93,7 @@ jobs:
   build_tests:
     name: Run Test for (Java ${{ matrix.java }} ${{ matrix.os }})
     needs: setup
+    if: ${{ inputs.skip_tests != true }}
     outputs:
       test_count_unit_test_java_17_ubuntu: ${{ steps.check-test-counts-java-all-ubuntu.outputs.test_count_unit_test_java_17_ubuntu }}
       test_count_unit_test_java_21_ubuntu: ${{ steps.check-test-counts-java-all-ubuntu.outputs.test_count_unit_test_java_21_ubuntu }}
@@ -275,7 +281,7 @@ jobs:
   fossa:
     needs: build_tests
     uses: liquibase/build-logic/.github/workflows/fossa_ai.yml@main
-    if: github.event_name != 'workflow_dispatch'
+    if: ${{ github.event_name != 'workflow_dispatch' && inputs.skip_tests != true }}
     secrets: inherit
     with:
       check_snippets: true
@@ -285,6 +291,7 @@ jobs:
   integration-test:
     name: Integration Test
     runs-on: ubuntu-22.04
+    if: ${{ inputs.skip_tests != true }}
     outputs:
       test_count_integration_db2: ${{ steps.check-test-count-integration.outputs.test_count_integration_db2 }}
       test_count_integration_h2: ${{ steps.check-test-count-integration.outputs.test_count_integration_h2 }}
@@ -409,6 +416,7 @@ jobs:
   sonar:
     needs: [ build_tests, integration-test ]
     uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@main
+    if: ${{ inputs.skip_tests != true }}
     with:
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
       thisSha: ${{ needs.setup.outputs.thisSha }}
@@ -420,16 +428,23 @@ jobs:
       dbPlatforms: h2,hsqldb,mariadb,mssql,mysql,oracle,postgresql,sqlite,firebird,db2
     secrets: inherit
 
-  run-build-publish-file:
-    needs: [ build_tests,integration-test ]
+  run-build-publish-file-with-tests:
+    needs: [ build_tests, integration-test ]
     uses: ./.github/workflows/build.yml
     secrets: inherit
+    if: ${{ inputs.skip_tests != true }}
+
+  run-build-publish-file-skip-tests:
+    needs: [ setup ]
+    uses: ./.github/workflows/build.yml
+    secrets: inherit
+    if: ${{ inputs.skip_tests == true }}
 
 
   update-test-count-secrets:
     needs: [build_tests, integration-test]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && inputs.skip_tests != true }}
     steps:
 
       - name: Configure AWS credentials for vault access
