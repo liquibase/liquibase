@@ -18,7 +18,8 @@ public class BlobTypeTest {
             "varbinary(50),VARBINARY(50),50",
             "binary(50),BINARY(50),50",
             "java.sql.Types.VARBINARY,VARBINARY,",
-            "blob, BLOB,"
+            "blob, BLOB,",
+            "blob(25000000), BLOB(25000000),25000000"
     })
     public void toDatabaseDataType_should_succeed_for_DB2Database(String liquibaseType, String expectedDatabaseType, Integer max) throws Exception {
         Scope.child(GlobalConfiguration.CONVERT_DATA_TYPES.getKey(), true, () -> {
