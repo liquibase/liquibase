@@ -5,7 +5,6 @@ import liquibase.Scope
 import liquibase.change.ChangeStatus
 import liquibase.database.core.PostgresDatabase
 import liquibase.database.DatabaseConnection
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.change.StandardChangeTest;
