@@ -11,8 +11,9 @@
     <url>http://www.liquibase.org/liquibase-maven-plugin</url>
     <licenses>
         <license>
-            <name>Functional Source License, Version 1.1, ALv2 Future License</name>
+            <name>FSL-1.1-ALv2</name>
             <url>https://fsl.software/FSL-1.1-ALv2.template.md</url>
+            <comments>Functional Source License, Version 1.1, ALv2 Future License</comments>
         </license>
     </licenses>
     <developers>

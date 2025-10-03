@@ -33,8 +33,9 @@
 
     <licenses>
         <license>
+            <name>FSL-1.1-ALv2</name>
             <url>https://fsl.software/FSL-1.1-ALv2.template.md</url>
-            <name>Functional Source License, Version 1.1, ALv2 Future License</name>
+            <comments>Functional Source License, Version 1.1, ALv2 Future License</comments>
         </license>
     </licenses>
 
