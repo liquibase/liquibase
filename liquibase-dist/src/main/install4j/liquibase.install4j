@@ -66,6 +66,16 @@
                 </serializedBean>
                 <condition>context.getBooleanVariable("sys.confirmedUpdateInstallation")</condition>
               </action>
+              <action id="413" beanClass="com.install4j.runtime.beans.actions.misc.ModifyInstallerVariableAction" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="variableName" type="string">liquibase.installChoice</property>
+                  <property name="value">
+                    <object class="com.install4j.api.beans.ScriptProperty">
+                      <property name="value" type="string">return "newDirectory";</property>
+                    </object>
+                  </property>
+                </serializedBean>
+              </action>
             </actions>
             <formComponents>
               <formComponent id="3" beanClass="com.install4j.runtime.beans.formcomponents.MultilineLabelComponent">
@@ -90,6 +100,35 @@ return console.askOkCancel(message, true);
                   <propertyName>updateCheck</propertyName>
                 </externalParametrizationPropertyNames>
               </formComponent>
+              <formComponent id="414" beanClass="com.install4j.runtime.beans.formcomponents.MultilineLabelComponent" insetTop="20">
+                <serializedBean>
+                  <property name="labelText" type="string">${i18n:PreviousInstallationDetected(${compiler:sys.version})}</property>
+                </serializedBean>
+                <visibilityScript>return context.getInstallationDirectory() != null;</visibilityScript>
+              </formComponent>
+              <formComponent id="415" beanClass="com.install4j.runtime.beans.formcomponents.RadioButtonGroupComponent" insetTop="10">
+                <serializedBean>
+                  <property name="labelText" type="string" />
+                  <property name="radioButtonDescriptors">
+                    <array elementType="com.install4j.runtime.beans.formcomponents.RadioButtonDescriptor" length="2">
+                      <element index="0">
+                        <object class="com.install4j.runtime.beans.formcomponents.RadioButtonDescriptor">
+                          <string>${i18n:InstallToNewDirectory(${compiler:sys.version})}</string>
+                          <string>newDirectory</string>
+                        </object>
+                      </element>
+                      <element index="1">
+                        <object class="com.install4j.runtime.beans.formcomponents.RadioButtonDescriptor">
+                          <string>${i18n:UpdateExistingInstallation}</string>
+                          <string>updateExisting</string>
+                        </object>
+                      </element>
+                    </array>
+                  </property>
+                  <property name="variableName" type="string">liquibase.installChoice</property>
+                </serializedBean>
+                <visibilityScript>return context.getInstallationDirectory() != null;</visibilityScript>
+              </formComponent>
               <formComponent id="6" beanClass="com.install4j.runtime.beans.formcomponents.MultilineLabelComponent" insetTop="20">
                 <serializedBean>
                   <property name="labelText" type="string">${i18n:ClickNext}</property>
@@ -98,7 +137,7 @@ return console.askOkCancel(message, true);
             </formComponents>
           </screen>
           <screen id="8" beanClass="com.install4j.runtime.beans.screens.InstallationDirectoryScreen" rollbackBarrierExitCode="0">
-            <condition>!context.getBooleanVariable("sys.confirmedUpdateInstallation")</condition>
+            <condition>!context.getBooleanVariable("sys.confirmedUpdateInstallation") &amp;&amp; !"updateExisting".equals(context.getVariable("liquibase.installChoice"))</condition>
             <actions>
               <action id="11" beanClass="com.install4j.runtime.beans.actions.misc.LoadResponseFileAction" rollbackBarrierExitCode="0" multiExec="true">
                 <serializedBean>
@@ -107,6 +146,27 @@ return console.askOkCancel(message, true);
                   </property>
                 </serializedBean>
                 <condition>context.getVariable("sys.responseFile") == null</condition>
+              </action>
+              <action id="416" beanClass="com.install4j.runtime.beans.actions.misc.ModifyInstallerVariableAction" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="variableName" type="string">sys.installationDir</property>
+                  <property name="value">
+                    <object class="com.install4j.api.beans.ScriptProperty">
+                      <property name="value" type="string">import java.io.File;
+
+File oldInstallDir = context.getInstallationDirectory();
+if (oldInstallDir != null &amp;&amp; "newDirectory".equals(context.getVariable("liquibase.installChoice"))) {
+    // Suggest a new directory with version number
+    File parentDir = oldInstallDir.getParentFile();
+    String newDirName = "Liquibase-" + context.getCompilerVariable("sys.version");
+    File newInstallDir = new File(parentDir, newDirName);
+    return newInstallDir.getAbsolutePath();
+}
+return context.getInstallationDirectory();</property>
+                    </object>
+                  </property>
+                </serializedBean>
+                <condition>"newDirectory".equals(context.getVariable("liquibase.installChoice")) &amp;&amp; context.getInstallationDirectory() != null</condition>
               </action>
             </actions>
             <formComponents>
