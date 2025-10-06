@@ -62,8 +62,8 @@ class SqlUtilTest extends Specification {
         Types.VARCHAR                 | false
     }
 
-    @Unroll("SqlUtil.parseValue(#value on #db as #dataType)")
-    def "ParseValue"() {
+  //  @Unroll("SqlUtil.parseValue('#value' on #db as '#dataType)")
+    def "ParseValue '#value' on #db as '#dataType"() {
         when:
         def type = new DataType(dataType)
         type.setDataTypeId(dataTypeId)
@@ -142,7 +142,7 @@ class SqlUtilTest extends Specification {
         "12.0"                                                    | new H2Database()       | "numeric"       | 12                                        | Types.NUMERIC
         "a_function()"                                            | new H2Database()       | "numeric"       | new DatabaseFunction("a_function()")      | Types.NUMERIC
         "12.35"                                                   | new DB2Database()      | "decfloat"      | 12.35                                     | Types.OTHER
-        "12.35"                                                   | new H2Database()       | "decfloat"      | new DatabaseFunction("12.35")             | Types.OTHER
+        "12.35"                                                   | new H2Database()       | "decfloat"      | 12.35                                     | Types.NUMERIC
         "a_function()"                                            | new H2Database()       | "ref"           | new DatabaseFunction("a_function()")      | Types.REF
         "a_function()"                                            | new H2Database()       | "rowid"         | new DatabaseFunction("a_function()")      | Types.ROWID
         "a_function()"                                            | new H2Database()       | "xml"           | new DatabaseFunction("a_function()")      | Types.SQLXML

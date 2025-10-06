@@ -7,6 +7,7 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.datatype.NumericType;
 import liquibase.statement.DatabaseFunction;
 
 import java.util.Locale;
@@ -15,19 +16,7 @@ import java.util.Locale;
  * Represents a signed integer number using 32 bits of storage.
  */
 @DataTypeInfo(name = "int", aliases = {"integer", "java.sql.Types.INTEGER", "java.lang.Integer", "serial", "int4", "serial4"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
-public class IntType extends LiquibaseDataType {
-
-    private boolean autoIncrement;
-
-    @Override
-    public boolean isAutoIncrement() {
-        return autoIncrement;
-    }
-
-    public void setAutoIncrement(boolean autoIncrement) {
-        this.autoIncrement = autoIncrement;
-    }
-
+public class IntType extends NumericType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
@@ -89,7 +78,7 @@ public class IntType extends LiquibaseDataType {
         super.finishInitialization(originalDefinition);
 
         if (originalDefinition.toLowerCase(Locale.US).startsWith("serial")) {
-            autoIncrement = true;
+            setAutoIncrement( true );
         }
     }
 
@@ -104,10 +93,4 @@ public class IntType extends LiquibaseDataType {
 
         return formatNumber(value.toString());
     }
-
-    @Override
-    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
-        return LoadDataChange.LOAD_DATA_TYPE.NUMERIC;
-    }
-
 }

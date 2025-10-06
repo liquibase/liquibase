@@ -7,23 +7,13 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.datatype.NumericType;
 import liquibase.statement.DatabaseFunction;
 
 import java.util.Locale;
 
 @DataTypeInfo(name = "smallint", aliases = {"java.sql.Types.SMALLINT", "int2", "smallserial"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
-public class SmallIntType extends LiquibaseDataType {
-
-    private boolean autoIncrement;
-
-    @Override
-    public boolean isAutoIncrement() {
-        return autoIncrement;
-    }
-
-    public void setAutoIncrement(boolean autoIncrement) {
-        this.autoIncrement = autoIncrement;
-    }
+public class SmallIntType extends NumericType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
@@ -45,7 +35,6 @@ public class SmallIntType extends LiquibaseDataType {
         if (database instanceof OracleDatabase) {
             return new DatabaseDataType("NUMBER", 5);
         }
-
 
         if (database instanceof PostgresDatabase) {
             if (isAutoIncrement()) {
@@ -84,16 +73,11 @@ public class SmallIntType extends LiquibaseDataType {
     }
 
     @Override
-    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
-        return LoadDataChange.LOAD_DATA_TYPE.NUMERIC;
-    }
-
-    @Override
     public void finishInitialization(String originalDefinition) {
         super.finishInitialization(originalDefinition);
 
         if (originalDefinition.toLowerCase(Locale.US).contains("serial")) {
-            autoIncrement = true;
+            setAutoIncrement( true );
         }
     }
 }

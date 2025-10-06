@@ -1,27 +1,16 @@
 package liquibase.datatype.core;
 
-import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.datatype.NumericType;
 
 import java.util.Arrays;
 
 @DataTypeInfo(name="number", aliases = {"numeric", "java.sql.Types.NUMERIC"}, minParameters = 0, maxParameters = 2, priority = LiquibaseDataType.PRIORITY_DEFAULT)
-public class NumberType extends LiquibaseDataType {
-
-    private boolean autoIncrement;
-
-    @Override
-    public boolean isAutoIncrement() {
-        return autoIncrement;
-    }
-
-    public void setAutoIncrement(boolean autoIncrement) {
-        this.autoIncrement = autoIncrement;
-    }
+public class NumberType extends NumericType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
@@ -59,10 +48,5 @@ public class NumberType extends LiquibaseDataType {
             return new DatabaseDataType("numeric", getParameters());
         }
         return super.toDatabaseDataType(database);
-    }
-
-    @Override
-    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
-        return LoadDataChange.LOAD_DATA_TYPE.NUMERIC;
     }
 }
