@@ -45,14 +45,9 @@ jobs:
     steps:
       - run: true
 
-  dependabot-pr-check:
-    uses: liquibase/build-logic/.github/workflows/check-for-dependabot-prs.yml@main
-    needs: authorize
-    secrets: inherit
-
   setup:
     name: setup
-    needs: [authorize, dependabot-pr-check]
+    needs: [authorize]
     runs-on: ubuntu-22.04
     outputs:
       timestamp: ${{ steps.get-date.outputs.date }}
