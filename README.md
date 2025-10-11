@@ -59,7 +59,7 @@ Earn points for your achievements and contributions, collect and show off your b
 
 ## License
 
-Liquibase Open Source is [licensed under the Apache 2.0 License](https://github.com/liquibase/liquibase/blob/master/LICENSE.txt).
+Liquibase Community is [licensed under the Functional Source License (FSL)](https://fsl.software/FSL-1.1-ALv2.template.md).
 
 [Liquibase Pro](https://www.liquibase.com/products/pro) has additional features and support and is commercially licensed.
 
