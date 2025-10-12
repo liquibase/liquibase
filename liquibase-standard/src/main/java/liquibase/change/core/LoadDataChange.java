@@ -3,6 +3,7 @@ package liquibase.change.core;
 import com.opencsv.exceptions.CsvMalformedLineException;
 import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
+import liquibase.Null;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeSet;
@@ -861,7 +862,9 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                     Object value = column.getValueObject();
 
                     if (value == null) {
-                        value = "NULL";
+                        // Don't conflate null with a String "NULL" here
+                        // Instead add a Null-instance, to distinguish it from "NULL"
+                        value = new Null();
                     }
 
                     insertStatement.addColumnValue(columnName, value);
