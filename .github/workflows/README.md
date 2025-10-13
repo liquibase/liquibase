@@ -13,8 +13,6 @@ The `dryRun` process simulates our current production Liquibase release workflow
 The following actions are identical to those in a regular Liquibase release, with no modifications:
 
 - Get latests liquibase artifacts from the `run-tests.yml` workflow
-- Build included extensions in core (Commercial Bigquery)
-- Build azure uber jars
 - Re-version artifacts to `dry-run-GITHUB_RUN_ID` version. i.e `dry-run-10522556642`
 - Build installers
 - Attach artifacts (`zip` and `tar` files) to a dryRun draft release
@@ -30,7 +28,7 @@ The following actions are identical to those in a regular Liquibase release, wit
 ## :warning: What a DryRun Release does not do?
 
 - Generate PRO tags
-- Generate install packages: `deb`, `rpm`, `brew` and the rest of them. (This will be covered in [DAT-18302](https://datical.atlassian.net/browse/DAT-18302))
+- Generate install packages: `deb`, `rpm`, `brew` and the rest of them.
 - Upload `javadocs` and `xsds` to `S3`
 - Deploy artifacts to `GPM`
 

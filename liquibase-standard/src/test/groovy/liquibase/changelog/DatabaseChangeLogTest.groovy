@@ -502,11 +502,9 @@ create view sql_view as select * from sql_table;'''
         def changelogText = """<?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" 
 xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" 
-xmlns:pro="http://www.liquibase.org/xml/ns/pro" 
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext 
 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd 
-http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
 http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
         <includeAll path="include-all-dir" labels="none" context="none"/>

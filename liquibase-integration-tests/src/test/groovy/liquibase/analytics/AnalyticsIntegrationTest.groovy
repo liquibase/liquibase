@@ -60,7 +60,7 @@ class AnalyticsIntegrationTest extends Specification {
         trackEvent.get("event") == "liquibase-command-executed"
         UUID.fromString(trackEvent.get("messageId")) // is a UUID
         trackEvent.get("type") == "track"
-        trackEvent.get("userId") == "null" // no pro license available
+        trackEvent.get("userId") == "null" // no license available
         def properties = trackEvent.get("properties")
         properties.get("chlog_formattedSql") == 0
         properties.get("chlog_json") == 0

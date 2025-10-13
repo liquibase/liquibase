@@ -13,6 +13,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changeset.ChangeSetService;
 import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.exception.ChangeLogParseException;
+import liquibase.parser.core.formattedsql.InvalidFormattedSqlPatternsForOssUtil;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.ExceptionUtil;
 import liquibase.util.StreamUtil;
@@ -514,6 +515,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                         throw new ChangeLogParseException("\n" + message);
                     }
                     if (changeSet != null) {
+                        InvalidFormattedSqlPatternsForOssUtil.interruptIfIsProCommandAndNoLicenseIsPresent(line);
                         AtomicBoolean changeSetFinished = new AtomicBoolean(false);
                         configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher, resourceAccessor, changeLog, change, rollbackSplitStatementsPatternMatcher, rollbackSplitStatements, rollbackEndDelimiter, changeSetFinished);
                         if (changeSetFinished.get()) {
@@ -792,6 +794,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
 
     protected boolean handleAdditionalLines(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, String line, StringBuilder currentSequence)
             throws ChangeLogParseException {
+        InvalidFormattedSqlPatternsForOssUtil.interruptIfIsProCommandAndNoLicenseIsPresent(line);
         // by default calls the deprecated method , otherwise old code may break.
         return handleAdditionalLines(changeLog, resourceAccessor, line);
     }

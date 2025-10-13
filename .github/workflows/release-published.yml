@@ -196,7 +196,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           java-version: "17"
-          distribution: "adopt"
+          distribution: "temurin"
           server-id: sonatype-nexus-staging
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
@@ -216,13 +216,10 @@ jobs:
           unzip -j liquibase-additional-*.zip
 
           ##extracts and sign poms, generate checksums for all artifacts
-          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-commercial'; do
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
             unzip -j $i-${version}.jar META-INF/maven/org.liquibase/$i/pom.xml
             sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
             mv pom.xml $i-${version}.pom
-            if test 'liquibase-commercial' == $i; then
-              sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private<\/connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" $i-${version}.pom   ## scm info not in the pom
-            fi
 
             # Sign POM file
             gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i-${version}.pom
@@ -242,21 +239,21 @@ jobs:
 
           # Create Maven repository layout structure for the bundle
           mkdir -p "bundle/org/liquibase"
-          
+
           # Copy all artifacts to proper Maven repository layout
-          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-commercial'; do
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
             mkdir -p "bundle/org/liquibase/$i/${version}"
             cp $i-${version}* "bundle/org/liquibase/$i/${version}/"
           done
-          
+
           # Create the bundle zip file
           cd bundle
           zip -r ../central-bundle.zip .
           cd ..
-          
+
           # Create base64 encoded credentials for Bearer auth
           AUTH_HEADER=$(printf "%s:%s" "${MAVEN_USERNAME}" "${MAVEN_PASSWORD}" | base64 -w 0)
-          
+
           # Upload bundle to Central Portal with AUTOMATIC publishing
           echo "Uploading bundle to Central Portal for liquibase-${version}..."
           UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" \
@@ -264,20 +261,20 @@ jobs:
             -H "Authorization: Bearer ${AUTH_HEADER}" \
             -F "bundle=@central-bundle.zip" \
             "https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC&name=liquibase-${version}")
-          
+
           # Parse response
           HTTP_CODE=$(echo "$UPLOAD_RESPONSE" | tail -n1)
           DEPLOYMENT_ID=$(echo "$UPLOAD_RESPONSE" | head -n1)
-          
+
           echo "HTTP Status: $HTTP_CODE"
           echo "Deployment ID: $DEPLOYMENT_ID"
-          
+
           if [ "$HTTP_CODE" != "201" ]; then
             echo "Upload failed with HTTP status $HTTP_CODE"
             echo "Response: $DEPLOYMENT_ID"
             exit 1
           fi
-          
+
           echo "Bundle uploaded successfully to Central Portal"
           echo "Deployment ID: $DEPLOYMENT_ID"
           echo "Automatic publishing initiated for liquibase-${version}"
@@ -391,25 +388,6 @@ jobs:
             ,/vault/liquibase
           parse-json-secrets: true
 
-      - name: Get GitHub App token
-        id: get-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: liquibase-pro
-          permission-contents: read
-          
-      - name: Download liquibase-pro xsd
-        uses: actions/checkout@v5
-        with:
-          ref: "${{ needs.setup.outputs.ref_branch }}"
-          token: ${{ steps.get-token.outputs.token }}
-          # Relative path under $GITHUB_WORKSPACE to place the repository
-          path: liquibase-pro-repo
-          repository: "liquibase/liquibase-pro"
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v5
         with:
@@ -419,9 +397,7 @@ jobs:
       - name: Upload to s3
         # aws s3 sync syncs directories and S3 prefixes.
         run: |
-          aws s3 sync liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/ s3://liquibaseorg-origin/xml/ns/pro/ --content-type application/octet-stream --only-show-errors
           aws s3 sync liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ s3://liquibaseorg-origin/xml/ns/dbchangelog/ --content-type application/octet-stream --only-show-errors
-          aws s3 sync liquibase-pro-repo/pro/src/main/resources/schemas/ s3://liquibaseorg-origin/json/schema/ --content-type application/octet-stream --only-show-errors
 
       - name: Index.htm file upload
         # get the major.minor xsd version. grab the index.htm from s3, add the new verison of xsd and sync with the s3 again
@@ -448,30 +424,6 @@ jobs:
           localDir: "liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/"
           remoteDir: "/xml/ns/dbchangelog/"
 
-      - name: Liquibase PRO xsds SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.4
-        with:
-          host: ${{ env.WPENGINE_SFTP_HOST }}
-          port: ${{ env.WPENGINE_SFTP_PORT }}
-          username: ${{ env.WPENGINE_SFTP_USER }}
-          password: ${{ env.WPENGINE_SFTP_PASSWORD }}
-          compress: false
-          forceUpload: true
-          localDir: "liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/"
-          remoteDir: "/xml/ns/pro/"
-
-      - name: Liquibase flow-file schema SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.4
-        with:
-          host: ${{ env.WPENGINE_SFTP_HOST }}
-          port: ${{ env.WPENGINE_SFTP_PORT }}
-          username: ${{ env.WPENGINE_SFTP_USER }}
-          password: ${{ env.WPENGINE_SFTP_PASSWORD }}
-          compress: false
-          forceUpload: true
-          localDir: "liquibase-pro-repo/pro/src/main/resources/schemas/"
-          remoteDir: "/json/schema/"
-
       - name: Liquibase index.htm SFTP upload
         uses: wangyucode/sftp-upload-action@v2.0.4
         with:
@@ -490,7 +442,6 @@ jobs:
     needs: [setup, manual_trigger_deployment]
     runs-on: ubuntu-22.04
     steps:
-
       - name: Configure AWS credentials for vault access
         uses: aws-actions/configure-aws-credentials@v5
         with:
@@ -630,7 +581,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           java-version: "17"
-          distribution: "adopt"
+          distribution: "temurin"
           server-id: dry-run-sonatype-nexus-staging
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
@@ -650,13 +601,10 @@ jobs:
           unzip -j liquibase-additional-*.zip
 
           ##extracts and sign poms, generate checksums for all artifacts
-          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-commercial'; do
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
             unzip -j $i-${version}.jar META-INF/maven/org.liquibase/$i/pom.xml
             sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
             mv pom.xml $i-${version}.pom
-            if test 'liquibase-commercial' == $i; then
-              sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private<\/connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" $i-${version}.pom   ## scm info not in the pom
-            fi
 
             # Sign POM file
             gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i-${version}.pom
@@ -676,21 +624,21 @@ jobs:
 
           # Create Maven repository layout structure for the bundle
           mkdir -p "bundle/org/liquibase"
-          
+
           # Copy all artifacts to proper Maven repository layout
-          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-commercial'; do
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
             mkdir -p "bundle/org/liquibase/$i/${version}"
             cp $i-${version}* "bundle/org/liquibase/$i/${version}/"
           done
-          
+
           # Create the bundle zip file
           cd bundle
           zip -r ../central-bundle.zip .
           cd ..
-          
+
           # Create base64 encoded credentials for Bearer auth
           AUTH_HEADER=$(printf "%s:%s" "${MAVEN_USERNAME}" "${MAVEN_PASSWORD}" | base64 -w 0)
-          
+
           # Upload bundle to Central Portal with USER_MANAGED publishing (dry run)
           echo "Uploading bundle to Central Portal for dry-run liquibase-${version}..."
           UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" \
@@ -698,20 +646,20 @@ jobs:
             -H "Authorization: Bearer ${AUTH_HEADER}" \
             -F "bundle=@central-bundle.zip" \
             "https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED&name=liquibase-${version}-dry-run")
-          
+
           # Parse response
           HTTP_CODE=$(echo "$UPLOAD_RESPONSE" | tail -n1)
           DEPLOYMENT_ID=$(echo "$UPLOAD_RESPONSE" | head -n1)
-          
+
           echo "HTTP Status: $HTTP_CODE"
           echo "Deployment ID: $DEPLOYMENT_ID"
-          
+
           if [ "$HTTP_CODE" != "201" ]; then
             echo "Upload failed with HTTP status $HTTP_CODE"
             echo "Response: $DEPLOYMENT_ID"
             exit 1
           fi
-          
+
           echo "Bundle uploaded successfully to Central Portal for dry-run"
           echo "Deployment ID: $DEPLOYMENT_ID"
           echo "Manual publishing required - visit https://central.sonatype.com/publishing/deployments to review and publish"
@@ -747,7 +695,7 @@ jobs:
           secret-ids: |
             ,/vault/liquibase
           parse-json-secrets: true
-          
+
       - name: Configure AWS credentials for prod account access
         uses: aws-actions/configure-aws-credentials@v5
         with:
