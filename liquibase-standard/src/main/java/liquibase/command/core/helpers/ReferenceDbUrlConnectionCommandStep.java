@@ -101,6 +101,7 @@ public class ReferenceDbUrlConnectionCommandStep extends AbstractDatabaseConnect
             } catch (Exception e) {
                 throw new DatabaseException(e);
             }
+            logLicenseUsage(url, database.get(), false, true);
             return database.get();
         } else {
             return commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);

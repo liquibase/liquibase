@@ -75,10 +75,12 @@ jobs:
       version: ${{ steps.collect-data.outputs.version }}
       ref_branch: ${{ steps.ref-branch.outputs.branch }}
       dry_run_branch_name: ${{ inputs.dry_run_branch_name }}
+      latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
+      timeStamp: ${{ steps.get-timestamp.outputs.timeStamp }}
     steps:
       - name: Collect Data
         id: collect-data
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             let tag;
@@ -110,6 +112,24 @@ jobs:
             echo "branch=${{ inputs.dry_run_branch_name }}" >> $GITHUB_OUTPUT
           fi
 
+      - name: Checkout the determined branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.ref-branch.outputs.branch }}
+          fetch-depth: 0
+
+      - name: Get Latest Merge Commit SHA
+        id: get-sha
+        run: |
+          latest_merge_sha=`(git rev-parse --short HEAD)`
+          echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
+
+      - name: Get Timestamp
+        id: get-timestamp
+        run: |
+          timestamp=`(date +'%Y-%m-%d %H:%M:%S %Z')`
+          echo "timeStamp=${timestamp}" >> $GITHUB_OUTPUT
+
   manual_trigger_deployment:
     if: ${{ inputs.dry_run == false }}
     name: Manually trigger deployment
@@ -120,7 +140,7 @@ jobs:
         uses: trstringer/manual-approval@v1
         with:
           secret: ${{ secrets.GITHUB_TOKEN }}
-          approvers: suryaaki2,rberezen,jnewton03,kristyldatical,sayaliM0412
+          approvers: filipelautert,rberezen,jnewton03,kristyldatical,sayaliM0412
           minimum-approvals: 2
           issue-title: "Deploying ${{ needs.setup.outputs.version }} to sonatype"
           issue-body: "Please approve or deny the deployment of version ${{ needs.setup.outputs.version }}"
@@ -149,87 +169,115 @@ jobs:
           fileName: "*"
           out-file-path: "."
 
-      - name: Set up Java for publishing to Maven Central Repository
-        uses: actions/setup-java@v4
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v5
         with:
-          java-version: "11"
-          distribution: "adopt"
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
+      - name: Convert escaped newlines and set GPG key
+        run: |
+          {
+            echo "GPG_KEY_CONTENT<<GPG_EOF"
+            printf '%b' "${{ env.GPG_SECRET }}"
+            echo
+            echo "GPG_EOF"
+          } >> $GITHUB_ENV
+
+      - name: Set up Java for publishing to Maven Central Repository
+        uses: actions/setup-java@v5
+        with:
+          java-version: "17"
+          distribution: "temurin"
           server-id: sonatype-nexus-staging
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
-          gpg-private-key: ${{ secrets.GPG_SECRET }}
+          gpg-private-key: ${{ env.GPG_KEY_CONTENT }}
           gpg-passphrase: GPG_PASSPHRASE
         env:
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
 
       - name: Publish to Maven Central
         env:
-          MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.SONATYPE_TOKEN }}
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+          MAVEN_USERNAME: ${{ env.SONATYPE_USERNAME }}
+          MAVEN_PASSWORD: ${{ env.SONATYPE_TOKEN }}
+          GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
         run: |
           version=${{ needs.setup.outputs.version }}
 
           unzip -j liquibase-additional-*.zip
 
-          ##extracts and sign poms
-          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-cdi' 'liquibase-cdi-jakarta' 'liquibase-commercial'; do
+          ##extracts and sign poms, generate checksums for all artifacts
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
             unzip -j $i-${version}.jar META-INF/maven/org.liquibase/$i/pom.xml
             sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
             mv pom.xml $i-${version}.pom
-            if test 'liquibase-commercial' == $i; then
-              sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private<\/connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" $i-${version}.pom   ## scm info not in the pom
-            fi
 
+            # Sign POM file
             gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i-${version}.pom
-
-            mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-              -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
-              -DrepositoryId=sonatype-nexus-staging \
-              -DpomFile=$i-${version}.pom \
-              -DgeneratePom=false \
-              -Dfile=$i-${version}.jar \
-              -Dsources=$i-${version}-sources.jar \
-              -Djavadoc=$i-${version}-javadoc.jar \
-              -Dfiles=$i-${version}.jar.asc,$i-${version}-sources.jar.asc,$i-${version}-javadoc.jar.asc,$i-${version}.pom.asc \
-              -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
-              -Dclassifiers=,sources,javadoc,
+            
+            # Generate checksums for POM file
+            md5sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.md5
+            sha1sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.sha1
+            
+            # Generate checksums for all JAR files (main, sources, javadoc)
+            for jar_file in $i-${version}.jar $i-${version}-sources.jar $i-${version}-javadoc.jar; do
+              if [ -f "$jar_file" ]; then
+                md5sum "$jar_file" | cut -d' ' -f1 > "$jar_file.md5"
+                sha1sum "$jar_file" | cut -d' ' -f1 > "$jar_file.sha1"
+              fi
+            done
           done
 
-          ## Release repository
-          ## Have to find the stagingRepositoryId that was auto-generated
-          api_output=$(curl -s -u "${{ secrets.SONATYPE_USERNAME }}:${{ secrets.SONATYPE_TOKEN }}" "https://oss.sonatype.org/service/local/staging/profile_repositories")
-          # Extract ids of repositories-item containing the string "liquibase"
-          repositories=$(echo "$api_output" | grep -B 8 "liquibase" | grep "<repositoryId>" | awk -F"<|>" '{print $3}')
-          echo "Repository IDs containing 'liquibase': $repositories"
-          for repo_id in $repositories; do
-            echo "Check if $repo_id repository is an extension"
-            api_output=$(curl -s -u "${{ secrets.SONATYPE_USERNAME }}:${{ secrets.SONATYPE_TOKEN }}" "https://oss.sonatype.org/service/local/repositories/$repo_id/content/org/liquibase/")
-            relative_path=$(echo "$api_output" | grep -oP '<relativePath>\K[^<]+' | awk 'NR==1')
-            echo "Relative path: $relative_path"
-            if [[ "$relative_path" == *"/org/liquibase/ext/"* ]]; then
-                echo "Relative path contains '/org/liquibase/ext/'. It is an extension."
-            else
-                echo "Relative path does not contain '/org/liquibase/ext/'. It is not an extension."
-                stagingRepositoryId=$repo_id
-                break
-            fi
+          # Create Maven repository layout structure for the bundle
+          mkdir -p "bundle/org/liquibase"
+
+          # Copy all artifacts to proper Maven repository layout
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
+            mkdir -p "bundle/org/liquibase/$i/${version}"
+            cp $i-${version}* "bundle/org/liquibase/$i/${version}/"
           done
 
-          echo "Staging Repository Id: $stagingRepositoryId"
+          # Create the bundle zip file
+          cd bundle
+          zip -r ../central-bundle.zip .
+          cd ..
 
-          mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-close \
-            -DnexusUrl=https://oss.sonatype.org/ \
-            -DserverId=sonatype-nexus-staging \
-            -DstagingRepositoryId=$stagingRepositoryId \
-            -DstagingProgressTimeoutMinutes=10
+          # Create base64 encoded credentials for Bearer auth
+          AUTH_HEADER=$(printf "%s:%s" "${MAVEN_USERNAME}" "${MAVEN_PASSWORD}" | base64 -w 0)
 
-          mvn org.sonatype.plugins:nexus-staging-maven-plugin:1.6.8:rc-release \
-            -DautoDropAfterRelease=true \
-            -DnexusUrl=https://oss.sonatype.org/ \
-            -DserverId=sonatype-nexus-staging \
-            -DstagingRepositoryId=$stagingRepositoryId \
-            -DstagingProgressTimeoutMinutes=10
+          # Upload bundle to Central Portal with AUTOMATIC publishing
+          echo "Uploading bundle to Central Portal for liquibase-${version}..."
+          UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X POST \
+            -H "Authorization: Bearer ${AUTH_HEADER}" \
+            -F "bundle=@central-bundle.zip" \
+            "https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC&name=liquibase-${version}")
+
+          # Parse response
+          HTTP_CODE=$(echo "$UPLOAD_RESPONSE" | tail -n1)
+          DEPLOYMENT_ID=$(echo "$UPLOAD_RESPONSE" | head -n1)
+
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Deployment ID: $DEPLOYMENT_ID"
+
+          if [ "$HTTP_CODE" != "201" ]; then
+            echo "Upload failed with HTTP status $HTTP_CODE"
+            echo "Response: $DEPLOYMENT_ID"
+            exit 1
+          fi
+
+          echo "Bundle uploaded successfully to Central Portal"
+          echo "Deployment ID: $DEPLOYMENT_ID"
+          echo "Automatic publishing initiated for liquibase-${version}"
 
   deploy_javadocs:
     if: ${{ inputs.dry_run == false }}
@@ -245,11 +293,27 @@ jobs:
           fileName: "liquibase-additional*.zip"
           out-file-path: "."
 
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
+          aws-region: us-east-1
+
       - name: Unpack javadoc files and upload to s3
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.JAVADOCS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.JAVADOCS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
         # unzip archives, create directory for each jar, and extract jar contents to directory.  Then delete the jar and zip files.  Then upload to s3.
         run: |
           unzip -j '*.zip' '*javadoc*.jar'
@@ -269,16 +333,16 @@ jobs:
     name: Publish artifacts to Github Packages
     runs-on: ubuntu-22.04
     needs: [setup, manual_trigger_deployment]
-
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Java for publishing to GitHub Repository
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: "17"
           distribution: "temurin"
           cache: "maven"
           server-id: liquibase
+
       - name: Set up Maven
         uses: stCarolas/setup-maven@v5
         with:
@@ -289,10 +353,10 @@ jobs:
 
       # Publish to GitHub Packages
       - name: Publish package to Github
-        run: mvn -B clean deploy -DskipTests=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TARGET_ARTIFACT_REPOSITORY: liquibase
+        run: mvn -B clean deploy -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.version }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
 
   deploy_xsd:
     if: ${{ inputs.dry_run == false }}
@@ -304,47 +368,38 @@ jobs:
       version: ${{ needs.setup.outputs.version }}
     steps:
       - name: Download liquibase xsd
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           # Relative path under $GITHUB_WORKSPACE to place the repository
           path: liquibase-core-repo
           repository: "liquibase/liquibase"
 
-      - name: Get GitHub App token
-        id: get-token
-        uses: actions/create-github-app-token@v2
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v5
         with:
-          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: liquibase-pro
-          permission-contents: read
-          
-      - name: Download liquibase-pro xsd
-        uses: actions/checkout@v4
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
         with:
-          ref: "${{ needs.setup.outputs.ref_branch }}"
-          token: ${{ steps.get-token.outputs.token }}
-          # Relative path under $GITHUB_WORKSPACE to place the repository
-          path: liquibase-pro-repo
-          repository: "liquibase/liquibase-pro"
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
+          aws-region: us-east-1
 
       - name: Upload to s3
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.LIQUIBASEORIGIN_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
         # aws s3 sync syncs directories and S3 prefixes.
         run: |
-          aws s3 sync liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/ s3://liquibaseorg-origin/xml/ns/pro/ --content-type application/octet-stream --only-show-errors
           aws s3 sync liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ s3://liquibaseorg-origin/xml/ns/dbchangelog/ --content-type application/octet-stream --only-show-errors
-          aws s3 sync liquibase-pro-repo/pro/src/main/resources/schemas/ s3://liquibaseorg-origin/json/schema/ --content-type application/octet-stream --only-show-errors
 
       - name: Index.htm file upload
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.LIQUIBASEORIGIN_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
         # get the major.minor xsd version. grab the index.htm from s3, add the new verison of xsd and sync with the s3 again
         run: |
           version=${{ needs.setup.outputs.version }}
@@ -360,46 +415,22 @@ jobs:
       - name: Liquibase xsds SFTP upload
         uses: wangyucode/sftp-upload-action@v2.0.4
         with:
-          host: ${{ secrets.WPENGINE_SFTP_HOST }}
-          port: ${{ secrets.WPENGINE_SFTP_PORT }}
-          username: ${{ secrets.WPENGINE_SFTP_USER }}
-          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }}
+          host: ${{ env.WPENGINE_SFTP_HOST }}
+          port: ${{ env.WPENGINE_SFTP_PORT }}
+          username: ${{ env.WPENGINE_SFTP_USER }}
+          password: ${{ env.WPENGINE_SFTP_PASSWORD }}
           compress: true
           forceUpload: true
           localDir: "liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/"
           remoteDir: "/xml/ns/dbchangelog/"
 
-      - name: Liquibase PRO xsds SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.4
-        with:
-          host: ${{ secrets.WPENGINE_SFTP_HOST }}
-          port: ${{ secrets.WPENGINE_SFTP_PORT }}
-          username: ${{ secrets.WPENGINE_SFTP_USER }}
-          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }}
-          compress: false
-          forceUpload: true
-          localDir: "liquibase-pro-repo/pro/src/main/resources/www.liquibase.org/xml/ns/pro/"
-          remoteDir: "/xml/ns/pro/"
-
-      - name: Liquibase flow-file schema SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.4
-        with:
-          host: ${{ secrets.WPENGINE_SFTP_HOST }}
-          port: ${{ secrets.WPENGINE_SFTP_PORT }}
-          username: ${{ secrets.WPENGINE_SFTP_USER }}
-          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }}
-          compress: false
-          forceUpload: true
-          localDir: "liquibase-pro-repo/pro/src/main/resources/schemas/"
-          remoteDir: "/json/schema/"
-
       - name: Liquibase index.htm SFTP upload
         uses: wangyucode/sftp-upload-action@v2.0.4
         with:
-          host: ${{ secrets.WPENGINE_SFTP_HOST }}
-          port: ${{ secrets.WPENGINE_SFTP_PORT }}
-          username: ${{ secrets.WPENGINE_SFTP_USER }}
-          password: ${{ secrets.WPENGINE_SFTP_PASSWORD }}
+          host: ${{ env.WPENGINE_SFTP_HOST }}
+          port: ${{ env.WPENGINE_SFTP_PORT }}
+          username: ${{ env.WPENGINE_SFTP_USER }}
+          password: ${{ env.WPENGINE_SFTP_PASSWORD }}
           compress: false
           forceUpload: true
           localDir: "index-file/"
@@ -411,12 +442,26 @@ jobs:
     needs: [setup, manual_trigger_deployment]
     runs-on: ubuntu-22.04
     steps:
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
       - name: Get GitHub App token
         id: get-token
         uses: actions/create-github-app-token@v2
         with:
-          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           permission-contents: write
           permission-actions: write
@@ -444,12 +489,26 @@ jobs:
     needs: [setup, manual_trigger_deployment]
     runs-on: ubuntu-22.04
     steps:
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
       - name: Get GitHub App token
         id: get-token
         uses: actions/create-github-app-token@v2
         with:
-          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           permission-contents: write
           permission-actions: write
@@ -466,29 +525,6 @@ jobs:
           wait-for-completion: true
           workflow-logs: json-output
 
-  generate-PRO-tag:
-    if: ${{ inputs.dry_run == false }}
-    name: Generate PRO tags based on OSS release
-    needs: [setup]
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Get GitHub App token
-        id: get-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          permission-contents: write
-          permission-actions: write
-
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ steps.get-token.outputs.token }}
-          repository: liquibase/liquibase-pro
-          event-type: oss-released-tag
-
   package:
     uses: liquibase/build-logic/.github/workflows/package.yml@main
     needs: [setup]
@@ -501,67 +537,12 @@ jobs:
       dry_run_zip_url: ${{ inputs.dry_run_zip_url || '' }}
       dry_run_tar_gz_url: ${{ inputs.dry_run_tar_gz_url || '' }}
       dry_run_release_id: ${{ inputs.dry_run_release_id || '' }}
-
-  update-docs-oss-pro-version:
-    if: ${{ inputs.dry_run == false }}
-    name: Update OSS and PRO tags based on OSS release
-    needs: [setup]
-    runs-on: ubuntu-latest
-    outputs:
-      latest_version: ${{ steps.get_latest_oss_version.outputs.latest_version }}
-      previous_version: ${{ steps.get_latest_oss_version.outputs.previous_version }}
-    steps:
-      - name: Get GitHub App token
-        id: get-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ secrets.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ secrets.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          permission-contents: write
-          permission-actions: write
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          repository: liquibase/liquibase
-          ref: "${{ needs.setup.outputs.ref_branch }}"
-          fetch-depth: 0
-
-      - name: Get the oss release version
-        id: get_latest_oss_version
-        run: |
-          # Fetch all tags from the remote
-          git fetch --tags
-          # Get the latest semver tag, strip 'v'
-          latest_tag=$(git tag --sort=-creatordate | grep -E '^v?[0-9]' | head -n1 | sed 's/^v//')
-          # Get the second latest tag
-          previous_tag=$(git tag --sort=-creatordate | grep -E '^v?[0-9]' | sed 's/^v//' | head -n2 | tail -n1)
-          echo "latest_version=$latest_tag" >> $GITHUB_OUTPUT
-          echo "previous_version=$previous_tag" >> $GITHUB_OUTPUT
-          echo "Latest Version: $latest_tag"
-          echo "Previous Version: $previous_tag"
-
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ steps.get-token.outputs.token }}
-          repository: liquibase/liquibase-docs
-          event-type: oss-released-version
-          client-payload: '{"latest_version": "${{ steps.get_latest_oss_version.outputs.latest_version }}", "previous_version": "${{ steps.get_latest_oss_version.outputs.previous_version }}"}'
-
-      # dispatch an event to `liquibase-aws-license-service` repository to update pom.xml with latest OSS Release
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ steps.get-token.outputs.token }}
-          repository: liquibase/liquibase-aws-license-service
-          event-type: oss-released-version
-
+      distribution: "liquibase"
+      download_base_url: "https://github.com/liquibase/liquibase/releases/download"
 
   dry_run_deploy_maven:
     if: ${{ inputs.dry_run == true }}
-    name: Deploy to repo.liquibase.net
+    name: Deploy to Maven Central Repository
     needs: [setup]
     runs-on: ubuntu-22.04
     steps:
@@ -573,53 +554,115 @@ jobs:
           fileName: "*"
           out-file-path: "."
 
-      - name: Set up Java for publishing to Maven Central Repository
-        uses: actions/setup-java@v4
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v5
         with:
-          java-version: "11"
-          distribution: "adopt"
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
+      - name: Convert escaped newlines and set GPG key
+        run: |
+          {
+            echo "GPG_KEY_CONTENT<<GPG_EOF"
+            printf '%b' "${{ env.GPG_SECRET }}"
+            echo
+            echo "GPG_EOF"
+          } >> $GITHUB_ENV
+
+      - name: Set up Java for publishing to Maven Central Repository
+        uses: actions/setup-java@v5
+        with:
+          java-version: "17"
+          distribution: "temurin"
           server-id: dry-run-sonatype-nexus-staging
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
-          gpg-private-key: ${{ secrets.GPG_SECRET }}
+          gpg-private-key: ${{ env.GPG_KEY_CONTENT }}
           gpg-passphrase: GPG_PASSPHRASE
         env:
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
 
-      - name: Publish to repo.liquibase.net
+      - name: Publish to Central Portal (Dry Run)
         env:
-          MAVEN_USERNAME: ${{ secrets.REPO_LIQUIBASE_NET_USER }}
-          MAVEN_PASSWORD: ${{ secrets.REPO_LIQUIBASE_NET_PASSWORD }}
-          GPG_PASSWORD: ${{ secrets.GPG_PASSPHRASE }}
+          MAVEN_USERNAME: ${{ env.SONATYPE_USERNAME }}
+          MAVEN_PASSWORD: ${{ env.SONATYPE_TOKEN }}
+          GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
         run: |
           version=${{ needs.setup.outputs.version }}
 
           unzip -j liquibase-additional-*.zip
 
-          ##extracts and sign poms
-          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-cdi' 'liquibase-cdi-jakarta' 'liquibase-commercial'; do
+          ##extracts and sign poms, generate checksums for all artifacts
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
             unzip -j $i-${version}.jar META-INF/maven/org.liquibase/$i/pom.xml
             sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
             mv pom.xml $i-${version}.pom
-            if test 'liquibase-commercial' == $i; then
-              sed -i -e "s/<\/licenses>/<\/licenses><scm><connection>private<\/connection><developerConnection>private<\/developerConnection><url>private<\/url><\/scm>/" $i-${version}.pom   ## scm info not in the pom
-            fi
 
+            # Sign POM file
             gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i-${version}.pom
-
-            mvn -B org.apache.maven.plugins:maven-deploy-plugin:3.0.0-M1:deploy-file \
-              -Durl=https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging/ \
-              -DrepositoryId=dry-run-sonatype-nexus-staging \
-              -DpomFile=$i-${version}.pom \
-              -DgeneratePom=false \
-              -Dfile=$i-${version}.jar \
-              -Dsources=$i-${version}-sources.jar \
-              -Djavadoc=$i-${version}-javadoc.jar \
-              -Dfiles=$i-${version}.jar.asc,$i-${version}-sources.jar.asc,$i-${version}-javadoc.jar.asc,$i-${version}.pom.asc \
-              -Dtypes=jar.asc,jar.asc,jar.asc,pom.asc \
-              -Dclassifiers=,sources,javadoc,
-
+            
+            # Generate checksums for POM file
+            md5sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.md5
+            sha1sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.sha1
+            
+            # Generate checksums for all JAR files (main, sources, javadoc)
+            for jar_file in $i-${version}.jar $i-${version}-sources.jar $i-${version}-javadoc.jar; do
+              if [ -f "$jar_file" ]; then
+                md5sum "$jar_file" | cut -d' ' -f1 > "$jar_file.md5"
+                sha1sum "$jar_file" | cut -d' ' -f1 > "$jar_file.sha1"
+              fi
+            done
           done
+
+          # Create Maven repository layout structure for the bundle
+          mkdir -p "bundle/org/liquibase"
+
+          # Copy all artifacts to proper Maven repository layout
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
+            mkdir -p "bundle/org/liquibase/$i/${version}"
+            cp $i-${version}* "bundle/org/liquibase/$i/${version}/"
+          done
+
+          # Create the bundle zip file
+          cd bundle
+          zip -r ../central-bundle.zip .
+          cd ..
+
+          # Create base64 encoded credentials for Bearer auth
+          AUTH_HEADER=$(printf "%s:%s" "${MAVEN_USERNAME}" "${MAVEN_PASSWORD}" | base64 -w 0)
+
+          # Upload bundle to Central Portal with USER_MANAGED publishing (dry run)
+          echo "Uploading bundle to Central Portal for dry-run liquibase-${version}..."
+          UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X POST \
+            -H "Authorization: Bearer ${AUTH_HEADER}" \
+            -F "bundle=@central-bundle.zip" \
+            "https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED&name=liquibase-${version}-dry-run")
+
+          # Parse response
+          HTTP_CODE=$(echo "$UPLOAD_RESPONSE" | tail -n1)
+          DEPLOYMENT_ID=$(echo "$UPLOAD_RESPONSE" | head -n1)
+
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Deployment ID: $DEPLOYMENT_ID"
+
+          if [ "$HTTP_CODE" != "201" ]; then
+            echo "Upload failed with HTTP status $HTTP_CODE"
+            echo "Response: $DEPLOYMENT_ID"
+            exit 1
+          fi
+
+          echo "Bundle uploaded successfully to Central Portal for dry-run"
+          echo "Deployment ID: $DEPLOYMENT_ID"
+          echo "Manual publishing required - visit https://central.sonatype.com/publishing/deployments to review and publish"
 
   publish_assets_to_s3_bucket:
     if: ${{ inputs.dry_run == false }}
@@ -639,10 +682,26 @@ jobs:
         id: timestamp
         run: echo "timestamp=$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
 
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
+      - name: Configure AWS credentials for prod account access
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
+          aws-region: us-east-1
+
       - name: Publish released assets to s3 bucket
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.LIQUIBASEORIGIN_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.LIQUIBASEORIGIN_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
         run: |
           aws s3 sync "./${{ needs.setup.outputs.version }}-released-assets" s3://liquibaseorg-origin/oss-released-assets/${{ needs.setup.outputs.version }}-released-assets-${{ env.timestamp }}/ --only-show-errors

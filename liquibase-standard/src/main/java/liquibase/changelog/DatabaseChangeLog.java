@@ -34,13 +34,17 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.util.ExceptionUtil;
 import liquibase.util.FileUtil;
+import liquibase.util.LiquibaseLauncherSettings;
 import liquibase.util.StringUtil;
 import lombok.Getter;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -105,6 +109,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private final List<ChangeSet> changeSets = new ArrayList<>();
     @Getter
     private final List<ChangeSet> skippedChangeSets = new ArrayList<>();
+    @Getter
+    private final List<ChangeSet> skippedBecauseOfChangeDbmsChangeSets = new ArrayList<>();
     @Getter
     private final List<ChangeSet> skippedBecauseOfOsMismatchChangeSets = new ArrayList<>();
     @Getter
@@ -601,7 +607,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         IncludeAllFilter resourceFilter = null;
         if (resourceFilterDef != null) {
             try {
-                resourceFilter = (IncludeAllFilter) Class.forName(resourceFilterDef).getConstructor().newInstance();
+                resourceFilter = (IncludeAllFilter) Class.forName(resourceFilterDef, true, Thread.currentThread().getContextClassLoader()).getConstructor().newInstance();
             } catch (ReflectiveOperationException e) {
                 throw new SetupException(e);
             }
@@ -691,7 +697,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             resourceComparator = getStandardChangeLogComparator();
         } else {
             try {
-                resourceComparator = (Comparator<String>) Class.forName(resourceComparatorDef).getConstructor().newInstance();
+                resourceComparator = (Comparator<String>) Class.forName(resourceComparatorDef, true, Thread.currentThread().getContextClassLoader()).getConstructor().newInstance();
             } catch (ReflectiveOperationException e) {
                 //take default comparator
                 Scope.getCurrentScope().getLog(getClass()).info("no resourceComparator defined - taking default " +
@@ -899,7 +905,13 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             List<Resource> unsortedResources = getUnsortedResources(pathName, errorIfMissingOrEmpty, resourceAccessor, relativeTo, seenChangelogPaths, searchOptions);
             SortedSet<Resource> resources = new TreeSet<>((o1, o2) -> resourceComparator.compare(o1.getPath(), o2.getPath()));
             if (unsortedResources != null) {
+                URI liquibaseHomeInternalUri = getLiquibaseHomeInternalUri();
                 for (Resource resourcePath : unsortedResources) {
+                    // if the resource is inside a jar located in liquibaseHomeUri/internal, we don't want to include it
+                    if (liquibaseHomeInternalUri != null && resourcePath.getUri().toString().startsWith("jar:" + liquibaseHomeInternalUri.toString())) {
+                        Scope.getCurrentScope().getLog(getClass()).info("Skipping resource from jar file in liquibase home internal: " + resourcePath);
+                        continue;
+                    }
                     if ((resourceFilter == null) || resourceFilter.include(resourcePath.getPath())) {
                         resources.add(resourcePath);
                     }
@@ -914,6 +926,19 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         } catch (IOException e) {
             throw new SetupException(e);
         }
+    }
+
+    private URI getLiquibaseHomeInternalUri() {
+        String liquibaseHome = LiquibaseLauncherSettings.getSetting(LiquibaseLauncherSettings.LiquibaseLauncherSetting.LIQUIBASE_HOME);
+        URI liquibaseHomeUri = null;
+        if (liquibaseHome != null) {
+            try {
+                liquibaseHomeUri = Paths.get(liquibaseHome + File.separator + "internal").toUri();
+            } catch (InvalidPathException e) {
+                Scope.getCurrentScope().getLog(DatabaseChangeLog.class).warning("Invalid LIQUIBASE_HOME path: " + liquibaseHome, e);
+            }
+        }
+        return liquibaseHomeUri;
     }
 
     private List<Resource> getUnsortedResources(String pathName, boolean errorIfMissingOrEmpty, ResourceAccessor resourceAccessor, String relativeTo, Set<String> seenChangelogPaths, ResourceAccessor.SearchOptions searchOptions) throws SetupException, IOException {

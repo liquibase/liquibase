@@ -65,5 +65,11 @@ class SimpleSqlGrammarTest extends Specification {
         "select q'{\\\n;\n\\}' from sys.dual;"                 | ["select", " ", "q", "'{\\\n;\n\\}'", " ", "from", " ", "sys.dual", ";"]
         "declare @myvar int;"                                  | ["declare", " ", "@myvar", " ", "int", ";"]
         "create table #temptable(col int);"                    | ["create", " ", "table", " ", "#temptable", "(", "col", " ", "int", ")", ";"]
+        "SELECT 'a\\'b;\nc';"                                  | ["SELECT", " ", "'a\\'b;\nc'", ";"]
+        "SELECT 'a\\'b;\nc\\'d';"                              | ["SELECT", " ", "'a\\'b;\nc\\'d'", ";"]
+        "INSERT INTO t VALUES ('a\\'b;\nc');"                  | ["INSERT", " ", "INTO", " ", "t", " ", "VALUES", " ", "(", "'a\\'b;\nc'", ")", ";"]
+        "SELECT \"a\\\"b;\nc\";"                               | ["SELECT", " ", "\"a\\\"b;\nc\"", ";"]
+        "SELECT \"a\\\"b;\nc\\\"d\";"                          | ["SELECT", " ", "\"a\\\"b;\nc\\\"d\"", ";"]
+        "INSERT INTO t VALUES ('<div class=\\'test\\'>;\ndata</div>');" | ["INSERT", " ", "INTO", " ", "t", " ", "VALUES", " ", "(", "'<div class=\\'test\\'>;\ndata</div>'", ")", ";"]
     }
 }

@@ -60,7 +60,7 @@ public class ViewExistsPrecondition extends AbstractPrecondition {
     	try {
             currentCatalogName = getCatalogName();
             currentSchemaName = getSchemaName();
-            if (!SnapshotGeneratorFactory.getInstance().hasIgnoreNested(new View().setName(database.correctObjectName(getViewName(), View.class)).setSchema(new Schema(currentCatalogName, currentSchemaName)), database)) {
+            if (!SnapshotGeneratorFactory.getInstance().has(new View().setName(database.correctObjectName(getViewName(), View.class)).setSchema(new Schema(currentCatalogName, currentSchemaName)), database)) {
                 throw new PreconditionFailedException("View "+database.escapeTableName(currentCatalogName, currentSchemaName, getViewName())+" does not exist", changeLog, this);
             }
         } catch (PreconditionFailedException e) {

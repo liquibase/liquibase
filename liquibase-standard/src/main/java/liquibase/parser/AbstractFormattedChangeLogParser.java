@@ -12,6 +12,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changeset.ChangeSetService;
 import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.exception.ChangeLogParseException;
+import liquibase.parser.core.formattedsql.InvalidFormattedSqlPatternsForOssUtil;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.ExceptionUtil;
 import liquibase.util.StreamUtil;
@@ -262,6 +263,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                 }
                 reader = new BufferedReader(StreamUtil.readStreamWithReader(fileStream, null));
 
+
                 String firstLine = reader.readLine();
 
                 while (firstLine != null && firstLine.trim().isEmpty() && reader.ready()) {
@@ -320,10 +322,20 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
             boolean rollbackSplitStatements = true;
             String rollbackEndDelimiter = null;
 
+            boolean foundHeader = false;
+            boolean foundAdditionalHeader = false;
             int count = 0;
             String line;
             while ((line = reader.readLine()) != null) {
                 count++;
+                Matcher changeLogPatternMatcher = FIRST_LINE_PATTERN.matcher(line);
+                if (changeLogPatternMatcher.matches()) {
+                    if (! foundHeader) {
+                        foundHeader = true;
+                    } else {
+                        foundAdditionalHeader = true;
+                    }
+                }
                 Matcher commentMatcher = COMMENT_PATTERN.matcher(line);
                 Matcher propertyPatternMatcher = PROPERTY_PATTERN.matcher(line);
                 Matcher altPropertyPatternMatcher = ALT_PROPERTY_ONE_CHARACTER_PATTERN.matcher(line);
@@ -334,9 +346,8 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     String message = String.format(EXCEPTION_MESSAGE, physicalChangeLogLocation, count, getSequenceName(), "--property name=<property name> value=<property value>", getDocumentationLink());
                     throw new ChangeLogParseException("\n" + message);
                 }
-                Matcher changeLogPatterMatcher = FIRST_LINE_PATTERN.matcher(line);
 
-                setLogicalFilePath(changeLog, line, changeLogPatterMatcher);
+                setLogicalFilePath(changeLog, line, changeLogPatternMatcher);
 
                 Matcher ignoreLinesMatcher = IGNORE_LINES_PATTERN.matcher(line);
                 Matcher altIgnoreMatcher = ALT_IGNORE_PATTERN.matcher(line);
@@ -383,6 +394,12 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     if (changeSet != null) {
                         if (finalCurrentSequence == null) {
                             throw new ChangeLogParseException(String.format("No %s for changeset %s", getSequenceName(), changeSet.toString(false)));
+                        } else {
+                            if (foundAdditionalHeader) {
+                                Scope.getCurrentScope().getLog(AbstractFormattedChangeLogParser.class)
+                                        .info(String.format("An additional formatted SQL header line was discovered for changeset %s and will be treated as a comment", changeSet.toString(false)));
+                                foundAdditionalHeader = false;
+                            }
                         }
 
                         setChangeSequence(change, finalCurrentSequence);
@@ -412,7 +429,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     boolean runOnChange = parseBoolean(runOnChangePatternMatcher, changeSet, false, "runOnChange");
                     boolean runAlways = parseBoolean(runAlwaysPatternMatcher, changeSet, false, "runAlways");
                     boolean runInTransaction = parseBoolean(runInTransactionPatternMatcher, changeSet, true, "runInTransaction");
-                    boolean failOnError = parseBoolean(failOnErrorPatternMatcher, changeSet, true, "failOnError");
+                    Boolean failOnError = parseBooleanObject(failOnErrorPatternMatcher, changeSet, null, "failOnError");
 
                     String runWith = parseString(runWithMatcher, RUN_WITH);
                     if (runWith != null) {
@@ -494,6 +511,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                         throw new ChangeLogParseException("\n" + message);
                     }
                     if (changeSet != null) {
+                        InvalidFormattedSqlPatternsForOssUtil.interruptIfIsProCommandAndNoLicenseIsPresent(line);
                         AtomicBoolean changeSetFinished = new AtomicBoolean(false);
                         configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher, resourceAccessor, changeLog, change, rollbackSplitStatementsPatternMatcher, rollbackSplitStatements, rollbackEndDelimiter, changeSetFinished);
                         if (changeSetFinished.get()) {
@@ -505,7 +523,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                                     String.format("Unexpected formatting at line %d. Formatted %s changelogs do not allow comment lines outside of changesets. Learn all the options at %s", count, getSequenceName(), getDocumentationLink());
                             throw new ChangeLogParseException("\n" + message);
                         } else {
-                            handleAdditionalLines(changeLog, resourceAccessor, line);
+                            handleAdditionalLines(changeLog, resourceAccessor, line, currentSequence);
                         }
                     }
                 }
@@ -714,7 +732,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     }
 
     protected ChangeSet configureChangeSet(DatabaseChangeLog changeLog, boolean runOnChange, boolean runAlways,
-                                           boolean runInTransaction, boolean failOnError, String runWith,
+                                           boolean runInTransaction, Boolean failOnError, String runWith,
                                            String runWithSpoolFile, String context, String labels, String logicalFilePath,
                                            String dbms, String ignore, String changeSetId, String changeSetAuthor) {
         ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
@@ -730,8 +748,8 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         return changeSet;
     }
 
-    protected void setLogicalFilePath(DatabaseChangeLog changeLog, String line, Matcher changeLogPatterMatcher) {
-        if (changeLogPatterMatcher.matches()) {
+    protected void setLogicalFilePath(DatabaseChangeLog changeLog, String line, Matcher changeLogPatternMatcher) {
+        if (changeLog.getLogicalFilePath() == null && changeLogPatternMatcher.matches()) {
             Matcher logicalFilePathMatcher = LOGICAL_FILE_PATH_PATTERN.matcher(line);
             changeLog.setLogicalFilePath(parseString(logicalFilePathMatcher, LOGICAL_FILE_PATH));
         }
@@ -761,9 +779,20 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         currentRollbackSequence.setLength(0);
     }
 
+    /**
+     * @deprecated use {@link AbstractFormattedChangeLogParser#handleAdditionalLines(DatabaseChangeLog, ResourceAccessor, String)}
+     */
+    @Deprecated
     protected boolean handleAdditionalLines(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, String line)
-        throws ChangeLogParseException {
+            throws ChangeLogParseException {
         return false;
+    }
+
+    protected boolean handleAdditionalLines(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, String line, StringBuilder currentSequence)
+            throws ChangeLogParseException {
+        InvalidFormattedSqlPatternsForOssUtil.interruptIfIsProCommandAndNoLicenseIsPresent(line);
+        // by default calls the deprecated method , otherwise old code may break.
+        return handleAdditionalLines(changeLog, resourceAccessor, line);
     }
 
     //
@@ -929,6 +958,24 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         return parseBoolean(matcher, changeSet, defaultValue, null);
     }
 
+    protected Boolean parseBooleanObject(Matcher matcher, ChangeSet changeSet, Boolean defaultValue, String description)
+            throws ChangeLogParseException {
+        Boolean booleanMatch = defaultValue;
+        if (matcher.matches()) {
+            try {
+                booleanMatch = Boolean.parseBoolean(matcher.group(1));
+                logMatch(description, String.valueOf(booleanMatch), getClass());
+            } catch (Exception e) {
+                if (changeSet != null) {
+                    throw new ChangeLogParseException("Cannot parse " + changeSet + " " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
+                } else {
+                    throw new ChangeLogParseException("Cannot parse pattern " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
+                }
+            }
+        }
+        return booleanMatch;
+    }
+
     protected boolean parseBoolean(Matcher matcher, ChangeSet changeSet, boolean defaultValue, String description)
             throws ChangeLogParseException {
         boolean booleanMatch = defaultValue;
@@ -937,7 +984,11 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                 booleanMatch = Boolean.parseBoolean(matcher.group(1));
                 logMatch(description, String.valueOf(booleanMatch), getClass());
             } catch (Exception e) {
-                throw new ChangeLogParseException("Cannot parse " + changeSet + " " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
+                if (changeSet != null) {
+                    throw new ChangeLogParseException("Cannot parse " + changeSet + " " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
+                } else {
+                    throw new ChangeLogParseException("Cannot parse pattern " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
+                }
             }
         }
         return booleanMatch;

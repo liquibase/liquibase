@@ -1,0 +1,64 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="wesley (generated)" id="1736451873490-667">
+        <createTable tableName="CNSMR_PYMNT_WRK_ACTN">
+            <column autoIncrement="true" defaultOnNull="false" generationType="BY DEFAULT" name="CNSMR_PYMNT_WRK_ACTN_ID" type="NUMBER(19, 0)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="SYS_C00127381"/>
+            </column>
+            <column name="CNSMR_ID" type="NUMBER(19, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="C_P_W_A_TRNSCTN_DTTM" type="TIMESTAMP(6)"/>
+            <column name="UPSRT_DTTM" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPSRT_SOFT_COMP_ID" type="NUMBER(10, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPSRT_TRNSCTN_NMBR" type="NUMBER(10, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UPSRT_USR_ID" type="NUMBER(19, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CRTD_USR_ID" type="NUMBER(19, 0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CRTD_DTTM" type="TIMESTAMP(6)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+     </changeSet>
+    <changeSet author="wesley (generated)" id="1736451873490-4043">
+        <createIndex indexName="CNSMR_PYMNT_WRK_ACTN_AK1" tableName="CNSMR_PYMNT_WRK_ACTN">
+            <column name="CNSMR_ID"/>
+            <column name="C_P_W_A_TRNSCTN_DTTM"/>
+            <column name="UPSRT_TRNSCTN_NMBR"/>
+            <column name="UPSRT_DTTM"/>
+            <column name="UPSRT_USR_ID"/>
+            <column name="UPSRT_SOFT_COMP_ID"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="wesley (generated)" id="1736451873490-4044" dbms="!mssql">
+        <addUniqueConstraint columnNames="CNSMR_ID" constraintName="CK_CNSMR_PYMNT_WRK_ACTN_AK1" forIndexName="CNSMR_PYMNT_WRK_ACTN_AK1" tableName="CNSMR_PYMNT_WRK_ACTN"/>
+    </changeSet>
+    <changeSet author="wesley (generated)" id="1736451873490-4044" dbms="mssql">
+        <addUniqueConstraint columnNames="CNSMR_ID" constraintName="CK_CNSMR_PYMNT_WRK_ACTN_AK1" tableName="CNSMR_PYMNT_WRK_ACTN"/>
+    </changeSet>
+    <changeSet author="wesley (generated)" id="1736451873490-4045" dbms="!mssql">
+        <preConditions onFail="MARK_RAN" onFailMessage="You are doing it wrong ;-)">
+          <not>
+            <uniqueConstraintExists tableName="CNSMR_PYMNT_WRK_ACTN" constraintName="CK_CNSMR_PYMNT_WRK_ACTN_AK1"/>
+          </not>
+        </preConditions>
+        <addUniqueConstraint columnNames="CNSMR_ID" constraintName="CK_CNSMR_PYMNT_WRK_ACTN_AK1" forIndexName="CNSMR_PYMNT_WRK_ACTN_AK1" tableName="CNSMR_PYMNT_WRK_ACTN"/>
+    </changeSet>
+    <changeSet author="wesley (generated)" id="1736451873490-4045" dbms="mssql">
+        <preConditions onFail="MARK_RAN" onFailMessage="You are doing it wrong ;-)">
+            <not>
+                <uniqueConstraintExists tableName="CNSMR_PYMNT_WRK_ACTN" constraintName="CK_CNSMR_PYMNT_WRK_ACTN_AK1"/>
+            </not>
+        </preConditions>
+        <addUniqueConstraint columnNames="CNSMR_ID" constraintName="CK_CNSMR_PYMNT_WRK_ACTN_AK1" tableName="CNSMR_PYMNT_WRK_ACTN"/>
+    </changeSet>
+</databaseChangeLog>

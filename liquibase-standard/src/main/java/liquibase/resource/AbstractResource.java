@@ -39,7 +39,7 @@ public abstract class AbstractResource implements Resource {
     private String handlePathForJarfile(String path) {
         String relative = this.uri.toString().replaceFirst(".*!", "");
         try {
-            if (!path.startsWith("..")) {
+            if (!path.startsWith("..") && !path.startsWith("/")) {
                 path = "/" + path;
             }
             return new URI(relative).resolve(new URI(path).normalize()).toString().replaceFirst("^/", "");
@@ -54,8 +54,20 @@ public abstract class AbstractResource implements Resource {
         // URI doesn't work as expected. So we need some manual handling
         if (uri.toString().contains(("!"))) {
             String[] uriSplit = uri.toString().split(("!"));
+            StringBuilder result = new StringBuilder();
             try {
-                return new URI(uriSplit[0] + "!" + new URI(uriSplit[1]).normalize());
+                for (int i = 0; i < uriSplit.length; i++) {
+                    if (i == uriSplit.length -1) {
+                        result.append(new URI(uriSplit[i]).normalize());
+                    } else {
+                        result.append(uriSplit[i]);
+                    }
+                    // append a ! if it's not the last part
+                    if (i < uriSplit.length - 1) {
+                        result.append("!");
+                    }
+                }
+                return new URI(result.toString());
             } catch (URISyntaxException e) {
                 return uri.normalize();
             }

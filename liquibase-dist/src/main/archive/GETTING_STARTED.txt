@@ -1,21 +1,22 @@
-Liquibase Version ${project.version}
+Liquibase Version ${project.version} - Getting Started
 
+Visit the always-current docs to learn more about Getting Started at https://docs.liquibase.com/oss/get-started)
 
 Getting Started
 --------------------------------------------
-Thanks for downloading and installing Liquibase ${project.version} from Liquibase.
+Thanks for downloading and installing Liquibase Community ${project.version} from Liquibase.
 
-By using the installer, you already have all the dependencies, directories, config, 
-and properties files to get started exploring the Liquibase examples provided, which 
-is a great way to understand the core concepts with a direct command-line introductory 
-experience.
+The open source Liquibase Community 5.0+ ships without extensions, drivers, and many other packages and dependencies. This change provides a much lighter, modular, and customizable Liquibase experience for Community users. Importantly, this flexibility both allows and requires users to manage their Liquibase dependencies for their specific needs.
+
+Using Liquibase Package Manager (LPM) 
+--------------------------------------------
+Liquibase Package Manager is now integrated and available for use directly from within the Community CLI experience with a new `liquibase lpm` command as the preferred method for managing dependencies. Check out the LPM README at https://github.com/liquibase/liquibase-package-manager for more information. Or run `liquibase lpm --help` in the app.
 
 
 Adding Liquibase to Your Path
 --------------------------------------------
-If you do not want always to provide an absolute path to the liquibase command, 
-add `/path/to/installed/liquibase` to your PATH. If you selected this option 
-during the installation process, this should have been done for you. 
+If you do not want always to provide an absolute path to the liquibase command, add `/path/to/installed/liquibase` to your PATH.
+If you used the Windows installer and selected this option during the installation process, this should have been done for you. 
 
 
 EXAMPLE PROJECTS
@@ -26,8 +27,10 @@ required to use Liquibase against a sample in-memory database.
 There are two projects under the examples directory: 
    * "examples/sql" directory shows how to use a SQL formatted changelog
    * "examples/xml" directory shows how to use an XML formatted changelog
+   * "examples/json" directory shows how to use a SQL formatted changelog
+   * "examples/yaml" directory shows how to use an XML formatted changelog
 
-Both projects utilize the same setup & examples and only differ in the changelog type.
+All projects utilize the same setup & examples and only differ in the changelog type.
 
 
 Setting Up Your Workspace
@@ -38,12 +41,12 @@ Copy the "examples" directory to another location on your machine.
 
 What got copied?
 
-In both ".../examples/sql" and "example/xml" there is a liquibase.properties file, 
+In all ".../examples/..." dirs, there is a liquibase.properties file, 
 which provides default values that allow you to run command-line (CLI) commands 
 immediately with Liquibase. This file is pre-configured to point to the changelog 
 you copied and the `start-h2` developer database.
 
-In both ".../examples/sql" and "example/xml" there is a sample changelogfile.
+In all ".../examples/..." dirs, there is a sample changelogfile.
 
 While not required, it is a best practice to keep your changelogs in a unique and 
 descriptive directory structure. Changelogs are normally stored in your version 
@@ -65,7 +68,7 @@ the command line can also be specified in the properties file. If a parameter is
 specified in both the properties file and the command line, the command line value 
 will override the value in the file.
 
-Learn more: https://docs.liquibase.com/concepts/connections/creating-config-properties.html
+
 
 
 Starting the Example H2 Database
@@ -117,7 +120,7 @@ yet run in your changelog to your database.
 
 First,
 1. Open a different command-line or Terminal app.
-2. Navigate to your ...examples/sql directory (or xml)
+2. Navigate to your ...examples/[xml|sql|yaml|json] directory
 
 
 To run the update command:
@@ -139,7 +142,7 @@ as defined by the changelog script.
 The DATABASECHANGELOG and DATABASECHANGELOGLOCK tables are liquibase-metadata tables. 
 Also, the changelog created the COMPANY and PERSON tables.
 
-Now, open the `example-changelog.xml` or `example-changelog.sql` file in your favorite 
+Now, open the `example-changelog.[xml|sql|yaml|json]`  file in your favorite 
 text editor.
 
 In each file, you can see how changes were defined as a series of changeSets. Each 
@@ -247,9 +250,10 @@ You can also post questions to the Liquibase forum: https://forum.liquibase.org
 
 Liquibase Documentation: https://docs.liquibase.com
 
-Need Liquibase Support? Get customer support by upgrading to Liquibase Pro here: 
+Need Liquibase Support? Get customer support by upgrading to Liquibase Secure here:
 https://liquibase.com/pricing
 
 
-Copyright ${current.year} Liquibase, Inc. All rights reserved. The program is subject to the
+Copyright 2007-${current.year} Liquibase, Inc. All rights reserved. The program is subject to the
 license agreement, copyright, trademark, patent, and other laws.
+

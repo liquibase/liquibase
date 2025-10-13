@@ -13,7 +13,9 @@ import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.diff.output.report.DiffToReport;
+import liquibase.exception.CommandExecutionException;
 import liquibase.exception.DatabaseException;
+import liquibase.license.LicenseServiceUtils;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcValue;
 import liquibase.logging.mdc.customobjects.DiffResultsSummary;
@@ -66,7 +68,7 @@ public class DiffCommandStep extends AbstractCommandStep {
 
     @Override
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
-        commandDefinition.setShortDescription("Outputs a description of differences.  If you have a Liquibase Pro key, you can output the differences as JSON using the --format=JSON option");
+        commandDefinition.setShortDescription("Outputs a description of differences.  If you have a Liquibase License Key, you can output the differences as JSON using the --format=JSON option");
     }
 
     public static Class<? extends DatabaseObject>[] parseSnapshotTypes(String... snapshotTypes) {
@@ -103,6 +105,8 @@ public class DiffCommandStep extends AbstractCommandStep {
                 final PrintStream printStream = new PrintStream(resultsBuilder.getOutputStream());
                 new DiffToReport(diffResult, printStream).print();
                 printStream.flush();
+            } else if ((printResult.equalsIgnoreCase("JSON") || printResult.equalsIgnoreCase("JSON_PRETTY")) && !LicenseServiceUtils.isProLicenseValid()) {
+                throw new CommandExecutionException("Using '--format=JSON|JSON_PRETTY' requires a valid Liquibase license key. Get a Liquibase license key and free trial at https://liquibase.com/trial");
             }
             Scope.getCurrentScope().addMdcValue(MdcKey.DIFF_OUTCOME, MdcValue.COMMAND_SUCCESSFUL);
             Scope.getCurrentScope().getLog(getClass()).info("Diff command completed");

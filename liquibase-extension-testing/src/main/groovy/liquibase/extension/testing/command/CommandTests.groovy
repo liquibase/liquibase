@@ -33,12 +33,15 @@ import liquibase.util.StringUtil
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.junit.Assert
 import org.junit.ComparisonFailure
+import org.junit.Test
 import org.junit.jupiter.api.Assumptions
+import org.opentest4j.TestAbortedException
 import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.OperatingSystem
 
 import java.util.logging.Level
+import java.util.regex.Matcher
 import java.util.regex.Pattern
 import java.util.stream.Collectors
 
@@ -101,8 +104,16 @@ class CommandTests extends Specification {
         def commandDefinition = Scope.currentScope.getSingleton(CommandFactory).getCommandDefinition(commandTestDefinition.getCommand() as String[])
         assert commandDefinition != null: "Cannot find specified command ${commandTestDefinition.getCommand()}"
 
-        assert commandTestDefinition.testFile.name == commandTestDefinition.getCommand().join("") + ".test.groovy": "Incorrect test file name"
 
+        def patternString = ".*?-(.*)?.test.groovy"
+        Pattern pattern = Pattern.compile(patternString)
+        Matcher m = pattern.matcher(commandTestDefinition.testFile.name)
+        if (! m.matches()) {
+            assert commandTestDefinition.testFile.name == commandTestDefinition.getCommand().join("") + ".test.groovy": "Incorrect test file name"
+        } else {
+            assert commandTestDefinition.testFile.name ==
+               String.format("%s-%s.test.groovy", commandTestDefinition.getCommand().join(""), m.group(1)): "Incorrect test file name"
+        }
         assert commandDefinition.getShortDescription() == null || commandDefinition.getShortDescription() != commandDefinition.getLongDescription() : "Short and long description should not be identical. If there is nothing more to say in the long description, return null"
 
         for (def runTest : commandTestDefinition.runTests) {
@@ -209,7 +220,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         Assumptions.assumeTrue(permutation.testSetupEnvironment.connection != null, "Skipping test: " + permutation.testSetupEnvironment.errorMessage)
 
         def testDef = permutation.definition
-        Assumptions.assumeFalse(testDef.disabled, "Skipping disabled test " + testDef.description)
 
         Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(permutation.testSetupEnvironment.connection))
 
@@ -336,13 +346,18 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         def results = Scope.child(scopeSettings, {
             try {
                 if (testDef.commandTestDefinition.beforeMethodInvocation != null) {
-                    testDef.commandTestDefinition.beforeMethodInvocation.call()
+                    try {
+                        testDef.commandTestDefinition.beforeMethodInvocation.call()
+                    } catch (TestDisabled ignore) {
+                        Assumptions.abort("Skipping disabled test " + testDef.description)
+                    }
                 }
                 def returnValue = commandScope.execute()
                 assert testDef.expectedException == null : "An exception was expected but the command completed successfully"
                 return returnValue
             }
             catch (Exception e) {
+                Assumptions.assumeFalse(e instanceof TestAbortedException)
                 savedException = e
                 if (testDef.expectedException == null) {
                     if (testDef.setup != null) {
@@ -871,7 +886,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
         private Map<String, ?> expectedFileContent = new HashMap<>()
         private Map<String, Object> expectedDatabaseContent = new HashMap<>()
         private Closure<Void> expectations = null
-        private boolean disabled = false
 
         private List<TestSetup> setup
 
@@ -1056,10 +1070,6 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.expectFileToNotExist = expectedFile
         }
 
-        def setDisabled(boolean disabled) {
-            this.disabled = disabled
-        }
-
         void validate() {
         }
     }
@@ -1075,6 +1085,12 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             return filter.shouldRun(TestFilter.DB, databaseName) &&
                     filter.shouldRun("command", definition.commandTestDefinition.joinedCommand) &&
                     filter.shouldRun("def", definition.description)
+        }
+    }
+
+    static class TestDisabled extends RuntimeException {
+        TestDisabled(String message) {
+            super(message)
         }
     }
 
@@ -1223,6 +1239,9 @@ Long Description: ${commandDefinition.getLongDescription() ?: "NOT SET"}
             this.setups.add(new SetupCleanResources(cleanOnSetup, filesToDelete))
         }
 
+        void cleanResources(CleanupMode cleanupMode, File resourceDirectory) {
+            this.setups.add(new SetupCleanResources(cleanupMode, resourceDirectory))
+        }
         /**
          * Mark the changeSets within a changelog as ran without actually running them
          */

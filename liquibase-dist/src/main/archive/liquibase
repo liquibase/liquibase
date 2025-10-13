@@ -1,5 +1,32 @@
 #!/usr/bin/env bash
 
+check_version() {
+  # Get the full Java version output and redirect stderr to stdout
+  JAVA_VERSION_OUTPUT=$("$1" -version 2>&1)
+
+  # Extract the version number using awk
+  # This command looks for the line containing "version" and extracts the string
+  # enclosed in double quotes (which is the version number).
+  JAVA_VERSION=$(echo "$JAVA_VERSION_OUTPUT" | awk -F '"' '/version/ {print $2}')
+
+  # You can also extract the major version for conditional logic
+  # This example gets the first part before the first dot
+  JAVA_MAJOR_VERSION=$(echo "$JAVA_VERSION" | cut -d'.' -f1)
+
+  # Handle cases like "1.8.0_..." vs "11.0.0_..."
+  if [[ "$JAVA_MAJOR_VERSION" == "1" ]]; then
+    # For older Java versions (e.g., Java 8), the major version is "1.x"
+    JAVA_MAJOR_VERSION=$(echo "$JAVA_VERSION" | cut -d'.' -f2)
+  fi
+
+  # Check the major version
+  if [[ "$JAVA_MAJOR_VERSION" -lt 17 ]]; then
+    echo "ERROR: The JVM version is $JAVA_MAJOR_VERSION. Liquibase requires a Java version of 17 or higher"
+    echo "Please install Java 17 or higher, or set JAVA_HOME to a Java 17 or higher installation."
+    exit 1
+  fi
+}
+
 if [ ! -n "${LIQUIBASE_HOME+x}" ]; then
   # echo "LIQUIBASE_HOME is not set."
 
@@ -31,7 +58,7 @@ if [ -z "${JAVA_HOME}" ]; then
     JAVA_HOME="${LIQUIBASE_HOME}/.install4j/jre.bundle/Contents/Home"
   fi
 else
-  if [ ! -x "$JAVA_HOME" ] ; then
+  if [ ! -d "$JAVA_HOME" ]; then
     echo "ERROR: The JAVA_HOME environment variable is not defined correctly, so Liquibase cannot be started. JAVA_HOME is set to \"$JAVA_HOME\" and it does not exist." >&2
     exit 1
   fi
@@ -51,6 +78,8 @@ fi
 
 # add any JVM options here
 JAVA_OPTS="${JAVA_OPTS-}"
+
+check_version "$JAVA_PATH"
 
 export LIQUIBASE_HOME
 "${JAVA_PATH}" $JAVA_OPTS -jar "$LIQUIBASE_HOME/internal/lib/liquibase-core.jar" ${1+"$@"}
