@@ -225,7 +225,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                         //mysql 8.0.13 introduced support for indexes on `lower(first_name)` which comes back in an "expression" column
                         String filterConditionValue = "NULL";
-                        if (database.getDatabaseMajorVersion() > 8 || (database.getDatabaseMajorVersion() == 8 && ((MySQLDatabase) database).getDatabasePatchVersion() >= 13)) {
+                        if (database.getDatabaseMajorVersion() > 8 ||
+                            (database.getDatabaseMajorVersion() == 8 && ((MySQLDatabase) database).getDatabasePatchVersion() >= 13) ||
+                            (database.getDatabaseMajorVersion() == 8 && database.getDatabaseMinorVersion() > 0)) {
                             filterConditionValue = "EXPRESSION";
                         }
 
@@ -282,7 +284,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
 
                 private void enrichPostgresqlResult(CatalogAndSchema catalogAndSchema, List<CachedRow> returnList) throws DatabaseException, SQLException {
-                    if (database instanceof PostgresDatabase) {
+                    if (database instanceof PostgresDatabase && !(database instanceof CockroachDatabase)) {
                         StringBuilder sql = new StringBuilder("SELECT ns.nspname as TABLE_SCHEM, tab.relname as TABLE_NAME, " +
                                 "cls.relname as INDEX_NAME, am.amname as INDEX_TYPE " +
                                 " FROM pg_index idx " +

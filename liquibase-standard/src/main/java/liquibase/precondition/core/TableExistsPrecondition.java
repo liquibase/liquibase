@@ -56,7 +56,7 @@ public class TableExistsPrecondition extends AbstractPrecondition {
             throws PreconditionFailedException, PreconditionErrorException {
     	try {
             String correctedTableName = database.correctObjectName(getTableName(), Table.class);
-            if (!SnapshotGeneratorFactory.getInstance().hasIgnoreNested(new Table().setName(correctedTableName).setSchema(new Schema(getCatalogName(), getSchemaName())), database)) {
+            if (!SnapshotGeneratorFactory.getInstance().has(new Table().setName(correctedTableName).setSchema(new Schema(getCatalogName(), getSchemaName())), database)) {
                 throw new PreconditionFailedException("Table "+database.escapeTableName(getCatalogName(), getSchemaName(), getTableName())+" does not exist", changeLog, this);
             }
         } catch (PreconditionFailedException e) {

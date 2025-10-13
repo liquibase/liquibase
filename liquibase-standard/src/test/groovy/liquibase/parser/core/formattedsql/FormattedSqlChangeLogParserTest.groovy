@@ -4,7 +4,6 @@ import liquibase.Contexts
 import liquibase.LabelExpression
 import liquibase.Scope
 import liquibase.change.AbstractSQLChange
-import liquibase.change.Change
 import liquibase.change.core.EmptyChange
 import liquibase.change.core.RawSQLChange
 import liquibase.changelog.ChangeLogParameters
@@ -12,8 +11,9 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.core.MockDatabase
 import liquibase.exception.ChangeLogParseException
-import liquibase.exception.MigrationFailedException
 import liquibase.exception.UnexpectedLiquibaseException
+import liquibase.license.LicenseServiceUtils
+import liquibase.logging.core.BufferedLogService
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.SqlPrecondition
 import liquibase.resource.ResourceAccessor
@@ -23,6 +23,8 @@ import liquibase.util.StringUtil
 import org.hamcrest.Matchers
 import spock.lang.Specification
 import spock.lang.Unroll
+
+import java.util.logging.Level
 
 import static spock.util.matcher.HamcrestSupport.that
 
@@ -448,6 +450,19 @@ CREATE TABLE public.Persons (
 --rollback GRANT `roles/bigquery.dataViewer` ON VIEW IDW_ACQ_REPORTS.CAMP_ENCLSR_1 TO "group:app_gcp_cdwp_idw_0374_pir@schwab.com";
 """
 
+    private static final String CHANGESET_WITH_NO_SQL =
+            """
+--liquibase formatted sql
+
+--changeset bharath.javaji1:1-PPgrant labels:CDW-394266   contextFilter:PP
+--comment GMDR - Cleanup of Talend Metrics
+--rollback GRANT `roles/bigquery.dataViewer` ON VIEW IDW_ACQ_REPORTS.CAMP_ENCLSR_1 TO "group:app_gcp_cdwp_idw_0375_uir@schwab.com";
+
+--changeset bharath.javaji1:1-PRODgrant labels:CDW-394266   contextFilter:PRD
+--comment GMDR - Cleanup of Talend Metrics
+--rollback GRANT `roles/bigquery.dataViewer` ON VIEW IDW_ACQ_REPORTS.CAMP_ENCLSR_1 TO "group:app_gcp_cdwp_idw_0374_pir@schwab.com";
+"""
+
     def supports() throws Exception {
         expect:
         assert new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).supports("asdf.sql", new JUnitResourceAccessor())
@@ -465,10 +480,20 @@ CREATE TABLE public.Persons (
 
     def duplicateHeaderLines() throws Exception {
         when:
-        new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_WITH_DUPLICATE_HEADERS).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        def bufferedLog = new BufferedLogService()
+        Scope.child(Scope.Attr.logService.name(), bufferedLog, () -> {
+            new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_WITH_DUPLICATE_HEADERS).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        })
         then:
-        def e = thrown(ChangeLogParseException)
-        e.getMessage().equals("Duplicate formatted SQL header at line 8")
+        noExceptionThrown()
+        bufferedLog.getLogAsString(Level.INFO).contains("An additional formatted SQL header line was discovered for changeset asdf.sql::1-PPgrant::bharath.javaji1 and will be treated as a comment")
+    }
+
+    def changeSetWithNoSQLFound() throws Exception {
+        when:
+        new MockFormattedSqlChangeLogParser(CHANGESET_WITH_NO_SQL).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        then:
+        thrown(ChangeLogParseException.class)
     }
 
     def invalidPrecondition() throws Exception {
@@ -1378,6 +1403,247 @@ create table table1 (
         then:
         def e = thrown(ChangeLogParseException)
         e.getMessage().contains("Precondition sql check failed because of missing required expectedResult and sql parameters.")
+    }
+
+    def "parse rollbackSqlFile throws exception when no license"() {
+        when:
+        String changeLogWithRollbackSqlFile = """--liquibase formatted sql
+
+--rollbackSqlFile rollback.sql
+
+--changeset test:1
+create table test_table (id int);
+"""
+        // Force OSS mode by ensuring no license
+        GroovySpy(LicenseServiceUtils, global: true)
+        LicenseServiceUtils.isProLicenseValid() >> false
+        
+        new MockFormattedSqlChangeLogParser(changeLogWithRollbackSqlFile).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        def e = thrown(ChangeLogParseException)
+        e.getMessage().contains("Error parsing command line: Using 'rollbackSqlFile in Formatted SQL changelog' requires a valid Liquibase license key")
+        e.getMessage().contains("https://liquibase.com/trial")
+    }
+
+    def "parse tagDatabase throws exception when no license"() {
+        when:
+        String changeLogWithTagDatabase = """--liquibase formatted sql
+
+--tagDatabase: v1.0
+
+--changeset test:1
+create table test_table (id int);
+"""
+        // Force OSS mode by ensuring no license
+        GroovySpy(LicenseServiceUtils, global: true)
+        LicenseServiceUtils.isProLicenseValid() >> false
+        
+        new MockFormattedSqlChangeLogParser(changeLogWithTagDatabase).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        def e = thrown(ChangeLogParseException)
+        e.getMessage().contains("Error parsing command line: Using 'tagDatabase in Formatted SQL changelog' requires a valid Liquibase license key")
+        e.getMessage().contains("https://liquibase.com/trial")
+    }
+
+    def "parse include throws exception when no license"() {
+        when:
+        String changeLogWithInclude = """--liquibase formatted sql
+
+--include file:another-changelog.sql
+
+--changeset test:1
+create table test_table (id int);
+"""
+        // Force OSS mode by ensuring no license
+        GroovySpy(LicenseServiceUtils, global: true)
+        LicenseServiceUtils.isProLicenseValid() >> false
+        
+        new MockFormattedSqlChangeLogParser(changeLogWithInclude).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        def e = thrown(ChangeLogParseException)
+        e.getMessage().contains("Error parsing command line: Using 'include in Formatted SQL changelog' requires a valid Liquibase license key")
+        e.getMessage().contains("https://liquibase.com/trial")
+    }
+
+    def "parse includeAll throws exception when no license"() {
+        when:
+        String changeLogWithIncludeAll = """--liquibase formatted sql
+
+--includeAll path/to/changelogs/
+
+--changeset test:1
+create table test_table (id int);
+"""
+        // Force OSS mode by ensuring no license
+        GroovySpy(LicenseServiceUtils, global: true)
+        LicenseServiceUtils.isProLicenseValid() >> false
+        
+        new MockFormattedSqlChangeLogParser(changeLogWithIncludeAll).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        def e = thrown(ChangeLogParseException)
+        e.getMessage().contains("Error parsing command line: Using 'includeAll in Formatted SQL changelog' requires a valid Liquibase license key")
+        e.getMessage().contains("https://liquibase.com/trial")
+    }
+
+
+    @Unroll
+    def "parse Pro commands with case insensitive matching: #command"() {
+        when:
+        String changeLogWithCaseVariation = """--liquibase formatted sql
+
+${command}
+
+--changeset test:1
+create table test_table (id int);
+"""
+        // Force OSS mode by ensuring no license
+        GroovySpy(LicenseServiceUtils, global: true)
+        LicenseServiceUtils.isProLicenseValid() >> false
+        
+        new MockFormattedSqlChangeLogParser(changeLogWithCaseVariation).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        def e = thrown(ChangeLogParseException)
+        e.getMessage().contains("Error parsing command line: Using '${expectedCommand} in Formatted SQL changelog' requires a valid Liquibase license key")
+
+        where:
+        command                              | expectedCommand
+        "--ROLLBACKSQLFILE rollback.sql"     | "rollbackSqlFile"
+        "--RollbackSqlFile rollback.sql"     | "rollbackSqlFile"
+        "--TAGDATABASE: v1.0"                | "tagDatabase"
+        "--TagDatabase: v1.0"                | "tagDatabase"
+        "--INCLUDE file:another.sql"         | "include"
+        "--Include file:another.sql"         | "include"
+        "--INCLUDEALL path/to/files/"        | "includeAll"
+        "--IncludeAll path/to/files/"        | "includeAll"
+    }
+
+    @Unroll
+    def "parse Pro commands with whitespace variations: #command"() {
+        when:
+        String changeLogWithWhitespace = """--liquibase formatted sql
+
+${command}
+
+--changeset test:1
+create table test_table (id int);
+"""
+        // Force OSS mode by ensuring no license
+        GroovySpy(LicenseServiceUtils, global: true)
+        LicenseServiceUtils.isProLicenseValid() >> false
+        
+        new MockFormattedSqlChangeLogParser(changeLogWithWhitespace).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        def e = thrown(ChangeLogParseException)
+        e.getMessage().contains("Error parsing command line: Using '${expectedCommand} in Formatted SQL changelog' requires a valid Liquibase license key")
+
+        where:
+        command                                  | expectedCommand
+        "   --rollbackSqlFile rollback.sql"      | "rollbackSqlFile"
+        "--  rollbackSqlFile   rollback.sql"     | "rollbackSqlFile"
+        "  --tagDatabase:  v1.0"                 | "tagDatabase"
+        "--  tagDatabase:   v1.0  "              | "tagDatabase"
+        "   --include    file:another.sql"       | "include"
+        "--   include  file:another.sql  "       | "include"
+        "  --includeAll   path/to/files/"        | "includeAll"
+        "--  includeAll  path/to/files/  "       | "includeAll"
+    }
+
+    def "parse ignores Pro patterns in regular comments"() {
+        when:
+        String changeLogWithComments = """--liquibase formatted sql
+
+--changeset test:1
+create table test_table (id int);
+-- This is a comment about rollbackSqlFile functionality
+-- Another comment mentioning tagDatabase feature
+-- Comment about include and includeAll commands
+select * from test_table;
+"""
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithComments).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        noExceptionThrown()
+        changeLog.getChangeSets().size() == 1
+        ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).getSql().contains("select * from test_table")
+    }
+
+    def "parse handles Pro patterns in SQL content"() {
+        when:
+        String changeLogWithProPatternsInSQL = """--liquibase formatted sql
+
+--changeset test:1
+create table test_table (id int);
+insert into test_table values (1, 'rollbackSqlFile');
+insert into test_table values (2, 'tagDatabase: v1.0');
+insert into test_table values (3, 'include file:test.sql');
+insert into test_table values (4, 'includeAll path/test/');
+"""
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithProPatternsInSQL).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        noExceptionThrown()
+        changeLog.getChangeSets().size() == 1
+        String sql = ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).getSql()
+        sql.contains("insert into test_table values (1, 'rollbackSqlFile')")
+        sql.contains("insert into test_table values (2, 'tagDatabase: v1.0')")
+        sql.contains("insert into test_table values (3, 'include file:test.sql')")
+        sql.contains("insert into test_table values (4, 'includeAll path/test/')")
+    }
+
+    def "parse mixed valid and invalid Pro commands throws exception on first invalid"() {
+        when:
+        String changeLogWithMixedCommands = """--liquibase formatted sql
+
+--rollbackSqlFile rollback.sql
+
+--changeset test:1
+create table test_table1 (id int);
+--rollback drop table test_table1;
+
+--changeset test:2
+create table test_table2 (id int);
+
+--changeset test:3
+create table test_table3 (id int);
+"""
+        // Force OSS mode by ensuring no license
+        GroovySpy(LicenseServiceUtils, global: true)
+        LicenseServiceUtils.isProLicenseValid() >> false
+        
+        new MockFormattedSqlChangeLogParser(changeLogWithMixedCommands).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        def e = thrown(ChangeLogParseException)
+        e.getMessage().contains("Error parsing command line: Using 'rollbackSqlFile in Formatted SQL changelog' requires a valid Liquibase license key")
+    }
+
+    def "parse changelog with multiple Pro command violations shows first violation"() {
+        when:
+        String changeLogWithMultipleViolations = """--liquibase formatted sql
+
+--rollbackSqlFile rollback1.sql
+--tagDatabase: v1.0
+--include file:another.sql
+--includeAll path/to/files/
+
+--changeset test:1
+create table test_table1 (id int);
+"""
+        // Force OSS mode by ensuring no license
+        GroovySpy(LicenseServiceUtils, global: true)
+        LicenseServiceUtils.isProLicenseValid() >> false
+        
+        new MockFormattedSqlChangeLogParser(changeLogWithMultipleViolations).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        def e = thrown(ChangeLogParseException)
+        e.getMessage().contains("Error parsing command line: Using 'rollbackSqlFile in Formatted SQL changelog' requires a valid Liquibase license key")
     }
 
     @LiquibaseService(skip = true)

@@ -4,6 +4,7 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.command.*;
 import liquibase.command.core.*;
+import liquibase.command.core.ProCommandsRegistry;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfigurationValueProvider;
 import liquibase.configuration.ConfiguredValue;
@@ -86,19 +87,6 @@ public class LiquibaseCommandLine {
     public static void main(String[] args) {
         //we don't ship jansi, so we know we can disable it without having to do the slow class checking
         System.setProperty("org.fusesource.jansi.Ansi.disable", "true");
-
-        //
-        // Do not allow any checks commands if the extension JAR is not present
-        //
-        if (args.length > 1 && args[0].equalsIgnoreCase("checks")) {
-            try {
-                Class.forName("com.datical.liquibase.ext.command.checks.ChecksRunCommandStep");
-            } catch (ClassNotFoundException ignored) {
-                System.out.println(Scope.CHECKS_MESSAGE);
-                Scope.getCurrentScope().getLog(LiquibaseCommandLine.class).severe(Scope.CHECKS_MESSAGE);
-                System.exit(1);
-            }
-        }
 
         //
         // Check for arguments which contain azure-storage and get out
@@ -284,7 +272,13 @@ public class LiquibaseCommandLine {
              PrintWriter suggestionsPrintWriter = new PrintWriter(suggestionWriter)) {
             if (exception instanceof CommandLine.ParameterException) {
                 if (exception instanceof CommandLine.UnmatchedArgumentException) {
-                    System.err.println("Unexpected argument(s): " + StringUtil.join(((CommandLine.UnmatchedArgumentException) exception).getUnmatched(), ", "));
+                    List<String> unmatchedArgs = ((CommandLine.UnmatchedArgumentException) exception).getUnmatched();
+                    String proCommandError = checkForProCommandError(unmatchedArgs);
+                    if (proCommandError != null) {
+                        System.err.println(proCommandError);
+                    } else {
+                        System.err.println("Unexpected argument(s): " + StringUtil.join(unmatchedArgs, ", "));
+                    }
                 } else {
                     System.err.println("Error parsing command line: " + uiMessage);
                 }
@@ -377,7 +371,7 @@ public class LiquibaseCommandLine {
 
     public int execute(String[] args) {
         try {
-            final String[] finalArgs = adjustLegacyArgs(args);
+            final String[] finalArgs = adjustLpmArgs(adjustLegacyArgs(args));
 
             configureLogging(Level.OFF, null);
 
@@ -408,9 +402,7 @@ public class LiquibaseCommandLine {
                             Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersionInfo()));
 
                             final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
-                            if (licenseService == null) {
-                                Scope.getCurrentScope().getUI().sendMessage("WARNING: License service not loaded, cannot determine Liquibase Pro license status. Please consider re-installing Liquibase to include all dependencies. Continuing operation without Pro license.");
-                            } else {
+                            if (licenseService != null) {
                                 Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
                             }
                         }
@@ -455,6 +447,69 @@ public class LiquibaseCommandLine {
         }
     }
 
+    /**
+     * If we find "init lpm" command sequence, everything after that should be treated as parameters to LPM,
+     * except for known CommandArgumentDefinition flags which should be handled by the command system.
+     * To handle that we use Scope.Attr.lpmArgs to store the parameters.
+     */
+    private String[] adjustLpmArgs(String[] strings) {
+        List<String> returnArgs = new ArrayList<>();
+        StringBuilder lpmArgs = null;
+
+        // Known flags that should not be passed to LPM binary - discovered via reflection
+        Set<String> knownFlags = discoverLpmCommandFlags();
+
+        for (String arg : strings) {
+            if (lpmArgs == null) {
+                returnArgs.add(arg);
+                
+                if ("lpm".equals(arg.toLowerCase())) {
+                    lpmArgs = new StringBuilder();
+                }
+            } else if (knownFlags.stream().noneMatch(arg::startsWith)) {
+                // Collecting arguments after "init lpm", but skip known command flags
+                lpmArgs.append(arg).append(" ");
+            } else {
+                // Add known flags back to returnArgs so they're processed by the command system
+                returnArgs.add(arg);
+            }
+        }
+        
+        if (lpmArgs != null) {
+            Scope.getCurrentScope().setLpmArgs(lpmArgs.toString().trim());
+        }
+        return returnArgs.toArray(new String[0]);
+    }
+
+    /**
+     * Discovers CommandArgumentDefinition names from LpmCommandStep using the CommandFactory
+     * and returns their names with "--" prefix. Uses existing factory methods instead of reflection.
+     */
+    private Set<String> discoverLpmCommandFlags() {
+        Set<String> flags = new HashSet<>();
+        
+        try {
+            final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
+            CommandDefinition lpmCommandDefinition = commandFactory.getCommandDefinition("lpm");
+            
+            if (lpmCommandDefinition != null) {
+                for (CommandArgumentDefinition<?> argumentDefinition : lpmCommandDefinition.getArguments().values()) {
+                    String argumentName = argumentDefinition.getName();
+                    if (argumentName != null) {
+                        flags.add("--" + argumentName);
+                        if (!argumentName.equals(StringUtil.toKabobCase(argumentName))) {
+                            flags.add("--" + StringUtil.toKabobCase(argumentName));
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Could not discover LPM command flags using CommandFactory: " + e.getMessage());
+        }
+        
+        return flags;
+    }
+
     private void addEmptyMdcValues() {
         Boolean addEmptyMdcValues = LiquibaseCommandLineConfiguration.ADD_EMPTY_MDC_VALUES.getCurrentValue();
         if (Boolean.TRUE.equals(addEmptyMdcValues)) {
@@ -490,6 +545,34 @@ public class LiquibaseCommandLine {
              MdcObject hostName = mdcManager.put(MdcKey.LIQUIBASE_HOST_NAME, localHostName)) {
             Scope.getCurrentScope().getLog(getClass()).info("Starting command execution.");
         }
+    }
+
+    /**
+     * Check if unmatched arguments contain a Pro command and return appropriate error message.
+     * @param unmatchedArgs the list of unmatched command line arguments
+     * @return formatted error message if a Pro command is detected, null otherwise
+     */
+    String checkForProCommandError(List<String> unmatchedArgs) {
+        if (unmatchedArgs == null || unmatchedArgs.isEmpty()) {
+            return null;
+        }
+
+        // Check the first argument (main command)
+        String firstArg = unmatchedArgs.get(0);
+        if (ProCommandsRegistry.isProCommand(firstArg)) {
+            // Check if there's a subcommand
+            if (unmatchedArgs.size() > 1) {
+                String secondArg = unmatchedArgs.get(1);
+                if (ProCommandsRegistry.isProSubcommand(firstArg, secondArg)) {
+                    // Format: "command subcommand" requires license
+                    return String.format(coreBundle.getString("pro.subcommand.requires.license"), firstArg, secondArg);
+                }
+            }
+            // Format: "command" requires license
+            return String.format(coreBundle.getString("pro.command.requires.license"), firstArg);
+        }
+
+        return null; // Not a Pro command, use default error handling
     }
 
     protected void enableMonitoring() {
@@ -1285,9 +1368,7 @@ public class LiquibaseCommandLine {
             Version mdcVersion = new Version();
             final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
             String licenseInfo = "";
-            if (licenseService == null) {
-                licenseInfo = "WARNING: License service not loaded, cannot determine Liquibase Pro license status. Please consider re-installing Liquibase to include all dependencies. Continuing operation without Pro license.";
-            } else {
+            if (licenseService != null) {
                 licenseInfo = licenseService.getLicenseInfo();
             }
 
