@@ -88,6 +88,7 @@ public class DropAllCommandStep extends AbstractCommandStep {
         lockService.waitForLock();
 
         List<CatalogAndSchema> catalogAndSchemas = getCatalogAndSchemas(database, commandScope);
+        boolean dropSuccess = false;
 
         try {
             for (CatalogAndSchema catalogAndSchema : catalogAndSchemas) {
@@ -99,6 +100,7 @@ public class DropAllCommandStep extends AbstractCommandStep {
                     database.dropDatabaseObjects(catalogAndSchema);
                 }
             }
+            dropSuccess = true;
         } catch (LiquibaseException liquibaseException) {
             String message =
                     String.format("Error occurred during dropAll: %s%nIt is possible that not all objects were dropped.%n",
@@ -111,7 +113,11 @@ public class DropAllCommandStep extends AbstractCommandStep {
             throw new DatabaseException(e);
         } finally {
             lockService.releaseLock();
-            lockService.destroy();
+            if (dropSuccess) {
+                lockService.destroy();
+            } else {
+                Scope.getCurrentScope().getLog(getClass()).fine("Not destroying the lock service because drop-all did not succeed.");
+            }
             resetServices();
         }
 

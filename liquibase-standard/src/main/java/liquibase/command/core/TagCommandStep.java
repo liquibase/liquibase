@@ -16,7 +16,7 @@ import java.util.List;
 
 public class TagCommandStep extends AbstractCommandStep {
 
-    protected static final String[] COMMAND_NAME = {"tag"};
+    public static final String[] COMMAND_NAME = {"tag"};
 
     public static final CommandArgumentDefinition<String> TAG_ARG;
 

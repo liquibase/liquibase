@@ -1,32 +1,12 @@
 package liquibase.parser.core.xml
 
-import com.example.liquibase.change.ChangeWithPrimitiveFields
-import com.example.liquibase.change.ColumnConfigExample
-import com.example.liquibase.change.ComputedConfig
-import com.example.liquibase.change.CreateTableExampleChange
-import com.example.liquibase.change.DefaultConstraintConfig
-import com.example.liquibase.change.IdentityConfig
-import com.example.liquibase.change.KeyColumnConfig
-import com.example.liquibase.change.PrimaryKeyConfig
-import com.example.liquibase.change.UniqueConstraintConfig
+import com.example.liquibase.change.*
 import liquibase.Contexts
 import liquibase.Scope
 import liquibase.change.Change
 import liquibase.change.ChangeFactory
 import liquibase.change.CheckSum
-import liquibase.change.core.AddColumnChange
-import liquibase.change.core.CreateIndexChange
-import liquibase.change.core.CreateSequenceChange
-import liquibase.change.core.CreateTableChange
-import liquibase.change.core.CreateViewChange
-import liquibase.change.core.DropTableChange
-import liquibase.change.core.EmptyChange
-import liquibase.change.core.ExecuteShellCommandChange
-import liquibase.change.core.InsertDataChange
-import liquibase.change.core.LoadDataChange
-import liquibase.change.core.RawSQLChange
-import liquibase.change.core.StopChange
-import liquibase.change.core.UpdateDataChange
+import liquibase.change.core.*
 import liquibase.change.custom.CustomChangeWrapper
 import liquibase.change.custom.ExampleCustomSqlChange
 import liquibase.changelog.ChangeLogParameters
@@ -38,13 +18,7 @@ import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.MockDatabase
 import liquibase.exception.ChangeLogParseException
 import liquibase.precondition.CustomPreconditionWrapper
-import liquibase.precondition.core.AndPrecondition
-import liquibase.precondition.core.DBMSPrecondition
-import liquibase.precondition.core.NotPrecondition
-import liquibase.precondition.core.OrPrecondition
-import liquibase.precondition.core.PreconditionContainer
-import liquibase.precondition.core.PrimaryKeyExistsPrecondition
-import liquibase.precondition.core.RunningAsPrecondition
+import liquibase.precondition.core.*
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.sql.visitor.AppendSqlVisitor
 import liquibase.sql.visitor.ReplaceSqlVisitor
@@ -383,7 +357,7 @@ class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 
     def "changeLog parameters that are not global are correctly expanded"() throws Exception {
         when:
-        def changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/localParameters/changelog.xml", new ChangeLogParameters(new MockDatabase()), new JUnitResourceAccessor());
+        def changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/localParameters/plain/changelog.xml", new ChangeLogParameters(new MockDatabase()), new JUnitResourceAccessor());
 
         then: "changeSet 1"
         changeLog.getChangeSets().size() == 2
@@ -396,6 +370,28 @@ class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         changeLog.getChangeSets()[1].getAuthor() == "Author2"
         changeLog.getChangeSets()[1].getId() == "createTable_financial_institution_enum"
         changeLog.getChangeSets()[1].getLogicalFilePath() == "create_table_financial_institution_enum.xml"
+    }
+
+    def "local parameters propagated down in changeLog hierarchy"() throws Exception {
+        when:
+        def changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/localParameters/hierarchy/changelog.xml", new ChangeLogParameters(new MockDatabase()), new JUnitResourceAccessor());
+
+        then: "2 changeSets in changeLog"
+        changeLog.getChangeSets().size() == 2
+
+        and: "table1 changeSet defines author and table properties"
+        changeLog.getChangeSets()[0].tap {
+            assert author == "author1"
+            assert id == "create_table1"
+            assert changes[0].columns[1].type == "varchar(50)"
+        }
+
+        and: "table2 changeSet defines author, table and value.size properties"
+        changeLog.getChangeSets()[1].tap {
+            assert author == "author2"
+            assert id == "create_table2"
+            assert changes[0].columns[1].type == "varchar(200)"
+        }
     }
 
 	def "tests for particular features and edge conditions part 1 testCasesChangeLog.xml"() throws Exception {

@@ -1,12 +1,14 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.HsqlDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
@@ -94,7 +96,11 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
                 sql.append(DataTypeFactory.getInstance().getFalseBooleanValue(database));
             }
         } else if (newValue instanceof DatabaseFunction) {
-            sql.append(database.generateDatabaseFunctionValue((DatabaseFunction) newValue));
+            if (newValue instanceof SequenceNextValueFunction && database instanceof HsqlDatabase) {
+                sql.append("NEXT VALUE FOR ").append(((SequenceNextValueFunction) newValue).getValue());
+            } else {
+                sql.append(database.generateDatabaseFunctionValue((DatabaseFunction) newValue));
+            }
         }
         else {
             sql.append(newValue);

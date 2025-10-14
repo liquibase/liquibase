@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class ReferenceDbUrlConnectionCommandStep extends AbstractDatabaseConnectionCommandStep implements CleanUpCommandStep {
 
-    protected static final String[] COMMAND_NAME = {"referenceDbUrlConnectionCommandStep"};
+    public static final String[] COMMAND_NAME = {"referenceDbUrlConnectionCommandStep"};
 
     public static final CommandArgumentDefinition<Database> REFERENCE_DATABASE_ARG;
     public static final CommandArgumentDefinition<String> REFERENCE_USERNAME_ARG;
@@ -101,6 +101,7 @@ public class ReferenceDbUrlConnectionCommandStep extends AbstractDatabaseConnect
             } catch (Exception e) {
                 throw new DatabaseException(e);
             }
+            logLicenseUsage(url, database.get(), false, true);
             return database.get();
         } else {
             return commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);

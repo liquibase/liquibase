@@ -53,8 +53,7 @@ Global Options
       --analytics-enabled=PARAM
                              Enable or disable sending product usage data and
                                analytics to Liquibase. Learn more at https:
-                               //docs.liquibase.com/analytics. DEFAULT: true
-                               for OSS users | false for PRO users
+                               //docs.liquibase.com/analytics.
                              (defaults file: 'liquibase.analytics.enabled',
                                environment variable:
                                'LIQUIBASE_ANALYTICS_ENABLED')
@@ -181,6 +180,14 @@ Global Options
                                variable:
                                'LIQUIBASE_ERROR_ON_CIRCULAR_INCLUDE_ALL')
 
+      --fail-on-null-snapshot-id=PARAM
+                             If true, referenced objects which do not have a
+                               snapshot ID will cause snapshot failure
+                             DEFAULT: true
+                             (defaults file: 'liquibase.failOnNullSnapshotId',
+                               environment variable:
+                               'LIQUIBASE_FAIL_ON_NULL_SNAPSHOT_ID')
+
       --file-encoding=PARAM  Encoding to use when reading files. Valid values
                                include: UTF-8, UTF-16, UTF-16BE, UTF-16LE,
                                US-ASCII, or OS to use the system configured
@@ -242,6 +249,15 @@ Global Options
                                variable:
                                'LIQUIBASE_INCLUDE_RELATIONS_FOR_COMPUTED_COLUMNS
                                ')
+
+      --include-schema-name-for-default=PARAM
+                             If true, the schema name is included for the
+                               default schema when loading a snapshot
+                             DEFAULT: false
+                             (defaults file: 'liquibase.
+                               includeSchemaNameForDefault', environment
+                               variable:
+                               'LIQUIBASE_INCLUDE_SCHEMA_NAME_FOR_DEFAULT')
 
       --include-system-classpath=PARAM
                              Include the system classpath when resolving
@@ -336,6 +352,13 @@ Global Options
                              (defaults file: 'liquibase.monitorPerformance',
                                environment variable:
                                'LIQUIBASE_MONITOR_PERFORMANCE')
+
+      --mssql-bytes-per-char=PARAM
+                             Number of bytes needed to store one character
+                               (depends on database's character encoding)
+                             DEFAULT: 1
+                             (defaults file: 'mssql.bytesPerChar', environment
+                               variable: 'MSSQL_BYTES_PER_CHAR')
 
       --on-missing-include-changelog=PARAM
                              If set to WARN, then liquibase will not throw
@@ -535,9 +558,9 @@ Commands
                                   existing database and changelogs
 
   diff                          Outputs a description of differences.  If you
-                                  have a Liquibase Pro key, you can output the
-                                  differences as JSON using the --format=JSON
-                                  option
+                                  have a Liquibase License Key, you can output
+                                  the differences as JSON using the
+                                  --format=JSON option
 
   diff-changelog                Compare two databases to produce changesets and
                                   write them to a changelog file
@@ -564,6 +587,9 @@ Commands
 
   list-locks                    List the hostname, IP address, and timestamp of
                                   the Liquibase lock record
+
+  lpm                           Initialize and update Liquibase Package Manager
+                                  (LPM)
 
   mark-next-changeset-ran       Marks the next change you apply as executed in
                                   your database
@@ -777,6 +803,7 @@ https://docs.liquibase.com
     }
 
     def "help output" () {
+        System.setProperty("picocli.ansi", "false") // Required for cygwin / MSYS
         when:
         Assumptions.assumeTrue(System.getProperty("skipHelpTests") == null, "Skipping help test")
         def oldOut = System.out

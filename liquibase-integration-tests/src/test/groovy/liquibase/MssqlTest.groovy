@@ -15,7 +15,7 @@ import spock.lang.Specification
 class MssqlTest extends Specification {
 
     @Shared
-    private DatabaseTestSystem postgres = Scope.getCurrentScope().getSingleton(TestSystemFactory).getTestSystem("mssql") as DatabaseTestSystem
+    private DatabaseTestSystem mssql = Scope.getCurrentScope().getSingleton(TestSystemFactory).getTestSystem("mssql") as DatabaseTestSystem
 
     def "verify foreignKeyExists constraint is not created again when precondition fails because it already exists"() {
         when:
@@ -25,9 +25,9 @@ class MssqlTest extends Specification {
         ]
         Scope.child(scopeSettings, {
             CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
-            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, postgres.getConnectionUrl())
-            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, postgres.getUsername())
-            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, postgres.getPassword())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, mssql.getConnectionUrl())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, mssql.getUsername())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, mssql.getPassword())
             commandScope.addArgumentValue(UpdateCountCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
             commandScope.execute()
         } as Scope.ScopedRunnerWithReturn<Void>)
@@ -35,4 +35,24 @@ class MssqlTest extends Specification {
         then:
         noExceptionThrown()
     }
+
+    def "verify Unique constraint is not created again when precondition fails because it already exists"() {
+        when:
+        def changeLogFile = "changelogs/uniqueConstraint.xml"
+        def scopeSettings = [
+                (Scope.Attr.resourceAccessor.name()): new SearchPathResourceAccessor(".,target/test-classes")
+        ]
+        Scope.child(scopeSettings, {
+            CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, mssql.getConnectionUrl())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, mssql.getUsername())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, mssql.getPassword())
+            commandScope.addArgumentValue(UpdateCountCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+            commandScope.execute()
+        } as Scope.ScopedRunnerWithReturn<Void>)
+
+        then:
+        noExceptionThrown()
+    }
+
 }

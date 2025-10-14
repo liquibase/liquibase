@@ -62,18 +62,23 @@ public class SnapshotGeneratorChain {
             return null;
         }
 
-        T objectToSnapshot = example;
+        //Initialize objectToSnapshot as null, so if nothing is found we return null
+        T objectToSnapshot = null;
         while (snapshotGenerators.hasNext()) {
             SnapshotGenerator generator = snapshotGenerators.next();
             if (replacedGenerators.contains(generator.getClass())) {
                 continue;
             }
-            T object = generator.snapshot(objectToSnapshot, snapshot, this);
-            if ((object != null) && (object.getSnapshotId() == null)) {
-                object.setSnapshotId(snapshotIdService.generateId());
+            T object = generator.snapshot(objectToSnapshot == null ? example : objectToSnapshot, snapshot, this);
+            if (object != null) {
+                // don't overwrite the previous finding with null
+                objectToSnapshot = object;
+                if (object.getSnapshotId() == null) {
+                    object.setSnapshotId(snapshotIdService.generateId());
+                }
             }
-            objectToSnapshot = object;
         }
         return objectToSnapshot;
     }
+
 }

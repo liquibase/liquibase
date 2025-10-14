@@ -10,8 +10,9 @@ import liquibase.exception.CommandExecutionException
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
+import liquibase.ui.ConsoleUIService
+import liquibase.ui.UIService
 import liquibase.util.FileUtil
-
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -23,10 +24,6 @@ class GenerateChangeLogPostgresqlIntegrationTest extends Specification {
     private DatabaseTestSystem db = (DatabaseTestSystem) Scope.getCurrentScope()
             .getSingleton(TestSystemFactory.class)
             .getTestSystem("postgresql")
-
-    def cleanupSpec() {
-        CommandUtil.runDropAll(db)
-    }
 
     private void callGenerateChangeLog(
             String outputFileName,
@@ -76,14 +73,45 @@ INSERT INTO "public"."TEST" ("afoo", "bfoo", "foo", "fool") VALUES ('AFOO', 'BFO
 """
         )
 
+        cleanup:
+        outputFile.delete()
+    }
+
+    def "Should not show message saying that no changesets were generated"() {
+        given:
+        db.executeSql("""
+CREATE TABLE "public"."TEST2" (
+    AFOO VARCHAR(4),
+    BFOO VARCHAR(4),
+    FOO  VARCHAR(4),
+    FOOL VARCHAR(4)
+);
+INSERT INTO "public"."TEST2" (AFOO, BFOO, FOO, FOOL) VALUES ('AFOO', 'BFOO', 'FOO', 'FOOL');
+COMMIT;
+""")
+
         when:
-        CommandUtil.runDropAll(db)
+        def outputFileName = 'test/test-classes/output.postgresql.sql'
+        OutputStream os = new ByteArrayOutputStream()
+        PrintStream printStream = new PrintStream(os)
+        UIService uiService = Scope.getCurrentScope().getUI()
+        ConsoleUIService consoleUIService = (ConsoleUIService)uiService
+        consoleUIService.setOutputStream(printStream)
+        callGenerateChangeLog (outputFileName, null, null)
 
         then:
-        noExceptionThrown()
+        def outputFile = new File(outputFileName)
+        outputFile.exists()
+        def contents = FileUtil.getContents(outputFile)
+        contents.contains("""
+INSERT INTO "public"."TEST2" ("afoo", "bfoo", "foo", "fool") VALUES ('AFOO', 'BFOO', 'FOO', 'FOOL');
+"""
+        )
 
         cleanup:
         outputFile.delete()
+        ! os.toString().contains("Changelog not generated. There are no changesets to write")
+        os.toString().contains("Generated changelog written to test/test-classes/output.postgresql.sql")
     }
 
     def "Should export database table TEST by applying includeObjects filter"() {
@@ -110,12 +138,6 @@ COMMIT;
 INSERT INTO "public"."TEST" ("afoo", "bfoo", "fool") VALUES ('AFOO', 'BFOO', 'FOOL');
 """
         )
-
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
 
         cleanup:
         outputFile.delete()
@@ -146,12 +168,6 @@ INSERT INTO "public"."TEST" ("foo", "fool") VALUES ('FOO', 'FOOL');
 """
         )
 
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
-
         cleanup:
         outputFile.delete()
     }
@@ -180,12 +196,6 @@ COMMIT;
 INSERT INTO "public"."TEST" ("foo", "fool") VALUES ('FOO', 'FOOL');
 """
         )
-
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
 
         cleanup:
         outputFile.delete()
@@ -217,12 +227,6 @@ INSERT INTO "public"."TEST" ("FOO", "FOOL") VALUES ('FOO', 'FOOL');
 """
         )
 
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
-
         cleanup:
         outputFile.delete()
     }
@@ -247,13 +251,6 @@ COMMIT;
         then:
         def e = thrown(CommandExecutionException)
         e.message.contains("No columns matched with excludeObjects 'column:^.*' / includeObjects 'null'")
-
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
-
     }
 
     def "Should export table TEST w/ neither excludeObjects nor includeObjects"() {
@@ -282,12 +279,6 @@ INSERT INTO "public"."TEST" ("AFOO", "BFOO", "FOO", "FOOL") VALUES ('AFOO', 'BFO
 """
         )
 
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
-
         cleanup:
         outputFile.delete()
     }
@@ -308,12 +299,6 @@ INSERT INTO "public"."PERSON" ("FIRSTNAME", "LASTNAME", "STATE") VALUES ('John',
 INSERT INTO "public"."PERSON" ("FIRSTNAME", "LASTNAME", "STATE") VALUES ('Jacqueline', 'Kennedy', 'DC');
 """
         )
-
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
 
         cleanup:
         outputFile.delete()
@@ -336,12 +321,6 @@ INSERT INTO "public"."PERSON" ("ID") VALUES (2);
 """
         )
 
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
-
         cleanup:
         outputFile.delete()
     }
@@ -362,12 +341,6 @@ INSERT INTO "public"."SECONDARY" ("ADDRESS", "COUNTRY", "REGION") VALUES ('1600 
 INSERT INTO "public"."SECONDARY" ("ADDRESS", "COUNTRY", "REGION") VALUES ('280 Mulberry Street', 'United States', 'NA');
 """
         )
-
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
 
         cleanup:
         outputFile.delete()
@@ -391,12 +364,6 @@ INSERT INTO "public"."SECONDARY" ("ID", "ADDRESS", "COUNTRY", "REGION") VALUES (
 INSERT INTO "public"."SECONDARY" ("ID", "ADDRESS", "COUNTRY", "REGION") VALUES (2, '280 Mulberry Street', 'United States', 'NA');
 """
         )
-
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
 
         cleanup:
         outputFile.delete()
@@ -426,12 +393,6 @@ INSERT INTO "public"."SECONDARY" ("ID") VALUES (2);
 """
         )
 
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
-
         cleanup:
         outputFile.delete()
     }
@@ -457,12 +418,6 @@ INSERT INTO "public"."SECONDARY" ("ADDRESS", "COUNTRY", "REGION") VALUES ('1600 
 INSERT INTO "public"."SECONDARY" ("ADDRESS", "COUNTRY", "REGION") VALUES ('280 Mulberry Street', 'United States', 'NA');
 """
         )
-
-        when:
-        CommandUtil.runDropAll(db)
-
-        then:
-        noExceptionThrown()
 
         cleanup:
         outputFile.delete()

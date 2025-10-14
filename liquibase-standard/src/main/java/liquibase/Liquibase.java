@@ -280,20 +280,51 @@ public class Liquibase implements AutoCloseable {
                 new IgnoreChangeSetFilter());
     }
 
+    /**
+     * This method is actually an updateSql method that is called by the update method. To be removed in Liquibase 5.0
+     * @deprecated use {@link #updateSql(Contexts, LabelExpression, Writer)} . For the contexts String you just need to surround in a new Contexts(String)
+     */
+    @Deprecated
     public void update(String contexts, Writer output) throws LiquibaseException {
-        this.update(new Contexts(contexts), output);
+        this.updateSql(new Contexts(contexts), null, output);
     }
 
+    /**
+     * This method is actually an updateSql method that is called by the update method. To be removed in Liquibase 5.0
+     * @deprecated use {@link #updateSql(Contexts, LabelExpression, Writer)}
+     */
+    @Deprecated
     public void update(Contexts contexts, Writer output) throws LiquibaseException {
-        update(contexts, new LabelExpression(), output);
+        updateSql(contexts, new LabelExpression(), output);
     }
 
+    /**
+     * This method is actually an updateSql method that is called by the update method. To be removed in Liquibase 5.0
+     * @deprecated use {@link #updateSql(Contexts, LabelExpression, Writer)}
+     */
+    @Deprecated
     public void update(Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
-        update(contexts, labelExpression, output, true);
+        updateSql(contexts, labelExpression, output);
     }
 
+    /**
+     * This method is actually an updateSql method that is called by the update method. To be removed in Liquibase 5.0
+     * @deprecated use {@link #updateSql(Contexts, LabelExpression, Writer)}
+     */
+    @Deprecated
     public void update(Contexts contexts, LabelExpression labelExpression, Writer output, boolean checkLiquibaseTables)
             throws LiquibaseException {
+        updateSql(contexts, labelExpression, output);
+    }
+
+    /**
+     * Generates SQL for the update operation based on the provided contexts and label expression.
+     * @param contexts the contexts to filter the changesets.
+     * @param labelExpression the label expression to filter the changesets.
+     * @param output the writer to output the generated SQL.
+     * @throws LiquibaseException if an error occurs while generating the SQL.
+     */
+    public void updateSql(Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
         runInScope(() -> {
             CommandScope updateCommand = new CommandScope(UpdateSqlCommandStep.COMMAND_NAME);
             updateCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, getDatabase());
@@ -453,7 +484,7 @@ public class Liquibase implements AutoCloseable {
     public void update(String tag, Contexts contexts, LabelExpression labelExpression, Writer output)
             throws LiquibaseException {
         if (tag == null) {
-            update(contexts, labelExpression, output);
+            updateSql(contexts, labelExpression, output);
             return;
         }
         changeLogParameters.setContexts(contexts);
@@ -970,7 +1001,7 @@ public class Liquibase implements AutoCloseable {
 
     /**
      * Drops all database objects in the default schema.
-     * @param dropDbclhistory If true, the database changelog history table will be dropped. Requires pro license.
+     * @param dropDbclhistory If true, the database changelog history table will be dropped. Requires license.
      */
     public final void dropAll(Boolean dropDbclhistory) throws DatabaseException {
         dropAll(dropDbclhistory, new CatalogAndSchema(getDatabase().getDefaultCatalogName(), getDatabase().getDefaultSchemaName()));
@@ -985,7 +1016,7 @@ public class Liquibase implements AutoCloseable {
 
     /**
      * Drops all database objects in the passed schema(s).
-     * @param dropDbclhistory If true, the database changelog history table will be dropped. Requires pro license.
+     * @param dropDbclhistory If true, the database changelog history table will be dropped. Requires license.
      */
     public final void dropAll(Boolean dropDbclhistory, CatalogAndSchema... schemas) throws DatabaseException {
 

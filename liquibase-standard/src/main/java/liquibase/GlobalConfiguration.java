@@ -32,6 +32,8 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> INCLUDE_CATALOG_IN_SPECIFICATION;
     public static final ConfigurationDefinition<Boolean> SHOULD_SNAPSHOT_DATA;
     public static final ConfigurationDefinition<Boolean> INCLUDE_RELATIONS_FOR_COMPUTED_COLUMNS;
+    public static final ConfigurationDefinition<Boolean> INCLUDE_SCHEMA_NAME_FOR_DEFAULT;
+    public static final ConfigurationDefinition<Boolean> FAIL_ON_NULL_SNAPSHOT_ID;
     public static final ConfigurationDefinition<Boolean> PRESERVE_SCHEMA_CASE;
     public static final ConfigurationDefinition<Boolean> SHOW_BANNER;
     public static final ConfigurationDefinition<Boolean> ALWAYS_DROP_INSTEAD_OF_REPLACE;
@@ -180,6 +182,16 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         INCLUDE_RELATIONS_FOR_COMPUTED_COLUMNS = builder.define("includeRelationsForComputedColumns", Boolean.class)
                 .setDescription("If true, the parent relationship for computed columns is preserved in snapshot-dependent commands: snapshot and diff")
                 .setDefaultValue(false)
+                .build();
+
+        INCLUDE_SCHEMA_NAME_FOR_DEFAULT = builder.define("includeSchemaNameForDefault", Boolean.class)
+                .setDescription("If true, the schema name is included for the default schema when loading a snapshot")
+                .setDefaultValue(false)
+                .build();
+
+        FAIL_ON_NULL_SNAPSHOT_ID = builder.define("failOnNullSnapshotId", Boolean.class)
+                .setDescription("If true, referenced objects which do not have a snapshot ID will cause snapshot failure")
+                .setDefaultValue(true)
                 .build();
 
         FILTER_LOG_MESSAGES = builder.define("filterLogMessages", Boolean.class)

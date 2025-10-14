@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionCommandStep implements CleanUpCommandStep {
 
-    protected static final String[] COMMAND_NAME = {"dbUrlConnectionCommandStep"};
+    public static final String[] COMMAND_NAME = {"dbUrlConnectionCommandStep"};
 
     /**
      * @deprecated This field is retained for backwards compatibility. Use the fields in {@link DbUrlConnectionArgumentsCommandStep} instead.
@@ -126,7 +126,9 @@ public class DbUrlConnectionCommandStep extends AbstractDatabaseConnectionComman
                 throw new DatabaseException(e);
             }
         }
-        logMdc(url == null ? database.get().getConnection().getURL() : url, database.get());
+        String urlForLogging = url == null ? database.get().getConnection().getURL() : url;
+        logMdc(urlForLogging, database.get());
+        logLicenseUsage(urlForLogging, database.get(), true, false);
         return database.get();
     }
 

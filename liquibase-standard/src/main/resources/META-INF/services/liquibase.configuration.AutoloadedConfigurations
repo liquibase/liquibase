@@ -4,3 +4,5 @@ liquibase.logging.core.DefaultLoggerConfiguration
 liquibase.sql.SqlConfiguration
 liquibase.parser.ChangeLogParserConfiguration
 liquibase.analytics.configuration.AnalyticsArgs
+liquibase.license.LicenseTrackingArgs
+liquibase.database.core.MSSQLDatabase$SpecificConfiguration

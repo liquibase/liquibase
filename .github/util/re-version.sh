@@ -60,7 +60,7 @@ mkdir -p $outdir
 MODIFIED_BRANCH_NAME=$(echo "$branch" | sed -e "s/[^a-zA-Z0-9-]/_/g")
 
 #### Update  jars
-declare -a jars=("liquibase-core-0-SNAPSHOT.jar" "liquibase-core-0-SNAPSHOT-sources.jar" "liquibase-commercial-$MODIFIED_BRANCH_NAME-SNAPSHOT.jar" "liquibase-commercial-$MODIFIED_BRANCH_NAME-SNAPSHOT-sources.jar" "liquibase-cdi-0-SNAPSHOT.jar" "liquibase-cdi-0-SNAPSHOT-sources.jar" "liquibase-cdi-jakarta-0-SNAPSHOT.jar" "liquibase-cdi-jakarta-0-SNAPSHOT-sources.jar" "liquibase-maven-plugin-0-SNAPSHOT.jar" "liquibase-maven-plugin-0-SNAPSHOT-sources.jar" "liquibase-cli-0-SNAPSHOT.jar" "liquibase-cli-0-SNAPSHOT-sources.jar")
+declare -a jars=("liquibase-core-0-SNAPSHOT.jar" "liquibase-core-0-SNAPSHOT-sources.jar" "liquibase-maven-plugin-0-SNAPSHOT.jar" "liquibase-maven-plugin-0-SNAPSHOT-sources.jar" "liquibase-cli-0-SNAPSHOT.jar" "liquibase-cli-0-SNAPSHOT-sources.jar")
 
 # If extension_name is specified, only reversion those jars
 if [ -n "$extension_name" ]; then
@@ -82,7 +82,7 @@ do
   rm -rf $workdir/META-INF
 
   ## Fix up liquibase.build.properties
-  if [[ $jar == "liquibase-core-0-SNAPSHOT.jar" || $jar == "liquibase-commercial-$MODIFIED_BRANCH_NAME-SNAPSHOT.jar" ]]; then
+  if [[ $jar == "liquibase-core-0-SNAPSHOT.jar" ]]; then
     unzip -q $workdir/$jar liquibase.build.properties -d $workdir
     sed -i -e "s/build.version=.*/build.version=$version/" $workdir/liquibase.build.properties
     (cd $workdir && jar -uf $jar liquibase.build.properties)
@@ -107,7 +107,7 @@ do
 done
 
 #### Update  javadoc jars
-declare -a javadocJars=("liquibase-core-0-SNAPSHOT-javadoc.jar" "liquibase-cdi-0-SNAPSHOT-javadoc.jar" "liquibase-cdi-jakarta-0-SNAPSHOT-javadoc.jar" "liquibase-maven-plugin-0-SNAPSHOT-javadoc.jar" "liquibase-cli-0-SNAPSHOT-javadoc.jar" "liquibase-commercial-$MODIFIED_BRANCH_NAME-SNAPSHOT-javadoc.jar")
+declare -a javadocJars=("liquibase-core-0-SNAPSHOT-javadoc.jar" "liquibase-maven-plugin-0-SNAPSHOT-javadoc.jar" "liquibase-cli-0-SNAPSHOT-javadoc.jar")
 # If extension_name is specified, only reversion those jars
 if [ -n "$extension_name" ]; then
   javadocJars=("$extension_name-0-SNAPSHOT-javadoc.jar")
@@ -172,14 +172,16 @@ if [ -z "$extension_name" ]; then
   ##### update zip/tar files
   mkdir -p $workdir/internal/lib
   cp $outdir/liquibase-core-$version.jar $workdir/internal/lib/liquibase-core.jar ##save versioned jar as unversioned to include in zip/tar
-  cp $outdir/liquibase-commercial-$version.jar $workdir/internal/lib/liquibase-commercial.jar ##save versioned jar as unversioned to include in zip/tar
 
   ## Extract tar.gz and rebuild it back into the tar.gz and zip
-  mkdir $workdir/tgz-repackage
+  mkdir $workdir/tgz-repackage 
   tar -xzf $workdir/liquibase-$MODIFIED_BRANCH_NAME-SNAPSHOT.tar.gz -C $workdir/tgz-repackage
+
   cp $workdir/internal/lib/liquibase-core.jar $workdir/tgz-repackage/internal/lib/liquibase-core.jar
-  cp $workdir/internal/lib/liquibase-commercial.jar $workdir/tgz-repackage/internal/lib/liquibase-commercial.jar
+
+  # replace the versions in all the text files
   find $workdir/tgz-repackage -name "*.txt" -exec sed -i -e "s/\(0\|release\|master\)-SNAPSHOT/$version/" {} \;
+
   (cd $workdir/tgz-repackage && tar -czf $outdir/liquibase-$version.tar.gz *)
   (cd $workdir/tgz-repackage && zip -qr $outdir/liquibase-$version.zip *)
 fi

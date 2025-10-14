@@ -2,6 +2,7 @@ package liquibase.command.core;
 
 import liquibase.Scope;
 import liquibase.TagVersionEnum;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.filter.AfterTagChangeSetFilter;
 import liquibase.command.*;
@@ -12,7 +13,6 @@ import liquibase.report.RollbackReportParameters;
 import liquibase.util.StringUtil;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -58,7 +58,7 @@ public class RollbackCommandStep extends AbstractRollbackCommandStep {
         List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
         TagVersionEnum tagVersion = TagVersionEnum.valueOf(commandScope.getArgumentValue(TAG_VERSION_ARG));
         try {
-            AfterTagChangeSetFilter afterTagChangeSetFilter = new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList, tagVersion); // This can throw an exception
+            AfterTagChangeSetFilter afterTagChangeSetFilter = new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList, tagVersion, (DatabaseChangeLog)commandScope.getDependency(DatabaseChangeLog.class)); // This can throw an exception
             this.doRollback(resultsBuilder, ranChangeSetList, afterTagChangeSetFilter, rollbackReportParameters);
         } catch (Exception exception) {
             rollbackReportParameters.setSuccess(false);

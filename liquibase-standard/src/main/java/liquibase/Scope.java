@@ -7,6 +7,7 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.license.LicenseTrackList;
 import liquibase.listener.LiquibaseListener;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
@@ -43,9 +44,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Scope {
 
-    public static final String CHECKS_MESSAGE =
-            "The Liquibase Checks Extension 2.0.0 or higher is required to execute checks commands. " +
-                    "Visit https://docs.liquibase.com/pro-extensions to acquire the Checks Extension.";
     public static final String AZURE_MESSAGE =
             "The Liquibase Azure Extension 1.0.0 or higher is required to use Azure Storage. " +
                     "Visit https://docs.liquibase.com/pro-extensions to acquire the Azure Extension.";
@@ -85,7 +83,9 @@ public class Scope {
         /**
          * The maximum number of analytics events that should be cached in memory before sent in a batch.
          */
-        maxAnalyticsCacheSize
+        maxAnalyticsCacheSize,
+        licenseTrackList,
+        lpmArgs
     }
 
     public static final String JAVA_PROPERTIES = "javaProperties";
@@ -542,12 +542,20 @@ public class Scope {
         return Scope.getCurrentScope().get(Attr.analyticsEvent, Event.class);
     }
 
+    public LicenseTrackList getLicenseTrackList() {
+        return Scope.getCurrentScope().get(Attr.licenseTrackList, LicenseTrackList.class);
+    }
+
     private static String generateDeploymentId() {
         long time = (new Date()).getTime();
         String dateString = String.valueOf(time);
         DecimalFormat decimalFormat = new DecimalFormat("0000000000");
         return dateString.length() > 9 ? dateString.substring(dateString.length() - 10) :
                 decimalFormat.format(time);
+    }
+
+    public void setLpmArgs(String args) {
+        this.values.put(Attr.lpmArgs.name(), args);
     }
 
     @Override

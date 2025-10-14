@@ -12,6 +12,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changeset.ChangeSetService;
 import liquibase.changeset.ChangeSetServiceFactory;
 import liquibase.exception.ChangeLogParseException;
+import liquibase.parser.core.formattedsql.InvalidFormattedSqlPatternsForOssUtil;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.ExceptionUtil;
 import liquibase.util.StreamUtil;
@@ -55,172 +56,174 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     public static final String PROPERTY_CONTEXT = "propertyContext";
     public static final String CHANGE_SET_ID = "changeSetID";
     public static final String CHANGE_SET_AUTHOR = "changeSetAuthor";
+    public static final String INCLUDE_ALL = "includeAll";
+    public static final String INCLUDE = "include";
 
-    protected final String FIRST_LINE_REGEX = String.format("^\\s*%s\\s*liquibase\\s*formatted.*", getSingleLineCommentSequence());
-    protected final Pattern FIRST_LINE_PATTERN = Pattern.compile(FIRST_LINE_REGEX, Pattern.CASE_INSENSITIVE);
+    public final String FIRST_LINE_REGEX = String.format("^\\s*%s\\s*liquibase\\s*formatted.*", getSingleLineCommentSequence());
+    public final Pattern FIRST_LINE_PATTERN = Pattern.compile(FIRST_LINE_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected final String PROPERTY_REGEX = String.format("\\s*%s[\\s]*property\\s+(.*:.*)\\s+(.*:.*).*", getSingleLineCommentSequence());
-    protected final Pattern PROPERTY_PATTERN = Pattern.compile(PROPERTY_REGEX, Pattern.CASE_INSENSITIVE);
+    public final String PROPERTY_REGEX = String.format("\\s*%s[\\s]*property\\s+(.*:.*)\\s+(.*:.*).*", getSingleLineCommentSequence());
+    public final Pattern PROPERTY_PATTERN = Pattern.compile(PROPERTY_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected final String ALT_PROPERTY_ONE_CHARACTER_REGEX = String.format("\\s*?[%s]+\\s*property\\s.*", getSingleLineCommentOneCharacter());
+    public final String ALT_PROPERTY_ONE_CHARACTER_REGEX = String.format("\\s*?[%s]+\\s*property\\s.*", getSingleLineCommentOneCharacter());
 
-    protected final Pattern ALT_PROPERTY_ONE_CHARACTER_PATTERN = Pattern.compile(ALT_PROPERTY_ONE_CHARACTER_REGEX, Pattern.CASE_INSENSITIVE);
+    public final Pattern ALT_PROPERTY_ONE_CHARACTER_PATTERN = Pattern.compile(ALT_PROPERTY_ONE_CHARACTER_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected final String CHANGE_SET_REGEX = String.format("\\s*%s[\\s]*changeset\\s+(\"[^\"]+\"|[^:]+):\\s*(\"[^\"]+\"|\\S+).*", getSingleLineCommentSequence());
-    protected final Pattern CHANGE_SET_PATTERN = Pattern.compile(CHANGE_SET_REGEX, Pattern.CASE_INSENSITIVE);
+    public final String CHANGE_SET_REGEX = String.format("\\s*%s[\\s]*changeset\\s+(\"[^\"]+\"|[^:]+):\\s*(\"[^\"]+\"|\\S+).*", getSingleLineCommentSequence());
+    public final Pattern CHANGE_SET_PATTERN = Pattern.compile(CHANGE_SET_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected final String ALT_CHANGE_SET_ONE_CHARACTER_REGEX = String.format("%s[\\s]*changeset\\s.*", getSingleLineCommentOneCharacter());
-    protected final Pattern ALT_CHANGE_SET_ONE_CHARACTER_PATTERN = Pattern.compile(ALT_CHANGE_SET_ONE_CHARACTER_REGEX, Pattern.CASE_INSENSITIVE);
+    public final String ALT_CHANGE_SET_ONE_CHARACTER_REGEX = String.format("%s[\\s]*changeset\\s.*", getSingleLineCommentOneCharacter());
+    public final Pattern ALT_CHANGE_SET_ONE_CHARACTER_PATTERN = Pattern.compile(ALT_CHANGE_SET_ONE_CHARACTER_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected final String ALT_CHANGE_SET_NO_OTHER_INFO_REGEX = String.format("\\s*%s[\\s]*changeset[\\s]*.*$", getSingleLineCommentSequence());
-    protected final Pattern ALT_CHANGE_SET_NO_OTHER_INFO_PATTERN = Pattern.compile(ALT_CHANGE_SET_NO_OTHER_INFO_REGEX, Pattern.CASE_INSENSITIVE);
+    public final String ALT_CHANGE_SET_NO_OTHER_INFO_REGEX = String.format("\\s*%s[\\s]*changeset[\\s]*.*$", getSingleLineCommentSequence());
+    public final Pattern ALT_CHANGE_SET_NO_OTHER_INFO_PATTERN = Pattern.compile(ALT_CHANGE_SET_NO_OTHER_INFO_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected final String ROLLBACK_REGEX = String.format("\\s*%s[\\s]*rollback (.*)", getSingleLineCommentSequence());
-    protected final Pattern ROLLBACK_PATTERN = Pattern.compile(ROLLBACK_REGEX, Pattern.CASE_INSENSITIVE);
+    public final String ROLLBACK_REGEX = String.format("\\s*%s[\\s]*rollback (.*)", getSingleLineCommentSequence());
+    public final Pattern ROLLBACK_PATTERN = Pattern.compile(ROLLBACK_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected final String ALT_ROLLBACK_ONE_CHARACTER_REGEX = String.format("\\s*%s[\\s]*rollback\\s.*", getSingleLineCommentOneCharacter());
-    protected final Pattern ALT_ROLLBACK_ONE_CHARACTER_PATTERN = Pattern.compile(ALT_ROLLBACK_ONE_CHARACTER_REGEX, Pattern.CASE_INSENSITIVE);
+    public final String ALT_ROLLBACK_ONE_CHARACTER_REGEX = String.format("\\s*%s[\\s]*rollback\\s.*", getSingleLineCommentOneCharacter());
+    public final Pattern ALT_ROLLBACK_ONE_CHARACTER_PATTERN = Pattern.compile(ALT_ROLLBACK_ONE_CHARACTER_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected final String PRECONDITIONS_REGEX = String.format("\\s*%s[\\s]*preconditions(.*)", getSingleLineCommentSequence());
-    protected final Pattern PRECONDITIONS_PATTERN = Pattern.compile(PRECONDITIONS_REGEX, Pattern.CASE_INSENSITIVE);
+    public final String PRECONDITIONS_REGEX = String.format("\\s*%s[\\s]*preconditions(.*)", getSingleLineCommentSequence());
+    public final Pattern PRECONDITIONS_PATTERN = Pattern.compile(PRECONDITIONS_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected final String ALT_PRECONDITIONS_ONE_CHARACTER_REGEX = String.format("\\s*%s[\\s]*preconditions\\s.*", getSingleLineCommentOneCharacter());
-    protected final Pattern ALT_PRECONDITIONS_ONE_CHARACTER_PATTERN = Pattern.compile(ALT_PRECONDITIONS_ONE_CHARACTER_REGEX, Pattern.CASE_INSENSITIVE);
+    public final String ALT_PRECONDITIONS_ONE_CHARACTER_REGEX = String.format("\\s*%s[\\s]*preconditions\\s.*", getSingleLineCommentOneCharacter());
+    public final Pattern ALT_PRECONDITIONS_ONE_CHARACTER_PATTERN = Pattern.compile(ALT_PRECONDITIONS_ONE_CHARACTER_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected final String PRECONDITION_REGEX = String.format("\\s*%s[\\s]*precondition\\-([a-zA-Z0-9-]+) (.*)", getSingleLineCommentSequence());
-    protected final Pattern PRECONDITION_PATTERN = Pattern.compile(PRECONDITION_REGEX, Pattern.CASE_INSENSITIVE);
+    public final String PRECONDITION_REGEX = String.format("\\s*%s[\\s]*precondition\\-([a-zA-Z0-9-]+) (.*)", getSingleLineCommentSequence());
+    public final Pattern PRECONDITION_PATTERN = Pattern.compile(PRECONDITION_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected final String
+    public final String
             INVALID_EMPTY_PRECONDITION_REGEX = String.format("\\s*%s[\\s]*precondition\\-([a-zA-Z0-9-]+)", getSingleLineCommentSequence());
 
-    protected final Pattern INVALID_EMPTY_PRECONDITION_PATTERN = Pattern.compile(INVALID_EMPTY_PRECONDITION_REGEX, Pattern.CASE_INSENSITIVE);
+    public final Pattern INVALID_EMPTY_PRECONDITION_PATTERN = Pattern.compile(INVALID_EMPTY_PRECONDITION_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected final String ALT_PRECONDITION_ONE_CHARACTER_REGEX = String.format("\\s*%s[\\s]*precondition(.*)", getSingleLineCommentOneCharacter());
-    protected final Pattern ALT_PRECONDITION_ONE_CHARACTER_PATTERN = Pattern.compile(ALT_PRECONDITION_ONE_CHARACTER_REGEX, Pattern.CASE_INSENSITIVE);
+    public final String ALT_PRECONDITION_ONE_CHARACTER_REGEX = String.format("\\s*%s[\\s]*precondition(.*)", getSingleLineCommentOneCharacter());
+    public final Pattern ALT_PRECONDITION_ONE_CHARACTER_PATTERN = Pattern.compile(ALT_PRECONDITION_ONE_CHARACTER_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String STRIP_COMMENTS_REGEX = ".*stripComments:(\\w+).*";
-    protected final Pattern STRIP_COMMENTS_PATTERN = Pattern.compile(STRIP_COMMENTS_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String STRIP_COMMENTS_REGEX = ".*stripComments:(\\w+).*";
+    public static final Pattern STRIP_COMMENTS_PATTERN = Pattern.compile(STRIP_COMMENTS_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String SPLIT_STATEMENTS_REGEX = ".*splitStatements:(\\w+).*";
-    protected final Pattern SPLIT_STATEMENTS_PATTERN = Pattern.compile(SPLIT_STATEMENTS_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String SPLIT_STATEMENTS_REGEX = ".*splitStatements:(\\w+).*";
+    public static final Pattern SPLIT_STATEMENTS_PATTERN = Pattern.compile(SPLIT_STATEMENTS_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String ROLLBACK_SPLIT_STATEMENTS_REGEX = ".*rollbackSplitStatements:(\\w+).*";
-    protected final Pattern ROLLBACK_SPLIT_STATEMENTS_PATTERN = Pattern.compile(ROLLBACK_SPLIT_STATEMENTS_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String ROLLBACK_SPLIT_STATEMENTS_REGEX = ".*rollbackSplitStatements:(\\w+).*";
+    public static final Pattern ROLLBACK_SPLIT_STATEMENTS_PATTERN = Pattern.compile(ROLLBACK_SPLIT_STATEMENTS_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String END_DELIMITER_REGEX = ".*\\bendDelimiter:(\\S*).*";
-    protected final Pattern END_DELIMITER_PATTERN = Pattern.compile(END_DELIMITER_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String END_DELIMITER_REGEX = ".*\\bendDelimiter:(\\S*).*";
+    public static final Pattern END_DELIMITER_PATTERN = Pattern.compile(END_DELIMITER_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String ROLLBACK_END_DELIMITER_REGEX = ".*\\brollbackEndDelimiter:(\\S*).*";
-    protected final Pattern ROLLBACK_END_DELIMITER_PATTERN = Pattern.compile(ROLLBACK_END_DELIMITER_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String ROLLBACK_END_DELIMITER_REGEX = ".*\\brollbackEndDelimiter:(\\S*).*";
+    public static final Pattern ROLLBACK_END_DELIMITER_PATTERN = Pattern.compile(ROLLBACK_END_DELIMITER_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected final String COMMENT_REGEX = String.format("%s[\\s]*comment:? (.*)", getSingleLineCommentSequence());
-    protected final Pattern COMMENT_PATTERN = Pattern.compile(COMMENT_REGEX, Pattern.CASE_INSENSITIVE);
+    public final String COMMENT_REGEX = String.format("%s[\\s]*comment:? (.*)", getSingleLineCommentSequence());
+    public final Pattern COMMENT_PATTERN = Pattern.compile(COMMENT_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected final String ALT_COMMENT_PLURAL_REGEX = String.format("%s[\\s]*comments:? (.*)", getSingleLineCommentSequence());
-    protected final Pattern ALT_COMMENT_PLURAL_PATTERN = Pattern.compile(ALT_COMMENT_PLURAL_REGEX, Pattern.CASE_INSENSITIVE);
+    public final String ALT_COMMENT_PLURAL_REGEX = String.format("%s[\\s]*comments:? (.*)", getSingleLineCommentSequence());
+    public final Pattern ALT_COMMENT_PLURAL_PATTERN = Pattern.compile(ALT_COMMENT_PLURAL_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected final String ALT_COMMENT_ONE_CHARACTER_REGEX = String.format("%s[\\s]*comment:? (.*)", getSingleLineCommentOneCharacter());
-    protected final Pattern ALT_COMMENT_ONE_CHARACTER_PATTERN = Pattern.compile(ALT_COMMENT_ONE_CHARACTER_REGEX, Pattern.CASE_INSENSITIVE);
+    public final String ALT_COMMENT_ONE_CHARACTER_REGEX = String.format("%s[\\s]*comment:? (.*)", getSingleLineCommentOneCharacter());
+    public final Pattern ALT_COMMENT_ONE_CHARACTER_PATTERN = Pattern.compile(ALT_COMMENT_ONE_CHARACTER_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected final String VALID_CHECK_SUM_REGEX = String.format("%s[\\s]*validCheckSum:? (.*)", getSingleLineCommentSequence());
-    protected final Pattern VALID_CHECK_SUM_PATTERN = Pattern.compile(VALID_CHECK_SUM_REGEX, Pattern.CASE_INSENSITIVE);
+    public final String VALID_CHECK_SUM_REGEX = String.format("%s[\\s]*validCheckSum:? (.*)", getSingleLineCommentSequence());
+    public final Pattern VALID_CHECK_SUM_PATTERN = Pattern.compile(VALID_CHECK_SUM_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected final String ALT_VALID_CHECK_SUM_ONE_CHARACTER_REGEX = String.format("^%s[\\s]*validCheckSum(.*)$", getSingleLineCommentOneCharacter());
-    protected final Pattern ALT_VALID_CHECK_SUM_ONE_CHARACTER_PATTERN = Pattern.compile(ALT_VALID_CHECK_SUM_ONE_CHARACTER_REGEX, Pattern.CASE_INSENSITIVE);
+    public final String ALT_VALID_CHECK_SUM_ONE_CHARACTER_REGEX = String.format("^%s[\\s]*validCheckSum(.*)$", getSingleLineCommentOneCharacter());
+    public final Pattern ALT_VALID_CHECK_SUM_ONE_CHARACTER_PATTERN = Pattern.compile(ALT_VALID_CHECK_SUM_ONE_CHARACTER_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected final String IGNORE_LINES_REGEX = String.format("%s[\\s]*ignoreLines:(\\w+)", getSingleLineCommentSequence());
-    protected final Pattern IGNORE_LINES_PATTERN = Pattern.compile(IGNORE_LINES_REGEX, Pattern.CASE_INSENSITIVE);
+    public final String IGNORE_LINES_REGEX = String.format("%s[\\s]*ignoreLines:(\\w+)", getSingleLineCommentSequence());
+    public final Pattern IGNORE_LINES_PATTERN = Pattern.compile(IGNORE_LINES_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected final String ALT_IGNORE_LINES_ONE_CHARACTER_REGEX = String.format("%s[\\s]*?ignoreLines:(\\w+).*$", getSingleLineCommentOneCharacter());
-    protected final Pattern ALT_IGNORE_LINES_ONE_CHARACTER_PATTERN = Pattern.compile(ALT_IGNORE_LINES_ONE_CHARACTER_REGEX, Pattern.CASE_INSENSITIVE);
+    public final String ALT_IGNORE_LINES_ONE_CHARACTER_REGEX = String.format("%s[\\s]*?ignoreLines:(\\w+).*$", getSingleLineCommentOneCharacter());
+    public final Pattern ALT_IGNORE_LINES_ONE_CHARACTER_PATTERN = Pattern.compile(ALT_IGNORE_LINES_ONE_CHARACTER_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected final String ALT_IGNORE_REGEX = String.format("%s[\\s]*ignore:(\\w+)", getSingleLineCommentSequence());
-    protected final Pattern ALT_IGNORE_PATTERN = Pattern.compile(ALT_IGNORE_REGEX, Pattern.CASE_INSENSITIVE);
+    public final String ALT_IGNORE_REGEX = String.format("%s[\\s]*ignore:(\\w+)", getSingleLineCommentSequence());
+    public final Pattern ALT_IGNORE_PATTERN = Pattern.compile(ALT_IGNORE_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String RUN_WITH_REGEX = ".*runWith:([\\w\\$\\{\\}]+).*";
-    protected final Pattern RUN_WITH_PATTERN = Pattern.compile(RUN_WITH_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String RUN_WITH_REGEX = ".*runWith:([\\w\\$\\{\\}]+).*";
+    public static final Pattern RUN_WITH_PATTERN = Pattern.compile(RUN_WITH_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String RUN_WITH_SPOOL_FILE_REGEX = ".*runWithSpoolFile:(.*).*";
-    protected final Pattern RUN_WITH_SPOOL_FILE_PATTERN = Pattern.compile(RUN_WITH_SPOOL_FILE_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String RUN_WITH_SPOOL_FILE_REGEX = ".*runWithSpoolFile:(.*).*";
+    public static final Pattern RUN_WITH_SPOOL_FILE_PATTERN = Pattern.compile(RUN_WITH_SPOOL_FILE_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String RUN_ON_CHANGE_REGEX = ".*runOnChange:(\\w+).*";
-    protected final Pattern RUN_ON_CHANGE_PATTERN = Pattern.compile(RUN_ON_CHANGE_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String RUN_ON_CHANGE_REGEX = ".*runOnChange:(\\w+).*";
+    public static final Pattern RUN_ON_CHANGE_PATTERN = Pattern.compile(RUN_ON_CHANGE_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String RUN_ALWAYS_REGEX = ".*runAlways:(\\w+).*";
-    protected final Pattern RUN_ALWAYS_PATTERN = Pattern.compile(RUN_ALWAYS_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String RUN_ALWAYS_REGEX = ".*runAlways:(\\w+).*";
+    public static final Pattern RUN_ALWAYS_PATTERN = Pattern.compile(RUN_ALWAYS_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String CONTEXT_REGEX = ".*context:(\".*?\"|\\S*).*";
-    protected final Pattern CONTEXT_PATTERN = Pattern.compile(CONTEXT_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String CONTEXT_REGEX = ".*context:(\".*?\"|\\S*).*";
+    public static final Pattern CONTEXT_PATTERN = Pattern.compile(CONTEXT_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String CONTEXT_FILTER_REGEX = ".*contextFilter:(\".*?\"|\\S*).*";
-    protected final Pattern CONTEXT_FILTER_PATTERN = Pattern.compile(CONTEXT_FILTER_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String CONTEXT_FILTER_REGEX = ".*contextFilter:(\".*?\"|\\S*).*";
+    public static final Pattern CONTEXT_FILTER_PATTERN = Pattern.compile(CONTEXT_FILTER_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String LOGICAL_FILE_PATH_REGEX = ".*logicalFilePath:(\\S*).*";
-    protected final Pattern LOGICAL_FILE_PATH_PATTERN = Pattern.compile(LOGICAL_FILE_PATH_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String LOGICAL_FILE_PATH_REGEX = ".*logicalFilePath:(\\S*).*";
+    public static final Pattern LOGICAL_FILE_PATH_PATTERN = Pattern.compile(LOGICAL_FILE_PATH_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String LABELS_REGEX = ".*labels:(\".*?\"|\\S*).*";
-    protected final Pattern LABELS_PATTERN = Pattern.compile(LABELS_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String LABELS_REGEX = ".*labels:(\".*?\"|\\S*).*";
+    public static final Pattern LABELS_PATTERN = Pattern.compile(LABELS_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String RUN_IN_TRANSACTION_REGEX = ".*runInTransaction:(\\w+).*";
-    protected final Pattern RUN_IN_TRANSACTION_PATTERN = Pattern.compile(RUN_IN_TRANSACTION_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String RUN_IN_TRANSACTION_REGEX = ".*runInTransaction:(\\w+).*";
+    public static final Pattern RUN_IN_TRANSACTION_PATTERN = Pattern.compile(RUN_IN_TRANSACTION_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String DBMS_REGEX = ".*dbms:([^,][\\w!,]+).*";
-    protected final Pattern DBMS_PATTERN = Pattern.compile(DBMS_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String DBMS_REGEX = ".*dbms:([^,][\\w!,]+).*";
+    public static final Pattern DBMS_PATTERN = Pattern.compile(DBMS_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String IGNORE_REGEX = ".*ignore:(\\w*).*";
-    protected final Pattern IGNORE_PATTERN = Pattern.compile(IGNORE_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String IGNORE_REGEX = ".*ignore:(\\w*).*";
+    public static final Pattern IGNORE_PATTERN = Pattern.compile(IGNORE_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String FAIL_ON_ERROR_REGEX = ".*failOnError:(\\w+).*";
-    protected final Pattern FAIL_ON_ERROR_PATTERN = Pattern.compile(FAIL_ON_ERROR_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String FAIL_ON_ERROR_REGEX = ".*failOnError:(\\w+).*";
+    public static final Pattern FAIL_ON_ERROR_PATTERN = Pattern.compile(FAIL_ON_ERROR_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String ON_FAIL_REGEX = ".*onFail:(\\w+).*";
-    protected final Pattern ON_FAIL_PATTERN = Pattern.compile(ON_FAIL_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String ON_FAIL_REGEX = ".*onFail:(\\w+).*";
+    public static final Pattern ON_FAIL_PATTERN = Pattern.compile(ON_FAIL_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String ON_ERROR_REGEX = ".*onError:(\\w+).*";
-    protected final Pattern ON_ERROR_PATTERN = Pattern.compile(ON_ERROR_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String ON_ERROR_REGEX = ".*onError:(\\w+).*";
+    public static final Pattern ON_ERROR_PATTERN = Pattern.compile(ON_ERROR_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String ROLLBACK_CHANGE_SET_ID_REGEX = ".*changeSetId:(\\S+).*";
-    protected final Pattern ROLLBACK_CHANGE_SET_ID_PATTERN = Pattern.compile(ROLLBACK_CHANGE_SET_ID_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String ROLLBACK_CHANGE_SET_ID_REGEX = ".*changeSetId:(\\S+).*";
+    public static final Pattern ROLLBACK_CHANGE_SET_ID_PATTERN = Pattern.compile(ROLLBACK_CHANGE_SET_ID_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String ROLLBACK_CHANGE_SET_AUTHOR_REGEX = ".*changesetAuthor:(\\S+).*";
-    protected final Pattern ROLLBACK_CHANGE_SET_AUTHOR_PATTERN = Pattern.compile(ROLLBACK_CHANGE_SET_AUTHOR_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String ROLLBACK_CHANGE_SET_AUTHOR_REGEX = ".*changesetAuthor:(\\S+).*";
+    public static final Pattern ROLLBACK_CHANGE_SET_AUTHOR_PATTERN = Pattern.compile(ROLLBACK_CHANGE_SET_AUTHOR_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String ROLLBACK_CHANGE_SET_PATH_REGEX = ".*changesetPath:(\\S+).*";
-    protected final Pattern ROLLBACK_CHANGE_SET_PATH_PATTERN = Pattern.compile(ROLLBACK_CHANGE_SET_PATH_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String ROLLBACK_CHANGE_SET_PATH_REGEX = ".*changesetPath:(\\S+).*";
+    public static final Pattern ROLLBACK_CHANGE_SET_PATH_PATTERN = Pattern.compile(ROLLBACK_CHANGE_SET_PATH_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected final String ROLLBACK_MULTI_LINE_START_REGEX = String.format("\\s*%s\\s*liquibase\\s*rollback\\s*$", getStartMultiLineCommentSequence());
-    protected final Pattern ROLLBACK_MULTI_LINE_START_PATTERN = Pattern.compile(ROLLBACK_MULTI_LINE_START_REGEX, Pattern.CASE_INSENSITIVE);
+    public final String ROLLBACK_MULTI_LINE_START_REGEX = String.format("\\s*%s\\s*liquibase\\s*rollback\\s*$", getStartMultiLineCommentSequence());
+    public final Pattern ROLLBACK_MULTI_LINE_START_PATTERN = Pattern.compile(ROLLBACK_MULTI_LINE_START_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected final String ROLLBACK_MULTI_LINE_END_REGEX = String.format(".*\\s*%s\\s*$", getEndMultiLineCommentSequence());
-    protected final Pattern ROLLBACK_MULTI_LINE_END_PATTERN = Pattern.compile(ROLLBACK_MULTI_LINE_END_REGEX, Pattern.CASE_INSENSITIVE);
+    public final String ROLLBACK_MULTI_LINE_END_REGEX = String.format(".*\\s*%s\\s*$", getEndMultiLineCommentSequence());
+    public final Pattern ROLLBACK_MULTI_LINE_END_PATTERN = Pattern.compile(ROLLBACK_MULTI_LINE_END_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String WORD_RESULT_REGEX = "^(?:expectedResult:)?(\\w+) (.*)";
-    protected static final String SINGLE_QUOTE_RESULT_REGEX = "^(?:expectedResult:)?'([^']+)' (.*)";
-    protected static final String DOUBLE_QUOTE_RESULT_REGEX = "^(?:expectedResult:)?\"([^\"]+)\" (.*)";
+    public static final String WORD_RESULT_REGEX = "^(?:expectedResult:)?(\\w+) (.*)";
+    public static final String SINGLE_QUOTE_RESULT_REGEX = "^(?:expectedResult:)?'([^']+)' (.*)";
+    public static final String DOUBLE_QUOTE_RESULT_REGEX = "^(?:expectedResult:)?\"([^\"]+)\" (.*)";
 
-    protected final Pattern[] WORD_AND_QUOTING_PATTERNS = new Pattern[]{
+    public static final Pattern[] WORD_AND_QUOTING_PATTERNS = new Pattern[]{
             Pattern.compile(WORD_RESULT_REGEX, Pattern.CASE_INSENSITIVE),
             Pattern.compile(SINGLE_QUOTE_RESULT_REGEX, Pattern.CASE_INSENSITIVE),
             Pattern.compile(DOUBLE_QUOTE_RESULT_REGEX, Pattern.CASE_INSENSITIVE)
     };
 
-    protected static final String NAME_REGEX = ".*name:\\s*(\\S++).*";
-    protected final Pattern NAME_PATTERN = Pattern.compile(NAME_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String NAME_REGEX = ".*name:\\s*(\\S++).*";
+    public static final Pattern NAME_PATTERN = Pattern.compile(NAME_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String VALUE_REGEX = ".*value:\\s*(\\S+).*";
-    protected final Pattern VALUE_PATTERN = Pattern.compile(VALUE_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String VALUE_REGEX = ".*value:\\s*(\\S+).*";
+    public static final Pattern VALUE_PATTERN = Pattern.compile(VALUE_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String GLOBAL_REGEX = ".*global:(\\S+).*";
-    protected final Pattern GLOBAL_PATTERN = Pattern.compile(GLOBAL_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String GLOBAL_REGEX = ".*global:(\\S+).*";
+    public static final Pattern GLOBAL_PATTERN = Pattern.compile(GLOBAL_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String VIEW_NAME_STATEMENT_REGEX = ".*view:(\\w+).*";
-    protected final Pattern VIEW_NAME_STATEMENT_PATTERN = Pattern.compile(VIEW_NAME_STATEMENT_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String VIEW_NAME_STATEMENT_REGEX = ".*view:(\\w+).*";
+    public static final Pattern VIEW_NAME_STATEMENT_PATTERN = Pattern.compile(VIEW_NAME_STATEMENT_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String TABLE_NAME_STATEMENT_REGEX = ".*table:(\\w+).*";
-    protected final Pattern TABLE_NAME_STATEMENT_PATTERN = Pattern.compile(TABLE_NAME_STATEMENT_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String TABLE_NAME_STATEMENT_REGEX = ".*table:(\\w+).*";
+    public static final Pattern TABLE_NAME_STATEMENT_PATTERN = Pattern.compile(TABLE_NAME_STATEMENT_REGEX, Pattern.CASE_INSENSITIVE);
 
-    protected static final String SCHEMA_NAME_STATEMENT_REGEX = ".*schema:(\\w+).*";
-    protected final Pattern SCHEMA_NAME_STATEMENT_PATTERN = Pattern.compile(SCHEMA_NAME_STATEMENT_REGEX, Pattern.CASE_INSENSITIVE);
+    public static final String SCHEMA_NAME_STATEMENT_REGEX = ".*schema:(\\w+).*";
+    public static final Pattern SCHEMA_NAME_STATEMENT_PATTERN = Pattern.compile(SCHEMA_NAME_STATEMENT_REGEX, Pattern.CASE_INSENSITIVE);
 
     protected abstract String getSingleLineCommentOneCharacter();
 
@@ -259,6 +262,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     return false;
                 }
                 reader = new BufferedReader(StreamUtil.readStreamWithReader(fileStream, null));
+
 
                 String firstLine = reader.readLine();
 
@@ -318,10 +322,20 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
             boolean rollbackSplitStatements = true;
             String rollbackEndDelimiter = null;
 
+            boolean foundHeader = false;
+            boolean foundAdditionalHeader = false;
             int count = 0;
             String line;
             while ((line = reader.readLine()) != null) {
                 count++;
+                Matcher changeLogPatternMatcher = FIRST_LINE_PATTERN.matcher(line);
+                if (changeLogPatternMatcher.matches()) {
+                    if (! foundHeader) {
+                        foundHeader = true;
+                    } else {
+                        foundAdditionalHeader = true;
+                    }
+                }
                 Matcher commentMatcher = COMMENT_PATTERN.matcher(line);
                 Matcher propertyPatternMatcher = PROPERTY_PATTERN.matcher(line);
                 Matcher altPropertyPatternMatcher = ALT_PROPERTY_ONE_CHARACTER_PATTERN.matcher(line);
@@ -332,9 +346,8 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     String message = String.format(EXCEPTION_MESSAGE, physicalChangeLogLocation, count, getSequenceName(), "--property name=<property name> value=<property value>", getDocumentationLink());
                     throw new ChangeLogParseException("\n" + message);
                 }
-                Matcher changeLogPatterMatcher = FIRST_LINE_PATTERN.matcher(line);
 
-                setLogicalFilePath(changeLog, line, changeLogPatterMatcher);
+                setLogicalFilePath(changeLog, line, changeLogPatternMatcher);
 
                 Matcher ignoreLinesMatcher = IGNORE_LINES_PATTERN.matcher(line);
                 Matcher altIgnoreMatcher = ALT_IGNORE_PATTERN.matcher(line);
@@ -381,6 +394,12 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     if (changeSet != null) {
                         if (finalCurrentSequence == null) {
                             throw new ChangeLogParseException(String.format("No %s for changeset %s", getSequenceName(), changeSet.toString(false)));
+                        } else {
+                            if (foundAdditionalHeader) {
+                                Scope.getCurrentScope().getLog(AbstractFormattedChangeLogParser.class)
+                                        .info(String.format("An additional formatted SQL header line was discovered for changeset %s and will be treated as a comment", changeSet.toString(false)));
+                                foundAdditionalHeader = false;
+                            }
                         }
 
                         setChangeSequence(change, finalCurrentSequence);
@@ -410,7 +429,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     boolean runOnChange = parseBoolean(runOnChangePatternMatcher, changeSet, false, "runOnChange");
                     boolean runAlways = parseBoolean(runAlwaysPatternMatcher, changeSet, false, "runAlways");
                     boolean runInTransaction = parseBoolean(runInTransactionPatternMatcher, changeSet, true, "runInTransaction");
-                    boolean failOnError = parseBoolean(failOnErrorPatternMatcher, changeSet, true, "failOnError");
+                    Boolean failOnError = parseBooleanObject(failOnErrorPatternMatcher, changeSet, null, "failOnError");
 
                     String runWith = parseString(runWithMatcher, RUN_WITH);
                     if (runWith != null) {
@@ -492,6 +511,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                         throw new ChangeLogParseException("\n" + message);
                     }
                     if (changeSet != null) {
+                        InvalidFormattedSqlPatternsForOssUtil.interruptIfIsProCommandAndNoLicenseIsPresent(line);
                         AtomicBoolean changeSetFinished = new AtomicBoolean(false);
                         configureChangeSet(physicalChangeLogLocation, changeLogParameters, reader, currentSequence, currentRollbackSequence, changeSet, count, line, commentMatcher, resourceAccessor, changeLog, change, rollbackSplitStatementsPatternMatcher, rollbackSplitStatements, rollbackEndDelimiter, changeSetFinished);
                         if (changeSetFinished.get()) {
@@ -503,7 +523,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                                     String.format("Unexpected formatting at line %d. Formatted %s changelogs do not allow comment lines outside of changesets. Learn all the options at %s", count, getSequenceName(), getDocumentationLink());
                             throw new ChangeLogParseException("\n" + message);
                         } else {
-                            handleAdditionalLines(changeLog, resourceAccessor, line);
+                            handleAdditionalLines(changeLog, resourceAccessor, line, currentSequence);
                         }
                     }
                 }
@@ -712,7 +732,7 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
     }
 
     protected ChangeSet configureChangeSet(DatabaseChangeLog changeLog, boolean runOnChange, boolean runAlways,
-                                           boolean runInTransaction, boolean failOnError, String runWith,
+                                           boolean runInTransaction, Boolean failOnError, String runWith,
                                            String runWithSpoolFile, String context, String labels, String logicalFilePath,
                                            String dbms, String ignore, String changeSetId, String changeSetAuthor) {
         ChangeSetService service = ChangeSetServiceFactory.getInstance().createChangeSetService();
@@ -728,8 +748,8 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         return changeSet;
     }
 
-    protected void setLogicalFilePath(DatabaseChangeLog changeLog, String line, Matcher changeLogPatterMatcher) {
-        if (changeLogPatterMatcher.matches()) {
+    protected void setLogicalFilePath(DatabaseChangeLog changeLog, String line, Matcher changeLogPatternMatcher) {
+        if (changeLog.getLogicalFilePath() == null && changeLogPatternMatcher.matches()) {
             Matcher logicalFilePathMatcher = LOGICAL_FILE_PATH_PATTERN.matcher(line);
             changeLog.setLogicalFilePath(parseString(logicalFilePathMatcher, LOGICAL_FILE_PATH));
         }
@@ -759,9 +779,20 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         currentRollbackSequence.setLength(0);
     }
 
+    /**
+     * @deprecated use {@link AbstractFormattedChangeLogParser#handleAdditionalLines(DatabaseChangeLog, ResourceAccessor, String)}
+     */
+    @Deprecated
     protected boolean handleAdditionalLines(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, String line)
-        throws ChangeLogParseException {
+            throws ChangeLogParseException {
         return false;
+    }
+
+    protected boolean handleAdditionalLines(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, String line, StringBuilder currentSequence)
+            throws ChangeLogParseException {
+        InvalidFormattedSqlPatternsForOssUtil.interruptIfIsProCommandAndNoLicenseIsPresent(line);
+        // by default calls the deprecated method , otherwise old code may break.
+        return handleAdditionalLines(changeLog, resourceAccessor, line);
     }
 
     //
@@ -927,6 +958,24 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
         return parseBoolean(matcher, changeSet, defaultValue, null);
     }
 
+    protected Boolean parseBooleanObject(Matcher matcher, ChangeSet changeSet, Boolean defaultValue, String description)
+            throws ChangeLogParseException {
+        Boolean booleanMatch = defaultValue;
+        if (matcher.matches()) {
+            try {
+                booleanMatch = Boolean.parseBoolean(matcher.group(1));
+                logMatch(description, String.valueOf(booleanMatch), getClass());
+            } catch (Exception e) {
+                if (changeSet != null) {
+                    throw new ChangeLogParseException("Cannot parse " + changeSet + " " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
+                } else {
+                    throw new ChangeLogParseException("Cannot parse pattern " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
+                }
+            }
+        }
+        return booleanMatch;
+    }
+
     protected boolean parseBoolean(Matcher matcher, ChangeSet changeSet, boolean defaultValue, String description)
             throws ChangeLogParseException {
         boolean booleanMatch = defaultValue;
@@ -935,7 +984,11 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                 booleanMatch = Boolean.parseBoolean(matcher.group(1));
                 logMatch(description, String.valueOf(booleanMatch), getClass());
             } catch (Exception e) {
-                throw new ChangeLogParseException("Cannot parse " + changeSet + " " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
+                if (changeSet != null) {
+                    throw new ChangeLogParseException("Cannot parse " + changeSet + " " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
+                } else {
+                    throw new ChangeLogParseException("Cannot parse pattern " + matcher.toString().replaceAll("\\.*", "") + " as a boolean", e);
+                }
             }
         }
         return booleanMatch;

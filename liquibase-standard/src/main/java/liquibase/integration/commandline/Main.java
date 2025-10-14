@@ -349,7 +349,7 @@ public class Main {
                         if (licenseService != null) {
                             if (main.liquibaseProLicenseKey == null) {
                                 if (!isRunningFromNewCli()) {
-                                    Scope.getCurrentScope().getLog(getClass()).info("No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
+                                    Scope.getCurrentScope().getLog(getClass()).info("No Liquibase license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase features.");
                                 }
                             } else {
                                 Location licenseKeyLocation = new Location("property liquibaseProLicenseKey", main.liquibaseProLicenseKey);
@@ -1594,7 +1594,7 @@ public class Main {
                     liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression
                             (getLabelFilter()), getOutputWriter());
                 } else if (COMMANDS.UPDATE_SQL.equalsIgnoreCase(command)) {
-                    liquibase.update(new Contexts(contexts), new LabelExpression(getLabelFilter()), getOutputWriter());
+                    liquibase.updateSql(new Contexts(contexts), new LabelExpression(getLabelFilter()), getOutputWriter());
                 } else if (COMMANDS.ROLLBACK_TO_DATE.equalsIgnoreCase(command)) {
                     if (getCommandArgument() == null) {
                         throw new CommandLineParsingException(

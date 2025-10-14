@@ -32,9 +32,7 @@ import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sql.visitor.SqlVisitorFactory;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.util.SqlUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
@@ -624,13 +622,16 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     protected Change toChange(ParsedNode value, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         Change change = getCurrentScope().getSingleton(ChangeFactory.class).create(value.getName());
         if (change == null) {
-            if (!value.getChildren().isEmpty() && ! ChangeFactory.isNoExceptionOnUnsupportedChangeType() &&
-                ChangeLogParserConfiguration.CHANGELOG_PARSE_MODE.getCurrentValue().equals(ChangeLogParserConfiguration.ChangelogParseMode.STRICT)) {
+            if (throwChangeTypeNotFoundException(value)) {
                 String message = "";
                 if (this.getChangeLog() != null && this.getChangeLog().getPhysicalFilePath() != null) {
                     message = "Error parsing " + this.getChangeLog().getPhysicalFilePath() + ": ";
                 }
-                message += "Unknown change type '" + value.getName() + "'. Check for spelling or capitalization errors and missing extensions such as liquibase-commercial.";
+                String displayName = value.getName();
+                if (value.getParsedNamespace() != null) {
+                    displayName = value.getParsedNamespace() + ":" + displayName;
+                }
+                message += "Unknown change type '" + displayName + "'. Check for spelling or capitalization errors and missing extensions such as liquibase-commercial.";
                 throw new ParsedNodeException(message);
             }
             return null;
@@ -651,6 +652,71 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     public ExecType execute(DatabaseChangeLog databaseChangeLog, Database database) throws MigrationFailedException {
         return execute(databaseChangeLog, null, database);
+    }
+
+    private void addSkippedChangesToSummary(DatabaseChangeLog databaseChangeLog, Database database) {
+        for (Change change : changes) {
+            if (isSkipExecChange(change) && ! databaseChangeLog.getSkippedBecauseOfOsMismatchChangeSets().contains(this)) {
+                databaseChangeLog.getSkippedBecauseOfOsMismatchChangeSets().add(this);
+            }
+            if (isSkipChangeForDbms(change, database) && ! databaseChangeLog.getSkippedBecauseOfChangeDbmsChangeSets().contains(this)) {
+                databaseChangeLog.getSkippedBecauseOfChangeDbmsChangeSets().add(this);
+            }
+        }
+    }
+
+    /**
+     * If we could not find the change type and
+     *   either
+     *      The node had a namespace
+     *   or
+     *      The node has children AND
+     *      The "do not throw an exception flag" is off AND
+     *      The changelog parsing mode is strict
+     *   then
+     *      throw an exception
+     *
+     * @param   value           The ParsedNode to evaluate
+     * @return  boolean         True if we should throw
+     *
+     */
+    private boolean throwChangeTypeNotFoundException(ParsedNode value) {
+        return
+            StringUtils.isNotEmpty(value.getParsedNamespace()) ||
+            (!value.getChildren().isEmpty() &&
+                ! ChangeFactory.isNoExceptionOnUnsupportedChangeType() &&
+                ChangeLogParserConfiguration.CHANGELOG_PARSE_MODE.getCurrentValue().equals(ChangeLogParserConfiguration.ChangelogParseMode.STRICT));
+    }
+
+    private ExecType isChangeToSkip(Change change, Database database, Logger log) {
+        boolean skipChangeForDbms = isSkipChangeForDbms(change, database);
+        boolean skipExecChange = isSkipExecChange(change);
+        if (skipChangeForDbms) {
+            log.fine("Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
+        }
+        if (skipExecChange) {
+            log.fine("Change " + change.getSerializedObjectName() + " not included: " + change.getConfirmationMessage());
+        }
+        if (skipChangeForDbms || skipExecChange) {
+            return ExecType.SKIPPED;
+        }
+        return null;
+    }
+
+    private static boolean isSkipExecChange(Change change) {
+        return !change.shouldRunOnOs();
+    }
+
+    private static boolean isSkipChangeForDbms(Change change, Database database) {
+        boolean skipChangeForDbms =
+           (change instanceof DbmsTargetedChange &&
+              ! DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true));
+        return skipChangeForDbms;
+    }
+
+    private void setStopTime() {
+        stopInstant = Instant.now();
+        operationStopTime = Date.from(stopInstant);
     }
 
     /**
@@ -777,9 +843,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 }
 
                 log.fine("Reading ChangeSet: " + this);
+                boolean skippedAllChanges = !changes.isEmpty();
                 for (Change change : changes) {
-                    execType = isChangeToSkip(change, database, log);
-                    if (execType != ExecType.SKIPPED) {
+                    if (isChangeToSkip(change, database, log) != ExecType.SKIPPED) {
+                        skippedAllChanges = false;
                         if (listener != null) {
                             listener.willRun(change, this, changeLog, database);
                         }
@@ -800,6 +867,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
                 if (runInTransaction) {
                     database.commit();
+                }
+                if (skippedAllChanges) {
+                    execType = ExecType.SKIPPED;
+                    addSkippedChangesToSummary(databaseChangeLog, database);
+                    log.fine("All changes have been skipped");
                 }
                 if (execType == null) {
                     execType = ExecType.EXECUTED;
@@ -835,7 +907,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 throw new MigrationFailedException(this, e);
             }
             if ((failOnError != null) && !failOnError) {
-                log.info("Changeset " + toString(false) + " failed, but failOnError was false.  Error: " + e.getMessage());
+                Scope.getCurrentScope().getUI().sendMessage("Changeset " + toString(false) + " failed, and the error was ignored because 'failOnError' was set to false. ");
+                log.info("Changeset " + toString(false) + " failed, and the error was ignored because 'failOnError' was set to false.  Error: " + e.getMessage());
                 log.fine("Failure Stacktrace", e);
                 execType = ExecType.FAILED;
             } else {
@@ -858,29 +931,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
         return execType;
-    }
-
-    private ExecType isChangeToSkip(Change change, Database database, Logger log) {
-        boolean skipChangeForDbms =
-           (change instanceof DbmsTargetedChange &&
-              ! DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true));
-        boolean skipExecChange = ! change.shouldRunOnOs();
-        if (skipChangeForDbms) {
-            log.fine("Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
-        }
-        if (skipExecChange) {
-            log.fine("Change " + change.getSerializedObjectName() + " not included: " + change.getConfirmationMessage());
-            change.getChangeSet().getChangeLog().getSkippedBecauseOfOsMismatchChangeSets().add(change.getChangeSet());
-        }
-        if (skipChangeForDbms || skipExecChange) {
-            return ExecType.SKIPPED;
-        }
-        return null;
-    }
-
-    private void setStopTime() {
-        stopInstant = Instant.now();
-        operationStopTime = Date.from(stopInstant);
     }
 
     private void setStartTime() {

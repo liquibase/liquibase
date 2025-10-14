@@ -296,4 +296,9 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
     public boolean supportsDatabaseChangeLogHistory() {
         return true;
     }
+
+    @Override
+    public String escapeForLike(String string) {
+        return string;
+    }
 }

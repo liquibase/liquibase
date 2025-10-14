@@ -16,31 +16,20 @@
     <properties>
         <deploy.repositoryId>liquibase</deploy.repositoryId>
         <deploy.url>https://maven.pkg.github.com/liquibase/liquibase</deploy.url>
-        <h2.version>2.2.224</h2.version>
-        <hsqldb.version>2.7.4</hsqldb.version>
-        <postgresql.version>42.7.5</postgresql.version>
-        <mssql.version>12.8.1.jre8</mssql.version>
-        <mysql.version>9.2.0</mysql.version>
-        <mariadb.version>3.4.1</mariadb.version>
-        <oracle.version>19.25.0.0</oracle.version>
-        <sqlite.version>3.48.0.0</sqlite.version>
-        <db2.version>11.5.9.0</db2.version>
-        <firebird.version>5.0.6.java8</firebird.version>
-        <slf4j.version>2.0.16</slf4j.version>
-        <liquibase-pro.version>master-SNAPSHOT</liquibase-pro.version>
-        <liquibase-checks.version>0-SNAPSHOT</liquibase-checks.version>
+        <h2.version>2.4.240</h2.version>
         <assemblyConfigFile>src/main/assembly/assembly-bin.xml</assemblyConfigFile>
         <maven.deploy.skip>true</maven.deploy.skip>
         <maven.install.skip>true</maven.install.skip>
         <artifact.version>${project.version}</artifact.version>
         <sonar.coverage.jacoco.xmlReportPaths>../target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <expected-distribution-contents-filename>expected-distribution-contents.txt</expected-distribution-contents-filename>
     </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
-                <version>5.11.4</version>
+                <version>5.13.4</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -56,13 +45,13 @@
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
-            <version>4.7.6</version>
+            <version>4.7.7</version>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.10</version>
+            <version>${opencsv.version}</version>
             <scope>compile</scope>
             <exclusions>
                 <!-- not used by liquibase code -->
@@ -89,116 +78,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <version>${hsqldb.version}</version>
-            <optional>true</optional>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${postgresql.version}</version>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>mssql-jdbc</artifactId>
-            <version>${mssql.version}</version>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>net.snowflake</groupId>
-            <artifactId>snowflake-jdbc</artifactId>
-            <version>3.22.0</version>
-        </dependency>
-
-        <!--        CANNOT INCLUDE MYSQL FOR LICENSING REASONS -->
-<!--        <dependency>-->
-<!--            <groupId>com.mysql</groupId>-->
-<!--            <artifactId>mysql-connector-j</artifactId>-->
-<!--            <version>${mysql.version}</version>-->
-<!--        </dependency>-->
-
-        <dependency>
-            <groupId>org.mariadb.jdbc</groupId>
-            <artifactId>mariadb-java-client</artifactId>
-            <version>${mariadb.version}</version>
-            <optional>true</optional>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.github.waffle</groupId>
-                    <artifactId>waffle-jna</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>com.oracle.database.jdbc</groupId>
-            <artifactId>ojdbc8</artifactId>
-            <version>${oracle.version}</version>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.xerial</groupId>
-            <artifactId>sqlite-jdbc</artifactId>
-            <version>${sqlite.version}</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.ibm.db2</groupId>
-            <artifactId>jcc</artifactId>
-            <version>${db2.version}</version>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <!-- sqlite requires slf4j, so we add simple to prevent log warning messages.
-             We also add it here to be able to manage the version for it -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-nop</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.firebirdsql.jdbc</groupId>
-            <artifactId>jaybird</artifactId>
-            <version>${firebird.version}</version>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>2.3</version>
-        </dependency>
-
-        <!-- needed for inclusion in CLI when running in newer java versions -->
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-core</artifactId>
-            <version>4.0.5</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-runtime</artifactId>
-            <version>4.0.5</version>
-            <optional>true</optional>
+            <version>2.5</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -208,7 +90,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.27.1</version>
+            <version>1.28.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -311,7 +193,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-install-plugin</artifactId>
-                <version>3.1.3</version>
+                <version>3.1.4</version>
                 <configuration>
                     <groupId>${project.groupId}</groupId>
                     <version>${artifact.version}</version>
@@ -331,7 +213,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>3.1.3</version>
+                <version>3.1.4</version>
                 <configuration>
                     <groupId>${project.groupId}</groupId>
                     <version>${artifact.version}</version>
@@ -354,7 +236,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>3.6.1</version>
                 <executions>
                     <execution>
                         <id>timestamp-property</id>
@@ -374,57 +256,6 @@
 
     <profiles>
         <profile>
-            <id>liquibase-commercial</id>
-
-            <activation>
-                <file>
-                    <exists>../../liquibase-pro/pom.xml</exists>
-                </file>
-            </activation>
-
-            <properties>
-                <assemblyConfigFile>src/main/assembly/assembly-bin-pro.xml</assemblyConfigFile>
-            </properties>
-
-            <dependencies>
-                <dependency>
-                    <groupId>org.liquibase</groupId>
-                    <artifactId>liquibase-commercial</artifactId>
-                    <version>${liquibase-pro.version}</version>
-                </dependency>
-            </dependencies>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.13.0</version>
-                        <executions>
-                            <execution>
-                                <phase>test-compile</phase>
-                                <goals>
-                                    <goal>testCompile</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
             <id>remote-repositories</id>
             <activation>
                 <property>
@@ -436,14 +267,6 @@
                 <repository>
                     <id>liquibase</id>
                     <url>https://maven.pkg.github.com/liquibase/liquibase</url>
-                    <snapshots>
-                        <enabled>true</enabled>
-                        <updatePolicy>always</updatePolicy>
-                    </snapshots>
-                </repository>
-                <repository>
-                    <id>liquibase-pro</id>
-                    <url>https://maven.pkg.github.com/liquibase/liquibase-pro</url>
                     <snapshots>
                         <enabled>true</enabled>
                         <updatePolicy>always</updatePolicy>
