@@ -212,6 +212,19 @@ class DataTypeFactoryTest extends Specification {
         "mediumblob"                                   | new MySQLDatabase()    | "MEDIUMBLOB"                                   | BlobType      | false
         "mediumtext"                                   | new MySQLDatabase()    | "MEDIUMTEXT"                                   | ClobType      | false
         "real"                                         | new MySQLDatabase()    | "REAL"                                         | FloatType     | false
+        "timestamptz"                                  | new MySQLDatabase()    | "timestamp"                                    | TimestampType | false
+        "timestamp with time zone"                      | new MySQLDatabase()   | "timestamp"                                    | TimestampType | false
+        "timestamp with timezone"                      | new MySQLDatabase()    | "timestamp"                                    | TimestampType | false
+        "java.sql.Types.TIMESTAMP_WITH_TIMEZONE"       | new MySQLDatabase()    | "timestamp"                                    | TimestampType | false
+        "java.sql.Types.TIMESTAMP_WITH_TIMEZONE(6)"    | new MySQLDatabase()    | "timestamp(6)"                                 | TimestampType | false
+        "timestamp"                                    | new MySQLDatabase()    | "timestamp"                                    | TimestampType | false
+        "timestamp(3)"                                 | new MySQLDatabase()    | "timestamp(3)"                                 | TimestampType | false
+        "TIMESTAMPTZ"                                  | new MySQLDatabase()    | "timestamp"                                    | TimestampType | false
+        "timestamptz(3)"                               | new MySQLDatabase()    | "timestamp(3)"                                 | TimestampType | false
+        "java.sql.Types.TIMESTAMP"                     | new MySQLDatabase()    | "timestamp"                                    | TimestampType | false
+        "java.sql.Types.TIMESTAMP(3)"                  | new MySQLDatabase()    | "timestamp(3)"                                 | TimestampType | false
+        "java.sql.Timestamp"                           | new MySQLDatabase()    | "timestamp"                                    | TimestampType | false
+        "java.sql.Timestamp(6)"                        | new MySQLDatabase()    | "timestamp(6)"                                 | TimestampType | false
         "nclob"                                        | new OracleDatabase()   | "NCLOB"                                        | ClobType      | false
         "xml"                                          | new OracleDatabase()   | "XMLTYPE"                                      | XMLType       | false
         "xmltype"                                      | new OracleDatabase()   | "XMLTYPE"                                      | XMLType       | false

@@ -60,9 +60,27 @@ public class TimestampType extends DateTimeType {
         }
 
         if (database instanceof MySQLDatabase) {
+            // MySQL uses plain TIMESTAMP which automatically converts to/from UTC
+            // All timestamp types (with or without timezone) map to TIMESTAMP
+            String lowerDef = originalDefinition.toLowerCase();
+
+            if (lowerDef.startsWith("java.sql.types.timestamp_with_timezone")
+                    || lowerDef.startsWith("java.sql.types.timestamp")
+                    || lowerDef.startsWith("java.sql.timestamp")
+                    || lowerDef.startsWith("timestamptz")
+                    || lowerDef.startsWith("timestamp with time zone")
+                    || lowerDef.startsWith("timestamp with timezone")
+                    || lowerDef.startsWith("timestamp")) {
+                // Return TIMESTAMP with parameters if present
+                Object[] parameters = getParameters();
+                return new DatabaseDataType("timestamp", parameters);
+            }
+
+            // For other definitions with spaces or parentheses, preserve them as-is
             if (originalDefinition.contains(" ") || originalDefinition.contains("(")) {
                 return new DatabaseDataType(getRawDefinition());
             }
+
             return super.toDatabaseDataType(database);
         }
         if (database instanceof MSSQLDatabase) {
