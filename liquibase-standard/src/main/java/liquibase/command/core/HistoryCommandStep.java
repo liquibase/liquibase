@@ -77,6 +77,9 @@ public class HistoryCommandStep extends AbstractCommandStep {
 
             ChangeLogHistoryService historyService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
 
+            if (database.getConnection() == null) {
+                throw new LiquibaseException("Database connection is not available");
+            }
             String headerMsg = "Liquibase History for " + database.getConnection().getURL();
             output.println(headerMsg);
             output.println("");
@@ -109,7 +112,8 @@ public class HistoryCommandStep extends AbstractCommandStep {
                 deployment.printReport(output);
             }
 
-            try (MdcObject historyMdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.HISTORY, new History(database.getConnection().getURL(), ranChangeSets.size(), mdcChangesets))) {
+            String databaseUrl = (database.getConnection() != null) ? database.getConnection().getURL() : "unknown";
+            try (MdcObject historyMdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.HISTORY, new History(databaseUrl, ranChangeSets.size(), mdcChangesets))) {
                 Scope.getCurrentScope().getLog(getClass()).fine(headerMsg);
             }
 

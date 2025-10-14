@@ -111,7 +111,7 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
         if (getCatalogName() != null)
             return false;
 
-        if (!(database.getConnection() instanceof JdbcConnection))
+        if (database.getConnection() == null || !(database.getConnection() instanceof JdbcConnection))
             return false;
 
         if (getColumnName() == null)
