@@ -210,9 +210,11 @@ public class TimestampType extends DateTimeType {
 
         // If we created a type with parameters for databases that don't need additional timezone info, return it
         // PostgreSQL needs "WITHOUT TIME ZONE" to be added by the parent class
+        // Firebird doesn't support TIMESTAMP(precision) syntax, so let it fall through to super
         if (getParameters().length > 0
                 && !(database instanceof SybaseASADatabase)
-                && !(database instanceof PostgresDatabase)) {
+                && !(database instanceof PostgresDatabase)
+                && !(database instanceof FirebirdDatabase)) {
             return type;
         }
 

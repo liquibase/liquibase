@@ -287,6 +287,8 @@ class DataTypeFactoryTest extends Specification {
         "long nvarchar"                                | new SybaseDatabase()   | "TEXT"                                         | ClobType      | false
         "character varying"                            | new SybaseDatabase()   | "VARCHAR"                                      | VarcharType   | false
         "uuid"                                         | new MariaDBDatabase()  | "UUID"                                         | UUIDType      | false
+        "timestamp"                                    | new FirebirdDatabase() | "TIMESTAMP"                                    | TimestampType | false
+        "timestamp(6)"                                 | new FirebirdDatabase() | "TIMESTAMP"                                    | TimestampType | false
     }
 
     @Unroll("#featureName: #object for #database")
