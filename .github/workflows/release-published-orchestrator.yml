@@ -91,7 +91,6 @@ jobs:
     name: Deploy Javadocs
     needs: [setup, manual-approval]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
-
     uses: ./.github/workflows/release-deploy-javadocs.yml
     with:
       tag: ${{ needs.setup.outputs.tag }}
@@ -112,7 +111,6 @@ jobs:
 
   deploy-xsd:
     name: Deploy XSD Files
-    needs: [setup]
     needs: [setup, manual-approval]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: ./.github/workflows/release-deploy-xsd.yml

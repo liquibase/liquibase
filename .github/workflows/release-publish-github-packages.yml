@@ -74,7 +74,7 @@ jobs:
       - name: Version artifact
         run: mvn versions:set -DnewVersion="${{ inputs.version }}"
 
-      Publish to GitHub Packages
+      # Publish to GitHub Packages
       - name: Publish package to Github
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
