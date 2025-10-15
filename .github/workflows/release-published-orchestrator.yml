@@ -71,7 +71,7 @@ permissions:
 jobs:
   setup:
     name: Setup Release Metadata
-    uses: ./.github/workflows/release-setup.yml@DAT-20880
+    uses: ./.github/workflows/release-setup.yml
     with:
       tag: ${{ inputs.tag || github.event.release.tag_name }}
       dry_run: ${{ inputs.dry_run || false }}
@@ -81,7 +81,7 @@ jobs:
   manual-approval:
     name: Manual Deployment Approval
     needs: [setup]
-    uses: ./.github/workflows/release-manual-approval.yml@DAT-20880
+    uses: ./.github/workflows/release-manual-approval.yml
     with:
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run || false }}
@@ -91,7 +91,7 @@ jobs:
     name: Deploy Javadocs
     needs: [setup, manual-approval]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
-    uses: ./.github/workflows/release-deploy-javadocs.yml@DAT-20880
+    uses: ./.github/workflows/release-deploy-javadocs.yml
     with:
       version: ${{ needs.setup.outputs.version }}
       tag: ${{ needs.setup.outputs.tag }}
@@ -102,7 +102,7 @@ jobs:
     name: Publish to GitHub Packages
     needs: [setup, manual-approval]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
-    uses: ./.github/workflows/release-publish-github-packages.yml@DAT-20880
+    uses: ./.github/workflows/release-publish-github-packages.yml
     with:
       version: ${{ needs.setup.outputs.version }}
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
@@ -114,7 +114,7 @@ jobs:
     name: Deploy XSD Files
     needs: [setup, manual-approval]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
-    uses: ./.github/workflows/release-deploy-xsd.yml@DAT-20880
+    uses: ./.github/workflows/release-deploy-xsd.yml
     with:
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run || false }}
@@ -124,7 +124,7 @@ jobs:
     name: Release Docker Images
     needs: [setup, manual-approval]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
-    uses: ./.github/workflows/release-docker.yml@DAT-20880
+    uses: ./.github/workflows/release-docker.yml
     with:
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run || false }}
@@ -134,7 +134,7 @@ jobs:
     name: Release Minimal Docker Image
     needs: [setup, manual-approval]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
-    uses: ./.github/workflows/release-docker-minimal.yml@DAT-20880
+    uses: ./.github/workflows/release-docker-minimal.yml
     with:
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run || false }}
@@ -144,7 +144,7 @@ jobs:
     name: Deploy to Maven Central
     needs: [setup, manual-approval, deploy-javadocs, publish-github-packages, deploy-xsd, release-docker]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') && (needs.deploy-javadocs.result == 'success' || needs.deploy-javadocs.result == 'skipped') && (needs.publish-github-packages.result == 'success' || needs.publish-github-packages.result == 'skipped') && (needs.deploy-xsd.result == 'success' || needs.deploy-xsd.result == 'skipped') && (needs.release-docker.result == 'success' || needs.release-docker.result == 'skipped')
-    uses: ./.github/workflows/release-deploy-maven.yml@DAT-20880
+    uses: ./.github/workflows/release-deploy-maven.yml
     with:
       version: ${{ needs.setup.outputs.version }}
       tag: ${{ needs.setup.outputs.tag }}
@@ -172,7 +172,7 @@ jobs:
     name: Publish Assets to S3
     needs: [setup, package]
     if: always() && needs.setup.result == 'success' && (needs.package.result == 'success' || needs.package.result == 'skipped')
-    uses: ./.github/workflows/release-publish-assets-s3.yml@DAT-20880
+    uses: ./.github/workflows/release-publish-assets-s3.yml
     with:
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run || false }}
