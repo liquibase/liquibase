@@ -156,7 +156,7 @@ jobs:
   package:
     name: Update Packages
     needs: [setup]
-    uses: liquibase/build-logic/.github/workflows/package.yml@DAT-20880
+    uses: liquibase/build-logic/.github/workflows/package.yml@main
     secrets: inherit
     with:
       groupId: "org.liquibase"
