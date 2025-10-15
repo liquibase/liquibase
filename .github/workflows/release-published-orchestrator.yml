@@ -155,7 +155,8 @@ jobs:
 
   package:
     name: Update Packages
-    needs: [setup]
+    needs: [setup, manual-approval]
+    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: liquibase/build-logic/.github/workflows/package.yml@main
     secrets: inherit
     with:
