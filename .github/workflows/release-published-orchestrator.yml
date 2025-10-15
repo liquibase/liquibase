@@ -1,6 +1,6 @@
 name: Release Published Orchestrator
 
-run-name: "🚀 Release Published v${{ inputs.tag || github.event.release.tag_name }}${{ inputs.dry_run && ' (Dry Run)' || '' }}"
+run-name: "🚀 Release Published ${{ inputs.tag || github.event.release.tag_name }}${{ inputs.dry_run && ' (Dry Run)' || '' }}"
 
 on:
   release:
@@ -96,7 +96,6 @@ jobs:
 
     uses: ./.github/workflows/release-deploy-javadocs.yml
     with:
-      version: ${{ needs.setup.outputs.version }}
       tag: ${{ needs.setup.outputs.tag }}
       dry_run: ${{ inputs.dry_run || false }}
     secrets: inherit

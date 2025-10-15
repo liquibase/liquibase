@@ -1,14 +1,10 @@
 name: Release Deploy Javadocs
 
-run-name: "Deploy Javadocs - v${{ inputs.version }}${{ inputs.dry_run && ' (Dry Run)' || '' }}"
+run-name: "Deploy Javadocs - ${{ inputs.tag }}${{ inputs.dry_run && ' (Dry Run)' || '' }}"
 
 on:
   workflow_call:
     inputs:
-      version:
-        description: "Version to deploy"
-        required: true
-        type: string
       tag:
         description: "Release tag"
         required: true
@@ -21,10 +17,6 @@ on:
   
   workflow_dispatch:
     inputs:
-      version:
-        description: "Version to deploy"
-        required: true
-        type: string
       tag:
         description: "Release tag"
         required: true
