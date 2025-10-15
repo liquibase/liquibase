@@ -155,8 +155,8 @@ jobs:
     name: Deploy to Maven Central
     needs: [setup, deploy-javadocs, publish-github-packages, deploy-xsd, release-docker]
     #needs: [setup, manual-approval, deploy-javadocs, publish-github-packages, deploy-xsd, release-docker]
-    if: always() && needs.setup.result == 'success' && (needs.deploy-javadocs.result == 'success' || needs.deploy-javadocs.result == 'skipped') && (needs.publish-github-packages.result == 'success' || needs.publish-github-packages.result == 'skipped') && (needs.deploy-xsd.result == 'success' || needs.deploy-xsd.result == 'skipped') && (needs.release-docker.result == 'success' || needs.release-docker.result == 'skipped')
-    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') && (needs.deploy-javadocs.result == 'success' || needs.deploy-javadocs.result == 'skipped') && (needs.publish-github-packages.result == 'success' || needs.publish-github-packages.result == 'skipped') && (needs.deploy-xsd.result == 'success' || needs.deploy-xsd.result == 'skipped') && (needs.release-docker.result == 'success' || needs.release-docker.result == 'skipped')
+    #if: always() && needs.setup.result == 'success' && (needs.deploy-javadocs.result == 'success' || needs.deploy-javadocs.result == 'skipped') && (needs.publish-github-packages.result == 'success' || needs.publish-github-packages.result == 'skipped') && (needs.deploy-xsd.result == 'success' || needs.deploy-xsd.result == 'skipped') && (needs.release-docker.result == 'success' || needs.release-docker.result == 'skipped')
+    if: always() && needs.setup.result == 'success'
     uses: ./.github/workflows/release-deploy-maven.yml
     with:
       version: ${{ needs.setup.outputs.version }}
