@@ -1,0 +1,89 @@
+name: Release Deploy Javadocs
+
+run-name: "Deploy Javadocs - v${{ inputs.version }}${{ inputs.dry_run && ' (Dry Run)' || '' }}"
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: "Version to deploy"
+        required: true
+        type: string
+      tag:
+        description: "Release tag"
+        required: true
+        type: string
+      dry_run:
+        description: "Flag to indicate if this is a dry-run deployment"
+        required: false
+        type: boolean
+        default: false
+  
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to deploy"
+        required: true
+        type: string
+      tag:
+        description: "Release tag"
+        required: true
+        type: string
+      dry_run:
+        description: "Flag to indicate if this is a dry-run deployment"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy-javadocs:
+    name: Upload Javadocs to S3
+    runs-on: ubuntu-22.04
+    if: ${{ inputs.dry_run == false }}
+    steps:
+      - name: Download release javadocs
+        uses: robinraju/release-downloader@v1.12
+        with:
+          repository: "liquibase/liquibase"
+          tag: "${{ inputs.tag }}"
+          fileName: "liquibase-additional*.zip"
+          out-file-path: "."
+
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
+          aws-region: us-east-1
+
+      - name: Unpack javadoc files and upload to s3
+        # unzip archives, create directory for each jar, and extract jar contents to directory.  Then delete the jar and zip files.  Then upload to s3.
+        run: |
+          unzip -j '*.zip' '*javadoc*.jar'
+
+          for jar in *liquibase*.jar; do
+            dir_name=$(basename "$jar" .jar)
+            dir_name=$(echo "$dir_name" | sed -E 's/(-[0-9]+(\.[0-9]+)*(-javadoc)?)//')
+            mkdir -p "$dir_name"
+            unzip -o "$jar" -d "$dir_name"
+          done
+
+          rm -rf *.jar *.zip
+          aws s3 sync . s3://javadocsliquibasecom-origin --only-show-errors
