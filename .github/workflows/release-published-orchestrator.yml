@@ -193,10 +193,22 @@ jobs:
 
   generate-summary:
     name: Generate Release Summary
+    # needs:
+    #   [
+    #     setup,
+    #     manual-approval,
+    #     deploy-javadocs,
+    #     publish-github-packages,
+    #     deploy-xsd,
+    #     release-docker,
+    #     release-docker-minimal,
+    #     deploy-maven,
+    #     package,
+    #     publish-assets-s3,
+    #   ]
     needs:
       [
         setup,
-        manual-approval,
         deploy-javadocs,
         publish-github-packages,
         deploy-xsd,
