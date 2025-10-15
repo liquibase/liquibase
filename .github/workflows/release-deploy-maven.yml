@@ -103,79 +103,79 @@ jobs:
         env:
           GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
 
-      # - name: Publish to Maven Central
-      #   env:
-      #     MAVEN_USERNAME: ${{ env.SONATYPE_USERNAME }}
-      #     MAVEN_PASSWORD: ${{ env.SONATYPE_TOKEN }}
-      #     GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
-      #   run: |
-      #     version=${{ inputs.version }}
+      - name: Publish to Maven Central
+        env:
+          MAVEN_USERNAME: ${{ env.SONATYPE_USERNAME }}
+          MAVEN_PASSWORD: ${{ env.SONATYPE_TOKEN }}
+          GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
+        run: |
+          version=${{ inputs.version }}
 
-      #     unzip -j liquibase-additional-*.zip
+          unzip -j liquibase-additional-*.zip
 
-      #     ##extracts and sign poms, generate checksums for all artifacts
-      #     for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
-      #       unzip -j $i-${version}.jar META-INF/maven/org.liquibase/$i/pom.xml
-      #       sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
-      #       mv pom.xml $i-${version}.pom
+          ##extracts and sign poms, generate checksums for all artifacts
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
+            unzip -j $i-${version}.jar META-INF/maven/org.liquibase/$i/pom.xml
+            sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
+            mv pom.xml $i-${version}.pom
 
-      #       # Sign POM file
-      #       gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i-${version}.pom
+            # Sign POM file
+            gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i-${version}.pom
             
-      #       # Generate checksums for POM file
-      #       md5sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.md5
-      #       sha1sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.sha1
+            # Generate checksums for POM file
+            md5sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.md5
+            sha1sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.sha1
             
-      #       # Generate checksums for all JAR files (main, sources, javadoc)
-      #       for jar_file in $i-${version}.jar $i-${version}-sources.jar $i-${version}-javadoc.jar; do
-      #         if [ -f "$jar_file" ]; then
-      #           md5sum "$jar_file" | cut -d' ' -f1 > "$jar_file.md5"
-      #           sha1sum "$jar_file" | cut -d' ' -f1 > "$jar_file.sha1"
-      #         fi
-      #       done
-      #     done
+            # Generate checksums for all JAR files (main, sources, javadoc)
+            for jar_file in $i-${version}.jar $i-${version}-sources.jar $i-${version}-javadoc.jar; do
+              if [ -f "$jar_file" ]; then
+                md5sum "$jar_file" | cut -d' ' -f1 > "$jar_file.md5"
+                sha1sum "$jar_file" | cut -d' ' -f1 > "$jar_file.sha1"
+              fi
+            done
+          done
 
-      #     # Create Maven repository layout structure for the bundle
-      #     mkdir -p "bundle/org/liquibase"
+          # Create Maven repository layout structure for the bundle
+          mkdir -p "bundle/org/liquibase"
 
-      #     # Copy all artifacts to proper Maven repository layout
-      #     for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
-      #       mkdir -p "bundle/org/liquibase/$i/${version}"
-      #       cp $i-${version}* "bundle/org/liquibase/$i/${version}/"
-      #     done
+          # Copy all artifacts to proper Maven repository layout
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
+            mkdir -p "bundle/org/liquibase/$i/${version}"
+            cp $i-${version}* "bundle/org/liquibase/$i/${version}/"
+          done
 
-      #     # Create the bundle zip file
-      #     cd bundle
-      #     zip -r ../central-bundle.zip .
-      #     cd ..
+          # Create the bundle zip file
+          cd bundle
+          zip -r ../central-bundle.zip .
+          cd ..
 
-      #     # Create base64 encoded credentials for Bearer auth
-      #     AUTH_HEADER=$(printf "%s:%s" "${MAVEN_USERNAME}" "${MAVEN_PASSWORD}" | base64 -w 0)
+          # Create base64 encoded credentials for Bearer auth
+          AUTH_HEADER=$(printf "%s:%s" "${MAVEN_USERNAME}" "${MAVEN_PASSWORD}" | base64 -w 0)
 
-      #     # Upload bundle to Central Portal with AUTOMATIC publishing
-      #     echo "Uploading bundle to Central Portal for liquibase-${version}..."
-      #     UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" \
-      #       -X POST \
-      #       -H "Authorization: Bearer ${AUTH_HEADER}" \
-      #       -F "bundle=@central-bundle.zip" \
-      #       "https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC&name=liquibase-${version}")
+          # Upload bundle to Central Portal with AUTOMATIC publishing
+          echo "Uploading bundle to Central Portal for liquibase-${version}..."
+          UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X POST \
+            -H "Authorization: Bearer ${AUTH_HEADER}" \
+            -F "bundle=@central-bundle.zip" \
+            "https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC&name=liquibase-${version}")
 
-      #     # Parse response
-      #     HTTP_CODE=$(echo "$UPLOAD_RESPONSE" | tail -n1)
-      #     DEPLOYMENT_ID=$(echo "$UPLOAD_RESPONSE" | head -n1)
+          # Parse response
+          HTTP_CODE=$(echo "$UPLOAD_RESPONSE" | tail -n1)
+          DEPLOYMENT_ID=$(echo "$UPLOAD_RESPONSE" | head -n1)
 
-      #     echo "HTTP Status: $HTTP_CODE"
-      #     echo "Deployment ID: $DEPLOYMENT_ID"
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Deployment ID: $DEPLOYMENT_ID"
 
-      #     if [ "$HTTP_CODE" != "201" ]; then
-      #       echo "Upload failed with HTTP status $HTTP_CODE"
-      #       echo "Response: $DEPLOYMENT_ID"
-      #       exit 1
-      #     fi
+          if [ "$HTTP_CODE" != "201" ]; then
+            echo "Upload failed with HTTP status $HTTP_CODE"
+            echo "Response: $DEPLOYMENT_ID"
+            exit 1
+          fi
 
-      #     echo "Bundle uploaded successfully to Central Portal"
-      #     echo "Deployment ID: $DEPLOYMENT_ID"
-      #     echo "Automatic publishing initiated for liquibase-${version}"
+          echo "Bundle uploaded successfully to Central Portal"
+          echo "Deployment ID: $DEPLOYMENT_ID"
+          echo "Automatic publishing initiated for liquibase-${version}"
 
   deploy-maven-dryrun:
     name: Deploy to Maven Central (Dry Run)

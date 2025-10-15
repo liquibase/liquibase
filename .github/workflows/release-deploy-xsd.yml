@@ -64,44 +64,44 @@ jobs:
           role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
           aws-region: us-east-1
 
-      # - name: Upload to s3
-      #   # aws s3 sync syncs directories and S3 prefixes.
-      #   run: |
-      #     aws s3 sync liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ s3://liquibaseorg-origin/xml/ns/dbchangelog/ --content-type application/octet-stream --only-show-errors
+      - name: Upload to s3
+        # aws s3 sync syncs directories and S3 prefixes.
+        run: |
+          aws s3 sync liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ s3://liquibaseorg-origin/xml/ns/dbchangelog/ --content-type application/octet-stream --only-show-errors
 
-      # - name: Index.htm file upload
-      #   # get the major.minor xsd version. grab the index.htm from s3, add the new verison of xsd and sync with the s3 again
-      #   run: |
-      #     version=${{ inputs.version }}
-      #     arr=(${version//./ })
-      #     xsd_version=${arr[0]}"."${arr[1]}
-      #     mkdir index-file
-      #     aws s3 cp s3://liquibaseorg-origin/xml/ns/dbchangelog/index.htm index-file
-      #     if ! grep -q ${xsd_version} index-file/index.htm ; then
-      #       sed -ie "s/<\/ul>/  <li><a href=\"\/xml\/ns\/dbchangelog\/dbchangelog-${xsd_version}.xsd\">dbchangelog-${xsd_version}.xsd<\/a><\/li>\n<\/ul>/" index-file/index.htm
-      #       aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
-      #     fi
+      - name: Index.htm file upload
+        # get the major.minor xsd version. grab the index.htm from s3, add the new verison of xsd and sync with the s3 again
+        run: |
+          version=${{ inputs.version }}
+          arr=(${version//./ })
+          xsd_version=${arr[0]}"."${arr[1]}
+          mkdir index-file
+          aws s3 cp s3://liquibaseorg-origin/xml/ns/dbchangelog/index.htm index-file
+          if ! grep -q ${xsd_version} index-file/index.htm ; then
+            sed -ie "s/<\/ul>/  <li><a href=\"\/xml\/ns\/dbchangelog\/dbchangelog-${xsd_version}.xsd\">dbchangelog-${xsd_version}.xsd<\/a><\/li>\n<\/ul>/" index-file/index.htm
+            aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
+          fi
 
-      # - name: Liquibase xsds SFTP upload
-      #   uses: wangyucode/sftp-upload-action@v2.0.4
-      #   with:
-      #     host: ${{ env.WPENGINE_SFTP_HOST }}
-      #     port: ${{ env.WPENGINE_SFTP_PORT }}
-      #     username: ${{ env.WPENGINE_SFTP_USER }}
-      #     password: ${{ env.WPENGINE_SFTP_PASSWORD }}
-      #     compress: true
-      #     forceUpload: true
-      #     localDir: "liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/"
-      #     remoteDir: "/xml/ns/dbchangelog/"
+      - name: Liquibase xsds SFTP upload
+        uses: wangyucode/sftp-upload-action@v2.0.4
+        with:
+          host: ${{ env.WPENGINE_SFTP_HOST }}
+          port: ${{ env.WPENGINE_SFTP_PORT }}
+          username: ${{ env.WPENGINE_SFTP_USER }}
+          password: ${{ env.WPENGINE_SFTP_PASSWORD }}
+          compress: true
+          forceUpload: true
+          localDir: "liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/"
+          remoteDir: "/xml/ns/dbchangelog/"
 
-      # - name: Liquibase index.htm SFTP upload
-      #   uses: wangyucode/sftp-upload-action@v2.0.4
-      #   with:
-      #     host: ${{ env.WPENGINE_SFTP_HOST }}
-      #     port: ${{ env.WPENGINE_SFTP_PORT }}
-      #     username: ${{ env.WPENGINE_SFTP_USER }}
-      #     password: ${{ env.WPENGINE_SFTP_PASSWORD }}
-      #     compress: false
-      #     forceUpload: true
-      #     localDir: "index-file/"
-      #     remoteDir: "/xml/ns/dbchangelog/"
+      - name: Liquibase index.htm SFTP upload
+        uses: wangyucode/sftp-upload-action@v2.0.4
+        with:
+          host: ${{ env.WPENGINE_SFTP_HOST }}
+          port: ${{ env.WPENGINE_SFTP_PORT }}
+          username: ${{ env.WPENGINE_SFTP_USER }}
+          password: ${{ env.WPENGINE_SFTP_PASSWORD }}
+          compress: false
+          forceUpload: true
+          localDir: "index-file/"
+          remoteDir: "/xml/ns/dbchangelog/"

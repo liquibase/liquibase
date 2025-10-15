@@ -78,21 +78,19 @@ jobs:
       dry_run_branch_name: ${{ inputs.dry_run_branch_name || '' }}
     secrets: inherit
 
-  # manual-approval:
-  #   name: Manual Deployment Approval
-  #   needs: [setup]
-  #   uses: ./.github/workflows/release-manual-approval.yml
-  #   with:
-  #     version: ${{ needs.setup.outputs.version }}
-  #     dry_run: ${{ inputs.dry_run || false }}
-  #   secrets: inherit
+  manual-approval:
+    name: Manual Deployment Approval
+    needs: [setup]
+    uses: ./.github/workflows/release-manual-approval.yml
+    with:
+      version: ${{ needs.setup.outputs.version }}
+      dry_run: ${{ inputs.dry_run || false }}
+    secrets: inherit
 
   deploy-javadocs:
     name: Deploy Javadocs
-    #needs: [setup, manual-approval]
-    needs: [setup]
-    #if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
-    if: always() && needs.setup.result == 'success'
+    needs: [setup, manual-approval]
+    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
 
     uses: ./.github/workflows/release-deploy-javadocs.yml
     with:
@@ -102,10 +100,8 @@ jobs:
 
   publish-github-packages:
     name: Publish to GitHub Packages
-    needs: [setup]
-    #needs: [setup, manual-approval]
-    if: always() && needs.setup.result == 'success'
-    #if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
+    needs: [setup, manual-approval]
+    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: ./.github/workflows/release-publish-github-packages.yml
     with:
       version: ${{ needs.setup.outputs.version }}
@@ -117,9 +113,8 @@ jobs:
   deploy-xsd:
     name: Deploy XSD Files
     needs: [setup]
-    #needs: [setup, manual-approval]
-    if: always() && needs.setup.result == 'success'
-    #if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
+    needs: [setup, manual-approval]
+    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: ./.github/workflows/release-deploy-xsd.yml
     with:
       version: ${{ needs.setup.outputs.version }}
@@ -128,10 +123,8 @@ jobs:
 
   release-docker:
     name: Release Docker Images
-    needs: [setup]
-    #needs: [setup, manual-approval]
-    if: always() && needs.setup.result == 'success'
-    #if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
+    needs: [setup, manual-approval]
+    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: ./.github/workflows/release-docker.yml
     with:
       version: ${{ needs.setup.outputs.version }}
@@ -140,10 +133,8 @@ jobs:
 
   release-docker-minimal:
     name: Release Minimal Docker Image
-    needs: [setup]
-    #needs: [setup, manual-approval]
-    if: always() && needs.setup.result == 'success'
-    #if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
+    needs: [setup, manual-approval]
+    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: ./.github/workflows/release-docker-minimal.yml
     with:
       version: ${{ needs.setup.outputs.version }}
@@ -152,10 +143,8 @@ jobs:
 
   deploy-maven:
     name: Deploy to Maven Central
-    needs: [setup, deploy-javadocs, publish-github-packages, deploy-xsd, release-docker]
-    #needs: [setup, manual-approval, deploy-javadocs, publish-github-packages, deploy-xsd, release-docker]
-    #if: always() && needs.setup.result == 'success' && (needs.deploy-javadocs.result == 'success' || needs.deploy-javadocs.result == 'skipped') && (needs.publish-github-packages.result == 'success' || needs.publish-github-packages.result == 'skipped') && (needs.deploy-xsd.result == 'success' || needs.deploy-xsd.result == 'skipped') && (needs.release-docker.result == 'success' || needs.release-docker.result == 'skipped')
-    if: always() && needs.setup.result == 'success'
+    needs: [setup, manual-approval, deploy-javadocs, publish-github-packages, deploy-xsd, release-docker]
+    if: always() && needs.setup.result == 'success' && (needs.deploy-javadocs.result == 'success' || needs.deploy-javadocs.result == 'skipped') && (needs.publish-github-packages.result == 'success' || needs.publish-github-packages.result == 'skipped') && (needs.deploy-xsd.result == 'success' || needs.deploy-xsd.result == 'skipped') && (needs.release-docker.result == 'success' || needs.release-docker.result == 'skipped')
     uses: ./.github/workflows/release-deploy-maven.yml
     with:
       version: ${{ needs.setup.outputs.version }}
@@ -192,22 +181,10 @@ jobs:
 
   generate-summary:
     name: Generate Release Summary
-    # needs:
-    #   [
-    #     setup,
-    #     manual-approval,
-    #     deploy-javadocs,
-    #     publish-github-packages,
-    #     deploy-xsd,
-    #     release-docker,
-    #     release-docker-minimal,
-    #     deploy-maven,
-    #     package,
-    #     publish-assets-s3,
-    #   ]
     needs:
       [
         setup,
+        manual-approval,
         deploy-javadocs,
         publish-github-packages,
         deploy-xsd,

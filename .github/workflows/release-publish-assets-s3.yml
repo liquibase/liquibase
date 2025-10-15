@@ -69,6 +69,6 @@ jobs:
           role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
           aws-region: us-east-1
 
-      # - name: Publish released assets to s3 bucket
-      #   run: |
-      #     aws s3 sync "./${{ inputs.version }}-released-assets" s3://liquibaseorg-origin/oss-released-assets/${{ inputs.version }}-released-assets-${{ env.timestamp }}/ --only-show-errors
+      - name: Publish released assets to s3 bucket
+        run: |
+          aws s3 sync "./${{ inputs.version }}-released-assets" s3://liquibaseorg-origin/oss-released-assets/${{ inputs.version }}-released-assets-${{ env.timestamp }}/ --only-show-errors

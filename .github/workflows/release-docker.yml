@@ -60,17 +60,17 @@ jobs:
           permission-contents: write
           permission-actions: write
 
-      # - name: Release liquibase/docker v${{ inputs.version }}
-      #   uses: the-actions-org/workflow-dispatch@v4
-      #   id: docker_dispatch
-      #   with:
-      #     workflow: create-release.yml
-      #     token: ${{ steps.get-token.outputs.token }}
-      #     inputs: '{ "liquibaseVersion": "${{ inputs.version }}", "dryRun": "${{ inputs.dry_run || false }}" }'
-      #     ref: main
-      #     repo: liquibase/docker
-      #     wait-for-completion: true
-      #     workflow-logs: json-output
+      - name: Release liquibase/docker v${{ inputs.version }}
+        uses: the-actions-org/workflow-dispatch@v4
+        id: docker_dispatch
+        with:
+          workflow: create-release.yml
+          token: ${{ steps.get-token.outputs.token }}
+          inputs: '{ "liquibaseVersion": "${{ inputs.version }}", "dryRun": "${{ inputs.dry_run || false }}" }'
+          ref: main
+          repo: liquibase/docker
+          wait-for-completion: true
+          workflow-logs: json-output
 
       - name: Adding Docker run to job summary
         if: success()
