@@ -230,8 +230,8 @@ class DataTypeFactoryTest extends Specification {
         "xmltype"                                      | new OracleDatabase()   | "XMLTYPE"                                      | XMLType       | false
         "timestamp"                                    | new OracleDatabase()   | "TIMESTAMP"                                    | TimestampType | false
         "timestamp(6)"                                 | new OracleDatabase()   | "TIMESTAMP(6)"                                 | TimestampType | false
-        "TIMESTAMP WITH TIMEZONE"                      | new OracleDatabase()   | "TIMESTAMP WITH TIMEZONE"                      | TimestampType | false
-        "TIMESTAMP(6) WITH TIMEZONE"                   | new OracleDatabase()   | "TIMESTAMP(6) WITH TIMEZONE"                   | TimestampType | false
+        "TIMESTAMP WITH TIMEZONE"                      | new OracleDatabase()   | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false
+        "TIMESTAMP(6) WITH TIMEZONE"                   | new OracleDatabase()   | "TIMESTAMP(6) WITH TIME ZONE"                  | TimestampType | false
         "timestamp without timezone"                   | new OracleDatabase()   | "TIMESTAMP"                                    | TimestampType | false
         "timestamp(6) without timezone"                | new OracleDatabase()   | "TIMESTAMP(6)"                                 | TimestampType | false
         "timestamptz"                                  | new OracleDatabase()   | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false
