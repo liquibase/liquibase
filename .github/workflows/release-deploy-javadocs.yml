@@ -73,17 +73,17 @@ jobs:
           role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
           aws-region: us-east-1
 
-      - name: Unpack javadoc files and upload to s3
-        # unzip archives, create directory for each jar, and extract jar contents to directory.  Then delete the jar and zip files.  Then upload to s3.
-        run: |
-          unzip -j '*.zip' '*javadoc*.jar'
+      # - name: Unpack javadoc files and upload to s3
+      #   # unzip archives, create directory for each jar, and extract jar contents to directory.  Then delete the jar and zip files.  Then upload to s3.
+      #   run: |
+      #     unzip -j '*.zip' '*javadoc*.jar'
 
-          for jar in *liquibase*.jar; do
-            dir_name=$(basename "$jar" .jar)
-            dir_name=$(echo "$dir_name" | sed -E 's/(-[0-9]+(\.[0-9]+)*(-javadoc)?)//')
-            mkdir -p "$dir_name"
-            unzip -o "$jar" -d "$dir_name"
-          done
+      #     for jar in *liquibase*.jar; do
+      #       dir_name=$(basename "$jar" .jar)
+      #       dir_name=$(echo "$dir_name" | sed -E 's/(-[0-9]+(\.[0-9]+)*(-javadoc)?)//')
+      #       mkdir -p "$dir_name"
+      #       unzip -o "$jar" -d "$dir_name"
+      #     done
 
-          rm -rf *.jar *.zip
-          aws s3 sync . s3://javadocsliquibasecom-origin --only-show-errors
+      #     rm -rf *.jar *.zip
+      #     aws s3 sync . s3://javadocsliquibasecom-origin --only-show-errors

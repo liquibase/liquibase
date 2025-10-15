@@ -61,14 +61,14 @@ jobs:
           permission-contents: write
           permission-actions: write
 
-      - name: Release liquibase/liquibase-infrastructure v${{ inputs.version }}
-        uses: the-actions-org/workflow-dispatch@v4
-        id: docker_dispatch
-        with:
-          workflow: build-liquibase-minimal.yml
-          token: ${{ steps.get-token.outputs.token }}
-          inputs: '{ "liquibaseVersion": "${{ inputs.version }}" }'
-          ref: master
-          repo: liquibase/liquibase-infrastructure
-          wait-for-completion: true
-          workflow-logs: json-output
+      # - name: Release liquibase/liquibase-infrastructure v${{ inputs.version }}
+      #   uses: the-actions-org/workflow-dispatch@v4
+      #   id: docker_dispatch
+      #   with:
+      #     workflow: build-liquibase-minimal.yml
+      #     token: ${{ steps.get-token.outputs.token }}
+      #     inputs: '{ "liquibaseVersion": "${{ inputs.version }}" }'
+      #     ref: master
+      #     repo: liquibase/liquibase-infrastructure
+      #     wait-for-completion: true
+      #     workflow-logs: json-output

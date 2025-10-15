@@ -75,8 +75,8 @@ jobs:
         run: mvn versions:set -DnewVersion="${{ inputs.version }}"
 
       # Publish to GitHub Packages
-      - name: Publish package to Github
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TARGET_ARTIFACT_REPOSITORY: liquibase
-        run: mvn -B clean deploy -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ inputs.version }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ inputs.latestMergeSha }}" "-Dbuild.timestamp=${{ inputs.timeStamp }}"
+      # - name: Publish package to Github
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     TARGET_ARTIFACT_REPOSITORY: liquibase
+      #   run: mvn -B clean deploy -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ inputs.version }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ inputs.latestMergeSha }}" "-Dbuild.timestamp=${{ inputs.timeStamp }}"
