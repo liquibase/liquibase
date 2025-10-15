@@ -78,18 +78,19 @@ jobs:
       dry_run_branch_name: ${{ inputs.dry_run_branch_name || '' }}
     secrets: inherit
 
-  manual-approval:
-    name: Manual Deployment Approval
-    needs: [setup]
-    uses: ./.github/workflows/release-manual-approval.yml
-    with:
-      version: ${{ needs.setup.outputs.version }}
-      dry_run: ${{ inputs.dry_run || false }}
-    secrets: inherit
+  # manual-approval:
+  #   name: Manual Deployment Approval
+  #   needs: [setup]
+  #   uses: ./.github/workflows/release-manual-approval.yml
+  #   with:
+  #     version: ${{ needs.setup.outputs.version }}
+  #     dry_run: ${{ inputs.dry_run || false }}
+  #   secrets: inherit
 
   deploy-javadocs:
     name: Deploy Javadocs
-    needs: [setup, manual-approval]
+    #needs: [setup, manual-approval]
+    needs: [setup]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: ./.github/workflows/release-deploy-javadocs.yml
     with:
@@ -100,7 +101,8 @@ jobs:
 
   publish-github-packages:
     name: Publish to GitHub Packages
-    needs: [setup, manual-approval]
+    needs: [setup]
+    #needs: [setup, manual-approval]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: ./.github/workflows/release-publish-github-packages.yml
     with:
@@ -112,7 +114,8 @@ jobs:
 
   deploy-xsd:
     name: Deploy XSD Files
-    needs: [setup, manual-approval]
+    needs: [setup]
+    #needs: [setup, manual-approval]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: ./.github/workflows/release-deploy-xsd.yml
     with:
@@ -122,7 +125,8 @@ jobs:
 
   release-docker:
     name: Release Docker Images
-    needs: [setup, manual-approval]
+    needs: [setup]
+    #needs: [setup, manual-approval]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: ./.github/workflows/release-docker.yml
     with:
@@ -132,7 +136,8 @@ jobs:
 
   release-docker-minimal:
     name: Release Minimal Docker Image
-    needs: [setup, manual-approval]
+    needs: [setup]
+    #needs: [setup, manual-approval]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: ./.github/workflows/release-docker-minimal.yml
     with:
