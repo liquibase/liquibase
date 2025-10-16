@@ -1,0 +1,82 @@
+name: Release Publish GitHub Packages
+
+run-name: "Publish to GitHub Packages - v${{ inputs.version }}"
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: "Version to publish"
+        required: true
+        type: string
+      latestMergeSha:
+        description: "Latest merge commit SHA"
+        required: true
+        type: string
+      timeStamp:
+        description: "Build timestamp"
+        required: true
+        type: string
+      dry_run:
+        description: "Flag to indicate if this is a dry-run"
+        required: false
+        type: boolean
+        default: false
+  
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish"
+        required: true
+        type: string
+      latestMergeSha:
+        description: "Latest merge commit SHA"
+        required: true
+        type: string
+      timeStamp:
+        description: "Build timestamp"
+        required: true
+        type: string
+      dry_run:
+        description: "Flag to indicate if this is a dry-run"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  MAVEN_VERSION: "3.9.2"
+
+jobs:
+  publish-github-packages:
+    name: Publish artifacts to Github Packages
+    runs-on: ubuntu-22.04
+    if: ${{ inputs.dry_run == false }}
+    steps:
+      - uses: actions/checkout@v5
+      
+      - name: Set up Java for publishing to GitHub Repository
+        uses: actions/setup-java@v5
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          cache: "maven"
+          server-id: liquibase
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: ${{ env.MAVEN_VERSION }}
+
+      - name: Version artifact
+        run: mvn versions:set -DnewVersion="${{ inputs.version }}"
+
+      # Publish to GitHub Packages
+      - name: Publish package to Github
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_ARTIFACT_REPOSITORY: liquibase
+        run: mvn -B clean deploy -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ inputs.version }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ inputs.latestMergeSha }}" "-Dbuild.timestamp=${{ inputs.timeStamp }}"

@@ -1,0 +1,301 @@
+name: Release Deploy Maven
+
+run-name: "Deploy to Maven Central - v${{ inputs.version }}${{ inputs.dry_run && ' (Dry Run)' || '' }}"
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: "Version to deploy"
+        required: true
+        type: string
+      tag:
+        description: "Release tag"
+        required: true
+        type: string
+      dry_run:
+        description: "Flag to indicate if this is a dry-run deployment"
+        required: false
+        type: boolean
+        default: false
+      dry_run_release_id:
+        description: "The release id of the dry-run release"
+        required: false
+        type: string
+        default: ""
+  
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to deploy"
+        required: true
+        type: string
+      tag:
+        description: "Release tag"
+        required: true
+        type: string
+      dry_run:
+        description: "Flag to indicate if this is a dry-run deployment"
+        required: false
+        type: boolean
+        default: false
+      dry_run_release_id:
+        description: "The release id of the dry-run release"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
+env:
+  MAVEN_VERSION: "3.9.2"
+
+jobs:
+  deploy-maven-production:
+    name: Deploy to Maven Central (Production)
+    runs-on: ubuntu-22.04
+    if: ${{ inputs.dry_run == false }}
+    steps:
+      - name: Download release assets
+        uses: robinraju/release-downloader@v1.12
+        with:
+          repository: "liquibase/liquibase"
+          tag: "${{ inputs.tag }}"
+          fileName: "*"
+          out-file-path: "."
+
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
+      - name: Convert escaped newlines and set GPG key
+        run: |
+          {
+            echo "GPG_KEY_CONTENT<<GPG_EOF"
+            printf '%b' "${{ env.GPG_SECRET }}"
+            echo
+            echo "GPG_EOF"
+          } >> $GITHUB_ENV
+
+      - name: Set up Java for publishing to Maven Central Repository
+        uses: actions/setup-java@v5
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          server-id: sonatype-nexus-staging
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          gpg-private-key: ${{ env.GPG_KEY_CONTENT }}
+          gpg-passphrase: GPG_PASSPHRASE
+        env:
+          GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
+
+      - name: Publish to Maven Central
+        env:
+          MAVEN_USERNAME: ${{ env.SONATYPE_USERNAME }}
+          MAVEN_PASSWORD: ${{ env.SONATYPE_TOKEN }}
+          GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
+        run: |
+          version=${{ inputs.version }}
+
+          unzip -j liquibase-additional-*.zip
+
+          ##extracts and sign poms, generate checksums for all artifacts
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
+            unzip -j $i-${version}.jar META-INF/maven/org.liquibase/$i/pom.xml
+            sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
+            mv pom.xml $i-${version}.pom
+
+            # Sign POM file
+            gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i-${version}.pom
+            
+            # Generate checksums for POM file
+            md5sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.md5
+            sha1sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.sha1
+            
+            # Generate checksums for all JAR files (main, sources, javadoc)
+            for jar_file in $i-${version}.jar $i-${version}-sources.jar $i-${version}-javadoc.jar; do
+              if [ -f "$jar_file" ]; then
+                md5sum "$jar_file" | cut -d' ' -f1 > "$jar_file.md5"
+                sha1sum "$jar_file" | cut -d' ' -f1 > "$jar_file.sha1"
+              fi
+            done
+          done
+
+          # Create Maven repository layout structure for the bundle
+          mkdir -p "bundle/org/liquibase"
+
+          # Copy all artifacts to proper Maven repository layout
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
+            mkdir -p "bundle/org/liquibase/$i/${version}"
+            cp $i-${version}* "bundle/org/liquibase/$i/${version}/"
+          done
+
+          # Create the bundle zip file
+          cd bundle
+          zip -r ../central-bundle.zip .
+          cd ..
+
+          # Create base64 encoded credentials for Bearer auth
+          AUTH_HEADER=$(printf "%s:%s" "${MAVEN_USERNAME}" "${MAVEN_PASSWORD}" | base64 -w 0)
+
+          # Upload bundle to Central Portal with AUTOMATIC publishing
+          echo "Uploading bundle to Central Portal for liquibase-${version}..."
+          UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X POST \
+            -H "Authorization: Bearer ${AUTH_HEADER}" \
+            -F "bundle=@central-bundle.zip" \
+            "https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC&name=liquibase-${version}")
+
+          # Parse response
+          HTTP_CODE=$(echo "$UPLOAD_RESPONSE" | tail -n1)
+          DEPLOYMENT_ID=$(echo "$UPLOAD_RESPONSE" | head -n1)
+
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Deployment ID: $DEPLOYMENT_ID"
+
+          if [ "$HTTP_CODE" != "201" ]; then
+            echo "Upload failed with HTTP status $HTTP_CODE"
+            echo "Response: $DEPLOYMENT_ID"
+            exit 1
+          fi
+
+          echo "Bundle uploaded successfully to Central Portal"
+          echo "Deployment ID: $DEPLOYMENT_ID"
+          echo "Automatic publishing initiated for liquibase-${version}"
+
+  deploy-maven-dryrun:
+    name: Deploy to Maven Central (Dry Run)
+    runs-on: ubuntu-22.04
+    if: ${{ inputs.dry_run == true }}
+    steps:
+      - name: Download dry-run release assets
+        uses: robinraju/release-downloader@v1.12
+        with:
+          repository: "liquibase/liquibase"
+          releaseId: "${{ inputs.dry_run_release_id }}"
+          fileName: "*"
+          out-file-path: "."
+
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        id: vault-secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
+      - name: Convert escaped newlines and set GPG key
+        run: |
+          {
+            echo "GPG_KEY_CONTENT<<GPG_EOF"
+            printf '%b' "${{ env.GPG_SECRET }}"
+            echo
+            echo "GPG_EOF"
+          } >> $GITHUB_ENV
+
+      - name: Set up Java for publishing to Maven Central Repository
+        uses: actions/setup-java@v5
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          server-id: dry-run-sonatype-nexus-staging
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          gpg-private-key: ${{ env.GPG_KEY_CONTENT }}
+          gpg-passphrase: GPG_PASSPHRASE
+        env:
+          GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
+
+      - name: Publish to Central Portal (Dry Run)
+        env:
+          MAVEN_USERNAME: ${{ env.SONATYPE_USERNAME }}
+          MAVEN_PASSWORD: ${{ env.SONATYPE_TOKEN }}
+          GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
+        run: |
+          version=${{ inputs.version }}
+
+          unzip -j liquibase-additional-*.zip
+
+          ##extracts and sign poms, generate checksums for all artifacts
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
+            unzip -j $i-${version}.jar META-INF/maven/org.liquibase/$i/pom.xml
+            sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
+            mv pom.xml $i-${version}.pom
+
+            # Sign POM file
+            gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i-${version}.pom
+            
+            # Generate checksums for POM file
+            md5sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.md5
+            sha1sum $i-${version}.pom | cut -d' ' -f1 > $i-${version}.pom.sha1
+            
+            # Generate checksums for all JAR files (main, sources, javadoc)
+            for jar_file in $i-${version}.jar $i-${version}-sources.jar $i-${version}-javadoc.jar; do
+              if [ -f "$jar_file" ]; then
+                md5sum "$jar_file" | cut -d' ' -f1 > "$jar_file.md5"
+                sha1sum "$jar_file" | cut -d' ' -f1 > "$jar_file.sha1"
+              fi
+            done
+          done
+
+          # Create Maven repository layout structure for the bundle
+          mkdir -p "bundle/org/liquibase"
+
+          # Copy all artifacts to proper Maven repository layout
+          for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
+            mkdir -p "bundle/org/liquibase/$i/${version}"
+            cp $i-${version}* "bundle/org/liquibase/$i/${version}/"
+          done
+
+          # Create the bundle zip file
+          cd bundle
+          zip -r ../central-bundle.zip .
+          cd ..
+
+          # Create base64 encoded credentials for Bearer auth
+          AUTH_HEADER=$(printf "%s:%s" "${MAVEN_USERNAME}" "${MAVEN_PASSWORD}" | base64 -w 0)
+
+          # Upload bundle to Central Portal with USER_MANAGED publishing (dry run)
+          echo "Uploading bundle to Central Portal for dry-run liquibase-${version}..."
+          UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X POST \
+            -H "Authorization: Bearer ${AUTH_HEADER}" \
+            -F "bundle=@central-bundle.zip" \
+            "https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED&name=liquibase-${version}-dry-run")
+
+          # Parse response
+          HTTP_CODE=$(echo "$UPLOAD_RESPONSE" | tail -n1)
+          DEPLOYMENT_ID=$(echo "$UPLOAD_RESPONSE" | head -n1)
+
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Deployment ID: $DEPLOYMENT_ID"
+
+          if [ "$HTTP_CODE" != "201" ]; then
+            echo "Upload failed with HTTP status $HTTP_CODE"
+            echo "Response: $DEPLOYMENT_ID"
+            exit 1
+          fi
+
+          echo "Bundle uploaded successfully to Central Portal for dry-run"
+          echo "Deployment ID: $DEPLOYMENT_ID"
+          echo "Manual publishing required - visit https://central.sonatype.com/publishing/deployments to review and publish"
