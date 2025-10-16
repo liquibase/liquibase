@@ -98,7 +98,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
 
         LOG_FORMAT = builder.define("logFormat", LogFormat.class)
                 .setDescription("Sets the format of log output to console or log files. " +
-                        "Community users default to unstructured \"" + LogFormat.TEXT + "\" logs to the console or output log files. " +
+                        "Open Source users default to unstructured \"" + LogFormat.TEXT + "\" logs to the console or output log files. " +
                         "Pro users have the option to set value as \"" + LogFormat.JSON + "\" or \"" + LogFormat.JSON_PRETTY + "\" to enable json-structured log files to the console or output log files.")
                 .setDefaultValue(LogFormat.TEXT)
                 .setValueHandler(logFormat -> {
