@@ -526,6 +526,35 @@ create view sql_view as select * from sql_table;'''
         changeSets.isEmpty() == true
     }
 
+    def "includeAll logs warning for unknown file extensions with file path shown"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "com/example/children/file1.xml": test1Xml,
+                "com/example/children/file2.unknown_ext": test1Xml,
+                "com/example/children/file3.xml": test2Xml,
+        ])
+
+        BufferedLogService bufferLog = new BufferedLogService()
+        def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
+
+        Scope.child([
+                (Scope.Attr.logService.name())                                      : bufferLog,
+                (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getKey()): ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN,
+        ], new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                changeLogFile.includeAll("com/example/children", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false, null, 0, Integer.MAX_VALUE)
+            }
+        })
+
+        def changeSets = changeLogFile.changeSets
+        def warnings = bufferLog.getLogAsString(Level.WARNING)
+
+        then:
+        changeSets.size() == 2
+        warnings.contains("included file com/example/children/file2.unknown_ext is not a recognized file type")
+    }
+
     def "includeAll executes include in alphabetical order"() {
         when:
         def resourceAccessor = new MockResourceAccessor([
