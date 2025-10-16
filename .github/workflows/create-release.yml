@@ -87,6 +87,8 @@ jobs:
     name: Re-version artifacts ${{ needs.setup.outputs.version }}
     runs-on: ubuntu-22.04
     steps:
+      
+      - uses: actions/checkout@v5
 
       - uses: actions/checkout@v5
 

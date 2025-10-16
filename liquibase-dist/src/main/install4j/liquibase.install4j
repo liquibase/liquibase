@@ -85,10 +85,19 @@ return console.askOkCancel(message, true);
                   </property>
                 </serializedBean>
               </formComponent>
-              <formComponent id="5" beanClass="com.install4j.runtime.beans.formcomponents.UpdateAlertComponent" useExternalParametrization="true" externalParametrizationName="Update Alert" externalParametrizationMode="include">
-                <externalParametrizationPropertyNames>
-                  <propertyName>updateCheck</propertyName>
-                </externalParametrizationPropertyNames>
+              <formComponent id="414" beanClass="com.install4j.runtime.beans.formcomponents.MultilineLabelComponent" insetTop="20">
+                <serializedBean>
+                  <property name="labelText" type="string">${i18n:PreviousInstallationDetected(${compiler:sys.version})}</property>
+                </serializedBean>
+                <visibilityScript>return context.getInstallationDirectory() != null;</visibilityScript>
+              </formComponent>
+              <formComponent id="415" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent" insetTop="10">
+                <serializedBean>
+                  <property name="checkboxText" type="string">${i18n:UpdateExistingInstallation}</property>
+                  <property name="variableName" type="string">liquibase.updateExisting</property>
+                  <property name="initiallySelected" type="boolean" value="false" />
+                </serializedBean>
+                <visibilityScript>return context.getInstallationDirectory() != null;</visibilityScript>
               </formComponent>
               <formComponent id="6" beanClass="com.install4j.runtime.beans.formcomponents.MultilineLabelComponent" insetTop="20">
                 <serializedBean>
@@ -98,7 +107,7 @@ return console.askOkCancel(message, true);
             </formComponents>
           </screen>
           <screen id="8" beanClass="com.install4j.runtime.beans.screens.InstallationDirectoryScreen" rollbackBarrierExitCode="0">
-            <condition>!context.getBooleanVariable("sys.confirmedUpdateInstallation")</condition>
+            <condition>!context.getBooleanVariable("sys.confirmedUpdateInstallation") &amp;&amp; !context.getBooleanVariable("liquibase.updateExisting")</condition>
             <actions>
               <action id="11" beanClass="com.install4j.runtime.beans.actions.misc.LoadResponseFileAction" rollbackBarrierExitCode="0" multiExec="true">
                 <serializedBean>
@@ -107,6 +116,28 @@ return console.askOkCancel(message, true);
                   </property>
                 </serializedBean>
                 <condition>context.getVariable("sys.responseFile") == null</condition>
+              </action>
+              <action id="416" beanClass="com.install4j.runtime.beans.actions.control.RunScriptAction" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="script">
+                    <object class="com.install4j.api.beans.ScriptProperty">
+                      <property name="value" type="string">import java.io.File;
+
+if (!context.getBooleanVariable("liquibase.updateExisting")) {
+    File oldInstallDir = context.getInstallationDirectory();
+    if (oldInstallDir != null) {
+        File parentDir = oldInstallDir.getParentFile();
+        String version = context.getCompilerVariable("sys.version");
+        String newDirName = "Liquibase-" + version;
+        File newInstallDir = new File(parentDir, newDirName);
+        context.setVariable("sys.installationDir", newInstallDir.getAbsolutePath());
+    }
+}
+return true;</property>
+                    </object>
+                  </property>
+                </serializedBean>
+                <condition>!context.getBooleanVariable("liquibase.updateExisting") &amp;&amp; context.getInstallationDirectory() != null</condition>
               </action>
             </actions>
             <formComponents>
