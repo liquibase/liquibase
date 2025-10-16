@@ -54,6 +54,9 @@ public class DropColumnGenerator extends AbstractSqlGenerator<DropColumnStatemen
 
     private Sql[] generateMultipleColumnSql(List<DropColumnStatement> columns, Database database) {
         List<Sql> result = new ArrayList<>();
+        if (columns.isEmpty()) {
+            return EMPTY_SQL;
+        }
         if (database instanceof MySQLDatabase) {
             final StringBuilder alterTable = new StringBuilder("ALTER TABLE " + database.escapeTableName(columns.get(0).getCatalogName(), columns.get(0).getSchemaName(), columns.get(0).getTableName()));
             for (int i = 0; i < columns.size(); i++) {

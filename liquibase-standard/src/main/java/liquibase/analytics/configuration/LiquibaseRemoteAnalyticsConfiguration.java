@@ -76,7 +76,11 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
         if (userTimeoutMillis.found()) {
             return userTimeoutMillis.getValue();
         } else {
-            return remoteAnalyticsConfiguration.get().getTimeoutMs();
+            RemoteAnalyticsConfiguration config = remoteAnalyticsConfiguration.get();
+            if (config == null) {
+                throw new IllegalStateException("Remote analytics configuration is not available");
+            }
+            return config.getTimeoutMs();
         }
     }
 
@@ -87,7 +91,11 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
      * @throws Exception if there is an issue fetching the configuration
      */
     public String getDestinationUrl() throws Exception {
-        return remoteAnalyticsConfiguration.get().getEndpointData();
+        RemoteAnalyticsConfiguration config = remoteAnalyticsConfiguration.get();
+        if (config == null) {
+            throw new IllegalStateException("Remote analytics configuration is not available");
+        }
+        return config.getEndpointData();
     }
 
     /**
@@ -123,7 +131,11 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
      * @throws Exception if there is an issue fetching the configuration
      */
     public String getWriteKey() throws Exception {
-        return remoteAnalyticsConfiguration.get().getWriteKey();
+        RemoteAnalyticsConfiguration config = remoteAnalyticsConfiguration.get();
+        if (config == null) {
+            throw new IllegalStateException("Remote analytics configuration is not available");
+        }
+        return config.getWriteKey();
     }
 
     /**
@@ -133,6 +145,10 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
      * @throws Exception if there is an issue fetching the configuration
      */
     public List<RemoteAnalyticsConfiguration.ExtensionName> getExtensionNames() throws Exception {
-        return remoteAnalyticsConfiguration.get().getExtensions();
+        RemoteAnalyticsConfiguration config = remoteAnalyticsConfiguration.get();
+        if (config == null) {
+            throw new IllegalStateException("Remote analytics configuration is not available");
+        }
+        return config.getExtensions();
     }
 }
