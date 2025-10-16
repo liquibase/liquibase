@@ -1,6 +1,6 @@
 name: Release Published Orchestrator
 
-run-name: "🚀 Release Published v${{ inputs.tag || github.event.release.tag_name }}${{ inputs.dry_run && ' (Dry Run)' || '' }}"
+run-name: "🚀 Release Published ${{ inputs.tag || github.event.release.tag_name }}${{ inputs.dry_run && ' (Dry Run)' || '' }}"
 
 on:
   release:
@@ -93,7 +93,6 @@ jobs:
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: ./.github/workflows/release-deploy-javadocs.yml
     with:
-      version: ${{ needs.setup.outputs.version }}
       tag: ${{ needs.setup.outputs.tag }}
       dry_run: ${{ inputs.dry_run || false }}
     secrets: inherit
@@ -154,7 +153,8 @@ jobs:
 
   package:
     name: Update Packages
-    needs: [setup]
+    needs: [setup, manual-approval]
+    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: liquibase/build-logic/.github/workflows/package.yml@main
     secrets: inherit
     with:
