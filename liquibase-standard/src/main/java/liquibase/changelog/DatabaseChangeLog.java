@@ -1131,7 +1131,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
             if (onUnknownFileFormat == OnUnknownFileFormat.WARN) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
-                        "included file " + normalizedFilePath + "/" + normalizedFilePath + " is not a recognized file type", e
+                        "included file " + normalizedFilePath + " is not a recognized file type", e
                 );
             }
             return false;
