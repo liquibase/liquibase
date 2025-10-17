@@ -435,6 +435,38 @@ create view sql_view as select * from sql_table;'''
         bufferLog.getLogAsString(Level.WARNING) == ""
     }
 
+    def "include ignore if version control system files"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "com/example/cvs": test1Xml,
+                "com/example/.svn": test1Xml.replace("testUser", "otherUser").replace("person", "person2"),
+                "com/example/.gitkeep": test1Xml.replace("testUser", "otherUser").replace("person", "person3"),
+                "com/example/.gitignore": test1Xml.replace("testUser", "otherUser").replace("person", "person4")
+        ])
+
+        BufferedLogService bufferLog = new BufferedLogService()
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+
+        Scope.child([
+                (Scope.Attr.logService.name())                                      : bufferLog,
+                (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getKey()): ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN,
+        ], new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                rootChangeLog.include("com/example/cvs", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+                rootChangeLog.include("com/example/.svn", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+                rootChangeLog.include("com/example/.gitkeep", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+                rootChangeLog.include("com/example/.gitignore", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
+            }
+        })
+
+        def changeSets= rootChangeLog.changeSets
+
+        then:
+        changeSets.isEmpty() == true
+        bufferLog.getLogAsString(Level.WARNING) == ""
+    }
+
     def "start with classpath: and hidden"() {
         when:
         def resourceAccessor = new MockResourceAccessor([
@@ -515,38 +547,6 @@ create view sql_view as select * from sql_table;'''
         then:
         changeSets.isEmpty() == true
         bufferLog.getLogAsString(Level.WARNING).contains("included file classpath:com/example/.hiddenfile is not a recognized file type")
-    }
-
-    def "include ignore if version control system files"() {
-        when:
-        def resourceAccessor = new MockResourceAccessor([
-                "com/example/cvs": test1Xml,
-                "com/example/.svn": test1Xml.replace("testUser", "otherUser").replace("person", "person2"),
-                "com/example/.gitkeep": test1Xml.replace("testUser", "otherUser").replace("person", "person3"),
-                "com/example/.gitignore": test1Xml.replace("testUser", "otherUser").replace("person", "person4")
-        ])
-
-        BufferedLogService bufferLog = new BufferedLogService()
-        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-
-        Scope.child([
-                (Scope.Attr.logService.name())                                      : bufferLog,
-                (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getKey()): ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN,
-        ], new Scope.ScopedRunner() {
-            @Override
-            void run() throws Exception {
-                rootChangeLog.include("com/example/cvs", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
-                rootChangeLog.include("com/example/.svn", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
-                rootChangeLog.include("com/example/.gitkeep", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
-                rootChangeLog.include("com/example/.gitignore", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, null, DatabaseChangeLog.OnUnknownFileFormat.WARN, new ModifyChangeSets(null, null))
-            }
-        })
-
-        def changeSets= rootChangeLog.changeSets
-
-        then:
-        changeSets.isEmpty() == true
-        bufferLog.getLogAsString(Level.WARNING) == ""
     }
 
     def "includeAll executes include in alphabetical order"() {
