@@ -549,148 +549,6 @@ create view sql_view as select * from sql_table;'''
         bufferLog.getLogAsString(Level.WARNING) == ""
     }
 
-    def "include throw exception if onUnknownFileFormat is FAIL and unknown file extension"() {
-        when:
-        def resourceAccessor = new MockResourceAccessor([
-                "com/example/notfound.notfound_extension": test1Xml,
-        ])
-        def onUnknownFileFormat = DatabaseChangeLog.OnUnknownFileFormat.FAIL
-        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-        rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, onUnknownFileFormat, new ModifyChangeSets(null, null))
-
-        then:
-        def e = thrown(UnknownChangelogFormatException)
-        assert e.getMessage().startsWith("Cannot find parser that supports com/example/notfound.notfound_extension")
-    }
-
-    def "include ignore if onUnknownFileFormat is WARN and unknown file extension"() {
-        when:
-        def resourceAccessor = new MockResourceAccessor([
-                "com/example/notfound.notfound_extension": test1Xml,
-        ])
-        def onUnknownFileFormat = DatabaseChangeLog.OnUnknownFileFormat.WARN
-
-        // TODO: Not use deprecated
-        BufferedLogService bufferLog = new BufferedLogService()
-        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-
-        Scope.child([
-                (Scope.Attr.logService.name())                                      : bufferLog,
-                (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getKey()): ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN,
-        ], new Scope.ScopedRunner() {
-            @Override
-            void run() throws Exception {
-                rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, onUnknownFileFormat, new ModifyChangeSets(null, null))
-            }
-        })
-
-        def changeSets= rootChangeLog.changeSets
-
-        then:
-        changeSets.isEmpty() == true
-        bufferLog.getLogAsString(Level.WARNING).contains("included file com/example/notfound.notfound_extension is not a recognized file type")
-    }
-
-    def "include ignore if onUnknownFileFormat is SKIP and unknown file extension"() {
-        when:
-        def resourceAccessor = new MockResourceAccessor([
-                "com/example/notfound.notfound_extension": test1Xml,
-        ])
-        def onUnknownFileFormat = DatabaseChangeLog.OnUnknownFileFormat.SKIP
-        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-        rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, onUnknownFileFormat, new ModifyChangeSets(null, null))
-
-        def changeSets= rootChangeLog.changeSets
-
-        then:
-        changeSets.isEmpty() == true
-    }
-
-    def "includeAll logs warning for unknown file extensions with file path shown"() {
-        when:
-        def resourceAccessor = new MockResourceAccessor([
-                "com/example/children/file1.xml": test1Xml,
-                "com/example/children/file2.unknown_ext": test1Xml,
-                "com/example/children/file3.xml": test2Xml,
-        ])
-
-        BufferedLogService bufferLog = new BufferedLogService()
-        def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-
-        Scope.child([
-                (Scope.Attr.logService.name())                                      : bufferLog,
-                (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getKey()): ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN,
-        ], new Scope.ScopedRunner() {
-            @Override
-            void run() throws Exception {
-                changeLogFile.includeAll("com/example/children", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false, null, 0, Integer.MAX_VALUE)
-            }
-        })
-
-        def changeSets = changeLogFile.changeSets
-        def warnings = bufferLog.getLogAsString(Level.WARNING)
-
-        then:
-        changeSets.size() == 2
-        warnings.contains("included file com/example/children/file2.unknown_ext is not a recognized file type")
-    }
-
-    def "include throw exception if onUnknownFileFormat is FAIL and unknown file extension"() {
-        when:
-        def resourceAccessor = new MockResourceAccessor([
-                "com/example/notfound.notfound_extension": test1Xml,
-        ])
-        def onUnknownFileFormat = DatabaseChangeLog.OnUnknownFileFormat.FAIL
-        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-        rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, onUnknownFileFormat, new ModifyChangeSets(null, null))
-
-        then:
-        def e = thrown(UnknownChangelogFormatException)
-        assert e.getMessage().startsWith("Cannot find parser that supports com/example/notfound.notfound_extension")
-    }
-
-    def "include ignore if onUnknownFileFormat is WARN and unknown file extension"() {
-        when:
-        def resourceAccessor = new MockResourceAccessor([
-                "com/example/notfound.notfound_extension": test1Xml,
-        ])
-        def onUnknownFileFormat = DatabaseChangeLog.OnUnknownFileFormat.WARN
-
-        BufferedLogService bufferLog = new BufferedLogService()
-        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-
-        Scope.child([
-                (Scope.Attr.logService.name())                                      : bufferLog,
-                (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getKey()): ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN,
-        ], new Scope.ScopedRunner() {
-            @Override
-            void run() throws Exception {
-                rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, onUnknownFileFormat, new ModifyChangeSets(null, null))
-            }
-        })
-
-        def changeSets= rootChangeLog.changeSets
-
-        then:
-        changeSets.isEmpty() == true
-        bufferLog.getLogAsString(Level.WARNING).contains("included file com/example/notfound.notfound_extension is not a recognized file type")
-    }
-
-    def "include ignore if onUnknownFileFormat is SKIP and unknown file extension"() {
-        when:
-        def resourceAccessor = new MockResourceAccessor([
-                "com/example/notfound.notfound_extension": test1Xml,
-        ])
-        def onUnknownFileFormat = DatabaseChangeLog.OnUnknownFileFormat.SKIP
-        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-        rootChangeLog.include("com/example/notfound.notfound_extension", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, null, onUnknownFileFormat, new ModifyChangeSets(null, null))
-
-        def changeSets= rootChangeLog.changeSets
-
-        then:
-        changeSets.isEmpty() == true
-    }
-
     def "includeAll executes include in alphabetical order"() {
         when:
         def resourceAccessor = new MockResourceAccessor([
@@ -822,22 +680,32 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
     }
 
-    def "include fails if no parser supports the file"() {
+    def "include logs warning if no parser supports the file"() {
         when:
         def resourceAccessor = new MockResourceAccessor(["com/example/test1.invalid": test1Xml])
 
+        BufferedLogService bufferLog = new BufferedLogService()
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
 
-        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
-                .addChild(new ParsedNode(null, "preConditions").addChildren([runningAs: [username: "user1"]]))
-                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
-                .addChildren([include: [file: "com/example/test1.invalid"]])
-                , resourceAccessor)
+        Scope.child([
+                (Scope.Attr.logService.name()): bufferLog,
+                (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getKey()): ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN,
+        ], new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                        .addChild(new ParsedNode(null, "preConditions").addChildren([runningAs: [username: "user1"]]))
+                        .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                        .addChildren([include: [file: "com/example/test1.invalid"]])
+                        , resourceAccessor)
+            }
+        })
 
+        def changeSets = rootChangeLog.changeSets
 
         then:
-        def e = thrown(SetupException)
-        e.message == "Cannot find parser that supports com/example/test1.invalid"
+        changeSets.size() == 1
+        bufferLog.getLogAsString(Level.WARNING).contains("included file com/example/test1.invalid is not a recognized file type")
     }
 
     def "include fails if XML file is empty"() {

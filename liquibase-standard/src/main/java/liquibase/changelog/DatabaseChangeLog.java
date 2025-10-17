@@ -658,7 +658,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     labels,
                     ignore,
                     node.getChildValue(null, LOGICAL_FILE_PATH, String.class),
-                    OnUnknownFileFormat.FAIL,
+                    OnUnknownFileFormat.WARN,
                     (ModifyChangeSets) nodeScratch.get(MODIFY_CHANGE_SETS));
         } catch (LiquibaseException e) {
             throw new SetupException(e);
