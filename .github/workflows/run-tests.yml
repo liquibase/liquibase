@@ -47,7 +47,7 @@ jobs:
 
   setup:
     name: setup
-    needs: authorize
+    needs: [authorize]
     runs-on: ubuntu-22.04
     outputs:
       timestamp: ${{ steps.get-date.outputs.date }}
@@ -55,7 +55,7 @@ jobs:
       thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
       setupSuccessful: "true"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
@@ -89,8 +89,6 @@ jobs:
     name: Run Test for (Java ${{ matrix.java }} ${{ matrix.os }})
     needs: setup
     outputs:
-      test_count_unit_test_java_8_ubuntu: ${{ steps.check-test-counts-java-all-ubuntu.outputs.test_count_unit_test_java_8_ubuntu }}
-      test_count_unit_test_java_11_ubuntu: ${{ steps.check-test-counts-java-all-ubuntu.outputs.test_count_unit_test_java_11_ubuntu }}
       test_count_unit_test_java_17_ubuntu: ${{ steps.check-test-counts-java-all-ubuntu.outputs.test_count_unit_test_java_17_ubuntu }}
       test_count_unit_test_java_21_ubuntu: ${{ steps.check-test-counts-java-all-ubuntu.outputs.test_count_unit_test_java_21_ubuntu }}
       test_count_unit_test_java_macos: ${{ steps.check-test-counts-java-macos.outputs.test_count_unit_test_java_macos }}
@@ -100,39 +98,30 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-22.04, macos-13, windows-latest ]
-        java: [ 8, 11, 17, 21 ]
+        java: [ 17, 21 ]
         exclude:
-          # exclude non-java 8 on macos and windows builds
-          - os: macos-13
-            java: 11
-          - os: windows-latest
-            java: 11
-          - os: macos-13
-            java: 17
           - os: windows-latest
             java: 17
           - os: macos-13
-            java: 21
-          - os: windows-latest
-            java: 21
+            java: 17
     runs-on: ${{ matrix.os }}
     env:
       OS_TYPE: ${{ matrix.os }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Built Code Cache
         if: ${{ matrix.java == 17}}
-        uses: actions/cache@v4.2.3
+        uses: actions/cache@v4.2.4
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
 
       - name: Set up JDK ${{ matrix.java }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: ${{ matrix.java }}
           distribution: 'temurin'
@@ -154,26 +143,10 @@ jobs:
                   "enabled": "true",
                   "updatePolicy": "always"
                 }
-              },
-              {
-                "id": "liquibase-pro",
-                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
-                "releases": {
-                  "enabled": "false"
-                },
-                "snapshots": {
-                  "enabled": "true",
-                  "updatePolicy": "always"
-                }
               }
             ]
           servers: |
             [
-              {
-                "id": "liquibase-pro",
-                "username": "liquibot",
-                "password": "${{ secrets.GITHUB_TOKEN }}"
-              },
               {
                 "id": "liquibase",
                 "username": "liquibot",
@@ -183,17 +156,11 @@ jobs:
 
       # getting from build results page. If we remove 0-SNAPSHOT then we will need settings.xml
 
-      - name: Build & Test Java below 11
-        if: ${{ matrix.java == 8 || matrix.java == 11}}
+      - name: Build & Test Java 17+
         run: |
           ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
 
-      - name: Build & Test Java 11+
-        if: ${{ matrix.java != 8 && matrix.java != 11}}
-        run: |
-          ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
-
-      - name: Check Unit Test Count for Java 8, 11, 17, 21 Ubuntu
+      - name: Check Unit Test Count for Java 17, 21 Ubuntu
         id: check-test-counts-java-all-ubuntu
         if: matrix.os == 'ubuntu-22.04'
         run: |
@@ -204,11 +171,7 @@ jobs:
             exit 1
           fi
           EXPECTED_TEST_COUNT=0
-          if [[ ${{ matrix.java }} == 8 ]]; then
-            EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_JAVA_8_UBUNTU }}
-          elif [[ ${{ matrix.java }} == 11 ]]; then
-            EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_JAVA_11_UBUNTU }}
-          elif [[ ${{ matrix.java }} == 17 ]]; then
+          if [[ ${{ matrix.java }} == 17 ]]; then
             EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_JAVA_17_UBUNTU }}
           elif [[ ${{ matrix.java }} == 21 ]]; then
             EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_JAVA_21_UBUNTU }}
@@ -219,9 +182,9 @@ jobs:
             exit 1
           fi
           echo "test_count_unit_test_java_${{ matrix.java }}_ubuntu=$TEST_COUNT" >> $GITHUB_OUTPUT
+          
 
-
-      - name: Check Unit Test Count for Java 8 macos-13
+      - name: Check Test Count for macos-13
         id: check-test-counts-java-macos
         if: matrix.os == 'macos-13'
         shell: bash
@@ -336,37 +299,37 @@ jobs:
     needs: build_tests
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
 
       - name: Prepare
         id: prepare
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             core.setOutput("testResultsArtifact", "liquibase-test-results-integration-${{ matrix.testSystem }}".replace(/[^a-zA-Z0-9\-_]/g, "_"));
 
       - name: Set up JDK 17
         if: ${{ matrix.testSystem != 'snowflake' }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Set up JDK 11 # get rid of this after https://github.com/snowflakedb/snowflake-jdbc/issues/589 is fixed
+      - name: Set up JDK 17 # get rid of this after https://github.com/snowflakedb/snowflake-jdbc/issues/589 is fixed
         if: ${{ matrix.testSystem == 'snowflake' }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
 
       # getting from build results page. If we remove 0-SNAPSHOT then we will need settings.xml
 
       - name: Restore Built Code Cache
-        uses: actions/cache@v4.2.3
+        uses: actions/cache@v4.2.4
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -454,7 +417,7 @@ jobs:
     steps:
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -468,17 +431,15 @@ jobs:
           parse-json-secrets: true
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Set GitHub Secret for Test Count
         env:
           TEST_COUNT_SECRET: ${{ env.TEST_COUNT_SECRET }}
         run: |
           echo $TEST_COUNT_SECRET | gh auth login --with-token
           repository='${{ github.repository }}'
-          gh variable set TEST_COUNT_JAVA_11_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_11_ubuntu }}"
           gh variable set TEST_COUNT_JAVA_17_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_17_ubuntu }}"
           gh variable set TEST_COUNT_JAVA_21_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_21_ubuntu }}"
-          gh variable set TEST_COUNT_JAVA_8_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_8_ubuntu }}"
           gh variable set TEST_COUNT_JAVA_MACOS --body "${{ needs.build_tests.outputs.test_count_unit_test_java_macos }}"
           gh variable set TEST_COUNT_JAVA_WINDOWS --body "${{ needs.build_tests.outputs.test_count_unit_test_java_windows}}"
           gh variable set TEST_COUNT_INTEGRATION_DB2 --body "${{ needs.integration-test.outputs.test_count_integration_db2 }}"

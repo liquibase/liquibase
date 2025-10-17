@@ -1,8 +1,9 @@
 package liquibase.structure.core;
 
 import liquibase.serializer.AbstractLiquibaseSerializable;
+import liquibase.serializer.UnwrappedLiquibaseSerializable;
 
-public class DataType extends AbstractLiquibaseSerializable {
+public class DataType extends AbstractLiquibaseSerializable implements UnwrappedLiquibaseSerializable {
 
     private String typeName;
 

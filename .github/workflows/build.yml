@@ -24,15 +24,13 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # authenticate GitHub Actions to the GitHub API.
       github-token: ${{ secrets.GITHUB_TOKEN }} # accessing a private repository
     outputs:
-      branchExistsInBoth: ${{ steps.check-branch.outputs.branchExistsInBoth }}
       thisBranchName: ${{ steps.get-branch-name.outputs.thisBranchName }}
       latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
       timeStamp: ${{ steps.get-timestamp.outputs.timestamp }}
-      proBranchNamePrefix: ${{ steps.check-branch.outputs.proBranchNamePrefix }}
       unmodifiedBranchName: ${{ steps.get-branch-name.outputs.unmodifiedBranchName }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       - name: Get Latest Merge Commit SHA
@@ -59,14 +57,12 @@ jobs:
           fi
           modified_branch_name=`(echo $branch_name | tr '/' '_')`
           echo "thisBranchName=$modified_branch_name" >> $GITHUB_OUTPUT
-
-          #this is to check if the same branch name exists in PRO, we need it in check-branch step
           echo "unmodifiedBranchName=$branch_name" >> $GITHUB_OUTPUT
           echo "Modified Branch Name:" $modified_branch_name
           echo "Original Branch Name thisBranchName:" $branch_name
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -88,66 +84,30 @@ jobs:
           owner: liquibase
           permission-contents: read
 
-      - name: Checkout PRO Repo
-        uses: actions/checkout@v4
-        with:
-          repository: liquibase/liquibase-pro
-          token: ${{ steps.get-token.outputs.token }}
 
-      #RUN THIS LOGIC WHEN THERE IS A SAME BRANCH IN OSS AND PRO
-
-      #checking if the branch specified by $currentBranch exists in the PRO repository, If the getBranch call throws an error, it means the branch doesn't exist in the PRO repo. Also, remove refs/heads/
-      # if the value of branchExistsInBoth = false then set liquibaseProVersionPrefix = master else $currentBranch
-      # if the value of branchExistsInBoth = true then set liquibaseProVersionPrefix = thisBranchName else $currentBranch as PRO also has replacement logic for / with _
-      - name: Check branch existence
-        id: check-branch
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ steps.get-token.outputs.token }}
-          script: |
-            const currentBranch = "${{ steps.get-branch-name.outputs.unmodifiedBranchName }}"
-            console.log(currentBranch)
-            let branchExistsInBoth;
-            try {
-              await github.rest.repos.getBranch({
-                owner: "liquibase",
-                repo: "liquibase-pro",
-                branch: currentBranch
-              });
-              branchExistsInBoth = true
-            } catch (error){
-              branchExistsInBoth = false
-            }
-            let liquibaseProVersionPrefix= branchExistsInBoth ? currentBranch : 'master'
-            liquibaseProVersionPrefix=liquibaseProVersionPrefix.replaceAll("/","_")
-            core.setOutput("branchExistsInBoth", branchExistsInBoth)
-            core.setOutput("proBranchNamePrefix", liquibaseProVersionPrefix)
-            console.log(liquibaseProVersionPrefix)
-
-  ### MATCHING BRANCH RUN THIS LOGIC
   build_publish_branch:
     name: Artifacts - Build & Package
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     needs: [setup]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
       - name: Download Artifacts for build.yml
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: temp-artifact
 
       ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
       - name: Install4j Cache
-        uses: actions/cache@v4.2.3
+        uses: actions/cache@v4.2.4
         with:
           key: install4j-A${{ hashFiles('liquibase-dist/src/main/install4j/liquibase.install4j') }}
           path: ~/.install4j8/**
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
@@ -169,10 +129,10 @@ jobs:
             echo "GPG_EOF"
           } >> $GITHUB_ENV
 
-      - name: Set up JDK 11
-        uses: actions/setup-java@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
         with:
-          java-version: "11"
+          java-version: "21"
           distribution: "temurin"
           gpg-private-key: ${{ env.GPG_KEY_CONTENT }}
           gpg-passphrase: GPG_PASSPHRASE
@@ -197,26 +157,10 @@ jobs:
                   "enabled": "true",
                   "updatePolicy": "always"
                 }
-              },
-              {
-                "id": "liquibase-pro",
-                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
-                "releases": {
-                  "enabled": "false"
-                },
-                "snapshots": {
-                  "enabled": "true",
-                  "updatePolicy": "always"
-                }
               }
             ]
           servers: |
             [
-              {
-                "id": "liquibase-pro",
-                "username": "liquibot",
-                "password": "${{ env.LIQUIBOT_PAT_GPM_ACCESS }}"
-              },
               {
                 "id": "liquibase",
                 "username": "liquibot",
@@ -239,41 +183,13 @@ jobs:
           ## save install4j code signing keys
           mkdir -p liquibase-dist/target/keys
         
-          # we are packaging and deploying liquibase tar which includes liquibase-commercial
-          # Build liquibase-commercial version
-          ./mvnw -B -pl liquibase-dist -P liquibase-commercial source:jar clean package failsafe:integration-test failsafe:verify \
-          "-Dliquibase.checks=true" \
-          "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT" \
+          ./mvnw -B -pl liquibase-dist source:jar clean package failsafe:integration-test failsafe:verify \
           "-Dbuild.repository.owner=liquibase" \
           "-Dbuild.repository.name=liquibase" \
           "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" \
           "-Dbuild.number=${{ github.run_number }}" \
           "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT" \
           "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
-
-          # backup commercial tarball to prevent it from being overwritten
-          mkdir -p liquibase-dist/backup
-          mv liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz liquibase-dist/backup/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz
-          mv liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip liquibase-dist/backup/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip
-
-          # Build liquibase-minimal version
-          ./mvnw -B -pl liquibase-dist -P liquibase-minimal source:jar clean package failsafe:integration-test failsafe:verify \
-          "-Dliquibase.checks=true" \
-          "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT" \
-          "-Dbuild.repository.owner=liquibase" \
-          "-Dbuild.repository.name=liquibase" \
-          "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" \
-          "-Dbuild.number=${{ github.run_number }}" \
-          "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT" \
-          "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
-
-          # Rename liquibase-minimal tarball to avoid overwriting the commercial one
-          mv liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz liquibase-dist/target/liquibase-minimal-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz
-          mv liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip liquibase-dist/target/liquibase-minimal-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip
-
-          # Restore commercial tarballs from backup into target dir
-          mv liquibase-dist/backup/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz
-          mv liquibase-dist/backup/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip
 
           # Extract the tarball to allow us to upload the liquibase installation files to our
           # github actions workflow so that we don't double zip the archive
@@ -291,8 +207,6 @@ jobs:
 
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip artifacts
-          cp liquibase-dist/target/liquibase-minimal-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts
-          cp liquibase-dist/target/liquibase-minimal-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip artifacts
           cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
           #cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/internal/lib/liquibase-core.jar artifacts/liquibase-core-0-SNAPSHOT.jar
 
@@ -308,35 +222,17 @@ jobs:
             cp $i/target/$i-0-SNAPSHOT-javadoc.jar artifacts
           done
 
-          echo "Source code not available for liquibase-commercial" > /tmp/readme.source.txt
-          (cd /tmp && jar cf liquibase-commercial-${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT-sources.jar readme.source.txt)
-
-          echo "Javadocs not available for liquibase-commercial" > /tmp/readme.javadocs.txt
-          (cd /tmp && jar cf liquibase-commercial-${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT-javadoc.jar readme.javadocs.txt)
-
-          ls -R /Users/runner/.m2/repository/org/liquibase/liquibase-commercial
-          echo "/Users/runner/.m2/repository/org/liquibase/liquibase-commercial "
-
-          commercialJarM2Location=/Users/runner/.m2/repository/org/liquibase/liquibase-commercial/${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT/liquibase-commercial-${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT.jar
-          cp $commercialJarM2Location artifacts
-          cp /tmp/liquibase-commercial-${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT-sources.jar artifacts
-          cp /tmp/liquibase-commercial-${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT-javadoc.jar artifacts
-
           .github/util/sign-artifacts.sh artifacts
 
           ##prepare branch-named convenience artifacts directories
           mkdir artifacts-named
 
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}.tar.gz
-          cp liquibase-dist/target/liquibase-minimal-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}-minimal.tar.gz
           cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}-deps.jar
 
           for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-extension-testing'; do
             cp $i/target/$i-0-SNAPSHOT.jar artifacts-named/$i-${{ needs.setup.outputs.thisBranchName }}.jar
           done
-
-          #check why only this step has branchName when there is a standalone PR
-          cp $commercialJarM2Location artifacts-named/liquibase-commercial-${{ needs.setup.outputs.thisBranchName }}.jar
 
       - name: Archive Packages
         uses: actions/upload-artifact@v4
@@ -366,33 +262,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      #Publish to GitHub Packages. We are building a tar file which includes liquibase-commercial hence we need "-Dliquibase-pro.version"
+      #Publish to GitHub Packages.
       - name: Publish tar.gz package to GPM
         run: |
-          ./mvnw -B -pl liquibase-dist -P liquibase-commercial clean deploy -DskipTests=true "-Dliquibase-pro.version=${{ needs.setup.outputs.proBranchNamePrefix }}-SNAPSHOT" "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}"
+          ./mvnw -B -pl liquibase-dist clean deploy -DskipTests=true "-Dbuild.timestamp=${{ needs.setup.outputs.timestamp }}" "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.thisSha }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  run-functional-tests:
-    if: github.actor != 'dependabot[bot]'
-    needs: [setup, build_publish_branch]
-    uses: liquibase/liquibase/.github/workflows/run-functional-tests.yml@master
-    secrets: inherit
-    with:
-      latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
-      thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
 
   run-tests-harness:
     needs: [setup, build_publish_branch]
     uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@master
-    secrets: inherit
-    with:
-      latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
-      thisBranchName: ${{ needs.setup.outputs.unmodifiedBranchName }}
-
-  run-pro-build-and-test:
-    needs: [setup, build_publish_branch]
-    uses: liquibase/liquibase/.github/workflows/run-pro-build-and-test.yml@master
     secrets: inherit
     with:
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}

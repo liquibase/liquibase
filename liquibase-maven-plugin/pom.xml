@@ -97,11 +97,18 @@
                     </mojoDependencies>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>17</source>
+                    <target>17</target>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>3.6.1</version>
                 <configuration>
                     <artifactSet>
                         <includes>
@@ -138,44 +145,7 @@
                 </executions>
             </plugin>
         </plugins>
-
     </build>
-
-    <profiles>
-        <profile>
-            <id>liquibase-commercial</id>
-
-            <activation>
-                <file>
-                    <exists>../../liquibase-pro/pom.xml</exists>
-                </file>
-            </activation>
-
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-install-plugin</artifactId>
-                        <configuration>
-                            <artifactId>liquibase-maven-plugin</artifactId>
-                            <file>${project.build.directory}/liquibase-maven-plugin-${project.version}.jar</file>
-                            <sources>${project.build.directory}/liquibase-maven-plugin-${project.version}-sources.jar</sources>
-                            <pomFile>${basedir}/src/main/maven/release.pom.xml</pomFile>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>custom-install</id>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>install-file</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-    </profiles>
 
     <reporting>
         <plugins>

@@ -73,7 +73,6 @@ public class AnalyticsBatch {
      * Each event is converted into an {@link AnalyticsTrackEvent} and added to the batch. If the event
      * contains any child events, they are recursively processed and added to the same batch.
      * </p>
-     *
      * @param event         the event to be added to the batch, along with any child events
      * @param analyticsBatch the batch to which the event and its children will be added
      * @param userId        the user ID associated with the event

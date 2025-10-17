@@ -1001,7 +1001,7 @@ public class Liquibase implements AutoCloseable {
 
     /**
      * Drops all database objects in the default schema.
-     * @param dropDbclhistory If true, the database changelog history table will be dropped. Requires pro license.
+     * @param dropDbclhistory If true, the database changelog history table will be dropped. Requires license.
      */
     public final void dropAll(Boolean dropDbclhistory) throws DatabaseException {
         dropAll(dropDbclhistory, new CatalogAndSchema(getDatabase().getDefaultCatalogName(), getDatabase().getDefaultSchemaName()));
@@ -1016,7 +1016,7 @@ public class Liquibase implements AutoCloseable {
 
     /**
      * Drops all database objects in the passed schema(s).
-     * @param dropDbclhistory If true, the database changelog history table will be dropped. Requires pro license.
+     * @param dropDbclhistory If true, the database changelog history table will be dropped. Requires license.
      */
     public final void dropAll(Boolean dropDbclhistory, CatalogAndSchema... schemas) throws DatabaseException {
 

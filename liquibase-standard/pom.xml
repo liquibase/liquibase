@@ -12,7 +12,7 @@
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
         <sonar.coverage.jacoco.xmlReportPaths>../target/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-        <lombok.version>1.18.38</lombok.version>
+        <lombok.version>1.18.42</lombok.version>
     </properties>
 
     <artifactId>liquibase-standard</artifactId>
@@ -139,7 +139,7 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>2.4</version>
+            <version>2.5</version>
         </dependency>
 
         <!-- include as a dependency for people running java 9+ -->
@@ -407,6 +407,7 @@
                         <param>liquibase.analytics.configuration.AnalyticsConfiguration</param>
                         <param>liquibase.command.CommandStep</param>
                         <param>liquibase.command.copy.ProjectCopier</param>
+                        <param>liquibase.diff.output.changelog.core.ChangelogPrintService</param>
                     </services>
                 </configuration>
                 <executions>

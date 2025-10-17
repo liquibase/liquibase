@@ -31,13 +31,18 @@ public class DropProcedureGeneratorSnowflake extends DropProcedureGenerator {
         //
         // Drop with a catalog prefix does not work.  We only add the schema name here
         //
+        String procedureName = statement.getProcedureName();
         StringBuilder unparsedSql = new StringBuilder("DROP PROCEDURE ");
         if (statement.getSchemaName() != null) {
             unparsedSql.append(database.escapeObjectName(statement.getSchemaName(), Schema.class));
             unparsedSql.append(".");
         }
-        unparsedSql.append(statement.getProcedureName());
-        unparsedSql.append("()");
+        unparsedSql.append(procedureName);
+
+        if (!(procedureName.contains("(") && procedureName.contains(")"))) {
+            unparsedSql.append("()");
+        }
+
         return new Sql[]{new UnparsedSql(unparsedSql.toString())};
     }
 }

@@ -1,0 +1,25 @@
+name: OWASP Dependency Scanner
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to scan'
+        required: true
+        default: 'master'
+        type: string
+
+permissions:
+  contents: read
+  packages: read
+  id-token: write
+  actions: read
+
+jobs:
+  owasp-scan:
+    name: OWASP Dependency Check
+    uses: liquibase/build-logic/.github/workflows/owasp-scanner.yml@main
+    with:
+      repository: 'liquibase'
+      branch: ${{ github.event.inputs.branch }}
+    secrets: inherit
