@@ -3,6 +3,7 @@ package liquibase.changelog;
 import liquibase.Beta;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
+import liquibase.ChecksumVersion;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
@@ -88,11 +89,11 @@ public interface ChangeLogHistoryService extends Plugin {
     void generateDeploymentId();
 
     /**
-     *  This method should return true if all checksums in dbcl table have the same version as {@link liquibase.ChecksumVersion#latest().getVersion()}.
+     *  This method should return true if all checksums in dbcl table have the same version as {@link ChecksumVersion#latest().getVersion()}.
      *  This method is used by Update command family in order to know if there are old checksum versions in the database that should be updated or if it can proceed with fast checksum update process.
      *  IF your implementation does not validate dbcl table then return false.
      *
-     * @return false if we have checksums different from  {@link liquibase.ChecksumVersion#latest().getVersion()} in the dbcl table.
+     * @return false if we have checksums different from  {@link ChecksumVersion#latest().getVersion()} in the dbcl table.
      */
     boolean isDatabaseChecksumsCompatible();
 
