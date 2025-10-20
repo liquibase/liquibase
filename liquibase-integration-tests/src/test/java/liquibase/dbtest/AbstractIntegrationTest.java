@@ -61,6 +61,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
@@ -1371,15 +1372,61 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
-    public void makeSureNoErrorIsReturnedWhenNonexistentCustomChangeIsRunWithFailOnErrorFalse() throws DatabaseException, CommandExecutionException {
+    public void makeSureNoErrorIsReturnedWhenNonexistentCustomChangeIsRunWithFailOnErrorFalse() throws Exception {
+        // Given: A clean database
         clearDatabase();
-        runUpdate("changelogs/common/missingcustomchange/missing_custom_change_fail_on_error_false.changelog.xml");
+
+        // When: Running a changelog with a missing custom change class and failOnError="false"
+        // Then: Execution should complete without throwing ClassNotFoundException
+        try {
+            runUpdate("changelogs/common/missingcustomchange/missing_custom_change_fail_on_error_false.changelog.xml");
+            // Success - no ClassNotFoundException was thrown, update completed
+        } catch (CommandExecutionException e) {
+            // Verify that the exception is NOT a ClassNotFoundException
+            String errorMessage = e.getMessage();
+            assertFalse("Should not throw ClassNotFoundException with failOnError=false. Error: " + errorMessage,
+                errorMessage.contains("ClassNotFoundException"));
+            throw e; // Re-throw if it's a different unexpected error
+        }
+
+        // Verify the DATABASECHANGELOG table was created (proving the update process ran)
+        assertTrue("Expected DATABASECHANGELOG table to exist after update",
+            SnapshotGeneratorFactory.getInstance().has(
+                new Table().setName(database.getDatabaseChangeLogTableName())
+                    .setSchema(new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())),
+                database));
     }
 
     @Test
-    public void makeSureNoErrorIsReturnedWhenNonexistentCustomChangeIsSkippedByPrecondition() throws DatabaseException, CommandExecutionException {
+    public void makeSureNoErrorIsReturnedWhenNonexistentCustomChangeIsSkippedByPrecondition() throws Exception {
+        // Given: A clean database
         clearDatabase();
-        runUpdate("changelogs/common/missingcustomchange/missing_custom_change_precondition_failed.changelog.xml");
+
+        // When: Running a changelog with a missing custom change class and precondition with onFail="MARK_RAN"
+        // Then: Execution should complete without throwing ClassNotFoundException
+        try {
+            runUpdate("changelogs/common/missingcustomchange/missing_custom_change_precondition_failed.changelog.xml");
+            // Success - no ClassNotFoundException was thrown
+        } catch (CommandExecutionException e) {
+            // Verify that the exception is NOT a ClassNotFoundException
+            String errorMessage = e.getMessage();
+            assertFalse("Should not throw ClassNotFoundException when precondition skips changeset. Error: " + errorMessage,
+                errorMessage.contains("ClassNotFoundException"));
+            throw e; // Re-throw if it's a different unexpected error
+        }
+
+        // Verify the changeset ID is present in DATABASECHANGELOG table and marked as MARK_RAN
+        Connection conn = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(
+            "SELECT ID, EXECTYPE FROM " + database.getDatabaseChangeLogTableName() +
+            " WHERE ID = 'missing_custom_change_precondition_failed' AND EXECTYPE = 'MARK_RAN'"
+        );
+
+        assertTrue("Expected changeset 'missing_custom_change_precondition_failed' to be present in DATABASECHANGELOG with EXECTYPE='MARK_RAN'",
+            rs.next());
+        rs.close();
+        stmt.close();
     }
 
     private ProcessBuilder prepareExternalLiquibaseProcess() {
