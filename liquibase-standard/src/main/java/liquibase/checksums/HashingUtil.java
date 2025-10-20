@@ -59,13 +59,14 @@ public class HashingUtil {
         try {
             digest = MessageDigest.getInstance(algorithm);
 
-            DigestInputStream digestStream = new DigestInputStream(stream, digest);
-            byte[] buf = new byte[20480];
-            while (digestStream.read(buf) != -1) {
-                //digest is updating
+            try (DigestInputStream digestStream = new DigestInputStream(stream, digest)) {
+                byte[] buf = new byte[20480];
+                while (digestStream.read(buf) != -1) {
+                    //digest is updating
+                }
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new UnexpectedLiquibaseException(e);
         }
         byte[] digestBytes = digest.digest();
 
