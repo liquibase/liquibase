@@ -14,7 +14,7 @@ on:
         required: false
         type: boolean
         default: false
-  
+
   workflow_dispatch:
     inputs:
       version:
@@ -67,7 +67,7 @@ jobs:
           workflow: create-release.yml
           token: ${{ steps.get-token.outputs.token }}
           inputs: '{ "liquibaseVersion": "${{ inputs.version }}", "dryRun": "${{ inputs.dry_run || false }}" }'
-          ref: main
+          ref: DAT-20987-test
           repo: liquibase/docker
           wait-for-completion: true
           workflow-logs: json-output
