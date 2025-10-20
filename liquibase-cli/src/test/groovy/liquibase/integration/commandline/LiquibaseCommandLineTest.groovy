@@ -91,6 +91,14 @@ Global Options
                                environment variable:
                                'LIQUIBASE_CHANGELOG_PARSE_MODE')
 
+      --checksum-algorithm=PARAM
+                             Changes the hashing algorithm that Liquibase uses
+                               to calculate checksums.
+                             DEFAULT: MD5
+                             (defaults file: 'liquibase.checksumAlgorithm',
+                               environment variable:
+                               'LIQUIBASE_CHECKSUM_ALGORITHM')
+
       --classpath=PARAM      Additional classpath entries to use
                              (defaults file: 'liquibase.classpath', environment
                                variable: 'LIQUIBASE_CLASSPATH')
