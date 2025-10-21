@@ -47,7 +47,7 @@ class AnalyticsArgsTest extends Specification {
         Map<String, ?> scopeKeys = new HashMap<>()
         scopeKeys.put(AnalyticsArgs.ENABLED.getKey(), userCliOption)
         scopeKeys.put(AnalyticsArgs.DEV_OVERRIDE.getKey(), true)
-        scopeKeys.put(AnalyticsArgs.CONFIG_ENDPOINT_URL.getKey(), "some other value")Ca
+        scopeKeys.put(AnalyticsArgs.CONFIG_ENDPOINT_URL.getKey(), "some other value")
         Boolean actuallyEnabled = Scope.child(scopeKeys, () -> {
             return listener.isEnabled()
         } as Scope.ScopedRunnerWithReturn)
