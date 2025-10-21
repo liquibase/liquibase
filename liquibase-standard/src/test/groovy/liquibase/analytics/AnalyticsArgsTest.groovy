@@ -10,7 +10,7 @@ import spock.lang.Unroll
 class AnalyticsArgsTest extends Specification {
 
     @Unroll
-    def "test all permutations of options for enabling/disabling for community"(Boolean userCliOption, boolean remoteCommunityEnabled, boolean isEnabled) {
+    def "test all permutations of options for enabling/disabling for community"(Boolean userCliOption, boolean remoteOssEnabled, boolean isEnabled) {
         setup:
         def analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class)
         def existingConfig = analyticsConfigurationFactory.getPlugin()
@@ -23,7 +23,7 @@ class AnalyticsArgsTest extends Specification {
 
             @Override
             boolean isOssAnalyticsEnabled() throws Exception {
-                return remoteCommunityEnabled
+                return remoteOssEnabled
             }
 
             @Override
@@ -47,7 +47,7 @@ class AnalyticsArgsTest extends Specification {
         Map<String, ?> scopeKeys = new HashMap<>()
         scopeKeys.put(AnalyticsArgs.ENABLED.getKey(), userCliOption)
         scopeKeys.put(AnalyticsArgs.DEV_OVERRIDE.getKey(), true)
-        scopeKeys.put(AnalyticsArgs.CONFIG_ENDPOINT_URL.getKey(), "some other value")
+        scopeKeys.put(AnalyticsArgs.CONFIG_ENDPOINT_URL.getKey(), "some other value")Ca
         Boolean actuallyEnabled = Scope.child(scopeKeys, () -> {
             return listener.isEnabled()
         } as Scope.ScopedRunnerWithReturn)
@@ -62,7 +62,7 @@ class AnalyticsArgsTest extends Specification {
         analyticsFactory.register(oldListener)
 
         where:
-        userCliOption | remoteCommunityEnabled | isEnabled
+        userCliOption | remoteOssEnabled | isEnabled
         true          | true             | true
         true          | false            | false
         false         | true             | false

@@ -146,7 +146,7 @@ public class StartH2CommandStep extends AbstractCommandStep {
     public void adjustCommandDefinition(CommandDefinition commandDefinition) {
         super.adjustCommandDefinition(commandDefinition);
         commandDefinition.setShortDescription(
-                "Launches H2, an included in-memory database. This Java application is shipped with Liquibase, and is useful in the Getting Started experience and for testing out Liquibase commands.");
+                "Launches H2, an included open source in-memory database. This Java application is shipped with Liquibase, and is useful in the Getting Started experience and for testing out Liquibase commands.");
         commandDefinition.setGroupShortDescription(new String[]{"init"}, "Init commands");
     }
 
