@@ -204,7 +204,6 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
         constraint.setReferencedTableSchemaName("app");
         AddColumnStatement statement = new AddColumnStatement(null, "app", "books", "id_category", "bigint", null, constraint);
         Sql[] sql = generator.generateSql(statement, database,  null);
-        String theSql = sql[1].toSql();
-        assertTrue("ensure references has schema name prefix", theSql.contains("ALTER TABLE app.books ADD CONSTRAINT fk_book_category FOREIGN KEY (id_category) REFERENCES app.categories (id)"));
+        assertEquals("ALTER TABLE app.books ADD CONSTRAINT fk_book_category FOREIGN KEY (id_category) REFERENCES app.categories (id)", sql[1].toSql());
     }
 }
