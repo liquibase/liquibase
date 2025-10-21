@@ -299,7 +299,7 @@ Global Options
                                variable: 'LIQUIBASE_LOG_FILE')
 
       --log-format=PARAM     Sets the format of log output to console or log
-                               files. Open Source users default to unstructured
+                               files. Community users default to unstructured
                                "TEXT" logs to the console or output log files.
                                Pro users have the option to set value as "JSON"
                                or "JSON_PRETTY" to enable json-structured log

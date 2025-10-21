@@ -10,7 +10,7 @@ import spock.lang.Unroll
 class AnalyticsArgsTest extends Specification {
 
     @Unroll
-    def "test all permutations of options for enabling/disabling for oss"(Boolean userCliOption, boolean remoteOssEnabled, boolean isEnabled) {
+    def "test all permutations of options for enabling/disabling for community"(Boolean userCliOption, boolean remoteCommunityEnabled, boolean isEnabled) {
         setup:
         def analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class)
         def existingConfig = analyticsConfigurationFactory.getPlugin()
@@ -23,7 +23,7 @@ class AnalyticsArgsTest extends Specification {
 
             @Override
             boolean isOssAnalyticsEnabled() throws Exception {
-                return remoteOssEnabled
+                return remoteCommunityEnabled
             }
 
             @Override
@@ -62,7 +62,7 @@ class AnalyticsArgsTest extends Specification {
         analyticsFactory.register(oldListener)
 
         where:
-        userCliOption | remoteOssEnabled | isEnabled
+        userCliOption | remoteCommunityEnabled | isEnabled
         true          | true             | true
         true          | false            | false
         false         | true             | false

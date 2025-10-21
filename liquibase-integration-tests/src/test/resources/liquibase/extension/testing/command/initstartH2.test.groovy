@@ -5,7 +5,7 @@ CommandTests.define {
     command = ["init", "startH2"]
 
     signature = """
-Short Description: Launches H2, an included open source in-memory database. This Java application is shipped with Liquibase, and is useful in the Getting Started experience and for testing out Liquibase commands.
+Short Description: Launches H2, an included in-memory database. This Java application is shipped with Liquibase, and is useful in the Getting Started experience and for testing out Liquibase commands.
 Long Description: NOT SET
 Required Args:
   NONE
