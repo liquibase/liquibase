@@ -128,7 +128,7 @@ jobs:
           } >> $GITHUB_ENV
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: "8"
           distribution: "temurin"
@@ -195,7 +195,7 @@ jobs:
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
 
       - name: Cache Completed Artifacts
-        uses: actions/cache@v4.2.4
+        uses: actions/cache@v4.3.0
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
@@ -239,7 +239,7 @@ jobs:
           } >> $GITHUB_ENV
 
       - name: Restore Completed Artifacts
-        uses: actions/cache@v4.2.4
+        uses: actions/cache@v4.3.0
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
