@@ -178,7 +178,7 @@ public class DataTypeFactory {
             }
         }
         if (database instanceof PostgresDatabase && dataTypeName.toLowerCase(Locale.US).equals("timestamptz")) {
-            additionalInfo = TimestampType.getTimeZoneAdditionInformation(database);
+            additionalInfo = "WITH TIME ZONE";
         }
 
         // try to find matching classes for the data type name in our registry

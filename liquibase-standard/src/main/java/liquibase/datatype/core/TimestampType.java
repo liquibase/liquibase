@@ -226,26 +226,5 @@ public class TimestampType extends DateTimeType {
         return LoadDataChange.LOAD_DATA_TYPE.DATE;
     }
 
-    /**
-     * Returns the time zone additional information for the specified database.
-     * @param database the database
-     * @return the time zone additional information
-     */
-    public static String getTimeZoneAdditionInformation(Database database) {
-        if (database instanceof PostgresDatabase
-            || database instanceof OracleDatabase
-            || database instanceof H2Database
-            || database instanceof HsqlDatabase
-            || database instanceof SybaseASADatabase) {
 
-            if (database instanceof PostgresDatabase
-                || database instanceof H2Database
-                || database instanceof SybaseASADatabase) {
-                return "WITH TIME ZONE";
-            } else {
-                return "WITH TIMEZONE";
-            }
-        }
-        return null;
-    }
 }

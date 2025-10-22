@@ -218,18 +218,18 @@ class DataTypeFactoryTest extends Specification {
         "xmltype"                                      | new OracleDatabase()   | "XMLTYPE"                                      | XMLType       | false                 | null
         "timestamp"                                    | new OracleDatabase()   | "TIMESTAMP"                                    | TimestampType | false                 | null
         "timestamp(6)"                                 | new OracleDatabase()   | "TIMESTAMP(6)"                                 | TimestampType | false                 | null
-        "TIMESTAMP WITH TIMEZONE"                      | new OracleDatabase()   | "TIMESTAMP WITH TIMEZONE"                      | TimestampType | false                 | "WITH TIMEZONE"
-        "TIMESTAMP(6) WITH TIMEZONE"                   | new OracleDatabase()   | "TIMESTAMP(6) WITH TIMEZONE"                   | TimestampType | false                 | "WITH TIMEZONE"
+        "TIMESTAMP WITH TIMEZONE"                      | new OracleDatabase()   | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false                 | "WITH TIMEZONE"
+        "TIMESTAMP(6) WITH TIMEZONE"                   | new OracleDatabase()   | "TIMESTAMP(6) WITH TIME ZONE"                  | TimestampType | false                 | "WITH TIMEZONE"
         "timestamp without timezone"                   | new OracleDatabase()   | "TIMESTAMP"                                    | TimestampType | false                 | "without timezone"
         "timestamp(6) without timezone"                | new OracleDatabase()   | "TIMESTAMP(6)"                                 | TimestampType | false                 | "without timezone"
-        "timestamptz"                                  | new OracleDatabase()   | "TIMESTAMP"                                    | TimestampType | false                 | null
-        "timestamptz(6)"                               | new OracleDatabase()   | "TIMESTAMP(6)"                                 | TimestampType | false                 | null
+        "timestamptz"                                  | new OracleDatabase()   | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false                 | null
+        "timestamptz(6)"                               | new OracleDatabase()   | "TIMESTAMP(6) WITH TIME ZONE"                  | TimestampType | false                 | null
         "java.sql.Timestamp"                           | new OracleDatabase()   | "TIMESTAMP"                                    | TimestampType | false                 | null
         "java.sql.Timestamp(6)"                        | new OracleDatabase()   | "TIMESTAMP(6)"                                 | TimestampType | false                 | null
         "java.sql.Types.TIMESTAMP"                     | new OracleDatabase()   | "TIMESTAMP"                                    | TimestampType | false                 | null
         "java.sql.Types.TIMESTAMP(6)"                  | new OracleDatabase()   | "TIMESTAMP(6)"                                 | TimestampType | false                 | null
-        "java.sql.Types.TIMESTAMP_WITH_TIMEZONE"       | new OracleDatabase()   | "TIMESTAMP WITH TIMEZONE"                      | TimestampType | false                 | null
-        "java.sql.Types.TIMESTAMP_WITH_TIMEZONE(6)"    | new OracleDatabase()   | "TIMESTAMP(6) WITH TIMEZONE"                   | TimestampType | false                 | null
+        "java.sql.Types.TIMESTAMP_WITH_TIMEZONE"       | new OracleDatabase()   | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false                 | null
+        "java.sql.Types.TIMESTAMP_WITH_TIMEZONE(6)"    | new OracleDatabase()   | "TIMESTAMP(6) WITH TIME ZONE"                  | TimestampType | false                 | null
         "xml"                                          | new PostgresDatabase() | "XML"                                          | XMLType       | false                 | null
         "timestamp"                                    | new PostgresDatabase() | "TIMESTAMP WITHOUT TIME ZONE"                  | TimestampType | false                 | null
         "timestamp(6)"                                 | new PostgresDatabase() | "TIMESTAMP(6) WITHOUT TIME ZONE"               | TimestampType | false                 | null
@@ -252,8 +252,8 @@ class DataTypeFactoryTest extends Specification {
         "TIMESTAMP(6) WITH TIMEZONE"                   | new H2Database()       | "TIMESTAMP(6) WITH TIME ZONE"                  | TimestampType | false                 | "WITH TIMEZONE"
         "timestamp without timezone"                   | new H2Database()       | "TIMESTAMP"                                    | TimestampType | false                 | "without timezone"
         "timestamp(6) without timezone"                | new H2Database()       | "TIMESTAMP(6)"                                 | TimestampType | false                 | "without timezone"
-        "timestamptz"                                  | new H2Database()       | "TIMESTAMP"                                    | TimestampType | false                 | null
-        "timestamptz(6)"                               | new H2Database()       | "TIMESTAMP(6)"                                 | TimestampType | false                 | null
+        "timestamptz"                                  | new H2Database()       | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false                 | null
+        "timestamptz(6)"                               | new H2Database()       | "TIMESTAMP(6) WITH TIME ZONE"                  | TimestampType | false                 | null
         "java.sql.Timestamp"                           | new H2Database()       | "TIMESTAMP"                                    | TimestampType | false                 | null
         "java.sql.Timestamp(6)"                        | new H2Database()       | "TIMESTAMP(6)"                                 | TimestampType | false                 | null
         "java.sql.Types.TIMESTAMP"                     | new H2Database()       | "TIMESTAMP"                                    | TimestampType | false                 | null
