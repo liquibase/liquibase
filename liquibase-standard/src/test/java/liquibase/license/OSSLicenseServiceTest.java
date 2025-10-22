@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test that the OSS LicenseService implementation properly handles license validation
+ * Test that the Community LicenseService implementation properly handles license validation
  */
 public class OSSLicenseServiceTest {
 
@@ -40,7 +40,7 @@ public class OSSLicenseServiceTest {
 
         LicenseService licenseService = factory.getLicenseService();
         assertNotNull(licenseService, "LicenseService should not be null");
-        assertTrue(licenseService instanceof OSSLicenseService, "Should be OSS LicenseService");
+        assertTrue(licenseService instanceof OSSLicenseService, "Should be Community LicenseService");
 
         // Verify service behaves correctly
         assertFalse(licenseService.licenseIsValid("Liquibase Pro"));

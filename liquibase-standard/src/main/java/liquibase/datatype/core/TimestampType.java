@@ -60,9 +60,27 @@ public class TimestampType extends DateTimeType {
         }
 
         if (database instanceof MySQLDatabase) {
+            // MySQL uses plain TIMESTAMP which automatically converts to/from UTC
+            // All timestamp types (with or without timezone) map to TIMESTAMP
+            String lowerDef = originalDefinition.toLowerCase();
+
+            if (lowerDef.startsWith("java.sql.types.timestamp_with_timezone")
+                    || lowerDef.startsWith("java.sql.types.timestamp")
+                    || lowerDef.startsWith("java.sql.timestamp")
+                    || lowerDef.startsWith("timestamptz")
+                    || lowerDef.startsWith("timestamp with time zone")
+                    || lowerDef.startsWith("timestamp with timezone")
+                    || lowerDef.startsWith("timestamp")) {
+                // Return TIMESTAMP with parameters if present
+                Object[] parameters = getParameters();
+                return new DatabaseDataType("timestamp", parameters);
+            }
+
+            // For other definitions with spaces or parentheses, preserve them as-is
             if (originalDefinition.contains(" ") || originalDefinition.contains("(")) {
                 return new DatabaseDataType(getRawDefinition());
             }
+
             return super.toDatabaseDataType(database);
         }
         if (database instanceof MSSQLDatabase) {
@@ -99,8 +117,15 @@ public class TimestampType extends DateTimeType {
          * TIMESTAMP[(p)] [WITH TIME ZONE|WITHOUT TIME ZONE] syntax. p is the number of fractional digits,
          * i.e. if "2017-06-02 23:59:45.123456" is supported by the DBMS, p would be 6.
          */
-        DatabaseDataType type;
 
+        // Check if this is a timezone-aware timestamp specification
+        String lowerDef = originalDefinition.toLowerCase();
+        boolean isTimezoneAware = lowerDef.startsWith("java.sql.types.timestamp_with_timezone")
+                || lowerDef.startsWith("timestamptz")
+                || lowerDef.contains(" with time zone")
+                || lowerDef.contains(" with timezone");
+
+        DatabaseDataType type;
         if (getParameters().length > 0 && !(database instanceof SybaseASADatabase)) {
             int fractionalDigits = 0;
             String fractionalDigitsInput = getParameters()[0].toString();
@@ -126,28 +151,42 @@ public class TimestampType extends DateTimeType {
             type = new DatabaseDataType("TIMESTAMP");
         }
 
-        if (originalDefinition.startsWith("java.sql.Types.TIMESTAMP_WITH_TIMEZONE")){
-            String additionalInformation = getTimeZoneAdditionInformation(database);
-            if (additionalInformation != null) {
-                type.addAdditionalInformation(additionalInformation);
+        if ((originalDefinition.toUpperCase().startsWith("JAVA.SQL.TYPES.TIMESTAMP_WITH_TIMEZONE")
+            && (database instanceof PostgresDatabase
+            || database instanceof OracleDatabase
+            || database instanceof H2Database
+            || database instanceof HsqlDatabase
+            || database instanceof SybaseASADatabase)) || (originalDefinition.toLowerCase().startsWith("timestamptz"))) {
+
+            if (database instanceof PostgresDatabase
+                    || database instanceof H2Database
+                    || database instanceof SybaseASADatabase
+                    || database instanceof OracleDatabase) {
+                type.addAdditionalInformation("WITH TIME ZONE");
+            } else {
+                type.addAdditionalInformation("WITH TIMEZONE");
             }
             return type;
         }
 
+
+
         if (getAdditionalInformation() != null
                 && (database instanceof PostgresDatabase
-                || database instanceof OracleDatabase)
+                || database instanceof OracleDatabase
                 || database instanceof H2Database
                 || database instanceof HsqlDatabase
-                || database instanceof SybaseASADatabase){
+                || database instanceof SybaseASADatabase)) {
             String additionalInformation = this.getAdditionalInformation();
 
             if (additionalInformation != null) {
                 String additionInformation = additionalInformation.toUpperCase(Locale.US);
-                if ((database instanceof PostgresDatabase || database instanceof H2Database || database instanceof SybaseASADatabase)
-                        && additionInformation.toUpperCase(Locale.US).contains("TIMEZONE")) {
-                    additionalInformation = additionInformation.toUpperCase(Locale.US).replace("TIMEZONE", "TIME ZONE");
+                // Normalize "TIMEZONE" to "TIME ZONE" for databases that require it
+                if ((database instanceof PostgresDatabase || database instanceof H2Database || database instanceof SybaseASADatabase || database instanceof OracleDatabase)
+                        && additionInformation.contains("TIMEZONE")) {
+                    additionalInformation = additionInformation.replace("TIMEZONE", "TIME ZONE");
                 }
+
                 // CORE-3229 Oracle 11g doesn't support WITHOUT clause in TIMESTAMP data type
                 if ((database instanceof OracleDatabase) && additionInformation.startsWith("WITHOUT")) {
                     // https://docs.oracle.com/cd/B19306_01/server.102/b14225/ch4datetime.htm#sthref389
@@ -166,6 +205,16 @@ public class TimestampType extends DateTimeType {
             }
 
             type.addAdditionalInformation(additionalInformation);
+            return type;
+        }
+
+        // If we created a type with parameters for databases that don't need additional timezone info, return it
+        // PostgreSQL needs "WITHOUT TIME ZONE" to be added by the parent class
+        // Firebird doesn't support TIMESTAMP(precision) syntax, so let it fall through to super
+        if (getParameters().length > 0
+                && !(database instanceof SybaseASADatabase)
+                && !(database instanceof PostgresDatabase)
+                && !(database instanceof FirebirdDatabase)) {
             return type;
         }
 
