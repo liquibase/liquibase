@@ -111,7 +111,6 @@ The main coordinator that triggers all release steps in the proper sequence. Sup
 | `release-publish-github-packages.yml` | Publish to GitHub Packages | ✅ Yes |
 | `release-deploy-xsd.yml` | Deploy XSD files to S3 and SFTP | ✅ Yes |
 | `release-docker.yml` | Trigger Docker image builds | ✅ Yes |
-| `release-docker-minimal.yml` | Trigger minimal Docker image builds | ✅ Yes |
 | `release-publish-assets-s3.yml` | Publish release assets to S3 | ✅ Yes |
 
 ## Key Benefits
@@ -543,25 +542,10 @@ dry_run: false
 
 **Note:** This triggers a workflow in the `liquibase/docker` repository.
 
-### 8. Release Minimal Docker Image (`release-docker-minimal.yml`)
-
-**When to use:** If minimal Docker image build fails.
-
-**Required inputs:**
-- `version`: Version to release (e.g., `4.28.0`)
-
-**Optional inputs:**
-- `dry_run`: false (default) - if true, workflow will be skipped
-
-**Example:**
-```
-version: 4.28.0
-dry_run: false
-```
 
 **Note:** This triggers a workflow in the `liquibase/liquibase-infrastructure` repository.
 
-### 9. Publish Assets to S3 (`release-publish-assets-s3.yml`)
+### 8. Publish Assets to S3 (`release-publish-assets-s3.yml`)
 
 **When to use:** If S3 asset upload fails.
 
@@ -630,7 +614,6 @@ If manually running multiple workflows, follow this order:
    - release-publish-github-packages
    - release-deploy-xsd
    - release-docker
-   - release-docker-minimal
    ↓
 4. release-deploy-maven (waits for step 3)
    ↓
