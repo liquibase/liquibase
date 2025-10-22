@@ -91,9 +91,9 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
     }
 
     /**
-     * Determines if OSS analytics are enabled by reading the remote configuration.
+     * Determines if Community analytics are enabled by reading the remote configuration.
      *
-     * @return true if OSS analytics are enabled, false otherwise
+     * @return true if Community analytics are enabled, false otherwise
      * @throws Exception if there is an issue fetching the configuration
      */
     @Override
