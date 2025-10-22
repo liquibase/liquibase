@@ -212,23 +212,36 @@ class DataTypeFactoryTest extends Specification {
         "mediumblob"                                   | new MySQLDatabase()    | "MEDIUMBLOB"                                   | BlobType      | false
         "mediumtext"                                   | new MySQLDatabase()    | "MEDIUMTEXT"                                   | ClobType      | false
         "real"                                         | new MySQLDatabase()    | "REAL"                                         | FloatType     | false
+        "timestamptz"                                  | new MySQLDatabase()    | "timestamp"                                    | TimestampType | false
+        "timestamp with time zone"                      | new MySQLDatabase()   | "timestamp"                                    | TimestampType | false
+        "timestamp with timezone"                      | new MySQLDatabase()    | "timestamp"                                    | TimestampType | false
+        "java.sql.Types.TIMESTAMP_WITH_TIMEZONE"       | new MySQLDatabase()    | "timestamp"                                    | TimestampType | false
+        "java.sql.Types.TIMESTAMP_WITH_TIMEZONE(6)"    | new MySQLDatabase()    | "timestamp(6)"                                 | TimestampType | false
+        "timestamp"                                    | new MySQLDatabase()    | "timestamp"                                    | TimestampType | false
+        "timestamp(3)"                                 | new MySQLDatabase()    | "timestamp(3)"                                 | TimestampType | false
+        "TIMESTAMPTZ"                                  | new MySQLDatabase()    | "timestamp"                                    | TimestampType | false
+        "timestamptz(3)"                               | new MySQLDatabase()    | "timestamp(3)"                                 | TimestampType | false
+        "java.sql.Types.TIMESTAMP"                     | new MySQLDatabase()    | "timestamp"                                    | TimestampType | false
+        "java.sql.Types.TIMESTAMP(3)"                  | new MySQLDatabase()    | "timestamp(3)"                                 | TimestampType | false
+        "java.sql.Timestamp"                           | new MySQLDatabase()    | "timestamp"                                    | TimestampType | false
+        "java.sql.Timestamp(6)"                        | new MySQLDatabase()    | "timestamp(6)"                                 | TimestampType | false
         "nclob"                                        | new OracleDatabase()   | "NCLOB"                                        | ClobType      | false
         "xml"                                          | new OracleDatabase()   | "XMLTYPE"                                      | XMLType       | false
         "xmltype"                                      | new OracleDatabase()   | "XMLTYPE"                                      | XMLType       | false
         "timestamp"                                    | new OracleDatabase()   | "TIMESTAMP"                                    | TimestampType | false
         "timestamp(6)"                                 | new OracleDatabase()   | "TIMESTAMP(6)"                                 | TimestampType | false
-        "TIMESTAMP WITH TIMEZONE"                      | new OracleDatabase()   | "TIMESTAMP WITH TIMEZONE"                      | TimestampType | false
-        "TIMESTAMP(6) WITH TIMEZONE"                   | new OracleDatabase()   | "TIMESTAMP(6) WITH TIMEZONE"                   | TimestampType | false
+        "TIMESTAMP WITH TIMEZONE"                      | new OracleDatabase()   | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false
+        "TIMESTAMP(6) WITH TIMEZONE"                   | new OracleDatabase()   | "TIMESTAMP(6) WITH TIME ZONE"                  | TimestampType | false
         "timestamp without timezone"                   | new OracleDatabase()   | "TIMESTAMP"                                    | TimestampType | false
         "timestamp(6) without timezone"                | new OracleDatabase()   | "TIMESTAMP(6)"                                 | TimestampType | false
-        "timestamptz"                                  | new OracleDatabase()   | "TIMESTAMP"                                    | TimestampType | false
-        "timestamptz(6)"                               | new OracleDatabase()   | "TIMESTAMP(6)"                                 | TimestampType | false
+        "timestamptz"                                  | new OracleDatabase()   | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false
+        "timestamptz(6)"                               | new OracleDatabase()   | "TIMESTAMP(6) WITH TIME ZONE"                  | TimestampType | false
         "java.sql.Timestamp"                           | new OracleDatabase()   | "TIMESTAMP"                                    | TimestampType | false
         "java.sql.Timestamp(6)"                        | new OracleDatabase()   | "TIMESTAMP(6)"                                 | TimestampType | false
         "java.sql.Types.TIMESTAMP"                     | new OracleDatabase()   | "TIMESTAMP"                                    | TimestampType | false
         "java.sql.Types.TIMESTAMP(6)"                  | new OracleDatabase()   | "TIMESTAMP(6)"                                 | TimestampType | false
-        "java.sql.Types.TIMESTAMP_WITH_TIMEZONE"       | new OracleDatabase()   | "TIMESTAMP WITH TIMEZONE"                      | TimestampType | false
-        "java.sql.Types.TIMESTAMP_WITH_TIMEZONE(6)"    | new OracleDatabase()   | "TIMESTAMP(6) WITH TIMEZONE"                   | TimestampType | false
+        "java.sql.Types.TIMESTAMP_WITH_TIMEZONE"       | new OracleDatabase()   | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false
+        "java.sql.Types.TIMESTAMP_WITH_TIMEZONE(6)"    | new OracleDatabase()   | "TIMESTAMP(6) WITH TIME ZONE"                  | TimestampType | false
         "xml"                                          | new PostgresDatabase() | "XML"                                          | XMLType       | false
         "timestamp"                                    | new PostgresDatabase() | "TIMESTAMP WITHOUT TIME ZONE"                  | TimestampType | false
         "timestamp(6)"                                 | new PostgresDatabase() | "TIMESTAMP(6) WITHOUT TIME ZONE"               | TimestampType | false
@@ -251,8 +264,8 @@ class DataTypeFactoryTest extends Specification {
         "TIMESTAMP(6) WITH TIMEZONE"                   | new H2Database()       | "TIMESTAMP(6) WITH TIME ZONE"                  | TimestampType | false
         "timestamp without timezone"                   | new H2Database()       | "TIMESTAMP"                                    | TimestampType | false
         "timestamp(6) without timezone"                | new H2Database()       | "TIMESTAMP(6)"                                 | TimestampType | false
-        "timestamptz"                                  | new H2Database()       | "TIMESTAMP"                                    | TimestampType | false
-        "timestamptz(6)"                               | new H2Database()       | "TIMESTAMP(6)"                                 | TimestampType | false
+        "timestamptz"                                  | new H2Database()       | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false
+        "timestamptz(6)"                               | new H2Database()       | "TIMESTAMP(6) WITH TIME ZONE"                  | TimestampType | false
         "java.sql.Timestamp"                           | new H2Database()       | "TIMESTAMP"                                    | TimestampType | false
         "java.sql.Timestamp(6)"                        | new H2Database()       | "TIMESTAMP(6)"                                 | TimestampType | false
         "java.sql.Types.TIMESTAMP"                     | new H2Database()       | "TIMESTAMP"                                    | TimestampType | false
@@ -274,6 +287,8 @@ class DataTypeFactoryTest extends Specification {
         "long nvarchar"                                | new SybaseDatabase()   | "TEXT"                                         | ClobType      | false
         "character varying"                            | new SybaseDatabase()   | "VARCHAR"                                      | VarcharType   | false
         "uuid"                                         | new MariaDBDatabase()  | "UUID"                                         | UUIDType      | false
+        "timestamp"                                    | new FirebirdDatabase() | "TIMESTAMP"                                    | TimestampType | false
+        "timestamp(6)"                                 | new FirebirdDatabase() | "TIMESTAMP"                                    | TimestampType | false
     }
 
     @Unroll("#featureName: #object for #database")

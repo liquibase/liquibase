@@ -11,7 +11,7 @@ import spock.lang.Unroll
 class LiquibaseCommandLineProCommandTest extends Specification {
 
     def setup() {
-        // Ensure we're in OSS mode by clearing any license configuration
+        // Ensure we're in Community mode by clearing any license configuration
         System.clearProperty("liquibase.licenseKey")
         System.clearProperty("LIQUIBASE_LICENSE_KEY")
     }

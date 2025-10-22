@@ -1,6 +1,6 @@
 # Triage Process and GitHub Labels for Liquibase
 
-This document describes how the Liquibase OSS team triages issues on GitHub.
+This document describes how the Liquibase Community team triages issues on GitHub.
 
 Issue triage should occur daily so that issues can be prioritized against other work currently planned.
 
@@ -8,7 +8,7 @@ If an issue or PR obviously relates to a release regression, we will assign an a
 
 ## Triage Steps
 
-Anyone from the team can triage issues as they arrive in the repository, although generally it is the OSS product manager.
+Anyone from the team can triage issues as they arrive in the repository, although generally it is the Community product manager.
 
 New untriaged issues can be found by filtering the issues list for those [not in a project](https://github.com/liquibase/liquibase/issues?q=is%3Aissue+is%3Aopen+no%3Aproject).
 
