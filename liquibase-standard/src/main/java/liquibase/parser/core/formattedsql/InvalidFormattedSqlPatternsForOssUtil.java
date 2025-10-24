@@ -6,7 +6,7 @@ import liquibase.license.LicenseServiceUtils;
 import java.util.regex.Pattern;
 
 /**
- * Utility class for handling invalid formatted SQL patterns for OSS distribution.
+ * Utility class for handling invalid formatted SQL patterns for Community distribution.
  */
 public class InvalidFormattedSqlPatternsForOssUtil {
 

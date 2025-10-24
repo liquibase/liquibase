@@ -129,16 +129,6 @@ jobs:
       dry_run: ${{ inputs.dry_run || false }}
     secrets: inherit
 
-  release-docker-minimal:
-    name: Release Minimal Docker Image
-    needs: [setup, manual-approval]
-    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
-    uses: ./.github/workflows/release-docker-minimal.yml
-    with:
-      version: ${{ needs.setup.outputs.version }}
-      dry_run: ${{ inputs.dry_run || false }}
-    secrets: inherit
-
   deploy-maven:
     name: Deploy to Maven Central
     needs: [setup, manual-approval, deploy-javadocs, publish-github-packages, deploy-xsd, release-docker]
@@ -188,7 +178,6 @@ jobs:
         publish-github-packages,
         deploy-xsd,
         release-docker,
-        release-docker-minimal,
         deploy-maven,
         package,
         publish-assets-s3,
@@ -204,7 +193,6 @@ jobs:
              [ "${{ needs.publish-github-packages.result }}" == "success" ] && \
              [ "${{ needs.deploy-xsd.result }}" == "success" ] && \
              [ "${{ needs.release-docker.result }}" == "success" ] && \
-             [ "${{ needs.release-docker-minimal.result }}" == "success" ] && \
              [ "${{ needs.deploy-maven.result }}" == "success" ] && \
              [ "${{ needs.package.result }}" == "success" ] && \
              [ "${{ needs.publish-assets-s3.result }}" == "success" ]; then
@@ -233,7 +221,6 @@ jobs:
           | Publish GitHub Packages | ${{ needs.publish-github-packages.result == 'success' && '✅' || needs.publish-github-packages.result == 'skipped' && '⏭️ Skipped' || '❌' }} |
           | Deploy XSD Files | ${{ needs.deploy-xsd.result == 'success' && '✅' || needs.deploy-xsd.result == 'skipped' && '⏭️ Skipped' || '❌' }} |
           | Release Docker Images | ${{ needs.release-docker.result == 'success' && '✅' || needs.release-docker.result == 'skipped' && '⏭️ Skipped' || '❌' }} |
-          | Release Minimal Docker | ${{ needs.release-docker-minimal.result == 'success' && '✅' || needs.release-docker-minimal.result == 'skipped' && '⏭️ Skipped' || '❌' }} |
           | Deploy to Maven Central | ${{ needs.deploy-maven.result == 'success' && '✅' || needs.deploy-maven.result == 'skipped' && '⏭️ Skipped' || '❌' }} |
           | Update Packages | ${{ needs.package.result == 'success' && '✅' || needs.package.result == 'skipped' && '⏭️ Skipped' || '❌' }} |
           | Publish Assets to S3 | ${{ needs.publish-assets-s3.result == 'success' && '✅' || needs.publish-assets-s3.result == 'skipped' && '⏭️ Skipped' || '❌' }} |
