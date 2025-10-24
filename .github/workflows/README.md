@@ -211,14 +211,14 @@ If a specific step fails, you can re-run just that workflow:
 │ Javadocs      │            │ GitHub Packages│
 └───────┬───────┘            └───────┬────────┘
         │                            │
-        │    ┌───────────────────────┼──────────────┐
-        │    │                       │              │
-        ▼    ▼                       ▼              ▼
-  ┌──────────────┐          ┌────────────┐  ┌─────────────────┐
-  │ Deploy XSD   │          │  Docker    │  │Docker Minimal   │
-  └──────┬───────┘          └──────┬─────┘  └────────┬────────┘
-         │                         │                  │
-         └─────────────────────────┴──────────────────┘
+        │    ┌───────────────────────┤
+        │    │                       │
+        ▼    ▼                       ▼
+  ┌──────────────┐          ┌────────────┐
+  │ Deploy XSD   │          │  Docker    │
+  └──────┬───────┘          └──────┬─────┘
+         │                         │
+         └─────────────────────────┘
                                    │
                                    ▼
                         ┌──────────────────┐
@@ -541,9 +541,6 @@ dry_run: false
 ```
 
 **Note:** This triggers a workflow in the `liquibase/docker` repository.
-
-
-**Note:** This triggers a workflow in the `liquibase/liquibase-infrastructure` repository.
 
 ### 8. Publish Assets to S3 (`release-publish-assets-s3.yml`)
 
