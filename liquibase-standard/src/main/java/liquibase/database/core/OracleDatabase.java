@@ -87,6 +87,10 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     private void tryProxySession(final JdbcConnection jdbcConnection) {
         String url = jdbcConnection.getURL();
         Properties connectionProperties = jdbcConnection.getConnectionProperties();
+        // This only happens during unit testing
+        if (connectionProperties == null) {
+            return;
+        }
         Connection con = jdbcConnection.getWrappedConnection();
         // 1st this fetch proxy username from --username parameter
         String proxyUserName = connectionProperties.getProperty("PROXY_USER_NAME");
