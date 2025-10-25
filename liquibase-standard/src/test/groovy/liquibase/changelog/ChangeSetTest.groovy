@@ -784,7 +784,7 @@ class ChangeSetTest extends Specification {
     def "validate rollback serialization doesn't duplicate rollback key on a YAML changelog format"() {
         when:
         DatabaseChangeLog changeLog = new DatabaseChangeLog()
-        ChangeSet changeSet = new ChangeSet(UUID.randomUUID().toString(), "author", false, false, "", "test", "mysql", changeLog)
+        ChangeSet changeSet = new ChangeSet(UUID.randomUUID().toString(), "author", false, false, "changelog.yaml", "test", "mysql", changeLog)
         changeSet.addRollbackChange(new EmptyChange())
         changeLog.addChangeSet(changeSet)
 
@@ -797,6 +797,48 @@ class ChangeSetTest extends Specification {
         def contents = FileUtil.getContents(outputFile).replace("\n","").replace("\r","").trim()
         def expectKeys = "rollback:      empty: {}".trim()
         contents.contains(expectKeys)
+
+        cleanup:
+        outputStream.close()
+        outputFile.delete()
+    }
+
+    def "should throw runtime exception when filePath property is empty"() {
+        when:
+        DatabaseChangeLog changeLog = new DatabaseChangeLog()
+        ChangeSet changeSet = new ChangeSet(UUID.randomUUID().toString(), "author", false, false, "", "test", "mysql", changeLog)
+        changeSet.addRollbackChange(new EmptyChange())
+        changeLog.addChangeSet(changeSet)
+
+        YamlChangeLogSerializer serializer = new YamlChangeLogSerializer()
+        OutputStream outputStream = new FileOutputStream("changelog-with-rollback.yaml")
+        serializer.write(changeLog.getChangeSets(), outputStream)
+
+        then:
+        def outputFile = new File("changelog-with-rollback.yaml")
+        def e = thrown(RuntimeException)
+        e.message.contains("Required field 'file' of element 'include' cannot be empty")
+
+        cleanup:
+        outputStream.close()
+        outputFile.delete()
+    }
+
+    def "should throw runtime exception when filePath property is null"() {
+        when:
+        DatabaseChangeLog changeLog = new DatabaseChangeLog()
+        ChangeSet changeSet = new ChangeSet(UUID.randomUUID().toString(), "author", false, false, null, "test", "mysql", changeLog)
+        changeSet.addRollbackChange(new EmptyChange())
+        changeLog.addChangeSet(changeSet)
+
+        YamlChangeLogSerializer serializer = new YamlChangeLogSerializer()
+        OutputStream outputStream = new FileOutputStream("changelog-with-rollback.yaml")
+        serializer.write(changeLog.getChangeSets(), outputStream)
+
+        then:
+        def outputFile = new File("changelog-with-rollback.yaml")
+        def e = thrown(RuntimeException)
+        e.message.contains("Required field 'file' of element 'include' cannot be empty")
 
         cleanup:
         outputStream.close()
