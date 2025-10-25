@@ -411,4 +411,39 @@ class AddColumnChangeTest extends StandardChangeTest {
         new FirebirdDatabase()  | ""
         new HsqlDatabase()      | ""
     }
+
+    @Unroll
+    def "adding column with foreign key constraint includes schema name prefix in referenced table for #database database"() {
+        given:
+        def change = new AddColumnChange()
+        def liquibaseType = DataTypeFactory.getInstance().fromDescription("BIGINT", database)
+        def databaseType = liquibaseType.toDatabaseDataType(database)
+        change.setSchemaName("source_schema")
+        change.setTableName("ex_table")
+
+        def constraintsConfig = new ConstraintsConfig()
+        constraintsConfig.setForeignKeyName("ex_table_object_fk")
+        constraintsConfig.setReferencedTableSchemaName("target_schema")
+        constraintsConfig.setReferencedTableName("objects")
+        constraintsConfig.setReferencedColumnNames("id")
+
+        change.addColumn(new AddColumnConfig()
+                .setName("object_id")
+                .setType('BIGINT')
+                .setConstraints(constraintsConfig))
+
+        when:
+        def statements = change.generateStatements(database)
+
+        then:
+        def sql = SqlGeneratorFactory.getInstance().generateSql(statements, database)*.toString()
+        sql.size() == 2
+        sql[1] == "ALTER TABLE source_schema.ex_table ADD CONSTRAINT ex_table_object_fk FOREIGN KEY (object_id) REFERENCES target_schema.objects (id);"
+
+        where:
+        database                | columnNull
+        new PostgresDatabase()  | ""
+        new MSSQLDatabase()     | ""
+        new H2Database()        | ""
+    }
 }

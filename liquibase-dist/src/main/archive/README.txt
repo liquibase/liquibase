@@ -4,7 +4,7 @@ Introduction
 --------------------------------------------
 Thanks for installing Liquibase Community ${project.version}.
 
-The open source Liquibase product ships without extensions, drivers, and many other packages and dependencies. This change provides a much lighter, modular, and customizable Liquibase experience for Community users. Importantly, this flexibility both allows and requires users to manage their Liquibase dependencies for their specific needs.
+The Liquibase Community product ships without extensions, drivers, and many other packages and dependencies. This change provides a much lighter, modular, and customizable Liquibase experience for Community users. Importantly, this flexibility both allows and requires users to manage their Liquibase dependencies for their specific needs.
 
 Using Liquibase Package Manager (LPM) 
 --------------------------------------------
