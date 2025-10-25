@@ -5,7 +5,7 @@ import liquibase.configuration.ConfiguredValue;
 import java.util.Date;
 
 /**
- * No-op LicenseService implementation for OSS distribution.
+ * No-op LicenseService implementation for Community distribution.
  * This provides a consistent "invalid license" response instead of null,
  * allowing Pro features to properly fail with appropriate error messages.
  */
@@ -40,17 +40,17 @@ public class OSSLicenseService implements LicenseService {
 
     @Override
     public LicenseInstallResult installLicense(Location... locations) {
-        return new LicenseInstallResult(1, "License installation not supported in OSS distribution");
+        return new LicenseInstallResult(1, "License installation not supported in Community distribution");
     }
 
     @Override
     public void disable() {
-        // No-op for OSS
+        // No-op for Community
     }
 
     @Override
     public void reset() {
-        // No-op for OSS
+        // No-op for Community
     }
 
     @Override
