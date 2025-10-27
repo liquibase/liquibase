@@ -483,48 +483,6 @@ jobs:
         continue-on-error: true
         run: echo '### 🐳 Docker Release Job -> ${{steps.docker_dispatch.outputs.workflow-url}}' >> $GITHUB_STEP_SUMMARY
 
-  release-minimal-docker:
-    if: ${{ inputs.dry_run == false }}
-    name: Release Minimal docker image
-    needs: [setup, manual_trigger_deployment]
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v5
-        with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
-          aws-region: us-east-1
-
-      - name: Get secrets from vault
-        id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
-        with:
-          secret-ids: |
-            ,/vault/liquibase
-          parse-json-secrets: true
-
-      - name: Get GitHub App token
-        id: get-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          permission-contents: write
-          permission-actions: write
-
-      - name: Release liquibase/liquibase-infrastructure v${{ needs.setup.outputs.version }}
-        uses: the-actions-org/workflow-dispatch@v4
-        id: docker_dispatch
-        with:
-          workflow: build-liquibase-minimal.yml
-          token: ${{ steps.get-token.outputs.token }}
-          inputs: '{ "liquibaseVersion": "${{ needs.setup.outputs.version }}" }'
-          ref: master
-          repo: liquibase/liquibase-infrastructure
-          wait-for-completion: true
-          workflow-logs: json-output
-
   package:
     uses: liquibase/build-logic/.github/workflows/package.yml@main
     needs: [setup]
