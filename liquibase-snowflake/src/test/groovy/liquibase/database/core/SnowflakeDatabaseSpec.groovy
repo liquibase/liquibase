@@ -1,6 +1,7 @@
 package liquibase.database.core
 
 import liquibase.structure.core.Column
+import liquibase.structure.core.Table
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -59,5 +60,26 @@ class SnowflakeDatabaseSpec extends Specification {
         "it's a col"    || "it\\'s a col"
         "\\'col'"       || "\\'col\\'"
         "''"            || "\\'\\'"
+    }
+
+    def "Should escape object name correctly with catalog and schema combinations"() {
+        given:
+        def database = new SnowflakeDatabase()
+
+        when:
+        def result = database.escapeObjectName(catalogName, schemaName, objectName, Table.class)
+
+        then:
+        result == expectedResult
+
+        where:
+        catalogName | schemaName | objectName | expectedResult
+        null        | null       | "myTable"  | "myTable"
+        null        | "mySchema" | "myTable"  | "mySchema.myTable"
+        "myCatalog" | "mySchema" | "myTable"  | "myCatalog.mySchema.myTable"
+        "myCatalog" | null       | "myTable"  | "myCatalog.PUBLIC.myTable"  // null schema defaults to PUBLIC
+        null        | "schema"   | "myTable"  | '"schema".myTable'  // "schema" is reserved word, gets quoted
+        "catalog"   | "schema"   | "myTable"  | 'catalog."schema".myTable'  // reserved word with catalog
+        "my_db"     | "my_sch"   | "my_tbl"   | "my_db.my_sch.my_tbl"
     }
 }

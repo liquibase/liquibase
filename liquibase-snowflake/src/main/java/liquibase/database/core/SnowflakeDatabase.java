@@ -4,26 +4,29 @@ import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.StoredProcedure;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.View;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 import liquibase.util.SystemUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 public class SnowflakeDatabase extends AbstractJdbcDatabase {
 
     public static final String PRODUCT_NAME = "Snowflake";
+    public static final String DEFAULT_SCHEMA_NAME = "PUBLIC";
     private static final Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     private final Set<String> systemTables = new HashSet<>();
     private final Set<String> systemViews = new HashSet<>();
@@ -106,7 +109,7 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type) {
-        return type == Table.class || type == View.class || type == StoredProcedure.class;
+        return true;
     }
 
     @Override
@@ -160,6 +163,11 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
         if (connection == null) {
             return null;
         }
+
+        if (connection instanceof OfflineConnection offlineConnection) {
+            return offlineConnection.getSchema();
+        }
+
         try (ResultSet resultSet = ((JdbcConnection) connection).createStatement().executeQuery("SELECT CURRENT_SCHEMA()")) {
             resultSet.next();
             return resultSet.getString(1);
@@ -167,6 +175,40 @@ public class SnowflakeDatabase extends AbstractJdbcDatabase {
             Scope.getCurrentScope().getLog(getClass()).info("Error getting default schema", e);
         }
         return null;
+    }
+
+    @Override
+    public String escapeObjectName(String catalogName, String schemaName, final String objectName,
+                                   final Class<? extends DatabaseObject> objectType) {
+        catalogName = StringUtils.stripToNull(catalogName);
+        schemaName = StringUtils.stripToNull(schemaName);
+
+        if (catalogName == null) {
+            catalogName = this.getDefaultCatalogName();
+        }
+        if (schemaName == null) {
+            schemaName = this.getDefaultSchemaName();
+        }
+
+        if ((catalogName == null) && (schemaName == null)) {
+            return escapeObjectName(objectName, objectType);
+        }
+        if (catalogName == null) {
+            if (isDefaultSchema(null, schemaName) && !getOutputDefaultSchema()) {
+                return escapeObjectName(objectName, objectType);
+            } else {
+                return escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
+            }
+        }
+
+        if (isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema() && !getOutputDefaultCatalog()) {
+            return escapeObjectName(objectName, objectType);
+        }
+        if (isDefaultSchema(catalogName, schemaName) && !getOutputDefaultCatalog()) {
+            return escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
+        }
+
+        return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(Objects.requireNonNullElse(schemaName, DEFAULT_SCHEMA_NAME), Schema.class) + "." + escapeObjectName(objectName, objectType);
     }
 
     @Override

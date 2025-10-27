@@ -86,7 +86,7 @@ public class SnowflakeDatabaseTest {
 
     @Test
     public void testSupportsCatalogInObjectName() {
-        assertFalse(database.supportsCatalogInObjectName(null));
+        assertTrue(database.supportsCatalogInObjectName(null));
     }
 
     @Test
