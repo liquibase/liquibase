@@ -154,7 +154,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             if (fks != null) {
                 for (ForeignKey fk : fks) {
                     if ((fk.getForeignKeyColumns() != null) && (fk.getForeignKeyColumns().size() == 1) &&
-                        (fk.getPrimaryKeyColumns() != null) && (fk.getPrimaryKeyColumns().size() >= 1) &&
+                        (fk.getPrimaryKeyColumns() != null) && (!fk.getPrimaryKeyColumns().isEmpty()) &&
                         fk.getForeignKeyColumns().get(0).getName().equals(getName())) {
                         constraints.setForeignKeyName(fk.getName());
                         constraints.setReferences(fk.getPrimaryKeyTable().getName() +
