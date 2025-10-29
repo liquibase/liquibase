@@ -44,8 +44,13 @@ public class TagExistsCommandStep  extends AbstractCommandStep {
 
     private void sendResults(boolean exists, Database database, String tag, CommandResultsBuilder resultsBuilder) {
         resultsBuilder.addResult(TAG_EXISTS_RESULT, exists);
+        if (database.getConnection() == null) {
+            throw new IllegalStateException("Database connection is not available");
+        }
+        String connectionUserName = database.getConnection().getConnectionUserName();
+        String connectionUrl = database.getConnection().getURL();
         Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString(exists ? "tag.exists" : "tag.does.not.exist"),
-                tag, database.getConnection().getConnectionUserName() + "@" + database.getConnection().getURL())
+                tag, connectionUserName + "@" + connectionUrl)
         );
     }
 

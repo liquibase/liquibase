@@ -398,7 +398,7 @@ jobs:
 
       - name: Attach standalone zip to Build
         if: ${{ inputs.standalone_zip == true && inputs.dry_run == false }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: liquibase-installers-${{ needs.setup.outputs.version }}
           path: re-version/final/*

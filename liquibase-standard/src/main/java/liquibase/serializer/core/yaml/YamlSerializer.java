@@ -114,7 +114,11 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
             Object value = object.getSerializableFieldValue(field);
             if (value != null) {
                 if (value instanceof UnwrappedLiquibaseSerializable) {
-                    value = ((Map) toMap((LiquibaseSerializable) value)).values().iterator().next();
+                    Map valueMap = (Map) toMap((LiquibaseSerializable) value);
+                    if (valueMap == null || valueMap.values().isEmpty()) {
+                        continue;
+                    }
+                    value = valueMap.values().iterator().next();
                 }
                 if (value instanceof LiquibaseSerializable) {
                     if (value instanceof RollbackContainer) {
