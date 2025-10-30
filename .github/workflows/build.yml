@@ -95,7 +95,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
       - name: Download Artifacts for build.yml
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: temp-artifact
 
@@ -235,19 +235,19 @@ jobs:
           done
 
       - name: Archive Packages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: liquibase-artifacts
           path: artifacts/*
 
       - name: Archive Convenience Zip
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: liquibase-zip-${{ needs.setup.outputs.thisBranchName }}
           path: branch-artifacts/*
 
       - name: Archive Convenience Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchName }}
           path: artifacts-named/*
