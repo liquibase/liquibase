@@ -14,6 +14,7 @@ import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.precondition.core.RunningAsPrecondition
 import liquibase.sdk.supplier.resource.ResourceSupplier
+import liquibase.serializer.core.json.JsonChangeLogSerializer
 import liquibase.serializer.core.xml.XMLChangeLogSerializer
 import liquibase.serializer.core.yaml.YamlChangeLogSerializer
 import liquibase.sql.visitor.ReplaceSqlVisitor
@@ -803,7 +804,7 @@ class ChangeSetTest extends Specification {
         outputFile.delete()
     }
 
-    def "should throw runtime exception when filePath property is empty"() {
+    def "should throw IllegalArgumentException when filePath property is empty in yaml changeLog file"() {
         when:
         DatabaseChangeLog changeLog = new DatabaseChangeLog()
         ChangeSet changeSet = new ChangeSet(UUID.randomUUID().toString(), "author", false, false, "", "test", "mysql", changeLog)
@@ -816,15 +817,36 @@ class ChangeSetTest extends Specification {
 
         then:
         def outputFile = new File("changelog-with-rollback.yaml")
-        def e = thrown(RuntimeException)
-        e.message.contains("Required field 'file' of element 'include' cannot be empty")
+        def e = thrown(IllegalArgumentException)
+        e.message.contains("The changeSet `filePath` attribute cannot be empty or null")
 
         cleanup:
         outputStream.close()
         outputFile.delete()
     }
 
-    def "should throw runtime exception when filePath property is null"() {
+    def "should throw IllegalArgumentException when filePath property is empty in json changeLog file"() {
+        when:
+        DatabaseChangeLog changeLog = new DatabaseChangeLog()
+        ChangeSet changeSet = new ChangeSet(UUID.randomUUID().toString(), "author", false, false, "", "test", "mysql", changeLog)
+        changeSet.addRollbackChange(new EmptyChange())
+        changeLog.addChangeSet(changeSet)
+
+        JsonChangeLogSerializer serializer = new JsonChangeLogSerializer()
+        OutputStream outputStream = new FileOutputStream("changelog-with-rollback.yaml")
+        serializer.write(changeLog.getChangeSets(), outputStream)
+
+        then:
+        def outputFile = new File("changelog-with-rollback.yaml")
+        def e = thrown(IllegalArgumentException)
+        e.message.contains("The changeSet `filePath` attribute cannot be empty or null")
+
+        cleanup:
+        outputStream.close()
+        outputFile.delete()
+    }
+
+    def "should throw IllegalArgumentException when filePath property is null yaml changeLog file"() {
         when:
         DatabaseChangeLog changeLog = new DatabaseChangeLog()
         ChangeSet changeSet = new ChangeSet(UUID.randomUUID().toString(), "author", false, false, null, "test", "mysql", changeLog)
@@ -837,8 +859,29 @@ class ChangeSetTest extends Specification {
 
         then:
         def outputFile = new File("changelog-with-rollback.yaml")
-        def e = thrown(RuntimeException)
-        e.message.contains("Required field 'file' of element 'include' cannot be empty")
+        def e = thrown(IllegalArgumentException)
+        e.message.contains("The changeSet `filePath` attribute cannot be empty or null")
+
+        cleanup:
+        outputStream.close()
+        outputFile.delete()
+    }
+
+    def "should throw IllegalArgumentException when filePath property is null json changeLog file"() {
+        when:
+        DatabaseChangeLog changeLog = new DatabaseChangeLog()
+        ChangeSet changeSet = new ChangeSet(UUID.randomUUID().toString(), "author", false, false, null, "test", "mysql", changeLog)
+        changeSet.addRollbackChange(new EmptyChange())
+        changeLog.addChangeSet(changeSet)
+
+        JsonChangeLogSerializer serializer = new JsonChangeLogSerializer()
+        OutputStream outputStream = new FileOutputStream("changelog-with-rollback.yaml")
+        serializer.write(changeLog.getChangeSets(), outputStream)
+
+        then:
+        def outputFile = new File("changelog-with-rollback.yaml")
+        def e = thrown(IllegalArgumentException)
+        e.message.contains("The changeSet `filePath` attribute cannot be empty or null")
 
         cleanup:
         outputStream.close()

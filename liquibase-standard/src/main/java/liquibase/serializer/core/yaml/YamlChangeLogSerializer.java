@@ -24,10 +24,7 @@ public class YamlChangeLogSerializer extends YamlSerializer implements ChangeLog
     public <T extends ChangeLogChild> void write(List<T> children, OutputStream out) throws IOException {
         List<Object> maps = new ArrayList<>();
         for (T changeSet : children) {
-            if(changeSet.getSerializableFieldValue("filePath") == null || changeSet.getSerializableFieldValue("filePath").toString().isEmpty())
-            {
-                throw new RuntimeException("Required field 'file' of element 'include' cannot be empty");
-            }
+            validateFilePath(changeSet);
             maps.add(toMap(changeSet));
         }
         Map<String, Object> containerMap = new HashMap<>();
