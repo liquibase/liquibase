@@ -12,7 +12,7 @@ import liquibase.util.ObjectUtil;
 
 /**
  *
- * The standard OSS implementation of the ChangeSetService
+ * The standard Community implementation of the ChangeSetService
  *
  */
 public class StandardChangeSetService implements ChangeSetService {

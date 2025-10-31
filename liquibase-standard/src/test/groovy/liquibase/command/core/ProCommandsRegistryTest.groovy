@@ -42,7 +42,7 @@ class ProCommandsRegistryTest extends Specification {
     }
 
     @Unroll
-    def "isProCommand should return false for OSS command: #command"() {
+    def "isProCommand should return false for Community command: #command"() {
         expect:
         ProCommandsRegistry.isProCommand(command) == false
 
@@ -92,7 +92,7 @@ class ProCommandsRegistryTest extends Specification {
 
         where:
         command        | subcommand
-        "update"       | "run"     // OSS command with Pro subcommand
+        "update"       | "run"     // Community command with Pro subcommand
         "checks"       | "update"  // Pro command with invalid subcommand
         "invalid"      | "run"     // Invalid command
         "flow"         | "invalid" // Pro command with invalid subcommand
@@ -130,7 +130,7 @@ class ProCommandsRegistryTest extends Specification {
         ProCommandsRegistry.PRO_COMMANDS.contains("driftreport")
         ProCommandsRegistry.PRO_COMMANDS.contains("snapshotreference")
 
-        and: "does not contain OSS commands"
+        and: "does not contain Community commands"
         !ProCommandsRegistry.PRO_COMMANDS.contains("update")
         !ProCommandsRegistry.PRO_COMMANDS.contains("rollback")
         !ProCommandsRegistry.PRO_COMMANDS.contains("status")

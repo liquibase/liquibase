@@ -1414,7 +1414,7 @@ create table table1 (
 --changeset test:1
 create table test_table (id int);
 """
-        // Force OSS mode by ensuring no license
+        // Force Community mode by ensuring no license
         GroovySpy(LicenseServiceUtils, global: true)
         LicenseServiceUtils.isProLicenseValid() >> false
         
@@ -1435,7 +1435,7 @@ create table test_table (id int);
 --changeset test:1
 create table test_table (id int);
 """
-        // Force OSS mode by ensuring no license
+        // Force Community mode by ensuring no license
         GroovySpy(LicenseServiceUtils, global: true)
         LicenseServiceUtils.isProLicenseValid() >> false
         
@@ -1456,7 +1456,7 @@ create table test_table (id int);
 --changeset test:1
 create table test_table (id int);
 """
-        // Force OSS mode by ensuring no license
+        // Force Community mode by ensuring no license
         GroovySpy(LicenseServiceUtils, global: true)
         LicenseServiceUtils.isProLicenseValid() >> false
         
@@ -1477,7 +1477,7 @@ create table test_table (id int);
 --changeset test:1
 create table test_table (id int);
 """
-        // Force OSS mode by ensuring no license
+        // Force Community mode by ensuring no license
         GroovySpy(LicenseServiceUtils, global: true)
         LicenseServiceUtils.isProLicenseValid() >> false
         
@@ -1500,7 +1500,7 @@ ${command}
 --changeset test:1
 create table test_table (id int);
 """
-        // Force OSS mode by ensuring no license
+        // Force Community mode by ensuring no license
         GroovySpy(LicenseServiceUtils, global: true)
         LicenseServiceUtils.isProLicenseValid() >> false
         
@@ -1532,7 +1532,7 @@ ${command}
 --changeset test:1
 create table test_table (id int);
 """
-        // Force OSS mode by ensuring no license
+        // Force Community mode by ensuring no license
         GroovySpy(LicenseServiceUtils, global: true)
         LicenseServiceUtils.isProLicenseValid() >> false
         
@@ -1612,7 +1612,7 @@ create table test_table2 (id int);
 --changeset test:3
 create table test_table3 (id int);
 """
-        // Force OSS mode by ensuring no license
+        // Force Community mode by ensuring no license
         GroovySpy(LicenseServiceUtils, global: true)
         LicenseServiceUtils.isProLicenseValid() >> false
         
@@ -1635,7 +1635,7 @@ create table test_table3 (id int);
 --changeset test:1
 create table test_table1 (id int);
 """
-        // Force OSS mode by ensuring no license
+        // Force Community mode by ensuring no license
         GroovySpy(LicenseServiceUtils, global: true)
         LicenseServiceUtils.isProLicenseValid() >> false
         

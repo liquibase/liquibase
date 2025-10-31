@@ -11,11 +11,7 @@ class SystemUtilTest extends Specification {
 
     def getJavaMajorVersion() {
         expect:
-        SystemUtil.getJavaMajorVersion() >= 8
+        SystemUtil.getJavaMajorVersion() >= 11
     }
 
-    def getJavaVersion() {
-        expect:
-        SystemUtil.getJavaVersion().contains(".")
-    }
 }

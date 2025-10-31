@@ -125,6 +125,8 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                     ForeignKeyConstraint foreignKeyConstraint = new ForeignKeyConstraint(constraintsConfig.getForeignKeyName(),
                             constraintsConfig.getReferences(), constraintsConfig.getReferencedTableName(),
                             constraintsConfig.getReferencedColumnNames());
+                    foreignKeyConstraint.setReferencedTableCatalogName(constraintsConfig.getReferencedTableCatalogName());
+                    foreignKeyConstraint.setReferencedTableSchemaName(constraintsConfig.getReferencedTableSchemaName());
                     if (constraintsConfig.getValidateForeignKey() != null && !constraintsConfig.getValidateForeignKey()) {
                         foreignKeyConstraint.setValidateForeignKey(false);
                     }

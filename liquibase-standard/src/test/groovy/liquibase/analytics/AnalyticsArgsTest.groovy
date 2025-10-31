@@ -10,7 +10,7 @@ import spock.lang.Unroll
 class AnalyticsArgsTest extends Specification {
 
     @Unroll
-    def "test all permutations of options for enabling/disabling for oss"(Boolean userCliOption, boolean remoteOssEnabled, boolean isEnabled) {
+    def "test all permutations of options for enabling/disabling for community"(Boolean userCliOption, boolean remoteOssEnabled, boolean isEnabled) {
         setup:
         def analyticsConfigurationFactory = Scope.getCurrentScope().getSingleton(AnalyticsConfigurationFactory.class)
         def existingConfig = analyticsConfigurationFactory.getPlugin()

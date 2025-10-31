@@ -54,7 +54,7 @@ class ProCommandErrorMessageTest extends Specification {
     }
 
     @Unroll
-    def "checkForProCommandError should return null for OSS command: #command"() {
+    def "checkForProCommandError should return null for Community command: #command"() {
         when:
         String result = liquibaseCommandLine.checkForProCommandError([command])
 

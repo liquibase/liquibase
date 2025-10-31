@@ -156,6 +156,9 @@ public class TableOutput {
                 finalTableList.add(emptyCells);
             }
         }
+        if (finalTableList.isEmpty()) {
+            throw new LiquibaseException("Cannot format empty table");
+        }
         String[][] finalTable = new String[finalTableList.size()][finalTableList.get(0).length];
         for (int i = 0; i < finalTable.length; i++) {
             finalTable[i] = finalTableList.get(i);

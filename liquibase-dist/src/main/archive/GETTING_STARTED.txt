@@ -6,7 +6,7 @@ Getting Started
 --------------------------------------------
 Thanks for downloading and installing Liquibase Community ${project.version} from Liquibase.
 
-The open source Liquibase Community 5.0+ ships without extensions, drivers, and many other packages and dependencies. This change provides a much lighter, modular, and customizable Liquibase experience for Community users. Importantly, this flexibility both allows and requires users to manage their Liquibase dependencies for their specific needs.
+Liquibase Community 5.0+ ships without extensions, drivers, and many other packages and dependencies. This change provides a much lighter, modular, and customizable Liquibase experience for Community users. Importantly, this flexibility both allows and requires users to manage their Liquibase dependencies for their specific needs.
 
 Using Liquibase Package Manager (LPM) 
 --------------------------------------------

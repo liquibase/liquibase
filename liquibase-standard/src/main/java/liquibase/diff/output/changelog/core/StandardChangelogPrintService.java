@@ -21,7 +21,7 @@ import java.util.List;
 
 /**
  *
- * OSS implementation of the ChangelogPrintService, which supports print
+ * Community implementation of the ChangelogPrintService, which supports print
  * operations that occurring GenerateChangeLog and DiffChangelog operations
  *
  */

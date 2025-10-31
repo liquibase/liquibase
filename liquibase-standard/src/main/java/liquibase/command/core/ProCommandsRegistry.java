@@ -4,7 +4,7 @@ import java.util.Set;
 
 /**
  * Registry of Liquibase Pro commands and subcommands for improved error messaging.
- * This registry helps identify when OSS users attempt to run Pro-only commands
+ * This registry helps identify when Community users attempt to run Pro-only commands
  * so we can provide clear messaging about license requirements.
  */
 public class ProCommandsRegistry {

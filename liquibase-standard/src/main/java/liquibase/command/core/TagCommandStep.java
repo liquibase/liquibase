@@ -43,10 +43,14 @@ public class TagCommandStep extends AbstractCommandStep {
     }
 
     private void sendResults(Database database) {
+        if (database.getConnection() == null) {
+            throw new IllegalStateException("Database connection is not available");
+        }
+        String connectionUserName = database.getConnection().getConnectionUserName();
+        String connectionUrl = database.getConnection().getURL();
         Scope.getCurrentScope().getUI().sendMessage(String.format(
-                        coreBundle.getString("successfully.tagged"), database
-                                .getConnection().getConnectionUserName() + "@" +
-                                database.getConnection().getURL()
+                        coreBundle.getString("successfully.tagged"),
+                        connectionUserName + "@" + connectionUrl
                 )
         );
     }
@@ -69,6 +73,9 @@ public class TagCommandStep extends AbstractCommandStep {
      */
     @Beta
     public static ChangeSet getEmptyTagChangeSet(Database database) {
+        if (database.getConnection() == null) {
+            throw new IllegalStateException("Database connection is not available");
+        }
         return new ChangeSet(String.valueOf(new Date().getTime()), "liquibase",
                 false,false, "liquibase-internal", null, null,
                 database.getObjectQuotingStrategy(), null);

@@ -106,7 +106,7 @@ jobs:
 
       # Upload to build page for the team to check the csv file contents.
     - name: Upload to build page
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: fossa-reports
         path: /home/runner/fossa_reports/liquibase.csv
