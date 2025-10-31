@@ -252,11 +252,55 @@ public class CommandScope {
                 CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
                 final List<CommandStep> pipeline = commandDefinition.getPipeline();
                 final List<CommandStep> executedCommands = new ArrayList<>();
+                final Set<Class<? extends CommandStep>> handledOverrideTargets = new HashSet<>();
                 Optional<Exception> thrownException = Optional.empty();
                 validate();
                 try {
                     addOutputFileToMdc();
                     for (CommandStep command : pipeline) {
+                        // Check if this is an override step and should be skipped
+                        if (command.getClass().isAnnotationPresent(CommandOverride.class)) {
+                            CommandOverride annotation = command.getClass().getAnnotation(CommandOverride.class);
+                            Class<? extends CommandStep> overrideTarget = annotation.override();
+
+                            // Skip if we already executed an override for this base step
+                            if (handledOverrideTargets.contains(overrideTarget)) {
+                                continue;
+                            }
+
+                            // Check if this override supports the current database
+                            Class<? extends Database>[] supportedDatabases = annotation.supportedDatabases();
+                            if (supportedDatabases.length > 0) {
+                                Database database = (Database) getDependency(Database.class);
+                                boolean matches = false;
+                                if (database != null) {
+                                    for (Class<? extends Database> dbClass : supportedDatabases) {
+                                        if (dbClass.isAssignableFrom(database.getClass())) {
+                                            matches = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (!matches) {
+                                    // Database doesn't match (or is null), skip this override
+                                    Scope.getCurrentScope().getLog(CommandScope.class).fine(String.format(
+                                        "Skipping %s - database %s does not match supportedDatabases",
+                                        command.getClass().getSimpleName(),
+                                        database != null ? database.getShortName() : "null"
+                                    ));
+                                    continue;
+                                }
+                            }
+
+                            // Mark that we've handled an override for this base step
+                            handledOverrideTargets.add(overrideTarget);
+                        } else {
+                            // Check if this base step was already handled by an override
+                            if (handledOverrideTargets.contains(command.getClass())) {
+                                continue;
+                            }
+                        }
+
                         try {
                             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, getCommandStepName(command));
                             Scope.getCurrentScope().getLog(CommandScope.class).fine(String.format("Executing internal command %s", getCommandStepName(command)));
