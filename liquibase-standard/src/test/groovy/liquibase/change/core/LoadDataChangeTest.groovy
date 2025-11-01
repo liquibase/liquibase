@@ -929,7 +929,7 @@ class LoadDataChangeTest extends StandardChangeTest {
 
         where:
         i | message
-        0 | "tableName is empty for loadData on mock"
+        0 | "'tableName' is empty for 'loadData' on mock"
     }
 
     def "allow statement generation to be overridden"() {
