@@ -80,20 +80,16 @@ public class CommandFactory implements SingletonObject {
 
             // order > 0 means is means that this CommandStep has been declared as part of this command
             if (step.getOrder(commandDefinition) > 0) {
-                // Add all override steps for this base step first
+                // Add override steps first (they need to execute before the base step)
                 List<CommandStep> overrideSteps = overrides.get(step.getClass());
-                if (overrideSteps != null && !overrideSteps.isEmpty()) {
-                    // Add override steps with their dependencies
+                if (overrideSteps != null) {
                     for (CommandStep overrideStep : overrideSteps) {
                         findDependenciesForCommand(pipelineGraph, allCommandStepInstances, overrideStep, overrides);
                     }
-                    // Make base step depend on the first override (ensures overrides run before base)
-                    pipelineGraph.add(overrideSteps.get(0), step);
-                    findDependenciesForCommand(pipelineGraph, allCommandStepInstances, step, overrides);
-                } else {
-                    // No overrides, just add the base step normally
-                    findDependenciesForCommand(pipelineGraph, allCommandStepInstances, step, overrides);
                 }
+
+                // Add the base step after overrides
+                findDependenciesForCommand(pipelineGraph, allCommandStepInstances, step, overrides);
             }
         }
         pipelineGraph.computeDependencies();
@@ -132,17 +128,17 @@ public class CommandFactory implements SingletonObject {
      */
     private CommandStep whoProvidesClass(Class<?> dependency, Collection<CommandStep> allCommandStepInstances, Map<Class<? extends CommandStep>, List<CommandStep>> overrides) {
         return allCommandStepInstances.stream().filter(cs -> {
-            if (cs.providedDependencies() == null || !cs.providedDependencies().contains(dependency)) {
-                return false;
-            }
-            // Ignore override steps
-            for (List<CommandStep> overrideList : overrides.values()) {
-                if (overrideList.contains(cs)) {
-                    return false;
-                }
-            }
-            return true;
-        })
+                    if (cs.providedDependencies() == null || !cs.providedDependencies().contains(dependency)) {
+                        return false;
+                    }
+                    // Ignore override steps
+                    for (List<CommandStep> overrideList : overrides.values()) {
+                        if (overrideList.contains(cs)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                })
                 .reduce((a, b) -> {
                     throw new IllegalStateException(String.format("More than one CommandStep provides class %s. Steps: %s, %s",
                             dependency.getName(), a.getClass().getName(), b.getClass().getName()));
@@ -228,7 +224,7 @@ public class CommandFactory implements SingletonObject {
         }
 
         if (commandArgumentDefinitions.get(commandNameKey).contains(definition)) {
-           throw new IllegalArgumentException("Duplicate argument '" + definition.getName() + "' found for command '" + commandNameKey + "'");
+            throw new IllegalArgumentException("Duplicate argument '" + definition.getName() + "' found for command '" + commandNameKey + "'");
         }
         if (definition.isRequired() && definition.getDefaultValue() != null) {
             throw new IllegalArgumentException("Argument '" + definition.getName() + "' for command '" + commandNameKey + "' has both a default value and the isRequired flag set to true. Arguments with default values cannot be marked as required.");
