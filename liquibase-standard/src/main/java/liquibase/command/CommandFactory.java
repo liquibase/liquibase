@@ -82,14 +82,24 @@ public class CommandFactory implements SingletonObject {
             if (step.getOrder(commandDefinition) > 0) {
                 // Add override steps first (they need to execute before the base step)
                 List<CommandStep> overrideSteps = overrides.get(step.getClass());
+                boolean hasDefaultOverride = false;
+
                 if (overrideSteps != null) {
                     for (CommandStep overrideStep : overrideSteps) {
                         findDependenciesForCommand(pipelineGraph, allCommandStepInstances, overrideStep, overrides);
+
+                        // Check if this is a default override (no supportedDatabases)
+                        CommandOverride annotation = overrideStep.getClass().getAnnotation(CommandOverride.class);
+                        if (annotation.supportedDatabases().length == 0) {
+                            hasDefaultOverride = true;
+                        }
                     }
                 }
 
-                // Add the base step after overrides
-                findDependenciesForCommand(pipelineGraph, allCommandStepInstances, step, overrides);
+                // Only add the base step if there's no default override
+                if (!hasDefaultOverride) {
+                    findDependenciesForCommand(pipelineGraph, allCommandStepInstances, step, overrides);
+                }
             }
         }
         pipelineGraph.computeDependencies();
