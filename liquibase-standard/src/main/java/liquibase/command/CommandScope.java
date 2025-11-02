@@ -263,8 +263,18 @@ public class CommandScope {
                             CommandOverride annotation = command.getClass().getAnnotation(CommandOverride.class);
                             Class<? extends CommandStep> overrideTarget = annotation.override();
 
+                            Scope.getCurrentScope().getLog(CommandScope.class).info(String.format(
+                                "Processing override: %s targeting %s",
+                                command.getClass().getSimpleName(),
+                                overrideTarget.getSimpleName()
+                            ));
+
                             // Skip if we already executed an override for this base step
                             if (handledOverrideTargets.contains(overrideTarget)) {
+                                Scope.getCurrentScope().getLog(CommandScope.class).info(String.format(
+                                    "Skipping %s - already handled by another override",
+                                    command.getClass().getSimpleName()
+                                ));
                                 continue;
                             }
 
@@ -272,6 +282,12 @@ public class CommandScope {
                             Class<? extends Database>[] supportedDatabases = annotation.supportedDatabases();
                             if (supportedDatabases.length > 0) {
                                 Database database = (Database) getDependency(Database.class);
+                                Scope.getCurrentScope().getLog(CommandScope.class).info(String.format(
+                                    "Checking database support for %s: database=%s, supportedDatabases=%s",
+                                    command.getClass().getSimpleName(),
+                                    database != null ? database.getClass().getSimpleName() : "null",
+                                    java.util.Arrays.toString(supportedDatabases)
+                                ));
                                 boolean matches = false;
                                 if (database != null) {
                                     for (Class<? extends Database> dbClass : supportedDatabases) {
@@ -283,22 +299,34 @@ public class CommandScope {
                                 }
                                 if (!matches) {
                                     // Database doesn't match (or is null), skip this override
-                                    Scope.getCurrentScope().getLog(CommandScope.class).fine(String.format(
-                                        "Skipping %s - database %s does not match supportedDatabases",
-                                        command.getClass().getSimpleName(),
-                                        database != null ? database.getShortName() : "null"
+                                    Scope.getCurrentScope().getLog(CommandScope.class).info(String.format(
+                                        "Skipping %s - database does not match supportedDatabases",
+                                        command.getClass().getSimpleName()
                                     ));
                                     continue;
                                 }
                             }
 
                             // Mark that we've handled an override for this base step
+                            Scope.getCurrentScope().getLog(CommandScope.class).info(String.format(
+                                "Executing override %s and marking %s as handled",
+                                command.getClass().getSimpleName(),
+                                overrideTarget.getSimpleName()
+                            ));
                             handledOverrideTargets.add(overrideTarget);
                         } else {
                             // Check if this base step was already handled by an override
                             if (handledOverrideTargets.contains(command.getClass())) {
+                                Scope.getCurrentScope().getLog(CommandScope.class).info(String.format(
+                                    "Skipping base step %s - already handled by override",
+                                    command.getClass().getSimpleName()
+                                ));
                                 continue;
                             }
+                            Scope.getCurrentScope().getLog(CommandScope.class).info(String.format(
+                                "Executing base step %s",
+                                command.getClass().getSimpleName()
+                            ));
                         }
 
                         try {
