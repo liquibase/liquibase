@@ -1,1 +1,6 @@
 liquibase.command.core.MockCommandStep
+liquibase.command.core.OverrideTestBaseCommandStep
+liquibase.command.core.OverrideTestH2CommandStep
+liquibase.command.core.OverrideTestPostgresCommandStep
+liquibase.command.core.OverrideTestDefaultBaseCommandStep
+liquibase.command.core.OverrideTestDefaultCommandStepImpl

@@ -272,18 +272,18 @@ public class CommandScope {
                             Class<? extends Database>[] supportedDatabases = annotation.supportedDatabases();
                             if (supportedDatabases.length > 0) {
                                 Database database = (Database) getDependency(Database.class);
+                                boolean matches = false;
                                 if (database != null) {
-                                    boolean matches = false;
                                     for (Class<? extends Database> dbClass : supportedDatabases) {
                                         if (dbClass.isAssignableFrom(database.getClass())) {
                                             matches = true;
                                             break;
                                         }
                                     }
-                                    if (!matches) {
-                                        // Database doesn't match, skip this override
-                                        continue;
-                                    }
+                                }
+                                if (!matches) {
+                                    // Database doesn't match (or is null), skip this override
+                                    continue;
                                 }
                             }
 
