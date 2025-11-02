@@ -217,7 +217,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
     private void setValueOnNode(Element node, String objectNamespace, String objectName, Object value, LiquibaseSerializable.SerializationType serializationType, String parentNamespace) {
         if (null == value) {
-            if ("value".equals(objectName)) {
+            if ("value".equals(objectName) && preserveNullValues) {
                 node.setAttribute("value", "null");
             }
             return;
