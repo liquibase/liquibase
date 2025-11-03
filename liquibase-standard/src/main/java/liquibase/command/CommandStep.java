@@ -17,13 +17,16 @@ public interface CommandStep {
     /**
      * Returned by {@link #getOrder(CommandDefinition)} if you are unsure where in the pipeline your step should go, use this value.
      */
-    @Deprecated
     int ORDER_DEFAULT = 1000;
+
+    /**
+     * Returned by {@link #getOrder(CommandDefinition)} when your extension overrides a core/secure step.
+     */
+    int ORDER_EXTENSION_OVERRIDE = 500;
 
     /**
      * Returned by {@link #getOrder(CommandDefinition)} if this step should not be a part of the pipeline.
      */
-    @Deprecated
     int ORDER_NOT_APPLICABLE = -1;
 
     /**
@@ -43,7 +46,6 @@ public interface CommandStep {
      *
      * @return -1 if this step does not apply to the given command
      */
-    @Deprecated
     int getOrder(CommandDefinition commandDefinition);
 
     /**
