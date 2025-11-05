@@ -292,21 +292,21 @@
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
             <artifactId>ojdbc8</artifactId>
-            <version>19.28.0.0</version>
+            <version>19.29.0.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.50.3.0</version>
+            <version>3.51.0.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.27.0</version>
+            <version>3.27.1</version>
             <scope>test</scope>
         </dependency>
 
