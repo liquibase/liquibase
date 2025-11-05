@@ -57,9 +57,13 @@ public class CustomChangeWrapper extends AbstractChange {
      * Return the CustomChange instance created by the call to {@link #setClass(String)}.
      */
     @DatabaseChangeProperty(isChangeProperty = false)
-    public CustomChange getCustomChange() throws CustomChangeException {
+    public CustomChange getCustomChange() {
         if (this.customChange == null) {
-            this.customChange = loadCustomChange(className);
+            try {
+                this.customChange = loadCustomChange(className);
+            } catch (CustomChangeException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
         }
         return customChange;
     }
@@ -146,9 +150,12 @@ public class CustomChangeWrapper extends AbstractChange {
         try {
             configureCustomChange();
         } catch (CustomChangeException e) {
-            throw new UnexpectedLiquibaseException(e);
+            return new ValidationErrors().addError("Exception thrown configuring " + getClassName() + ": " + e.getMessage());
         }
         try {
+            if (customChange == null) {
+                return new ValidationErrors().addWarning("Custom change class could not be loaded");
+            }
             return customChange.validate(database);
         } catch (Exception e) {
             return new ValidationErrors().addError("Exception thrown calling " + getClassName() + ".validate():" + e.getMessage());

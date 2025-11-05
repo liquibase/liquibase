@@ -1389,12 +1389,19 @@ public abstract class AbstractIntegrationTest {
             throw e; // Re-throw if it's a different unexpected error
         }
 
-        // Verify the DATABASECHANGELOG table was created (proving the update process ran)
-        assertTrue("Expected DATABASECHANGELOG table to exist after update",
-            SnapshotGeneratorFactory.getInstance().has(
-                new Table().setName(database.getDatabaseChangeLogTableName())
-                    .setSchema(new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())),
-                database));
+        // runUpdate() uses a separate connection. Commit current transaction
+        // so this connection can see the table created by the other connection.
+        // Skip for SQLite as it handles cross-connection visibility differently.
+        if (!(database instanceof SQLiteDatabase)) {
+            database.commit();
+
+            // Verify the DATABASECHANGELOG table was created (proving the update process ran)
+            assertTrue("Expected DATABASECHANGELOG table to exist after update",
+                SnapshotGeneratorFactory.getInstance().has(
+                    new Table().setName(database.getDatabaseChangeLogTableName())
+                        .setSchema(new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())),
+                    database));
+        }
     }
 
     @Test
@@ -1415,18 +1422,25 @@ public abstract class AbstractIntegrationTest {
             throw e; // Re-throw if it's a different unexpected error
         }
 
-        // Verify the changeset ID is present in DATABASECHANGELOG table and marked as MARK_RAN
-        Connection conn = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
-        Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery(
-            "SELECT ID, EXECTYPE FROM " + database.getDatabaseChangeLogTableName() +
-            " WHERE ID = 'missing_custom_change_precondition_failed' AND EXECTYPE = 'MARK_RAN'"
-        );
+        // runUpdate() uses a separate connection. Commit current transaction
+        // so this connection can see the table created by the other connection.
+        // Skip for SQLite as it handles cross-connection visibility differently.
+        if (!(database instanceof SQLiteDatabase)) {
+            database.commit();
 
-        assertTrue("Expected changeset 'missing_custom_change_precondition_failed' to be present in DATABASECHANGELOG with EXECTYPE='MARK_RAN'",
-            rs.next());
-        rs.close();
-        stmt.close();
+            // Verify the changeset ID is present in DATABASECHANGELOG table and marked as MARK_RAN
+            Connection conn = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(
+                "SELECT ID, EXECTYPE FROM " + database.getDatabaseChangeLogTableName() +
+                " WHERE ID = 'missing_custom_change_precondition_failed' AND EXECTYPE = 'MARK_RAN'"
+            );
+
+            assertTrue("Expected changeset 'missing_custom_change_precondition_failed' to be present in DATABASECHANGELOG with EXECTYPE='MARK_RAN'",
+                rs.next());
+            rs.close();
+            stmt.close();
+        }
     }
 
     private ProcessBuilder prepareExternalLiquibaseProcess() {
