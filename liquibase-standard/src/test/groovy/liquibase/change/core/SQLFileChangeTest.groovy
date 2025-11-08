@@ -13,9 +13,11 @@ import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.statement.SqlStatement
 import liquibase.test.JUnitResourceAccessor
 import liquibase.util.StreamUtil
+
 import spock.lang.Unroll
 
 import static org.junit.Assert.assertEquals
+import static liquibase.util.TestUtil.*
 
 class SQLFileChangeTest extends StandardChangeTest {
 
@@ -96,7 +98,7 @@ class SQLFileChangeTest extends StandardChangeTest {
         def changeSet1 = new ChangeSet("x", "y", false, false, null, null, null, changelog)
         changeSet1.setChangeLogParameters(changeLogParameters1)
         change1.setChangeSet(changeSet1)
- 
+
         def sqlForSchema1 = change1.getSql().trim()
         def checksum1 = change1.generateCheckSum()
 
@@ -145,7 +147,7 @@ class SQLFileChangeTest extends StandardChangeTest {
 
         then:
         def e = thrown(IOException)
-        e.message.startsWith("The file non-existing.sql was not found")
+        e.message.startsWith("The file 'non-existing.sql' not found set sqlFile:path")
     }
 
     @Unroll
@@ -173,7 +175,6 @@ class SQLFileChangeTest extends StandardChangeTest {
         "com/example/my-logic.sql" | "a/logical/path.xml" | false
         "my-logic.sql"             | null                 | true
         "my-logic.sql"             | "a/logical/path.xml" | true
-
     }
 
     @Unroll
@@ -210,5 +211,16 @@ class SQLFileChangeTest extends StandardChangeTest {
         version | originalChecksum | updatedChecksum
         ChecksumVersion.V8 | "8:25560f4c442fa581b820d0a6206fd14e" | "8:b934d68e53222bc7b5cbf147ce6746b4"
         ChecksumVersion.latest() | "9:8cfbd3e5970885470db17cd149feb637" | "9:f6302129ace10ca356faa21343dd1aa8"
+    }
+
+    def "relativeToChangelogFile set from file attribute" () {
+        when:
+        def changelog = new DatabaseChangeLog("com/example/changelog.xml")
+        def change = new SQLFileChange()
+        change.changeSet = new ChangeSet(changelog)
+        load( change, path: "./my-logic.sql", testResourceAccessor)
+
+        then:
+        change.sql == "My Logic Here\n"
     }
 }

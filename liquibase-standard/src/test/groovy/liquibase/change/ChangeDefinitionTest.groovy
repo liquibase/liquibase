@@ -1,7 +1,7 @@
 package liquibase.change
 
 import liquibase.Scope
-import liquibase.util.StringUtil
+import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 import org.yaml.snakeyaml.Yaml
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -39,9 +39,9 @@ class ChangeDefinitionTest extends Specification {
 
             }
         }
-
+        String expected = trimToEmpty(changeDefinitions[changeName])
         then:
-        assert definition.trim() == StringUtil.trimToEmpty(changeDefinitions[changeName]) : "Change name " + changeName + " does not match"
+        assert definition.trim() == expected : "Change name " + changeName + " does not match"
 
         where:
         changeName << Scope.currentScope.getSingleton(ChangeFactory).definedChanges

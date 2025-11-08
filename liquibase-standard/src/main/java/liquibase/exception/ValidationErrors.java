@@ -6,9 +6,11 @@ import liquibase.change.ChangeFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.precondition.Precondition;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 import lombok.Getter;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -86,10 +88,13 @@ public class ValidationErrors {
         }
 
         if (err != null) {
-            addError(err + (this.change == null ? "" : " for '" + this.change + "'")
-                    + (postfix == null ? "" : postfix));
+            addError(err + changeInMsg() + (postfix == null ? "" : postfix));
         }
         return this;
+    }
+
+    protected String changeInMsg() {
+        return change == null ? "" : " for '" + change + "'";
     }
 
     /**
@@ -197,5 +202,19 @@ public class ValidationErrors {
             }
         }
         return Collections.unmodifiableList(unsupportedErrorMessages);
+    }
+
+    /** add error message to errors if {@code path} relative to path {@code relativeTo} defined in
+        {@code property} refers to an existing file
+     */
+    public ValidationErrors fileExisting(String property, String path, String relativeTo) {
+        ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+        try {
+            resourceAccessor.getExistingFile(path, relativeTo,
+                  " set " + change + ":" + property);
+        } catch (IOException e) {
+            addError(e.getMessage());
+        }
+        return this;
     }
 }

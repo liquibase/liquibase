@@ -164,5 +164,10 @@ public class UrlDrivenResourceAccessorTest {
                 return "/" + other;
             }
         }
+
+        @Override
+        public boolean isFile() {
+            return true;
+        }
     }
 }

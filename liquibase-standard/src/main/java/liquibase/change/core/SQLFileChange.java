@@ -7,32 +7,37 @@ import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
-import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.parser.ChangeLogParserConfiguration;
-import liquibase.resource.Resource;
-import liquibase.resource.ResourceAccessor;
-import liquibase.util.FileUtil;
-import liquibase.util.ObjectUtil;
+
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
+import static liquibase.change.ChangeParameterMetaData.ALL;
 /**
  * Represents a Change for custom SQL stored in a File.
  */
-@DatabaseChange(name = "sqlFile",
+@DatabaseChange(name = SQLFileChange.changeName,
         description = "Allows you to specify any SQL statement and have it stored external in a file.",
         priority = ChangeMetaData.PRIORITY_DEFAULT)
-public class SQLFileChange extends AbstractSQLChange {
-
-    private String path;
-    private Boolean relativeToChangelogFile;
+public class SQLFileChange extends AbstractSQLChange implements HasFileProperty {
+    static final String changeName = "sqlFile";
+    @Getter
+    @Setter
+    @Accessors(fluent = true, chain=false)
+    private String file;
+    @Setter
+    protected String encoding;
+    @Setter
+	 private Boolean relativeToChangelogFile;
     private Boolean doExpandExpressionsInGenerateChecksum = false;
 
     @Override
@@ -46,18 +51,18 @@ public class SQLFileChange extends AbstractSQLChange {
     }
 
     @DatabaseChangeProperty(description = "The file path of the SQL file to load",
-            exampleValue = "my/path/file.sql", requiredForDatabase = "all")
+            exampleValue = "my/path/file.sql", requiredForDatabase = ALL)
     public String getPath() {
-        return path;
+        return file();
     }
 
     /**
      * Sets the file name but setUp must be called for the change to have impact.
      *
-     * @param fileName The file to use
+     * @param file The file to use
      */
-    public void setPath(String fileName) {
-        path = fileName;
+    public void setPath(String file) {
+        setFile(file);
     }
 
     /**
@@ -70,86 +75,50 @@ public class SQLFileChange extends AbstractSQLChange {
         return encoding;
     }
 
-    /**
-     * @param encoding the encoding to set
-     */
-    public void setEncoding(String encoding) {
-        this.encoding = encoding;
-    }
-
     @DatabaseChangeProperty(description = "Specifies whether the file path is relative to the changelog file " +
         "rather than looked up in the search path. Default: false.")
     public Boolean isRelativeToChangelogFile() {
         return relativeToChangelogFile;
     }
 
-    public void setRelativeToChangelogFile(Boolean relativeToChangelogFile) {
-        this.relativeToChangelogFile = relativeToChangelogFile;
-    }
-
-    public void setDoExpandExpressionsInGenerateChecksum(Boolean doExpandExpressionsInGenerateChecksum) {
+	public void setDoExpandExpressionsInGenerateChecksum(Boolean doExpandExpressionsInGenerateChecksum) {
         this.doExpandExpressionsInGenerateChecksum = doExpandExpressionsInGenerateChecksum;
     }
 
-    @Override
-    public void finishInitialization() throws SetupException {
-        if (path == null) {
-            throw new SetupException("<sqlfile> - No path specified");
-        }
-    }
-
-    @Override
+//    @Override
     public InputStream openSqlStream() throws IOException {
-        if (path == null) {
+        if (file() == null) {
             return null;
         }
 
         return getResource().openInputStream();
     }
 
-    private Resource getResource() throws IOException {
-        ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-        if (ObjectUtil.defaultIfNull(isRelativeToChangelogFile(), false)) {
-            return resourceAccessor.get(getChangeSet().getChangeLog().getPhysicalFilePath()).resolveSibling(path);
-        } else {
-            return resourceAccessor.getExisting(path);
-        }
-    }
-
     @Override
     public ValidationErrors validate(Database database) {
-        ValidationErrors validationErrors = new ValidationErrors();
-        if(getDbms() != null) {
-            DatabaseList.validateDefinitions(getDbms(), validationErrors);
-        }
-        if (StringUtil.trimToNull(getPath()) == null) {
-            validationErrors.addError("'path' is required");
-        } else {
-            try {
-                Resource resource = getResource();
-                if (!resource.exists()) {
-                    alertOnNonExistentSqlFile(validationErrors);
+        ValidationErrors validationErrors = new ValidationErrors(changeName);
+        validationErrors.checkRequiredField("path", file());
+        if(!validationErrors.hasErrors()) {
+            validationErrors.fileExisting("path", file(), relativeTo());
+            if(validationErrors.hasErrors()) {
+                Scope.getCurrentScope().getLog(getClass()).warning("Failed to obtain sqlFile resource at path '" +
+                      file() + "'while attempting to validate the existence of the sqlFile.");
+                if (ChangeLogParserConfiguration.ON_MISSING_SQL_FILE.getCurrentValue().equals(ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN)) {
+                    validationErrors.addWarning(validationErrors.getErrorMessages().get(0));
+                    validationErrors.getErrorMessages().clear();
                 }
-            } catch (IOException e) {
-                Scope.getCurrentScope().getLog(getClass()).warning("Failed to obtain sqlFile resource at path '" + path + "'while attempting to validate the existence of the sqlFile.", e);
-                alertOnNonExistentSqlFile(validationErrors);
             }
         }
 
-        return validationErrors;
-    }
-
-    private void alertOnNonExistentSqlFile(ValidationErrors validationErrors) {
-        if (ChangeLogParserConfiguration.ON_MISSING_SQL_FILE.getCurrentValue().equals(ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN)) {
-            validationErrors.addWarning(FileUtil.getFileNotFoundMessage(path));
-        } else {
-            validationErrors.addError(FileUtil.getFileNotFoundMessage(path));
+        if(getDbms() != null) {
+            DatabaseList.validateDefinitions(getDbms(), validationErrors);
         }
+        return validationErrors;
     }
 
     @Override
     public String getConfirmationMessage() {
-        return "SQL in file " + path + " executed";
+        return "SQL in file " + file() + " executed";
     }
 
     @Override
@@ -197,7 +166,7 @@ public class SQLFileChange extends AbstractSQLChange {
     @Override
     public String describe() {
         return "SQLFileChange{" +
-                "path='" + path + '\'' +
+                "path='" + file + '\'' +
                 ", relativeToChangelogFile=" + relativeToChangelogFile +
                 '}';
     }

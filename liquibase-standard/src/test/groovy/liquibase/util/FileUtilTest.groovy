@@ -32,7 +32,7 @@ class FileUtilTest extends Specification {
         def message = FileUtil.getFileNotFoundMessage("path/to/file")
 
         then:
-        message.startsWith("The file path/to/file was not found in the configured search path")
+        message.startsWith("The file 'path/to/file' not found in the configured search path")
         message.endsWith("More locations can be added with the 'searchPath' parameter.")
     }
 

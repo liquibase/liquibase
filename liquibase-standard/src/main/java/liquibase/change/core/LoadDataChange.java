@@ -38,7 +38,9 @@ import liquibase.util.ObjectUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.csv.CSVReader;
+import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -51,13 +53,15 @@ import java.util.zip.GZIPInputStream;
 
 import static java.util.ResourceBundle.getBundle;
 import static liquibase.change.ChangeParameterMetaData.ALL;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
 @DatabaseChange(name = "loadData",
         description = "Loads data from a CSV file into an existing table",
         priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table",
         since = "1.7")
 @SuppressWarnings("java:S2583")
-public class LoadDataChange extends AbstractTableChange implements ChangeWithColumns<LoadDataColumnConfig> {
+public class LoadDataChange extends AbstractTableChange
+      implements ChangeWithColumns<LoadDataColumnConfig>, HasFileProperty {
     /**
      * CSV Lines starting with that sign(s) will be treated as comments by default
      */
@@ -65,6 +69,8 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     public static final Pattern BASE64_PATTERN = Pattern.compile("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$");
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     @Setter
+    @Getter
+    @Accessors(fluent = true, chain = false)
     private String file;
     private String commentLineStartsWith = DEFAULT_COMMENT_PATTERN;
     @Setter
@@ -647,8 +653,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
 
     @Override
     public ValidationErrors validate(Database database) {
-        ValidationErrors validationErrors = new ValidationErrors(this);
-        validationErrors.addAll(super.validate(database));
+        ValidationErrors validationErrors = super.validate(database);
         return validateColumns(validationErrors);
     }
 
@@ -706,7 +711,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     }
 
     private boolean isLineCommented(String[] line) {
-        return StringUtils.startsWith(line[0], commentLineStartsWith);
+        return line[0].startsWith(commentLineStartsWith);
     }
 
     @Override
@@ -715,20 +720,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     }
 
     public CSVReader getCSVReader() throws IOException, LiquibaseException {
-        ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-        if (resourceAccessor == null) {
-            throw new UnexpectedLiquibaseException("No file resourceAccessor specified for " + getFile());
-        }
-
-        Resource resource;
-        if (getRelativeTo() == null) {
-            resource = resourceAccessor.get(file);
-        } else {
-            resource = resourceAccessor.get(getRelativeTo()).resolveSibling(file);
-        }
-        if (!resource.exists()) {
-            return null;
-        }
+        Resource resource = getResource();
 
         @SuppressWarnings("java:S2095") // SONAR want us to close the stream here, but it is only read by CSVReader outside this method.
         InputStream stream = resource.openInputStream();
@@ -754,7 +746,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
 
     protected String getRelativeTo() {
         String relativeTo = null;
-        if (ObjectUtil.defaultIfNull(isRelativeToChangelogFile(), false)) {
+        if (getIfNull(isRelativeToChangelogFile(), false)) {
             relativeTo = getChangeSet().getChangeLog().getPhysicalFilePath();
         }
         return relativeTo;
@@ -805,14 +797,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     public CheckSum generateCheckSum() {
         InputStream stream = null;
         try {
-            ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-            Resource resource;
-            if (getRelativeTo() == null) {
-                resource = resourceAccessor.getExisting(file);
-            } else {
-                resource = resourceAccessor.get(getRelativeTo()).resolveSibling(file);
-            }
-
+            Resource resource = getResource();
             stream = new EmptyLineAndCommentSkippingInputStream(resource.openInputStream(), commentLineStartsWith);
             return CheckSum.compute(getTableName() + ":" + CheckSum.compute(stream, /*standardizeLineEndings*/ true));
         } catch (IOException e) {
@@ -837,7 +822,6 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
     }
-
 
     protected SqlStatement[] generateStatementsFromRows(Database database, List<LoadDataRowConfig> rows) {
         List<SqlStatement> statements = new ArrayList<>();

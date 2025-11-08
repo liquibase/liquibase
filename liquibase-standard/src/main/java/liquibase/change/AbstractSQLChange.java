@@ -18,6 +18,8 @@ import liquibase.statement.core.RawCompoundStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.BooleanUtil;
 import liquibase.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -45,21 +47,18 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
     @Deprecated
     private Boolean ignoreOriginalSplitStatements;
-    /**
-     *
-     * @deprecated  To be removed when splitStatements is changed to be type Boolean
-     *
-     */
+
+    /**  @deprecated  To be removed when splitStatements is changed to be type Boolean */
     @Deprecated
     private boolean splitStatementsSet;
 
     private String endDelimiter;
     private String sql;
+    @Setter
     private String dbms;
 
-    protected String encoding;
-    private boolean stripCommentsUsedDefaultValue;
-
+    @Getter
+	 private boolean stripCommentsUsedDefaultValue;
 
     protected AbstractSQLChange() {
         setStripComments(null);
@@ -98,11 +97,6 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         return dbms;
     }
 
-    @Override
-    public void setDbms(final String dbms) {
-        this.dbms = dbms;
-    }
-
     /**
      * {@inheritDoc}
      * @param database
@@ -116,16 +110,6 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     @Override
     public Warnings warn(Database database) {
         return new Warnings();
-    }
-
-    @Override
-    public ValidationErrors validate(Database database) {
-        ValidationErrors validationErrors = new ValidationErrors();
-        if (StringUtil.trimToNull(sql) == null) {
-            validationErrors.addError("'sql' is required");
-        }
-        return validationErrors;
-
     }
 
     /**
@@ -202,11 +186,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         return splitStatementsSet;
     }
 
-    public boolean isStripCommentsUsedDefaultValue() {
-        return stripCommentsUsedDefaultValue;
-    }
-
-    /**
+	/**
      * Return the raw SQL managed by this Change
      */
     @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE)

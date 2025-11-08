@@ -1,6 +1,7 @@
 package liquibase.change.core
 
 import liquibase.ChecksumVersion
+import liquibase.GlobalConfiguration
 import liquibase.Scope
 import liquibase.change.CheckSum
 import liquibase.change.StandardChangeTest
@@ -17,6 +18,9 @@ import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.test.JUnitResourceAccessor
 import liquibase.util.StreamUtil
 import spock.lang.Unroll
+
+import static liquibase.util.TestUtil.load
+import static liquibase.util.TestUtil.testResourceAccessor
 
 class CreateProcedureChangeTest extends StandardChangeTest {
 
@@ -47,7 +51,7 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         def change = new CreateProcedureChange()
         change.load(new ParsedNode(null, "createProcedure").setValue("create procedure sql"), new MockResourceAccessor())
         change.validate(new OracleDatabase())
-
+        String enc = GlobalConfiguration.FILE_ENCODING.getCurrentValue().toString()
         then:
         change.serialize().toString() == "createProcedure[procedureText=create procedure sql]"
     }
@@ -85,19 +89,23 @@ class CreateProcedureChangeTest extends StandardChangeTest {
         when:
 
         CreateProcedureChange createProcedure = new CreateProcedureChange();
+        createProcedure.setProcedureText("s")
         createProcedure.setDbms(dbms);
         ValidationErrors valErrors = createProcedure.validate(database);
 
         then:
-        valErrors.getErrorMessages().get(0).contains(expectedValidationErrorMsg);
-
+        if(expectedValidationErrorMsg != null) {
+            valErrors.getErrorMessages().get(0).contains(expectedValidationErrorMsg);
+        } else {
+            valErrors.getErrorMessages().size() == 0
+        }
         where:
         database               | dbms                             | expectedValidationErrorMsg
         new PostgresDatabase() | "post"                           | String.format("%s is not a supported DB", dbms)
-        new PostgresDatabase() | "postgresql"                     | ""
-        new MockDatabase()     | "postgresql, h2, mssql, !sqlite" | ""
-        new PostgresDatabase() | "none"                           | ""
-        new PostgresDatabase() | "all"                            | ""
+        new PostgresDatabase() | "postgresql"                     | null
+        new MockDatabase()     | "postgresql, h2, mssql, !sqlite" | null
+        new PostgresDatabase() | "none"                           | null
+        new PostgresDatabase() | "all"                            | null
     }
 
     @Unroll
@@ -337,5 +345,16 @@ class CreateProcedureChangeTest extends StandardChangeTest {
 
         then:
         checkSum.toString() == "8:bf4003d3123aea9ae2c1899073ce4431"
+    }
+
+    def "relativeToChangelogFile set from file attribute" () {
+        when:
+        def changelog = new DatabaseChangeLog("com/example/changelog.xml")
+        def change = new CreateProcedureChange()
+        change.changeSet = new ChangeSet(changelog)
+        load( change, path: "./my-logic.sql", testResourceAccessor)
+
+        then:
+        StreamUtil.readStreamAsString(change.openSqlStream()) == "My Logic Here\n"
     }
 }

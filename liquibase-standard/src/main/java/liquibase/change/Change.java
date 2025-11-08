@@ -164,4 +164,9 @@ public interface Change extends LiquibaseSerializable, Plugin, ExtensibleObject 
     default boolean shouldRunOnOs() {
         return true;
     }
+
+    default String locationReference(String prop) {
+        return " set " + getSerializedObjectName() + ":" + prop +
+              (getChangeSet() != null ? " in changeset " + getChangeSet() : "");
+    }
 }
