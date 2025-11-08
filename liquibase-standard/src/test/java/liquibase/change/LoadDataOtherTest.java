@@ -44,6 +44,6 @@ public class LoadDataOtherTest {
     Assert.assertEquals(3, ((InsertSetStatement) statements[0]).getStatementsArray().length);
     Assert.assertEquals("EnumValOne", ((InsertSetStatement) statements[0]).getStatementsArray()[0].getColumnValues().get("enum_col"));
     Assert.assertEquals("EnumValTwo", ((InsertSetStatement) statements[0]).getStatementsArray()[1].getColumnValues().get("enum_col"));
-    Assert.assertEquals(new Null(), ((InsertSetStatement) statements[0]).getStatementsArray()[2].getColumnValues().get("enum_col")); // NULL sql ref
+    Assert.assertEquals(Null.getInstance(), ((InsertSetStatement) statements[0]).getStatementsArray()[2].getColumnValues().get("enum_col")); // NULL sql ref
   }
 }
