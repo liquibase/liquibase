@@ -1,14 +1,13 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.Null;
 import liquibase.database.Database;
-import liquibase.database.core.HsqlDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
@@ -70,22 +69,22 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
 
         for (String column : statement.getColumnValues().keySet()) {
             Object newValue = statement.getColumnValues().get(column);
-            if ((newValue == null) || (newValue instanceof liquibase.Null)) {
+            if ((newValue == null) || (newValue instanceof Null)) {
                 sql.append("NULL");
             } else if (StringUtil.equalsWordNull(newValue.toString())) {
                 sql.append("'").append(newValue).append("'");
-            } else if ((newValue instanceof String) && !looksLikeFunctionCall(((String) newValue), database)) {
+            } else if ((newValue instanceof String string) && !looksLikeFunctionCall(string, database)) {
                 sql.append(DataTypeFactory.getInstance().fromObject(newValue, database).objectToSql(newValue, database));
-            } else if (newValue instanceof Date) {
-                sql.append(database.getDateLiteral(((Date) newValue)));
-            } else if (newValue instanceof Boolean) {
-                if (((Boolean) newValue)) {
+            } else if (newValue instanceof Date date) {
+                sql.append(database.getDateLiteral(date));
+            } else if (newValue instanceof Boolean bool) {
+                if (bool) {
                     sql.append(DataTypeFactory.getInstance().getTrueBooleanValue(database));
                 } else {
                     sql.append(DataTypeFactory.getInstance().getFalseBooleanValue(database));
                 }
-            } else if (newValue instanceof DatabaseFunction) {
-                sql.append(database.generateDatabaseFunctionValue((DatabaseFunction) newValue));
+            } else if (newValue instanceof DatabaseFunction databaseFunction) {
+                sql.append(database.generateDatabaseFunctionValue(databaseFunction));
             }
             else {
                 sql.append(newValue);
