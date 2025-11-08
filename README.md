@@ -61,7 +61,7 @@ Earn points for your achievements and contributions, collect and show off your b
 
 Liquibase Community is [licensed under the Functional Source License (FSL)](https://fsl.software/FSL-1.1-ALv2.template.md).
 
-[Liquibase Pro](https://www.liquibase.com/products/pro) has additional features and support and is commercially licensed.
+[Liquibase Secure](https://www.liquibase.com/liquibase-secure) has additional features and support and is commercially licensed.
 
 LIQUIBASE is a registered trademark of [Liquibase Inc.](https://www.liquibase.com/company)
 

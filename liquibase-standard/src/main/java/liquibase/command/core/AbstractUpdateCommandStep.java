@@ -75,8 +75,13 @@ public abstract class AbstractUpdateCommandStep extends AbstractCommandStep impl
         Database database = (Database) commandScope.getDependency(Database.class);
         updateReportParameters.getDatabaseInfo().setDatabaseType(database.getDatabaseProductName());
         updateReportParameters.getDatabaseInfo().setVersion(database.getDatabaseProductVersion());
-        updateReportParameters.getDatabaseInfo().setDatabaseUrl(database.getConnection().getVisibleUrl());
-        updateReportParameters.setJdbcUrl(database.getConnection().getURL());
+        if (database.getConnection() == null) {
+            throw new LiquibaseException("Database connection is not available");
+        }
+        String visibleUrl = database.getConnection().getVisibleUrl();
+        String connectionUrl = database.getConnection().getURL();
+        updateReportParameters.getDatabaseInfo().setDatabaseUrl(visibleUrl);
+        updateReportParameters.setJdbcUrl(connectionUrl);
         final ChangeLogParameters changeLogParameters = (ChangeLogParameters) commandScope.getDependency(ChangeLogParameters.class);
         Contexts contexts = new Contexts(getContextsArg(commandScope));
         LabelExpression labelExpression = new LabelExpression(getLabelFilterArg(commandScope));
