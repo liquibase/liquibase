@@ -90,6 +90,13 @@ public class Scope {
 
     public static final String JAVA_PROPERTIES = "javaProperties";
 
+    /**
+     * Lazily initialized scope manager ThreadLocal.
+     * Uses double-checked locking pattern with volatile for thread-safe lazy initialization.
+     * The volatile keyword ensures visibility of the initialized object across threads.
+     * Once initialized, this field is never modified, making it effectively immutable.
+     */
+    @SuppressWarnings("java:S3077")
     private static volatile InheritableThreadLocal<ScopeManager> scopeManager;
 
     /**
