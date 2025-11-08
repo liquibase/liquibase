@@ -9,7 +9,6 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.core.MockDatabase
 import liquibase.exception.SetupException
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.parser.core.ParsedNodeException
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
@@ -18,6 +17,8 @@ import liquibase.structure.core.View
 import liquibase.test.JUnitResourceAccessor
 import liquibase.util.StreamUtil
 import spock.lang.Unroll
+
+import static liquibase.util.TestUtil.*
 
 class CreateViewChangeTest extends StandardChangeTest {
 
@@ -56,7 +57,8 @@ class CreateViewChangeTest extends StandardChangeTest {
         when:
         def change = new CreateViewChange()
         try {
-            change.load(new liquibase.parser.core.ParsedNode(null, "createView").addChild(null, "viewName", "my_view").setValue("select * from test"), resourceSupplier.simpleResourceAccessor)
+            change.load(parsedNode("createView", viewName: "my_view")
+               .setValue("select * from test"), resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         } catch (SetupException e) {
@@ -259,5 +261,16 @@ class CreateViewChangeTest extends StandardChangeTest {
         version | originalChecksum | updatedChecksum
         ChecksumVersion.V8 | "8:dcb086e83731ee5f3e04af0a7010dd69" | "8:5effbea4284f4277c1bdd81505787591"
         ChecksumVersion.latest() | "9:44c9d30cc310fbecd58e03d557fe85df" | "9:44c9d30cc310fbecd58e03d557fe85df"
+    }
+
+    def "relativeToChangelogFile set from file attribute" () {
+        when:
+        def changelog = new DatabaseChangeLog("com/example/changelog.xml")
+        def change = new CreateViewChange()
+        change.changeSet = new ChangeSet(changelog)
+        load( change, path: "./my-logic.sql", testResourceAccessor)
+
+        then:
+        StreamUtil.readStreamAsString(change.openSqlStream()) == "My Logic Here\n"
     }
 }

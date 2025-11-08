@@ -22,6 +22,7 @@ import liquibase.logging.mdc.customobjects.DuplicateChangesets;
 import liquibase.logging.mdc.customobjects.MdcChangeset;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserConfiguration;
+import liquibase.parser.ChangeLogParserConfiguration.MissingIncludeConfiguration;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -42,6 +43,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -382,7 +384,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return changesets;
     }
 
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+    public DatabaseChangeLog load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         ExceptionUtil.doSilently(() -> {
             String physicalFilePathLowerCase = this.physicalFilePath.toLowerCase();
             if (ParserSupportedFileExtension.JSON_SUPPORTED_EXTENSIONS.stream().anyMatch(physicalFilePathLowerCase::endsWith)) {
@@ -406,6 +408,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             handleChildNode(childNode, resourceAccessor, new HashMap<>());
         }
         this.currentlyLoadedChangeSetNode = null;
+        return this;
     }
 
     protected void expandExpressions(ParsedNode parsedNode) throws UnknownChangeLogParameterException {
@@ -503,7 +506,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             Labels labels = new Labels(node.getChildValue(null, LABELS, String.class));
             boolean global = node.getChildValue(null, GLOBAL, true ); // behave like liquibase < 3.4 and set global == true by default
             String file = node.getChildValue(null, FILE, String.class);
-            Resource resource;
+
             // direct referenced property, no file
             String name = node.getChildValue(null, NAME, String.class);
             String value = node.getChildValue(null, VALUE, String.class);
@@ -525,38 +528,34 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
 
                 file = file.trim();
-                // get relative path if specified
-                if (getRelativeToChangelog(node, file)) {
-                    resource = resourceAccessor.get(this.getPhysicalFilePath()).resolveSibling(file);
-                } else {
-                    resource = resourceAccessor.get(file);
-                }
+                Resource resource = resourceAccessor.getExistingFile(file,
+                          getRelativeToChangelog(node, file) ? getPhysicalFilePath() : null,
+                          " set property:file in '" + getPhysicalFilePath() + "'"
+                    );
 
-                // read properties from the file
-                Properties props = new Properties();
-                if (!resource.exists()) {
-                    if (node.getChildValue(null, ERROR_IF_MISSING, true)) {
-                        throw new UnexpectedLiquibaseException(FileUtil.getFileNotFoundMessage(file));
-                    } else {
-                        Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(file));
-                    }
-                } else {
-                    try (InputStream propertiesStream = resource.openInputStream()) {
-                        props.load(propertiesStream);
+                try (InputStream propertiesStream = resource.openInputStream()) {
+                    // read properties from the file
+                    Properties props = new Properties();
+                    props.load(propertiesStream);
 
-                        for (Map.Entry<Object, Object> entry : props.entrySet()) {
-                            this.changeLogParameters.set(
-                                    entry.getKey().toString(),
-                                    entry.getValue().toString(),
-                                    propertyContextFilter,
-                                    labels,
-                                    dbms,
-                                    global,
-                                    this
-                            );
-                        }
+                    for (Map.Entry<Object, Object> entry : props.entrySet()) {
+                        this.changeLogParameters.set(
+                                entry.getKey().toString(),
+                                entry.getValue().toString(),
+                                propertyContextFilter,
+                                labels,
+                                dbms,
+                                global,
+                                this
+                        );
                     }
                 }
+            }
+        } catch (FileNotFoundException e) {
+            if (node.getChildValue(null, ERROR_IF_MISSING, true)) {
+                throw new ParsedNodeException(e.getMessage());
+            } else {
+                Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage());
             }
         } catch (IOException e) {
             throw new ParsedNodeException(e);
@@ -1042,16 +1041,25 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             return false;
         }
 
-        if (isRelativePath) {
-            try {
-                fileName = resourceAccessor.get(this.getPhysicalFilePath()).resolveSibling(fileName).getPath();
-                fileName = normalizePath(normalizePathViaPaths(fileName, false));
-            } catch (IOException e) {
-                throw new UnexpectedLiquibaseException(e);
+        try {
+            Resource res = resourceAccessor.getExistingFile(fileName,
+                  isRelativePath ? getPhysicalFilePath() : null,
+                  " set include:file in '" + getPhysicalFilePath() + "'"
+            );
+            if(isRelativePath) {
+                fileName = normalizePath(normalizePathViaPaths(res.getPath(), false));
+            }
+        } catch (IOException e) {
+            if (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getCurrentValue().equals(
+                                                                MissingIncludeConfiguration.WARN)
+                      || !errorIfMissing) {
+                    Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage());
+                    return false;
+            } else {
+                throw new ChangeLogParseException(e.getMessage());
             }
         }
         final String normalizedFilePath = fileName;
-
         ChangeLogParser parser = null;
         DatabaseChangeLog changeLog;
         try {
@@ -1062,15 +1070,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             DatabaseChangeLog parentChangeLogInstance = PARENT_CHANGE_LOG.get();
             PARENT_CHANGE_LOG.set(this);
             try {
-                if (!resourceAccessor.get(normalizedFilePath).exists()) {
-                    if (ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getCurrentValue().equals(ChangeLogParserConfiguration.MissingIncludeConfiguration.WARN)
-                            || !errorIfMissing) {
-                        Scope.getCurrentScope().getLog(getClass()).warning(FileUtil.getFileNotFoundMessage(normalizedFilePath));
-                        return false;
-                    } else {
-                        throw new ChangeLogParseException(FileUtil.getFileNotFoundMessage(normalizedFilePath));
-                    }
-                }
+
                 parser = ChangeLogParserFactory.getInstance().getParser(normalizedFilePath, resourceAccessor);
 
                 if (modifyChangeSets != null) {
