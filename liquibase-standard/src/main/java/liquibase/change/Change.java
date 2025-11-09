@@ -166,7 +166,7 @@ public interface Change extends LiquibaseSerializable, Plugin, ExtensibleObject 
     }
 
     default String locationReference(String prop) {
-        return " set " + getSerializedObjectName() + ":" + prop +
+        return " set as " + getSerializedObjectName() + ":" + prop +
               (getChangeSet() != null ? " in changeset " + getChangeSet() : "");
     }
 }

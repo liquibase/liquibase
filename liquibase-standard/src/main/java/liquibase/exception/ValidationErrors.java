@@ -211,7 +211,7 @@ public class ValidationErrors {
         ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         try {
             resourceAccessor.getExistingFile(path, relativeTo,
-                  " set " + change + ":" + property);
+                  " set as " + change + ":" + property);
         } catch (IOException e) {
             addError(e.getMessage());
         }

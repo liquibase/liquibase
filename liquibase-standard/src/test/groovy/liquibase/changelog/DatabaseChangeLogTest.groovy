@@ -606,7 +606,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         then:
         ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getCurrentValue() == MissingIncludeConfiguration.FAIL
         def e = thrown(SetupException)
-        e.message.startsWith("The file 'com/example/invalid.xml' not found set include:file in '$rootChangeLogPath' in")
+        e.message.startsWith("The file 'com/example/invalid.xml' not found set as include:file in '$rootChangeLogPath' in")
     }
 
     def "properties values are correctly loaded and stored when properties file is relative to changelog"() {
@@ -671,12 +671,12 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
 
         where:
         errorIfMissingDef | relativeToChangelogFileDef | fileDef                        | expMsg
-        null              | null                       | "file.properties"              | FileUtil.getFileNotFoundMessage(fileDef, " set property:file in '$rootChangeLogFile'")
-        null              | false                      | "file.properties"              | FileUtil.getFileNotFoundMessage(fileDef, " set property:file in '$rootChangeLogFile'")
-        null              | true                       | "com/example/file.properties"  | "File 'com/example/com/example/file.properties' not found set property:file in '$rootChangeLogFile'"
-        true              | null                       | "file.properties"              | FileUtil.getFileNotFoundMessage(fileDef, " set property:file in '$rootChangeLogFile'")
-        true              | false                      | "file.properties"              | FileUtil.getFileNotFoundMessage(fileDef, " set property:file in '$rootChangeLogFile'")
-        true              | true                       | "com/example/file.properties"  | "File 'com/example/com/example/file.properties' not found set property:file in '$rootChangeLogFile'"
+        null              | null                       | "file.properties"              | FileUtil.getFileNotFoundMessage(fileDef, " set as property:file in '$rootChangeLogFile'")
+        null              | false                      | "file.properties"              | FileUtil.getFileNotFoundMessage(fileDef, " set as property:file in '$rootChangeLogFile'")
+        null              | true                       | "com/example/file.properties"  | "File 'com/example/com/example/file.properties' not found set as property:file in '$rootChangeLogFile'"
+        true              | null                       | "file.properties"              | FileUtil.getFileNotFoundMessage(fileDef, " set as property:file in '$rootChangeLogFile'")
+        true              | false                      | "file.properties"              | FileUtil.getFileNotFoundMessage(fileDef, " set as property:file in '$rootChangeLogFile'")
+        true              | true                       | "com/example/file.properties"  | "File 'com/example/com/example/file.properties' not found set as property:file in '$rootChangeLogFile'"
     }
 
     @Unroll
@@ -774,7 +774,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         })
 
         then:
-        bufferLog.getLogAsString(Level.WARNING).contains(FileUtil.getFileNotFoundMessage(includedChangeLogPath, " set include:file in '$rootChangeLogPath'"));
+        bufferLog.getLogAsString(Level.WARNING).contains(FileUtil.getFileNotFoundMessage(includedChangeLogPath, " set as include:file in '$rootChangeLogPath'"));
     }
 
     @Unroll

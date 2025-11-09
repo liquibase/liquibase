@@ -530,7 +530,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 file = file.trim();
                 Resource resource = resourceAccessor.getExistingFile(file,
                           getRelativeToChangelog(node, file) ? getPhysicalFilePath() : null,
-                          " set property:file in '" + getPhysicalFilePath() + "'"
+                          " set as property:file in '" + getPhysicalFilePath() + "'"
                     );
 
                 try (InputStream propertiesStream = resource.openInputStream()) {
@@ -1044,7 +1044,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         try {
             Resource res = resourceAccessor.getExistingFile(fileName,
                   isRelativePath ? getPhysicalFilePath() : null,
-                  " set include:file in '" + getPhysicalFilePath() + "'"
+                  " set as include:file in '" + getPhysicalFilePath() + "'"
             );
             if(isRelativePath) {
                 fileName = normalizePath(normalizePathViaPaths(res.getPath(), false));

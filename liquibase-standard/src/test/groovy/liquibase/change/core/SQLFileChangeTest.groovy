@@ -147,7 +147,7 @@ class SQLFileChangeTest extends StandardChangeTest {
 
         then:
         def e = thrown(IOException)
-        e.message.startsWith("The file 'non-existing.sql' not found set sqlFile:path")
+        e.message.startsWith("The file 'non-existing.sql' not found set as sqlFile:path")
     }
 
     @Unroll
