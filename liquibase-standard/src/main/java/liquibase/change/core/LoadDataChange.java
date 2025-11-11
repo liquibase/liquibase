@@ -65,6 +65,8 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     public static final String DEFAULT_COMMENT_PATTERN = "#";
     public static final Pattern BASE64_PATTERN = Pattern.compile("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$");
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    private static final Null NULL_INSTANCE = Null.getInstance();
+
     @Setter
     private String file;
     private String commentLineStartsWith = DEFAULT_COMMENT_PATTERN;
@@ -839,7 +841,6 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
-
     protected SqlStatement[] generateStatementsFromRows(Database database, List<LoadDataRowConfig> rows) {
         List<SqlStatement> statements = new ArrayList<>();
         List<ExecutablePreparedStatementBase> preparedStatements = new ArrayList<>();
@@ -864,7 +865,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                     if (value == null) {
                         // Don't conflate null with a String "NULL" here
                         // Instead add a Null-instance, to distinguish it from "NULL"
-                        value = new Null();
+                        value = NULL_INSTANCE;
                     }
 
                     insertStatement.addColumnValue(columnName, value);
