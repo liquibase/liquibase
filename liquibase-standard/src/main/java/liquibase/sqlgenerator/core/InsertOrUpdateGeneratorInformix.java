@@ -113,7 +113,7 @@ public class InsertOrUpdateGeneratorInformix extends InsertOrUpdateGenerator {
   // Copied and modified from liquibase.sqlgenerator.core.InsertOrUpdateGeneratorMySQL
   private String convertToString(Object newValue, Database database) {
     String sqlString;
-    if ((newValue == null) || (newValue instanceof Null) || newValue.toString().equals("")) {
+    if ((newValue == null) || (newValue instanceof Null) || newValue.toString().length() == 0) {
       sqlString = "NULL::INTEGER";
     } else if (newValue instanceof String string && StringUtil.equalsWordNull(string)) {
       sqlString = "'" + database.escapeStringForDatabase(string) + "'";
