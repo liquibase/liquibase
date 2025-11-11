@@ -1,10 +1,12 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.Null;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
+import liquibase.util.StringUtil;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -111,8 +113,10 @@ public class InsertOrUpdateGeneratorInformix extends InsertOrUpdateGenerator {
   // Copied and modified from liquibase.sqlgenerator.core.InsertOrUpdateGeneratorMySQL
   private String convertToString(Object newValue, Database database) {
     String sqlString;
-    if (newValue == null || newValue.toString().equals("") || newValue.toString().equalsIgnoreCase("NULL")) {
+    if ((newValue == null) || (newValue instanceof Null) || newValue.toString().equals("")) {
       sqlString = "NULL::INTEGER";
+    } else if (newValue instanceof String string && StringUtil.equalsWordNull(string)) {
+      sqlString = "'" + database.escapeStringForDatabase(string) + "'";
     } else if (newValue instanceof String && !looksLikeFunctionCall(((String) newValue), database)) {
       sqlString = "'" + database.escapeStringForDatabase(newValue.toString()) + "'";
     } else if (newValue instanceof Date) {
