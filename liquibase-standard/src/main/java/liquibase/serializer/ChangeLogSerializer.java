@@ -16,7 +16,7 @@ public interface ChangeLogSerializer extends LiquibaseSerializer, PrioritizedSer
 
     void append(ChangeSet changeSet, File changeLogFile) throws IOException;
 
-    default <T extends ChangeLogChild> void validateFilePath(T child) {
+    default void validateFilePath(ChangeSet child) {
         Object filePathObject = child.getSerializableFieldValue("filePath");
         String filePath = StringUtils.trimToNull(Optional.ofNullable(filePathObject).map(Object::toString).orElse(null));
         if (StringUtils.isEmpty(filePath)) {

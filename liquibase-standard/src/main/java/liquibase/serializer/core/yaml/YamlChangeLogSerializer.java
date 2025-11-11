@@ -23,9 +23,11 @@ public class YamlChangeLogSerializer extends YamlSerializer implements ChangeLog
     @Override
     public <T extends ChangeLogChild> void write(List<T> children, OutputStream out) throws IOException {
         List<Object> maps = new ArrayList<>();
-        for (T changeSet : children) {
-            validateFilePath(changeSet);
-            maps.add(toMap(changeSet));
+        for (T child : children) {
+            if(child instanceof ChangeSet changeSet) {
+                validateFilePath(changeSet);
+            }
+            maps.add(toMap(child));
         }
         Map<String, Object> containerMap = new HashMap<>();
         containerMap.put("databaseChangeLog", maps);

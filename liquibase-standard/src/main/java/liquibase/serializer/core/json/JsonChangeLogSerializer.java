@@ -2,6 +2,7 @@ package liquibase.serializer.core.json;
 
 import liquibase.changelog.ChangeLogChild;
 import liquibase.GlobalConfiguration;
+import liquibase.changelog.ChangeSet;
 import liquibase.serializer.core.yaml.YamlChangeLogSerializer;
 import liquibase.util.StringUtil;
 
@@ -19,7 +20,9 @@ public class JsonChangeLogSerializer extends YamlChangeLogSerializer {
         writer.write("{ \"databaseChangeLog\": [\n");
         int i = 0;
         for (T child : children) {
-            validateFilePath(child);
+            if(child instanceof ChangeSet changeSet) {
+                validateFilePath(changeSet);
+            }
             String serialized = serialize(child, true);
             if (++i < children.size()) {
                 serialized = serialized.replaceFirst("}\\s*$", "},\n");
