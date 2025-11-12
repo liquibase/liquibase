@@ -47,4 +47,23 @@ class CSVReaderTest extends Specification {
         CSVReader.DEFAULT_SEPARATOR | CSVReader.DEFAULT_QUOTE_CHARACTER | "a,b,c,\"def"          | "unended quote"
 
     }
+
+    @Unroll
+    def "invalid csv with exception context"() {
+        when:
+        def reader = new CSVReader(new StringReader("id${separator}name${separator}address\n" + input), separator as char, quote as char)
+
+        def contextSupplier = { "Thing I am Parsing" }
+        reader.readNext(contextSupplier)
+        reader.readNext(contextSupplier)
+
+        then:
+        def e = thrown(CsvMalformedLineException)
+        e.lineNumber == 2
+        e.message.startsWith("Error parsing Thing I am Parsing on line 2: ")
+
+        where:
+        separator                   | quote                             | input                  | notes
+        ","                         | "'"                               | "'', '','' , '' ,"     | "whitespace before and after empty strings"
+    }
 }
