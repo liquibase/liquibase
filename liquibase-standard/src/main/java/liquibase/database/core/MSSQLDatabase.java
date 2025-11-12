@@ -316,6 +316,20 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public String escapeTablespaceName(String tablespaceName) {
+        //
+        // If the tablespace name has a parenthesis in it, the escape logic might mistake it for stored logic
+        // and not add quotes. We can check for a space and the lack of a quote at the beginning and quote
+        // it anyway.
+        //
+        tablespaceName = escapeObjectName(tablespaceName, Tablespace.class);
+        if (tablespaceName != null && tablespaceName.contains(" ") && ! tablespaceName.startsWith("\"")) {
+            tablespaceName = "\"" + tablespaceName + "\"";
+        }
+        return tablespaceName;
+    }
+
+    @Override
     public boolean supportsTablespaces() {
         return true;
     }
