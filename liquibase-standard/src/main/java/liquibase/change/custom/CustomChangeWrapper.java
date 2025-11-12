@@ -55,6 +55,7 @@ public class CustomChangeWrapper extends AbstractChange {
 
     /**
      * Return the CustomChange instance created by the call to {@link #setClass(String)}.
+     * Returns null if the custom change class cannot be loaded.
      */
     @DatabaseChangeProperty(isChangeProperty = false)
     public CustomChange getCustomChange() {
@@ -62,7 +63,9 @@ public class CustomChangeWrapper extends AbstractChange {
             try {
                 this.customChange = loadCustomChange(className);
             } catch (CustomChangeException e) {
-                throw new UnexpectedLiquibaseException(e);
+                final Logger log = Scope.getCurrentScope().getLog(getClass());
+                log.warning("Exception thrown loading " + getClassName(), e);
+                return null;
             }
         }
         return customChange;
@@ -253,7 +256,9 @@ public class CustomChangeWrapper extends AbstractChange {
                     return super.generateCheckSum();
                 }
             } catch (CustomChangeException e) {
-                throw new UnexpectedLiquibaseException(e);
+                final Logger log = Scope.getCurrentScope().getLog(getClass());
+                log.warning("Exception thrown configuring " + getClassName() + ", not using its generateChecksum", e);
+                return super.generateCheckSum();
             }
         } else {
             return super.generateCheckSum();
@@ -281,6 +286,10 @@ public class CustomChangeWrapper extends AbstractChange {
             throw new UnexpectedLiquibaseException(e);
         }
 
+        if (customChange == null) {
+            return "Custom change " + getClassName() + " could not be loaded";
+        }
+
         return customChange.getConfirmationMessage();
     }
 
@@ -290,7 +299,19 @@ public class CustomChangeWrapper extends AbstractChange {
         }
 
         if (this.customChange == null) {
-            this.customChange = loadCustomChange(className);
+            try {
+                this.customChange = loadCustomChange(className);
+            } catch (CustomChangeException e) {
+                final Logger log = Scope.getCurrentScope().getLog(getClass());
+                log.warning("Exception thrown loading " + getClassName() + " during configuration", e);
+                // Can't configure a change that can't be loaded
+                return;
+            }
+        }
+
+        // If customChange is still null after trying to load, we can't configure it
+        if (this.customChange == null) {
+            return;
         }
 
         try {
