@@ -16,6 +16,7 @@ import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.logging.core.BufferedLogService
 import liquibase.resource.SearchPathResourceAccessor
+import liquibase.util.StringUtil
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -43,14 +44,14 @@ class UpdateIntegrationTest extends Specification {
         String output = results.getResult("output") as String
 
         then:
-        assert output == """Output of select * from parameter_value_tests order by id:
+        assert StringUtil.standardizeLineEndings(output) == """Output of select * from parameter_value_tests order by id:
 ID | DEPLOYMENT_ID | CHANGELOG_FILE | CHANGESET_ID | CHANGESET_AUTHOR |
-1 | """ + expectedDeploymentId + """ | src/test/resources/changelogs/h2/update/execution-parameter/1.xml | 1.1 | jlyle | 
-2 | """ + expectedDeploymentId + """ | src/test/resources/changelogs/h2/update/execution-parameter/1.xml | 1.2 | not_jlyle | 
-3 | """ + expectedDeploymentId + """ | src/test/resources/changelogs/h2/update/execution-parameter/1.xml | 1.3 | jlyle | 
-4 | """ + expectedDeploymentId + """ | src/test/resources/changelogs/h2/update/execution-parameter/2.xml | 2.1 | jlyle | 
-5 | """ + expectedDeploymentId + """ | src/test/resources/changelogs/h2/update/execution-parameter/2.xml | 2.2 | not_jlyle | 
-6 | """ + expectedDeploymentId + """ | src/test/resources/changelogs/h2/update/execution-parameter/2.xml | 2.3 | jlyle | 
+1 | $expectedDeploymentId | src/test/resources/changelogs/h2/update/execution-parameter/1.xml | 1.1 | jlyle | 
+2 | $expectedDeploymentId | src/test/resources/changelogs/h2/update/execution-parameter/1.xml | 1.2 | not_jlyle | 
+3 | $expectedDeploymentId | src/test/resources/changelogs/h2/update/execution-parameter/1.xml | 1.3 | jlyle | 
+4 | $expectedDeploymentId | src/test/resources/changelogs/h2/update/execution-parameter/2.xml | 2.1 | jlyle | 
+5 | $expectedDeploymentId | src/test/resources/changelogs/h2/update/execution-parameter/2.xml | 2.2 | not_jlyle | 
+6 | $expectedDeploymentId | src/test/resources/changelogs/h2/update/execution-parameter/2.xml | 2.3 | jlyle | 
 
 """
     }

@@ -277,7 +277,11 @@ public class DatabaseFactory implements SingletonObject {
                 return specifiedDbClass;
             }
         }
-        return implementedDatabases.get(shortName).iterator().next();
+        SortedSet<Database> databases = implementedDatabases.get(shortName);
+        if (databases == null || databases.isEmpty()) {
+            return null;
+        }
+        return databases.iterator().next();
 
     }
 

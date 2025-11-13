@@ -195,4 +195,15 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
         Sql[] sql = instance.generateSql(statement, new PostgresDatabase());
         assertEquals("ALTER TABLE table_name ADD column_name COLUMN_TYPE GENERATED ALWAYS AS (value->>'foo') STORED", sql[0].toSql());
     }
+
+    @Test
+    public void testAddColumnWithForeignKeyConstraintReferencedWithSchemaName(){
+        MSSQLDatabase database = new MSSQLDatabase();
+        AddColumnGenerator generator = new AddColumnGenerator();
+        ForeignKeyConstraint constraint = new ForeignKeyConstraint("fk_book_category", null, "categories", "id");
+        constraint.setReferencedTableSchemaName("app");
+        AddColumnStatement statement = new AddColumnStatement(null, "app", "books", "id_category", "bigint", null, constraint);
+        Sql[] sql = generator.generateSql(statement, database,  null);
+        assertEquals("ALTER TABLE app.books ADD CONSTRAINT fk_book_category FOREIGN KEY (id_category) REFERENCES app.categories (id)", sql[1].toSql());
+    }
 }

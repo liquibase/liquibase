@@ -323,16 +323,20 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 Scope.getCurrentScope().getLog(getClass()).info("Reading from " + databaseChangeLogTableName);
                 List<Map<String, ?>> results = queryDatabaseChangeLogTable(database);
                 for (Map rs : results) {
-                    String storedFileName = rs.get("FILENAME").toString();
+                    Object storedFileNameObj = rs.get("FILENAME");
+                    String storedFileName = (storedFileNameObj == null) ? null : storedFileNameObj.toString();
                     String fileName = DatabaseChangeLog.normalizePath(storedFileName);
-                    String author = rs.get("AUTHOR").toString();
-                    String id = rs.get("ID").toString();
+                    Object authorObj = rs.get("AUTHOR");
+                    String author = (authorObj == null) ? null : authorObj.toString();
+                    Object idObj = rs.get("ID");
+                    String id = (idObj == null) ? null : idObj.toString();
                     String md5sum = ((rs.get("MD5SUM") == null)) ? null : rs.get("MD5SUM").toString();
                     String description = (rs.get("DESCRIPTION") == null) ? null : rs.get("DESCRIPTION").toString();
                     String comments = (rs.get("COMMENTS") == null) ? null : rs.get("COMMENTS").toString();
                     Object tmpDateExecuted = rs.get("DATEEXECUTED");
                     Date dateExecuted = convertDate(tmpDateExecuted);
-                    String tmpOrderExecuted = rs.get("ORDEREXECUTED").toString();
+                    Object tmpOrderExecutedObj = rs.get("ORDEREXECUTED");
+                    String tmpOrderExecuted = (tmpOrderExecutedObj == null) ? null : tmpOrderExecutedObj.toString();
                     Integer orderExecuted = ((tmpOrderExecuted == null) ? null : Integer.valueOf(tmpOrderExecuted));
                     String tag = (rs.get("TAG") == null) ? null : rs.get("TAG").toString();
                     String execType = (rs.get("EXECTYPE") == null) ? null : rs.get("EXECTYPE").toString();
