@@ -16,6 +16,8 @@ permissions:
   issues: write
   id-token: write
   actions: read
+  checks: read
+  statuses: read
 
 jobs:
   claude:
