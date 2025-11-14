@@ -39,7 +39,7 @@ public abstract class AbstractResource implements Resource {
     private String handlePathForJarfile(String path) {
         String relative = this.uri.toString().replaceFirst(".*!", "");
         try {
-            if (!path.startsWith("..")) {
+            if (!path.startsWith("..") && !path.startsWith("/")) {
                 path = "/" + path;
             }
             return new URI(relative).resolve(new URI(path).normalize()).toString().replaceFirst("^/", "");

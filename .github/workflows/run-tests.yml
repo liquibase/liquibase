@@ -45,14 +45,9 @@ jobs:
     steps:
       - run: true
 
-  dependabot-pr-check:
-    uses: liquibase/build-logic/.github/workflows/check-for-dependabot-prs.yml@main
-    needs: authorize
-    secrets: inherit
-
   setup:
     name: setup
-    needs: [authorize, dependabot-pr-check]
+    needs: [authorize]
     runs-on: ubuntu-22.04
     outputs:
       timestamp: ${{ steps.get-date.outputs.date }}
@@ -103,7 +98,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-22.04, macos-13, windows-latest ]
-        java: [ 17, 21 ]
+        java: [ 17, 21, 25 ]
         exclude:
           - os: windows-latest
             java: 17
@@ -120,7 +115,7 @@ jobs:
 
       - name: Built Code Cache
         if: ${{ matrix.java == 17}}
-        uses: actions/cache@v4.2.4
+        uses: actions/cache@v4.3.0
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -148,26 +143,10 @@ jobs:
                   "enabled": "true",
                   "updatePolicy": "always"
                 }
-              },
-              {
-                "id": "liquibase-pro",
-                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
-                "releases": {
-                  "enabled": "false"
-                },
-                "snapshots": {
-                  "enabled": "true",
-                  "updatePolicy": "always"
-                }
               }
             ]
           servers: |
             [
-              {
-                "id": "liquibase-pro",
-                "username": "liquibot",
-                "password": "${{ secrets.GITHUB_TOKEN }}"
-              },
               {
                 "id": "liquibase",
                 "username": "liquibot",
@@ -203,6 +182,24 @@ jobs:
             exit 1
           fi
           echo "test_count_unit_test_java_${{ matrix.java }}_ubuntu=$TEST_COUNT" >> $GITHUB_OUTPUT
+          
+
+      - name: Check Test Count for macos-13
+        id: check-test-counts-java-macos
+        if: matrix.os == 'macos-13'
+        shell: bash
+        run: |
+          TEST_COUNT=$(grep -r -o -E 'Tests run: [0-9]+' . | awk -F: '{s+=$NF} END {print s}')
+          echo "Total Unit tests run: $TEST_COUNT"
+          if [ -z "$TEST_COUNT" ] || [ "$TEST_COUNT" -eq 0 ]; then
+            echo "No test result files found or test count is zero."
+            exit 1
+          fi
+          if [[ $TEST_COUNT -lt $((${{ vars.TEST_COUNT_JAVA_MACOS }} - (${{ vars.TEST_COUNT_JAVA_MACOS }} / 100))) ]] ; then
+            echo "MacOS Unit Test count is below the acceptable range of - 1% of the expected count. Expected ${{ vars.TEST_COUNT_JAVA_MACOS }}. Actual $TEST_COUNT."
+            exit 1
+          fi
+          echo "test_count_unit_test_java_macos=$TEST_COUNT" >> $GITHUB_OUTPUT
 
       - name: Check Test Count for windows-latest
         id: check-test-counts-java-windows
@@ -228,7 +225,7 @@ jobs:
 
       - name: Upload Artifacts for build.yml
         if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-22.04'}}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: temp-artifact
           path: |
@@ -236,7 +233,7 @@ jobs:
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: liquibase-test-results-jdk${{ matrix.java }}
           path: |
@@ -245,7 +242,7 @@ jobs:
 
       - name: Save Jacoco Report for Sonar
         if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-22.04'}}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: liquibase-jacoco-test-results
           path: |
@@ -253,7 +250,7 @@ jobs:
 
       - name: Archive Modules
         if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-22.04'}}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: liquibase-modules
           path: |
@@ -308,7 +305,7 @@ jobs:
 
       - name: Prepare
         id: prepare
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             core.setOutput("testResultsArtifact", "liquibase-test-results-integration-${{ matrix.testSystem }}".replace(/[^a-zA-Z0-9\-_]/g, "_"));
@@ -332,7 +329,7 @@ jobs:
       # getting from build results page. If we remove 0-SNAPSHOT then we will need settings.xml
 
       - name: Restore Built Code Cache
-        uses: actions/cache@v4.2.4
+        uses: actions/cache@v4.3.0
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -380,14 +377,14 @@ jobs:
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ steps.prepare.outputs.testResultsArtifact }}
           path: |
             ./**/target/surefire-reports
 
       - name: Save Jacoco Report for Sonar
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: liquibase-integration-jacoco-test-results-${{ matrix.testSystem }}
           path: |
