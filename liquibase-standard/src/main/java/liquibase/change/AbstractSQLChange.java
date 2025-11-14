@@ -134,10 +134,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
     @Override
     public ValidationErrors validate(Database database) {
-        ValidationErrors validationErrors = new ValidationErrors();
-        if (StringUtils.trimToNull(sql) == null) {
-            validationErrors.addError("'sql' is required");
-        }
+        ValidationErrors validationErrors = super.validate(database);
         if(setProperty != null &&
             getChangeSet().getChangeLog().getChangeLogParameters().hasValue(setProperty.name, setProperty.local ? getChangeSet().getChangeLog() : null)) {
             validationErrors.addError(String.format("'%s' property is already defined! Cannot set new runtime value", setProperty));
