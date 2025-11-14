@@ -7,7 +7,7 @@
 
     <xsd:simpleType name="propertyExpression" id="propertyExpression">
         <xsd:restriction base="xsd:string">
-            <xsd:pattern value="$\{[\w\.]+\}"/>
+            <xsd:pattern value="$\{\:?[\w\.\-\+_]+\}"/>
         </xsd:restriction>
     </xsd:simpleType>
 
@@ -81,6 +81,18 @@
             <xsd:enumeration value="QUOTE_ONLY_RESERVED_WORDS"/>
         </xsd:restriction>
     </xsd:simpleType>
+
+    <xsd:simpleType name="propertyName">
+        <xsd:annotation>
+            <xsd:documentation>Name of the property
+                Supported format includes alphanumeric characters, +, -, . , and _
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="[\w\.\-\+_]+"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
     <!-- include -->
     <xsd:element name="include">
         <xsd:complexType>
@@ -1152,15 +1164,27 @@
             </xsd:annotation>
         </xsd:attribute>
         <xsd:attribute name="dbms" type="xsd:string"/>
-        <xsd:attribute name="setProperty" type="nonEmptyString">
+        <xsd:attribute name="setProperty">
             <xsd:annotation>
                 <xsd:documentation>Name of the property set from the result of this sql's statement(s).
                     The last statement has to return a single row with the first column containing the
                     new value of the property.
-                    If the name starts with 'local:' the property is defined as local to the changeset.
-                    Property is created as global otherwise
+                    If the name starts with 'global:' the property is defined as global to the changeset.
+                    Property is created as local otherwise
                 </xsd:documentation>
             </xsd:annotation>
+            <xsd:simpleType>
+                <xsd:union>
+                    <xsd:simpleType>
+                        <xsd:restriction base="propertyName"/>
+                    </xsd:simpleType>
+                    <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                            <xsd:pattern value="global:[\w\.\-\+_]+"/>
+                        </xsd:restriction>
+                    </xsd:simpleType>
+                </xsd:union>
+            </xsd:simpleType>
         </xsd:attribute>
         <xsd:attributeGroup ref="changeAttributes"/>
     </xsd:attributeGroup>

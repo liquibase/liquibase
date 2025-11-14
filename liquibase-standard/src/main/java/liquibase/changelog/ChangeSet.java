@@ -46,7 +46,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static liquibase.Scope.getCurrentScope;
-import static liquibase.executor.ExecutorService.JDBC;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 
 /**
@@ -747,7 +746,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         Executor originalExecutor = setupCustomExecutorIfNecessary(database);
         try {
-            Executor executor = getCurrentScope().getSingleton(ExecutorService.class).getExecutor(JDBC, database);
+            Executor executor = getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
             // set object quoting strategy
             database.setObjectQuotingStrategy(objectQuotingStrategy);
 
@@ -855,7 +854,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                         if (change.generateStatementsVolatile(database)) {
                             executor.comment("WARNING The following SQL may change each run and therefore is possibly incorrect and/or invalid:");
                         }
-                        InjectRuntimeVariablesVisitor.addTo(sqlVisitors, databaseChangeLog);
+                        InjectRuntimeVariablesVisitor.addTo(sqlVisitors, changeLog);
                         String sql = addSqlMdc(change, database, false);
                         this.getGeneratedSql().add(sql);
 

@@ -19,7 +19,7 @@ public abstract class ReturningSqlStatement extends AbstractSqlStatement {
     @Getter
     protected Property property;
     protected ChangeSet changeSet;
-    public static final String localPrefix = "local:";
+    public static final String globalPrefix = "global:";
 
     public void setResult(String sResult) {
         DatabaseChangeLog changeLog = null;
@@ -46,15 +46,15 @@ public abstract class ReturningSqlStatement extends AbstractSqlStatement {
         public final String name;
         public final boolean local;
         public Property(String property) {
-            if((local = property.startsWith(localPrefix))) {
-                this.name = property.substring(localPrefix.length());
-            } else {
+            if((local = !property.startsWith(globalPrefix))) {
                 this.name = property;
+            } else {
+                this.name = property.substring(globalPrefix.length());
             }
         }
         @Override
         public String toString() {
-            return (local ? "local " : "") + name;
+            return (local ? "" : globalPrefix) + name;
         }
     }
 

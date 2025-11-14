@@ -87,7 +87,7 @@ class RuntimePropsTest extends Specification {
 		final FakeJdbcExecutor mockExecutor = new FakeJdbcExecutor(db, rtPropValue)
 		DatabaseChangeLog chLog = databaseChangeLog('dummy')
 		ChangeSet changeSet = new ChangeSet(chLog)
-		RawSQLChange sql = load (new RawSQLChange(), changeSet, setProperty: rtPropName,
+		RawSQLChange sql = load (new RawSQLChange(), changeSet, setProperty: 'global:' + rtPropName,
 																			 	  sql: "SELECT '$rtPropValue'" )
 		InjectRuntimeVariablesVisitorTest.clear() // Test executes in mass with mvn uses same static
 		when:
@@ -104,7 +104,7 @@ class RuntimePropsTest extends Specification {
 		final FakeJdbcExecutor mockExecutor = new FakeJdbcExecutor(db, rtPropValue)
 		DatabaseChangeLog chLog = databaseChangeLog('dummy')
 		ChangeSet changeSet = new ChangeSet(chLog)
-		RawSQLChange sql = load (new RawSQLChange(), changeSet, setProperty: 'local:'+rtPropName,
+		RawSQLChange sql = load (new RawSQLChange(), changeSet, setProperty: rtPropName,
 																					sql: "SELECT '$rtPropValue'" )
 		InjectRuntimeVariablesVisitorTest.clear() // Test executes in mass with mvn uses same static
 		when:
