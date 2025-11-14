@@ -9,7 +9,6 @@ import liquibase.database.Database
 import liquibase.database.core.MockDatabase
 import liquibase.parser.core.ParsedNode
 import liquibase.resource.ResourceAccessor
-import liquibase.resource.SearchPathResourceAccessor
 import liquibase.serializer.LiquibaseSerializable
 
 import java.lang.reflect.Modifier
@@ -169,7 +168,7 @@ abstract class TestUtil {
      * @return the {@code change} instance with children loaded using ParsedNode
      */
     static <T extends LiquibaseSerializable> T load(Map children, T change, ResourceAccessor resourceAccessor = null) {
-        change.load(new ParsedNode(null, change.serializedObjectName ).setValue(children), resourceAccessor)
+        change.load( parsedNode( children, change.serializedObjectName ), resourceAccessor)
         change
     }
 
@@ -177,7 +176,4 @@ abstract class TestUtil {
     static ParsedNode parsedNode(Map<String, Object> children, String name = "") {
         new ParsedNode(null, name).setValue(children)
     }
-
-    /** ResourceAccessor can be used to access files in the {@code src/test/resources} folder */
-    static SearchPathResourceAccessor testResourceAccessor = new SearchPathResourceAccessor("target/test-classes/")
 }

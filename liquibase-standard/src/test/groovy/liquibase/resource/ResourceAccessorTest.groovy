@@ -3,8 +3,8 @@ package liquibase.resource
 import liquibase.GlobalConfiguration
 import liquibase.Scope
 import liquibase.sdk.resource.MockResource
+import liquibase.test.JUnitResourceAccessor
 import liquibase.ui.UIService
-import static liquibase.util.TestUtil.testResourceAccessor
 import static ResourceAccessor.NotFoundResource
 
 import spock.lang.Specification
@@ -137,6 +137,7 @@ class ResourceAccessorTest extends Specification {
     }
 
     static final Path path = Path.of('path')
+    static final def testResourceAccessor = new JUnitResourceAccessor()
 
     def "fullPathToLog"() {
         when:

@@ -218,7 +218,7 @@ class SQLFileChangeTest extends StandardChangeTest {
         def changelog = new DatabaseChangeLog("com/example/changelog.xml")
         def change = new SQLFileChange()
         change.changeSet = new ChangeSet(changelog)
-        load( change, path: "./my-logic.sql", testResourceAccessor)
+        load( change, path: "./my-logic.sql", new JUnitResourceAccessor())
 
         then:
         change.sql == "My Logic Here\n"

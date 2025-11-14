@@ -268,7 +268,7 @@ class CreateViewChangeTest extends StandardChangeTest {
         def changelog = new DatabaseChangeLog("com/example/changelog.xml")
         def change = new CreateViewChange()
         change.changeSet = new ChangeSet(changelog)
-        load( change, path: "./my-logic.sql", testResourceAccessor)
+        load( change, path: "./my-logic.sql", new JUnitResourceAccessor())
 
         then:
         StreamUtil.readStreamAsString(change.openSqlStream()) == "My Logic Here\n"
