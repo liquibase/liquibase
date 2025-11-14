@@ -4,6 +4,7 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.analytics.AnalyticsFactory;
 import liquibase.analytics.Event;
+import liquibase.analytics.LiquibaseAnalyticsListener;
 import liquibase.configuration.*;
 import liquibase.database.Database;
 import liquibase.exception.CommandExecutionException;
@@ -237,16 +238,23 @@ public class CommandScope {
         if (!Scope.getCurrentScope().isMdcKeyPresent(MdcKey.LIQUIBASE_COMMAND_NAME)) {
             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, commandName);
         }
-        Event analyticsEvent = ExceptionUtil.doSilently(() -> {
-            return new Event(commandName);
-        });
-        Event parentAnalyticsEvent = Scope.getCurrentScope().getAnalyticsEvent();
+
+
         LicenseTrackList licenseTrackList = new LicenseTrackList();
         LicenseTrackList parentLicenseTrackList = Scope.getCurrentScope().getLicenseTrackList();
 
         try {
             Map<String, Object> scopeValues = new HashMap<>();
+            LiquibaseAnalyticsListener lAl = new LiquibaseAnalyticsListener();
+            final Event analyticsEvent = lAl.isEnabled()
+                    ? ExceptionUtil.doSilently(() -> new Event(commandName))
+                    : null;
+
+            Event parentAnalyticsEvent = Scope.getCurrentScope().getAnalyticsEvent();
+
             scopeValues.put(Scope.Attr.analyticsEvent.toString(), analyticsEvent);
+
+
             scopeValues.put(Scope.Attr.licenseTrackList.toString(), licenseTrackList);
             return Scope.child(scopeValues, () -> {
                 CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
@@ -264,9 +272,12 @@ public class CommandScope {
                         } catch (Exception runException) {
                             // Suppress the exception for now so that we can run the cleanup steps even when encountering an exception.
                             thrownException = Optional.of(runException);
-                            ExceptionUtil.doSilently(() -> {
-                                analyticsEvent.setOperationOutcome(MdcValue.COMMAND_FAILED);
-                            });
+                            if (analyticsEvent != null){
+                                ExceptionUtil.doSilently(() -> {
+                                    analyticsEvent.setOperationOutcome(MdcValue.COMMAND_FAILED);
+                                });
+                            }
+
                             Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_OUTCOME, MdcValue.COMMAND_FAILED, false);
                             break;
                         }
@@ -295,15 +306,21 @@ public class CommandScope {
                         }
                         throw thrownException.get();
                     } else {
-                        ExceptionUtil.doSilently(() -> {
-                            analyticsEvent.setOperationOutcome(MdcValue.COMMAND_SUCCESSFUL);
-                        });
+                        if (analyticsEvent != null){
+                            ExceptionUtil.doSilently(() -> {
+                                analyticsEvent.setOperationOutcome(MdcValue.COMMAND_SUCCESSFUL);
+                            });
+                        }
+
                         Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_OUTCOME, MdcValue.COMMAND_SUCCESSFUL, false);
                     }
                 } catch (Exception e) {
-                    ExceptionUtil.doSilently(() -> {
-                        analyticsEvent.setExceptionClass(e.getClass().getName());
-                    });
+                    if (analyticsEvent != null){
+                        ExceptionUtil.doSilently(() -> {
+                            analyticsEvent.setExceptionClass(e.getClass().getName());
+                        });
+                    }
+
                     if (e instanceof CommandExecutionException) {
                         throw (CommandExecutionException) e;
                     } else {
@@ -320,22 +337,25 @@ public class CommandScope {
                     } catch (Exception e) {
                         Scope.getCurrentScope().getLog(getClass()).warning("Error flushing command output stream: " + e.getMessage(), e);
                     }
-                    ExceptionUtil.doSilently(() -> {
-                        AnalyticsFactory analyticsFactory = Scope.getCurrentScope().getSingleton(AnalyticsFactory.class);
-                        if (parentAnalyticsEvent == null) {
-                            analyticsFactory.handleEvent(analyticsEvent);
-                        } else if (analyticsFactory.getListener().isEnabled()) {
-                            parentAnalyticsEvent.getChildEvents().add(analyticsEvent);
-                        }
-                    });
-                    if (Boolean.TRUE.equals(LicenseTrackingArgs.ENABLED.getCurrentValue())) {
-                        if (parentLicenseTrackList == null) {
-                            LicenseTrackingFactory licenseTrackingFactory = Scope.getCurrentScope().getSingleton(LicenseTrackingFactory.class);
-                            licenseTrackingFactory.handleEvent(licenseTrackList);
-                        } else {
-                            parentLicenseTrackList.getLicenseTracks().addAll(licenseTrackList.getLicenseTracks());
+                    if (analyticsEvent != null){
+                        ExceptionUtil.doSilently(() -> {
+                            AnalyticsFactory analyticsFactory = Scope.getCurrentScope().getSingleton(AnalyticsFactory.class);
+                            if (parentAnalyticsEvent == null) {
+                                analyticsFactory.handleEvent(analyticsEvent);
+                            } else if (analyticsFactory.getListener().isEnabled()) {
+                                parentAnalyticsEvent.getChildEvents().add(analyticsEvent);
+                            }
+                        });
+                        if ( Boolean.TRUE.equals(LicenseTrackingArgs.ENABLED.getCurrentValue())) {
+                            if (parentLicenseTrackList == null) {
+                                LicenseTrackingFactory licenseTrackingFactory = Scope.getCurrentScope().getSingleton(LicenseTrackingFactory.class);
+                                licenseTrackingFactory.handleEvent(licenseTrackList);
+                            } else {
+                                parentLicenseTrackList.getLicenseTracks().addAll(licenseTrackList.getLicenseTracks());
+                            }
                         }
                     }
+
                 }
 
                 return resultsBuilder.build();
