@@ -16,7 +16,6 @@ import liquibase.exception.Warnings;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCompoundStatement;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.util.BooleanUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * A common parent for all raw SQL related changes regardless of where the sql was sourced from.
@@ -51,7 +51,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     /**  @deprecated  To be removed when splitStatements is changed to be type Boolean */
     @Deprecated
     private boolean splitStatementsSet;
-
+    @Setter
     private String endDelimiter;
     private String sql;
     @Setter
@@ -177,6 +177,12 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         }
     }
 
+    @Override
+    public ValidationErrors validate(Database database) {
+        ValidationErrors validationErrors = super.validate(database);
+        return validationErrors;
+    }
+
     /**
      * @deprecated  To be removed when splitStatements is changed to be Boolean type
      * @return
@@ -216,15 +222,6 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     }
 
     /**
-     * Sets the end delimiter for splitting SQL statements. Set to {@code null} to use the default delimiter.
-     *
-     * @param endDelimiter the end delimiter to set
-     */
-    public void setEndDelimiter(String endDelimiter) {
-        this.endDelimiter = endDelimiter;
-    }
-
-    /**
      * Calculates the checksum based on the contained SQL.
      *
      * @see Change#generateCheckSum()
@@ -253,8 +250,8 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             if (version.lowerOrEqualThan(ChecksumVersion.V8)) {
                 boolean isSplitStatements = this.isSplitStatements();
                 if (getChangeSet() != null && getChangeSet().getRunWith() != null
-                        && !BooleanUtil.isTrue(isIgnoreOriginalSplitStatements()) && !isSplitStatements) {
-                    isSplitStatements = BooleanUtil.isTrue(originalSplitStatements);
+                        && !isTrue(isIgnoreOriginalSplitStatements()) && !isSplitStatements) {
+                    isSplitStatements = isTrue(originalSplitStatements);
                 }
                 return CheckSum.compute(new NormalizingStreamV8(this.getEndDelimiter(), isSplitStatements, this.isStripComments(), stream), false);
             }

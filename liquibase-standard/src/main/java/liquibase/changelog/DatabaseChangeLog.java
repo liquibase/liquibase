@@ -103,10 +103,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     @Setter
     private String physicalFilePath;
     @Setter
-	 private String logicalFilePath;
+    private String logicalFilePath;
 
     @Setter
-	 @Getter
+    @Getter
     private ObjectQuotingStrategy objectQuotingStrategy;
 
     @Getter
@@ -126,34 +126,33 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private final List<ChangeSet> skippedBecauseOfPreconditionsChangeSets = new ArrayList<>();
 
     @Getter
-    @Setter
-    @Accessors(chain = true)
+    @Setter @Accessors(chain = true)
     private ChangeLogParameters changeLogParameters;
 
     @Setter
-	 @Getter
+    @Getter
     private RuntimeEnvironment runtimeEnvironment;
 
     @Setter
-	 private DatabaseChangeLog rootChangeLog = ROOT_CHANGE_LOG.get();
+    private DatabaseChangeLog rootChangeLog = ROOT_CHANGE_LOG.get();
 
     @Setter
-	 @Getter
+    @Getter
     private DatabaseChangeLog parentChangeLog = PARENT_CHANGE_LOG.get();
 
     @Setter
-	 @Getter
+    @Getter
     private ContextExpression contextFilter;
 
     @Setter
-	 @Getter
+    @Getter
     private ContextExpression includeContextFilter;
 
     @Getter
     private Labels includeLabels;
 
     @Setter
-	 @Getter
+    @Getter
     private boolean includeIgnore;
 
     @Getter
@@ -163,27 +162,27 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public DatabaseChangeLog(String physicalFilePath) {
-       this(physicalFilePath, new ChangeLogParameters());
+        this(physicalFilePath, new ChangeLogParameters());
     }
 
-   public DatabaseChangeLog(String physicalFilePath, ChangeLogParameters changeLogParameters) {
-      this.physicalFilePath = physicalFilePath;
-      this.changeLogParameters = changeLogParameters;
-   }
+    public DatabaseChangeLog(String physicalFilePath, ChangeLogParameters changeLogParameters) {
+       this.physicalFilePath = physicalFilePath;
+       this.changeLogParameters = changeLogParameters;
+    }
 
-	public DatabaseChangeLog getRootChangeLog() {
+    public DatabaseChangeLog getRootChangeLog() {
         return (rootChangeLog != null) ? rootChangeLog : this;
     }
 
-	@Override
-   public PreconditionContainer getPreconditions() {
+    @Override
+    public PreconditionContainer getPreconditions() {
         return preconditionContainer;
     }
 
-   @Override
-   public void setPreconditions(PreconditionContainer precondition) {
+    @Override
+    public void setPreconditions(PreconditionContainer precondition) {
        this.preconditionContainer.addNestedPrecondition(precondition);
-   }
+    }
 
     public String getRawLogicalFilePath() {
         return logicalFilePath;
@@ -201,7 +200,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return SLASH_PATTERN.matcher(path).replaceFirst("");
     }
 
-	public String getFilePath() {
+    public String getFilePath() {
         if (logicalFilePath == null) {
             return physicalFilePath;
         } else {
@@ -209,7 +208,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
     }
 
-	/**
+    /**
      * @deprecated use {@link #getContextFilter()}
      */
     @Deprecated
@@ -225,7 +224,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         setContextFilter(contexts);
     }
 
-	/**
+    /**
      * @deprecated Correct version is {@link #setIncludeLabels(Labels)}. Kept for backwards compatibility.
      */
     @Deprecated
@@ -237,7 +236,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         this.includeLabels = labels;
     }
 
-	/**
+    /**
      * @deprecated use {@link #setIncludeContextFilter(ContextExpression)}
      */
     @Deprecated
@@ -245,7 +244,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         setIncludeContextFilter(includeContexts);
     }
 
-	@Override
+    @Override
     public String toString() {
         return getFilePath();
     }

@@ -343,7 +343,8 @@ create view sql_view as select * from sql_table;'''
 
     def "included changelogs inherit contexts, labels, and ignores via load()"() {
         when:
-        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml, "com/example/test2.xml": test1Xml.replace("testUser", "otherUser").replace("person", "person2")])
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml,
+                                                         "com/example/test2.xml": test1Xml.replace("testUser", "otherUser").replace("person", "person2")])
 
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
@@ -1134,7 +1135,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         when:
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
             .load(parsedNode(include: [file: "./test1.xml"]),
-               new MockResourceAccessor(["com/example/test1.xml": test1Xml]))
+               new MockResourceAccessor(["com/example/test1.xml": test2Xml]))
         then:
         rootChangeLog.preconditions.nestedPreconditions.size() == 1
     }
@@ -1143,7 +1144,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         when:
         def rootChangeLog = new DatabaseChangeLog("example/root.xml")
             .load(parsedNode( includeAll: [path: "./inc"]),
-                new MockResourceAccessor(["example/inc/test1.xml": test1Xml]))
+                new MockResourceAccessor(["example/inc/test1.xml": test2Xml]))
         then:
         rootChangeLog.preconditions.nestedPreconditions.size() == 1
     }
