@@ -749,7 +749,7 @@ class ChangeSetTest extends Specification {
         changeSet.setValidationFailed(true)
 
         then:
-        changeSet.execute(databaseChangeLog, new MockDatabase()) == ChangeSet.ExecType.MARK_RAN
+        changeSet.execute( new MockDatabase()) == ChangeSet.ExecType.MARK_RAN
     }
 
     def "execute returns a EXECUTED state when changeSet is set with validation failed as false"() {
@@ -760,7 +760,7 @@ class ChangeSetTest extends Specification {
         changeSet.setValidationFailed(false)
 
         then:
-        changeSet.execute(databaseChangeLog, new MockDatabase()) == ChangeSet.ExecType.EXECUTED
+        changeSet.execute( new MockDatabase()) == ChangeSet.ExecType.EXECUTED
     }
 
     def "execute does not execute shell command against when adding MDC"() {
@@ -774,7 +774,7 @@ class ChangeSetTest extends Specification {
         changeSet.addChange(executeShellCommandChange)
 
         then:
-        changeSet.execute(databaseChangeLog, new MockDatabase()) == ChangeSet.ExecType.EXECUTED
+        changeSet.execute( new MockDatabase()) == ChangeSet.ExecType.EXECUTED
         ! new File("liquibase_shell_out").exists()
 
         cleanup:

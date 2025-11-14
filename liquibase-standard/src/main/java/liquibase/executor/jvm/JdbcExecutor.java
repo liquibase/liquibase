@@ -32,6 +32,8 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static liquibase.executor.ExecutorService.JDBC;
+
 /**
  * Class to simplify execution of SqlStatements.  Based heavily on <a href="http://static.springframework.org/spring/docs/2.0.x/reference/jdbc.html">Spring's JdbcTemplate</a>.
  * <br><br>
@@ -49,7 +51,7 @@ public class JdbcExecutor extends AbstractExecutor {
      */
     @Override
     public String getName() {
-        return "jdbc";
+        return JDBC;
     }
 
     /**
@@ -150,11 +152,6 @@ public class JdbcExecutor extends AbstractExecutor {
     }
 
     @Override
-    public void execute(final SqlStatement sql) throws DatabaseException {
-        execute(sql, new ArrayList<>());
-    }
-
-    @Override
     public void execute(final SqlStatement sql, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
         if (sql instanceof RawParameterizedSqlStatement) {
             PreparedStatementFactory factory = new PreparedStatementFactory((JdbcConnection) database.getConnection());
@@ -171,7 +168,7 @@ public class JdbcExecutor extends AbstractExecutor {
             }
         }
 
-        if (sql instanceof ExecutablePreparedStatement) {
+        if (sql instanceof ExecutablePreparedStatement) { // TODO applySqlVisitor
             ((ExecutablePreparedStatement) sql).execute(new PreparedStatementFactory((JdbcConnection) database.getConnection()));
             return;
         }
@@ -181,7 +178,7 @@ public class JdbcExecutor extends AbstractExecutor {
                 return;
             }
         }
-        if (sql instanceof ReturningSqlStatement && ((ReturningSqlStatement) sql).getResultIn() != null) {
+        if (sql instanceof ReturningSqlStatement && ((ReturningSqlStatement) sql).getProperty() != null) {
             ReturningSqlStatement stmt = (ReturningSqlStatement) sql;
             String sResult = queryForObject(sql, String.class, sqlVisitors);
             stmt.setResult(sResult);
@@ -227,20 +224,7 @@ public class JdbcExecutor extends AbstractExecutor {
                 }
             }
         }
-        InjectRuntimeVariablesVisitor v = InjectRuntimeVariablesVisitor.getInstance(); // Required for SsqlPrecondition
-        if(v != null) {
-             finalSql = v.modifySql(finalSql, database);
-        }
         return finalSql;
-    }
-
-    @Override
-    protected String[] applyVisitors(SqlStatement statement, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        InjectRuntimeVariablesVisitor v = InjectRuntimeVariablesVisitor.getInstance();
-        if(null != v && !sqlVisitors.contains(v)) {
-            sqlVisitors.add(v);
-        }
-        return super.applyVisitors(statement, sqlVisitors);
     }
 
     public Object query(final SqlStatement sql, final ResultSetExtractor rse) throws DatabaseException {
@@ -292,40 +276,8 @@ public class JdbcExecutor extends AbstractExecutor {
     }
 
     @Override
-    public <T> T queryForObject(SqlStatement sql, Class<T> requiredType) throws DatabaseException {
-        return (T) queryForObject(sql, requiredType, new ArrayList<>());
-    }
-
-    @Override
     public <T> T queryForObject(SqlStatement sql, Class<T> requiredType, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         return (T) queryForObject(sql, getSingleColumnRowMapper(requiredType), sqlVisitors);
-    }
-
-    @Override
-    public long queryForLong(SqlStatement sql) throws DatabaseException {
-        return queryForLong(sql, new ArrayList<>());
-    }
-
-    @Override
-    public long queryForLong(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        Number number = queryForObject(sql, Long.class, sqlVisitors);
-        return ((number != null) ? number.longValue() : 0);
-    }
-
-    @Override
-    public int queryForInt(SqlStatement sql) throws DatabaseException {
-        return queryForInt(sql, new ArrayList<>());
-    }
-
-    @Override
-    public int queryForInt(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        Number number = queryForObject(sql, Integer.class, sqlVisitors);
-        return ((number != null) ? number.intValue() : 0);
-    }
-
-    @Override
-    public List queryForList(SqlStatement sql, Class elementType) throws DatabaseException {
-        return queryForList(sql, elementType, new ArrayList<>());
     }
 
     @Override
@@ -334,18 +286,8 @@ public class JdbcExecutor extends AbstractExecutor {
     }
 
     @Override
-    public List<Map<String, ?>> queryForList(SqlStatement sql) throws DatabaseException {
-        return queryForList(sql, new ArrayList<>());
-    }
-
-    @Override
     public List<Map<String, ?>> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         return (List<Map<String, ?>>) query(sql, getColumnMapRowMapper(), sqlVisitors);
-    }
-
-    @Override
-    public int update(final SqlStatement sql) throws DatabaseException {
-        return update(sql, new ArrayList<>());
     }
 
     // Incorrect warning, at least at this point. The situation here is not that we inject some unsanitised parameter

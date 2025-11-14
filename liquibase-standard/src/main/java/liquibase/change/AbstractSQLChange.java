@@ -13,7 +13,9 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
+import liquibase.sql.visitor.InjectRuntimeVariablesVisitor;
 import liquibase.statement.ReturningSqlStatement;
+import liquibase.statement.ReturningSqlStatement.Property;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCompoundStatement;
 import liquibase.statement.core.RawSqlStatement;
@@ -136,9 +138,9 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         if (StringUtils.trimToNull(sql) == null) {
             validationErrors.addError("'sql' is required");
         }
-        if(resultIn != null &&
-            getChangeSet().getChangeLog().getChangeLogParameters().hasValue(resultIn, null)) {
-            validationErrors.addError(String.format("Property '%s' is already defined! Cannot set new runtime value", resultIn));
+        if(setProperty != null &&
+            getChangeSet().getChangeLog().getChangeLogParameters().hasValue(setProperty.name, setProperty.local ? getChangeSet().getChangeLog() : null)) {
+            validationErrors.addError(String.format("'%s' property is already defined! Cannot set new runtime value", setProperty));
         }
         return validationErrors;
     }
@@ -249,16 +251,16 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         return service.getEndDelimiter(getChangeSet());
     }
 
-    protected String resultIn;
+    protected Property setProperty;
 
     @DatabaseChangeProperty(description = "The name of the property to return the value into DURING RUNTIME EXECUTION",
             exampleValue = "newId", requiredForDatabase = NONE, supportsDatabase = ALL)
-    public String getResultIn() {
-        return resultIn;
+    public String getSetProperty() {
+        return null == setProperty ? null : String.valueOf(setProperty);
     }
 
-    public void setResultIn(String value) {
-        resultIn = StringUtils.trimToNull(value);
+    public void setSetProperty(String value) {
+        setProperty = new Property(StringUtils.trimToNull(value));
     }
 
     /**
@@ -311,9 +313,9 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     }
 
     void addReturnIn( List<SqlStatement> returnStatements) {
-        if(getResultIn() != null) {
+        if(setProperty != null) {
             cast(returnStatements.get(returnStatements.size() - 1), ReturningSqlStatement.class)
-                    .ifPresent(stmt -> stmt.setResultIn(getResultIn(), getChangeSet()));
+                    .ifPresent(stmt -> stmt.setProperty(setProperty, getChangeSet()));
         }
     }
 
@@ -339,6 +341,9 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             addReturnIn(returnStatements);
             return returnStatements.toArray(EMPTY_SQL_STATEMENT);
         }
+
+        // Has to do the runtime replace, 'cause nativeSQL can remove the placeholders
+        processedSQL = InjectRuntimeVariablesVisitor.expand(processedSQL, getChangeSet().getChangeLog());
 
         for (String statement : StringUtil.processMultiLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter(), getChangeSet())) {
             if (database instanceof MSSQLDatabase) {

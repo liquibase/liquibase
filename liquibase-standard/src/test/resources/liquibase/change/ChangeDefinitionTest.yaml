@@ -1037,7 +1037,7 @@ sql: |
     Supported: all
   ignoreOriginalSplitStatements boolean 
     Supported: all
-  resultIn string 
+  setProperty string 
     Description: The name of the property to return the value into DURING RUNTIME EXECUTION
     Supported: all
   splitStatements boolean 
@@ -1074,7 +1074,7 @@ sqlFile: |
   relativeToChangelogFile boolean 
     Description: Specifies whether the file path is relative to the changelog file rather than looked up in the search path. Default: false.
     Supported: all
-  resultIn string 
+  setProperty string 
     Description: The name of the property to return the value into DURING RUNTIME EXECUTION
     Supported: all
   splitStatements boolean 

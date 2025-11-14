@@ -1152,10 +1152,14 @@
             </xsd:annotation>
         </xsd:attribute>
         <xsd:attribute name="dbms" type="xsd:string"/>
-        <xsd:attribute name="resultIn" type="nonEmptyString">
+        <xsd:attribute name="setProperty" type="nonEmptyString">
             <xsd:annotation>
                 <xsd:documentation>Name of the property set from the result of this sql's statement(s).
-                    The last statement has to return a single row with the first column containing the new value of the property</xsd:documentation>
+                    The last statement has to return a single row with the first column containing the
+                    new value of the property.
+                    If the name starts with 'local:' the property is defined as local to the changeset.
+                    Property is created as global otherwise
+                </xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
         <xsd:attributeGroup ref="changeAttributes"/>
