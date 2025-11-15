@@ -63,7 +63,7 @@ public abstract class AbstractSQLAndFileChange extends AbstractChange
     }
 
     @Setter
-    protected String encoding;// = GlobalConfiguration.FILE_ENCODING.getCurrentValue().toString();
+    protected String encoding;
 
     @DatabaseChangeProperty(exampleValue = "utf8", description = "Encoding used in the file you specify in 'path'")
     public String getEncoding() {
@@ -146,14 +146,14 @@ public abstract class AbstractSQLAndFileChange extends AbstractChange
         InputStream stream = null;
         CheckSum checkSum;
         try {
+            Charset fileEncoding = GlobalConfiguration.FILE_ENCODING.getCurrentValue();
             if (file() == null) {
-                Charset encoding = GlobalConfiguration.FILE_ENCODING.getCurrentValue();
                 if (sqlText != null) {
-                    stream = new ByteArrayInputStream(sqlText.getBytes(encoding));
+                    stream = new ByteArrayInputStream(sqlText.getBytes(fileEncoding));
                 }
             } else {
                 stream = getResource().openInputStream();
-                stream = new PropertyExpandingStream(this.getChangeSet(), stream, encoding);
+                stream = new PropertyExpandingStream(this.getChangeSet(), stream, fileEncoding.name());
             }
             checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
             return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum);
@@ -214,8 +214,7 @@ public abstract class AbstractSQLAndFileChange extends AbstractChange
                 sqlText = "NO CHANGESET";
             } else {
                 try {
-                    sqlText = StreamUtil.readStreamAsString(openSqlStream(),
-                          getIfNull(encoding, FILE_ENCODING.getCurrentValue().name()));
+                    sqlText = StreamUtil.readStreamAsString(openSqlStream(), getEncoding());
                     ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
                     if (parameters != null) {
                         sqlText = parameters.expandExpressions(sqlText, getChangeSet().getChangeLog());
