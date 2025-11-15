@@ -515,8 +515,8 @@ public class ChangeParameterMetaData {
 
         Map<String, String> standardDescriptions = new HashMap<>();
         standardDescriptions.put("tableName", "Name of the table");
-        standardDescriptions.put("schemaName", "Name of the schema");
-        standardDescriptions.put("catalogName", "Name of the catalog");
+        standardDescriptions.put("schemaName", "Name of the database schema");
+        standardDescriptions.put("catalogName", "Name of the database catalog");
         standardDescriptions.put("columnName", "Name of the column");
 
         return StringUtil.trimToEmpty(standardDescriptions.get(parameterName));

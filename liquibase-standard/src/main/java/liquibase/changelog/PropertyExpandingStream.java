@@ -19,14 +19,13 @@ public class PropertyExpandingStream extends InputStream {
      * @param stream
      * @return an updated {@link InputStream} if any replacement has been performed in the content of the original stream.
      */
-    public PropertyExpandingStream(ChangeSet changeSet, InputStream stream) {
+    public PropertyExpandingStream(ChangeSet changeSet, InputStream stream, String encoding) {
         try {
             if (changeSet == null) {
                 this.stream = stream;
             }
             else {
-                Charset encoding = GlobalConfiguration.FILE_ENCODING.getCurrentValue();
-                String streamContent = StreamUtil.readStreamAsString(stream, encoding.toString());
+                String streamContent = StreamUtil.readStreamAsString(stream, encoding);
                 ChangeLogParameters parameters = changeSet.getChangeLogParameters();
                 if (parameters != null) {
                     streamContent = parameters.expandExpressions(streamContent, changeSet.getChangeLog());

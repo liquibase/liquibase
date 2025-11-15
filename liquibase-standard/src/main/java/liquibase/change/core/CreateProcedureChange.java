@@ -1,72 +1,31 @@
 package liquibase.change.core;
 
 import liquibase.ChecksumVersion;
-import liquibase.GlobalConfiguration;
-import liquibase.Scope;
 import liquibase.change.*;
-import liquibase.changelog.ChangeLogParameters;
-import liquibase.changelog.PropertyExpandingStream;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateProcedureStatement;
-import liquibase.util.FileUtil;
-import liquibase.util.StreamUtil;
-import liquibase.util.StringUtil;
 import lombok.Setter;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.util.Map;
 
 @DatabaseChange(name = "createProcedure", description = "Defines a stored procedure.", priority = ChangeMetaData.PRIORITY_DEFAULT)
-public class CreateProcedureChange extends AbstractChange implements DbmsTargetedChange, ReplaceIfExists {
+public class CreateProcedureChange extends AbstractSQLAndFileChange implements DbmsTargetedChange {
     @Setter
     private String comment;
-    @Setter
-    private String catalogName;
-    @Setter
-    private String schemaName;
+
     @Setter
     private String procedureName;
-    @Setter
-    private String procedureText;
+
     private String dbms;
-
-    @Setter
-    private String path;
-    @Setter
-    private Boolean relativeToChangelogFile;
-    @Setter
-    private String encoding;
-    private Boolean replaceIfExists;
-
-    @Override
-    public boolean generateStatementsVolatile(Database database) {
-        return false;
-    }
 
     @Override
     public boolean generateRollbackStatementsVolatile(Database database) {
         return false;
-    }
-
-    @DatabaseChangeProperty(description = "Name of the database catalog")
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    @DatabaseChangeProperty(description = "Name of the database schema")
-    public String getSchemaName() {
-        return schemaName;
     }
 
     @DatabaseChangeProperty(exampleValue = "new_customer",
@@ -75,23 +34,12 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         return procedureName;
     }
 
-    @DatabaseChangeProperty(exampleValue = "utf8", description = "Encoding used in the file you specify in 'path'")
-    public String getEncoding() {
-        return encoding;
-    }
-
     @DatabaseChangeProperty(
         description = "File containing the procedure text. You must either use this attribute or write inline SQL within the createProcedure definition.",
         exampleValue = "com/example/my-logic.sql"
     )
     public String getPath() {
-        return path;
-    }
-
-    @DatabaseChangeProperty(description = "Specifies whether the file path is relative to the changelog file " +
-        "rather than looked up in the search path. Default: false.")
-    public Boolean isRelativeToChangelogFile() {
-        return relativeToChangelogFile;
+        return file();
     }
 
     @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE, version = {ChecksumVersion.V8})
@@ -101,7 +49,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
      */
     @Deprecated
     public String getProcedureBody() {
-        return procedureText;
+        return sql();
     }
 
     /**
@@ -109,11 +57,12 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
      */
     @Deprecated
     public void setProcedureBody(String procedureText) {
-        this.procedureText = procedureText;
+        sql( procedureText );
     }
 
     private final String procedureTextDescription = "The SQL creating the procedure. You need to define either this attribute or 'path'. " +
             "procedureText is not supported in the XML format; however, you can specify the procedure SQL inline within the createProcedure definition.";
+
     @DatabaseChangeProperty(
         description = procedureTextDescription,
             isChangeProperty = false, version = {ChecksumVersion.V8})
@@ -122,7 +71,11 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             serializationType = SerializationType.DIRECT_VALUE,
             alternatePropertyNames = {"procedureBody"})
     public String getProcedureText() {
-        return procedureText;
+        return sql();
+    }
+
+    public void setProcedureText(String s) {
+        sql(s);
     }
 
     @Override
@@ -155,32 +108,17 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     }
 
     @Override
-    public void setReplaceIfExists(Boolean replaceIfExists) {
-        this.replaceIfExists = replaceIfExists;
+    protected String sqlFieldName() {
+        return "procedureText";
     }
 
     @Override
     public ValidationErrors validate(Database database) {
         // Not falling back to default because of path/procedureText option group. Need to specify everything.
-        ValidationErrors validate = new ValidationErrors();
-
+        ValidationErrors validate = super.validate(database, new ValidationErrors(this));
         validate.checkDisallowedField("catalogName", this.getCatalogName(), database, MSSQLDatabase.class);
         if(getDbms() != null) {
             DatabaseList.validateDefinitions(getDbms(), validate);
-        }
-
-        if ((StringUtil.trimToNull(getProcedureText()) != null) && (StringUtil.trimToNull(getPath()) != null)) {
-            validate.addError(
-                "Cannot specify both 'path' and a nested procedure text in " +
-                    Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName()
-            );
-        }
-
-        if ((StringUtil.trimToNull(getProcedureText()) == null) && (StringUtil.trimToNull(getPath()) == null)) {
-            validate.addError(
-                "Must specify either 'path' or a nested procedure text in " +
-                    Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName()
-            );
         }
 
         if ((this.getReplaceIfExists() != null) && (DatabaseList.definitionMatches(getDbms(), database, true))) {
@@ -193,121 +131,6 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             }
         }
         return validate;
-    }
-
-    public InputStream openSqlStream() throws IOException {
-        if (path == null) {
-            return null;
-        }
-
-        try {
-            ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-
-            String path = getPath();
-            final Boolean isRelative = isRelativeToChangelogFile();
-            if (isRelative != null && isRelative) {
-                return resourceAccessor.get(getChangeSet().getChangeLog().getPhysicalFilePath()).resolveSibling(path).openInputStream();
-            } else {
-                return resourceAccessor.getExisting(path).openInputStream();
-            }
-        } catch (IOException e) {
-            throw new IOException(
-                "<" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " path=" +
-                path +
-                "> -Unable to read file",
-                e
-            );
-        }
-    }
-
-    /**
-     * Calculates the checksum based on the contained SQL.
-     *
-     * @see Change#generateCheckSum()
-     */
-    @Override
-    public CheckSum generateCheckSum() {
-        ChecksumVersion version = Scope.getCurrentScope().getChecksumVersion();
-        if (version.lowerOrEqualThan(ChecksumVersion.V8)) {
-            return generateCheckSumV8();
-        }
-        return generateCheckSumLatest(this.procedureText);
-    }
-
-    @Deprecated
-    private CheckSum generateCheckSumV8() {
-        if (this.path == null) {
-            return super.generateCheckSum();
-        }
-
-        InputStream stream = null;
-        try {
-            stream = openSqlStream();
-        } catch (IOException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-
-        try {
-            String procedureText = this.procedureText;
-            if ((stream == null) && (procedureText == null)) {
-                procedureText = "";
-            }
-
-            String localEncoding = GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue();
-            if (procedureText != null) {
-                try {
-                    stream = new ByteArrayInputStream(procedureText.getBytes(localEncoding));
-                } catch (UnsupportedEncodingException e) {
-                    throw new AssertionError(localEncoding +
-                            " is not supported by the JVM, this should not happen according to the JavaDoc of " +
-                            "the Charset class"
-                    );
-                }
-            }
-
-            CheckSum checkSum = CheckSum.compute(new NormalizingStreamV8(";", false, false, stream), false);
-
-            return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum);
-        } finally {
-            if (stream != null) {
-                try {
-                    stream.close();
-                } catch (IOException ignore) {
-                    // Do nothing
-                }
-            }
-        }
-    }
-
-    protected CheckSum generateCheckSumLatest(String sqlText) {
-        InputStream stream = null;
-        CheckSum checkSum;
-        try {
-            if (getPath() == null) {
-                Charset encoding = GlobalConfiguration.FILE_ENCODING.getCurrentValue();
-                if (sqlText != null) {
-                    stream = new ByteArrayInputStream(sqlText.getBytes(encoding));
-                }
-            }
-            else {
-                stream = openSqlStream();
-                stream = new PropertyExpandingStream(this.getChangeSet(), stream);
-            }
-            checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(stream), false);
-            return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum);
-
-        } catch (IOException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-        finally {
-            if (stream != null) {
-                try {
-                    stream.close();
-                } catch (IOException ignore) {
-                    // Do nothing
-                }
-            }
-        }
     }
 
     /**
@@ -347,34 +170,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         } else if (database instanceof AbstractDb2Database) {
             endDelimiter = "";
         }
-
-        String procedureText;
-        String path = getPath();
-        if (path == null) {
-            procedureText = StringUtil.trimToNull(getProcedureText());
-        } else {
-            if (getChangeSet() == null) {
-                //only try to read a file when inside a changest. Not when analyzing supported
-                procedureText = "NO CHANGESET";
-            } else {
-                try {
-                    InputStream stream = openSqlStream();
-                    if (stream == null) {
-                        throw new IOException(FileUtil.getFileNotFoundMessage(path));
-                    }
-                    procedureText = StreamUtil.readStreamAsString(stream, encoding);
-                    if (getChangeSet() != null) {
-                        ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
-                        if (parameters != null) {
-                            procedureText = parameters.expandExpressions(procedureText, getChangeSet().getChangeLog());
-                        }
-                    }
-                } catch (IOException e) {
-                    throw new UnexpectedLiquibaseException(e);
-                }
-            }
-        }
-        return generateStatements(procedureText, endDelimiter, database);
+        return generateStatements(getSqlText(), endDelimiter, database);
     }
 
     protected SqlStatement[] generateStatements(String logicText, String endDelimiter, Database database) {
@@ -400,11 +196,6 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     @Override
     public String getConfirmationMessage() {
         return "Stored procedure created";
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
     }
 
     @SuppressWarnings("java:S2095")

@@ -140,4 +140,9 @@ public abstract class AbstractResource implements Resource {
             return "/" + other;
         }
     }
+
+    @Override
+    public boolean isFile() {
+        return exists();
+    }
 }

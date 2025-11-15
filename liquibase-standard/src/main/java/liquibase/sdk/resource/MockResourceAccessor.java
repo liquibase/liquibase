@@ -6,6 +6,8 @@ import liquibase.resource.Resource;
 import java.io.IOException;
 import java.util.*;
 
+import static liquibase.changelog.DatabaseChangeLog.normalizePath;
+
 public class MockResourceAccessor extends AbstractResourceAccessor {
 
     private final SortedMap<String, String> contentByFileName;
@@ -25,7 +27,7 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
 
     @Override
     public List<Resource> getAll(String path) throws IOException {
-        path = path.replace("\\", "/");
+        path = normalizePath(path);
         String content = contentByFileName.get(path);
         List<Resource> returnSet = new ArrayList<>();
         if (content != null) {

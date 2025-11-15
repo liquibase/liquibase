@@ -4,13 +4,11 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.Logger;
+import liquibase.sdk.resource.MockResource;
 import liquibase.util.CollectionUtil;
 import liquibase.util.FileUtil;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URI;
 import java.util.*;
 
@@ -202,7 +200,8 @@ public interface ResourceAccessor extends AutoCloseable {
      * <p>
      * If the resourceAccessor returns multiple values, the returned List should be considered sorted for that resource accessor.
      * For example, {@link ClassLoaderResourceAccessor} returns them in order based on the configured classloader.
-     * Order is important to pay attention to, because users may set {@link GlobalConfiguration#DUPLICATE_FILE_MODE} to pick the "best" file which is defined as
+     * Order is important to pay attention to, because users may set {@link GlobalConfiguration#DUPLICATE_FILE_MODE}
+     * to pick the "best" file which is defined as
      * "the first file from this function".
      * <p>
      *
@@ -217,15 +216,56 @@ public interface ResourceAccessor extends AutoCloseable {
      * @throws FileNotFoundException if the file does not exist
      */
     default Resource getExisting(String path) throws IOException {
+        return getExisting( path, "");
+    }
+
+    /**
+     * Convenience version of {@link #get(String)} which throws an exception if the file does not exist.
+     * @param requiredAt location the path is required
+     * @throws FileNotFoundException if the file does not exist
+     */
+    default Resource getExisting(String path, String requiredAt ) throws IOException {
         Resource resource = get(path);
         if (!resource.exists()) {
-            throw new FileNotFoundException(FileUtil.getFileNotFoundMessage(path));
+            throw new FileNotFoundException(FileUtil.getFileNotFoundMessage(path, requiredAt));
         }
         return resource;
     }
 
     /**
-     * Finds a single specific {@link Resource}. If multiple files match the given path, handle based on the {@link GlobalConfiguration#DUPLICATE_FILE_MODE} setting.
+     * Convenience version of {@link #get(String)} which validates existence of the path and if points to a file
+     *
+     * @throws FileNotFoundException if the file does not exist or is a directory
+     */
+    default Resource getExistingFile(String path, String relativeTo, String requiredAt) throws IOException {
+        Resource r;
+        if ( null != relativeTo ) {
+            r = get(relativeTo).resolveSibling(path);
+            if(!r.exists()) {
+                throw new FileNotFoundException("File '" + fullPathToLog(r) + "' not found" + requiredAt);
+            }
+        } else {
+            r = getExisting(path, requiredAt);
+        }
+        if(!r.isFile()) {
+            throw new FileNotFoundException("'" + fullPathToLog(r) + "' is a directory" + requiredAt);
+        }
+        return r;
+    }
+
+    default String fullPathToLog(Resource r) {
+        if(r instanceof NotFoundResource || r instanceof MockResource) {
+            return r.getPath();
+        } else if (r instanceof PathResource) {
+            return r.getUri().getPath();
+        } else {
+            return r.getUri().toString();
+        }
+    }
+
+    /**
+     * Finds a single specific {@link Resource}. If multiple files match the given path, handle based on the
+     * {@link GlobalConfiguration#DUPLICATE_FILE_MODE} setting.
      * Default implementation calls {@link #getAll(String)}.
      *
      * @return a Resource even if the path does not exist
@@ -233,7 +273,7 @@ public interface ResourceAccessor extends AutoCloseable {
     default Resource get(String path) throws IOException {
         List<Resource> resources = getAll(path);
 
-        if (resources == null || resources.size() == 0) {
+        if (resources == null || resources.isEmpty()) {
             return new NotFoundResource(path, this);
         } else if (resources.size() == 1) {
             return resources.iterator().next();
@@ -298,7 +338,7 @@ public interface ResourceAccessor extends AutoCloseable {
      */
     List<String> describeLocations();
 
-    public class NotFoundResource extends AbstractResource {
+    class NotFoundResource extends AbstractResource {
         private final ResourceAccessor resourceAccessor;
 
         public NotFoundResource(String path, ResourceAccessor resourceAccessor) {
@@ -342,6 +382,11 @@ public interface ResourceAccessor extends AutoCloseable {
         @Override
         public OutputStream openOutputStream(OpenOptions openOptions) throws IOException {
             return openOutputStream(new OpenOptions());
+        }
+
+        @Override
+        public boolean isFile() {
+            return false;
         }
     }
 

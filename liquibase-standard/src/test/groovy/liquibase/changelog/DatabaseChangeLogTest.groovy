@@ -12,11 +12,12 @@ import liquibase.database.Database
 import liquibase.database.core.MockDatabase
 import liquibase.exception.ChangeLogParseException
 import liquibase.exception.SetupException
-import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.logging.core.BufferedLogService
 import liquibase.parser.ChangeLogParser
 import liquibase.parser.ChangeLogParserConfiguration
+import liquibase.parser.ChangeLogParserConfiguration.MissingIncludeConfiguration
 import liquibase.parser.core.ParsedNode
+import liquibase.parser.core.ParsedNodeException
 import liquibase.parser.core.xml.XMLChangeLogSAXParser
 import liquibase.precondition.core.OrPrecondition
 import liquibase.precondition.core.PreconditionContainer
@@ -26,6 +27,7 @@ import liquibase.resource.ResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.util.FileUtil
+import static liquibase.util.TestUtil.*
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -34,8 +36,7 @@ import java.util.logging.Level
 
 class DatabaseChangeLogTest extends Specification {
 
-    @Shared
-            resourceSupplier = new ResourceSupplier()
+    @Shared resourceSupplier = new ResourceSupplier()
     def test1Xml = '''<databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -191,10 +192,8 @@ create view sql_view as select * from sql_table;'''
         changeLogFromChildren.load(nodeWithChildren, resourceSupplier.simpleResourceAccessor)
 
         then:
-
         changeLogFromChildren.changeVisitors.size() == 1
         changeLogFromChildren.changeSets.size() == 1
-
 
         ((ChangeVisitor) changeLogFromChildren.changeVisitors[0]).change == "addColumn"
         ((ChangeVisitor) changeLogFromChildren.changeVisitors[0]).dbms == ["mock"] as HashSet
@@ -204,10 +203,10 @@ create view sql_view as select * from sql_table;'''
 
     def "included changelog files have their preconditions and changes included in root changelog"() {
         when:
-        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml, "com/example/test2.xml": test1Xml.replace("\${loginUser}", "otherUser").replace("person", "person2")])
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml,
+                                                         "com/example/test2.xml": test1Xml.replace("\${loginUser}", "otherUser").replace("person", "person2")])
 
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
         rootChangeLog.getChangeLogParameters().set("loginUser", "testUser")
 
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
@@ -244,9 +243,7 @@ create view sql_view as select * from sql_table;'''
                         .replace("person", "person2")])
 
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
         rootChangeLog.getChangeLogParameters().set("loginUser", "testUser")
-
 
         def topLevel =
                 new ParsedNode(null, "databaseChangeLog")
@@ -259,9 +256,7 @@ create view sql_view as select * from sql_table;'''
         topLevel.addChild(modifyNode)
         rootChangeLog.load(topLevel, resourceAccessor)
 
-
         then:
-
         rootChangeLog.changeSets.size() == 3
         ((CreateTableChange) rootChangeLog.getChangeSet("com/example/root.xml", "nvoxland", "1").changes[0]).tableName == "test_table"
         rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").getRunWith() == "psql"
@@ -276,9 +271,7 @@ create view sql_view as select * from sql_table;'''
                 "com/example/test.sql" : testSql
         ])
 
-        Database database = new MockDatabase();
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
         rootChangeLog.getChangeLogParameters().set("loginUser", "testUser")
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChild(new ParsedNode(null, "preConditions").addChildren([runningAs: [username: "user1"]]))
@@ -320,7 +313,6 @@ create view sql_view as select * from sql_table;'''
         ])
 
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
         rootChangeLog.getChangeLogParameters().set("loginUser", "testUser")
         def topLevel =
                 new ParsedNode(null, "databaseChangeLog")
@@ -352,9 +344,10 @@ create view sql_view as select * from sql_table;'''
 
     def "included changelogs inherit contexts, labels, and ignores via load()"() {
         when:
-        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml, "com/example/test2.xml": test1Xml.replace("testUser", "otherUser").replace("person", "person2")])
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml,
+                                                         "com/example/test2.xml": test1Xml.replace("testUser", "otherUser").replace("person", "person2")])
 
-        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml", null)
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChild(new ParsedNode(null, "preConditions").addChildren([runningAs: [username: "user1"]]))
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
@@ -387,7 +380,7 @@ create view sql_view as select * from sql_table;'''
                 "com/example/test2.xml": test1Xml.replace("testUser", "otherUser").replace("person", "person2")
         ])
 
-        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml", null)
         rootChangeLog.include("com/example/test1.xml", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, false)
         rootChangeLog.include("com/example/test2.xml", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, false)
 
@@ -536,7 +529,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         changeLogFile.includeAll("com/example/missing", false, null, false, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new Labels(), false, null, 0, Integer.MAX_VALUE)
         then:
         changeLogFile.changeSets.collect { it.filePath } == []
-
     }
 
     def "include fails if no parser supports the file"() {
@@ -550,7 +542,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
                 .addChildren([include: [file: "com/example/test1.invalid"]])
                 , resourceAccessor)
-
 
         then:
         def e = thrown(SetupException)
@@ -571,7 +562,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
                 .addChildren([include: [file: "com/example/test1.xml"]])
                 , resourceAccessor)
 
-
         then:
         def e = thrown(SetupException)
         e.getMessage().contains(String.format("Unable to parse empty file: '%s'", "com/example/test1.xml"))
@@ -587,7 +577,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
                 .addChildren([include: [file: "com/example/test1.sql"]])
                 , resourceAccessor)
-
 
         then:
         def e = thrown(SetupException)
@@ -605,7 +594,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
                 .addChildren([include: [file: "com/example/test1.json"]])
                 , resourceAccessor)
 
-
         then:
         def e = thrown(SetupException)
         e.getMessage().contains("Empty file com/example/test1.json")
@@ -614,20 +602,13 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
     def "include fails if file is empty"() {
         when:
         def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml])
-
-        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-
-        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
-                .addChild(new ParsedNode(null, "preConditions").addChildren([runningAs: [username: "user1"]]))
-                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
-                .addChildren([include: [file: "com/example/invalid.xml"]])
-                , resourceAccessor)
-
-
+        String rootChangeLogPath = "com/example/root.xml"
+        new DatabaseChangeLog(rootChangeLogPath)
+            .load(parsedNode(include: [file: "com/example/invalid.xml"]), resourceAccessor)
         then:
-        ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getCurrentValue() == ChangeLogParserConfiguration.MissingIncludeConfiguration.FAIL
+        ChangeLogParserConfiguration.ON_MISSING_INCLUDE_CHANGELOG.getCurrentValue() == MissingIncludeConfiguration.FAIL
         def e = thrown(SetupException)
-        e.message.startsWith("The file com/example/invalid.xml was not found in")
+        e.message.startsWith("The file 'com/example/invalid.xml' not found set as include:file in '$rootChangeLogPath' in")
     }
 
     def "properties values are correctly loaded and stored when properties file is relative to changelog"() {
@@ -641,6 +622,20 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
                 .addChildren([property: [file: "file.properties", relativeToChangelogFile: "true", errorIfMissing: "true"]]),
                 propertiesResourceAccessor)
+
+        then:
+        rootChangeLog.getChangeLogParameters().hasValue("context", rootChangeLog)
+        rootChangeLog.getChangeLogParameters().getValue("context", rootChangeLog) == "test"
+    }
+
+    def "properties values are loaded and stored from properties file is relative to changelog"() {
+        when:
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
+
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+           .addChildren([property: [file: "./file.properties"]]),
+           new MockResourceAccessor(["com/example/file.properties": testProperties]))
 
         then:
         rootChangeLog.getChangeLogParameters().hasValue("context", rootChangeLog)
@@ -662,32 +657,28 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         then:
         rootChangeLog.getChangeLogParameters().hasValue("context", rootChangeLog) == false
     }
-
+    final static String rootChangeLogFile = "com/example/root.xml"
     @Unroll
     def "an error is thrown when properties file is not found and is set to error"() {
+
         when:
         def propertiesResourceAccessor = new MockResourceAccessor(["com/example/file.properties": testProperties])
-
-        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
-
-        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
-                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
-                .addChildren([property: [errorIfMissing: errorIfMissingDef, relativeToChangelogFile: relativeToChangelogFileDef, file: fileDef]]),
-                propertiesResourceAccessor)
-
+        new DatabaseChangeLog(rootChangeLogFile)
+            .load(parsedNode(property: [errorIfMissing: errorIfMissingDef,
+                                        relativeToChangelogFile: relativeToChangelogFileDef,
+                                        file: fileDef]), propertiesResourceAccessor)
         then:
-        def e = thrown(UnexpectedLiquibaseException)
-        assert e.getMessage() == FileUtil.getFileNotFoundMessage(fileDef)
+        def e = thrown(ParsedNodeException)
+        assert e.getMessage() == expMsg
 
         where:
-        errorIfMissingDef | relativeToChangelogFileDef | fileDef
-        null              | null                       | "file.properties"
-        null              | false                      | "file.properties"
-        null              | true                       | "com/example/file.properties"
-        true              | null                       | "file.properties"
-        true              | false                      | "file.properties"
-        true              | true                       | "com/example/file.properties"
+        errorIfMissingDef | relativeToChangelogFileDef | fileDef                        | expMsg
+        null              | null                       | "file.properties"              | FileUtil.getFileNotFoundMessage(fileDef, " set as property:file in '$rootChangeLogFile'")
+        null              | false                      | "file.properties"              | FileUtil.getFileNotFoundMessage(fileDef, " set as property:file in '$rootChangeLogFile'")
+        null              | true                       | "com/example/file.properties"  | "File 'com/example/com/example/file.properties' not found set as property:file in '$rootChangeLogFile'"
+        true              | null                       | "file.properties"              | FileUtil.getFileNotFoundMessage(fileDef, " set as property:file in '$rootChangeLogFile'")
+        true              | false                      | "file.properties"              | FileUtil.getFileNotFoundMessage(fileDef, " set as property:file in '$rootChangeLogFile'")
+        true              | true                       | "com/example/file.properties"  | "File 'com/example/com/example/file.properties' not found set as property:file in '$rootChangeLogFile'"
     }
 
     @Unroll
@@ -696,7 +687,6 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         def propertiesResourceAccessor = new MockResourceAccessor(["com/example/file.properties": testProperties])
 
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
-        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
 
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
@@ -786,7 +776,7 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         })
 
         then:
-        bufferLog.getLogAsString(Level.WARNING).contains(FileUtil.getFileNotFoundMessage(includedChangeLogPath));
+        bufferLog.getLogAsString(Level.WARNING).contains(FileUtil.getFileNotFoundMessage(includedChangeLogPath, " set as include:file in '$rootChangeLogPath'"));
     }
 
     @Unroll
@@ -1142,4 +1132,66 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         ]
     }
 
+    def "include changelog files relative to root changelog"() {
+        when:
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+            .load(parsedNode(include: [file: "./test1.xml"]),
+               new MockResourceAccessor(["com/example/test1.xml": test2Xml]))
+        then:
+        rootChangeLog.preconditions.nestedPreconditions.size() == 1
+    }
+
+    def "includeAll changelog files relative to root changelog"() {
+        when:
+        def rootChangeLog = new DatabaseChangeLog("example/root.xml")
+            .load(parsedNode( includeAll: [path: "./inc"]),
+                new MockResourceAccessor(["example/inc/test1.xml": test2Xml]))
+        then:
+        rootChangeLog.preconditions.nestedPreconditions.size() == 1
+    }
+
+    def "property loaded from relative properties file"() {
+        final def fileProperty1 = 'fileProperty1'
+        final def fileProperty1Val = 'property1 from file'
+        final def propFile = 'props.prop'
+        when:
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+                .load(parsedNode( property:[file: "./$propFile"]),
+           new MockResourceAccessor(
+            [("com/example/$propFile" as String):"$fileProperty1: $fileProperty1Val".toString()]));
+        then:
+        rootChangeLog.changeLogParameters.getValue(fileProperty1,rootChangeLog) == fileProperty1Val
+    }
+
+    def "property error case #propDef" () {
+        when:
+        new DatabaseChangeLog("com/example/root.xml")
+                .load(parsedNode( property: propDef ), null)
+        then:
+        def e = thrown(ParsedNodeException)
+        e.message == err
+        where:
+        propDef | err
+        [:]   | "Either 'file' or 'name' + 'value' must be set for 'property'"
+        [name: ''] | "'name' is empty for 'property'"
+        [name: 's'] | "'value' is required for 'property' when 'name' is set"
+        [value: 's'] | "'name' is required for 'property'"
+    }
+
+
+    def "error case #c" () {
+        when:
+        new DatabaseChangeLog("com/example/root.xml")
+                    .load(parsedNode(tagDef), null)
+        then:
+        def e = thrown(ParsedNodeException)
+        e.message == err
+
+        where:
+        c                         | tagDef                 | err
+        'includeAll missing path' | [includeAll:[:]]       | "'path' is required for 'includeAll'"
+        'includeAll empty path'   | [includeAll:[path:'']] | "'path' is empty for 'includeAll'"
+        'include missing file'    | [include:[:]]          | "'file' is required for 'include'"
+        'include empty file'      | [include:[file:'']]    | "'file' is empty for 'include'"
+    }
 }

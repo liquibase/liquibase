@@ -468,7 +468,7 @@ createTable: |
 
 
 createView: |
-  catalogName string (since 3.0)
+  catalogName string 
     Description: Name of the database catalog
     Supported: all
   encoding string 
@@ -480,6 +480,7 @@ createView: |
   path string (since 3.6)
     Description: Path to the file containing the view definition. Specifying 'path' is an alternative to selectQuery.
     Supported: all
+    Required For: informix
   relativeToChangelogFile boolean 
     Description: Specifies whether the file path is relative to the changelog file rather than looked up in the search path. Default: false.
     Supported: all
@@ -757,7 +758,7 @@ insert: |
 
 loadData: |
   catalogName string (since 3.0)
-    Description: Name of the catalog
+    Description: Name of the database catalog
     Supported: all
   columns list of loadDataColumnConfig 
     Description: Column mapping and defaults can be defined.
@@ -783,7 +784,7 @@ loadData: |
     Description: Specifies whether the file path is relative to the changelog file rather than looked up in the search path. Default: false.
     Supported: all
   schemaName string 
-    Description: Name of the schema
+    Description: Name of the database schema
     Supported: all
   separator string 
     Description: Character separating the fields. Default: ,
@@ -799,7 +800,7 @@ loadData: |
 
 loadUpdateData: |
   catalogName string (since 3.0)
-    Description: Name of the catalog
+    Description: Name of the database catalog
     Supported: all
   columns list of loadDataColumnConfig 
     Description: Column mapping and defaults can be defined.
@@ -832,7 +833,7 @@ loadUpdateData: |
     Description: Specifies whether the file path is relative to the changelog file rather than looked up in the search path. Default: false.
     Supported: all
   schemaName string 
-    Description: Name of the schema
+    Description: Name of the database schema
     Supported: all
   separator string 
     Description: Character separating the fields. Default: ,

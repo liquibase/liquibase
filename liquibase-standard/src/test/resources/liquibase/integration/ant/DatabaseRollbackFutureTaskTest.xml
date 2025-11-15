@@ -90,7 +90,7 @@
     </target>
 
     <target name="testDatabaseRollbackFutureChangeLogDirectoryDoesNotExist">
-        <au:expectfailure expectedmessage="Unable to initialize Liquibase: Unable to generate future rollback SQL: liquibase.exception.ChangeLogParseException: The file changelog-with-rollback.xml was not found in the configured search path">
+        <au:expectfailure expectedmessage="Unable to initialize Liquibase: Unable to generate future rollback SQL: liquibase.exception.ChangeLogParseException: The file 'changelog-with-rollback.xml' not found in the configured search path">
 	        <lb:rollbackFutureDatabase outputfile="${temp.dir}/rollback-future.sql"
 	                                   changelogdirectory="${liquibase.test.ant.basedir}/bad_changelog"
 	        	                       changelogfile="changelog-with-rollback.xml">

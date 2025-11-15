@@ -30,6 +30,7 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import static liquibase.change.ChangeParameterMetaData.ALL;
 import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
 
 /**
@@ -460,8 +461,8 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                 Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getParameters().values()) {
             if (param.isRequiredFor(database)) {
                 changeValidationErrors.checkRequiredField (
-                        param.getParameterName(), param.getCurrentValue(this)
-                        , " on " + database.getShortName());
+                    param.getParameterName(), param.getCurrentValue(this),
+                    param.getRequiredForDatabase().contains(ALL) ? "" : " on " + database.getShortName());
             }
         }
 
@@ -499,9 +500,6 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     public ChangeStatus checkStatus(Database database) {
         return new ChangeStatus().unknown("Not implemented");
     }
-
-    //
-    //
 
     /**
      *

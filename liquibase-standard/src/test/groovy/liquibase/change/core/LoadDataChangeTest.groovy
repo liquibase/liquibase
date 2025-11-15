@@ -463,6 +463,30 @@ class LoadDataChangeTest extends StandardChangeTest {
         assert relativeStatements.size() == nonRelativeStatements.size()
     }
 
+    def "relativeToChangelogFile set from file attribute"() throws Exception {
+        when:
+        def changelog = new DatabaseChangeLog("liquibase/changelog.xml")
+        ChangeSet changeSet = new ChangeSet( changelog)
+        LoadDataChange relativeChange = new LoadDataChange()
+        relativeChange.setTableName("TABLE_NAME")
+        relativeChange.setChangeSet(changeSet)
+        relativeChange.setFile("./change/core/sample.data1.csv")
+
+        SqlStatement[] relativeStatements = relativeChange.generateStatements(mockDb)
+
+        LoadUpdateDataChange nonRelativeChange = new LoadUpdateDataChange()
+        nonRelativeChange.setRelativeToChangelogFile(Boolean.FALSE)
+        nonRelativeChange.setTableName("TABLE_NAME")
+        nonRelativeChange.setChangeSet(changeSet)
+        nonRelativeChange.setFile("./liquibase/change/core/sample.data1.csv")
+
+        SqlStatement[] nonRelativeStatements = nonRelativeChange.generateStatements(mockDb)
+        then:
+        assert relativeStatements != null
+        assert nonRelativeStatements != null
+        assert relativeStatements.size() == nonRelativeStatements.size()
+    }
+
     @Unroll
     def "openSqlStream correctly opens files"() {
         when:
@@ -929,7 +953,7 @@ class LoadDataChangeTest extends StandardChangeTest {
 
         where:
         i | message
-        0 | "tableName is empty for loadData on mock"
+        0 | "'tableName' is empty for 'loadData'"
     }
 
     def "allow statement generation to be overridden"() {

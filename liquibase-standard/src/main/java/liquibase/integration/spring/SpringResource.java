@@ -72,4 +72,9 @@ class SpringResource extends liquibase.resource.AbstractResource {
         }
         throw new IOException("Read only");
     }
+
+    @Override
+    public boolean isFile() {
+        return resource.isFile();
+    }
 }
