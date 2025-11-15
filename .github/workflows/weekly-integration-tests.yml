@@ -52,26 +52,10 @@ jobs:
                   "enabled": "true",
                   "updatePolicy": "always"
                 }
-              },
-              {
-                "id": "liquibase-pro",
-                "url": "https://maven.pkg.github.com/liquibase/liquibase-pro",
-                "releases": {
-                  "enabled": "false"
-                },
-                "snapshots": {
-                  "enabled": "true",
-                  "updatePolicy": "always"
-                }
               }
             ]
           servers: |
             [
-              {
-                "id": "liquibase-pro",
-                "username": "liquibot",
-                "password": "${{ secrets.GITHUB_TOKEN }}"
-              },
               {
                 "id": "liquibase",
                 "username": "liquibot",
@@ -121,7 +105,7 @@ jobs:
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: liquibase-test-results-snowflake
           path: |
@@ -161,7 +145,7 @@ jobs:
     steps:
       - name: Dispatch event to build-logic repository
         id: weekly-integration-tests
-        uses: peter-evans/repository-dispatch@v3
+        uses: peter-evans/repository-dispatch@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: liquibase/build-logic

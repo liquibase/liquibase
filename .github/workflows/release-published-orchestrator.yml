@@ -1,0 +1,261 @@
+name: Release Published Orchestrator
+
+run-name: "🚀 Release Published ${{ inputs.tag || github.event.release.tag_name }}${{ inputs.dry_run && ' (Dry Run)' || '' }}"
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release Tag"
+        required: true
+        type: string
+      dry_run:
+        description: "Flag to indicate if the workflow is triggered to create a dry-run release"
+        required: false
+        type: boolean
+        default: false
+      dry_run_release_id:
+        description: "The release id of the dry-run release"
+        required: false
+        type: string
+      dry_run_zip_url:
+        description: "URL of the dry-run zip release"
+        required: false
+        type: string
+      dry_run_tar_gz_url:
+        description: "URL of the dry-run tar.gz release"
+        required: false
+        type: string
+      dry_run_branch_name:
+        description: "The branch name of the dry-run"
+        required: false
+        type: string
+  workflow_call:
+    inputs:
+      tag:
+        description: "Release Tag"
+        required: true
+        type: string
+      dry_run:
+        description: "Flag to indicate if the workflow is triggered to create a dry-run release"
+        required: true
+        type: boolean
+        default: false
+      dry_run_release_id:
+        description: "The release id of the dry-run release"
+        required: false
+        type: string
+      dry_run_zip_url:
+        description: "URL of the dry-run zip release"
+        required: false
+        type: string
+      dry_run_tar_gz_url:
+        description: "URL of the dry-run tar.gz release"
+        required: false
+        type: string
+      dry_run_branch_name:
+        description: "The branch name of the dry-run"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  packages: write
+  actions: write
+  id-token: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  setup:
+    name: Setup Release Metadata
+    uses: ./.github/workflows/release-setup.yml
+    with:
+      tag: ${{ inputs.tag || github.event.release.tag_name }}
+      dry_run: ${{ inputs.dry_run || false }}
+      dry_run_branch_name: ${{ inputs.dry_run_branch_name || '' }}
+    secrets: inherit
+
+  manual-approval:
+    name: Manual Deployment Approval
+    needs: [setup]
+    uses: ./.github/workflows/release-manual-approval.yml
+    with:
+      version: ${{ needs.setup.outputs.version }}
+      dry_run: ${{ inputs.dry_run || false }}
+    secrets: inherit
+
+  deploy-javadocs:
+    name: Deploy Javadocs
+    needs: [setup, manual-approval]
+    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
+    uses: ./.github/workflows/release-deploy-javadocs.yml
+    with:
+      tag: ${{ needs.setup.outputs.tag }}
+      dry_run: ${{ inputs.dry_run || false }}
+    secrets: inherit
+
+  publish-github-packages:
+    name: Publish to GitHub Packages
+    needs: [setup, manual-approval]
+    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
+    uses: ./.github/workflows/release-publish-github-packages.yml
+    with:
+      version: ${{ needs.setup.outputs.version }}
+      latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
+      timeStamp: ${{ needs.setup.outputs.timeStamp }}
+      dry_run: ${{ inputs.dry_run || false }}
+    secrets: inherit
+
+  deploy-xsd:
+    name: Deploy XSD Files
+    needs: [setup, manual-approval]
+    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
+    uses: ./.github/workflows/release-deploy-xsd.yml
+    with:
+      version: ${{ needs.setup.outputs.version }}
+      dry_run: ${{ inputs.dry_run || false }}
+    secrets: inherit
+
+  release-docker:
+    name: Release Docker Images
+    needs: [setup, manual-approval]
+    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
+    uses: ./.github/workflows/release-docker.yml
+    with:
+      version: ${{ needs.setup.outputs.version }}
+      dry_run: ${{ inputs.dry_run || false }}
+    secrets: inherit
+
+  deploy-maven:
+    name: Deploy to Maven Central
+    needs: [setup, manual-approval, deploy-javadocs, publish-github-packages, deploy-xsd, release-docker]
+    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') && (needs.deploy-javadocs.result == 'success' || needs.deploy-javadocs.result == 'skipped') && (needs.publish-github-packages.result == 'success' || needs.publish-github-packages.result == 'skipped') && (needs.deploy-xsd.result == 'success' || needs.deploy-xsd.result == 'skipped') && (needs.release-docker.result == 'success' || needs.release-docker.result == 'skipped')
+    uses: ./.github/workflows/release-deploy-maven.yml
+    with:
+      version: ${{ needs.setup.outputs.version }}
+      tag: ${{ needs.setup.outputs.tag }}
+      dry_run: ${{ inputs.dry_run || false }}
+      dry_run_release_id: ${{ inputs.dry_run_release_id || '' }}
+    secrets: inherit
+
+  package:
+    name: Update Packages
+    needs: [setup, manual-approval]
+    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
+    uses: liquibase/build-logic/.github/workflows/package.yml@main
+    secrets: inherit
+    with:
+      groupId: "org.liquibase"
+      artifactId: "liquibase"
+      version: ${{ needs.setup.outputs.version }}
+      dry_run: ${{ inputs.dry_run || false}}
+      dry_run_zip_url: ${{ inputs.dry_run_zip_url || '' }}
+      dry_run_tar_gz_url: ${{ inputs.dry_run_tar_gz_url || '' }}
+      dry_run_release_id: ${{ inputs.dry_run_release_id || '' }}
+      distribution: "liquibase"
+      download_base_url: "https://github.com/liquibase/liquibase/releases/download"
+
+  publish-assets-s3:
+    name: Publish Assets to S3
+    needs: [setup, package]
+    if: always() && needs.setup.result == 'success' && (needs.package.result == 'success' || needs.package.result == 'skipped')
+    uses: ./.github/workflows/release-publish-assets-s3.yml
+    with:
+      version: ${{ needs.setup.outputs.version }}
+      dry_run: ${{ inputs.dry_run || false }}
+    secrets: inherit
+
+  generate-summary:
+    name: Generate Release Summary
+    needs:
+      [
+        setup,
+        manual-approval,
+        deploy-javadocs,
+        publish-github-packages,
+        deploy-xsd,
+        release-docker,
+        deploy-maven,
+        package,
+        publish-assets-s3,
+      ]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Generate Orchestrator Summary
+        run: |
+          # Determine overall status
+          if [ "${{ needs.setup.result }}" == "success" ] && \
+             [ "${{ needs.deploy-javadocs.result }}" == "success" ] && \
+             [ "${{ needs.publish-github-packages.result }}" == "success" ] && \
+             [ "${{ needs.deploy-xsd.result }}" == "success" ] && \
+             [ "${{ needs.release-docker.result }}" == "success" ] && \
+             [ "${{ needs.deploy-maven.result }}" == "success" ] && \
+             [ "${{ needs.package.result }}" == "success" ] && \
+             [ "${{ needs.publish-assets-s3.result }}" == "success" ]; then
+            OVERALL_STATUS="✅ SUCCESS"
+            STATUS_ICON="🎉"
+          else
+            OVERALL_STATUS="❌ FAILED"
+            STATUS_ICON="💥"
+          fi
+
+          VERSION="${{ needs.setup.outputs.version }}"
+          DRY_RUN="${{ inputs.dry_run || false }}"
+
+          # Generate simplified summary
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          # $STATUS_ICON Release Published: $OVERALL_STATUS
+
+          **Version:** \`$VERSION\` | **Build:** $(date -u +"%Y-%m-%d %H:%M") | **Mode:** $([ "$DRY_RUN" == "true" ] && echo "🧪 Dry Run" || echo "🚀 Production")
+
+          ## Pipeline Results
+          | Stage | Status |
+          |-------|--------|
+          | Setup | ${{ needs.setup.result == 'success' && '✅' || '❌' }} |
+          | Manual Approval | ${{ needs.manual-approval.result == 'success' && '✅' || needs.manual-approval.result == 'skipped' && '⏭️ Skipped' || '❌' }} |
+          | Deploy Javadocs | ${{ needs.deploy-javadocs.result == 'success' && '✅' || needs.deploy-javadocs.result == 'skipped' && '⏭️ Skipped' || '❌' }} |
+          | Publish GitHub Packages | ${{ needs.publish-github-packages.result == 'success' && '✅' || needs.publish-github-packages.result == 'skipped' && '⏭️ Skipped' || '❌' }} |
+          | Deploy XSD Files | ${{ needs.deploy-xsd.result == 'success' && '✅' || needs.deploy-xsd.result == 'skipped' && '⏭️ Skipped' || '❌' }} |
+          | Release Docker Images | ${{ needs.release-docker.result == 'success' && '✅' || needs.release-docker.result == 'skipped' && '⏭️ Skipped' || '❌' }} |
+          | Deploy to Maven Central | ${{ needs.deploy-maven.result == 'success' && '✅' || needs.deploy-maven.result == 'skipped' && '⏭️ Skipped' || '❌' }} |
+          | Update Packages | ${{ needs.package.result == 'success' && '✅' || needs.package.result == 'skipped' && '⏭️ Skipped' || '❌' }} |
+          | Publish Assets to S3 | ${{ needs.publish-assets-s3.result == 'success' && '✅' || needs.publish-assets-s3.result == 'skipped' && '⏭️ Skipped' || '❌' }} |
+
+          $(if [ "$OVERALL_STATUS" == "✅ SUCCESS" ]; then
+          cat << 'SUCCESS'
+          ## 🎯 Release Available
+
+          **Repositories:**
+          - Maven Central: [repo1.maven.org/maven2/org/liquibase/](https://repo1.maven.org/maven2/org/liquibase/)
+          - GitHub Packages: [github.com/liquibase/liquibase/packages](https://github.com/liquibase/liquibase/packages)
+          - Docker Hub: \`docker pull liquibase/liquibase:$VERSION\`
+          - GitHub Release: [github.com/liquibase/liquibase/releases/tag/v$VERSION](https://github.com/liquibase/liquibase/releases/tag/v$VERSION)
+
+          **Quick Start:**
+          \`\`\`bash
+          # Maven
+          mvn org.liquibase:liquibase-maven-plugin:$VERSION:update
+
+          # Docker
+          docker pull liquibase/liquibase:$VERSION
+          docker run liquibase/liquibase:$VERSION --version
+          \`\`\`
+          SUCCESS
+          else
+          cat << 'FAILURE'
+          ## 🔧 Action Required
+
+          **Failed Steps:** Check logs above for details
+          **Next:** Fix issues and re-run failed workflows individually or restart orchestrator
+          
+          **Individual Workflow Triggers:**
+          Each workflow can be manually triggered from the Actions tab if needed.
+          FAILURE
+          fi)
+          EOF
+
+          echo "📋 Release $VERSION: $OVERALL_STATUS"

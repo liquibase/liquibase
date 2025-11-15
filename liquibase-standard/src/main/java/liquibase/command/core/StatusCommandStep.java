@@ -66,13 +66,19 @@ public class StatusCommandStep extends AbstractCommandStep {
         LabelExpression labels = changeLogParameters.getLabels();
         boolean verbose = commandScope.getArgumentValue(VERBOSE_ARG);
 
+        if (database.getConnection() == null) {
+            throw new DatabaseException("Database connection is not available");
+        }
+        String connectionUserName = database.getConnection().getConnectionUserName();
+        String connectionUrl = database.getConnection().getURL();
+
         List<ChangeSet> unrunChangeSets = listUnrunChangeSets(contexts, labels, changeLog, database);
         String message;
         if (unrunChangeSets.isEmpty()) {
             message = "up-to-date";
-            out.append(database.getConnection().getConnectionUserName());
+            out.append(connectionUserName);
             out.append("@");
-            out.append(database.getConnection().getURL());
+            out.append(connectionUrl);
             out.append(" is up to date");
             out.append(StreamUtil.getLineSeparator());
         } else {
@@ -84,9 +90,9 @@ public class StatusCommandStep extends AbstractCommandStep {
             } else {
                 out.append(" changesets have not been applied to ");
             }
-            out.append(database.getConnection().getConnectionUserName());
+            out.append(connectionUserName);
             out.append("@");
-            out.append(database.getConnection().getURL());
+            out.append(connectionUrl);
             out.append(StreamUtil.getLineSeparator());
             if (verbose) {
                 for (ChangeSet changeSet : unrunChangeSets) {
@@ -99,16 +105,16 @@ public class StatusCommandStep extends AbstractCommandStep {
 
         SimpleStatus statusMdc;
         if (verbose) {
-            statusMdc = new Status(message, database.getConnection().getURL(), unrunChangeSets);
+            statusMdc = new Status(message, connectionUrl, unrunChangeSets);
         } else {
-            statusMdc = new SimpleStatus(message, database.getConnection().getURL(), unrunChangeSets);
+            statusMdc = new SimpleStatus(message, connectionUrl, unrunChangeSets);
         }
 
         try (MdcObject statusMdcObject = Scope.getCurrentScope().addMdcValue(MdcKey.STATUS, statusMdc)) {
             Scope.getCurrentScope().getLog(getClass()).fine("Status");
         }
 
-        resultsBuilder.addResult("status", new SimpleStatus(message, database.getConnection().getURL(), unrunChangeSets));
+        resultsBuilder.addResult("status", new SimpleStatus(message, connectionUrl, unrunChangeSets));
         out.flush();
     }
 

@@ -1,6 +1,154 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 5.0.1 (2025.10.03)
+
+# Liquibase Community 5.0.1 is a minor patch release
+See the [Liquibase Community 5.0.1 Release Notes](https://docs.liquibase.com/community/community-release-notes/liquibase-community-501-release-notes) for the complete set of release information.
+
+### License corrections for Maven
+The license block for Maven users has been corrected to use the Functional Source License (FSL).
+- Name: Functional Source License, Version 1.1, ALv2 Future License
+- URL: https://fsl.software/FSL-1.1-ALv2.template.md
+
+## Changelog
+-(#7350) Update licensing and documentation for Community distribution by @filipelautert
+
+
+Changes in version 5.0.0 (2025.09.30)
+
+# Liquibase Community 5.0 is a major release
+See the [Liquibase Community 5.0 Release Notes](https://docs.liquibase.com/community/release-notes/5-0) for the complete set of release information.
+
+## MAJOR CHANGES IN COMMUNITY AND COMMERCIAL DISTRIBUTIONS
+
+Liquibase is evolving to better serve both open-source contributors and enterprise customers by introducing a clearer separation between its Community and the commercial Secure offering. This change is designed to ensure that each distribution is optimized for its respective users: providing Community users with flexibility and control, while delivering scalability, reliability, and governance for Secure enterprise teams. The changes provide Liquibase Secure customers:
+- **Developer Productivity.** Enable developers with autonomy and guardrails built directly into their daily workflow.
+- **Secure Automation.** Embed governance, security, and compliance into every change automatically.
+- **Change Insights.** Deliver audit-ready visibility so every change is trusted, explainable, and observable.
+
+The new structure enables Liquibase to more effectively support developers at all stages—from experimentation and community collaboration to mission-critical deployments. Therefore, starting with this Liquibase 5.0 release, only the Community distribution is available at the traditional Github, Docker, and Maven access channels.
+If you need the Secure commercial offering, please visit [Liquibase.com](https://docs.liquibase.com/secure/release-notes/5-0)
+* Learn more [Liquibase 5.0](https://www.liquibase.com/blog/liquibase-5-0-release)
+
+### Liquibase Community Licensing Change
+Additionally, Liquibase Community is now licensed under the Functional Source License (FSL). See LICENSE file at the root of the distribution for details. Starting with Liquibase 5.0, contributors will be asked to sign a one-time **Contributor License Agreement (CLA)**. This is handled automatically by CLA Assistant when you open your first pull request.
+
+
+## Liquibase 5.0 Community Release Notable Changes
+
+### Liquibase Package Manager (LPM) integrated to enable users to install, update, and manage their dependencies
+- Liquibase Community 5.0 ships without extensions, drivers, and many other packages and dependencies. This change provides a much lighter, modular, and customizable Liquibase experience for Community users. Importantly, this flexibility both allows and requires users to manage their Liquibase dependencies for their specific needs.
+- Liquibase Package Manager is now integrated and available for use directly from within the Community CLI experience with a new `liquibase lpm` command as the preferred method for managing dependencies.
+- Learn more at the [LPM README](https://github.com/liquibase/liquibase-package-manager)
+
+### Liquibase Community 5.0+ ships with the Functional Source License (FSL)
+- "The Functional Source License (FSL) is a Fair Source license that converts to Apache 2.0 or MIT after two years. It is designed for SaaS companies that value both user freedom and developer sustainability. FSL provides everything a developer needs to use and learn from your software without harmful free-riding."
+- Learn more at https://fsl.software/
+
+### SnowFlake JDBC Driver CVE Fix
+- Liquibase 5.0 patches a vulnerability found in Snowflake JDBC driver (CVE-2025-24789) and resolves issue with logicalfilepath reported in 4.31.0. Note: Neither Community nor the commercial Secure products were affected by this CVE.
+
+### Java 8 and Java 11 support is deprecated
+- The minimal Java dependency for Liquibase 5.0+ is Java 17. This update enables Liquiabase to build, test, and ship with modern and more secure dependencies.
+
+### ValueDate Checksum bug fix
+- In the last release, an issue was introduced by a change in how valueDate was calculated and incorporated into the checksum calculations. This issue has been fixed by ensuring that rawDatevalue is excluded from checksum calculations.
+- (#7101) fix: prevent rawDateValue from being used for checksum calculations @filipelautert
+
+## Changelog of Community PRs
+
+## New Features
+- (#7286) Allow anyAttribute in dbchangelog-latest.xsd complex types @filipelautert
+- (#7190) Create LPM command (DAT-20511) @filipelautert
+- (#7216) Deprecate Java 8/11 @wwillard7800
+- (#7187) Fixed: #7186 - Liquibase creates too short VARCHAR and CHAR fields on MS SQL databases using multi-byte encodings, effectively leading to data truncation eventually @mkarg
+- (#7230) DAT-16042: Add test cases for SQL injection and HTML content pattern validation in `SimpleSqlGrammarTest` and `StringUtilTest` @filipelautert
+- (#7214) INT-1414 - Implement credential obfuscation in SQL statements for Snowflake STAGE objects @filipelautert
+- (#7202) INT-1416: refactored Unwrapping of DatabaseObject's inner objects while snapshot serialization @SvampX
+- (#7199) Make Update Sql be Update SQL in command title @wwillard7800
+- (#7177) [7176]: Mapped tag in History.Changeset @hemanthsridhar
+- (#7144) Refactored to allow creation of a ChangelogPrintService for use by generateChangeLog and diffChangeLog operations @wwillard7800
+- (#7104) Parameters for update SQL command @wwillard7800
+- (#7118) Honor strip comments flag passed in scope in executeSql command DAT-20417 @wwillard7800
+
+## Bug Fixes
+- (#7269) INT-1392: add get/setArguments and get/setProcedureName methods into … @HorbatenkoYehor
+- (#7274) Fixed errors in tests on Windows 11 + git-bash cygwin @b-gyula
+- (#7264) Back out change to ignore nested objects in TableExistsPreCondition @wwillard7800
+- (#7257) INT-1416: Updated handling of complex UnwrappedLiquibaseSerializables @SvampX
+- (#7233) Comparator resoluition should work in non-flat classloaders @gastaldi
+- (#7227) #7220: Thread-safety issue when running Liquibase in a multithreaded and multitenant environment @galovics
+- (#7231) fix sqlite JDBC URL parsing failure when tracking licenses (DAT-20124) @StevenMassaro
+- (#7187) Fixed: #7186 - Liquibase creates too short VARCHAR and CHAR fields on MS SQL databases using multi-byte encodings, effectively leading to data truncation eventually @mkarg
+- (#7154) Only mark changeset as SKIPPED if all changes are skipped GH issue 7153 @wwillard7800
+- (#7200) Remove duplicate header check for formatted SQL and add log message @wwillard7800
+- (#7208) Handle overwrite flag for formatted SQL correctly in generateChangelog @wwillard7800
+- (#7155) Option to allow snapshot to continue after finding null snapshot ID  DAT-20436 @wwillard7800
+- (#7182) Fix OAuth2Secret credential exposure in update-sql command @filipelautert
+- (#7192) Fixes for regressions in DAT-20619, DAT-20620, and DAT-20621 @wwillard7800
+- (#7178) Throw exception if a change type has a namespace and cannot be found @wwillard7800
+- (#7168) Use missing objects instead of changed objects in test DAT-20536 @wwillard7800
+- (#7158) Handle situation that occurs when generateChangeLog is run with diffTypes=data @wwillard7800
+- (#7165) Fix rename column generator test @wwillard7800
+- (#6920) fix: Change the rename column query for mysql v8 and later using rename column to @quangdutran
+- (#7141) Rollback OpenCSV version to 5.10 and address CSV loading issue @filipelautert
+- (#7140) NullPointerException in SpringLiquibase.toString() @tweimer
+- (#7152) fix updateSQL command ignoring endDelimiter for some statements #7148 @ponziani
+- (#7108) Fix the version check for the MySQL FILTER\_CONDITION to handle minor version > 0 DAT-20441 @wwillard7800
+- (#7101) fix: prevent rawDateValue from being used for checksum calculations @filipelautert
+- (#7079) feat: add logic to exclude resources from liquibaseHomeUri/internal in resource processing for includeAll @filipelautert
+
+## DevOps
+- (#7084) DAT-20288: fill in details for root's liquibase.build.properties file @sayaliM0412
+- (#7219) DAT-20673 Secure: Create new package locations @jandroav
+
+## Security, Driver and Other Updates
+<details>
+<summary>39 changes</summary>
+- (#7292) Remove update-docs-oss-pro-version job @sayaliM0412
+- (#7291) chore(deps): bump the build-tools group with 3 updates @dependabot[bot]
+- (#7284) chore(deps-dev): bump org.postgresql:postgresql from 42.7.7 to 42.7.8 in the build-tools group @dependabot[bot]
+- (#7283) chore(deps-dev): bump org.assertj:assertj-core from 3.27.4 to 3.27.5 in the test-deps group @dependabot[bot]
+- (#7281) chore(deps): bump org.projectlombok:lombok from 1.18.40 to 1.18.42 @dependabot[bot]
+- (#7277) chore(deps): bump the build-tools group with 3 updates @dependabot[bot]
+- (#7266) chore(deps-dev): bump org.mariadb.jdbc:mariadb-java-client from 3.5.5 to 3.5.6 in the build-tools group @dependabot[bot]
+- (#7251) chore(deps): bump org.projectlombok:lombok from 1.18.38 to 1.18.40 @dependabot[bot]
+- (#7252) chore(deps): bump actions/github-script from 7 to 8 in the github-actions group @dependabot[bot]
+- (#7242) chore(deps): bump the github-actions group across 1 directory with 3 updates @dependabot[bot]
+- (#7241) chore(deps-dev): bump the build-tools group across 1 directory with 2 updates @dependabot[bot]
+- (#7236) chore(deps): bump org.yaml:snakeyaml from 2.4 to 2.5 @dependabot[bot]
+- (#7234) chore(deps): bump org.sonarsource.scanner.maven:sonar-maven-plugin from 5.1.0.4751 to 5.2.0.4988 in the build-tools group @dependabot[bot]
+- (#7223) chore(deps-dev): bump org.firebirdsql.jdbc:jaybird from 5.0.8.java8 to 5.0.9.java8 in the build-tools group @dependabot[bot]
+- (#7225) chore(deps): bump actions/setup-java from 4 to 5 in the github-actions group @dependabot[bot]
+- (#7207) chore(deps): bump org.apache.maven.plugins:maven-javadoc-plugin from 3.11.2 to 3.11.3 in the build-tools group @dependabot[bot]
+- (#7206) chore(deps): bump actions/checkout from 4 to 5 in the github-actions group @dependabot[bot]
+- (#7203) chore(deps): bump org.mockito:mockito-core from 4.11.0 to 5.19.0 @dependabot[bot]
+- (#7198) chore(deps-dev): bump net.snowflake:snowflake-jdbc from 3.25.1 to 3.26.0 in the build-tools group @dependabot[bot]
+- (#7195) chore(deps): bump org.firebirdsql:firebird-testcontainers-java from 1.5.1 to 1.6.0 @dependabot[bot]
+- (#7189) chore(deps): bump the github-actions group with 2 updates @dependabot[bot]
+- (#7188) chore(deps-dev): bump org.mariadb.jdbc:mariadb-java-client from 3.5.4 to 3.5.5 in the build-tools group @dependabot[bot]
+- (#7185) chore(deps-dev): bump org.assertj:assertj-core from 3.27.3 to 3.27.4 in the test-deps group @dependabot[bot]
+- (#7160) chore(deps-dev): bump org.apache.commons:commons-compress from 1.27.1 to 1.28.0 in the production-deps group @dependabot[bot]
+- (#7164) chore(deps-dev): bump the build-tools group across 1 directory with 2 updates @dependabot[bot]
+- (#7157) chore(deps): bump com.opencsv:opencsv from 5.10 to 5.12.0 @dependabot[bot]
+- (#7135) chore(deps): bump commons-io:commons-io from 2.19.0 to 2.20.0 @dependabot[bot]
+- (#7156) chore(deps): bump org.codehaus.mojo:flatten-maven-plugin from 1.7.1 to 1.7.2 in the build-tools group @dependabot[bot]
+- (#7132) chore(deps): bump the github-actions group with 2 updates @dependabot[bot]
+- (#7150) chore(deps): bump org.apache.commons:commons-text from 1.13.1 to 1.14.0 in the production-deps group @dependabot[bot]
+- (#7139) chore(deps-dev): bump the build-tools group across 1 directory with 2 updates @dependabot[bot]
+- (#7142) chore(deps): bump the test-deps group across 1 directory with 7 updates @dependabot[bot]
+- (#7127) chore(deps): bump the build-tools group across 1 directory with 3 updates @dependabot[bot]
+- (#7115) chore(deps): bump the test-deps group with 5 updates @dependabot[bot]
+- (#7120) chore(deps): bump the production-deps group with 2 updates @dependabot[bot]
+- (#7121) chore(deps): bump targetMavenVersion from 3.9.10 to 3.9.11 @dependabot[bot]
+- (#7119) Fix dependabot.yml version syntax error @jnewton03
+- (#7117) Add Spring Framework 6.x to dependabot ignore list @jnewton03
+- (#7106) Reduce dependabot PR overload through strategic grouping and automation @jnewton03
+</details>
+
+### Full Changelog: [https://github.com/liquibase/liquibase/compare/v4.33.0...v5.0.0](https://github.com/liquibase/liquibase/compare/v4.33.0...v5.0.0)
+
 Changes in version 4.33.0 (2025.07.09)
 
 # Liquibase 4.33.0 is a major release
@@ -23,16 +171,16 @@ See the [Liquibase 4.33.0 Release Notes](https://docs.liquibase.com/start/releas
 ### Policy Checks
 -  **MongoChangetypeAttributes Policy Check**. Introduced a new quality check named MongoChangetypeAttributes that allows users to enforce specific values or patterns for attributes within MongoDB-specific changetypes. Users can select a single Mongo changetype (e.g., createIndex, dropCollection) and specify expected values or patterns for its attributes. The check triggers if a specified attribute is present but does not match the defined value or regex—ensuring consistent standards across Mongo changesets. This supports validation across key changetypes attributes like adminCommand, createCollection, insertOne, and more, and enhances control and quality enforcement in MongoDB deployment pipelines. [DAT-18275]
 
- **[OSS]**
+ **[Community]**
 
 ### Important dependency updates
- - Liquibase OSS 4.33+ has Java 24 core build support.
-- The liquibase-cdi and liquibase-cdi-jakarta modules are still supported, but have been removed from the OSS distribution to their own repositories.
+ - Liquibase Community 4.33+ has Java 24 core build support.
+- The liquibase-cdi and liquibase-cdi-jakarta modules are still supported, but have been removed from the Community distribution to their own repositories.
 
-## ️[PRO] and [OSS] Upcoming Change in Distributions
-Liquibase is evolving to better serve both open-source contributors and enterprise customers by introducing a clearer separation between its Open Source (OSS) and PRO offerings. This change is designed to ensure that each distribution is optimized for its respective users—providing open-source users with flexibility and control, while delivering scalability, reliability, and governance for enterprise teams.
+## ️[PRO] and [Community] Upcoming Change in Distributions
+Liquibase is evolving to better serve both open-source contributors and enterprise customers by introducing a clearer separation between its Community and PRO offerings. This change is designed to ensure that each distribution is optimized for its respective users—providing Community users with flexibility and control, while delivering scalability, reliability, and governance for enterprise teams.
 The new structure enables Liquibase to more effectively support developers at all stages—from experimentation and community collaboration to mission-critical deployments. Liquibase 4.32.0 introduced the first general availability (GA) release of independently packaged Pro distributions, along with dedicated distribution channels and key-based access enforcement for Pro capabilities. This marks a significant step toward delivering a curated, enterprise-grade experience for Pro users.
-The OSS distribution and its delivery channels remain unchanged in this phase.
+The Community distribution and its delivery channels remain unchanged in this phase.
 * Learn more https://docs.liquibase.com/start/install/home.html
 
 ## PRO PRs
@@ -63,7 +211,7 @@ The OSS distribution and its delivery channels remain unchanged in this phase.
 - [DAT-20176] [DAT-20202] **Liquibase displays SQL compiler errors if they occur.** https://github.com/liquibase/liquibase-pro/pull/2410 by @wwillard7800
 - [INT-1362]: **Fix of empty generated changelog in case when only type attributes order is different** https://github.com/liquibase/liquibase-pro/pull/2435 by @SvampX
 - [DAT-20175] **Correctly determine if stored logic is valid for Oracle** https://github.com/liquibase/liquibase-pro/pull/2366 by @wwillard7800
-- [DAT-20193] **Correctly labeled the AWS and RDS documentation to reflect that it is available to OSS users.** https://github.com/liquibase/liquibase-docs/commit/f104c3e3f42f7e6f70d56f75a086a3116f247a33 by @AMBERMW13
+- [DAT-20193] **Correctly labeled the AWS and RDS documentation to reflect that it is available to Community users.** https://github.com/liquibase/liquibase-docs/commit/f104c3e3f42f7e6f70d56f75a086a3116f247a33 by @AMBERMW13
 - [DAT-20244] **When a formatted SQL changelog is parsed and is found to have multiple header lines, the message will display: Duplicate formatted SQL header at line X** https://github.com/liquibase/liquibase/pull/7036 by @wwillard7800
 - [DAT-20282] **The deployment summary no longer includes internal DATABASECHANGELOG updates in the "Rows affected" count.** This prevents inconsistencies when no customer data is changed but the summary previously showed rows affected due to internal tracking. https://github.com/liquibase/liquibase/pull/7063 by @StevenMassaro
 - [DAT-18983] **SQLPlus Spool file saves if you set –sqlplus-create-spool: true or –sql-plus-keep-temp=true.** Learn more here: [runWithSpoolFile](https://docs.liquibase.com/concepts/changelogs/attributes/run-with-spool-file.html)
@@ -103,7 +251,7 @@ The OSS distribution and its delivery channels remain unchanged in this phase.
 - chore(deps-dev): **bump junit.version from 5.11.4 to 5.12.2** https://github.com/liquibase/liquibase-commercial-bigquery/pull/98 by @dependabot
 
 
-## OSS PRs
+## Community PRs
 
 ### New Features
 - (#7059) Java 24 core build support @filipelautert
@@ -167,10 +315,10 @@ Changes in version 4.32.0 (2025.05.21)
 
 See the [Liquibase 4.32.0 Release Notes](https://docs.liquibase.com/start/release-notes/liquibase-release-notes/liquibase-4.32.0.html) for the complete set of release information.
 
-## [PRO] and [OSS] Upcoming Change in Distributions
-Liquibase is evolving to better serve both open-source contributors and enterprise customers by introducing a clearer separation between its Open Source (OSS) and PRO offerings. This change is designed to ensure that each distribution is optimized for its respective users—providing open-source users with flexibility and control, while delivering scalability, reliability, and governance for enterprise teams. The new structure enables Liquibase to more effectively support developers at all stages—from experimentation and community collaboration to mission-critical deployments.
+## [PRO] and [Community] Upcoming Change in Distributions
+Liquibase is evolving to better serve both open-source contributors and enterprise customers by introducing a clearer separation between its Community and PRO offerings. This change is designed to ensure that each distribution is optimized for its respective users—providing Community users with flexibility and control, while delivering scalability, reliability, and governance for enterprise teams. The new structure enables Liquibase to more effectively support developers at all stages—from experimentation and community collaboration to mission-critical deployments.
 Liquibase 4.32.0 introduces the first general availability (GA) release of independently packaged Pro distributions, along with dedicated distribution channels and key-based access enforcement for Pro capabilities. This marks a significant step toward delivering a curated, enterprise-grade experience for Pro users.
-The OSS distribution and its delivery channels remain unchanged in this phase.
+The Community distribution and its delivery channels remain unchanged in this phase.
 * Learn more https://docs.liquibase.com/start/install/home.html
 
 ## Notable Changes
@@ -209,9 +357,9 @@ Other Updates
 Anonymous Analytics (New Pro Distribution Only). Liquibase Pro 4.32.0 updates the default behavior for anonymous usage analytics. Analytics are now enabled by default for new Liquibase Pro distribution users. These analytics help the Liquibase team improve the product by collecting aggregated, non-PII data such as command usage, error rates, database types, Java versions, and Liquibase feature adoption. Analytics are only captured when a command is run, and users can opt in or out at any time using the --analytics-enabled global parameter. This allows organizations to maintain control over data sharing in alignment with internal policies.
 Liquibase Pro Software Bill of Materials (New Pro Distribution Only). Liquibase Pro introduces Liquibase Pro SBOM, machine-readable Software Bill of Materials (SBOM) files bundled with every Liquibase Pro release. Provided in both CycloneDX and SPDX JSON formats, these SBOMs give enterprise teams full transparency into included packages, versions, licenses, dependencies, and checksums—helping meet regulatory compliance (e.g., EO 14028, FedRAMP, SOC 2), support vendor risk reviews, and streamline audits. No extra setup or CLI steps are required—SBOMs are automatically included with each release, ensuring teams stay secure and audit-ready by default. [DAT-20209]
 
-### [OSS]
+### [Community]
 
-#### OSS Notable Changes
+#### Community Notable Changes
 
 NoSql Snapshot improvements. The previous snapshot capability allowed only one Generator as top level for the chain. With this release, the chain handler has been enhanced to ensure all subscribed generators are called. (#5775)
 Snowflake timestamp improvements. This release fixes breaks and provides enhanced messaging for time, datetime, and timestamp types (such as `timestamp_ntz`) in Snowflake changesets.  (#6742)
@@ -294,7 +442,7 @@ Snowflake timestamp improvements. This release fixes breaks and provides enhance
 * Bump org.apache.maven.plugins\:maven-surefire-plugin from 3.2.5 to 3.5.2 in https://github.com/liquibase/liquibase-checks/pull/164](https://github.com/liquibase/liquibase-checks/pull/164) by @dependabot bot
 
 
-## [OSS] Changelog
+## [Community] Changelog
 
 ### New Features
 - (#6921) INT-1249: refactored StringSnapshotSerializerReadable to be able to extend expandable and skipped object types from Pro and Extensions. @SvampX
@@ -370,7 +518,7 @@ Changes in version 4.31.1 (2025.02.13)
 > See the [Liquibase 4.31.1 Release Notes](https://docs.liquibase.com/start/release-notes/liquibase-release-notes/liquibase-4.31.1.html) for the complete set of release information.
 
 ## Notable Changes
-### [OSS]
+### [Community]
 
 #### logicalfilepath bug: in 4.31.0, the parent logicalfilepath value will be used in DBCL/DBCLH as the changelogfilepath value, as a result the changesets from the included changelogs that were deployed with the changelog level logicalFilePath in version 4.31.0 will be considered new and will be redeployed in the latest versions. 4.31.1 fixes this behavior and deployed changesets will not be redeployed.
 
@@ -379,13 +527,13 @@ Changes in version 4.31.1 (2025.02.13)
 ## [PRO] Bug Fixes
 * DAT-19579: The changesets from the included changelogs that were deployed with the changelog level logicalFilePath in version 4.31.0 will be considered new and will be redeployed in the latest versions https://github.com/liquibase/liquibase/pull/6716 @filipelautert
 
-### [OSS] Changelog
+### [Community] Changelog
 
-## [OSS] Bug Fixes
+## [Community] Bug Fixes
 * (#6664) Don't ignore logicalFilePath when including changelogs @filipelautert
 * (#6716) fix filename in dbcl incorrectly generated during 4.31.0 (#6712) @filipelautert
 
-## [OSS] Security, Driver and Other Updates
+## [Community] Security, Driver and Other Updates
 
 #### Snowflake vulnerability update CVE-2025-24789
 * Snowflake discovered and remediated a vulnerability in the Snowflake JDBC Driver. Liquibase now includes a version with the fixed issue 3.22.0.
@@ -439,7 +587,7 @@ Changes in version 4.31.0 (2025.01.16)
 * Revert "Bump com.github.jsqlparser:jsqlparser from 4.9 to 5.0" in https://github.com/liquibase/liquibase-pro/pull/2044 by @StevenMassaro
 
 
-### [OSS] Changelog
+### [Community] Changelog
 
 ## New Features
 
@@ -552,7 +700,7 @@ Changes in version 4.30.0 (2024.11.05)
 ### Liquibase 4.30.0 is a major release
 
 > [!IMPORTANT]
-> Liquibase 4.30.0 contains new capabilities and notable enhancements for Liquibase OSS and Pro users including Anonymous Analytics and deprecation of the MacOS dmg installer.
+> Liquibase 4.30.0 contains new capabilities and notable enhancements for Liquibase Community and Pro users including Anonymous Analytics and deprecation of the MacOS dmg installer.
 > [!NOTE]
 > See the [Liquibase 4.30.0 Release Notes](https://docs.liquibase.com/start/release-notes/liquibase-release-notes/liquibase-4.30.0.html) for the complete set of release information.
 
@@ -562,7 +710,7 @@ Changes in version 4.30.0 (2024.11.05)
 #### Anonymous Analytics:
 * Liquibase can now gather anonymous usage analytics when commands are run. No user-specific data will be gathered.
 
-For Liquibase OSS users, this functionality is enabled by default, but can be opted-out of before any data is sent. For Liquibase Pro users, this is disabled by default with the ability to opt-in.
+For Liquibase Community users, this functionality is enabled by default, but can be opted-out of before any data is sent. For Liquibase Pro users, this is disabled by default with the ability to opt-in.
 
 Gathering anonymous usage analytics allows us to better understand how Liquibase is actually being used by a very wide, diverse set of millions of users.
 
@@ -574,7 +722,7 @@ Gathering anonymous usage analytics allows us to better understand how Liquibase
 * Learn more https://docs.liquibase.com/flow
 
 
-### [OSS]
+### [Community]
 
 #### Deprecated: MacOS .dmg installer
 * The MacOS dmg installer no longer ships with release artifacts. Please use the tar.gz or .zip release artifacts, or install via homebrew by running brew install liquibase
@@ -630,7 +778,7 @@ Gathering anonymous usage analytics allows us to better understand how Liquibase
 (#2005) Bump org.nanohttpd:nanohttpd from 2.2.0 to 2.3.1 by dependabot
 
 
-### [OSS] Changelog
+### [Community] Changelog
 
 
 ## New Features
@@ -777,7 +925,7 @@ Changes in version 4.29.2 (2024.09.03)
 * DAT-18389 Changing Quality Checks -> Policy Checks in https://github.com/liquibase/liquibase-pro/pull/1906 by @wwillard7800
 
 
-### [OSS] Changelog
+### [Community] Changelog
 
 ## Changes
 
@@ -914,7 +1062,7 @@ Changes in version 4.29.0 (2024.07.25)
 (#1762) Bump org.apache.maven.plugins:maven-shade-plugin from 3.5.3 to 3.6.0 by @dependabot
 
 
-### [OSS] Changelog
+### [Community] Changelog
 
 ## Breaking Changes
 - (#6089) refactor history command to use command framework (DAT-17970) @StevenMassaro
@@ -1080,7 +1228,7 @@ Changes in version 4.28.0 (2024.05.15)
 (#1666) Bump actions/upload-artifact from 2 to 3 @dependabot
 
 
-### [OSS] Changelog
+### [Community] Changelog
 
 ## Breaking Changes
 
@@ -1289,7 +1437,7 @@ Changes in version 4.27.0 (2024.03.26)
 * Bump org.postgresql:postgresql from 42.6.0 to 42.7.2 in /liquibase-pro-extension-testing  dependencies java #1527 by dependabot bot
 
 
-### [OSS] Changelog
+### [Community] Changelog
 
 ## Breaking Changes
 
@@ -1457,7 +1605,7 @@ Changes in version 4.26.0 (2024.02.06)
 * Previously, Formatted SQL ChangeLogs could only run in-line rollback commands. But, sometimes you need something more complex, like a full rollbackSqlFile. This functionality has been available for XML, JSON, and YAML formatted changelogs.
 * Learn more https://docs.liquibase.com/concepts/changelogs/sql-format.html
 
-### Liquibase Open Source and Liquibase Pro
+### Liquibase Community and Liquibase Pro
 
 #### Liquibase capability enhancements
 * The `diffChangeLog` command has been updated only to create a changelog when changes are detected. This is a change from the previous behavior of creating an empty changelog.
@@ -1516,7 +1664,7 @@ Changes in version 4.26.0 (2024.02.06)
 * Bump com.oracle.database.jdbc:ojdbc8 from 19.20.0.0 to 19.21.0.0 #1339 by dependabot bot
 
 
-### [OSS] Changelog
+### [Community] Changelog
 
 ## New Features
 - (#5525) Add labels, context and rollback on error info to report (DAT-16531) @abrackx
@@ -1623,7 +1771,7 @@ Changes in version 4.25.1 (2023.12.18)
 - (#1342) Fixes problematic V8 checksums for pro CreateFunctionChange by filipelautert
 
 
-## [OSS]
+## [Community]
 
 ### New Features
 - (#5186) Adding exception details key and implementation DAT-16064 @wwillard7800
@@ -2008,7 +2156,7 @@ Changes in version 4.23.1 (2023.08.09)
 * DAT-15610: resolve license generator build failure that occurs on both-repo PRs by @StevenMassaro in https://github.com/liquibase/liquibase-pro/pull/1157
 
 
-### [OSS]
+### [Community]
 
 * (#4370) add liquibaseHostName MDC key (DAT-14956) @StevenMassaro
 * (#4452) Fix checksum upgrade changes preventing useless updates and using AbstractChangeLogHistoryService for extensions compatibility @filipelautert
@@ -2064,7 +2212,7 @@ Changes in version 4.23.0 (2023.06.22)
 * The flow, history, status, and version commands have been structured Logging enhancements for improved compatibility with automated monitoring and analysis tools.
 * Learn more about Liquibase's Observability and Structured Logging capabilities to generate more meaningful reports and dashboards at https://docs.liquibase.com/observability
 
-### [OSS]
+### [Community]
 * Checksums upgraded to v9, which improves whitespace handling in views, procedures, Liquibase Pro stored logic objects, and more.
  -- No action is required of users to benefit from this enhancement
  -- This release is backwards compatible with v8 checksums (found in 3.5 to 4.21.1 releases)
@@ -2098,7 +2246,7 @@ Changes in version 4.23.0 (2023.06.22)
 * DAT-15167 by @sayaliM0412 in https://github.com/liquibase/liquibase-pro/pull/1045
 
 
-## [OSS] What's Changed
+## [Community] What's Changed
 
 * Add binary, varbinary and longvarbinary support for Snowflake https://github.com/liquibase/liquibase/pull/4226
 * Liquibase should not fail when change log has only databaseChangeLog tag https://github.com/liquibase/liquibase/pull/4273
@@ -2390,7 +2538,7 @@ Structured Logging makes Liquibase operation data easily available for automated
 
 
 ## Enhancements
-* [OSS] New update summary output table for update commands DAT-13182 by @wwillard7800 in https://github.com/liquibase/liquibase/pull/3812
+* [Community] New update summary output table for update commands DAT-13182 by @wwillard7800 in https://github.com/liquibase/liquibase/pull/3812
 * [PRO] New runWithSpoolFile attribute for runWith changesets DAT-12881 by @wwillard7800 in https://github.com/liquibase/liquibase/pull/3864
 
 
@@ -2781,7 +2929,7 @@ Changes in version Liquibase v4.18.0 (2022.11.30)
 - Note: changesets marked `failonerror=false`, do not count as error, and so do not rollback-on-error
 
 
-#### [OSS] Liquibase Environment variables
+#### [Community] Liquibase Environment variables
 * Now free to all users, not just Pro users.
 * Learn more at https://docs.liquibase.com/concepts/connections/liquibase-environment-variables.html
 

@@ -1,0 +1,124 @@
+name: Release Setup
+
+run-name: "Setup Release - v${{ inputs.tag || github.event.release.tag_name }}"
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: "Release Tag"
+        required: false
+        type: string
+      dry_run:
+        description: "Flag to indicate if this is a dry-run release"
+        required: false
+        type: boolean
+        default: false
+      dry_run_branch_name:
+        description: "The branch name for dry-run releases"
+        required: false
+        type: string
+        default: ""
+    outputs:
+      tag:
+        description: "The release tag"
+        value: ${{ jobs.setup.outputs.tag }}
+      version:
+        description: "The release version (without v prefix)"
+        value: ${{ jobs.setup.outputs.version }}
+      ref_branch:
+        description: "The branch to checkout"
+        value: ${{ jobs.setup.outputs.ref_branch }}
+      dry_run_branch_name:
+        description: "The dry-run branch name"
+        value: ${{ jobs.setup.outputs.dry_run_branch_name }}
+      latestMergeSha:
+        description: "Latest merge commit SHA"
+        value: ${{ jobs.setup.outputs.latestMergeSha }}
+      timeStamp:
+        description: "Build timestamp"
+        value: ${{ jobs.setup.outputs.timeStamp }}
+  
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release Tag"
+        required: true
+        type: string
+      dry_run:
+        description: "Flag to indicate if this is a dry-run release"
+        required: false
+        type: boolean
+        default: false
+      dry_run_branch_name:
+        description: "The branch name for dry-run releases"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  setup:
+    name: Setup Release Metadata
+    runs-on: ubuntu-22.04
+    outputs:
+      tag: ${{ steps.collect-data.outputs.tag }}
+      version: ${{ steps.collect-data.outputs.version }}
+      ref_branch: ${{ steps.ref-branch.outputs.branch }}
+      dry_run_branch_name: ${{ inputs.dry_run_branch_name }}
+      latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
+      timeStamp: ${{ steps.get-timestamp.outputs.timeStamp }}
+    steps:
+      - name: Collect Data
+        id: collect-data
+        uses: actions/github-script@v8
+        with:
+          script: |
+            let tag;
+            if (context.payload.inputs) {
+              tag = context.payload.inputs.tag;
+            } else if ("${{ inputs.tag }}" != "") {
+              tag = "${{ inputs.tag }}";
+             } else {
+              tag = context.payload.release.tag_name;
+            }
+            let version = tag.replace(/^v/, "");
+
+            core.setOutput("tag", tag);
+            core.setOutput("version", version);
+
+      - run: |
+          echo "Publishing version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.tag }}"
+
+        # Use the 'release' branch for hotfix changes;
+        # otherwise, use the 'master' branch for regular updates.
+      - name: Ref branch to checkout
+        id: ref-branch
+        run: |
+          if [ "${{ github.ref_name }}" == "release" ]; then
+            echo "branch=release" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref_name }}" == "master" ]; then
+            echo "branch=master" >> $GITHUB_OUTPUT
+          else
+            echo "branch=${{ inputs.dry_run_branch_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout the determined branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.ref-branch.outputs.branch }}
+          fetch-depth: 0
+
+      - name: Get Latest Merge Commit SHA
+        id: get-sha
+        run: |
+          latest_merge_sha=`(git rev-parse --short HEAD)`
+          echo "latestMergeSha=${latest_merge_sha}" >> $GITHUB_OUTPUT
+
+      - name: Get Timestamp
+        id: get-timestamp
+        run: |
+          timestamp=`(date +'%Y-%m-%d %H:%M:%S %Z')`
+          echo "timeStamp=${timestamp}" >> $GITHUB_OUTPUT

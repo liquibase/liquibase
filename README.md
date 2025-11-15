@@ -8,11 +8,11 @@ Liquibase helps millions of developers track, version, and deploy database schem
 - Easily rollback changes
 - Collaborate with tools you already use
 
-This repository contains the main source code for Liquibase Open Source. For more information about the product, see the [Liquibase website](https://www.liquibase.com/).
+This repository contains the main source code for Liquibase Community. For more information about the product, see the [Liquibase website](https://www.liquibase.com/).
 
 ## Liquibase Automation and Integrations
 
-Liquibase Open Source has built-in support for a variety of databases. Databases that are not part of Liquibase Open Source require extensions that you can download for free. Here is the full list of [supported databases](https://www.liquibase.com/supported-databases).
+Liquibase Community has built-in support for a variety of databases. Databases that are not part of Liquibase Community require extensions that you can download for free. Here is the full list of [supported databases](https://www.liquibase.com/supported-databases).
 
 Liquibase can be integrated with Maven, Ant, Gradle, Spring Boot, and other CI/CD tools. For a full list, see [Liquibase Tools & Integrations](https://docs.liquibase.com/tools-integrations/home.html). You can use Liquibase with [GitHub Actions](https://github.com/liquibase/liquibase-github-action-example), [Spinnaker](https://github.com/liquibase/liquibase-spinnaker-plugin), and many different [workflows](https://docs.liquibase.com/workflows/home.html).
 
@@ -47,7 +47,7 @@ Want to file a bug or improve documentation? Excellent! Read up on our guideline
 
 ### Contribute code 
 
-Use our [step-by-step instructions](https://contribute.liquibase.com/code/) for contributing code to the Liquibase open source project. 
+Use our [step-by-step instructions](https://contribute.liquibase.com/code/) for contributing code to the Liquibase project. 
 
 ### Join the Liquibase Community
 
@@ -59,9 +59,9 @@ Earn points for your achievements and contributions, collect and show off your b
 
 ## License
 
-Liquibase Open Source is [licensed under the Apache 2.0 License](https://github.com/liquibase/liquibase/blob/master/LICENSE.txt).
+Liquibase Community is [licensed under the Functional Source License (FSL)](https://fsl.software/FSL-1.1-ALv2.template.md).
 
-[Liquibase Pro](https://www.liquibase.com/products/pro) has additional features and support and is commercially licensed.
+[Liquibase Secure](https://www.liquibase.com/liquibase-secure) has additional features and support and is commercially licensed.
 
 LIQUIBASE is a registered trademark of [Liquibase Inc.](https://www.liquibase.com/company)
 

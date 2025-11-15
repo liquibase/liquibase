@@ -13,6 +13,8 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.core.DefaultsFileValueProvider;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.license.LicenseService;
+import liquibase.license.LicenseServiceFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -291,12 +293,16 @@ public class InitProjectCommandStep extends AbstractCommandStep {
             }
 
             boolean usedH2 = createDefaultsFile(resultsBuilder, defaultsFileConfig, changelogFileConfig, urlConfig, usernameConfig, passwordConfig, skippedDefaultsFileCreation, projectDir, projectCopier, projectDirFile, changelogFileCreationResult, format);
-            if (commandScope.getArgumentValue(COPY_EXAMPLE_FLOW_FILES)) {
-                //Add example flow files to directory
-                InitProjectUtil.copyExampleFlowFiles(format, projectDirFile);
-            }
-            if (commandScope.getArgumentValue(COPY_EXAMPLE_CHECKS_PACKAGE_FILE)) {
-                InitProjectUtil.copyChecksPackageFile(format, projectDirFile);
+
+            final LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
+            if (licenseService != null) {
+                if (commandScope.getArgumentValue(COPY_EXAMPLE_FLOW_FILES)) {
+                    //Add example flow files to directory
+                    InitProjectUtil.copyExampleFlowFiles(format, projectDirFile);
+                }
+                if (commandScope.getArgumentValue(COPY_EXAMPLE_CHECKS_PACKAGE_FILE)) {
+                    InitProjectUtil.copyChecksPackageFile(format, projectDirFile);
+                }
             }
             Scope.getCurrentScope().getUI().sendMessage("");
 
