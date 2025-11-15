@@ -203,7 +203,8 @@ create view sql_view as select * from sql_table;'''
 
     def "included changelog files have their preconditions and changes included in root changelog"() {
         when:
-        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml, "com/example/test2.xml": test1Xml.replace("\${loginUser}", "otherUser").replace("person", "person2")])
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml,
+                                                         "com/example/test2.xml": test1Xml.replace("\${loginUser}", "otherUser").replace("person", "person2")])
 
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
         rootChangeLog.getChangeLogParameters().set("loginUser", "testUser")
@@ -346,7 +347,7 @@ create view sql_view as select * from sql_table;'''
         def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml,
                                                          "com/example/test2.xml": test1Xml.replace("testUser", "otherUser").replace("person", "person2")])
 
-        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml", null)
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChild(new ParsedNode(null, "preConditions").addChildren([runningAs: [username: "user1"]]))
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
@@ -379,7 +380,7 @@ create view sql_view as select * from sql_table;'''
                 "com/example/test2.xml": test1Xml.replace("testUser", "otherUser").replace("person", "person2")
         ])
 
-        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml", null)
         rootChangeLog.include("com/example/test1.xml", false, true, resourceAccessor, new ContextExpression("context1"), new Labels("label1"), false, false)
         rootChangeLog.include("com/example/test2.xml", false, true, resourceAccessor, new ContextExpression("context2"), new Labels("label2"), true, false)
 
