@@ -14,6 +14,7 @@ import liquibase.structure.core.*;
 import liquibase.util.*;
 import lombok.Getter;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigInteger;
 import java.text.NumberFormat;
@@ -357,7 +358,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * If the string "null" or an empty string is passed, it will set a null value.
      */
     public ColumnConfig setValueBit(String valueBit) {
-        valueBit = StringUtil.trimToNull(valueBit);
+        valueBit = StringUtils.trimToNull(valueBit);
         if ((valueBit == null) || "null".equalsIgnoreCase(valueBit)) {
             this.valueBit = null;
         } else {
