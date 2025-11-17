@@ -123,8 +123,8 @@ public class Event {
         });
 
         isDocker = detectDockerEnvironment();
-        isLiquibaseDocker = isDocker && BooleanUtils.toBoolean(System.getenv("DOCKER_LIQUIBASE"));
-        isAwsLiquibaseDocker = isDocker && BooleanUtils.toBoolean(System.getenv("DOCKER_AWS_LIQUIBASE"));
+        isLiquibaseDocker = isDocker || BooleanUtils.toBoolean(System.getenv("DOCKER_LIQUIBASE"));
+        isAwsLiquibaseDocker = isDocker || BooleanUtils.toBoolean(System.getenv("DOCKER_AWS_LIQUIBASE"));
     }
 
     public void incrementFormattedSqlChangelogCount() {
