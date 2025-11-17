@@ -121,24 +121,10 @@ public class Event {
                 return JAVA_API_INTEGRATION_NAME;
             }
         });
-/*        isLiquibaseDocker = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("DOCKER_LIQUIBASE"))));
-        isAwsLiquibaseDocker = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("DOCKER_AWS_LIQUIBASE"))));*/
 
         isDocker = detectDockerEnvironment();
         isLiquibaseDocker = isDocker && BooleanUtils.toBoolean(System.getenv("DOCKER_LIQUIBASE"));
         isAwsLiquibaseDocker = isDocker && BooleanUtils.toBoolean(System.getenv("DOCKER_AWS_LIQUIBASE"));
-
-        /*isDocker = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> {
-            if (isLiquibaseDocker || isAwsLiquibaseDocker) {
-                return true;
-            }
-            boolean dockerenvExists = Files.exists(Paths.get("/.dockerenv"));
-            if (dockerenvExists) {
-                return true;
-            }
-            String cgroupContent = new String(Files.readAllBytes(Paths.get("/proc/1/cgroup")));
-            return cgroupContent.contains("docker") || cgroupContent.contains("kubepods");
-        }));*/
     }
 
     public void incrementFormattedSqlChangelogCount() {
