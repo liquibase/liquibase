@@ -8,7 +8,7 @@ import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.DatabaseException;
-import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -18,7 +18,7 @@ public class BitType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
+        String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
         if ((database instanceof FirebirdDatabase)) {
             try {
                 if (database.getDatabaseMajorVersion() <= 2) {
