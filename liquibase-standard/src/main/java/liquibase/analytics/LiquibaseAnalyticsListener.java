@@ -215,7 +215,7 @@ public class LiquibaseAnalyticsListener implements AnalyticsListener {
             if (Boolean.TRUE.equals(userSuppliedEnabled)) {
                 boolean enabled = isProRemoteAnalyticsEnabled(analyticsConfigurationFactory);
                 if (Boolean.FALSE.equals(enabled)) {
-                    log.log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Analytics is disabled, because a pro license was detected and analytics was not enabled by the user or because it was turned off by Liquibase.", null);
+                    log.log(AnalyticsArgs.LOG_LEVEL.getCurrentValue(), "Analytics is disabled, because a license was detected and analytics was not enabled by the user or because it was turned off by Liquibase.", null);
                 }
                 return enabled;
             }

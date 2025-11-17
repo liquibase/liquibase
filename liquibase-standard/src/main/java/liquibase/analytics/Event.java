@@ -195,7 +195,8 @@ public class Event {
     private static String getExtensionVersion(String extensionName) {
         return ExceptionUtil.doSilently(() -> {
             Map<String, VersionUtils.LibraryInfo> libraries = EXTENSIONS_CACHE.get();
-            return libraries.get(extensionName).version;
+            VersionUtils.LibraryInfo libraryInfo = libraries.get(extensionName);
+            return libraryInfo != null ? libraryInfo.version : null;
         });
     }
 

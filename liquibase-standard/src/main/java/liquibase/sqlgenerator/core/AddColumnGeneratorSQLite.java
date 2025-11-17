@@ -117,6 +117,9 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
 
         };
 
+        if (columns.isEmpty()) {
+            throw new IllegalStateException("Columns list cannot be empty");
+        }
         final String catalogName = columns.get(0).getCatalogName();
         final String schemaName = columns.get(0).getSchemaName();
         final String tableName = columns.get(0).getTableName();
