@@ -93,10 +93,10 @@ class SqlUtilTest extends Specification {
         "[binary literal]"                                        | new H2Database()       | "binary"        | new DatabaseFunction("[binary literal]")  | Types.BINARY
         "[binary literal]"                                        | new H2Database()       | "varbinary"     | new DatabaseFunction("[binary literal]")  | Types.VARBINARY
         "[binary literal]"                                        | new H2Database()       | "longvarbinary" | new DatabaseFunction("[binary literal]")  | Types.LONGVARBINARY
-        "b'0'"                                                    | new MySQLDatabase()    | "bit"           | "0"                                       | Types.BIT
-        "b'1'"                                                    | new MySQLDatabase()    | "bit"           | "1"                                       | Types.BIT
-        "B'0'::\"bit\""                                           | new PostgresDatabase() | "bit"           | "0"                                       | Types.BIT
-        "B'1'::\"bit\""                                           | new PostgresDatabase() | "bit"           | "1"                                       | Types.BIT
+        "b'0'"                                                    | new MySQLDatabase()    | "bit"           | 0                                         | Types.BIT
+        "b'1'"                                                    | new MySQLDatabase()    | "bit"           | 1                                         | Types.BIT
+        "B'0'::\"bit\""                                           | new PostgresDatabase() | "bit"           | 0                                         | Types.BIT
+        "B'1'::\"bit\""                                           | new PostgresDatabase() | "bit"           | 1                                         | Types.BIT
         "0"                                                       | new H2Database()       | "bit"           | 0                                         | Types.BIT
         "1"                                                       | new H2Database()       | "bit"           | 1                                         | Types.BIT
         "false"                                                   | new H2Database()       | "bit"           | false                                     | Types.BIT
