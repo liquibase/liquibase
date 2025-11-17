@@ -1,4 +1,5 @@
 liquibase.datatype.core.BigIntType
+liquibase.datatype.core.BitType
 liquibase.datatype.core.BlobType
 liquibase.datatype.core.BooleanType
 liquibase.datatype.core.CharType
@@ -23,4 +24,3 @@ liquibase.datatype.core.UUIDType
 liquibase.datatype.core.UnknownType
 liquibase.datatype.core.VarcharType
 liquibase.datatype.core.XMLType
-liquibase.datatype.core.BitType

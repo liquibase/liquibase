@@ -51,6 +51,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     private DatabaseFunction defaultValueComputed;
     private SequenceNextValueFunction defaultValueSequenceNext;
     private String defaultValueConstraintName;
+    private Integer defaultValueBit;
 
     private ConstraintsConfig constraints;
     private Boolean autoIncrement;
@@ -349,6 +350,30 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    /**
+     * Set the valueBit based on a given string.
+     * Accepts numeric values ("0", "1") or boolean-like values ("true", "false").
+     * If the passed value is not 0, 1, true, or false, it is assumed to be a function that returns a bit value.
+     * If the string "null" or an empty string is passed, it will set a null value.
+     */
+    public ColumnConfig setValueBit(String valueBit) {
+        valueBit = StringUtil.trimToNull(valueBit);
+        if ((valueBit == null) || "null".equalsIgnoreCase(valueBit)) {
+            this.valueBit = null;
+        } else {
+            if ("1".equals(valueBit) || "true".equalsIgnoreCase(valueBit)) {
+                this.valueBit = 1;
+            } else if ("0".equals(valueBit) || "false".equalsIgnoreCase(valueBit)) {
+                this.valueBit = 0;
+            } else {
+                // For non-binary values like "101010" or function names, treat as computed
+                this.valueComputed = new DatabaseFunction(valueBit);
+            }
+        }
+
+        return this;
+    }
+
     public ColumnConfig setValueBit(Integer valueBit) {
         if (valueBit == null) {
             this.valueBit = null;
@@ -485,6 +510,8 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             return getValue();
         } else if (getValueBoolean() != null) {
             return getValueBoolean();
+        } else if (getValueBit() != null) {
+          return getValueBit();
         } else if (getValueNumeric() != null) {
             return getValueNumeric();
         } else if (getValueDate() != null) {
@@ -662,6 +689,8 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             return getDefaultValue();
         } else if (getDefaultValueBoolean() != null) {
             return getDefaultValueBoolean();
+        } else if (getDefaultValueBit() != null) {
+          return getDefaultValueBit();
         } else if (getDefaultValueNumeric() != null) {
             return getDefaultValueNumeric();
         } else if (getDefaultValueDate() != null) {
@@ -852,6 +881,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             valueComputed = new DatabaseFunction(this.rawDateValue);
         }
         valueBoolean = parsedNode.getChildValue(null, "valueBoolean", Boolean.class);
+        valueBit = parsedNode.getChildValue(null, "valueBit", Integer.class);
         valueBlobFile = parsedNode.getChildValue(null, "valueBlobFile", String.class);
         valueClobFile = parsedNode.getChildValue(null, "valueClobFile", String.class);
         String valueComputedString = parsedNode.getChildValue(null, "valueComputed", String.class);
@@ -880,6 +910,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             defaultValueComputed = new DatabaseFunction(parsedNode.getChildValue(null, "defaultValueDate", String.class));
         }
         defaultValueBoolean = parsedNode.getChildValue(null, "defaultValueBoolean", Boolean.class);
+        defaultValueBit = parsedNode.getChildValue(null, "defaultValueBit", Integer.class);
         String defaultValueComputedString = parsedNode.getChildValue(null, "defaultValueComputed", String.class);
         if (defaultValueComputedString != null) {
             defaultValueComputed = new DatabaseFunction(defaultValueComputedString);
@@ -997,5 +1028,41 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         } else {
             return o;
         }
+    }
+
+    public Integer getValueBit() {
+        return valueBit;
+    }
+
+    /**
+     * Set the defaultValueBit based on a given string.
+     * Accepts numeric values ("0", "1") or boolean-like values ("true", "false").
+     * If the passed value is not 0, 1, true, or false, it is assumed to be a function that returns a bit value.
+     * If the string "null" or an empty string is passed, it will set a null value.
+     */
+    public ColumnConfig setDefaultValueBit(String defaultValueBit) {
+        defaultValueBit = StringUtil.trimToNull(defaultValueBit);
+        if ((defaultValueBit == null) || "null".equalsIgnoreCase(defaultValueBit)) {
+            this.defaultValueBit = null;
+        } else {
+            if ("1".equals(defaultValueBit) || "true".equalsIgnoreCase(defaultValueBit)) {
+                this.defaultValueBit = 1;
+            } else if ("0".equals(defaultValueBit) || "false".equalsIgnoreCase(defaultValueBit)) {
+                this.defaultValueBit = 0;
+            } else {
+                // For non-binary values like "101010", treat as computed
+                this.defaultValueComputed = new DatabaseFunction(defaultValueBit);
+            }
+        }
+        return this;
+    }
+
+    public Integer getDefaultValueBit() {
+        return defaultValueBit;
+    }
+
+    public ColumnConfig setDefaultValueBit(Integer defaultValueBit) {
+        this.defaultValueBit = defaultValueBit;
+        return this;
     }
 }
