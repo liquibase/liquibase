@@ -153,7 +153,7 @@ public abstract class SqlUtil {
                 //postgres defaults for bit columns look like: B'0'::"bit", '0'::bit(1), ('0')::bit(1), or 0::bit(1)
                 if (database instanceof PostgresDatabase) {
                     // Strip B'...' format: B'0' or B'1'
-                    if (stringVal.startsWith("B'") && stringVal.endsWith("'")) {
+                    if (stringVal.startsWith("B'") && stringVal.indexOf('\'', 2) >= 0) {
                         stringVal = stringVal.substring(2); // Remove "B'"
                         stringVal = stringVal.replaceFirst("'.*$", ""); // Remove trailing ' and anything after
                     }
@@ -199,19 +199,24 @@ public abstract class SqlUtil {
                     // Legacy behavior: parse as Boolean first
                     if (scanner.hasNextBoolean()) {
                         value = scanner.nextBoolean();
-                    } else if (scanner.hasNextInt()) {
-                        if (stringVal.length() > 1) {
-                            stringVal = stringVal.substring(0, 1);
+                    } else {
+                        // Try to parse as integer
+                        try {
+                            value = Integer.parseInt(stringVal);
+                        } catch (NumberFormatException e) {
+                            // Keep as string if not parseable as int
                         }
-                        value = Integer.valueOf(stringVal);
                     }
                 } else {
                     // BitType on databases where BIT is binary: parse as Integer first
-                    if (scanner.hasNextInt()) {
-                        value = Integer.valueOf(stringVal);
-                    } else if (scanner.hasNextBoolean()) {
-                        // Convert boolean text to integer for consistency
-                        value = Boolean.parseBoolean(stringVal) ? 1 : 0;
+                    try {
+                        value = Integer.parseInt(stringVal);
+                    } catch (NumberFormatException e) {
+                        // Try boolean parsing
+                        if ("true".equalsIgnoreCase(stringVal) || "false".equalsIgnoreCase(stringVal)) {
+                            value = Boolean.parseBoolean(stringVal) ? 1 : 0;
+                        }
+                        // Otherwise keep as string
                     }
                 }
 
