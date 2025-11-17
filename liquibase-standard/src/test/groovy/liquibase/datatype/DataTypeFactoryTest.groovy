@@ -257,6 +257,16 @@ class DataTypeFactoryTest extends Specification {
         "java.sql.Types.TIMESTAMP(6)"                  | new PostgresDatabase() | "TIMESTAMP(6) WITHOUT TIME ZONE"               | TimestampType | false
         "java.sql.Types.TIMESTAMP_WITH_TIMEZONE"       | new PostgresDatabase() | "TIMESTAMP WITH TIME ZONE"                     | TimestampType | false
         "java.sql.Types.TIMESTAMP_WITH_TIMEZONE(6)"    | new PostgresDatabase() | "TIMESTAMP(6) WITH TIME ZONE"                  | TimestampType | false
+        "bit"                                          | new PostgresDatabase() | "BIT"                                          | BitType       | false
+        "bit(1)"                                       | new PostgresDatabase() | "BIT(1)"                                       | BitType       | false
+        "bit(8)"                                       | new PostgresDatabase() | "BIT(8)"                                       | BitType       | false
+        "bit"                                          | new MySQLDatabase()    | "TINYINT"                                      | BitType       | false
+        "bit(1)"                                       | new MySQLDatabase()    | "BIT(1)"                                       | BitType       | false
+        "bit(8)"                                       | new MySQLDatabase()    | "BIT(8)"                                       | BitType       | false
+        "bit"                                          | new H2Database()       | "BOOLEAN"                                      | BitType       | false
+        "bit(8)"                                       | new H2Database()       | "BIT(8)"                                       | BitType       | false
+        "bit"                                          | new OracleDatabase()   | "NUMBER(1)"                                    | BitType       | false
+        "bit"                                          | new DB2Database()      | "SMALLINT"                                     | BitType       | false
         "BINARY(16)"                                   | new H2Database()       | "BINARY(16)"                                   | BlobType      | false
         "timestamp"                                    | new H2Database()       | "TIMESTAMP"                                    | TimestampType | false
         "timestamp(6)"                                 | new H2Database()       | "TIMESTAMP(6)"                                 | TimestampType | false

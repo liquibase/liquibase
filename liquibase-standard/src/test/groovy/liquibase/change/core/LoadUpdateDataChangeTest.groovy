@@ -5,24 +5,23 @@ import liquibase.Scope
 import liquibase.change.ChangeStatus
 import liquibase.database.core.PostgresDatabase
 import liquibase.database.DatabaseConnection
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
-import liquibase.change.StandardChangeTest;
+import liquibase.change.StandardChangeTest
 import liquibase.database.core.MockDatabase
-import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.statement.SqlStatement
 import liquibase.statement.core.InsertOrUpdateStatement
 import liquibase.database.core.MSSQLDatabase
 import spock.lang.Unroll
 
-public class LoadUpdateDataChangeTest extends StandardChangeTest {
+class LoadUpdateDataChangeTest extends StandardChangeTest {
 
     def getConfirmationMessage() throws Exception {
         when:
-        LoadUpdateDataChange refactoring = new LoadUpdateDataChange();
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile("FILE_NAME");
+        LoadUpdateDataChange refactoring = new LoadUpdateDataChange()
+        refactoring.setTableName("TABLE_NAME")
+        refactoring.setFile("FILE_NAME")
 
         then:
         "Data loaded from 'FILE_NAME' into table 'TABLE_NAME'" == refactoring.getConfirmationMessage()
@@ -30,13 +29,13 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
 
 	def "loadUpdateEmpty database agnostic"() throws Exception {
 		when:
-		LoadUpdateDataChange refactoring = new LoadUpdateDataChange();
-		refactoring.setSchemaName("SCHEMA_NAME");
-		refactoring.setTableName("TABLE_NAME");
-		refactoring.setFile("liquibase/change/core/empty.data.csv");
-		refactoring.setSeparator(",");
+		LoadUpdateDataChange refactoring = new LoadUpdateDataChange()
+		refactoring.setSchemaName("SCHEMA_NAME")
+		refactoring.setTableName("TABLE_NAME")
+		refactoring.setFile("liquibase/change/core/empty.data.csv")
+		refactoring.setSeparator(",")
 
-		SqlStatement[] sqlStatement = refactoring.generateRollbackStatements(new MSSQLDatabase());
+		SqlStatement[] sqlStatement = refactoring.generateRollbackStatements(new MSSQLDatabase())
 		
 		then:
 		sqlStatement.length == 0
@@ -44,16 +43,16 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
 
     def "loadUpdate generates InsertOrUpdateStatements"() throws Exception {
         when:
-        MockDatabase database = new MockDatabase();
+        MockDatabase database = new MockDatabase()
         database.setConnection((DatabaseConnection) null)
 
-        LoadUpdateDataChange change = new LoadUpdateDataChange();
+        LoadUpdateDataChange change = new LoadUpdateDataChange()
 
-        change.setSchemaName("SCHEMA_NAME");
-        change.setTableName("TABLE_NAME");
-        change.setFile("liquibase/change/core/sample.data1.csv");
+        change.setSchemaName("SCHEMA_NAME")
+        change.setTableName("TABLE_NAME")
+        change.setFile("liquibase/change/core/sample.data1.csv")
 
-        SqlStatement[] statements = change.generateStatements(database);
+        SqlStatement[] statements = change.generateStatements(database)
 
         then:
         assert statements != null
@@ -63,36 +62,36 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
 
     def "loadUpdate generates InsertOrUpdateStatements for Postgres"() throws Exception {
         when:
-        PostgresDatabase database = new PostgresDatabase();
+        PostgresDatabase database = new PostgresDatabase()
 
-        LoadUpdateDataChange change = new LoadUpdateDataChange();
+        LoadUpdateDataChange change = new LoadUpdateDataChange()
 
-        change.setSchemaName("SCHEMA_NAME");
-        change.setTableName("TABLE_NAME");
-        change.setFile("liquibase/change/core/jhi_text.csv");
-        change.setResourceAccessor(new ClassLoaderResourceAccessor());
+        change.setSchemaName("SCHEMA_NAME")
+        change.setTableName("TABLE_NAME")
+        change.setFile("liquibase/change/core/jhi_text.csv")
+        change.setResourceAccessor(new ClassLoaderResourceAccessor())
 
-        LoadDataColumnConfig idConfig = new LoadDataColumnConfig();
-        idConfig.setHeader("id");
-        idConfig.setType("NUMERIC");
-        change.addColumn(idConfig);
+        LoadDataColumnConfig idConfig = new LoadDataColumnConfig()
+        idConfig.setHeader("id")
+        idConfig.setType("NUMERIC")
+        change.addColumn(idConfig)
 
-        LoadDataColumnConfig pickupConfig = new LoadDataColumnConfig();
-        pickupConfig.setHeader("selected_pickup_date");
-        pickupConfig.setType("DATETIME");
-        change.addColumn(pickupConfig);
+        LoadDataColumnConfig pickupConfig = new LoadDataColumnConfig()
+        pickupConfig.setHeader("selected_pickup_date")
+        pickupConfig.setType("DATETIME")
+        change.addColumn(pickupConfig)
 
-        LoadDataColumnConfig effectiveConfig = new LoadDataColumnConfig();
-        effectiveConfig.setHeader("effective_pickup_date");
-        effectiveConfig.setType("DATETIME");
-        change.addColumn(effectiveConfig);
+        LoadDataColumnConfig effectiveConfig = new LoadDataColumnConfig()
+        effectiveConfig.setHeader("effective_pickup_date")
+        effectiveConfig.setType("DATETIME")
+        change.addColumn(effectiveConfig)
 
-        LoadDataColumnConfig textConfig = new LoadDataColumnConfig();
-        textConfig.setHeader("textfield");
-        textConfig.setType("CLOB");
-        change.addColumn(textConfig);
+        LoadDataColumnConfig textConfig = new LoadDataColumnConfig()
+        textConfig.setHeader("textfield")
+        textConfig.setType("CLOB")
+        change.addColumn(textConfig)
 
-        SqlStatement[] statements = change.generateStatements(database);
+        SqlStatement[] statements = change.generateStatements(database)
 
         then:
         assert statements != null
@@ -102,17 +101,17 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
 
     def "loadUpdate generates InsertOrUpdateStatements with onlyUpdate"() throws Exception {
         when:
-        MockDatabase database = new MockDatabase();
+        MockDatabase database = new MockDatabase()
         database.setConnection((DatabaseConnection) null)
 
-        LoadUpdateDataChange change = new LoadUpdateDataChange();
+        LoadUpdateDataChange change = new LoadUpdateDataChange()
 
-        change.setSchemaName("SCHEMA_NAME");
-        change.setTableName("TABLE_NAME");
-        change.setFile("liquibase/change/core/sample.data1.csv");
-        change.setOnlyUpdate(true);
+        change.setSchemaName("SCHEMA_NAME")
+        change.setTableName("TABLE_NAME")
+        change.setFile("liquibase/change/core/sample.data1.csv")
+        change.setOnlyUpdate(true)
 
-        SqlStatement[] statements = change.generateStatements(database);
+        SqlStatement[] statements = change.generateStatements(database)
 
         then:
         assert statements != null
@@ -123,16 +122,16 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
     @Unroll
     def "generateChecksum produces different values with each field - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
-        LoadUpdateDataChange refactoring = new LoadUpdateDataChange();
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile("liquibase/change/core/sample.data1.csv");
+        LoadUpdateDataChange refactoring = new LoadUpdateDataChange()
+        refactoring.setSchemaName("SCHEMA_NAME")
+        refactoring.setTableName("TABLE_NAME")
+        refactoring.setFile("liquibase/change/core/sample.data1.csv")
 
         String md5sum1 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
             return refactoring.generateCheckSum().toString()
         } as Scope.ScopedRunnerWithReturn<String>)
 
-        refactoring.setFile("liquibase/change/core/sample.data2.csv");
+        refactoring.setFile("liquibase/change/core/sample.data2.csv")
         String md5sum2 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
             return refactoring.generateCheckSum().toString()
         } as Scope.ScopedRunnerWithReturn<String>)
@@ -148,7 +147,7 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
 
     @Override
     protected boolean canUseStandardGenerateCheckSumTest() {
-        return false;
+        return false
     }
 
     def "checkStatus"() {
@@ -167,18 +166,18 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
     @Unroll
     def "checksum does not change when no comments in CSV and comment property changes"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
-        LoadUpdateDataChange refactoring = new LoadUpdateDataChange();
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile("liquibase/change/core/sample.data1.csv");
-        //refactoring.setFileOpener(new JUnitResourceAccessor());
+        LoadUpdateDataChange refactoring = new LoadUpdateDataChange()
+        refactoring.setSchemaName("SCHEMA_NAME")
+        refactoring.setTableName("TABLE_NAME")
+        refactoring.setFile("liquibase/change/core/sample.data1.csv")
+        //refactoring.setFileOpener(new JUnitResourceAccessor())
 
         refactoring.setCommentLineStartsWith("") //comments disabled
         String md5sum1 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
             return refactoring.generateCheckSum().toString()
         } as Scope.ScopedRunnerWithReturn<String>)
 
-        refactoring.setCommentLineStartsWith("#");
+        refactoring.setCommentLineStartsWith("#")
         String md5sum2 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
             return refactoring.generateCheckSum().toString()
         } as Scope.ScopedRunnerWithReturn<String>)
@@ -196,17 +195,17 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
     @Unroll
     def "checksum changes when there are comments in CSV"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
-        LoadUpdateDataChange refactoring = new LoadUpdateDataChange();
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile("liquibase/change/core/sample.data1-withComments.csv");
+        LoadUpdateDataChange refactoring = new LoadUpdateDataChange()
+        refactoring.setSchemaName("SCHEMA_NAME")
+        refactoring.setTableName("TABLE_NAME")
+        refactoring.setFile("liquibase/change/core/sample.data1-withComments.csv")
 
         refactoring.setCommentLineStartsWith("") //comments disabled
         String md5sum1 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
             return refactoring.generateCheckSum().toString()
         } as Scope.ScopedRunnerWithReturn<String>)
 
-        refactoring.setCommentLineStartsWith("#");
+        refactoring.setCommentLineStartsWith("#")
         String md5sum2 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
             return refactoring.generateCheckSum().toString()
         } as Scope.ScopedRunnerWithReturn<String>)
@@ -224,18 +223,18 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
     @Unroll
     def "checksum same for CSV files with comments and file with removed comments manually - #version"(ChecksumVersion version, String originalChecksum, String updatedChecksum) {
         when:
-        LoadUpdateDataChange refactoring = new LoadUpdateDataChange();
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile("liquibase/change/core/sample.data1-withComments.csv");
+        LoadUpdateDataChange refactoring = new LoadUpdateDataChange()
+        refactoring.setSchemaName("SCHEMA_NAME")
+        refactoring.setTableName("TABLE_NAME")
+        refactoring.setFile("liquibase/change/core/sample.data1-withComments.csv")
 
-        refactoring.setCommentLineStartsWith("#");
+        refactoring.setCommentLineStartsWith("#")
         String md5sum1 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
             return refactoring.generateCheckSum().toString()
         } as Scope.ScopedRunnerWithReturn<String>)
 
-        refactoring.setFile("liquibase/change/core/sample.data1-removedComments.csv");
-        refactoring.setCommentLineStartsWith(""); //disable comments just in case
+        refactoring.setFile("liquibase/change/core/sample.data1-removedComments.csv")
+        refactoring.setCommentLineStartsWith("") //disable comments just in case
         String md5sum2 = Scope.child([(Scope.Attr.checksumVersion.name()): version], {
             return refactoring.generateCheckSum().toString()
         } as Scope.ScopedRunnerWithReturn<String>)

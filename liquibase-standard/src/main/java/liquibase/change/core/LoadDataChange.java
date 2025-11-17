@@ -423,7 +423,21 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                                 valueConfig.setValue(value);
                             }
                         } else if(columnConfig.getTypeEnum() == LOAD_DATA_TYPE.BIT) {
-                            valueConfig.setValueBit(Integer.valueOf(value));
+                            valueConfig.setType(columnConfig.getType());
+                            if (value == null) {
+                                valueConfig.setValueBit(columnConfig.getDefaultValueBit());
+                            } else {
+                                // Parse using BooleanUtil for consistent behavior with CSV data
+                                boolean boolValue = BooleanUtil.parseBoolean(value);
+                                int bitValue = boolValue ? 1 : 0;
+
+                                // For PostgreSQL, wrap BIT values as DatabaseFunction with bit string literal format (issue #4677)
+                                if (database instanceof PostgresDatabase) {
+                                    valueConfig.setValueComputed(new liquibase.statement.DatabaseFunction("B'" + bitValue + "'"));
+                                } else {
+                                    valueConfig.setValueBit(bitValue);
+                                }
+                            }
                         } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.OTHER.toString())) {
                             valueConfig.setType(columnConfig.getType());
                             if (StringUtil.equalsWordNull(value)) {

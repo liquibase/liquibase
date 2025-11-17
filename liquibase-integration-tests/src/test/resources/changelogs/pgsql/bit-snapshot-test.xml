@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="issue-4677-bit-snapshot" author="test">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="bit_snapshot_table"/>
+            </not>
+        </preConditions>
+        <createTable tableName="bit_snapshot_table">
+            <column name="id" type="serial">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="bit_col_0" type="BIT" defaultValueNumeric="0"/>
+            <column name="bit_col_1" type="BIT" defaultValueNumeric="1"/>
+            <column name="bit_col_no_default" type="BIT"/>
+        </createTable>
+        <rollback>
+            <dropTable tableName="bit_snapshot_table"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
