@@ -3,6 +3,7 @@ package liquibase.command;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.analytics.AnalyticsFactory;
+import liquibase.analytics.AnalyticsListener;
 import liquibase.analytics.Event;
 import liquibase.analytics.LiquibaseAnalyticsListener;
 import liquibase.configuration.*;
@@ -245,10 +246,7 @@ public class CommandScope {
 
         try {
             Map<String, Object> scopeValues = new HashMap<>();
-            LiquibaseAnalyticsListener lAl = new LiquibaseAnalyticsListener();
-            final Event analyticsEvent = lAl.isEnabled()
-                    ? ExceptionUtil.doSilently(() -> new Event(commandName))
-                    : null;
+            final Event analyticsEvent = createAnalyticsEventIfEnabled(commandName);
 
             Event parentAnalyticsEvent = Scope.getCurrentScope().getAnalyticsEvent();
 
@@ -346,16 +344,15 @@ public class CommandScope {
                                 parentAnalyticsEvent.getChildEvents().add(analyticsEvent);
                             }
                         });
-                        if ( Boolean.TRUE.equals(LicenseTrackingArgs.ENABLED.getCurrentValue())) {
-                            if (parentLicenseTrackList == null) {
-                                LicenseTrackingFactory licenseTrackingFactory = Scope.getCurrentScope().getSingleton(LicenseTrackingFactory.class);
-                                licenseTrackingFactory.handleEvent(licenseTrackList);
-                            } else {
-                                parentLicenseTrackList.getLicenseTracks().addAll(licenseTrackList.getLicenseTracks());
-                            }
+                    }
+                    if ( Boolean.TRUE.equals(LicenseTrackingArgs.ENABLED.getCurrentValue())) {
+                        if (parentLicenseTrackList == null) {
+                            LicenseTrackingFactory licenseTrackingFactory = Scope.getCurrentScope().getSingleton(LicenseTrackingFactory.class);
+                            licenseTrackingFactory.handleEvent(licenseTrackList);
+                        } else {
+                            parentLicenseTrackList.getLicenseTracks().addAll(licenseTrackList.getLicenseTracks());
                         }
                     }
-
                 }
 
                 return resultsBuilder.build();
@@ -437,6 +434,28 @@ public class CommandScope {
             }
         }
         return commandStepName.toString();
+    }
+
+    /**
+     * Creates an analytics event if analytics is enabled, or returns null if disabled.
+     * This method handles all potential failures gracefully to ensure analytics issues
+     * never break command execution.
+     */
+    private Event createAnalyticsEventIfEnabled(String commandName) {
+        try {
+            AnalyticsFactory factory = Scope.getCurrentScope().getSingleton(AnalyticsFactory.class);
+            if (factory == null) return null;
+
+            AnalyticsListener listener = factory.getListener();
+            if (listener == null || !listener.isEnabled()) {
+                return null;
+            }
+
+            return new Event(commandName);
+        } catch (Exception e) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Could not create analytics event: " + e.getMessage());
+            return null;
+        }
     }
 
     /**
