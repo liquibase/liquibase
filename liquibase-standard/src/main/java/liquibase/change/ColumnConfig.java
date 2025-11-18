@@ -235,7 +235,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     }
 
     /**
-     * The data type fof the column.
+     * The data type for the column.
      * This value will pass through {@link liquibase.datatype.DataTypeFactory#fromDescription(String, liquibase.database.Database)} before being included in SQL.
      */
     public String getType() {
