@@ -430,7 +430,14 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                                 // BIT(n) where n>1: preserve the bit string value as-is
                                 // For PostgreSQL, wrap BIT values as DatabaseFunction with bit string literal format (issue #4677)
                                 if (database instanceof PostgresDatabase) {
-                                    valueConfig.setValueComputed(new liquibase.statement.DatabaseFunction("B'" + value + "'"));
+                                    // Convert boolean strings to numeric format before wrapping
+                                    String bitValue = value;
+                                    if ("true".equalsIgnoreCase(value.trim())) {
+                                        bitValue = "1";
+                                    } else if ("false".equalsIgnoreCase(value.trim())) {
+                                        bitValue = "0";
+                                    }
+                                    valueConfig.setValueComputed(new liquibase.statement.DatabaseFunction("B'" + bitValue + "'"));
                                 } else {
                                     // For other databases, use setValue to preserve the bit string
                                     valueConfig.setValue(value);
