@@ -40,6 +40,11 @@ import java.util.stream.Collectors;
  */
 public class ChangeLogParameters {
 
+    /**
+     * The key of the parameter that will be set to identify included context filters from parent changelog.
+     */
+    public static final String PARENT_INCLUDE_CONTEXT_FILTER = "parent.include.context.filter";
+
     private final List<ChangeLogParameter> globalParameters = new ArrayList<>();
     private final Map<String, List<ChangeLogParameter>> localParameters = new HashMap<>();
     private final List<ChangeLogParameter> systemParameters = new ArrayList<>();

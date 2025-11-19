@@ -18,16 +18,19 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.nodes.Tag;
 
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 
     @Override
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
+        return parse(physicalChangeLogLocation, changeLogParameters, resourceAccessor, null);
+    }
+
+    @Override
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, ContextExpression includeContextFilter) throws ChangeLogParseException {
         Yaml yaml = new Yaml(new CustomSafeConstructor(createLoaderOptions()));
 
         try {
@@ -45,7 +48,9 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
                 throw new ChangeLogParseException("Empty file " + physicalChangeLogLocation);
             }
             DatabaseChangeLog changeLog = new DatabaseChangeLog(DatabaseChangeLog.normalizePath(physicalChangeLogLocation));
-
+            if (changeLogParameters != null) {
+                changeLogParameters.setLocal(ChangeLogParameters.PARENT_INCLUDE_CONTEXT_FILTER, includeContextFilter, changeLog);
+            }
             if (!parsedYaml.containsKey(DATABASE_CHANGE_LOG)) {
                 throw new ChangeLogParseException("Could not find databaseChangeLog node");
             }
