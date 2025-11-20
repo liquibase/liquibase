@@ -13,6 +13,7 @@ import org.apache.commons.lang3.BooleanUtils;
 
 import java.lang.reflect.Field;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -105,6 +106,8 @@ public class Event {
      * see https://segment.com/docs/connections/spec/common/#timestamps for more info
      */
     private String timestamp = Instant.now().atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
+    // Save the isDocker value statically to avoid executing it multiple times
+    private static volatile Boolean cachedIsDocker = null;
 
     public Event(String command) {
         this.command = command;
@@ -118,19 +121,10 @@ public class Event {
                 return JAVA_API_INTEGRATION_NAME;
             }
         });
-        isLiquibaseDocker = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("DOCKER_LIQUIBASE"))));
-        isAwsLiquibaseDocker = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("DOCKER_AWS_LIQUIBASE"))));
-        isDocker = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> {
-            if (isLiquibaseDocker || isAwsLiquibaseDocker) {
-                return true;
-            }
-            boolean dockerenvExists = Files.exists(Paths.get("/.dockerenv"));
-            if (dockerenvExists) {
-                return true;
-            }
-            String cgroupContent = new String(Files.readAllBytes(Paths.get("/proc/1/cgroup")));
-            return cgroupContent.contains("docker") || cgroupContent.contains("kubepods");
-        }));
+
+        isDocker = detectDockerEnvironment();
+        isLiquibaseDocker = isDocker || BooleanUtils.toBoolean(System.getenv("DOCKER_LIQUIBASE"));
+        isAwsLiquibaseDocker = isDocker || BooleanUtils.toBoolean(System.getenv("DOCKER_AWS_LIQUIBASE"));
     }
 
     public void incrementFormattedSqlChangelogCount() {
@@ -205,4 +199,46 @@ public class Event {
             return libraryInfo != null ? libraryInfo.version : null;
         });
     }
+
+    private static boolean detectDockerEnvironment() {
+        if (cachedIsDocker != null) {
+            return cachedIsDocker;
+        }
+
+        // Double-check locking for thread safety
+        synchronized (Event.class) {
+            if (cachedIsDocker != null) {
+                return cachedIsDocker;
+            }
+
+            cachedIsDocker = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> {
+                if (BooleanUtils.toBoolean(System.getenv("DOCKER_LIQUIBASE")) ||
+                        BooleanUtils.toBoolean(System.getenv("DOCKER_AWS_LIQUIBASE"))) {
+                    return true;
+                }
+
+                // Only do file I/O on Linux/Unix systems
+                String osName = System.getProperty("os.name", "").toLowerCase();
+                if (!osName.contains("linux") && !osName.contains("unix")) {
+                    return false;
+                }
+
+                if (Files.exists(Paths.get("/.dockerenv"))) {
+                    return true;
+                }
+
+                // Only check cgroup if all else fails
+                Path cgroupPath = Paths.get("/proc/1/cgroup");
+                if (Files.exists(cgroupPath)) {
+                    String cgroupContent = new String(Files.readAllBytes(cgroupPath));
+                    return cgroupContent.contains("docker") || cgroupContent.contains("kubepods");
+                }
+
+                return false;
+            }));
+
+            return cachedIsDocker;
+        }
+    }
+
 }
