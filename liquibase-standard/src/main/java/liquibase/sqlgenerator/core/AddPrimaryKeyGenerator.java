@@ -47,12 +47,11 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
     @Override
     public Sql[] generateSql(AddPrimaryKeyStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
-        if ((statement.getConstraintName() == null) || (database instanceof MySQLDatabase) || (database instanceof
-            SybaseASADatabase)) {
+        if ((statement.getConstraintName() == null) || (database instanceof MySQLDatabase)) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ADD PRIMARY KEY (" + database.escapeColumnNameList(statement.getColumnNames()) + ")";
         } else {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ADD CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName())+" PRIMARY KEY";
-            if ((database instanceof MSSQLDatabase) && (statement.isClustered() != null)) {
+            if ((database instanceof MSSQLDatabase || database instanceof SybaseASADatabase) && (statement.isClustered() != null)) {
                 if (statement.isClustered()) {
                     sql += " CLUSTERED";
                 } else {
