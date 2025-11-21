@@ -2,9 +2,15 @@ package liquibase.resource
 
 import liquibase.GlobalConfiguration
 import liquibase.Scope
+import liquibase.sdk.resource.MockResource
+import liquibase.test.JUnitResourceAccessor
 import liquibase.ui.UIService
+import static ResourceAccessor.NotFoundResource
+
 import spock.lang.Specification
 import spock.lang.Unroll
+
+import java.nio.file.Path
 
 /**
  * Tests for the ResourceAccessor interface and its default methods.
@@ -128,5 +134,22 @@ class ResourceAccessorTest extends Specification {
 
         @Override
         void close() {}
+    }
+
+    static final Path path = Path.of('path')
+    static final def testResourceAccessor = new JUnitResourceAccessor()
+
+    def "fullPathToLog"() {
+        when:
+        String fullPath = testResourceAccessor.fullPathToLog(r)
+        then:
+        fullPath == expPath
+        where:
+        r                                                     | expPath
+        new NotFoundResource('path/to', testResourceAccessor) | 'path/to'
+        new NotFoundResource('path', testResourceAccessor)    | 'path'
+        new PathResource('path', path)                        | path.toUri().getPath()
+        new URIResource('path/to', new URI('http://path/to')) | 'http://path/to'
+        new MockResource('path/to', 'content')                | 'path/to'
     }
 }

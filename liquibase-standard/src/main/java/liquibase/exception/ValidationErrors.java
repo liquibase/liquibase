@@ -6,8 +6,11 @@ import liquibase.change.ChangeFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.precondition.Precondition;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
+import lombok.Getter;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -15,8 +18,10 @@ import java.util.List;
 
 public class ValidationErrors {
 
-    protected List<String> errorMessages = new ArrayList<>();
-    protected List<String> warningMessages = new ArrayList<>();
+    @Getter
+	 protected List<String> errorMessages = new ArrayList<>();
+    @Getter
+	 protected List<String> warningMessages = new ArrayList<>();
     protected String change = null;
 
     public boolean hasErrors() {
@@ -70,23 +75,26 @@ public class ValidationErrors {
     public ValidationErrors checkRequiredField(String requiredFieldName, Object value, String postfix, boolean allowEmptyValue) {
         String err = null;
         if (value == null) {
-            err = requiredFieldName + " is required";
+            err = "'" + requiredFieldName + "' is required";
         }
 
         if (!allowEmptyValue) {
             if ((value instanceof Collection && ((Collection<?>) value).isEmpty())
                     || (value instanceof Object[] && ((Object[]) value).length == 0)) {
-                err = "No " + requiredFieldName + " defined";
+                err = "No '" + requiredFieldName + "' defined";
             } else if (value instanceof String && StringUtil.trimToNull((String) value) == null) {
-                err = requiredFieldName + " is empty";
+                err = "'" + requiredFieldName + "' is empty";
             }
         }
 
         if (err != null) {
-            addError(err + (this.change == null ? "" : " for " + this.change)
-                    + (postfix == null ? "" : postfix));
+            addError(err + changeInMsg() + (postfix == null ? "" : postfix));
         }
         return this;
+    }
+
+    protected String changeInMsg() {
+        return change == null ? "" : " for '" + change + "'";
     }
 
     /**
@@ -128,26 +136,17 @@ public class ValidationErrors {
         return this;
     }
 
-
     public ValidationErrors addError(String message, ChangeSet changeSet) {
         this.errorMessages.add(message + ", " + changeSet);
         return this;
     }
 
-    public List<String> getErrorMessages() {
-        return errorMessages;
-    }
-
-    public ValidationErrors addWarning(String message) {
+	public ValidationErrors addWarning(String message) {
         warningMessages.add(message);
         return this;
     }
 
-    public List<String> getWarningMessages() {
-        return warningMessages;
-    }
-
-    public ValidationErrors addAll(ValidationErrors validationErrors) {
+	public ValidationErrors addAll(ValidationErrors validationErrors) {
         if (validationErrors == null) {
             return this;
         }
@@ -203,5 +202,19 @@ public class ValidationErrors {
             }
         }
         return Collections.unmodifiableList(unsupportedErrorMessages);
+    }
+
+    /** add error message to errors if {@code path} relative to path {@code relativeTo} defined in
+        {@code property} refers to an existing file
+     */
+    public ValidationErrors fileExisting(String property, String path, String relativeTo) {
+        ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+        try {
+            resourceAccessor.getExistingFile(path, relativeTo,
+                  " set as " + change + ":" + property);
+        } catch (IOException e) {
+            addError(e.getMessage());
+        }
+        return this;
     }
 }

@@ -253,7 +253,7 @@ class AbstractChangeTest extends Specification {
         then:
 
         errors.getErrorMessages().size() == 1
-        errors.getErrorMessages().get(0) == "paramTwo is required for exampleAbstractChange on mssql"
+        errors.getErrorMessages().get(0) == "'paramTwo' is required for 'exampleAbstractChange' on mssql"
     }
 
     def validate_noErrors() throws Exception {

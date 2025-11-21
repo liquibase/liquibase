@@ -26,7 +26,7 @@ public class PathResource extends AbstractResource {
     public InputStream openInputStream() throws IOException {
         if (!Files.exists(this.path)) {
             throw new FileNotFoundException(this.path + " does not exist");
-        } else if (Files.isDirectory(this.path)) {
+        } else if (!isFile()) {
             throw new FileNotFoundException(this.path + " is a directory");
         } else {
             InputStream stream = Files.newInputStream(this.path);
@@ -56,7 +56,7 @@ public class PathResource extends AbstractResource {
 
     @Override
     public boolean isWritable() {
-        return !Files.isDirectory(this.path) && Files.isWritable(path);
+        return isFile() && Files.isWritable(path);
     }
 
     @Override
@@ -71,12 +71,12 @@ public class PathResource extends AbstractResource {
                     }
                 }
             } else {
-                throw new IOException("File " + this.getUri() + " does not exist");
+                throw new IOException("File " + this.path + " does not exist");
             }
         }
 
-        if (Files.isDirectory(this.path)) {
-            throw new FileNotFoundException(this.getPath() + " is a directory");
+        if (!isFile()) {
+            throw new FileNotFoundException(this.path + " is a directory");
         } else {
             List<StandardOpenOption> options = new ArrayList<>();
             if (openOptions.isCreateIfNeeded()) {
@@ -92,5 +92,10 @@ public class PathResource extends AbstractResource {
             return Files.newOutputStream(this.path, options.toArray(new OpenOption[0]));
 
         }
+    }
+
+    @Override
+    public boolean isFile() {
+        return !Files.isDirectory(this.path);
     }
 }

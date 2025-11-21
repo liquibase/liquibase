@@ -17,10 +17,10 @@ public interface Resource {
      */
     String getPath();
 
-
     /**
      * Opens an input stream to read from this resource.
-     * @throws IOException if there is an error reading from the resource, including if the resource does not exist or cannot be read.
+     * @throws IOException if there is an error reading from the resource,
+     *                     including if the resource does not exist or cannot be read.
      */
     InputStream openInputStream() throws IOException;
 
@@ -44,7 +44,9 @@ public interface Resource {
 
     /**
      * Resolves the given path against this resource's parent path.
-     * This is useful where a file name needs to be replaced with another file name. For example, suppose that the name separator is "/" and a path represents "dir1/dir2/foo", then invoking this method with the Path "bar" will result in the Path "dir1/dir2/bar".
+     * This is useful where a file name needs to be replaced with another file name.
+     * For example, suppose that the name separator is "/" and a path represents "dir1/dir2/foo",
+     * then invoking this method with the Path "bar" will result in the Path "dir1/dir2/bar".
      * If other is an empty path then this method returns this path's parent.
      * <b>Even if "other" begins with a `/`, the returned resource should be relative to this resource.</b>
      */
@@ -57,7 +59,8 @@ public interface Resource {
     OutputStream openOutputStream(OpenOptions openOptions) throws IOException;
 
     /**
-     * Opens an output stream to write to this resource using the default {@link OpenOptions#OpenOptions()} settings plus the passed createIfNeeded value.
+     * Opens an output stream to write to this resource using the default {@link OpenOptions#OpenOptions()}
+     * settings plus the passed createIfNeeded value.
      *
      * @deprecated use {@link #openOutputStream(OpenOptions)}
      */
@@ -68,9 +71,14 @@ public interface Resource {
 
     /**
      * Returns a unique and complete identifier for this resource.
-     * This will be different than what is returned by {@link #getPath()} because the path within the resource accessor whereas this is the a complete path to it.
+     * This is different than {@link #getPath()} that returns the path within the resource accessor
+     * whereas this is the complete path to it.
      * <p>
-     * For example, a file resource may return a path of <code>my/file.txt</code> and a uri of <code>file:/tmp/project/liquibase/my/file.txt</code> for a resource accessor using <code>file:/tmp/project/liquibase</code> as a root
+     * For example, a file resource may return a path of <code>my/file.txt</code> and
+     * uri of {@code file:/tmp/project/liquibase/my/file.txt} for a resource accessor using
+     * {@code file:/tmp/project/liquibase} as a root
      */
     URI getUri();
+
+    boolean isFile();
 }

@@ -45,7 +45,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 continue; //need to better handle strange "one of defaultValue* is required" logic
             }
 
-            if ("createProcedure".equals(changeName)) {
+            if (List.of("createProcedure", "createView").contains(changeName)) {
                 continue; //need to better handle strange "one of path or body is required" logic
             }
 
