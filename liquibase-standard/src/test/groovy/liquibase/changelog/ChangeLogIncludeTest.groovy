@@ -1,8 +1,7 @@
 package liquibase.changelog
 
-
+import liquibase.serializer.LiquibaseSerializable
 import spock.lang.Specification
-import spock.lang.Unroll
 
 /**
  * Unit tests for {@link ChangeLogInclude} class.
