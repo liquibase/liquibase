@@ -76,7 +76,7 @@ public class SmallIntType extends NumericType {
     public void finishInitialization(String originalDefinition) {
         super.finishInitialization(originalDefinition);
 
-        if (originalDefinition.toLowerCase(Locale.US).contains("serial")) {
+        if (originalDefinition != null && originalDefinition.toLowerCase(Locale.US).contains("serial")) {
             setAutoIncrement( true );
         }
     }

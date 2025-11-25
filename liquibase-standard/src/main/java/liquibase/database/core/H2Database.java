@@ -505,8 +505,6 @@ public class H2Database extends AbstractJdbcDatabase {
         return true;
     }
 
-//    public String getSystemSchema(){        return "INFORMATION_SCHEMA";    }
-
     @Override
     public void setConnection(DatabaseConnection conn) {
         Connection sqlConn = null;
@@ -524,7 +522,7 @@ public class H2Database extends AbstractJdbcDatabase {
                         unquotedObjectsAreUppercased = false;
                     }
                 }
-            } catch (Exception e) {
+            } catch (DatabaseException | SQLException | ReflectiveOperationException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
 
