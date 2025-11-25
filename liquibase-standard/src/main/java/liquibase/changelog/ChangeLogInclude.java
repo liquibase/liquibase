@@ -16,10 +16,11 @@ public class ChangeLogInclude extends AbstractLiquibaseSerializable implements C
     private Boolean relativeToChangelogFile;
     private Boolean errorIfMissing;
     private ContextExpression context;
+    private String logicalFilePath;
 
     @Override
     public Set<String> getSerializableFields() {
-        return new LinkedHashSet<>(Arrays.asList("file", "relativeToChangelogFile", "errorIfMissing", "context"));
+        return new LinkedHashSet<>(Arrays.asList("file", "relativeToChangelogFile", "errorIfMissing", "context", "logicalFilePath"));
     }
 
     @Override
