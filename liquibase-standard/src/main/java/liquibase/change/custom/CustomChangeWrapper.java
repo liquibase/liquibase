@@ -64,7 +64,7 @@ public class CustomChangeWrapper extends AbstractChange {
                 this.customChange = loadCustomChange(className);
             } catch (CustomChangeException e) {
                 final Logger log = Scope.getCurrentScope().getLog(getClass());
-                log.warning("Exception thrown loading " + getClassName(), e);
+                log.warning(String.format("Custom change class %s cannot be loaded. Please verify the class exists and is on the classpath.", getClassName()), e);
                 return null;
             }
         }
