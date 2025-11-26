@@ -161,4 +161,100 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
         }
         return super.getExpectedSqlVisitors(database);
     }
+
+    @Test
+    public void testEscapeTablespaceName_withoutSpaces() throws DatabaseException {
+        // Given: A tablespace name without spaces
+        try (Database database = new MSSQLDatabase()) {
+            String tablespaceName = "MyTablespace";
+
+            // When: Escaping the tablespace name
+            String result = database.escapeTablespaceName(tablespaceName);
+
+            // Then: The tablespace name should be properly escaped without additional quotes
+            assertEquals("MyTablespace", result);
+        } catch (final DatabaseException e) {
+            throw e;
+        }
+    }
+
+    @Test
+    public void testEscapeTablespaceName_withSpaces() throws DatabaseException {
+        // Given: A tablespace name with spaces
+        try (Database database = new MSSQLDatabase()) {
+            String tablespaceName = "My Tablespace";
+
+            // When: Escaping the tablespace name
+            String result = database.escapeTablespaceName(tablespaceName);
+
+            // Then: The tablespace name should be bracket-escaped (spaces require brackets) and wrapped in double quotes
+            assertEquals("\"[My Tablespace]\"", result);
+        } catch (final DatabaseException e) {
+            throw e;
+        }
+    }
+
+    @Test
+    public void testEscapeTablespaceName_null() throws DatabaseException {
+        // Given: A null tablespace name
+        try (Database database = new MSSQLDatabase()) {
+            String tablespaceName = null;
+
+            // When: Escaping the tablespace name
+            String result = database.escapeTablespaceName(tablespaceName);
+
+            // Then: The result should be null
+            assertNull(result);
+        } catch (final DatabaseException e) {
+            throw e;
+        }
+    }
+
+    @Test
+    public void testEscapeTablespaceName_withParenthesis() throws DatabaseException {
+        // Given: A tablespace name with parenthesis
+        try (Database database = new MSSQLDatabase()) {
+            String tablespaceName = "Tablespace(1)";
+
+            // When: Escaping the tablespace name
+            String result = database.escapeTablespaceName(tablespaceName);
+
+            // Then: The tablespace name should not be escaped (treated as function)
+            assertEquals("Tablespace(1)", result);
+        } catch (final DatabaseException e) {
+            throw e;
+        }
+    }
+
+    @Test
+    public void testEscapeTablespaceName_withSpecialCharacters() throws DatabaseException {
+        // Given: A tablespace name with special characters
+        try (Database database = new MSSQLDatabase()) {
+            String tablespaceName = "My€Tablespace";
+
+            // When: Escaping the tablespace name
+            String result = database.escapeTablespaceName(tablespaceName);
+
+            // Then: The tablespace name should be bracket-escaped
+            assertEquals("[My€Tablespace]", result);
+        } catch (final DatabaseException e) {
+            throw e;
+        }
+    }
+
+    @Test
+    public void testEscapeTablespaceName_withSpacesAndSpecialCharacters() throws DatabaseException {
+        // Given: A tablespace name with both spaces and special characters
+        try (Database database = new MSSQLDatabase()) {
+            String tablespaceName = "My €Tablespace";
+
+            // When: Escaping the tablespace name
+            String result = database.escapeTablespaceName(tablespaceName);
+
+            // Then: The tablespace name should be bracket-escaped and double-quoted
+            assertEquals("\"[My €Tablespace]\"", result);
+        } catch (final DatabaseException e) {
+            throw e;
+        }
+    }
 }
