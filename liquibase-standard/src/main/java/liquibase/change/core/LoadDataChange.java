@@ -1,6 +1,5 @@
 package liquibase.change.core;
 
-import com.opencsv.exceptions.CsvMalformedLineException;
 import liquibase.CatalogAndSchema;
 import liquibase.GlobalConfiguration;
 import liquibase.Null;
@@ -478,8 +477,6 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                 rows.add(new LoadDataRowConfig(actuallyUsePreparedStatements, columnsFromCsv));
             }
             return generateStatementsFromRows(database, rows);
-        } catch (CsvMalformedLineException e) {
-            throw new RuntimeException("Error parsing " + getRelativeTo() + " on line " + e.getLineNumber() + ": " + e.getMessage());
         } catch (IOException | LiquibaseException e) {
             throw new RuntimeException(e);
         } catch (UnexpectedLiquibaseException ule) {
