@@ -347,7 +347,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 
         if ((statement.getTablespace() != null) && database.supportsTablespaces()) {
             if ((database instanceof MSSQLDatabase) || (database instanceof SybaseASADatabase)) {
-                sql += " ON " + statement.getTablespace();
+                sql += " ON " + database.escapeTablespaceName(statement.getTablespace());
             } else if ((database instanceof AbstractDb2Database) || (database instanceof InformixDatabase)) {
                 sql += " IN " + statement.getTablespace();
             } else {
