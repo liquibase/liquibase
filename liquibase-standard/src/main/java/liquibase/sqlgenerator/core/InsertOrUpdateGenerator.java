@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.Null;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
@@ -51,10 +52,10 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
             where.append(database.escapeColumnName(insertOrUpdateStatement.getCatalogName(),
                     insertOrUpdateStatement.getSchemaName(),
                     insertOrUpdateStatement.getTableName(),
-                    thisPkColumn)).append(((newValue == null) || "NULL".equalsIgnoreCase(newValue.toString())) ?
+                    thisPkColumn)).append((newValue == null) || (newValue instanceof Null) ?
                     " is " : " = ");
 
-            if ((newValue == null) || "NULL".equalsIgnoreCase(newValue.toString())) {
+            if ((newValue == null) || (newValue instanceof Null)) {
                 where.append("NULL");
             } else {
                 where.append(DataTypeFactory.getInstance().fromObject(newValue, database).objectToSql(newValue, database));
