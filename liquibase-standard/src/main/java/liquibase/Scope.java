@@ -90,14 +90,38 @@ public class Scope {
 
     public static final String JAVA_PROPERTIES = "javaProperties";
 
-    private static final InheritableThreadLocal<ScopeManager> scopeManager = new InheritableThreadLocal<ScopeManager>() {
-        @Override
-        protected ScopeManager childValue(ScopeManager parentValue) {
-            ScopeManager sm = new SingletonScopeManager();
-            sm.setCurrentScope(parentValue.getCurrentScope());
-            return sm;
+    /**
+     * Lazily initialized scope manager ThreadLocal.
+     * Uses double-checked locking pattern with volatile for thread-safe lazy initialization.
+     * The volatile keyword ensures visibility of the initialized object across threads.
+     * Once initialized, this field is never modified, making it effectively immutable.
+     */
+    @SuppressWarnings("java:S3077")
+    private static volatile InheritableThreadLocal<ScopeManager> scopeManager;
+
+    /**
+     * Lazily initializes and returns the scopeManager ThreadLocal.
+     */
+    private static InheritableThreadLocal<ScopeManager> getScopeManagerThreadLocal() {
+        if (scopeManager == null) {
+            synchronized (Scope.class) {
+                if (scopeManager == null) {
+                    scopeManager = new InheritableThreadLocal<ScopeManager>() {
+                        @Override
+                        protected ScopeManager childValue(ScopeManager parentValue) {
+                            if (parentValue == null) {
+                                return null;
+                            }
+                            ScopeManager sm = new SingletonScopeManager();
+                            sm.setCurrentScope(parentValue.getCurrentScope());
+                            return sm;
+                        }
+                    };
+                }
+            }
         }
-    };
+        return scopeManager;
+    }
 
     private final Scope parent;
     private final SmartMap values = new SmartMap();
@@ -108,12 +132,13 @@ public class Scope {
     private LiquibaseListener listener;
 
     public static Scope getCurrentScope() {
-        if (scopeManager.get() == null) {
-            scopeManager.set(new SingletonScopeManager());
+        InheritableThreadLocal<ScopeManager> manager = getScopeManagerThreadLocal();
+        if (manager.get() == null) {
+            manager.set(new SingletonScopeManager());
         }
-        if (scopeManager.get().getCurrentScope() == null) {
+        if (manager.get().getCurrentScope() == null) {
             Scope rootScope = new Scope();
-            scopeManager.get().setCurrentScope(rootScope);
+            manager.get().setCurrentScope(rootScope);
 
             rootScope.values.put(Attr.logService.name(), new JavaLogService());
             rootScope.values.put(Attr.serviceLocator.name(), new StandardServiceLocator());
@@ -142,11 +167,11 @@ public class Scope {
             rootScope.values.put(Attr.osgiPlatform.name(), ContainerChecker.isOsgiPlatform());
             rootScope.values.put(Attr.deploymentId.name(), generateDeploymentId());
         }
-        return scopeManager.get().getCurrentScope();
+        return manager.get().getCurrentScope();
     }
 
     public static void setScopeManager(ScopeManager scopeManager) {
-        Scope.scopeManager.set(scopeManager);
+        getScopeManagerThreadLocal().set(scopeManager);
     }
 
     /**
@@ -245,7 +270,7 @@ public class Scope {
         Scope originalScope = getCurrentScope();
         Scope child = new Scope(originalScope, scopeValues);
         child.listener = listener;
-        scopeManager.get().setCurrentScope(child);
+        getScopeManagerThreadLocal().get().setCurrentScope(child);
 
         return child.scopeId;
     }
@@ -267,7 +292,7 @@ public class Scope {
             mdcObject.close();
         }
 
-        scopeManager.get().setCurrentScope(currentScope.getParent());
+        getScopeManagerThreadLocal().get().setCurrentScope(currentScope.getParent());
     }
 
     /**
