@@ -422,6 +422,27 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             } else {
                                 valueConfig.setValue(value);
                             }
+                        } else if(columnConfig.getTypeEnum() == LOAD_DATA_TYPE.BIT) {
+                            valueConfig.setType(columnConfig.getType());
+                            if (value == null) {
+                                valueConfig.setValueBit(columnConfig.getDefaultValueBit());
+                            } else {
+                                // BIT(n) where n>1: preserve the bit string value as-is
+                                // For PostgreSQL, wrap BIT values as DatabaseFunction with bit string literal format (issue #4677)
+                                if (database instanceof PostgresDatabase) {
+                                    // Convert boolean strings to numeric format before wrapping
+                                    String bitValue = value;
+                                    if ("true".equalsIgnoreCase(value.trim())) {
+                                        bitValue = "1";
+                                    } else if ("false".equalsIgnoreCase(value.trim())) {
+                                        bitValue = "0";
+                                    }
+                                    valueConfig.setValueComputed(new liquibase.statement.DatabaseFunction("B'" + bitValue + "'"));
+                                } else {
+                                    // For other databases, use setValue to preserve the bit string
+                                    valueConfig.setValue(value);
+                                }
+                            }
                         } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.OTHER.toString())) {
                             valueConfig.setType(columnConfig.getType());
                             if (StringUtil.equalsWordNull(value)) {
@@ -933,7 +954,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
 
     @SuppressWarnings("HardCodedStringLiteral")
     public enum LOAD_DATA_TYPE {
-        BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE, BLOB, CLOB, SKIP, UUID, OTHER, UNKNOWN
+        BIT, BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE, BLOB, CLOB, SKIP, UUID, OTHER, UNKNOWN
     }
 
     protected static class LoadDataRowConfig {
