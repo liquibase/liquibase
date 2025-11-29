@@ -18,17 +18,15 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.nodes.Tag;
 
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 
     @Override
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
-        Yaml yaml = new Yaml(new CustomSafeConstructor(createLoaderOptions()));
+        Yaml yaml = CustomTimestampSafeConstructor.createYaml();
 
         try {
             Resource changelog = resourceAccessor.get(physicalChangeLogLocation);
@@ -187,15 +185,19 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
         }
     }
 
-    static class CustomSafeConstructor extends SafeConstructor {
+    private static class CustomTimestampSafeConstructor extends SafeConstructor {
         /**
          * Create an instance
          *
          * @param loaderOptions - the configuration options
          */
-        public CustomSafeConstructor(LoaderOptions loaderOptions) {
+        public CustomTimestampSafeConstructor(LoaderOptions loaderOptions) {
             super(loaderOptions);
             this.yamlConstructors.put(Tag.TIMESTAMP, new CustomConstructYamlTimestamp());
+        }
+
+        private static Yaml createYaml() {
+            return new Yaml(new CustomTimestampSafeConstructor(createLoaderOptions()));
         }
     }
 }
