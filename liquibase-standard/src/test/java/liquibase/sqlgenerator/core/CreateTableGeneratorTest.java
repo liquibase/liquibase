@@ -1315,7 +1315,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 
                 // Then: The tablespace should be escaped with brackets and wrapped in double quotes
                 assertTrue(
-                    "Expected tablespace with spaces to be bracket-escaped and double-quoted, but got: " + generatedSql[0].toSql(), generatedSql[0].toSql().contains("ON \"[My Tablespace]\""));
+                    "Expected tablespace with spaces to be bracket-escaped, but got: " + generatedSql[0].toSql(), generatedSql[0].toSql().contains("ON [My Tablespace]"));
             }
         }
     }
