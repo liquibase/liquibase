@@ -16,12 +16,4 @@ public interface ChangeLogSerializer extends LiquibaseSerializer, PrioritizedSer
 
     void append(ChangeSet changeSet, File changeLogFile) throws IOException;
 
-    default void validateFilePath(ChangeSet child) {
-        Object filePathObject = child.getSerializableFieldValue("filePath");
-        String filePath = StringUtils.trimToNull(Optional.ofNullable(filePathObject).map(Object::toString).orElse(null));
-        if (StringUtils.isEmpty(filePath)) {
-            throw new IllegalArgumentException("The changeSet `filePath` attribute cannot be empty or null");
-
-        }
-    }
 }
