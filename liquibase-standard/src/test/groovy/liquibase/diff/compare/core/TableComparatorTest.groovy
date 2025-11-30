@@ -1,6 +1,8 @@
 package liquibase.diff.compare.core
 
 import liquibase.database.core.MockDatabase
+import liquibase.diff.compare.CompareControl
+import liquibase.diff.compare.DatabaseObjectComparatorChain
 import liquibase.diff.compare.DatabaseObjectComparatorFactory
 import liquibase.structure.core.Table
 import spock.lang.Specification
@@ -34,5 +36,27 @@ class TableComparatorTest extends Specification {
         new Table("x", "y", "a")   | new Table("s", "t", "A")   | false | false | false | true  | "Different catalog/schemas always match if database doesn't support catalogs"
         new Table("X", "Y", "a")   | new Table("X", "Y", "A")   | false | true  | true  | true  | "catalog/schema case never matters"
         new Table("X", "Y", "a")   | new Table("X", "Y", "A")   | true  | true  | true  | true  | "catalog/schema case never matters"
+    }
+
+    @Unroll
+    def "expect difference between two tables when the comment changes from '#before' to '#after'" (String before, String after) {
+        when:
+        def comparator = new TableComparator()
+        def table1 = new Table().setName("a")
+        def table2 = new Table().setName("a")
+        table1.setRemarks(before)
+        table2.setRemarks(after)
+
+        then:
+        def differences = comparator.findDifferences(table1, table2, new MockDatabase(), CompareControl.STANDARD, new DatabaseObjectComparatorChain(Collections.emptyList(), null), new HashSet<String>())
+        !differences.differences.isEmpty()
+
+        where:
+        before | after
+        null | "this table has a comment"
+        null | ""
+        "" | null
+        "non-empty" | null
+        "old comment" | "new comment"
     }
 }
