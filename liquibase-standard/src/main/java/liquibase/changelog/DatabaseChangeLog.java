@@ -476,7 +476,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         String nodeName = node.getName();
         switch (nodeName) {
             case CHANGE_SET:
-                validateAttributes(node, nodeName);
                 handleDbmsAttribute(node, resourceAccessor);
                 break;
             case MODIFY_CHANGE_SETS:
@@ -524,8 +523,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 );
             }
             if (pathValue instanceof String) {
-                String pathStr = StringUtils.trimToNull((String) pathValue);
-                if (StringUtils.isEmpty(pathStr)) {
+                if (StringUtils.trimToNull((String) pathValue) == null) {
                     throw new IllegalArgumentException(
                             String.format("The '%s' attribute cannot be empty or null in <%s>", attribute, nodeName)
                     );
