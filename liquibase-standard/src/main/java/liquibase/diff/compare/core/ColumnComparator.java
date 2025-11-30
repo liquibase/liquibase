@@ -16,6 +16,7 @@ import liquibase.util.BooleanUtil;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 public class ColumnComparator implements DatabaseObjectComparator {
@@ -92,6 +93,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
         differences.compare("name", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
         compareTypes(databaseObject1, databaseObject2, accordingTo, type1, type2, differences);
         autoIncrementCompare((Column) databaseObject1, (Column) databaseObject2, accordingTo, compareControl, differences);
+        differences.compare("remarks", databaseObject1, databaseObject2, Objects::equals);
 
         return differences;
     }
