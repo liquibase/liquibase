@@ -14,6 +14,7 @@ import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.precondition.core.RunningAsPrecondition
 import liquibase.sdk.supplier.resource.ResourceSupplier
+import liquibase.serializer.core.json.JsonChangeLogSerializer
 import liquibase.serializer.core.xml.XMLChangeLogSerializer
 import liquibase.serializer.core.yaml.YamlChangeLogSerializer
 import liquibase.sql.visitor.ReplaceSqlVisitor
@@ -784,7 +785,7 @@ class ChangeSetTest extends Specification {
     def "validate rollback serialization doesn't duplicate rollback key on a YAML changelog format"() {
         when:
         DatabaseChangeLog changeLog = new DatabaseChangeLog()
-        ChangeSet changeSet = new ChangeSet(UUID.randomUUID().toString(), "author", false, false, "", "test", "mysql", changeLog)
+        ChangeSet changeSet = new ChangeSet(UUID.randomUUID().toString(), "author", false, false, "changelog.yaml", "test", "mysql", changeLog)
         changeSet.addRollbackChange(new EmptyChange())
         changeLog.addChangeSet(changeSet)
 
