@@ -20,9 +20,6 @@ public class JsonChangeLogSerializer extends YamlChangeLogSerializer {
         writer.write("{ \"databaseChangeLog\": [\n");
         int i = 0;
         for (T child : children) {
-            if( child instanceof ChangeSet changeSet) {
-                validateFilePath(changeSet);
-            }
             String serialized = serialize(child, true);
             if (++i < children.size()) {
                 serialized = serialized.replaceFirst("}\\s*$", "},\n");
