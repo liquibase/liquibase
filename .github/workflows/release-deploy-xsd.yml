@@ -38,7 +38,7 @@ jobs:
     if: ${{ inputs.dry_run == false }}
     steps:
       - name: Download liquibase xsd
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           # Relative path under $GITHUB_WORKSPACE to place the repository
           path: liquibase-core-repo
