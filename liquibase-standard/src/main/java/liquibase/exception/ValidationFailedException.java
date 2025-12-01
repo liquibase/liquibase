@@ -10,6 +10,7 @@ import liquibase.util.StringUtil;
 
 import java.io.PrintStream;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -29,6 +30,7 @@ public class ValidationFailedException extends MigrationFailedException {
     private final List<SetupException> setupExceptions;
     private final List<Throwable> changeValidationExceptions;
     private final ValidationErrors validationErrors;
+    private final Map<ChangeSet, ChangeSet> duplicatesFromDifferentFiles;
 
     public ValidationFailedException(ValidatingVisitor changeLogHandler) {
         this.invalidMD5Sums = changeLogHandler.getInvalidMD5Sums();
@@ -40,6 +42,7 @@ public class ValidationFailedException extends MigrationFailedException {
         this.setupExceptions = changeLogHandler.getSetupExceptions();
         this.changeValidationExceptions = changeLogHandler.getChangeValidationExceptions();
         this.validationErrors = changeLogHandler.getValidationErrors();
+        this.duplicatesFromDifferentFiles = changeLogHandler.getDuplicatesFromDifferentFiles();
     }
 
     @Override
@@ -90,9 +93,26 @@ public class ValidationFailedException extends MigrationFailedException {
             message.append(INDENT_SPACES).append(String.format(
                 coreBundle.getString("change.sets.duplicate.identifiers"),
                 duplicateChangeSets.size())).append(separator);
+
             for (ChangeSet invalid : duplicateChangeSets) {
                 message.append("          ").append(invalid.toString(false));
                 message.append(separator);
+                if (duplicatesFromDifferentFiles.containsKey(invalid)) {
+                    ChangeSet original = duplicatesFromDifferentFiles.get(invalid);
+                    message.append("          ")
+                            .append("  -> Found in file: ").append(invalid.getChangeLog().getPhysicalFilePath())
+                            .append(separator);
+                    message.append("          ")
+                            .append("  -> Originally seen in file: ").append(original.getChangeLog().getPhysicalFilePath())
+                            .append(separator);
+                    message.append("          ")
+                            .append("  -> This may be caused by logicalFilePath inheritance (Liquibase 4.31.0-5.0.1 bug).")
+                            .append(separator);
+                    message.append("          ")
+                            .append("  -> Solution: Use unique IDs or add explicit logicalFilePath to each included changelog.")
+                            .append(separator);
+                }
+
             }
         }
         
