@@ -304,7 +304,7 @@ public class ValidatingVisitorUtil {
 
             int major = Integer.parseInt(parts[0]);
             int minor = Integer.parseInt(parts[1]);
-            int patch = parts.length >= 3 ? Integer.parseInt(parts[2].split("-")[0]) : 0; // Handle "-SNAPSHOT"
+            int patch = parts.length >= 3 ? Integer.parseInt(parts[2].replaceAll("[^0-9].*", "")) : 0; // Handle "-SNAPSHOT"
 
             // Check if version is 4.31.0 or higher
             if (major < 4 || (major == 4 && minor < 31)) {
