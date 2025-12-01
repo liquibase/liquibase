@@ -250,31 +250,77 @@ public class ValidatingVisitorUtil {
      * FIXME As 4.31.0 has been out for just 3 weeks and then it was patched, we should consider removing this fix around Liquibase 4.34.0 ,and document that if a user faces this issue he first needs to upgrade to 4.31.1 -> 4.34.0 and then up.
      */
     public static RanChangeSet fixChangesetFilenameForLogicalfilepathBugIn4300(ChangeSet changeSet, RanChangeSet ranChangeSet, String key, Map<String, RanChangeSet> ranIndex, Database database) throws LiquibaseException {
-        if (ranChangeSet == null && changeSet.getChangeLog() != null && changeSet.getChangeLog().getRawLogicalFilePath() != null && changeSet.getChangeLog().getParentChangeLog() != null) {
+        if (ranChangeSet == null && changeSet.getChangeLog() != null &&
+                changeSet.getChangeLog().getRawLogicalFilePath() != null &&
+                changeSet.getChangeLog().getParentChangeLog() != null) {
+
             String incorrectPath = DatabaseChangeLog.normalizePath(changeSet.getChangeLog().getParentChangeLog().getRawLogicalFilePath());
             String incorrectKey = DatabaseChangeLog.normalizePath(incorrectPath) + "::" + changeSet.getId() + "::" + changeSet.getAuthor();
             ranChangeSet = ranIndex.get(incorrectKey);
+
             if (ranChangeSet != null) {
-                if (!checkLiquibaseVersionIs(ranChangeSet.getLiquibaseVersion(), 4, 31)) {
-                    // if the changeset was generated in a version different from 4.31.0 then it's not a bug
+                // Check if it was generated in affected versions (4.31.0 through 5.0.1)
+                if (!isAffectedVersion(ranChangeSet.getLiquibaseVersion())) {
                     return null;
-                } else {
-                    ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
-                    try {
-                        changeLogService.replaceFilePath(changeSet, ranChangeSet.getChangeLog());
-                    } catch (DatabaseException e) {
-                        throw new LiquibaseException("Error while replacing path in databasechangelog table for broken changeset with id ["
-                                + incorrectKey + "] generated in Liquibase 4.31.0. The new path should be " + changeSet.getFilePath() + ".", e);
-                    }
-                    ranChangeSet.setChangeLog(changeSet.getStoredFilePath());
-                    ranIndex.remove(incorrectKey);
-                    ranIndex.put(key, ranChangeSet);
-
-
                 }
-            }
 
+                Scope.getCurrentScope().getLog(ValidatingVisitorUtil.class).warning(
+                        String.format("Fixing changeset path for %s. Was incorrectly stored as '%s', correcting to '%s'. " +
+                                        "This was due to a bug in Liquibase versions 4.31.0-5.0.1.",
+                                key, ranChangeSet.getChangeLog(), changeSet.getFilePath())
+                );
+
+                ChangeLogHistoryService changeLogService = Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database);
+                try {
+                    changeLogService.replaceFilePath(changeSet, ranChangeSet.getChangeLog());
+                } catch (DatabaseException e) {
+                    throw new LiquibaseException("Error while replacing path in databasechangelog table...", e);
+                }
+                ranChangeSet.setChangeLog(changeSet.getStoredFilePath());
+                ranIndex.remove(incorrectKey);
+                ranIndex.put(key, ranChangeSet);
+            }
         }
         return ranChangeSet;
+    }
+
+    /**
+     * Checks if the given Liquibase version is affected by the logicalFilePath inheritance bug.
+     * The bug was introduced in 4.31.0 and needs to be fixed for all versions up to and including 5.0.1.
+     *
+     * @param version The Liquibase version string (e.g., "4.31.0", "5.0.1")
+     * @return true if the version is between 4.31.0 and 5.0.1 (inclusive), false otherwise
+     */
+    private static boolean isAffectedVersion(String version) {
+        if (StringUtils.isEmpty(version)) {
+            return false;
+        }
+
+        String[] parts = version.split("\\.");
+        try {
+            if (parts.length < 2) {
+                return false;
+            }
+
+            int major = Integer.parseInt(parts[0]);
+            int minor = Integer.parseInt(parts[1]);
+            int patch = parts.length >= 3 ? Integer.parseInt(parts[2].split("-")[0]) : 0; // Handle "-SNAPSHOT"
+
+            // Check if version is 4.31.0 or higher
+            if (major < 4 || (major == 4 && minor < 31)) {
+                return false;
+            }
+
+            // Check if version is 5.0.1 or lower
+            if (major > 5 || (major == 5 && minor > 0) || (major == 5 && minor == 0 && patch > 1)) {
+                return false;
+            }
+
+            return true;
+        } catch (NumberFormatException e) {
+            Scope.getCurrentScope().getLog(ValidatingVisitorUtil.class)
+                    .fine("Unable to parse version number: " + version, e);
+            return false;
+        }
     }
 }
