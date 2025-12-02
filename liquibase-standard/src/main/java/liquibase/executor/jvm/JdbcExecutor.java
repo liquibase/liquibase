@@ -487,7 +487,7 @@ public class JdbcExecutor extends AbstractExecutor {
             }
             // Exclude Liquibase internal tracking tables
             String upperStatement = statement.toUpperCase();
-            return !upperStatement.toUpperCase().contains("DATABASECHANGELOG") && !upperStatement.toUpperCase().contains("DATABASECHANGELOGLOCK");
+            return !upperStatement.contains("DATABASECHANGELOG") && !upperStatement.contains("DATABASECHANGELOGLOCK");
         }
 
         @Override
