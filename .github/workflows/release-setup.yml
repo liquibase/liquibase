@@ -106,7 +106,7 @@ jobs:
           fi
 
       - name: Checkout the determined branch
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ steps.ref-branch.outputs.branch }}
           fetch-depth: 0

@@ -181,7 +181,7 @@ jobs:
     needs: [setup, dry-run-create-release, dry-run-release-published]
     steps:
       - name: Checkout liquibase
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Git
         run: |

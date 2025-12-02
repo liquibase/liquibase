@@ -34,7 +34,7 @@ jobs:
           echo "github.event.pull_request.merged: ${{ github.event.pull_request.merged }}"
           echo "github.event_name: ${{ github.event_name }}"
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}} #sets the Git reference (commit or branch) to be checked out in the workflow
 
@@ -43,7 +43,7 @@ jobs:
     needs: [ test-harness-build ]
     name: Trigger Test Harness Tests
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Set environment variables for PR branch and SHA
         run: |
@@ -87,7 +87,7 @@ jobs:
           permission-actions: write
           
       - name: Dispatch an action and get the run ID
-        uses: codex-/return-dispatch@v2
+        uses: codex-/return-dispatch@v3
         id: return_dispatch
         with:
           token: ${{ steps.get-token.outputs.token }}

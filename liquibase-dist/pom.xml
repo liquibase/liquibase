@@ -99,7 +99,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.4.0</version>
                 <executions>
                     <execution>
                         <id>copy-resources</id>
@@ -162,7 +162,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.4.0</version>
                 <configuration>
                     <!-- sources.jar from this module is the shaded sources of others -->
                     <skipSource>true</skipSource>
@@ -171,7 +171,7 @@
             <!-- this builds and attaches the tar file of liquibase (which has liquibase cli) -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.7.1</version>
+                <version>3.8.0</version>
                 <configuration>
                     <tarLongFileMode>posix</tarLongFileMode>
                     <finalName>liquibase-${project.version}</finalName>
