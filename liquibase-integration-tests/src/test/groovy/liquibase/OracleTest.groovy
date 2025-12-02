@@ -148,9 +148,15 @@ END;
 
         then:
         String logAsString = bufferLog.getLogAsString(Level.FINE)
-        assert logAsString.contains("0 row(s) affected")
         assert logAsString.contains("1 row(s) affected")
         assert ! logAsString.contains("-1 row(s) affected")
-        assert StringUtils.countMatches(logAsString, "row(s) affected") == 10
+        // Expected: 2 original INSERTs + 5 new DML statements (2 INSERTs + 1 UPDATE + 2 DELETEs) = 7
+        // Note: DDL statements (CREATE TABLE) and PL/SQL blocks should NOT show "rows affected"
+        assert StringUtils.countMatches(logAsString, "row(s) affected") == 7
+        // Verify case-insensitive matching works
+        assert logAsString.contains("insert into TABLE1 (name, id) VALUES ('lowercase', '3')")
+        assert logAsString.contains("Insert Into TABLE1 (name, id) VALUES ('mixedcase', '4')")
+        assert logAsString.contains("update TABLE1 set role = 'admin' where id = '1'")
+        assert logAsString.contains("delete from TABLE1 where id = '4'")
     }
 }

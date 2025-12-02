@@ -480,9 +480,14 @@ public class JdbcExecutor extends AbstractExecutor {
         }
 
         private boolean isDML(String statement) {
-            Pattern dmlPattern = Pattern.compile("^\\s*?(SELECT\\s|INSERT\\s|UPDATE\\s|DELETE\\s|MERGE\\s)(.*)");
+            Pattern dmlPattern = Pattern.compile("^\\s*?(SELECT\\s|INSERT\\s|UPDATE\\s|DELETE\\s|MERGE\\s)(.*)", Pattern.CASE_INSENSITIVE);
             Matcher m = dmlPattern.matcher(statement);
-            return m.matches();
+            if (!m.matches()) {
+                return false;
+            }
+            // Exclude Liquibase internal tracking tables
+            String upperStatement = statement.toUpperCase();
+            return !upperStatement.toUpperCase().contains("DATABASECHANGELOG") && !upperStatement.toUpperCase().contains("DATABASECHANGELOGLOCK");
         }
 
         @Override
@@ -526,8 +531,9 @@ public class JdbcExecutor extends AbstractExecutor {
                         if (!stmt.getMoreResults()) {
                             updateCount = stmt.getUpdateCount();
                             addUpdateCountToScope(updateCount);
-                            if (updateCount != -1)
+                            if (updateCount != -1 && isDML(statement)) {
                                 log.log(sqlLogLevel, updateCount + " row(s) affected", null);
+                            }
                         }
                     } while (updateCount != -1);
 
