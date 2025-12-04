@@ -181,12 +181,12 @@ jobs:
     needs: [setup, dry-run-create-release, dry-run-release-published]
     steps:
       - name: Checkout liquibase
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Git
         run: |
-          git config user.name "liquibot"
-          git config user.email "liquibot@liquibase.org"
+          git config user.name "liquibase-workflows[bot]"
+          git config user.email "1241802+liquibase-workflows[bot]@users.noreply.github.com"
 
       - name: Delete liquibase dry-run tag
         if: always()
