@@ -161,6 +161,94 @@ class ScopeTest extends Specification {
         deploymentIdScope == deploymentIdService2;
     }
 
+    def "lazy initialization of scope manager for GraalVM compatibility"() {
+        when:
+        // Reset scope manager to test lazy initialization
+        Scope.setScopeManager(null)
+        def scope = Scope.getCurrentScope()
+
+        then:
+        // Should successfully create scope with lazy initialization
+        scope != null
+        scope.getResourceAccessor() != null
+        scope.getUI() != null
+        scope.getServiceLocator() != null
+    }
+
+    def "threadLocal inheritance for child threads"() {
+        given:
+        def inheritableValue = "inheritableValue"
+        def scopeId = Scope.enter(null, [inheritableKey: inheritableValue])
+        def childThreadValue = null
+
+        when:
+        // Create a child thread while scope is active - should inherit parent scope
+        def childThread = Thread.start {
+            childThreadValue = Scope.getCurrentScope().get("inheritableKey", String)
+        }
+        childThread.join(5000) // Wait up to 5 seconds
+
+        then:
+        // Child thread should inherit parent scope values through InheritableThreadLocal
+        childThreadValue == inheritableValue
+
+        cleanup:
+        Scope.exit(scopeId)
+    }
+
+    def "concurrent scope access is thread safe"() {
+        given:
+        def threadCount = 10
+        def errors = Collections.synchronizedList([])
+        def latch = new java.util.concurrent.CountDownLatch(threadCount)
+
+        when:
+        // Create multiple threads that concurrently create and use scopes
+        def threads = (0..<threadCount).collect { threadId ->
+            Thread.start {
+                try {
+                    Scope.child([threadId: threadId], {
+                        def currentScope = Scope.getCurrentScope()
+                        def retrievedId = currentScope.get("threadId", Integer)
+                        if (retrievedId != threadId) {
+                            errors.add("Thread ${threadId} got wrong value: ${retrievedId}")
+                        }
+                    } as Scope.ScopedRunner)
+                } catch (Exception e) {
+                    errors.add("Thread ${threadId} failed: ${e.message}")
+                } finally {
+                    latch.countDown()
+                }
+            }
+        }
+
+        // Wait for all threads to complete
+        def completed = latch.await(10, java.util.concurrent.TimeUnit.SECONDS)
+        threads.each { it.join(1000) }
+
+        then:
+        completed
+        errors.isEmpty()
+    }
+
+    def "custom scope manager can be set"() {
+        given:
+        def customManager = new SingletonScopeManager()
+        def customScope = new Scope(Scope.getCurrentScope(), [:])
+        customManager.setCurrentScope(customScope)
+
+        when:
+        Scope.setScopeManager(customManager)
+        def currentScope = Scope.getCurrentScope()
+
+        then:
+        currentScope.getScopeId() == customScope.getScopeId()
+
+        cleanup:
+        // Reset to default
+        Scope.setScopeManager(null)
+    }
+
     private class TestMdcManager implements MdcManager {
 
         private Map<String, Object> values = new ConcurrentHashMap<>()
