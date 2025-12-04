@@ -11,6 +11,7 @@ import liquibase.exception.DatabaseException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Locale;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @DataTypeInfo(name = "bit", minParameters = 0, maxParameters = 2, priority = LiquibaseDataType.PRIORITY_DEFAULT)
@@ -67,18 +68,36 @@ public class BitType extends LiquibaseDataType {
             return null;
         }
 
-        // For PostgreSQL, handle bit string literals
         if (database instanceof PostgresDatabase) {
             String strValue = value.toString().trim();
-            // If already formatted as PostgreSQL bit literal, return as-is
-            if (Pattern.matches("b'[01]+'(::bit.*)?", strValue.toLowerCase(Locale.US))) {
-                return strValue;
+
+            // Already formatted as PostgreSQL bit literal - normalize to uppercase
+            Matcher bitLiteralMatcher = Pattern.compile("(?i)b'([01]+)'(::bit.*)?").matcher(strValue);
+            if (bitLiteralMatcher.matches()) {
+                String bitString = bitLiteralMatcher.group(1);
+                String cast = bitLiteralMatcher.group(2);
+                if (cast != null) {
+                    return "B'" + bitString + "'" + cast;
+                } else {
+                    return "B'" + bitString + "'";
+                }
             }
-            // For simple 0/1, convert to PostgreSQL bit string literal format
-            if ("0".equals(strValue) || "1".equals(strValue)) {
+            // Binary string (e.g., "101010")
+            if (Pattern.matches("[01]+", strValue)) {
                 return "B'" + strValue + "'";
             }
+
+            // Decimal integer - convert to binary
+            try {
+                long decimalValue = Long.parseLong(strValue);
+                if (decimalValue >= 0) {
+                    return "B'" + Long.toBinaryString(decimalValue) + "'";
+                }
+            } catch (NumberFormatException e) {
+                // Not a decimal, fall through
+            }
         }
+
 
         return super.objectToSql(value, database);
     }
