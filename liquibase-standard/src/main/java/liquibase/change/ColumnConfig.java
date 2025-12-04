@@ -1042,7 +1042,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * If the string "null" or an empty string is passed, it will set a null value.
      */
     public ColumnConfig setDefaultValueBit(String defaultValueBit) {
-        defaultValueBit = StringUtil.trimToNull(defaultValueBit);
+        defaultValueBit = StringUtils.trimToNull(defaultValueBit);
         if ((defaultValueBit == null) || "null".equalsIgnoreCase(defaultValueBit)) {
             this.defaultValueBit = null;
         } else {
@@ -1063,7 +1063,17 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     }
 
     public ColumnConfig setDefaultValueBit(Integer defaultValueBit) {
-        this.defaultValueBit = defaultValueBit;
+        if (defaultValueBit == null) {
+            this.defaultValueBit = null;
+        } else {
+            if (1 == defaultValueBit) {
+                this.defaultValueBit = 1;
+            } else if (0 == defaultValueBit) {
+                this.defaultValueBit = 0;
+            } else {
+                this.defaultValueComputed = new DatabaseFunction(String.valueOf(defaultValueBit));
+            }
+        }
         return this;
     }
 }

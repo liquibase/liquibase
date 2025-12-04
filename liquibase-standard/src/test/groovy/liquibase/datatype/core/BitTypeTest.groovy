@@ -72,10 +72,10 @@ class BitTypeTest extends Specification {
 
         where:
         value              | expected
-        "b'0'"             | "b'0'"
-        "b'1'"             | "b'1'"
-        "b'101010'"        | "b'101010'"
-        "b'1'::bit"        | "b'1'::bit"
-        "b'101'::bit(3)"   | "b'101'::bit(3)"
+        "b'0'"             | "B'0'"
+        "b'1'"             | "B'1'"
+        "b'101010'"        | "B'101010'"
+        "b'1'::bit"        | "B'1'::bit"
+        "b'101'::bit(3)"   | "B'101'::bit(3)"
     }
 }
