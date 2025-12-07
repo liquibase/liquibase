@@ -1281,4 +1281,61 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
         // This sql is intended to be invalid
         assertEquals("CREATE TABLE schema.some_table (col1 CHAR(2, col2 CHAR(2))", generatedSql[0].toSql());
     }
+
+    @Test
+    public void testTablespaceEscaping_mssql_withoutSpaces() {
+        // Given: A MSSQL database and a create table statement with a tablespace without spaces
+        for (Database database : TestContext.getInstance().getAllDatabases()) {
+            if (database instanceof MSSQLDatabase) {
+                CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
+                statement.addColumn(COLUMN_NAME1, DataTypeFactory.getInstance().fromDescription("int", database));
+                statement.setTablespace("MyTablespace");
+
+                // When: Generating SQL
+                Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
+
+                // Then: The tablespace should be properly escaped
+                assertTrue("Expected tablespace without spaces to not need quotes, but got: " + generatedSql[0].toSql(),
+                        generatedSql[0].toSql().contains("ON MyTablespace"));
+            }
+        }
+    }
+
+    @Test
+    public void testTablespaceEscaping_mssql_withSpaces() {
+        // Given: A MSSQL database and a create table statement with a tablespace containing spaces
+        for (Database database : TestContext.getInstance().getAllDatabases()) {
+            if (database instanceof MSSQLDatabase) {
+                CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
+                statement.addColumn(COLUMN_NAME1, DataTypeFactory.getInstance().fromDescription("int", database));
+                statement.setTablespace("My Tablespace");
+
+                // When: Generating SQL
+                Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
+
+                // Then: The tablespace should be escaped with brackets and wrapped in double quotes
+                assertTrue(
+                    "Expected tablespace with spaces to be bracket-escaped and double-quoted, but got: " + generatedSql[0].toSql(), generatedSql[0].toSql().contains("ON \"[My Tablespace]\""));
+            }
+        }
+    }
+
+    @Test
+    public void testTablespaceEscaping_mssql_withSpecialCharacters() {
+        // Given: A MSSQL database and a create table statement with a tablespace containing special characters
+        for (Database database : TestContext.getInstance().getAllDatabases()) {
+            if (database instanceof MSSQLDatabase) {
+                CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
+                statement.addColumn(COLUMN_NAME1, DataTypeFactory.getInstance().fromDescription("int", database));
+                statement.setTablespace("My€Tablespace");
+
+                // When: Generating SQL
+                Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
+
+                // Then: The tablespace should be escaped with brackets
+                assertTrue("Expected tablespace with special chars to be bracket-escaped, but got: " + generatedSql[0].toSql(),
+                        generatedSql[0].toSql().contains("ON [My€Tablespace]"));
+            }
+        }
+    }
 }

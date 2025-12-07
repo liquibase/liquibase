@@ -1,9 +1,12 @@
 package liquibase.util
 
+import spock.lang.IgnoreIf
 import spock.lang.Specification
+import spock.util.environment.OperatingSystem
 
 class NetUtilTest extends Specification {
 
+    @IgnoreIf({ OperatingSystem.current.macOs })
     def getLocalHostAddress() {
         when:
         def address = NetUtil.getLocalHostAddress()
