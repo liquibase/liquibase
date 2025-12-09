@@ -184,7 +184,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 
 	    if ((StringUtil.trimToNull(statement.getTablespace()) != null) && database.supportsTablespaces()) {
 		    if ((database instanceof MSSQLDatabase) || (database instanceof SybaseASADatabase)) {
-			    buffer.append(" ON ").append(statement.getTablespace());
+			    buffer.append(" ON ").append(database.escapeTablespaceName(statement.getTablespace()));
 		    } else if ((database instanceof AbstractDb2Database) || (database instanceof InformixDatabase)) {
 			    buffer.append(" IN ").append(statement.getTablespace());
 		    } else {

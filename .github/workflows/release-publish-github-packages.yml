@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-22.04
     if: ${{ inputs.dry_run == false }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       
       - name: Set up Java for publishing to GitHub Repository
         uses: actions/setup-java@v5

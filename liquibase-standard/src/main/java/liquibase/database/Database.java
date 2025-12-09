@@ -26,7 +26,6 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import liquibase.util.SqlUtil;
 import liquibase.util.StringUtil;
 
 import java.io.IOException;
@@ -333,6 +332,10 @@ public interface Database extends PrioritizedService, AutoCloseable {
     String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType);
 
     String escapeTableName(String catalogName, String schemaName, String tableName);
+
+    default String escapeTablespaceName(String tablespaceName) {
+        return escapeObjectName(tablespaceName, Tablespace.class);
+    }
 
     String escapeIndexName(String catalogName, String schemaName, String indexName);
 

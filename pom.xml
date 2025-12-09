@@ -71,7 +71,7 @@
         <commons-lang3.version>3.20.0</commons-lang3.version>
         <commons-io.version>2.21.0</commons-io.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
-        <commons-text.version>1.14.0</commons-text.version>
+        <commons-text.version>1.15.0</commons-text.version>
         <ant.version>1.10.15</ant.version>
         <junit-jupiter.version>6.0.1</junit-jupiter.version>
         <groovy.version>4.0.28</groovy.version>
@@ -300,7 +300,7 @@
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.51.0.0</version>
+            <version>3.51.1.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -343,7 +343,7 @@
 
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.4.0</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
                 </configuration>
@@ -457,7 +457,7 @@
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
-                <version>5.3.0.6276</version>
+                <version>5.5.0.6356</version>
                 <executions>
                     <execution>
                         <id>sonar</id>
@@ -476,7 +476,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.4.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
