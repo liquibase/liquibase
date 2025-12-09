@@ -6,6 +6,8 @@ import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ChangeParameterMetaData;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.Db2zDatabase;
@@ -40,6 +42,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
     @Test
     public void compareGeneratedSqlWithExpectedSqlForMinimalChangesets() throws Exception {
         ChangeFactory changeFactory = Scope.getCurrentScope().getSingleton(ChangeFactory.class);
+        ChangeSet changeSet = new ChangeSet(new DatabaseChangeLog());
         for (String changeName : changeFactory.getDefinedChanges()) {
             if ("addDefaultValue".equals(changeName)) {
                 continue; //need to better handle strange "one of defaultValue* is required" logic
@@ -68,6 +71,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 if (change.generateStatementsVolatile(database)) {
                     continue;
                 }
+                changeSet.addChange(change);
                 ChangeMetaData changeMetaData = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(change);
 
                 // Prepare a list of required parameters, plus a few extra for complicated cases (e.g. where at least
@@ -175,7 +179,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 for (String paramName : requiredParams) {
                     ChangeParameterMetaData param = changeMetaData.getParameters().get(paramName);
                     Object paramValue = param.getExampleValue(database);
-                    param.setValue(change, paramValue);
+                        param.setValue(change, paramValue);
                 }
 
                 for (int i = 0; i < requiredParams.size(); i++) {
