@@ -4,7 +4,6 @@ import liquibase.ChecksumVersion;
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
