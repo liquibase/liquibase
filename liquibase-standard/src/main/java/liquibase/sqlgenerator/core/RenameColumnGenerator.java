@@ -11,7 +11,7 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.RenameColumnStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStatement> {
     @Override
@@ -39,7 +39,7 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
         if (database instanceof MySQLDatabase) {
             MySQLDatabase mySQLDatabase = (MySQLDatabase) database;
             if (!isRenameKeywordSupported(mySQLDatabase)) {
-                validationErrors.checkRequiredField("columnDataType", StringUtil.trimToNull(renameColumnStatement.getColumnDataType()));
+                validationErrors.checkRequiredField("columnDataType", StringUtils.trimToNull(renameColumnStatement.getColumnDataType()));
             }
         }
 
@@ -96,7 +96,7 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
      * @return the SQL string for the rename operation
      */
     private String generateMysqlStatement(MySQLDatabase database, RenameColumnStatement statement) {
-        String columnDataType = StringUtil.trimToNull(statement.getColumnDataType());
+        String columnDataType = StringUtils.trimToNull(statement.getColumnDataType());
 
         // Use RENAME COLUMN syntax only when:
         // 1. Database supports it (MariaDB 10.5+, MySQL 8.0+)
