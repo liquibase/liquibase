@@ -83,10 +83,35 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
         };
     }
 
+    /**
+     * Generates the appropriate SQL statement for renaming a column in MySQL/MariaDB.
+     * <p>
+     * Uses RENAME COLUMN syntax (MariaDB 10.5+, MySQL 8.0+) when only renaming is needed.
+     * Falls back to CHANGE syntax when columnDataType is specified, allowing simultaneous
+     * rename and type modification.
+     * </p>
+     *
+     * @param database the MySQL or MariaDB database instance
+     * @param statement the rename column statement containing the rename parameters
+     * @return the SQL string for the rename operation
+     */
     private String generateMysqlStatement(MySQLDatabase database, RenameColumnStatement statement) {
-        return isRenameKeywordSupported(database)
-                ? "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " RENAME COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " TO " + statement.getNewColumnName()
-                : "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " CHANGE " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database);
+        String columnDataType = StringUtil.trimToNull(statement.getColumnDataType());
+
+        // Use RENAME COLUMN syntax only when:
+        // 1. Database supports it (MariaDB 10.5+, MySQL 8.0+)
+        // 2. No columnDataType is specified (user only wants to rename, not change type)
+        if (isRenameKeywordSupported(database) && columnDataType == null) {
+            return "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
+                    + " RENAME COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName())
+                    + " TO " + statement.getNewColumnName();
+        }
+
+        // Use CHANGE syntax when columnDataType is specified (for type changes) or when RENAME COLUMN is not supported
+        return "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
+                + " CHANGE " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName())
+                + " " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName())
+                + " " + DataTypeFactory.getInstance().fromDescription(columnDataType, database).toDatabaseDataType(database);
     }
 
     private boolean isRenameKeywordSupported(MySQLDatabase database) {
