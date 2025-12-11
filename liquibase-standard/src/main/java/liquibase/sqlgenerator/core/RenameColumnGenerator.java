@@ -104,7 +104,7 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
         if (isRenameKeywordSupported(database) && columnDataType == null) {
             return "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
                     + " RENAME COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName())
-                    + " TO " + statement.getNewColumnName();
+                    + " TO " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName());
         }
 
         // Use CHANGE syntax when columnDataType is specified (for type changes) or when RENAME COLUMN is not supported
