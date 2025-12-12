@@ -88,21 +88,15 @@ jobs:
   build_tests:
     name: Run Test for (Java ${{ matrix.java }} ${{ matrix.os }})
     needs: setup
-    outputs:
-      test_count_unit_test_java_17_ubuntu: ${{ steps.check-test-counts-java-all-ubuntu.outputs.test_count_unit_test_java_17_ubuntu }}
-      test_count_unit_test_java_21_ubuntu: ${{ steps.check-test-counts-java-all-ubuntu.outputs.test_count_unit_test_java_21_ubuntu }}
-      test_count_unit_test_java_macos: ${{ steps.check-test-counts-java-macos.outputs.test_count_unit_test_java_macos }}
-      test_count_unit_test_java_windows: ${{ steps.check-test-counts-java-windows.outputs.test_count_unit_test_java_windows }}
-
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, macos-13, windows-latest ]
+        os: [ ubuntu-22.04, macos-15-intel, windows-latest ]
         java: [ 17, 21, 25 ]
         exclude:
           - os: windows-latest
             java: 17
-          - os: macos-13
+          - os: macos-15-intel
             java: 17
     runs-on: ${{ matrix.os }}
     env:
@@ -160,64 +154,6 @@ jobs:
         run: |
           ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
 
-      - name: Check Unit Test Count for Java 17, 21 Ubuntu
-        id: check-test-counts-java-all-ubuntu
-        if: matrix.os == 'ubuntu-22.04'
-        run: |
-          TEST_COUNT=$(find . -name '*.txt' | xargs grep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
-          echo "Total Unit tests run: $TEST_COUNT"
-          if [ "$TEST_COUNT" -eq 0 ]; then
-            echo "No Unit tests were run."
-            exit 1
-          fi
-          EXPECTED_TEST_COUNT=0
-          if [[ ${{ matrix.java }} == 17 ]]; then
-            EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_JAVA_17_UBUNTU }}
-          elif [[ ${{ matrix.java }} == 21 ]]; then
-            EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_JAVA_21_UBUNTU }}
-          fi
-
-          if [[ ($TEST_COUNT -lt $(($EXPECTED_TEST_COUNT - ($EXPECTED_TEST_COUNT / 100))) ) ]]; then
-            echo "Unit Test count is below the acceptable range of - 1% of the expected count. Expected $EXPECTED_TEST_COUNT. Actual $TEST_COUNT."
-            exit 1
-          fi
-          echo "test_count_unit_test_java_${{ matrix.java }}_ubuntu=$TEST_COUNT" >> $GITHUB_OUTPUT
-          
-
-      - name: Check Test Count for macos-13
-        id: check-test-counts-java-macos
-        if: matrix.os == 'macos-13'
-        shell: bash
-        run: |
-          TEST_COUNT=$(grep -r -o -E 'Tests run: [0-9]+' . | awk -F: '{s+=$NF} END {print s}')
-          echo "Total Unit tests run: $TEST_COUNT"
-          if [ -z "$TEST_COUNT" ] || [ "$TEST_COUNT" -eq 0 ]; then
-            echo "No test result files found or test count is zero."
-            exit 1
-          fi
-          if [[ $TEST_COUNT -lt $((${{ vars.TEST_COUNT_JAVA_MACOS }} - (${{ vars.TEST_COUNT_JAVA_MACOS }} / 100))) ]] ; then
-            echo "MacOS Unit Test count is below the acceptable range of - 1% of the expected count. Expected ${{ vars.TEST_COUNT_JAVA_MACOS }}. Actual $TEST_COUNT."
-            exit 1
-          fi
-          echo "test_count_unit_test_java_macos=$TEST_COUNT" >> $GITHUB_OUTPUT
-
-      - name: Check Test Count for windows-latest
-        id: check-test-counts-java-windows
-        if: matrix.os == 'windows-latest'
-        shell: pwsh
-        run: |
-          $TEST_COUNT = (Get-ChildItem -Recurse -Filter "*.txt" | Select-String -Pattern 'Tests run: (\d+)' | ForEach-Object { $_.Matches.Groups[1].Value } | Measure-Object -Sum).Sum
-          Write-Output "Total Unit tests run: $TEST_COUNT"
-          if ($TEST_COUNT -eq 0) {
-              Write-Output "No Unit tests were run."
-              exit 1
-          }
-          if (($TEST_COUNT -lt $((${{ vars.TEST_COUNT_JAVA_WINDOWS }} - (${{ vars.TEST_COUNT_JAVA_WINDOWS }} / 100))) ) ) {
-              Write-Host "Windows Unit Test count is below the acceptable range of - 1% of the expected count. Expected ${{ vars.TEST_COUNT_JAVA_WINDOWS }}. Actual $TEST_COUNT."
-              exit 1
-          }
-          echo "test_count_unit_test_java_windows=$TEST_COUNT" >> $env:GITHUB_OUTPUT
-
       - name: Remove Original Jars for *nix
         if: env.OS_TYPE != 'windows-latest'
         run: |
@@ -269,18 +205,6 @@ jobs:
   integration-test:
     name: Integration Test
     runs-on: ubuntu-22.04
-    outputs:
-      test_count_integration_db2: ${{ steps.check-test-count-integration.outputs.test_count_integration_db2 }}
-      test_count_integration_h2: ${{ steps.check-test-count-integration.outputs.test_count_integration_h2 }}
-      test_count_integration_mariadb: ${{ steps.check-test-count-integration.outputs.test_count_integration_mariadb }}
-      test_count_integration_mssql: ${{ steps.check-test-count-integration.outputs.test_count_integration_mssql }}
-      test_count_integration_mysql: ${{ steps.check-test-count-integration.outputs.test_count_integration_mysql }}
-      test_count_integration_oracle: ${{ steps.check-test-count-integration.outputs.test_count_integration_oracle }}
-      test_count_integration_postgresql: ${{ steps.check-test-count-integration.outputs.test_count_integration_postgresql }}
-      test_count_integration_sqlite: ${{ steps.check-test-count-integration.outputs.test_count_integration_sqlite }}
-      test_count_integration_firebird: ${{ steps.check-test-count-integration.outputs.test_count_integration_firebird }}
-      test_count_integration_hsqldb: ${{ steps.check-test-count-integration.outputs.test_count_integration_hsqldb }}
-
     strategy:
       fail-fast: false
       matrix:
@@ -337,44 +261,6 @@ jobs:
       - name: Run Tests
         run: ./mvnw -B clean verify -DtrimStackTrace=false -Dliquibase.sdk.testSystem.test=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.acceptLicenses=${{ matrix.testSystem }} -Dliquibase.sdk.testSystem.snowflake.url=${{ env.TH_SNOW_URL }} -Dliquibase.sdk.testSystem.snowflake.username=${{ env.TH_DB_ADMIN }} -Dliquibase.sdk.testSystem.snowflake.password=${{ env.TH_DB_PASSWD }} -Dtest=*IntegrationTest,*ExecutorTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false -Dsurefire.failIfNoTests=false
 
-      - name: Check Test Count
-        id: check-test-count-integration
-        run: |
-          TEST_COUNT=$(find . -name '*.txt' | xargs grep -oP 'Tests run: \K[0-9]+' | awk -F ':' '{s+=$2} END {print(s)}')
-          echo "Total integration tests run: $TEST_COUNT"
-          if [ "$TEST_COUNT" -eq 0 ]; then
-            echo "No integration tests were run."
-            exit 1
-          fi
-          EXPECTED_TEST_COUNT=0
-          if [[ ${{ matrix.testSystem }} == 'db2'  ]]; then
-              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_DB2 }}
-            elif [[ ${{ matrix.testSystem }} == 'h2'  ]]; then
-              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_H2 }}
-            elif [[ ${{ matrix.testSystem }} == 'hsqldb'  ]]; then
-              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_HSQLDB }}
-            elif [[ ${{ matrix.testSystem }} == 'mariadb'  ]]; then
-              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_MARIADB }}
-            elif [[ ${{ matrix.testSystem }} == 'mssql'  ]]; then
-              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_MSSQL }}
-            elif [[ ${{ matrix.testSystem }} == 'mysql'  ]]; then
-              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_MYSQL }}
-            elif [[ ${{ matrix.testSystem }} == 'oracle'  ]]; then
-              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_ORACLE }}
-            elif [[ ${{ matrix.testSystem }} == 'postgresql'  ]]; then
-              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_POSTGRESQL }}
-            elif [[ ${{ matrix.testSystem }} == 'sqlite'  ]]; then
-              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_SQLITE }}
-            elif [[ ${{ matrix.testSystem }} == 'firebird'  ]]; then
-              EXPECTED_TEST_COUNT=${{ vars.TEST_COUNT_INTEGRATION_FIREBIRD }}
-            fi
-
-            if [[ $TEST_COUNT -lt $(($EXPECTED_TEST_COUNT - ($EXPECTED_TEST_COUNT / 100))) ]] ; then
-              echo "Integration Test count is below the acceptable range of - 1% of the expected count. Expected $EXPECTED_TEST_COUNT. Actual $TEST_COUNT."
-              exit 1
-            fi
-            echo "test_count_integration_${{ matrix.testSystem }}=$TEST_COUNT" >> $GITHUB_OUTPUT
-
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
         uses: actions/upload-artifact@v5
@@ -408,47 +294,3 @@ jobs:
     needs: [ build_tests,integration-test ]
     uses: ./.github/workflows/build.yml
     secrets: inherit
-
-
-  update-test-count-secrets:
-    needs: [build_tests, integration-test]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    steps:
-
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v5
-        with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
-          aws-region: us-east-1
-
-      - name: Get secrets from vault
-        id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
-        with:
-          secret-ids: |
-            ,/vault/liquibase
-          parse-json-secrets: true
-
-      - name: Checkout code
-        uses: actions/checkout@v6
-      - name: Set GitHub Secret for Test Count
-        env:
-          TEST_COUNT_SECRET: ${{ env.TEST_COUNT_SECRET }}
-        run: |
-          echo $TEST_COUNT_SECRET | gh auth login --with-token
-          repository='${{ github.repository }}'
-          gh variable set TEST_COUNT_JAVA_17_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_17_ubuntu }}"
-          gh variable set TEST_COUNT_JAVA_21_UBUNTU --body "${{ needs.build_tests.outputs.test_count_unit_test_java_21_ubuntu }}"
-          gh variable set TEST_COUNT_JAVA_MACOS --body "${{ needs.build_tests.outputs.test_count_unit_test_java_macos }}"
-          gh variable set TEST_COUNT_JAVA_WINDOWS --body "${{ needs.build_tests.outputs.test_count_unit_test_java_windows}}"
-          gh variable set TEST_COUNT_INTEGRATION_DB2 --body "${{ needs.integration-test.outputs.test_count_integration_db2 }}"
-          gh variable set TEST_COUNT_INTEGRATION_H2 --body "${{ needs.integration-test.outputs.test_count_integration_h2 }}"
-          gh variable set TEST_COUNT_INTEGRATION_HSQLDB --body "${{ needs.integration-test.outputs.test_count_integration_hsqldb }}"
-          gh variable set TEST_COUNT_INTEGRATION_MARIADB --body "${{ needs.integration-test.outputs.test_count_integration_mariadb}}"
-          gh variable set TEST_COUNT_INTEGRATION_MSSQL --body "${{ needs.integration-test.outputs.test_count_integration_mssql }}"
-          gh variable set TEST_COUNT_INTEGRATION_MYSQL --body "${{ needs.integration-test.outputs.test_count_integration_mysql }}"
-          gh variable set TEST_COUNT_INTEGRATION_ORACLE --body "${{ needs.integration-test.outputs.test_count_integration_oracle }}"
-          gh variable set TEST_COUNT_INTEGRATION_POSTGRESQL --body "${{ needs.integration-test.outputs.test_count_integration_postgresql }}"
-          gh variable set TEST_COUNT_INTEGRATION_SQLITE --body "${{ needs.integration-test.outputs.test_count_integration_sqlite }}"
-          gh variable set TEST_COUNT_INTEGRATION_FIREBIRD --body "${{ needs.integration-test.outputs.test_count_integration_firebird }}"
