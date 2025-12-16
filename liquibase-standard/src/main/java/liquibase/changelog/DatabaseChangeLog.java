@@ -1194,7 +1194,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
         // Second priority: if include statement explicitly provided logicalFilePath, search parent tree
         if (StringUtils.isNotBlank(logicalFilePath)) {
-            return searchParentLogicalFilePath(changeLog, logicalFilePath);
+            return logicalFilePath;
         }
 
         // No explicit logicalFilePath specified on changelog or include statement

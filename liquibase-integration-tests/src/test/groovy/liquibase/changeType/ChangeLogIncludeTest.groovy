@@ -201,4 +201,94 @@ values (1,'dev','main_changelog_level','2025-02-07 13:56:14',1,'EXECUTED','9:6dc
         filenames[0] == "parent-logical-path"
         filenames[1] == "parent-logical-path"
     }
+
+    def "include statement with explicit logicalFilePath uses that value directly, not parent's logicalFilePath"() {
+
+        given:
+        def logService = new BufferedLogService()
+        Map<String, Object> scopeValues = new HashMap<>()
+        scopeValues.put(Scope.Attr.logService.name(), logService)
+
+        Scope.child(scopeValues, new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+                commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "changelogs/changeType/logicalFilePathTestData/explicit-include-parent.yaml")
+                commandScope.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY, UpdateSummaryEnum.VERBOSE)
+                commandScope.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY_OUTPUT, UpdateSummaryOutputEnum.LOG)
+                commandScope.execute()
+            }
+        })
+
+        when:
+        def logContent = logService.getLogAsString(Level.INFO)
+
+        then:
+        // Changeset should use the explicit logicalFilePath from the include statement
+        logContent.contains("ChangeSet explicit-include-path::explicit_test::testauthor")
+        // Should NOT use parent's logicalFilePath
+        !logContent.contains("ChangeSet parent-logical-path::explicit_test::testauthor")
+        // Should NOT use physical file path
+        !logContent.contains("ChangeSet changelogs/changeType/logicalFilePathTestData/explicit-include-child.yaml::explicit_test::testauthor")
+
+        when:
+        def resultSet = db.getConnection().createStatement().executeQuery(
+            "select filename from databasechangelog where id = 'explicit_test' and author = 'testauthor'"
+        )
+        def filename = null
+        if (resultSet.next()) {
+            filename = resultSet.getString(1)
+        }
+
+        then:
+        filename == "explicit-include-path"
+    }
+
+    def "child changelog's own logicalFilePath takes highest priority over include statement and parent"() {
+
+        given:
+        def logService = new BufferedLogService()
+        Map<String, Object> scopeValues = new HashMap<>()
+        scopeValues.put(Scope.Attr.logService.name(), logService)
+
+        Scope.child(scopeValues, new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+                commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "changelogs/changeType/logicalFilePathTestData/child-with-own-lfp-parent.yaml")
+                commandScope.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY, UpdateSummaryEnum.VERBOSE)
+                commandScope.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY_OUTPUT, UpdateSummaryOutputEnum.LOG)
+                commandScope.execute()
+            }
+        })
+
+        when:
+        def logContent = logService.getLogAsString(Level.INFO)
+
+        then:
+        // Changeset should use the child changelog's own logicalFilePath (highest priority)
+        logContent.contains("ChangeSet child-own-logical-path::child_own_test::testauthor")
+        // Should NOT use include statement's logicalFilePath
+        !logContent.contains("ChangeSet include-statement-path::child_own_test::testauthor")
+        // Should NOT use parent's logicalFilePath
+        !logContent.contains("ChangeSet parent-logical-path::child_own_test::testauthor")
+
+        when:
+        def resultSet = db.getConnection().createStatement().executeQuery(
+            "select filename from databasechangelog where id = 'child_own_test' and author = 'testauthor'"
+        )
+        def filename = null
+        if (resultSet.next()) {
+            filename = resultSet.getString(1)
+        }
+
+        then:
+        filename == "child-own-logical-path"
+    }
 }
