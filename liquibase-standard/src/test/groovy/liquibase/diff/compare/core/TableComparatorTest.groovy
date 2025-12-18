@@ -50,7 +50,7 @@ class TableComparatorTest extends Specification {
         then:
         def differences = comparator.findDifferences(table1, table2, new MockDatabase(), CompareControl.STANDARD, new DatabaseObjectComparatorChain(Collections.emptyList(), null), new HashSet<String>())
         !differences.differences.isEmpty()
-        differences.differences.containsKey("remarks")
+        differences.isDifferent("remarks")
 
         where:
         before | after

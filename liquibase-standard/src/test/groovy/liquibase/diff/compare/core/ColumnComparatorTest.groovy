@@ -53,7 +53,7 @@ class ColumnComparatorTest extends Specification {
         then:
         def differences = comparator.findDifferences(column1, column2, new PostgresDatabase(), CompareControl.STANDARD, new DatabaseObjectComparatorChain(Collections.emptyList(), null), new HashSet<String>())
         !differences.differences.isEmpty()
-        differences.differences.containsKey("remarks")
+        differences.isDifferent("remarks")
 
         where:
         before | after
