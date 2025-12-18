@@ -48,7 +48,7 @@ jobs:
   setup:
     name: setup
     needs: [authorize]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       timestamp: ${{ steps.get-date.outputs.date }}
       latestMergeSha: ${{ steps.get-sha.outputs.latestMergeSha }}
@@ -91,7 +91,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, macos-15-intel, windows-latest ]
+        os: [ ubuntu-24.04, macos-15-intel, windows-latest ]
         java: [ 17, 21, 25 ]
         exclude:
           - os: windows-latest
@@ -160,7 +160,7 @@ jobs:
           find . -name original-*.jar -exec rm {} \;
 
       - name: Upload Artifacts for build.yml
-        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-22.04'}}
+        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-24.04'}}
         uses: actions/upload-artifact@v6
         with:
           name: temp-artifact
@@ -177,7 +177,7 @@ jobs:
             ./**/target/site
 
       - name: Save Jacoco Report for Sonar
-        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-22.04'}}
+        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-24.04'}}
         uses: actions/upload-artifact@v6
         with:
           name: liquibase-jacoco-test-results
@@ -185,7 +185,7 @@ jobs:
             ./liquibase-standard/target/jacoco.exec
 
       - name: Archive Modules
-        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-22.04'}}
+        if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-24.04'}}
         uses: actions/upload-artifact@v6
         with:
           name: liquibase-modules
@@ -204,7 +204,7 @@ jobs:
 
   integration-test:
     name: Integration Test
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
