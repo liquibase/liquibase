@@ -71,7 +71,7 @@
         <commons-lang3.version>3.20.0</commons-lang3.version>
         <commons-io.version>2.21.0</commons-io.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
-        <commons-text.version>1.15.0</commons-text.version>
+        <commons-text.version>1.14.0</commons-text.version>
         <ant.version>1.10.15</ant.version>
         <junit-jupiter.version>6.0.1</junit-jupiter.version>
         <groovy.version>4.0.28</groovy.version>
