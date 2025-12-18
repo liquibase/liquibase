@@ -105,7 +105,7 @@ jobs:
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: liquibase-test-results-snowflake
           path: |

@@ -109,7 +109,7 @@ jobs:
 
       - name: Built Code Cache
         if: ${{ matrix.java == 17}}
-        uses: actions/cache@v4.3.0
+        uses: actions/cache@v5.0.1
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -161,7 +161,7 @@ jobs:
 
       - name: Upload Artifacts for build.yml
         if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-22.04'}}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: temp-artifact
           path: |
@@ -169,7 +169,7 @@ jobs:
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: liquibase-test-results-jdk${{ matrix.java }}
           path: |
@@ -178,7 +178,7 @@ jobs:
 
       - name: Save Jacoco Report for Sonar
         if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-22.04'}}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: liquibase-jacoco-test-results
           path: |
@@ -186,7 +186,7 @@ jobs:
 
       - name: Archive Modules
         if: ${{ matrix.java == 17 && matrix.os == 'ubuntu-22.04'}}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: liquibase-modules
           path: |
@@ -253,7 +253,7 @@ jobs:
       # getting from build results page. If we remove 0-SNAPSHOT then we will need settings.xml
 
       - name: Restore Built Code Cache
-        uses: actions/cache@v4.3.0
+        uses: actions/cache@v5.0.1
         with:
           key: built-code-${{ github.run_number }}-${{ github.run_attempt }}
           path: ./**/target
@@ -263,14 +263,14 @@ jobs:
 
       - name: Archive Test Results
         if: ${{ inputs.archive_test_results == 'true' }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ steps.prepare.outputs.testResultsArtifact }}
           path: |
             ./**/target/surefire-reports
 
       - name: Save Jacoco Report for Sonar
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: liquibase-integration-jacoco-test-results-${{ matrix.testSystem }}
           path: |
