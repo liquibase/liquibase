@@ -37,10 +37,12 @@ class DeprecatedConfigurationCodeTest extends Specification {
     def "4_3 ConfigurationContainer custom implementations"() {
         when:
         def config = LiquibaseConfiguration.getInstance().getConfiguration(DeprecatedConfigurationConfig.class)
-        def property = (ConfigurationProperty) config.getProperty(DeprecatedConfigurationConfig.TEST_PROPERTY)
+        ConfigurationContainer configContainer = (ConfigurationContainer) config
+        def property = (ConfigurationProperty) configContainer.getProperty(DeprecatedConfigurationConfig.TEST_PROPERTY)
+        def properties = configContainer.getProperties()
 
         then:
-        config.getProperties()*.getName() == ["testProperty"]
+        properties*.getName() == ["testProperty"]
         property.description == "A test property"
         property.getValue() == "default value"
         !property.getWasOverridden()

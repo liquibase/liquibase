@@ -66,7 +66,7 @@ class TestSystemDefinitionTest extends Specification {
 
         then:
         TestSystem.Definition.parse("test").getProfiles().size() == 0
-        xyDefinition.getProfiles().toArrayString() == "[x, y]"
+        Arrays.toString(xyDefinition.getProfiles() == "[x, y]")
 
         !xyDefinition.getProfiles().is(xyDefinition.getProfiles())
 
