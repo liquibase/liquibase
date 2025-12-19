@@ -195,7 +195,7 @@ jobs:
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
 
       - name: Cache Completed Artifacts
-        uses: actions/cache@v4.3.0
+        uses: actions/cache@v5.0.1
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
@@ -239,7 +239,7 @@ jobs:
           } >> $GITHUB_ENV
 
       - name: Restore Completed Artifacts
-        uses: actions/cache@v4.3.0
+        uses: actions/cache@v5.0.1
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
@@ -398,7 +398,7 @@ jobs:
 
       - name: Attach standalone zip to Build
         if: ${{ inputs.standalone_zip == true && inputs.dry_run == false }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: liquibase-installers-${{ needs.setup.outputs.version }}
           path: re-version/final/*
