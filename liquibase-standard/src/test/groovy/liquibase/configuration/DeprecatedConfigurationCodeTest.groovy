@@ -9,7 +9,7 @@ import spock.lang.Specification
  */
 class DeprecatedConfigurationCodeTest extends Specification {
 
-    def "cleanup"() {
+    def cleanup() {
         DeprecatedConfigurationValueProvider.clearData()
     }
 
