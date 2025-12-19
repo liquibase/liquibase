@@ -65,8 +65,8 @@ class TestSystemDefinitionTest extends Specification {
         def xyDefinition = TestSystem.Definition.parse("test:x,y")
 
         then:
-        TestSystem.Definition.parse("test").getProfiles().size() == 0
-        Arrays.toString(xyDefinition.getProfiles() == "[x, y]")
+        TestSystem.Definition.parse("test").getProfiles().length == 0
+        Arrays.toString(xyDefinition.getProfiles()) == "[x, y]"
 
         !xyDefinition.getProfiles().is(xyDefinition.getProfiles())
 
