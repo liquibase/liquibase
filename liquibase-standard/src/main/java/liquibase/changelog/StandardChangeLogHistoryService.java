@@ -249,14 +249,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 }
             }
 
-            SqlStatement databaseChangeLogStatement = new SelectFromDatabaseChangeLogStatement(
-                    new SelectFromDatabaseChangeLogStatement.ByCheckSumNotNullAndNotLike(ChecksumVersion.latest().getVersion()),
-                    new ColumnConfig().setName("MD5SUM"));
-            List<Map<String, ?>> md5sumRS = ChangelogJdbcMdcListener.query(getDatabase(), ex -> ex.queryForList(databaseChangeLogStatement));
-
             //check if any checksum is not using the current version
-            databaseChecksumsCompatible = md5sumRS.isEmpty();
-
+            databaseChecksumsCompatible = getNotCompatibleDatabaseChangeLog().isEmpty();
 
         } else if (!changeLogCreateAttempted) {
             executor.comment("Create Database Change Log Table");
@@ -514,6 +508,16 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
     protected String getContextsSize() {
         return CONTEXTS_SIZE;
+    }
+
+    public List<Map<String, ?>> getNotCompatibleDatabaseChangeLog() throws DatabaseException {
+        SqlStatement databaseChangeLogStatement = new SelectFromDatabaseChangeLogStatement(
+                new SelectFromDatabaseChangeLogStatement.ByCheckSumNotNullAndNotLike(
+                        ChecksumVersion.latest().getVersion()
+                ),
+                new ColumnConfig().setName("MD5SUM")
+        );
+        return ChangelogJdbcMdcListener.query(getDatabase(), ex -> ex.queryForList(databaseChangeLogStatement));
     }
 
     @Override
