@@ -250,7 +250,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             }
 
             //check if any checksum is not using the current version
-            databaseChecksumsCompatible = getNotCompatibleDatabaseChangeLog().isEmpty();
+            databaseChecksumsCompatible = getIncompatibleDatabaseChangeLogs().isEmpty();
 
         } else if (!changeLogCreateAttempted) {
             executor.comment("Create Database Change Log Table");
@@ -510,7 +510,15 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         return CONTEXTS_SIZE;
     }
 
-    public List<Map<String, ?>> getNotCompatibleDatabaseChangeLog() throws DatabaseException {
+    /**
+     * Retrieves changelog entries with checksums that are not compatible with the latest checksum version.
+     * This method can be overridden by database-specific implementations to provide custom queries for databases that
+     * don't support standard SQL constructs (e.g., Cassandra CQL).
+     *
+     * @return a list of maps containing MD5SUM values for incompatible changelog entries
+     * @throws DatabaseException if there is an error querying the database
+     */
+    public List<Map<String, ?>> getIncompatibleDatabaseChangeLogs() throws DatabaseException {
         SqlStatement databaseChangeLogStatement = new SelectFromDatabaseChangeLogStatement(
                 new SelectFromDatabaseChangeLogStatement.ByCheckSumNotNullAndNotLike(
                         ChecksumVersion.latest().getVersion()
