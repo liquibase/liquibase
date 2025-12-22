@@ -156,7 +156,7 @@ jobs:
           rm re-version/final/*.sha1
 
       - name: Archive Packages
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: liquibase-test-packages
           path: re-version/final/*
