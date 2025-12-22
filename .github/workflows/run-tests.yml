@@ -1,14 +1,11 @@
 
 name: Unit and Integration Tests
 
+# Security: Use minimal workflow-level permissions (principle of least privilege)
+# Job-specific permissions are granted at the job level where needed
+# Reference: https://docs.github.com/en/actions/security-guides/automatic-token-authentication
 permissions:
-  contents: write
-  pull-requests: write
-  issues: write
-  checks: write
-  id-token: write
-  actions: write
-  packages: write
+  contents: read
 
 on:
   workflow_call:
