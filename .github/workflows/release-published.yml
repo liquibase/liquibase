@@ -1,12 +1,12 @@
 name: Release Published
 
+# Security: Minimal workflow-level permissions (principle of least privilege)
+# Job-specific permissions are granted at the job level where needed
 permissions:
-  contents: write
-  packages: write
-  actions: write
-  id-token: write
-  pull-requests: write
-  issues: write
+  contents: read
+  packages: read
+  actions: read
+  id-token: write  # Required for AWS OIDC
 
 on:
   release:
