@@ -533,7 +533,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
     }
 
-
     private void validateAttributes(ParsedNode node, String nodeName) throws ParsedNodeException {
 
         if (INCLUDE_CHANGELOG.equals(nodeName)) {

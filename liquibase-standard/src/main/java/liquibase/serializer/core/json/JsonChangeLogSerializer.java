@@ -2,7 +2,6 @@ package liquibase.serializer.core.json;
 
 import liquibase.changelog.ChangeLogChild;
 import liquibase.GlobalConfiguration;
-import liquibase.changelog.ChangeSet;
 import liquibase.serializer.core.yaml.YamlChangeLogSerializer;
 import liquibase.util.StringUtil;
 
