@@ -728,7 +728,7 @@ https://docs.liquibase.com
     @Unroll
     def "adjustLegacyArgs"() {
         expect:
-        new LiquibaseCommandLine().adjustLegacyArgs(input as String[]).toArrayString() == (expected as String[]).toArrayString()
+        Arrays.toString(new LiquibaseCommandLine().adjustLegacyArgs(input as String[])) == Arrays.toString(expected as String[])
 
         where:
         input                                                                                                                                                                                       | expected
