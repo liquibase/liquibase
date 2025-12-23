@@ -135,6 +135,8 @@ jobs:
     name: Manually trigger deployment
     needs: [setup]
     runs-on: ubuntu-22.04
+    permissions:
+      issues: write  # Required for trstringer/manual-approval to create approval issues
     steps:
       - name: Get Version to deploy
         uses: trstringer/manual-approval@v1
