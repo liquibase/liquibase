@@ -108,4 +108,66 @@
         </sql>
     </changeSet>
 
+    <!-- Create a test sequence -->
+    <changeSet author="liquibase" id="db2-precondition-test-10">
+        <createSequence sequenceName="TEST_SEQUENCE_PRECOND" startValue="1" incrementBy="1"/>
+    </changeSet>
+
+    <!-- Test sequenceExists precondition - should pass -->
+    <changeSet author="liquibase" id="db2-precondition-test-11">
+        <preConditions onFail="HALT">
+            <sequenceExists sequenceName="TEST_SEQUENCE_PRECOND"/>
+        </preConditions>
+        <comment>Verify sequenceExists precondition works with DB2 optimization</comment>
+        <sql>
+            -- This changeset should execute because the sequence exists
+            INSERT INTO TEST_TABLE_PRECOND (ID, NAME) VALUES (7, 'Test Data 7')
+        </sql>
+    </changeSet>
+
+    <!-- Test negative case: sequenceExists should fail for non-existent sequence -->
+    <changeSet author="liquibase" id="db2-precondition-test-12">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="NON_EXISTENT_SEQUENCE"/>
+            </not>
+        </preConditions>
+        <comment>Verify sequenceExists precondition correctly identifies non-existent sequence</comment>
+        <sql>
+            -- This changeset should execute because the sequence does NOT exist
+            INSERT INTO TEST_TABLE_PRECOND (ID, NAME) VALUES (8, 'Test Data 8')
+        </sql>
+    </changeSet>
+
+    <!-- Add a unique constraint to the table -->
+    <changeSet author="liquibase" id="db2-precondition-test-13">
+        <addUniqueConstraint tableName="TEST_TABLE_PRECOND" columnNames="NAME" constraintName="UQ_TEST_PRECOND_NAME"/>
+    </changeSet>
+
+    <!-- Test uniqueConstraintExists precondition - should pass -->
+    <changeSet author="liquibase" id="db2-precondition-test-14">
+        <preConditions onFail="HALT">
+            <uniqueConstraintExists tableName="TEST_TABLE_PRECOND" constraintName="UQ_TEST_PRECOND_NAME"/>
+        </preConditions>
+        <comment>Verify uniqueConstraintExists precondition works with DB2 optimization</comment>
+        <sql>
+            -- This changeset should execute because the unique constraint exists
+            INSERT INTO TEST_TABLE_PRECOND (ID, NAME) VALUES (9, 'Test Data 9')
+        </sql>
+    </changeSet>
+
+    <!-- Test negative case: uniqueConstraintExists should fail for non-existent constraint -->
+    <changeSet author="liquibase" id="db2-precondition-test-15">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <uniqueConstraintExists tableName="TEST_TABLE_PRECOND" constraintName="NON_EXISTENT_CONSTRAINT"/>
+            </not>
+        </preConditions>
+        <comment>Verify uniqueConstraintExists precondition correctly identifies non-existent constraint</comment>
+        <sql>
+            -- This changeset should execute because the constraint does NOT exist
+            INSERT INTO TEST_TABLE_PRECOND (ID, NAME) VALUES (10, 'Test Data 10')
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

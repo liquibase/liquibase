@@ -34,7 +34,7 @@ class DB2Test extends Specification {
      */
     private static final int PERFORMANCE_TIMEOUT_SECONDS = 60
 
-    def "verify tableExists, viewExists, and indexExists preconditions work efficiently on DB2"() {
+    def "verify all database object preconditions work efficiently on DB2"() {
         given:
         def changeLogFile = "changelogs/db2/preconditions-test.xml"
         def scopeSettings = [
