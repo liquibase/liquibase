@@ -38,6 +38,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
     public void write(DatabaseSnapshot snapshot, OutputStream out) throws IOException {
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
         writer.write(serialize(snapshot, true));
+        writer.flush();
     }
 
     @Override
