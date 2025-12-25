@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.changelog.StandardChangeLogHistoryService;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.MSSQLDatabase;
@@ -55,7 +56,7 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
                 .addColumn("DATEEXECUTED", DataTypeFactory.getInstance().fromDescription(dateTimeTypeString, database), null, null, new NotNullConstraint())
                 .addColumn("ORDEREXECUTED", DataTypeFactory.getInstance().fromDescription("int", database), null, null, new NotNullConstraint())
                 .addColumn("EXECTYPE", DataTypeFactory.getInstance().fromDescription(charTypeName + "(10)", database), null, null, new NotNullConstraint())
-                .addColumn("MD5SUM", DataTypeFactory.getInstance().fromDescription(charTypeName + "(35)", database))
+                .addColumn("MD5SUM", DataTypeFactory.getInstance().fromDescription(charTypeName + "(" + StandardChangeLogHistoryService.MD5_COLUMN_SIZE + ")", database))
                 .addColumn("DESCRIPTION", DataTypeFactory.getInstance().fromDescription(charTypeName + "(255)", database))
                 .addColumn("COMMENTS", DataTypeFactory.getInstance().fromDescription(charTypeName + "(255)", database))
                 .addColumn("TAG", DataTypeFactory.getInstance().fromDescription(charTypeName + "(255)", database))

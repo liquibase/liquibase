@@ -32,3 +32,5 @@ class LiquibaseCommandLineThreadingTest extends Specification {
     }
 
 }
+
+

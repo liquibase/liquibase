@@ -1,5 +1,6 @@
 package liquibase;
 
+import liquibase.checksums.ChecksumAlgorithm;
 import liquibase.command.core.DiffCommandStep;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
@@ -59,6 +60,8 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<SupportsMethodValidationLevelsEnum> SUPPORTS_METHOD_VALIDATION_LEVEL;
 
     public static final ConfigurationDefinition<Boolean> PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS;
+
+    public static final ConfigurationDefinition<ChecksumAlgorithm> CHECKSUM_ALGORITHM;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -273,6 +276,11 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS = builder.define("preserveClasspathPrefixInNormalizedPaths", Boolean.class)
                 .setDescription("If true 'classpath:' prefix will be preserved in normalized paths, allowing to resolve hierarchical resources under a classpath-based root.")
                 .setDefaultValue(false)
+                .build();
+
+        CHECKSUM_ALGORITHM = builder.define("checksumAlgorithm", ChecksumAlgorithm.class)
+                .setDescription("Changes the hashing algorithm that Liquibase uses to calculate checksums.")
+                .setDefaultValue(ChecksumAlgorithm.MD5)
                 .build();
     }
 
