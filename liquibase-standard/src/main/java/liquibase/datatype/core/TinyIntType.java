@@ -6,24 +6,13 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.datatype.NumericType;
 import liquibase.statement.DatabaseFunction;
 
 import java.util.Locale;
 
 @DataTypeInfo(name = "tinyint", aliases = "java.sql.Types.TINYINT", minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
-public class TinyIntType extends LiquibaseDataType {
-
-
-    private boolean autoIncrement;
-
-    @Override
-    public boolean isAutoIncrement() {
-        return autoIncrement;
-    }
-
-    public void setAutoIncrement(boolean autoIncrement) {
-        this.autoIncrement = autoIncrement;
-    }
+public class TinyIntType extends NumericType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
@@ -66,8 +55,4 @@ public class TinyIntType extends LiquibaseDataType {
         return formatNumber(value.toString());
     }
 
-    @Override
-    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
-        return LoadDataChange.LOAD_DATA_TYPE.NUMERIC;
-    }
 }

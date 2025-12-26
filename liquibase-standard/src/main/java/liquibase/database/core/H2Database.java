@@ -20,16 +20,14 @@ import liquibase.util.JdbcUtil;
 
 import java.lang.reflect.Method;
 import java.math.BigInteger;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.text.ParseException;
 import java.util.*;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static liquibase.util.BooleanUtil.isTrue;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 public class H2Database extends AbstractJdbcDatabase {
 
@@ -385,10 +383,21 @@ public class H2Database extends AbstractJdbcDatabase {
     }
 
     @Override
+    public CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase() {
+        if(null == unquotedObjectsAreUppercased) {
+            return CatalogAndSchemaCase.ORIGINAL_CASE;
+        } else {
+            return unquotedObjectsAreUppercased ? CatalogAndSchemaCase.UPPER_CASE
+                  : CatalogAndSchemaCase.LOWER_CASE;
+        }
+    }
+
+    @Override
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (objectName == null) {
             return null;
         }
+
         if (isCatalogOrSchemaType(objectType)) {
             if (isTrue(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getCurrentValue())
                     || getSchemaAndCatalogCase() == CatalogAndSchemaCase.ORIGINAL_CASE) {
@@ -506,8 +515,14 @@ public class H2Database extends AbstractJdbcDatabase {
                     Method wrappedConn = conn.getClass().getMethod("getWrappedConnection");
                     wrappedConn.setAccessible(true);
                     sqlConn = (Connection) wrappedConn.invoke(conn);
+                    DatabaseMetaData m = ((JdbcConnection) conn).getMetaData();
+                    if(m.supportsMixedCaseIdentifiers()){
+                        unquotedObjectsAreUppercased = null;
+                    } else if(m.storesLowerCaseIdentifiers()){
+                        unquotedObjectsAreUppercased = false;
+                    }
                 }
-            } catch (Exception e) {
+            } catch (DatabaseException | SQLException | ReflectiveOperationException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
 
