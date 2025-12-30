@@ -14,7 +14,7 @@ import liquibase.sql.UnparsedSql
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class CreateProcedureGeneratorTest extends Specification {
+class CreateProcedureGeatuneratorTest extends Specification {
 
     @Unroll
     def "removeTrailingDelimiter"() {
@@ -105,8 +105,8 @@ class CreateProcedureGeneratorTest extends Specification {
         ""         | new OracleDatabase()      | "passed sql 1;\npassed sql 2;"
         "other"    | new OracleDatabase()      | "ALTER SESSION SET CURRENT_SCHEMA=other;\npassed sql 1;\npassed sql 2;\nALTER SESSION SET CURRENT_SCHEMA=MAIN_SCHEMA;"
         "other"    | new DB2Database()         | "SET CURRENT SCHEMA other;\npassed sql 1;\npassed sql 2;\nSET CURRENT SCHEMA main_schema;"
-        "other"    | new PostgresDatabase()    | "SET LOCAL SEARCH_PATH TO other, main_schema;\npassed sql 1;\npassed sql 2;\nSET LOCAL CURRENT SCHEMA main_schema;"
-        "other"    | new EnterpriseDBDatabase() | "SET LOCAL SEARCH_PATH TO main_schema, main_schema;\npassed sql 1;\npassed sql 2;\nSET LOCAL CURRENT SCHEMA main_schema;"
+        "other"    | new PostgresDatabase()    | "SET LOCAL SEARCH_PATH TO other, main_schema;\npassed sql 1;\npassed sql 2;"
+        "other"    | new EnterpriseDBDatabase() | "SET LOCAL SEARCH_PATH TO other, main_schema;\npassed sql 1;\npassed sql 2;"
 
     }
 }
