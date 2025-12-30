@@ -130,9 +130,7 @@ class SearchPathIntegrationTest extends Specification {
         // The search_path should have reverted to the original value
         // This proves that SET LOCAL was used instead of persistent SET
         // (If persistent SET was used, the customSchema would still be in search_path)
-        currentSearchPath == originalSearchPath ||
-            currentSearchPath.startsWith("\"\$user\"") ||
-            currentSearchPath.startsWith("\"$postgres.username\"")
+        currentSearchPath == originalSearchPath
 
         // customSchema should NOT be in current path - this proves SET LOCAL worked
         !currentSearchPath.contains(customSchema)
