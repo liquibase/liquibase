@@ -14,7 +14,7 @@ import liquibase.sql.UnparsedSql
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class CreateProcedureGeatuneratorTest extends Specification {
+class CreateProcedureGeneratorTest extends Specification {
 
     @Unroll
     def "removeTrailingDelimiter"() {
