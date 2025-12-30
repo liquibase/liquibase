@@ -160,12 +160,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
                 }
 
                 if (!originalSearchPath.equals(schemaName) && !originalSearchPath.startsWith(schemaName + ",") && !originalSearchPath.startsWith("\"" + schemaName + "\",")) {
-                    if (database instanceof EnterpriseDBDatabase){
-                        sql.add(0, new UnparsedSql("SET LOCAL SEARCH_PATH TO " + database.escapeObjectName(defaultSchema, Schema.class) + ", " + originalSearchPath));
-                        sql.add(new UnparsedSql("ALTER SESSION SET CURRENT SCHEMA " + originalSearchPath));
-                    } else {
-                        sql.add(0, new UnparsedSql("SET LOCAL SEARCH_PATH TO " + database.escapeObjectName(schemaName, Schema.class) + ", " + originalSearchPath));
-                    }
+                    sql.add(0, new UnparsedSql("SET LOCAL SEARCH_PATH TO " + database.escapeObjectName(schemaName, Schema.class) + ", " + originalSearchPath));
                 }
             }
         }
