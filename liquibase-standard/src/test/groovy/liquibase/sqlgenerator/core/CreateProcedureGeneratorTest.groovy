@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core
 
 import liquibase.Scope
 import liquibase.database.core.DB2Database
+import liquibase.database.core.EnterpriseDBDatabase
 import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.OracleDatabase
 import liquibase.database.core.PostgresDatabase
@@ -99,12 +100,13 @@ class CreateProcedureGeneratorTest extends Specification {
         sql*.toString().join("\n").toString() == expected
 
         where:
-        schemaName | database             | expected
-        null       | new OracleDatabase() | "passed sql 1;\npassed sql 2;"
-        ""         | new OracleDatabase() | "passed sql 1;\npassed sql 2;"
-        "other"    | new OracleDatabase() | "ALTER SESSION SET CURRENT_SCHEMA=other;\npassed sql 1;\npassed sql 2;\nALTER SESSION SET CURRENT_SCHEMA=MAIN_SCHEMA;"
-        "other"    | new DB2Database()    | "SET CURRENT SCHEMA other;\npassed sql 1;\npassed sql 2;\nSET CURRENT SCHEMA main_schema;"
-        "other"    | new PostgresDatabase() | "SET SEARCH_PATH TO other, main_schema;\npassed sql 1;\npassed sql 2;\nSET CURRENT SCHEMA main_schema;"
+        schemaName | database                  | expected
+        null       | new OracleDatabase()      | "passed sql 1;\npassed sql 2;"
+        ""         | new OracleDatabase()      | "passed sql 1;\npassed sql 2;"
+        "other"    | new OracleDatabase()      | "ALTER SESSION SET CURRENT_SCHEMA=other;\npassed sql 1;\npassed sql 2;\nALTER SESSION SET CURRENT_SCHEMA=MAIN_SCHEMA;"
+        "other"    | new DB2Database()         | "SET CURRENT SCHEMA other;\npassed sql 1;\npassed sql 2;\nSET CURRENT SCHEMA main_schema;"
+        "other"    | new PostgresDatabase()    | "SET LOCAL SEARCH_PATH TO other, main_schema;\npassed sql 1;\npassed sql 2;\nSET LOCAL CURRENT SCHEMA main_schema;"
+        "other"    | new EnterpriseDBDatabase() | "SET LOCAL SEARCH_PATH TO main_schema, main_schema;\npassed sql 1;\npassed sql 2;\nSET LOCAL CURRENT SCHEMA main_schema;"
 
     }
 }
