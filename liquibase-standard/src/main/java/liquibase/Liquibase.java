@@ -73,7 +73,7 @@ public class Liquibase implements AutoCloseable {
     @Getter
     private String changeLogFile;
     @Setter
-    private UpdateSummaryOutputEnum showSummaryOutput;
+    private UpdateSummaryOutputEnum showSummaryOutput = UpdateSummaryOutputEnum.LOG;
     @Setter
     private UpdateSummaryEnum showSummary;
     /**
