@@ -1192,20 +1192,21 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             return changeLog.getRawLogicalFilePath();
         }
 
-        // Second priority: if include statement explicitly provided logicalFilePath, search parent tree
+        // Check configuration to determine behavior for all inheritance scenarios
+        if (!GlobalConfiguration.ALLOW_INHERIT_LOGICAL_FILE_PATH.getCurrentValue()) {
+            // Strict behavior: return null so changeset uses physical file path
+            // This ignores both explicit logicalFilePath on include statement and parent inheritance
+            return null;
+        }
+
+        // Legacy behavior (4.31.0+): allow inheritance
+        // Second priority: if include statement explicitly provided logicalFilePath, use it
         if (StringUtils.isNotBlank(logicalFilePath)) {
             return logicalFilePath;
         }
 
-        // No explicit logicalFilePath specified on changelog or include statement
-        // Check configuration to determine behavior
-        if (GlobalConfiguration.ALLOW_INHERIT_LOGICAL_FILE_PATH.getCurrentValue()) {
-            // Legacy behavior (4.31.0+): search parent tree for logicalFilePath to inherit
-            return searchParentLogicalFilePath(changeLog, null);
-        }
-
-        // New behavior (fixes issue #7222): return null so changeset uses physical file path
-        return null;
+        // Third priority: search parent tree for logicalFilePath to inherit
+        return searchParentLogicalFilePath(changeLog, null);
     }
 
     /**

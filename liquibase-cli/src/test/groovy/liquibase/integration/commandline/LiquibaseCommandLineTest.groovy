@@ -34,11 +34,15 @@ Global Options
       --allow-inherit-logical-file-path=PARAM
                              If true, included changelogs without an explicit
                                logicalFilePath will inherit their parent
-                               changelog's logicalFilePath (Liquibase 4.31.0+
-                               behavior). If false, included changelogs use
-                               their physical file paths (corrected behavior
-                               that prevents unintended inheritance). Defaults
-                               to true for backward compatibility.
+                               changelog's logicalFilePath, and explicit
+                               logicalFilePath attributes on include statements
+                               are honored (Liquibase 4.31.0+ behavior). If
+                               false, included changelogs use their physical
+                               file paths, ignoring both implicit inheritance
+                               and explicit logicalFilePath attributes on
+                               include statements. Only logicalFilePath set
+                               directly on the changelog itself is respected.
+                               Defaults to true for backward compatibility.
                              DEFAULT: true
                              (defaults file: 'liquibase.
                                allowInheritLogicalFilePath', environment

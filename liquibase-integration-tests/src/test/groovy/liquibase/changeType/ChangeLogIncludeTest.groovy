@@ -291,4 +291,51 @@ values (1,'dev','main_changelog_level','2025-02-07 13:56:14',1,'EXECUTED','9:6dc
         then:
         filename == "child-own-logical-path"
     }
+
+    def "include statement with explicit logicalFilePath is ignored when allowInheritLogicalFilePath=false"() {
+
+        given:
+        def logService = new BufferedLogService()
+        Map<String, Object> scopeValues = new HashMap<>()
+        scopeValues.put(Scope.Attr.logService.name(), logService)
+        scopeValues.put(GlobalConfiguration.ALLOW_INHERIT_LOGICAL_FILE_PATH.getKey(), false)
+
+        Scope.child(scopeValues, new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+                commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "changelogs/changeType/logicalFilePathTestData/explicit-include-no-inherit-parent.yaml")
+                commandScope.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY, UpdateSummaryEnum.VERBOSE)
+                commandScope.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY_OUTPUT, UpdateSummaryOutputEnum.LOG)
+                commandScope.execute()
+            }
+        })
+
+        when:
+        def logContent = logService.getLogAsString(Level.INFO)
+
+        then:
+        // When allowInheritLogicalFilePath=false, even explicit logicalFilePath on include should be ignored
+        // Changeset should use its physical file path
+        logContent.contains("ChangeSet changelogs/changeType/logicalFilePathTestData/explicit-include-no-inherit-child.yaml::explicit_include_no_inherit_test::testauthor")
+        // Should NOT use the include statement's explicit logicalFilePath
+        !logContent.contains("ChangeSet explicit-include-logical-path::explicit_include_no_inherit_test::testauthor")
+        // Should NOT use parent's logicalFilePath
+        !logContent.contains("ChangeSet parent-logical-path::explicit_include_no_inherit_test::testauthor")
+
+        when:
+        def resultSet = db.getConnection().createStatement().executeQuery(
+            "select filename from databasechangelog where id = 'explicit_include_no_inherit_test' and author = 'testauthor'"
+        )
+        def filename = null
+        if (resultSet.next()) {
+            filename = resultSet.getString(1)
+        }
+
+        then:
+        filename == "changelogs/changeType/logicalFilePathTestData/explicit-include-no-inherit-child.yaml"
+    }
 }
