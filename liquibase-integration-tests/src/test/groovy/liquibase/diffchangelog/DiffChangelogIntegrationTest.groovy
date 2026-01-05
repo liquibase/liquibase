@@ -293,7 +293,7 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
 
     def "Treat 'null' / 'NULL' values not as NULLs"() {
         given:
-        def outputChangelogFile = "test/classes/test-null.postgres.sql"
+        def outputChangelogFile = "test/classes/test-null.postgresql.sql"
 
         postgres.executeSql("""
             create table TEST_WITH_NULL_STRINGS (
