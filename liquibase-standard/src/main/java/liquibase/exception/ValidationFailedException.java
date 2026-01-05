@@ -103,17 +103,19 @@ public class ValidationFailedException extends MigrationFailedException {
                         String currentPath = invalid.getChangeLog().getPhysicalFilePath();
                         String originalPath = original.getChangeLog().getPhysicalFilePath();
                         if (currentPath != null && originalPath != null) {
-                                message.append("          ")
-                                        .append("  -> Found in file: ")
-                                        .append(currentPath).append(separator);
-                               message.append("          ")
-                                       .append("  -> Originally seen in file: ").append(originalPath)
-                                       .append(separator);
-                               message.append(" ").append(" -> This may be caused by logicalFilePath inheritance (Liquibase 4.31.0-5.0.1 bug).")
-                                       .append(separator);
-                               message.append(" ").append(" -> Solution: Use unique IDs or add explicit logicalFilePath to each included changelog.")
-                                       .append(separator);
-                            }
+                            message.append("          ")
+                                    .append("  -> Found in file: ")
+                                    .append(currentPath).append(separator);
+                            message.append("          ")
+                                    .append("  -> Originally seen in file: ").append(originalPath)
+                                    .append(separator);
+                            message.append("          ")
+                                    .append("  -> This may be caused by logicalFilePath inheritance (Liquibase 4.31.0-5.0.1 bug).")
+                                    .append(separator);
+                            message.append("          ")
+                                    .append("  -> Solution: Use unique IDs or add explicit logicalFilePath to each included changelog.")
+                                    .append(separator);
+                        }
                    }
                 }
 
