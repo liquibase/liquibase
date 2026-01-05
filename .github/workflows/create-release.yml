@@ -105,7 +105,7 @@ jobs:
           parse-json-secrets: true
 
       - name: Download liquibase-artifacts
-        uses: dawidd6/action-download-artifact@v11
+        uses: dawidd6/action-download-artifact@v12
         with:
           workflow: run-tests.yml
           run_id: ${{ needs.setup.outputs.runId }}
