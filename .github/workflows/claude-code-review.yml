@@ -20,4 +20,12 @@ permissions:
 jobs:
   claude-review:
     uses: liquibase/build-logic/.github/workflows/claude-code-review.yml@main
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+      id-token: write
+      actions: read
+      checks: read
+      statuses: read
     secrets: inherit
