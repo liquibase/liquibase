@@ -284,6 +284,7 @@ jobs:
     permissions:
       pull-requests: write
       id-token: write
+      contents: read
     with:
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
       thisSha: ${{ needs.setup.outputs.thisSha }}
