@@ -413,7 +413,7 @@ jobs:
           fi
 
       - name: Liquibase xsds SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.4
+        uses: wangyucode/sftp-upload-action@v3.0.0
         with:
           host: ${{ env.WPENGINE_SFTP_HOST }}
           port: ${{ env.WPENGINE_SFTP_PORT }}
@@ -425,7 +425,7 @@ jobs:
           remoteDir: "/xml/ns/dbchangelog/"
 
       - name: Liquibase index.htm SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.4
+        uses: wangyucode/sftp-upload-action@v3.0.0
         with:
           host: ${{ env.WPENGINE_SFTP_HOST }}
           port: ${{ env.WPENGINE_SFTP_PORT }}

@@ -28,11 +28,37 @@
             <column name="name" type="CHAR(20)"/>
         </createTable>
     </changeSet>
-    <changeSet id="10" author="jbennett" labels="release-1.5.0">
+    <changeSet id="10" author="jbennett" labels="release-1.5.0" dbms="oracle">
       <sql endDelimiter="/">
 BEGIN
 DBMS_UTILITY.COMPILE_SCHEMA(schema=>'LBUSER',compile_all=>FALSE);
 END; /
+      </sql>
+    </changeSet>
+    <!-- Test case-insensitive DML matching for issue #7043 -->
+    <changeSet author="mallod" id="test-lowercase-insert">
+      <sql>
+      insert into TABLE1 (name, id) VALUES ('lowercase', '3');
+      </sql>
+    </changeSet>
+    <changeSet author="mallod" id="test-mixedcase-insert">
+      <sql>
+      Insert Into TABLE1 (name, id) VALUES ('mixedcase', '4');
+      </sql>
+    </changeSet>
+    <changeSet author="mallod" id="test-lowercase-update">
+      <sql>
+      update TABLE1 set role = 'admin' where id = '1';
+      </sql>
+    </changeSet>
+    <changeSet author="mallod" id="test-uppercase-delete">
+      <sql>
+      DELETE FROM TABLE1 WHERE id = '3';
+      </sql>
+    </changeSet>
+    <changeSet author="mallod" id="test-lowercase-delete">
+      <sql>
+      delete from TABLE1 where id = '4';
       </sql>
     </changeSet>
 </databaseChangeLog>
