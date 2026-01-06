@@ -194,6 +194,11 @@ jobs:
     uses: liquibase/build-logic/.github/workflows/fossa_ai.yml@main
     if: github.event_name != 'workflow_dispatch'
     secrets: inherit
+    permissions:
+      actions: write
+      pull-requests: write
+      id-token: write
+      contents: read
     with:
       check_snippets: true
       check_ai_generated_code: true
@@ -276,6 +281,10 @@ jobs:
   sonar:
     needs: [ build_tests, integration-test ]
     uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@main
+    permissions:
+      pull-requests: write
+      id-token: write
+      contents: read
     with:
       thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
       thisSha: ${{ needs.setup.outputs.thisSha }}
@@ -290,4 +299,9 @@ jobs:
   run-build-publish-file:
     needs: [ build_tests,integration-test ]
     uses: ./.github/workflows/build.yml
+    permissions:
+      contents: read
+      packages: write
+      actions: read
+      id-token: write
     secrets: inherit

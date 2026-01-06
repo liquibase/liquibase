@@ -78,6 +78,9 @@ jobs:
     name: Manual Deployment Approval
     needs: [setup]
     uses: ./.github/workflows/release-manual-approval.yml
+    permissions:
+      issues: write
+      pull-requests: write
     with:
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run || false }}
@@ -88,6 +91,9 @@ jobs:
     needs: [setup, manual-approval]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: ./.github/workflows/release-deploy-javadocs.yml
+    permissions:
+      contents: read
+      id-token: write
     with:
       tag: ${{ needs.setup.outputs.tag }}
       dry_run: ${{ inputs.dry_run || false }}
@@ -98,6 +104,9 @@ jobs:
     needs: [setup, manual-approval]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: ./.github/workflows/release-publish-github-packages.yml
+    permissions:
+      contents: read
+      packages: write
     with:
       version: ${{ needs.setup.outputs.version }}
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
@@ -110,6 +119,9 @@ jobs:
     needs: [setup, manual-approval]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: ./.github/workflows/release-deploy-xsd.yml
+    permissions:
+      contents: read
+      id-token: write
     with:
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run || false }}
@@ -120,6 +132,9 @@ jobs:
     needs: [setup, manual-approval]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: ./.github/workflows/release-docker.yml
+    permissions:
+      contents: read
+      id-token: write
     with:
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run || false }}
@@ -130,6 +145,10 @@ jobs:
     needs: [setup, manual-approval, deploy-javadocs, publish-github-packages, deploy-xsd, release-docker]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') && (needs.deploy-javadocs.result == 'success' || needs.deploy-javadocs.result == 'skipped') && (needs.publish-github-packages.result == 'success' || needs.publish-github-packages.result == 'skipped') && (needs.deploy-xsd.result == 'success' || needs.deploy-xsd.result == 'skipped') && (needs.release-docker.result == 'success' || needs.release-docker.result == 'skipped')
     uses: ./.github/workflows/release-deploy-maven.yml
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
     with:
       version: ${{ needs.setup.outputs.version }}
       tag: ${{ needs.setup.outputs.tag }}
@@ -142,6 +161,13 @@ jobs:
     needs: [setup, manual-approval]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: liquibase/build-logic/.github/workflows/package.yml@main
+    permissions:
+      actions: write
+      contents: write
+      issues: write
+      packages: write
+      pull-requests: write
+      id-token: write
     secrets: inherit
     with:
       groupId: "org.liquibase"
@@ -159,6 +185,9 @@ jobs:
     needs: [setup, package]
     if: always() && needs.setup.result == 'success' && (needs.package.result == 'success' || needs.package.result == 'skipped')
     uses: ./.github/workflows/release-publish-assets-s3.yml
+    permissions:
+      contents: read
+      id-token: write
     with:
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run || false }}
