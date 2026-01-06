@@ -299,4 +299,9 @@ jobs:
   run-build-publish-file:
     needs: [ build_tests,integration-test ]
     uses: ./.github/workflows/build.yml
+    permissions:
+      contents: read
+      packages: write
+      actions: read
+      id-token: write
     secrets: inherit
