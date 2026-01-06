@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - logicalFilePath: child-own-logical-path
+  - changeSet:
+      id: child_own_test
+      author: testauthor
+      changes:
+        - createTable:
+            tableName: test_table_child_own
+            columns:
+              - column:
+                  name: id
+                  type: int
