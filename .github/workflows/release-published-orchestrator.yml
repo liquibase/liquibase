@@ -60,13 +60,9 @@ on:
         required: false
         type: string
 
+# Security: Minimal workflow-level permissions - called workflows define their own
 permissions:
-  contents: write
-  packages: write
-  actions: write
-  id-token: write
-  pull-requests: write
-  issues: write
+  contents: read
 
 jobs:
   setup:
