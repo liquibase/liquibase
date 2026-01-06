@@ -194,6 +194,10 @@ jobs:
     uses: liquibase/build-logic/.github/workflows/fossa_ai.yml@main
     if: github.event_name != 'workflow_dispatch'
     secrets: inherit
+    permissions:
+      actions: write
+      pull-requests: write
+      id-token: write
     with:
       check_snippets: true
       check_ai_generated_code: true

@@ -492,6 +492,12 @@ jobs:
     uses: liquibase/build-logic/.github/workflows/package.yml@main
     needs: [setup]
     secrets: inherit
+    permissions:
+      actions: write
+      contents: write
+      issues: write
+      packages: write
+      pull-requests: write
     with:
       groupId: "org.liquibase"
       artifactId: "liquibase"
