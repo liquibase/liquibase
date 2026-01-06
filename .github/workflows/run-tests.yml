@@ -198,6 +198,7 @@ jobs:
       actions: write
       pull-requests: write
       id-token: write
+      contents: read
     with:
       check_snippets: true
       check_ai_generated_code: true
