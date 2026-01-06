@@ -91,6 +91,9 @@ jobs:
     needs: [setup, manual-approval]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: ./.github/workflows/release-deploy-javadocs.yml
+    permissions:
+      contents: read
+      id-token: write
     with:
       tag: ${{ needs.setup.outputs.tag }}
       dry_run: ${{ inputs.dry_run || false }}
@@ -101,6 +104,9 @@ jobs:
     needs: [setup, manual-approval]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: ./.github/workflows/release-publish-github-packages.yml
+    permissions:
+      contents: read
+      packages: write
     with:
       version: ${{ needs.setup.outputs.version }}
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}
@@ -113,6 +119,9 @@ jobs:
     needs: [setup, manual-approval]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: ./.github/workflows/release-deploy-xsd.yml
+    permissions:
+      contents: read
+      id-token: write
     with:
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run || false }}
@@ -123,6 +132,9 @@ jobs:
     needs: [setup, manual-approval]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: ./.github/workflows/release-docker.yml
+    permissions:
+      contents: read
+      id-token: write
     with:
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run || false }}
