@@ -161,6 +161,13 @@ jobs:
     needs: [setup, manual-approval]
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
     uses: liquibase/build-logic/.github/workflows/package.yml@main
+    permissions:
+      actions: write
+      contents: write
+      issues: write
+      packages: write
+      pull-requests: write
+      id-token: write
     secrets: inherit
     with:
       groupId: "org.liquibase"
