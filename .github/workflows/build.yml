@@ -1,11 +1,16 @@
 
 name: Build and Publish
 
+# Security: Minimal permissions for build workflow
+# - contents: read - checkout code (write not needed for builds)
+# - packages: write - publish snapshots to GitHub Packages
+# - actions: read - read workflow artifacts
+# - id-token: write - AWS OIDC authentication
 permissions:
-  contents: write
+  contents: read
   packages: write
   actions: read
-  id-token: write # Required for OIDC authentication with AWS
+  id-token: write
 
 # The concurrency check will cancel in-progress runs on non-master branches and pull requests on forked repositories regardless of the target branch.
 concurrency:

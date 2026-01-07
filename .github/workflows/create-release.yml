@@ -1,9 +1,12 @@
 name: Attach Artifacts To Draft Release
 
+# Security: These write permissions are required for release creation
+# - contents: write - create release tags and upload assets
+# - actions: write - trigger downstream workflows
+# - id-token: write - AWS OIDC authentication
 permissions:
   contents: write
   actions: write
-  packages: write
   id-token: write
 
 on:
