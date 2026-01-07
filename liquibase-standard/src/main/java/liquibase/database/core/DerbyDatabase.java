@@ -167,18 +167,25 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void close() throws DatabaseException {
-      // FIXME Seems not to be a good way to handle the possibility of getting `getConnection() == null`
-      if (getConnection() != null) {
-        String url = getConnection().getURL();
-        String driverName = getDefaultDriver(url);
-        super.close();
-        if (shutdownEmbeddedDerby && (driverName != null) && driverName.toLowerCase().contains("embedded")) {
-            shutdownDerby(url, driverName);
+        DatabaseConnection connection = getConnection();
+        if (connection == null) {
+            return;
         }
-      }
+        String url = connection.getURL();
+        String driverName = getDefaultDriver(url);
+        // Capture the classloader before closing, as we need it for shutdown
+        ClassLoader driverClassLoader = null;
+        if (shutdownEmbeddedDerby && (driverName != null) && driverName.toLowerCase().contains("embedded")
+                && connection instanceof JdbcConnection) {
+            driverClassLoader = ((JdbcConnection) connection).getWrappedConnection().getClass().getClassLoader();
+        }
+        super.close();
+        if (driverClassLoader != null) {
+            shutdownDerby(url, driverName, driverClassLoader);
+        }
     }
 
-    protected void shutdownDerby(String url, String driverName) throws DatabaseException {
+    protected void shutdownDerby(String url, String driverName, ClassLoader driverClassLoader) throws DatabaseException {
         try {
             if (url.contains(";")) {
                 url = url.substring(0, url.indexOf(";")) + ";shutdown=true";
@@ -187,10 +194,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
             }
             Scope.getCurrentScope().getLog(getClass()).info("Shutting down derby connection: " + url);
             // this cleans up the lock files in the embedded derby database folder
-            JdbcConnection connection = (JdbcConnection) getConnection();
-            ClassLoader classLoader = connection.getWrappedConnection().getClass().getClassLoader();
-            Driver driver = (Driver) classLoader.loadClass(driverName).getConstructor().newInstance();
-            // this cleans up the lock files in the embedded derby database folder
+            Driver driver = (Driver) driverClassLoader.loadClass(driverName).getConstructor().newInstance();
             driver.connect(url, null);
         } catch (Exception e) {
             if (e instanceof SQLException) {

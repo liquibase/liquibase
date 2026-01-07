@@ -11,6 +11,7 @@ import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.RETURNS_SMART_NULLS;
 import static org.mockito.Mockito.doNothing;
@@ -48,7 +49,7 @@ public class DerbyDatabaseTest {
 
         database.close();
 
-        verify(database).shutdownDerby(anyString(), anyString());
+        verify(database).shutdownDerby(anyString(), anyString(), any(ClassLoader.class));
         verify(con).close();
     }
 
@@ -60,13 +61,13 @@ public class DerbyDatabaseTest {
 
         database.close();
 
-        verify(database, never()).shutdownDerby(anyString(), anyString());
+        verify(database, never()).shutdownDerby(anyString(), anyString(), any(ClassLoader.class));
         verify(con).close();
     }
 
     private static DerbyDatabase spyDatabase(Connection con) throws DatabaseException {
         DerbyDatabase database = spy(new DerbyDatabase());
-        doNothing().when(database).shutdownDerby(anyString(), anyString());
+        doNothing().when(database).shutdownDerby(anyString(), anyString(), any(ClassLoader.class));
         database.setConnection(new JdbcConnection(con));
         return database;
     }
