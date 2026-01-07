@@ -458,7 +458,9 @@ public abstract class AbstractFormattedChangeLogParser implements ChangeLogParse
                     }
                     if (logicalFilePath != null) {
                         logicalFilePath = changeLogParameters.expandExpressions(logicalFilePath, changeLog);
+                        changeLog.setLogicalFilePath(logicalFilePath);
                     }
+                    
                     String dbms = handleDbms(changeLogParameters, line, changeLog);
 
                     String ignore = parseString(ignorePatternMatcher, IGNORE);
