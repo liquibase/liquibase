@@ -88,10 +88,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-24.04, macos-15-intel, windows-latest ]
+        os: [ ubuntu-24.04, macos-15-intel, blacksmith-2vcpu-windows-2025 ]
         java: [ 17, 21, 25 ]
         exclude:
-          - os: windows-latest
+          - os: blacksmith-2vcpu-windows-2025
             java: 17
           - os: macos-15-intel
             java: 17
@@ -152,7 +152,7 @@ jobs:
           ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
 
       - name: Remove Original Jars for *nix
-        if: env.OS_TYPE != 'windows-latest'
+        if: env.OS_TYPE != 'blacksmith-2vcpu-windows-2025'
         run: |
           find . -name original-*.jar -exec rm {} \;
 
