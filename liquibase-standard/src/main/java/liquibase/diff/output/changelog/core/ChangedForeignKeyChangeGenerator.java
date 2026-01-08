@@ -41,9 +41,15 @@ public class ChangedForeignKeyChangeGenerator extends AbstractChangeGenerator im
 
         StringUtil.StringUtilFormatter<Column> formatter = obj -> obj.toString(false);
 
+        // Use the comparison object for the drop statement to get the correct constraint name from the target database
+        ForeignKey comparisonFk = (ForeignKey) differences.getComparisonObject();
+        if (comparisonFk == null) {
+            comparisonFk = fk; // Fallback to reference object if comparison not available
+        }
+
         DropForeignKeyConstraintChange dropFkChange = new DropForeignKeyConstraintChange();
-        dropFkChange.setConstraintName(fk.getName());
-        dropFkChange.setBaseTableName(fk.getForeignKeyTable().getName());
+        dropFkChange.setConstraintName(comparisonFk.getName());
+        dropFkChange.setBaseTableName(comparisonFk.getForeignKeyTable().getName());
 
         AddForeignKeyConstraintChange addFkChange = new AddForeignKeyConstraintChange();
         addFkChange.setConstraintName(fk.getName());
@@ -55,13 +61,13 @@ public class ChangedForeignKeyChangeGenerator extends AbstractChangeGenerator im
         addFkChange.setOnUpdate(fk.getUpdateRule());
 
         if (control.getIncludeCatalog()) {
-            dropFkChange.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());
+            dropFkChange.setBaseTableCatalogName(comparisonFk.getForeignKeyTable().getSchema().getCatalogName());
 
             addFkChange.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());
             addFkChange.setReferencedTableCatalogName(fk.getPrimaryKeyTable().getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            dropFkChange.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
+            dropFkChange.setBaseTableSchemaName(comparisonFk.getForeignKeyTable().getSchema().getName());
 
             addFkChange.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
             addFkChange.setReferencedTableSchemaName(fk.getPrimaryKeyTable().getSchema().getName());

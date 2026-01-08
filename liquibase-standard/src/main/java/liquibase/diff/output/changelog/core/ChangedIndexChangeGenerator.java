@@ -82,9 +82,15 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
             }
         }
 
+        // Use the comparison object for the drop statement to get the correct index name from the target database
+        Index comparisonIndex = (Index) differences.getComparisonObject();
+        if (comparisonIndex == null) {
+            comparisonIndex = index; // Fallback to reference object if comparison not available
+        }
+
         DropIndexChange dropIndexChange = createDropIndexChange();
-        dropIndexChange.setTableName(index.getRelation().getName());
-        dropIndexChange.setIndexName(index.getName());
+        dropIndexChange.setTableName(comparisonIndex.getRelation().getName());
+        dropIndexChange.setIndexName(comparisonIndex.getName());
 
         CreateIndexChange addIndexChange = createCreateIndexChange();
         addIndexChange.setTableName(index.getRelation().getName());
@@ -98,11 +104,11 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
         addIndexChange.setUsing(index.getUsing());
 
         if (control.getIncludeCatalog()) {
-            dropIndexChange.setCatalogName(index.getSchema().getCatalogName());
+            dropIndexChange.setCatalogName(comparisonIndex.getSchema().getCatalogName());
             addIndexChange.setCatalogName(index.getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            dropIndexChange.setSchemaName(index.getSchema().getName());
+            dropIndexChange.setSchemaName(comparisonIndex.getSchema().getName());
             addIndexChange.setSchemaName(index.getSchema().getName());
         }
 

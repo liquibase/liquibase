@@ -80,20 +80,20 @@ public class DatabaseObjectComparatorChain {
 
     public ObjectDifferences findDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo, CompareControl compareControl, Set<String> exclude) {
         if ((object1 == null) && (object2 == null)) {
-            return new ObjectDifferences(compareControl);
+            return new ObjectDifferences(compareControl, null, null);
         }
         if ((object1 == null) && (object2 != null)) {
-            return new ObjectDifferences(compareControl).addDifference("Reference value was null", "this", null, null);
+            return new ObjectDifferences(compareControl, null, object2).addDifference("Reference value was null", "this", null, null);
         }
 
         if ((object1 != null) && (object2 == null)) {
-            return new ObjectDifferences(compareControl).addDifference("Compared value was null", "this", null, null);
+            return new ObjectDifferences(compareControl, object1, null).addDifference("Compared value was null", "this", null, null);
         }
 
         DatabaseObjectComparator next = getNextComparator();
 
         if (next == null) {
-            return new ObjectDifferences(compareControl);
+            return new ObjectDifferences(compareControl, object1, object2);
         }
 
         return next.findDifferences(object1, object2, accordingTo, compareControl, this, exclude);

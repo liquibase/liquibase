@@ -45,9 +45,15 @@ public class ChangedUniqueConstraintChangeGenerator extends AbstractChangeGenera
 
         UniqueConstraint uniqueConstraint = (UniqueConstraint) changedObject;
 
+        // Use the comparison object for the drop statement to get the correct constraint name from the target database
+        UniqueConstraint comparisonUniqueConstraint = (UniqueConstraint) differences.getComparisonObject();
+        if (comparisonUniqueConstraint == null) {
+            comparisonUniqueConstraint = uniqueConstraint; // Fallback to reference object if comparison not available
+        }
+
         DropUniqueConstraintChange dropUniqueConstraintChange = createDropUniqueConstraintChange();
-        dropUniqueConstraintChange.setTableName(uniqueConstraint.getRelation().getName());
-        dropUniqueConstraintChange.setConstraintName(uniqueConstraint.getName());
+        dropUniqueConstraintChange.setTableName(comparisonUniqueConstraint.getRelation().getName());
+        dropUniqueConstraintChange.setConstraintName(comparisonUniqueConstraint.getName());
 
         AddUniqueConstraintChange addUniqueConstraintChange = createAddUniqueConstraintChange();
         addUniqueConstraintChange.setConstraintName(uniqueConstraint.getName());
@@ -57,11 +63,11 @@ public class ChangedUniqueConstraintChangeGenerator extends AbstractChangeGenera
         returnList.add(dropUniqueConstraintChange);
 
         if (control.getIncludeCatalog()) {
-            dropUniqueConstraintChange.setCatalogName(uniqueConstraint.getSchema().getCatalogName());
+            dropUniqueConstraintChange.setCatalogName(comparisonUniqueConstraint.getSchema().getCatalogName());
             addUniqueConstraintChange.setCatalogName(uniqueConstraint.getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            dropUniqueConstraintChange.setSchemaName(uniqueConstraint.getSchema().getName());
+            dropUniqueConstraintChange.setSchemaName(comparisonUniqueConstraint.getSchema().getName());
             addUniqueConstraintChange.setSchemaName(uniqueConstraint.getSchema().getName());
         }
 

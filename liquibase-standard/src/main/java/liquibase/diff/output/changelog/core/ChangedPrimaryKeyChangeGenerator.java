@@ -53,11 +53,18 @@ public class ChangedPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
 
         PrimaryKey pk = (PrimaryKey) changedObject;
 
+        // Use the comparison object for the drop statement to get the correct constraint name from the target database
+        PrimaryKey comparisonPk = (PrimaryKey) differences.getComparisonObject();
+        if (comparisonPk == null) {
+            comparisonPk = pk; // Fallback to reference object if comparison not available
+        }
+
         List<Change> returnList = new ArrayList<>();
 
 
         DropPrimaryKeyChange dropPkChange = new DropPrimaryKeyChange();
-        dropPkChange.setTableName(pk.getTable().getName());
+        dropPkChange.setTableName(comparisonPk.getTable().getName());
+        dropPkChange.setConstraintName(comparisonPk.getName());
         returnList.add(dropPkChange);
 
         AddPrimaryKeyChange addPkChange = new AddPrimaryKeyChange();
@@ -88,11 +95,11 @@ public class ChangedPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
         returnList.add(addPkChange);
 
         if (control.getIncludeCatalog()) {
-            dropPkChange.setCatalogName(pk.getSchema().getCatalogName());
+            dropPkChange.setCatalogName(comparisonPk.getSchema().getCatalogName());
             addPkChange.setCatalogName(pk.getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            dropPkChange.setSchemaName(pk.getSchema().getName());
+            dropPkChange.setSchemaName(comparisonPk.getSchema().getName());
             addPkChange.setSchemaName(pk.getSchema().getName());
         }
 
