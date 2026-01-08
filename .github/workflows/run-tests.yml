@@ -152,7 +152,7 @@ jobs:
           ./mvnw -B "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-DtrimStackTrace=false" -P 'skip-integration-tests' clean test package surefire-report:report
 
       - name: Remove Original Jars for *nix
-        if: env.OS_TYPE != 'blacksmith-2vcpu-windows-2025'
+        if: runner.os != 'Windows'
         run: |
           find . -name original-*.jar -exec rm {} \;
 
