@@ -57,17 +57,17 @@ public class ChangedForeignKeyChangeGenerator extends AbstractChangeGenerator im
         addFkChange.setOnDelete(fk.getDeleteRule());
         addFkChange.setOnUpdate(fk.getUpdateRule());
 
-        Schema comparissonSchema = comparisonFk.getForeignKeyTable().getSchema();
+        Schema comparisonSchema = comparisonFk.getForeignKeyTable().getSchema();
         Schema referenceSchema = fk.getPrimaryKeyTable().getSchema();
         Schema fkSchema = fk.getForeignKeyTable().getSchema();
-        if (control.getIncludeCatalog() && comparissonSchema != null && referenceSchema != null && fkSchema != null) {
-            dropFkChange.setBaseTableCatalogName(comparissonSchema.getCatalogName());
+        if (control.getIncludeCatalog() && comparisonSchema != null && referenceSchema != null && fkSchema != null) {
+            dropFkChange.setBaseTableCatalogName(comparisonSchema.getCatalogName());
 
             addFkChange.setBaseTableCatalogName(fkSchema.getCatalogName());
             addFkChange.setReferencedTableCatalogName(referenceSchema.getCatalogName());
         }
-        if (control.getIncludeSchema() && comparissonSchema != null && referenceSchema != null && fkSchema != null) {
-            dropFkChange.setBaseTableSchemaName(comparissonSchema.getName());
+        if (control.getIncludeSchema() && comparisonSchema != null && referenceSchema != null && fkSchema != null) {
+            dropFkChange.setBaseTableSchemaName(comparisonSchema.getName());
 
             addFkChange.setBaseTableSchemaName(fkSchema.getName());
             addFkChange.setReferencedTableSchemaName(referenceSchema.getName());
