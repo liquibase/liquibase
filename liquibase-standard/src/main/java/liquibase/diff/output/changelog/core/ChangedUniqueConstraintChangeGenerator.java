@@ -62,13 +62,15 @@ public class ChangedUniqueConstraintChangeGenerator extends AbstractChangeGenera
 
         returnList.add(dropUniqueConstraintChange);
 
-        if (control.getIncludeCatalog()) {
-            dropUniqueConstraintChange.setCatalogName(comparisonUniqueConstraint.getSchema().getCatalogName());
-            addUniqueConstraintChange.setCatalogName(uniqueConstraint.getSchema().getCatalogName());
+        Schema comparisonSchema = comparisonUniqueConstraint.getSchema();
+        Schema uniqueConstraintSchema = uniqueConstraint.getSchema();
+        if (control.getIncludeCatalog() && comparisonSchema != null && uniqueConstraintSchema != null) {
+            dropUniqueConstraintChange.setCatalogName(comparisonSchema.getCatalogName());
+            addUniqueConstraintChange.setCatalogName(uniqueConstraintSchema.getCatalogName());
         }
-        if (control.getIncludeSchema()) {
-            dropUniqueConstraintChange.setSchemaName(comparisonUniqueConstraint.getSchema().getName());
-            addUniqueConstraintChange.setSchemaName(uniqueConstraint.getSchema().getName());
+        if (control.getIncludeSchema() && comparisonSchema != null && uniqueConstraintSchema != null) {
+            dropUniqueConstraintChange.setSchemaName(comparisonSchema.getName());
+            addUniqueConstraintChange.setSchemaName(uniqueConstraintSchema.getName());
         }
 
         Index backingIndex = uniqueConstraint.getBackingIndex();

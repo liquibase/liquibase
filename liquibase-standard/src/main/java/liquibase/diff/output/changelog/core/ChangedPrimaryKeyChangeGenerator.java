@@ -94,13 +94,15 @@ public class ChangedPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
         }
         returnList.add(addPkChange);
 
-        if (control.getIncludeCatalog()) {
-            dropPkChange.setCatalogName(comparisonPk.getSchema().getCatalogName());
-            addPkChange.setCatalogName(pk.getSchema().getCatalogName());
+        Schema comparisonSchema = comparisonPk.getSchema();
+        Schema pkSchema = pk.getSchema();
+        if (control.getIncludeCatalog() && comparisonSchema != null && pkSchema != null) {
+            dropPkChange.setCatalogName(comparisonSchema.getCatalogName());
+            addPkChange.setCatalogName(pkSchema.getCatalogName());
         }
-        if (control.getIncludeSchema()) {
-            dropPkChange.setSchemaName(comparisonPk.getSchema().getName());
-            addPkChange.setSchemaName(pk.getSchema().getName());
+        if (control.getIncludeSchema() && comparisonSchema != null && pkSchema != null) {
+            dropPkChange.setSchemaName(comparisonSchema.getName());
+            addPkChange.setSchemaName(pkSchema.getName());
         }
 
         Difference columnDifferences = differences.getDifference("columns");
