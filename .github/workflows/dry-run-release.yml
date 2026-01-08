@@ -1,10 +1,15 @@
 name: Dry run release
 
+# Security: These write permissions are required for dry-run release testing
+# - actions: write - trigger downstream workflows
+# - contents: write - create/delete dry-run releases
+# - packages: write - test package publishing
+# - id-token: write - AWS OIDC authentication
 permissions:
   actions: write
   contents: write
   packages: write
-  id-token: write # Required for OIDC authentication with AWS
+  id-token: write
 
 on:
   workflow_dispatch: # Trigger on demand

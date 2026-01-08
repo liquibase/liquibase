@@ -249,14 +249,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 }
             }
 
-            SqlStatement databaseChangeLogStatement = new SelectFromDatabaseChangeLogStatement(
-                    new SelectFromDatabaseChangeLogStatement.ByCheckSumNotNullAndNotLike(ChecksumVersion.latest().getVersion()),
-                    new ColumnConfig().setName("MD5SUM"));
-            List<Map<String, ?>> md5sumRS = ChangelogJdbcMdcListener.query(getDatabase(), ex -> ex.queryForList(databaseChangeLogStatement));
-
             //check if any checksum is not using the current version
-            databaseChecksumsCompatible = md5sumRS.isEmpty();
-
+            databaseChecksumsCompatible = getIncompatibleDatabaseChangeLogs().isEmpty();
 
         } else if (!changeLogCreateAttempted) {
             executor.comment("Create Database Change Log Table");
@@ -514,6 +508,24 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
     protected String getContextsSize() {
         return CONTEXTS_SIZE;
+    }
+
+    /**
+     * Retrieves changelog entries with checksums that are not compatible with the latest checksum version.
+     * This method can be overridden by database-specific implementations to provide custom queries for databases that
+     * don't support standard SQL constructs (e.g., Cassandra CQL).
+     *
+     * @return a list of maps containing MD5SUM values for incompatible changelog entries
+     * @throws DatabaseException if there is an error querying the database
+     */
+    public List<Map<String, ?>> getIncompatibleDatabaseChangeLogs() throws DatabaseException {
+        SqlStatement databaseChangeLogStatement = new SelectFromDatabaseChangeLogStatement(
+                new SelectFromDatabaseChangeLogStatement.ByCheckSumNotNullAndNotLike(
+                        ChecksumVersion.latest().getVersion()
+                ),
+                new ColumnConfig().setName("MD5SUM")
+        );
+        return ChangelogJdbcMdcListener.query(getDatabase(), ex -> ex.queryForList(databaseChangeLogStatement));
     }
 
     @Override
