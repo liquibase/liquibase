@@ -502,6 +502,7 @@ jobs:
       groupId: "org.liquibase"
       artifactId: "liquibase"
       version: ${{ needs.setup.outputs.version }}
+      tag: ${{ needs.setup.outputs.tag }}
       dry_run: ${{ inputs.dry_run || false}}
       dry_run_zip_url: ${{ inputs.dry_run_zip_url || '' }}
       dry_run_tar_gz_url: ${{ inputs.dry_run_tar_gz_url || '' }}
