@@ -1,12 +1,12 @@
 name: Release Published
 
+# Security: Minimal workflow-level permissions (principle of least privilege)
+# Job-specific permissions are granted at the job level where needed
 permissions:
-  contents: write
-  packages: write
-  actions: write
-  id-token: write
-  pull-requests: write
-  issues: write
+  contents: read
+  packages: read
+  actions: read
+  id-token: write  # Required for AWS OIDC
 
 on:
   release:
@@ -135,6 +135,8 @@ jobs:
     name: Manually trigger deployment
     needs: [setup]
     runs-on: ubuntu-22.04
+    permissions:
+      issues: write  # Required for trstringer/manual-approval to create approval issues
     steps:
       - name: Get Version to deploy
         uses: trstringer/manual-approval@v1
@@ -333,6 +335,9 @@ jobs:
     name: Publish artifacts to Github Packages
     runs-on: ubuntu-22.04
     needs: [setup, manual_trigger_deployment]
+    permissions:
+      contents: read
+      packages: write  # Required for mvn deploy to GitHub Packages
     steps:
       - uses: actions/checkout@v6
       - name: Set up Java for publishing to GitHub Repository
@@ -413,7 +418,7 @@ jobs:
           fi
 
       - name: Liquibase xsds SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.4
+        uses: wangyucode/sftp-upload-action@v3.0.0
         with:
           host: ${{ env.WPENGINE_SFTP_HOST }}
           port: ${{ env.WPENGINE_SFTP_PORT }}
@@ -425,7 +430,7 @@ jobs:
           remoteDir: "/xml/ns/dbchangelog/"
 
       - name: Liquibase index.htm SFTP upload
-        uses: wangyucode/sftp-upload-action@v2.0.4
+        uses: wangyucode/sftp-upload-action@v3.0.0
         with:
           host: ${{ env.WPENGINE_SFTP_HOST }}
           port: ${{ env.WPENGINE_SFTP_PORT }}
@@ -487,6 +492,12 @@ jobs:
     uses: liquibase/build-logic/.github/workflows/package.yml@main
     needs: [setup]
     secrets: inherit
+    permissions:
+      actions: write
+      contents: write
+      issues: write
+      packages: write
+      pull-requests: write
     with:
       groupId: "org.liquibase"
       artifactId: "liquibase"

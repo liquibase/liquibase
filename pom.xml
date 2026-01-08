@@ -76,7 +76,7 @@
         <junit-jupiter.version>6.0.1</junit-jupiter.version>
         <groovy.version>5.0.3</groovy.version>
         <spock.version>2.4-groovy-5.0</spock.version>
-        <spring.version>5.3.39</spring.version>
+        <spring.version>7.0.2</spring.version>
         <maven-failsafe-plugin.version>3.5.4</maven-failsafe-plugin.version>
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
         <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
@@ -91,6 +91,7 @@
         <sonar.exclusions>.github/workflows/**</sonar.exclusions>
         <surefire.failIfNoTests>true</surefire.failIfNoTests>
         <opencsv.version>5.12.0</opencsv.version>
+        <jaxb-api.version>2.3.1</jaxb-api.version>
         <mockito.version>4.11.0</mockito.version>
     </properties>
 

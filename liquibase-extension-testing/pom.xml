@@ -104,7 +104,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>5.3.39</version>
+            <version>${spring.version}</version>
             <scope>compile</scope>
         </dependency>
 
