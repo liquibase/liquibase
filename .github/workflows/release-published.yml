@@ -518,12 +518,14 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Download dry-run release assets
-        uses: robinraju/release-downloader@v1.12
-        with:
-          repository: "liquibase/liquibase"
-          releaseId: "${{ inputs.dry_run_release_id }}"
-          fileName: "*"
-          out-file-path: "."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Use gh CLI which handles draft release auth correctly
+          gh release download "${{ needs.setup.outputs.tag }}" \
+            --repo liquibase/liquibase \
+            --pattern "*" \
+            --dir "."
 
       - name: Configure AWS credentials for vault access
         uses: aws-actions/configure-aws-credentials@v5
