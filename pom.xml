@@ -73,7 +73,7 @@
         <commons-collections4.version>4.5.0</commons-collections4.version>
         <commons-text.version>1.15.0</commons-text.version>
         <ant.version>1.10.15</ant.version>
-        <junit-jupiter.version>6.0.1</junit-jupiter.version>
+        <junit-jupiter.version>6.0.2</junit-jupiter.version>
         <groovy.version>5.0.3</groovy.version>
         <spock.version>2.4-groovy-5.0</spock.version>
         <spring.version>7.0.2</spring.version>
