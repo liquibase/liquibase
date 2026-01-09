@@ -23,7 +23,12 @@ on:
         required: false
         type: string
         default: ""
-  
+      dry_run_assets_url:
+        description: "URL pattern for downloading dry-run release assets"
+        required: false
+        type: string
+        default: ""
+
   workflow_dispatch:
     inputs:
       version:
@@ -41,6 +46,11 @@ on:
         default: false
       dry_run_release_id:
         description: "The release id of the dry-run release"
+        required: false
+        type: string
+        default: ""
+      dry_run_assets_url:
+        description: "URL pattern for downloading dry-run release assets"
         required: false
         type: string
         default: ""
@@ -186,7 +196,7 @@ jobs:
         uses: robinraju/release-downloader@v1.12
         with:
           repository: "liquibase/liquibase"
-          releaseId: "${{ inputs.dry_run_release_id }}"
+          tag: "${{ inputs.tag }}"
           fileName: "*"
           out-file-path: "."
 
