@@ -498,6 +498,7 @@ jobs:
       issues: write
       packages: write
       pull-requests: write
+      id-token: write
     with:
       groupId: "org.liquibase"
       artifactId: "liquibase"
