@@ -141,6 +141,37 @@ jobs:
           echo "dry_run_zip_url=$dry_run_zip_url" >> $GITHUB_OUTPUT
           echo "dry_run_release_id=$dry_run_release_id" >> $GITHUB_OUTPUT
 
+      - name: Add to Job Summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## Dry-Run Release Summary
+
+          ### Release Details
+          | Property | Value |
+          |----------|-------|
+          | **Version** | \`dry-run-${{ github.run_id }}\` |
+          | **Tag** | \`vdry-run-${{ github.run_id }}\` |
+          | **Release ID** | \`${{ steps.wait_and_get_outputs.outputs.dry_run_release_id }}\` |
+
+          ### Assets
+          | Asset | URL |
+          |-------|-----|
+          | **ZIP** | ${{ steps.wait_and_get_outputs.outputs.dry_run_zip_url }} |
+          | **TAR.GZ** | ${{ steps.wait_and_get_outputs.outputs.dry_run_tar_gz_url }} |
+
+          ### Build Source
+          | Property | Value |
+          |----------|-------|
+          | **Source Run** | [run-tests.yml #${{ needs.setup.outputs.dry_run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ needs.setup.outputs.dry_run_id }}) |
+          | **Branch** | \`${{ needs.setup.outputs.dry_run_branch_name }}\` |
+
+          ### Triggered Workflows
+          | Workflow | Link |
+          |----------|------|
+          | **create-release** | [View Runs](https://github.com/${{ github.repository }}/actions/workflows/create-release.yml) |
+          | **release-published** | [View Runs](https://github.com/${{ github.repository }}/actions/workflows/release-published.yml) |
+          EOF
+
   dry-run-release-published:
     needs: [setup, dry-run-create-release]
     runs-on: ubuntu-latest
