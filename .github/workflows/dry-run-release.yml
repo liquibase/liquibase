@@ -209,7 +209,6 @@ jobs:
           inputs: '{"tag": "vdry-run-${{ github.run_id }}", "dry_run_release_id": "${{ needs.dry-run-create-release.outputs.dry_run_release_id }}", "dry_run_zip_url": "${{ needs.dry-run-create-release.outputs.dry_run_zip_url }}", "dry_run_tar_gz_url": "${{ needs.dry-run-create-release.outputs.dry_run_tar_gz_url }}", "dry_run": "true", "dry_run_branch_name": "${{ needs.setup.outputs.dry_run_branch_name }}"}'
           ref: master
           wait-for-completion: true
-          workflow-logs: json-output
 
   cleanup:
     runs-on: ubuntu-latest
