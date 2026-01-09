@@ -7,6 +7,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   dependabot-automerge:
     uses: liquibase/build-logic/.github/workflows/dependabot-automerge.yml@main
