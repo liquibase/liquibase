@@ -521,11 +521,23 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Use gh CLI which handles draft release auth correctly
-          gh release download "${{ needs.setup.outputs.tag }}" \
-            --repo liquibase/liquibase \
-            --pattern "*" \
-            --dir "."
+          # Retry logic for draft release accessibility
+          # Draft releases may not be immediately accessible after creation
+          for i in 1 2 3 4 5; do
+            if gh release download "${{ needs.setup.outputs.tag }}" \
+                 --repo liquibase/liquibase \
+                 --pattern "*" \
+                 --dir "."; then
+              echo "Download successful on attempt $i"
+              break
+            fi
+            if [ $i -eq 5 ]; then
+              echo "Failed to download release after 5 attempts"
+              exit 1
+            fi
+            echo "Attempt $i failed, waiting $((i * 5)) seconds..."
+            sleep $((i * 5))
+          done
 
       - name: Configure AWS credentials for vault access
         uses: aws-actions/configure-aws-credentials@v5
