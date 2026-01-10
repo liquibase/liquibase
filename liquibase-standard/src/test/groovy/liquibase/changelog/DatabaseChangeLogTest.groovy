@@ -96,6 +96,83 @@ create view sql_view as select * from sql_table;'''
 
     def testProperties = '''context: test'''
 
+    def "loading include with empty file path throws exception"() {
+        def path = "com/example/path.xml"
+        when:
+        def changeLog = new DatabaseChangeLog(path)
+        def children = [
+                new ParsedNode(null, "include").setValue(["file": "", "relativeToChangelogFile": "false"]),
+        ]
+
+        def node = new ParsedNode(null, "databaseChangeLog")
+        for(child in children) {
+            node.addChild(child)
+        }
+        changeLog.load(node, resourceSupplier.simpleResourceAccessor)
+
+        then:
+        def e = thrown(IllegalArgumentException)
+        assert e.getMessage().contains("The 'file' attribute cannot be empty or null in <include>")
+    }
+
+    def "loading include with null file path throws exception"() {
+        def path = "com/example/path.xml"
+        when:
+        def changeLog = new DatabaseChangeLog(path)
+        def children = [
+                new ParsedNode(null, "include").setValue(["file": null, "relativeToChangelogFile": "false"]),
+        ]
+
+        def node = new ParsedNode(null, "databaseChangeLog")
+        for(child in children) {
+            node.addChild(child)
+        }
+        changeLog.load(node, resourceSupplier.simpleResourceAccessor)
+
+        then:
+        def e = thrown(IllegalArgumentException)
+        assert e.getMessage().contains("The 'file' attribute cannot be null in <include>")
+    }
+
+    def "loading includeAll with empty path throws exception"() {
+        def path = "com/example/path.xml"
+        when:
+        def changeLog = new DatabaseChangeLog(path)
+        def children = [
+                new ParsedNode(null, "includeAll").setValue(["path": ""]),
+        ]
+
+        def node = new ParsedNode(null, "databaseChangeLog")
+        for(child in children) {
+            node.addChild(child)
+        }
+        changeLog.load(node, resourceSupplier.simpleResourceAccessor)
+
+        then:
+        def e = thrown(IllegalArgumentException)
+        assert e.getMessage().contains("The 'path' attribute cannot be empty or null in <includeAll>")
+    }
+
+    def "loading includeAll with null path throws exception"() {
+        def path = "com/example/path.xml"
+        when:
+        def changeLog = new DatabaseChangeLog(path)
+        def children = [
+                new ParsedNode(null, "includeAll").setValue(["path": null]),
+        ]
+
+        def node = new ParsedNode(null, "databaseChangeLog")
+        for(child in children) {
+            node.addChild(child)
+        }
+        changeLog.load(node, resourceSupplier.simpleResourceAccessor)
+
+        then:
+        def e = thrown(IllegalArgumentException)
+        assert e.getMessage().contains("The 'path' attribute cannot be null in <includeAll>")
+    }
+
+
     def "getChangeSet passing id, author and file"() {
         def path = "com/example/path.xml"
         def path2 = "com/example/path2.xml"

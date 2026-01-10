@@ -23,7 +23,12 @@ on:
         required: false
         type: string
         default: ""
-  
+      dry_run_assets_url:
+        description: "URL pattern for downloading dry-run release assets"
+        required: false
+        type: string
+        default: ""
+
   workflow_dispatch:
     inputs:
       version:
@@ -41,6 +46,11 @@ on:
         default: false
       dry_run_release_id:
         description: "The release id of the dry-run release"
+        required: false
+        type: string
+        default: ""
+      dry_run_assets_url:
+        description: "URL pattern for downloading dry-run release assets"
         required: false
         type: string
         default: ""
@@ -183,12 +193,14 @@ jobs:
     if: ${{ inputs.dry_run == true }}
     steps:
       - name: Download dry-run release assets
-        uses: robinraju/release-downloader@v1.12
-        with:
-          repository: "liquibase/liquibase"
-          releaseId: "${{ inputs.dry_run_release_id }}"
-          fileName: "*"
-          out-file-path: "."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Use gh CLI which handles draft release auth correctly
+          gh release download "${{ inputs.tag }}" \
+            --repo liquibase/liquibase \
+            --pattern "*" \
+            --dir "."
 
       - name: Configure AWS credentials for vault access
         uses: aws-actions/configure-aws-credentials@v5
