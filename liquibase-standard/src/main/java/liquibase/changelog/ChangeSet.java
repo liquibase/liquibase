@@ -1612,6 +1612,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
 
+        if("filePath".equals(field)) {
+            return this.getFilePath();
+        }
+
         throw new UnexpectedLiquibaseException("Unexpected field request on changeSet: " + field);
     }
 
