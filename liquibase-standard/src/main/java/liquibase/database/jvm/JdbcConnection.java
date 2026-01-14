@@ -118,8 +118,8 @@ public class JdbcConnection implements DatabaseConnection {
     }
 
     /**
-     * Return properties used to create this connection. There still can be some usefull information in it
-     * @return sproperties used to create this connection.
+     * Return properties used to create this connection. There still can be some useful information in it
+     * @return properties used to create this connection.
      */
     public Properties getConnectionProperties() {
         return originalProperties;
