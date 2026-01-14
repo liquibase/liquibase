@@ -57,8 +57,6 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     private Integer databaseMajorVersion;
     private Integer databaseMinorVersion;
 
-    private Properties connectionProperties;
-
     /**
      * Default constructor for an object that represents the Oracle Database DBMS.
      */
@@ -92,7 +90,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return;
         }
         Connection con = jdbcConnection.getWrappedConnection();
-        // 1st this fetch proxy username from --username parameter
+        // 1st this fetches proxy username from --username parameter
         String proxyUserName = connectionProperties.getProperty("PROXY_USER_NAME");
         // 2nd try to extract proxyUserName from JDBC url
         Matcher m = PROXY_USER_PATTERN.matcher(url);
