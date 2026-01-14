@@ -33,6 +33,7 @@ public class DatabaseFactory implements SingletonObject {
     private static DatabaseFactory instance;
     private final Map<String, SortedSet<Database>> implementedDatabases = new HashMap<>();
     private final Map<String, SortedSet<Database>> internalDatabases = new HashMap<>();
+    private static final Pattern PROXY_USER_PATTERN = Pattern.compile("^([^\\[]+)\\[([^\\]]+)\\]$");
 
     private Database specifiedDbClass;
 
@@ -235,7 +236,6 @@ public class DatabaseFactory implements SingletonObject {
                 // Try to split a pair CONNECT_USER[PROXY_USER] into two and store them in their properties
                 String userValue = driverProperties.getProperty("user");
                 if (userValue != null) {
-                    Pattern PROXY_USER_PATTERN = Pattern.compile("^([^\\[]+)\\[([^\\]]+)\\]$");
                     Matcher matcher = PROXY_USER_PATTERN.matcher(userValue);
                     if (matcher.matches()) {
                         String username2 = matcher.group(1);
