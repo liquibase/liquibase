@@ -112,7 +112,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>6.0.1</version>
+            <version>6.0.2</version>
             <scope>test</scope>
         </dependency>
 
@@ -120,6 +120,8 @@
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
             <version>${opencsv.version}</version>
+            <!-- Maven-shade-plugin can skip exclusions when using liquibase-standard as dependency -->
+            <!-- Check https://github.com/liquibase/liquibase/issues/7416 -->
             <exclusions>
                 <exclusion>
                     <groupId>commons-beanutils</groupId>
@@ -146,7 +148,9 @@
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
-            <version>2.3.1</version>
+            <version>${jaxb-api.version}</version>
+            <!-- Maven-shade-plugin can skip exclusions when using liquibase-standard as dependency -->
+            <!-- Check https://github.com/liquibase/liquibase/issues/7416 -->
             <exclusions>
                 <exclusion>
                     <groupId>javax.activation</groupId>

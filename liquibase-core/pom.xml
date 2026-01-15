@@ -36,6 +36,45 @@
             <artifactId>liquibase-standard</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- BLOCK START: Direct dependency with exclusions as a workaround for a problem with maven-shade-plugin -->
+        <!-- Exclusions defined inside liquibase-standard do not work correctly -->
+        <!-- See: https://github.com/liquibase/liquibase/issues/7416 -->
+        <!-- See: https://github.com/apache/maven-shade-plugin/issues/573 -->
+        <!-- See: https://github.com/apache/maven-shade-plugin/pull/770 -->
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>${opencsv.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-beanutils</groupId>
+                    <artifactId>commons-beanutils</artifactId>
+                </exclusion>
+                <exclusion> <!-- direct dependency for better dependabot control -->
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-text</artifactId>
+                </exclusion>
+                <exclusion> <!-- direct dependency for better dependabot control -->
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-collections4</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>${jaxb-api.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.activation</groupId>
+                    <artifactId>javax.activation-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- BLOCK END: Direct dependency with exclusions as a workaround for a problem with maven-shade-plugin -->
+
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
