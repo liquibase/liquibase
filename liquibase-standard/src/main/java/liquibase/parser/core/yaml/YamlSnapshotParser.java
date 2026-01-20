@@ -1,9 +1,11 @@
 package liquibase.parser.core.yaml;
 
 import liquibase.GlobalConfiguration;
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.OfflineConnection;
+import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.exception.LiquibaseParseException;
 import liquibase.parser.SnapshotParser;
 import liquibase.parser.core.ParsedNode;
@@ -11,6 +13,8 @@ import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.RestoredDatabaseSnapshot;
+import liquibase.snapshot.SnapshotControl;
+import liquibase.structure.DatabaseObject;
 import liquibase.util.SnakeYamlUtil;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
@@ -53,7 +57,15 @@ public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
             Database database = DatabaseFactory.getInstance().getDatabase(shortName).getClass().getConstructor().newInstance();
             database.setConnection(new OfflineConnection("offline:" + shortName, null));
 
-            DatabaseSnapshot snapshot = new RestoredDatabaseSnapshot(database);
+            SnapshotControl snapshotControl = getSnapshotControl(database);
+
+            DatabaseSnapshot snapshot;
+            if (snapshotControl != null) {
+                snapshot = new RestoredDatabaseSnapshot(database, snapshotControl);
+            } else {
+                snapshot = new RestoredDatabaseSnapshot(database);
+            }
+
             ParsedNode snapshotNode = new ParsedNode(null, "snapshot");
             snapshotNode.setValue(rootList);
 
@@ -103,5 +115,19 @@ public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
             throw new LiquibaseParseException("Syntax error in " + getSupportedFileExtensions()[0] + ": " + e.getMessage(), e);
         }
         return parsedYaml;
+    }
+
+    private SnapshotControl getSnapshotControl(Database database) {
+        SnapshotControl snapshotControl = Scope.getCurrentScope().get("snapshotControl", SnapshotControl.class);
+        if (snapshotControl == null) {
+            ObjectChangeFilter objectChangeFilter = Scope.getCurrentScope().get("objectChangeFilter", ObjectChangeFilter.class);
+            Class<? extends DatabaseObject>[] snapshotTypes = Scope.getCurrentScope().get("snapshotTypes", Class[].class);
+
+            if (objectChangeFilter != null || snapshotTypes != null) {
+                snapshotControl = new SnapshotControl(database, objectChangeFilter,
+                        snapshotTypes != null ? snapshotTypes : new Class[0]);
+            }
+        }
+        return snapshotControl;
     }
 }

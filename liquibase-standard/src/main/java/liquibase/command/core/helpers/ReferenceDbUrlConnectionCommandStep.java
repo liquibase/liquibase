@@ -2,12 +2,17 @@ package liquibase.command.core.helpers;
 
 import liquibase.Scope;
 import liquibase.command.*;
+import liquibase.command.core.DiffCommandStep;
 import liquibase.command.providers.ReferenceDatabase;
 import liquibase.configuration.ConfigurationValueObfuscator;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.diff.output.ObjectChangeFilter;
+import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.mdc.MdcKey;
+import liquibase.structure.DatabaseObject;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
@@ -74,13 +79,17 @@ public class ReferenceDbUrlConnectionCommandStep extends AbstractDatabaseConnect
     }
 
     /**
-     * Try to retrieve and set the database object from the command scope, otherwise creates a new one .
+     * Try to retrieve and set the database object from the command scope, otherwise creates a new one.
+     * If creating a new database, also retrieves objectChangeFilter and snapshotTypes from command arguments
+     * and passes them through Scope for offline snapshot filtering.
      *
      * @param commandScope current command scope
      * @throws DatabaseException Thrown when there is a connection error
      */
     private Database obtainDatabase(CommandScope commandScope) throws DatabaseException {
-        if (commandScope.getArgumentValue(REFERENCE_DATABASE_ARG) == null) {
+        Database existingDatabase = commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);
+
+        if (existingDatabase == null) {
             String url = commandScope.getArgumentValue(REFERENCE_URL_ARG);
             String username = commandScope.getArgumentValue(REFERENCE_USERNAME_ARG);
             String password = commandScope.getArgumentValue(REFERENCE_PASSWORD_ARG);
@@ -91,6 +100,17 @@ public class ReferenceDbUrlConnectionCommandStep extends AbstractDatabaseConnect
             logMdc(url, username, defaultSchemaName, defaultCatalogName);
             Map<String, Object> scopeValues = new HashMap<>();
             scopeValues.put(Database.IGNORE_MISSING_REFERENCES_KEY, commandScope.getArgumentValue(DiffArgumentsCommandStep.IGNORE_MISSING_REFERENCES));
+
+            ObjectChangeFilter objectChangeFilter = getObjectChangeFilter(commandScope);
+            if (objectChangeFilter != null) {
+                scopeValues.put("objectChangeFilter", objectChangeFilter);
+            }
+
+            Class<? extends DatabaseObject>[] snapshotTypes = getSnapshotTypes(commandScope);
+            if (snapshotTypes != null) {
+                scopeValues.put("snapshotTypes", snapshotTypes);
+            }
+
             AtomicReference<Database> database = new AtomicReference<>();
             try {
                 Scope.child(scopeValues, () -> {
@@ -104,7 +124,7 @@ public class ReferenceDbUrlConnectionCommandStep extends AbstractDatabaseConnect
             logLicenseUsage(url, database.get(), false, true);
             return database.get();
         } else {
-            return commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);
+            return existingDatabase;
         }
     }
 
@@ -113,6 +133,53 @@ public class ReferenceDbUrlConnectionCommandStep extends AbstractDatabaseConnect
         Scope.getCurrentScope().addMdcValue(MdcKey.REFERENCE_USERNAME, username);
         Scope.getCurrentScope().addMdcValue(MdcKey.REFERENCE_DEFAULT_SCHEMA_NAME, defaultSchemaName);
         Scope.getCurrentScope().addMdcValue(MdcKey.REFERENCE_DEFAULT_CATALOG_NAME, defaultCatalogName);
+    }
+
+    /**
+     * Creates ObjectChangeFilter from command arguments (excludeObjects or includeObjects).
+     *
+     * @param commandScope current command scope
+     * @return ObjectChangeFilter if exclude/include arguments are present, null otherwise
+     */
+    private ObjectChangeFilter getObjectChangeFilter(CommandScope commandScope) {
+        if (commandScope.getArgumentValue(PreCompareCommandStep.OBJECT_CHANGE_FILTER_ARG) != null) {
+            return commandScope.getArgumentValue(PreCompareCommandStep.OBJECT_CHANGE_FILTER_ARG);
+        }
+        String excludeObjects = commandScope.getArgumentValue(PreCompareCommandStep.EXCLUDE_OBJECTS_ARG);
+        String includeObjects = commandScope.getArgumentValue(PreCompareCommandStep.INCLUDE_OBJECTS_ARG);
+
+        if ((excludeObjects != null) && (includeObjects != null)) {
+            throw new UnexpectedLiquibaseException(
+                    String.format("Cannot specify both '%s' and '%s'",
+                            PreCompareCommandStep.EXCLUDE_OBJECTS_ARG.getName(),
+                            PreCompareCommandStep.INCLUDE_OBJECTS_ARG.getName()));
+        }
+
+        ObjectChangeFilter objectChangeFilter = null;
+        if (excludeObjects != null) {
+            objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE,
+                    excludeObjects);
+        }
+        if (includeObjects != null) {
+            objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE,
+                    includeObjects);
+        }
+
+        return objectChangeFilter;
+    }
+
+    /**
+     * Gets snapshot types from command arguments (either from snapshotTypes arg or parsed from diffTypes).
+     *
+     * @param commandScope current command scope
+     * @return Array of DatabaseObject classes to include in snapshot, or empty array if not specified
+     */
+    private Class<? extends DatabaseObject>[] getSnapshotTypes(CommandScope commandScope) {
+        if (commandScope.getArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG) != null) {
+            return commandScope.getArgumentValue(PreCompareCommandStep.SNAPSHOT_TYPES_ARG);
+        }
+        String diffTypes = commandScope.getArgumentValue(PreCompareCommandStep.DIFF_TYPES_ARG);
+        return DiffCommandStep.parseSnapshotTypes(diffTypes);
     }
 
     @Override

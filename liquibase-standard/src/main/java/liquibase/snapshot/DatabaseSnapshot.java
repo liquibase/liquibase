@@ -662,10 +662,14 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             }
 
             for (DatabaseObject object : objects.values()) {
-                this.allFound.add(object);
+                if (snapshotControl.shouldInclude(object)) {
+                    this.allFound.add(object);
+                }
             }
             for (DatabaseObject object : referencedObjects.values()) {
-                this.referencedObjects.add(object);
+                if (snapshotControl.shouldInclude(object)) {
+                    this.referencedObjects.add(object);
+                }
             }
         } catch (Exception e) {
             throw new ParsedNodeException(e);
