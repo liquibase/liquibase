@@ -266,7 +266,7 @@
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>12.10.2.jre11</version>
+            <version>13.2.1.jre11</version>
             <scope>test</scope>
         </dependency>
 
@@ -315,7 +315,7 @@
         <dependency>
             <groupId>org.firebirdsql.jdbc</groupId>
             <artifactId>jaybird</artifactId>
-            <version>5.0.10.java8</version>
+            <version>6.0.3</version>
             <scope>test</scope>
         </dependency>
 
