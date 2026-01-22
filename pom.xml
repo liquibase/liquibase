@@ -273,7 +273,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.8</version>
+            <version>42.7.9</version>
             <scope>test</scope>
         </dependency>
 
@@ -375,7 +375,7 @@
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>4.2.1</version>
+                <version>4.3.0</version>
                 <executions>
                     <execution>
                         <goals>
