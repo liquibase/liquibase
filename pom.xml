@@ -376,6 +376,16 @@
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
                 <version>4.3.0</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.groovy</groupId>
+                        <artifactId>groovy</artifactId>
+                        <version>${groovy.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <includeClasspath>PROJECT_AND_PLUGIN</includeClasspath>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
