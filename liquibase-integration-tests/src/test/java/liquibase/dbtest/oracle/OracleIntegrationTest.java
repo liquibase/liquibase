@@ -22,6 +22,7 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.sql.visitor.AbstractSqlVisitor;
 import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.core.Index;
+import liquibase.structure.core.Table;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -30,6 +31,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Date;
 
+import static liquibase.test.SnapshotAssert.assertThat;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeNotNull;
@@ -250,4 +252,17 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
             Assert.fail("Should not fail. Reason: " + e.getMessage());
         }
     }
+
+    @Override
+    protected void assertThatSnapshotReportsAllObjectTypes(DatabaseSnapshot snapshot) {
+        super.assertThatSnapshotReportsAllObjectTypes(snapshot);
+        
+        Table testFloatPrecision = assertThat(snapshot).containsObject(Table.class, table ->
+            "TEST_FLOAT_PRECISION".equalsIgnoreCase(table.getName()));
+        Assert.assertEquals(Integer.valueOf(54), testFloatPrecision.getColumn("floatColumn54").getType().getColumnSize());
+        Assert.assertEquals(Integer.valueOf(126), testFloatPrecision.getColumn("floatColumn126").getType().getColumnSize());
+    }
+
+
+
 }
