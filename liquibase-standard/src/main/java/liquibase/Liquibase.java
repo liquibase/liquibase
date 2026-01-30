@@ -1,5 +1,6 @@
 package liquibase;
 
+// DAT-21768: Test SonarCloud workflow integration
 import liquibase.change.CheckSum;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
