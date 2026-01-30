@@ -17,6 +17,7 @@ import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.datatype.DataTypeFactory;
@@ -103,6 +104,7 @@ public abstract class AbstractIntegrationTest {
     private final String indexWithAssociatedWithChangeLog;
     private Database database;
     private String defaultSchemaName;
+    private ObjectQuotingStrategy objectQuotingStrategy;
 
     private final String pathChangeLog;
 
@@ -158,6 +160,11 @@ public abstract class AbstractIntegrationTest {
         // If we should test with a custom defaultSchemaName:
         if (getDefaultSchemaName() != null && getDefaultSchemaName().length() > 0) {
             database.setDefaultSchemaName(getDefaultSchemaName());
+        }
+
+        // If we should test with a custom QUOTING STRATEGY
+        if(getObjectQuotingStrategy() != null) {
+            database.setObjectQuotingStrategy(getObjectQuotingStrategy());
         }
 
         SnapshotGeneratorFactory.resetAll();
@@ -1201,6 +1208,14 @@ public abstract class AbstractIntegrationTest {
 
     public void setDefaultSchemaName(String defaultSchemaName) {
         this.defaultSchemaName = defaultSchemaName;
+    }
+
+    protected ObjectQuotingStrategy getObjectQuotingStrategy() {
+        return objectQuotingStrategy;
+    }
+
+    protected void setObjectQuotingStrategy(ObjectQuotingStrategy objectQuotingStrategy) {
+       this.objectQuotingStrategy = objectQuotingStrategy;
     }
 
     @Test

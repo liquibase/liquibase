@@ -416,7 +416,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         // SET SEARCH_PATH SQL statements
         final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this);
         if(executor.updatesDatabase()) {
-            DatabaseUtils.initializeDatabase(getDefaultCatalogName(), getDefaultSchemaName(), this);
+            DatabaseUtils.initializeDatabase(this.escapeObjectName(getDefaultCatalogName(), Catalog.class), this.escapeObjectName(getDefaultSchemaName(), Schema.class), this);
         }
     }
 
