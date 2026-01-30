@@ -378,6 +378,8 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             return line;
         });
 
+        // Clear the FastCheck cache to ensure checksums are re-evaluated
+        Scope.getCurrentScope().getSingleton(FastCheckService.class).clearCache();
     }
 
     @Override

@@ -469,6 +469,10 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         updateStatement.addNewColumnValue("MD5SUM", null);
         ChangelogJdbcMdcListener.execute(getDatabase(), executor -> executor.execute(updateStatement));
         database.commit();
+
+        // Clear the in-memory cache and FastCheck cache to ensure checksums are re-evaluated
+        this.ranChangeSetList = null;
+        Scope.getCurrentScope().getSingleton(FastCheckService.class).clearCache();
     }
 
     @Override
