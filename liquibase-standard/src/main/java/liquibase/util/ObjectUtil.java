@@ -28,6 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.logging.Level;
 
+import static java.util.Optional.ofNullable;
+
 /**
  * Various methods that make it easier to read and write object properties using the propertyName, instead of having
  * to look up the correct reader/writer methods manually first. All methods in this class are static by nature.
@@ -536,4 +538,7 @@ public class ObjectUtil {
         }
     }
 
+    public static <T> Optional<T> cast(  Object o, Class<T> cls) {
+        return ofNullable(cls.isInstance(o) ? cls.cast(o) : null);
+    }
 }
