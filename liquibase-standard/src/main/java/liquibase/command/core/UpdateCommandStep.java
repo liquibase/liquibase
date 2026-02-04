@@ -16,7 +16,7 @@ import java.util.List;
 public class UpdateCommandStep extends AbstractUpdateCommandStep implements CleanUpCommandStep {
 
     public static final String[] LEGACY_COMMAND_NAME = {"migrate"};
-    public static String[] COMMAND_NAME = {"update"};
+    public static final String[] COMMAND_NAME = {"update"};
 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
 

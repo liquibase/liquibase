@@ -1,9 +1,12 @@
 name: Attach Artifacts To Draft Release
 
+# Security: These write permissions are required for release creation
+# - contents: write - create release tags and upload assets
+# - actions: write - trigger downstream workflows
+# - id-token: write - AWS OIDC authentication
 permissions:
   contents: write
   actions: write
-  packages: write
   id-token: write
 
 on:
@@ -105,7 +108,7 @@ jobs:
           parse-json-secrets: true
 
       - name: Download liquibase-artifacts
-        uses: dawidd6/action-download-artifact@v11
+        uses: dawidd6/action-download-artifact@v12
         with:
           workflow: run-tests.yml
           run_id: ${{ needs.setup.outputs.runId }}
@@ -195,7 +198,7 @@ jobs:
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
 
       - name: Cache Completed Artifacts
-        uses: actions/cache@v5.0.1
+        uses: actions/cache@v5.0.2
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
@@ -239,7 +242,7 @@ jobs:
           } >> $GITHUB_ENV
 
       - name: Restore Completed Artifacts
-        uses: actions/cache@v5.0.1
+        uses: actions/cache@v5.0.2
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final

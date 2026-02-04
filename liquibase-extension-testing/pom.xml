@@ -99,12 +99,12 @@
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-suite</artifactId>
-            <version>6.0.1</version>
+            <version>6.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>5.3.39</version>
+            <version>${spring.version}</version>
             <scope>compile</scope>
         </dependency>
 
@@ -112,6 +112,20 @@
 
     <build>
         <plugins>
+            <!-- This module has main Groovy sources, so we need compile goal (not just compileTests) -->
+            <plugin>
+                <groupId>org.codehaus.gmavenplus</groupId>
+                <artifactId>gmavenplus-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>groovy-compile</id>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>removeStubs</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>

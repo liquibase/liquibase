@@ -1,11 +1,16 @@
 
 name: Build and Publish
 
+# Security: Minimal permissions for build workflow
+# - contents: read - checkout code (write not needed for builds)
+# - packages: write - publish snapshots to GitHub Packages
+# - actions: read - read workflow artifacts
+# - id-token: write - AWS OIDC authentication
 permissions:
-  contents: write
+  contents: read
   packages: write
   actions: read
-  id-token: write # Required for OIDC authentication with AWS
+  id-token: write
 
 # The concurrency check will cancel in-progress runs on non-master branches and pull requests on forked repositories regardless of the target branch.
 concurrency:
@@ -101,7 +106,7 @@ jobs:
 
       ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
       - name: Install4j Cache
-        uses: actions/cache@v5.0.1
+        uses: actions/cache@v5.0.2
         with:
           key: install4j-A${{ hashFiles('liquibase-dist/src/main/install4j/liquibase.install4j') }}
           path: ~/.install4j8/**
