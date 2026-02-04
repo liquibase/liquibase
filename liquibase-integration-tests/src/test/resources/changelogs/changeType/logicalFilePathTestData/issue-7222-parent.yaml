@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - logicalFilePath: parent-logical-path
+  - include:
+      relativeToChangelogFile: true
+      file: issue-7222-child1.yaml
+  - include:
+      relativeToChangelogFile: true
+      file: issue-7222-child2.yaml
