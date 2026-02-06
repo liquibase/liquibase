@@ -1,18 +1,12 @@
 package liquibase.diff.compare.core
 
 import liquibase.database.core.PostgresDatabase
-import liquibase.diff.Difference
-import liquibase.diff.ObjectDifferences
 import liquibase.diff.compare.CompareControl
 import liquibase.diff.compare.DatabaseObjectComparatorChain
-import liquibase.diff.output.DiffOutputControl
-import liquibase.diff.output.changelog.core.ChangedColumnChangeGenerator
 import liquibase.snapshot.SnapshotIdService
 import liquibase.structure.core.Column
 import liquibase.structure.core.DataType
-import liquibase.structure.core.Relation
 import liquibase.structure.core.Table
-import liquibase.util.StringUtil
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -46,6 +40,28 @@ class ColumnComparatorTest extends Specification {
         "int2" | "smallserial"
         "smallserial" | "smallserial"
         "int2" | "int2"
+    }
+
+    def "expect difference between two columns when the comment changes from '#before' to '#after'" (String before, String after) {
+        when:
+        def comparator = new ColumnComparator()
+        def column1 = makeColumn("int8")
+        def column2 = makeColumn("int8")
+        column1.setRemarks(before)
+        column2.setRemarks(after)
+
+        then:
+        def differences = comparator.findDifferences(column1, column2, new PostgresDatabase(), CompareControl.STANDARD, new DatabaseObjectComparatorChain(Collections.emptyList(), null), new HashSet<String>())
+        !differences.differences.isEmpty()
+        differences.isDifferent("remarks")
+
+        where:
+        before | after
+        null | "this column has a comment"
+        null | ""
+        "" | null
+        "non-empty" | null
+        "old comment" | "new comment"
     }
 
     def makeColumn(String type) {

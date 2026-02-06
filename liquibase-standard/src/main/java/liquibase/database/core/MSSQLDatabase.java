@@ -309,8 +309,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         // it anyway.
         //
         tableName = escapeObjectName(catalogName, schemaName, tableName, Table.class);
-        if (tableName != null && tableName.contains(" ") && ! tableName.startsWith("\"")) {
-            tableName = "\"" + tableName + "\"";
+        if (tableName != null && tableName.contains(" ") && ! isQuoted(tableName)) {
+            tableName = quoteObject(tableName, Table.class);
         }
         return tableName;
     }
@@ -323,8 +323,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         // it anyway.
         //
         tablespaceName = escapeObjectName(tablespaceName, Tablespace.class);
-        if (tablespaceName != null && tablespaceName.contains(" ") && ! tablespaceName.startsWith("\"")) {
-            tablespaceName = "\"" + tablespaceName + "\"";
+        if (tablespaceName != null && tablespaceName.contains(" ") && ! isQuoted(tablespaceName)) {
+            tablespaceName = quoteObject(tablespaceName, Tablespace.class);
         }
         return tablespaceName;
     }
@@ -744,5 +744,9 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                 .setDefaultValue(1)
                 .setDescription("Number of bytes needed to store one character (depends on database's character encoding)")
                 .build();
+    }
+
+    private boolean isQuoted(final String name) {
+        return name.startsWith(getQuotingStartCharacter()) || name.startsWith("\"");
     }
 }
