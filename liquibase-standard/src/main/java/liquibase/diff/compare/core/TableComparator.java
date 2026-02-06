@@ -9,6 +9,7 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 
+import java.util.Objects;
 import java.util.Set;
 
 public class TableComparator  implements DatabaseObjectComparator {
@@ -52,6 +53,8 @@ public class TableComparator  implements DatabaseObjectComparator {
 
         ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo, compareControl, exclude);
         differences.compare("name", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Table.class, accordingTo));
+
+        differences.compare("remarks", databaseObject1, databaseObject2, Objects::equals);
 
         Table table1 = (Table)databaseObject1;
         Table table2 = (Table)databaseObject2;

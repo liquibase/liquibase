@@ -187,8 +187,8 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
             // When: Escaping the tablespace name
             String result = database.escapeTablespaceName(tablespaceName);
 
-            // Then: The tablespace name should be bracket-escaped (spaces require brackets) and wrapped in double quotes
-            assertEquals("\"[My Tablespace]\"", result);
+            // Then: The tablespace name should be bracket-escaped (spaces require brackets)
+            assertEquals("[My Tablespace]", result);
         } catch (final DatabaseException e) {
             throw e;
         }
@@ -251,8 +251,8 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
             // When: Escaping the tablespace name
             String result = database.escapeTablespaceName(tablespaceName);
 
-            // Then: The tablespace name should be bracket-escaped and double-quoted
-            assertEquals("\"[My €Tablespace]\"", result);
+            // Then: The tablespace name should be bracket-escaped
+            assertEquals("[My €Tablespace]", result);
         } catch (final DatabaseException e) {
             throw e;
         }

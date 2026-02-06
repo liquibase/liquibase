@@ -74,9 +74,9 @@
         <commons-text.version>1.15.0</commons-text.version>
         <ant.version>1.10.15</ant.version>
         <junit-jupiter.version>6.0.2</junit-jupiter.version>
-        <groovy.version>5.0.3</groovy.version>
+        <groovy.version>5.0.4</groovy.version>
         <spock.version>2.4-groovy-5.0</spock.version>
-        <spring.version>7.0.2</spring.version>
+        <spring.version>7.0.3</spring.version>
         <maven-failsafe-plugin.version>3.5.4</maven-failsafe-plugin.version>
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
         <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
@@ -92,7 +92,7 @@
         <surefire.failIfNoTests>true</surefire.failIfNoTests>
         <opencsv.version>5.12.0</opencsv.version>
         <jaxb-api.version>2.3.1</jaxb-api.version>
-        <mockito.version>4.11.0</mockito.version>
+        <mockito.version>5.21.0</mockito.version>
     </properties>
 
     <!-- comment -->
@@ -193,7 +193,7 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.27.6</version>
+            <version>3.27.7</version>
             <scope>test</scope>
         </dependency>
 
@@ -239,7 +239,7 @@
             CGLIB) -->
             <groupId>org.objenesis</groupId>
             <artifactId>objenesis</artifactId>
-            <version>3.4</version>
+            <version>3.5</version>
             <scope>test</scope>
         </dependency>
 
@@ -259,21 +259,21 @@
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
-            <version>9.5.0</version>
+            <version>9.6.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>12.10.2.jre11</version>
+            <version>13.2.1.jre11</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.8</version>
+            <version>42.7.9</version>
             <scope>test</scope>
         </dependency>
 
@@ -315,7 +315,7 @@
         <dependency>
             <groupId>org.firebirdsql.jdbc</groupId>
             <artifactId>jaybird</artifactId>
-            <version>5.0.10.java8</version>
+            <version>6.0.4</version>
             <scope>test</scope>
         </dependency>
 
@@ -375,15 +375,13 @@
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>4.2.1</version>
+                <version>4.3.0</version>
                 <executions>
                     <execution>
                         <goals>
                             <goal>addSources</goal>
                             <goal>addTestSources</goal>
-                            <goal>compile</goal>
                             <goal>compileTests</goal>
-                            <goal>removeStubs</goal>
                             <goal>removeTestStubs</goal>
                         </goals>
                     </execution>

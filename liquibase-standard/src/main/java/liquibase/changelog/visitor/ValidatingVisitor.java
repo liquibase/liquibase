@@ -33,7 +33,9 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     private final ValidationErrors validationErrors = new ValidationErrors();
     private final Warnings warnings = new Warnings();
 
-    private final Set<String> seenChangeSets = new HashSet<>();
+    private final Map<String, ChangeSet> seenChangeSets = new HashMap<>();
+    @Getter
+    private final Map<ChangeSet, ChangeSet> duplicatesFromDifferentFiles = new HashMap<>();
 
     private Map<String, RanChangeSet> ranIndex;
     private Database database;
@@ -133,11 +135,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
         // Did we already see this ChangeSet?
         String changeSetString = changeSet.toString(false);
-        if (seenChangeSets.contains(changeSetString)) {
-            duplicateChangeSets.add(changeSet);
-        } else {
-            seenChangeSets.add(changeSetString);
-        }
+        checkForDuplicatesFromDifferentFiles(changeSet, changeSetString);
     }
 
     /**
@@ -209,5 +207,25 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         return invalidMD5Sums.isEmpty() && failedPreconditions.isEmpty() && errorPreconditions.isEmpty() &&
                 duplicateChangeSets.isEmpty() && changeValidationExceptions.isEmpty() && setupExceptions.isEmpty() &&
                 !validationErrors.hasErrors();
+    }
+
+    private void checkForDuplicatesFromDifferentFiles(ChangeSet changeSet, String changeSetString) {
+        if (seenChangeSets.containsKey(changeSetString)) {
+            ChangeSet existingChangeSet = seenChangeSets.get(changeSetString);
+
+            // Check if different physical files
+            if (existingChangeSet != null &&
+                    existingChangeSet.getChangeLog() != null &&
+                    changeSet.getChangeLog() != null &&
+                    !existingChangeSet.getChangeLog().getPhysicalFilePath()
+                            .equals(changeSet.getChangeLog().getPhysicalFilePath())) {
+                // Track this as a duplicate from different files
+                duplicatesFromDifferentFiles.put(changeSet, existingChangeSet);
+            }
+
+            duplicateChangeSets.add(changeSet);
+        } else {
+            seenChangeSets.put(changeSetString, changeSet);
+        }
     }
 }

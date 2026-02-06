@@ -1193,10 +1193,15 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             // Do not update the logical file path if the change set has
             // already been executed because this would cause the addition
             // of another DBCL entry.  Also, skip setting the logical file
-            // path for raw SQL change sets
+            // path for raw SQL change sets.
+            //
+            // IMPORTANT: Only set logicalFilePath on changesets that originated from THIS changelog,
+            // not from included child changelogs. This prevents parent changelogs from overwriting
+            // the correct file paths of changesets from included changelogs (fixes issue #7222).
             //
             if (actualLogicalFilePath != null && changeSet.getLogicalFilePath() == null &&
-                    !(parser instanceof SqlChangeLogParser) && !ranChangeSetExists(changeSet, ranChangeSets)) {
+                !(parser instanceof SqlChangeLogParser) && !ranChangeSetExists(changeSet, ranChangeSets) &&
+                changeSet.getChangeLog() == changeLog) {
                 changeSet.setLogicalFilePath(actualLogicalFilePath);
                 if (StringUtils.isNotEmpty(actualLogicalFilePath)) {
                     changeSet.setFilePath(actualLogicalFilePath);
@@ -1213,17 +1218,49 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
      * Search for the closest logicalfilePath for this changelog
      */
     private String getActualLogicalFilePath(String logicalFilePath, DatabaseChangeLog changeLog) {
-        DatabaseChangeLog currentChangeLog = changeLog;
-        do {
+        // First priority: if the included changelog itself has a logicalFilePath, use it
+        if (StringUtils.isNotBlank(changeLog.getRawLogicalFilePath())) {
+            return changeLog.getRawLogicalFilePath();
+        }
+
+        // Check configuration to determine behavior for all inheritance scenarios
+        if (!GlobalConfiguration.ALLOW_INHERIT_LOGICAL_FILE_PATH.getCurrentValue()) {
+            // Strict behavior: return null so changeset uses physical file path
+            // This ignores both explicit logicalFilePath on include statement and parent inheritance
+            return null;
+        }
+
+        // Legacy behavior (4.31.0+): allow inheritance
+        // Second priority: if include statement explicitly provided logicalFilePath, use it
+        if (StringUtils.isNotBlank(logicalFilePath)) {
+            return logicalFilePath;
+        }
+
+        // Third priority: search parent tree for logicalFilePath to inherit
+        return searchParentLogicalFilePath(changeLog, null);
+    }
+
+    /**
+     * Search parent changelog tree for a logicalFilePath value
+     *
+     * @param changeLog the changelog to start searching from
+     * @param fallbackValue value to return if no parent logicalFilePath is found
+     * @return the first non-blank logicalFilePath found in parent tree, or fallbackValue if none found
+     */
+    private String searchParentLogicalFilePath(DatabaseChangeLog changeLog, String fallbackValue) {
+        DatabaseChangeLog currentChangeLog = changeLog.getParentChangeLog();
+        while (currentChangeLog != null) {
             if (StringUtils.isNotBlank(currentChangeLog.getRawLogicalFilePath())) {
                 return currentChangeLog.getRawLogicalFilePath();
             }
-        } while ((currentChangeLog = currentChangeLog.getParentChangeLog()) != null);
+            currentChangeLog = currentChangeLog.getParentChangeLog();
+        }
 
         if (StringUtils.isNotBlank(this.getRawLogicalFilePath())) {
             return this.getRawLogicalFilePath();
         }
-        return logicalFilePath;
+
+        return fallbackValue;
     }
 
     /**
