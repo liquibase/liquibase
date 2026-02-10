@@ -301,7 +301,7 @@
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.51.1.0</version>
+            <version>3.51.2.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -339,7 +339,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.14.1</version>
+                <version>3.15.0</version>
             </plugin>
 
             <plugin>
