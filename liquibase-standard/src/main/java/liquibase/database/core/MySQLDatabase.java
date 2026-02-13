@@ -662,8 +662,11 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
      */
     private void addMySQLVersionedReservedWords() {
         try {
+            int major = getDatabaseMajorVersion();
+            int minor = getDatabaseMinorVersion();
+
             // words that became reserved in 8.0
-            if(getDatabaseMajorVersion() >= 8){
+            if (major >= 8) {
                 reservedWords.addAll(List.of("CUBE",
                         "CUME_DIST",
                         "DENSE_RANK",
@@ -695,7 +698,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             }
 
             // words that became reserved in 8.4
-            if(getDatabaseMajorVersion() >= 9 || (getDatabaseMajorVersion() == 8 && getDatabaseMinorVersion() >= 4)) {
+            if (major >= 9 || (major == 8 && minor >= 4)) {
                 reservedWords.remove("MASTER_BIND");
                 reservedWords.remove("MASTER_SSL_VERIFY_SERVER_CERT");
                 reservedWords.add("MANUAL");
@@ -705,17 +708,17 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             }
 
             // words that became reserved in 9.3
-            if(getDatabaseMajorVersion() >= 10 || (getDatabaseMajorVersion() == 9 && getDatabaseMinorVersion() >= 3)) {
+            if (major >= 10 || (major == 9 && minor >= 3)) {
                 reservedWords.add("LIBRARY");
             }
 
             // words that became reserved in 9.4
-            if(getDatabaseMajorVersion() >= 10 || (getDatabaseMajorVersion() == 9 && getDatabaseMinorVersion() >= 4)) {
+            if (major >= 10 || (major == 9 && minor >= 4)) {
                 reservedWords.add("EXTERNAL");
             }
 
             // words that became reserved in 9.6
-            if(getDatabaseMajorVersion() >= 10 || (getDatabaseMajorVersion() == 9 && getDatabaseMinorVersion() >= 6)) {
+            if (major >= 10 || (major == 9 && minor >= 6)) {
                 reservedWords.add("SETS");
             }
         } catch (DatabaseException e) {
