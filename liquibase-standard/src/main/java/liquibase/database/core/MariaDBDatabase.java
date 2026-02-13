@@ -9,7 +9,7 @@ import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 
 
 /**
@@ -19,7 +19,33 @@ public class MariaDBDatabase extends MySQLDatabase {
     private static final String PRODUCT_NAME = "MariaDB";
 
     public MariaDBDatabase() {
-        addReservedWords(Collections.singletonList("PERIOD"));
+        /*
+         * From https://mariadb.com/docs/server/reference/sql-structure/sql-language-structure/reserved-words
+         * A list can be extracted with the following JS snippet:
+         * console.log($x("//h2[@id='reserved-words']/following-sibling::div[1]//div[@role='row']/div[@role='cell'][1]//p")
+         *     .map(x => `"${x.textContent.trim()}"`).join(",\n"))
+         * Most of them are already covered by MySQLDatabase.
+         */
+        addReservedWords(List.of("CURRENT_ROLE",
+                "DELETE_DOMAIN_ID",
+                "DO_DOMAIN_IDS",
+                "GENERAL",
+                "IGNORE_DOMAIN_IDS",
+                "IGNORE_SERVER_IDS",
+                "MASTER_HEARTBEAT_PERIOD",
+                "MASTER_SSL_VERIFY_SERVER_CERT",
+                "OFFSET",
+                "PAGE_CHECKSUM",
+                "PARSE_VCOL_EXPR",
+                "REF_SYSTEM_ID",
+                "RETURNING",
+                "ROW_NUMBER",
+                "SLOW",
+                "STATS_AUTO_RECALC",
+                "STATS_PERSISTENT",
+                "STATS_SAMPLE_PAGES",
+                "VECTOR"
+        ));
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
         // According to https://mariadb.com/kb/en/library/data-types/, retrieved on 2019-02-12
         super.unmodifiableDataTypes.addAll(Arrays.asList(
