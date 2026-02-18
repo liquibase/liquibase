@@ -1646,6 +1646,84 @@ create table test_table1 (id int);
         e.getMessage().contains("Error parsing command line: Using 'rollbackSqlFile in Formatted SQL changelog' requires a valid Liquibase license key")
     }
 
+    def "global logicalFilePath from formatted SQL header is stored on DatabaseChangeLog and applied to changesets"() {
+        given:
+        def changeLogString = "--liquibase formatted sql logicalFilePath:my-logical-path\n" +
+                "\n" +
+                "--changeset author:1\n" +
+                "create table test1 (id int primary key);\n" +
+                "--rollback drop table test1;\n"
+
+        when:
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogString).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getLogicalFilePath() == "my-logical-path"
+        changeLog.changeSets.size() == 1
+        changeLog.changeSets[0].filePath == "my-logical-path"
+    }
+
+    def "per-changeset logicalFilePath overrides global logicalFilePath from header"() {
+        given:
+        def changeLogString = "--liquibase formatted sql logicalFilePath:global-path\n" +
+                "\n" +
+                "--changeset author:1 logicalFilePath:per-changeset-path\n" +
+                "create table test1 (id int primary key);\n" +
+                "--rollback drop table test1;\n"
+
+        when:
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogString).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getLogicalFilePath() == "global-path"
+        changeLog.changeSets.size() == 1
+        changeLog.changeSets[0].filePath == "per-changeset-path"
+    }
+
+    def "no logicalFilePath anywhere falls back to physical file path"() {
+        given:
+        def changeLogString = "--liquibase formatted sql\n" +
+                "\n" +
+                "--changeset author:1\n" +
+                "create table test1 (id int primary key);\n" +
+                "--rollback drop table test1;\n"
+
+        when:
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogString).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getLogicalFilePath() == "asdf.sql"
+        changeLog.changeSets.size() == 1
+        changeLog.changeSets[0].filePath == "asdf.sql"
+    }
+
+    def "mixed changesets: global logicalFilePath applied only to changesets without their own"() {
+        given:
+        def changeLogString = "--liquibase formatted sql logicalFilePath:global-path\n" +
+                "\n" +
+                "--changeset author:1\n" +
+                "create table test1 (id int primary key);\n" +
+                "--rollback drop table test1;\n" +
+                "\n" +
+                "--changeset author:2 logicalFilePath:own-path\n" +
+                "create table test2 (id int primary key);\n" +
+                "--rollback drop table test2;\n" +
+                "\n" +
+                "--changeset author:3\n" +
+                "create table test3 (id int primary key);\n" +
+                "--rollback drop table test3;\n"
+
+        when:
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogString).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getLogicalFilePath() == "global-path"
+        changeLog.changeSets.size() == 3
+        changeLog.changeSets[0].filePath == "global-path"
+        changeLog.changeSets[1].filePath == "own-path"
+        changeLog.changeSets[2].filePath == "global-path"
+    }
+
     @LiquibaseService(skip = true)
     private static class MockFormattedSqlChangeLogParser extends FormattedSqlChangeLogParser {
         private String changeLog
