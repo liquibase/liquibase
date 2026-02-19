@@ -44,7 +44,7 @@ public abstract class AbstractResource implements Resource {
             }
             return new URI(relative).resolve(new URI(path).normalize()).toString().replaceFirst("^/", "");
         } catch (URISyntaxException e) {
-            Scope.getCurrentScope().getLog(AbstractResource.class).warning("Error handling URI syntax for file inside jar. Defaulting to previous behavior.", e);
+            Scope.getCurrentScope().getLog(AbstractResource.class).fine("Error handling URI syntax for file inside jar. Defaulting to previous behavior.", e);
             return path.replaceFirst("^/", "");
         }
     }

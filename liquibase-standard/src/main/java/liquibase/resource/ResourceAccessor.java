@@ -302,8 +302,27 @@ public interface ResourceAccessor extends AutoCloseable {
         private final ResourceAccessor resourceAccessor;
 
         public NotFoundResource(String path, ResourceAccessor resourceAccessor) {
-            super(path, URI.create("resourceaccessor:"+path.replace(" ", "%20").replace('\\', '/')));
+            super(path, createSafeUri(path));
             this.resourceAccessor = resourceAccessor;
+        }
+
+        private static URI createSafeUri(String path) {
+            String sanitized = path.replace(" ", "%20").replace('\\', '/');
+            try {
+                return URI.create("resourceaccessor:" + sanitized);
+            } catch (IllegalArgumentException e) {
+                // Percent-encode any remaining URI-illegal characters (e.g. {, })
+                StringBuilder sb = new StringBuilder();
+                for (char c : sanitized.toCharArray()) {
+                    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+                            (c >= '0' && c <= '9') || "/-._~:@!$&'()*+,;=%".indexOf(c) >= 0) {
+                        sb.append(c);
+                    } else {
+                        sb.append(String.format("%%%02X", (int) c));
+                    }
+                }
+                return URI.create("resourceaccessor:" + sb);
+            }
         }
 
         @Override
