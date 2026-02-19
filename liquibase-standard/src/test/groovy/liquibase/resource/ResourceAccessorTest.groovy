@@ -138,6 +138,9 @@ class ResourceAccessorTest extends Specification {
         "path with {braces} and spaces"       | "braces and spaces"
         "simple/path.txt"                     | "simple path (no special chars)"
         "path\\with\\backslashes"             | "backslashes"
+        "100% cotton"                         | "bare percent sign"
+        "path/with%20encoded"                 | "already encoded percent"
+        "données/café.txt"                    | "non-ASCII characters"
     }
 
     /**

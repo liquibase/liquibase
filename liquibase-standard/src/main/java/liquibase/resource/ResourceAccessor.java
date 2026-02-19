@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 
 /**
@@ -307,21 +308,10 @@ public interface ResourceAccessor extends AutoCloseable {
         }
 
         private static URI createSafeUri(String path) {
-            String sanitized = path.replace(" ", "%20").replace('\\', '/');
             try {
-                return URI.create("resourceaccessor:" + sanitized);
-            } catch (IllegalArgumentException e) {
-                // Percent-encode any remaining URI-illegal characters (e.g. {, })
-                StringBuilder sb = new StringBuilder();
-                for (char c : sanitized.toCharArray()) {
-                    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
-                            (c >= '0' && c <= '9') || "/-._~:@!$&'()*+,;=%".indexOf(c) >= 0) {
-                        sb.append(c);
-                    } else {
-                        sb.append(String.format("%%%02X", (int) c));
-                    }
-                }
-                return URI.create("resourceaccessor:" + sb);
+                return new URI("resourceaccessor", path.replace('\\', '/'), null);
+            } catch (URISyntaxException e) {
+                return URI.create("resourceaccessor:unknown");
             }
         }
 
