@@ -26,7 +26,7 @@ public class CommandFactory implements SingletonObject {
     private Map<Class<? extends CommandStep>, CommandStep> commandOverrides;
 
 
-    private final Map<String, Set<CommandArgumentDefinition<?>>> commandArgumentDefinitions = new HashMap<>();
+    private static final Map<String, Set<CommandArgumentDefinition<?>>> commandArgumentDefinitions = new HashMap<>();
 
     /**
      * @deprecated. Use {@link Scope#getSingleton(Class)}
