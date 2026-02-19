@@ -101,26 +101,6 @@ class ResourceAccessorTest extends Specification {
         0 * mockUIService.sendMessage(_ as String)
     }
 
-    def "NotFoundResource handles path with spaces"() {
-        when:
-        def notFound = new ResourceAccessor.NotFoundResource("some path with spaces.txt", resourceAccessor)
-
-        then:
-        noExceptionThrown()
-        notFound.getPath() == "some path with spaces.txt"
-        notFound.getUri() != null
-    }
-
-    def "NotFoundResource handles path with curly braces"() {
-        when:
-        def notFound = new ResourceAccessor.NotFoundResource("path/with{curly}braces.txt", resourceAccessor)
-
-        then:
-        noExceptionThrown()
-        notFound.getPath() == "path/with{curly}braces.txt"
-        notFound.getUri() != null
-    }
-
     @Unroll
     def "NotFoundResource handles path with URI-illegal characters: #description"() {
         when:
@@ -129,18 +109,19 @@ class ResourceAccessorTest extends Specification {
         then:
         noExceptionThrown()
         notFound.getUri() != null
+        notFound.getPath() == expectedPath
 
         where:
-        path                                  | description
-        "value with spaces"                   | "spaces"
-        "path/with{braces}"                   | "curly braces"
-        "some [bracketed] path"               | "square brackets"
-        "path with {braces} and spaces"       | "braces and spaces"
-        "simple/path.txt"                     | "simple path (no special chars)"
-        "path\\with\\backslashes"             | "backslashes"
-        "100% cotton"                         | "bare percent sign"
-        "path/with%20encoded"                 | "already encoded percent"
-        "données/café.txt"                    | "non-ASCII characters"
+        path                                  | expectedPath                          | description
+        "value with spaces"                   | "value with spaces"                   | "spaces"
+        "path/with{braces}"                   | "path/with{braces}"                   | "curly braces"
+        "some [bracketed] path"               | "some [bracketed] path"               | "square brackets"
+        "path with {braces} and spaces"       | "path with {braces} and spaces"       | "braces and spaces"
+        "simple/path.txt"                     | "simple/path.txt"                     | "simple path (no special chars)"
+        "path\\with\\backslashes"             | "path/with/backslashes"               | "backslashes"
+        "100% cotton"                         | "100% cotton"                         | "bare percent sign"
+        "path/with%20encoded"                 | "path/with%20encoded"                 | "already encoded percent"
+        "données/café.txt"                    | "données/café.txt"                    | "non-ASCII characters"
     }
 
     /**
