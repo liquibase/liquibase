@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: explicit_include_no_inherit_test
+      author: testauthor
+      changes:
+        - createTable:
+            tableName: test_table_no_inherit
+            columns:
+              - column:
+                  name: id
+                  type: int
