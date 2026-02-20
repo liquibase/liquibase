@@ -195,9 +195,7 @@ public class CommandFactory implements SingletonObject {
      */
     protected void register(String[] commandName, CommandArgumentDefinition<?> definition) {
         String commandNameKey = StringUtil.join(commandName, " ");
-        if (!commandArgumentDefinitions.containsKey(commandNameKey)) {
-            commandArgumentDefinitions.put(commandNameKey, new TreeSet<>());
-        }
+        commandArgumentDefinitions.computeIfAbsent(commandNameKey, k -> new TreeSet<>());
 
         if (commandArgumentDefinitions.get(commandNameKey).contains(definition)) {
            throw new IllegalArgumentException("Duplicate argument '" + definition.getName() + "' found for command '" + commandNameKey + "'");
