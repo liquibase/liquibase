@@ -281,7 +281,7 @@ jobs:
 
   sonar:
     needs: [ setup, build_tests, integration-test ]
-    uses: liquibase/build-logic/.github/workflows/sonar-coverage-merge.yml@DAT-21845
+    uses: liquibase/build-logic/.github/workflows/sonar-coverage-merge.yml@main
     permissions:
       pull-requests: write
       id-token: write
