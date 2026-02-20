@@ -281,19 +281,13 @@ jobs:
 
   sonar:
     needs: [ setup, build_tests, integration-test ]
-    uses: liquibase/build-logic/.github/workflows/sonar-test-scan.yml@main
+    uses: liquibase/build-logic/.github/workflows/sonar-coverage-merge.yml@main
     permissions:
       pull-requests: write
       id-token: write
       contents: read
     with:
-      thisBranchName: ${{ needs.setup.outputs.thisBranchName }}
-      thisSha: ${{ needs.setup.outputs.thisSha }}
-      pullRequestNumber: ${{ github.event.pull_request.number }}
-      pullRequestBranchName: ${{ github.event.pull_request.head.ref }}
-      pullRequestBaseBranchName: ${{ github.event.pull_request.base.ref }}
       testedClassesModuleName: liquibase-standard
-      dbPlatforms: h2,hsqldb,mariadb,mssql,mysql,oracle,postgresql,sqlite,firebird,db2
     secrets: inherit
 
   run-build-publish-file:
