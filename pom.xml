@@ -83,6 +83,8 @@
         <sonar.projectName>Liquibase</sonar.projectName>
         <sonar.projectDescription>Liquibase</sonar.projectDescription>
         <sonar.projectKey>liquibase</sonar.projectKey>
+        <sonar.organization>liquibase</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
         <code.coverage.project.folder>${basedir}/../</code.coverage.project.folder>
         <code.coverage.overall.data.folder>${basedir}/target/</code.coverage.overall.data.folder>      
