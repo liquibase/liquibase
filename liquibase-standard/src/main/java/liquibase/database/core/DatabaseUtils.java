@@ -60,7 +60,7 @@ public class DatabaseUtils {
                         });
                     }
 
-                    executor.execute(new RawParameterizedSqlStatement(String.format("SET SEARCH_PATH TO %s", finalSearchPath)));
+                    executor.execute(new RawParameterizedSqlStatement(String.format("SET LOCAL SEARCH_PATH TO %s", finalSearchPath)));
                 }
 
             } else if (database instanceof AbstractDb2Database) {
