@@ -1214,6 +1214,10 @@ public class Liquibase implements AutoCloseable {
         });
     }
 
+    public Collection<RanChangeSet> listUnexpectedChangeSets() throws LiquibaseException {
+        return listUnexpectedChangeSets(new Contexts(), new LabelExpression());
+    }
+
     public Collection<RanChangeSet> listUnexpectedChangeSets(String contexts) throws LiquibaseException {
         return listUnexpectedChangeSets(new Contexts(contexts), new LabelExpression());
     }
