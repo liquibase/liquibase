@@ -111,7 +111,15 @@ public class UniqueConstraintExistsPrecondition extends AbstractPrecondition {
 		}
 
 		try {
-			if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
+			boolean constraintExists;
+
+			if (database.supportsEfficientPreconditionChecks()) {
+				constraintExists = SnapshotGeneratorFactory.getInstance().hasIgnoreNested(example, database);
+			} else {
+				constraintExists = SnapshotGeneratorFactory.getInstance().has(example, database);
+			}
+
+			if (!constraintExists) {
 				throw new PreconditionFailedException(String.format("%s does not exist", example), changeLog, this);
 			}
 		} catch (DatabaseException | InvalidExampleException e) {

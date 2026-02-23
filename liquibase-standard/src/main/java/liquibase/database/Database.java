@@ -679,6 +679,16 @@ public interface Database extends PrioritizedService, AutoCloseable {
     }
 
     /**
+     * Does the database support efficient precondition existence checks using hasIgnoreNested()?
+     * Some databases (Derby, H2, Oracle) require full nested object searches to correctly identify
+     * tables and views, while others (DB2) can efficiently check existence without nested searches.
+     * @return true if the database supports efficient existence checks, false otherwise (default)
+     */
+    default boolean supportsEfficientPreconditionChecks() {
+        return false;
+    }
+
+    /**
      * Some databases (such as MongoDB) require you to verify the connection to the database
      * to ensure that the database is accessible.
      * It can be "ping" signal to the database
