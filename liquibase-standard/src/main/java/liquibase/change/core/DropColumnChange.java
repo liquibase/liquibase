@@ -19,10 +19,7 @@ import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -168,7 +165,9 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
         // Since SQLite does not support a drop column statement, use alter table visitor to copy the table
         // except for the column (and index containing that column) to delete.
 
-        Set<String> removedColumnNames = columns.stream().map(ColumnConfig::getName).collect(Collectors.toSet());
+        Set<String> removedColumnNames;
+        if (isMultiple()) removedColumnNames = columns.stream().map(ColumnConfig::getName).collect(Collectors.toSet());
+        else removedColumnNames = Collections.singleton(columnName);
 
         SQLiteDatabase.AlterTableVisitor alterTableVisitor = new SQLiteDatabase.AlterTableVisitor() {
             @Override
