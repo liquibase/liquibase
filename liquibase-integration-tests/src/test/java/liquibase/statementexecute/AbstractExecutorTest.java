@@ -6,9 +6,7 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.core.MariaDBDatabase;
 import liquibase.database.core.MockDatabase;
-import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.UnsupportedDatabase;
 import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -18,8 +16,6 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.extension.testing.testsystem.TestSystemFactory;
-import liquibase.extension.testing.testsystem.core.MariaDBTestSystem;
-import liquibase.extension.testing.testsystem.core.MySQLTestSystem;
 import liquibase.listener.SqlListener;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -41,7 +37,7 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public abstract class AbstractExecuteTest {
+public abstract class AbstractExecutorTest {
 
     protected SqlStatement statementUnderTest;
     private Set<Class<? extends Database>> testedDatabases = new HashSet<Class<? extends Database>>();

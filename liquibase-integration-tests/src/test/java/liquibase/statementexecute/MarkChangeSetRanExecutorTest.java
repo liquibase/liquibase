@@ -15,7 +15,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
-public class MarkChangeSetRanExecuteTest extends AbstractExecuteTest {
+public class MarkChangeSetRanExecutorTest extends AbstractExecutorTest {
 
     @Override
     protected List<? extends SqlStatement> setupStatements(Database database) {
