@@ -415,26 +415,29 @@ create table table1 (
 );
 """.trim()
 
-    private static final String INVALID_CHANGELOG_WITH_LEXICAL_ERROR =
-"""-- liquibase formatted sql
-
--- changeset postgres:1
-CREATE TABLE public.PersonsMe (
-    PersonID int,
-    LastName varchar(255),
-    FirstName varchar(255),
-    Address varchar(255),
-    City varchar(255)
-);
-
--- changeset postgres:2
-CREATE TABLE public.Persons (
-    PersonID int�
-    LastName varchar(255),
-    FirstName varchar(255),
-    Address varchar(255),
-    City varchar(255)
-);"""
+    // Construct at runtime to prevent Groovy compiler from stripping the invalid character on Windows/non-UTF-8 locales
+    // Using \u0000 (null byte) instead of \uFFFD since it reliably triggers lexical errors across all platforms
+    private static final String INVALID_CHANGELOG_WITH_LEXICAL_ERROR = [
+        "-- liquibase formatted sql",
+        "",
+        "-- changeset postgres:1",
+        "CREATE TABLE public.PersonsMe (",
+        "    PersonID int,",
+        "    LastName varchar(255),",
+        "    FirstName varchar(255),",
+        "    Address varchar(255),",
+        "    City varchar(255)",
+        ");",
+        "",
+        "-- changeset postgres:2",
+        "CREATE TABLE public.Persons (",
+        "    PersonID int" + "\u0000",
+        "    LastName varchar(255),",
+        "    FirstName varchar(255),",
+        "    Address varchar(255),",
+        "    City varchar(255)",
+        ");"
+    ].join("\n")
 
     private static final String INVALID_CHANGELOG_WITH_DUPLICATE_HEADERS =
 """
