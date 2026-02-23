@@ -697,10 +697,12 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     databasePrefix = "[" + databaseName + "].";
                 }
 
+                String jdbcSchemaName =
+                    ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
                 String sql = "select " +
                         "db_name(" + (databaseName == null ? "" : "db_id('" + databaseName + "')") + ") AS TABLE_CAT, " +
-                        "object_schema_name(c.object_id" + dbIdParam + ") AS TABLE_SCHEM, " +
-                        "object_name(c.object_id" + dbIdParam + ") AS TABLE_NAME, " +
+                        "isnull(object_schema_name(c.object_id" + dbIdParam + "),'" + jdbcSchemaName + "') AS TABLE_SCHEM, " +
+                        "object_name(c.object_id) AS TABLE_NAME, " +
                         "c.name AS COLUMN_NAME, " +
                         "is_filestream AS IS_FILESTREAM, " +
                         "is_rowguidcol AS IS_ROWGUIDCOL, " +
@@ -756,18 +758,20 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         "inner join " + databasePrefix + "sys.types t on c.user_type_id=t.user_type_id " +
                         "{REMARKS_JOIN_PLACEHOLDER}" +
                         "left outer join " + databasePrefix + "sys.default_constraints dc on dc.parent_column_id = c.column_id AND dc.parent_object_id=c.object_id AND type_desc='DEFAULT_CONSTRAINT' " +
-                        "WHERE object_schema_name(c.object_id" + dbIdParam + ")='" + ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema) + "'";
+                        "WHERE isnull(object_schema_name(c.object_id" + dbIdParam + "),'"+ jdbcSchemaName+"') = '" + jdbcSchemaName
+                    + "'";
 
 
                 if (!bulk) {
                     if (tableName != null) {
-                        sql += " and object_name(c.object_id" + dbIdParam + ")='" + database.escapeStringForDatabase(tableName) + "'";
+                        sql += " and object_name(c.object_id)='" + database.escapeStringForDatabase(tableName) + "'";
                     }
                     if (columnName != null) {
                         sql += " and c.name='" + database.escapeStringForDatabase(columnName) + "'";
                     }
                 }
-                sql += "order by object_schema_name(c.object_id" + dbIdParam + "), object_name(c.object_id" + dbIdParam + "), c.column_id";
+                sql += "order by isnull(object_schema_name(c.object_id" + dbIdParam + "),'"
+                    + jdbcSchemaName + "'), object_name(c.object_id), c.column_id";
 
 
                 // sys.extended_properties is added to Azure on V12: https://feedback.azure.com/forums/217321-sql-database/suggestions/6549815-add-sys-extended-properties-for-meta-data-support
@@ -1283,7 +1287,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     //From select object_definition(object_id('sp_tables'))
                     String sql = "select " +
                             "db_name(" + (databaseName == null ? "" : "db_id('" + databaseName + "')") + ") AS TABLE_CAT, " +
-                            "convert(sysname,object_schema_name(o.object_id" + dbIdParam + ")) AS TABLE_SCHEM, " +
+                            "convert(sysname,isnull(object_schema_name(o.object_id" + dbIdParam + "),'" + ownerName + "')) AS TABLE_SCHEM, " +
                             "convert(sysname,o.name) AS TABLE_NAME, " +
                             "'TABLE' AS TABLE_TYPE, " +
                             "CAST(ep.value as varchar(max)) as REMARKS " +
@@ -1291,9 +1295,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "left outer join sys.extended_properties ep on ep.name='MS_Description' and major_id=o.object_id and minor_id=0 " +
                             "where " +
                             "o.type in ('U') " +
-                            "and has_perms_by_name(" + (databaseName == null ? "" : "quotename('" + databaseName + "') + '.' + ") + "quotename(object_schema_name(o.object_id" + dbIdParam + ")) + '.' + quotename(o.name), 'object', 'select') = 1 " +
+                            "and has_perms_by_name(" + (databaseName == null ? "" : "quotename('" + databaseName + "') + '.' + ") + "quotename(isnull(object_schema_name(o.object_id" + dbIdParam + "),'" + ownerName + "')) + '.' + quotename(o.name), 'object', 'select') = 1 " +
                             "and charindex(substring(o.type,1,1),'U') <> 0 " +
-                            "and object_schema_name(o.object_id" + dbIdParam + ")='" + database.escapeStringForDatabase(ownerName) + "'";
+                            "and isnull(object_schema_name(o.object_id" + dbIdParam + "),'" + ownerName +"')='" + database.escapeStringForDatabase(ownerName) + "'";
                     if (tableName != null) {
                         sql += " AND o.name='" + database.escapeStringForDatabase(tableName) + "' ";
                     }
