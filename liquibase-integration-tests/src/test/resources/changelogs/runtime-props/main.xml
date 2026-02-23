@@ -1,0 +1,62 @@
+<databaseChangeLog
+		xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+		logicalFilePath="main"
+>
+	<changeSet id="create table" author="b-gyula">
+		<createTable tableName="test">
+			<column name="id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="name" type="varchar(50)"/>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="seed Tom" author="">
+		<insert tableName="test">
+			<column name="name" value="Tom"/>
+		</insert>
+	</changeSet>
+
+	<changeSet id="read id" author="">
+		<preConditions><not> <!-- Not defined yet -->
+			<changeLogPropertyDefined property="run-prop-id"/>
+			</not>
+		</preConditions>
+		<sql resultIn="run-prop-id">SELECT id FROM test WHERE name = 'Tom'</sql>
+	</changeSet>
+
+	<changeSet id="use" author="">
+		<update tableName="test">
+			<column name="name" value="Bob"/>
+			<where>id = ${run-prop-id}</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="update Rob" author="">
+		<preConditions>
+			<sqlCheck expectedResult="Bob">SELECT name FROM test WHERE id=${run-prop-id}</sqlCheck>
+		</preConditions>
+		<sql>UPDATE test SET name = 'Rob' WHERE id=${run-prop-id}</sql>
+		<sql resultIn="runPropName">SELECT name from test where id=${run-prop-id}</sql>
+	</changeSet>
+
+	<changeSet id="insert Rob 2" author="">
+		<preConditions>
+			<changeLogPropertyDefined property="runPropName" value="Rob"/>
+		</preConditions>
+		<sqlFile resultIn="runPropName" relativeToChangelogFile="true" path="test.sql"/>
+	</changeSet>
+
+	<changeSet id="insert Rob 3" author="">
+		<preConditions> <!-- Write once like other properties -->
+			<changeLogPropertyDefined property="runPropName" value="Rob"/>
+			<sqlCheck expectedResult="Rob 2">SELECT name from test where id=2</sqlCheck>
+		</preConditions>
+		<insert tableName="test">
+			<column name="name" value="${runPropName} 3"/>
+		</insert>
+		<sql resultIn="runPropName">SELECT name from test where id=3</sql>
+	</changeSet>
+</databaseChangeLog>

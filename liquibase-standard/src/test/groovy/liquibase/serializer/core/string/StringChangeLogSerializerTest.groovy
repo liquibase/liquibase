@@ -208,19 +208,31 @@ public class StringChangeLogSerializerTest extends Specification {
         def change = new SQLFileChange();
 
         then:
-        new StringChangeLogSerializer().serialize(change, false) == "sqlFile:[\n" +
-                "    splitStatements=\"true\"\n" +
-                "    stripComments=\"false\"\n]"
+        new StringChangeLogSerializer().serialize(change, false) == """sqlFile:[
+                |    splitStatements="true"
+                |    stripComments="false"
+                |]""".stripMargin()
 
         when:
-        change.setPath("PATH/TO/File.txt");
+        String filePath = 'PATH/TO/File.txt'
+        change.setPath(filePath);
 
         then:
-        new StringChangeLogSerializer().serialize(change, false) == "sqlFile:[\n" +
-                "    path=\"PATH/TO/File.txt\"\n" +
-                "    splitStatements=\"true\"\n" +
-                "    stripComments=\"false\"\n" +
-                "]"
+        new StringChangeLogSerializer().serialize(change, false) == """sqlFile:[
+                |    path="$filePath"
+                |    splitStatements="true"
+                |    stripComments="false"
+                |]""".stripMargin()
+        when:
+        String propName = 'prop'
+        change.setSetProperty(propName)
+        then:
+        new StringChangeLogSerializer().serialize(change, false) == """sqlFile:[
+            |    path="$filePath"
+            |    setProperty="$propName"
+            |    splitStatements="true"
+            |    stripComments="false"
+            |]""".stripMargin()
     }
 
     def serialized_rawSql() {
@@ -228,18 +240,29 @@ public class StringChangeLogSerializerTest extends Specification {
         def change = new RawSQLChange();
 
         then:
-        new StringChangeLogSerializer().serialize(change, false) == "sql:[\n" +
-                "    splitStatements=\"true\"\n" +
-                "    stripComments=\"false\"\n]"
-
+        new StringChangeLogSerializer().serialize(change, false) == """sql:[
+                |    splitStatements="true"
+                |    stripComments="false"
+                |]""".stripMargin()
         when:
-        change.setSql("some SQL Here");
+        final String sql = 'some SQL Here'
+        change.setSql(sql);
         then:
-        new StringChangeLogSerializer().serialize(change, false) == "sql:[\n" +
-                "    splitStatements=\"true\"\n" +
-                "    sql=\"some SQL Here\"\n" +
-                "    stripComments=\"false\"\n" +
-                "]"
+        new StringChangeLogSerializer().serialize(change, false) == """sql:[
+                |    splitStatements="true"
+                |    sql="$sql"
+                |    stripComments="false"
+                |]""".stripMargin()
+        when:
+        String propName = 'prop'
+        change.setSetProperty(propName)
+        then:
+        new StringChangeLogSerializer().serialize(change, false) == """sql:[
+            |    setProperty="$propName"
+            |    splitStatements="true"
+            |    sql="$sql"
+            |    stripComments="false"
+            |]""".stripMargin()
     }
 
     @Unroll("#featureName: #change.class.name")

@@ -13,11 +13,16 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
+import liquibase.sql.visitor.InjectRuntimeVariablesVisitor;
+import liquibase.statement.ReturningSqlStatement;
+import liquibase.statement.ReturningSqlStatement.Property;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCompoundStatement;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.util.BooleanUtil;
 import liquibase.util.StringUtil;
+import lombok.Setter;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -27,7 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static liquibase.statement.SqlStatement.EMPTY_SQL_STATEMENT;
-
+import static liquibase.change.ChangeParameterMetaData.ALL;
+import static liquibase.change.ChangeParameterMetaData.NONE;
+import static liquibase.util.ObjectUtil.cast;
 /**
  * A common parent for all raw SQL related changes regardless of where the sql was sourced from.
  * <p>
@@ -53,6 +60,13 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     @Deprecated
     private boolean splitStatementsSet;
 
+    /**
+     *  Sets the end delimiter for splitting SQL statements. Set to
+     *  to use the default delimiter.
+     *
+     * @param endDelimiter the end delimiter to set
+     */
+    @Setter
     private String endDelimiter;
     private String sql;
     private String dbms;
@@ -120,12 +134,12 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
     @Override
     public ValidationErrors validate(Database database) {
-        ValidationErrors validationErrors = new ValidationErrors();
-        if (StringUtil.trimToNull(sql) == null) {
-            validationErrors.addError("'sql' is required");
+        ValidationErrors validationErrors = super.validate(database);
+        if(setProperty != null &&
+            getChangeSet().getChangeLog().getChangeLogParameters().hasValue(setProperty.name, setProperty.local ? getChangeSet().getChangeLog() : null)) {
+            validationErrors.addError(String.format("'%s' property is already defined! Cannot set new runtime value", setProperty));
         }
         return validationErrors;
-
     }
 
     /**
@@ -195,7 +209,6 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
     /**
      * @deprecated  To be removed when splitStatements is changed to be Boolean type
-     * @return
      */
     @Deprecated
     public boolean isSplitStatementsSet() {
@@ -218,7 +231,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      * Set the raw SQL managed by this Change. The passed sql is trimmed and set to null if an empty string is passed.
      */
     public void setSql(String sql) {
-       this.sql = StringUtil.trimToNull(sql);
+       this.sql = StringUtils.trimToNull(sql);
     }
 
     /**
@@ -235,13 +248,16 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         return service.getEndDelimiter(getChangeSet());
     }
 
-    /**
-     * Sets the end delimiter for splitting SQL statements. Set to {@code null} to use the default delimiter.
-     *
-     * @param endDelimiter the end delimiter to set
-     */
-    public void setEndDelimiter(String endDelimiter) {
-        this.endDelimiter = endDelimiter;
+    protected Property setProperty;
+
+    @DatabaseChangeProperty(description = "The name of the property to return the value into DURING RUNTIME EXECUTION",
+            exampleValue = "newId", requiredForDatabase = NONE, supportsDatabase = ALL)
+    public String getSetProperty() {
+        return null == setProperty ? null : String.valueOf(setProperty);
+    }
+
+    public void setSetProperty(String value) {
+        setProperty = new Property(StringUtils.trimToNull(value));
     }
 
     /**
@@ -273,8 +289,8 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             if (version.lowerOrEqualThan(ChecksumVersion.V8)) {
                 boolean isSplitStatements = this.isSplitStatements();
                 if (getChangeSet() != null && getChangeSet().getRunWith() != null
-                        && !BooleanUtil.isTrue(isIgnoreOriginalSplitStatements()) && !isSplitStatements) {
-                    isSplitStatements = BooleanUtil.isTrue(originalSplitStatements);
+                        && !BooleanUtils.isTrue(isIgnoreOriginalSplitStatements()) && !isSplitStatements) {
+                    isSplitStatements = BooleanUtils.isTrue(originalSplitStatements);
                 }
                 return CheckSum.compute(new NormalizingStreamV8(this.getEndDelimiter(), isSplitStatements, this.isStripComments(), stream), false);
             }
@@ -293,6 +309,12 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         }
     }
 
+    void addReturnIn( List<SqlStatement> returnStatements) {
+        if(setProperty != null) {
+            cast(returnStatements.get(returnStatements.size() - 1), ReturningSqlStatement.class)
+                    .ifPresent(stmt -> stmt.setProperty(setProperty, getChangeSet()));
+        }
+    }
 
     /**
      * Generates one or more SqlStatements depending on how the SQL should be parsed.
@@ -303,10 +325,8 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      */
     @Override
     public SqlStatement[] generateStatements(Database database) {
-
         List<SqlStatement> returnStatements = new ArrayList<>();
-
-        String sql = StringUtil.trimToNull(getSql());
+        String sql = StringUtils.trimToNull(getSql());
         if (sql == null) {
             return EMPTY_SQL_STATEMENT;
         }
@@ -315,8 +335,13 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         if (this instanceof RawSQLChange && ((RawSQLChange) this).isRerunnable()) {
             //For some reason PRINT statement execution is not working properly with PreparedStatement, so we are reverting this change for now.
             returnStatements.add(new RawSqlStatement(processedSQL, getEndDelimiter()));
+            addReturnIn(returnStatements);
             return returnStatements.toArray(EMPTY_SQL_STATEMENT);
         }
+
+        // Has to do the runtime replace, 'cause nativeSQL can remove the placeholders
+        processedSQL = InjectRuntimeVariablesVisitor.expand(processedSQL, getChangeSet().getChangeLog());
+
         for (String statement : StringUtil.processMultiLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter(), getChangeSet())) {
             if (database instanceof MSSQLDatabase) {
                 statement = statement.replaceAll("\\n", "\r\n");
@@ -338,7 +363,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
                 returnStatements.add(new RawSqlStatement(escapedStatement, getEndDelimiter()));
             }
         }
-
+        addReturnIn(returnStatements);
         return returnStatements.toArray(EMPTY_SQL_STATEMENT);
     }
 

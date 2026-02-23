@@ -30,6 +30,7 @@ import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
+import liquibase.sql.visitor.InjectRuntimeVariablesVisitor;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sql.visitor.SqlVisitorFactory;
 import liquibase.statement.SqlStatement;
@@ -45,6 +46,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static liquibase.Scope.getCurrentScope;
+import static org.apache.commons.lang3.StringUtils.trimToNull;
 
 /**
  * Encapsulates a changeSet and all its associated changes.
@@ -433,7 +435,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         if (this.contextFilter.isEmpty()) {
             contextFilter = new ContextExpression(node.getChildValue(null, "context", String.class));
         }
-        this.labels = new Labels(StringUtil.trimToNull(node.getChildValue(null, "labels", String.class)));
+        this.labels = new Labels(trimToNull(node.getChildValue(null, "labels", String.class)));
         setDbms(node.getChildValue(null, "dbms", String.class));
         this.runInTransaction = node.getChildValue(null, "runInTransaction", true);
         this.created = node.getChildValue(null, "created", String.class);
@@ -446,9 +448,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 return ((ParsedNode) obj).getValue().toString();
             }
         });
-        this.comments = StringUtil.trimToNull(this.comments);
+        this.comments = trimToNull(this.comments);
 
-        String objectQuotingStrategyString = StringUtil.trimToNull(node.getChildValue(null, "objectQuotingStrategy", String.class));
+        String objectQuotingStrategyString = trimToNull(node.getChildValue(null, "objectQuotingStrategy", String.class));
         if (changeLog != null) {
             this.objectQuotingStrategy = changeLog.getObjectQuotingStrategy();
         }
@@ -460,7 +462,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             this.objectQuotingStrategy = ObjectQuotingStrategy.LEGACY;
         }
 
-        this.logicalFilePath = StringUtil.trimToNull(node.getChildValue(null, "logicalFilePath", String.class));
+        this.logicalFilePath = trimToNull(node.getChildValue(null, "logicalFilePath", String.class));
 
         this.filePath = logicalFilePath;
         if (filePath == null) {
@@ -502,13 +504,13 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 }
                 break;
             case "modifySql":
-                String dbmsString = StringUtil.trimToNull(child.getChildValue(null, "dbms", String.class));
-                String contextFilterString = StringUtil.trimToNull(child.getChildValue(null, "contextFilter", String.class));
+                String dbmsString = trimToNull(child.getChildValue(null, "dbms", String.class));
+                String contextFilterString = trimToNull(child.getChildValue(null, "contextFilter", String.class));
                 if (contextFilterString == null) {
-                    contextFilterString = StringUtil.trimToNull(child.getChildValue(null, "context", String.class));
+                    contextFilterString = trimToNull(child.getChildValue(null, "context", String.class));
                 }
 
-                String labelsString = StringUtil.trimToNull(child.getChildValue(null, "labels", String.class));
+                String labelsString = trimToNull(child.getChildValue(null, "labels", String.class));
                 boolean applyToRollback = child.getChildValue(null, "applyToRollback", false);
 
                 Set<String> dbms = new HashSet<>();
@@ -602,7 +604,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         Object value = rollbackNode.getValue();
         if (value != null) {
             if (value instanceof String) {
-                String finalValue = StringUtil.trimToNull((String) value);
+                String finalValue = trimToNull((String) value);
                 if (finalValue != null) {
                     String[] strings = StringUtil.processMultiLineSQL(finalValue, true, true, ";", this);
                     for (String string : strings) {
@@ -650,8 +652,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
 
-    public ExecType execute(DatabaseChangeLog databaseChangeLog, Database database) throws MigrationFailedException {
-        return execute(databaseChangeLog, null, database);
+    public ExecType execute( Database database) throws MigrationFailedException {
+        return execute(changeLog, null, database);
     }
 
     private void addSkippedChangesToSummary(DatabaseChangeLog databaseChangeLog, Database database) {
@@ -755,7 +757,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             executor.modifyChangeSet(this);
 
             executor.comment("Changeset " + toString(false));
-            if (StringUtil.trimToNull(getComments()) != null) {
+            if (trimToNull(getComments()) != null) {
                 String comments = getComments();
                 String[] lines = comments.split("\\n");
                 for (int i = 0; i < lines.length; i++) {
@@ -827,7 +829,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 } else {
                     throw new UnexpectedLiquibaseException("Unexpected precondition onError attribute: " + preconditions.getOnError(), e);
                 }
-
                 database.rollback();
             } finally {
                 database.rollback();
@@ -853,7 +854,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                         if (change.generateStatementsVolatile(database)) {
                             executor.comment("WARNING The following SQL may change each run and therefore is possibly incorrect and/or invalid:");
                         }
-
+                        InjectRuntimeVariablesVisitor.addTo(sqlVisitors, changeLog);
                         String sql = addSqlMdc(change, database, false);
                         this.getGeneratedSql().add(sql);
 
@@ -1247,7 +1248,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         if ((changeSetContext != null) && !changeSetContext.isEmpty()) {
             appendContext(contextExpression, changeSetContext.toString(), notFirstContext);
         }
-        return StringUtil.trimToNull(contextExpression.toString());
+        return trimToNull(contextExpression.toString());
     }
 
     /**
@@ -1266,7 +1267,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         if ((changeSetLabels != null) && !changeSetLabels.isEmpty()) {
             appendLabels(labels, changeSetLabels.toString(), notFirstLabel);
         }
-        return StringUtil.trimToNull(labels.toString());
+        return trimToNull(labels.toString());
     }
 
     private void appendLabels(StringBuilder existingLabels, String labelToAppend, boolean notFirstContext) {
@@ -1334,7 +1335,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     public void addRollBackSQL(String sql) {
-        if (StringUtil.trimToNull(sql) == null) {
+        if (trimToNull(sql) == null) {
             if (rollback.getChanges().isEmpty()) {
                 rollback.getChanges().add(new EmptyChange());
             }
@@ -1554,7 +1555,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
 
         if ("comment".equals(field)) {
-            return StringUtil.trimToNull(this.getComments());
+            return trimToNull(this.getComments());
         }
 
         if ("objectQuotingStrategy".equals(field)) {
