@@ -7,6 +7,7 @@ import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 import liquibase.util.StringUtil;
@@ -158,6 +159,23 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
         final String expectedPrimaryKeyName = "name_" + StringUtil.repeat("\u03A9", 15) + "_pkey";
 
         assertPrimaryKeyName(expectedPrimaryKeyName, this.database.generatePrimaryKeyName(nameWith15NonAsciiSymbols));
+    }
+
+    @Test
+    void rollbackUsesEscapedSchemaName() {
+        PostgresDatabase database = new PostgresDatabase();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+        database.setDefaultSchemaName("4b5d63f449304c05a291c4c27136ebb5");
+
+        String escaped = database.escapeObjectName(
+                database.getDefaultSchemaName(),
+                Schema.class
+        );
+
+        assertEquals(
+                "\"4b5d63f449304c05a291c4c27136ebb5\"",
+                escaped
+        );
     }
 
 //    @Test
