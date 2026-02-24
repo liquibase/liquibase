@@ -13,7 +13,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AddAutoIncrementExecuteTest extends AbstractExecuteTest {
+public class AddAutoIncrementExecutorTest extends AbstractExecutorTest {
 
     protected static final String TABLE_NAME = "table_name";
     protected static final String COLUMN_NAME = "column_name";

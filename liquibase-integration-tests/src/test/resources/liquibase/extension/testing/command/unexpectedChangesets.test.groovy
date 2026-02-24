@@ -75,6 +75,44 @@ Optional Args:
         ]
     }
 
+    run "Happy path with 1 unexpected", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                verbose      : "true",
+                changelogFile: "changelogs/h2/complete/unexpected.tag.changelog.xml",
+        ]
+
+        setup {
+            syncChangelog "changelogs/h2/complete/rollback.sql.changelog.xml"
+        }
+
+        expectedOutput = """
+1 unexpected change was found in LBUSER@jdbc:h2:mem:lbcat
+     changelogs/h2/complete/rollback.sql.changelog.xml::1::me
+"""
+    }
+
+    run "Verbose false with 1 unexpected", {
+        arguments = [
+                url:        { it.url },
+                username:   { it.username },
+                password:   { it.password },
+                verbose      : "false",
+                changelogFile: "changelogs/h2/complete/unexpected.tag.changelog.xml",
+        ]
+
+        setup {
+            syncChangelog "changelogs/h2/complete/rollback.sql.changelog.xml"
+        }
+
+        expectedOutput = [
+                CommandTests.assertContains("1 unexpected change was found in LBUSER@jdbc:h2:mem:lbcat"),
+                CommandTests.assertNotContains("changelogs/h2/complete/rollback.sql.changelog.xml::1::me"),
+        ]
+    }
+
     run "Run without a URL should throw an exception",  {
         arguments = [
                 url          : "",

@@ -73,13 +73,13 @@
         <commons-collections4.version>4.5.0</commons-collections4.version>
         <commons-text.version>1.15.0</commons-text.version>
         <ant.version>1.10.15</ant.version>
-        <junit-jupiter.version>6.0.2</junit-jupiter.version>
+        <junit-jupiter.version>6.0.3</junit-jupiter.version>
         <groovy.version>5.0.4</groovy.version>
         <spock.version>2.4-groovy-5.0</spock.version>
-        <spring.version>7.0.3</spring.version>
-        <maven-failsafe-plugin.version>3.5.4</maven-failsafe-plugin.version>
+        <spring.version>7.0.5</spring.version>
+        <maven-failsafe-plugin.version>3.5.5</maven-failsafe-plugin.version>
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
-        <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+        <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
         <sonar.projectName>Liquibase</sonar.projectName>
         <sonar.projectDescription>Liquibase</sonar.projectDescription>
         <sonar.projectKey>liquibase</sonar.projectKey>
@@ -275,7 +275,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.9</version>
+            <version>42.7.10</version>
             <scope>test</scope>
         </dependency>
 
@@ -303,14 +303,14 @@
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.51.1.0</version>
+            <version>3.51.2.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.28.0</version>
+            <version>4.0.1</version>
             <scope>test</scope>
         </dependency>
 
@@ -341,7 +341,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.14.1</version>
+                <version>3.15.0</version>
             </plugin>
 
             <plugin>
@@ -377,7 +377,7 @@
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>4.3.0</version>
+                <version>4.3.1</version>
                 <executions>
                     <execution>
                         <goals>

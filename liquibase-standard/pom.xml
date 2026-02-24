@@ -112,7 +112,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>6.0.2</version>
+            <version>6.0.3</version>
             <scope>test</scope>
         </dependency>
 
@@ -224,7 +224,7 @@
             <plugin>
                 <groupId>org.javacc.plugin</groupId>
                 <artifactId>javacc-maven-plugin</artifactId>
-                <version>3.0.3</version>
+                <version>3.8.0</version>
                 <dependencies>
                     <dependency>
                         <groupId>net.java.dev.javacc</groupId>
