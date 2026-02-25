@@ -62,6 +62,8 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
      */
     public static final String DEFAULT_COMMENT_PATTERN = "#";
     public static final Pattern BASE64_PATTERN = Pattern.compile("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$");
+    private static final Pattern BIT_LITERAL_PATTERN = Pattern.compile("(?i)^b'([01]+)'(::bit.*)?$");
+    private static final Pattern BINARY_STRING_PATTERN = Pattern.compile("^[01]+$");
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     @Setter
     private String file;
@@ -738,7 +740,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
 
         // Already a PostgreSQL bit literal (e.g., "B'101010'" or "b'101010'")
         // Pattern matches: b'[01]+' (case-insensitive) with optional ::bit cast
-        java.util.regex.Matcher bitLiteralMatcher = Pattern.compile("(?i)^b'([01]+)'(::bit.*)?$").matcher(value);
+        java.util.regex.Matcher bitLiteralMatcher = BIT_LITERAL_PATTERN.matcher(value);
         if (bitLiteralMatcher.matches()) {
             // Extract the bit string and return in uppercase format
             String bitString = bitLiteralMatcher.group(1);
@@ -753,7 +755,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         }
 
         // Pure binary string (e.g., "101010" - only contains 0s and 1s)
-        if (value.matches("^[01]+$")) {
+        if (BINARY_STRING_PATTERN.matcher(value).matches()) {
             return "B'" + value + "'";
         }
 
