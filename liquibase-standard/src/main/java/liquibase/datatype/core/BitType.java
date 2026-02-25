@@ -17,6 +17,9 @@ import java.util.regex.Pattern;
 @DataTypeInfo(name = "bit", minParameters = 0, maxParameters = 2, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class BitType extends LiquibaseDataType {
 
+    private static final Pattern PG_BIT_LITERAL_PATTERN = Pattern.compile("(?i)b'([01]+)'(::bit.*)?");
+    private static final Pattern BINARY_STRING_PATTERN = Pattern.compile("[01]+");
+
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
@@ -72,7 +75,7 @@ public class BitType extends LiquibaseDataType {
             String strValue = value.toString().trim();
 
             // Already formatted as PostgreSQL bit literal - normalize to uppercase
-            Matcher bitLiteralMatcher = Pattern.compile("(?i)b'([01]+)'(::bit.*)?").matcher(strValue);
+            Matcher bitLiteralMatcher = PG_BIT_LITERAL_PATTERN.matcher(strValue);
             if (bitLiteralMatcher.matches()) {
                 String bitString = bitLiteralMatcher.group(1);
                 String cast = bitLiteralMatcher.group(2);
@@ -83,7 +86,7 @@ public class BitType extends LiquibaseDataType {
                 }
             }
             // Binary string (e.g., "101010")
-            if (Pattern.matches("[01]+", strValue)) {
+            if (BINARY_STRING_PATTERN.matcher(strValue).matches()) {
                 return "B'" + strValue + "'";
             }
 

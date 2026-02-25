@@ -7,6 +7,7 @@ import liquibase.database.core.PostgresDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.datatype.core.BitType;
 import liquibase.datatype.core.BooleanType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
@@ -147,6 +148,19 @@ public class AddNotNullConstraintChange extends AbstractChange {
                             finalDefaultNullValue = new DatabaseFunction( "B'0'");
                         } else if (finalDefaultNullValue.equals(1)) {
                             finalDefaultNullValue = new DatabaseFunction( "B'1'");
+                        }
+                    }
+                } else if (datatype instanceof BitType) {
+                    if (database instanceof PostgresDatabase) {
+                        String sqlValue = datatype.objectToSql(finalDefaultNullValue, database);
+                        if (sqlValue != null) {
+                            finalDefaultNullValue = new DatabaseFunction(sqlValue);
+                        }
+                    } else {
+                        if (BooleanUtil.parseBoolean(finalDefaultNullValue.toString())) {
+                            finalDefaultNullValue = 1;
+                        } else {
+                            finalDefaultNullValue = 0;
                         }
                     }
                 }

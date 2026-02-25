@@ -5,7 +5,7 @@ import liquibase.database.core.MySQLDatabase
 import liquibase.statement.core.SetNullableStatement
 import liquibase.statement.core.UpdateStatement
 
-public class AddNotNullConstraintChangeTest extends StandardChangeTest {
+class AddNotNullConstraintChangeTest extends StandardChangeTest {
 
     def getConfirmationMessage() throws Exception {
         when:
@@ -101,7 +101,7 @@ public class AddNotNullConstraintChangeTest extends StandardChangeTest {
         def update = (UpdateStatement) output[0]
         update.getTableName() == "xxx"
         update.getNewColumnValues().size() == 1
-        update.getNewColumnValues().get("col_name") == "1"
+        update.getNewColumnValues().get("col_name") == 1
         update.getWhereClause() == "col_name IS NULL"
 
         output[1] instanceof SetNullableStatement
