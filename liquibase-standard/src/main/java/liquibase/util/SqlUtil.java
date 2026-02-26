@@ -128,7 +128,13 @@ public abstract class SqlUtil {
         } else if (stringVal.startsWith("('") && stringVal.endsWith("')")) {
             stringVal = stringVal.substring(2, stringVal.length() - 2);
         } else if (stringVal.startsWith("(") && stringVal.endsWith(")")) {
-            return new DatabaseFunction(stringVal.substring(1, stringVal.length() - 1));
+            // Special case for PostgreSQL BIT defaults like (0)::bit(1) - don't treat as DatabaseFunction
+            // Let it fall through to BIT-specific parsing logic
+            if (!(typeId == Types.BIT && database instanceof PostgresDatabase && stringVal.contains("::bit"))) {
+                return new DatabaseFunction(stringVal.substring(1, stringVal.length() - 1));
+            }
+            // For PostgreSQL BIT, strip outer parentheses and continue to BIT handling
+            stringVal = stringVal.substring(1, stringVal.length() - 1);
         }
 
         String typeName = type.getTypeName();
@@ -144,24 +150,74 @@ public abstract class SqlUtil {
             } else if (typeId == Types.BINARY) {
                 return new DatabaseFunction(stringVal.trim());
             } else if (typeId == Types.BIT) {
-                if (stringVal.startsWith("b'") || stringVal.startsWith("B'")) { //mysql returns boolean values as b'0' and b'1'
-                    stringVal = stringVal.replaceFirst("b'", "").replaceFirst("B'", "").replaceFirst("'$", "");
-                }
-                //postgres defaults for bit columns look like: B'0'::"bit"
-                if (stringVal.endsWith("'::\"bit\"")) {
-                    stringVal = stringVal.replaceFirst("'::\"bit\"", "");
+                //postgres defaults for bit columns look like: B'0'::"bit", '0'::bit(1), ('0')::bit(1), or 0::bit(1)
+                if (database instanceof PostgresDatabase) {
+                    // Strip B'...' format: B'0' or B'1'
+                    if (stringVal.startsWith("B'") && stringVal.indexOf('\'', 2) >= 0) {
+                        stringVal = stringVal.substring(2); // Remove "B'"
+                        stringVal = stringVal.replaceFirst("'.*$", ""); // Remove trailing ' and anything after
+                    }
+                    // Strip '...'::bit format: '0'::bit(1) or '1'::bit
+                    else if (stringVal.startsWith("'") && stringVal.contains("'::")) {
+                        stringVal = stringVal.substring(1); // Remove leading '
+                        stringVal = stringVal.replaceFirst("'::.*$", ""); // Remove from ' onwards
+                    }
+                    // Strip ('...')::bit format: ('0')::bit(1) - from snapshot defaults
+                    else if (stringVal.startsWith("('") && stringVal.contains("')::bit")) {
+                        stringVal = stringVal.substring(2); // Remove "('
+                        stringVal = stringVal.replaceFirst("'\\)::\\s*bit.*$", ""); // Remove from ') onwards
+                    }
+                    // Strip )::bit format: 0)::bit(1) - from CREATE TABLE defaults
+                    else if (stringVal.contains(")::bit")) {
+                        stringVal = stringVal.replaceFirst("\\)::\\s*bit.*$", "");
+                        // If after stripping we still have a leading (, remove it
+                        if (stringVal.startsWith("(")) {
+                            stringVal = stringVal.substring(1);
+                        }
+                    }
+                    // Strip just outer quotes if present (fallback)
+                    if (stringVal.startsWith("'") && stringVal.endsWith("'")) {
+                        stringVal = stringVal.substring(1, stringVal.length() - 1);
+                    }
+                } else if (stringVal.startsWith("b'") || stringVal.startsWith("B'")) {
+                    // MySQL returns boolean values as b'0' and b'1'
+                    stringVal = stringVal.replaceFirst("^[bB]'", "").replaceFirst("'$", "");
                 }
 
                 stringVal = stringVal.trim();
 
                 Object value = stringVal;
-                if (scanner.hasNextBoolean()) {
-                    value = scanner.nextBoolean();
-                } else if (scanner.hasNextInt()) {
-                    if (stringVal.length() > 1) {
-                        stringVal = stringVal.substring(0, 1);
+
+                // For BitType on databases where BIT is a real binary type (PostgreSQL, MySQL, MSSQL, Sybase),
+                // prefer Integer over Boolean
+                // For databases where BIT maps to BOOLEAN (H2, Firebird), use legacy Boolean parsing
+                boolean useBooleanParsing = !(liquibaseDataType instanceof BitType) ||
+                                           (database instanceof H2Database) ||
+                                           (database instanceof FirebirdDatabase);
+
+                if (useBooleanParsing) {
+                    // Legacy behavior: parse as Boolean first
+                    if (scanner.hasNextBoolean()) {
+                        value = scanner.nextBoolean();
+                    } else {
+                        // Try to parse as integer
+                        try {
+                            value = Integer.parseInt(stringVal);
+                        } catch (NumberFormatException e) {
+                            // Keep as string if not parseable as int
+                        }
                     }
-                    value = Integer.valueOf(stringVal);
+                } else {
+                    // BitType on databases where BIT is binary: parse as Integer first
+                    try {
+                        value = Integer.parseInt(stringVal);
+                    } catch (NumberFormatException e) {
+                        // Try boolean parsing
+                        if ("true".equalsIgnoreCase(stringVal) || "false".equalsIgnoreCase(stringVal)) {
+                            value = Boolean.parseBoolean(stringVal) ? 1 : 0;
+                        }
+                        // Otherwise keep as string
+                    }
                 }
 
                 // Make sure we handle BooleanType values which are not Boolean

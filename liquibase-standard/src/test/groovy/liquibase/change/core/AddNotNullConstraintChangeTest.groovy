@@ -5,7 +5,7 @@ import liquibase.database.core.MySQLDatabase
 import liquibase.statement.core.SetNullableStatement
 import liquibase.statement.core.UpdateStatement
 
-public class AddNotNullConstraintChangeTest extends StandardChangeTest {
+class AddNotNullConstraintChangeTest extends StandardChangeTest {
 
     def getConfirmationMessage() throws Exception {
         when:

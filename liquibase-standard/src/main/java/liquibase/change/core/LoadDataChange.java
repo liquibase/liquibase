@@ -62,6 +62,8 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
      */
     public static final String DEFAULT_COMMENT_PATTERN = "#";
     public static final Pattern BASE64_PATTERN = Pattern.compile("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$");
+    private static final Pattern BIT_LITERAL_PATTERN = Pattern.compile("(?i)^b'([01]+)'(::bit.*)?$");
+    private static final Pattern BINARY_STRING_PATTERN = Pattern.compile("^[01]+$");
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     @Setter
     private String file;
@@ -422,6 +424,20 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             } else {
                                 valueConfig.setValue(value);
                             }
+                        } else if(columnConfig.getTypeEnum() == LOAD_DATA_TYPE.BIT) {
+                            valueConfig.setType(columnConfig.getType());
+                            if (value == null) {
+                                valueConfig.setValueBit(columnConfig.getDefaultValueBit());
+                            } else {
+                                // For BIT(n) where n>1, parse and validate bit values
+                                if (database instanceof PostgresDatabase) {
+                                    String parsedBitValue = parseBitValue(value.trim(), lineNumber);
+                                    valueConfig.setValueComputed(new liquibase.statement.DatabaseFunction(parsedBitValue));
+                                } else {
+                                    // For other databases, use setValue to preserve the bit string
+                                    valueConfig.setValue(value);
+                                }
+                            }
                         } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.OTHER.toString())) {
                             valueConfig.setType(columnConfig.getType());
                             if (StringUtil.equalsWordNull(value)) {
@@ -706,6 +722,70 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         return StringUtils.startsWith(line[0], commentLineStartsWith);
     }
 
+    /**
+     * Parse and validate bit values for PostgreSQL BIT columns.
+     * Handles existing bit literals, binary strings, decimal integers, and boolean-like values.
+     *
+     * @param value the value from CSV
+     * @param lineNumber the current line number for error reporting
+     * @return a valid PostgreSQL bit string literal (e.g., "B'101010'")
+     * @throws UnexpectedLiquibaseException if the value is invalid
+     */
+    protected String parseBitValue(String value, int lineNumber) {
+        if (value == null || value.isEmpty()) {
+            throw new UnexpectedLiquibaseException(
+                    "CSV file " + getFile() + " Line " + lineNumber + ": BIT value cannot be empty"
+            );
+        }
+
+        // Already a PostgreSQL bit literal (e.g., "B'101010'" or "b'101010'")
+        // Pattern matches: b'[01]+' (case-insensitive) with optional ::bit cast
+        java.util.regex.Matcher bitLiteralMatcher = BIT_LITERAL_PATTERN.matcher(value);
+        if (bitLiteralMatcher.matches()) {
+            // Extract the bit string and return in uppercase format
+            String bitString = bitLiteralMatcher.group(1);
+            return "B'" + bitString + "'";
+        }
+
+        // Boolean-like values ("true", "false")
+        if ("true".equalsIgnoreCase(value)) {
+            return "B'1'";
+        } else if ("false".equalsIgnoreCase(value)) {
+            return "B'0'";
+        }
+
+        // Pure binary string (e.g., "101010" - only contains 0s and 1s)
+        if (BINARY_STRING_PATTERN.matcher(value).matches()) {
+            return "B'" + value + "'";
+        }
+
+        // Decimal integer - convert to binary
+        // This handles values like "42" -> "B'101010'"
+        try {
+            long decimalValue = Long.parseLong(value);
+            if (decimalValue < 0) {
+                throw new UnexpectedLiquibaseException(
+                        "CSV file " + getFile() + " Line " + lineNumber +
+                        ": BIT value cannot be negative: " + value
+                );
+            }
+            String binaryString = Long.toBinaryString(decimalValue);
+            return "B'" + binaryString + "'";
+        } catch (NumberFormatException e) {
+            // Not a valid decimal number, fall through to error
+        }
+
+        // Invalid format - throw error with helpful message
+        throw new UnexpectedLiquibaseException(
+                "CSV file " + getFile() + " Line " + lineNumber +
+                ": Invalid BIT value '" + value + "'. Expected formats: " +
+                "binary string (e.g., '101010'), " +
+                "decimal integer (e.g., '42'), " +
+                "boolean (e.g., 'true' or 'false'), " +
+                "or PostgreSQL bit literal (e.g., \"B'101010'\")"
+        );
+    }
+
     @Override
     public boolean generateStatementsVolatile(Database database) {
         return true;
@@ -933,7 +1013,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
 
     @SuppressWarnings("HardCodedStringLiteral")
     public enum LOAD_DATA_TYPE {
-        BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE, BLOB, CLOB, SKIP, UUID, OTHER, UNKNOWN
+        BIT, BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE, BLOB, CLOB, SKIP, UUID, OTHER, UNKNOWN
     }
 
     protected static class LoadDataRowConfig {

@@ -65,6 +65,8 @@ public class CreateTableChangeTest extends StandardChangeTest {
             columnConfig.setDefaultValue(defaultValue)
         } else if (method == "defaultValueBoolean") {
             columnConfig.setDefaultValueBoolean(defaultValue)
+        } else if (method == "defaultValueBit") {
+            columnConfig.setDefaultValueBit(defaultValue)
         } else if (method == "defaultValueNumeric") {
             columnConfig.setDefaultValueNumeric(defaultValue)
         } else if (method == "defaultValueDate") {
@@ -94,6 +96,10 @@ public class CreateTableChangeTest extends StandardChangeTest {
         Boolean.FALSE                             | "defaultValueBoolean"      | "SAME"
         "true"                                    | "defaultValueBoolean"      | Boolean.TRUE
         "false"                                   | "defaultValueBoolean"      | Boolean.FALSE
+        0                                         | "defaultValueBit"          | "SAME"
+        1                                         | "defaultValueBit"          | "SAME"
+        "0"                                       | "defaultValueBit"          | 0
+        "1"                                       | "defaultValueBit"          | 1
         42L                                       | "defaultValueNumeric"      | "SAME"
         15.23                                     | "defaultValueNumeric"      | 15.23
         "52"                                      | "defaultValueNumeric"      | 52L
@@ -104,6 +110,27 @@ public class CreateTableChangeTest extends StandardChangeTest {
         new SequenceNextValueFunction("seq_name") | "defaultValueSequenceNext" | "SAME"
     }
 
+    def "CREATE TABLE with BIT column and numeric default"() {
+        when:
+        def change = new CreateTableChange()
+        change.setTableName("test_table")
+        def column = new ColumnConfig()
+        column.setName("bit_col")
+        column.setType("BIT")
+        column.setDefaultValueNumeric("0")
+        change.addColumn(column)
+
+        def statements = change.generateStatements(new PostgresDatabase())
+        def sql = SqlGeneratorFactory.getInstance().generateSql(statements[0], new PostgresDatabase())
+
+        then:
+        statements.length == 1
+        statements[0] instanceof CreateTableStatement
+        statements[0].getDefaultValue("bit_col") == 0
+        sql[0].toString().contains("DEFAULT B'0'")
+        !sql[0].toString().contains("DEFAULT FALSE")
+        !sql[0].toString().contains("DEFAULT false")
+    }
 
     def createInverse() {
         when:
