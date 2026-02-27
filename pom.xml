@@ -94,7 +94,7 @@
         <surefire.failIfNoTests>true</surefire.failIfNoTests>
         <opencsv.version>5.12.0</opencsv.version>
         <jaxb-api.version>2.3.1</jaxb-api.version>
-        <mockito.version>5.21.0</mockito.version>
+        <mockito.version>5.22.0</mockito.version>
     </properties>
 
     <!-- comment -->
