@@ -359,13 +359,13 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         return 0;
     }
 
-    /*
-     * list from http://dev.mysql.com/doc/refman/5.6/en/reserved-words.html
+    /**
+     * List of reserved keywords from <a href="https://dev.mysql.com/doc/refman/5.7/en/keywords.html">MySQL 5.7 Keywords and Reserved Words</a>.
+     * Keywords that were added in later versions are handled in the function {@link #addMySQLVersionedReservedWords()}.
      */
     private static Set<String> createReservedWords() {
         return new HashSet<>(Arrays.asList("ACCESSIBLE",
                 "ADD",
-                "ADMIN",
                 "ALL",
                 "ALTER",
                 "ANALYZE",
@@ -379,7 +379,6 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "BINARY",
                 "BLOB",
                 "BOTH",
-                "BUCKETS",
                 "BY",
                 "CALL",
                 "CASCADE",
@@ -396,10 +395,6 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "CONVERT",
                 "CREATE",
                 "CROSS",
-                "CLONE",
-                "COMPONENT",
-                "CUBE",
-                "CUME_DIST",
                 "CURRENT_DATE",
                 "CURRENT_TIME",
                 "CURRENT_TIMESTAMP",
@@ -415,13 +410,10 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "DECIMAL",
                 "DECLARE",
                 "DEFAULT",
-                "DEFINITION",
                 "DELAYED",
                 "DELETE",
-                "DENSE_RANK",
                 "DESC",
                 "DESCRIBE",
-                "DESCRIPTION",
                 "DETERMINISTIC",
                 "DISTINCT",
                 "DISTINCTROW",
@@ -432,38 +424,27 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "EACH",
                 "ELSE",
                 "ELSEIF",
-                "EMPTY",
                 "ENCLOSED",
                 "ESCAPED",
-                "EXCEPT",
-                "EXCLUDE",
                 "EXISTS",
                 "EXIT",
                 "EXPLAIN",
                 "FALSE",
                 "FETCH",
-                "FIRST_VALUE",
                 "FLOAT",
                 "FLOAT4",
                 "FLOAT8",
-                "FOLLOWING",
                 "FOR",
                 "FORCE",
                 "FOREIGN",
                 "FROM",
                 "FULLTEXT",
-                "GEOMCOLLECTION",
                 "GENERATED",
                 "GET",
-                "GET_MASTER_PUBLIC_KEY",
                 "GRANT",
                 "GROUP",
-                "GROUPING",
-                "GROUPS",
                 "HAVING",
                 "HIGH_PRIORITY",
-                "HISTOGRAM",
-                "HISTORY",
                 "HOUR_MICROSECOND",
                 "HOUR_MINUTE",
                 "HOUR_SECOND",
@@ -485,17 +466,14 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "INTEGER",
                 "INTERVAL",
                 "INTO",
+                "IO_AFTER_GTIDS",
+                "IO_BEFORE_GTIDS",
                 "IS",
                 "ITERATE",
-                "INVISIBLE",
                 "JOIN",
-                "JSON_TABLE",
                 "KEY",
                 "KEYS",
                 "KILL",
-                "LAG",
-                "LAST_VALUE",
-                "LEAD",
                 "LEADING",
                 "LEAVE",
                 "LEFT",
@@ -507,13 +485,12 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "LOCALTIME",
                 "LOCALTIMESTAMP",
                 "LOCK",
-                "LOCKED",
                 "LONG",
                 "LONGBLOB",
                 "LONGTEXT",
                 "LOOP",
                 "LOW_PRIORITY",
-                "MASTER_PUBLIC_KEY_PATH",
+                "MASTER_BIND",
                 "MASTER_SSL_VERIFY_SERVER_CERT",
                 "MATCH",
                 "MAXVALUE",
@@ -526,16 +503,10 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "MOD",
                 "MODIFIES",
                 "NATURAL",
-                "NESTED",
                 "NOT",
-                "NOWAIT",
                 "NO_WRITE_TO_BINLOG",
-                "NTH_VALUE",
-                "NTILE",
                 "NULL",
-                "NULLS",
                 "NUMERIC",
-                "OF",
                 "ON",
                 "OPTIMIZE",
                 "OPTIMIZER_COSTS",
@@ -543,52 +514,32 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "OPTIONALLY",
                 "OR",
                 "ORDER",
-                "ORDINALITY",
-                "ORGANIZATION",
                 "OUT",
                 "OUTER",
                 "OUTFILE",
-                "OTHERS",
-                "OVER",
                 "PARTITION",
-                "PATH",
-                "PERCENT_RANK",
-                "PERSIST",
-                "PERSIST_ONLY",
-                "PRECEDING",
                 "PRECISION",
                 "PRIMARY",
                 "PROCEDURE",
-                "PROCESS",
                 "PURGE",
                 "RANGE",
-                "RANK",
                 "READ",
                 "READS",
                 "READ_WRITE",
                 "REAL",
-                "RECURSIVE",
-                "REFERENCE",
                 "REFERENCES",
                 "REGEXP",
                 "RELEASE",
-                "REMOTE",
                 "RENAME",
                 "REPEAT",
                 "REPLACE",
                 "REQUIRE",
                 "RESIGNAL",
-                "RESOURCE",
-                "RESPECT",
-                "RESTART",
                 "RESTRICT",
                 "RETURN",
-                "REUSE",
                 "REVOKE",
                 "RIGHT",
                 "RLIKE",
-                "ROLE",
-                "ROW_NUMBER",
                 "SCHEMA",
                 "SCHEMAS",
                 "SECOND_MICROSECOND",
@@ -598,7 +549,6 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "SET",
                 "SHOW",
                 "SIGNAL",
-                "SKIP",
                 "SMALLINT",
                 "SPATIAL",
                 "SPECIFIC",
@@ -609,17 +559,13 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "SQL_BIG_RESULT",
                 "SQL_CALC_FOUND_ROWS",
                 "SQL_SMALL_RESULT",
-                "SRID",
                 "SSL",
                 "STARTING",
                 "STORED",
                 "STRAIGHT_JOIN",
-                "SYSTEM",
                 "TABLE",
                 "TERMINATED",
                 "THEN",
-                "THREAD_PRIORITY",
-                "TIES",
                 "TINYBLOB",
                 "TINYINT",
                 "TINYTEXT",
@@ -627,7 +573,6 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "TRAILING",
                 "TRIGGER",
                 "TRUE",
-                "UNBOUNDED",
                 "UNDO",
                 "UNION",
                 "UNIQUE",
@@ -645,13 +590,10 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "VARCHAR",
                 "VARCHARACTER",
                 "VARYING",
-                "VCPU",
-                "VISIBLE",
                 "VIRTUAL",
                 "WHEN",
                 "WHERE",
                 "WHILE",
-                "WINDOW",
                 "WITH",
                 "WRITE",
                 "XOR",
@@ -713,19 +655,71 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
      * Adds reserved words that were introduced for a specific version of MySQL. For an overview of 
      * changes to 8.0, please see: <a href="https://dev.mysql.com/doc/refman/8.0/en/keywords.html">
      * Keywords and Reserved Words</a>.
+     * Use this JS snippet on the page to extract the list of reserved words:
+     * <pre>
+     * console.log($x("//div[contains(@class, 'simplesect')][.//a[@name='keywords-in-current-series']]//li[@class='listitem']//p[contains(., '(R)')]/code").map(x => `"${x.textContent}"`).join(",\n"))
+     * </pre>
      */
     private void addMySQLVersionedReservedWords() {
         try {
-            // words that became reserved in 8.4
-            if(getDatabaseMajorVersion() >= 9 || (getDatabaseMajorVersion() == 8 && getDatabaseMinorVersion() >= 4)) {
-                reservedWords.add("MANUAL");
-            }
-            
+            int major = getDatabaseMajorVersion();
+            int minor = getDatabaseMinorVersion();
+
             // words that became reserved in 8.0
-            if(getDatabaseMajorVersion() >= 8){
-                reservedWords.add("FUNCTION");
-                reservedWords.add("ROW");
-                reservedWords.add("ROWS");
+            if (major >= 8) {
+                reservedWords.addAll(List.of("CUBE",
+                        "CUME_DIST",
+                        "DENSE_RANK",
+                        "EMPTY",
+                        "EXCEPT",
+                        "FIRST_VALUE",
+                        "FUNCTION",
+                        "GROUPING",
+                        "GROUPS",
+                        "INTERSECT",
+                        "JSON_TABLE",
+                        "LAG",
+                        "LAST_VALUE",
+                        "LATERAL",
+                        "LEAD",
+                        "NTH_VALUE",
+                        "NTILE",
+                        "OF",
+                        "OVER",
+                        "PERCENT_RANK",
+                        "RANK",
+                        "RECURSIVE",
+                        "ROW",
+                        "ROWS",
+                        "ROW_NUMBER",
+                        "SYSTEM",
+                        "WINDOW"
+                ));
+            }
+
+            // words that became reserved in 8.4
+            if (major >= 9 || (major == 8 && minor >= 4)) {
+                reservedWords.remove("MASTER_BIND");
+                reservedWords.remove("MASTER_SSL_VERIFY_SERVER_CERT");
+                reservedWords.add("MANUAL");
+                reservedWords.add("PARALLEL");
+                reservedWords.add("QUALIFY");
+                reservedWords.add("TABLESAMPLE");
+            }
+
+            // words that became reserved in 9.3
+            if (major >= 10 || (major == 9 && minor >= 3)) {
+                reservedWords.add("LIBRARY");
+            }
+
+            // words that became reserved in 9.4
+            if (major >= 10 || (major == 9 && minor >= 4)) {
+                reservedWords.add("EXTERNAL");
+            }
+
+            // words that became reserved in 9.6
+            if (major >= 10 || (major == 9 && minor >= 6)) {
+                reservedWords.add("SETS");
             }
         } catch (DatabaseException e) {
             throw new RuntimeException(e);
