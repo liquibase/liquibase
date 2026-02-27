@@ -116,7 +116,72 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
                 include(obj);
             }
+            
+            // Discover root-level extension objects (peers to Catalog) 
+            // This enables extensions to add objects at the root level of the database hierarchy
+            discoverRootLevelExtensionObjects();
         }
+    }
+
+    /**
+     * Discovers and includes root-level extension objects (objects that are peers to Catalog).
+     * This method enables database extensions to add objects at the root level of the database hierarchy.
+     * 
+     * Root-level objects are identified by snapshot generators that return an empty array from addsTo(),
+     * indicating they are not contained within other objects but are peers to standard root objects like Catalog.
+     */
+    private void discoverRootLevelExtensionObjects() throws DatabaseException, InvalidExampleException {
+
+        
+        // Get all snapshot generators for this database
+        SnapshotGeneratorFactory factory = SnapshotGeneratorFactory.getInstance();
+        
+        Set<Class<? extends DatabaseObject>> typesToInclude = snapshotControl.getTypesToInclude();
+
+        
+        // Find generators that create root-level objects (addsTo returns empty array)
+        for (Class<? extends DatabaseObject> type : typesToInclude) {
+            if (type == null) continue;
+            
+
+            
+            // Get generators for this type
+            SortedSet<SnapshotGenerator> generators = factory.getGenerators(type, database);
+
+            
+            for (SnapshotGenerator generator : generators) {
+                // Check if this is a root-level generator (doesn't add to other objects)
+                Class<? extends DatabaseObject>[] addsTo = generator.addsTo();
+                
+
+                
+                if (addsTo != null && addsTo.length == 0) {
+
+                    
+                    // This is a root-level generator - create an example object and include it
+                    try {
+                        // Create a minimal example object of this type
+                        DatabaseObject example = type.getDeclaredConstructor().newInstance();
+
+                        
+                        // Use include() to properly discover and add the object
+                        // This will call the generator's snapshotObject method if the object exists
+                        DatabaseObject result = include(example);
+
+                        
+                    } catch (Exception e) {
+
+                        e.printStackTrace();
+                        // Log but don't fail the entire snapshot for extension issues
+                        Scope.getCurrentScope().getLog(DatabaseSnapshot.class)
+                            .warning("Error discovering root-level objects of type " + 
+                                   type.getSimpleName() + ": " + e.getMessage(), e);
+                    }
+                }
+            }
+        }
+        
+
     }
 
     /**
@@ -286,7 +351,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
      * if the object does not exist in the database. If the same object was returned by an earlier include() call,
      * the same object instance will be returned.
      */
-    protected <T extends DatabaseObject> T include(T example) throws DatabaseException, InvalidExampleException {
+    public <T extends DatabaseObject> T include(T example) throws DatabaseException, InvalidExampleException {
         if (example == null) {
             return null;
         }
@@ -336,13 +401,23 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             }
 
         } else {
+
             allFound.add(object);
-            if (snapshotControl.shouldSearchNestedObjects()) {
+            
+            boolean shouldSearchNested = snapshotControl.shouldSearchNestedObjects();
+
+            
+            if (shouldSearchNested) {
                 try {
+
                     includeNestedObjects(object);
+
                 } catch (ReflectiveOperationException e) {
+
                     throw new UnexpectedLiquibaseException(e);
                 }
+            } else {
+
             }
         }
 
