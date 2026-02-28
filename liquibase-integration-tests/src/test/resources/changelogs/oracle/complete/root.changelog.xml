@@ -482,4 +482,12 @@ END testSP;
         </insert>
     </changeSet>
 
+    <changeSet id="float_column_precisions" author="marchof">
+        <comment>Test precision in a FLOAT column is captured correctly.</comment>
+        <createTable tableName="test_float_precision">
+            <column name="floatColumn54" type="float(54)" />
+            <column name="floatColumn126" type="float(126)" />
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>
