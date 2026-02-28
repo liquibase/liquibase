@@ -45,9 +45,15 @@ public class ChangedUniqueConstraintChangeGenerator extends AbstractChangeGenera
 
         UniqueConstraint uniqueConstraint = (UniqueConstraint) changedObject;
 
+        // Use the comparison object for the drop statement to get the correct constraint name from the target database
+        UniqueConstraint comparisonUniqueConstraint = (UniqueConstraint) differences.getComparisonObject();
+        if (comparisonUniqueConstraint == null) {
+            comparisonUniqueConstraint = uniqueConstraint; // Fallback to reference object if comparison not available
+        }
+
         DropUniqueConstraintChange dropUniqueConstraintChange = createDropUniqueConstraintChange();
-        dropUniqueConstraintChange.setTableName(uniqueConstraint.getRelation().getName());
-        dropUniqueConstraintChange.setConstraintName(uniqueConstraint.getName());
+        dropUniqueConstraintChange.setTableName(comparisonUniqueConstraint.getRelation().getName());
+        dropUniqueConstraintChange.setConstraintName(comparisonUniqueConstraint.getName());
 
         AddUniqueConstraintChange addUniqueConstraintChange = createAddUniqueConstraintChange();
         addUniqueConstraintChange.setConstraintName(uniqueConstraint.getName());
@@ -56,13 +62,15 @@ public class ChangedUniqueConstraintChangeGenerator extends AbstractChangeGenera
 
         returnList.add(dropUniqueConstraintChange);
 
-        if (control.getIncludeCatalog()) {
-            dropUniqueConstraintChange.setCatalogName(uniqueConstraint.getSchema().getCatalogName());
-            addUniqueConstraintChange.setCatalogName(uniqueConstraint.getSchema().getCatalogName());
+        Schema comparisonSchema = comparisonUniqueConstraint.getSchema();
+        Schema uniqueConstraintSchema = uniqueConstraint.getSchema();
+        if (control.getIncludeCatalog() && comparisonSchema != null && uniqueConstraintSchema != null) {
+            dropUniqueConstraintChange.setCatalogName(comparisonSchema.getCatalogName());
+            addUniqueConstraintChange.setCatalogName(uniqueConstraintSchema.getCatalogName());
         }
-        if (control.getIncludeSchema()) {
-            dropUniqueConstraintChange.setSchemaName(uniqueConstraint.getSchema().getName());
-            addUniqueConstraintChange.setSchemaName(uniqueConstraint.getSchema().getName());
+        if (control.getIncludeSchema() && comparisonSchema != null && uniqueConstraintSchema != null) {
+            dropUniqueConstraintChange.setSchemaName(comparisonSchema.getName());
+            addUniqueConstraintChange.setSchemaName(uniqueConstraintSchema.getName());
         }
 
         Index backingIndex = uniqueConstraint.getBackingIndex();

@@ -51,7 +51,7 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
         attributes.addAll(databaseObject1.getAttributes());
         attributes.addAll(databaseObject2.getAttributes());
 
-        ObjectDifferences differences = new ObjectDifferences(compareControl);
+        ObjectDifferences differences = new ObjectDifferences(compareControl, databaseObject1, databaseObject2);
 
         exclude.add("schema");
         exclude.add("catalog");

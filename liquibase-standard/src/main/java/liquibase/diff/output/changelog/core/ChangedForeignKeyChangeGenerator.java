@@ -10,10 +10,7 @@ import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.ForeignKey;
-import liquibase.structure.core.Index;
-import liquibase.structure.core.UniqueConstraint;
+import liquibase.structure.core.*;
 import liquibase.util.StringUtil;
 
 public class ChangedForeignKeyChangeGenerator extends AbstractChangeGenerator implements ChangedObjectChangeGenerator {
@@ -41,9 +38,15 @@ public class ChangedForeignKeyChangeGenerator extends AbstractChangeGenerator im
 
         StringUtil.StringUtilFormatter<Column> formatter = obj -> obj.toString(false);
 
+        // Use the comparison object for the drop statement to get the correct constraint name from the target database
+        ForeignKey comparisonFk = (ForeignKey) differences.getComparisonObject();
+        if (comparisonFk == null) {
+            comparisonFk = fk; // Fallback to reference object if comparison not available
+        }
+
         DropForeignKeyConstraintChange dropFkChange = new DropForeignKeyConstraintChange();
-        dropFkChange.setConstraintName(fk.getName());
-        dropFkChange.setBaseTableName(fk.getForeignKeyTable().getName());
+        dropFkChange.setConstraintName(comparisonFk.getName());
+        dropFkChange.setBaseTableName(comparisonFk.getForeignKeyTable().getName());
 
         AddForeignKeyConstraintChange addFkChange = new AddForeignKeyConstraintChange();
         addFkChange.setConstraintName(fk.getName());
@@ -54,17 +57,20 @@ public class ChangedForeignKeyChangeGenerator extends AbstractChangeGenerator im
         addFkChange.setOnDelete(fk.getDeleteRule());
         addFkChange.setOnUpdate(fk.getUpdateRule());
 
-        if (control.getIncludeCatalog()) {
-            dropFkChange.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());
+        Schema comparisonSchema = comparisonFk.getForeignKeyTable().getSchema();
+        Schema referenceSchema = fk.getPrimaryKeyTable().getSchema();
+        Schema fkSchema = fk.getForeignKeyTable().getSchema();
+        if (control.getIncludeCatalog() && comparisonSchema != null && referenceSchema != null && fkSchema != null) {
+            dropFkChange.setBaseTableCatalogName(comparisonSchema.getCatalogName());
 
-            addFkChange.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());
-            addFkChange.setReferencedTableCatalogName(fk.getPrimaryKeyTable().getSchema().getCatalogName());
+            addFkChange.setBaseTableCatalogName(fkSchema.getCatalogName());
+            addFkChange.setReferencedTableCatalogName(referenceSchema.getCatalogName());
         }
-        if (control.getIncludeSchema()) {
-            dropFkChange.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
+        if (control.getIncludeSchema() && comparisonSchema != null && referenceSchema != null && fkSchema != null) {
+            dropFkChange.setBaseTableSchemaName(comparisonSchema.getName());
 
-            addFkChange.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
-            addFkChange.setReferencedTableSchemaName(fk.getPrimaryKeyTable().getSchema().getName());
+            addFkChange.setBaseTableSchemaName(fkSchema.getName());
+            addFkChange.setReferencedTableSchemaName(referenceSchema.getName());
         }
 
         if (fk.getBackingIndex() != null) {
