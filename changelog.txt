@@ -16,7 +16,6 @@ See the [Liquibase Community 5.0.2 Release Notes](https://docs.liquibase.com/com
 - (#7506) fix: use gh CLI for dry-run Maven download in release-published.yml @jandroav
 - (#7425) Fixed Issue #7413: SQL Anywhere: Constraint name is not considered for PRIMARY KEY @mkarg
 - (#7380) Gh7374 remove oss mentions @petepickerill
-- (#7247) LIQUIBASE 5.0 RELEASE  @rberezen
 
 ## Notable Changes
 - (#7439) Fix performance degradation since implementing analytics @tati-qalified
