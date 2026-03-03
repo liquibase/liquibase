@@ -35,7 +35,7 @@ See the [Liquibase Community 5.0.2 Release Notes](https://docs.liquibase.com/com
 - (#7401) chore: update Liquibase Pro reference to Liquibase Secure in README.md @filipelautert
 
 ## Bug Fixes
-- (#7532) Fix clearCheckSums to make checksums be correctly re-evaluate them @MalloD12
+- (#7532) Fix clearCheckSums so checksums are correctly re-evaluated @MalloD12
 - (#7457) Fix issue 7184 @MalloD12
 - (#7468) Fix #7385: Fix PostgreSQL rollback with quoted numeric schema names @RohanMittal-01
 - (#7521) fix: Use correct grammar when reporting unexpected changes @Vampire
