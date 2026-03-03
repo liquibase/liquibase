@@ -14,7 +14,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
+public class AddUniqueConstraintExecutorTest extends AbstractExecutorTest {
 
     protected static final String TABLE_NAME = "AddUQTest";
     protected static final String COLUMN_NAME = "colToMakeUQ";

@@ -150,10 +150,12 @@ public class Scope {
             rootScope.getSingleton(LiquibaseConfiguration.class).init(rootScope);
 
             LogService overrideLogService = rootScope.getSingleton(LogServiceFactory.class).getDefaultLogService();
-            if (overrideLogService == null) {
-                throw new UnexpectedLiquibaseException("Cannot find default log service");
+            if (overrideLogService != null) {
+                rootScope.values.put(Attr.logService.name(), overrideLogService);
+            } else {
+                // Log a warning using the already-created JavaLogService
+                rootScope.getLog(Scope.class).warning("Could not find log service via LogServiceFactory. Using JavaLogService as default.");
             }
-            rootScope.values.put(Attr.logService.name(), overrideLogService);
 
             //check for higher-priority serviceLocator
             ServiceLocator serviceLocator = rootScope.getServiceLocator();

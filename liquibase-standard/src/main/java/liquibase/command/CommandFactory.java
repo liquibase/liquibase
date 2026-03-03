@@ -26,7 +26,7 @@ public class CommandFactory implements SingletonObject {
     private Map<Class<? extends CommandStep>, CommandStep> commandOverrides;
 
 
-    private final Map<String, Set<CommandArgumentDefinition<?>>> commandArgumentDefinitions = new HashMap<>();
+    private static final Map<String, Set<CommandArgumentDefinition<?>>> commandArgumentDefinitions = new ConcurrentHashMap<>();
 
     /**
      * @deprecated. Use {@link Scope#getSingleton(Class)}
@@ -195,9 +195,7 @@ public class CommandFactory implements SingletonObject {
      */
     protected void register(String[] commandName, CommandArgumentDefinition<?> definition) {
         String commandNameKey = StringUtil.join(commandName, " ");
-        if (!commandArgumentDefinitions.containsKey(commandNameKey)) {
-            commandArgumentDefinitions.put(commandNameKey, new TreeSet<>());
-        }
+        commandArgumentDefinitions.computeIfAbsent(commandNameKey, k -> new TreeSet<>());
 
         if (commandArgumentDefinitions.get(commandNameKey).contains(definition)) {
            throw new IllegalArgumentException("Duplicate argument '" + definition.getName() + "' found for command '" + commandNameKey + "'");

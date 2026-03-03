@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: explicit_test
+      author: testauthor
+      changes:
+        - createTable:
+            tableName: test_table_explicit
+            columns:
+              - column:
+                  name: id
+                  type: int

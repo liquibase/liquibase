@@ -17,6 +17,7 @@ import liquibase.command.core.helpers.DatabaseChangelogCommandStep;
 import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.diff.DiffGeneratorFactory;
@@ -45,8 +46,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.junit.Assume.assumeNotNull;
 import static org.junit.Assume.assumeTrue;
 
@@ -55,6 +55,8 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
     private String dependenciesChangeLog;
     private String blobChangeLog;
     private String sleepChangelog;
+    private String rollbackEscapeChangelog;
+    private String createNumericSchema;
     private static DatabaseTestSystem localTestSystem;
 
     public PostgreSQLIntegrationTest() throws Exception {
@@ -62,6 +64,8 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
         dependenciesChangeLog = "changelogs/pgsql/complete/testFkPkDependencies.xml";
         blobChangeLog = "changelogs/pgsql/complete/testBlob.changelog.xml";
         sleepChangelog = "changelogs/pgsql/pg_sleep.sql";
+        rollbackEscapeChangelog = "changelogs/pgsql/rollback/rollback-escape.xml";
+        createNumericSchema = "changelogs/pgsql/rollback/rollback-create-numeric-schema.xml";
         localTestSystem = testSystem;
     }
 
@@ -434,6 +438,15 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
         }
     }
 
+    private void assertTableNotExists(String tableName) throws SQLException {
+        Connection connection = testSystem.getConnection();
+        DatabaseMetaData dbm = connection.getMetaData();
+        String catalog = connection.getCatalog();
+        try (ResultSet tables = dbm.getTables(catalog.toLowerCase(), null, tableName.toLowerCase(), null)) {
+            assertFalse("Table " + tableName + " should not be found, but is found.", tables.isBeforeFirst());
+        }
+    }
+
     private void dropTablesOutsidefastCheck() throws SQLException {
         Connection connection = testSystem.getConnection();
         try (Statement statement = connection.createStatement()) {
@@ -475,5 +488,26 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
         Assert.assertTrue("Using index function should be \"" + using + "\"", found);
     }
 
+    @Test
+    public void rollbackRestoresSearchPathForNumericSchema() throws Exception {
+        final String numericSchema = "4b5d63f449304c05a291c4c27136ebb5";
+        assumeNotNull(this.getDatabase());
+        this.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+        Liquibase liquibase = createLiquibase(createNumericSchema);
+        liquibase.update("");
+        this.setDefaultSchemaName(numericSchema);
+
+        liquibase = createLiquibase(rollbackEscapeChangelog);
+
+        liquibase.update("");
+        assertTableExists("small_table");
+
+        liquibase.rollback(1, "");
+
+        assertTableExists("databasechangelog");
+        assertTableExists("databasechangeloglock");
+        assertTableNotExists("small_table");
+        clearDatabase();
+    }
 
 }
