@@ -882,7 +882,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             valueComputed = new DatabaseFunction(this.rawDateValue);
         }
         valueBoolean = parsedNode.getChildValue(null, "valueBoolean", Boolean.class);
-        valueBit = parsedNode.getChildValue(null, "valueBit", Integer.class);
+        setValueBit(parsedNode.getChildValue(null, "valueBit", Integer.class));
         valueBlobFile = parsedNode.getChildValue(null, "valueBlobFile", String.class);
         valueClobFile = parsedNode.getChildValue(null, "valueClobFile", String.class);
         String valueComputedString = parsedNode.getChildValue(null, "valueComputed", String.class);
@@ -911,7 +911,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             defaultValueComputed = new DatabaseFunction(parsedNode.getChildValue(null, "defaultValueDate", String.class));
         }
         defaultValueBoolean = parsedNode.getChildValue(null, "defaultValueBoolean", Boolean.class);
-        defaultValueBit = parsedNode.getChildValue(null, "defaultValueBit", Integer.class);
+        setDefaultValueBit(parsedNode.getChildValue(null, "defaultValueBit", Integer.class));
         String defaultValueComputedString = parsedNode.getChildValue(null, "defaultValueComputed", String.class);
         if (defaultValueComputedString != null) {
             defaultValueComputed = new DatabaseFunction(defaultValueComputedString);
