@@ -429,14 +429,13 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
                             if (value == null) {
                                 valueConfig.setValueBit(columnConfig.getDefaultValueBit());
                             } else {
-                                // For BIT(n) where n>1, parse and validate bit values
-                                if (database instanceof PostgresDatabase) {
-                                    String parsedBitValue = parseBitValue(value.trim(), lineNumber);
-                                    valueConfig.setValueComputed(new liquibase.statement.DatabaseFunction(parsedBitValue));
-                                } else {
-                                    // For other databases, use setValue to preserve the bit string
-                                    valueConfig.setValue(value);
-                                }
+                                // For BIT(n) where n>1, parse and validate bit values.
+                                // Use DatabaseFunction wrapping for all databases so the SQL generator
+                                // emits the bit literal directly instead of inferring StringType from
+                                // the raw CSV string (which would produce VALUES ('101010') instead of
+                                // VALUES (b'101010')).
+                                String parsedBitValue = parseBitValue(value.trim(), lineNumber);
+                                valueConfig.setValueComputed(new liquibase.statement.DatabaseFunction(parsedBitValue));
                             }
                         } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.OTHER.toString())) {
                             valueConfig.setType(columnConfig.getType());
@@ -723,12 +722,14 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     }
 
     /**
-     * Parse and validate bit values for PostgreSQL BIT columns.
+     * Parse and validate bit values for BIT(n) columns.
      * Handles existing bit literals, binary strings, decimal integers, and boolean-like values.
+     * Returns a bit string literal in {@code B'...'} format, which is valid for databases with
+     * native BIT(n) support (e.g., MySQL, PostgreSQL).
      *
      * @param value the value from CSV
      * @param lineNumber the current line number for error reporting
-     * @return a valid PostgreSQL bit string literal (e.g., "B'101010'")
+     * @return a bit string literal (e.g., "B'101010'")
      * @throws UnexpectedLiquibaseException if the value is invalid
      */
     protected String parseBitValue(String value, int lineNumber) {
