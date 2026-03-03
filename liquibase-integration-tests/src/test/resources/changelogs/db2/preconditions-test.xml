@@ -1,0 +1,173 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+                   http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- Create a test table -->
+    <changeSet author="liquibase" id="db2-precondition-test-1">
+        <createTable tableName="TEST_TABLE_PRECOND">
+            <column name="ID" type="INT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="NAME" type="VARCHAR(100)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Create a test view -->
+    <changeSet author="liquibase" id="db2-precondition-test-2">
+        <createView viewName="TEST_VIEW_PRECOND">
+            SELECT ID, NAME FROM TEST_TABLE_PRECOND
+        </createView>
+    </changeSet>
+
+    <!-- Create an index on the table -->
+    <changeSet author="liquibase" id="db2-precondition-test-3">
+        <createIndex indexName="IDX_TEST_PRECOND" tableName="TEST_TABLE_PRECOND">
+            <column name="NAME"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Test tableExists precondition - should pass -->
+    <changeSet author="liquibase" id="db2-precondition-test-4">
+        <preConditions onFail="HALT">
+            <tableExists tableName="TEST_TABLE_PRECOND"/>
+        </preConditions>
+        <comment>Verify tableExists precondition works with DB2 optimization</comment>
+        <sql>
+            -- This changeset should execute because the table exists
+            INSERT INTO TEST_TABLE_PRECOND (ID, NAME) VALUES (1, 'Test Data')
+        </sql>
+    </changeSet>
+
+    <!-- Test viewExists precondition - should pass -->
+    <changeSet author="liquibase" id="db2-precondition-test-5">
+        <preConditions onFail="HALT">
+            <viewExists viewName="TEST_VIEW_PRECOND"/>
+        </preConditions>
+        <comment>Verify viewExists precondition works with DB2 optimization</comment>
+        <sql>
+            -- This changeset should execute because the view exists
+            INSERT INTO TEST_TABLE_PRECOND (ID, NAME) VALUES (2, 'Test Data 2')
+        </sql>
+    </changeSet>
+
+    <!-- Test indexExists precondition - should pass -->
+    <changeSet author="liquibase" id="db2-precondition-test-6">
+        <preConditions onFail="HALT">
+            <indexExists indexName="IDX_TEST_PRECOND"/>
+        </preConditions>
+        <comment>Verify indexExists precondition works with DB2 optimization</comment>
+        <sql>
+            -- This changeset should execute because the index exists
+            INSERT INTO TEST_TABLE_PRECOND (ID, NAME) VALUES (3, 'Test Data 3')
+        </sql>
+    </changeSet>
+
+    <!-- Test negative case: tableExists should fail for non-existent table -->
+    <changeSet author="liquibase" id="db2-precondition-test-7">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="NON_EXISTENT_TABLE"/>
+            </not>
+        </preConditions>
+        <comment>Verify tableExists precondition correctly identifies non-existent table</comment>
+        <sql>
+            -- This changeset should execute because the table does NOT exist
+            INSERT INTO TEST_TABLE_PRECOND (ID, NAME) VALUES (4, 'Test Data 4')
+        </sql>
+    </changeSet>
+
+    <!-- Test negative case: viewExists should fail for non-existent view -->
+    <changeSet author="liquibase" id="db2-precondition-test-8">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <viewExists viewName="NON_EXISTENT_VIEW"/>
+            </not>
+        </preConditions>
+        <comment>Verify viewExists precondition correctly identifies non-existent view</comment>
+        <sql>
+            -- This changeset should execute because the view does NOT exist
+            INSERT INTO TEST_TABLE_PRECOND (ID, NAME) VALUES (5, 'Test Data 5')
+        </sql>
+    </changeSet>
+
+    <!-- Test negative case: indexExists should fail for non-existent index -->
+    <changeSet author="liquibase" id="db2-precondition-test-9">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="NON_EXISTENT_INDEX"/>
+            </not>
+        </preConditions>
+        <comment>Verify indexExists precondition correctly identifies non-existent index</comment>
+        <sql>
+            -- This changeset should execute because the index does NOT exist
+            INSERT INTO TEST_TABLE_PRECOND (ID, NAME) VALUES (6, 'Test Data 6')
+        </sql>
+    </changeSet>
+
+    <!-- Create a test sequence -->
+    <changeSet author="liquibase" id="db2-precondition-test-10">
+        <createSequence sequenceName="TEST_SEQUENCE_PRECOND" startValue="1" incrementBy="1"/>
+    </changeSet>
+
+    <!-- Test sequenceExists precondition - should pass -->
+    <changeSet author="liquibase" id="db2-precondition-test-11">
+        <preConditions onFail="HALT">
+            <sequenceExists sequenceName="TEST_SEQUENCE_PRECOND"/>
+        </preConditions>
+        <comment>Verify sequenceExists precondition works with DB2 optimization</comment>
+        <sql>
+            -- This changeset should execute because the sequence exists
+            INSERT INTO TEST_TABLE_PRECOND (ID, NAME) VALUES (7, 'Test Data 7')
+        </sql>
+    </changeSet>
+
+    <!-- Test negative case: sequenceExists should fail for non-existent sequence -->
+    <changeSet author="liquibase" id="db2-precondition-test-12">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="NON_EXISTENT_SEQUENCE"/>
+            </not>
+        </preConditions>
+        <comment>Verify sequenceExists precondition correctly identifies non-existent sequence</comment>
+        <sql>
+            -- This changeset should execute because the sequence does NOT exist
+            INSERT INTO TEST_TABLE_PRECOND (ID, NAME) VALUES (8, 'Test Data 8')
+        </sql>
+    </changeSet>
+
+    <!-- Add a unique constraint to the table -->
+    <changeSet author="liquibase" id="db2-precondition-test-13">
+        <addUniqueConstraint tableName="TEST_TABLE_PRECOND" columnNames="NAME" constraintName="UQ_TEST_PRECOND_NAME"/>
+    </changeSet>
+
+    <!-- Test uniqueConstraintExists precondition - should pass -->
+    <changeSet author="liquibase" id="db2-precondition-test-14">
+        <preConditions onFail="HALT">
+            <uniqueConstraintExists tableName="TEST_TABLE_PRECOND" constraintName="UQ_TEST_PRECOND_NAME"/>
+        </preConditions>
+        <comment>Verify uniqueConstraintExists precondition works with DB2 optimization</comment>
+        <sql>
+            -- This changeset should execute because the unique constraint exists
+            INSERT INTO TEST_TABLE_PRECOND (ID, NAME) VALUES (9, 'Test Data 9')
+        </sql>
+    </changeSet>
+
+    <!-- Test negative case: uniqueConstraintExists should fail for non-existent constraint -->
+    <changeSet author="liquibase" id="db2-precondition-test-15">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <uniqueConstraintExists tableName="TEST_TABLE_PRECOND" constraintName="NON_EXISTENT_CONSTRAINT"/>
+            </not>
+        </preConditions>
+        <comment>Verify uniqueConstraintExists precondition correctly identifies non-existent constraint</comment>
+        <sql>
+            -- This changeset should execute because the constraint does NOT exist
+            INSERT INTO TEST_TABLE_PRECOND (ID, NAME) VALUES (10, 'Test Data 10')
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
