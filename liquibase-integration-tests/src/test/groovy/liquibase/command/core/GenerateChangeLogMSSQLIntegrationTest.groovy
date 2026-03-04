@@ -10,6 +10,7 @@ import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.util.FileUtil
 import liquibase.util.StringUtil
+import org.apache.commons.io.FileUtils
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -20,7 +21,6 @@ class GenerateChangeLogMSSQLIntegrationTest extends Specification {
 
     def "Should generate table comments, view comments, table column comments, view column comments and be able to use the generated sql changelog"() {
         given:
-        CommandUtil.runDropAll(mssql)
         CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/generate.changelog.table.view.comments.sql')
 
         when:
@@ -44,13 +44,11 @@ class GenerateChangeLogMSSQLIntegrationTest extends Specification {
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(mssql)
         outputFile.delete()
     }
 
     def "Should generate table comments, view comments, table column comments, view column comments and be able to use the generated xml/json/yml changelog"(String fileType) {
         given:
-        CommandUtil.runDropAll(mssql)
         CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/generate.changelog.table.view.comments.sql')
 
         when:
@@ -69,7 +67,6 @@ class GenerateChangeLogMSSQLIntegrationTest extends Specification {
         noExceptionThrown()
 
         cleanup:
-        CommandUtil.runDropAll(mssql)
         outputFile.delete()
 
         where:
@@ -134,16 +131,30 @@ CREATE VIEW employees_view AS SELECT FirstName FROM [dbo].Employees;
         generatedChangelogContents.contains("N'CREATE VIEW [employees_view] AS SELECT '")
 
         cleanup:
-        try {
-            generatedChangelog.delete()
-        } catch (Exception ignored) {
+        FileUtils.deleteQuietly(generatedChangelog)
+    }
 
-        }
+    def "Should not add size to user defined types"() {
+        when:
+        CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/user.defined.types.sql')
+        CommandUtil.runGenerateChangelog(mssql, 'test.mssql.sql')
+        then:
+        def outputFile = new File('test.mssql.sql')
+        FileUtil.getContents(outputFile).contains("CREATE TABLE udt_test (flag Flag NOT NULL)")
+        cleanup:
+        outputFile.delete()
+    }
 
-        CommandUtil.runDropAll(mssql)
+    def "Should generate decimal sequence without overflow"() {
+        when:
+        CommandUtil.runUpdate(mssql,'src/test/resources/changelogs/mssql/issues/decimal.sequence.sql')
+        CommandUtil.runGenerateChangelog(mssql, 'sequence.mssql.sql')
+        then:
+        def outputFile = new File('sequence.mssql.sql')
+        FileUtil.getContents(outputFile).contains("CREATE SEQUENCE big AS decimal(19) START WITH 100000000000 INCREMENT BY 1 MINVALUE -9999999999999999999 MAXVALUE 9999999999999999999;")
+        FileUtil.getContents(outputFile).contains("CREATE SEQUENCE small START WITH 1 INCREMENT BY 1 MINVALUE 0 MAXVALUE 20")
 
-        if (mssql.getConnection()) {
-            mssql.getConnection().close()
-        }
+        cleanup:
+        outputFile.delete()
     }
 }

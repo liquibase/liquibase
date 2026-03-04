@@ -56,7 +56,8 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
                     , database.escapeColumnNameList(statement.getColumnNames())
             );
         }
-        if ((database instanceof OracleDatabase) || (database instanceof PostgresDatabase)) {
+
+        if (database instanceof OracleDatabase) {
             if (statement.isDeferrable()) {
                 sql += " DEFERRABLE";
             }
@@ -80,7 +81,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
 
         if ((StringUtil.trimToNull(statement.getTablespace()) != null) && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase) {
-                sql += " ON " + statement.getTablespace();
+                sql += " ON " + database.escapeTablespaceName(statement.getTablespace());
             } else if ((database instanceof AbstractDb2Database) || (database instanceof SybaseASADatabase) || (database
                 instanceof InformixDatabase)) {
                 //not supported
@@ -104,6 +105,15 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
 
         if (database instanceof OracleDatabase) {
             sql += !statement.shouldValidate() ? " ENABLE NOVALIDATE " : "";
+        }
+
+        if (database instanceof PostgresDatabase) {
+            if (statement.isDeferrable()) {
+                sql += " DEFERRABLE";
+            }
+            if (statement.isInitiallyDeferred()) {
+                sql += " INITIALLY DEFERRED";
+            }
         }
 
         return new Sql[]{

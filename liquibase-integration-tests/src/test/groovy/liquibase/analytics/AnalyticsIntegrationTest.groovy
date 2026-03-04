@@ -60,7 +60,7 @@ class AnalyticsIntegrationTest extends Specification {
         trackEvent.get("event") == "liquibase-command-executed"
         UUID.fromString(trackEvent.get("messageId")) // is a UUID
         trackEvent.get("type") == "track"
-        trackEvent.get("userId") == "null" // no pro license available
+        trackEvent.get("userId") == "null" // no license available
         def properties = trackEvent.get("properties")
         properties.get("chlog_formattedSql") == 0
         properties.get("chlog_json") == 0
@@ -133,6 +133,7 @@ class AnalyticsIntegrationTest extends Specification {
         scopeVars.put(AnalyticsArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getKey(), TimeUnit.SECONDS.toMillis(60)) // to allow for debugging, otherwise the thread gets killed fast
         scopeVars.put(AnalyticsArgs.DEV_OVERRIDE.getKey(), true)
         scopeVars.put(AnalyticsArgs.ENABLED.getKey(), true)
+        scopeVars.put(Scope.Attr.maxAnalyticsCacheSize.name(), 1)
         Scope.child(scopeVars, scopedRunner)
     }
 }

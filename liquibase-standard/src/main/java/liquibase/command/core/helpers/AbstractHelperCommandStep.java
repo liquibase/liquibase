@@ -18,4 +18,8 @@ public abstract class AbstractHelperCommandStep extends AbstractCommandStep {
         }
     }
 
+    @Override
+    public boolean isInternal() {
+        return true;
+    }
 }

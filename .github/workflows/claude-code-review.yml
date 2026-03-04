@@ -1,0 +1,32 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+# Security: Minimal permissions for code review
+# - contents: read - read code for review
+# - pull-requests: write - post review comments
+# - id-token: write - authentication
+# Note: issues: write removed as code review doesn't create issues
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+  actions: read
+  checks: read
+  statuses: read
+
+jobs:
+  claude-review:
+    if: ${{ !endsWith(github.actor, '[bot]') }}
+    uses: liquibase/build-logic/.github/workflows/claude-code-review.yml@main
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+      id-token: write
+      actions: read
+      checks: read
+      statuses: read
+    secrets: inherit

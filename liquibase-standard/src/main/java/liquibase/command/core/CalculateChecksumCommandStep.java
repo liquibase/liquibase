@@ -29,7 +29,7 @@ import java.util.List;
 
 public class CalculateChecksumCommandStep extends AbstractCommandStep {
 
-    protected static final String[] COMMAND_NAME = {"calculateChecksum"};
+    public static final String[] COMMAND_NAME = {"calculateChecksum"};
 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> CHANGESET_PATH_ARG;

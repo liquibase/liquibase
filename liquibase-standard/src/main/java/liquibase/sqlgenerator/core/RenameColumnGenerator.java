@@ -11,10 +11,9 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.RenameColumnStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStatement> {
-
     @Override
     public boolean supports(RenameColumnStatement statement, Database database) {
         if(database instanceof  SQLiteDatabase) {
@@ -38,7 +37,10 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
         validationErrors.checkRequiredField("newColumnName", renameColumnStatement.getNewColumnName());
 
         if (database instanceof MySQLDatabase) {
-            validationErrors.checkRequiredField("columnDataType", StringUtil.trimToNull(renameColumnStatement.getColumnDataType()));
+            MySQLDatabase mySQLDatabase = (MySQLDatabase) database;
+            if (!isRenameKeywordSupported(mySQLDatabase)) {
+                validationErrors.checkRequiredField("columnDataType", StringUtils.trimToNull(renameColumnStatement.getColumnDataType()));
+            }
         }
 
         return validationErrors;
@@ -51,7 +53,8 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
         	// do no escape the new column name. Otherwise it produce "exec sp_rename '[dbo].[person].[usernae]', '[username]'"
             sql = "exec sp_rename '" + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + "." + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + "', '" + statement.getNewColumnName() + "', 'COLUMN'";
         } else if (database instanceof MySQLDatabase) {
-            sql ="ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " CHANGE " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database);
+            // works for MariaDB too
+            sql= generateMysqlStatement((MySQLDatabase) database, statement);
         } else if (database instanceof SybaseDatabase) {
             sql = "exec sp_rename '" + statement.getTableName() + "." + statement.getOldColumnName() + "', '" + statement.getNewColumnName() + "'";
         } else if ((database instanceof HsqlDatabase) || (database instanceof H2Database)) {
@@ -78,6 +81,52 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
         return new Sql[] {
                 new UnparsedSql(sql, getAffectedOldColumn(statement), getAffectedNewColumn(statement))
         };
+    }
+
+    /**
+     * Generates the appropriate SQL statement for renaming a column in MySQL/MariaDB.
+     * <p>
+     * Uses RENAME COLUMN syntax (MariaDB 10.5+, MySQL 8.0+) when only renaming is needed.
+     * Falls back to CHANGE syntax when columnDataType is specified, allowing simultaneous
+     * rename and type modification.
+     * </p>
+     *
+     * @param database the MySQL or MariaDB database instance
+     * @param statement the rename column statement containing the rename parameters
+     * @return the SQL string for the rename operation
+     */
+    private String generateMysqlStatement(MySQLDatabase database, RenameColumnStatement statement) {
+        String columnDataType = StringUtils.trimToNull(statement.getColumnDataType());
+
+        // Use RENAME COLUMN syntax only when:
+        // 1. Database supports it (MariaDB 10.5+, MySQL 8.0+)
+        // 2. No columnDataType is specified (user only wants to rename, not change type)
+        if (isRenameKeywordSupported(database) && columnDataType == null) {
+            return "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
+                    + " RENAME COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName())
+                    + " TO " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName());
+        }
+
+        // Use CHANGE syntax when columnDataType is specified (for type changes) or when RENAME COLUMN is not supported
+        return "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
+                + " CHANGE " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName())
+                + " " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName())
+                + " " + DataTypeFactory.getInstance().fromDescription(columnDataType, database).toDatabaseDataType(database);
+    }
+
+    private boolean isRenameKeywordSupported(MySQLDatabase database) {
+        try {
+            if (database instanceof MariaDBDatabase) {
+                // https://mariadb.com/kb/en/alter-table/#rename-column
+                return (database.getDatabaseMajorVersion() == 10 && database.getDatabaseMinorVersion() >= 5) // RENAME
+                        || database.getDatabaseMajorVersion() >= 11;
+            } else {
+                // https://dev.mysql.com/worklog/task/?id=10761 RENAME COLUMN introduced in v8
+                return database.getDatabaseMajorVersion() >= 8;
+            }
+        } catch (DatabaseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected Column getAffectedOldColumn(RenameColumnStatement statement) {

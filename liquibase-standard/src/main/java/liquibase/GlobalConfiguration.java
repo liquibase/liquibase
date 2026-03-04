@@ -1,5 +1,6 @@
 package liquibase;
 
+import liquibase.command.core.DiffCommandStep;
 import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.ui.UIServiceEnum;
@@ -31,6 +32,8 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> INCLUDE_CATALOG_IN_SPECIFICATION;
     public static final ConfigurationDefinition<Boolean> SHOULD_SNAPSHOT_DATA;
     public static final ConfigurationDefinition<Boolean> INCLUDE_RELATIONS_FOR_COMPUTED_COLUMNS;
+    public static final ConfigurationDefinition<Boolean> INCLUDE_SCHEMA_NAME_FOR_DEFAULT;
+    public static final ConfigurationDefinition<Boolean> FAIL_ON_NULL_SNAPSHOT_ID;
     public static final ConfigurationDefinition<Boolean> PRESERVE_SCHEMA_CASE;
     public static final ConfigurationDefinition<Boolean> SHOW_BANNER;
     public static final ConfigurationDefinition<Boolean> ALWAYS_DROP_INSTEAD_OF_REPLACE;
@@ -56,6 +59,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<SupportsMethodValidationLevelsEnum> SUPPORTS_METHOD_VALIDATION_LEVEL;
 
     public static final ConfigurationDefinition<Boolean> PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS;
+    public static final ConfigurationDefinition<Boolean> ALLOW_INHERIT_LOGICAL_FILE_PATH;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -181,6 +185,16 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .setDefaultValue(false)
                 .build();
 
+        INCLUDE_SCHEMA_NAME_FOR_DEFAULT = builder.define("includeSchemaNameForDefault", Boolean.class)
+                .setDescription("If true, the schema name is included for the default schema when loading a snapshot")
+                .setDefaultValue(false)
+                .build();
+
+        FAIL_ON_NULL_SNAPSHOT_ID = builder.define("failOnNullSnapshotId", Boolean.class)
+                .setDescription("If true, referenced objects which do not have a snapshot ID will cause snapshot failure")
+                .setDefaultValue(true)
+                .build();
+
         FILTER_LOG_MESSAGES = builder.define("filterLogMessages", Boolean.class)
                 .setDescription("DEPRECATED: No longer used")
                 .setCommonlyUsed(false)
@@ -260,6 +274,11 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         PRESERVE_CLASSPATH_PREFIX_IN_NORMALIZED_PATHS = builder.define("preserveClasspathPrefixInNormalizedPaths", Boolean.class)
                 .setDescription("If true 'classpath:' prefix will be preserved in normalized paths, allowing to resolve hierarchical resources under a classpath-based root.")
                 .setDefaultValue(false)
+                .build();
+
+        ALLOW_INHERIT_LOGICAL_FILE_PATH = builder.define("allowInheritLogicalFilePath", Boolean.class)
+                .setDescription("If true, included changelogs without an explicit logicalFilePath will inherit their parent changelog's logicalFilePath, and explicit logicalFilePath attributes on include statements are honored (Liquibase 4.31.0+ behavior). If false, included changelogs use their physical file paths, ignoring both implicit inheritance and explicit logicalFilePath attributes on include statements. Only logicalFilePath set directly on the changelog itself is respected. Defaults to true for backward compatibility.")
+                .setDefaultValue(true)
                 .build();
     }
 

@@ -262,9 +262,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             if (this.analyticsEnabled != null) {
                 scopeVars.put(AnalyticsArgs.ENABLED.getKey(), this.analyticsEnabled);
             }
+            scopeVars.put(Scope.Attr.maxAnalyticsCacheSize.name(), 10);
 
             if (this.licenseKey != null) {
-                log.fine("Using PRO licenseKey.");
+                log.fine("Using licenseKey.");
                 scopeVars.put("liquibase.licenseKey", licenseKey);
             }
 
@@ -445,7 +446,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     @Override
     public String toString() {
-        return getClass().getName() + "(" + this.getResourceLoader().toString() + ")";
+        return getClass().getName() + "(" + this.getResourceLoader() + ")";
     }
 
 }

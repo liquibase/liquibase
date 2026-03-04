@@ -225,7 +225,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                         //mysql 8.0.13 introduced support for indexes on `lower(first_name)` which comes back in an "expression" column
                         String filterConditionValue = "NULL";
-                        if (database.getDatabaseMajorVersion() > 8 || (database.getDatabaseMajorVersion() == 8 && ((MySQLDatabase) database).getDatabasePatchVersion() >= 13)) {
+                        if (database.getDatabaseMajorVersion() > 8 ||
+                            (database.getDatabaseMajorVersion() == 8 && ((MySQLDatabase) database).getDatabasePatchVersion() >= 13) ||
+                            (database.getDatabaseMajorVersion() == 8 && database.getDatabaseMinorVersion() > 0)) {
                             filterConditionValue = "EXPRESSION";
                         }
 
@@ -276,7 +278,44 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         }
                     }
 
+                    enrichPostgresqlResult(catalogAndSchema, returnList);
+
                     return returnList;
+                }
+
+                private void enrichPostgresqlResult(CatalogAndSchema catalogAndSchema, List<CachedRow> returnList) throws DatabaseException, SQLException {
+                    if (database instanceof PostgresDatabase && !(database instanceof CockroachDatabase)) {
+                        StringBuilder sql = new StringBuilder("SELECT ns.nspname as TABLE_SCHEM, tab.relname as TABLE_NAME, " +
+                                "cls.relname as INDEX_NAME, am.amname as INDEX_TYPE " +
+                                " FROM pg_index idx " +
+                                "         JOIN pg_class cls ON cls.oid=idx.indexrelid " +
+                                "         JOIN pg_class tab ON tab.oid=idx.indrelid " +
+                                "         JOIN pg_am am ON am.oid=cls.relam " +
+                                "         JOIN pg_namespace ns ON ns.oid=cls.relnamespace " +
+                                "WHERE ns.nspname = '").append(database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class)).append("'");
+
+                        if (!isBulkFetchMode && tableName != null) {
+                            sql.append(" AND tab.relname = '").append(database.escapeStringForDatabase(tableName)).append("'");
+                        }
+
+                        if (!isBulkFetchMode && indexName != null) {
+                            sql.append(" AND cls.relname='").append(database.escapeStringForDatabase(indexName)).append("'");
+                        }
+
+                        List<CachedRow> usingTypeInformation = executeAndExtract(sql.toString(), database);
+
+                        for (CachedRow row : usingTypeInformation) {
+                            // Postgres returns the index type for the using field, so we need to set it to "INDEX_TYPE" in the matching entries from the returnList
+                            for (CachedRow returnRow : returnList) {
+                                if (returnRow.getString("INDEX_NAME").equalsIgnoreCase(row.getString("INDEX_NAME"))
+                                    && returnRow.getString("TABLE_NAME").equalsIgnoreCase(row.getString("TABLE_NAME"))
+                                    && returnRow.getString("TABLE_SCHEM").equalsIgnoreCase(row.getString("TABLE_SCHEM"))) {
+                                    returnRow.set("INDEX_TYPE", row.getString("INDEX_TYPE"));
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
 
                 private List<CachedRow> setIndexExpressions(List<CachedRow> c) throws DatabaseException, SQLException {
@@ -745,33 +784,28 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     sql = sql.replace("{REMARKS_COLUMN_PLACEHOLDER}", "");
                     sql = sql.replace("{REMARKS_JOIN_PLACEHOLDER}", "");
                 }
-
-                List<CachedRow> rows = this.executeAndExtract(sql, database);
-
-                for (CachedRow row : rows) {
-                    String typeName = row.getString("TYPE_NAME");
-                    if ("nvarchar".equals(typeName) || "nchar".equals(typeName)) {
-                        Integer size = row.getInt("COLUMN_SIZE");
-                        if (size > 0) {
-                            row.set("COLUMN_SIZE", size / 2);
-                        }
-                    } else if ((row.getInt("DATA_PRECISION") != null) && (row.getInt("DATA_PRECISION") > 0)) {
-                        row.set("COLUMN_SIZE", row.getInt("DATA_PRECISION"));
-                    }
-                }
-
-                return rows;
+                return this.executeAndExtract(sql, database);
             }
 
             @Override
             protected List<CachedRow> extract(ResultSet resultSet, boolean informixIndexTrimHint) throws SQLException {
                 List<CachedRow> rows = super.extract(resultSet, informixIndexTrimHint);
-                if ((database instanceof MSSQLDatabase) && !userDefinedTypes.isEmpty()) { //UDT types in MSSQL don't take parameters
+                if (database instanceof MSSQLDatabase) {
                     for (CachedRow row : rows) {
-                        String dataType = (String) row.get("TYPE_NAME");
-                        if (userDefinedTypes.contains(dataType.toLowerCase())) {
+                        String typeName = row.getString("TYPE_NAME");
+                        // UDT types in MSSQL don't take parameters
+                        if (userDefinedTypes.contains(typeName.toLowerCase())) {
                             row.set("COLUMN_SIZE", null);
                             row.set("DECIMAL_DIGITS ", null);
+                            continue;
+                        }
+                        if ("nvarchar".equals(typeName) || "nchar".equals(typeName)) {
+                            Integer size = row.getInt("COLUMN_SIZE");
+                            if (size > 0) {
+                                row.set("COLUMN_SIZE", size / 2);
+                            }
+                        } else if ((row.getInt("DATA_PRECISION") != null) && (row.getInt("DATA_PRECISION") > 0)) {
+                            row.set("COLUMN_SIZE", row.getInt("DATA_PRECISION"));
                         }
                     }
                 }
@@ -1938,17 +1972,6 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
     }
 
     private String escapeForLike(String string, Database database) {
-        if (string == null) {
-            return null;
-        }
-
-        if (database instanceof SQLiteDatabase) {
-            //sqlite jdbc's queries does not support escaped patterns.
-            return string;
-        }
-
-        return string
-                .replace("%", "\\%")
-                .replace("_", "\\_");
+        return database.escapeForLike(string);
     }
 }

@@ -17,6 +17,7 @@ import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.datatype.DataTypeFactory;
@@ -61,6 +62,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
@@ -102,6 +104,7 @@ public abstract class AbstractIntegrationTest {
     private final String indexWithAssociatedWithChangeLog;
     private Database database;
     private String defaultSchemaName;
+    private ObjectQuotingStrategy objectQuotingStrategy;
 
     private final String pathChangeLog;
 
@@ -157,6 +160,11 @@ public abstract class AbstractIntegrationTest {
         // If we should test with a custom defaultSchemaName:
         if (getDefaultSchemaName() != null && getDefaultSchemaName().length() > 0) {
             database.setDefaultSchemaName(getDefaultSchemaName());
+        }
+
+        // If we should test with a custom QUOTING STRATEGY
+        if(getObjectQuotingStrategy() != null) {
+            database.setObjectQuotingStrategy(getObjectQuotingStrategy());
         }
 
         SnapshotGeneratorFactory.resetAll();
@@ -438,7 +446,7 @@ public abstract class AbstractIntegrationTest {
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter("loginuser", testSystem.getUsername());
-        liquibase.update(this.contexts, output);
+        liquibase.updateSql(new Contexts(this.contexts), null, output);
 
         String outputResult = output.getBuffer().toString();
         assertNotNull("generated output change log must not be empty", outputResult);
@@ -546,6 +554,7 @@ public abstract class AbstractIntegrationTest {
         liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         liquibase.update(this.contexts);
         liquibase.update(this.contexts);
+
     }
 
     @Test
@@ -646,6 +655,8 @@ public abstract class AbstractIntegrationTest {
 
         liquibase.tag("Test Tag");
         assertTrue(liquibase.tagExists("Test Tag"));
+
+        clearDatabase();
     }
 
     @Test
@@ -943,6 +954,8 @@ public abstract class AbstractIntegrationTest {
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", testSystem.getUsername());
         liquibase.generateDocumentation(outputDir.toAbsolutePath().toString(), this.contexts);
+
+        clearDatabase();
     }
 
     /**
@@ -958,7 +971,7 @@ public abstract class AbstractIntegrationTest {
         Liquibase liquibase = createLiquibase(encodingChangeLog);
 
         StringWriter writer=new StringWriter();
-        liquibase.update(this.contexts,writer);
+        liquibase.updateSql(new Contexts(this.contexts), null, writer);
         assertTrue("Update to SQL preserves encoding",
             new RegexMatcher(writer.toString(), new String[] {
                 //For the UTF-8 encoded cvs
@@ -1061,7 +1074,7 @@ public abstract class AbstractIntegrationTest {
         clearDatabase();
 
         liquibase = createLiquibase(includedChangeLog);
-        liquibase.update(contexts, output);
+        liquibase.updateSql(new Contexts(contexts), null, output);
 
         String outputResult = output.getBuffer().toString();
         assertNotNull("generated SQL may not be empty", outputResult);
@@ -1085,6 +1098,7 @@ public abstract class AbstractIntegrationTest {
         List<ChangeSet> changeSets = changeLogWriter.generateChangeSets();
         assertEquals("generating two change logs without any changes in between should result in an empty generated " +
                 "differential changeset.", 0, changeSets.size());
+        clearDatabase();
     }
 
     @Test
@@ -1194,6 +1208,14 @@ public abstract class AbstractIntegrationTest {
 
     public void setDefaultSchemaName(String defaultSchemaName) {
         this.defaultSchemaName = defaultSchemaName;
+    }
+
+    protected ObjectQuotingStrategy getObjectQuotingStrategy() {
+        return objectQuotingStrategy;
+    }
+
+    protected void setObjectQuotingStrategy(ObjectQuotingStrategy objectQuotingStrategy) {
+       this.objectQuotingStrategy = objectQuotingStrategy;
     }
 
     @Test
@@ -1361,6 +1383,78 @@ public abstract class AbstractIntegrationTest {
         if(database instanceof H2Database || database instanceof MySQLDatabase || database instanceof HsqlDatabase
                 || database instanceof SQLiteDatabase || database instanceof DB2Database) {
             Assert.assertTrue(errorMsg.contains("Database driver requires a table name to be specified in order to search for a primary key."));
+        }
+    }
+
+    @Test
+    public void makeSureNoErrorIsReturnedWhenNonexistentCustomChangeIsRunWithFailOnErrorFalse() throws Exception {
+        // Given: A clean database
+        clearDatabase();
+
+        // When: Running a changelog with a missing custom change class and failOnError="false"
+        // Then: Execution should complete without throwing ClassNotFoundException
+        try {
+            runUpdate("changelogs/common/missingcustomchange/missing_custom_change_fail_on_error_false.changelog.xml");
+            // Success - no ClassNotFoundException was thrown, update completed
+        } catch (CommandExecutionException e) {
+            // Verify that the exception is NOT a ClassNotFoundException
+            String errorMessage = e.getMessage();
+            assertFalse("Should not throw ClassNotFoundException with failOnError=false. Error: " + errorMessage,
+                errorMessage.contains("ClassNotFoundException"));
+            throw e; // Re-throw if it's a different unexpected error
+        }
+
+        // runUpdate() uses a separate connection. Commit current transaction
+        // so this connection can see the table created by the other connection.
+        // Skip for SQLite as it handles cross-connection visibility differently.
+        if (!(database instanceof SQLiteDatabase)) {
+            database.commit();
+
+            // Verify the DATABASECHANGELOG table was created (proving the update process ran)
+            assertTrue("Expected DATABASECHANGELOG table to exist after update",
+                SnapshotGeneratorFactory.getInstance().has(
+                    new Table().setName(database.getDatabaseChangeLogTableName())
+                        .setSchema(new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())),
+                    database));
+        }
+    }
+
+    @Test
+    public void makeSureNoErrorIsReturnedWhenNonexistentCustomChangeIsSkippedByPrecondition() throws Exception {
+        // Given: A clean database
+        clearDatabase();
+
+        // When: Running a changelog with a missing custom change class and precondition with onFail="MARK_RAN"
+        // Then: Execution should complete without throwing ClassNotFoundException
+        try {
+            runUpdate("changelogs/common/missingcustomchange/missing_custom_change_precondition_failed.changelog.xml");
+            // Success - no ClassNotFoundException was thrown
+        } catch (CommandExecutionException e) {
+            // Verify that the exception is NOT a ClassNotFoundException
+            String errorMessage = e.getMessage();
+            assertFalse("Should not throw ClassNotFoundException when precondition skips changeset. Error: " + errorMessage,
+                errorMessage.contains("ClassNotFoundException"));
+            throw e; // Re-throw if it's a different unexpected error
+        }
+
+        // runUpdate() uses a separate connection. Commit current transaction
+        // so this connection can see the table created by the other connection.
+        // Skip for SQLite as it handles cross-connection visibility differently.
+        if (!(database instanceof SQLiteDatabase)) {
+            database.commit();
+
+            // Verify the changeset ID is present in DATABASECHANGELOG table and marked as MARK_RAN
+            Connection conn = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(
+                "SELECT ID, EXECTYPE FROM " + database.getDatabaseChangeLogTableName() +
+                " WHERE ID = 'missing_custom_change_precondition_failed' AND EXECTYPE = 'MARK_RAN'"
+            );
+
+            assertTrue("Expected changeset 'missing_custom_change_precondition_failed' to be present in DATABASECHANGELOG with EXECTYPE='MARK_RAN'",
+                rs.next());
+            rs.close();
+            stmt.close();
         }
     }
 

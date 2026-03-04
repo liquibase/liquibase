@@ -190,7 +190,10 @@ public class Index extends AbstractDatabaseObject {
             for (ParsedNode node : nodes) {
                 Column column = new Column();
                 column.load(node, resourceAccessor);
-                column.setName((String) node.getChildren(null, "name").get(0).getValue());
+                List<ParsedNode> nameNodes = node.getChildren(null, "name");
+                if (nameNodes != null && !nameNodes.isEmpty()) {
+                    column.setName((String) nameNodes.get(0).getValue());
+                }
                 column.setDescending(node.getChildValue(null, "descending", Boolean.class));
                 column.setComputed(node.getChildValue(null, "computed", Boolean.class));
                 getColumns().add(column);
@@ -231,6 +234,14 @@ public class Index extends AbstractDatabaseObject {
 
     public Index setClustered(Boolean clustered) {
         return (Index) setAttribute("clustered", clustered);
+    }
+
+    public String getUsing() {
+        return getAttribute("using", String.class);
+    }
+
+    public Index setUsing(String using) {
+        return (Index) setAttribute("using", using);
     }
 
     @Override

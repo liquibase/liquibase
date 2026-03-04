@@ -1,24 +1,115 @@
 version: 2
+# =============================================================================
+# SECURITY UPDATES vs VERSION UPDATES
+# =============================================================================
+# IMPORTANT: Security updates are created immediately when vulnerabilities are
+# detected, regardless of the schedule below. The schedule only affects when
+# Dependabot checks for new versions (non-security updates).
+#
+# However, some security fixes may come as regular version updates rather than
+# security advisories, so production dependencies use daily schedule for
+# fastest response while non-production dependencies use weekly batching.
+# =============================================================================
 updates:
-
+  # =============================================================================
+  # GITHUB ACTIONS DEPENDENCIES
+  # =============================================================================
+  # All GitHub Actions grouped together - these are generally safe to auto-merge
+  # since they don't affect runtime behavior and are validated by CI
   - package-ecosystem: "github-actions"
     directory: "/"
-    open-pull-requests-limit: 50
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "America/Chicago"
+    open-pull-requests-limit: 5
     labels:
       - "sdou"
       - "dependencies"
-
-  - package-ecosystem: "maven"
-    directory: "/"
-    open-pull-requests-limit: 50
-    schedule:
-      interval: "daily"
-    pull-request-branch-name:
-      # Separate sections of the branch name with a hyphen
-      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
-      separator: "-"
+      - "github-actions"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
     ignore:
       - dependency-name: "actions/delete-package-versions"
-        update-types: ["version-update:semver-major"]  
+        update-types: ["version-update:semver-major"]
+
+  # =============================================================================
+  # MAVEN DEPENDENCIES
+  # =============================================================================
+  # All Maven dependencies use daily schedule for faster security response
+  # Dependencies are grouped by risk level for organization
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "06:00"
+      timezone: "America/Chicago"
+    open-pull-requests-limit: 10
+    pull-request-branch-name:
+      separator: "-"
+    labels:
+      - "sdou"
+      - "dependencies"
+    groups:
+      # Production dependencies - core runtime dependencies
+      # Major updates require manual review, patch/minor updates auto-merge
+      production-deps:
+        patterns:
+          - "org.apache.commons:*"
+          - "org.springframework:*"
+          - "org.apache.ant:*"
+          - "org.glassfish.jaxb:*"
+          - "org.liquibase:*"
+        exclude-patterns:
+          - "*junit*"
+          - "*test*"
+          - "*mockito*"
+          - "*spock*"
+          - "*groovy*"
+      # Test dependencies - testing framework dependencies
+      # Patch/minor updates only = eligible for auto-merge
+      test-deps:
+        patterns:
+          - "org.junit.jupiter:*"
+          - "org.junit.platform:*"
+          - "org.junit.vintage:*"
+          - "org.mockito:*"
+          - "org.spockframework:*"
+          - "org.apache.groovy:*"
+          - "org.hamcrest:*"
+          - "org.assertj:*"
+          - "cglib:*"
+          - "org.objenesis:*"
+        update-types:
+          - "minor"
+          - "patch"
+      # Build tools and database drivers - build-time dependencies
+      # Patch/minor updates only = eligible for auto-merge
+      build-tools:
+        patterns:
+          - "org.apache.maven.plugins:*"
+          - "org.codehaus.mojo:*"
+          - "org.codehaus.gmavenplus:*"
+          - "org.jacoco:*"
+          - "org.sonarsource.scanner.maven:*"
+          - "com.h2database:*"
+          - "org.hsqldb:*"
+          - "org.xerial:*"
+          - "com.mysql:*"
+          - "org.postgresql:*"
+          - "org.mariadb.jdbc:*"
+          - "com.microsoft.sqlserver:*"
+          - "com.ibm.db2:*"
+          - "com.oracle.database.jdbc:*"
+          - "net.snowflake:*"
+          - "org.firebirdsql.jdbc:*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      - dependency-name: "org.springframework:*"
+        update-types: ["version-update:semver-major"]
+

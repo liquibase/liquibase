@@ -4,9 +4,7 @@ import liquibase.ChecksumVersion;
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.Change;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.RanChangeSet;
+import liquibase.changelog.*;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
@@ -35,7 +33,9 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     private final ValidationErrors validationErrors = new ValidationErrors();
     private final Warnings warnings = new Warnings();
 
-    private final Set<String> seenChangeSets = new HashSet<>();
+    private final Map<String, ChangeSet> seenChangeSets = new HashMap<>();
+    @Getter
+    private final Map<ChangeSet, ChangeSet> duplicatesFromDifferentFiles = new HashMap<>();
 
     private Map<String, RanChangeSet> ranIndex;
     private Database database;
@@ -90,9 +90,10 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
-    private RanChangeSet findChangeSet(ChangeSet changeSet) {
+    private RanChangeSet findChangeSet(ChangeSet changeSet) throws LiquibaseException {
         String key = changeSet.toNormalizedString();
-        return ranIndex.get(key);
+        RanChangeSet ranChangeSet =  ranIndex.get(key);
+        return ValidatingVisitorUtil.fixChangesetFilenameForLogicalfilepathBugIn4300(changeSet, ranChangeSet, key, ranIndex, database);
     }
 
     @Override
@@ -134,11 +135,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
         // Did we already see this ChangeSet?
         String changeSetString = changeSet.toString(false);
-        if (seenChangeSets.contains(changeSetString)) {
-            duplicateChangeSets.add(changeSet);
-        } else {
-            seenChangeSets.add(changeSetString);
-        }
+        checkForDuplicatesFromDifferentFiles(changeSet, changeSetString);
     }
 
     /**
@@ -210,5 +207,25 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         return invalidMD5Sums.isEmpty() && failedPreconditions.isEmpty() && errorPreconditions.isEmpty() &&
                 duplicateChangeSets.isEmpty() && changeValidationExceptions.isEmpty() && setupExceptions.isEmpty() &&
                 !validationErrors.hasErrors();
+    }
+
+    private void checkForDuplicatesFromDifferentFiles(ChangeSet changeSet, String changeSetString) {
+        if (seenChangeSets.containsKey(changeSetString)) {
+            ChangeSet existingChangeSet = seenChangeSets.get(changeSetString);
+
+            // Check if different physical files
+            if (existingChangeSet != null &&
+                    existingChangeSet.getChangeLog() != null &&
+                    changeSet.getChangeLog() != null &&
+                    !existingChangeSet.getChangeLog().getPhysicalFilePath()
+                            .equals(changeSet.getChangeLog().getPhysicalFilePath())) {
+                // Track this as a duplicate from different files
+                duplicatesFromDifferentFiles.put(changeSet, existingChangeSet);
+            }
+
+            duplicateChangeSets.add(changeSet);
+        } else {
+            seenChangeSets.put(changeSetString, changeSet);
+        }
     }
 }

@@ -5,13 +5,17 @@ import liquibase.configuration.ConfiguredValue;
 import liquibase.logging.Logger;
 import liquibase.util.Cache;
 import lombok.Data;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.io.InputStream;
+import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
@@ -40,22 +44,18 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
         Level logLevel = AnalyticsArgs.LOG_LEVEL.getCurrentValue();
         String url = AnalyticsArgs.CONFIG_ENDPOINT_URL.getCurrentValue();
         AtomicReference<RemoteAnalyticsConfiguration> remoteAnalyticsConfiguration = new AtomicReference<>();
-        AtomicBoolean timedOut = new AtomicBoolean(true);
-        Thread thread = new Thread(() -> {
-            try {
-                InputStream input = new URL(url).openStream();
-                Yaml yaml = new Yaml();
-                Map<String, Object> loaded = yaml.loadAs(input, Map.class);
-                remoteAnalyticsConfiguration.set(RemoteAnalyticsConfiguration.fromYaml(loaded));
-            } catch (Exception e) {
-                log.log(logLevel, "Failed to load analytics configuration from " + url, e);
-            }
-            timedOut.set(false);
-        });
-        thread.start();
-        thread.join(AnalyticsArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getCurrentValue());
-        if (timedOut.get()) {
+        try {
+            URLConnection urlConnection = new URL(url).openConnection();
+            urlConnection.setConnectTimeout(AnalyticsArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getCurrentValue());
+            urlConnection.setReadTimeout(AnalyticsArgs.CONFIG_ENDPOINT_TIMEOUT_MILLIS.getCurrentValue());
+            InputStream input = urlConnection.getInputStream();
+            Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
+            Map<String, Object> loaded = yaml.load(input);
+            remoteAnalyticsConfiguration.set(RemoteAnalyticsConfiguration.fromYaml(loaded));
+        } catch (SocketTimeoutException e) {
             log.log(logLevel, "Timed out while attempting to load analytics configuration from " + url, null);
+        } catch (Exception e) {
+            log.log(logLevel, "Failed to load analytics configuration from " + url, e);
         }
         return remoteAnalyticsConfiguration.get();
     }, false, AnalyticsArgs.CONFIG_CACHE_TIMEOUT_MILLIS.getCurrentValue());
@@ -76,7 +76,11 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
         if (userTimeoutMillis.found()) {
             return userTimeoutMillis.getValue();
         } else {
-            return remoteAnalyticsConfiguration.get().getTimeoutMs();
+            RemoteAnalyticsConfiguration config = remoteAnalyticsConfiguration.get();
+            if (config == null) {
+                throw new IllegalStateException("Remote analytics configuration is not available");
+            }
+            return config.getTimeoutMs();
         }
     }
 
@@ -87,18 +91,24 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
      * @throws Exception if there is an issue fetching the configuration
      */
     public String getDestinationUrl() throws Exception {
-        return remoteAnalyticsConfiguration.get().getEndpointData();
+        RemoteAnalyticsConfiguration config = remoteAnalyticsConfiguration.get();
+        if (config == null) {
+            throw new IllegalStateException("Remote analytics configuration is not available");
+        }
+        return config.getEndpointData();
     }
 
     /**
-     * Determines if OSS analytics are enabled by reading the remote configuration.
+     * Determines if Community analytics are enabled by reading the remote configuration.
      *
-     * @return true if OSS analytics are enabled, false otherwise
+     * @return true if Community analytics are enabled, false otherwise
      * @throws Exception if there is an issue fetching the configuration
      */
     @Override
     public boolean isOssAnalyticsEnabled() throws Exception {
-        return remoteAnalyticsConfiguration.get().isSendOss();
+        return Optional.ofNullable(remoteAnalyticsConfiguration.get())
+                .map(RemoteAnalyticsConfiguration::isSendOss)
+                .orElse(false);
     }
 
     /**
@@ -109,7 +119,9 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
      */
     @Override
     public boolean isProAnalyticsEnabled() throws Exception {
-        return remoteAnalyticsConfiguration.get().isSendPro();
+        return Optional.ofNullable(remoteAnalyticsConfiguration.get())
+                .map(RemoteAnalyticsConfiguration::isSendPro)
+                .orElse(false);
     }
 
     /**
@@ -119,7 +131,11 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
      * @throws Exception if there is an issue fetching the configuration
      */
     public String getWriteKey() throws Exception {
-        return remoteAnalyticsConfiguration.get().getWriteKey();
+        RemoteAnalyticsConfiguration config = remoteAnalyticsConfiguration.get();
+        if (config == null) {
+            throw new IllegalStateException("Remote analytics configuration is not available");
+        }
+        return config.getWriteKey();
     }
 
     /**
@@ -129,6 +145,10 @@ public class LiquibaseRemoteAnalyticsConfiguration implements AnalyticsConfigura
      * @throws Exception if there is an issue fetching the configuration
      */
     public List<RemoteAnalyticsConfiguration.ExtensionName> getExtensionNames() throws Exception {
-        return remoteAnalyticsConfiguration.get().getExtensions();
+        RemoteAnalyticsConfiguration config = remoteAnalyticsConfiguration.get();
+        if (config == null) {
+            throw new IllegalStateException("Remote analytics configuration is not available");
+        }
+        return config.getExtensions();
     }
 }

@@ -190,20 +190,14 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
             if (catalogName == null || catalogName.isEmpty()) {
                 catalogName = database.getDefaultCatalogName();
             }
-            StringBuilder sql = new StringBuilder("SELECT sequence_name, \n")
-                    .append("CASE WHEN increment_by > 0 \n")
-                    .append("     THEN CASE WHEN min_value=1 THEN NULL ELSE min_value END\n")
-                    .append("     ELSE CASE WHEN min_value=(-999999999999999999999999999) THEN NULL else min_value END\n")
-                    .append("END AS min_value, \n")
-                    .append("CASE WHEN increment_by > 0 \n")
-                    .append("     THEN CASE WHEN max_value=999999999999999999999999999 THEN NULL ELSE max_value END\n")
-                    .append("     ELSE CASE WHEN max_value=last_number THEN NULL else max_value END \n")
-                    .append("END  AS max_value, \n")
-                    .append("CASE WHEN increment_by = 1 THEN NULL ELSE increment_by END AS increment_by, \n")
-                    .append("CASE WHEN cycle_flag = 'N' THEN NULL ELSE cycle_flag END AS will_cycle, \n")
-                    .append("CASE WHEN order_flag = 'N' THEN NULL ELSE order_flag END AS is_ordered, \n")
+            StringBuilder sql = new StringBuilder("SELECT SEQUENCE_NAME, \n")
+                    .append("MIN_VALUE, \n")
+                    .append("MAX_VALUE, \n")
+                    .append("INCREMENT_BY, \n")
+                    .append("CYCLE_FLAG AS WILL_CYCLE, \n")
+                    .append("ORDER_FLAG AS IS_ORDERED, \n")
                     .append("LAST_NUMBER as START_VALUE, \n")
-                    .append("CASE WHEN cache_size = 20 THEN NULL ELSE cache_size END AS cache_size \n")
+                    .append("CACHE_SIZE \n")
                     .append(String.format("FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '%s'", catalogName));
             return new RawParameterizedSqlStatement(sql.toString());
         } else if (database instanceof PostgresDatabase) {
@@ -231,10 +225,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                 return new RawParameterizedSqlStatement(sql.toString());
             }
         } else if (database instanceof MSSQLDatabase) {
-            StringBuilder sql = new StringBuilder("SELECT SEQUENCE_NAME, cast(START_VALUE AS BIGINT) AS START_VALUE, cast(MINIMUM_VALUE AS BIGINT) AS MIN_VALUE, ")
-                    .append("cast(MAXIMUM_VALUE AS BIGINT) AS MAX_VALUE, CAST(INCREMENT AS BIGINT) AS INCREMENT_BY, CYCLE_OPTION AS WILL_CYCLE ")
-                    .append("FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = ?");
-            return new RawParameterizedSqlStatement( sql.toString(), schema.getName());
+            return getMSSQLQuery(schema);
         } else if (database instanceof MariaDBDatabase) {
             StringJoiner j = new StringJoiner(" \n UNION\n");
             try {
@@ -271,5 +262,17 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         } else {
             throw new UnexpectedLiquibaseException("Don't know how to query for sequences on " + database);
         }
+    }
+
+    private static RawParameterizedSqlStatement getMSSQLQuery(Schema schema) {
+        String sql = "SELECT SEQUENCE_NAME, START_VALUE, MINIMUM_VALUE AS MIN_VALUE, " +
+                "MAXIMUM_VALUE AS MAX_VALUE, INCREMENT AS INCREMENT_BY, CYCLE_OPTION AS WILL_CYCLE, " +
+                // If we have a decimal sequence we want to include the precision with the data type.
+                // This is not necessary with types like bigint. Previously we did not include the data type
+                // in our query which would create the sequence with data type bigint. So we normalize all other
+                // non-decimal seq_type values to null.
+                "IIF(DATA_TYPE = 'decimal', DATA_TYPE + '(' + CAST(NUMERIC_PRECISION AS VARCHAR) + ')', NULL) AS SEQ_TYPE " +
+                "FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = ?";
+        return new RawParameterizedSqlStatement(sql, schema.getName());
     }
 }

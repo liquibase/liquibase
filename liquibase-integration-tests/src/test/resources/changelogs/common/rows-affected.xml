@@ -1,0 +1,64 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="wesley (generated)" id="1692462595665-1">
+      <createTable tableName="table1" ifNotExists="true">
+            <column name="name" type="CHAR(20)"/>
+            <column name="id" type="CHAR(20)"/>
+            <column name="role" type="CHAR(20)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="wesley (generated)" id="1692462595665-2">
+      <createTable tableName="table2">
+            <column name="name" type="CHAR(20)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="wesley (generated)" id="1692462595665-22">
+      <sql>
+      INSERT
+      INTO TABLE1 (name, id) VALUES ('erzsebet', '1');
+      </sql>
+    </changeSet>
+    <changeSet author="wesley (generated)" id="1692462595665-23">
+      <sql>
+      INSERT INTO TABLE1 (name, id) VALUES ('carmean', '2');
+      </sql>
+    </changeSet>
+    <changeSet author="wesley (generated)" id="1692462595665-3">
+      <createTable tableName="table3">
+            <column name="name" type="CHAR(20)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="10" author="jbennett" labels="release-1.5.0" dbms="oracle">
+      <sql endDelimiter="/">
+BEGIN
+DBMS_UTILITY.COMPILE_SCHEMA(schema=>'LBUSER',compile_all=>FALSE);
+END; /
+      </sql>
+    </changeSet>
+    <!-- Test case-insensitive DML matching for issue #7043 -->
+    <changeSet author="mallod" id="test-lowercase-insert">
+      <sql>
+      insert into TABLE1 (name, id) VALUES ('lowercase', '3');
+      </sql>
+    </changeSet>
+    <changeSet author="mallod" id="test-mixedcase-insert">
+      <sql>
+      Insert Into TABLE1 (name, id) VALUES ('mixedcase', '4');
+      </sql>
+    </changeSet>
+    <changeSet author="mallod" id="test-lowercase-update">
+      <sql>
+      update TABLE1 set role = 'admin' where id = '1';
+      </sql>
+    </changeSet>
+    <changeSet author="mallod" id="test-uppercase-delete">
+      <sql>
+      DELETE FROM TABLE1 WHERE id = '3';
+      </sql>
+    </changeSet>
+    <changeSet author="mallod" id="test-lowercase-delete">
+      <sql>
+      delete from TABLE1 where id = '4';
+      </sql>
+    </changeSet>
+</databaseChangeLog>

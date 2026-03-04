@@ -2,10 +2,12 @@ package liquibase.util.csv;
 
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.RFC4180ParserBuilder;
+import com.opencsv.exceptions.CsvMalformedLineException;
 import com.opencsv.exceptions.CsvValidationException;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.function.Supplier;
 
 public class CSVReader implements AutoCloseable {
 
@@ -36,6 +38,14 @@ public class CSVReader implements AutoCloseable {
             return delegate.readNext();
         } catch (CsvValidationException e) {
             throw new IOException(e.getMessage(), e);
+        }
+    }
+
+    public String[] readNext(Supplier<String> parseContext) throws IOException {
+        try {
+            return readNext();
+        } catch (CsvMalformedLineException e) {
+            throw new CsvMalformedLineException(String.format("Error parsing %s on line %d: %s", parseContext.get(), e.getLineNumber(), e.getMessage()), e.getLineNumber(), e.getContext());
         }
     }
 }

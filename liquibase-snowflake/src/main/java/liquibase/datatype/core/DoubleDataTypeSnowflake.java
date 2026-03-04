@@ -5,13 +5,14 @@ import liquibase.database.core.SnowflakeDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.servicelocator.PrioritizedService;
 
 @DataTypeInfo(
     name = "double",
     aliases = {"java.sql.Types.DOUBLE", "java.lang.Double"},
     minParameters = 0,
     maxParameters = 2,
-    priority = LiquibaseDataType.PRIORITY_DATABASE
+    priority = PrioritizedService.PRIORITY_DATABASE
 )
 public class DoubleDataTypeSnowflake extends DoubleType {
 
@@ -20,7 +21,7 @@ public class DoubleDataTypeSnowflake extends DoubleType {
     }
 
     public int getPriority() {
-        return LiquibaseDataType.PRIORITY_DATABASE;
+        return PrioritizedService.PRIORITY_DATABASE;
     }
 
     @Override

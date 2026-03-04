@@ -13,7 +13,11 @@ import org.apache.commons.lang3.BooleanUtils;
 
 import java.lang.reflect.Field;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,6 +26,8 @@ import static liquibase.util.VersionUtils.getLibraryInfoMap;
 @FieldNameConstants(asEnum = true)
 @Data
 public class Event {
+
+    public static final String JAVA_API_INTEGRATION_NAME = "JavaAPI";
 
     /**
      * Cached extensions, to avoid costly lookups for each extension.
@@ -95,6 +101,13 @@ public class Event {
      * Is the code running in Liquibase IO?
      */
     private boolean isIO = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("isIO"))));
+    /**
+     * The event might be transmitted at a different time than it was cached, so set the timestamp here, in UTC time.
+     * see https://segment.com/docs/connections/spec/common/#timestamps for more info
+     */
+    private String timestamp = Instant.now().atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
+    // Save the isDocker value statically to avoid executing it multiple times
+    private static volatile Boolean cachedIsDocker = null;
 
     public Event(String command) {
         this.command = command;
@@ -105,22 +118,13 @@ public class Event {
             } else {
                 // If no integration details exist in the scope, we assume that the CommandScope is being constructed
                 // directly and thus is a JavaAPI.
-                return "JavaAPI";
+                return JAVA_API_INTEGRATION_NAME;
             }
         });
-        isLiquibaseDocker = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("DOCKER_LIQUIBASE"))));
-        isAwsLiquibaseDocker = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> BooleanUtils.toBoolean(System.getenv("DOCKER_AWS_LIQUIBASE"))));
-        isDocker = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> {
-            if (isLiquibaseDocker || isAwsLiquibaseDocker) {
-                return true;
-            }
-            boolean dockerenvExists = Files.exists(Paths.get("/.dockerenv"));
-            if (dockerenvExists) {
-                return true;
-            }
-            String cgroupContent = new String(Files.readAllBytes(Paths.get("/proc/1/cgroup")));
-            return cgroupContent.contains("docker") || cgroupContent.contains("kubepods");
-        }));
+
+        isDocker = detectDockerEnvironment();
+        isLiquibaseDocker = isDocker || BooleanUtils.toBoolean(System.getenv("DOCKER_LIQUIBASE"));
+        isAwsLiquibaseDocker = isDocker || BooleanUtils.toBoolean(System.getenv("DOCKER_AWS_LIQUIBASE"));
     }
 
     public void incrementFormattedSqlChangelogCount() {
@@ -146,7 +150,8 @@ public class Event {
     public Map<String, ?> getPropertiesAsMap() {
         Map<String, Object> properties = new LinkedHashMap<>();
         // Exclude the childEvents field because it should be handled separately
-        for (Fields field : Arrays.stream(Fields.values()).filter(f -> f != Fields.childEvents).collect(Collectors.toList())) {
+        // Exclude the timestamp field because it is POSTed in the AnalyticsTrackEvent object
+        for (Fields field : Arrays.stream(Fields.values()).filter(f -> !Arrays.asList(Fields.childEvents, Fields.timestamp).contains(f)).collect(Collectors.toList())) {
             try {
                 Field refField = this.getClass().getDeclaredField(field.toString());
                 refField.setAccessible(true);
@@ -190,23 +195,50 @@ public class Event {
     private static String getExtensionVersion(String extensionName) {
         return ExceptionUtil.doSilently(() -> {
             Map<String, VersionUtils.LibraryInfo> libraries = EXTENSIONS_CACHE.get();
-            return libraries.get(extensionName).version;
+            VersionUtils.LibraryInfo libraryInfo = libraries.get(extensionName);
+            return libraryInfo != null ? libraryInfo.version : null;
         });
     }
 
-    /**
-     * Add the child event only if analytics is enabled.
-     * If unable to determine analytics enabled status no event will be added.
-     *
-     * @param event the event to add
-     */
-    public void addChildEvent(Event event) {
-        try {
-            if (AnalyticsArgs.isAnalyticsEnabled()) {
-                getChildEvents().add(event);
+    private static boolean detectDockerEnvironment() {
+        if (cachedIsDocker != null) {
+            return cachedIsDocker;
+        }
+
+        // Double-check locking for thread safety
+        synchronized (Event.class) {
+            if (cachedIsDocker != null) {
+                return cachedIsDocker;
             }
-        } catch (Exception analyticsEnabledException) {
-            Scope.getCurrentScope().getLog(getClass()).fine("Failed to add child event: could not determine analytics status", analyticsEnabledException);
+
+            cachedIsDocker = Boolean.TRUE.equals(ExceptionUtil.doSilently(() -> {
+                if (BooleanUtils.toBoolean(System.getenv("DOCKER_LIQUIBASE")) ||
+                        BooleanUtils.toBoolean(System.getenv("DOCKER_AWS_LIQUIBASE"))) {
+                    return true;
+                }
+
+                // Only do file I/O on Linux/Unix systems
+                String osName = System.getProperty("os.name", "").toLowerCase();
+                if (!osName.contains("linux") && !osName.contains("unix")) {
+                    return false;
+                }
+
+                if (Files.exists(Paths.get("/.dockerenv"))) {
+                    return true;
+                }
+
+                // Only check cgroup if all else fails
+                Path cgroupPath = Paths.get("/proc/1/cgroup");
+                if (Files.exists(cgroupPath)) {
+                    String cgroupContent = new String(Files.readAllBytes(cgroupPath));
+                    return cgroupContent.contains("docker") || cgroupContent.contains("kubepods");
+                }
+
+                return false;
+            }));
+
+            return cachedIsDocker;
         }
     }
+
 }

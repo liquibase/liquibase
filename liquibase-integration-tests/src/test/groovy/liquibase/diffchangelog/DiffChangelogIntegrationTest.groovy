@@ -26,6 +26,7 @@ import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.Sequence
 import liquibase.util.FileUtil
 import liquibase.util.StringUtil
+import org.apache.commons.io.FileUtils
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -38,7 +39,7 @@ class DiffChangelogIntegrationTest extends Specification {
 
     def "auto increment on varchar column" () {
         when:
-        def changelogfile = StringUtil.randomIdentifier(10) + ".sql"
+        def changelogfile = StringUtil.randomIdentifier(10) + ".postgresql.sql"
         def sequenceName = "customer_customer_id_seq"
         def tableName = StringUtil.randomIdentifier(10)
         def sql = """
@@ -75,15 +76,10 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         generatedChangelogContents.contains(" contextFilter:\"newContexts\"")
 
         cleanup:
-        try {
-            generatedChangelog.delete()
-        } catch (Exception ignored) {
-
-        }
+        FileUtils.deleteQuietly(generatedChangelog)
         postgres.getConnection().close()
         refDatabase.close()
         targetDatabase.close()
-        CommandUtil.runDropAll(postgres)
     }
 
     def "FKs which are different but have same name" () {
@@ -115,11 +111,7 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
         dropFK.getConstraintName() == addFK.getConstraintName()
 
         cleanup:
-        try {
-            generatedChangelog.delete()
-        } catch (Exception ignored) {
-
-        }
+        FileUtils.deleteQuietly(generatedChangelog)
         postgres.getConnection().close()
         refDatabase.close()
         targetDatabase.close()
@@ -127,7 +119,7 @@ CREATE TABLE $tableName ( product_no varchar(20) DEFAULT nextval('$sequenceName'
 
     def "should include view comments"() {
         when:
-        def changelogfile = StringUtil.randomIdentifier(10) + ".sql"
+        def changelogfile = StringUtil.randomIdentifier(10) + ".postgresql.sql"
         def viewName = StringUtil.randomIdentifier(10)
         def columnName = StringUtil.randomIdentifier(10)
         def viewComment = "some insightful comment"
@@ -162,15 +154,10 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         generatedChangelogContents.contains(columnComment)
 
         cleanup:
-        try {
-            generatedChangelog.delete()
-        } catch (Exception ignored) {
-
-        }
+        FileUtils.deleteQuietly(generatedChangelog)
         postgres.getConnection().close()
         refDatabase.close()
         targetDatabase.close()
-        CommandUtil.runDropAll(postgres)
     }
 
     def "Ensure diff-changelog set runOnChange and replaceIfExists properties correctly for a created view changeset"() {
@@ -202,7 +189,6 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         outputFile.delete()
         refDatabase.close()
         targetDatabase.close()
-        CommandUtil.runDropAll(postgres)
         postgres.getConnection().close()
     }
 
@@ -231,7 +217,6 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         outputFile.delete()
         refDatabase.close()
         targetDatabase.close()
-        CommandUtil.runDropAll(postgres)
         postgres.getConnection().close()
     }
 
@@ -261,8 +246,39 @@ COMMENT ON COLUMN $viewName.$columnName IS '$columnComment';
         outputFile.delete()
         refDatabase.close()
         targetDatabase.close()
-        CommandUtil.runDropAll(postgres)
         postgres.getConnection().close()
+    }
+
+    def "Ensure loadData csv file is processed from dataDir directory"() {
+        given:
+        CommandUtil.runUpdate(postgres, "changelogs/h2/complete/loadData.test.changelog.xml", null, null, null)
+        def outputFile = "output.diffChangelog.file.xml"
+        def dataDir = "testDataDir/"
+        Database refDatabase = DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl(), postgres.getUsername(), postgres.getPassword(), null, null)
+
+        Database targetDatabase =
+                DatabaseFactory.instance.openDatabase(postgres.getConnectionUrl().replace("lbcat", "lbcat2"), postgres.getUsername(), postgres.getPassword(), null, null)
+
+        when:
+        CommandScope commandScope = new CommandScope(DiffChangelogCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, targetDatabase)
+        commandScope.addArgumentValue(DiffChangelogCommandStep.CHANGELOG_FILE_ARG, outputFile)
+        commandScope.addArgumentValue(ReferenceDbUrlConnectionCommandStep.REFERENCE_DATABASE_ARG, refDatabase)
+        commandScope.addArgumentValue(PreCompareCommandStep.DIFF_TYPES_ARG, "table,data")
+        commandScope.addArgumentValue(DiffOutputControlCommandStep.DATA_OUTPUT_DIR_ARG, dataDir)
+        commandScope.execute()
+
+        then:
+        def changelogFile = new File(outputFile)
+        def changelogFileContent = FileUtil.getContents(changelogFile)
+        changelogFileContent.containsIgnoreCase("file=\"testDataDir/")
+
+        cleanup:
+        FileUtils.deleteQuietly(changelogFile)
+        FileUtils.deleteQuietly(new File(dataDir))
+        postgres.getConnection().close()
+        refDatabase.close()
+        targetDatabase.close()
     }
 
     static void runDiffToChangelogWithUseOrReplaceCommandArgument(Database targetDatabase, Database referenceDatabase,

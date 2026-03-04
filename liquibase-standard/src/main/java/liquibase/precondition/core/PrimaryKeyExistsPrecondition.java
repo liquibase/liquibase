@@ -54,7 +54,7 @@ public class PrimaryKeyExistsPrecondition extends AbstractPrecondition {
             example.setTable(table);
             example.setName(getPrimaryKeyName());
 
-            if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
+            if (!SnapshotGeneratorFactory.getInstance().hasIgnoreNested(example, database)) {
                 if (tableName != null) {
                     throw new PreconditionFailedException("Primary Key does not exist on " + database.escapeObjectName(getTableName(), Table.class), changeLog, this);
                 } else {

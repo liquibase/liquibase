@@ -1,0 +1,30 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="wesley (generated)" id="1625004305927-1">
+        <createTable tableName="arbitrage_media_mix">
+            <column autoIncrement="true" name="ID" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column defaultValueNumeric="0" name="ARB_MEDIA_ID" type="BIGINT"/>
+            <column defaultValueNumeric="0" name="ARB_MEDIA_IMG_ID" type="BIGINT"/>
+            <column defaultValueNumeric="0" name="ARB_MEDIA_TEXT_ID" type="BIGINT"/>
+            <column defaultValue="1" name="STATUS" type="VARCHAR(45)"/>
+            <column name="UPDATER_UID" type="VARCHAR(512)"/>
+            <column name="UPDATE_DATE" type="timestamp"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="CREATE_DATE" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="wesley (generated)" id="1625004305927-25">
+        <addUniqueConstraint columnNames="ARB_MEDIA_ID, ARB_MEDIA_IMG_ID, ARB_MEDIA_TEXT_ID" constraintName="unq" tableName="arbitrage_media_mix"/>
+    </changeSet>
+
+    <changeSet author="wesley (generated)" id="1736451873490-4045" dbms="mssql">
+        <preConditions onFail="MARK_RAN" onFailMessage="You are doing it wrong ;-)">
+            <not>
+                <uniqueConstraintExists tableName="arbitrage_media_mix" constraintName="unq"/>
+            </not>
+        </preConditions>
+        <addUniqueConstraint columnNames="ARB_MEDIA_ID, ARB_MEDIA_IMG_ID, ARB_MEDIA_TEXT_ID" constraintName="unq" tableName="arbitrage_media_mix"/>
+    </changeSet>
+</databaseChangeLog>

@@ -84,14 +84,19 @@ class LoadDataChangeTest extends StandardChangeTest {
 
         LoadDataColumnConfig col4 = new LoadDataColumnConfig()
         col4.setType(LoadDataChange.LOAD_DATA_TYPE.CLOB)
-        col4.setName("empty")
+        col4.setName("invalid")
         change.addColumn(col4)
+
+        LoadDataColumnConfig col5 = new LoadDataColumnConfig()
+        col5.setType(LoadDataChange.LOAD_DATA_TYPE.CLOB)
+        col5.setName("empty")
+        change.addColumn(col5)
 
         change.setSchemaName("SCHEMA_NAME")
         change.setTableName("TABLE_NAME")
         change.setRelativeToChangelogFile(Boolean.TRUE)
         change.setChangeSet(changeSet)
-        change.setFile("change/core/sample.data.for.clob.types.csv")
+        change.setFile("../liquibase/change/core/sample.data.for.clob.types.csv")
 
         def mockDBCsv = new MockDatabase() {
             @Override
@@ -114,7 +119,8 @@ class LoadDataChangeTest extends StandardChangeTest {
         "change/core/SQLFileTestData.sql" == columns.get(0).getValueClobFile()
         "nothing.txt" == columns.get(1).getValue()
         "sample text" == columns.get(2).getValue()
-        null == columns.get(3).getValue()
+        "/dev/null/foo:a" == columns.get(3).getValue()
+        null == columns.get(4).getValue()
     }
 
     def "loadDataEmpty database agnostic"() throws Exception {
@@ -990,6 +996,27 @@ class LoadDataChangeTest extends StandardChangeTest {
         sqlStatement.getColumnValues().keySet()[2] == " name"
         sqlStatement.getColumnValues().keySet()[3] == " description"
     }
+
+    /**
+     * This test validates that blank lines in a CSV file are ignored during the load data process and that subsequent rows are processed correctly.
+     */
+    def "validate blank lines in CSV file are ignored but other rows are loaded as expected"() {
+        when:
+        def table = testTable("table")
+        SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory(table)
+
+        LoadDataChange change = new LoadDataChange()
+        change.setFile("liquibase/change/core/sample.data.with.blank.line.csv")
+        change.setTableName("table")
+
+        SqlStatement[] sqlStatements = change.generateStatements(mockDB)
+
+        then:
+        sqlStatements.length == 2
+        assert columnValue(sqlStatements[0], "username") == "bjohnson"
+        assert columnValue(sqlStatements[1], "username") == "jdoe"
+    }
+
 
 
     class ColDef {

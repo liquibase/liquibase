@@ -30,11 +30,21 @@ public class ParsedNode {
     private final String name;
     private final List<ParsedNode> children = new ArrayList<>();
     private Object value;
+    private String parsedNamespace = null;
 
     public ParsedNode(String namespace, String name) {
         this.namespace = namespace;
         this.name = name;
     }
+
+    public String getParsedNamespace() {
+        return parsedNamespace;
+    }
+
+    public void setParsedNamespace(String parsedNamespace) {
+        this.parsedNamespace = parsedNamespace;
+    }
+
 
     /**
      * Each node key contains both a namespace and a name which together identifies the node.

@@ -49,6 +49,7 @@ public interface Database extends PrioritizedService, AutoCloseable {
     String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase(Locale.US);
     String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase(Locale.US);
     String COMPLETE_SQL_SCOPE_KEY = "completeSql";
+    String IGNORE_MISSING_REFERENCES_KEY = "ignoreMissingReferences";
 
     /**
      * Is this AbstractDatabase subclass the correct one to use for the given connection.
@@ -331,6 +332,10 @@ public interface Database extends PrioritizedService, AutoCloseable {
     String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType);
 
     String escapeTableName(String catalogName, String schemaName, String tableName);
+
+    default String escapeTablespaceName(String tablespaceName) {
+        return escapeObjectName(tablespaceName, Tablespace.class);
+    }
 
     String escapeIndexName(String catalogName, String schemaName, String indexName);
 
@@ -619,6 +624,15 @@ public interface Database extends PrioritizedService, AutoCloseable {
 
     String unescapeDataTypeString(String dataTypeString);
 
+    default String escapeForLike(String string) {
+        if (string == null) {
+            return null;
+        }
+        return string
+                .replace("%", "\\%")
+                .replace("_", "\\_");
+    }
+
     ValidationErrors validate();
 
     default boolean failOnDefferable() {
@@ -684,5 +698,6 @@ public interface Database extends PrioritizedService, AutoCloseable {
     default String generateConnectCommandSuccessMessage() {
         return null;
     }
+
 }
 

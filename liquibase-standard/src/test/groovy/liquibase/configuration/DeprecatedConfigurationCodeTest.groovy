@@ -9,7 +9,7 @@ import spock.lang.Specification
  */
 class DeprecatedConfigurationCodeTest extends Specification {
 
-    def "cleanup"() {
+    def cleanup() {
         DeprecatedConfigurationValueProvider.clearData()
     }
 
@@ -37,10 +37,13 @@ class DeprecatedConfigurationCodeTest extends Specification {
     def "4_3 ConfigurationContainer custom implementations"() {
         when:
         def config = LiquibaseConfiguration.getInstance().getConfiguration(DeprecatedConfigurationConfig.class)
-        def property = (ConfigurationProperty) config.getProperty(DeprecatedConfigurationConfig.TEST_PROPERTY)
+        // Use getContainer() to access the inner ConfigurationContainer which avoids Groovy property resolution conflicts
+        def configContainer = config.getContainer()
+        def property = (ConfigurationProperty) configContainer.getProperty(DeprecatedConfigurationConfig.TEST_PROPERTY)
+        def properties = config.getProperties()
 
         then:
-        config.getProperties()*.getName() == ["testProperty"]
+        properties*.getName() == ["sampleProperty"]
         property.description == "A test property"
         property.getValue() == "default value"
         !property.getWasOverridden()
@@ -48,7 +51,7 @@ class DeprecatedConfigurationCodeTest extends Specification {
 
     private static class DeprecatedConfigurationConfig extends AbstractConfigurationContainer {
 
-        private static final String TEST_PROPERTY = "testProperty"
+        private static final String TEST_PROPERTY = "sampleProperty"
 
         DeprecatedConfigurationConfig() {
             super("test");
@@ -62,11 +65,11 @@ class DeprecatedConfigurationCodeTest extends Specification {
         /**
          * Should Liquibase execute
          */
-        boolean getTestProperty() {
+        boolean getSampleProperty() {
             return getContainer().getValue(TEST_PROPERTY, Boolean.class);
         }
 
-        DeprecatedConfigurationConfig setTestProperty(boolean value) {
+        DeprecatedConfigurationConfig setSampleProperty(boolean value) {
             getContainer().setValue(TEST_PROPERTY, value);
             return this;
         }

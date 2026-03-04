@@ -1,6 +1,9 @@
 package liquibase.changelog;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
 import liquibase.Scope;
+import liquibase.database.Database;
 import liquibase.database.OfflineConnection;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.executor.ExecutorService;
@@ -14,11 +17,12 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.lang.reflect.Field;
+import java.util.Map;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @see https://liquibase.jira.com/browse/CORE-2334
@@ -118,6 +122,56 @@ public class OfflineChangeLogHistoryServiceTest {
 
     private void unregisterService(OfflineChangeLogHistoryService service) {
         Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).unregister(service);
+    }
+
+    /**
+     * Test that clearAllCheckSums clears the FastCheck cache
+     */
+    @Test
+    public void testClearAllCheckSumsClearsFastCheckCache() throws Exception {
+        // Given
+        StringWriter writer = new StringWriter();
+        OfflineChangeLogHistoryService service = createService(writer, "true");
+        ChangeSet changeSet = createChangeSet();
+        FastCheckService fastCheckService = Scope.getCurrentScope().getSingleton(FastCheckService.class);
+        Database database = service.getDatabase();
+
+        // Initialize service and mark changeset as executed
+        service.init();
+        service.setExecType(changeSet, ChangeSet.ExecType.EXECUTED);
+
+        DatabaseChangeLog databaseChangeLog = new DatabaseChangeLog("/patch/changeLog.xml");
+        databaseChangeLog.addChangeSet(changeSet);
+
+        // Populate the FastCheck cache by calling isUpToDateFastCheck
+        fastCheckService.isUpToDateFastCheck(null, database, databaseChangeLog, new Contexts(), new LabelExpression());
+
+        // Verify the cache was populated by using reflection to check the cache map size
+        int cacheSizeBefore = getFastCheckCacheSize(fastCheckService);
+        assertTrue("FastCheck cache should be populated after first check", cacheSizeBefore > 0);
+
+        // When - Clear all checksums (this should clear the FastCheck cache)
+        service.clearAllCheckSums();
+
+        // Then - Verify the cache was actually cleared
+        int cacheSizeAfter = getFastCheckCacheSize(fastCheckService);
+        assertEquals("FastCheck cache should be empty after clearAllCheckSums", 0, cacheSizeAfter);
+
+        writer.close();
+        unregisterService(service);
+
+        // Clean up
+        fastCheckService.clearCache();
+    }
+
+    /**
+     * Helper method to get the size of the FastCheck cache using reflection
+     */
+    private int getFastCheckCacheSize(FastCheckService fastCheckService) throws Exception {
+        Field cacheField = FastCheckService.class.getDeclaredField("upToDateFastCheck");
+        cacheField.setAccessible(true);
+        Map<?, ?> cache = (Map<?, ?>) cacheField.get(fastCheckService);
+        return cache.size();
     }
 
     /**

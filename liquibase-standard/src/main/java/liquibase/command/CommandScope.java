@@ -2,13 +2,18 @@ package liquibase.command;
 
 import liquibase.GlobalConfiguration;
 import liquibase.Scope;
-import liquibase.analytics.Event;
 import liquibase.analytics.AnalyticsFactory;
+import liquibase.analytics.AnalyticsListener;
+import liquibase.analytics.Event;
+import liquibase.analytics.LiquibaseAnalyticsListener;
 import liquibase.configuration.*;
 import liquibase.database.Database;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.CommandValidationException;
 import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
+import liquibase.license.LicenseTrackList;
+import liquibase.license.LicenseTrackingArgs;
+import liquibase.license.LicenseTrackingFactory;
 import liquibase.listener.LiquibaseListener;
 import liquibase.logging.mdc.MdcKey;
 import liquibase.logging.mdc.MdcManager;
@@ -19,7 +24,9 @@ import liquibase.util.ExceptionUtil;
 import liquibase.util.StringUtil;
 import lombok.Getter;
 
-import java.io.*;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -232,13 +239,22 @@ public class CommandScope {
         if (!Scope.getCurrentScope().isMdcKeyPresent(MdcKey.LIQUIBASE_COMMAND_NAME)) {
             Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_COMMAND_NAME, commandName);
         }
-        Event analyticsEvent = ExceptionUtil.doSilently(() -> {
-            return new Event(commandName);
-        });
-        Event parentAnalyticsEvent = Scope.getCurrentScope().getAnalyticsEvent();
+
+
+        LicenseTrackList licenseTrackList = new LicenseTrackList();
+        LicenseTrackList parentLicenseTrackList = Scope.getCurrentScope().getLicenseTrackList();
 
         try {
-            return Scope.child(Collections.singletonMap(Scope.Attr.analyticsEvent.toString(), analyticsEvent), () -> {
+            Map<String, Object> scopeValues = new HashMap<>();
+            final Event analyticsEvent = createAnalyticsEventIfEnabled(commandName);
+
+            Event parentAnalyticsEvent = Scope.getCurrentScope().getAnalyticsEvent();
+
+            scopeValues.put(Scope.Attr.analyticsEvent.toString(), analyticsEvent);
+
+
+            scopeValues.put(Scope.Attr.licenseTrackList.toString(), licenseTrackList);
+            return Scope.child(scopeValues, () -> {
                 CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
                 final List<CommandStep> pipeline = commandDefinition.getPipeline();
                 final List<CommandStep> executedCommands = new ArrayList<>();
@@ -254,9 +270,12 @@ public class CommandScope {
                         } catch (Exception runException) {
                             // Suppress the exception for now so that we can run the cleanup steps even when encountering an exception.
                             thrownException = Optional.of(runException);
-                            ExceptionUtil.doSilently(() -> {
-                                analyticsEvent.setOperationOutcome(MdcValue.COMMAND_FAILED);
-                            });
+                            if (analyticsEvent != null){
+                                ExceptionUtil.doSilently(() -> {
+                                    analyticsEvent.setOperationOutcome(MdcValue.COMMAND_FAILED);
+                                });
+                            }
+
                             Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_OUTCOME, MdcValue.COMMAND_FAILED, false);
                             break;
                         }
@@ -285,15 +304,21 @@ public class CommandScope {
                         }
                         throw thrownException.get();
                     } else {
-                        ExceptionUtil.doSilently(() -> {
-                            analyticsEvent.setOperationOutcome(MdcValue.COMMAND_SUCCESSFUL);
-                        });
+                        if (analyticsEvent != null){
+                            ExceptionUtil.doSilently(() -> {
+                                analyticsEvent.setOperationOutcome(MdcValue.COMMAND_SUCCESSFUL);
+                            });
+                        }
+
                         Scope.getCurrentScope().addMdcValue(MdcKey.OPERATION_OUTCOME, MdcValue.COMMAND_SUCCESSFUL, false);
                     }
                 } catch (Exception e) {
-                    ExceptionUtil.doSilently(() -> {
-                        analyticsEvent.setExceptionClass(e.getClass().getName());
-                    });
+                    if (analyticsEvent != null){
+                        ExceptionUtil.doSilently(() -> {
+                            analyticsEvent.setExceptionClass(e.getClass().getName());
+                        });
+                    }
+
                     if (e instanceof CommandExecutionException) {
                         throw (CommandExecutionException) e;
                     } else {
@@ -310,14 +335,24 @@ public class CommandScope {
                     } catch (Exception e) {
                         Scope.getCurrentScope().getLog(getClass()).warning("Error flushing command output stream: " + e.getMessage(), e);
                     }
-                    ExceptionUtil.doSilently(() -> {
-                        if (parentAnalyticsEvent == null) {
+                    if (analyticsEvent != null){
+                        ExceptionUtil.doSilently(() -> {
                             AnalyticsFactory analyticsFactory = Scope.getCurrentScope().getSingleton(AnalyticsFactory.class);
-                            analyticsFactory.handleEvent(analyticsEvent);
+                            if (parentAnalyticsEvent == null) {
+                                analyticsFactory.handleEvent(analyticsEvent);
+                            } else if (analyticsFactory.getListener().isEnabled()) {
+                                parentAnalyticsEvent.getChildEvents().add(analyticsEvent);
+                            }
+                        });
+                    }
+                    if ( Boolean.TRUE.equals(LicenseTrackingArgs.ENABLED.getCurrentValue())) {
+                        if (parentLicenseTrackList == null) {
+                            LicenseTrackingFactory licenseTrackingFactory = Scope.getCurrentScope().getSingleton(LicenseTrackingFactory.class);
+                            licenseTrackingFactory.handleEvent(licenseTrackList);
                         } else {
-                            parentAnalyticsEvent.addChildEvent(analyticsEvent);
+                            parentLicenseTrackList.getLicenseTracks().addAll(licenseTrackList.getLicenseTracks());
                         }
-                    });
+                    }
                 }
 
                 return resultsBuilder.build();
@@ -399,6 +434,28 @@ public class CommandScope {
             }
         }
         return commandStepName.toString();
+    }
+
+    /**
+     * Creates an analytics event if analytics is enabled, or returns null if disabled.
+     * This method handles all potential failures gracefully to ensure analytics issues
+     * never break command execution.
+     */
+    private Event createAnalyticsEventIfEnabled(String commandName) {
+        try {
+            AnalyticsFactory factory = Scope.getCurrentScope().getSingleton(AnalyticsFactory.class);
+            if (factory == null) return null;
+
+            AnalyticsListener listener = factory.getListener();
+            if (listener == null || !listener.isEnabled()) {
+                return null;
+            }
+
+            return new Event(commandName);
+        } catch (Exception e) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Could not create analytics event: " + e.getMessage());
+            return null;
+        }
     }
 
     /**

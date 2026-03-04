@@ -1,0 +1,6 @@
+databaseChangeLog:
+  - logicalFilePath: parent-logical-path
+  - include:
+      relativeToChangelogFile: true
+      file: explicit-include-no-inherit-child.yaml
+      logicalFilePath: explicit-include-logical-path

@@ -7,6 +7,7 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.license.LicenseTrackList;
 import liquibase.listener.LiquibaseListener;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
@@ -43,10 +44,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Scope {
 
-    public static final String CHECKS_MESSAGE =
-            "The Liquibase Checks Extension 2.0.0 or higher is required to execute checks commands. " +
-                    "Visit https://docs.liquibase.com/pro-extensions to acquire the Checks Extension.";
-
+    public static final String AZURE_MESSAGE =
+            "The Liquibase Azure Extension 1.0.0 or higher is required to use Azure Storage. " +
+                    "Visit https://docs.liquibase.com/pro-extensions to acquire the Azure Extension.";
     /**
      * Enumeration containing standard attributes. Normally use methods like convenience {@link #getResourceAccessor()} or {@link #getDatabase()}
      */
@@ -79,12 +79,49 @@ public class Scope {
          */
         mavenConfigurationProperties,
         analyticsEvent,
-        integrationDetails
+        integrationDetails,
+        /**
+         * The maximum number of analytics events that should be cached in memory before sent in a batch.
+         */
+        maxAnalyticsCacheSize,
+        licenseTrackList,
+        lpmArgs
     }
 
     public static final String JAVA_PROPERTIES = "javaProperties";
 
-    private static final InheritableThreadLocal<ScopeManager> scopeManager = new InheritableThreadLocal<>();
+    /**
+     * Lazily initialized scope manager ThreadLocal.
+     * Uses double-checked locking pattern with volatile for thread-safe lazy initialization.
+     * The volatile keyword ensures visibility of the initialized object across threads.
+     * Once initialized, this field is never modified, making it effectively immutable.
+     */
+    @SuppressWarnings("java:S3077")
+    private static volatile InheritableThreadLocal<ScopeManager> scopeManager;
+
+    /**
+     * Lazily initializes and returns the scopeManager ThreadLocal.
+     */
+    private static InheritableThreadLocal<ScopeManager> getScopeManagerThreadLocal() {
+        if (scopeManager == null) {
+            synchronized (Scope.class) {
+                if (scopeManager == null) {
+                    scopeManager = new InheritableThreadLocal<ScopeManager>() {
+                        @Override
+                        protected ScopeManager childValue(ScopeManager parentValue) {
+                            if (parentValue == null) {
+                                return null;
+                            }
+                            ScopeManager sm = new SingletonScopeManager();
+                            sm.setCurrentScope(parentValue.getCurrentScope());
+                            return sm;
+                        }
+                    };
+                }
+            }
+        }
+        return scopeManager;
+    }
 
     private final Scope parent;
     private final SmartMap values = new SmartMap();
@@ -95,12 +132,13 @@ public class Scope {
     private LiquibaseListener listener;
 
     public static Scope getCurrentScope() {
-        if (scopeManager.get() == null) {
-            scopeManager.set(new SingletonScopeManager());
+        InheritableThreadLocal<ScopeManager> manager = getScopeManagerThreadLocal();
+        if (manager.get() == null) {
+            manager.set(new SingletonScopeManager());
         }
-        if (scopeManager.get().getCurrentScope() == null) {
+        if (manager.get().getCurrentScope() == null) {
             Scope rootScope = new Scope();
-            scopeManager.get().setCurrentScope(rootScope);
+            manager.get().setCurrentScope(rootScope);
 
             rootScope.values.put(Attr.logService.name(), new JavaLogService());
             rootScope.values.put(Attr.serviceLocator.name(), new StandardServiceLocator());
@@ -112,10 +150,12 @@ public class Scope {
             rootScope.getSingleton(LiquibaseConfiguration.class).init(rootScope);
 
             LogService overrideLogService = rootScope.getSingleton(LogServiceFactory.class).getDefaultLogService();
-            if (overrideLogService == null) {
-                throw new UnexpectedLiquibaseException("Cannot find default log service");
+            if (overrideLogService != null) {
+                rootScope.values.put(Attr.logService.name(), overrideLogService);
+            } else {
+                // Log a warning using the already-created JavaLogService
+                rootScope.getLog(Scope.class).warning("Could not find log service via LogServiceFactory. Using JavaLogService as default.");
             }
-            rootScope.values.put(Attr.logService.name(), overrideLogService);
 
             //check for higher-priority serviceLocator
             ServiceLocator serviceLocator = rootScope.getServiceLocator();
@@ -129,11 +169,11 @@ public class Scope {
             rootScope.values.put(Attr.osgiPlatform.name(), ContainerChecker.isOsgiPlatform());
             rootScope.values.put(Attr.deploymentId.name(), generateDeploymentId());
         }
-        return scopeManager.get().getCurrentScope();
+        return manager.get().getCurrentScope();
     }
 
     public static void setScopeManager(ScopeManager scopeManager) {
-        Scope.scopeManager.set(scopeManager);
+        getScopeManagerThreadLocal().set(scopeManager);
     }
 
     /**
@@ -232,7 +272,7 @@ public class Scope {
         Scope originalScope = getCurrentScope();
         Scope child = new Scope(originalScope, scopeValues);
         child.listener = listener;
-        scopeManager.get().setCurrentScope(child);
+        getScopeManagerThreadLocal().get().setCurrentScope(child);
 
         return child.scopeId;
     }
@@ -254,7 +294,7 @@ public class Scope {
             mdcObject.close();
         }
 
-        scopeManager.get().setCurrentScope(currentScope.getParent());
+        getScopeManagerThreadLocal().get().setCurrentScope(currentScope.getParent());
     }
 
     /**
@@ -529,12 +569,20 @@ public class Scope {
         return Scope.getCurrentScope().get(Attr.analyticsEvent, Event.class);
     }
 
+    public LicenseTrackList getLicenseTrackList() {
+        return Scope.getCurrentScope().get(Attr.licenseTrackList, LicenseTrackList.class);
+    }
+
     private static String generateDeploymentId() {
         long time = (new Date()).getTime();
         String dateString = String.valueOf(time);
         DecimalFormat decimalFormat = new DecimalFormat("0000000000");
         return dateString.length() > 9 ? dateString.substring(dateString.length() - 10) :
                 decimalFormat.format(time);
+    }
+
+    public void setLpmArgs(String args) {
+        this.values.put(Attr.lpmArgs.name(), args);
     }
 
     @Override

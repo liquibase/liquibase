@@ -1,16 +1,23 @@
 package liquibase
 
+import liquibase.command.CommandScope
+import liquibase.command.core.UpdateCommandStep
+import liquibase.command.core.UpdateCountCommandStep
+import liquibase.command.core.helpers.DbUrlConnectionArgumentsCommandStep
 import liquibase.command.util.CommandUtil
-import liquibase.exception.CommandExecutionException
 import liquibase.extension.testing.testsystem.DatabaseTestSystem
 import liquibase.extension.testing.testsystem.TestSystemFactory
 import liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationTest
+import liquibase.logging.core.BufferedLogService
 import liquibase.resource.SearchPathResourceAccessor
+import org.apache.commons.lang3.StringUtils
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Timeout
 
 import java.sql.ResultSet
+import java.util.logging.Level
 
 @LiquibaseIntegrationTest
 class OracleTest extends Specification {
@@ -51,11 +58,15 @@ class OracleTest extends Specification {
 
     def "Use loadData with invalid clob"() {
         when:
-        CommandUtil.runUpdate(oracle, "src/test/resources/changelogs/common/invalid-clob-data-load.xml")
+        BufferedLogService bufferLog = new BufferedLogService()
+
+        Scope.child(Scope.Attr.logService.name(), bufferLog, () -> {
+            CommandUtil.runUpdate(oracle, "src/test/resources/changelogs/common/invalid-clob-data-load.xml")
+        })
 
         then:
-        def exception = thrown(CommandExecutionException)
-        exception.cause.message.contains("Could not find clob file: this is not a valid file path so this will error if loaded into a clob/blob type column via load data! Make sure the value of the clob is a valid path to a file containing the clob's actual value to be loaded.")
+        String logAsString = bufferLog.getLogAsString(Level.FINE)
+        assert logAsString.contains("not found. Inserting the value as a string. See https://docs.liquibase.com for more information.")
     }
 
     @Timeout(value = 25)
@@ -87,5 +98,65 @@ END;
 
         then:
         noExceptionThrown()
+    }
+
+    def "verify foreignKeyExists constraint is not created again when precondition fails because it already exists"() {
+        when:
+        def changeLogFile = "changelogs/oracle/complete/fkep.test.changelog.xml"
+        def scopeSettings = [
+                (Scope.Attr.resourceAccessor.name()): new SearchPathResourceAccessor(".,target/test-classes")
+        ]
+        Scope.child(scopeSettings, {
+            CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, oracle.getConnectionUrl())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, oracle.getUsername())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, oracle.getPassword())
+            commandScope.addArgumentValue(UpdateCountCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+            commandScope.execute()
+        } as Scope.ScopedRunnerWithReturn<Void>)
+
+        then:
+        noExceptionThrown()
+    }
+
+    def "verify Unique constraint is not created again when precondition fails because it already exists"() {
+        when:
+        def changeLogFile = "changelogs/uniqueConstraint.xml"
+        def scopeSettings = [
+                (Scope.Attr.resourceAccessor.name()): new SearchPathResourceAccessor(".,target/test-classes")
+        ]
+        Scope.child(scopeSettings, {
+            CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, oracle.getConnectionUrl())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, oracle.getUsername())
+            commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, oracle.getPassword())
+            commandScope.addArgumentValue(UpdateCountCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+            commandScope.execute()
+        } as Scope.ScopedRunnerWithReturn<Void>)
+
+        then:
+        noExceptionThrown()
+    }
+
+    def showRowsAffectedForDMLOnly() {
+        when:
+        BufferedLogService bufferLog = new BufferedLogService()
+
+        Scope.child(Scope.Attr.logService.name(), bufferLog, () -> {
+            CommandUtil.runUpdate(oracle, "src/test/resources/changelogs/common/rows-affected.xml")
+        })
+
+        then:
+        String logAsString = bufferLog.getLogAsString(Level.FINE)
+        assert logAsString.contains("1 row(s) affected")
+        assert ! logAsString.contains("-1 row(s) affected")
+        // Expected: 2 original INSERTs + 5 new DML statements (2 INSERTs + 1 UPDATE + 2 DELETEs) = 7
+        // Note: DDL statements (CREATE TABLE) and PL/SQL blocks should NOT show "rows affected"
+        assert StringUtils.countMatches(logAsString, "row(s) affected") == 7
+        // Verify case-insensitive matching works
+        assert logAsString.contains("insert into TABLE1 (name, id) VALUES ('lowercase', '3')")
+        assert logAsString.contains("Insert Into TABLE1 (name, id) VALUES ('mixedcase', '4')")
+        assert logAsString.contains("update TABLE1 set role = 'admin' where id = '1'")
+        assert logAsString.contains("delete from TABLE1 where id = '4'")
     }
 }

@@ -15,6 +15,7 @@ import liquibase.logging.Logger;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtil;
@@ -307,6 +308,10 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             return objectName;
         }
 
+        if(objectType.equals(Catalog.class) && !StringUtil.hasLowerCase(objectName)) {
+            return objectName;
+        }
+
         if (objectName.contains("-")
                 || hasMixedCase(objectName)
                 || startsWithNumeric(objectName)
@@ -411,7 +416,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         // SET SEARCH_PATH SQL statements
         final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this);
         if(executor.updatesDatabase()) {
-            DatabaseUtils.initializeDatabase(getDefaultCatalogName(), getDefaultSchemaName(), this);
+            DatabaseUtils.initializeDatabase(this.escapeObjectName(getDefaultCatalogName(), Catalog.class), this.escapeObjectName(getDefaultSchemaName(), Schema.class), this);
         }
     }
 

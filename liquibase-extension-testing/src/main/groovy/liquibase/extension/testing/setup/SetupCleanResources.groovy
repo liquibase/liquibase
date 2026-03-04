@@ -1,5 +1,9 @@
 package liquibase.extension.testing.setup
 
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+
 class SetupCleanResources extends TestSetup {
 
     private final List<String> resourcesToDelete = new ArrayList<>()
@@ -20,6 +24,11 @@ class SetupCleanResources extends TestSetup {
     SetupCleanResources(CleanupMode cleanupMode, FilenameFilter filter, File resourceDirectory) {
         this.cleanupMode = cleanupMode
         this.filter = filter
+        this.resourceDirectory = resourceDirectory
+    }
+
+    SetupCleanResources(CleanupMode cleanupMode, File resourceDirectory) {
+        this.cleanupMode = cleanupMode
         this.resourceDirectory = resourceDirectory
     }
 
@@ -46,6 +55,9 @@ class SetupCleanResources extends TestSetup {
         if (filter != null) {
             deleteResourcesThatMatch()
             return
+        } else if (resourceDirectory != null && resourceDirectory.isDirectory()) {
+            deleteDirectory(resourceDirectory.toPath())
+            return
         }
 
         for (String fileToDelete : resourcesToDelete) {
@@ -66,6 +78,18 @@ class SetupCleanResources extends TestSetup {
                 f.deleteDir()
             }
         }
+    }
+
+    private static void deleteDirectory(Path directory) throws IOException {
+        Files.walk(directory)
+                .sorted(Comparator.reverseOrder()) // Sort in reverse order to delete contents before parent
+                .forEach(path -> {
+                    try {
+                        Files.delete(path);
+                    } catch (IOException e) {
+                        System.err.println("Failed to delete: " + path + " - " + e.getMessage());
+                    }
+                });
     }
 
     void deleteResourcesThatMatch() {

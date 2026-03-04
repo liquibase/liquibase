@@ -11,7 +11,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AddColumnExecutorTest extends AbstractExecuteTest {
+public class AddColumnExecutorTest extends AbstractExecutorTest {
 
     protected static final String TABLE_NAME = "table_name";
 

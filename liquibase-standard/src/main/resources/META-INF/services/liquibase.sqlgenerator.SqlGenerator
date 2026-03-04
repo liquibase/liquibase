@@ -9,6 +9,7 @@ liquibase.sqlgenerator.core.AddColumnGeneratorDefaultClauseBeforeNotNull
 liquibase.sqlgenerator.core.AddColumnGeneratorSQLite
 liquibase.sqlgenerator.core.AddDefaultValueGenerator
 liquibase.sqlgenerator.core.AddDefaultValueGeneratorDerby
+liquibase.sqlgenerator.core.AddDefaultValueGeneratorHsqldb
 liquibase.sqlgenerator.core.AddDefaultValueGeneratorInformix
 liquibase.sqlgenerator.core.AddDefaultValueGeneratorMSSQL
 liquibase.sqlgenerator.core.AddDefaultValueGeneratorMySQL
@@ -102,5 +103,6 @@ liquibase.sqlgenerator.core.TableRowCountGenerator
 liquibase.sqlgenerator.core.TagDatabaseGenerator
 liquibase.sqlgenerator.core.UnlockDatabaseChangeLogGenerator
 liquibase.sqlgenerator.core.UpdateChangeSetChecksumGenerator
+liquibase.sqlgenerator.core.UpdateChangeSetFilenameGenerator
 liquibase.sqlgenerator.core.UpdateDataChangeGenerator
 liquibase.sqlgenerator.core.UpdateGenerator

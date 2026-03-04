@@ -99,7 +99,7 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
         example.setName(database.correctObjectName(getColumnName(), Column.class));
 
         try {
-            if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
+            if (!SnapshotGeneratorFactory.getInstance().hasIgnoreNested(example, database)) {
                 throw new PreconditionFailedException("Column '" + database.escapeColumnName(catalogName, schemaName, getTableName(), getColumnName()) + "' does not exist", changeLog, this);
             }
         } catch (LiquibaseException e) {
@@ -111,7 +111,7 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
         if (getCatalogName() != null)
             return false;
 
-        if (!(database.getConnection() instanceof JdbcConnection))
+        if (database.getConnection() == null || !(database.getConnection() instanceof JdbcConnection))
             return false;
 
         if (getColumnName() == null)

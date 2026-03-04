@@ -23,6 +23,10 @@ public abstract class AbstractMapConfigurationValueProvider extends AbstractConf
 
     protected abstract String getSourceDescription();
 
+    public String getDescription() {
+        return getSourceDescription();
+    }
+
     /**
      * Default implementation stores a cache of found known values, falling back to {@link #lookupProvidedValue(String...)} when it is asked about a new key.
      * Uses {@link #getMapHash()} to determine if the underlying map has changed.

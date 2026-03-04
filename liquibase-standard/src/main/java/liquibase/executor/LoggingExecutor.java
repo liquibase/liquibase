@@ -22,6 +22,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  * A variant of the Executor service that does not actually modify the target database(s). Instead, it creates
@@ -33,6 +35,14 @@ public class LoggingExecutor extends AbstractExecutor {
 
     private final Writer output;
     private final Executor delegatedReadExecutor;
+    
+    private static final Pattern SNOWFLAKE_STAGE_CREDENTIALS_PATTERN = Pattern.compile(
+        "(?i)\\b(AWS_KEY_ID|AWS_SECRET_KEY|AWS_TOKEN|AZURE_SAS_TOKEN|MASTER_KEY|KMS_KEY_ID)\\s*=\\s*(['\"])([^'\"]*+)\\2",
+        Pattern.CASE_INSENSITIVE);
+    
+    // Context-aware pattern to identify CREDENTIALS and ENCRYPTION blocks to avoid false positives in string literals
+    private static final Pattern SNOWFLAKE_STAGE_CREDENTIALS_BLOCK_PATTERN = Pattern.compile(
+        "(?i)\\b(CREDENTIALS|ENCRYPTION)\\s*=\\s*\\(([^)]*)\\)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     public LoggingExecutor(Executor delegatedExecutor, Writer output, Database database) {
         if (output != null) {
@@ -66,6 +76,43 @@ public class LoggingExecutor extends AbstractExecutor {
 
     protected Writer getOutput() {
         return output;
+    }
+    
+    /**
+     * Obfuscates credentials in SQL statements for Snowflake STAGE objects.
+     * Handles both CREDENTIALS and ENCRYPTION blocks.
+     *
+     * @param statement SQL statement that may contain credentials
+     * @return SQL statement with credentials obfuscated
+     */
+    private String obfuscateCredentials(String statement) {
+        if (statement == null) {
+            return null;
+        }
+        
+        Matcher credentialsMatcher = SNOWFLAKE_STAGE_CREDENTIALS_BLOCK_PATTERN.matcher(statement);
+        StringBuffer obfuscatedStatement = new StringBuffer();
+        
+        while (credentialsMatcher.find()) {
+            String blockType = credentialsMatcher.group(1); // CREDENTIALS or ENCRYPTION
+            String blockContent = credentialsMatcher.group(2); // Content inside the parentheses
+            String obfuscatedBlock = obfuscateCredentialsInBlock(blockContent);
+            // Replace the block with obfuscated version, preserving the original block type
+            String replacement = blockType + " = (" + obfuscatedBlock + ")";
+            credentialsMatcher.appendReplacement(obfuscatedStatement, Matcher.quoteReplacement(replacement));
+        }
+
+        credentialsMatcher.appendTail(obfuscatedStatement);
+
+        return obfuscatedStatement.toString();
+    }
+    
+    /**
+     * Obfuscates credentials within CREDENTIALS or ENCRYPTION blocks. 
+     * This method only processes the content inside the parentheses.
+     */
+    private String obfuscateCredentialsInBlock(String credentialsBlock) {
+        return SNOWFLAKE_STAGE_CREDENTIALS_PATTERN.matcher(credentialsBlock).replaceAll("$1 = $2*****$2");
     }
 
     @Override
@@ -149,6 +196,9 @@ public class LoggingExecutor extends AbstractExecutor {
                     }
                 }
 
+                // Obfuscate credentials before writing to output
+                statement = obfuscateCredentials(statement);
+
                 output.write(statement);
 
                 if ((database instanceof MSSQLDatabase) || (database instanceof SybaseDatabase) || (database
@@ -158,7 +208,9 @@ public class LoggingExecutor extends AbstractExecutor {
                 } else {
                     String endDelimiter = ";";
                     String potentialDelimiter = null;
-                    if (sql instanceof RawParameterizedSqlStatement) {
+                    if (sql instanceof RawSqlStatement) {
+                        potentialDelimiter = ((RawSqlStatement) sql).getEndDelimiter();
+                    } else if (sql instanceof RawParameterizedSqlStatement) {
                         potentialDelimiter = ((RawParameterizedSqlStatement) sql).getEndDelimiter();
                     } else if (sql instanceof CreateProcedureStatement) {
                         potentialDelimiter = ((CreateProcedureStatement) sql).getEndDelimiter();

@@ -76,7 +76,9 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
                 .setDefaultValue("liquibase", "Controls which log channels have their level set by the liquibase.logLevel setting. Comma separate multiple values. To set the level of all channels, use 'all'. Example: liquibase,org.mariadb.jdbc")
                 .build();
 
-        LOG_FILE = builder.define("logFile", String.class).build();
+        LOG_FILE = builder.define("logFile", String.class)
+                .setDescription("Users can use .gz file extension to enable log files compression.")
+                .build();
         MIRROR_CONSOLE_MESSAGES_TO_LOG = builder.define("mirrorConsoleMessagesToLog", Boolean.class)
                 .setDefaultValue(Boolean.TRUE)
                 .setDescription("When set to true, the console messages are mirrored to the logs as [liquibase.ui] to provide a more complete picture of liquibase operations to log analysis tools. Set to false to change this behavior.")
@@ -96,7 +98,7 @@ public class LiquibaseCommandLineConfiguration implements AutoloadedConfiguratio
 
         LOG_FORMAT = builder.define("logFormat", LogFormat.class)
                 .setDescription("Sets the format of log output to console or log files. " +
-                        "Open Source users default to unstructured \"" + LogFormat.TEXT + "\" logs to the console or output log files. " +
+                        "Community users default to unstructured \"" + LogFormat.TEXT + "\" logs to the console or output log files. " +
                         "Pro users have the option to set value as \"" + LogFormat.JSON + "\" or \"" + LogFormat.JSON_PRETTY + "\" to enable json-structured log files to the console or output log files.")
                 .setDefaultValue(LogFormat.TEXT)
                 .setValueHandler(logFormat -> {

@@ -1,11 +1,15 @@
 package liquibase.serializer.core.formattedsql;
 
-import liquibase.*;
+import liquibase.ContextExpression;
+import liquibase.GlobalConfiguration;
+import liquibase.Labels;
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.core.OracleDatabase;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.ChangeLogSerializer;
@@ -38,11 +42,14 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
         if (object instanceof ChangeSet) {
             //
             // If there is a Database object in the current scope, then use it for serialization
+            // Also, handle the case where the target database specified by the changelog file name
+            // differs from the database in scope
             //
             ChangeSet changeSet = (ChangeSet) object;
             Database database = Scope.getCurrentScope().get(DiffToChangeLog.DIFF_SNAPSHOT_DATABASE, Database.class);
+            Database targetDatabase = getTargetDatabase(changeSet);
             if (database == null) {
-                database = getTargetDatabase(changeSet);
+                database = targetDatabase;
             }
 
             StringBuilder builder = new StringBuilder();
@@ -50,6 +57,15 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
             for (Change change : changeSet.getChanges()) {
                 Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change.generateStatements(database), database);
                 if (sqls != null) {
+                    if (sqls.length > 1) {
+                        builder = new StringBuilder(builder.toString().replace(" splitStatements:false", " splitStatements:true"));
+                    } else if (database instanceof OracleDatabase) {
+                        //
+                        // Handle Oracle differently because setting splitStatements:true on a statement
+                        // that has an endDelimiter will cause invalid syntax
+                        //
+                        builder = new StringBuilder(builder.toString().replace(" splitStatements:false", ""));
+                    }
                     for (Sql sql : sqls) {
                         builder.append(sql.toSql().endsWith(sql.getEndDelimiter()) ? sql.toSql() : sql.toSql() + sql.getEndDelimiter()).append("\n");
                     }
@@ -94,19 +110,16 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
             builder.append(logicalFilePath);
             builder.append("\"");
         }
+        builder.append(" splitStatements:" + getSplitStatementsValue(changeSet));
         builder.append("\n");
     }
 
+    public boolean getSplitStatementsValue(ChangeSet changeSet) {
+        return false;
+    }
+
     protected Database getTargetDatabase(ChangeSet changeSet) {
-        String filePath = changeSet.getFilePath();
-        if (filePath == null) {
-            throw new UnexpectedLiquibaseException("You must specify the changelog file name as filename.DB_TYPE.sql. Example: changelog.mysql.sql");
-        }
-        Matcher matcher = SQL_FILE_NAME_PATTERN.matcher(filePath);
-        if (!matcher.matches()) {
-            throw new UnexpectedLiquibaseException("Serializing changelog as sql requires a file name in the format *.databaseType.sql. Example: changelog.h2.sql. Passed: "+filePath);
-        }
-        String shortName = matcher.replaceFirst("$1");
+        final String shortName = getShortName(changeSet);
 
         Database database = DatabaseFactory.getInstance().getDatabase(shortName);
 
@@ -123,10 +136,24 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
         return database;
     }
 
+    private static String getShortName(ChangeSet changeSet) {
+        String filePath = changeSet.getFilePath();
+        if (filePath == null) {
+            throw new UnexpectedLiquibaseException("You must specify the changelog file name as filename.DB_TYPE.sql. Example: changelog.mysql.sql");
+        }
+        Matcher matcher = SQL_FILE_NAME_PATTERN.matcher(filePath);
+        if (!matcher.matches()) {
+            throw new UnexpectedLiquibaseException("Serializing changelog as sql requires a file name in the format *.databaseType.sql. Example: changelog.h2.sql. Passed: "+filePath);
+        }
+        return matcher.replaceFirst("$1");
+    }
+
     @Override
     public <T extends ChangeLogChild> void write(List<T> children, OutputStream out) throws IOException {
         StringBuilder builder = new StringBuilder();
-        builder.append("-- liquibase formatted sql\n\n");
+        if (Scope.getCurrentScope().get(DiffToChangeLog.ADD_FORMATTED_SQL_HEADER, true)) {
+            builder.append("-- liquibase formatted sql\n\n");
+        }
 
         for (T child : children) {
             builder.append(serialize(child, true));

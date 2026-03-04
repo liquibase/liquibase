@@ -1,0 +1,56 @@
+<!-- include all this in the tar file -->
+<component>
+    <fileSets>
+        <fileSet>
+            <directory>${project.build.directory}/site/apidocs</directory>
+            <outputDirectory>javadoc</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>${maven.multiModuleProjectDirectory}/liquibase-standard/src/main/resources/liquibase/examples</directory>
+            <outputDirectory>examples</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+            <excludes>
+                <exclude>**/start-h2*</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>${maven.multiModuleProjectDirectory}/liquibase-standard/src/main/resources/liquibase/examples</directory>
+            <outputDirectory>examples</outputDirectory>
+            <includes>
+                <include>**/start-h2</include>
+            </includes>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>${maven.multiModuleProjectDirectory}/liquibase-standard/src/main/resources/liquibase/examples</directory>
+            <outputDirectory>examples</outputDirectory>
+            <includes>
+                <include>**/start-h2.bat</include>
+            </includes>
+            <lineEnding>dos</lineEnding>
+        </fileSet>
+    </fileSets>
+    <dependencySets>
+        <dependencySet>
+            <outputFileNameMapping>${artifact.artifactId}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputDirectory>internal/lib</outputDirectory>
+            <useTransitiveFiltering>true</useTransitiveFiltering>
+            <scope>runtime</scope>
+            <includes>
+                <include>com.h2database:h2:jar:</include>
+            </includes>
+
+            <excludes>
+                <exclude>org.liquibase:liquibase-snowflake:jar:</exclude> <!-- from liquibase-core -->
+        		<exclude>org.liquibase:liquibase-cli:jar:</exclude> <!-- from liquibase-core  -->
+        		<exclude>org.liquibase:liquibase-standard:jar:</exclude> <!-- from liquibase-core  -->
+            </excludes>
+		    </dependencySet>
+    </dependencySets>
+</component>

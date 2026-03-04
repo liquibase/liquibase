@@ -18,6 +18,7 @@ import liquibase.resource.ResourceAccessor
 import liquibase.resource.SearchPathResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.snapshot.DatabaseSnapshot
+import liquibase.util.StringUtil
 
 class CommandUtil {
 
@@ -180,16 +181,31 @@ class CommandUtil {
         commandScope.execute()
     }
 
+    /**
+     * @deprecated the integration test framework automatically runs drop all when running tests; see
+     * {@link liquibase.extension.testing.testsystem.spock.LiquibaseIntegrationMethodInterceptor#dropAllDatabases(org.spockframework.runtime.extension.IMethodInvocation)}
+     * Individual tests should not need to run drop all themselves, and it is not recommended to do so for performance
+     * reasons.
+     */
+    @Deprecated
     static void runDropAll(DatabaseTestSystem db) throws Exception {
         if (! db.shouldTest()) {
             return;
         }
         def lockService = LockServiceFactory.getInstance().getLockService(db.getDatabaseFromFactory());
         lockService.releaseLock()
+        internalRunDropAll(db, null)
+        internalRunDropAll(db, db.getAltSchema())
+    }
+
+    private static void internalRunDropAll(DatabaseTestSystem db, String... schemas) {
         CommandScope commandScope = new CommandScope(DropAllCommandStep.COMMAND_NAME)
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+        if (schemas != null) {
+            commandScope.addArgumentValue(DropAllCommandStep.SCHEMAS_ARG, StringUtil.join(schemas, ","))
+        }
         commandScope.setOutput(new ByteArrayOutputStream())
         commandScope.execute()
     }
@@ -251,9 +267,9 @@ class CommandUtil {
     }
 
     private static void execUpdateCommandInScope(SearchPathResourceAccessor resourceAccessor, DatabaseTestSystem db, String changelogFile) {
-        def scopeSettings = [
-                (Scope.Attr.resourceAccessor.name()): resourceAccessor
-        ]
+        def scopeSettings = new LinkedHashMap<String, Object>()
+        scopeSettings.put(Scope.Attr.resourceAccessor.name(), resourceAccessor)
+
         Scope.child(scopeSettings, {
             CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
             commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
@@ -285,6 +301,15 @@ class CommandUtil {
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+        commandScope.execute()
+    }
+
+    static void runStatus(DatabaseTestSystem db, String changelog) {
+        CommandScope commandScope = new CommandScope(StatusCommandStep.COMMAND_NAME)
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+        commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changelog)
         commandScope.execute()
     }
 }

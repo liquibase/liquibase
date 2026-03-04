@@ -34,9 +34,10 @@ public class TimestampNTZTypeTest {
     public void timestampAliases() {
         LiquibaseDataType liquibaseDataType = DataTypeFactory.getInstance().fromDescription("datetime", snowflakeDatabase);
         String[] aliases = liquibaseDataType.getAliases();
-        assertEquals(2, aliases.length);
+        assertEquals(3, aliases.length);
         assertTrue(Arrays.asList(aliases).contains("datetime"));
         assertTrue(Arrays.asList(aliases).contains("java.sql.Types.DATETIME"));
+        assertTrue(Arrays.asList(aliases).contains("timestampntz"));
     }
 
     @Test

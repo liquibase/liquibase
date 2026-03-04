@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: testauthor
+      changes:
+        - createTable:
+            tableName: test_table_child1
+            columns:
+              - column:
+                  name: id
+                  type: int
