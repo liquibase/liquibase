@@ -16,9 +16,29 @@ public class ObjectDifferences {
 
     private final CompareControl compareControl;
     private final HashMap<String, Difference> differences = new HashMap<>();
+    private final DatabaseObject referenceObject;
+    private final DatabaseObject comparisonObject;
 
+    /**
+     * Creates an ObjectDifferences with only a CompareControl.
+     * @param compareControl the control to use for comparisons
+     * @deprecated Use {@link #ObjectDifferences(CompareControl, DatabaseObject, DatabaseObject)} instead to provide both objects being compared
+     */
+    @Deprecated
     public ObjectDifferences(CompareControl compareControl) {
+        this(compareControl, null, null);
+    }
+
+    /**
+     * Creates an ObjectDifferences with the control and both objects being compared.
+     * @param compareControl the control to use for comparisons
+     * @param referenceObject the reference database object (can be null)
+     * @param comparisonObject the comparison database object (can be null)
+     */
+    public ObjectDifferences(CompareControl compareControl, DatabaseObject referenceObject, DatabaseObject comparisonObject) {
         this.compareControl = compareControl;
+        this.referenceObject = referenceObject;
+        this.comparisonObject = comparisonObject;
     }
 
     public Set<Difference> getDifferences() {
@@ -102,6 +122,22 @@ public class ObjectDifferences {
 
     public CompareControl.SchemaComparison[] getSchemaComparisons() {
         return compareControl.getSchemaComparisons();
+    }
+
+    /**
+     * Returns the reference database object being compared.
+     * @return the reference object, or null if not set
+     */
+    public DatabaseObject getReferenceObject() {
+        return referenceObject;
+    }
+
+    /**
+     * Returns the comparison database object being compared.
+     * @return the comparison object, or null if not set
+     */
+    public DatabaseObject getComparisonObject() {
+        return comparisonObject;
     }
 
     public interface CompareFunction {
