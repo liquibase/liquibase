@@ -10,6 +10,7 @@ Liquibase helps millions of developers track, version, and deploy database schem
 
 This repository contains the main source code for Liquibase Community. For more information about the product, see the [Liquibase website](https://www.liquibase.com/).
 
+
 ## Liquibase Automation and Integrations
 
 Liquibase Community has built-in support for a variety of databases. Databases that are not part of Liquibase Community require extensions that you can download for free. Here is the full list of [supported databases](https://www.liquibase.com/supported-databases).
