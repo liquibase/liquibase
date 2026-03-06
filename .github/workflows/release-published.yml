@@ -142,7 +142,7 @@ jobs:
         uses: trstringer/manual-approval@v1
         with:
           secret: ${{ secrets.GITHUB_TOKEN }}
-          approvers: filipelautert,rberezen,jnewton03,kristyldatical,sayaliM0412
+          approvers: filipelautert,rberezen,jnewton03,jandroav,sayaliM0412
           minimum-approvals: 2
           issue-title: "Deploying ${{ needs.setup.outputs.version }} to sonatype"
           issue-body: "Please approve or deny the deployment of version ${{ needs.setup.outputs.version }}"
@@ -159,7 +159,6 @@ jobs:
         deploy_javadocs,
         publish_to_github_packages,
         deploy_xsd,
-        release-docker,
       ]
     runs-on: ubuntu-22.04
     steps:
@@ -442,7 +441,7 @@ jobs:
           remoteDir: "/xml/ns/dbchangelog/"
 
   release-docker:
-    if: always()
+    if: false  # TEMP: skip for v5.0.2 recovery - already completed
     name: Release docker images
     needs: [setup, manual_trigger_deployment]
     runs-on: ubuntu-22.04
@@ -489,6 +488,7 @@ jobs:
         run: echo '### 🐳 Docker Release Job -> ${{steps.docker_dispatch.outputs.workflow-url}}' >> $GITHUB_STEP_SUMMARY
 
   package:
+    if: false  # TEMP: skip for v5.0.2 recovery - already published
     uses: liquibase/build-logic/.github/workflows/package.yml@main
     needs: [setup]
     secrets: inherit
@@ -653,7 +653,7 @@ jobs:
           echo "Manual publishing required - visit https://central.sonatype.com/publishing/deployments to review and publish"
 
   publish_assets_to_s3_bucket:
-    if: ${{ inputs.dry_run == false }}
+    if: false  # TEMP: skip for v5.0.2 recovery - already uploaded
     name: Publish OSS released assets to s3 bucket liquibaseorg-origin
     needs: [setup]
     runs-on: ubuntu-22.04
