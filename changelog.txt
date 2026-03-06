@@ -1,6 +1,116 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 5.0.2 (2026.03.03)
+
+# Liquibase Community 5.0.2 is a minor patch release
+See the [Liquibase Community 5.0.2 Release Notes](https://docs.liquibase.com/community/community-release-notes/liquibase-community-502-release-notes) for the complete set of release information.
+
+## Changes
+- (#7540) DAT-21768: Fix sonar workflow inputs and add missing thisSha output @jnewton03
+- (#7483) Fix: Flush BufferedWriter in YamlSnapshotSerializer to prevent snapshot file truncation @Folgerjun
+- (#7510) feat: add comprehensive job summary to dry-run release workflow @jandroav
+- (#7509) fix: remove workflow-logs option to eliminate skipped job warnings @jandroav
+- (#7508) fix: add contents:write permission for draft release download @jandroav
+- (#7507) fix: add retry logic for draft release download in Maven job @jandroav
+- (#7506) fix: use gh CLI for dry-run Maven download in release-published.yml @jandroav
+- (#7425) Fixed Issue #7413: SQL Anywhere: Constraint name is not considered for PRIMARY KEY @mkarg
+- (#7380) Gh7374 remove oss mentions @petepickerill
+
+## Notable Changes
+- (#7439) Fix performance degradation since implementing analytics @tati-qalified
+
+## New Features
+- (#7452) fix: detect comment changes on columns and tables @peteraisher
+- (#7537) fix: Use default logger service instead of throwing exception in Scope#getCurrentScope() @jnewton03
+- (#7487) Creates a test to ensure all COMMAND\_NAME and \*\_ARG constants are always public static final @tati-qalified
+- (#7448) rewrite: Simplified MSSQLDatabase escaping @mkarg
+- (#7539) fix(build): configure GMavenPlus 4.3.0 to detect Groovy in test scope @filipelautert
+- (#7528) DAT-21265 :: Jdbc drivers upgrade @MalloD12
+- (#7493) chore: update workflow permissions for release and test jobs @sayaliM0412
+- (#7479) Extract checksum compatibility logic in StandardChangeLogHistoryService @maximevw
+- (#7478) feat: Upgrade Ubuntu version in CI workflow to 24.04 @sayaliM0412
+- (#7465) DAT-21398: fix(tests): update macOS version in test matrix to macos-15-intel @sayaliM0412
+- (#7378) Add defensive null pointer checks across codebase @filipelautert
+- (#7401) chore: update Liquibase Pro reference to Liquibase Secure in README.md @filipelautert
+
+## Bug Fixes
+- (#7532) Fix clearCheckSums so checksums are correctly re-evaluated @MalloD12
+- (#7457) Fix issue 7184 @MalloD12
+- (#7468) Fix #7385: Fix PostgreSQL rollback with quoted numeric schema names @RohanMittal-01
+- (#7521) fix: Use correct grammar when reporting unexpected changes @Vampire
+- (#7569) Fix failing test @MalloD12
+- (#7451) Fixed undesired logicalFilePath inheritance of included changesets  @MalloD12
+- (#7489) showSummaryOutput set to LOG by default for Liquibase API @MalloD12
+- (#7501) INT-1717: fix missing quotes in query in SetColumnRemarksGeneratorSnowflake @HorbatenkoYehor
+- (#7464) fix(mysql/mariadb): respect columnDataType in renameColumn for modern versions @filipelautert
+- (#7395) Liquibase throws exception when the filePath property is empty #7320 @Parthiee
+- (#7505) fix: use gh CLI for Maven dry-run release downloads @jandroav
+- (#7504) fix: use tag instead of releaseId for dry-run Maven downloads @jandroav
+- (#7503) fix: add id-token permission to package job in release-published.yml @jandroav
+- (#7502) DAT-21648: Pass tag parameter to package workflow for release downloads @jandroav
+- (#7469) (Fixes #7416) Add explicit dependencies with exclusions to liquibase-core pom.xml to fix problem with missing exclusions and duplicated dependency `commons-text` @marwin1991
+- (#7456) Fix Row affected count case sensitive issue @MalloD12
+- (#7417) Fix Incompatibility Between Quarkus and Liquibase   @MalloD12
+- (#7390) Allow skipping a missing custom change (Copy of 6627) @MalloD12
+- (#7426) Fixed issue #7415: MSSQL, SQL Anywhere: Does not quote tablespace name @mkarg
+- (#7394) fix: Support reading liquibase.classpath from properties file @filipelautert
+- (#7430) fix: reinstate ability to run without SnakeYaml/OpenCSV on Java 25 by delaying class loading @chadlwilson
+- (#6639) fix: prefix table name with schema name when adding column constraint @Xstoudi
+- (#6929) Fix for TIMESTAMP with TIME ZONE issue for Oracle @MalloD12
+- (#7389) Replace 'oss' and 'open source' occurrences by 'Community' @MalloD12
+
+## Security, Driver and Other Updates
+- (#7572) chore(deps-dev): bump com.oracle.database.jdbc:ojdbc8 from 19.29.0.0 to 19.30.0.0 in the build-tools group @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7568) chore(deps): bump the production-deps group with 6 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7567) chore(deps): bump spring.version from 7.0.3 to 7.0.5 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7541) chore(deps-dev): bump net.snowflake:snowflake-jdbc from 3.28.0 to 4.0.0 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7564) chore(deps-dev): bump org.javacc.plugin:javacc-maven-plugin from 3.0.3 to 3.8.0 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7561) chore(deps): bump the test-deps group with 4 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7562) chore(deps): bump junit-jupiter.version from 6.0.2 to 6.0.3 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7553) chore(deps): bump the github-actions group across 1 directory with 4 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7552) chore(deps-dev): bump org.apache.maven.plugin-testing:maven-plugin-testing-harness from 3.5.0 to 3.5.1 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7571) chore(deps): bump the build-tools group across 1 directory with 6 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7545) chore(deps-dev): bump com.mysql:mysql-connector-j from 9.5.0 to 9.6.0 in the build-tools group @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7538) chore(deps): bump the test-deps group across 1 directory with 3 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7534) chore(deps-dev): bump the build-tools group across 1 directory with 3 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7526) chore(deps): bump actions/cache from 5.0.1 to 5.0.2 in the github-actions group @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7535) chore(deps-dev): bump org.assertj:assertj-core from 3.27.6 to 3.27.7 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7513) chore(deps-dev): bump org.apache.maven.plugin-testing:maven-plugin-testing-harness from 3.4.0 to 3.5.0 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7518) chore(deps): bump spring.version from 7.0.2 to 7.0.3 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7462) chore(deps-dev): bump org.mockito:mockito-core from 4.11.0 to 5.21.0 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7494) chore(deps): bump the test-deps group with 4 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7497) chore(deps-dev): bump com.microsoft.sqlserver:mssql-jdbc from 12.10.2.jre8 to 12.10.2.jre11 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7480) security: harden GitHub Actions workflow permissions @jnewton03
+- (#7491) chore(deps): bump spring.version from 5.3.39 to 7.0.2 @filipelautert
+- (#7490) chore(deps): bump the github-actions group across 1 directory with 2 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7458) chore(deps): bump groovy.version from 4.0.28 to 5.0.3 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7472) chore(deps): bump the github-actions group with 3 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7476) chore(deps-dev): bump the build-tools group across 1 directory with 2 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7475) chore(deps): bump targetMavenVersion from 3.9.11 to 3.9.12 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7454) chore(deps): bump org.sonarsource.scanner.maven:sonar-maven-plugin from 5.3.0.6276 to 5.4.0.6343 in the build-tools group @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7460) chore(deps): bump org.apache.commons:commons-text from 1.14.0 to 1.15.0 in the production-deps group @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7453) chore(deps): bump the github-actions group across 1 directory with 2 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7449) chore(deps): bump the build-tools group with 4 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7438) chore(deps): bump org.apache.commons:commons-lang3 from 3.19.0 to 3.20.0 in the production-deps group @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7420) chore(deps): bump commons-io:commons-io from 2.20.0 to 2.21.0 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7437) chore(deps): bump the build-tools group across 1 directory with 2 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7405) chore(deps): bump junit-jupiter.version from 5.13.4 to 6.0.1 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7407) chore(deps): bump org.junit.platform:junit-platform-suite from 1.13.4 to 6.0.1 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7408) chore(deps): bump org.junit.jupiter:junit-jupiter from 5.13.4 to 6.0.1 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7406) chore(deps-dev): bump org.apache.maven.plugin-testing:maven-plugin-testing-harness from 3.3.0 to 3.4.0 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7414) chore(deps-dev): bump the build-tools group across 1 directory with 3 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7398) chore(deps): bump the github-actions group with 2 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7399) chore(deps): bump org.liquibase.ext:liquibase-sdk-maven-plugin from 0.10.25 to 0.11.0 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7400) chore(deps): bump the build-tools group with 2 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7393) DAT-20490 Revisit minimal package removal from OSS starting in 5.0 @jandroav
+- (#7367) chore(deps): bump the github-actions group across 1 directory with 4 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7387) chore(deps): bump the build-tools group across 1 directory with 5 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+
+### Full Changelog: [https://github.com/liquibase/liquibase/compare/v5.0.1...v5.0.2](https://github.com/liquibase/liquibase/compare/v5.0.1...v5.0.2)
+
+
+
 Changes in version 5.0.1 (2025.10.03)
 
 # Liquibase Community 5.0.1 is a minor patch release

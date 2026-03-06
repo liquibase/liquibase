@@ -130,7 +130,7 @@ jobs:
   release-docker:
     name: Release Docker Images
     needs: [setup, manual-approval]
-    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
+    if: false  # TEMP: skip for v5.0.2 recovery - already completed
     uses: ./.github/workflows/release-docker.yml
     permissions:
       contents: read
@@ -142,8 +142,8 @@ jobs:
 
   deploy-maven:
     name: Deploy to Maven Central
-    needs: [setup, manual-approval, deploy-javadocs, publish-github-packages, deploy-xsd, release-docker]
-    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') && (needs.deploy-javadocs.result == 'success' || needs.deploy-javadocs.result == 'skipped') && (needs.publish-github-packages.result == 'success' || needs.publish-github-packages.result == 'skipped') && (needs.deploy-xsd.result == 'success' || needs.deploy-xsd.result == 'skipped') && (needs.release-docker.result == 'success' || needs.release-docker.result == 'skipped')
+    needs: [setup, manual-approval, deploy-javadocs, publish-github-packages, deploy-xsd]
+    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') && (needs.deploy-javadocs.result == 'success' || needs.deploy-javadocs.result == 'skipped') && (needs.publish-github-packages.result == 'success' || needs.publish-github-packages.result == 'skipped') && (needs.deploy-xsd.result == 'success' || needs.deploy-xsd.result == 'skipped')
     uses: ./.github/workflows/release-deploy-maven.yml
     permissions:
       contents: write
@@ -159,7 +159,7 @@ jobs:
   package:
     name: Update Packages
     needs: [setup, manual-approval]
-    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped')
+    if: false  # TEMP: skip for v5.0.2 recovery - already published
     uses: liquibase/build-logic/.github/workflows/package.yml@main
     permissions:
       actions: write
@@ -184,7 +184,7 @@ jobs:
   publish-assets-s3:
     name: Publish Assets to S3
     needs: [setup, package]
-    if: always() && needs.setup.result == 'success' && (needs.package.result == 'success' || needs.package.result == 'skipped')
+    if: false  # TEMP: skip for v5.0.2 recovery - already uploaded
     uses: ./.github/workflows/release-publish-assets-s3.yml
     permissions:
       contents: read
