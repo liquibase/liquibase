@@ -60,17 +60,6 @@ jobs:
           name: liquibase-artifacts
           path: download/liquibase-artifacts
 
-      - name: Download installer artifacts (best effort, same commit only)
-        id: installer-download
-        continue-on-error: true
-        uses: dawidd6/action-download-artifact@v15
-        with:
-          workflow: installer-build-check.yml
-          workflow_conclusion: success
-          commit: ${{ steps.get-run-id.outputs.sha }}
-          name: liquibase-test-packages
-          path: download/installer-packages
-
       - name: Rename artifacts from SNAPSHOT to nightly
         id: rename-artifacts
         run: |
@@ -86,16 +75,7 @@ jobs:
           else
             echo "has_additional=false" >> $GITHUB_OUTPUT
           fi
-          # Check for installer from installer-build-check workflow (glob to match any version/arch)
-          installer_file=$(find ../installer-packages -name 'liquibase-*-installer-*.exe' 2>/dev/null | head -1)
-          if [ -n "$installer_file" ]; then
-            mv "$installer_file" liquibase-windows-x64-installer-nightly.exe
-            echo "has_installer=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_installer=false" >> $GITHUB_OUTPUT
-            echo "Warning: Windows installer not available (installer-build-check.yml may not have run recently)"
-          fi
-          ls -la liquibase-nightly.* liquibase-additional-nightly.zip liquibase-windows-x64-installer-nightly.exe 2>/dev/null || true
+          ls -la liquibase-nightly.* liquibase-additional-nightly.zip 2>/dev/null || true
       - name: Delete existing nightly release and tag
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -106,7 +86,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HAS_ADDITIONAL: ${{ steps.rename-artifacts.outputs.has_additional }}
-          HAS_INSTALLER: ${{ steps.rename-artifacts.outputs.has_installer }}
           SHORT_SHA: ${{ steps.get-run-id.outputs.short_sha }}
           FULL_SHA: ${{ steps.get-run-id.outputs.sha }}
           SOURCE_RUN_ID: ${{ steps.get-run-id.outputs.run_id }}
@@ -129,11 +108,6 @@ jobs:
             assets+=(liquibase-additional-nightly.zip)
             table+="
           | \`liquibase-additional-nightly.zip\` | Signatures and checksums (.asc, .md5, .sha1) |"
-          fi
-          if [ "$HAS_INSTALLER" == "true" ]; then
-            assets+=(liquibase-windows-x64-installer-nightly.exe)
-            table+="
-          | \`liquibase-windows-x64-installer-nightly.exe\` | Windows x64 installer |"
           fi
           gh release create nightly \
             --repo "$REPO" \
