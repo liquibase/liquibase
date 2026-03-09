@@ -29,6 +29,8 @@ jobs:
       github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v6
+
       - name: Get run ID for artifact download
         id: get-run-id
         env:
