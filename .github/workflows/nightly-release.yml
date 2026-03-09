@@ -61,7 +61,7 @@ jobs:
           name: liquibase-artifacts
           path: download/liquibase-artifacts
 
-      - name: Download installer artifacts (best effort)
+      - name: Download installer artifacts (best effort, same commit only)
         id: installer-download
         continue-on-error: true
         uses: dawidd6/action-download-artifact@v15
@@ -69,6 +69,7 @@ jobs:
           workflow: installer-build-check.yml
           workflow_conclusion: success
           branch: master
+          commit: ${{ steps.get-run-id.outputs.sha }}
           name: liquibase-test-packages
           path: download/installer-packages
 
