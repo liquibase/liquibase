@@ -103,7 +103,7 @@ jobs:
 
           gh release create nightly \
             --repo "$REPO" \
-            --target master \
+            --target "$FULL_SHA" \
             --title "Nightly Build ($date_str)" \
             --notes "## Nightly Build
 
