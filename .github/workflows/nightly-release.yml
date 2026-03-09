@@ -1,11 +1,13 @@
 name: Nightly Release
 
-# Security: Minimal permissions for nightly release publishing
+# Security: Permissions for nightly release publishing
 # - contents: write - create/delete releases and tags
 # - actions: read - download artifacts from triggering workflow
+# - id-token: write - AWS OIDC authentication for vault access
 permissions:
   contents: write
   actions: read
+  id-token: write
 
 on:
   workflow_run:
@@ -30,6 +32,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
+      - name: Get GitHub App token
+        id: get-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          permission-contents: write
 
       - name: Get run ID for artifact download
         id: get-run-id
@@ -86,7 +110,7 @@ jobs:
 
       - name: Delete existing nightly release and tag
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.get-token.outputs.token }}
           REPO: ${{ github.repository }}
         run: |
           gh release delete nightly --repo "$REPO" --cleanup-tag --yes 2>/dev/null || true
@@ -94,7 +118,7 @@ jobs:
 
       - name: Create nightly pre-release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.get-token.outputs.token }}
           SHORT_SHA: ${{ steps.get-run-id.outputs.short_sha }}
           FULL_SHA: ${{ steps.get-run-id.outputs.sha }}
           SOURCE_RUN_ID: ${{ steps.get-run-id.outputs.run_id }}
