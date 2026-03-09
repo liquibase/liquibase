@@ -53,7 +53,7 @@ jobs:
           echo "short_sha=${sha:0:7}" >> $GITHUB_OUTPUT
           echo "Using run ID: $run_id (commit: ${sha:0:7})"
       - name: Download liquibase-artifacts
-        uses: dawidd6/action-download-artifact@v15
+        uses: dawidd6/action-download-artifact@v16
         with:
           workflow: run-tests.yml
           run_id: ${{ steps.get-run-id.outputs.run_id }}
