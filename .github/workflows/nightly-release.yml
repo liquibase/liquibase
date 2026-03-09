@@ -9,7 +9,7 @@ permissions:
 
 on:
   workflow_run:
-    workflows: ["Unit and Integration Tests"]
+    workflows: ["Build Test Installers"]
     types:
       - completed
     branches:
@@ -31,20 +31,26 @@ jobs:
     steps:
       - name: Get run ID for artifact download
         id: get-run-id
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          WR_RUN_ID: ${{ github.event.workflow_run.id }}
+          WR_SHA: ${{ github.event.workflow_run.head_sha }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
         run: |
-          if [ "${{ github.event_name }}" == "workflow_run" ]; then
-            run_id="${{ github.event.workflow_run.id }}"
-            sha="${{ github.event.workflow_run.head_sha }}"
+          if [ "$EVENT_NAME" == "workflow_run" ]; then
+            run_id="$WR_RUN_ID"
+            sha="$WR_SHA"
           else
-            # workflow_dispatch: fetch latest successful run-tests.yml on master
+            # workflow_dispatch: fetch latest successful installer-build-check.yml on master
             response=$(curl -s \
-              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Authorization: token $GH_TOKEN" \
               -H "Accept: application/vnd.github.v3+json" \
-              "https://api.github.com/repos/${{ github.repository }}/actions/workflows/run-tests.yml/runs?branch=master&status=success&per_page=1")
+              "https://api.github.com/repos/$REPO/actions/workflows/installer-build-check.yml/runs?branch=master&status=success&per_page=1")
             run_id=$(echo "$response" | jq -r '.workflow_runs[0].id')
             sha=$(echo "$response" | jq -r '.workflow_runs[0].head_sha')
             if [ "$run_id" == "null" ] || [ -z "$run_id" ]; then
-              echo "Error: No successful run-tests.yml run found on master"
+              echo "Error: No successful installer-build-check.yml run found on master"
               exit 1
             fi
           fi
@@ -53,99 +59,46 @@ jobs:
           echo "short_sha=${sha:0:7}" >> $GITHUB_OUTPUT
           echo "Using run ID: $run_id (commit: ${sha:0:7})"
 
-      - name: Download liquibase-artifacts
-        uses: dawidd6/action-download-artifact@v15
-        with:
-          workflow: run-tests.yml
-          run_id: ${{ steps.get-run-id.outputs.run_id }}
-          name: liquibase-artifacts
-          path: download/liquibase-artifacts
-
-      - name: Download installer artifacts (best effort, same commit only)
-        id: installer-download
-        continue-on-error: true
+      - name: Download liquibase-test-packages
         uses: dawidd6/action-download-artifact@v15
         with:
           workflow: installer-build-check.yml
-          workflow_conclusion: success
-          branch: master
-          commit: ${{ steps.get-run-id.outputs.sha }}
+          run_id: ${{ steps.get-run-id.outputs.run_id }}
           name: liquibase-test-packages
-          path: download/installer-packages
+          path: download/artifacts
 
       - name: Rename artifacts from SNAPSHOT to nightly
-        id: rename-artifacts
         run: |
-          cd download/liquibase-artifacts
-
-          # Core artifacts
+          cd download/artifacts
           mv liquibase-master-SNAPSHOT.tar.gz liquibase-nightly.tar.gz
           mv liquibase-master-SNAPSHOT.zip liquibase-nightly.zip
           mv liquibase-core-0-SNAPSHOT.jar liquibase-core-nightly.jar
+          mv liquibase-additional-0-SNAPSHOT.zip liquibase-additional-nightly.zip
 
-          # Create additional zip from signature files (tolerant of missing extensions)
-          if compgen -G "*.asc" > /dev/null || compgen -G "*.md5" > /dev/null || compgen -G "*.sha1" > /dev/null; then
-            zip liquibase-additional-nightly.zip *.asc *.md5 *.sha1 2>/dev/null || true
-            echo "has_additional=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_additional=false" >> $GITHUB_OUTPUT
-          fi
+          installer_file=$(find . -name 'liquibase-*-installer-*.exe' | head -1)
+          mv "$installer_file" liquibase-windows-x64-installer-nightly.exe
 
-          # Check for installer from installer-build-check workflow (glob to match any version/arch)
-          installer_file=$(find ../installer-packages -name 'liquibase-*-installer-*.exe' 2>/dev/null | head -1)
-          if [ -n "$installer_file" ]; then
-            mv "$installer_file" liquibase-windows-x64-installer-nightly.exe
-            echo "has_installer=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_installer=false" >> $GITHUB_OUTPUT
-            echo "Warning: Windows installer not available (installer-build-check.yml may not have run recently)"
-          fi
-
-          ls -la liquibase-nightly.* liquibase-additional-nightly.zip liquibase-windows-x64-installer-nightly.exe 2>/dev/null || true
+          echo "Nightly artifacts:"
+          ls -la liquibase-nightly.* liquibase-additional-nightly.zip liquibase-windows-x64-installer-nightly.exe
 
       - name: Delete existing nightly release and tag
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
         run: |
-          gh release delete nightly --repo ${{ github.repository }} --cleanup-tag --yes 2>/dev/null || true
+          gh release delete nightly --repo "$REPO" --cleanup-tag --yes 2>/dev/null || true
           echo "Cleaned up previous nightly release and tag (if any)"
 
       - name: Create nightly pre-release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HAS_ADDITIONAL: ${{ steps.rename-artifacts.outputs.has_additional }}
-          HAS_INSTALLER: ${{ steps.rename-artifacts.outputs.has_installer }}
           SHORT_SHA: ${{ steps.get-run-id.outputs.short_sha }}
           FULL_SHA: ${{ steps.get-run-id.outputs.sha }}
           SOURCE_RUN_ID: ${{ steps.get-run-id.outputs.run_id }}
           REPO: ${{ github.repository }}
         run: |
           date_str=$(date -u +'%Y-%m-%d %H:%M UTC')
-          cd download/liquibase-artifacts
-
-          # Build dynamic asset list and table rows
-          assets=(
-            liquibase-nightly.tar.gz
-            liquibase-nightly.zip
-            liquibase-core-nightly.jar
-          )
-          table="| File | Description |
-          |------|-------------|
-          | \`liquibase-nightly.tar.gz\` | CLI distribution (Linux/macOS) |
-          | \`liquibase-nightly.zip\` | CLI distribution (Windows) |
-          | \`liquibase-core-nightly.jar\` | Core library JAR |"
-
-          if [ "$HAS_ADDITIONAL" == "true" ]; then
-            assets+=(liquibase-additional-nightly.zip)
-            table+="
-          | \`liquibase-additional-nightly.zip\` | Signatures and checksums (.asc, .md5, .sha1) |"
-          fi
-
-          if [ "$HAS_INSTALLER" == "true" ]; then
-            assets+=(liquibase-windows-x64-installer-nightly.exe)
-            table+="
-          | \`liquibase-windows-x64-installer-nightly.exe\` | Windows x64 installer |"
-          fi
+          cd download/artifacts
 
           gh release create nightly \
             --repo "$REPO" \
@@ -155,21 +108,31 @@ jobs:
 
           **Date:** $date_str
           **Commit:** [\`$SHORT_SHA\`](https://github.com/$REPO/commit/$FULL_SHA)
-          **Source run:** [Unit and Integration Tests #$SOURCE_RUN_ID](https://github.com/$REPO/actions/runs/$SOURCE_RUN_ID)
+          **Source run:** [Build Test Installers #$SOURCE_RUN_ID](https://github.com/$REPO/actions/runs/$SOURCE_RUN_ID)
 
           ---
 
           > **Warning:** This is an automated nightly build from the \`master\` branch. It is not a stable release. Use at your own risk.
 
           ### Included Assets
-          $table
+          | File | Description |
+          |------|-------------|
+          | \`liquibase-nightly.tar.gz\` | CLI distribution (Linux/macOS) |
+          | \`liquibase-nightly.zip\` | CLI distribution (Windows) |
+          | \`liquibase-core-nightly.jar\` | Core library JAR |
+          | \`liquibase-additional-nightly.zip\` | Signatures and checksums (.asc, .md5, .sha1) |
+          | \`liquibase-windows-x64-installer-nightly.exe\` | Windows x64 installer |
 
           ### Stable URL
           This release is always available at:
           https://github.com/$REPO/releases/tag/nightly" \
             --prerelease \
             --latest=false \
-            "${assets[@]}"
+            liquibase-nightly.tar.gz \
+            liquibase-nightly.zip \
+            liquibase-core-nightly.jar \
+            liquibase-additional-nightly.zip \
+            liquibase-windows-x64-installer-nightly.exe
 
       - name: Add to Job Summary
         env:

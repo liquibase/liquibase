@@ -1,6 +1,13 @@
 name: Build Test Installers
 
 on:
+  workflow_run:
+    workflows: ["Unit and Integration Tests"]
+    types:
+      - completed
+    branches:
+      - master
+
   workflow_dispatch:
   push:
     branches:
@@ -8,10 +15,14 @@ on:
 
 permissions:
   id-token: write # Required for OIDC authentication with AWS
+  actions: read # Required to download artifacts from triggering workflow
 
 jobs:
   build-installers:
     name: Build Installers
+    if: >
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v6
@@ -97,9 +108,29 @@ jobs:
         uses: digicert/ssm-code-signing@v1.2.1
 
       - name: Set branch variable
-        run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          WR_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          WR_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          if [ "$EVENT_NAME" == "workflow_run" ]; then
+            echo "BRANCH=$WR_BRANCH" >> $GITHUB_ENV
+            echo "RUN_TESTS_RUN_ID=$WR_RUN_ID" >> $GITHUB_ENV
+          else
+            echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+          fi
 
-      - name: Download liquibase-artifacts
+      - name: Download liquibase-artifacts (from triggering workflow)
+        if: github.event_name == 'workflow_run'
+        uses: dawidd6/action-download-artifact@v15
+        with:
+          workflow: run-tests.yml
+          run_id: ${{ github.event.workflow_run.id }}
+          name: liquibase-artifacts
+          path: re-version/final
+
+      - name: Download liquibase-artifacts (from branch)
+        if: github.event_name != 'workflow_run'
         uses: dawidd6/action-download-artifact@v15
         with:
           workflow: run-tests.yml
