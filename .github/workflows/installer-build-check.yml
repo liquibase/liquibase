@@ -1,12 +1,17 @@
 name: Build Test Installers
 
 on:
-  workflow_run:
-    workflows: ["Unit and Integration Tests"]
-    types:
-      - completed
-    branches:
-      - master
+  workflow_call:
+    inputs:
+      run_id:
+        description: "run-tests.yml run ID to download artifacts from"
+        required: true
+        type: string
+      branch:
+        description: "Branch name for artifact naming"
+        required: false
+        type: string
+        default: "master"
 
   workflow_dispatch:
   push:
@@ -20,9 +25,6 @@ permissions:
 jobs:
   build-installers:
     name: Build Installers
-    if: >
-      github.event_name != 'workflow_run' ||
-      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v6
@@ -109,28 +111,25 @@ jobs:
 
       - name: Set branch variable
         env:
-          EVENT_NAME: ${{ github.event_name }}
-          WR_BRANCH: ${{ github.event.workflow_run.head_branch }}
-          WR_RUN_ID: ${{ github.event.workflow_run.id }}
+          INPUT_BRANCH: ${{ inputs.branch }}
         run: |
-          if [ "$EVENT_NAME" == "workflow_run" ]; then
-            echo "BRANCH=$WR_BRANCH" >> $GITHUB_ENV
-            echo "RUN_TESTS_RUN_ID=$WR_RUN_ID" >> $GITHUB_ENV
+          if [ -n "$INPUT_BRANCH" ]; then
+            echo "BRANCH=$INPUT_BRANCH" >> $GITHUB_ENV
           else
             echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
           fi
 
-      - name: Download liquibase-artifacts (from triggering workflow)
-        if: github.event_name == 'workflow_run'
+      - name: Download liquibase-artifacts (by run ID)
+        if: inputs.run_id != ''
         uses: dawidd6/action-download-artifact@v15
         with:
           workflow: run-tests.yml
-          run_id: ${{ github.event.workflow_run.id }}
+          run_id: ${{ inputs.run_id }}
           name: liquibase-artifacts
           path: re-version/final
 
-      - name: Download liquibase-artifacts (from branch)
-        if: github.event_name != 'workflow_run'
+      - name: Download liquibase-artifacts (by branch)
+        if: inputs.run_id == ''
         uses: dawidd6/action-download-artifact@v15
         with:
           workflow: run-tests.yml

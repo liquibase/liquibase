@@ -6,10 +6,11 @@ name: Nightly Release
 permissions:
   contents: write
   actions: read
+  id-token: write # Inherited by installer-build-check for AWS OIDC
 
 on:
   workflow_run:
-    workflows: ["Build Test Installers"]
+    workflows: ["Unit and Integration Tests"]
     types:
       - completed
     branches:
@@ -22,12 +23,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  nightly-release:
-    name: Publish Nightly Release
+  setup:
+    name: Resolve Source Run
     if: >
       github.event_name == 'workflow_dispatch' ||
       github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
+    outputs:
+      run_id: ${{ steps.get-run-id.outputs.run_id }}
+      sha: ${{ steps.get-run-id.outputs.sha }}
+      short_sha: ${{ steps.get-run-id.outputs.short_sha }}
     steps:
       - name: Get run ID for artifact download
         id: get-run-id
@@ -42,15 +47,15 @@ jobs:
             run_id="$WR_RUN_ID"
             sha="$WR_SHA"
           else
-            # workflow_dispatch: fetch latest successful installer-build-check.yml on master
+            # workflow_dispatch: fetch latest successful run-tests.yml on master
             response=$(curl -s \
               -H "Authorization: token $GH_TOKEN" \
               -H "Accept: application/vnd.github.v3+json" \
-              "https://api.github.com/repos/$REPO/actions/workflows/installer-build-check.yml/runs?branch=master&status=success&per_page=1")
+              "https://api.github.com/repos/$REPO/actions/workflows/run-tests.yml/runs?branch=master&status=success&per_page=1")
             run_id=$(echo "$response" | jq -r '.workflow_runs[0].id')
             sha=$(echo "$response" | jq -r '.workflow_runs[0].head_sha')
             if [ "$run_id" == "null" ] || [ -z "$run_id" ]; then
-              echo "Error: No successful installer-build-check.yml run found on master"
+              echo "Error: No successful run-tests.yml run found on master"
               exit 1
             fi
           fi
@@ -59,11 +64,23 @@ jobs:
           echo "short_sha=${sha:0:7}" >> $GITHUB_OUTPUT
           echo "Using run ID: $run_id (commit: ${sha:0:7})"
 
+  build-installers:
+    name: Build Installers
+    needs: setup
+    uses: ./.github/workflows/installer-build-check.yml
+    with:
+      run_id: ${{ needs.setup.outputs.run_id }}
+      branch: master
+    secrets: inherit
+
+  nightly-release:
+    name: Publish Nightly Release
+    needs: [setup, build-installers]
+    runs-on: ubuntu-latest
+    steps:
       - name: Download liquibase-test-packages
-        uses: dawidd6/action-download-artifact@v15
+        uses: actions/download-artifact@v4
         with:
-          workflow: installer-build-check.yml
-          run_id: ${{ steps.get-run-id.outputs.run_id }}
           name: liquibase-test-packages
           path: download/artifacts
 
@@ -92,9 +109,9 @@ jobs:
       - name: Create nightly pre-release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SHORT_SHA: ${{ steps.get-run-id.outputs.short_sha }}
-          FULL_SHA: ${{ steps.get-run-id.outputs.sha }}
-          SOURCE_RUN_ID: ${{ steps.get-run-id.outputs.run_id }}
+          SHORT_SHA: ${{ needs.setup.outputs.short_sha }}
+          FULL_SHA: ${{ needs.setup.outputs.sha }}
+          SOURCE_RUN_ID: ${{ needs.setup.outputs.run_id }}
           REPO: ${{ github.repository }}
         run: |
           date_str=$(date -u +'%Y-%m-%d %H:%M UTC')
@@ -108,7 +125,7 @@ jobs:
 
           **Date:** $date_str
           **Commit:** [\`$SHORT_SHA\`](https://github.com/$REPO/commit/$FULL_SHA)
-          **Source run:** [Build Test Installers #$SOURCE_RUN_ID](https://github.com/$REPO/actions/runs/$SOURCE_RUN_ID)
+          **Source run:** [Unit and Integration Tests #$SOURCE_RUN_ID](https://github.com/$REPO/actions/runs/$SOURCE_RUN_ID)
 
           ---
 
@@ -136,8 +153,8 @@ jobs:
 
       - name: Add to Job Summary
         env:
-          SHORT_SHA: ${{ steps.get-run-id.outputs.short_sha }}
-          SOURCE_RUN_ID: ${{ steps.get-run-id.outputs.run_id }}
+          SHORT_SHA: ${{ needs.setup.outputs.short_sha }}
+          SOURCE_RUN_ID: ${{ needs.setup.outputs.run_id }}
           REPO: ${{ github.repository }}
         run: |
           cat >> $GITHUB_STEP_SUMMARY << EOF
