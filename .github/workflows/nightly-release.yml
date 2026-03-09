@@ -61,13 +61,45 @@ jobs:
           name: liquibase-artifacts
           path: download/liquibase-artifacts
 
+      - name: Download installer artifacts (best effort)
+        id: installer-download
+        continue-on-error: true
+        uses: dawidd6/action-download-artifact@v15
+        with:
+          workflow: installer-build-check.yml
+          workflow_conclusion: success
+          branch: master
+          name: liquibase-test-packages
+          path: download/installer-packages
+
       - name: Rename artifacts from SNAPSHOT to nightly
+        id: rename-artifacts
         run: |
           cd download/liquibase-artifacts
+
+          # Core artifacts
           mv liquibase-master-SNAPSHOT.tar.gz liquibase-nightly.tar.gz
           mv liquibase-master-SNAPSHOT.zip liquibase-nightly.zip
           mv liquibase-core-0-SNAPSHOT.jar liquibase-core-nightly.jar
-          ls -la liquibase-nightly.*
+
+          # Create additional zip from signature files
+          if ls *.asc *.md5 *.sha1 1>/dev/null 2>&1; then
+            zip liquibase-additional-nightly.zip *.asc *.md5 *.sha1
+            echo "has_additional=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_additional=false" >> $GITHUB_OUTPUT
+          fi
+
+          # Check for installer from installer-build-check workflow
+          if [ -f ../installer-packages/liquibase-windows-x64-installer-0-SNAPSHOT.exe ]; then
+            mv ../installer-packages/liquibase-windows-x64-installer-0-SNAPSHOT.exe liquibase-windows-x64-installer-nightly.exe
+            echo "has_installer=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_installer=false" >> $GITHUB_OUTPUT
+            echo "Warning: Windows installer not available (installer-build-check.yml may not have run recently)"
+          fi
+
+          ls -la liquibase-nightly.* liquibase-additional-nightly.zip liquibase-windows-x64-installer-nightly.exe 2>/dev/null || true
 
       - name: Delete existing nightly release and tag
         env:
@@ -81,6 +113,32 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           date_str=$(date -u +'%Y-%m-%d %H:%M UTC')
+          cd download/liquibase-artifacts
+
+          # Build dynamic asset list and table rows
+          assets=(
+            liquibase-nightly.tar.gz
+            liquibase-nightly.zip
+            liquibase-core-nightly.jar
+          )
+          table="| File | Description |
+          |------|-------------|
+          | \`liquibase-nightly.tar.gz\` | CLI distribution (Linux/macOS) |
+          | \`liquibase-nightly.zip\` | CLI distribution (Windows) |
+          | \`liquibase-core-nightly.jar\` | Core library JAR |"
+
+          if [ "${{ steps.rename-artifacts.outputs.has_additional }}" == "true" ]; then
+            assets+=(liquibase-additional-nightly.zip)
+            table+="
+          | \`liquibase-additional-nightly.zip\` | Signatures and checksums (.asc, .md5, .sha1) |"
+          fi
+
+          if [ "${{ steps.rename-artifacts.outputs.has_installer }}" == "true" ]; then
+            assets+=(liquibase-windows-x64-installer-nightly.exe)
+            table+="
+          | \`liquibase-windows-x64-installer-nightly.exe\` | Windows x64 installer |"
+          fi
+
           gh release create nightly \
             --repo ${{ github.repository }} \
             --target master \
@@ -96,20 +154,14 @@ jobs:
           > **Warning:** This is an automated nightly build from the \`master\` branch. It is not a stable release. Use at your own risk.
 
           ### Included Assets
-          | File | Description |
-          |------|-------------|
-          | \`liquibase-nightly.tar.gz\` | CLI distribution (Linux/macOS) |
-          | \`liquibase-nightly.zip\` | CLI distribution (Windows) |
-          | \`liquibase-core-nightly.jar\` | Core library JAR |
+          $table
 
           ### Stable URL
           This release is always available at:
           https://github.com/${{ github.repository }}/releases/tag/nightly" \
             --prerelease \
             --latest=false \
-            download/liquibase-artifacts/liquibase-nightly.tar.gz \
-            download/liquibase-artifacts/liquibase-nightly.zip \
-            download/liquibase-artifacts/liquibase-core-nightly.jar
+            "${assets[@]}"
 
       - name: Add to Job Summary
         run: |
