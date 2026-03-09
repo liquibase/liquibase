@@ -82,17 +82,18 @@ jobs:
           mv liquibase-master-SNAPSHOT.zip liquibase-nightly.zip
           mv liquibase-core-0-SNAPSHOT.jar liquibase-core-nightly.jar
 
-          # Create additional zip from signature files
-          if ls *.asc *.md5 *.sha1 1>/dev/null 2>&1; then
-            zip liquibase-additional-nightly.zip *.asc *.md5 *.sha1
+          # Create additional zip from signature files (tolerant of missing extensions)
+          if compgen -G "*.asc" > /dev/null || compgen -G "*.md5" > /dev/null || compgen -G "*.sha1" > /dev/null; then
+            zip liquibase-additional-nightly.zip *.asc *.md5 *.sha1 2>/dev/null || true
             echo "has_additional=true" >> $GITHUB_OUTPUT
           else
             echo "has_additional=false" >> $GITHUB_OUTPUT
           fi
 
-          # Check for installer from installer-build-check workflow
-          if [ -f ../installer-packages/liquibase-windows-x64-installer-0-SNAPSHOT.exe ]; then
-            mv ../installer-packages/liquibase-windows-x64-installer-0-SNAPSHOT.exe liquibase-windows-x64-installer-nightly.exe
+          # Check for installer from installer-build-check workflow (glob to match any version/arch)
+          installer_file=$(find ../installer-packages -name 'liquibase-*-installer-*.exe' 2>/dev/null | head -1)
+          if [ -n "$installer_file" ]; then
+            mv "$installer_file" liquibase-windows-x64-installer-nightly.exe
             echo "has_installer=true" >> $GITHUB_OUTPUT
           else
             echo "has_installer=false" >> $GITHUB_OUTPUT
@@ -111,6 +112,12 @@ jobs:
       - name: Create nightly pre-release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HAS_ADDITIONAL: ${{ steps.rename-artifacts.outputs.has_additional }}
+          HAS_INSTALLER: ${{ steps.rename-artifacts.outputs.has_installer }}
+          SHORT_SHA: ${{ steps.get-run-id.outputs.short_sha }}
+          FULL_SHA: ${{ steps.get-run-id.outputs.sha }}
+          SOURCE_RUN_ID: ${{ steps.get-run-id.outputs.run_id }}
+          REPO: ${{ github.repository }}
         run: |
           date_str=$(date -u +'%Y-%m-%d %H:%M UTC')
           cd download/liquibase-artifacts
@@ -127,32 +134,27 @@ jobs:
           | \`liquibase-nightly.zip\` | CLI distribution (Windows) |
           | \`liquibase-core-nightly.jar\` | Core library JAR |"
 
-          env:
-            HAS_ADDITIONAL: ${{ steps.rename-artifacts.outputs.has_additional }}
-            HAS_INSTALLER: ${{ steps.rename-artifacts.outputs.has_installer }}
-          run: |
-            ...
-            if [ "$HAS_ADDITIONAL" == "true" ]; then
+          if [ "$HAS_ADDITIONAL" == "true" ]; then
             assets+=(liquibase-additional-nightly.zip)
             table+="
           | \`liquibase-additional-nightly.zip\` | Signatures and checksums (.asc, .md5, .sha1) |"
           fi
 
-          if [ "${{ steps.rename-artifacts.outputs.has_installer }}" == "true" ]; then
+          if [ "$HAS_INSTALLER" == "true" ]; then
             assets+=(liquibase-windows-x64-installer-nightly.exe)
             table+="
           | \`liquibase-windows-x64-installer-nightly.exe\` | Windows x64 installer |"
           fi
 
           gh release create nightly \
-            --repo ${{ github.repository }} \
+            --repo "$REPO" \
             --target master \
             --title "Nightly Build ($date_str)" \
             --notes "## Nightly Build
 
           **Date:** $date_str
-          **Commit:** [\`${{ steps.get-run-id.outputs.short_sha }}\`](https://github.com/${{ github.repository }}/commit/${{ steps.get-run-id.outputs.sha }})
-          **Source run:** [Unit and Integration Tests #${{ steps.get-run-id.outputs.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ steps.get-run-id.outputs.run_id }})
+          **Commit:** [\`$SHORT_SHA\`](https://github.com/$REPO/commit/$FULL_SHA)
+          **Source run:** [Unit and Integration Tests #$SOURCE_RUN_ID](https://github.com/$REPO/actions/runs/$SOURCE_RUN_ID)
 
           ---
 
@@ -163,12 +165,16 @@ jobs:
 
           ### Stable URL
           This release is always available at:
-          https://github.com/${{ github.repository }}/releases/tag/nightly" \
+          https://github.com/$REPO/releases/tag/nightly" \
             --prerelease \
             --latest=false \
             "${assets[@]}"
 
       - name: Add to Job Summary
+        env:
+          SHORT_SHA: ${{ steps.get-run-id.outputs.short_sha }}
+          SOURCE_RUN_ID: ${{ steps.get-run-id.outputs.run_id }}
+          REPO: ${{ github.repository }}
         run: |
           cat >> $GITHUB_STEP_SUMMARY << EOF
           ## Nightly Release Published
@@ -176,7 +182,7 @@ jobs:
           | Property | Value |
           |----------|-------|
           | **Date** | $(date -u +'%Y-%m-%d %H:%M UTC') |
-          | **Commit** | \`${{ steps.get-run-id.outputs.short_sha }}\` |
-          | **Source Run** | [#${{ steps.get-run-id.outputs.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ steps.get-run-id.outputs.run_id }}) |
-          | **Release URL** | https://github.com/${{ github.repository }}/releases/tag/nightly |
+          | **Commit** | \`$SHORT_SHA\` |
+          | **Source Run** | [#$SOURCE_RUN_ID](https://github.com/$REPO/actions/runs/$SOURCE_RUN_ID) |
+          | **Release URL** | https://github.com/$REPO/releases/tag/nightly |
           EOF
