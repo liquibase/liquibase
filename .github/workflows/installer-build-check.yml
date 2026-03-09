@@ -1,18 +1,6 @@
 name: Build Test Installers
 
 on:
-  workflow_call:
-    inputs:
-      run_id:
-        description: "run-tests.yml run ID to download artifacts from"
-        required: true
-        type: string
-      branch:
-        description: "Branch name for artifact naming"
-        required: false
-        type: string
-        default: "master"
-
   workflow_dispatch:
   push:
     branches:
@@ -20,7 +8,6 @@ on:
 
 permissions:
   id-token: write # Required for OIDC authentication with AWS
-  actions: read # Required to download artifacts from triggering workflow
 
 jobs:
   build-installers:
@@ -110,26 +97,9 @@ jobs:
         uses: digicert/ssm-code-signing@v1.2.1
 
       - name: Set branch variable
-        env:
-          INPUT_BRANCH: ${{ inputs.branch }}
-        run: |
-          if [ -n "$INPUT_BRANCH" ]; then
-            echo "BRANCH=$INPUT_BRANCH" >> $GITHUB_ENV
-          else
-            echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-          fi
+        run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
 
-      - name: Download liquibase-artifacts (by run ID)
-        if: inputs.run_id != ''
-        uses: dawidd6/action-download-artifact@v15
-        with:
-          workflow: run-tests.yml
-          run_id: ${{ inputs.run_id }}
-          name: liquibase-artifacts
-          path: re-version/final
-
-      - name: Download liquibase-artifacts (by branch)
-        if: inputs.run_id == ''
+      - name: Download liquibase-artifacts
         uses: dawidd6/action-download-artifact@v15
         with:
           workflow: run-tests.yml

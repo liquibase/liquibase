@@ -6,7 +6,6 @@ name: Nightly Release
 permissions:
   contents: write
   actions: read
-  id-token: write # Inherited by installer-build-check for AWS OIDC
 
 on:
   workflow_run:
@@ -23,16 +22,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  setup:
-    name: Resolve Source Run
+  nightly-release:
+    name: Publish Nightly Release
     if: >
       github.event_name == 'workflow_dispatch' ||
       github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    outputs:
-      run_id: ${{ steps.get-run-id.outputs.run_id }}
-      sha: ${{ steps.get-run-id.outputs.sha }}
-      short_sha: ${{ steps.get-run-id.outputs.short_sha }}
     steps:
       - name: Get run ID for artifact download
         id: get-run-id
@@ -64,24 +59,12 @@ jobs:
           echo "short_sha=${sha:0:7}" >> $GITHUB_OUTPUT
           echo "Using run ID: $run_id (commit: ${sha:0:7})"
 
-  build-installers:
-    name: Build Installers
-    needs: setup
-    uses: ./.github/workflows/installer-build-check.yml
-    with:
-      run_id: ${{ needs.setup.outputs.run_id }}
-      branch: master
-    secrets: inherit
-
-  nightly-release:
-    name: Publish Nightly Release
-    needs: [setup, build-installers]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download liquibase-test-packages
-        uses: actions/download-artifact@v4
+      - name: Download liquibase-artifacts
+        uses: dawidd6/action-download-artifact@v15
         with:
-          name: liquibase-test-packages
+          workflow: run-tests.yml
+          run_id: ${{ steps.get-run-id.outputs.run_id }}
+          name: liquibase-artifacts
           path: download/artifacts
 
       - name: Rename artifacts from SNAPSHOT to nightly
@@ -90,13 +73,14 @@ jobs:
           mv liquibase-master-SNAPSHOT.tar.gz liquibase-nightly.tar.gz
           mv liquibase-master-SNAPSHOT.zip liquibase-nightly.zip
           mv liquibase-core-0-SNAPSHOT.jar liquibase-core-nightly.jar
-          mv liquibase-additional-0-SNAPSHOT.zip liquibase-additional-nightly.zip
 
-          installer_file=$(find . -name 'liquibase-*-installer-*.exe' | head -1)
-          mv "$installer_file" liquibase-windows-x64-installer-nightly.exe
+          # Create additional zip from signature files
+          if compgen -G "*.asc" > /dev/null || compgen -G "*.md5" > /dev/null || compgen -G "*.sha1" > /dev/null; then
+            zip liquibase-additional-nightly.zip *.asc *.md5 *.sha1 2>/dev/null || true
+          fi
 
           echo "Nightly artifacts:"
-          ls -la liquibase-nightly.* liquibase-additional-nightly.zip liquibase-windows-x64-installer-nightly.exe
+          ls -la liquibase-nightly.* liquibase-additional-nightly.zip
 
       - name: Delete existing nightly release and tag
         env:
@@ -109,9 +93,9 @@ jobs:
       - name: Create nightly pre-release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SHORT_SHA: ${{ needs.setup.outputs.short_sha }}
-          FULL_SHA: ${{ needs.setup.outputs.sha }}
-          SOURCE_RUN_ID: ${{ needs.setup.outputs.run_id }}
+          SHORT_SHA: ${{ steps.get-run-id.outputs.short_sha }}
+          FULL_SHA: ${{ steps.get-run-id.outputs.sha }}
+          SOURCE_RUN_ID: ${{ steps.get-run-id.outputs.run_id }}
           REPO: ${{ github.repository }}
         run: |
           date_str=$(date -u +'%Y-%m-%d %H:%M UTC')
@@ -138,7 +122,6 @@ jobs:
           | \`liquibase-nightly.zip\` | CLI distribution (Windows) |
           | \`liquibase-core-nightly.jar\` | Core library JAR |
           | \`liquibase-additional-nightly.zip\` | Signatures and checksums (.asc, .md5, .sha1) |
-          | \`liquibase-windows-x64-installer-nightly.exe\` | Windows x64 installer |
 
           ### Stable URL
           This release is always available at:
@@ -148,13 +131,12 @@ jobs:
             liquibase-nightly.tar.gz \
             liquibase-nightly.zip \
             liquibase-core-nightly.jar \
-            liquibase-additional-nightly.zip \
-            liquibase-windows-x64-installer-nightly.exe
+            liquibase-additional-nightly.zip
 
       - name: Add to Job Summary
         env:
-          SHORT_SHA: ${{ needs.setup.outputs.short_sha }}
-          SOURCE_RUN_ID: ${{ needs.setup.outputs.run_id }}
+          SHORT_SHA: ${{ steps.get-run-id.outputs.short_sha }}
+          SOURCE_RUN_ID: ${{ steps.get-run-id.outputs.run_id }}
           REPO: ${{ github.repository }}
         run: |
           cat >> $GITHUB_STEP_SUMMARY << EOF
