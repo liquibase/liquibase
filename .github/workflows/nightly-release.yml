@@ -127,7 +127,12 @@ jobs:
           | \`liquibase-nightly.zip\` | CLI distribution (Windows) |
           | \`liquibase-core-nightly.jar\` | Core library JAR |"
 
-          if [ "${{ steps.rename-artifacts.outputs.has_additional }}" == "true" ]; then
+          env:
+            HAS_ADDITIONAL: ${{ steps.rename-artifacts.outputs.has_additional }}
+            HAS_INSTALLER: ${{ steps.rename-artifacts.outputs.has_installer }}
+          run: |
+            ...
+            if [ "$HAS_ADDITIONAL" == "true" ]; then
             assets+=(liquibase-additional-nightly.zip)
             table+="
           | \`liquibase-additional-nightly.zip\` | Signatures and checksums (.asc, .md5, .sha1) |"
