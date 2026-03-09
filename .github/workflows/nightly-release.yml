@@ -1,0 +1,125 @@
+name: Nightly Release
+
+# Security: Minimal permissions for nightly release publishing
+# - contents: write - create/delete releases and tags
+# - actions: read - download artifacts from triggering workflow
+permissions:
+  contents: write
+  actions: read
+
+on:
+  workflow_run:
+    workflows: ["Unit and Integration Tests"]
+    types:
+      - completed
+    branches:
+      - master
+
+  workflow_dispatch:
+
+concurrency:
+  group: nightly-release
+  cancel-in-progress: true
+
+jobs:
+  nightly-release:
+    name: Publish Nightly Release
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get run ID for artifact download
+        id: get-run-id
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_run" ]; then
+            run_id="${{ github.event.workflow_run.id }}"
+            sha="${{ github.event.workflow_run.head_sha }}"
+          else
+            # workflow_dispatch: fetch latest successful run-tests.yml on master
+            response=$(curl -s \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/${{ github.repository }}/actions/workflows/run-tests.yml/runs?branch=master&status=success&per_page=1")
+            run_id=$(echo "$response" | jq -r '.workflow_runs[0].id')
+            sha=$(echo "$response" | jq -r '.workflow_runs[0].head_sha')
+            if [ "$run_id" == "null" ] || [ -z "$run_id" ]; then
+              echo "Error: No successful run-tests.yml run found on master"
+              exit 1
+            fi
+          fi
+          echo "run_id=$run_id" >> $GITHUB_OUTPUT
+          echo "sha=$sha" >> $GITHUB_OUTPUT
+          echo "short_sha=${sha:0:7}" >> $GITHUB_OUTPUT
+          echo "Using run ID: $run_id (commit: ${sha:0:7})"
+
+      - name: Download liquibase-artifacts
+        uses: dawidd6/action-download-artifact@v15
+        with:
+          workflow: run-tests.yml
+          run_id: ${{ steps.get-run-id.outputs.run_id }}
+          name: liquibase-artifacts
+          path: download/liquibase-artifacts
+
+      - name: Rename artifacts from SNAPSHOT to nightly
+        run: |
+          cd download/liquibase-artifacts
+          mv liquibase-master-SNAPSHOT.tar.gz liquibase-nightly.tar.gz
+          mv liquibase-master-SNAPSHOT.zip liquibase-nightly.zip
+          mv liquibase-core-0-SNAPSHOT.jar liquibase-core-nightly.jar
+          ls -la liquibase-nightly.*
+
+      - name: Delete existing nightly release and tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete nightly --repo ${{ github.repository }} --cleanup-tag --yes 2>/dev/null || true
+          echo "Cleaned up previous nightly release and tag (if any)"
+
+      - name: Create nightly pre-release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          date_str=$(date -u +'%Y-%m-%d %H:%M UTC')
+          gh release create nightly \
+            --repo ${{ github.repository }} \
+            --target master \
+            --title "Nightly Build ($date_str)" \
+            --notes "## Nightly Build
+
+          **Date:** $date_str
+          **Commit:** [\`${{ steps.get-run-id.outputs.short_sha }}\`](https://github.com/${{ github.repository }}/commit/${{ steps.get-run-id.outputs.sha }})
+          **Source run:** [Unit and Integration Tests #${{ steps.get-run-id.outputs.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ steps.get-run-id.outputs.run_id }})
+
+          ---
+
+          > **Warning:** This is an automated nightly build from the \`master\` branch. It is not a stable release. Use at your own risk.
+
+          ### Included Assets
+          | File | Description |
+          |------|-------------|
+          | \`liquibase-nightly.tar.gz\` | CLI distribution (Linux/macOS) |
+          | \`liquibase-nightly.zip\` | CLI distribution (Windows) |
+          | \`liquibase-core-nightly.jar\` | Core library JAR |
+
+          ### Stable URL
+          This release is always available at:
+          https://github.com/${{ github.repository }}/releases/tag/nightly" \
+            --prerelease \
+            --latest=false \
+            download/liquibase-artifacts/liquibase-nightly.tar.gz \
+            download/liquibase-artifacts/liquibase-nightly.zip \
+            download/liquibase-artifacts/liquibase-core-nightly.jar
+
+      - name: Add to Job Summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## Nightly Release Published
+
+          | Property | Value |
+          |----------|-------|
+          | **Date** | $(date -u +'%Y-%m-%d %H:%M UTC') |
+          | **Commit** | \`${{ steps.get-run-id.outputs.short_sha }}\` |
+          | **Source Run** | [#${{ steps.get-run-id.outputs.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ steps.get-run-id.outputs.run_id }}) |
+          | **Release URL** | https://github.com/${{ github.repository }}/releases/tag/nightly |
+          EOF
