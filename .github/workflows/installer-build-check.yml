@@ -100,7 +100,7 @@ jobs:
         run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
 
       - name: Download liquibase-artifacts
-        uses: dawidd6/action-download-artifact@v15
+        uses: dawidd6/action-download-artifact@v16
         with:
           workflow: run-tests.yml
           workflow_conclusion: success
@@ -156,7 +156,7 @@ jobs:
           rm re-version/final/*.sha1
 
       - name: Archive Packages
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: liquibase-test-packages
           path: re-version/final/*
