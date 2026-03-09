@@ -65,26 +65,23 @@ class LockServiceCommandStepTest extends Specification {
         field.setAccessible(true)
         def threadLocal = (ThreadLocal<Boolean>) field.get(step)
         def executor = Executors.newFixedThreadPool(2)
-        def barrier = new CyclicBarrier(2)
+        def barrier1 = new CyclicBarrier(2) // both threads have set their values
+        def barrier2 = new CyclicBarrier(2) // thread 2 has removed, thread 1 can now read
 
         when:
         def thread1Value = null
         def futures = [
             executor.submit {
                 threadLocal.set(true)
-                barrier.await(10, TimeUnit.SECONDS) // sync: both set
-                // Thread 1 waits while Thread 2 removes
-                Thread.sleep(100)
-    executor.submit {
-                threadLocal.set(true)
-                barrier.await(10, TimeUnit.SECONDS) // sync: both set
-                // Thread 1 waits while Thread 2 removes
-                Thread.sleep(100)
+                barrier1.await(10, TimeUnit.SECONDS) // sync: both set
+                barrier2.await(10, TimeUnit.SECONDS) // wait for thread 2 to remove
+                thread1Value = threadLocal.get()     // read after thread 2 removed its value
             },
             executor.submit {
                 threadLocal.set(true)
-                barrier.await(10, TimeUnit.SECONDS) // sync: both set
-                threadLocal.remove() // Thread 2 removes its value
+                barrier1.await(10, TimeUnit.SECONDS) // sync: both set
+                threadLocal.remove()                 // thread 2 removes its value
+                barrier2.await(10, TimeUnit.SECONDS) // signal thread 1 it can read
             }
         ]
         futures.each { it.get(30, TimeUnit.SECONDS) }
