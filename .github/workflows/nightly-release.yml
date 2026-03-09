@@ -1,13 +1,11 @@
 name: Nightly Release
 
-# Security: Permissions for nightly release publishing
+# Security: Minimal permissions for nightly release publishing
 # - contents: write - create/delete releases and tags
 # - actions: read - download artifacts from triggering workflow
-# - id-token: write - AWS OIDC authentication for vault access
 permissions:
   contents: write
   actions: read
-  id-token: write
 
 on:
   workflow_run:
@@ -31,48 +29,18 @@ jobs:
       github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
-          aws-region: us-east-1
-
-      - name: Get secrets from vault
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
-        with:
-          secret-ids: |
-            ,/vault/liquibase
-          parse-json-secrets: true
-
-      - name: Get GitHub App token
-        id: get-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          permission-contents: write
-
       - name: Get run ID for artifact download
         id: get-run-id
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          WR_RUN_ID: ${{ github.event.workflow_run.id }}
-          WR_SHA: ${{ github.event.workflow_run.head_sha }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
         run: |
-          if [ "$EVENT_NAME" == "workflow_run" ]; then
-            run_id="$WR_RUN_ID"
-            sha="$WR_SHA"
+          if [ "${{ github.event_name }}" == "workflow_run" ]; then
+            run_id="${{ github.event.workflow_run.id }}"
+            sha="${{ github.event.workflow_run.head_sha }}"
           else
             # workflow_dispatch: fetch latest successful run-tests.yml on master
             response=$(curl -s \
-              -H "Authorization: token $GH_TOKEN" \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
               -H "Accept: application/vnd.github.v3+json" \
-              "https://api.github.com/repos/$REPO/actions/workflows/run-tests.yml/runs?branch=master&status=success&per_page=1")
+              "https://api.github.com/repos/${{ github.repository }}/actions/workflows/run-tests.yml/runs?branch=master&status=success&per_page=1")
             run_id=$(echo "$response" | jq -r '.workflow_runs[0].id')
             sha=$(echo "$response" | jq -r '.workflow_runs[0].head_sha')
             if [ "$run_id" == "null" ] || [ -z "$run_id" ]; then
@@ -84,81 +52,108 @@ jobs:
           echo "sha=$sha" >> $GITHUB_OUTPUT
           echo "short_sha=${sha:0:7}" >> $GITHUB_OUTPUT
           echo "Using run ID: $run_id (commit: ${sha:0:7})"
-
       - name: Download liquibase-artifacts
         uses: dawidd6/action-download-artifact@v15
         with:
           workflow: run-tests.yml
           run_id: ${{ steps.get-run-id.outputs.run_id }}
           name: liquibase-artifacts
-          path: download/artifacts
+          path: download/liquibase-artifacts
+
+      - name: Download installer artifacts (best effort, same commit only)
+        id: installer-download
+        continue-on-error: true
+        uses: dawidd6/action-download-artifact@v15
+        with:
+          workflow: installer-build-check.yml
+          workflow_conclusion: success
+          branch: master
+          commit: ${{ steps.get-run-id.outputs.sha }}
+          name: liquibase-test-packages
+          path: download/installer-packages
 
       - name: Rename artifacts from SNAPSHOT to nightly
+        id: rename-artifacts
         run: |
-          cd download/artifacts
+          cd download/liquibase-artifacts
+          # Core artifacts
           mv liquibase-master-SNAPSHOT.tar.gz liquibase-nightly.tar.gz
           mv liquibase-master-SNAPSHOT.zip liquibase-nightly.zip
           mv liquibase-core-0-SNAPSHOT.jar liquibase-core-nightly.jar
-
-          # Create additional zip from signature files
+          # Create additional zip from signature files (tolerant of missing extensions)
           if compgen -G "*.asc" > /dev/null || compgen -G "*.md5" > /dev/null || compgen -G "*.sha1" > /dev/null; then
             zip liquibase-additional-nightly.zip *.asc *.md5 *.sha1 2>/dev/null || true
+            echo "has_additional=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_additional=false" >> $GITHUB_OUTPUT
           fi
-
-          echo "Nightly artifacts:"
-          ls -la liquibase-nightly.* liquibase-additional-nightly.zip
-
+          # Check for installer from installer-build-check workflow (glob to match any version/arch)
+          installer_file=$(find ../installer-packages -name 'liquibase-*-installer-*.exe' 2>/dev/null | head -1)
+          if [ -n "$installer_file" ]; then
+            mv "$installer_file" liquibase-windows-x64-installer-nightly.exe
+            echo "has_installer=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_installer=false" >> $GITHUB_OUTPUT
+            echo "Warning: Windows installer not available (installer-build-check.yml may not have run recently)"
+          fi
+          ls -la liquibase-nightly.* liquibase-additional-nightly.zip liquibase-windows-x64-installer-nightly.exe 2>/dev/null || true
       - name: Delete existing nightly release and tag
         env:
-          GH_TOKEN: ${{ steps.get-token.outputs.token }}
-          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete nightly --repo "$REPO" --cleanup-tag --yes 2>/dev/null || true
+          gh release delete nightly --repo ${{ github.repository }} --cleanup-tag --yes 2>/dev/null || true
           echo "Cleaned up previous nightly release and tag (if any)"
-
       - name: Create nightly pre-release
         env:
-          GH_TOKEN: ${{ steps.get-token.outputs.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HAS_ADDITIONAL: ${{ steps.rename-artifacts.outputs.has_additional }}
+          HAS_INSTALLER: ${{ steps.rename-artifacts.outputs.has_installer }}
           SHORT_SHA: ${{ steps.get-run-id.outputs.short_sha }}
           FULL_SHA: ${{ steps.get-run-id.outputs.sha }}
           SOURCE_RUN_ID: ${{ steps.get-run-id.outputs.run_id }}
           REPO: ${{ github.repository }}
         run: |
           date_str=$(date -u +'%Y-%m-%d %H:%M UTC')
-          cd download/artifacts
-
-          gh release create nightly \
-            --repo "$REPO" \
-            --target "$FULL_SHA" \
-            --title "Nightly Build ($date_str)" \
-            --notes "## Nightly Build
-
-          **Date:** $date_str
-          **Commit:** [\`$SHORT_SHA\`](https://github.com/$REPO/commit/$FULL_SHA)
-          **Source run:** [Unit and Integration Tests #$SOURCE_RUN_ID](https://github.com/$REPO/actions/runs/$SOURCE_RUN_ID)
-
-          ---
-
-          > **Warning:** This is an automated nightly build from the \`master\` branch. It is not a stable release. Use at your own risk.
-
-          ### Included Assets
-          | File | Description |
+          cd download/liquibase-artifacts
+          # Build dynamic asset list and table rows
+          assets=(
+            liquibase-nightly.tar.gz
+            liquibase-nightly.zip
+            liquibase-core-nightly.jar
+          )
+          table="| File | Description |
           |------|-------------|
           | \`liquibase-nightly.tar.gz\` | CLI distribution (Linux/macOS) |
           | \`liquibase-nightly.zip\` | CLI distribution (Windows) |
-          | \`liquibase-core-nightly.jar\` | Core library JAR |
-          | \`liquibase-additional-nightly.zip\` | Signatures and checksums (.asc, .md5, .sha1) |
-
+          | \`liquibase-core-nightly.jar\` | Core library JAR |"
+          if [ "$HAS_ADDITIONAL" == "true" ]; then
+            assets+=(liquibase-additional-nightly.zip)
+            table+="
+          | \`liquibase-additional-nightly.zip\` | Signatures and checksums (.asc, .md5, .sha1) |"
+          fi
+          if [ "$HAS_INSTALLER" == "true" ]; then
+            assets+=(liquibase-windows-x64-installer-nightly.exe)
+            table+="
+          | \`liquibase-windows-x64-installer-nightly.exe\` | Windows x64 installer |"
+          fi
+          gh release create nightly \
+            --repo "$REPO" \
+            --target master \
+            --title "Nightly Build ($date_str)" \
+            --notes "## Nightly Build
+          **Date:** $date_str
+          **Commit:** [\`$SHORT_SHA\`](https://github.com/$REPO/commit/$FULL_SHA)
+          **Source run:** [Unit and Integration Tests #$SOURCE_RUN_ID](https://github.com/$REPO/actions/runs/$SOURCE_RUN_ID)
+          ---
+          > **Warning:** This is an automated nightly build from the \`master\` branch. It is not a stable release. Use at your own risk.
+          ### Included Assets
+          $table
           ### Stable URL
           This release is always available at:
           https://github.com/$REPO/releases/tag/nightly" \
             --prerelease \
             --latest=false \
-            liquibase-nightly.tar.gz \
-            liquibase-nightly.zip \
-            liquibase-core-nightly.jar \
-            liquibase-additional-nightly.zip
-
+            "${assets[@]}"
       - name: Add to Job Summary
         env:
           SHORT_SHA: ${{ steps.get-run-id.outputs.short_sha }}
@@ -167,7 +162,6 @@ jobs:
         run: |
           cat >> $GITHUB_STEP_SUMMARY << EOF
           ## Nightly Release Published
-
           | Property | Value |
           |----------|-------|
           | **Date** | $(date -u +'%Y-%m-%d %H:%M UTC') |
