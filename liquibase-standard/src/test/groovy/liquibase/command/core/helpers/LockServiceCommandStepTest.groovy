@@ -75,7 +75,11 @@ class LockServiceCommandStepTest extends Specification {
                 barrier.await(10, TimeUnit.SECONDS) // sync: both set
                 // Thread 1 waits while Thread 2 removes
                 Thread.sleep(100)
-                thread1Value = threadLocal.get()
+    executor.submit {
+                threadLocal.set(true)
+                barrier.await(10, TimeUnit.SECONDS) // sync: both set
+                // Thread 1 waits while Thread 2 removes
+                Thread.sleep(100)
             },
             executor.submit {
                 threadLocal.set(true)
