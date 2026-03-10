@@ -97,6 +97,8 @@ class SqlUtilTest extends Specification {
         "b'1'"                                                    | new MySQLDatabase()    | "bit"           | 1                                         | Types.BIT
         "B'0'::\"bit\""                                           | new PostgresDatabase() | "bit"           | 0                                         | Types.BIT
         "B'1'::\"bit\""                                           | new PostgresDatabase() | "bit"           | 1                                         | Types.BIT
+        "b'0'::\"bit\""                                           | new PostgresDatabase() | "bit"           | 0                                         | Types.BIT
+        "b'1'::\"bit\""                                           | new PostgresDatabase() | "bit"           | 1                                         | Types.BIT
         "0"                                                       | new H2Database()       | "bit"           | 0                                         | Types.BIT
         "1"                                                       | new H2Database()       | "bit"           | 1                                         | Types.BIT
         "false"                                                   | new H2Database()       | "bit"           | false                                     | Types.BIT

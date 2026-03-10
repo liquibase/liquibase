@@ -762,7 +762,8 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     public boolean hasDefaultValue() {
         return (this.getDefaultValue() != null) || (this.getDefaultValueBoolean() != null) || (this
             .getDefaultValueDate() != null) || (this.getDefaultValueNumeric() != null) || (this
-            .getDefaultValueComputed() != null) || (this.getDefaultValueSequenceNext() != null);
+            .getDefaultValueComputed() != null) || (this.getDefaultValueSequenceNext() != null) ||
+            (this.getDefaultValueBit() != null);
     }
 
     /**

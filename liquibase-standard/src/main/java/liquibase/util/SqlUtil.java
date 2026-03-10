@@ -130,7 +130,8 @@ public abstract class SqlUtil {
         } else if (stringVal.startsWith("(") && stringVal.endsWith(")")) {
             // Special case for PostgreSQL BIT defaults like (0)::bit(1) - don't treat as DatabaseFunction
             // Let it fall through to BIT-specific parsing logic
-            if (!(typeId == Types.BIT && database instanceof PostgresDatabase && stringVal.contains("::bit"))) {
+            String lowerVal = stringVal.toLowerCase(ENGLISH);
+            if (!(typeId == Types.BIT && database instanceof PostgresDatabase && (lowerVal.contains("::bit") || lowerVal.contains("::\"bit\"")))) {
                 return new DatabaseFunction(stringVal.substring(1, stringVal.length() - 1));
             }
             // For PostgreSQL BIT, strip outer parentheses and continue to BIT handling
@@ -153,7 +154,7 @@ public abstract class SqlUtil {
                 //postgres defaults for bit columns look like: B'0'::"bit", '0'::bit(1), ('0')::bit(1), or 0::bit(1)
                 if (database instanceof PostgresDatabase) {
                     // Strip B'...' format: B'0' or B'1'
-                    if (stringVal.startsWith("B'") && stringVal.indexOf('\'', 2) >= 0) {
+                    if ((stringVal.startsWith("B'") || stringVal.startsWith("b'")) && stringVal.indexOf('\'', 2) >= 0) {
                         stringVal = stringVal.substring(2); // Remove "B'"
                         stringVal = stringVal.replaceFirst("'.*$", ""); // Remove trailing ' and anything after
                     }
