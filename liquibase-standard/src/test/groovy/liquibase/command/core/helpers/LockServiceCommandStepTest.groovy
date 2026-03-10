@@ -41,10 +41,12 @@ class LockServiceCommandStepTest extends Specification {
             }
         }
         futures.each { it.get(30, TimeUnit.SECONDS) }
-        executor.shutdown()
 
         then: "every thread should have seen its own locked state as true"
         cleanUpSawLocked.get() == threadCount
+
+        cleanup:
+        executor.shutdownNow()
     }
 
     def "isDBLocked is false by default for new threads"() {
@@ -85,9 +87,11 @@ class LockServiceCommandStepTest extends Specification {
             }
         ]
         futures.each { it.get(30, TimeUnit.SECONDS) }
-        executor.shutdown()
 
         then: "thread 1's value is unaffected by thread 2's removal"
         thread1Value == true
+
+        cleanup:
+        executor.shutdownNow()
     }
 }
