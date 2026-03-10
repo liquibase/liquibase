@@ -20,7 +20,7 @@ public class LockServiceCommandStep extends AbstractHelperCommandStep implements
 
     public static final String[] COMMAND_NAME = {"lockServiceCommandStep"};
 
-    private boolean isDBLocked = false;
+    private final ThreadLocal<Boolean> isDBLocked = ThreadLocal.withInitial(() -> false);
 
     @Override
     public List<Class<?>> requiredDependencies() {
@@ -34,11 +34,10 @@ public class LockServiceCommandStep extends AbstractHelperCommandStep implements
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        isDBLocked = false;
         CommandScope commandScope = resultsBuilder.getCommandScope();
         Database database = (Database) commandScope.getDependency(Database.class);
         LockServiceFactory.getInstance().getLockService(database).waitForLock();
-        isDBLocked = true;
+        isDBLocked.set(true);
     }
 
     @Override
@@ -48,16 +47,19 @@ public class LockServiceCommandStep extends AbstractHelperCommandStep implements
 
     @Override
     public void cleanUp(CommandResultsBuilder resultsBuilder) {
-        if (isDBLocked) {
-            try {
-                LockServiceFactory.getInstance().getLockService(
-                        (Database) resultsBuilder.getCommandScope().getDependency(Database.class)
-                ).releaseLock();
-                isDBLocked = false;
-            } catch (LockException e) {
-                Scope.getCurrentScope().getLog(getClass()).severe(Liquibase.MSG_COULD_NOT_RELEASE_LOCK, e);
+        try {
+            if (isDBLocked.get()) {
+                try {
+                    LockServiceFactory.getInstance().getLockService(
+                            (Database) resultsBuilder.getCommandScope().getDependency(Database.class)
+                    ).releaseLock();
+                } catch (LockException e) {
+                    Scope.getCurrentScope().getLog(getClass()).severe(Liquibase.MSG_COULD_NOT_RELEASE_LOCK, e);
+                }
+                LockServiceFactory.getInstance().resetAll();
             }
-            LockServiceFactory.getInstance().resetAll();
+        } finally {
+            isDBLocked.remove();
         }
     }
 }
