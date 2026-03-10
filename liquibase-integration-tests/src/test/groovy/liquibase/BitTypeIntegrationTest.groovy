@@ -52,6 +52,11 @@ class BitTypeIntegrationTest extends Specification {
         bitColumn.defaultValue != null
         // Default should be 0 (Integer), not FALSE (Boolean)
         bitColumn.defaultValue == 0 || bitColumn.defaultValue.toString() == "0"
+
+        cleanup:
+        def stmt = postgres.getConnection().createStatement()
+        stmt.execute("DROP TABLE IF EXISTS bit_test_table")
+        stmt.close()
     }
 
     def "verify BIT column snapshot preserves numeric default"() {
@@ -88,6 +93,12 @@ class BitTypeIntegrationTest extends Specification {
 
         bitCol1 != null
         bitCol1.defaultValue == 1 || bitCol1.defaultValue.toString() == "1"
+
+        cleanup:
+        database?.close()
+        def stmt = postgres.getConnection().createStatement()
+        stmt.execute("DROP TABLE IF EXISTS bit_snapshot_table")
+        stmt.close()
     }
 
     def "verify LoadData with boolean values into BIT column"() {
@@ -128,6 +139,11 @@ class BitTypeIntegrationTest extends Specification {
         !rs.next()
         rs.close()
         stmt.close()
+
+        cleanup:
+        def cleanupStmt = postgres.getConnection().createStatement()
+        cleanupStmt.execute("DROP TABLE IF EXISTS bit_loaddata_table")
+        cleanupStmt.close()
     }
 
     def "verify LoadData with various bit formats into BIT VARYING column"() {
@@ -206,5 +222,10 @@ class BitTypeIntegrationTest extends Specification {
         !rs.next()
         rs.close()
         stmt.close()
+
+        cleanup:
+        def cleanupStmt = postgres.getConnection().createStatement()
+        cleanupStmt.execute("DROP TABLE IF EXISTS bit_multi_loaddata_table")
+        cleanupStmt.close()
     }
 }
