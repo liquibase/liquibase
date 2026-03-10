@@ -142,10 +142,14 @@ class LockServiceCommandStepTest extends Specification {
         futures.each { it.get(30, TimeUnit.SECONDS) }
 
         then: "each thread's lock service had waitForLock and releaseLock called exactly once"
-        mockLockServices.each { lockService ->
-            1 * lockService.waitForLock()
-            1 * lockService.releaseLock()
-        }
+        1 * mockLockServices[0].waitForLock()
+        1 * mockLockServices[0].releaseLock()
+        1 * mockLockServices[1].waitForLock()
+        1 * mockLockServices[1].releaseLock()
+        1 * mockLockServices[2].waitForLock()
+        1 * mockLockServices[2].releaseLock()
+        1 * mockLockServices[3].waitForLock()
+        1 * mockLockServices[3].releaseLock()
 
         and: "all threads completed cleanup"
         releasedCount.get() == threadCount
