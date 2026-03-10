@@ -1,5 +1,10 @@
 package liquibase.command.core.helpers
 
+import liquibase.command.CommandResultsBuilder
+import liquibase.command.CommandScope
+import liquibase.database.Database
+import liquibase.lockservice.LockService
+import liquibase.lockservice.LockServiceFactory
 import spock.lang.Specification
 
 import java.util.concurrent.CyclicBarrier
@@ -8,6 +13,10 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
 class LockServiceCommandStepTest extends Specification {
+
+    def cleanup() {
+        LockServiceFactory.reset()
+    }
 
     def "isDBLocked ThreadLocal ensures each thread tracks its own lock state"() {
         given: "a shared LockServiceCommandStep instance (simulating static COMMAND_DEFINITIONS)"
@@ -20,23 +29,19 @@ class LockServiceCommandStepTest extends Specification {
         when: "multiple threads run and cleanUp concurrently"
         def futures = (1..threadCount).collect {
             executor.submit {
-                // Access the private isDBLocked field to simulate run() setting it to true
                 def field = LockServiceCommandStep.getDeclaredField("isDBLocked")
                 field.setAccessible(true)
                 def threadLocal = (ThreadLocal<Boolean>) field.get(step)
 
-                // Simulate run() acquiring lock
                 threadLocal.set(true)
 
                 // Synchronize: all threads have "locked" before any starts cleanup
                 barrier.await(10, TimeUnit.SECONDS)
 
-                // Check if this thread still sees its own locked state
                 if (threadLocal.get()) {
                     cleanUpSawLocked.incrementAndGet()
                 }
 
-                // Simulate one thread's cleanup clearing its value
                 threadLocal.remove()
             }
         }
@@ -56,8 +61,8 @@ class LockServiceCommandStepTest extends Specification {
         field.setAccessible(true)
         def threadLocal = (ThreadLocal<Boolean>) field.get(step)
 
-        expect: "default value is false"
-        !threadLocal.get()
+        expect: "default value is false, not null"
+        threadLocal.get() == Boolean.FALSE
     }
 
     def "isDBLocked removal in one thread does not affect another"() {
@@ -67,23 +72,23 @@ class LockServiceCommandStepTest extends Specification {
         field.setAccessible(true)
         def threadLocal = (ThreadLocal<Boolean>) field.get(step)
         def executor = Executors.newFixedThreadPool(2)
-        def barrier1 = new CyclicBarrier(2) // both threads have set their values
-        def barrier2 = new CyclicBarrier(2) // thread 2 has removed, thread 1 can now read
+        def barrier1 = new CyclicBarrier(2)
+        def barrier2 = new CyclicBarrier(2)
 
         when:
         def thread1Value = null
         def futures = [
             executor.submit {
                 threadLocal.set(true)
-                barrier1.await(10, TimeUnit.SECONDS) // sync: both set
-                barrier2.await(10, TimeUnit.SECONDS) // wait for thread 2 to remove
-                thread1Value = threadLocal.get()     // read after thread 2 removed its value
+                barrier1.await(10, TimeUnit.SECONDS)
+                barrier2.await(10, TimeUnit.SECONDS)
+                thread1Value = threadLocal.get()
             },
             executor.submit {
                 threadLocal.set(true)
-                barrier1.await(10, TimeUnit.SECONDS) // sync: both set
-                threadLocal.remove()                 // thread 2 removes its value
-                barrier2.await(10, TimeUnit.SECONDS) // signal thread 1 it can read
+                barrier1.await(10, TimeUnit.SECONDS)
+                threadLocal.remove()
+                barrier2.await(10, TimeUnit.SECONDS)
             }
         ]
         futures.each { it.get(30, TimeUnit.SECONDS) }
@@ -93,5 +98,103 @@ class LockServiceCommandStepTest extends Specification {
 
         cleanup:
         executor.shutdownNow()
+    }
+
+    def "concurrent run and cleanUp through public API releases only the calling thread's lock"() {
+        given: "a mock LockServiceFactory that tracks per-thread lock/release calls"
+        def step = new LockServiceCommandStep()
+        def threadCount = 4
+        def barrier = new CyclicBarrier(threadCount)
+        def executor = Executors.newFixedThreadPool(threadCount)
+        def releasedCount = new AtomicInteger(0)
+
+        and: "mock lock services — one per thread to verify independent release"
+        def mockLockServices = (1..threadCount).collect { Mock(LockService) }
+        def mockDatabases = (1..threadCount).collect { Mock(Database) }
+        def lockServiceIndex = new AtomicInteger(0)
+
+        def mockFactory = Mock(LockServiceFactory) {
+            getLockService(_) >> { Database db ->
+                def idx = mockDatabases.indexOf(db)
+                return mockLockServices[idx]
+            }
+        }
+        LockServiceFactory.setInstance(mockFactory)
+
+        when: "multiple threads call run() then cleanUp() concurrently"
+        def futures = (0..<threadCount).collect { idx ->
+            executor.submit {
+                def command = new CommandScope(LockServiceCommandStep.COMMAND_NAME)
+                        .provideDependency(Database.class, mockDatabases[idx])
+                def resultsBuilder = new CommandResultsBuilder(command, new ByteArrayOutputStream())
+
+                // run() acquires the lock and sets isDBLocked for this thread
+                step.run(resultsBuilder)
+
+                // sync: all threads have acquired locks before any cleans up
+                barrier.await(10, TimeUnit.SECONDS)
+
+                // cleanUp() should release only this thread's lock
+                step.cleanUp(resultsBuilder)
+                releasedCount.incrementAndGet()
+            }
+        }
+        futures.each { it.get(30, TimeUnit.SECONDS) }
+
+        then: "each thread's lock service had waitForLock and releaseLock called exactly once"
+        mockLockServices.each { lockService ->
+            1 * lockService.waitForLock()
+            1 * lockService.releaseLock()
+        }
+
+        and: "all threads completed cleanup"
+        releasedCount.get() == threadCount
+
+        cleanup:
+        executor.shutdownNow()
+    }
+
+    def "cleanUp after successful run releases the lock"() {
+        given:
+        def step = new LockServiceCommandStep()
+        def mockLockService = Mock(LockService)
+        def mockDatabase = Mock(Database)
+        def mockFactory = Mock(LockServiceFactory) {
+            getLockService(mockDatabase) >> mockLockService
+        }
+        LockServiceFactory.setInstance(mockFactory)
+
+        def command = new CommandScope(LockServiceCommandStep.COMMAND_NAME)
+                .provideDependency(Database.class, mockDatabase)
+        def resultsBuilder = new CommandResultsBuilder(command, new ByteArrayOutputStream())
+
+        when:
+        step.run(resultsBuilder)
+        step.cleanUp(resultsBuilder)
+
+        then:
+        1 * mockLockService.waitForLock()
+        1 * mockLockService.releaseLock()
+    }
+
+    def "cleanUp without prior run does not attempt lock release"() {
+        given:
+        def step = new LockServiceCommandStep()
+        def mockLockService = Mock(LockService)
+        def mockDatabase = Mock(Database)
+        def mockFactory = Mock(LockServiceFactory) {
+            getLockService(mockDatabase) >> mockLockService
+        }
+        LockServiceFactory.setInstance(mockFactory)
+
+        def command = new CommandScope(LockServiceCommandStep.COMMAND_NAME)
+                .provideDependency(Database.class, mockDatabase)
+        def resultsBuilder = new CommandResultsBuilder(command, new ByteArrayOutputStream())
+
+        when:
+        step.cleanUp(resultsBuilder)
+
+        then:
+        0 * mockLockService.releaseLock()
     }
 }
