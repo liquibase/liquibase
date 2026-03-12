@@ -169,7 +169,7 @@ jobs:
           | Workflow | Link |
           |----------|------|
           | **create-release** | [View Runs](https://github.com/${{ github.repository }}/actions/workflows/create-release.yml) |
-          | **release-published** | [View Runs](https://github.com/${{ github.repository }}/actions/workflows/release-published.yml) |
+          | **release-published-orchestrator** | [View Runs](https://github.com/${{ github.repository }}/actions/workflows/release-published-orchestrator.yml) |
           EOF
 
   dry-run-release-published:
@@ -201,12 +201,12 @@ jobs:
           permission-contents: write
           permission-actions: write
 
-      - name: Trigger release-published workflow
+      - name: Trigger release-published-orchestrator workflow
         uses: the-actions-org/workflow-dispatch@v4
         with:
-          workflow: release-published.yml
+          workflow: release-published-orchestrator.yml
           token: ${{ steps.get-token.outputs.token }}
-          inputs: '{"tag": "vdry-run-${{ github.run_id }}", "dry_run_release_id": "${{ needs.dry-run-create-release.outputs.dry_run_release_id }}", "dry_run_zip_url": "${{ needs.dry-run-create-release.outputs.dry_run_zip_url }}", "dry_run_tar_gz_url": "${{ needs.dry-run-create-release.outputs.dry_run_tar_gz_url }}", "dry_run": "true", "dry_run_branch_name": "${{ needs.setup.outputs.dry_run_branch_name }}"}'
+          inputs: '{"tag": "vdry-run-${{ github.run_id }}", "dry_run_release_id": "${{ needs.dry-run-create-release.outputs.dry_run_release_id }}", "dry_run_zip_url": "${{ needs.dry-run-create-release.outputs.dry_run_zip_url }}", "dry_run_tar_gz_url": "${{ needs.dry-run-create-release.outputs.dry_run_tar_gz_url }}", "dry_run": true, "dry_run_branch_name": "${{ needs.setup.outputs.dry_run_branch_name }}"}'
           ref: master
           wait-for-completion: true
 
