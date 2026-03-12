@@ -13,6 +13,7 @@ import liquibase.extension.testing.testsystem.core.DB2TestSystem;
 import liquibase.util.CollectionUtil;
 import liquibase.util.StringUtil;
 import org.springframework.test.util.TestSocketUtils;
+import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 
 import java.util.*;
@@ -40,7 +41,7 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
         return "Docker image: " + container.getDockerImageName() + "\n" +
                 "Container name: " + container.getContainerName() + "\n" +
                 "Exposed ports: " + StringUtil.join(container.getExposedPorts(), ",") + "\n" +
-                "Reusable: " + container.isShouldBeReused();
+                "Reusable: " + testSystem.getKeepRunning();
 
     }
 
@@ -50,7 +51,7 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
             return;
         }
 
-        final DockerClient dockerClient = container.getDockerClient();
+        final DockerClient dockerClient = DockerClientFactory.instance().client();
         for (Container container : dockerClient.listContainersCmd().exec()) {
             final String containerTestSystem = container.getLabels().get(TEST_SYSTEM_LABEL);
             if (containerTestSystem != null && containerTestSystem.equals(testSystem.getDefinition().toString())) {
@@ -148,7 +149,7 @@ public class DockerDatabaseWrapper extends DatabaseWrapper {
         if (container.isRunning()) {
             container.stop();
         } else {
-            final DockerClient dockerClient = container.getDockerClient();
+            final DockerClient dockerClient = DockerClientFactory.instance().client();
             final List<Container> containers = dockerClient.listContainersCmd().withLabelFilter(Collections.singletonMap(TEST_SYSTEM_LABEL, testSystem.getDefinition().toString())).exec();
             if (containers.size() == 0) {
                 throw new UnexpectedLiquibaseException("Cannot find running container " + testSystem.getDefinition().getName());
