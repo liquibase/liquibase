@@ -2,9 +2,10 @@ package liquibase.change;
 
 import liquibase.ChecksumVersion;
 import liquibase.Scope;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StreamUtil;
 import org.junit.Test;
@@ -320,6 +321,7 @@ public class AbstractSQLChangeTest {
 
         private ExampleAbstractSQLChange(String sql) {
             setSql(sql);
+            new ChangeSet(new DatabaseChangeLog()).addChange(this);
         }
 
 
