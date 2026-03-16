@@ -33,22 +33,34 @@ jobs:
 
     steps:
 
-      # Get version id(s) based on version name
-    - uses: castlabs/get-package-version-id-action@v2.2
+      # Replaced castlabs/get-package-version-id-action@v2.2 (stuck on Node 16, unmaintained)
+      # with actions/github-script@v8 (Node 24) to look up package version IDs by name
+    - name: Get package version IDs
       id: version
+      uses: actions/github-script@v8
       with:
-        version: "${{ needs.extract-branch-info.outputs.branch_name }}-SNAPSHOT"
+        script: |
+          const versionName = `${{ needs.extract-branch-info.outputs.branch_name }}-SNAPSHOT`;
+          core.info(`Looking for version: ${versionName}`);
+          const versions = await github.rest.packages.getAllPackageVersionsForPackageOwnedByOrg({
+            package_type: 'maven',
+            package_name: 'org.liquibase.liquibase-core',
+            org: 'liquibase',
+            per_page: 100
+          });
+          const ids = versions.data
+            .filter(v => v.name === versionName)
+            .map(v => v.id)
+            .join(',');
+          core.info(`Version IDs to delete: ${ids}`);
+          core.setOutput('ids', ids);
 
-      # show versions to delete
-    - run: |
-        echo "Version to delete ${{ steps.version.outputs.ids }} for ${{ needs.extract-branch-info.outputs.branch_name }}-SNAPSHOT"
-    
     - uses: actions/delete-package-versions@v5
       if: ${{ steps.version.outputs.ids != '' }}
       with:
         # Delete all deletable versions
         package-type: maven
-        
+
         # on branch id's deletion we only want to delete that particular branch version
         package-version-ids: "${{ steps.version.outputs.ids }}"
         
