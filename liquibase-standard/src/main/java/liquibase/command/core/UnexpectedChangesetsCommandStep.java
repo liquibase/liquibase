@@ -73,8 +73,12 @@ public class UnexpectedChangesetsCommandStep extends AbstractCommandStep {
                 out.append(" contains no unexpected changes!");
                 out.append(StreamUtil.getLineSeparator());
             } else {
-                out.append(String.valueOf(unexpectedChangeSets.size()));
-                out.append(" unexpected changes were found in ");
+                if (unexpectedChangeSets.size() == 1) {
+                    out.append("1 unexpected change was found in ");
+                } else {
+                    out.append(String.valueOf(unexpectedChangeSets.size()));
+                    out.append(" unexpected changes were found in ");
+                }
                 out.append(database.getConnection().getConnectionUserName());
                 out.append("@");
                 out.append(database.getConnection().getURL());

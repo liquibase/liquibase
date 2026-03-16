@@ -62,7 +62,7 @@ jobs:
       run: mvn clean install -DskipTests
       
     - name: Configure AWS credentials for vault access
-      uses: aws-actions/configure-aws-credentials@v5
+      uses: aws-actions/configure-aws-credentials@v6
       with:
         role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
         aws-region: us-east-1
@@ -106,13 +106,13 @@ jobs:
 
       # Upload to build page for the team to check the csv file contents.
     - name: Upload to build page
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: fossa-reports
         path: /home/runner/fossa_reports/liquibase.csv
 
     - name: Configure AWS credentials for vault access
-      uses: aws-actions/configure-aws-credentials@v5
+      uses: aws-actions/configure-aws-credentials@v6
       with:
         role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
         aws-region: us-east-1
@@ -126,7 +126,7 @@ jobs:
         parse-json-secrets: true
 
     - name: Configure AWS credentials for prod account access
-      uses: aws-actions/configure-aws-credentials@v5
+      uses: aws-actions/configure-aws-credentials@v6
       with:
         role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
         aws-region: us-east-1

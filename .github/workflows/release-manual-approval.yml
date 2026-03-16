@@ -41,7 +41,7 @@ jobs:
         uses: trstringer/manual-approval@v1
         with:
           secret: ${{ secrets.GITHUB_TOKEN }}
-          approvers: filipelautert,rberezen,jnewton03,kristyldatical,sayaliM0412
+          approvers: filipelautert,rberezen,jnewton03,jandroav,sayaliM0412
           minimum-approvals: 2
           issue-title: "Deploying ${{ inputs.version }} to Maven Central"
           issue-body: "Please approve or deny the deployment of version ${{ inputs.version }} to Maven Central"
