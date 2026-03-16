@@ -85,16 +85,13 @@ jobs:
           const fs = require('fs');
           const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 
-          // Fetch code scanning alerts
+          // Fetch all code scanning alerts with pagination
           let alerts = [];
           try {
-            const response = await github.rest.codeScanning.listAlertsForRepo({
-              owner,
-              repo,
-              per_page: 100,
-              state: 'open'
-            });
-            alerts = response.data;
+            alerts = await github.paginate(
+              github.rest.codeScanning.listAlertsForRepo,
+              { owner, repo, per_page: 100, state: 'open' }
+            );
           } catch (e) {
             core.warning(`Could not fetch code scanning alerts: ${e.message}`);
           }

@@ -38,17 +38,22 @@ jobs:
     - name: Get package version IDs
       id: version
       uses: actions/github-script@v8
+      env:
+        BRANCH_NAME: ${{ needs.extract-branch-info.outputs.branch_name }}
       with:
         script: |
-          const versionName = `${{ needs.extract-branch-info.outputs.branch_name }}-SNAPSHOT`;
+          const versionName = `${process.env.BRANCH_NAME}-SNAPSHOT`;
           core.info(`Looking for version: ${versionName}`);
-          const versions = await github.rest.packages.getAllPackageVersionsForPackageOwnedByOrg({
-            package_type: 'maven',
-            package_name: 'org.liquibase.liquibase-core',
-            org: 'liquibase',
-            per_page: 100
-          });
-          const ids = versions.data
+          const versions = await github.paginate(
+            github.rest.packages.getAllPackageVersionsForPackageOwnedByOrg,
+            {
+              package_type: 'maven',
+              package_name: 'org.liquibase.liquibase-core',
+              org: 'liquibase',
+              per_page: 100
+            }
+          );
+          const ids = versions
             .filter(v => v.name === versionName)
             .map(v => v.id)
             .join(',');
@@ -60,6 +65,7 @@ jobs:
       with:
         # Delete all deletable versions
         package-type: maven
+        package-name: org.liquibase.liquibase-core
 
         # on branch id's deletion we only want to delete that particular branch version
         package-version-ids: "${{ steps.version.outputs.ids }}"
