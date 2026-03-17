@@ -114,7 +114,7 @@ jobs:
       id: prepare-packages
       run: |
         MASTER_COMMITS="${{ env.MASTER_COMMITS }}"
-        RELEASE_COMMITS="${{ env.env.RELEASE_COMMITS }}"
+        RELEASE_COMMITS="${{ env.RELEASE_COMMITS }}"
         PACKAGE_VERSIONS=""
 
         for COMMIT in $(echo "$MASTER_COMMITS,$RELEASE_COMMITS" | tr ',' '\n'); do
@@ -139,7 +139,7 @@ jobs:
         for VERSION in $(echo "${{ env.PACKAGE_VERSIONS }}" | tr ',' '\n'); do
           echo "Processing version: $VERSION"
 
-          ID=$(gh api "orgs/$ORG/packages/$PACKAGE_TYPE/${{ matrix.packages_to_delete }}/versions" | jq -r --arg VERSION "$VERSION" '.[] | select(.name == $VERSION) | .id')
+          ID=$(gh api --paginate "orgs/$ORG/packages/$PACKAGE_TYPE/${{ matrix.packages_to_delete }}/versions" | jq -r --arg VERSION "$VERSION" '.[] | select(.name == $VERSION) | .id')
 
           if [ -n "$ID" ]; then
             echo "Found ID: $ID for version $VERSION"

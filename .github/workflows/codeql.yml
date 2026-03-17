@@ -87,29 +87,35 @@ jobs:
 
           // Fetch all code scanning alerts with pagination
           let alerts = [];
+          let fetchFailed = false;
           try {
             alerts = await github.paginate(
               github.rest.codeScanning.listAlertsForRepo,
               { owner, repo, per_page: 100, state: 'open' }
             );
           } catch (e) {
+            fetchFailed = true;
             core.warning(`Could not fetch code scanning alerts: ${e.message}`);
           }
+
+          // Helper to escape pipe and newline chars for markdown table cells
+          const escapeCell = (val) => String(val).replace(/\|/g, '\\|').replace(/\n/g, ' ');
 
           // Build summary report
           const summary = {
             repository: `${owner}/${repo}`,
             generated_at: new Date().toISOString(),
-            total_open_alerts: alerts.length,
+            fetch_failed: fetchFailed,
+            total_open_alerts: fetchFailed ? 'INCOMPLETE' : alerts.length,
             by_severity: {},
             alerts: alerts.map(a => ({
               number: a.number,
-              rule: a.rule.id,
+              rule: escapeCell(a.rule.id),
               severity: a.rule.security_severity_level || a.rule.severity,
               description: a.rule.description,
               state: a.state,
               html_url: a.html_url,
-              location: a.most_recent_instance?.location?.path || 'N/A'
+              location: escapeCell(a.most_recent_instance?.location?.path || 'N/A')
             }))
           };
 
@@ -128,6 +134,9 @@ jobs:
           md += `**Repository:** ${summary.repository}\n`;
           md += `**Generated:** ${summary.generated_at}\n`;
           md += `**Open Alerts:** ${summary.total_open_alerts}\n\n`;
+          if (fetchFailed) {
+            md += `> **⚠ Warning:** Alert retrieval failed. This report may be incomplete.\n\n`;
+          }
           md += `## Alerts by Severity\n\n`;
           md += `| Severity | Count |\n|----------|-------|\n`;
           for (const [sev, count] of Object.entries(summary.by_severity)) {
