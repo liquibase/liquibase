@@ -41,7 +41,9 @@ public class ColumnSnapshotGeneratorOracle extends ColumnSnapshotGenerator {
 
         } else {
             type.setColumnSize(columnMetadataResultSet.getInt("DATA_LENGTH"));
-
+            if ("FLOAT".equalsIgnoreCase(dataType)) { //FLOAT [(precision)] see: https://docs.oracle.com/javadb/10.10.1.2/ref/rrefsqlj27281.html
+                type.setColumnSize(columnMetadataResultSet.getInt("DATA_PRECISION"));
+            }
             if ("NCLOB".equalsIgnoreCase(dataType) || "BLOB".equalsIgnoreCase(dataType) || "CLOB".equalsIgnoreCase
                 (dataType)) {
                 type.setColumnSize(null);

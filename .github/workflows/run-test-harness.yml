@@ -20,7 +20,15 @@ permissions:
   id-token: write # Required for OIDC authentication with AWS
   
 jobs:
+
+  authorize:
+    environment: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && 'external' || 'internal' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: true
+
   test-harness-build:
+    needs: authorize
     runs-on: ubuntu-latest
     if: contains(github.event.pull_request.labels.*.name, 'runFunctional&HarnessTests') || (github.event_name != 'pull_request' && github.event_name != 'pull_request_target')
     steps:

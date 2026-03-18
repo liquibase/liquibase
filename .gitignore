@@ -43,3 +43,5 @@ original-pom.xml
 /liquibase-standard/var
 
 CLAUDE.md
+
+.worktrees/

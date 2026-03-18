@@ -34,7 +34,7 @@ The following actions are identical to those in a regular Liquibase release, wit
 
 ## :wrench: How a DryRun Release works?
 
-You can check the `dry-run-release.yml` workflow, which is essentially composed of calls to existing release workflows such as `create-release.yml` and `release-published.yml`. It sends them a new input, `dry_run: true`, to control which steps are executed for regular releases versus dry-run releases.
+You can check the `dry-run-release.yml` workflow, which is essentially composed of calls to existing release workflows such as `create-release.yml` and `release-published-orchestrator.yml`. It sends them a new input, `dry_run: true`, to control which steps are executed for regular releases versus dry-run releases.
 
 ```yml
 [...]
@@ -53,7 +53,7 @@ You can check the `dry-run-release.yml` workflow, which is essentially composed 
 
   dry-run-release-published:
     needs: [ setup, dry-run-create-release, dry-run-get-draft-release ]
-    uses: liquibase/liquibase/.github/workflows/release-published.yml@master
+    uses: liquibase/liquibase/.github/workflows/release-published-orchestrator.yml@master
     with:
       tag: "vdry-run-${{ github.run_id }}"
       dry_run_release_id: ${{ needs.dry-run-get-draft-release.outputs.dry_run_release_id }}
@@ -283,39 +283,6 @@ Test the orchestrator's ability to handle failures:
    - Verify downstream workflows are skipped
    - Confirm summary shows failure status
 
-## Migration Path
-
-### Phase 1: Parallel Running (Recommended)
-1. **Keep** `release-published.yml` as is (rename to `release-published-legacy.yml`)
-2. **Add** new orchestrator workflows
-3. **Test** both in parallel for 1-2 release cycles
-4. **Compare** results and execution times
-
-### Phase 2: Switch Over
-1. **Update** triggers on legacy workflow to manual-only
-2. **Enable** orchestrator for automatic releases
-3. **Monitor** first few releases closely
-4. **Document** any issues encountered
-
-### Phase 3: Deprecation
-1. **Archive** legacy workflow after 3-4 successful releases
-2. **Update** team documentation
-3. **Train** team on new workflow usage
-
-## Rollback Plan
-
-If issues arise with the orchestrator:
-
-1. **Immediate Rollback**
-   - Rename `release-published-legacy.yml` back to `release-published.yml`
-   - Disable orchestrator (remove triggers)
-   - Use original workflow for next release
-
-2. **Individual Workflow Fallback**
-   - Each workflow can be run independently
-   - Can mix orchestrator and manual triggers
-   - Original workflow remains available
-
 ## Maintenance
 
 ### Adding New Release Steps
@@ -370,18 +337,6 @@ To add a new step to the release process:
 **Issue**: Output not passed between workflows
 - **Solution**: Check outputs are defined in called workflow
 - **Solution**: Verify correct reference in orchestrator
-
-## Key Differences from Original
-
-| Aspect | Original (`release-published.yml`) | New (Orchestrator Pattern) |
-|--------|-----------------------------------|----------------------------|
-| **File Size** | ~700 lines | ~270 lines (orchestrator) + 9 smaller files |
-| **Retry Failed Steps** | Must re-run entire workflow | Can retry individual workflows |
-| **Visibility** | Single workflow run | Multiple workflow runs (one per stage) |
-| **Maintenance** | Changes affect entire workflow | Changes isolated to specific workflow |
-| **Testing** | Must test entire release | Can test individual components |
-| **Parallel Execution** | Limited (within jobs) | Better (across workflows) |
-| **Pattern Consistency** | Unique to liquibase | Matches liquibase-pro pattern |
 
 ## Support
 
