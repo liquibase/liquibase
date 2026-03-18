@@ -14,7 +14,7 @@
     <description>A Maven plugin wraps up some of the functionality of Liquibase</description>
 
     <properties>
-        <targetMavenVersion>3.9.12</targetMavenVersion>
+        <targetMavenVersion>3.9.13</targetMavenVersion>
         <maven.install.skip>false</maven.install.skip>
         <maven.deploy.skip>false</maven.deploy.skip>
         <maven.javadoc.skip>false</maven.javadoc.skip>
@@ -108,7 +108,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.6.1</version>
+                <version>3.6.2</version>
                 <configuration>
                     <artifactSet>
                         <includes>

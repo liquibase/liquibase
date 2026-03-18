@@ -1,4 +1,4 @@
-# Liquibase [![Build and Test](https://github.com/liquibase/liquibase/actions/workflows/run-tests.yml/badge.svg)](https://github.com/liquibase/liquibase/actions/workflows/run-tests.yml) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=liquibase&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=liquibase)
+# Liquibase [![Build and Test](https://github.com/liquibase/liquibase/actions/workflows/run-tests.yml/badge.svg)](https://github.com/liquibase/liquibase/actions/workflows/run-tests.yml) [![Nightly Release](https://github.com/liquibase/liquibase/actions/workflows/nightly-release.yml/badge.svg)](https://github.com/liquibase/liquibase/releases/tag/nightly) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=liquibase&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=liquibase)
 <p align="center"><img src="https://github.com/liquibase/liquibase/blob/master/Liquibase.png" width="30%" height="30%"></p>
 
 Liquibase helps millions of developers track, version, and deploy database schema changes. It will help you to:
@@ -21,7 +21,7 @@ Together, these options ensure that teams can choose the path that best fits the
 
 ### Build Access and Release Planning
 
-- **Nightly builds:** The latest Main branch build is available from the Liquibase GitHub Actions tab (https://github.com/liquibase/liquibase/actions). Select the “Unit and Integration Tests” workflow, find the most recent job tagged “master”, scroll to “Artifacts” section to download and decompress the “liquibase-artifacts-master” file.
+- **Nightly builds:** The latest Main branch build is available at https://github.com/liquibase/liquibase/releases/tag/nightly — download `liquibase-nightly.tar.gz` (Linux/macOS) or `liquibase-nightly.zip` (Windows). Updated automatically after each successful test run on master.
 - **Latest Release: v5.0.2 — March 5, 2026** \
 https://www.liquibase.com/download-community
 - **Next Planned Release: May 15, 2026** 
