@@ -76,14 +76,87 @@ jobs:
       with:
         category: "/language:${{matrix.language}}"
 
+    # Replaced rsdmike/github-security-report-action@v3.0.4 (stuck on Node 16, unmaintained)
+    # with actions/github-script@v8 (Node 24) to generate a security report from code scanning alerts
     - name: Generate Security Report
-      uses: rsdmike/github-security-report-action@v3.0.4
+      uses: actions/github-script@v8
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        outputDir: ./reports/
+        script: |
+          const fs = require('fs');
+          const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+
+          // Fetch all code scanning alerts with pagination
+          let alerts = [];
+          let fetchFailed = false;
+          try {
+            alerts = await github.paginate(
+              github.rest.codeScanning.listAlertsForRepo,
+              { owner, repo, per_page: 100, state: 'open' }
+            );
+          } catch (e) {
+            fetchFailed = true;
+            core.warning(`Could not fetch code scanning alerts: ${e.message}`);
+          }
+
+          // Helper to escape pipe and newline chars for markdown table cells
+          const escapeCell = (val) => String(val).replace(/\|/g, '\\|').replace(/\n/g, ' ');
+
+          // Build summary report
+          const summary = {
+            repository: `${owner}/${repo}`,
+            generated_at: new Date().toISOString(),
+            fetch_failed: fetchFailed,
+            total_open_alerts: fetchFailed ? 'INCOMPLETE' : alerts.length,
+            by_severity: {},
+            alerts: alerts.map(a => ({
+              number: a.number,
+              rule: escapeCell(a.rule.id),
+              severity: a.rule.security_severity_level || a.rule.severity,
+              description: a.rule.description,
+              state: a.state,
+              html_url: a.html_url,
+              location: escapeCell(a.most_recent_instance?.location?.path || 'N/A')
+            }))
+          };
+
+          // Count by severity
+          for (const a of summary.alerts) {
+            const sev = a.severity || 'unknown';
+            summary.by_severity[sev] = (summary.by_severity[sev] || 0) + 1;
+          }
+
+          // Write JSON report
+          fs.mkdirSync('./reports', { recursive: true });
+          fs.writeFileSync('./reports/security-report.json', JSON.stringify(summary, null, 2));
+
+          // Write markdown summary
+          let md = `# Security Report\n\n`;
+          md += `**Repository:** ${summary.repository}\n`;
+          md += `**Generated:** ${summary.generated_at}\n`;
+          md += `**Open Alerts:** ${summary.total_open_alerts}\n\n`;
+          if (fetchFailed) {
+            md += `> **⚠ Warning:** Alert retrieval failed. This report may be incomplete.\n\n`;
+          }
+          md += `## Alerts by Severity\n\n`;
+          md += `| Severity | Count |\n|----------|-------|\n`;
+          for (const [sev, count] of Object.entries(summary.by_severity)) {
+            md += `| ${sev} | ${count} |\n`;
+          }
+          if (summary.alerts.length > 0) {
+            md += `\n## Alert Details\n\n`;
+            md += `| # | Rule | Severity | File | Link |\n|---|------|----------|------|------|\n`;
+            for (const a of summary.alerts) {
+              md += `| ${a.number} | ${a.rule} | ${a.severity} | ${a.location} | [View](${a.html_url}) |\n`;
+            }
+          }
+          fs.writeFileSync('./reports/security-report.md', md);
+
+          // Post to job summary
+          await core.summary.addRaw(md).write();
+          core.info(`Security report generated with ${summary.total_open_alerts} open alerts`);
 
     - name: Upload Security Report
       uses: actions/upload-artifact@v7
       with:
         name: security-report
-        path: ./reports/summary.pdf
+        path: ./reports/

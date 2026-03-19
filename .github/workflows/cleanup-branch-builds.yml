@@ -33,22 +33,40 @@ jobs:
 
     steps:
 
-      # Get version id(s) based on version name
-    - uses: castlabs/get-package-version-id-action@v2.2
+      # Replaced castlabs/get-package-version-id-action@v2.2 (stuck on Node 16, unmaintained)
+      # with actions/github-script@v8 (Node 24) to look up package version IDs by name
+    - name: Get package version IDs
       id: version
+      uses: actions/github-script@v8
+      env:
+        BRANCH_NAME: ${{ needs.extract-branch-info.outputs.branch_name }}
       with:
-        version: "${{ needs.extract-branch-info.outputs.branch_name }}-SNAPSHOT"
+        script: |
+          const versionName = `${process.env.BRANCH_NAME}-SNAPSHOT`;
+          core.info(`Looking for version: ${versionName}`);
+          const versions = await github.paginate(
+            github.rest.packages.getAllPackageVersionsForPackageOwnedByOrg,
+            {
+              package_type: 'maven',
+              package_name: 'org.liquibase.liquibase-core',
+              org: 'liquibase',
+              per_page: 100
+            }
+          );
+          const ids = versions
+            .filter(v => v.name === versionName)
+            .map(v => v.id)
+            .join(',');
+          core.info(`Version IDs to delete: ${ids}`);
+          core.setOutput('ids', ids);
 
-      # show versions to delete
-    - run: |
-        echo "Version to delete ${{ steps.version.outputs.ids }} for ${{ needs.extract-branch-info.outputs.branch_name }}-SNAPSHOT"
-    
     - uses: actions/delete-package-versions@v5
       if: ${{ steps.version.outputs.ids != '' }}
       with:
         # Delete all deletable versions
         package-type: maven
-        
+        package-name: org.liquibase.liquibase-core
+
         # on branch id's deletion we only want to delete that particular branch version
         package-version-ids: "${{ steps.version.outputs.ids }}"
         
@@ -96,7 +114,7 @@ jobs:
       id: prepare-packages
       run: |
         MASTER_COMMITS="${{ env.MASTER_COMMITS }}"
-        RELEASE_COMMITS="${{ env.env.RELEASE_COMMITS }}"
+        RELEASE_COMMITS="${{ env.RELEASE_COMMITS }}"
         PACKAGE_VERSIONS=""
 
         for COMMIT in $(echo "$MASTER_COMMITS,$RELEASE_COMMITS" | tr ',' '\n'); do
@@ -121,7 +139,7 @@ jobs:
         for VERSION in $(echo "${{ env.PACKAGE_VERSIONS }}" | tr ',' '\n'); do
           echo "Processing version: $VERSION"
 
-          ID=$(gh api "orgs/$ORG/packages/$PACKAGE_TYPE/${{ matrix.packages_to_delete }}/versions" | jq -r --arg VERSION "$VERSION" '.[] | select(.name == $VERSION) | .id')
+          ID=$(gh api --paginate "orgs/$ORG/packages/$PACKAGE_TYPE/${{ matrix.packages_to_delete }}/versions" | jq -r --arg VERSION "$VERSION" '.[] | select(.name == $VERSION) | .id')
 
           if [ -n "$ID" ]; then
             echo "Found ID: $ID for version $VERSION"
