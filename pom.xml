@@ -299,6 +299,24 @@
             <version>19.30.0.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.oracle.database.security</groupId>
+	        <artifactId>oraclepki</artifactId>
+            <version>19.29.0.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.oracle.database.security</groupId>
+            <artifactId>osdt_core</artifactId>
+            <version>19.29.0.0</version>
+            <scope>test</scope>
+        </dependency>
+	    <dependency>
+            <groupId>com.oracle.database.security</groupId>
+            <artifactId>osdt_cert</artifactId>
+            <version>19.29.0.0</version>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.xerial</groupId>
