@@ -8,6 +8,7 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.MariaDBDatabase;
 import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.CachedRow;
@@ -80,6 +81,13 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
                         // Strip the schema definition because it can optionally be included in the tag attribute
                         definition = definition.replaceAll("(?i)\""+view.getSchema().getName()+"\"\\.", "");
+                    }
+
+                    if (database instanceof MSSQLDatabase && definition != null) {
+                        // Strip the schema name in definition, because it can be optional from OBJECT_DEFINITION
+                        definition = definition.replaceFirst("(?i)(create\\s+view\\s+)\\[?"
+                                + view.getSchema().getName()
+                                + "\\]?\\.\\[?([a-z][a-z0-9_$#@]*)\\]?", "$1$2");
                     }
 
                     definition = StringUtil.trimToNull(definition);
