@@ -85,6 +85,10 @@ public class ColumnComparator implements DatabaseObjectComparator {
             exclude.add("order");
         }
 
+        if (!GlobalConfiguration.DIFF_COLUMN_DEFAULT_VALUE_CONSTRAINT_NAME.getCurrentValue()) {
+            exclude.add("defaultValueConstraintName");
+        }
+
         ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo, compareControl, exclude);
 
         DataType type1 = ((Column) databaseObject1).getType();
