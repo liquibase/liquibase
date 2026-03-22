@@ -23,6 +23,7 @@ import liquibase.util.StringUtil;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
@@ -83,11 +84,12 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
                         definition = definition.replaceAll("(?i)\""+view.getSchema().getName()+"\"\\.", "");
                     }
 
-                    if (database instanceof MSSQLDatabase && definition != null) {
+                    if (database instanceof MSSQLDatabase && definition != null
+                            && view.getSchema() != null && view.getSchema().getName() != null) {
                         // Strip the schema name in definition, because it can be optional from OBJECT_DEFINITION
                         definition = definition.replaceFirst("(?i)(create\\s+view\\s+)\\[?"
-                                + view.getSchema().getName()
-                                + "\\]?\\.\\[?([a-z][a-z0-9_$#@]*)\\]?", "$1$2");
+                                + Pattern.quote(view.getSchema().getName())
+                                + "\\]?\\.\\[?([^\\]\\s]+)\\]?", "$1$2");
                     }
 
                     definition = StringUtil.trimToNull(definition);
