@@ -8,8 +8,8 @@ on:
 
 jobs:
   automated-os-extensions-release:
-    uses: liquibase/build-logic/.github/workflows/extension-automated-release.yml@jandroav/dat-22608-release-fix
+    uses: liquibase/build-logic/.github/workflows/extension-automated-release.yml@main
     secrets: inherit
     with:
       version: ${{ inputs.version }}
-      repositories: '["liquibase-cache"]'
+
