@@ -89,7 +89,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
                         // Strip the schema name in definition, because it can be optional from OBJECT_DEFINITION
                         definition = definition.replaceFirst("(?i)(create\\s+view\\s+)\\[?"
                                 + Pattern.quote(view.getSchema().getName())
-                                + "\\]?\\.\\[?([^\\]\\s]+)\\]?", "$1$2");
+                                + "\\]?\\.(?=\\[?[^\\]\\s]+\\]?)", "$1");
                     }
 
                     definition = StringUtil.trimToNull(definition);
