@@ -12,9 +12,9 @@ jobs:
   urlcheck:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Check URLs
-        uses: urlstechie/urlchecker-action@master
+        uses: urlstechie/urlchecker-action@b643b43e2ac605e1475331c7b67247d242b7dce4 # master
         with:
           # A comma-separated list of file types to cover in the URL checks
           include_files: url-test.md
@@ -31,7 +31,7 @@ jobs:
 
       - name: Slack Notification
         if: ${{ failure() }}
-        uses: rtCamp/action-slack-notify@v2
+        uses: rtCamp/action-slack-notify@e31e87e03dd19038e411e38ae27cbad084a90661 # v2
         env:
           SLACK_CHANNEL: team-liquibase-foundation
           SLACK_COLOR: ${{ job.status }} # or a specific color like 'good' or '#ff00ff'

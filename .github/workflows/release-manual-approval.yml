@@ -38,7 +38,7 @@ jobs:
     if: ${{ inputs.dry_run == false }}
     steps:
       - name: Get Version to deploy
-        uses: trstringer/manual-approval@v1
+        uses: trstringer/manual-approval@74d99dff7380e3e4b122d4ededcbca2b6ce59367 # v1
         with:
           secret: ${{ secrets.GITHUB_TOKEN }}
           approvers: filipelautert,rberezen,jnewton03,jandroav,sayaliM0412
