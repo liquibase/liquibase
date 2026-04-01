@@ -76,7 +76,7 @@ jobs:
         parse-json-secrets: true
 
     - name: run FOSSA CLI
-      uses: fossas/fossa-action@c414b9ad82eaad041e47a7cf62a4f02411f427a0 # v1.8.0 # v1
+      uses: fossas/fossa-action@c414b9ad82eaad041e47a7cf62a4f02411f427a0 # v1.8.0
       with:
         api-key: ${{ env.FOSSA_API_KEY }}
         branch: ${{ github.ref }}
