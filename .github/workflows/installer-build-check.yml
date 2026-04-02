@@ -100,7 +100,7 @@ jobs:
         run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
 
       - name: Download liquibase-artifacts
-        uses: dawidd6/action-download-artifact@v16
+        uses: dawidd6/action-download-artifact@v18
         with:
           workflow: run-tests.yml
           workflow_conclusion: success
@@ -150,10 +150,11 @@ jobs:
 
       - name: Re-version Installers
         run: |
-          (cd re-version/final && zip liquibase-additional-0-SNAPSHOT.zip *.asc *.md5 *.sha1)
+          (cd re-version/final && zip liquibase-additional-0-SNAPSHOT.zip *.asc *.md5 *.sha1 *.sha256)
           rm re-version/final/*.asc
           rm re-version/final/*.md5
           rm re-version/final/*.sha1
+          rm re-version/final/*.sha256
 
       - name: Archive Packages
         uses: actions/upload-artifact@v7

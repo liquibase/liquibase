@@ -53,7 +53,7 @@ jobs:
           echo "short_sha=${sha:0:7}" >> $GITHUB_OUTPUT
           echo "Using run ID: $run_id (commit: ${sha:0:7})"
       - name: Download liquibase-artifacts
-        uses: dawidd6/action-download-artifact@v16
+        uses: dawidd6/action-download-artifact@v18
         with:
           workflow: run-tests.yml
           run_id: ${{ steps.get-run-id.outputs.run_id }}
@@ -69,8 +69,8 @@ jobs:
           mv liquibase-master-SNAPSHOT.zip liquibase-nightly.zip
           mv liquibase-core-0-SNAPSHOT.jar liquibase-core-nightly.jar
           # Create additional zip from signature files (tolerant of missing extensions)
-          if compgen -G "*.asc" > /dev/null || compgen -G "*.md5" > /dev/null || compgen -G "*.sha1" > /dev/null; then
-            zip liquibase-additional-nightly.zip *.asc *.md5 *.sha1 2>/dev/null || true
+          if compgen -G "*.asc" > /dev/null || compgen -G "*.md5" > /dev/null || compgen -G "*.sha1" > /dev/null || compgen -G "*.sha256" > /dev/null; then
+            zip liquibase-additional-nightly.zip *.asc *.md5 *.sha1 *.sha256 2>/dev/null || true
             echo "has_additional=true" >> $GITHUB_OUTPUT
           else
             echo "has_additional=false" >> $GITHUB_OUTPUT
@@ -107,7 +107,7 @@ jobs:
           if [ "$HAS_ADDITIONAL" == "true" ]; then
             assets+=(liquibase-additional-nightly.zip)
             table+="
-          | \`liquibase-additional-nightly.zip\` | Signatures and checksums (.asc, .md5, .sha1) |"
+          | \`liquibase-additional-nightly.zip\` | Signatures and checksums (.asc, .md5, .sha1, .sha256) |"
           fi
           gh release create nightly \
             --repo "$REPO" \

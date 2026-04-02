@@ -27,8 +27,7 @@ jobs:
         if: github.ref == 'refs/heads/master'
 
         # Drafts your next Release notes as Pull Requests are merged into the default branch
-        uses: release-drafter/release-drafter@v6
+        uses: release-drafter/release-drafter@v7
         with:
           config-name: release-drafter-master.yml # located in .github/ in default branch
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
