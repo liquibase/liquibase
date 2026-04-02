@@ -19,6 +19,7 @@ permissions:
 
 jobs:
   claude-review:
+    if: ${{ !endsWith(github.actor, '[bot]') }}
     uses: liquibase/build-logic/.github/workflows/claude-code-review.yml@main
     permissions:
       contents: read
