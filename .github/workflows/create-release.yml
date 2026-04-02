@@ -108,7 +108,7 @@ jobs:
           parse-json-secrets: true
 
       - name: Download liquibase-artifacts
-        uses: dawidd6/action-download-artifact@v16
+        uses: dawidd6/action-download-artifact@v18
         with:
           workflow: run-tests.yml
           run_id: ${{ needs.setup.outputs.runId }}
@@ -357,10 +357,11 @@ jobs:
           ##Sign Files
           $PWD/.github/util/sign-artifacts.sh re-version/final
 
-          (cd re-version/final && zip liquibase-additional-$version.zip *.asc *.md5 *.sha1)
+          (cd re-version/final && zip liquibase-additional-$version.zip *.asc *.md5 *.sha1 *.sha256)
           rm re-version/final/*.asc
           rm re-version/final/*.md5
           rm re-version/final/*.sha1
+          rm re-version/final/*.sha256
 
         # Check if the tag already exists in OSS repository, if it does, exit with error. This is to prevent the artifacts from being attached to the already released tag.
       - name: Check OSS release tag existence, if tag exists, exit with error
