@@ -27,6 +27,12 @@ if [[ "$OSTYPE" != "linux-gnu"* ]]; then
 
   ##Fix files with Gnu-sed on macos-latest
   brew install gnu-sed
+
+  # sha256sum is not included in md5sha1sum; use shasum -a 256 as fallback on macOS
+  if ! command -v sha256sum &> /dev/null; then
+    sha256sum() { shasum -a 256 "$@"; }
+    export -f sha256sum
+  fi
 fi
 
 for file_pattern in "${file_patterns[@]}"
@@ -37,20 +43,24 @@ do
     rm -f $i.asc
     rm -f $i.md5
     rm -f $i.sha1
+    rm -f $i.sha256
 
     gpg --batch --pinentry-mode=loopback --passphrase "$GPG_PASSWORD" -ab $i
     sleep 5
     md5sum < $i > $i.md5
     sha1sum < $i > $i.sha1
+    sha256sum < $i > $i.sha256
   done
 done
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   sed -i 's/ -//' $archiveDir/*.md5
   sed -i 's/ -//' $archiveDir/*.sha1
+  sed -i 's/ -//' $archiveDir/*.sha256
 else
   gsed -i 's/ -//' $archiveDir/*.md5
   gsed -i 's/ -//' $archiveDir/*.sha1
+  gsed -i 's/ -//' $archiveDir/*.sha256
 fi
 
 # sed -i 's/ -//' $archiveDir/*.md5

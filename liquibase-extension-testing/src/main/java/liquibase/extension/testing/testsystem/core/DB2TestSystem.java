@@ -4,7 +4,7 @@ import liquibase.extension.testing.testsystem.DatabaseTestSystem;
 import liquibase.extension.testing.testsystem.wrapper.DatabaseWrapper;
 import liquibase.extension.testing.testsystem.wrapper.DockerDatabaseWrapper;
 import org.jetbrains.annotations.NotNull;
-import org.testcontainers.containers.Db2Container;
+import org.testcontainers.db2.Db2Container;
 import org.testcontainers.utility.DockerImageName;
 
 public class DB2TestSystem extends DatabaseTestSystem {
