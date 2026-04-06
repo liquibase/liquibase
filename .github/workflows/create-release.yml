@@ -141,31 +141,35 @@ jobs:
           GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
 
 
-      - name: maven-settings-xml-action
-        uses: whelk-io/maven-settings-xml-action@9dc09b23833fa9aa7f27b63db287951856f3433d # v22
-        with:
-          repositories: |
-            [
-              {
-                "id": "liquibase",
-                "url": "https://maven.pkg.github.com/liquibase/liquibase",
-                "releases": {
-                  "enabled": "true"
-                },
-                "snapshots": {
-                  "enabled": "true",
-                  "updatePolicy": "always"
-                }
-              }
-            ]
-          servers: |
-            [
-              {
-                "id": "liquibase",
-                "username": "liquibot",
-                "password": "${{ env.LIQUIBOT_PAT_GPM_ACCESS }}"
-              }
-            ]
+      - name: Generate Maven settings.xml
+        run: |
+          cat > ~/.m2/settings.xml << 'EOF'
+          <settings>
+            <servers>
+              <server>
+                <id>liquibase</id>
+                <username>liquibot</username>
+                <password>${env.LIQUIBOT_PAT_GPM_ACCESS}</password>
+              </server>
+            </servers>
+            <profiles>
+              <profile>
+                <id>liquibase</id>
+                <repositories>
+                  <repository>
+                    <id>liquibase</id>
+                    <url>https://maven.pkg.github.com/liquibase/liquibase</url>
+                    <releases><enabled>true</enabled></releases>
+                    <snapshots><enabled>true</enabled><updatePolicy>always</updatePolicy></snapshots>
+                  </repository>
+                </repositories>
+              </profile>
+            </profiles>
+            <activeProfiles>
+              <activeProfile>liquibase</activeProfile>
+            </activeProfiles>
+          </settings>
+          EOF
 
       - name: Re-version Artifacts
         env:
@@ -311,7 +315,7 @@ jobs:
           echo "$ANDROID_SDK_ROOT/build-tools/30.0.2" >> $GITHUB_PATH
           
       - name: Install DigiCert KeyLocker Client Tools
-        uses: digicert/ssm-code-signing@1d820463733701cf1484c7eb5d7d24a15ca2c454 # v1.2.1
+        uses: digicert/code-signing-software-trust-action@96e9240f28ec3a3b1a686c5c9f3e32a083da7318 # v1.2.0
 
       - name: Build Unsigned Windows Installer
         env:

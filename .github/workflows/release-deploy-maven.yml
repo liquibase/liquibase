@@ -70,12 +70,9 @@ jobs:
     if: ${{ inputs.dry_run == false }}
     steps:
       - name: Download release assets
-        uses: robinraju/release-downloader@daf26c55d821e836577a15f77d86ddc078948b05 # v1.12
-        with:
-          repository: "liquibase/liquibase"
-          tag: "${{ inputs.tag }}"
-          fileName: "*"
-          out-file-path: "."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release download "${{ inputs.tag }}" --repo liquibase/liquibase --dir "."
 
       - name: Configure AWS credentials for vault access
         uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0

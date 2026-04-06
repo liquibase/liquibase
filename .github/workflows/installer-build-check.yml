@@ -95,7 +95,7 @@ jobs:
           mv pkcs11properties.cfg $(pwd)/.github/util/
 
       - name: Install DigiCert KeyLocker Client Tools
-        uses: digicert/ssm-code-signing@1d820463733701cf1484c7eb5d7d24a15ca2c454 # v1.2.1
+        uses: digicert/code-signing-software-trust-action@96e9240f28ec3a3b1a686c5c9f3e32a083da7318 # v1.2.0
 
       - name: Set branch variable
         run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
