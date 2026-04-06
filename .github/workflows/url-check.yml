@@ -14,20 +14,10 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Check URLs
-        uses: urlstechie/urlchecker-action@b643b43e2ac605e1475331c7b67247d242b7dce4 # 0.0.34
+        uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411 # v2.8.0
         with:
-          # A comma-separated list of file types to cover in the URL checks
-          include_files: url-test.md
-          # Choose whether to include file with no URLs in the printouts.
-          print_all: false
-          # Choose whether to print a more verbose end summary with files and broken URLs.
-          verbose: true
-          # The timeout seconds to provide to requests, defaults to 5 seconds
-          timeout: 5
-          # How many times to retry a failed request (each is logged, defaults to 1)
-          retry_count: 2
-          # choose if the force pass or not
-          force_pass : false
+          args: --verbose --timeout 5 --max-retries 2 url-test.md
+          fail: true
 
       - name: Slack Notification
         if: ${{ failure() }}

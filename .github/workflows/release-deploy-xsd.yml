@@ -82,26 +82,26 @@ jobs:
             aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
           fi
 
+      # WPEngine only accepts files via SFTP, so S3-direct is not an option here.
+      # Replaced third-party SFTP action with lftp CLI to reduce supply chain risk.
+      - name: Install lftp
+        run: sudo apt-get update && sudo apt-get install -y lftp
+
       - name: Liquibase xsds SFTP upload
-        uses: wangyucode/sftp-upload-action@a1e64f60df0d085b26ca9efff77566e79f1c6b78 # v3.0.0
-        with:
-          host: ${{ env.WPENGINE_SFTP_HOST }}
-          port: ${{ env.WPENGINE_SFTP_PORT }}
-          username: ${{ env.WPENGINE_SFTP_USER }}
-          password: ${{ env.WPENGINE_SFTP_PASSWORD }}
-          compress: true
-          forceUpload: true
-          localDir: "liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/"
-          remoteDir: "/xml/ns/dbchangelog/"
+        run: |
+          lftp -u "${{ env.WPENGINE_SFTP_USER }},${{ env.WPENGINE_SFTP_PASSWORD }}" \
+            -p "${{ env.WPENGINE_SFTP_PORT }}" \
+            "sftp://${{ env.WPENGINE_SFTP_HOST }}" \
+            -e "set sftp:connect-program 'ssh -a -x -C'; \
+              mirror --reverse --overwrite --verbose \
+              liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ \
+              /xml/ns/dbchangelog/; bye"
 
       - name: Liquibase index.htm SFTP upload
-        uses: wangyucode/sftp-upload-action@a1e64f60df0d085b26ca9efff77566e79f1c6b78 # v3.0.0
-        with:
-          host: ${{ env.WPENGINE_SFTP_HOST }}
-          port: ${{ env.WPENGINE_SFTP_PORT }}
-          username: ${{ env.WPENGINE_SFTP_USER }}
-          password: ${{ env.WPENGINE_SFTP_PASSWORD }}
-          compress: false
-          forceUpload: true
-          localDir: "index-file/"
-          remoteDir: "/xml/ns/dbchangelog/"
+        run: |
+          lftp -u "${{ env.WPENGINE_SFTP_USER }},${{ env.WPENGINE_SFTP_PASSWORD }}" \
+            -p "${{ env.WPENGINE_SFTP_PORT }}" \
+            "sftp://${{ env.WPENGINE_SFTP_HOST }}" \
+            -e "mirror --reverse --overwrite --verbose \
+              index-file/ \
+              /xml/ns/dbchangelog/; bye"
