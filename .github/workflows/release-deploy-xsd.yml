@@ -107,6 +107,6 @@ jobs:
           SFTP_PORT: ${{ env.WPENGINE_SFTP_PORT }}
         run: |
           sshpass -e sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=accept-new "$SFTP_USER@$SFTP_HOST" <<'SFTP_EOF'
-          put -r index-file/* /xml/ns/dbchangelog/
+          put index-file/index.htm /xml/ns/dbchangelog/index.htm
           bye
           SFTP_EOF
