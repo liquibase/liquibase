@@ -38,6 +38,8 @@ jobs:
           cache: 'maven'
 
       - name: Generate Maven settings.xml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cat > ~/.m2/settings.xml << 'EOF'
           <settings>

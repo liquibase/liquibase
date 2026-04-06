@@ -42,7 +42,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p "./${{ inputs.version }}-released-assets"
-          gh release download --repo liquibase/liquibase --pattern "*" --dir "./${{ inputs.version }}-released-assets"
+          gh release download "v${{ inputs.version }}" --repo liquibase/liquibase --pattern "*" --dir "./${{ inputs.version }}-released-assets"
 
       - name: Get current timestamp
         id: timestamp
