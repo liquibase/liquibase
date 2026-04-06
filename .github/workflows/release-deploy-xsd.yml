@@ -83,25 +83,30 @@ jobs:
           fi
 
       # WPEngine only accepts files via SFTP, so S3-direct is not an option here.
-      # Replaced third-party SFTP action with lftp CLI to reduce supply chain risk.
-      - name: Install lftp
-        run: sudo apt-get update && sudo apt-get install -y lftp
+      # Replaced third-party SFTP action with sshpass + sftp CLI to reduce supply chain risk.
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
 
       - name: Liquibase xsds SFTP upload
+        env:
+          SFTP_PASS: ${{ env.WPENGINE_SFTP_PASSWORD }}
+          SFTP_USER: ${{ env.WPENGINE_SFTP_USER }}
+          SFTP_HOST: ${{ env.WPENGINE_SFTP_HOST }}
+          SFTP_PORT: ${{ env.WPENGINE_SFTP_PORT }}
         run: |
-          lftp -u "${{ env.WPENGINE_SFTP_USER }},${{ env.WPENGINE_SFTP_PASSWORD }}" \
-            -p "${{ env.WPENGINE_SFTP_PORT }}" \
-            "sftp://${{ env.WPENGINE_SFTP_HOST }}" \
-            -e "set sftp:connect-program 'ssh -a -x -C'; \
-              mirror --reverse --overwrite --verbose \
-              liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/ \
-              /xml/ns/dbchangelog/; bye"
+          sshpass -p "$SFTP_PASS" sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=no "$SFTP_USER@$SFTP_HOST" <<'SFTP_EOF'
+          put -r liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/* /xml/ns/dbchangelog/
+          bye
+          SFTP_EOF
 
       - name: Liquibase index.htm SFTP upload
+        env:
+          SFTP_PASS: ${{ env.WPENGINE_SFTP_PASSWORD }}
+          SFTP_USER: ${{ env.WPENGINE_SFTP_USER }}
+          SFTP_HOST: ${{ env.WPENGINE_SFTP_HOST }}
+          SFTP_PORT: ${{ env.WPENGINE_SFTP_PORT }}
         run: |
-          lftp -u "${{ env.WPENGINE_SFTP_USER }},${{ env.WPENGINE_SFTP_PASSWORD }}" \
-            -p "${{ env.WPENGINE_SFTP_PORT }}" \
-            "sftp://${{ env.WPENGINE_SFTP_HOST }}" \
-            -e "mirror --reverse --overwrite --verbose \
-              index-file/ \
-              /xml/ns/dbchangelog/; bye"
+          sshpass -p "$SFTP_PASS" sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=no "$SFTP_USER@$SFTP_HOST" <<'SFTP_EOF'
+          put -r index-file/* /xml/ns/dbchangelog/
+          bye
+          SFTP_EOF
