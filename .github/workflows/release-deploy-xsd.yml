@@ -94,7 +94,7 @@ jobs:
           SFTP_HOST: ${{ env.WPENGINE_SFTP_HOST }}
           SFTP_PORT: ${{ env.WPENGINE_SFTP_PORT }}
         run: |
-          sshpass -p "$SFTP_PASS" sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=no "$SFTP_USER@$SFTP_HOST" <<'SFTP_EOF'
+          sshpass -p "$SFTP_PASS" sftp -P "$SFTP_PORT" -oCompression=yes -oStrictHostKeyChecking=no "$SFTP_USER@$SFTP_HOST" <<'SFTP_EOF'
           put -r liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/* /xml/ns/dbchangelog/
           bye
           SFTP_EOF
