@@ -40,7 +40,8 @@ jobs:
       - name: Download release javadocs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release download "${{ inputs.tag }}" --repo liquibase/liquibase --pattern "liquibase-additional*.zip" --dir "."
+          TAG: ${{ inputs.tag }}
+        run: gh release download "$TAG" --repo liquibase/liquibase --pattern "liquibase-additional*.zip" --dir "."
 
       - name: Configure AWS credentials for vault access
         uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0

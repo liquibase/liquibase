@@ -262,7 +262,7 @@ jobs:
           method: chat.postMessage
           token: ${{ env.DRY_RUN_SLACK_BOT_TOKEN }}
           payload: |
-            channel: "dryrun-releases"
+            channel: ${{ env.DRYRUN_RELEASES_SLACK_ID }}
             username: "liquibot"
             icon_emoji: ":robot_face:"
             link_names: true

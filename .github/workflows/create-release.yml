@@ -141,35 +141,11 @@ jobs:
           GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
 
 
-      - name: Generate Maven settings.xml
+      - name: Configure Maven settings
         run: |
-          cat > ~/.m2/settings.xml << 'EOF'
-          <settings>
-            <servers>
-              <server>
-                <id>liquibase</id>
-                <username>liquibot</username>
-                <password>${env.LIQUIBOT_PAT_GPM_ACCESS}</password>
-              </server>
-            </servers>
-            <profiles>
-              <profile>
-                <id>liquibase</id>
-                <repositories>
-                  <repository>
-                    <id>liquibase</id>
-                    <url>https://maven.pkg.github.com/liquibase/liquibase</url>
-                    <releases><enabled>true</enabled></releases>
-                    <snapshots><enabled>true</enabled><updatePolicy>always</updatePolicy></snapshots>
-                  </repository>
-                </repositories>
-              </profile>
-            </profiles>
-            <activeProfiles>
-              <activeProfile>liquibase</activeProfile>
-            </activeProfiles>
-          </settings>
-          EOF
+          mkdir -p ~/.m2
+          cp .github/maven/settings-releases.xml ~/.m2/settings.xml
+          echo "MAVEN_GPM_PASSWORD=${{ env.LIQUIBOT_PAT_GPM_ACCESS }}" >> $GITHUB_ENV
 
       - name: Re-version Artifacts
         env:

@@ -87,6 +87,13 @@ jobs:
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
+      - name: Configure WPEngine known hosts
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ env.WPENGINE_SFTP_HOST_KEY }}" >> ~/.ssh/known_hosts
+          chmod 700 ~/.ssh
+          chmod 600 ~/.ssh/known_hosts
+
       - name: Liquibase xsds SFTP upload
         env:
           SSHPASS: ${{ env.WPENGINE_SFTP_PASSWORD }}
@@ -94,7 +101,7 @@ jobs:
           SFTP_HOST: ${{ env.WPENGINE_SFTP_HOST }}
           SFTP_PORT: ${{ env.WPENGINE_SFTP_PORT }}
         run: |
-          sshpass -e sftp -P "$SFTP_PORT" -oCompression=yes -oStrictHostKeyChecking=accept-new "$SFTP_USER@$SFTP_HOST" <<'SFTP_EOF'
+          sshpass -e sftp -P "$SFTP_PORT" -oCompression=yes -oStrictHostKeyChecking=yes "$SFTP_USER@$SFTP_HOST" <<'SFTP_EOF'
           put -r liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/* /xml/ns/dbchangelog/
           bye
           SFTP_EOF
@@ -106,7 +113,7 @@ jobs:
           SFTP_HOST: ${{ env.WPENGINE_SFTP_HOST }}
           SFTP_PORT: ${{ env.WPENGINE_SFTP_PORT }}
         run: |
-          sshpass -e sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=accept-new "$SFTP_USER@$SFTP_HOST" <<'SFTP_EOF'
+          sshpass -e sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=yes "$SFTP_USER@$SFTP_HOST" <<'SFTP_EOF'
           put index-file/index.htm /xml/ns/dbchangelog/index.htm
           bye
           SFTP_EOF
