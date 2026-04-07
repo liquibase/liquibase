@@ -1,9 +1,6 @@
 package liquibase.logging.core;
 
-import liquibase.Liquibase;
 import liquibase.Scope;
-import liquibase.configuration.ConfiguredValue;
-import liquibase.integration.commandline.LiquibaseCommandLineConfiguration;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.serializer.LiquibaseSerializable;
@@ -32,7 +29,6 @@ public class JavaLogService extends AbstractLogService {
         JavaLogger logger = loggers.get(clazz);
         if (logger == null) {
             java.util.logging.Logger utilLogger = java.util.logging.Logger.getLogger(getLogName(clazz));
-            utilLogger.setUseParentHandlers(true);
             if (parent != null && !parent.getName().equals(utilLogger.getName())) {
                 utilLogger.setParent(parent);
             }
@@ -67,7 +63,11 @@ public class JavaLogService extends AbstractLogService {
         if (! configuredChannels.equalsIgnoreCase("all")) {
             channels = StringUtil.splitAndTrim(configuredChannels.toLowerCase(), ",");
             if (channels.contains(channelName.toLowerCase())) {
-                java.util.logging.Logger.getLogger(channelName).setLevel(logLevel);
+                try {
+                    java.util.logging.Logger.getLogger(channelName).setLevel(logLevel);
+                } catch (Exception e) {
+                    // Ignore errors from logging bridges (e.g. Log4j JUL bridge) that do not support setLevel
+                }
             }
         }
     }
