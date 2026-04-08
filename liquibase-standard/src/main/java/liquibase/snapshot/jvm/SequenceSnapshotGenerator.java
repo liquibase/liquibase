@@ -31,7 +31,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     private static final StringBuilder COMMON_PG_SEQUENCE_QUERY = new StringBuilder("JOIN pg_namespace ns on c.relnamespace = ns.oid ")
-            .append("LEFT JOIN pg_depend d ON c.oid = d.objid AND d.deptype IN ('a', 'i', 'n') AND d.refobjsubid > 0 ")
+            .append("LEFT JOIN pg_depend d ON c.oid = d.objid AND d.deptype IN ('a', 'i') AND d.refobjsubid > 0 ")
             .append("WHERE c.relkind = 'S' AND ns.nspname = 'SCHEMA_NAME' ")
             .append("AND (d.objid IS NULL OR EXISTS ( ")
             .append("SELECT 1 FROM pg_attribute a JOIN pg_class t ON t.oid = d.refobjid AND a.attrelid=t.oid AND a.attnum=d.refobjsubid ")
