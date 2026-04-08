@@ -104,7 +104,7 @@ public final class ExpressionMatcher {
         }
 
         // 'nocontexts' is a pseudo-context that evaluates to true when no runtime contexts are
-        // specified.  This lets changeset authors opt into stricter matching, e.g.
+        // specified.  This allows changeset authors to opt into stricter matching, e.g.
         //   context="!nocontexts AND mycontext"
         // will only apply when at least one runtime context is provided.
         if (!requiredExpression && "nocontexts".equalsIgnoreCase(expression)) {
