@@ -103,6 +103,14 @@ public final class ExpressionMatcher {
             expression = expression.substring(1).trim();
         }
 
+        // 'nocontexts' is a pseudo-context that evaluates to true when no runtime contexts are
+        // specified.  This lets changeset authors opt into stricter matching, e.g.
+        //   context="!nocontexts AND mycontext"
+        // will only apply when at least one runtime context is provided.
+        if (!requiredExpression && "nocontexts".equalsIgnoreCase(expression)) {
+            return notExpression ^ items.isEmpty();
+        }
+
         if (!requiredExpression && items.isEmpty()) {
             return true;
         }
