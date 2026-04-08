@@ -32,31 +32,11 @@ jobs:
         java-version: '17'
     
         #look for dependencies in maven
-    - name: maven-settings-xml-action
-      uses: whelk-io/maven-settings-xml-action@9dc09b23833fa9aa7f27b63db287951856f3433d # v22
-      with:
-        repositories: |
-          [
-            {
-              "id": "liquibase",
-              "url": "https://maven.pkg.github.com/liquibase/liquibase",
-              "releases": {
-                "enabled": "false"
-              },
-              "snapshots": {
-                "enabled": "true",
-                "updatePolicy": "always"
-              }
-            }
-          ]
-        servers: |
-          [
-            {
-              "id": "liquibase",
-              "username": "liquibot",
-              "password": "${{ secrets.GITHUB_TOKEN }}"
-            }
-          ]
+    - name: Configure Maven settings
+      run: |
+        mkdir -p ~/.m2
+        cp .github/maven/settings-snapshots.xml ~/.m2/settings.xml
+        echo "MAVEN_GPM_PASSWORD=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
 
     - name: Install Maven dependencies (excluding test scope)
       run: mvn clean install -DskipTests

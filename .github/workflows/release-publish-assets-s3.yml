@@ -38,12 +38,12 @@ jobs:
     if: ${{ inputs.dry_run == false }}
     steps:
       - name: Download released assets
-        uses: robinraju/release-downloader@daf26c55d821e836577a15f77d86ddc078948b05 # v1.12
-        with:
-          repository: "liquibase/liquibase"
-          latest: true
-          fileName: "*"
-          out-file-path: "./${{ inputs.version }}-released-assets"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          mkdir -p "./${VERSION}-released-assets"
+          gh release download "v${VERSION}" --repo liquibase/liquibase --pattern "*" --dir "./${VERSION}-released-assets"
 
       - name: Get current timestamp
         id: timestamp

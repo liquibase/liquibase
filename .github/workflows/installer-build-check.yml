@@ -8,6 +8,7 @@ on:
 
 permissions:
   id-token: write # Required for OIDC authentication with AWS
+  actions: read # Required for cross-workflow artifact download
 
 jobs:
   build-installers:
@@ -94,19 +95,31 @@ jobs:
           mv pkcs11properties.cfg $(pwd)/.github/util/
 
       - name: Install DigiCert KeyLocker Client Tools
-        uses: digicert/ssm-code-signing@1d820463733701cf1484c7eb5d7d24a15ca2c454 # v1.2.1
+        uses: digicert/code-signing-software-trust-action@96e9240f28ec3a3b1a686c5c9f3e32a083da7318 # v1.2.0
 
       - name: Set branch variable
         run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
 
+      - name: Get latest successful run-tests run ID
+        id: get-run-id
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          run_id=$(gh api "repos/${{ github.repository }}/actions/workflows/run-tests.yml/runs?branch=${{ env.BRANCH }}&status=success&per_page=1" --jq '.workflow_runs[0].id')
+          if [ -z "$run_id" ] || [ "$run_id" == "null" ]; then
+            echo "Error: No successful run-tests.yml run found on branch ${{ env.BRANCH }}"
+            exit 1
+          fi
+          echo "run_id=$run_id" >> $GITHUB_OUTPUT
+          echo "Using run ID: $run_id"
+
       - name: Download liquibase-artifacts
-        uses: dawidd6/action-download-artifact@1f8785ff7a5130826f848e7f72725c85d241860f # v18
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          workflow: run-tests.yml
-          workflow_conclusion: success
-          branch: ${{ env.BRANCH }}
           name: liquibase-artifacts
           path: re-version/final
+          run-id: ${{ steps.get-run-id.outputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Unsigned Windows Installer
         env:
