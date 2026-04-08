@@ -31,12 +31,12 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     private static final StringBuilder COMMON_PG_SEQUENCE_QUERY = new StringBuilder("JOIN pg_namespace ns on c.relnamespace = ns.oid ")
-            .append("LEFT JOIN pg_depend d ON c.oid = d.objid AND d.deptype IN ('a', 'i') AND d.refobjsubid > 0 ")
+            .append("LEFT JOIN pg_depend d ON c.oid = d.objid AND d.deptype IN ('a', 'i', 'n') AND d.refobjsubid > 0 ")
             .append("WHERE c.relkind = 'S' AND ns.nspname = 'SCHEMA_NAME' ")
             .append("AND (d.objid IS NULL OR EXISTS ( ")
             .append("SELECT 1 FROM pg_attribute a JOIN pg_class t ON t.oid = d.refobjid AND a.attrelid=t.oid AND a.attnum=d.refobjsubid ")
             .append("LEFT JOIN pg_catalog.pg_attrdef ad ON ad.adrelid = a.attrelid AND ad.adnum = a.attnum ")
-            .append("WHERE (a.attidentity NOT IN ('a', 'd')) ")
+            .append("WHERE a.attidentity NOT IN ('a', 'd') ")
             .append("AND (a.atthasdef = false OR NOT (pg_get_expr(ad.adbin, ad.adrelid) ILIKE '%' || c.relname || '%')))) ");
 
     @Override
