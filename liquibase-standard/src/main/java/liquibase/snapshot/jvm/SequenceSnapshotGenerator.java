@@ -34,9 +34,10 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
             .append("LEFT JOIN pg_depend d ON c.oid = d.objid AND d.deptype IN ('a', 'i') AND d.refobjsubid > 0 ")
             .append("WHERE c.relkind = 'S' AND ns.nspname = 'SCHEMA_NAME' ")
             .append("AND (d.objid IS NULL OR EXISTS ( ")
-            .append("select 1 from pg_attribute a JOIN pg_class t ON t.oid = d.refobjid AND a.attrelid=t.oid AND a.attnum=d.refobjsubid ")
+            .append("SELECT 1 FROM pg_attribute a JOIN pg_class t ON t.oid = d.refobjid AND a.attrelid=t.oid AND a.attnum=d.refobjsubid ")
             .append("LEFT JOIN pg_catalog.pg_attrdef ad ON ad.adrelid = a.attrelid AND ad.adnum = a.attnum ")
-            .append("WHERE a.atthasdef = false or not (pg_get_expr(ad.adbin, ad.adrelid) ilike '%' || c.relname || '%'))) ");
+            .append("WHERE (a.attidentity NOT IN ('a', 'd')) ")
+            .append("AND (a.atthasdef = false OR NOT (pg_get_expr(ad.adbin, ad.adrelid) ILIKE '%' || c.relname || '%')))) ");
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
