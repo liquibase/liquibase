@@ -189,6 +189,32 @@ class ContextExpressionTest extends Specification {
         "! (a and  b ) or ( ! c and  d)"| "!(a and b) or (!c and d)"
     }
 
+    @Unroll("#featureName: testContexts #testContexts currentContexts: #currentContexts")
+    def "'nocontexts' pseudo-context"() {
+        expect:
+        assert new ContextExpression(testContexts).matches(new Contexts(currentContexts)) == expectedResult
+
+        where:
+        testContexts                          | currentContexts | expectedResult
+        // 'nocontexts' evaluates to true when no runtime contexts are provided
+        "nocontexts"                          | ""              | true
+        "nocontexts"                          | null            | true
+        "nocontexts"                          | "a"             | false
+        "nocontexts"                          | "nocontexts"    | false
+        // '!nocontexts' evaluates to true when runtime contexts ARE provided
+        "!nocontexts"                         | ""              | false
+        "!nocontexts"                         | null            | false
+        "!nocontexts"                         | "a"             | true
+        // Combined: only apply when contexts are specified AND the context matches
+        "!nocontexts and mycontext"           | ""              | false
+        "!nocontexts and mycontext"           | "mycontext"     | true
+        "!nocontexts and mycontext"           | "other"         | false
+        // 'nocontexts' in an OR expression
+        "nocontexts or mycontext"             | ""              | true
+        "nocontexts or mycontext"             | "mycontext"     | true
+        "nocontexts or mycontext"             | "other"         | false
+    }
+
     @Unroll
     def isEmpty() {
         expect:
