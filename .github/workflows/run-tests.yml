@@ -121,6 +121,7 @@ jobs:
 
       # look for dependencies in maven
       - name: Configure Maven settings
+        shell: bash
         run: |
           mkdir -p ~/.m2
           cp .github/maven/settings-snapshots.xml ~/.m2/settings.xml
