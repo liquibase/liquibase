@@ -119,17 +119,19 @@ jobs:
         ORPHAN_IDS=""
         ORPHAN_COUNT=0
 
+        # Cache all branch HEAD SHAs once to avoid per-version API calls
+        # and handle pagination (repo has ~190 branches, default page is 30)
+        echo "Fetching all branch heads..."
+        BRANCH_HEADS=$(gh api --paginate "repos/$REPO/branches?per_page=100" --jq '.[].commit.sha' 2>/dev/null || echo "")
+        BRANCH_COUNT=$(echo "$BRANCH_HEADS" | grep -c '.' || echo "0")
+        echo "Cached $BRANCH_COUNT branch head SHAs"
+
         while read -r VERSION_ID VERSION_NAME; do
           [ -z "$VERSION_ID" ] && continue
 
           # Extract the commit SHA from the version name (remove -SNAPSHOT suffix)
           COMMIT_SHA="${VERSION_NAME%-SNAPSHOT}"
 
-          # Check if this commit still belongs to an active branch.
-          # Strategy: check if the commit exists in any open branch by querying
-          # the documented /repos/{owner}/{repo}/commits/{sha} endpoint.
-          # If it returns 404 (commit pruned/unreachable), it's orphaned.
-          # If it exists, check if any branch still references it.
           IS_ORPHAN=true
 
           # First: does the commit still exist in the repo?
@@ -137,16 +139,19 @@ jobs:
           if [ -z "$COMMIT_EXISTS" ]; then
             echo "ORPHANED (commit gone): $VERSION_NAME"
           else
-            # Check if any branch HEAD points to this commit
-            BRANCH_MATCH=$(gh api "repos/$REPO/branches" --jq '.[].commit.sha' 2>/dev/null | grep -c "^${COMMIT_SHA}$" || echo "0")
+            # Check if any branch HEAD points to this commit (using cached list)
+            BRANCH_MATCH=$(printf '%s\n' "$BRANCH_HEADS" | grep -c "^${COMMIT_SHA}$" || true)
             if [ "$BRANCH_MATCH" -gt 0 ]; then
               IS_ORPHAN=false
               echo "ACTIVE (branch head): $VERSION_NAME"
             else
-              # Check if commit is an ancestor of master or release using merge-base
+              # Check if commit is an ancestor of master or release.
+              # compare/{commit}...{base} returns "behind" when base has commits
+              # the commit doesn't — meaning the commit is an ancestor of base.
+              # "identical" means they point to the same commit.
               for BASE_BRANCH in master release; do
-                MERGE_BASE=$(gh api "repos/$REPO/compare/${BASE_BRANCH}...${COMMIT_SHA}" --jq '.status' 2>/dev/null || echo "error")
-                if [[ "$MERGE_BASE" == "behind" || "$MERGE_BASE" == "identical" ]]; then
+                COMPARE_STATUS=$(gh api "repos/$REPO/compare/${COMMIT_SHA}...${BASE_BRANCH}" --jq '.status' 2>/dev/null || echo "error")
+                if [[ "$COMPARE_STATUS" == "ahead" || "$COMPARE_STATUS" == "identical" ]]; then
                   IS_ORPHAN=false
                   echo "REACHABLE: $VERSION_NAME (ancestor of $BASE_BRANCH)"
                   break
