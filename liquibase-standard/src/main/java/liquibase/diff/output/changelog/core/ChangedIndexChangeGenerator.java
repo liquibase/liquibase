@@ -14,10 +14,7 @@ import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Index;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.UniqueConstraint;
+import liquibase.structure.core.*;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
@@ -82,9 +79,15 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
             }
         }
 
+        // Use the comparison object for the drop statement to get the correct index name from the target database
+        Index comparisonIndex = (Index) differences.getComparisonObject();
+        if (comparisonIndex == null) {
+            comparisonIndex = index; // Fallback to reference object if comparison not available
+        }
+
         DropIndexChange dropIndexChange = createDropIndexChange();
-        dropIndexChange.setTableName(index.getRelation().getName());
-        dropIndexChange.setIndexName(index.getName());
+        dropIndexChange.setTableName(comparisonIndex.getRelation().getName());
+        dropIndexChange.setIndexName(comparisonIndex.getName());
 
         CreateIndexChange addIndexChange = createCreateIndexChange();
         addIndexChange.setTableName(index.getRelation().getName());
@@ -97,13 +100,15 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
         addIndexChange.setUnique(index.isUnique());
         addIndexChange.setUsing(index.getUsing());
 
-        if (control.getIncludeCatalog()) {
-            dropIndexChange.setCatalogName(index.getSchema().getCatalogName());
-            addIndexChange.setCatalogName(index.getSchema().getCatalogName());
+        Schema comparisonSchema = comparisonIndex.getSchema();
+        Schema indexSchema = index.getSchema();
+        if (control.getIncludeCatalog() && comparisonSchema != null && indexSchema != null) {
+            dropIndexChange.setCatalogName(comparisonSchema.getCatalogName());
+            addIndexChange.setCatalogName(indexSchema.getCatalogName());
         }
-        if (control.getIncludeSchema()) {
-            dropIndexChange.setSchemaName(index.getSchema().getName());
-            addIndexChange.setSchemaName(index.getSchema().getName());
+        if (control.getIncludeSchema() && comparisonSchema != null && indexSchema != null) {
+            dropIndexChange.setSchemaName(comparisonSchema.getName());
+            addIndexChange.setSchemaName(indexSchema.getName());
         }
 
         Difference columnsDifference = differences.getDifference("columns");

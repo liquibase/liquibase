@@ -1,0 +1,30 @@
+<!-- Maven settings for release workflows that need both published releases and snapshots.
+     Used by: create-release.yml
+     Credential: set MAVEN_GPM_PASSWORD env var before running Maven. -->
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <servers>
+    <server>
+      <id>liquibase</id>
+      <username>liquibot</username>
+      <password>${env.MAVEN_GPM_PASSWORD}</password>
+    </server>
+  </servers>
+  <profiles>
+    <profile>
+      <id>github</id>
+      <repositories>
+        <repository>
+          <id>liquibase</id>
+          <url>https://maven.pkg.github.com/liquibase/liquibase</url>
+          <releases><enabled>true</enabled></releases>
+          <snapshots><enabled>true</enabled><updatePolicy>always</updatePolicy></snapshots>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
+  <activeProfiles>
+    <activeProfile>github</activeProfile>
+  </activeProfiles>
+</settings>
