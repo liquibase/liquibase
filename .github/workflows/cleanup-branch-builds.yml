@@ -123,30 +123,40 @@ jobs:
           # Extract the commit SHA from the version name (remove -SNAPSHOT suffix)
           COMMIT_SHA="${VERSION_NAME%-SNAPSHOT}"
 
-          # Check if this commit is reachable from master or release
-          IS_REACHABLE=false
+          # Check if this commit still belongs to an active branch.
+          # Strategy: check if the commit exists in any open branch by querying
+          # the documented /repos/{owner}/{repo}/commits/{sha} endpoint.
+          # If it returns 404 (commit pruned/unreachable), it's orphaned.
+          # If it exists, check if any branch still references it.
+          IS_ORPHAN=true
 
-          for BASE_BRANCH in master release; do
-            # Use the commits API to check if the SHA exists and is an ancestor of the base branch
-            RESPONSE=$(gh api "repos/$REPO/compare/${COMMIT_SHA}...${BASE_BRANCH}" --jq '.status' 2>/dev/null || echo "error")
-            if [[ "$RESPONSE" == "ahead" || "$RESPONSE" == "identical" ]]; then
-              IS_REACHABLE=true
-              break
-            fi
-          done
-
-          if [ "$IS_REACHABLE" = "false" ]; then
-            # Also check if any branch currently points to or contains this commit
-            BRANCHES=$(gh api "repos/$REPO/commits/$COMMIT_SHA/branches-where-head" 2>/dev/null | jq -r 'length' 2>/dev/null || echo "0")
-            if [ "$BRANCHES" = "0" ] || [ "$BRANCHES" = "" ]; then
-              echo "ORPHANED: $PACKAGE_NAME $VERSION_NAME (ID: $VERSION_ID)"
-              ORPHAN_IDS="${ORPHAN_IDS}${VERSION_ID},"
-              ORPHAN_COUNT=$((ORPHAN_COUNT + 1))
-            else
-              echo "ACTIVE (branch head): $VERSION_NAME"
-            fi
+          # First: does the commit still exist in the repo?
+          COMMIT_EXISTS=$(gh api "repos/$REPO/commits/$COMMIT_SHA" --jq '.sha' 2>/dev/null || echo "")
+          if [ -z "$COMMIT_EXISTS" ]; then
+            echo "ORPHANED (commit gone): $VERSION_NAME"
           else
-            echo "REACHABLE: $VERSION_NAME (ancestor of master/release)"
+            # Check if any branch HEAD points to this commit
+            BRANCH_MATCH=$(gh api "repos/$REPO/branches" --jq '.[].commit.sha' 2>/dev/null | grep -c "^${COMMIT_SHA}$" || echo "0")
+            if [ "$BRANCH_MATCH" -gt 0 ]; then
+              IS_ORPHAN=false
+              echo "ACTIVE (branch head): $VERSION_NAME"
+            else
+              # Check if commit is an ancestor of master or release using merge-base
+              for BASE_BRANCH in master release; do
+                MERGE_BASE=$(gh api "repos/$REPO/compare/${BASE_BRANCH}...${COMMIT_SHA}" --jq '.status' 2>/dev/null || echo "error")
+                if [[ "$MERGE_BASE" == "behind" || "$MERGE_BASE" == "identical" ]]; then
+                  IS_ORPHAN=false
+                  echo "REACHABLE: $VERSION_NAME (ancestor of $BASE_BRANCH)"
+                  break
+                fi
+              done
+            fi
+          fi
+
+          if [ "$IS_ORPHAN" = "true" ]; then
+            echo "ORPHANED: $PACKAGE_NAME $VERSION_NAME (ID: $VERSION_ID)"
+            ORPHAN_IDS="${ORPHAN_IDS}${VERSION_ID},"
+            ORPHAN_COUNT=$((ORPHAN_COUNT + 1))
           fi
         done <<< "$ALL_VERSIONS"
 
