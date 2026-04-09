@@ -122,7 +122,11 @@ jobs:
         # Cache all branch HEAD SHAs once to avoid per-version API calls
         # and handle pagination (repo has ~190 branches, default page is 30)
         echo "Fetching all branch heads..."
-        BRANCH_HEADS=$(gh api --paginate "repos/$REPO/branches?per_page=100" --jq '.[].commit.sha' 2>/dev/null || echo "")
+        BRANCH_HEADS=$(gh api --paginate "repos/$REPO/branches?per_page=100" --jq '.[].commit.sha')
+        if [ $? -ne 0 ] || [ -z "$BRANCH_HEADS" ]; then
+          echo "::error::Failed to fetch branch heads — aborting to prevent incorrect deletions"
+          exit 1
+        fi
         BRANCH_COUNT=$(echo "$BRANCH_HEADS" | grep -c '.' || echo "0")
         echo "Cached $BRANCH_COUNT branch head SHAs"
 
@@ -135,9 +139,17 @@ jobs:
           IS_ORPHAN=true
 
           # First: does the commit still exist in the repo?
-          COMMIT_EXISTS=$(gh api "repos/$REPO/commits/$COMMIT_SHA" --jq '.sha' 2>/dev/null || echo "")
-          if [ -z "$COMMIT_EXISTS" ]; then
-            echo "ORPHANED (commit gone): $VERSION_NAME"
+          # Capture both output and exit code to distinguish 404 from transient errors
+          COMMIT_RESPONSE=$(gh api "repos/$REPO/commits/$COMMIT_SHA" --jq '.sha' 2>&1)
+          COMMIT_EXIT=$?
+          if [ $COMMIT_EXIT -ne 0 ]; then
+            if echo "$COMMIT_RESPONSE" | grep -q "404\|Not Found"; then
+              echo "ORPHANED (commit gone): $VERSION_NAME"
+            else
+              # Non-404 failure (429/503/network) — skip to be safe
+              echo "SKIPPED (API error): $VERSION_NAME — $COMMIT_RESPONSE"
+              continue
+            fi
           else
             # Check if any branch HEAD points to this commit (using cached list)
             BRANCH_MATCH=$(printf '%s\n' "$BRANCH_HEADS" | grep -c "^${COMMIT_SHA}$" || true)
@@ -149,14 +161,24 @@ jobs:
               # compare/{commit}...{base} returns "behind" when base has commits
               # the commit doesn't — meaning the commit is an ancestor of base.
               # "identical" means they point to the same commit.
+              API_FAILED=false
               for BASE_BRANCH in master release; do
-                COMPARE_STATUS=$(gh api "repos/$REPO/compare/${COMMIT_SHA}...${BASE_BRANCH}" --jq '.status' 2>/dev/null || echo "error")
+                COMPARE_STATUS=$(gh api "repos/$REPO/compare/${COMMIT_SHA}...${BASE_BRANCH}" --jq '.status' 2>/dev/null || echo "api_error")
+                if [[ "$COMPARE_STATUS" == "api_error" ]]; then
+                  echo "SKIPPED (compare API error for $BASE_BRANCH): $VERSION_NAME"
+                  API_FAILED=true
+                  break
+                fi
                 if [[ "$COMPARE_STATUS" == "ahead" || "$COMPARE_STATUS" == "identical" ]]; then
                   IS_ORPHAN=false
                   echo "REACHABLE: $VERSION_NAME (ancestor of $BASE_BRANCH)"
                   break
                 fi
               done
+              # If compare API failed, skip this version entirely — don't mark as orphan
+              if [ "$API_FAILED" = "true" ]; then
+                continue
+              fi
             fi
           fi
 
