@@ -158,7 +158,7 @@ jobs:
               echo "ACTIVE (branch head): $VERSION_NAME"
             else
               # Check if commit is an ancestor of master or release.
-              # compare/{commit}...{base} returns "behind" when base has commits
+              # compare/{commit}...{base} returns "ahead" when base has commits
               # the commit doesn't — meaning the commit is an ancestor of base.
               # "identical" means they point to the same commit.
               API_FAILED=false
