@@ -94,6 +94,8 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        set -o pipefail # Ensure API failures in pipes don't get silently swallowed
+
         ORG="liquibase"
         PACKAGE_TYPE="maven"
         PACKAGE_NAME="${{ matrix.packages_to_delete }}"
@@ -189,3 +191,8 @@ jobs:
 
         echo ""
         echo "Deleted: $DELETED, Failed: $FAILED"
+
+        if [ "$FAILED" -gt 0 ]; then
+          echo "::error::$FAILED package version(s) failed to delete"
+          exit 1
+        fi
