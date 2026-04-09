@@ -165,7 +165,8 @@ Global Options
                              (defaults file: 'liquibase.
                                diffColumnDefaultValueConstraintName',
                                environment variable:
-                               'LIQUIBASE_DIFF_COLUMN_DEFAULT_VALUE_CONSTRAINT_NAME')
+                               'LIQUIBASE_DIFF_COLUMN_DEFAULT_VALUE_CONSTRAINT_N
+                               AME')
 
       --diff-column-order=PARAM
                              Should Liquibase compare column order in diff
