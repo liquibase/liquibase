@@ -38,29 +38,27 @@ jobs:
     if: ${{ inputs.dry_run == false }}
     steps:
       - name: Download release javadocs
-        uses: robinraju/release-downloader@v1.12
-        with:
-          repository: "liquibase/liquibase"
-          tag: "${{ inputs.tag }}"
-          fileName: "liquibase-additional*.zip"
-          out-file-path: "."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag }}
+        run: gh release download "$TAG" --repo liquibase/liquibase --pattern "liquibase-additional*.zip" --dir "."
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
 
       - name: Get secrets from vault
         id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        uses: aws-actions/aws-secretsmanager-get-secrets@a9a7eb4e2f2871d30dc5b892576fde60a2ecc802 # v2.0.10
         with:
           secret-ids: |
             ,/vault/liquibase
           parse-json-secrets: true
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
         with:
           role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
           aws-region: us-east-1

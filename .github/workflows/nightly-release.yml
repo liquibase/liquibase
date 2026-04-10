@@ -53,12 +53,12 @@ jobs:
           echo "short_sha=${sha:0:7}" >> $GITHUB_OUTPUT
           echo "Using run ID: $run_id (commit: ${sha:0:7})"
       - name: Download liquibase-artifacts
-        uses: dawidd6/action-download-artifact@v18
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          workflow: run-tests.yml
-          run_id: ${{ steps.get-run-id.outputs.run_id }}
           name: liquibase-artifacts
           path: download/liquibase-artifacts
+          run-id: ${{ steps.get-run-id.outputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Rename artifacts from SNAPSHOT to nightly
         id: rename-artifacts
