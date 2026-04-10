@@ -103,9 +103,16 @@ jobs:
 
         echo "Listing all SHA-SNAPSHOT versions for $PACKAGE_NAME..."
 
-        # Get all versions that match the SHA-SNAPSHOT pattern (40 hex chars + -SNAPSHOT)
+        # Match both full (40-char) and short (7+ char) SHA-SNAPSHOT versions.
+        # build.yml publishes full SHAs, build-main.yml publishes short SHAs.
         ALL_VERSIONS=$(gh api --paginate "orgs/$ORG/packages/$PACKAGE_TYPE/$PACKAGE_NAME/versions" \
-          | jq -r '.[] | select(.name | test("^[0-9a-f]{40}-SNAPSHOT$")) | "\(.id) \(.name)"')
+          | jq -r '.[] | select(.name | test("^[0-9a-f]{7,40}-SNAPSHOT$")) | "\(.id) \(.name)"')
+        FETCH_EXIT=$?
+
+        if [ $FETCH_EXIT -ne 0 ]; then
+          echo "::error::Failed to fetch package versions — aborting"
+          exit 1
+        fi
 
         if [ -z "$ALL_VERSIONS" ]; then
           echo "No SHA-SNAPSHOT versions found for $PACKAGE_NAME"
