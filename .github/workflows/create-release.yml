@@ -91,29 +91,29 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
 
       - name: Get secrets from vault
         id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        uses: aws-actions/aws-secretsmanager-get-secrets@a9a7eb4e2f2871d30dc5b892576fde60a2ecc802 # v2.0.10
         with:
           secret-ids: |
             ,/vault/liquibase
           parse-json-secrets: true
 
       - name: Download liquibase-artifacts
-        uses: dawidd6/action-download-artifact@v18
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          workflow: run-tests.yml
-          run_id: ${{ needs.setup.outputs.runId }}
           name: liquibase-artifacts
           path: download/liquibase-artifacts
+          run-id: ${{ needs.setup.outputs.runId }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get Current Run ID
         id: get_run_id
@@ -131,7 +131,7 @@ jobs:
           } >> $GITHUB_ENV
 
       - name: Set up JDK
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
           java-version: "8"
           distribution: "temurin"
@@ -141,31 +141,11 @@ jobs:
           GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
 
 
-      - name: maven-settings-xml-action
-        uses: whelk-io/maven-settings-xml-action@v22
-        with:
-          repositories: |
-            [
-              {
-                "id": "liquibase",
-                "url": "https://maven.pkg.github.com/liquibase/liquibase",
-                "releases": {
-                  "enabled": "true"
-                },
-                "snapshots": {
-                  "enabled": "true",
-                  "updatePolicy": "always"
-                }
-              }
-            ]
-          servers: |
-            [
-              {
-                "id": "liquibase",
-                "username": "liquibot",
-                "password": "${{ env.LIQUIBOT_PAT_GPM_ACCESS }}"
-              }
-            ]
+      - name: Configure Maven settings
+        run: |
+          mkdir -p ~/.m2
+          cp .github/maven/settings-releases.xml ~/.m2/settings.xml
+          echo "MAVEN_GPM_PASSWORD=${{ env.LIQUIBOT_PAT_GPM_ACCESS }}" >> $GITHUB_ENV
 
       - name: Re-version Artifacts
         env:
@@ -198,7 +178,7 @@ jobs:
           mv re-version/out/liquibase-additional-${{ needs.setup.outputs.version }}.zip re-version/final
 
       - name: Cache Completed Artifacts
-        uses: actions/cache@v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
@@ -216,17 +196,17 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
 
       - name: Get secrets from vault
         id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        uses: aws-actions/aws-secretsmanager-get-secrets@a9a7eb4e2f2871d30dc5b892576fde60a2ecc802 # v2.0.10
         with:
           secret-ids: |
             ,/vault/liquibase
@@ -242,14 +222,14 @@ jobs:
           } >> $GITHUB_ENV
 
       - name: Restore Completed Artifacts
-        uses: actions/cache@v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           key: completed-artifacts-${{ github.run_number }}-${{ github.run_attempt }}
           path: re-version/final
 
        # https://github.com/actions/setup-java/tree/v4/?tab=readme-ov-file#install-multiple-jdks   
       - name: Set up JDK for GPG
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
           java-version: |
             17
@@ -311,7 +291,7 @@ jobs:
           echo "$ANDROID_SDK_ROOT/build-tools/30.0.2" >> $GITHUB_PATH
           
       - name: Install DigiCert KeyLocker Client Tools
-        uses: digicert/ssm-code-signing@v1.2.1
+        uses: digicert/code-signing-software-trust-action@96e9240f28ec3a3b1a686c5c9f3e32a083da7318 # v1.2.0
 
       - name: Build Unsigned Windows Installer
         env:
@@ -375,7 +355,7 @@ jobs:
 
       - name: Attach Files to Draft Release
         if: ${{ inputs.standalone_zip == false && inputs.dry_run == false }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2
         with:
           tag_name: v${{ needs.setup.outputs.version }}
           fail_on_unmatched_files: true
@@ -389,7 +369,7 @@ jobs:
       - name: Attach Files to Dry-Run Draft Release
         id: attach-files-dry-run
         if: ${{ inputs.standalone_zip == false && inputs.dry_run == true }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2
         with:
           tag_name: v${{ needs.setup.outputs.version }}
           fail_on_unmatched_files: true
@@ -402,7 +382,7 @@ jobs:
 
       - name: Attach standalone zip to Build
         if: ${{ inputs.standalone_zip == true && inputs.dry_run == false }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: liquibase-installers-${{ needs.setup.outputs.version }}
           path: re-version/final/*

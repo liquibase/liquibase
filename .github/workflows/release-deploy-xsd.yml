@@ -38,28 +38,28 @@ jobs:
     if: ${{ inputs.dry_run == false }}
     steps:
       - name: Download liquibase xsd
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           # Relative path under $GITHUB_WORKSPACE to place the repository
           path: liquibase-core-repo
           repository: "liquibase/liquibase"
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
 
       - name: Get secrets from vault
         id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        uses: aws-actions/aws-secretsmanager-get-secrets@a9a7eb4e2f2871d30dc5b892576fde60a2ecc802 # v2.0.10
         with:
           secret-ids: |
             ,/vault/liquibase
           parse-json-secrets: true
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
         with:
           role-to-assume: ${{ env.AWS_PROD_GITHUB_OIDC_ROLE_ARN_BUILD_LOGIC }}
           aws-region: us-east-1
@@ -82,26 +82,38 @@ jobs:
             aws s3 sync index-file s3://liquibaseorg-origin/xml/ns/dbchangelog/ --only-show-errors
           fi
 
+      # WPEngine only accepts files via SFTP, so S3-direct is not an option here.
+      # Replaced third-party SFTP action with sshpass + sftp CLI to reduce supply chain risk.
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Configure WPEngine known hosts
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ env.WPENGINE_SFTP_HOST_KEY }}" >> ~/.ssh/known_hosts
+          chmod 700 ~/.ssh
+          chmod 600 ~/.ssh/known_hosts
+
       - name: Liquibase xsds SFTP upload
-        uses: wangyucode/sftp-upload-action@v3.0.0
-        with:
-          host: ${{ env.WPENGINE_SFTP_HOST }}
-          port: ${{ env.WPENGINE_SFTP_PORT }}
-          username: ${{ env.WPENGINE_SFTP_USER }}
-          password: ${{ env.WPENGINE_SFTP_PASSWORD }}
-          compress: true
-          forceUpload: true
-          localDir: "liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/"
-          remoteDir: "/xml/ns/dbchangelog/"
+        env:
+          SSHPASS: ${{ env.WPENGINE_SFTP_PASSWORD }}
+          SFTP_USER: ${{ env.WPENGINE_SFTP_USER }}
+          SFTP_HOST: ${{ env.WPENGINE_SFTP_HOST }}
+          SFTP_PORT: ${{ env.WPENGINE_SFTP_PORT }}
+        run: |
+          sshpass -e sftp -P "$SFTP_PORT" -oCompression=yes -oStrictHostKeyChecking=yes "$SFTP_USER@$SFTP_HOST" <<'SFTP_EOF'
+          put -r liquibase-core-repo/liquibase-standard/src/main/resources/www.liquibase.org/xml/ns/dbchangelog/* /xml/ns/dbchangelog/
+          bye
+          SFTP_EOF
 
       - name: Liquibase index.htm SFTP upload
-        uses: wangyucode/sftp-upload-action@v3.0.0
-        with:
-          host: ${{ env.WPENGINE_SFTP_HOST }}
-          port: ${{ env.WPENGINE_SFTP_PORT }}
-          username: ${{ env.WPENGINE_SFTP_USER }}
-          password: ${{ env.WPENGINE_SFTP_PASSWORD }}
-          compress: false
-          forceUpload: true
-          localDir: "index-file/"
-          remoteDir: "/xml/ns/dbchangelog/"
+        env:
+          SSHPASS: ${{ env.WPENGINE_SFTP_PASSWORD }}
+          SFTP_USER: ${{ env.WPENGINE_SFTP_USER }}
+          SFTP_HOST: ${{ env.WPENGINE_SFTP_HOST }}
+          SFTP_PORT: ${{ env.WPENGINE_SFTP_PORT }}
+        run: |
+          sshpass -e sftp -P "$SFTP_PORT" -oStrictHostKeyChecking=yes "$SFTP_USER@$SFTP_HOST" <<'SFTP_EOF'
+          put index-file/index.htm /xml/ns/dbchangelog/index.htm
+          bye
+          SFTP_EOF

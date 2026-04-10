@@ -35,7 +35,7 @@ jobs:
       unmodifiedBranchName: ${{ steps.get-branch-name.outputs.unmodifiedBranchName }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       - name: Get Latest Merge Commit SHA
@@ -67,14 +67,14 @@ jobs:
           echo "Original Branch Name thisBranchName:" $branch_name
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
 
       - name: Get secrets from vault
         id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        uses: aws-actions/aws-secretsmanager-get-secrets@a9a7eb4e2f2871d30dc5b892576fde60a2ecc802 # v2.0.10
         with:
           secret-ids: |
             ,/vault/liquibase
@@ -82,7 +82,7 @@ jobs:
 
       - name: Get GitHub App token
         id: get-token
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3.0.0
         with:
           app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
           private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
@@ -95,31 +95,31 @@ jobs:
     runs-on: ubuntu-latest
     needs: [setup]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.after}}
       # this includes all the tar files included in the previous runs. So in the next step we deploy what was previously build
       - name: Download Artifacts for build.yml
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: temp-artifact
 
       ##Cache based on install4j file, since changes to JVM is seen in there. If install4j version changes without changing the file, change the prefix letter before hashFiles to force a new cache
       - name: Install4j Cache
-        uses: actions/cache@v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           key: install4j-A${{ hashFiles('liquibase-dist/src/main/install4j/liquibase.install4j') }}
           path: ~/.install4j8/**
 
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
 
       - name: Get secrets from vault
         id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        uses: aws-actions/aws-secretsmanager-get-secrets@a9a7eb4e2f2871d30dc5b892576fde60a2ecc802 # v2.0.10
         with:
           secret-ids: |
             ,/vault/liquibase
@@ -135,7 +135,7 @@ jobs:
           } >> $GITHUB_ENV
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
           java-version: "21"
           distribution: "temurin"
@@ -147,31 +147,11 @@ jobs:
           GPG_PASSWORD: ${{ env.GPG_PASSPHRASE }}
 
       #look for dependencies in maven
-      - name: maven-settings-xml-action
-        uses: whelk-io/maven-settings-xml-action@v22
-        with:
-          repositories: |
-            [
-              {
-                "id": "liquibase",
-                "url": "https://maven.pkg.github.com/liquibase/liquibase",
-                "releases": {
-                  "enabled": "false"
-                },
-                "snapshots": {
-                  "enabled": "true",
-                  "updatePolicy": "always"
-                }
-              }
-            ]
-          servers: |
-            [
-              {
-                "id": "liquibase",
-                "username": "liquibot",
-                "password": "${{ env.LIQUIBOT_PAT_GPM_ACCESS }}"
-              }
-            ]
+      - name: Configure Maven settings
+        run: |
+          mkdir -p ~/.m2
+          cp .github/maven/settings-snapshots.xml ~/.m2/settings.xml
+          echo "MAVEN_GPM_PASSWORD=${{ env.LIQUIBOT_PAT_GPM_ACCESS }}" >> $GITHUB_ENV
 
       # Version artifact based off of branch
       - name: Version Artifact
@@ -240,19 +220,19 @@ jobs:
           done
 
       - name: Archive Packages
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: liquibase-artifacts
           path: artifacts/*
 
       - name: Archive Convenience Zip
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: liquibase-zip-${{ needs.setup.outputs.thisBranchName }}
           path: branch-artifacts/*
 
       - name: Archive Convenience Artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: liquibase-artifacts-${{ needs.setup.outputs.thisBranchName }}
           path: artifacts-named/*
