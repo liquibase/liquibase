@@ -61,9 +61,9 @@ module.exports = ({github, context}) => {
         findMatchingBranch: async function (owner, repo, branchesToCheck) {
             if (!branchesToCheck) {
                 if (context.payload.pull_request) {
-                    branchesToCheck = [context.payload.pull_request.head.ref, context.payload.pull_request.base.ref, "main", "master"]
+                    branchesToCheck = [context.payload.pull_request.head.ref, context.payload.pull_request.base.ref, "main"]
                 } else {
-                    branchesToCheck = [context.payload.ref, "main", "master"]
+                    branchesToCheck = [context.payload.ref, "main"]
                 }
             }
 

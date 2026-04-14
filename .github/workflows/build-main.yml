@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - 'main'
-      - 'master'
 
 jobs:
   setup:
@@ -52,16 +51,16 @@ jobs:
           cache: 'maven'
           server-id: liquibase
 
-        # Publish master-SNAPSHOT version to GPM
-      - name: Version Artifact as master-SNAPSHOT
-        run: ./mvnw versions:set "-DnewVersion=master-SNAPSHOT"
+        # Publish main-SNAPSHOT version to GPM
+      - name: Version Artifact as main-SNAPSHOT
+        run: ./mvnw versions:set "-DnewVersion=main-SNAPSHOT"
 
-      - name: Publish master-SNAPSHOT
-        run: ./mvnw -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=master" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
+      - name: Publish main-SNAPSHOT
+        run: ./mvnw -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=main" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
 
       # Publish <commitsha>-SNAPSHOT version to GPM
       - name: Version Artifact as commit-SNAPSHOT
         run: ./mvnw versions:set -DnewVersion="${{ needs.setup.outputs.latestMergeSha }}-SNAPSHOT"
 
       - name: Publish commit-SNAPSHOT
-        run: ./mvnw -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=master" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"
+        run: ./mvnw -B clean deploy -pl '!liquibase-dist' -DskipTests=true "-Dbuild.repository.owner=liquibase" "-Dbuild.repository.name=liquibase" "-Dbuild.branch=main" "-Dbuild.number=${{ github.run_number }}" "-Dbuild.commit=${{ needs.setup.outputs.latestMergeSha }}" "-Dbuild.timestamp=${{ needs.setup.outputs.timeStamp }}"

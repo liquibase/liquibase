@@ -81,7 +81,7 @@ jobs:
 
     steps:
 
-    - name: Fetch commits between branch and master via GitHub API
+    - name: Fetch commits between branch and main via GitHub API
       id: fetch-commits
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -89,10 +89,10 @@ jobs:
         BRANCH_NAME=${{ needs.extract-branch-info.outputs.branch_name }}
         echo "Fetching commits for branch: $BRANCH_NAME"
 
-        # Fetch commits between branch and master
-        MASTER_COMMITS_RESPONSE=$(gh api -H "Accept: application/vnd.github.v3+json" /repos/${{ github.repository }}/compare/master...$BRANCH_NAME || echo "error")
+        # Fetch commits between branch and main
+        MASTER_COMMITS_RESPONSE=$(gh api -H "Accept: application/vnd.github.v3+json" /repos/${{ github.repository }}/compare/main...$BRANCH_NAME || echo "error")
         if [[ "$MASTER_COMMITS_RESPONSE" == "error" || "$MASTER_COMMITS_RESPONSE" == "null" ]]; then
-          echo "No differences found between branch $BRANCH_NAME and master."
+          echo "No differences found between branch $BRANCH_NAME and main."
           MASTER_COMMITS=""
         else
           MASTER_COMMITS=$(echo "$MASTER_COMMITS_RESPONSE" | jq -r '.commits[].sha' | tr '\n' ',' | sed 's/,$//')

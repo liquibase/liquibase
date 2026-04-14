@@ -18,7 +18,7 @@ on:
         default: 'false'
   push:
     branches:
-      - master
+      - main
       - '*.*.*'
 
   pull_request_target:
@@ -32,11 +32,11 @@ on:
 
 jobs:
   authorize:
-    #concurrent runs for pull requests from forked repositories will be canceled, while runs for pull requests from the master repository won't be affected.
-    #for a pull_request against master: the concurrency check will cancel commit A so that commit B check can run.
+    #concurrent runs for pull requests from forked repositories will be canceled, while runs for pull requests from the main repository won't be affected.
+    #for a pull_request against main: the concurrency check will cancel commit A so that commit B check can run.
     concurrency:
-      group: ${{ github.workflow }}-${{ github.head_ref == 'master' && (github.event_name == 'push' && 'push-to-master' || github.event_name == 'pull_request' && 'merge-to-master') || github.event_name == 'pull_request_target' && github.event.pull_request.number || github.run_id }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' && github.base_ref == 'master' }}
+      group: ${{ github.workflow }}-${{ github.head_ref == 'main' && (github.event_name == 'push' && 'push-to-main' || github.event_name == 'pull_request' && 'merge-to-main') || github.event_name == 'pull_request_target' && github.event.pull_request.number || github.run_id }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' && github.base_ref == 'main' }}
     environment: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && 'external' || 'internal' }}
     runs-on: ubuntu-latest
     steps:

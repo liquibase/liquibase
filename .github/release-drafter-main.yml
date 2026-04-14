@@ -2,7 +2,7 @@
 name-template: 'Liquibase v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
 filter-by-commitish: true
-commitish: master
+commitish: main
 exclude-labels:
   - 'skipReleaseNotes'
 categories:
