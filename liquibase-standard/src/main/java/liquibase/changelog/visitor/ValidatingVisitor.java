@@ -6,6 +6,7 @@ import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.ChangeSetFilterResult;
+import liquibase.checksums.ChecksumAlgorithm;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.exception.*;
@@ -128,14 +129,38 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                     !ValidatingVisitorUtil.isChecksumIssue(changeSet, ranChangeSet, databaseChangeLog, database) &&
                     !changeSet.shouldRunOnChange() &&
                     !changeSet.shouldAlwaysRun()) {
-                invalidMD5Sums.add(changeSet.toString(false) + " was: " + ranChangeSet.getLastCheckSum().toString()
-                        + " but is now: " + changeSet.generateCheckSum(ChecksumVersion.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion())).toString());
+                invalidMD5Sums.add(generateInvalidChecksumMessage(changeSet, ranChangeSet));
             }
         }
 
         // Did we already see this ChangeSet?
         String changeSetString = changeSet.toString(false);
         checkForDuplicatesFromDifferentFiles(changeSet, changeSetString);
+    }
+
+    private String generateInvalidChecksumMessage(ChangeSet changeSet, RanChangeSet ranChangeSet) {
+        String newChecksum = changeSet.generateCheckSum(ChecksumVersion.enumFromChecksumVersion(ranChangeSet.getLastCheckSum().getVersion())).toString();
+        String oldChecksum = ranChangeSet.getLastCheckSum().toString();
+        int oldChecksumSize = oldChecksum.contains(":") ? oldChecksum.split(":")[1].length() : -1;
+
+        String algorithmFailure = "";
+        if (oldChecksumSize == ChecksumAlgorithm.MD5.getSize() && isNotCurrentAlgorithm(ChecksumAlgorithm.MD5)) {
+            algorithmFailure = generateAlgorithmFailureMessage("MD5");
+        } else if (oldChecksumSize == ChecksumAlgorithm.SHA1.getSize() && isNotCurrentAlgorithm(ChecksumAlgorithm.SHA1)) {
+            algorithmFailure = generateAlgorithmFailureMessage("SHA-1");
+        } else if (oldChecksumSize == ChecksumAlgorithm.SHA256.getSize() && isNotCurrentAlgorithm(ChecksumAlgorithm.SHA256)) {
+            algorithmFailure = generateAlgorithmFailureMessage("SHA-256");
+        }
+
+        return changeSet.toString(false) + " was: " + oldChecksum + " but is now: " + newChecksum + algorithmFailure;
+    }
+
+    private boolean isNotCurrentAlgorithm(ChecksumAlgorithm algorithm) {
+        return !GlobalConfiguration.CHECKSUM_ALGORITHM.getCurrentValue().equals(algorithm);
+    }
+
+    private String generateAlgorithmFailureMessage(String algorithmName) {
+        return " (Note: you are using checksumAlgorithm " + GlobalConfiguration.CHECKSUM_ALGORITHM.getCurrentValue().getAlgorithm() + ", but the checksum in database looks like " + algorithmName + ")";
     }
 
     /**
