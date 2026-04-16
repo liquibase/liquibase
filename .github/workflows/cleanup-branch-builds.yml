@@ -106,7 +106,7 @@ jobs:
         # Match both full (40-char) and short (7+ char) SHA-SNAPSHOT versions.
         # build.yml publishes full SHAs, build-main.yml publishes short SHAs.
         ALL_VERSIONS=$(gh api --paginate "orgs/$ORG/packages/$PACKAGE_TYPE/$PACKAGE_NAME/versions" \
-          | jq -r '.[] | select(.name | test("^[0-9a-f]{7,40}-SNAPSHOT$")) | "\(.id) \(.name)"')
+          --jq '.[] | select(.name | test("^[0-9a-f]{7,40}-SNAPSHOT$")) | "\(.id) \(.name)"')
         FETCH_EXIT=$?
 
         if [ $FETCH_EXIT -ne 0 ]; then
@@ -159,7 +159,8 @@ jobs:
             fi
           else
             # Check if any branch HEAD points to this commit (using cached list)
-            BRANCH_MATCH=$(printf '%s\n' "$BRANCH_HEADS" | grep -c "^${COMMIT_SHA}$" || true)
+            # Use prefix match to handle short SHAs (7-char from build-main.yml)
+            BRANCH_MATCH=$(printf '%s\n' "$BRANCH_HEADS" | grep -c "^${COMMIT_SHA}" || true)
             if [ "$BRANCH_MATCH" -gt 0 ]; then
               IS_ORPHAN=false
               echo "ACTIVE (branch head): $VERSION_NAME"
@@ -214,11 +215,12 @@ jobs:
         for ID in $(echo "${{ env.ORPHAN_IDS }}" | tr ',' '\n'); do
           [ -z "$ID" ] && continue
           echo -n "Deleting $PACKAGE_NAME version ID $ID... "
-          if gh api -X DELETE "orgs/liquibase/packages/maven/$PACKAGE_NAME/versions/$ID" 2>/dev/null; then
+          DELETE_OUTPUT=$(gh api -X DELETE "orgs/liquibase/packages/maven/$PACKAGE_NAME/versions/$ID" 2>&1)
+          if [ $? -eq 0 ]; then
             echo "OK"
             DELETED=$((DELETED + 1))
           else
-            echo "FAILED"
+            echo "FAILED: $DELETE_OUTPUT"
             FAILED=$((FAILED + 1))
           fi
         done
