@@ -86,10 +86,16 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
                     if (database instanceof MSSQLDatabase && definition != null
                             && view.getSchema() != null && view.getSchema().getName() != null) {
-                        // Strip the schema name in definition, because it can be optional from OBJECT_DEFINITION
+                        // Strip the schema name in definition, because it can be optional from OBJECT_DEFINITION.
+                        // Pass 1: strip "[schema]." prefix when present.
                         definition = definition.replaceFirst("(?i)(create\\s+view\\s+)\\[?"
                                 + Pattern.quote(view.getSchema().getName())
-                                + "\\]?\\.(?=\\[?[^\\]\\s]+\\]?)", "$1");
+                                + "\\]?\\.", "$1");
+                        // Pass 2: normalize brackets on the view name itself (handles both
+                        // "[view_name]" returned without schema prefix and the result of pass 1),
+                        // so "[view_name]" and "view_name" compare as equal.
+                        definition = definition.replaceFirst(
+                                "(?i)(create\\s+view\\s+)\\[([^\\]\\s]+)\\]", "$1$2");
                     }
 
                     definition = StringUtil.trimToNull(definition);
