@@ -28,6 +28,15 @@ public class ContextExpression {
      * </p>
      */
     public static final String NOCONTEXTS = "nocontexts";
+    public static final String NOCONTEXTS = "nocontexts";
+
+    /**
+     * Matches the {@code nocontexts} pseudo-context token as a whole word, but only when it is
+     * <em>not</em> preceded by the {@code @} required-context prefix (i.e. {@code @nocontexts}
+     * falls through to normal matching and is intentionally excluded).
+     */
+    private static final Pattern NOCONTEXTS_PATTERN =
+            Pattern.compile("(?i)(?<![\\w@])" + NOCONTEXTS + "(?!\\w)");
 
     private HashSet<String> contexts = new HashSet<>();
     @Getter
