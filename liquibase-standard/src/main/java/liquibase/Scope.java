@@ -147,15 +147,17 @@ public class Scope {
             rootScope.values.put(Attr.checksumVersion.name(), ChecksumVersion.latest());
 
             rootScope.values.put(Attr.ui.name(), new ConsoleUIService());
-            rootScope.getSingleton(LiquibaseConfiguration.class).init(rootScope);
 
+            // Discover custom LogService early, before LiquibaseConfiguration.init(),
+            // so that logging during configuration setup uses the correct LogService.
             LogService overrideLogService = rootScope.getSingleton(LogServiceFactory.class).getDefaultLogService();
             if (overrideLogService != null) {
                 rootScope.values.put(Attr.logService.name(), overrideLogService);
             } else {
-                // Log a warning using the already-created JavaLogService
                 rootScope.getLog(Scope.class).warning("Could not find log service via LogServiceFactory. Using JavaLogService as default.");
             }
+
+            rootScope.getSingleton(LiquibaseConfiguration.class).init(rootScope);
 
             //check for higher-priority serviceLocator
             ServiceLocator serviceLocator = rootScope.getServiceLocator();
