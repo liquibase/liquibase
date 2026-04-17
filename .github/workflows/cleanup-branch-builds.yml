@@ -1,3 +1,4 @@
+# │ Purpose : Reactive cleanup when a branch is removed 
 name: Cleanup on Branch Delete
 
 on:
@@ -37,7 +38,7 @@ jobs:
       # with actions/github-script@v8 (Node 24) to look up package version IDs by name
     - name: Get package version IDs
       id: version
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       env:
         BRANCH_NAME: ${{ needs.extract-branch-info.outputs.branch_name }}
       with:
@@ -81,82 +82,153 @@ jobs:
 
     steps:
 
-    - name: Fetch commits between branch and master via GitHub API
-      id: fetch-commits
+    # Bug fix: The previous approach tried to compare the deleted branch against
+    # master/release via the GitHub API, but the branch is already gone by the time
+    # this workflow runs (404). So PACKAGE_VERSIONS was always empty and nothing
+    # was ever deleted.
+    #
+    # New approach: List all SHA-SNAPSHOT versions from the package and delete any
+    # whose commit SHA is orphaned (not reachable from master or release).
+    - name: Find orphaned SHA-SNAPSHOT package versions
+      id: find-orphans
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        BRANCH_NAME=${{ needs.extract-branch-info.outputs.branch_name }}
-        echo "Fetching commits for branch: $BRANCH_NAME"
+        set -o pipefail # Ensure API failures in pipes don't get silently swallowed
 
-        # Fetch commits between branch and master
-        MASTER_COMMITS_RESPONSE=$(gh api -H "Accept: application/vnd.github.v3+json" /repos/${{ github.repository }}/compare/master...$BRANCH_NAME || echo "error")
-        if [[ "$MASTER_COMMITS_RESPONSE" == "error" || "$MASTER_COMMITS_RESPONSE" == "null" ]]; then
-          echo "No differences found between branch $BRANCH_NAME and master."
-          MASTER_COMMITS=""
-        else
-          MASTER_COMMITS=$(echo "$MASTER_COMMITS_RESPONSE" | jq -r '.commits[].sha' | tr '\n' ',' | sed 's/,$//')
-        fi
-
-        # Fetch commits between branch and release
-        RELEASE_COMMITS_RESPONSE=$(gh api -H "Accept: application/vnd.github.v3+json" /repos/${{ github.repository }}/compare/release...$BRANCH_NAME || echo "error")
-        if [[ "$RELEASE_COMMITS_RESPONSE" == "error" || "$RELEASE_COMMITS_RESPONSE" == "null" ]]; then
-          echo "No differences found between branch $BRANCH_NAME and release."
-          RELEASE_COMMITS=""
-        else
-          RELEASE_COMMITS=$(echo "$RELEASE_COMMITS_RESPONSE" | jq -r '.commits[].sha' | tr '\n' ',' | sed 's/,$//')
-        fi
-
-        echo "MASTER_COMMITS=$MASTER_COMMITS" >> $GITHUB_ENV
-        echo "RELEASE_COMMITS=$RELEASE_COMMITS" >> $GITHUB_ENV
-
-    - name: Prepare list of package versions to delete
-      id: prepare-packages
-      run: |
-        MASTER_COMMITS="${{ env.MASTER_COMMITS }}"
-        RELEASE_COMMITS="${{ env.RELEASE_COMMITS }}"
-        PACKAGE_VERSIONS=""
-
-        for COMMIT in $(echo "$MASTER_COMMITS,$RELEASE_COMMITS" | tr ',' '\n'); do
-          if [ -n "$COMMIT" ]; then
-            PACKAGE_VERSIONS="${PACKAGE_VERSIONS}${COMMIT}-SNAPSHOT,"
-          fi
-        done
-
-        # Remove trailing comma
-        PACKAGE_VERSIONS="${PACKAGE_VERSIONS%,}"
-        echo "PACKAGE_VERSIONS=$PACKAGE_VERSIONS" >> $GITHUB_ENV
-        echo "Package versions to query: $PACKAGE_VERSIONS"
-
-    - name: Get package version IDs
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        PACKAGE_IDS=""
         ORG="liquibase"
         PACKAGE_TYPE="maven"
+        PACKAGE_NAME="${{ matrix.packages_to_delete }}"
+        REPO="${{ github.repository }}"
 
-        for VERSION in $(echo "${{ env.PACKAGE_VERSIONS }}" | tr ',' '\n'); do
-          echo "Processing version: $VERSION"
+        echo "Listing all SHA-SNAPSHOT versions for $PACKAGE_NAME..."
 
-          ID=$(gh api --paginate "orgs/$ORG/packages/$PACKAGE_TYPE/${{ matrix.packages_to_delete }}/versions" | jq -r --arg VERSION "$VERSION" '.[] | select(.name == $VERSION) | .id')
+        # Match both full (40-char) and short (7+ char) SHA-SNAPSHOT versions.
+        # build.yml publishes full SHAs, build-main.yml publishes short SHAs.
+        ALL_VERSIONS=$(gh api --paginate "orgs/$ORG/packages/$PACKAGE_TYPE/$PACKAGE_NAME/versions" \
+          --jq '.[] | select(.name | test("^[0-9a-f]{7,40}-SNAPSHOT$")) | "\(.id) \(.name)"')
+        FETCH_EXIT=$?
 
-          if [ -n "$ID" ]; then
-            echo "Found ID: $ID for version $VERSION"
-            PACKAGE_IDS="${PACKAGE_IDS}${ID},"
+        if [ $FETCH_EXIT -ne 0 ]; then
+          echo "::error::Failed to fetch package versions — aborting"
+          exit 1
+        fi
+
+        if [ -z "$ALL_VERSIONS" ]; then
+          echo "No SHA-SNAPSHOT versions found for $PACKAGE_NAME"
+          echo "ORPHAN_IDS=" >> $GITHUB_ENV
+          exit 0
+        fi
+
+        TOTAL=$(echo "$ALL_VERSIONS" | wc -l | tr -d ' ')
+        echo "Found $TOTAL SHA-SNAPSHOT version(s)"
+
+        ORPHAN_IDS=""
+        ORPHAN_COUNT=0
+
+        # Cache all branch HEAD SHAs once to avoid per-version API calls
+        # and handle pagination (repo has ~190 branches, default page is 30)
+        echo "Fetching all branch heads..."
+        BRANCH_HEADS=$(gh api --paginate "repos/$REPO/branches?per_page=100" --jq '.[].commit.sha')
+        if [ $? -ne 0 ] || [ -z "$BRANCH_HEADS" ]; then
+          echo "::error::Failed to fetch branch heads — aborting to prevent incorrect deletions"
+          exit 1
+        fi
+        BRANCH_COUNT=$(echo "$BRANCH_HEADS" | grep -c '.' || echo "0")
+        echo "Cached $BRANCH_COUNT branch head SHAs"
+
+        while read -r VERSION_ID VERSION_NAME; do
+          [ -z "$VERSION_ID" ] && continue
+
+          # Extract the commit SHA from the version name (remove -SNAPSHOT suffix)
+          COMMIT_SHA="${VERSION_NAME%-SNAPSHOT}"
+
+          IS_ORPHAN=true
+
+          # First: does the commit still exist in the repo?
+          # Capture both output and exit code to distinguish 404 from transient errors
+          COMMIT_RESPONSE=$(gh api "repos/$REPO/commits/$COMMIT_SHA" --jq '.sha' 2>&1)
+          COMMIT_EXIT=$?
+          if [ $COMMIT_EXIT -ne 0 ]; then
+            if echo "$COMMIT_RESPONSE" | grep -q "404\|Not Found"; then
+              echo "ORPHANED (commit gone): $VERSION_NAME"
+            else
+              # Non-404 failure (429/503/network) — skip to be safe
+              echo "SKIPPED (API error): $VERSION_NAME — $COMMIT_RESPONSE"
+              continue
+            fi
           else
-            echo "No ID found for version $VERSION"
+            # Check if any branch HEAD points to this commit (using cached list)
+            # Use prefix match to handle short SHAs (7-char from build-main.yml)
+            BRANCH_MATCH=$(printf '%s\n' "$BRANCH_HEADS" | grep -c "^${COMMIT_SHA}" || true)
+            if [ "$BRANCH_MATCH" -gt 0 ]; then
+              IS_ORPHAN=false
+              echo "ACTIVE (branch head): $VERSION_NAME"
+            else
+              # Check if commit is an ancestor of master or release.
+              # compare/{commit}...{base} returns "ahead" when base has commits
+              # the commit doesn't — meaning the commit is an ancestor of base.
+              # "identical" means they point to the same commit.
+              API_FAILED=false
+              for BASE_BRANCH in master release; do
+                COMPARE_STATUS=$(gh api "repos/$REPO/compare/${COMMIT_SHA}...${BASE_BRANCH}" --jq '.status' 2>/dev/null || echo "api_error")
+                if [[ "$COMPARE_STATUS" == "api_error" ]]; then
+                  echo "SKIPPED (compare API error for $BASE_BRANCH): $VERSION_NAME"
+                  API_FAILED=true
+                  break
+                fi
+                if [[ "$COMPARE_STATUS" == "ahead" || "$COMPARE_STATUS" == "identical" ]]; then
+                  IS_ORPHAN=false
+                  echo "REACHABLE: $VERSION_NAME (ancestor of $BASE_BRANCH)"
+                  break
+                fi
+              done
+              # If compare API failed, skip this version entirely — don't mark as orphan
+              if [ "$API_FAILED" = "true" ]; then
+                continue
+              fi
+            fi
           fi
-        done
-        echo "PACKAGE_IDS=$PACKAGE_IDS" >> $GITHUB_ENV
-        echo "Package ID versions to delete: $PACKAGE_IDS"
-    
-    - name: Delete package versions
-      if: env.PACKAGE_VERSIONS != ''
+
+          if [ "$IS_ORPHAN" = "true" ]; then
+            echo "ORPHANED: $PACKAGE_NAME $VERSION_NAME (ID: $VERSION_ID)"
+            ORPHAN_IDS="${ORPHAN_IDS}${VERSION_ID},"
+            ORPHAN_COUNT=$((ORPHAN_COUNT + 1))
+          fi
+        done <<< "$ALL_VERSIONS"
+
+        # Remove trailing comma
+        ORPHAN_IDS="${ORPHAN_IDS%,}"
+        echo "ORPHAN_IDS=$ORPHAN_IDS" >> $GITHUB_ENV
+        echo ""
+        echo "Summary: $ORPHAN_COUNT orphaned out of $TOTAL total SHA-SNAPSHOT versions"
+
+    - name: Delete orphaned package versions
+      if: env.ORPHAN_IDS != ''
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        for ID in $(echo "${{ env.PACKAGE_IDS }}" | tr ',' '\n'); do
-          echo "Deleting package version with ID: $ID"
-          gh api -X DELETE "orgs/liquibase/packages/maven/${{ matrix.packages_to_delete }}/versions/$ID"
+        PACKAGE_NAME="${{ matrix.packages_to_delete }}"
+        DELETED=0
+        FAILED=0
+
+        for ID in $(echo "${{ env.ORPHAN_IDS }}" | tr ',' '\n'); do
+          [ -z "$ID" ] && continue
+          echo -n "Deleting $PACKAGE_NAME version ID $ID... "
+          DELETE_OUTPUT=$(gh api -X DELETE "orgs/liquibase/packages/maven/$PACKAGE_NAME/versions/$ID" 2>&1)
+          if [ $? -eq 0 ]; then
+            echo "OK"
+            DELETED=$((DELETED + 1))
+          else
+            echo "FAILED: $DELETE_OUTPUT"
+            FAILED=$((FAILED + 1))
+          fi
         done
+
+        echo ""
+        echo "Deleted: $DELETED, Failed: $FAILED"
+
+        if [ "$FAILED" -gt 0 ]; then
+          echo "::error::$FAILED package version(s) failed to delete"
+          exit 1
+        fi
