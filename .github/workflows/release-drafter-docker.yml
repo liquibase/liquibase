@@ -22,6 +22,10 @@ jobs:
       - uses: release-drafter/release-drafter@139054aeaa9adc52ab36ddf67437541f039b88e2 # v6
         with:
           config-name: release-drafter-docker.yml
+          # disable-releaser prevents creating/updating a draft release on PR events;
+          # only the autolabeler runs, which avoids the invalid target_commitish error
+          disable-releaser: true
+          commitish: master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

@@ -68,6 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       sha256: ${{ steps.checksums.outputs.sha256 }}
+      minor_version: ${{ steps.parse-version.outputs.minor_version }}
     steps:
       - name: Configure AWS credentials for vault access
         uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
@@ -105,6 +106,14 @@ jobs:
           SHA256=$(curl -sL "https://package.liquibase.com/downloads/dockerhub/official/liquibase-${LB_VERSION}.tar.gz" | sha256sum | cut -d' ' -f1)
           echo "sha256=$SHA256" >> "$GITHUB_OUTPUT"
 
+      - name: Derive major.minor version
+        id: parse-version
+        env:
+          LB_VERSION: "${{ inputs.liquibaseVersion }}"
+        run: |
+          MINOR=$(echo "$LB_VERSION" | awk -F. '{print $1"."$2}')
+          echo "minor_version=$MINOR" >> "$GITHUB_OUTPUT"
+
       - name: Update LIQUIBASE_VERSION in Dockerfiles
         env:
           LB_VERSION: "${{ inputs.liquibaseVersion }}"
@@ -136,8 +145,20 @@ jobs:
       build_context: docker/
       dockerfile_path: docker/Dockerfile
       image_name: liquibase/liquibase
-      liquibase_version: ${{ inputs.liquibaseVersion }}
+      suffix: ""
+      version: ${{ inputs.liquibaseVersion }}
+      minor_version: ${{ needs.update-dockerfiles.outputs.minor_version }}
+      latest_tag: "latest"
+      push_dockerhub: ${{ inputs.pushDockerHub && !inputs.dryRun }}
+      push_ghcr: ${{ inputs.pushGHCR && !inputs.dryRun }}
+      push_ecr: ${{ inputs.pushECR && !inputs.dryRun }}
+      dockerhub_repo: liquibase/liquibase
+      ghcr_repo: ghcr.io/liquibase/liquibase
+      ecr_repo: public.ecr.aws/liquibase/liquibase
       dry_run: ${{ inputs.dryRun || false }}
+      image_source_url: https://github.com/${{ github.repository }}
+      image_description: Liquibase Container Image
+      image_licenses: FSL-1.1-ALv2
     secrets: inherit
 
   # ── Step 2b: Build Alpine image ───────────────────────────────────────────────
@@ -152,27 +173,39 @@ jobs:
       build_context: docker/
       dockerfile_path: docker/Dockerfile.alpine
       image_name: liquibase/liquibase
-      image_suffix: "-alpine"
-      liquibase_version: ${{ inputs.liquibaseVersion }}
+      suffix: "-alpine"
+      version: ${{ inputs.liquibaseVersion }}
+      minor_version: ${{ needs.update-dockerfiles.outputs.minor_version }}
+      latest_tag: "alpine"
+      push_dockerhub: ${{ inputs.pushDockerHub && !inputs.dryRun }}
+      push_ghcr: ${{ inputs.pushGHCR && !inputs.dryRun }}
+      push_ecr: ${{ inputs.pushECR && !inputs.dryRun }}
+      dockerhub_repo: liquibase/liquibase
+      ghcr_repo: ghcr.io/liquibase/liquibase
+      ecr_repo: public.ecr.aws/liquibase/liquibase
       dry_run: ${{ inputs.dryRun || false }}
+      image_source_url: https://github.com/${{ github.repository }}
+      image_description: Liquibase Container Image (Alpine)
+      image_licenses: FSL-1.1-ALv2
     secrets: inherit
 
   # ── Step 3: Publish both images ───────────────────────────────────────────────
   publish-release:
     name: Publish release
-    needs: [build-community, build-alpine]
+    needs: [update-dockerfiles, build-community, build-alpine]
     # NOTE: Uses DAT-22523-publish-reuse-existing branch until Phase 1 merges to
     # build-logic main. After Phase 1 is merged, flip @DAT-22523-publish-reuse-existing → @main.
     # TODO(DAT-22523/Phase4): flip ref to @main after build-logic Phase 1 merges
     uses: liquibase/build-logic/.github/workflows/reusable-docker-publish.yml@DAT-22523-publish-reuse-existing
     permissions:
-      contents: read
-      id-token: write
+      contents: write
     with:
-      liquibase_version: ${{ inputs.liquibaseVersion }}
+      release_type: liquibase-release
+      version: ${{ inputs.liquibaseVersion }}
+      tag_suffix: ""
       reuse_existing_release: true
-      push_docker_hub: ${{ inputs.pushDockerHub || true }}
-      push_ghcr: ${{ inputs.pushGHCR || true }}
-      push_ecr: ${{ inputs.pushECR || true }}
+      image_name: liquibase/liquibase
+      minor_version: ${{ needs.update-dockerfiles.outputs.minor_version }}
+      latest_tag: "latest"
       dry_run: ${{ inputs.dryRun || false }}
     secrets: inherit
