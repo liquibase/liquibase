@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 # Note: static `strategy.matrix.include:` + `uses:` reusable call is rejected by
 # GitHub Actions workflow parser ("workflow file issue" startup_failure). Split
