@@ -15,6 +15,8 @@ permissions:
   contents: read
   security-events: write
   id-token: write
+  packages: write
+  pull-requests: write
 
 jobs:
   scan-community:
