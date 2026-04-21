@@ -34,8 +34,6 @@ jobs:
     # NOTE: pinned to DAT-22523-publish-reuse-existing until build_context input merges to main.
     # TODO(DAT-22523/Phase4): flip ref to @main after build-logic Phase 1+2 merges
     uses: liquibase/build-logic/.github/workflows/reusable-docker-test.yml@DAT-22523-publish-reuse-existing
-    permissions:
-      contents: read
     with:
       build_context: docker/
       dockerfile_path: ${{ matrix.dockerfile }}
