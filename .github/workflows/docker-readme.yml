@@ -1,0 +1,33 @@
+name: Docker README
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "docker/README.md"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — skip Docker Hub push"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  update-readme:
+    name: Push README to Docker Hub
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-readme.yml@main
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      target_image: liquibase/liquibase
+      readme_path: docker/README.md
+      short_description: "Liquibase Community"
+      dry_run: ${{ inputs.dry_run || false }}
+    secrets: inherit

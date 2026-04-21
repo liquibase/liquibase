@@ -1,0 +1,41 @@
+name: Docker Test
+
+on:
+  push:
+    paths:
+      - "docker/**"
+  pull_request:
+    paths:
+      - "docker/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: "Test ${{ matrix.variant }} on ${{ matrix.runner }}"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: community
+            dockerfile: docker/Dockerfile
+            runner: ubuntu-latest
+          - variant: community
+            dockerfile: docker/Dockerfile
+            runner: macos-15-intel
+          - variant: alpine
+            dockerfile: docker/Dockerfile.alpine
+            runner: ubuntu-latest
+          - variant: alpine
+            dockerfile: docker/Dockerfile.alpine
+            runner: macos-15-intel
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-test.yml@main
+    permissions:
+      contents: read
+    with:
+      build_context: docker/
+      dockerfile_path: ${{ matrix.dockerfile }}
+      runner: ${{ matrix.runner }}
+    secrets: inherit

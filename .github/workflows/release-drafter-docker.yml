@@ -1,0 +1,37 @@
+name: Release Drafter (Docker)
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "docker/**"
+  pull_request:
+    types: [opened, reopened, synchronize, labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  # Auto-label PRs based on title (runs on PR events)
+  label-prs:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: release-drafter/release-drafter@139054aeaa9adc52ab36ddf67437541f039b88e2 # v6
+        with:
+          config-name: release-drafter-docker.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Update Docker draft release (runs on push to master with docker/** changes)
+  draft-docker:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: release-drafter/release-drafter@139054aeaa9adc52ab36ddf67437541f039b88e2 # v6
+        with:
+          config-name: release-drafter-docker.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

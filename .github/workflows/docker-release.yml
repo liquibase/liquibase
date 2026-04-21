@@ -1,0 +1,178 @@
+name: Docker Release
+
+run-name: "Docker Release - v${{ inputs.liquibaseVersion }}${{ inputs.dryRun && ' (Dry Run)' || '' }}"
+
+on:
+  workflow_call:
+    inputs:
+      liquibaseVersion:
+        description: "Liquibase version to release (e.g. 5.0.2)"
+        required: true
+        type: string
+      dryRun:
+        description: "Dry run — skip pushes and commits"
+        required: false
+        type: boolean
+        default: false
+      pushDockerHub:
+        description: "Push to Docker Hub"
+        required: false
+        type: boolean
+        default: true
+      pushGHCR:
+        description: "Push to GitHub Container Registry"
+        required: false
+        type: boolean
+        default: true
+      pushECR:
+        description: "Push to Amazon ECR Public"
+        required: false
+        type: boolean
+        default: true
+
+  workflow_dispatch:
+    inputs:
+      liquibaseVersion:
+        description: "Liquibase version to release (e.g. 5.0.2)"
+        required: true
+        type: string
+      dryRun:
+        description: "Dry run — skip pushes and commits"
+        required: false
+        type: boolean
+        default: false
+      pushDockerHub:
+        description: "Push to Docker Hub"
+        required: false
+        type: boolean
+        default: true
+      pushGHCR:
+        description: "Push to GitHub Container Registry"
+        required: false
+        type: boolean
+        default: true
+      pushECR:
+        description: "Push to Amazon ECR Public"
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  # ── Step 1: Bump LIQUIBASE_VERSION ARG in Dockerfiles, commit to master ──────
+  update-dockerfiles:
+    name: Update Dockerfile versions
+    runs-on: ubuntu-latest
+    outputs:
+      sha256: ${{ steps.checksums.outputs.sha256 }}
+    steps:
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get secrets from vault
+        uses: aws-actions/aws-secretsmanager-get-secrets@2cb1a461cbd4865ac4299648312e4704c646cd53 # v3.0.1
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
+      - name: Get GitHub App token
+        id: get-token
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
+        with:
+          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
+          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          permission-contents: write
+
+      - name: Checkout master
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          token: ${{ steps.get-token.outputs.token }}
+          ref: master
+
+      - name: Resolve SHA256 checksums for ${{ inputs.liquibaseVersion }}
+        id: checksums
+        env:
+          LB_VERSION: "${{ inputs.liquibaseVersion }}"
+        run: |
+          SHA256=$(curl -sL "https://package.liquibase.com/downloads/dockerhub/official/liquibase-${LB_VERSION}.tar.gz" | sha256sum | cut -d' ' -f1)
+          echo "sha256=$SHA256" >> "$GITHUB_OUTPUT"
+
+      - name: Update LIQUIBASE_VERSION in Dockerfiles
+        env:
+          LB_VERSION: "${{ inputs.liquibaseVersion }}"
+          LB_SHA256: "${{ steps.checksums.outputs.sha256 }}"
+        run: |
+          sed -i "s/^ARG LIQUIBASE_VERSION=.*/ARG LIQUIBASE_VERSION=${LB_VERSION}/" docker/Dockerfile docker/Dockerfile.alpine
+          sed -i "s/^ARG LB_SHA256=.*/ARG LB_SHA256=${LB_SHA256}/" docker/Dockerfile docker/Dockerfile.alpine
+
+      - name: Commit and push version bump
+        if: ${{ !inputs.dryRun }}
+        env:
+          LB_VERSION: "${{ inputs.liquibaseVersion }}"
+        run: |
+          git config user.name "liquibase-github-app[bot]"
+          git config user.email "liquibase-github-app[bot]@users.noreply.github.com"
+          git add docker/Dockerfile docker/Dockerfile.alpine
+          git diff --cached --quiet || git commit -m "chore(docker): bump Liquibase version to ${LB_VERSION}"
+          git push
+
+  # ── Step 2a: Build community (ubuntu) image ───────────────────────────────────
+  build-community:
+    name: Build community image
+    needs: [update-dockerfiles]
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-build.yml@main
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      build_context: docker/
+      dockerfile_path: docker/Dockerfile
+      image_name: liquibase/liquibase
+      liquibase_version: ${{ inputs.liquibaseVersion }}
+      dry_run: ${{ inputs.dryRun || false }}
+    secrets: inherit
+
+  # ── Step 2b: Build Alpine image ───────────────────────────────────────────────
+  build-alpine:
+    name: Build alpine image
+    needs: [update-dockerfiles]
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-build.yml@main
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      build_context: docker/
+      dockerfile_path: docker/Dockerfile.alpine
+      image_name: liquibase/liquibase
+      image_suffix: "-alpine"
+      liquibase_version: ${{ inputs.liquibaseVersion }}
+      dry_run: ${{ inputs.dryRun || false }}
+    secrets: inherit
+
+  # ── Step 3: Publish both images ───────────────────────────────────────────────
+  publish-release:
+    name: Publish release
+    needs: [build-community, build-alpine]
+    # NOTE: Uses DAT-22523-publish-reuse-existing branch until Phase 1 merges to
+    # build-logic main. After Phase 1 is merged, flip @DAT-22523-publish-reuse-existing → @main.
+    # TODO(DAT-22523/Phase4): flip ref to @main after build-logic Phase 1 merges
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-publish.yml@DAT-22523-publish-reuse-existing
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      liquibase_version: ${{ inputs.liquibaseVersion }}
+      reuse_existing_release: true
+      push_docker_hub: ${{ inputs.pushDockerHub || true }}
+      push_ghcr: ${{ inputs.pushGHCR || true }}
+      push_ecr: ${{ inputs.pushECR || true }}
+      dry_run: ${{ inputs.dryRun || false }}
+    secrets: inherit
