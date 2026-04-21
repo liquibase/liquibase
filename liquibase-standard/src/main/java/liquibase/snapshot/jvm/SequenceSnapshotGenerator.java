@@ -30,13 +30,6 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         super(Sequence.class, new Class[]{Schema.class});
     }
 
-    private static final StringBuilder COMMON_PG_SEQUENCE_QUERY = new StringBuilder("JOIN pg_namespace ns on c.relnamespace = ns.oid ")
-            .append("LEFT JOIN pg_depend d ON c.oid = d.objid WHERE c.relkind = 'S' AND ns.nspname = 'SCHEMA_NAME' ")
-            .append("AND (c.oid not in (select ds.objid FROM pg_depend ds where ds.refobjsubid > 0) OR ( d.deptype = 'a' AND EXISTS ( ")
-            .append("select 1 from pg_attribute a JOIN pg_class t ON t.oid = d.refobjid AND a.attrelid=t.oid AND a.attnum=d.refobjsubid ")
-            .append("LEFT JOIN pg_catalog.pg_attrdef ad ON ad.adrelid = a.attrelid AND ad.adnum = a.attnum ")
-            .append("WHERE a.atthasdef = false or not (pg_get_expr(ad.adbin, ad.adrelid) ilike '%' || c.relname || '%'))))");
-
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         if (!(foundObject instanceof Schema) || !snapshot.getDatabase().supports(Sequence.class)) {
@@ -203,15 +196,29 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         } else if (database instanceof PostgresDatabase) {
             int version = 9;
             try {
-                version = database.getDatabaseMajorVersion();
-            } catch (Exception ignore) {
-                Scope.getCurrentScope().getLog(getClass()).warning("Failed to retrieve database version: " + ignore);
+                if (database.getConnection() != null) {
+                    version = database.getDatabaseMajorVersion();
+                    Scope.getCurrentScope().getLog(getClass()).fine("Retrieved database version for PostgreSQL: " + version);
+                }
+            } catch (DatabaseException e) {
+                Scope.getCurrentScope().getLog(getClass()).warning("Failed to retrieve database version: " + e.getMessage());
             }
             String schemaName = schema.getName();
             if(schemaName == null) {
                 schemaName = database.getDefaultSchemaName();
             }
-            String pgSequenceQuery = COMMON_PG_SEQUENCE_QUERY.toString().replace("SCHEMA_NAME", schemaName);
+
+            // Build the query dynamically, only including the attidentity check for PG 10+
+            String pgSequenceQuery = new StringBuilder("JOIN pg_namespace ns on c.relnamespace = ns.oid ")
+                    .append("LEFT JOIN pg_depend d ON c.oid = d.objid AND d.deptype IN ('a', 'i') AND d.refobjsubid > 0 ")
+                    .append("WHERE c.relkind = 'S' AND ns.nspname = '").append(schemaName).append("' ")
+                    .append("AND (d.objid IS NULL OR EXISTS ( ")
+                    .append("SELECT 1 FROM pg_attribute a JOIN pg_class t ON t.oid = d.refobjid AND a.attrelid=t.oid AND a.attnum=d.refobjsubid ")
+                    .append("LEFT JOIN pg_catalog.pg_attrdef ad ON ad.adrelid = a.attrelid AND ad.adnum = a.attnum ")
+                    .append(version >= 10 ? "WHERE a.attidentity NOT IN ('a', 'd') AND " : "WHERE ")
+                    .append("(a.atthasdef = false OR NOT (pg_get_expr(ad.adbin, ad.adrelid) ILIKE '%' || c.relname || '%')))) ")
+                    .toString();
+
             if (version < 10) { // 'pg_sequence' view does not exists yet
                 return new RawParameterizedSqlStatement(String.format("SELECT c.relname AS \"SEQUENCE_NAME\" FROM pg_class c %s", pgSequenceQuery));
             } else {

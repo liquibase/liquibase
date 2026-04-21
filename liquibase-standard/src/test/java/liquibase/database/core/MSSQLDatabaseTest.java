@@ -5,9 +5,16 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.sql.visitor.SqlVisitor;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -152,6 +159,20 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
         assertEquals("int", database.unescapeDataTypeString("[int]"));
         assertEquals("decimal(19, 2)", database.unescapeDataTypeString("decimal(19, 2)"));
         assertEquals("decimal(19, 2)", database.unescapeDataTypeString("[decimal](19, 2)"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("systemObjectsProvider")
+    void testIsSystemObject(DatabaseObject example, boolean expected) {
+        assertEquals(expected, database.isSystemObject(example));
+    }
+
+    private static Stream<Arguments> systemObjectsProvider() {
+        return Stream.of(
+            Arguments.of(new Table("some_catalog_name", "dbo", "systranschemas"), true),
+            Arguments.of(new View("some_catalog_name", "dbo", "systranschemas"), true),
+            Arguments.of(new Table("some_catalog_name", "dbo", "user_table"), false)
+        );
     }
 
     @Override
