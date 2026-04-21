@@ -17,6 +17,7 @@ permissions:
   id-token: write
   packages: write
   pull-requests: write
+  actions: read
 
 jobs:
   scan-community:
