@@ -1,6 +1,10 @@
 # Liquibase [![Build and Test](https://github.com/liquibase/liquibase/actions/workflows/run-tests.yml/badge.svg)](https://github.com/liquibase/liquibase/actions/workflows/run-tests.yml) [![Nightly Release](https://github.com/liquibase/liquibase/actions/workflows/nightly-release.yml/badge.svg)](https://github.com/liquibase/liquibase/releases/tag/nightly) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=liquibase&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=liquibase)
 <p align="center"><img src="https://github.com/liquibase/liquibase/blob/main/Liquibase.png" width="30%" height="30%"></p>
 
+> **Note:** This repository's default branch is `main`.
+> - **Local clones/forks:** run `git branch -m master main && git fetch origin && git branch -u origin/main main`
+> - **CI / scripts / docs:** update any references to `master` (e.g., `raw.githubusercontent.com/liquibase/liquibase/master/...`, workflow triggers, submodules) to use `main`
+
 Liquibase helps millions of developers track, version, and deploy database schema changes. It will help you to:
 - Control database schema changes for specific versions
 - Eliminate errors and delays when releasing databases
