@@ -98,7 +98,7 @@ module.exports = ({github, context}) => {
                     if (pulls.data.length === 0) {
                         console.log(`No pull request for branch ${branchName}`);
 
-                        if (branchName === "master" || branchName === "main") {
+                        if (branchName === "main") {
                             console.log(`Expect no pull request for ${branchName}`);
                         } else {
                             continue;
