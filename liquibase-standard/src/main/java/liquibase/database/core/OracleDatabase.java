@@ -685,7 +685,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     @Override
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         // Internally Oracle converts int/integer to number, so when we need to extract and compare it we need number too
-        if (objectType.equals(Column.class) && StringUtils.startsWithIgnoreCase(objectName, "int")) {
+        if (objectType.equals(Column.class)
+                && ("int".equalsIgnoreCase(objectName) || "integer".equalsIgnoreCase(objectName))) {
             return "NUMBER(*, 0)";
         }
         return super.correctObjectName(objectName, objectType);
