@@ -103,7 +103,11 @@ jobs:
         env:
           LB_VERSION: "${{ inputs.liquibaseVersion }}"
         run: |
-          SHA256=$(curl -sL "https://package.liquibase.com/downloads/dockerhub/official/liquibase-${LB_VERSION}.tar.gz" | sha256sum | cut -d' ' -f1)
+          SHA256=$(curl -fsSL "https://package.liquibase.com/downloads/dockerhub/official/liquibase-${LB_VERSION}.tar.gz" | sha256sum | cut -d' ' -f1)
+          if [ -z "$SHA256" ] || [ "$SHA256" = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" ]; then
+            echo "::error::SHA256 resolution failed — empty or zero-byte archive for version ${LB_VERSION}"
+            exit 1
+          fi
           echo "sha256=$SHA256" >> "$GITHUB_OUTPUT"
 
       - name: Derive major.minor version
