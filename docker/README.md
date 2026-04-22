@@ -297,11 +297,6 @@ Published Liquibase Docker images (Community and Secure) are automatically scann
 - **Version Compare** — Compare two versions side by side to see which CVEs were fixed, which are new, and which are shared
 - **Export** — Download vulnerability data as CSV or print reports as PDF
 
-**GitHub Actions** — Raw scan results are also available directly from this repository:
-1. Go to the **Actions** tab
-2. Select **Published Images Vulnerability Scanning**
-3. Choose a workflow run to view the summary or download artifacts
-
 For a detailed guide on reading vulnerability reports, see [SECURITY.md](SECURITY.md).
 
 ---

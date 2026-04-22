@@ -211,5 +211,11 @@ jobs:
       image_name: liquibase/liquibase
       minor_version: ${{ needs.update-dockerfiles.outputs.minor_version }}
       latest_tag: "latest"
+      # Alpine variants also published by build-alpine; list them explicitly so
+      # the Release body covers every published tag for this version.
+      extra_tags: |
+        liquibase/liquibase:${{ inputs.liquibaseVersion }}-alpine
+        liquibase/liquibase:${{ needs.update-dockerfiles.outputs.minor_version }}-alpine
+        liquibase/liquibase:alpine
       dry_run: ${{ inputs.dryRun || false }}
     secrets: inherit

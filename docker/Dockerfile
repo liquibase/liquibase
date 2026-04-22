@@ -1,4 +1,3 @@
-# Builder Stage
 FROM eclipse-temurin:21-jre-noble
 
 # Create liquibase user
