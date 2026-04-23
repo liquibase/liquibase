@@ -27,12 +27,19 @@ import liquibase.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("java:S2583")
 public class SqlChangeLogParser implements ChangeLogParser {
+
+    // Per-Database index of physicalChangeLogLocation -> interim changeset id, built lazily on
+    // the first generateId call and reused thereafter. Avoids an O(N) scan of getRanChangeSets()
+    // per SQL changelog file, which on workloads with many SQL changelogs and large
+    // DATABASECHANGELOG histories was the dominant cost of changelog parsing.
+    private final Map<Database, Map<String, String>> interimIdIndexByDatabase = new ConcurrentHashMap<>();
 
     @Override
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
@@ -107,26 +114,30 @@ public class SqlChangeLogParser implements ChangeLogParser {
         if (database == null || isOldFormat(database)) {
             return "raw";
         }
+        Map<String, String> index = interimIdIndexByDatabase.computeIfAbsent(database, this::buildInterimIdIndex);
+        return index.getOrDefault(physicalChangeLogLocation, "raw");
+    }
 
-        List<RanChangeSet> ranChangeSets = new ArrayList<>();
+    private Map<String, String> buildInterimIdIndex(Database database) {
         try {
-            ranChangeSets = new ArrayList<>(
-               Scope.getCurrentScope().getSingleton(ChangeLogHistoryServiceFactory.class).getChangeLogService(database).getRanChangeSets());
+            Map<String, String> result = new HashMap<>();
+            for (RanChangeSet rc : Scope.getCurrentScope()
+                    .getSingleton(ChangeLogHistoryServiceFactory.class)
+                    .getChangeLogService(database).getRanChangeSets()) {
+                String id = rc.getId();
+                String changeLog = rc.getChangeLog();
+                if (id == null || changeLog == null || !"includeAll".equals(rc.getAuthor())) {
+                    continue;
+                }
+                String expectedInterimId = "raw_" + DatabaseChangeLog.normalizePath(changeLog).replace("/", "_");
+                if (id.equals(expectedInterimId)) {
+                    result.put(changeLog, id);
+                }
+            }
+            return result;
         } catch (Exception dbe) {
-            return "raw";
+            return Collections.emptyMap();
         }
-
-        String interimId = "raw_" + DatabaseChangeLog.normalizePath(physicalChangeLogLocation).replace("/", "_");
-        Optional<RanChangeSet> ranChangeSet =
-            ranChangeSets.stream().filter(rc -> {
-                return rc.getId().equals(interimId) &&
-                       rc.getAuthor().equals("includeAll") &&
-                       rc.getChangeLog().equals(physicalChangeLogLocation);
-            }).findFirst();
-        if (ranChangeSet.isPresent()) {
-            return interimId;
-        }
-        return "raw";
     }
 
     /**
