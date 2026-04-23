@@ -141,7 +141,10 @@ jobs:
   build-community:
     name: Build community image
     needs: [update-dockerfiles]
-    uses: liquibase/build-logic/.github/workflows/reusable-docker-build.yml@main
+    # NOTE: Uses DAT-22523-publish-reuse-existing branch until Phase 1 merges to
+    # build-logic main (reusable gained `build_args` input on that branch).
+    # TODO(DAT-22523/Phase4): flip ref to @main after build-logic Phase 1 merges
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-build.yml@DAT-22523-publish-reuse-existing
     permissions:
       contents: read
       id-token: write
@@ -160,6 +163,9 @@ jobs:
       ghcr_repo: ghcr.io/liquibase/liquibase
       ecr_repo: public.ecr.aws/liquibase/liquibase
       dry_run: ${{ inputs.dryRun || false }}
+      build_args: |
+        LIQUIBASE_VERSION=${{ inputs.liquibaseVersion }}
+        LB_SHA256=${{ needs.update-dockerfiles.outputs.sha256 }}
       image_source_url: https://github.com/${{ github.repository }}
       image_description: Liquibase Container Image
       image_licenses: FSL-1.1-ALv2
@@ -169,7 +175,10 @@ jobs:
   build-alpine:
     name: Build alpine image
     needs: [update-dockerfiles]
-    uses: liquibase/build-logic/.github/workflows/reusable-docker-build.yml@main
+    # NOTE: Uses DAT-22523-publish-reuse-existing branch until Phase 1 merges to
+    # build-logic main (reusable gained `build_args` input on that branch).
+    # TODO(DAT-22523/Phase4): flip ref to @main after build-logic Phase 1 merges
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-build.yml@DAT-22523-publish-reuse-existing
     permissions:
       contents: read
       id-token: write
@@ -188,6 +197,9 @@ jobs:
       ghcr_repo: ghcr.io/liquibase/liquibase
       ecr_repo: public.ecr.aws/liquibase/liquibase
       dry_run: ${{ inputs.dryRun || false }}
+      build_args: |
+        LIQUIBASE_VERSION=${{ inputs.liquibaseVersion }}
+        LB_SHA256=${{ needs.update-dockerfiles.outputs.sha256 }}
       image_source_url: https://github.com/${{ github.repository }}
       image_description: Liquibase Container Image (Alpine)
       image_licenses: FSL-1.1-ALv2
