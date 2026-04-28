@@ -148,6 +148,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      packages: write
     with:
       build_context: docker/
       dockerfile_path: docker/Dockerfile
@@ -182,6 +183,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      packages: write
     with:
       build_context: docker/
       dockerfile_path: docker/Dockerfile.alpine
