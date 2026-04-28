@@ -6,10 +6,9 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.RanChangeSet
 import liquibase.database.Database
+import liquibase.database.DatabaseConnection
 import liquibase.database.core.MockDatabase
 import spock.lang.Specification
-
-import java.lang.reflect.Method
 
 import static liquibase.servicelocator.PrioritizedService.PRIORITY_DATABASE
 
@@ -20,7 +19,9 @@ class SqlChangeLogParserTest extends Specification {
 
     ChangeLogHistoryService changeLogHistoryService
 
-    Database database = new MockDatabase()
+    // Connection set to null so SnapshotGeneratorFactory returns an EmptyDatabaseSnapshot,
+    // which lets isOldFormat() return false without trying real JDBC metadata calls.
+    Database database = new MockDatabase().tap { it.setConnection((DatabaseConnection) null) }
 
     def setup() {
         changeLogHistoryService = Mock(ChangeLogHistoryService)
@@ -39,7 +40,7 @@ class SqlChangeLogParserTest extends Specification {
         def parser = new SqlChangeLogParser()
 
         when:
-        def result = invokeGenerateId(parser, "path/to/file.sql")
+        def result = parser.generateId("path/to/file.sql", database)
 
         then:
         result == "raw"
@@ -53,7 +54,7 @@ class SqlChangeLogParserTest extends Specification {
         def parser = new SqlChangeLogParser()
 
         when:
-        def result = invokeGenerateId(parser, "path/to/file.sql")
+        def result = parser.generateId("path/to/file.sql", database)
 
         then:
         result == "raw_path_to_file.sql"
@@ -67,7 +68,7 @@ class SqlChangeLogParserTest extends Specification {
         def parser = new SqlChangeLogParser()
 
         when:
-        def result = invokeGenerateId(parser, "path/to/file.sql")
+        def result = parser.generateId("path/to/file.sql", database)
 
         then: "behavior matches the pre-cache code: fall back to 'raw'"
         result == "raw"
@@ -81,7 +82,7 @@ class SqlChangeLogParserTest extends Specification {
         def parser = new SqlChangeLogParser()
 
         when:
-        def result = invokeGenerateId(parser, "path/to/file.sql")
+        def result = parser.generateId("path/to/file.sql", database)
 
         then:
         result == "raw"
@@ -92,21 +93,15 @@ class SqlChangeLogParserTest extends Specification {
         def parser = new SqlChangeLogParser()
 
         when:
-        def r1 = invokeGenerateId(parser, "dir/a.sql")
-        def r2 = invokeGenerateId(parser, "dir/b.sql")
-        def r3 = invokeGenerateId(parser, "dir/a.sql")
+        def r1 = parser.generateId("dir/a.sql", database)
+        def r2 = parser.generateId("dir/b.sql", database)
+        def r3 = parser.generateId("dir/a.sql", database)
 
         then:
         r1 == "raw"
         r2 == "raw"
         r3 == "raw"
         1 * changeLogHistoryService.getRanChangeSets() >> []
-    }
-
-    private Object invokeGenerateId(SqlChangeLogParser parser, String path) {
-        Method m = SqlChangeLogParser.class.getDeclaredMethod("generateId", String.class, Database.class)
-        m.setAccessible(true)
-        return m.invoke(parser, path, database)
     }
 
     private static RanChangeSet ranChangeSet(String changeLog, String id, String author) {
