@@ -22,9 +22,7 @@ permissions:
 jobs:
   scan-community:
     name: Scan community image
-    # NOTE: pinned to DAT-22523-publish-reuse-existing until build_context input merges to main.
-    # TODO(DAT-22523/Phase4): flip ref to @main after build-logic Phase 1+2 merges
-    uses: liquibase/build-logic/.github/workflows/reusable-docker-scan.yml@DAT-22523-publish-reuse-existing
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-scan.yml@main
     with:
       build_context: docker/
       dockerfile_path: docker/Dockerfile
@@ -36,9 +34,7 @@ jobs:
 
   scan-alpine:
     name: Scan alpine image
-    # NOTE: pinned to DAT-22523-publish-reuse-existing until build_context input merges to main.
-    # TODO(DAT-22523/Phase4): flip ref to @main after build-logic Phase 1+2 merges
-    uses: liquibase/build-logic/.github/workflows/reusable-docker-scan.yml@DAT-22523-publish-reuse-existing
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-scan.yml@main
     with:
       build_context: docker/
       dockerfile_path: docker/Dockerfile.alpine

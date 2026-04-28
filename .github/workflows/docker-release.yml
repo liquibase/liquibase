@@ -141,10 +141,7 @@ jobs:
   build-community:
     name: Build community image
     needs: [update-dockerfiles]
-    # NOTE: Uses DAT-22523-publish-reuse-existing branch until Phase 1 merges to
-    # build-logic main (reusable gained `build_args` input on that branch).
-    # TODO(DAT-22523/Phase4): flip ref to @main after build-logic Phase 1 merges
-    uses: liquibase/build-logic/.github/workflows/reusable-docker-build.yml@DAT-22523-publish-reuse-existing
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-build.yml@main
     permissions:
       contents: read
       id-token: write
@@ -176,10 +173,7 @@ jobs:
   build-alpine:
     name: Build alpine image
     needs: [update-dockerfiles]
-    # NOTE: Uses DAT-22523-publish-reuse-existing branch until Phase 1 merges to
-    # build-logic main (reusable gained `build_args` input on that branch).
-    # TODO(DAT-22523/Phase4): flip ref to @main after build-logic Phase 1 merges
-    uses: liquibase/build-logic/.github/workflows/reusable-docker-build.yml@DAT-22523-publish-reuse-existing
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-build.yml@main
     permissions:
       contents: read
       id-token: write
@@ -211,10 +205,7 @@ jobs:
   publish-release:
     name: Publish release
     needs: [update-dockerfiles, build-community, build-alpine]
-    # NOTE: Uses DAT-22523-publish-reuse-existing branch until Phase 1 merges to
-    # build-logic main. After Phase 1 is merged, flip @DAT-22523-publish-reuse-existing → @main.
-    # TODO(DAT-22523/Phase4): flip ref to @main after build-logic Phase 1 merges
-    uses: liquibase/build-logic/.github/workflows/reusable-docker-publish.yml@DAT-22523-publish-reuse-existing
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-publish.yml@main
     permissions:
       contents: write
     with:

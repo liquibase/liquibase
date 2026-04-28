@@ -17,13 +17,11 @@ permissions:
 # GitHub Actions workflow parser ("workflow file issue" startup_failure). Split
 # into explicit named jobs per (variant × runner) pair. Matches the proven
 # pattern on liquibase/docker/.github/workflows/trivy.yml.
-# Pinned to DAT-22523-publish-reuse-existing until build_context input merges.
-# TODO(DAT-22523/Phase4): flip ref to @main after build-logic Phase 1+2 merges
 
 jobs:
   test-community-ubuntu:
     name: Test community on ubuntu-latest
-    uses: liquibase/build-logic/.github/workflows/reusable-docker-test.yml@DAT-22523-publish-reuse-existing
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-test.yml@main
     with:
       build_context: docker/
       dockerfile_path: docker/Dockerfile
@@ -32,7 +30,7 @@ jobs:
 
   test-community-macos:
     name: Test community on macos-15-intel
-    uses: liquibase/build-logic/.github/workflows/reusable-docker-test.yml@DAT-22523-publish-reuse-existing
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-test.yml@main
     with:
       build_context: docker/
       dockerfile_path: docker/Dockerfile
@@ -41,7 +39,7 @@ jobs:
 
   test-alpine-ubuntu:
     name: Test alpine on ubuntu-latest
-    uses: liquibase/build-logic/.github/workflows/reusable-docker-test.yml@DAT-22523-publish-reuse-existing
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-test.yml@main
     with:
       build_context: docker/
       dockerfile_path: docker/Dockerfile.alpine
@@ -50,7 +48,7 @@ jobs:
 
   test-alpine-macos:
     name: Test alpine on macos-15-intel
-    uses: liquibase/build-logic/.github/workflows/reusable-docker-test.yml@DAT-22523-publish-reuse-existing
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-test.yml@main
     with:
       build_context: docker/
       dockerfile_path: docker/Dockerfile.alpine
