@@ -1,0 +1,39 @@
+services:
+  # PostgreSQL database
+  postgres:
+    image: postgres:15-alpine
+    container_name: liquibase_postgres
+    environment:
+      POSTGRES_DB: liquibase_demo
+      POSTGRES_USER: liquibase
+      POSTGRES_PASSWORD: liquibase_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U liquibase -d liquibase_demo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Liquibase service - built from local Dockerfile
+  liquibase:
+    build:
+      context: ../../
+      dockerfile: Dockerfile.alpine
+    container_name: liquibase_runner
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./changelog:/liquibase/changelog
+      - ./liquibase.properties:/liquibase/liquibase.properties
+    environment:
+      LIQUIBASE_COMMAND_URL: jdbc:postgresql://postgres:5432/liquibase_demo
+      LIQUIBASE_COMMAND_USERNAME: liquibase
+      LIQUIBASE_COMMAND_PASSWORD: liquibase_password
+    command: ["--defaults-file=/liquibase/liquibase.properties", "update"]
+
+volumes:
+  postgres_data:
