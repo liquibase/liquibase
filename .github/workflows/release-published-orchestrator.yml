@@ -129,8 +129,8 @@ jobs:
 
   release-docker:
     name: Release Docker Images
-    needs: [setup, manual-approval]
-    if: false  # TEMP: skip for v5.0.2 recovery - already completed
+    needs: [setup, manual-approval, deploy-maven]
+    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') && needs.deploy-maven.result == 'success'
     uses: ./.github/workflows/release-docker.yml
     permissions:
       contents: read

@@ -1,0 +1,89 @@
+# Release Drafter configuration for Docker Community releases
+# Scoped to docker/** changes only — does not affect Maven release notes
+# https://github.com/release-drafter/release-drafter
+
+name-template: 'Docker v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+
+# Exclude PRs that are not docker-related
+exclude-labels:
+  - 'skipReleaseNotes'
+
+# Auto-link Jira tickets
+replacers:
+  - search: '/DAT-(\d+)/g'
+    replace: '[DAT-$1](https://datical.atlassian.net/browse/DAT-$1)'
+
+template: |
+  ## What's Changed in Liquibase Docker $RESOLVED_VERSION
+
+  $CHANGES
+
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
+
+categories:
+  - title: '🚀 Features'
+    labels:
+      - 'TypeEnhancement'
+  - title: '🐛 Bug Fixes'
+    labels:
+      - 'TypeBug'
+  - title: '🔧 CI/CD & Infrastructure'
+    labels:
+      - 'TypeCI'
+      - 'TypeChore'
+  - title: '📦 Dependencies'
+    labels:
+      - 'dependencies'
+      - 'docker'
+  - title: '📚 Documentation'
+    labels:
+      - 'TypeDocs'
+  - title: '🔄 Other Changes'
+    labels:
+      - '*'
+
+change-template: '- $TITLE (#$NUMBER) @$AUTHOR'
+change-title-escapes: '\<*_&'
+no-changes-template: 'No changes since last release.'
+
+# Auto-label PRs based on conventional commit title patterns
+autolabeler:
+  - label: 'TypeEnhancement'
+    title:
+      - '/^feat(\(.+\))?:/i'
+  - label: 'TypeBug'
+    title:
+      - '/^fix(\(.+\))?:/i'
+  - label: 'TypeChore'
+    title:
+      - '/^chore(\(.+\))?:/i'
+  - label: 'TypeCI'
+    title:
+      - '/^ci(\(.+\))?:/i'
+  - label: 'TypeDocs'
+    title:
+      - '/^docs(\(.+\))?:/i'
+  - label: 'TypeRefactor'
+    title:
+      - '/^refactor(\(.+\))?:/i'
+  - label: 'dependencies'
+    title:
+      - '/^chore\(deps\):/i'
+  - label: 'docker'
+    files:
+      - 'docker/**'
+
+version-resolver:
+  major:
+    labels:
+      - 'breakingChanges'
+  minor:
+    labels:
+      - 'TypeEnhancement'
+  patch:
+    labels:
+      - 'TypeBug'
+      - 'TypeChore'
+      - 'TypeCI'
+  default: patch
