@@ -12,7 +12,7 @@ The `dryRun` process simulates our current production Liquibase release workflow
 
 The following actions are identical to those in a regular Liquibase release, with no modifications:
 
-- Get latests liquibase artifacts from the `run-tests.yml` workflow
+- Get latest liquibase artifacts from the `run-tests.yml` workflow
 - Re-version artifacts to `dry-run-GITHUB_RUN_ID` version. i.e `dry-run-10522556642`
 - Build installers
 - Attach artifacts (`zip` and `tar` files) to a dryRun draft release
