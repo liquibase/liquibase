@@ -1,0 +1,46 @@
+name: Docker Scan
+
+on:
+  push:
+    paths:
+      - "docker/**"
+  pull_request:
+    paths:
+      - "docker/**"
+  schedule:
+    - cron: "0 7 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  id-token: write
+  packages: write
+  pull-requests: write
+  actions: read
+
+jobs:
+  scan-community:
+    name: Scan community image
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-scan.yml@main
+    with:
+      build_context: docker/
+      dockerfile_path: docker/Dockerfile
+      image_name: liquibase/liquibase
+      vex_enabled: false
+      upload_sarif: true
+      dispatch_new_cves: true
+    secrets: inherit
+
+  scan-alpine:
+    name: Scan alpine image
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-scan.yml@main
+    with:
+      build_context: docker/
+      dockerfile_path: docker/Dockerfile.alpine
+      image_name: liquibase/liquibase
+      suffix: "-alpine"
+      vex_enabled: false
+      upload_sarif: true
+      dispatch_new_cves: true
+    secrets: inherit
