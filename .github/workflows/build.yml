@@ -12,9 +12,9 @@ permissions:
   actions: read
   id-token: write
 
-# The concurrency check will cancel in-progress runs on non-master branches and pull requests on forked repositories regardless of the target branch.
+# The concurrency check will cancel in-progress runs on non-main branches and pull requests on forked repositories regardless of the target branch.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref == 'master' && 'master' || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.head_ref == 'main' && 'main' || github.run_id }}
   cancel-in-progress: true
 
 on:
@@ -256,7 +256,7 @@ jobs:
 
   run-tests-harness:
     needs: [setup, build_publish_branch]
-    uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@master
+    uses: liquibase/liquibase/.github/workflows/run-test-harness.yml@main
     secrets: inherit
     with:
       latestMergeSha: ${{ needs.setup.outputs.latestMergeSha }}

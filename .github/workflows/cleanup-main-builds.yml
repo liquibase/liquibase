@@ -1,4 +1,4 @@
-name: Cleanup Master Builds on Release Published
+name: Cleanup Main Builds on Release Published
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   delete-package:
-    name: Delete Github Packages for Master/Main
+    name: Delete Github Packages for Main
     runs-on: ubuntu-22.04
 
     strategy:

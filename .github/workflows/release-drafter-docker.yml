@@ -3,7 +3,7 @@ name: Release Drafter (Docker)
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - "docker/**"
   pull_request:
@@ -25,11 +25,11 @@ jobs:
           # disable-releaser prevents creating/updating a draft release on PR events;
           # only the autolabeler runs, which avoids the invalid target_commitish error
           disable-releaser: true
-          commitish: master
+          commitish: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Update Docker draft release (runs on push to master with docker/** changes)
+  # Update Docker draft release (runs on push to main with docker/** changes)
   draft-docker:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest

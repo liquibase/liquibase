@@ -93,14 +93,14 @@ jobs:
           echo "Publishing version ${{ steps.collect-data.outputs.version }} from ${{ steps.collect-data.outputs.tag }}"
 
         # Use the 'release' branch for hotfix changes;
-        # otherwise, use the 'master' branch for regular updates.
+        # otherwise, use the 'main' branch for regular updates.
       - name: Ref branch to checkout
         id: ref-branch
         run: |
           if [ "${{ github.ref_name }}" == "release" ]; then
             echo "branch=release" >> $GITHUB_OUTPUT
-          elif [ "${{ github.ref_name }}" == "master" ]; then
-            echo "branch=master" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref_name }}" == "main" ]; then
+            echo "branch=main" >> $GITHUB_OUTPUT
           else
             echo "branch=${{ inputs.dry_run_branch_name }}" >> $GITHUB_OUTPUT
           fi

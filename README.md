@@ -1,5 +1,9 @@
 # Liquibase [![Build and Test](https://github.com/liquibase/liquibase/actions/workflows/run-tests.yml/badge.svg)](https://github.com/liquibase/liquibase/actions/workflows/run-tests.yml) [![Nightly Release](https://github.com/liquibase/liquibase/actions/workflows/nightly-release.yml/badge.svg)](https://github.com/liquibase/liquibase/releases/tag/nightly) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=liquibase&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=liquibase)
-<p align="center"><img src="https://github.com/liquibase/liquibase/blob/master/Liquibase.png" width="30%" height="30%"></p>
+<p align="center"><img src="https://github.com/liquibase/liquibase/blob/main/Liquibase.png" width="30%" height="30%"></p>
+
+> **Note:** This repository's default branch is `main`.
+> - **Local clones/forks:** run `git branch -m master main && git fetch origin && git branch -u origin/main main`
+> - **CI / scripts / docs:** update any references to `master` (e.g., `raw.githubusercontent.com/liquibase/liquibase/master/...`, workflow triggers, submodules) to use `main`
 
 Liquibase helps millions of developers track, version, and deploy database schema changes. It will help you to:
 - Control database schema changes for specific versions
@@ -21,7 +25,7 @@ Together, these options ensure that teams can choose the path that best fits the
 
 ### Build Access and Release Planning
 
-- **Nightly builds:** The latest Main branch build is available at https://github.com/liquibase/liquibase/releases/tag/nightly — download `liquibase-nightly.tar.gz` (Linux/macOS) or `liquibase-nightly.zip` (Windows). Updated automatically after each successful test run on master.
+- **Nightly builds:** The latest Main branch build is available at https://github.com/liquibase/liquibase/releases/tag/nightly — download `liquibase-nightly.tar.gz` (Linux/macOS) or `liquibase-nightly.zip` (Windows). Updated automatically after each successful test run on main.
 - **Latest Release: v5.0.2 — March 5, 2026** \
 https://www.liquibase.com/download-community
 - **Next Planned Release: May 15, 2026** 

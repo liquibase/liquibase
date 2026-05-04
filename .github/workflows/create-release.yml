@@ -16,9 +16,9 @@ on:
         description: "Version (example: 4.8.2)"
         required: true
       branch:
-        description: "Branch to release (Defaults to master)"
+        description: "Branch to release (Defaults to main)"
         required: false
-        default: "master"
+        default: "main"
       runId:
         description: "RunId of liquibase/liquibase artifacts to attach"
         required: true
@@ -39,9 +39,9 @@ on:
         required: true
         type: string
       branch:
-        description: "Branch to release (Defaults to master)"
+        description: "Branch to release (Defaults to main)"
         required: false
-        default: "master"
+        default: "main"
         type: string
       runId:
         description: "RunId of liquibase/liquibase artifacts to attach"

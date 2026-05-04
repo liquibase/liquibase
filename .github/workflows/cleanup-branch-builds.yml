@@ -83,12 +83,12 @@ jobs:
     steps:
 
     # Bug fix: The previous approach tried to compare the deleted branch against
-    # master/release via the GitHub API, but the branch is already gone by the time
+    # main/release via the GitHub API, but the branch is already gone by the time
     # this workflow runs (404). So PACKAGE_VERSIONS was always empty and nothing
     # was ever deleted.
     #
     # New approach: List all SHA-SNAPSHOT versions from the package and delete any
-    # whose commit SHA is orphaned (not reachable from master or release).
+    # whose commit SHA is orphaned (not reachable from main or release).
     - name: Find orphaned SHA-SNAPSHOT package versions
       id: find-orphans
       env:
@@ -165,12 +165,12 @@ jobs:
               IS_ORPHAN=false
               echo "ACTIVE (branch head): $VERSION_NAME"
             else
-              # Check if commit is an ancestor of master or release.
+              # Check if commit is an ancestor of main or release.
               # compare/{commit}...{base} returns "ahead" when base has commits
               # the commit doesn't — meaning the commit is an ancestor of base.
               # "identical" means they point to the same commit.
               API_FAILED=false
-              for BASE_BRANCH in master release; do
+              for BASE_BRANCH in main release; do
                 COMPARE_STATUS=$(gh api "repos/$REPO/compare/${COMMIT_SHA}...${BASE_BRANCH}" --jq '.status' 2>/dev/null || echo "api_error")
                 if [[ "$COMPARE_STATUS" == "api_error" ]]; then
                   echo "SKIPPED (compare API error for $BASE_BRANCH): $VERSION_NAME"

@@ -13,7 +13,7 @@ on:
     types:
       - completed
     branches:
-      - master
+      - main
 
   workflow_dispatch:
 
@@ -36,15 +36,15 @@ jobs:
             run_id="${{ github.event.workflow_run.id }}"
             sha="${{ github.event.workflow_run.head_sha }}"
           else
-            # workflow_dispatch: fetch latest successful run-tests.yml on master
+            # workflow_dispatch: fetch latest successful run-tests.yml on main
             response=$(curl -s \
               -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
               -H "Accept: application/vnd.github.v3+json" \
-              "https://api.github.com/repos/${{ github.repository }}/actions/workflows/run-tests.yml/runs?branch=master&status=success&per_page=1")
+              "https://api.github.com/repos/${{ github.repository }}/actions/workflows/run-tests.yml/runs?branch=main&status=success&per_page=1")
             run_id=$(echo "$response" | jq -r '.workflow_runs[0].id')
             sha=$(echo "$response" | jq -r '.workflow_runs[0].head_sha')
             if [ "$run_id" == "null" ] || [ -z "$run_id" ]; then
-              echo "Error: No successful run-tests.yml run found on master"
+              echo "Error: No successful run-tests.yml run found on main"
               exit 1
             fi
           fi
@@ -65,8 +65,8 @@ jobs:
         run: |
           cd download/liquibase-artifacts
           # Core artifacts
-          mv liquibase-master-SNAPSHOT.tar.gz liquibase-nightly.tar.gz
-          mv liquibase-master-SNAPSHOT.zip liquibase-nightly.zip
+          mv liquibase-main-SNAPSHOT.tar.gz liquibase-nightly.tar.gz
+          mv liquibase-main-SNAPSHOT.zip liquibase-nightly.zip
           mv liquibase-core-0-SNAPSHOT.jar liquibase-core-nightly.jar
           # Create additional zip from signature files (tolerant of missing extensions)
           if compgen -G "*.asc" > /dev/null || compgen -G "*.md5" > /dev/null || compgen -G "*.sha1" > /dev/null || compgen -G "*.sha256" > /dev/null; then
@@ -111,14 +111,14 @@ jobs:
           fi
           gh release create nightly \
             --repo "$REPO" \
-            --target master \
+            --target main \
             --title "Nightly Build ($date_str)" \
             --notes "## Nightly Build
           **Date:** $date_str
           **Commit:** [\`$SHORT_SHA\`](https://github.com/$REPO/commit/$FULL_SHA)
           **Source run:** [Unit and Integration Tests #$SOURCE_RUN_ID](https://github.com/$REPO/actions/runs/$SOURCE_RUN_ID)
           ---
-          > **Warning:** This is an automated nightly build from the \`master\` branch. It is not a stable release. Use at your own risk.
+          > **Warning:** This is an automated nightly build from the \`main\` branch. It is not a stable release. Use at your own risk.
           ### Included Assets
           $table
           ### Stable URL

@@ -76,7 +76,7 @@ do
   find $workdir/META-INF -name pom.xml -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/g" {} \;
   find $workdir/META-INF -name pom.xml -exec sed -i -e "s/<liquibase.version>0-SNAPSHOT<\/liquibase.version>/<liquibase.version>$version<\/liquibase.version>/g" {} \;
   find $workdir/META-INF -name pom.xml -exec sed -i -e "s/<version>$MODIFIED_BRANCH_NAME-SNAPSHOT<\/version>/<version>$version<\/version>/g" {} \;
-  find $workdir/META-INF -name pom.properties -exec sed -i -e "s/\(0\|master\|release\)-SNAPSHOT/$version/g" {} \;
+  find $workdir/META-INF -name pom.properties -exec sed -i -e "s/\(0\|main\|release\)-SNAPSHOT/$version/g" {} \;
   find $workdir/META-INF -name plugin*.xml -exec sed -i -e "s/<version>0-SNAPSHOT<\/version>/<version>$version<\/version>/g" {} \;
   (cd $workdir && jar -uMf $jar META-INF)
   rm -rf $workdir/META-INF
@@ -180,7 +180,7 @@ if [ -z "$extension_name" ]; then
   cp $workdir/internal/lib/liquibase-core.jar $workdir/tgz-repackage/internal/lib/liquibase-core.jar
 
   # replace the versions in all the text files
-  find $workdir/tgz-repackage -name "*.txt" -exec sed -i -e "s/\(0\|release\|master\)-SNAPSHOT/$version/" {} \;
+  find $workdir/tgz-repackage -name "*.txt" -exec sed -i -e "s/\(0\|release\|main\)-SNAPSHOT/$version/" {} \;
 
   (cd $workdir/tgz-repackage && tar -czf $outdir/liquibase-$version.tar.gz *)
   (cd $workdir/tgz-repackage && zip -qr $outdir/liquibase-$version.zip *)
