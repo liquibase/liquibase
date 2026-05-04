@@ -338,4 +338,137 @@ values (1,'dev','main_changelog_level','2025-02-07 13:56:14',1,'EXECUTED','9:6dc
         then:
         filename == "changelogs/changeType/logicalFilePathTestData/explicit-include-no-inherit-child.yaml"
     }
+
+    def "formatted SQL included changelogs without logicalFilePath use physical paths when allowInheritLogicalFilePath=false"() {
+
+        given:
+        def logService = new BufferedLogService()
+        Map<String, Object> scopeValues = new HashMap<>()
+        scopeValues.put(Scope.Attr.logService.name(), logService)
+        scopeValues.put(GlobalConfiguration.ALLOW_INHERIT_LOGICAL_FILE_PATH.getKey(), false)
+
+        Scope.child(scopeValues, new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+                commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "changelogs/changeType/logicalFilePathTestData/issue-7388-parent.yaml")
+                commandScope.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY, UpdateSummaryEnum.VERBOSE)
+                commandScope.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY_OUTPUT, UpdateSummaryOutputEnum.LOG)
+                commandScope.execute()
+            }
+        })
+
+        when:
+        def logContent = logService.getLogAsString(Level.INFO)
+
+        then:
+        // Should use physical file path, not parent's logicalFilePath
+        logContent.contains("ChangeSet changelogs/changeType/logicalFilePathTestData/issue-7388-child.sql::1::testauthor")
+        // Should NOT contain parent's logicalFilePath
+        !logContent.contains("ChangeSet parent-logical-path::1::testauthor")
+
+        when:
+        def resultSet = db.getConnection().createStatement().executeQuery(
+            "select filename from databasechangelog where id = '1' and author = 'testauthor' and filename like '%issue-7388%'"
+        )
+        def filename = null
+        if (resultSet.next()) {
+            filename = resultSet.getString(1)
+        }
+
+        then:
+        filename == "changelogs/changeType/logicalFilePathTestData/issue-7388-child.sql"
+    }
+
+    def "formatted SQL included changelogs without logicalFilePath inherit parent's logicalFilePath when allowInheritLogicalFilePath=true (legacy behavior)"() {
+
+        given:
+        def logService = new BufferedLogService()
+        Map<String, Object> scopeValues = new HashMap<>()
+        scopeValues.put(Scope.Attr.logService.name(), logService)
+        scopeValues.put(GlobalConfiguration.ALLOW_INHERIT_LOGICAL_FILE_PATH.getKey(), true)
+
+        Scope.child(scopeValues, new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+                commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "changelogs/changeType/logicalFilePathTestData/issue-7388-legacy-parent.yaml")
+                commandScope.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY, UpdateSummaryEnum.VERBOSE)
+                commandScope.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY_OUTPUT, UpdateSummaryOutputEnum.LOG)
+                commandScope.execute()
+            }
+        })
+
+        when:
+        def logContent = logService.getLogAsString(Level.INFO)
+
+        then:
+        // Should inherit parent's logicalFilePath
+        logContent.contains("ChangeSet parent-logical-path::sql_legacy_child1::testauthor")
+        // Should NOT use physical file path
+        !logContent.contains("ChangeSet changelogs/changeType/logicalFilePathTestData/issue-7388-legacy-child.sql::sql_legacy_child1::testauthor")
+
+        when:
+        def resultSet = db.getConnection().createStatement().executeQuery(
+            "select filename from databasechangelog where id = 'sql_legacy_child1' and author = 'testauthor'"
+        )
+        def filename = null
+        if (resultSet.next()) {
+            filename = resultSet.getString(1)
+        }
+
+        then:
+        filename == "parent-logical-path"
+    }
+
+    def "formatted SQL child changelog's own logicalFilePath takes highest priority over include statement and parent"() {
+
+        given:
+        def logService = new BufferedLogService()
+        Map<String, Object> scopeValues = new HashMap<>()
+        scopeValues.put(Scope.Attr.logService.name(), logService)
+
+        Scope.child(scopeValues, new Scope.ScopedRunner() {
+            @Override
+            void run() throws Exception {
+                CommandScope commandScope = new CommandScope(UpdateCommandStep.COMMAND_NAME)
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
+                commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
+                commandScope.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, "changelogs/changeType/logicalFilePathTestData/child-with-own-lfp-sql-parent.yaml")
+                commandScope.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY, UpdateSummaryEnum.VERBOSE)
+                commandScope.addArgumentValue(ShowSummaryArgument.SHOW_SUMMARY_OUTPUT, UpdateSummaryOutputEnum.LOG)
+                commandScope.execute()
+            }
+        })
+
+        when:
+        def logContent = logService.getLogAsString(Level.INFO)
+
+        then:
+        // Child's own logicalFilePath should be used (highest priority)
+        logContent.contains("ChangeSet child-own-logical-path::sql_child_own_test::testauthor")
+        // Should NOT use include statement's logicalFilePath
+        !logContent.contains("ChangeSet include-statement-path::sql_child_own_test::testauthor")
+        // Should NOT use parent's logicalFilePath
+        !logContent.contains("ChangeSet parent-logical-path::sql_child_own_test::testauthor")
+
+        when:
+        def resultSet = db.getConnection().createStatement().executeQuery(
+            "select filename from databasechangelog where id = 'sql_child_own_test' and author = 'testauthor'"
+        )
+        def filename = null
+        if (resultSet.next()) {
+            filename = resultSet.getString(1)
+        }
+
+        then:
+        filename == "child-own-logical-path"
+    }
 }
