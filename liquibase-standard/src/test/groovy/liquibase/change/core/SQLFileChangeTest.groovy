@@ -35,6 +35,7 @@ class SQLFileChangeTest extends StandardChangeTest {
     def "lines from file parse into one or more statements correctly"() throws Exception {
         when:
         SQLFileChange change2 = new SQLFileChange();
+        change2.setChangeSet(new ChangeSet(new DatabaseChangeLog()))
         change2.setSql(fileContents);
         MockDatabase database = new MockDatabase();
         SqlStatement[] statements = change2.generateStatements(database);
