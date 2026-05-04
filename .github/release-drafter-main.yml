@@ -1,7 +1,12 @@
 
 name-template: 'Liquibase v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
-filter-by-commitish: true
+# filter-by-commitish must stay false: existing releases (v4.x and v5.0.x)
+# have target_commitish: master, which GitHub does not auto-update on branch
+# rename. Filtering by commitish: main would exclude every prior release,
+# causing release-drafter to walk full repo history (~3.6k PRs, ~300KB body)
+# and fail GitHub's 125KB release-body limit. See DAT-22091.
+filter-by-commitish: false
 commitish: main
 exclude-labels:
   - 'skipReleaseNotes'
