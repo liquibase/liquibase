@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jre-noble
+FROM eclipse-temurin:25-jre-noble
 
 # Create liquibase user
 RUN groupadd --gid 1001 liquibase && \
@@ -11,6 +11,11 @@ WORKDIR /liquibase
 
 ARG LIQUIBASE_VERSION=5.0.2
 ARG LB_SHA256=10356bea9dc57868a57fc3af88ad471f5027d67ad1f5fc88a9c2221401cbae23
+
+# wget is not shipped in eclipse-temurin:25-jre-noble (purged from the base image); install it for the downloads below and remove with the unzip purge in the lpm RUN.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends wget ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN wget -q -O liquibase-${LIQUIBASE_VERSION}.tar.gz "https://package.liquibase.com/downloads/dockerhub/official/liquibase-${LIQUIBASE_VERSION}.tar.gz" && \
     echo "$LB_SHA256 *liquibase-${LIQUIBASE_VERSION}.tar.gz" | sha256sum -c - && \
@@ -45,7 +50,7 @@ RUN apt-get update && \
     echo "$LPM_SHA256 *lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip" | sha256sum -c - && \
     unzip lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip -d bin/ && \
     rm lpm-${LPM_VERSION}-linux${DOWNLOAD_ARCH}.zip && \
-    apt-get purge -y --auto-remove unzip && \
+    apt-get purge -y --auto-remove unzip wget && \
     ln -s /liquibase/bin/lpm /usr/local/bin/lpm && \
     lpm --version
 
