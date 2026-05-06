@@ -8,6 +8,7 @@ import liquibase.changelog.RanChangeSet
 import liquibase.database.Database
 import liquibase.database.DatabaseConnection
 import liquibase.database.core.MockDatabase
+import liquibase.exception.DatabaseException
 import spock.lang.Specification
 
 import static liquibase.servicelocator.PrioritizedService.PRIORITY_DATABASE
@@ -102,6 +103,20 @@ class SqlChangeLogParserTest extends Specification {
         r2 == "raw"
         r3 == "raw"
         1 * changeLogHistoryService.getRanChangeSets() >> []
+    }
+
+    def "generateId retries the index build after a transient failure instead of caching it"() {
+        given:
+        def parser = new SqlChangeLogParser()
+
+        when:
+        def first = parser.generateId("dir/a.sql", database)
+        def second = parser.generateId("dir/a.sql", database)
+
+        then:
+        first == "raw"
+        second == "raw"
+        2 * changeLogHistoryService.getRanChangeSets() >> { throw new DatabaseException("transient") } >> []
     }
 
     private static RanChangeSet ranChangeSet(String changeLog, String id, String author) {
