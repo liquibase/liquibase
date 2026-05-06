@@ -14,7 +14,7 @@ on:
         required: false
         type: boolean
         default: false
-  
+
   workflow_dispatch:
     inputs:
       version:
@@ -34,45 +34,11 @@ permissions:
 jobs:
   release-docker:
     name: Release docker images
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
-        with:
-          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
-          aws-region: us-east-1
-
-      - name: Get secrets from vault
-        id: vault-secrets
-        uses: aws-actions/aws-secretsmanager-get-secrets@2cb1a461cbd4865ac4299648312e4704c646cd53 # v3.0.1
-        with:
-          secret-ids: |
-            ,/vault/liquibase
-          parse-json-secrets: true
-
-      - name: Get GitHub App token
-        id: get-token
-        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
-        with:
-          app-id: ${{ env.LIQUIBASE_GITHUB_APP_ID }}
-          private-key: ${{ env.LIQUIBASE_GITHUB_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          permission-contents: write
-          permission-actions: write
-
-      - name: Release liquibase/docker v${{ inputs.version }}
-        uses: the-actions-org/workflow-dispatch@3133c5d135c7dbe4be4f9793872b6ef331b53bc7 # v4.0.0
-        id: docker_dispatch
-        with:
-          workflow: create-release.yml
-          token: ${{ steps.get-token.outputs.token }}
-          inputs: '{ "liquibaseVersion": "${{ inputs.version }}", "dryRun": "${{ inputs.dry_run || false }}" }'
-          ref: main
-          repo: liquibase/docker
-          wait-for-completion: true
-          workflow-logs: json-output
-
-      - name: Adding Docker run to job summary
-        if: success()
-        continue-on-error: true
-        run: echo '### 🐳 Docker Release Job -> ${{steps.docker_dispatch.outputs.workflow-url}}' >> $GITHUB_STEP_SUMMARY
+    uses: ./.github/workflows/docker-release.yml
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      liquibaseVersion: ${{ inputs.version }}
+      dryRun: ${{ inputs.dry_run || false }}
+    secrets: inherit

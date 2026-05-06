@@ -1,0 +1,16 @@
+FROM liquibase/liquibase:latest
+
+# Install SQLCMD
+USER root
+
+RUN wget -qO - https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+  wget -qO - https://packages.microsoft.com/config/ubuntu/20.04/prod.list | tee /etc/apt/sources.list.d/msprod.list && \
+  apt-get update -y && \
+  ACCEPT_EULA=Y apt-get install --no-install-recommends -y mssql-tools unixodbc-dev && \
+  rm -rf /var/lib/apt/lists/*
+
+# Set SQLCMD Env Vars
+ENV PATH="$PATH:/opt/mssql-tools/bin"
+
+# Return to liquibase user space
+USER liquibase

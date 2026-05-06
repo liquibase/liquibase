@@ -113,3 +113,16 @@ updates:
       - dependency-name: "org.springframework:*"
         update-types: ["version-update:semver-major"]
 
+  # =============================================================================
+  # DOCKER DEPENDENCIES
+  # =============================================================================
+  # Base image updates for community Docker images in docker/
+  - package-ecosystem: "docker"
+    directory: "docker/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "docker"
+      - "dependencies"
+    open-pull-requests-limit: 5
+

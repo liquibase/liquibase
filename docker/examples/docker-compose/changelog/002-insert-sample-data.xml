@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2" author="docker-compose-example">
+        <insert tableName="users">
+            <column name="username" value="john_doe"/>
+            <column name="email" value="john.doe@example.com"/>
+        </insert>
+        <insert tableName="users">
+            <column name="username" value="jane_smith"/>
+            <column name="email" value="jane.smith@example.com"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
