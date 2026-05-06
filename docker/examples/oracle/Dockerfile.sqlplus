@@ -1,0 +1,17 @@
+FROM liquibase/liquibase:latest
+
+# Install SQLPlus
+USER root
+RUN apt-get update && apt-get -y install libaio1 libaio-dev && rm -rf /var/lib/apt/lists/*
+RUN mkdir /opt/oracle
+# You must already have the sqlplus archives downloaded from Oracle
+COPY instantclient-sqlplus-linux.x64-19.12.0.0.0dbru.zip instantclient-basic-linux.x64-19.12.0.0.0dbru.zip .
+RUN sh -c 'unzip -q "*.zip" -d /opt/oracle/'
+RUN rm *.zip
+
+# Set SQLPlus Env Vars
+ENV PATH="$PATH:/opt/oracle/instantclient_19_12"
+ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/oracle/instantclient_19_12"
+
+# Return to liquibase user space
+USER liquibase

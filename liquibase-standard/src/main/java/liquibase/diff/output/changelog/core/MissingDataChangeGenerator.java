@@ -15,6 +15,7 @@ import liquibase.exception.CommandExecutionException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.Data;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Index;
@@ -33,6 +34,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class MissingDataChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
 
@@ -92,7 +94,9 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                     throw new CommandExecutionException(String.format("No columns matched with excludeObjects '%s' / includeObjects '%s'", excludeObjects, includeObjects));
                 }
 
-                String replacement = "\"" + String.join("\", \"", columnNames) + "\"";
+                String replacement = columnNames.stream()
+                        .map(col -> referenceDatabase.escapeObjectName(col, Column.class))
+                        .collect(Collectors.joining(", "));
                 // replace "*" in original SELECT statement with list of filtered column names
                 sql = sql.replace("*", replacement);
             }
@@ -199,7 +203,7 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                 (withIncludeOnly && pattern.matcher(columnName).matches()) ||
                 (withExcludeOnly && !pattern.matcher(columnName).matches()))
             {
-                columnNames.add(isCaseSensitive ? "\\\"" + columnName + "\\\"" : columnName);
+                columnNames.add(columnName);
             }
         }
 

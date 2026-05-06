@@ -6,7 +6,7 @@ on:
       branch:
         description: 'Branch to scan'
         required: true
-        default: 'master'
+        default: 'main'
         type: string
 
 permissions:

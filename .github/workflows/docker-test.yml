@@ -1,0 +1,56 @@
+name: Docker Test
+
+on:
+  push:
+    paths:
+      - "docker/**"
+  pull_request:
+    paths:
+      - "docker/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+# Note: static `strategy.matrix.include:` + `uses:` reusable call is rejected by
+# GitHub Actions workflow parser ("workflow file issue" startup_failure). Split
+# into explicit named jobs per (variant × runner) pair. Matches the proven
+# pattern on liquibase/docker/.github/workflows/trivy.yml.
+
+jobs:
+  test-community-ubuntu:
+    name: Test community on ubuntu-latest
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-test.yml@main
+    with:
+      build_context: docker/
+      dockerfile_path: docker/Dockerfile
+      runs_on: ubuntu-latest
+    secrets: inherit
+
+  test-community-macos:
+    name: Test community on macos-15-intel
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-test.yml@main
+    with:
+      build_context: docker/
+      dockerfile_path: docker/Dockerfile
+      runs_on: macos-15-intel
+    secrets: inherit
+
+  test-alpine-ubuntu:
+    name: Test alpine on ubuntu-latest
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-test.yml@main
+    with:
+      build_context: docker/
+      dockerfile_path: docker/Dockerfile.alpine
+      runs_on: ubuntu-latest
+    secrets: inherit
+
+  test-alpine-macos:
+    name: Test alpine on macos-15-intel
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-test.yml@main
+    with:
+      build_context: docker/
+      dockerfile_path: docker/Dockerfile.alpine
+      runs_on: macos-15-intel
+    secrets: inherit

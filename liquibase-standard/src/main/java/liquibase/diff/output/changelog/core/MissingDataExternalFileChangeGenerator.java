@@ -58,9 +58,22 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
         return stmt;
     }
 
+    /**
+     * Strips path traversal sequences and non-filesystem-safe characters from a table name so the
+     * resulting CSV filename stays within the configured data directory. Any character that is not
+     * alphanumeric, an underscore, or a hyphen is replaced with an underscore and the result is
+     * lowercased.
+     *
+     * @param tableName the raw table name from database metadata
+     * @return a filesystem-safe, lowercase basename suitable for use as a CSV filename
+     */
+    static String sanitizeTableName(String tableName) {
+        return tableName.replaceAll("[^a-zA-Z0-9_\\-]", "_").toLowerCase();
+    }
+
     @Override
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl outputControl, Database referenceDatabase, Database comparisionDatabase, ChangeGeneratorChain chain) {
-    
+
         ResultSet rs = null;
         try (
             Statement stmt = createStatement(referenceDatabase);
@@ -86,7 +99,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                 }
 
                 final PathHandlerFactory pathHandlerFactory = Scope.getCurrentScope().getSingleton(PathHandlerFactory.class);
-                String fileName = table.getName().toLowerCase() + ".csv";
+                String fileName = sanitizeTableName(table.getName()) + ".csv";
                 Resource externalFileResource = pathHandlerFactory.getResource(fileName);
                 if (dataDir != null) {
                     Resource dataDirResource = pathHandlerFactory.getResource(dataDir);

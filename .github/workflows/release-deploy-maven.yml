@@ -124,7 +124,7 @@ jobs:
           ##extracts and sign poms, generate checksums for all artifacts
           for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
             unzip -j $i-${version}.jar META-INF/maven/org.liquibase/$i/pom.xml
-            sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
+            sed -i -e "s/<version>\(release\|main\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
             mv pom.xml $i-${version}.pom
 
             # Sign POM file
@@ -249,7 +249,7 @@ jobs:
           ##extracts and sign poms, generate checksums for all artifacts
           for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli'; do
             unzip -j $i-${version}.jar META-INF/maven/org.liquibase/$i/pom.xml
-            sed -i -e "s/<version>\(release\|master\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
+            sed -i -e "s/<version>\(release\|main\)-SNAPSHOT<\/version>/<version>${version}<\/version>/" pom.xml
             mv pom.xml $i-${version}.pom
 
             # Sign POM file

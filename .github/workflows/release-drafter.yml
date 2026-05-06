@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - master
+      - main
 
 permissions:
   # write permission is required to create a github release
@@ -14,7 +14,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  create_draft_release_master_branch:
+  create_draft_release_main_branch:
     permissions:
       # write permission is required to create a github release
       contents: write
@@ -23,11 +23,11 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      - name: Create Draft Release (Master)
-        if: github.ref == 'refs/heads/master'
+      - name: Create Draft Release (Main)
+        if: github.ref == 'refs/heads/main'
 
         # Drafts your next Release notes as Pull Requests are merged into the default branch
         uses: release-drafter/release-drafter@5de93583980a40bd78603b6dfdcda5b4df377b32 # v7.2.0
         with:
-          config-name: release-drafter-master.yml # located in .github/ in default branch
+          config-name: release-drafter-main.yml # located in .github/ in default branch
           token: ${{ secrets.GITHUB_TOKEN }}
