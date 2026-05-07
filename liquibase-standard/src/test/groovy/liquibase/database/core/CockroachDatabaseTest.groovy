@@ -1,5 +1,6 @@
 package liquibase.database.core
 
+import liquibase.database.DatabaseConnection
 import liquibase.structure.core.Column
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -61,3 +62,27 @@ class CockroachDatabaseTest extends Specification {
         22           | 0            | false
     }
 }
+
+    def "isCorrectDatabaseImplementation returns false when connection URL is null"() {
+        given:
+        def conn = Mock(DatabaseConnection)
+        conn.getURL() >> null
+
+        when:
+        def result = new CockroachDatabase().isCorrectDatabaseImplementation(conn)
+
+        then:
+        result == false
+    }
+
+    def "isCorrectDatabaseImplementation returns false when connection URL does not match postgres patterns"() {
+        given:
+        def conn = Mock(DatabaseConnection)
+        conn.getURL() >> "jdbc:oracle:thin:@localhost:1521:orcl"
+
+        when:
+        def result = new CockroachDatabase().isCorrectDatabaseImplementation(conn)
+
+        then:
+        result == false
+    }
