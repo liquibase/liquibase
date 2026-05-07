@@ -2,15 +2,11 @@ package liquibase.command.core.helpers
 
 import liquibase.Scope
 import liquibase.changelog.ChangeLogParameters
-import liquibase.changelog.DatabaseChangeLog
-import liquibase.command.CommandResultsBuilder
 import liquibase.command.CommandScope
-import liquibase.command.core.UpdateCommandStep
-import liquibase.command.core.helpers.DatabaseChangelogCommandStep
-import liquibase.database.core.MockDatabase
 import liquibase.database.core.PostgresDatabase
 import spock.lang.Specification
-import spock.lang.Unroll
+
+import java.lang.reflect.Method
 
 /**
  * Tests for {@link DatabaseChangelogCommandStep}, specifically the fix for issue #7602
@@ -41,8 +37,16 @@ class DatabaseChangelogCommandStepTest extends Specification {
         def commandScope = new CommandScope("update")
         commandScope.addArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS, userParams)
         
+        // Use reflection to call the actual private method
+        Method method = DatabaseChangelogCommandStep.getDeclaredMethod(
+            "getChangeLogParameters",
+            CommandScope,
+            liquibase.database.Database
+        )
+        method.setAccessible(true)
+        
         def changeLogParams = Scope.instance((Scope.ScopedRunnerWithReturn<ChangeLogParameters>) {
-            return getChangeLogParametersInternal(commandScope, postgresDb)
+            return (ChangeLogParameters) method.invoke(null, commandScope, postgresDb)
         })
         
         then: "the database filter should be set to postgres's short name"
@@ -50,24 +54,5 @@ class DatabaseChangelogCommandStepTest extends Specification {
         
         cleanup:
         postgresDb.close()
-    }
-    
-    /**
-     * Helper method that replicates the logic of getChangeLogParameters for testing.
-     * This is needed because the method is private.
-     */
-    private ChangeLogParameters getChangeLogParametersInternal(CommandScope commandScope, liquibase.database.Database database) {
-        ChangeLogParameters changeLogParameters = commandScope.getArgumentValue(DatabaseChangelogCommandStep.CHANGELOG_PARAMETERS)
-        if (changeLogParameters == null) {
-            changeLogParameters = new ChangeLogParameters(database)
-            changeLogParameters.addJavaProperties()
-            changeLogParameters.addDefaultFileProperties()
-        } else {
-            // This is the fix for issue #7602 - when a user-provided ChangeLogParameters is passed,
-            // we still need to set the database filter so that dbms-specific properties
-            // are correctly resolved.
-            changeLogParameters.setDatabase(database.getShortName())
-        }
-        return changeLogParameters
     }
 }
