@@ -98,6 +98,10 @@ public class DatabaseChangelogCommandStep extends AbstractHelperCommandStep impl
             changeLogParameters = new ChangeLogParameters(database);
             changeLogParameters.addJavaProperties();
             changeLogParameters.addDefaultFileProperties();
+        } else {
+            // When a user-provided ChangeLogParameters is passed, we still need to set the database
+            // filter so that dbms-specific properties are correctly resolved.
+            changeLogParameters.setDatabase(database.getShortName());
         }
         extractContextAndLabels(commandScope, changeLogParameters);
         return changeLogParameters;
