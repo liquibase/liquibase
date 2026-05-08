@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Encapsulates logic for evaluating if a set of runtime contexts matches a context expression string.
@@ -27,7 +28,6 @@ public class ContextExpression {
      * skipped.
      * </p>
      */
-    public static final String NOCONTEXTS = "nocontexts";
     public static final String NOCONTEXTS = "nocontexts";
 
     /**
@@ -109,7 +109,12 @@ public class ContextExpression {
                 .noneMatch(context -> context.startsWith("@"));
 
         if (this.contexts.isEmpty() && noRequiredRuntime) {
-            return true;
+            // Legacy behaviour: an empty context expression matches anything when no required
+            // runtime contexts are present. Exception: if any of the items being matched against
+            // mentions the `nocontexts` pseudo-context, the changeset author has opted into
+            // strict matching, so we fall through to per-expression evaluation instead.
+            return runtimeContexts.getContexts().stream()
+                    .noneMatch(item -> NOCONTEXTS_PATTERN.matcher(item).find());
         }
 
         for (String expression : this.contexts) {
