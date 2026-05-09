@@ -1,6 +1,5 @@
 package liquibase.command.core.helpers
 
-import liquibase.Scope
 import liquibase.changelog.ChangeLogParameters
 import liquibase.command.CommandScope
 import liquibase.database.core.PostgresDatabase
@@ -45,9 +44,8 @@ class DatabaseChangelogCommandStepTest extends Specification {
         )
         method.setAccessible(true)
         
-        def changeLogParams = Scope.instance((Scope.ScopedRunnerWithReturn<ChangeLogParameters>) {
-            return (ChangeLogParameters) method.invoke(null, commandScope, postgresDb)
-        })
+        def step = new DatabaseChangelogCommandStep()
+        def changeLogParams = (ChangeLogParameters) method.invoke(step, commandScope, postgresDb)
         
         then: "the database filter should be set to postgres's short name"
         changeLogParams.getDatabase() == "postgresql"
