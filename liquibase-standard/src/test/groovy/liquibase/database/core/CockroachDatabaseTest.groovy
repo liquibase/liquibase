@@ -61,7 +61,6 @@ class CockroachDatabaseTest extends Specification {
         21           | 3            | false
         22           | 0            | false
     }
-}
 
     def "isCorrectDatabaseImplementation returns false when connection URL is null"() {
         given:
@@ -86,3 +85,4 @@ class CockroachDatabaseTest extends Specification {
         then:
         result == false
     }
+}
