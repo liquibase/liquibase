@@ -11,11 +11,13 @@ import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.precondition.AbstractPrecondition;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 public class ChangeLogPropertyDefinedPrecondition extends AbstractPrecondition {
-
+    @Setter
     private String property;
+    @Setter
     private String value;
 
     @Override
@@ -28,14 +30,6 @@ public class ChangeLogPropertyDefinedPrecondition extends AbstractPrecondition {
         return "changeLogPropertyDefined";
     }
 
-    public void setProperty(String property) {
-        this.property = property;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-    
     @Override
     public Warnings warn(Database database) {
         return new Warnings();
@@ -43,7 +37,7 @@ public class ChangeLogPropertyDefinedPrecondition extends AbstractPrecondition {
 
     @Override
     public ValidationErrors validate(Database database) {
-        return new ValidationErrors();
+        return new ValidationErrors(this).checkRequiredField("property", property);
     }
 
     @Override
@@ -54,14 +48,12 @@ public class ChangeLogPropertyDefinedPrecondition extends AbstractPrecondition {
             throw new PreconditionFailedException("No Changelog properties were set", changeLog, this);
         }
         Object propertyValue = changeLogParameters.getValue(property, changeLog);
-        if (propertyValue == null) {
-            propertyValue = changeLogParameters.getLocalValue(property, changeSet);
-            if (null == propertyValue) {
-                throw new PreconditionFailedException("Changelog property '"+ property +"' was not set", changeLog, this);
-            }
+        if (null == propertyValue) {
+            throw new PreconditionFailedException("Changelog property '"+ property +"' was not set", changeLog, this);
         }
+
         if ((value != null) && !propertyValue.toString().equals(value)) {
-            throw new PreconditionFailedException("Expected changelog property '"+ property +"' to have a value of '"+value+"'.  Got '"+propertyValue+"'", changeLog, this);
+            throw new PreconditionFailedException("Expected changelog property '"+ property +"' to have a value of '"+value+"'. Got '"+propertyValue+"'", changeLog, this);
         }
     }
 }
