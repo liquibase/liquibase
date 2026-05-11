@@ -7,11 +7,11 @@ import liquibase.command.CommandFactory;
 import liquibase.command.CommandScope;
 import liquibase.configuration.AbstractMapConfigurationValueProvider;
 import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.resource.InputStreamList;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.util.StringUtil;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.util.Map;
 import java.util.Properties;
 import java.util.SortedSet;
@@ -20,29 +20,83 @@ import java.util.TreeSet;
 @LiquibaseService(skip = true)
 public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProvider {
 
+    private static final int DEFAULT_PRECEDENCE = 50;
     private final Properties properties;
     private final String sourceDescription;
+    private final int precedence;
 
-    protected DefaultsFileValueProvider(Properties properties) {
+    protected DefaultsFileValueProvider(Properties properties, String sourceDescription, int precedenceOffset) {
         this.properties = properties;
-        sourceDescription = "Passed default properties";
+        this.sourceDescription = sourceDescription;
+        this.precedence = DEFAULT_PRECEDENCE - precedenceOffset;
+    }
+
+    protected DefaultsFileValueProvider(Properties properties, int precedenceOffset) throws IOException {
+        this(properties, "Passed default properties", precedenceOffset);
+    }
+
+    protected DefaultsFileValueProvider(Properties properties) throws IOException {
+        this(properties, 0);
+    }
+
+    public DefaultsFileValueProvider(Map<?,?> properties, int precedenceOffset) throws IOException {
+        this(propertiesFromMap(properties), precedenceOffset);
+    }
+
+    public DefaultsFileValueProvider(Map<?,?> properties) throws IOException {
+        this(properties, 0);
+    }
+
+    public DefaultsFileValueProvider(InputStreamList streamList, String sourceDescription, int precedenceOffset) throws IOException {
+        this(propertiesFromStreams(streamList), sourceDescription, precedenceOffset);
+    }
+
+    public DefaultsFileValueProvider(InputStream stream, String sourceDescription, int precedenceOffset) throws IOException {
+        this(propertiesFromStream(stream), sourceDescription, precedenceOffset);
+    }
+
+    public DefaultsFileValueProvider(File path, int precedenceOffset) throws IOException {
+        this(propertiesFromFile(path), "File " + path.getAbsolutePath(), precedenceOffset);
     }
 
     public DefaultsFileValueProvider(InputStream stream, String sourceDescription) throws IOException {
-        this.sourceDescription = sourceDescription;
-        this.properties = new Properties();
-        this.properties.load(stream);
-        trimAllProperties();
+        this(stream, sourceDescription, 0);
     }
 
     public DefaultsFileValueProvider(File path) throws IOException {
-        this.sourceDescription = "File " + path.getAbsolutePath();
+        this(path, 0);
+    }
 
-        try (InputStream stream = Files.newInputStream(path.toPath())) {
-            this.properties = new Properties();
-            this.properties.load(stream);
-            trimAllProperties();
+    private static Properties propertiesFromStream(InputStream stream) throws IOException {
+
+        Properties properties = new Properties();
+        properties.load(stream);
+        trimAllProperties(properties);
+        return properties;
+    }
+
+    private static Properties propertiesFromStreams(InputStreamList streamList) throws IOException {
+
+        Properties properties = new Properties();
+        for(InputStream stream : streamList.getInputStreams()) {
+            properties.putAll(propertiesFromStream(stream));
         }
+        return properties;
+    }
+
+    private static Properties propertiesFromFile(File file) throws IOException {
+
+        try (InputStream stream = new FileInputStream(file)) {
+            return propertiesFromStream(stream);
+        }
+    }
+
+    private static Properties propertiesFromMap(Map<?,?> map) {
+
+        Properties properties = new Properties();
+        properties.putAll(map);
+        trimAllProperties(properties);
+        return properties;
     }
 
     @Override
@@ -94,7 +148,7 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
             }
         }
 
-        if (invalidKeys.size() > 0) {
+        if (!invalidKeys.isEmpty()) {
             if (strict) {
                 String message = "Strict check failed due to undefined key(s) for '" + StringUtil.join(commandScope.getCommand().getName(), " ")
                     + "' command in " + StringUtil.lowerCaseFirst(sourceDescription) + "':\n"
@@ -110,21 +164,17 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
     //
     // Remove trailing spaces on the property file values
     //
-    private void trimAllProperties() {
+    private static void trimAllProperties(Properties properties) {
         properties.forEach((key, value) -> {
-            if (value == null) {
-                return;
+            if (value instanceof String) {
+                properties.put(key, StringUtil.trimToEmpty((String) value));
             }
-            if (!(value instanceof String)) {
-                return;
-            }
-            properties.put(key, StringUtil.trimToEmpty((String) value));
         });
     }
 
     @Override
     public int getPrecedence() {
-        return 50;
+        return this.precedence;
     }
 
     @Override

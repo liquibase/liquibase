@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 /**
  * A list of {@link InputStream}s. Custom class to allow try-with-resources using output from {@link ResourceAccessor#openStreams(String, String)}.
  */
-public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
+public class InputStreamList implements Iterable<Map.Entry<URI, InputStream>>, AutoCloseable {
 
     private final LinkedHashMap<URI, InputStream> streams = new LinkedHashMap<>();
 
@@ -82,7 +82,7 @@ public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
      */
     @Override
     public void close() throws IOException {
-        for (InputStream stream : this) {
+        for (InputStream stream : streams.values()) {
             try {
                 stream.close();
             } catch (IOException e) {
@@ -92,18 +92,18 @@ public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
     }
 
     @Override
-    public Iterator<InputStream> iterator() {
-        return streams.values().iterator();
+    public Iterator<Map.Entry<URI, InputStream>> iterator() {
+        return streams.entrySet().iterator();
     }
 
     @Override
-    public void forEach(Consumer<? super InputStream> action) {
-        streams.values().forEach(action);
+    public void forEach(Consumer<? super Map.Entry<URI, InputStream>> action) {
+        streams.entrySet().forEach(action);
     }
 
     @Override
-    public Spliterator<InputStream> spliterator() {
-        return streams.values().spliterator();
+    public Spliterator<Map.Entry<URI, InputStream>> spliterator() {
+        return streams.entrySet().spliterator();
     }
 
     public int size() {
@@ -116,5 +116,13 @@ public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
 
     public List<URI> getURIs() {
         return new ArrayList<>(streams.keySet());
+    }
+
+    public List<InputStream> getInputStreams() {
+        return new ArrayList<>(streams.values());
+    }
+
+    public Map.Entry<URI, InputStream> getFirst() {
+        return iterator().next();
     }
 }
