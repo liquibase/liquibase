@@ -1,24 +1,36 @@
 package liquibase.database.core;
 
 import liquibase.GlobalConfiguration;
+import liquibase.Scope;
 import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.DatabaseException;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
+import liquibase.statement.core.RawParameterizedSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 import liquibase.util.StringUtil;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.stream.Stream;
 
@@ -29,6 +41,11 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
 
     public PostgresDatabaseTest() throws Exception {
         super(new PostgresDatabase());
+    }
+
+    @AfterEach
+    void resetExecutorService() {
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
     }
 
     @Override
@@ -176,6 +193,32 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
                 "\"4b5d63f449304c05a291c4c27136ebb5\"",
                 escaped
         );
+    }
+
+    @Test
+    void rollbackQuotesPreservedCasePostgresSchemaOnce() throws Exception {
+        PostgresDatabase database = new PostgresDatabase();
+        DatabaseConnection connection = mock(DatabaseConnection.class);
+        when(connection.getConnectionUserName()).thenReturn("test");
+        when(connection.getURL()).thenReturn("jdbc:postgresql://localhost/test");
+        when(connection.getAutoCommit()).thenReturn(false);
+        database.setConnection(connection);
+
+        Executor executor = mock(Executor.class);
+        when(executor.updatesDatabase()).thenReturn(true);
+        when(executor.queryForObject(any(RawParameterizedSqlStatement.class), eq(String.class)))
+                .thenReturn("$user, public");
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, executor);
+
+        Scope.child(GlobalConfiguration.PRESERVE_SCHEMA_CASE.getKey(), true, () -> {
+            database.setDefaultSchemaName("Test");
+            database.rollback();
+        });
+
+        ArgumentCaptor<RawParameterizedSqlStatement> statementCaptor =
+                ArgumentCaptor.forClass(RawParameterizedSqlStatement.class);
+        verify(executor).execute(statementCaptor.capture());
+        assertEquals("SET LOCAL SEARCH_PATH TO \"Test\", \"$user\",\"public\"", statementCaptor.getValue().getSql());
     }
 
 //    @Test
