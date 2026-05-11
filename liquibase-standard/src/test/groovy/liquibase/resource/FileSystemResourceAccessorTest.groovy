@@ -31,7 +31,7 @@ class FileSystemResourceAccessorTest extends Specification {
 
         then:
         streams.size() == 1
-        StreamUtil.readStreamAsString(streams.iterator().next()).contains(expected)
+        StreamUtil.readStreamAsString(streams.getFirst().getValue()).contains(expected)
         StreamUtil.readStreamAsString(stream).contains(expected)
 
         where:
@@ -120,5 +120,4 @@ class FileSystemResourceAccessorTest extends Specification {
                                      "com/example/my-logic.sql",
                                      "com/example/users.csv"]
     }
-
 }
