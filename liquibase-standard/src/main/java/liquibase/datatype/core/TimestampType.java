@@ -64,6 +64,10 @@ public class TimestampType extends DateTimeType {
             // All timestamp types (with or without timezone) map to TIMESTAMP
             String lowerDef = originalDefinition.toLowerCase();
 
+            if (isNativeMySqlTimestampDefinitionWithColumnAttributes(lowerDef)) {
+                return new DatabaseDataType(getRawDefinition());
+            }
+
             if (lowerDef.startsWith("java.sql.types.timestamp_with_timezone")
                     || lowerDef.startsWith("java.sql.types.timestamp")
                     || lowerDef.startsWith("java.sql.timestamp")
@@ -219,6 +223,15 @@ public class TimestampType extends DateTimeType {
         }
 
         return super.toDatabaseDataType(database);
+    }
+
+    private boolean isNativeMySqlTimestampDefinitionWithColumnAttributes(String lowerDefinition) {
+        if (!lowerDefinition.matches("^timestamp(\\s|\\(|$).*")
+                || lowerDefinition.matches("^timestamp\\s*(\\([^)]*\\))?\\s*$")) {
+            return false;
+        }
+
+        return !lowerDefinition.matches("^timestamp\\s*(\\([^)]*\\))?\\s+(with|without)\\s+time\\s*zone$");
     }
 
     @Override
