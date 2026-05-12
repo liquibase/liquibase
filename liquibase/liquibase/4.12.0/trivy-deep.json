@@ -1,0 +1,1094 @@
+{
+  "SchemaVersion": 2,
+  "Trivy": {
+    "Version": "0.69.3"
+  },
+  "ReportID": "019e1c70-e347-71ff-9f13-e4017ed32bdd",
+  "CreatedAt": "2026-05-12T13:47:00.807132072Z",
+  "ArtifactName": "/tmp/extracted-deps",
+  "ArtifactType": "filesystem",
+  "Results": [
+    {
+      "Target": "Java",
+      "Class": "lang-pkgs",
+      "Type": "jar",
+      "Packages": [
+        {
+          "Name": "com.h2database:h2",
+          "Identifier": {
+            "PURL": "pkg:maven/com.h2database/h2@2.1.212",
+            "UID": "6927dc49c5899541"
+          },
+          "Version": "2.1.212",
+          "FilePath": "internal-jars/lib/h2.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "com.ibm.db2:jcc",
+          "Identifier": {
+            "PURL": "pkg:maven/com.ibm.db2/jcc@11.5.7.0",
+            "UID": "788d17be2ddf26f"
+          },
+          "Version": "11.5.7.0",
+          "FilePath": "internal-jars/lib/jcc.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "com.microsoft.sqlserver:mssql-jdbc",
+          "Identifier": {
+            "PURL": "pkg:maven/com.microsoft.sqlserver/mssql-jdbc@10.2.1",
+            "UID": "baa58eb1ce61476b"
+          },
+          "Version": "10.2.1",
+          "FilePath": "internal-jars/lib/mssql-jdbc.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "com.microsoft.sqlserver:mssql-jdbc",
+          "Identifier": {
+            "PURL": "pkg:maven/com.microsoft.sqlserver/mssql-jdbc@10.2.1.jre8",
+            "UID": "46dcb700a05baaaf"
+          },
+          "Version": "10.2.1.jre8",
+          "FilePath": "internal-jars/lib/mssql-jdbc.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "com.opencsv:opencsv",
+          "Identifier": {
+            "PURL": "pkg:maven/com.opencsv/opencsv@5.6",
+            "UID": "5935b8c35bac7793"
+          },
+          "Version": "5.6",
+          "FilePath": "internal-jars/lib/opencsv.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "com.oracle.database.jdbc:ojdbc8",
+          "Identifier": {
+            "PURL": "pkg:maven/com.oracle.database.jdbc/ojdbc8@21.5.0.0",
+            "UID": "f2138d2d7782864e"
+          },
+          "Version": "21.5.0.0",
+          "FilePath": "internal-jars/lib/ojdbc8.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "info.picocli:picocli",
+          "Identifier": {
+            "PURL": "pkg:maven/info.picocli/picocli@4.6.3",
+            "UID": "5a38aba3cb37be9a"
+          },
+          "Version": "4.6.3",
+          "FilePath": "internal-jars/lib/picocli.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "javax.resource:connector-api",
+          "Identifier": {
+            "PURL": "pkg:maven/javax.resource/connector-api@1.5",
+            "UID": "d218af4e30324f7c"
+          },
+          "Version": "1.5",
+          "FilePath": "internal-jars/lib/connector-api.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "javax.xml.bind:jaxb-api",
+          "Identifier": {
+            "PURL": "pkg:maven/javax.xml.bind/jaxb-api@2.3.1",
+            "UID": "f6a09ef7b08580f1"
+          },
+          "Version": "2.3.1",
+          "FilePath": "internal-jars/lib/jaxb-api.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "net.snowflake:snowflake-jdbc",
+          "Identifier": {
+            "PURL": "pkg:maven/net.snowflake/snowflake-jdbc@3.13.19",
+            "UID": "9a78110a2f0ec081"
+          },
+          "Version": "3.13.19",
+          "FilePath": "internal-jars/lib/snowflake-jdbc.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "one.gfw:jaxb-api",
+          "Identifier": {
+            "PURL": "pkg:maven/one.gfw/jaxb-api@2.3.1",
+            "UID": "1987e1416acbc840"
+          },
+          "Version": "2.3.1",
+          "FilePath": "internal-jars/lib/jaxb-api.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.apache.commons:commons-collections4",
+          "Identifier": {
+            "PURL": "pkg:maven/org.apache.commons/commons-collections4@4.4",
+            "UID": "6c3cd4a03e4e79b5"
+          },
+          "Version": "4.4",
+          "FilePath": "internal-jars/lib/commons-collections4.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.apache.commons:commons-lang3",
+          "Identifier": {
+            "PURL": "pkg:maven/org.apache.commons/commons-lang3@3.12.0",
+            "UID": "d738757f859362e8"
+          },
+          "Version": "3.12.0",
+          "FilePath": "internal-jars/lib/commons-lang3.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.apache.commons:commons-text",
+          "Identifier": {
+            "PURL": "pkg:maven/org.apache.commons/commons-text@1.9",
+            "UID": "95a8e474b7851398"
+          },
+          "Version": "1.9",
+          "FilePath": "internal-jars/lib/commons-text.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.firebirdsql.jdbc:jaybird",
+          "Identifier": {
+            "PURL": "pkg:maven/org.firebirdsql.jdbc/jaybird@4.0.6.java8",
+            "UID": "bd3fab11a6282c69"
+          },
+          "Version": "4.0.6.java8",
+          "FilePath": "internal-jars/lib/jaybird.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.glassfish.jaxb:jaxb-core",
+          "Identifier": {
+            "PURL": "pkg:maven/org.glassfish.jaxb/jaxb-core@2.3.0.1",
+            "UID": "5817dcc5374c5fba"
+          },
+          "Version": "2.3.0.1",
+          "FilePath": "internal-jars/lib/jaxb-core.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.glassfish.jaxb:jaxb-runtime",
+          "Identifier": {
+            "PURL": "pkg:maven/org.glassfish.jaxb/jaxb-runtime@2.3.6",
+            "UID": "f6fe97a94b5e0334"
+          },
+          "Version": "2.3.6",
+          "FilePath": "internal-jars/lib/jaxb-runtime.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.hsqldb:hsqldb",
+          "Identifier": {
+            "PURL": "pkg:maven/org.hsqldb/hsqldb@2.5.2",
+            "UID": "910dfa3b283e8914"
+          },
+          "Version": "2.5.2",
+          "FilePath": "internal-jars/lib/hsqldb.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.mariadb.jdbc:mariadb-java-client",
+          "Identifier": {
+            "PURL": "pkg:maven/org.mariadb.jdbc/mariadb-java-client@3.0.4",
+            "UID": "70f5807fbc59824"
+          },
+          "Version": "3.0.4",
+          "FilePath": "internal-jars/lib/mariadb-java-client.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.postgresql:postgresql",
+          "Identifier": {
+            "PURL": "pkg:maven/org.postgresql/postgresql@42.3.4",
+            "UID": "cc35f1cd5a3f4e40"
+          },
+          "Version": "42.3.4",
+          "FilePath": "internal-jars/lib/postgresql.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.xerial:sqlite-jdbc",
+          "Identifier": {
+            "PURL": "pkg:maven/org.xerial/sqlite-jdbc@3.36.0.3",
+            "UID": "6831838e0db32f11"
+          },
+          "Version": "3.36.0.3",
+          "FilePath": "internal-jars/lib/sqlite-jdbc.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.yaml:snakeyaml",
+          "Identifier": {
+            "PURL": "pkg:maven/org.yaml/snakeyaml@1.30",
+            "UID": "d27d1f4bb3e76174"
+          },
+          "Version": "1.30",
+          "FilePath": "internal-jars/lib/snakeyaml.jar",
+          "AnalyzedBy": "jar"
+        }
+      ],
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2022-45868",
+          "VendorIDs": [
+            "GHSA-22wj-vf5f-wrvj"
+          ],
+          "PkgName": "com.h2database:h2",
+          "PkgPath": "internal-jars/lib/h2.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/com.h2database/h2@2.1.212",
+            "UID": "6927dc49c5899541"
+          },
+          "InstalledVersion": "2.1.212",
+          "FixedVersion": "2.2.220",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2022-45868",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:673ef0c20bd3d3c35cc9d22072fcb946c6f38b17699aa7b83aeb2ce41566ed94",
+          "Title": "The web-based admin console in H2 Database Engine before 2.2.220 can b ...",
+          "Description": "The web-based admin console in H2 Database Engine before 2.2.220 can be started via the CLI with the argument -webAdminPassword, which allows the user to specify the password in cleartext for the web admin console. Consequently, a local user (or an attacker that has obtained local access through some means) would be able to discover the password by listing processes and their arguments. NOTE: the vendor states \"This is not a vulnerability of H2 Console ... Passwords should never be passed on the command line and every qualified DBA or system administrator is expected to know that.\" Nonetheless, the issue was fixed in 2.2.220.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-312"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "nvd": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 7.8
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 7.8
+            }
+          },
+          "References": [
+            "https://github.com/advisories/GHSA-22wj-vf5f-wrvj",
+            "https://github.com/h2database/h2database",
+            "https://github.com/h2database/h2database/blob/96832bf5a97cdc0adc1f2066ed61c54990d66ab5/h2/src/main/org/h2/server/web/WebServer.java#L346-L347",
+            "https://github.com/h2database/h2database/commit/581ed18ff9d6b3761d851620ed88a3994a351a0d",
+            "https://github.com/h2database/h2database/issues/3686",
+            "https://github.com/h2database/h2database/pull/3833",
+            "https://github.com/h2database/h2database/releases/tag/version-2.2.220",
+            "https://nvd.nist.gov/vuln/detail/CVE-2022-45868",
+            "https://sites.google.com/sonatype.com/vulnerabilities/sonatype-2022-6243"
+          ],
+          "PublishedDate": "2022-11-23T21:15:11.36Z",
+          "LastModifiedDate": "2024-11-21T07:29:52.05Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-59250",
+          "VendorIDs": [
+            "GHSA-m494-w24q-6f7w"
+          ],
+          "PkgName": "com.microsoft.sqlserver:mssql-jdbc",
+          "PkgPath": "internal-jars/lib/mssql-jdbc.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/com.microsoft.sqlserver/mssql-jdbc@10.2.1",
+            "UID": "baa58eb1ce61476b"
+          },
+          "InstalledVersion": "10.2.1",
+          "FixedVersion": "10.2.4.jre11, 11.2.4.jre11, 12.2.1.jre11, 12.6.5.jre11, 12.8.2.jre11, 12.10.2.jre11, 13.2.1.jre11",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-59250",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:fb500633ad65448dbd61075a464b40a0d284f5f236fb4be82bcdcbb24830f97c",
+          "Title": "JDBC Driver for SQL Server has improper input validation issue",
+          "Description": "Improper input validation in JDBC Driver for SQL Server allows an unauthorized attacker to perform spoofing over a network.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-20"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "nvd": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N",
+              "V3Score": 8.1
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N",
+              "V3Score": 8.1
+            }
+          },
+          "References": [
+            "https://github.com/microsoft/mssql-jdbc",
+            "https://github.com/microsoft/mssql-jdbc/blob/main/CHANGELOG.md",
+            "https://github.com/microsoft/mssql-jdbc/commit/9732e1bbc6ec44166fda2cddab31ce1c86c873dd#diff-45367b99a1951943bfecfc7765e80df687967aa56286a5b2e039f77cd9a0e118",
+            "https://github.com/microsoft/mssql-jdbc/pull/2798",
+            "https://github.com/microsoft/mssql-jdbc/pull/2800",
+            "https://github.com/microsoft/mssql-jdbc/pull/2801",
+            "https://github.com/microsoft/mssql-jdbc/pull/2802",
+            "https://github.com/microsoft/mssql-jdbc/pull/2803",
+            "https://github.com/microsoft/mssql-jdbc/pull/2807",
+            "https://learn.microsoft.com/en-us/sql/connect/jdbc/microsoft-jdbc-driver-for-sql-server-support-matrix",
+            "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-59250",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-59250"
+          ],
+          "PublishedDate": "2025-10-14T17:16:07.24Z",
+          "LastModifiedDate": "2025-10-30T16:35:42.213Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-59250",
+          "VendorIDs": [
+            "GHSA-m494-w24q-6f7w"
+          ],
+          "PkgName": "com.microsoft.sqlserver:mssql-jdbc",
+          "PkgPath": "internal-jars/lib/mssql-jdbc.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/com.microsoft.sqlserver/mssql-jdbc@10.2.1.jre8",
+            "UID": "46dcb700a05baaaf"
+          },
+          "InstalledVersion": "10.2.1.jre8",
+          "FixedVersion": "10.2.4.jre11, 11.2.4.jre11, 12.2.1.jre11, 12.6.5.jre11, 12.8.2.jre11, 12.10.2.jre11, 13.2.1.jre11",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-59250",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:fb500633ad65448dbd61075a464b40a0d284f5f236fb4be82bcdcbb24830f97c",
+          "Title": "JDBC Driver for SQL Server has improper input validation issue",
+          "Description": "Improper input validation in JDBC Driver for SQL Server allows an unauthorized attacker to perform spoofing over a network.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-20"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "nvd": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N",
+              "V3Score": 8.1
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N",
+              "V3Score": 8.1
+            }
+          },
+          "References": [
+            "https://github.com/microsoft/mssql-jdbc",
+            "https://github.com/microsoft/mssql-jdbc/blob/main/CHANGELOG.md",
+            "https://github.com/microsoft/mssql-jdbc/commit/9732e1bbc6ec44166fda2cddab31ce1c86c873dd#diff-45367b99a1951943bfecfc7765e80df687967aa56286a5b2e039f77cd9a0e118",
+            "https://github.com/microsoft/mssql-jdbc/pull/2798",
+            "https://github.com/microsoft/mssql-jdbc/pull/2800",
+            "https://github.com/microsoft/mssql-jdbc/pull/2801",
+            "https://github.com/microsoft/mssql-jdbc/pull/2802",
+            "https://github.com/microsoft/mssql-jdbc/pull/2803",
+            "https://github.com/microsoft/mssql-jdbc/pull/2807",
+            "https://learn.microsoft.com/en-us/sql/connect/jdbc/microsoft-jdbc-driver-for-sql-server-support-matrix",
+            "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-59250",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-59250"
+          ],
+          "PublishedDate": "2025-10-14T17:16:07.24Z",
+          "LastModifiedDate": "2025-10-30T16:35:42.213Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2023-30535",
+          "VendorIDs": [
+            "GHSA-4g3j-c4wg-6j7x"
+          ],
+          "PkgName": "net.snowflake:snowflake-jdbc",
+          "PkgPath": "internal-jars/lib/snowflake-jdbc.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/net.snowflake/snowflake-jdbc@3.13.19",
+            "UID": "9a78110a2f0ec081"
+          },
+          "InstalledVersion": "3.13.19",
+          "FixedVersion": "3.13.29",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2023-30535",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:7824973a63fb1a5def18067ddcbaea9809d7a17bb8d1ff769bb703bde9035318",
+          "Title": "Snowflake JDBC vulnerable to command injection via SSO URL authentication",
+          "Description": "Snowflake JDBC provides a JDBC type 4 driver that supports core functionality, allowing Java program to connect to Snowflake. Users of the Snowflake JDBC driver were vulnerable to a command injection vulnerability. An attacker could set up a malicious, publicly accessible server which responds to the SSO URL with an attack payload. If the attacker then tricked a user into visiting the maliciously crafted connection URL, the user’s local machine would render the malicious payload, leading to a remote code execution. The vulnerability was patched on March 17, 2023 as part of Snowflake JDBC driver Version 3.13.29. All users should immediately upgrade the Snowflake JDBC driver to the latest version: 3.13.29.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-20",
+            "CWE-77"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "nvd": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:N",
+              "V3Score": 7.3
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+              "V3Score": 8.8
+            }
+          },
+          "References": [
+            "https://community.snowflake.com/s/article/JDBC-Driver-Release-Notes",
+            "https://github.com/snowflakedb/snowflake-jdbc",
+            "https://github.com/snowflakedb/snowflake-jdbc/security/advisories/GHSA-4g3j-c4wg-6j7x",
+            "https://nvd.nist.gov/vuln/detail/CVE-2023-30535"
+          ],
+          "PublishedDate": "2023-04-14T20:15:09.963Z",
+          "LastModifiedDate": "2024-11-21T08:00:22.41Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-24789",
+          "VendorIDs": [
+            "GHSA-7hpq-3g6w-pvhf"
+          ],
+          "PkgName": "net.snowflake:snowflake-jdbc",
+          "PkgPath": "internal-jars/lib/snowflake-jdbc.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/net.snowflake/snowflake-jdbc@3.13.19",
+            "UID": "9a78110a2f0ec081"
+          },
+          "InstalledVersion": "3.13.19",
+          "FixedVersion": "3.22.0",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-24789",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:ae3eb37cd35370f168c5b739e36fc73803caaaf8c24c396174ccacc19ce55080",
+          "Title": "Snowflake JDBC allows an untrusted search path on Windows",
+          "Description": "Snowflake JDBC provides a JDBC type 4 driver that supports core functionality, allowing Java program to connect to Snowflake. Snowflake discovered and remediated a vulnerability in the Snowflake JDBC Driver. When the EXTERNALBROWSER authentication method is used on Windows, an attacker with write access to a directory in the %PATH% can escalate their privileges to the user that runs the vulnerable JDBC Driver version. This vulnerability affects versions 3.2.3 through 3.21.0 on Windows. Snowflake fixed the issue in version 3.22.0.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-426"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 7.8
+            }
+          },
+          "References": [
+            "https://github.com/snowflakedb/snowflake-jdbc",
+            "https://github.com/snowflakedb/snowflake-jdbc/commit/4f01bb8f9b708c71e7a2111c87371dbfc1d53dd6",
+            "https://github.com/snowflakedb/snowflake-jdbc/security/advisories/GHSA-7hpq-3g6w-pvhf",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-24789"
+          ],
+          "PublishedDate": "2025-01-29T18:15:47.03Z",
+          "LastModifiedDate": "2025-08-20T18:18:54.14Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2022-42889",
+          "VendorIDs": [
+            "GHSA-599f-7c49-w659"
+          ],
+          "PkgName": "org.apache.commons:commons-text",
+          "PkgPath": "internal-jars/lib/commons-text.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/org.apache.commons/commons-text@1.9",
+            "UID": "95a8e474b7851398"
+          },
+          "InstalledVersion": "1.9",
+          "FixedVersion": "1.10.0",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2022-42889",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:e3c297e7f63473eb60bfdeebfae6cc23e6398d8ca1929e71f641d4c9a9a30172",
+          "Title": "apache-commons-text: variable interpolation RCE",
+          "Description": "Apache Commons Text performs variable interpolation, allowing properties to be dynamically evaluated and expanded. The standard format for interpolation is \"${prefix:name}\", where \"prefix\" is used to locate an instance of org.apache.commons.text.lookup.StringLookup that performs the interpolation. Starting with version 1.5 and continuing through 1.9, the set of default Lookup instances included interpolators that could result in arbitrary code execution or contact with remote servers. These lookups are: - \"script\" - execute expressions using the JVM script execution engine (javax.script) - \"dns\" - resolve dns records - \"url\" - load values from urls, including from remote servers Applications using the interpolation defaults in the affected versions may be vulnerable to remote code execution or unintentional contact with remote servers if untrusted configuration values are used. Users are recommended to upgrade to Apache Commons Text 1.10.0, which disables the problematic interpolators by default.",
+          "Severity": "CRITICAL",
+          "CweIDs": [
+            "CWE-94"
+          ],
+          "VendorSeverity": {
+            "ghsa": 4,
+            "nvd": 4,
+            "redhat": 4,
+            "ubuntu": 2
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 9.8
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 9.8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 9.8
+            }
+          },
+          "References": [
+            "http://packetstormsecurity.com/files/171003/OX-App-Suite-Cross-Site-Scripting-Server-Side-Request-Forgery.html",
+            "http://packetstormsecurity.com/files/176650/Apache-Commons-Text-1.9-Remote-Code-Execution.html",
+            "http://seclists.org/fulldisclosure/2023/Feb/3",
+            "http://www.openwall.com/lists/oss-security/2022/10/13/4",
+            "http://www.openwall.com/lists/oss-security/2022/10/18/1",
+            "https://access.redhat.com/security/cve/CVE-2022-42889",
+            "https://arxiv.org/pdf/2306.05534",
+            "https://blogs.apache.org/security/entry/cve-2022-42889",
+            "https://github.com/apache/commons-text",
+            "https://lists.apache.org/thread/n2bd4vdsgkqh2tm14l1wyc3jyol7s1om",
+            "https://nvd.nist.gov/vuln/detail/CVE-2022-42889",
+            "https://psirt.global.sonicwall.com/vuln-detail/SNWLID-2022-0022",
+            "https://seclists.org/oss-sec/2022/q4/22",
+            "https://security.gentoo.org/glsa/202301-05",
+            "https://security.netapp.com/advisory/ntap-20221020-0004",
+            "https://security.netapp.com/advisory/ntap-20221020-0004/",
+            "https://securitylab.github.com/advisories/GHSL-2022-018_Apache_Commons_Text",
+            "https://www.cve.org/CVERecord?id=CVE-2022-42889"
+          ],
+          "PublishedDate": "2022-10-13T13:15:10.113Z",
+          "LastModifiedDate": "2024-11-21T07:25:32.1Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2022-41853",
+          "VendorIDs": [
+            "GHSA-77xx-rxvh-q682"
+          ],
+          "PkgName": "org.hsqldb:hsqldb",
+          "PkgPath": "internal-jars/lib/hsqldb.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/org.hsqldb/hsqldb@2.5.2",
+            "UID": "910dfa3b283e8914"
+          },
+          "InstalledVersion": "2.5.2",
+          "FixedVersion": "2.7.1",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2022-41853",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:334cab46c5f72e91b18ce882504469fdfa793f6de41b9514648179a934312c38",
+          "Title": "hsqldb: Untrusted input may lead to RCE attack",
+          "Description": "Those using java.sql.Statement or java.sql.PreparedStatement in hsqldb (HyperSQL DataBase) to process untrusted input may be vulnerable to a remote code execution attack. By default it is allowed to call any static method of any Java class in the classpath resulting in code execution. The issue can be prevented by updating to 2.7.1 or by setting the system property \"hsqldb.method_class_names\" to classes which are allowed to be called. For example, System.setProperty(\"hsqldb.method_class_names\", \"abc\") or Java argument -Dhsqldb.method_class_names=\"abc\" can be used. From version 2.7.1 all classes by default are not accessible except those in java.lang.Math and need to be manually enabled.",
+          "Severity": "CRITICAL",
+          "CweIDs": [
+            "CWE-470"
+          ],
+          "VendorSeverity": {
+            "amazon": 3,
+            "ghsa": 4,
+            "nvd": 4,
+            "oracle-oval": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 9.8
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 9.8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 9.8
+            }
+          },
+          "References": [
+            "http://hsqldb.org/doc/2.0/guide/sqlroutines-chapt.html#src_jrt_access_control",
+            "https://access.redhat.com/security/cve/CVE-2022-41853",
+            "https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50212#c7",
+            "https://github.com/advisories/GHSA-77xx-rxvh-q682",
+            "https://linux.oracle.com/cve/CVE-2022-41853.html",
+            "https://linux.oracle.com/errata/ELSA-2023-12103.html",
+            "https://lists.debian.org/debian-lts-announce/2022/12/msg00020.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2022-41853",
+            "https://sourceforge.net/projects/hsqldb",
+            "https://www.cve.org/CVERecord?id=CVE-2022-41853",
+            "https://www.debian.org/security/2023/dsa-5313"
+          ],
+          "PublishedDate": "2022-10-06T18:17:07.19Z",
+          "LastModifiedDate": "2024-11-21T07:23:56.657Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2024-1597",
+          "VendorIDs": [
+            "GHSA-24rp-q3w6-vc56"
+          ],
+          "PkgName": "org.postgresql:postgresql",
+          "PkgPath": "internal-jars/lib/postgresql.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/org.postgresql/postgresql@42.3.4",
+            "UID": "cc35f1cd5a3f4e40"
+          },
+          "InstalledVersion": "42.3.4",
+          "FixedVersion": "42.2.28, 42.3.9, 42.4.4, 42.5.5, 42.6.1, 42.7.2",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2024-1597",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:0c221a86445f6f88718e1eccd824bac6abd38314aa863c3c61e1f2938dd38659",
+          "Title": "pgjdbc: PostgreSQL JDBC Driver allows attacker to inject SQL if using PreferQueryMode=SIMPLE",
+          "Description": "pgjdbc, the PostgreSQL JDBC Driver, allows attacker to inject SQL if using PreferQueryMode=SIMPLE. Note this is not the default. In the default mode there is no vulnerability. A placeholder for a numeric value must be immediately preceded by a minus. There must be a second placeholder for a string value after the first placeholder; both must be on the same line. By constructing a matching string payload, the attacker can inject SQL to alter the query,bypassing the protections that parameterized queries bring against SQL Injection attacks. Versions before 42.7.2, 42.6.1, 42.5.5, 42.4.4, 42.3.9, and 42.2.28 are affected.",
+          "Severity": "CRITICAL",
+          "CweIDs": [
+            "CWE-89"
+          ],
+          "VendorSeverity": {
+            "alma": 3,
+            "bitnami": 4,
+            "ghsa": 4,
+            "nvd": 4,
+            "oracle-oval": 3,
+            "redhat": 3,
+            "rocky": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 9.8
+            },
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+              "V3Score": 10
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 9.8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 9.8
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2024/04/02/6",
+            "https://access.redhat.com/errata/RHSA-2024:1436",
+            "https://access.redhat.com/security/cve/CVE-2024-1597",
+            "https://bugzilla.redhat.com/2266523",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2266523",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-1597",
+            "https://errata.almalinux.org/9/ALSA-2024-1436.html",
+            "https://errata.rockylinux.org/RLSA-2024:1435",
+            "https://github.com/pgjdbc/pgjdbc",
+            "https://github.com/pgjdbc/pgjdbc/commit/06abfb78a627277a580d4df825f210e96a4e14ee",
+            "https://github.com/pgjdbc/pgjdbc/commit/93b0fcb2711d9c1e3a2a03134369738a02a58b40",
+            "https://github.com/pgjdbc/pgjdbc/security/advisories/GHSA-24rp-q3w6-vc56",
+            "https://linux.oracle.com/cve/CVE-2024-1597.html",
+            "https://linux.oracle.com/errata/ELSA-2024-1436.html",
+            "https://lists.debian.org/debian-lts-announce/2024/05/msg00007.html",
+            "https://lists.debian.org/debian-lts-announce/2024/12/msg00017.html",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/TZQTSMESZD2RJ5XBPSXH3TIQVUW5DIUU/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2024-1597",
+            "https://security.netapp.com/advisory/ntap-20240419-0008/",
+            "https://www.cve.org/CVERecord?id=CVE-2024-1597",
+            "https://www.enterprisedb.com/docs/jdbc_connector/latest/01_jdbc_rel_notes/",
+            "https://www.enterprisedb.com/docs/security/assessments/cve-2024-1597/",
+            "https://www.sonarsource.com/blog/double-dash-double-trouble-a-subtle-sql-injection-flaw/"
+          ],
+          "PublishedDate": "2024-02-19T13:15:07.74Z",
+          "LastModifiedDate": "2025-11-03T22:16:40.287Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2022-31197",
+          "VendorIDs": [
+            "GHSA-r38f-c4h4-hqq2"
+          ],
+          "PkgName": "org.postgresql:postgresql",
+          "PkgPath": "internal-jars/lib/postgresql.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/org.postgresql/postgresql@42.3.4",
+            "UID": "cc35f1cd5a3f4e40"
+          },
+          "InstalledVersion": "42.3.4",
+          "FixedVersion": "42.2.26, 42.4.1, 42.3.7",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2022-31197",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:f1513bf6ae66a2ca8871a58986ea4694e5743c1bb4e1f9192b1325f94bb52df1",
+          "Title": "postgresql: SQL Injection in ResultSet.refreshRow() with malicious column names",
+          "Description": "PostgreSQL JDBC Driver (PgJDBC for short) allows Java programs to connect to a PostgreSQL database using standard, database independent Java code. The PGJDBC implementation of the `java.sql.ResultRow.refreshRow()` method is not performing escaping of column names so a malicious column name that contains a statement terminator, e.g. `;`, could lead to SQL injection. This could lead to executing additional SQL commands as the application's JDBC user. User applications that do not invoke the `ResultSet.refreshRow()` method are not impacted. User application that do invoke that method are impacted if the underlying database that they are querying via their JDBC application may be under the control of an attacker. The attack requires the attacker to trick the user into executing SQL against a table name who's column names would contain the malicious SQL and subsequently invoke the `refreshRow()` method on the ResultSet. Note that the application's JDBC user and the schema owner need not be the same. A JDBC application that executes as a privileged user querying database schemas owned by potentially malicious less-privileged users would be vulnerable. In that situation it may be possible for the malicious user to craft a schema that causes the application to execute commands as the privileged user. Patched versions will be released as `42.2.26` and `42.4.1`. Users are advised to upgrade. There are no known workarounds for this issue.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-89"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "bitnami": 3,
+            "ghsa": 3,
+            "nvd": 3,
+            "oracle-oval": 2,
+            "redhat": 2,
+            "rocky": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H",
+              "V3Score": 8
+            },
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:L/UI:R/S:U/C:H/I:H/A:H",
+              "V3Score": 7.1
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H",
+              "V3Score": 8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H",
+              "V3Score": 8
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2023:0318",
+            "https://access.redhat.com/security/cve/CVE-2022-31197",
+            "https://bugzilla.redhat.com/2129428",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2129428",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-31197",
+            "https://errata.almalinux.org/9/ALSA-2023-0318.html",
+            "https://errata.rockylinux.org/RLSA-2023:0318",
+            "https://github.com/pgjdbc/pgjdbc",
+            "https://github.com/pgjdbc/pgjdbc/commit/739e599d52ad80f8dcd6efedc6157859b1a9d637",
+            "https://github.com/pgjdbc/pgjdbc/security/advisories/GHSA-r38f-c4h4-hqq2",
+            "https://linux.oracle.com/cve/CVE-2022-31197.html",
+            "https://linux.oracle.com/errata/ELSA-2023-0318.html",
+            "https://lists.debian.org/debian-lts-announce/2022/10/msg00009.html",
+            "https://lists.debian.org/debian-lts-announce/2024/12/msg00017.html",
+            "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/I6WHUADTZBBQLVHO4YG4XCWDGWBT4LRP",
+            "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/I6WHUADTZBBQLVHO4YG4XCWDGWBT4LRP/",
+            "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/UTFE6SV33P5YYU2GNTQZQKQRVR3GYE4S",
+            "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/UTFE6SV33P5YYU2GNTQZQKQRVR3GYE4S/",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/I6WHUADTZBBQLVHO4YG4XCWDGWBT4LRP",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/UTFE6SV33P5YYU2GNTQZQKQRVR3GYE4S",
+            "https://nvd.nist.gov/vuln/detail/CVE-2022-31197",
+            "https://www.cve.org/CVERecord?id=CVE-2022-31197"
+          ],
+          "PublishedDate": "2022-08-03T19:15:08.63Z",
+          "LastModifiedDate": "2025-11-03T22:15:58.603Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-42198",
+          "VendorIDs": [
+            "GHSA-98qh-xjc8-98pq"
+          ],
+          "PkgName": "org.postgresql:postgresql",
+          "PkgPath": "internal-jars/lib/postgresql.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/org.postgresql/postgresql@42.3.4",
+            "UID": "cc35f1cd5a3f4e40"
+          },
+          "InstalledVersion": "42.3.4",
+          "FixedVersion": "42.7.11",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-42198",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:0d74d523df9f4de1a2f809b617be2f69ba2f77b51e58d3c8280b0f4250be98ad",
+          "Title": "jdbc.postgresql.org: pgjdbc: Client-side Denial of Service via malicious SCRAM-SHA-256 authentication",
+          "Description": "pgjdbc is an open source postgresql JDBC Driver. From version 42.2.0 to before version 42.7.11, pgjdbc is vulnerable to a client-side denial of service during SCRAM-SHA-256 authentication. A malicious server can instruct the driver to perform SCRAM authentication with a very large iteration count. With a large enough value, the client spends an unbounded amount of CPU time inside PBKDF2 before authentication can fail. A single attempt ties up a CPU core. Repeated or concurrent attempts exhaust client CPU and can wedge connection pools. In affected versions, loginTimeout did not fully mitigate this problem. When loginTimeout expired, the caller could stop waiting, but the worker thread performing the connection attempt could continue running and burning CPU inside the SCRAM PBKDF2 computation. This issue has been patched in version 42.7.11.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-770"
+          ],
+          "VendorSeverity": {
+            "bitnami": 3,
+            "ghsa": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-42198",
+            "https://github.com/pgjdbc/pgjdbc",
+            "https://github.com/pgjdbc/pgjdbc/releases/tag/REL42.7.11",
+            "https://github.com/pgjdbc/pgjdbc/security/advisories/GHSA-98qh-xjc8-98pq",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-42198",
+            "https://www.cve.org/CVERecord?id=CVE-2026-42198"
+          ],
+          "PublishedDate": "2026-04-29T16:16:25.427Z",
+          "LastModifiedDate": "2026-05-01T12:51:20.853Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2023-32697",
+          "VendorIDs": [
+            "GHSA-6phf-6h5g-97j2"
+          ],
+          "PkgName": "org.xerial:sqlite-jdbc",
+          "PkgPath": "internal-jars/lib/sqlite-jdbc.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/org.xerial/sqlite-jdbc@3.36.0.3",
+            "UID": "6831838e0db32f11"
+          },
+          "InstalledVersion": "3.36.0.3",
+          "FixedVersion": "3.41.2.2",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2023-32697",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:ce58ff30da1ffae2ba137dbcfe5cf216f168125478a834ba5ccb00db3ce38e0c",
+          "Title": "sqlite-jdbc: Remote code execution when JDBC url is attacker controlled",
+          "Description": "SQLite JDBC is a library for accessing and creating SQLite database files in Java. Sqlite-jdbc addresses a remote code execution vulnerability via JDBC URL. This issue impacting versions 3.6.14.1 through 3.41.2.1 and has been fixed in version 3.41.2.2.\n",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-94"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "nvd": 4,
+            "redhat": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 8.8
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 9.8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 8.8
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2023-32697",
+            "https://github.com/xerial/sqlite-jdbc",
+            "https://github.com/xerial/sqlite-jdbc/releases/tag/3.41.2.2",
+            "https://github.com/xerial/sqlite-jdbc/security/advisories/GHSA-6phf-6h5g-97j2",
+            "https://nvd.nist.gov/vuln/detail/CVE-2023-32697",
+            "https://www.cve.org/CVERecord?id=CVE-2023-32697"
+          ],
+          "PublishedDate": "2023-05-23T23:15:09.337Z",
+          "LastModifiedDate": "2024-11-21T08:03:52.44Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2022-1471",
+          "VendorIDs": [
+            "GHSA-mjmj-j48q-9wg2"
+          ],
+          "PkgName": "org.yaml:snakeyaml",
+          "PkgPath": "internal-jars/lib/snakeyaml.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/org.yaml/snakeyaml@1.30",
+            "UID": "d27d1f4bb3e76174"
+          },
+          "InstalledVersion": "1.30",
+          "FixedVersion": "2.0",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2022-1471",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:6554e949e33d52367cc3ea8df59da1af64292c2fcc3cd7c330716c5beb0bcc5f",
+          "Title": "SnakeYaml: Constructor Deserialization Remote Code Execution",
+          "Description": "SnakeYaml's Constructor() class does not restrict types which can be instantiated during deserialization. Deserializing yaml content provided by an attacker can lead to remote code execution. We recommend using SnakeYaml's SafeConsturctor when parsing untrusted content to restrict deserialization. We recommend upgrading to version 2.0 and beyond.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-20",
+            "CWE-502"
+          ],
+          "VendorSeverity": {
+            "alma": 3,
+            "ghsa": 3,
+            "nvd": 4,
+            "oracle-oval": 3,
+            "redhat": 3,
+            "rocky": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:L",
+              "V3Score": 8.3
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 9.8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 9.8
+            }
+          },
+          "References": [
+            "http://packetstormsecurity.com/files/175095/PyTorch-Model-Server-Registration-Deserialization-Remote-Code-Execution.html",
+            "http://www.openwall.com/lists/oss-security/2023/11/19/1",
+            "https://access.redhat.com/errata/RHSA-2022:9058",
+            "https://access.redhat.com/security/cve/CVE-2022-1471",
+            "https://bitbucket.org/snakeyaml/snakeyaml",
+            "https://bitbucket.org/snakeyaml/snakeyaml/commits/5014df1a36f50aca54405bb8433bc99a8847f758",
+            "https://bitbucket.org/snakeyaml/snakeyaml/commits/acc44099f5f4af26ff86b4e4e4cc1c874e2dc5c4",
+            "https://bitbucket.org/snakeyaml/snakeyaml/issues/561/cve-2022-1471-vulnerability-in#comment-64581479",
+            "https://bitbucket.org/snakeyaml/snakeyaml/issues/561/cve-2022-1471-vulnerability-in#comment-64634374",
+            "https://bitbucket.org/snakeyaml/snakeyaml/issues/561/cve-2022-1471-vulnerability-in#comment-64876314",
+            "https://bitbucket.org/snakeyaml/snakeyaml/wiki/CVE-2022-1471",
+            "https://bugzilla.redhat.com/2150009",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2150009",
+            "https://confluence.atlassian.com/security/cve-2022-1471-snakeyaml-library-rce-vulnerability-in-multiple-products-1296171009.html",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-1471",
+            "https://errata.almalinux.org/8/ALSA-2022-9058.html",
+            "https://errata.rockylinux.org/RLSA-2022:9058",
+            "https://github.com/google/security-research/security/advisories/GHSA-mjmj-j48q-9wg2",
+            "https://github.com/mbechler/marshalsec",
+            "https://groups.google.com/g/kubernetes-security-announce/c/mwrakFaEdnc",
+            "https://infosecwriteups.com/%EF%B8%8F-inside-the-160-comment-fight-to-fix-snakeyamls-rce-default-1a20c5ca4d4c",
+            "https://linux.oracle.com/cve/CVE-2022-1471.html",
+            "https://linux.oracle.com/errata/ELSA-2022-9058-1.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2022-1471",
+            "https://security.netapp.com/advisory/ntap-20230818-0015",
+            "https://security.netapp.com/advisory/ntap-20230818-0015/",
+            "https://security.netapp.com/advisory/ntap-20240621-0006",
+            "https://security.netapp.com/advisory/ntap-20240621-0006/",
+            "https://snyk.io/blog/unsafe-deserialization-snakeyaml-java-cve-2022-1471",
+            "https://www.cve.org/CVERecord?id=CVE-2022-1471",
+            "https://www.github.com/mbechler/marshalsec/blob/master/marshalsec.pdf?raw=true"
+          ],
+          "PublishedDate": "2022-12-01T11:15:10.553Z",
+          "LastModifiedDate": "2025-06-18T09:15:47.243Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2022-25857",
+          "VendorIDs": [
+            "GHSA-3mc7-4q67-w48m"
+          ],
+          "PkgName": "org.yaml:snakeyaml",
+          "PkgPath": "internal-jars/lib/snakeyaml.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/org.yaml/snakeyaml@1.30",
+            "UID": "d27d1f4bb3e76174"
+          },
+          "InstalledVersion": "1.30",
+          "FixedVersion": "1.31",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2022-25857",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:5c93340f75861575b1ef90f5a512c7ed67d40bf3ebd818376710f5a1815d4077",
+          "Title": "snakeyaml: Denial of Service due to missing nested depth limitation for collections",
+          "Description": "The package org.yaml:snakeyaml from 0 and before 1.31 are vulnerable to Denial of Service (DoS) due missing to nested depth limitation for collections.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-776"
+          ],
+          "VendorSeverity": {
+            "alma": 2,
+            "amazon": 3,
+            "ghsa": 3,
+            "nvd": 3,
+            "oracle-oval": 2,
+            "redhat": 3,
+            "rocky": 2,
+            "ubuntu": 1
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2022:6820",
+            "https://access.redhat.com/security/cve/CVE-2022-25857",
+            "https://bitbucket.org/snakeyaml/snakeyaml/commits/fc300780da21f4bb92c148bc90257201220cf174",
+            "https://bitbucket.org/snakeyaml/snakeyaml/issues/525",
+            "https://bugzilla.redhat.com/2126789",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2126789",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-25857",
+            "https://errata.almalinux.org/8/ALSA-2022-6820.html",
+            "https://errata.rockylinux.org/RLSA-2022:6820",
+            "https://github.com/snakeyaml/snakeyaml",
+            "https://github.com/snakeyaml/snakeyaml/commit/fc300780da21f4bb92c148bc90257201220cf174",
+            "https://linux.oracle.com/cve/CVE-2022-25857.html",
+            "https://linux.oracle.com/errata/ELSA-2022-6820.html",
+            "https://lists.debian.org/debian-lts-announce/2022/10/msg00001.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2022-25857",
+            "https://security.netapp.com/advisory/ntap-20240315-0010",
+            "https://security.netapp.com/advisory/ntap-20240315-0010/",
+            "https://security.snyk.io/vuln/SNYK-JAVA-ORGYAML-2806360",
+            "https://ubuntu.com/security/notices/USN-5944-1",
+            "https://www.cve.org/CVERecord?id=CVE-2022-25857"
+          ],
+          "PublishedDate": "2022-08-30T05:15:07.667Z",
+          "LastModifiedDate": "2024-11-21T06:53:07.563Z"
+        }
+      ]
+    }
+  ]
+}
