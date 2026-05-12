@@ -1,0 +1,629 @@
+{
+  "SchemaVersion": 2,
+  "Trivy": {
+    "Version": "0.69.3"
+  },
+  "ReportID": "019e1c65-308b-7c38-8a09-c48c1938443f",
+  "CreatedAt": "2026-05-12T13:34:14.155802034Z",
+  "ArtifactName": "/tmp/extracted-deps",
+  "ArtifactType": "filesystem",
+  "Results": [
+    {
+      "Target": "Java",
+      "Class": "lang-pkgs",
+      "Type": "jar",
+      "Packages": [
+        {
+          "Name": "com.github.jsqlparser:jsqlparser",
+          "Identifier": {
+            "PURL": "pkg:maven/com.github.jsqlparser/jsqlparser@4.9",
+            "UID": "64e335e710e6fd08"
+          },
+          "Version": "4.9",
+          "FilePath": "internal-jars/lib/liquibase-commercial.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "com.github.spullara.mustache.java:compiler",
+          "Identifier": {
+            "PURL": "pkg:maven/com.github.spullara.mustache.java/compiler@0.9.13",
+            "UID": "821fe72b87a170a"
+          },
+          "Version": "0.9.13",
+          "FilePath": "internal-jars/lib/liquibase-commercial.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "com.github.vertical-blank:sql-formatter",
+          "Identifier": {
+            "PURL": "pkg:maven/com.github.vertical-blank/sql-formatter@2.0.5",
+            "UID": "a724abf87410cc99"
+          },
+          "Version": "2.0.5",
+          "FilePath": "internal-jars/lib/liquibase-commercial.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "com.h2database:h2",
+          "Identifier": {
+            "PURL": "pkg:maven/com.h2database/h2@2.2.224",
+            "UID": "4032cdff92231132"
+          },
+          "Version": "2.2.224",
+          "FilePath": "internal-jars/lib/h2.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "com.ibm.db2:jcc",
+          "Identifier": {
+            "PURL": "pkg:maven/com.ibm.db2/jcc@11.5.9.0",
+            "UID": "4279b7f7b1c97c07"
+          },
+          "Version": "11.5.9.0",
+          "FilePath": "internal-jars/lib/jcc.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "com.microsoft.sqlserver:mssql-jdbc",
+          "Identifier": {
+            "PURL": "pkg:maven/com.microsoft.sqlserver/mssql-jdbc@12.8.1",
+            "UID": "ea33e1f8be2956e8"
+          },
+          "Version": "12.8.1",
+          "FilePath": "internal-jars/lib/mssql-jdbc.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "com.microsoft.sqlserver:mssql-jdbc",
+          "Identifier": {
+            "PURL": "pkg:maven/com.microsoft.sqlserver/mssql-jdbc@12.8.1.jre8",
+            "UID": "c7d543b0d9b286a2"
+          },
+          "Version": "12.8.1.jre8",
+          "FilePath": "internal-jars/lib/mssql-jdbc.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "com.opencsv:opencsv",
+          "Identifier": {
+            "PURL": "pkg:maven/com.opencsv/opencsv@5.9",
+            "UID": "46da6f173335c72d"
+          },
+          "Version": "5.9",
+          "FilePath": "internal-jars/lib/opencsv.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "com.oracle.database.jdbc:ojdbc8",
+          "Identifier": {
+            "PURL": "pkg:maven/com.oracle.database.jdbc/ojdbc8@19.24.0.0",
+            "UID": "93b12119628c9d14"
+          },
+          "Version": "19.24.0.0",
+          "FilePath": "internal-jars/lib/ojdbc8.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "commons-io:commons-io",
+          "Identifier": {
+            "PURL": "pkg:maven/commons-io/commons-io@2.17.0",
+            "UID": "caab9e92e2c16212"
+          },
+          "Version": "2.17.0",
+          "FilePath": "internal-jars/lib/commons-io.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "info.picocli:picocli",
+          "Identifier": {
+            "PURL": "pkg:maven/info.picocli/picocli@4.7.6",
+            "UID": "3d7dc65a5ea1c156"
+          },
+          "Version": "4.7.6",
+          "FilePath": "internal-jars/lib/picocli.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "io.github.java-diff-utils:java-diff-utils",
+          "Identifier": {
+            "PURL": "pkg:maven/io.github.java-diff-utils/java-diff-utils@4.12",
+            "UID": "feae28cc1ddf9858"
+          },
+          "Version": "4.12",
+          "FilePath": "internal-jars/lib/liquibase-commercial.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "javax.xml.bind:jaxb-api",
+          "Identifier": {
+            "PURL": "pkg:maven/javax.xml.bind/jaxb-api@2.3.1",
+            "UID": "f6a09ef7b08580f1"
+          },
+          "Version": "2.3.1",
+          "FilePath": "internal-jars/lib/jaxb-api.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "net.snowflake:snowflake-jdbc",
+          "Identifier": {
+            "PURL": "pkg:maven/net.snowflake/snowflake-jdbc@3.18.0",
+            "UID": "e303ef63c5f59f80"
+          },
+          "Version": "3.18.0",
+          "FilePath": "internal-jars/lib/snowflake-jdbc.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "one.gfw:jaxb-api",
+          "Identifier": {
+            "PURL": "pkg:maven/one.gfw/jaxb-api@2.3.1",
+            "UID": "1987e1416acbc840"
+          },
+          "Version": "2.3.1",
+          "FilePath": "internal-jars/lib/jaxb-api.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.apache.commons:commons-collections4",
+          "Identifier": {
+            "PURL": "pkg:maven/org.apache.commons/commons-collections4@4.4",
+            "UID": "6c3cd4a03e4e79b5"
+          },
+          "Version": "4.4",
+          "FilePath": "internal-jars/lib/commons-collections4.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.apache.commons:commons-lang3",
+          "Identifier": {
+            "PURL": "pkg:maven/org.apache.commons/commons-lang3@3.17.0",
+            "UID": "59b9b06792f0c22a"
+          },
+          "Version": "3.17.0",
+          "FilePath": "internal-jars/lib/commons-lang3.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.apache.commons:commons-text",
+          "Identifier": {
+            "PURL": "pkg:maven/org.apache.commons/commons-text@1.12.0",
+            "UID": "e2cd8cd7b8b4a4f2"
+          },
+          "Version": "1.12.0",
+          "FilePath": "internal-jars/lib/commons-text.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.firebirdsql.jdbc:jaybird",
+          "Identifier": {
+            "PURL": "pkg:maven/org.firebirdsql.jdbc/jaybird@5.0.5.java8",
+            "UID": "fd785b5f24c4045"
+          },
+          "Version": "5.0.5.java8",
+          "FilePath": "internal-jars/lib/jaybird.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.glassfish.jaxb:jaxb-core",
+          "Identifier": {
+            "PURL": "pkg:maven/org.glassfish.jaxb/jaxb-core@4.0.5",
+            "UID": "712bf05616de5e07"
+          },
+          "Version": "4.0.5",
+          "FilePath": "internal-jars/lib/jaxb-core.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.glassfish.jaxb:jaxb-runtime",
+          "Identifier": {
+            "PURL": "pkg:maven/org.glassfish.jaxb/jaxb-runtime@4.0.5",
+            "UID": "8f2fa51109458693"
+          },
+          "Version": "4.0.5",
+          "FilePath": "internal-jars/lib/jaxb-runtime.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.hsqldb:hsqldb",
+          "Identifier": {
+            "PURL": "pkg:maven/org.hsqldb/hsqldb@2.7.3",
+            "UID": "e60e228efae32468"
+          },
+          "Version": "2.7.3",
+          "FilePath": "internal-jars/lib/hsqldb.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.liquibase:liquibase-commercial",
+          "Identifier": {
+            "PURL": "pkg:maven/org.liquibase/liquibase-commercial@4.30.0",
+            "UID": "db3b92437017333e"
+          },
+          "Version": "4.30.0",
+          "FilePath": "internal-jars/lib/liquibase-commercial.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.liquibase:liquibase-commercial",
+          "Identifier": {
+            "PURL": "pkg:maven/org.liquibase/liquibase-commercial@master-SNAPSHOT",
+            "UID": "409da6bb4b93c780"
+          },
+          "Version": "master-SNAPSHOT",
+          "FilePath": "internal-jars/lib/liquibase-commercial.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.liquibase:liquibase-core",
+          "Identifier": {
+            "PURL": "pkg:maven/org.liquibase/liquibase-core@4.30.0",
+            "UID": "46ef5c132bb87e6d"
+          },
+          "Version": "4.30.0",
+          "FilePath": "internal-jars/lib/liquibase-core.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.mariadb.jdbc:mariadb-java-client",
+          "Identifier": {
+            "PURL": "pkg:maven/org.mariadb.jdbc/mariadb-java-client@3.4.1",
+            "UID": "f94bf22495735b26"
+          },
+          "Version": "3.4.1",
+          "FilePath": "internal-jars/lib/mariadb-java-client.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.mvel:mvel2",
+          "Identifier": {
+            "PURL": "pkg:maven/org.mvel/mvel2@2.5.2.Final",
+            "UID": "653142b4b78ea93"
+          },
+          "Version": "2.5.2.Final",
+          "FilePath": "internal-jars/lib/liquibase-commercial.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.postgresql:postgresql",
+          "Identifier": {
+            "PURL": "pkg:maven/org.postgresql/postgresql@42.7.4",
+            "UID": "d3c7a56e162b1f62"
+          },
+          "Version": "42.7.4",
+          "FilePath": "internal-jars/lib/postgresql.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.slf4j:slf4j-api",
+          "Identifier": {
+            "PURL": "pkg:maven/org.slf4j/slf4j-api@2.0.16",
+            "UID": "cd1de091904f6b5"
+          },
+          "Version": "2.0.16",
+          "FilePath": "internal-jars/lib/slf4j-api.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.slf4j:slf4j-simple",
+          "Identifier": {
+            "PURL": "pkg:maven/org.slf4j/slf4j-simple@2.0.16",
+            "UID": "72f9e5295de3af7d"
+          },
+          "Version": "2.0.16",
+          "FilePath": "internal-jars/lib/slf4j-simple.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.xerial:sqlite-jdbc",
+          "Identifier": {
+            "PURL": "pkg:maven/org.xerial/sqlite-jdbc@3.46.1.3",
+            "UID": "e70584163797545a"
+          },
+          "Version": "3.46.1.3",
+          "FilePath": "internal-jars/lib/sqlite-jdbc.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.yaml:snakeyaml",
+          "Identifier": {
+            "PURL": "pkg:maven/org.yaml/snakeyaml@2.3",
+            "UID": "c8118983a12f8b3e"
+          },
+          "Version": "2.3",
+          "FilePath": "internal-jars/lib/snakeyaml.jar",
+          "AnalyzedBy": "jar"
+        }
+      ],
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2025-59250",
+          "VendorIDs": [
+            "GHSA-m494-w24q-6f7w"
+          ],
+          "PkgName": "com.microsoft.sqlserver:mssql-jdbc",
+          "PkgPath": "internal-jars/lib/mssql-jdbc.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/com.microsoft.sqlserver/mssql-jdbc@12.8.1",
+            "UID": "ea33e1f8be2956e8"
+          },
+          "InstalledVersion": "12.8.1",
+          "FixedVersion": "10.2.4.jre11, 11.2.4.jre11, 12.2.1.jre11, 12.6.5.jre11, 12.8.2.jre11, 12.10.2.jre11, 13.2.1.jre11",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-59250",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:fb500633ad65448dbd61075a464b40a0d284f5f236fb4be82bcdcbb24830f97c",
+          "Title": "JDBC Driver for SQL Server has improper input validation issue",
+          "Description": "Improper input validation in JDBC Driver for SQL Server allows an unauthorized attacker to perform spoofing over a network.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-20"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "nvd": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N",
+              "V3Score": 8.1
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N",
+              "V3Score": 8.1
+            }
+          },
+          "References": [
+            "https://github.com/microsoft/mssql-jdbc",
+            "https://github.com/microsoft/mssql-jdbc/blob/main/CHANGELOG.md",
+            "https://github.com/microsoft/mssql-jdbc/commit/9732e1bbc6ec44166fda2cddab31ce1c86c873dd#diff-45367b99a1951943bfecfc7765e80df687967aa56286a5b2e039f77cd9a0e118",
+            "https://github.com/microsoft/mssql-jdbc/pull/2798",
+            "https://github.com/microsoft/mssql-jdbc/pull/2800",
+            "https://github.com/microsoft/mssql-jdbc/pull/2801",
+            "https://github.com/microsoft/mssql-jdbc/pull/2802",
+            "https://github.com/microsoft/mssql-jdbc/pull/2803",
+            "https://github.com/microsoft/mssql-jdbc/pull/2807",
+            "https://learn.microsoft.com/en-us/sql/connect/jdbc/microsoft-jdbc-driver-for-sql-server-support-matrix",
+            "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-59250",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-59250"
+          ],
+          "PublishedDate": "2025-10-14T17:16:07.24Z",
+          "LastModifiedDate": "2025-10-30T16:35:42.213Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-59250",
+          "VendorIDs": [
+            "GHSA-m494-w24q-6f7w"
+          ],
+          "PkgName": "com.microsoft.sqlserver:mssql-jdbc",
+          "PkgPath": "internal-jars/lib/mssql-jdbc.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/com.microsoft.sqlserver/mssql-jdbc@12.8.1.jre8",
+            "UID": "c7d543b0d9b286a2"
+          },
+          "InstalledVersion": "12.8.1.jre8",
+          "FixedVersion": "10.2.4.jre11, 11.2.4.jre11, 12.2.1.jre11, 12.6.5.jre11, 12.8.2.jre11, 12.10.2.jre11, 13.2.1.jre11",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-59250",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:fb500633ad65448dbd61075a464b40a0d284f5f236fb4be82bcdcbb24830f97c",
+          "Title": "JDBC Driver for SQL Server has improper input validation issue",
+          "Description": "Improper input validation in JDBC Driver for SQL Server allows an unauthorized attacker to perform spoofing over a network.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-20"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "nvd": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N",
+              "V3Score": 8.1
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N",
+              "V3Score": 8.1
+            }
+          },
+          "References": [
+            "https://github.com/microsoft/mssql-jdbc",
+            "https://github.com/microsoft/mssql-jdbc/blob/main/CHANGELOG.md",
+            "https://github.com/microsoft/mssql-jdbc/commit/9732e1bbc6ec44166fda2cddab31ce1c86c873dd#diff-45367b99a1951943bfecfc7765e80df687967aa56286a5b2e039f77cd9a0e118",
+            "https://github.com/microsoft/mssql-jdbc/pull/2798",
+            "https://github.com/microsoft/mssql-jdbc/pull/2800",
+            "https://github.com/microsoft/mssql-jdbc/pull/2801",
+            "https://github.com/microsoft/mssql-jdbc/pull/2802",
+            "https://github.com/microsoft/mssql-jdbc/pull/2803",
+            "https://github.com/microsoft/mssql-jdbc/pull/2807",
+            "https://learn.microsoft.com/en-us/sql/connect/jdbc/microsoft-jdbc-driver-for-sql-server-support-matrix",
+            "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-59250",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-59250"
+          ],
+          "PublishedDate": "2025-10-14T17:16:07.24Z",
+          "LastModifiedDate": "2025-10-30T16:35:42.213Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-24789",
+          "VendorIDs": [
+            "GHSA-7hpq-3g6w-pvhf"
+          ],
+          "PkgName": "net.snowflake:snowflake-jdbc",
+          "PkgPath": "internal-jars/lib/snowflake-jdbc.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/net.snowflake/snowflake-jdbc@3.18.0",
+            "UID": "e303ef63c5f59f80"
+          },
+          "InstalledVersion": "3.18.0",
+          "FixedVersion": "3.22.0",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-24789",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:ae3eb37cd35370f168c5b739e36fc73803caaaf8c24c396174ccacc19ce55080",
+          "Title": "Snowflake JDBC allows an untrusted search path on Windows",
+          "Description": "Snowflake JDBC provides a JDBC type 4 driver that supports core functionality, allowing Java program to connect to Snowflake. Snowflake discovered and remediated a vulnerability in the Snowflake JDBC Driver. When the EXTERNALBROWSER authentication method is used on Windows, an attacker with write access to a directory in the %PATH% can escalate their privileges to the user that runs the vulnerable JDBC Driver version. This vulnerability affects versions 3.2.3 through 3.21.0 on Windows. Snowflake fixed the issue in version 3.22.0.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-426"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 7.8
+            }
+          },
+          "References": [
+            "https://github.com/snowflakedb/snowflake-jdbc",
+            "https://github.com/snowflakedb/snowflake-jdbc/commit/4f01bb8f9b708c71e7a2111c87371dbfc1d53dd6",
+            "https://github.com/snowflakedb/snowflake-jdbc/security/advisories/GHSA-7hpq-3g6w-pvhf",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-24789"
+          ],
+          "PublishedDate": "2025-01-29T18:15:47.03Z",
+          "LastModifiedDate": "2025-08-20T18:18:54.14Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-49146",
+          "VendorIDs": [
+            "GHSA-hq9p-pm7w-8p54"
+          ],
+          "PkgName": "org.postgresql:postgresql",
+          "PkgPath": "internal-jars/lib/postgresql.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/org.postgresql/postgresql@42.7.4",
+            "UID": "d3c7a56e162b1f62"
+          },
+          "InstalledVersion": "42.7.4",
+          "FixedVersion": "42.7.7",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-49146",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:9064d8c9810ed449e3e689ceba2ee10402d7090c4c545e3222f9812f1cc72007",
+          "Title": "pgjdbc: pgjdbc insecure authentication in channel binding",
+          "Description": "pgjdbc is an open source postgresql JDBC Driver. From 42.7.4 and until 42.7.7, when the PostgreSQL JDBC driver is configured with channel binding set to required (default value is prefer), the driver would incorrectly allow connections to proceed with authentication methods that do not support channel binding (such as password, MD5, GSS, or SSPI authentication). This could allow a man-in-the-middle attacker to intercept connections that users believed were protected by channel binding requirements. This vulnerability is fixed in 42.7.7.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-287"
+          ],
+          "VendorSeverity": {
+            "bitnami": 2,
+            "ghsa": 3,
+            "nvd": 2,
+            "redhat": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+              "V3Score": 5.9
+            },
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N",
+              "V3Score": 8.2
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+              "V3Score": 5.9
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N",
+              "V3Score": 8.2
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2025-49146",
+            "https://datatracker.ietf.org/doc/html/rfc5802",
+            "https://datatracker.ietf.org/doc/html/rfc7677",
+            "https://github.com/pgjdbc/pgjdbc",
+            "https://github.com/pgjdbc/pgjdbc/commit/9217ed16cb2918ab1b6b9258ae97e6ede244d8a0",
+            "https://github.com/pgjdbc/pgjdbc/security/advisories/GHSA-hq9p-pm7w-8p54",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-49146",
+            "https://www.cve.org/CVERecord?id=CVE-2025-49146",
+            "https://www.postgresql.org/docs/current/sasl-authentication.html#SASL-SCRAM-SHA-256"
+          ],
+          "PublishedDate": "2025-06-11T15:15:42.85Z",
+          "LastModifiedDate": "2025-10-06T19:29:58.977Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-42198",
+          "VendorIDs": [
+            "GHSA-98qh-xjc8-98pq"
+          ],
+          "PkgName": "org.postgresql:postgresql",
+          "PkgPath": "internal-jars/lib/postgresql.jar",
+          "PkgIdentifier": {
+            "PURL": "pkg:maven/org.postgresql/postgresql@42.7.4",
+            "UID": "d3c7a56e162b1f62"
+          },
+          "InstalledVersion": "42.7.4",
+          "FixedVersion": "42.7.11",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-42198",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Maven",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+          },
+          "Fingerprint": "sha256:0d74d523df9f4de1a2f809b617be2f69ba2f77b51e58d3c8280b0f4250be98ad",
+          "Title": "jdbc.postgresql.org: pgjdbc: Client-side Denial of Service via malicious SCRAM-SHA-256 authentication",
+          "Description": "pgjdbc is an open source postgresql JDBC Driver. From version 42.2.0 to before version 42.7.11, pgjdbc is vulnerable to a client-side denial of service during SCRAM-SHA-256 authentication. A malicious server can instruct the driver to perform SCRAM authentication with a very large iteration count. With a large enough value, the client spends an unbounded amount of CPU time inside PBKDF2 before authentication can fail. A single attempt ties up a CPU core. Repeated or concurrent attempts exhaust client CPU and can wedge connection pools. In affected versions, loginTimeout did not fully mitigate this problem. When loginTimeout expired, the caller could stop waiting, but the worker thread performing the connection attempt could continue running and burning CPU inside the SCRAM PBKDF2 computation. This issue has been patched in version 42.7.11.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-770"
+          ],
+          "VendorSeverity": {
+            "bitnami": 3,
+            "ghsa": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-42198",
+            "https://github.com/pgjdbc/pgjdbc",
+            "https://github.com/pgjdbc/pgjdbc/releases/tag/REL42.7.11",
+            "https://github.com/pgjdbc/pgjdbc/security/advisories/GHSA-98qh-xjc8-98pq",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-42198",
+            "https://www.cve.org/CVERecord?id=CVE-2026-42198"
+          ],
+          "PublishedDate": "2026-04-29T16:16:25.427Z",
+          "LastModifiedDate": "2026-05-01T12:51:20.853Z"
+        }
+      ]
+    }
+  ]
+}

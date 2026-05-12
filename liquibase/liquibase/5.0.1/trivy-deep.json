@@ -1,0 +1,109 @@
+{
+  "SchemaVersion": 2,
+  "Trivy": {
+    "Version": "0.69.3"
+  },
+  "ReportID": "019e1c65-1b74-7bb4-b397-733835f6b828",
+  "CreatedAt": "2026-05-12T13:34:08.756767887Z",
+  "ArtifactName": "/tmp/extracted-deps",
+  "ArtifactType": "filesystem",
+  "Results": [
+    {
+      "Target": "Java",
+      "Class": "lang-pkgs",
+      "Type": "jar",
+      "Packages": [
+        {
+          "Name": "com.h2database:h2",
+          "Identifier": {
+            "PURL": "pkg:maven/com.h2database/h2@2.4.240",
+            "UID": "80efe96e3013b2c"
+          },
+          "Version": "2.4.240",
+          "FilePath": "internal-jars/lib/h2.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "com.opencsv:opencsv",
+          "Identifier": {
+            "PURL": "pkg:maven/com.opencsv/opencsv@5.12.0",
+            "UID": "66f5257881a24d0e"
+          },
+          "Version": "5.12.0",
+          "FilePath": "internal-jars/lib/opencsv.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "commons-io:commons-io",
+          "Identifier": {
+            "PURL": "pkg:maven/commons-io/commons-io@2.20.0",
+            "UID": "f348caadc499d766"
+          },
+          "Version": "2.20.0",
+          "FilePath": "internal-jars/lib/commons-io.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "info.picocli:picocli",
+          "Identifier": {
+            "PURL": "pkg:maven/info.picocli/picocli@4.7.7",
+            "UID": "f054a9e493e0104d"
+          },
+          "Version": "4.7.7",
+          "FilePath": "internal-jars/lib/picocli.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.apache.commons:commons-collections4",
+          "Identifier": {
+            "PURL": "pkg:maven/org.apache.commons/commons-collections4@4.5.0",
+            "UID": "48b6ebcaa3bd717a"
+          },
+          "Version": "4.5.0",
+          "FilePath": "internal-jars/lib/commons-collections4.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.apache.commons:commons-lang3",
+          "Identifier": {
+            "PURL": "pkg:maven/org.apache.commons/commons-lang3@3.19.0",
+            "UID": "7a2e5ecf6dae89c7"
+          },
+          "Version": "3.19.0",
+          "FilePath": "internal-jars/lib/commons-lang3.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.apache.commons:commons-text",
+          "Identifier": {
+            "PURL": "pkg:maven/org.apache.commons/commons-text@1.14.0",
+            "UID": "6a53c1fbd997a201"
+          },
+          "Version": "1.14.0",
+          "FilePath": "internal-jars/lib/commons-text.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.liquibase:liquibase-core",
+          "Identifier": {
+            "PURL": "pkg:maven/org.liquibase/liquibase-core@5.0.1",
+            "UID": "11ec59e6e787cb9f"
+          },
+          "Version": "5.0.1",
+          "FilePath": "internal-jars/lib/liquibase-core.jar",
+          "AnalyzedBy": "jar"
+        },
+        {
+          "Name": "org.yaml:snakeyaml",
+          "Identifier": {
+            "PURL": "pkg:maven/org.yaml/snakeyaml@2.5",
+            "UID": "49fc5c24053ca299"
+          },
+          "Version": "2.5",
+          "FilePath": "internal-jars/lib/snakeyaml.jar",
+          "AnalyzedBy": "jar"
+        }
+      ]
+    }
+  ]
+}
