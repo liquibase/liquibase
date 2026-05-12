@@ -32,6 +32,26 @@ The following actions are identical to those in a regular Liquibase release, wit
 - Upload `javadocs` and `xsds` to `S3`
 - Deploy artifacts to `GPM`
 
+## :construction: Known limitations / open work
+
+### 🐳 Docker chain is currently broken in dry-run — tracked in [TECHOPS-428](https://datical.atlassian.net/browse/TECHOPS-428)
+
+The "Push `docker` images to our internal `ecr` repository" line above is the **intended** behavior, but as of 2026-05-12 the docker chain fails at the first step in dry-run mode:
+
+- `docker-release.yml::update-dockerfiles` → "Resolve SHA256 checksums" curls `https://package.liquibase.com/downloads/dockerhub/official/liquibase-${LB_VERSION}.tar.gz`.
+- In dry-run, `LB_VERSION` is the synthetic `dry-run-<run_id>` (e.g. `dry-run-25760954216`); no such tarball is published on the CDN, so curl returns 404 and the step exits 1. Every downstream docker job (`build-community`, `build-alpine`, `publish-release`) is then skipped.
+
+This gap was introduced by [#7669 (DAT-22523)](https://github.com/liquibase/liquibase/pull/7669) on 2026-04-28 when the community Dockerfile was migrated into this repo and the cross-repo dispatcher was replaced with an intra-repo `release-docker.yml` → `docker-release.yml` call chain. It stayed latent until two earlier blockers were cleared in the orchestrator path:
+
+1. [TECHOPS-417](https://datical.atlassian.net/browse/TECHOPS-417) — `packages: write` / `contents: write` permission propagation through nested workflows (fixed by [#7702](https://github.com/liquibase/liquibase/pull/7702) and [#7709](https://github.com/liquibase/liquibase/pull/7709)).
+2. [DAT-22091](https://datical.atlassian.net/browse/DAT-22091) leftover — stale `ref: master` in `actions/checkout` after the default-branch rename (fixed by [#7710](https://github.com/liquibase/liquibase/pull/7710)).
+
+With those landed, the chain now executes far enough to hit the SHA256 step and surface the original gap.
+
+**Planned fix (TECHOPS-428):** plumb `dry_run_tar_gz_url` from the orchestrator through `release-docker.yml` → `docker-release.yml`, and through `docker/Dockerfile` / `docker/Dockerfile.alpine` (via build-arg) so the docker build pulls the dry-run draft-release tarball instead of `package.liquibase.com`. This preserves the original design intent (real docker images pushed to the dry-run ECR) instead of silently skipping the chain.
+
+Until TECHOPS-428 ships, dry-run runs will continue to fail at this step. The orchestrator and the rest of the pipeline (Maven dry-run, javadocs guard, etc.) are unaffected and validated by every dry-run attempt.
+
 ## :wrench: How a DryRun Release works?
 
 You can check the `dry-run-release.yml` workflow, which is essentially composed of calls to existing release workflows such as `create-release.yml` and `release-published-orchestrator.yml`. It sends them a new input, `dry_run: true`, to control which steps are executed for regular releases versus dry-run releases.
