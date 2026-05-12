@@ -82,25 +82,19 @@ class CommandUtil {
     }
 
     static void runGenerateChangelog(DatabaseTestSystem db, String outputFile) throws CommandExecutionException {
-        CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
-        commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
-        commandScope.addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, true)
-        commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, outputFile)
-        OutputStream outputStream = new ByteArrayOutputStream()
-        commandScope.setOutput(outputStream)
-        commandScope.execute()
+        runGenerateChangelog(db, outputFile, null)
     }
 
-    static void runGenerateChangelog (DatabaseTestSystem db, String outputFile, String diffType) {
+    static void runGenerateChangelog(DatabaseTestSystem db, String outputFile, String diffType) throws CommandExecutionException {
         CommandScope commandScope = new CommandScope(GenerateChangelogCommandStep.COMMAND_NAME)
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.URL_ARG, db.getConnectionUrl())
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.USERNAME_ARG, db.getUsername())
         commandScope.addArgumentValue(DbUrlConnectionArgumentsCommandStep.PASSWORD_ARG, db.getPassword())
         commandScope.addArgumentValue(GenerateChangelogCommandStep.OVERWRITE_OUTPUT_FILE_ARG, true)
         commandScope.addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, outputFile)
-        commandScope.addArgumentValue(PreCompareCommandStep.DIFF_TYPES_ARG, diffType)
+        if (null != diffType) {
+            commandScope.addArgumentValue(PreCompareCommandStep.DIFF_TYPES_ARG, diffType)
+        }
         OutputStream outputStream = new ByteArrayOutputStream()
         commandScope.setOutput(outputStream)
         commandScope.execute()
