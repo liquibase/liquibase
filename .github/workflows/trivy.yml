@@ -1,0 +1,131 @@
+name: Vulnerability Scanning
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - "docker/Dockerfile*"
+      - "docker/docker-entrypoint.sh"
+      - ".github/workflows/trivy.yml"
+      - "docker/examples/**"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "docker/Dockerfile*"
+      - "docker/docker-entrypoint.sh"
+      - ".github/workflows/trivy.yml"
+      - "docker/examples/**"
+  schedule:
+    - cron: "0 7 * * 1-5" # Run every weekday at 7am UTC
+
+concurrency:
+  group: scan-results-writer
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+  packages: write
+  security-events: write
+  actions: read
+  pull-requests: write
+
+jobs:
+  # ============================================
+  # SCAN: community (Dockerfile)
+  # ============================================
+  scan-community:
+    name: Scan liquibase/liquibase
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-scan.yml@main
+    with:
+      build_context: docker/
+      dockerfile_path: docker/Dockerfile
+      image_name: liquibase/liquibase
+      suffix: ""
+      vex_enabled: false
+      upload_sarif: true
+      dispatch_new_cves: true
+      scout_enabled: true
+      build_logic_ref: main
+    secrets: inherit
+
+  # ============================================
+  # SCAN: alpine (Dockerfile.alpine)
+  # ============================================
+  scan-alpine:
+    name: Scan liquibase/liquibase-alpine
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-scan.yml@main
+    with:
+      build_context: docker/
+      dockerfile_path: docker/Dockerfile.alpine
+      image_name: liquibase/liquibase
+      suffix: "-alpine"
+      vex_enabled: false
+      upload_sarif: true
+      dispatch_new_cves: true
+      scout_enabled: true
+      build_logic_ref: main
+    secrets: inherit
+
+  # ============================================
+  # PERSIST SCAN RESULTS TO scan-results BRANCH
+  # ============================================
+  persist-results:
+    name: Persist Scan Results
+    needs: [scan-community, scan-alpine]
+    if: always() && github.event_name != 'pull_request' && needs.scan-community.result != 'cancelled'
+    runs-on: ubuntu-22.04
+    permissions:
+      actions: read
+      contents: write
+      id-token: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Download vulnerability report artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          path: scan-artifacts
+          pattern: vulnerability-report-*
+
+      - name: Download Scout JSON artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          path: scout-artifacts
+          pattern: scout-results*
+        continue-on-error: true
+
+      - name: Merge Scout JSON into vulnerability report directories
+        run: |
+          # Map scout artifact suffix to matching vulnerability-report artifact name.
+          # scout-results         -> vulnerability-report-liquibase-liquibase-latest
+          # scout-results-alpine  -> vulnerability-report-liquibase-liquibase--alpine
+          declare -A SCOUT_TO_VULN=(
+            ["scout-results"]="vulnerability-report-liquibase-liquibase-latest"
+            ["scout-results-alpine"]="vulnerability-report-liquibase-liquibase--alpine"
+          )
+
+          for SCOUT_DIR in scout-artifacts/scout-results*/; do
+            [ -d "$SCOUT_DIR" ] || continue
+            SCOUT_NAME=$(basename "$SCOUT_DIR")
+            VULN_NAME="${SCOUT_TO_VULN[$SCOUT_NAME]:-}"
+            if [ -z "$VULN_NAME" ]; then
+              echo "WARNING: no mapping for $SCOUT_NAME — skipping"
+              continue
+            fi
+            VULN_DIR="scan-artifacts/$VULN_NAME"
+            if [ -d "$VULN_DIR" ] && [ -f "$SCOUT_DIR/scout-results.json" ]; then
+              cp "$SCOUT_DIR/scout-results.json" "$VULN_DIR/scout-results.json"
+              echo "Merged scout-results.json into $VULN_NAME"
+            fi
+          done
+
+      - name: Persist to scan-results branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          scripts/persist-scan-results.sh scan-artifacts
