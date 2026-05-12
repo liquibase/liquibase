@@ -133,7 +133,7 @@ jobs:
     if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') && needs.deploy-maven.result == 'success'
     uses: ./.github/workflows/release-docker.yml
     permissions:
-      contents: read
+      contents: write
       id-token: write
       packages: write
     with:
