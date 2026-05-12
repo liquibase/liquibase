@@ -30,6 +30,7 @@ on:
 permissions:
   contents: read
   id-token: write
+  packages: write
 
 jobs:
   release-docker:
@@ -38,6 +39,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      packages: write
     with:
       liquibaseVersion: ${{ inputs.version }}
       dryRun: ${{ inputs.dry_run || false }}

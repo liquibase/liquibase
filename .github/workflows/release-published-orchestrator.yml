@@ -135,6 +135,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      packages: write
     with:
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run || false }}
