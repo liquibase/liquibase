@@ -7,12 +7,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.function.Consumer;
 
 /**
  * A list of {@link InputStream}s. Custom class to allow try-with-resources using output from {@link ResourceAccessor#openStreams(String, String)}.
  */
-public class InputStreamList implements Iterable<Map.Entry<URI, InputStream>>, AutoCloseable {
+public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
 
     private final LinkedHashMap<URI, InputStream> streams = new LinkedHashMap<>();
 
@@ -92,18 +93,18 @@ public class InputStreamList implements Iterable<Map.Entry<URI, InputStream>>, A
     }
 
     @Override
-    public Iterator<Map.Entry<URI, InputStream>> iterator() {
-        return streams.entrySet().iterator();
+    public Iterator<InputStream> iterator() {
+        return streams.values().iterator();
     }
 
     @Override
-    public void forEach(Consumer<? super Map.Entry<URI, InputStream>> action) {
-        streams.entrySet().forEach(action);
+    public void forEach(Consumer<? super InputStream> action) {
+        streams.values().forEach(action);
     }
 
     @Override
-    public Spliterator<Map.Entry<URI, InputStream>> spliterator() {
-        return streams.entrySet().spliterator();
+    public Spliterator<InputStream> spliterator() {
+        return streams.values().spliterator();
     }
 
     public int size() {
@@ -123,6 +124,23 @@ public class InputStreamList implements Iterable<Map.Entry<URI, InputStream>>, A
     }
 
     public Map.Entry<URI, InputStream> getFirst() {
-        return iterator().next();
+        return streams.entrySet().iterator().next();
+    }
+
+    public Iterable<Map.Entry<URI, InputStream>> iterableWithURI() {
+        return new Iterable<>() {
+            @Override
+            public Iterator<Entry<URI, InputStream>> iterator() {
+                return streams.entrySet().iterator();
+            }
+            @Override
+            public void forEach(Consumer<? super Map.Entry<URI, InputStream>> action) {
+                streams.entrySet().forEach(action);
+            }
+            @Override
+            public Spliterator<Map.Entry<URI, InputStream>> spliterator() {
+                return streams.entrySet().spliterator();
+            }
+        };
     }
 }

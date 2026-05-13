@@ -784,7 +784,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                 LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
                 int precedenceOffset = 0;
-                for (Map.Entry<URI,InputStream> entry : isl) {
+                for (Map.Entry<URI,InputStream> entry : isl.iterableWithURI()) {
                     final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(entry.getValue(), entry.getKey().toString(), ++precedenceOffset);
                     liquibaseConfiguration.registerProvider(fileProvider);
                 }
@@ -928,8 +928,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private static Properties loadProperties(InputStreamList inputStreamList) throws MojoExecutionException {
         Properties props = new Properties();
         try {
-            for (Map.Entry<URI, InputStream> entry : inputStreamList) {
-                props.load(entry.getValue());
+            for (InputStream is : inputStreamList) {
+                props.load(is);
             }
             return props;
         } catch (IOException e) {
