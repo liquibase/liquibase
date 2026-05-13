@@ -1,6 +1,78 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 5.0.3 (2026.05.15)
+
+# Liquibase Community 5.0.3 is a minor patch release
+See the [Liquibase Community 5.0.3 Release Notes](https://docs.liquibase.com/community/community-release-notes/liquibase-community-503-release-notes) for the complete set of release information.
+
+## New Features
+- (#7674) perf: cache ranChangeSets lookup in SqlChangeLogParser.generateId @andrewcedgar
+- (#7660) [DAT-22091] Migrate default branch from master to main @sayaliM0412
+- (#1964) MSSQL exclude schema name when diff view definition @MatrixDai
+- (#7603) fix: make LockServiceCommandStep.isDBLocked thread-safe @filipelautert
+- (#1944) Exclude system table systranschemas for mssql diff @MatrixDai
+- (#7647) Use LEFT JOIN instead of NOT IN for PostgreSQL sequence dependency detection @harsh-kaushal
+- (#7639) DAT-22653: update GHA workflows and functionality @sayaliM0412
+- (#7618) DAT-22530: update GitHub Actions to use latest versions of actions @sayaliM0412
+- (#7610) chore(deps): upgrade testcontainers to 2.0.3 @filipelautert
+
+## Bug Fixes
+- (#7680) fix(mssql): preserve schema prefix in view definitions during generate-changelog @wwillard7800
+- (#7689) DAT-22984/DAT-29985: Sanitize table names when saving files. Escape column-name list when running generate changelog @abrackx
+- (#7488) SEARCH\_PATH setup as LOCAL for Postgres @MalloD12
+- (#7659) fix: OracleDatabase.correctObjectName() no longer mangles column names starting with "int" @filipelautert
+- (#7642) fix: escape mentions and special chars in release notes @filipelautert
+- (#7646) Discover custom LogService before configuration init @filipelautert
+- (#7500) Issue-7461 :: diff-changelog dropps now the expected constraint  @MalloD12
+- (#7542) fix: Capture float precision again on Oracle DBs @marchof
+
+## Security, Driver and Other Updates
+- (#7716) fix(ci): skip release-docker on dry-run @jandroav
+- (#7715) feat(docker-scan): persist main HEAD scan to scan-results branch [TECHOPS-408] @jandroav
+- (#7714) TECHOPS-432: add docker/.trivyignore to suppress SNAPSHOT-version false positive @jandroav
+- (#7712) TECHOPS-427: bump LPM\_VERSION 0.3.3 -> 0.3.4 to clear 5 Go stdlib HIGH CVEs @sayaliM0412
+- (#7702) fix(TECHOPS-417): propagate packages: write to nested docker workflows @sayaliM0412
+- (#7596) Update README.md @mnovotnyLB
+- (#7591) DAT-22396: fix approvers and skip completed orchestrator jobs for v5.0.2 recovery @jnewton03
+- (#7590) DAT-22396: temp skip completed jobs for v5.0.2 recovery @jnewton03
+- (#7588) DAT-22397:fix: update approvers list for manual deployment approval @sayaliM0412
+- (#7699) chore(deps-dev): bump net.snowflake:snowflake-jdbc from 4.1.0 to 4.2.0 in the build-tools group @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7695) chore(deps): bump the test-deps group with 2 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7688) chore(deps-dev): bump the production-deps group across 1 directory with 2 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7691) chore(deps-dev): bump org.xerial:sqlite-jdbc from 3.53.0.0 to 3.53.1.0 in the build-tools group across 1 directory @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7692) fix(TECHOPS-365): pin docker base image to temurin:21-jre-noble @sayaliM0412
+- (#7662) chore(deps): bump targetMavenVersion from 3.9.14 to 3.9.15 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7664) chore(deps): bump the production-deps group across 1 directory with 6 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7670) chore(deps): bump org.testcontainers:testcontainers-bom from 2.0.4 to 2.0.5 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7671) chore(deps): bump org.projectlombok:lombok from 1.18.44 to 1.18.46 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7672) chore(deps): bump commons-io:commons-io from 2.21.0 to 2.22.0 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7677) chore(deps): bump eclipse-temurin from 21-jre-noble to 25-jre-noble in /docker @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7678) chore(deps): bump the github-actions group across 1 directory with 5 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7681) chore(deps-dev): bump the build-tools group across 1 directory with 3 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7658) chore(deps): bump the production-deps group across 1 directory with 8 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7636) chore(deps): bump javax.servlet:javax.servlet-api from 3.1.0 to 4.0.1 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7652) chore(deps): bump jakarta.servlet:jakarta.servlet-api from 5.0.0 to 6.0.0 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7614) chore(deps): bump spring.version from 7.0.5 to 7.0.6 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7613) chore(deps): bump targetMavenVersion from 3.9.13 to 3.9.14 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7621) chore(deps): bump org.testcontainers:testcontainers-bom from 2.0.3 to 2.0.4 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7626) chore(deps): bump the test-deps group across 1 directory with 2 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7635) chore(deps-dev): bump the build-tools group across 1 directory with 4 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7656) chore(deps): bump ant.version from 1.10.15 to 1.10.17 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7657) chore(deps): bump the github-actions group across 1 directory with 10 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7628) DAT-22652: pin GitHub Actions to commit SHAs for supply chain security @jnewton03
+- (#7610) chore(deps): upgrade testcontainers to 2.0.3 @filipelautert
+- (#7577) chore(deps-dev): bump org.apache.felix:maven-bundle-plugin from 5.1.9 to 6.0.2 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7606) chore(deps): bump org.projectlombok:lombok from 1.18.42 to 1.18.44 @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7608) chore(deps-dev): bump org.mockito:mockito-core from 5.22.0 to 5.23.0 in the test-deps group @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7579) chore(deps): bump the github-actions group with 3 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7586) chore(deps): bump the build-tools group with 2 updates @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7576) chore(deps-dev): bump org.mockito:mockito-core from 5.21.0 to 5.22.0 in the test-deps group @[dependabot[bot]](https://github.com/apps/dependabot)
+- (#7578) chore(deps): bump org.yaml:snakeyaml from 2.5 to 2.6 @[dependabot[bot]](https://github.com/apps/dependabot)
+
+### Full Changelog: [https://github.com/liquibase/liquibase/compare/v5.0.2...v5.0.3](https://github.com/liquibase/liquibase/compare/v5.0.2...v5.0.3)
+
+
 Changes in version 5.0.2 (2026.03.03)
 
 # Liquibase Community 5.0.2 is a minor patch release
