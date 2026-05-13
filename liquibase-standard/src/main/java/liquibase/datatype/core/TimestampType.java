@@ -225,6 +225,11 @@ public class TimestampType extends DateTimeType {
         return super.toDatabaseDataType(database);
     }
 
+    /**
+     * Returns true for lowercased MySQL-like TIMESTAMP definitions that include
+     * column attributes to preserve, while excluding plain TIMESTAMP precision
+     * forms and WITH/WITHOUT TIME ZONE aliases that should keep normal handling.
+     */
     private boolean isNativeMySqlTimestampDefinitionWithColumnAttributes(String lowerDefinition) {
         if (!lowerDefinition.matches("^timestamp(\\s|\\(|$).*")
                 || lowerDefinition.matches("^timestamp\\s*(\\([^)]*\\))?\\s*$")) {
