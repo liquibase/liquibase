@@ -1,5 +1,8 @@
 package liquibase.integration.commandline;
 
+import java.net.URL
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.regex.Pattern
 
 import liquibase.Scope
@@ -15,9 +18,12 @@ public class MultipleDefaultsFilesOverlayEachOtherTest extends Specification {
     @Unroll
     def overlay() {
         given:
-        def classPath = Arrays.asList(System.getProperty("java.class.path").split(Pattern.quote(File.pathSeparator)));
-        def urls = [new File (classPath[0] + File.separator + "subfolder" + File.separator).toURI().toURL()]
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader()
+        URL properties = contextClassLoader.getResource("test.properties")
+        Path path = Paths.get(properties.toURI()).getParent();
+        URL url1 = path.toUri().toURL()
+        URL url2 = path.resolve("subfolder").toUri().toURL()
+        def urls = [ url1, url2 ]
         URLClassLoader classLoader = new URLClassLoader(urls.toArray(new URL[0]), contextClassLoader)
         Thread.currentThread().setContextClassLoader(classLoader)
         LiquibaseCommandLine liquibaseCommandLine = new LiquibaseCommandLine()
