@@ -28,16 +28,18 @@ on:
         default: false
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
+  packages: write
 
 jobs:
   release-docker:
     name: Release docker images
     uses: ./.github/workflows/docker-release.yml
     permissions:
-      contents: read
+      contents: write
       id-token: write
+      packages: write
     with:
       liquibaseVersion: ${{ inputs.version }}
       dryRun: ${{ inputs.dry_run || false }}
