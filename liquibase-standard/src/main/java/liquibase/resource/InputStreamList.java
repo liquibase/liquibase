@@ -123,8 +123,9 @@ public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
         return new ArrayList<>(streams.values());
     }
 
-    public Map.Entry<URI, InputStream> getFirst() {
-        return streams.entrySet().iterator().next();
+    public InputStream getFirst() {
+            Iterator<InputStream> i = streams.values().iterator();
+            return i.hasNext() ? i.next() : null;
     }
 
     public Iterable<Map.Entry<URI, InputStream>> iterableWithURI() {
