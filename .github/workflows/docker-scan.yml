@@ -79,6 +79,22 @@ jobs:
           # liquibase/liquibase:latest in scan-results.
           pattern: vulnerability-report-liquibase-liquibase-latest
 
+      # download-artifact@v8 flattens a single-match download directly into
+      # `path`. persist-scan-results.sh, by contrast, derives the image+tag
+      # from a per-artifact subdirectory (scan-artifacts/<artifact-name>/).
+      # Re-wrap the files into that subdir. Idempotent — skips if the subdir
+      # already exists (multi-match downloads create it themselves).
+      - name: Wrap artifact files in expected subdir
+        run: |
+          set -euo pipefail
+          ART_NAME="vulnerability-report-liquibase-liquibase-latest"
+          ART_DIR="scan-artifacts/${ART_NAME}"
+          if [ ! -d "$ART_DIR" ]; then
+            mkdir -p "$ART_DIR"
+            find scan-artifacts -maxdepth 1 -type f -exec mv -t "$ART_DIR/" {} +
+          fi
+          ls -la "$ART_DIR"
+
       - name: Persist to scan-results branch
         run: |
           git config user.name "github-actions[bot]"
