@@ -133,7 +133,10 @@ public class SqlChangeLogParser implements ChangeLogParser {
             index = indexByDatabase.computeIfAbsent(database, db -> {
                 try {
                     return buildInterimIdIndex(db);
-                } catch (DatabaseException e) {
+                } catch (Exception e) {
+                    // Catch any exception (DatabaseException, IllegalArgumentException from a null
+                    // JDBC connection in offline mode, etc.) so the parser falls back to "raw"
+                    // instead of failing parsing of changelog-scope `checks run` and similar paths.
                     throw new UnexpectedLiquibaseException(e);
                 }
             });
