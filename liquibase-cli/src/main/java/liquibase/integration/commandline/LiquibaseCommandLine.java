@@ -755,10 +755,12 @@ public class LiquibaseCommandLine {
         List<Resource> resources = classLoaderResourceAccessor.getAll(defaultsFileConfigValue);
         if (resources != null) {
             for (Resource res : resources) {
-                if (res.exists()) {
-                    final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(res.openInputStream(), "File in classpath " + res.getUri(), returnList.size());
-                    liquibaseConfiguration.registerProvider(fileProvider);
-                    returnList.add(fileProvider);
+                if (res.exists() && !res.equals(resource)) {
+                    try (InputStream defaultsStream = res.openInputStream()) {
+                        final DefaultsFileValueProvider fileProvider = new DefaultsFileValueProvider(defaultsStream, "File in classpath " + res.getUri(), returnList.size());
+                        liquibaseConfiguration.registerProvider(fileProvider);
+                        returnList.add(fileProvider);
+                    }
                 }
             }
         }
