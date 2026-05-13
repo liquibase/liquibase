@@ -1,0 +1,100 @@
+# Vulnerability scanning for published Docker images
+# This workflow scans published images on Docker Hub for vulnerabilities
+# using the reusable vulnerability scanning workflow from build-logic.
+#
+# NOTE: SARIF results are NOT uploaded to GitHub Security tab to avoid stale alerts.
+# Published image vulnerabilities are tracked via workflow artifacts and GitHub Actions summary.
+# Only the main branch workflow (trivy.yml) populates the Security tab.
+
+name: Published Images Vulnerability Scanning
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_tags_to_scan:
+        description: "Maximum number of published tags to scan"
+        required: false
+        default: "20"
+  schedule:
+    # Run Monday-Friday at 10 AM UTC (published image monitoring)
+    - cron: "0 10 * * 1-5"
+
+concurrency:
+  group: scan-results-writer
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+  packages: read
+  security-events: write
+
+jobs:
+  generate-matrix:
+    name: Generate Scan Matrix
+    runs-on: ubuntu-22.04
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    env:
+      MAX_TAGS: ${{ github.event.inputs.max_tags_to_scan || '10' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Generate matrix for all image/tag combinations
+        id: set-matrix
+        run: |
+          scripts/generate-dockerhub-matrix.sh
+
+  vulnerability-scan:
+    name: Scan ${{ matrix.image }}:${{ matrix.tag }}
+    needs: generate-matrix
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+    uses: liquibase/build-logic/.github/workflows/reusable-vulnerability-scan.yml@main
+    with:
+      mode: docker
+      source: "${{ matrix.image }}:${{ matrix.tag }}"
+      image_name: ${{ matrix.image }}
+      image_tag: ${{ matrix.tag }}
+      fail_on_vulnerabilities: false
+      upload_sarif: false
+      generate_sbom: true
+      vex_enabled: false
+      # Community images have no VEX coverage and do not feed the auto-assess
+      # pipeline (VEX assessments only apply to liquibase-secure scans in
+      # liquibase-pro). Skip CVE dispatch entirely. [TECHOPS-408]
+      dispatch_new_cves: false
+      run_osv: true  # TECHOPS-410 Phase-1 dual-run; output is artifact-only, does not gate
+      build_logic_ref: main
+    secrets: inherit
+
+  persist-results:
+    name: Persist Scan Results
+    needs: [generate-matrix, vulnerability-scan]
+    if: always() && needs.vulnerability-scan.result != 'cancelled'
+    runs-on: ubuntu-22.04
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Download all scan artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: scan-artifacts
+          pattern: vulnerability-report-*
+
+      - name: Persist to scan-results branch
+        env:
+          EXPECTED_MATRIX: ${{ needs.generate-matrix.outputs.matrix }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          scripts/persist-scan-results.sh scan-artifacts

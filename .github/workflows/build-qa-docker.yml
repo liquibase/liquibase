@@ -1,0 +1,200 @@
+name: Build QA Docker Images
+
+# Migrated from liquibase/docker/.github/workflows/build-qa-docker.yml as part of TECHOPS-431.
+# Scope: community + alpine QA builds only.
+# Secure QA builds are handled by liquibase-pro/.github/workflows/build-qa-docker.yml.
+# Removal of the legacy liquibase/docker workflow is deferred to TECHOPS-366.
+#
+# NOTE: default is 'main' (not 'master') — design ADR-4 was corrected per TECHOPS-431
+# orchestrator decision (HEAD branch of liquibase/liquibase is main).
+
+permissions:
+  contents: read
+  id-token: write
+  actions: read
+  packages: write
+  security-events: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      liquibaseBranch:
+        description: "Liquibase branch to build from (e.g., main, feature-branch)"
+        required: true
+        type: string
+        default: "main"
+      buildTargets:
+        description: "Which images to build"
+        required: true
+        type: choice
+        default: "All (Community + Alpine)"
+        options:
+          - "All (Community + Alpine)"
+          - "Standard Community Only"
+          - "Alpine Community Only"
+
+jobs:
+  build-qa-community:
+    name: Build Community QA
+    if: ${{ inputs.buildTargets == 'All (Community + Alpine)' || inputs.buildTargets == 'Standard Community Only' }}
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-build-qa.yml@main
+    with:
+      image_name: liquibase-qa
+      dockerfile_path: docker/Dockerfile
+      build_context: docker/
+      build_type: Community
+      is_rc: "false"
+      push_nexus: true
+      push_ghcr: true
+      ghcr_name: community
+      branch_name: ${{ inputs.liquibaseBranch }}
+      build_logic_ref: main
+    secrets: inherit
+
+  build-qa-alpine:
+    name: Build Alpine Community QA
+    if: ${{ inputs.buildTargets == 'All (Community + Alpine)' || inputs.buildTargets == 'Alpine Community Only' }}
+    uses: liquibase/build-logic/.github/workflows/reusable-docker-build-qa.yml@main
+    with:
+      image_name: liquibase-qa-alpine
+      dockerfile_path: docker/Dockerfile.alpine
+      build_context: docker/
+      suffix: "-alpine"
+      build_type: Community
+      is_rc: "false"
+      push_nexus: true
+      push_ghcr: true
+      ghcr_name: alpine
+      branch_name: ${{ inputs.liquibaseBranch }}
+      build_logic_ref: main
+    secrets: inherit
+
+  vuln-scan-community:
+    name: Scan Community QA
+    needs: [build-qa-community]
+    if: ${{ !cancelled() && needs.build-qa-community.result == 'success' }}
+    uses: liquibase/build-logic/.github/workflows/reusable-vulnerability-scan.yml@main
+    with:
+      mode: docker
+      source: ghcr.io/${{ github.repository }}/liquibase-community:${{ github.sha }}
+      image_name: liquibase-qa
+      image_tag: qa
+      fail_on_vulnerabilities: true
+      upload_sarif: false
+      generate_sbom: true
+      # ─── TECHOPS-408: community scans MUST NOT dispatch CVEs to investigate-cve in liquibase-pro ───
+      # The pro-secure twin (liquibase-pro/.github/workflows/build-qa-docker.yml) sets this to true.
+      # DO NOT COPY THAT VALUE HERE. Community CVE handling is owned by docker-scan.yml in this repo.
+      # See: https://liquibase.atlassian.net/browse/TECHOPS-408
+      dispatch_new_cves: false
+      build_logic_ref: main
+    secrets: inherit
+
+  vuln-scan-alpine:
+    name: Scan Alpine Community QA
+    needs: [build-qa-alpine]
+    if: ${{ !cancelled() && needs.build-qa-alpine.result == 'success' }}
+    uses: liquibase/build-logic/.github/workflows/reusable-vulnerability-scan.yml@main
+    with:
+      mode: docker
+      source: ghcr.io/${{ github.repository }}/liquibase-alpine:${{ github.sha }}
+      image_name: liquibase-qa-alpine
+      image_tag: qa
+      fail_on_vulnerabilities: true
+      upload_sarif: false
+      generate_sbom: true
+      # ─── TECHOPS-408: community scans MUST NOT dispatch CVEs to investigate-cve in liquibase-pro ───
+      # The pro-secure twin (liquibase-pro/.github/workflows/build-qa-docker.yml) sets this to true.
+      # DO NOT COPY THAT VALUE HERE. Community CVE handling is owned by docker-scan.yml in this repo.
+      # See: https://liquibase.atlassian.net/browse/TECHOPS-408
+      dispatch_new_cves: false
+      build_logic_ref: main
+    secrets: inherit
+
+  cleanup-ghcr-community:
+    name: Cleanup Community GHCR
+    needs: [vuln-scan-community]
+    if: always()
+    runs-on: ubuntu-latest
+    # Cleanup is best-effort: the temp QA image is throwaway and any failure here
+    # should not fail the dispatched workflow. The Delete GHCR image step catches the
+    # known GHCR "last tagged version" 400 explicitly; continue-on-error covers anything
+    # else (auth, transient network, future API changes) — those still log so we can
+    # notice them, but they don't redden the build.
+    continue-on-error: true
+    permissions:
+      packages: write
+    steps:
+      - name: Delete GHCR image
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          TAG: ${{ github.sha }}
+        run: |
+          PACKAGE_NAME="${REPO_NAME}/liquibase-community"
+          ENCODED_PACKAGE_NAME="${REPO_NAME}%2Fliquibase-community"
+          VERSION_ID=$(gh api \
+            "/orgs/${REPO_OWNER}/packages/container/${ENCODED_PACKAGE_NAME}/versions" \
+            --jq ".[] | select(.metadata.container.tags[] == \"${TAG}\") | .id" 2>/dev/null || echo "")
+          if [ -z "$VERSION_ID" ]; then
+            echo "No version found for ${PACKAGE_NAME}:${TAG}, skipping"
+            exit 0
+          fi
+          # GHCR rejects deletion of the last tagged version of a package with HTTP 400.
+          # Treat that as a no-op — the temp QA image just stays until a future run
+          # creates a second version, at which point cleanup of the older one succeeds.
+          if RESPONSE=$(gh api --method DELETE \
+              "/orgs/${REPO_OWNER}/packages/container/${ENCODED_PACKAGE_NAME}/versions/${VERSION_ID}" 2>&1); then
+            echo "Deleted ${PACKAGE_NAME}:${TAG}"
+          elif echo "$RESPONSE" | grep -q "cannot delete the last tagged version"; then
+            echo "Skipping: ${PACKAGE_NAME}:${TAG} is the last tagged version (GHCR API constraint). Leaving image in place."
+          else
+            echo "Failed to delete ${PACKAGE_NAME}:${TAG}:"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+  cleanup-ghcr-alpine:
+    name: Cleanup Alpine GHCR
+    needs: [vuln-scan-alpine]
+    if: always()
+    runs-on: ubuntu-latest
+    # Cleanup is best-effort: the temp QA image is throwaway and any failure here
+    # should not fail the dispatched workflow. The Delete GHCR image step catches the
+    # known GHCR "last tagged version" 400 explicitly; continue-on-error covers anything
+    # else (auth, transient network, future API changes) — those still log so we can
+    # notice them, but they don't redden the build.
+    continue-on-error: true
+    permissions:
+      packages: write
+    steps:
+      - name: Delete GHCR image
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          TAG: ${{ github.sha }}
+        run: |
+          PACKAGE_NAME="${REPO_NAME}/liquibase-alpine"
+          ENCODED_PACKAGE_NAME="${REPO_NAME}%2Fliquibase-alpine"
+          VERSION_ID=$(gh api \
+            "/orgs/${REPO_OWNER}/packages/container/${ENCODED_PACKAGE_NAME}/versions" \
+            --jq ".[] | select(.metadata.container.tags[] == \"${TAG}\") | .id" 2>/dev/null || echo "")
+          if [ -z "$VERSION_ID" ]; then
+            echo "No version found for ${PACKAGE_NAME}:${TAG}, skipping"
+            exit 0
+          fi
+          # GHCR rejects deletion of the last tagged version of a package with HTTP 400.
+          # Treat that as a no-op — the temp QA image just stays until a future run
+          # creates a second version, at which point cleanup of the older one succeeds.
+          if RESPONSE=$(gh api --method DELETE \
+              "/orgs/${REPO_OWNER}/packages/container/${ENCODED_PACKAGE_NAME}/versions/${VERSION_ID}" 2>&1); then
+            echo "Deleted ${PACKAGE_NAME}:${TAG}"
+          elif echo "$RESPONSE" | grep -q "cannot delete the last tagged version"; then
+            echo "Skipping: ${PACKAGE_NAME}:${TAG} is the last tagged version (GHCR API constraint). Leaving image in place."
+          else
+            echo "Failed to delete ${PACKAGE_NAME}:${TAG}:"
+            echo "$RESPONSE"
+            exit 1
+          fi
