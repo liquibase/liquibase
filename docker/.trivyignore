@@ -1,0 +1,7 @@
+# CVE-2022-0839 — SQL injection in changelog parameters, fixed in 4.8.0.
+# False positive on QA builds: Maven coordinates report version
+# "0.0.0.main-SNAPSHOT" which Trivy compares lexicographically against
+# the fix version 4.8.0 and concludes "vulnerable". main is well past
+# 4.8.0; real release artifacts are not affected.
+# Re-evaluate if/when the build is changed to inject a real version.
+CVE-2022-0839
