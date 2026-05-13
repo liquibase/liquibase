@@ -39,11 +39,11 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
         this(properties, 0);
     }
 
-    public DefaultsFileValueProvider(Map<?,?> properties, int precedenceOffset) throws IOException {
+    public DefaultsFileValueProvider(Map<String,?> properties, int precedenceOffset) throws IOException {
         this(propertiesFromMap(properties), precedenceOffset);
     }
 
-    public DefaultsFileValueProvider(Map<?,?> properties) throws IOException {
+    public DefaultsFileValueProvider(Map<String,?> properties) throws IOException {
         this(properties, 0);
     }
 
@@ -91,7 +91,7 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
         }
     }
 
-    private static Properties propertiesFromMap(Map<?,?> map) {
+    private static Properties propertiesFromMap(Map<String,?> map) {
 
         Properties properties = new Properties();
         properties.putAll(map);
@@ -104,8 +104,7 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
         boolean strict = GlobalConfiguration.STRICT.getCurrentValue();
         SortedSet<String> invalidKeys = new TreeSet<>();
         for (Map.Entry<Object, Object> entry : this.properties.entrySet()) {
-            String key = (String) entry.getKey();
-            key = StringUtil.toCamelCase(key);
+            String key = StringUtil.toCamelCase(entry.getKey().toString());
             String originalKey = key;
 
             if (key.equalsIgnoreCase("strict") || key.startsWith("parameter.")) {
