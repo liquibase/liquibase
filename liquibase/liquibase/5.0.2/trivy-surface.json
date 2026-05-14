@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019e20f7-6a55-778c-8175-805e78331d17",
-  "CreatedAt": "2026-05-13T10:52:26.069496469Z",
+  "ReportID": "019e261a-90a2-7755-a270-3b0dbc67b728",
+  "CreatedAt": "2026-05-14T10:48:55.714482517Z",
   "ArtifactID": "sha256:ff9ccc0f412885d2f350273b856e29f33d5cbd3a86b57d23715fdffe9f11c356",
   "ArtifactName": "liquibase/liquibase:5.0.2",
   "ArtifactType": "container_image",
@@ -10896,7 +10896,7 @@
             "https://bugzilla.redhat.com/show_bug.cgi?id=2445356",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-25679",
             "https://errata.almalinux.org/9/ALSA-2026-9044.html",
-            "https://errata.rockylinux.org/RLSA-2026:7011",
+            "https://errata.rockylinux.org/RLSA-2026:8841",
             "https://go.dev/cl/752180",
             "https://go.dev/issue/77578",
             "https://groups.google.com/g/golang-announce/c/EdhZqrQ98hk",
@@ -10967,16 +10967,22 @@
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456336",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456338",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456339",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2456340",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2456341",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2456342",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-27140",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-27143",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-27144",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32280",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32282",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32283",
             "https://errata.almalinux.org/9/ALSA-2026-14200.html",
-            "https://errata.rockylinux.org/RLSA-2026:11514",
+            "https://errata.rockylinux.org/RLSA-2026:10219",
             "https://go.dev/cl/758320",
             "https://go.dev/issue/78282",
             "https://groups.google.com/g/golang-announce/c/0uYbvbPZRWU",
             "https://linux.oracle.com/cve/CVE-2026-32280.html",
-            "https://linux.oracle.com/errata/ELSA-2026-14200.html",
+            "https://linux.oracle.com/errata/ELSA-2026-16875.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-32280",
             "https://pkg.go.dev/vuln/GO-2026-4947",
             "https://www.cve.org/CVERecord?id=CVE-2026-32280"
@@ -11111,17 +11117,15 @@
             "https://bugzilla.redhat.com/2456339",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456336",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456338",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2456339",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32280",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32282",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32283",
             "https://errata.almalinux.org/9/ALSA-2026-14200.html",
-            "https://errata.rockylinux.org/RLSA-2026:11514",
+            "https://errata.rockylinux.org/RLSA-2026:11711",
             "https://go.dev/cl/763767",
             "https://go.dev/issue/78334",
             "https://groups.google.com/g/golang-announce/c/0uYbvbPZRWU",
             "https://linux.oracle.com/cve/CVE-2026-32283.html",
-            "https://linux.oracle.com/errata/ELSA-2026-14200.html",
+            "https://linux.oracle.com/errata/ELSA-2026-17075.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2026-32283",
             "https://pkg.go.dev/vuln/GO-2026-4870",
             "https://www.cve.org/CVERecord?id=CVE-2026-32283"
@@ -11147,6 +11151,7 @@
             "Digest": "sha256:334358fec3557bd2107a578a8e241f43310faa3450b8bdeebacdef14e26c6dcd",
             "DiffID": "sha256:b84826ae26736d68df8fcf86f4361b697476c69a1d0f50e0d01c811374467f32"
           },
+          "SeveritySource": "nvd",
           "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-33811",
           "DataSource": {
             "ID": "govulndb",
@@ -11157,11 +11162,19 @@
           "Title": "When using LookupCNAME with the cgo DNS resolver, a very long CNAME re ...",
           "Description": "When using LookupCNAME with the cgo DNS resolver, a very long CNAME response can trigger a double-free of C memory and a crash.",
           "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-415"
+          ],
           "VendorSeverity": {
-            "bitnami": 3
+            "bitnami": 3,
+            "nvd": 3
           },
           "CVSS": {
             "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "nvd": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
               "V3Score": 7.5
             }
@@ -11174,7 +11187,7 @@
             "https://pkg.go.dev/vuln/GO-2026-4981"
           ],
           "PublishedDate": "2026-05-07T20:16:42.77Z",
-          "LastModifiedDate": "2026-05-08T15:16:36.64Z"
+          "LastModifiedDate": "2026-05-12T20:23:02.333Z"
         },
         {
           "VulnerabilityID": "CVE-2026-33814",
@@ -11194,6 +11207,7 @@
             "Digest": "sha256:334358fec3557bd2107a578a8e241f43310faa3450b8bdeebacdef14e26c6dcd",
             "DiffID": "sha256:b84826ae26736d68df8fcf86f4361b697476c69a1d0f50e0d01c811374467f32"
           },
+          "SeveritySource": "nvd",
           "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-33814",
           "DataSource": {
             "ID": "govulndb",
@@ -11204,11 +11218,19 @@
           "Title": "When processing HTTP/2 SETTINGS frames, transport will enter an infini ...",
           "Description": "When processing HTTP/2 SETTINGS frames, transport will enter an infinite loop of writing CONTINUATION frames if it receives a SETTINGS_MAX_FRAME_SIZE with a value of 0.",
           "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-835"
+          ],
           "VendorSeverity": {
-            "bitnami": 3
+            "bitnami": 3,
+            "nvd": 3
           },
           "CVSS": {
             "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "nvd": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
               "V3Score": 7.5
             }
@@ -11222,7 +11244,7 @@
             "https://pkg.go.dev/vuln/GO-2026-4918"
           ],
           "PublishedDate": "2026-05-07T20:16:42.88Z",
-          "LastModifiedDate": "2026-05-08T19:16:30.567Z"
+          "LastModifiedDate": "2026-05-13T14:41:59.52Z"
         },
         {
           "VulnerabilityID": "CVE-2026-39820",
@@ -11242,6 +11264,7 @@
             "Digest": "sha256:334358fec3557bd2107a578a8e241f43310faa3450b8bdeebacdef14e26c6dcd",
             "DiffID": "sha256:b84826ae26736d68df8fcf86f4361b697476c69a1d0f50e0d01c811374467f32"
           },
+          "SeveritySource": "nvd",
           "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-39820",
           "DataSource": {
             "ID": "govulndb",
@@ -11252,11 +11275,19 @@
           "Title": "Well-crafted inputs reaching ParseAddress, ParseAddressList, and Parse ...",
           "Description": "Well-crafted inputs reaching ParseAddress, ParseAddressList, and ParseDate were able to trigger excessive CPU exhaustion and memory allocations.",
           "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-770"
+          ],
           "VendorSeverity": {
-            "bitnami": 3
+            "bitnami": 3,
+            "nvd": 3
           },
           "CVSS": {
             "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "nvd": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
               "V3Score": 7.5
             }
@@ -11269,7 +11300,7 @@
             "https://pkg.go.dev/vuln/GO-2026-4986"
           ],
           "PublishedDate": "2026-05-07T20:16:43.187Z",
-          "LastModifiedDate": "2026-05-08T15:16:37.323Z"
+          "LastModifiedDate": "2026-05-13T15:10:58.65Z"
         },
         {
           "VulnerabilityID": "CVE-2026-39836",
@@ -11289,6 +11320,7 @@
             "Digest": "sha256:334358fec3557bd2107a578a8e241f43310faa3450b8bdeebacdef14e26c6dcd",
             "DiffID": "sha256:b84826ae26736d68df8fcf86f4361b697476c69a1d0f50e0d01c811374467f32"
           },
+          "SeveritySource": "nvd",
           "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-39836",
           "DataSource": {
             "ID": "govulndb",
@@ -11299,11 +11331,19 @@
           "Title": "Panic in Dial and LookupPort when handling NUL byte on Windows in net",
           "Description": "The Dial and LookupPort functions panic on Windows when provided with an input containing a NUL (0).",
           "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-476"
+          ],
           "VendorSeverity": {
-            "bitnami": 3
+            "bitnami": 3,
+            "nvd": 3
           },
           "CVSS": {
             "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "nvd": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
               "V3Score": 7.5
             }
@@ -11316,7 +11356,7 @@
             "https://pkg.go.dev/vuln/GO-2026-4971"
           ],
           "PublishedDate": "2026-05-07T20:16:43.593Z",
-          "LastModifiedDate": "2026-05-08T22:16:29.723Z"
+          "LastModifiedDate": "2026-05-13T15:11:10.31Z"
         },
         {
           "VulnerabilityID": "CVE-2026-42499",
@@ -11363,7 +11403,7 @@
             "https://pkg.go.dev/vuln/GO-2026-4977"
           ],
           "PublishedDate": "2026-05-07T20:16:44.54Z",
-          "LastModifiedDate": "2026-05-08T22:16:33.183Z"
+          "LastModifiedDate": "2026-05-13T16:59:17.563Z"
         }
       ]
     }
