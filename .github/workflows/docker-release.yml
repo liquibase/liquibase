@@ -60,6 +60,7 @@ on:
 permissions:
   contents: read
   id-token: write
+  packages: write
 
 jobs:
   # ── Step 1: Bump LIQUIBASE_VERSION ARG in Dockerfiles, commit to main ────────
