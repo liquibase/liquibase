@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jre-noble
+FROM eclipse-temurin:25-jre-noble
 
 # Create liquibase user
 RUN groupadd --gid 1001 liquibase && \
