@@ -9,8 +9,8 @@ RUN groupadd --gid 1001 liquibase && \
 # Download and install Liquibase
 WORKDIR /liquibase
 
-ARG LIQUIBASE_VERSION=5.0.2
-ARG LB_SHA256=10356bea9dc57868a57fc3af88ad471f5027d67ad1f5fc88a9c2221401cbae23
+ARG LIQUIBASE_VERSION=5.0.3
+ARG LB_SHA256=865aab391be9cbe3fee22461392d5d29aa76652596598b14700a3f5f05c9e2b7
 
 RUN wget -q -O liquibase-${LIQUIBASE_VERSION}.tar.gz "https://package.liquibase.com/downloads/dockerhub/official/liquibase-${LIQUIBASE_VERSION}.tar.gz" && \
     echo "$LB_SHA256 *liquibase-${LIQUIBASE_VERSION}.tar.gz" | sha256sum -c - && \
