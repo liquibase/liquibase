@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019e2f02-cda2-7526-8e36-79207612aaed",
-  "CreatedAt": "2026-05-16T04:19:33.410338374Z",
+  "ReportID": "019e2f02-8ecf-7105-a23f-234b12443028",
+  "CreatedAt": "2026-05-16T04:19:17.327068168Z",
   "ArtifactName": "/tmp/extracted-deps",
   "ArtifactType": "filesystem",
   "Results": [
@@ -36,10 +36,10 @@
         {
           "Name": "commons-io:commons-io",
           "Identifier": {
-            "PURL": "pkg:maven/commons-io/commons-io@2.21.0",
-            "UID": "3849a281d72021cf"
+            "PURL": "pkg:maven/commons-io/commons-io@2.22.0",
+            "UID": "a29d879b68ad5017"
           },
-          "Version": "2.21.0",
+          "Version": "2.22.0",
           "FilePath": "internal-jars/lib/commons-io.jar",
           "AnalyzedBy": "jar"
         },
@@ -86,20 +86,20 @@
         {
           "Name": "org.liquibase:liquibase-core",
           "Identifier": {
-            "PURL": "pkg:maven/org.liquibase/liquibase-core@5.0.2",
-            "UID": "34ee5f12eafe2f83"
+            "PURL": "pkg:maven/org.liquibase/liquibase-core@5.0.3",
+            "UID": "70fff2b4dfca2978"
           },
-          "Version": "5.0.2",
+          "Version": "5.0.3",
           "FilePath": "internal-jars/lib/liquibase-core.jar",
           "AnalyzedBy": "jar"
         },
         {
           "Name": "org.yaml:snakeyaml",
           "Identifier": {
-            "PURL": "pkg:maven/org.yaml/snakeyaml@2.5",
-            "UID": "49fc5c24053ca299"
+            "PURL": "pkg:maven/org.yaml/snakeyaml@2.6",
+            "UID": "ccf7cbc3eccd5024"
           },
-          "Version": "2.5",
+          "Version": "2.6",
           "FilePath": "internal-jars/lib/snakeyaml.jar",
           "AnalyzedBy": "jar"
         }

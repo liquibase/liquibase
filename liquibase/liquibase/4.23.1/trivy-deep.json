@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019e1f91-4bdd-7efe-b98a-19caf9283463",
-  "CreatedAt": "2026-05-13T04:21:16.381986192Z",
+  "ReportID": "019e2f02-e3f2-75e9-9bb3-8fae79fa043e",
+  "CreatedAt": "2026-05-16T04:19:39.122388482Z",
   "ArtifactName": "/tmp/extracted-deps",
   "ArtifactType": "filesystem",
   "Results": [
@@ -444,13 +444,13 @@
           },
           "References": [
             "http://www.openwall.com/lists/oss-security/2024/04/02/6",
-            "https://access.redhat.com/errata/RHSA-2024:1436",
+            "https://access.redhat.com/errata/RHSA-2024:1435",
             "https://access.redhat.com/security/cve/CVE-2024-1597",
             "https://bugzilla.redhat.com/2266523",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2266523",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-1597",
-            "https://errata.almalinux.org/9/ALSA-2024-1436.html",
-            "https://errata.rockylinux.org/RLSA-2024:1435",
+            "https://errata.almalinux.org/8/ALSA-2024-1435.html",
+            "https://errata.rockylinux.org/RLSA-2024:1436",
             "https://github.com/pgjdbc/pgjdbc",
             "https://github.com/pgjdbc/pgjdbc/commit/06abfb78a627277a580d4df825f210e96a4e14ee",
             "https://github.com/pgjdbc/pgjdbc/commit/93b0fcb2711d9c1e3a2a03134369738a02a58b40",
