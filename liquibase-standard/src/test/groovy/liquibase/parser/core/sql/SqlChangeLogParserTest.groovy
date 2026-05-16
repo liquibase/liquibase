@@ -119,6 +119,18 @@ class SqlChangeLogParserTest extends Specification {
         2 * changeLogHistoryService.getRanChangeSets() >> { throw new DatabaseException("transient") } >> []
     }
 
+    def "generateId falls back to 'raw' when the index build throws a non-DatabaseException"() {
+        given: "the lookup throws IllegalArgumentException, as PreparedStatementFactory(null) does in offline mode"
+        changeLogHistoryService.getRanChangeSets() >> { throw new IllegalArgumentException("connection is null") }
+        def parser = new SqlChangeLogParser()
+
+        when:
+        def result = parser.generateId("path/to/file.sql", database)
+
+        then:
+        result == "raw"
+    }
+
     private static RanChangeSet ranChangeSet(String changeLog, String id, String author) {
         return new RanChangeSet(
                 changeLog,
