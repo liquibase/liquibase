@@ -573,6 +573,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         if (database instanceof MySQLDatabase) {
             readDefaultValueForMysqlDatabase(columnMetadataResultSet, columnInfo, database);
+            if ((columnMetadataResultSet.get(COLUMN_DEF_COL) != null)
+                    && StringUtil.equalsWordNull((String) columnMetadataResultSet.get(COLUMN_DEF_COL))) {
+                columnMetadataResultSet.set(COLUMN_DEF_COL, null);
+            }
         }
 
         if ((database instanceof AbstractDb2Database)
