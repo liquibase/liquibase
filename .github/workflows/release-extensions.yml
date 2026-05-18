@@ -5,6 +5,10 @@ on:
       version:
         description: 'Liquibase Version'
         required: true
+      repositories:
+        description: 'JSON array of repositories to release. Leave blank to use the default list (excludes liquibase-parent-pom, which has its own release cadence).'
+        required: false
+        default: '["liquibase-bigquery","liquibase-cache","liquibase-cassandra","liquibase-cosmosdb","liquibase-db2i","liquibase-filechangelog","liquibase-nochangeloglock","liquibase-hanadb","liquibase-maxdb","liquibase-modify-column","liquibase-mssql","liquibase-oracle","liquibase-postgresql","liquibase-redshift","liquibase-sqlfire","liquibase-teradata","liquibase-vertica","liquibase-yugabytedb","liquibase-hibernate","liquibase-cdi","liquibase-cdi-jakarta"]'
 
 jobs:
   automated-os-extensions-release:
@@ -12,4 +16,4 @@ jobs:
     secrets: inherit
     with:
       version: ${{ inputs.version }}
-
+      repositories: ${{ inputs.repositories }}
