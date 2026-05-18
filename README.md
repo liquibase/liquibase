@@ -26,9 +26,9 @@ Together, these options ensure that teams can choose the path that best fits the
 ### Build Access and Release Planning
 
 - **Nightly builds:** The latest Main branch build is available at https://github.com/liquibase/liquibase/releases/tag/nightly — download `liquibase-nightly.tar.gz` (Linux/macOS) or `liquibase-nightly.zip` (Windows). Updated automatically after each successful test run on main.
-- **Latest Release: v5.0.2 — March 5, 2026** \
+- **Latest Release: v5.0.3 — May 15, 2026** \
 https://www.liquibase.com/download-community
-- **Next Planned Release: May 15, 2026** 
+- **Next Planned Release: August 20, 2026** 
 - **Roadmap:** \
 https://github.com/orgs/liquibase/projects/3/views/9?layout=board
 
