@@ -9,6 +9,26 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 
+/**
+ * Base class for {@link ResourceAccessor}s that resolve a caller-supplied path against a
+ * configured root directory (file system, zip, etc.).
+ * <p>
+ * <b>Containment guarantee.</b> Both {@link #getAll(String)} and
+ * {@link #search(String, SearchOptions)} reject any path that, after normalisation, escapes
+ * the configured {@link #getRootPath()}. They additionally verify the canonical real path
+ * (after symbolic-link resolution) stays within the canonical root, so a symlink located
+ * inside the root that targets a file outside it is not silently followed.
+ * <p>
+ * <b>Caveats.</b>
+ * <ul>
+ *   <li>The containment check is evaluated at {@code getAll} / {@code search} time. A
+ *       symlink created or modified after the check (TOCTOU race) is not re-validated
+ *       when the returned {@link Resource}'s stream is opened later.</li>
+ *   <li>For {@link #search(String, SearchOptions)}, each visited file or directory is
+ *       re-checked individually so symlinks discovered during the walk are skipped
+ *       rather than aborting the whole walk.</li>
+ * </ul>
+ */
 public abstract class AbstractPathResourceAccessor extends AbstractResourceAccessor {
 
     abstract protected Path getRootPath();
@@ -36,26 +56,30 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
         if (path == null) {
             return returnList;
         }
-        Path finalPath = getRootPath().resolve(path).normalize();
+        // Hoist the normalised root once so the containment check and error message
+        // don't recompute it. DirectoryResourceAccessor stores the root as
+        // normalize()+toAbsolutePath() at construction, so normalize() here is a
+        // no-op for that subclass — done defensively for other implementations.
+        Path rootPath = getRootPath().normalize();
+        Path finalPath = rootPath.resolve(path).normalize();
         // Reject any payload that, after normalization, escapes the configured root.
         // Java's Path.normalize() on a relative path leaves leading ".." segments intact,
         // so a payload like "../../etc/passwd" survives standardizePath() and only
         // collapses after resolve(); a startsWith check catches it before Files.exists
         // would resolve it through the OS layer.
-        if (!finalPath.startsWith(getRootPath().normalize())) {
-            throw new IOException("Path '" + path + "' resolves outside accessor root '"
-                    + getRootPath().normalize() + "'");
+        if (!finalPath.startsWith(rootPath)) {
+            throw new IOException("Path '" + path + "' resolves outside accessor root '" + rootPath + "'");
         }
         if (Files.exists(finalPath)) {
             // Defense in depth: a symbolic link at finalPath could point outside the
             // configured root. toRealPath() follows symlinks; reject if the canonical
             // location escapes the canonical root.
-            if (!finalPath.toRealPath().startsWith(getRootPath().toRealPath())) {
+            if (!finalPath.toRealPath().startsWith(rootPath.toRealPath())) {
                 throw new IOException("Path '" + path + "' resolves outside accessor root via symlink");
             }
             returnList.add(createResource(finalPath, path));
         } else {
-            log.fine("Path " + path + " in " + getRootPath() + " does not exist (" + this + ")");
+            log.fine("Path " + path + " in " + rootPath + " does not exist (" + this + ")");
         }
 
         return returnList;
@@ -94,16 +118,18 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
             throw new IllegalArgumentException("Path must not be null");
         }
 
-        startPath = startPath
-                .replaceFirst("^file:/+", "")
-                .replaceFirst("^/", "");
+        // Strip the file: scheme first (standardizePath() does not), then route startPath
+        // through the same separator/drive normalisation as getAll() so behaviour matches
+        // across both entry points (e.g. mixed-separator payloads like "..\\..\\..\\" on
+        // Linux are recognised as traversal, not treated as a literal filename).
+        startPath = standardizePath(startPath.replaceFirst("^file:/+", ""));
         Logger log = Scope.getCurrentScope().getLog(getClass());
 
-        Path rootPath = getRootPath();
+        Path rootPath = getRootPath().normalize();
         Path basePath = rootPath.resolve(startPath).normalize();
-        if (!basePath.startsWith(rootPath.normalize())) {
+        if (!basePath.startsWith(rootPath)) {
             throw new IOException("Search startPath '" + startPath
-                    + "' resolves outside accessor root '" + rootPath.normalize() + "'");
+                    + "' resolves outside accessor root '" + rootPath + "'");
         }
 
         final List<Resource> returnSet = new ArrayList<>();
