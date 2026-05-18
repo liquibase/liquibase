@@ -36,8 +36,23 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
         if (path == null) {
             return returnList;
         }
-        Path finalPath = getRootPath().resolve(path);
+        Path finalPath = getRootPath().resolve(path).normalize();
+        // Reject any payload that, after normalization, escapes the configured root.
+        // Java's Path.normalize() on a relative path leaves leading ".." segments intact,
+        // so a payload like "../../etc/passwd" survives standardizePath() and only
+        // collapses after resolve(); a startsWith check catches it before Files.exists
+        // would resolve it through the OS layer.
+        if (!finalPath.startsWith(getRootPath().normalize())) {
+            throw new IOException("Path '" + path + "' resolves outside accessor root '"
+                    + getRootPath().normalize() + "'");
+        }
         if (Files.exists(finalPath)) {
+            // Defense in depth: a symbolic link at finalPath could point outside the
+            // configured root. toRealPath() follows symlinks; reject if the canonical
+            // location escapes the canonical root.
+            if (!finalPath.toRealPath().startsWith(getRootPath().toRealPath())) {
+                throw new IOException("Path '" + path + "' resolves outside accessor root via symlink");
+            }
             returnList.add(createResource(finalPath, path));
         } else {
             log.fine("Path " + path + " in " + getRootPath() + " does not exist (" + this + ")");
@@ -85,7 +100,11 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
         Logger log = Scope.getCurrentScope().getLog(getClass());
 
         Path rootPath = getRootPath();
-        Path basePath = rootPath.resolve(startPath);
+        Path basePath = rootPath.resolve(startPath).normalize();
+        if (!basePath.startsWith(rootPath.normalize())) {
+            throw new IOException("Search startPath '" + startPath
+                    + "' resolves outside accessor root '" + rootPath.normalize() + "'");
+        }
 
         final List<Resource> returnSet = new ArrayList<>();
         if (!Files.exists(basePath)) {
@@ -97,9 +116,30 @@ public abstract class AbstractPathResourceAccessor extends AbstractResourceAcces
             throw new IOException("'" + startPath + "' is a file, not a directory");
         }
 
+        // Cache the canonical root once so the per-entry containment check below
+        // doesn't re-resolve it on every visited file/directory.
+        final Path rootRealPath = rootPath.toRealPath();
+
         SimpleFileVisitor<Path> fileVisitor = new SimpleFileVisitor<Path>() {
             @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                // walkFileTree is invoked with FOLLOW_LINKS so subdirectories may be
+                // reached via symlinks. Skip any subtree whose canonical location
+                // escapes the canonical root.
+                if (!dir.toRealPath().startsWith(rootRealPath)) {
+                    log.fine("Skipping directory '" + dir + "' that resolves outside accessor root");
+                    return FileVisitResult.SKIP_SUBTREE;
+                }
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                // Per-file symlink check (e.g. file-level link pointing outside the root).
+                if (!file.toRealPath().startsWith(rootRealPath)) {
+                    log.fine("Skipping file '" + file + "' that resolves outside accessor root");
+                    return FileVisitResult.CONTINUE;
+                }
                 if (attrs.isRegularFile() && meetsSearchCriteria(file)) {
                     addToReturnList(file);
                 }
