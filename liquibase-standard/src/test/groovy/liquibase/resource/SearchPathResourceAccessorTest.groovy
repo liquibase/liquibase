@@ -17,4 +17,19 @@ class SearchPathResourceAccessorTest extends Specification {
         accessor.describeLocations()[0].endsWith("test-classes")
         accessor.describeLocations()[1].endsWith("classes")
     }
+
+    def "search-path wrapper does not bypass path-traversal containment"() {
+        given:
+        ResourceAccessor accessor = new SearchPathResourceAccessor(new File(".", "target/test-classes").getAbsolutePath())
+
+        when:
+        accessor.getAll("../../../etc/passwd")
+
+        then:
+        // CompositeResourceAccessor.getAll iterates child accessors and unions results.
+        // The per-accessor IOException from AbstractPathResourceAccessor propagates up
+        // (the composite does not catch on getAll). Pin this behaviour.
+        IOException e = thrown()
+        e.message.contains("resolves outside accessor root")
+    }
 }
