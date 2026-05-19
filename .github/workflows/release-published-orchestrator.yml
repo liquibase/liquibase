@@ -130,11 +130,17 @@ jobs:
   release-docker:
     name: Release Docker Images
     needs: [setup, manual-approval, deploy-maven]
-    if: always() && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') && needs.deploy-maven.result == 'success'
+    # Skip on dry-run: docker-release.yml resolves SHA256 from
+    # package.liquibase.com/.../liquibase-${version}.tar.gz, which only hosts GA
+    # tarballs — a dry-run-${run_id} version yields a zero-byte archive and the
+    # job intentionally exits 1. Docker builds are exercised by docker-test.yml
+    # and build-qa-docker.yml; nothing else needs validating here on dry-run.
+    if: always() && inputs.dry_run != true && needs.setup.result == 'success' && (needs.manual-approval.result == 'success' || needs.manual-approval.result == 'skipped') && needs.deploy-maven.result == 'success'
     uses: ./.github/workflows/release-docker.yml
     permissions:
-      contents: read
+      contents: write
       id-token: write
+      packages: write
     with:
       version: ${{ needs.setup.outputs.version }}
       dry_run: ${{ inputs.dry_run || false }}
