@@ -48,6 +48,13 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
             } catch (Throwable e) {
                 Scope.getCurrentScope().getLog(getClass()).fine("Cannot enable FEATURE_SECURE_PROCESSING: " + e.getMessage(), e);
             }
+            try {
+                // Changelogs are validated against XSD, not DTD. DOCTYPE has no legitimate use here;
+                // disabling it eliminates XXE entity-expansion as an attack surface.
+                saxParserFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            } catch (Throwable e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Cannot enable disallow-doctype-decl: " + e.getMessage(), e);
+            }
         }
     }
 
