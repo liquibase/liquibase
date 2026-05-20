@@ -66,15 +66,9 @@ public class JdbcConnectionPatterns extends ConnectionPatterns {
         addJdbcBlankToObfuscatePatternsReplaceWithEmpty(PatternPair.of(Pattern.compile(mysqlMatcherRegex), Pattern.compile(FILTER_CREDS_MYSQL_TO_OBFUSCATE_EMPTY)));
         addJdbcBlankToObfuscatePatternsReplaceWithEmpty(PatternPair.of(Pattern.compile(mariadbMatcherRegex), Pattern.compile(FILTER_CREDS_MARIADB_TO_OBFUSCATE_EMPTY)));
 
-        // Generic JDBC userinfo fallback. Any "jdbc:<driver>://user:pass@host" URL whose
-        // dialect-specific matcher above did not match (postgresql, sqlserver, third-party
-        // drivers, future extensions) still gets basic credential redaction. The filter
-        // regexes are the same generic ones already used by mysql/mariadb; only the matcher
-        // is broadened to any jdbc:-prefixed URL. Registered last so dialect-specific entries
-        // win for their idiomatic URL shapes; the userinfo filter is idempotent when re-run
-        // on an already-redacted "*****:*****@..." string. Anchored to "jdbc:" so non-JDBC
-        // protocols (cosmosdb://, mongodb://, ...) continue to use only their dedicated
-        // patterns and are not subject to this fallback.
+        // Generic JDBC userinfo fallback for any jdbc: URL not covered by the dialect
+        // patterns above (postgresql, sqlserver, third-party drivers; CWE-693).
+        // See git blame / PR for design rationale and the dialect-vs-generic tradeoff.
         final Pattern anyJdbcUrl = Pattern.compile("(?i)jdbc:.*");
         addJdbcBlankPatterns(PatternPair.of(anyJdbcUrl, Pattern.compile(FILTER_CREDS)));
         addJdbcBlankToObfuscatePatterns(PatternPair.of(anyJdbcUrl, Pattern.compile(FILTER_CREDS_MYSQL_TO_OBFUSCATE)));
