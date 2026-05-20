@@ -50,6 +50,17 @@ public class CommandScope {
 
     private final SortedMap<String, Object> argumentValues = new TreeMap<>();
 
+    /**
+     * Substring tokens (lowercase) that mark an argument key as credential-bearing.
+     * Values for matching keys are overwritten with {@code "*****"} at the end of
+     * {@link #execute()} so the original credential Strings become GC-eligible and
+     * do not linger in heap for the rest of the JVM lifetime (CWE-316). Mirrors
+     * the denylist used by {@code IntegrationDetails.setParameter}.
+     */
+    private static final String[] CREDENTIAL_KEY_TOKENS = {
+            "password", "passwd", "secret", "token", "apikey", "accesskey"
+    };
+
     private final Map<Class<?>, Object> dependencies = new HashMap<>();
 
     /**
@@ -361,6 +372,37 @@ public class CommandScope {
             throw e;
         } catch (Exception e) {
             throw new CommandExecutionException(e);
+        } finally {
+            clearCredentialArguments();
+        }
+    }
+
+    /**
+     * Overwrite the values of any credential-bearing argument keys with
+     * {@code "*****"} so the original credential Strings stop being referenced by
+     * this scope. Strings are immutable and cannot be wiped in-place, but dropping
+     * the reference here makes them GC-eligible (assuming no other references hold
+     * the same String) instead of letting them live for the rest of the JVM in
+     * long-running embedded scenarios (CWE-316: Cleartext Storage of Sensitive
+     * Information in Memory). Called from {@link #execute()}'s outer finally so
+     * it runs regardless of command outcome; package-private for direct testing.
+     */
+    void clearCredentialArguments() {
+        if (argumentValues.isEmpty()) {
+            return;
+        }
+        for (Map.Entry<String, Object> entry : argumentValues.entrySet()) {
+            String key = entry.getKey();
+            if (key == null) {
+                continue;
+            }
+            String lowerKey = key.toLowerCase();
+            for (String token : CREDENTIAL_KEY_TOKENS) {
+                if (lowerKey.contains(token)) {
+                    entry.setValue("*****");
+                    break;
+                }
+            }
         }
     }
 

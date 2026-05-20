@@ -18,6 +18,7 @@ import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 
@@ -67,6 +68,31 @@ public class MainTest {
         main.changeLogFile = "changelog.xml";
         messages = main.checkSetup();
         assertEquals("There should be one message from Main.checkSetup", 1, messages.size());
+    }
+
+    /**
+     * CWE-316 regression: clearCredentialFields() must null all credential-bearing
+     * String fields so they become GC-eligible after a command run. Non-credential
+     * fields (url, username) must NOT be touched - operators rely on those staying
+     * set for post-execution log/MDC entries.
+     */
+    @Test
+    public void clearCredentialFields_nulls_credentials_but_leaves_other_fields_intact() {
+        Main main = new Main();
+        main.password = "supersecret-pw-12345";
+        main.referencePassword = "supersecret-ref-67890";
+        main.liquibaseProLicenseKey = "license-key-abcdef";
+        main.username = "regular-user";
+        main.url = "jdbc:postgresql://host:5432/db";
+
+        main.clearCredentialFields();
+
+        assertNull("password must be nulled", main.password);
+        assertNull("referencePassword must be nulled", main.referencePassword);
+        assertNull("liquibaseProLicenseKey must be nulled", main.liquibaseProLicenseKey);
+        assertEquals("username must remain set after credential clearing", "regular-user", main.username);
+        assertEquals("url must remain set after credential clearing",
+                "jdbc:postgresql://host:5432/db", main.url);
     }
 
 //    @Rule
