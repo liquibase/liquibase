@@ -342,13 +342,16 @@ public class DatabaseType extends DataType {
         this.password = null;
         if (isReference()) {
             try {
-                Object ref = getCheckedRef();
-                if (ref instanceof DatabaseType) {
-                    ((DatabaseType) ref).clearCredentials();
-                }
+                // Type-safe Ant API (since 1.8) — the zero-arg getCheckedRef() form is
+                // deprecated. getCheckedRef(Class, String) returns the dereferenced
+                // value already cast, or throws BuildException if the refid does not
+                // resolve to a DatabaseType (which is the only valid use here).
+                DatabaseType ref = getCheckedRef(DatabaseType.class, "database");
+                ref.clearCredentials();
             } catch (BuildException ignored) {
                 // The referenced object may no longer be resolvable at buildFinished
-                // time (project tear-down). The local shell's field is already null.
+                // time (project tear-down), or the refid may point to a non-DatabaseType.
+                // The local shell's field is already null.
             }
         }
     }
