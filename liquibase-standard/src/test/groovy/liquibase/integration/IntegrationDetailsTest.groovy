@@ -35,6 +35,8 @@ class IntegrationDetailsTest extends Specification {
         "argument__authToken"                 | "Bearer eyJ..."
         "argument__client_secret"             | "csecret"
         "argument__accessKey"                 | "AKIA..."
+        // "credentials" token — catches awsCredentials, credentialsFile, etc.
+        "argument__awsCredentials"            | "ASIA-creds-blob"
         // Case variants
         "argument__PASSWORD"                  | "upper-s3cret"
         "argument__Passwd"                    | "mixed-case"
@@ -155,5 +157,38 @@ class IntegrationDetailsTest extends Specification {
         then:
         details.name == "cli"
         details.parameters.isEmpty()
+    }
+
+    def "getParameters returns an unmodifiable view that cannot bypass the sanitize boundary"() {
+        // CWE-200 defense in depth (per @filipelautert + @coderabbitai review): a future caller
+        // that obtains a reference to getParameters() must not be able to write a raw credential
+        // into the map and skip setParameter()'s redaction.
+        given:
+        def details = new IntegrationDetails()
+        details.setParameter("argument__username", "regular-user")
+
+        when:
+        details.parameters["argument__password"] = "raw-leak-via-getter"
+
+        then:
+        thrown(UnsupportedOperationException)
+        // The map still holds the pre-attempt state — the failed put did not partially apply.
+        details.parameters["argument__username"] == "regular-user"
+        !details.parameters.containsKey("argument__password")
+    }
+
+    def "getParameters reads still work normally on the unmodifiable view"() {
+        // Confirms the unmodifiable wrap does NOT block legitimate read access patterns the
+        // existing tests and downstream consumers already rely on.
+        given:
+        def details = new IntegrationDetails()
+        details.setParameter("argument__password", "s3cret")
+        details.setParameter("argument__username", "regular-user")
+
+        expect:
+        details.parameters["argument__password"] == "*****"
+        details.parameters["argument__username"] == "regular-user"
+        details.parameters.containsKey("argument__password")
+        details.parameters.size() == 2
     }
 }
