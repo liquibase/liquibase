@@ -55,10 +55,12 @@ public class CommandScope {
      * Values for matching keys are overwritten with {@code "*****"} at the end of
      * {@link #execute()} so the original credential Strings become GC-eligible and
      * do not linger in heap for the rest of the JVM lifetime (CWE-316). Mirrors
-     * the denylist used by {@code IntegrationDetails.setParameter}.
+     * the denylist used by {@code IntegrationDetails.setParameter}, plus
+     * {@code "licensekey"} to also catch {@code liquibaseProLicenseKey} which is
+     * placed in this map via {@code Main.createLiquibaseCommand()}.
      */
     private static final String[] CREDENTIAL_KEY_TOKENS = {
-            "password", "passwd", "secret", "token", "apikey", "accesskey"
+            "password", "passwd", "secret", "token", "apikey", "accesskey", "licensekey"
     };
 
     private final Map<Class<?>, Object> dependencies = new HashMap<>();

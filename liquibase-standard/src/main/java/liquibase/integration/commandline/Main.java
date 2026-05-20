@@ -1271,6 +1271,14 @@ public class Main {
                 // is cleared separately by clearCredentialFields() in run()'s
                 // finally block.
                 char[] pwdChars = c.readPassword(attributeName + ": ");
+                // Console.readPassword returns null on EOF (Ctrl+D on Unix, Ctrl+Z on
+                // Windows). Without this guard, the subsequent new String(pwdChars)
+                // and Arrays.fill(pwdChars, '\0') would NPE rather than producing a
+                // clear parsing error.
+                if (pwdChars == null) {
+                    throw new CommandLineParsingException(
+                            "No value provided for '" + attributeName + "' (end-of-input reached)");
+                }
                 try {
                     value = new String(pwdChars);
                 } finally {

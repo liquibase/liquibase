@@ -118,30 +118,35 @@ class CommandScopeTest extends Specification {
         // the lowercased key.
         given:
         def scope = new CommandScope("mock")
-        scope.addArgumentValue("password",         "supersecret-pw-12345")
-        scope.addArgumentValue("apiSecret",        "secret-svc-token")
-        scope.addArgumentValue("authToken",        "bearer-xyz")
-        scope.addArgumentValue("AccessKey",        "AKIA-EXAMPLE")
-        scope.addArgumentValue("PASSWORD",         "case-insensitive-match")
-        scope.addArgumentValue("ldap.passwd",      "embedded-token-match")
-        scope.addArgumentValue("username",         "regular-user")
-        scope.addArgumentValue("url",              "jdbc:postgresql://host:5432/db")
-        scope.addArgumentValue("driver",           "org.postgresql.Driver")
+        scope.addArgumentValue("password",                "supersecret-pw-12345")
+        scope.addArgumentValue("apiSecret",               "secret-svc-token")
+        scope.addArgumentValue("authToken",               "bearer-xyz")
+        scope.addArgumentValue("AccessKey",               "AKIA-EXAMPLE")
+        scope.addArgumentValue("PASSWORD",                "case-insensitive-match")
+        scope.addArgumentValue("ldap.passwd",             "embedded-token-match")
+        // CommandScope receives liquibaseProLicenseKey via Main.createLiquibaseCommand()
+        // putting it into argsMap. Lowercase form "liquibaseprolicensekey" contains
+        // the "licensekey" token, so it must be redacted alongside passwords / secrets.
+        scope.addArgumentValue("liquibaseProLicenseKey",  "PRO-LICENSE-KEY-VALUE-12345")
+        scope.addArgumentValue("username",                "regular-user")
+        scope.addArgumentValue("url",                     "jdbc:postgresql://host:5432/db")
+        scope.addArgumentValue("driver",                  "org.postgresql.Driver")
 
         when:
         scope.clearCredentialArguments()
         def values = scope.@argumentValues
 
         then:
-        values["password"]    == "*****"
-        values["apiSecret"]   == "*****"
-        values["authToken"]   == "*****"
-        values["AccessKey"]   == "*****"
-        values["PASSWORD"]    == "*****"
-        values["ldap.passwd"] == "*****"
-        values["username"]    == "regular-user"
-        values["url"]         == "jdbc:postgresql://host:5432/db"
-        values["driver"]      == "org.postgresql.Driver"
+        values["password"]               == "*****"
+        values["apiSecret"]              == "*****"
+        values["authToken"]              == "*****"
+        values["AccessKey"]              == "*****"
+        values["PASSWORD"]               == "*****"
+        values["ldap.passwd"]            == "*****"
+        values["liquibaseProLicenseKey"] == "*****"
+        values["username"]               == "regular-user"
+        values["url"]                    == "jdbc:postgresql://host:5432/db"
+        values["driver"]                 == "org.postgresql.Driver"
     }
 
     def "clearCredentialArguments is a no-op when there are no arguments"() {
