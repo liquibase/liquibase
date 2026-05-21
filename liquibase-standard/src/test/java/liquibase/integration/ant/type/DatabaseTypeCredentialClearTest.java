@@ -150,4 +150,59 @@ public class DatabaseTypeCredentialClearTest {
         shell.clearCredentials();
         assertTrue("clearCredentials must not throw on a dangling refid", true);
     }
+
+    @Test
+    public void registerCredentialCleanup_listener_deregisters_itself_after_firing() {
+        // CWE-316 regression for the long-lived embedded Ant case (per @wwillard7800's
+        // review on #7743). In one-shot Ant CLI builds the Project is GC'd after the
+        // build and any attached listeners go with it. In embedded hosts that reuse a
+        // single Project across many builds (build daemons, IDE plugins, MPS-style
+        // tools), each new DatabaseType would otherwise add a permanent listener that
+        // holds a strong reference back to the (now-cleared) DatabaseType — defeating
+        // the residency-window goal this PR series is trying to achieve. The listener
+        // must deregister itself from the Project once buildFinished fires.
+        Project project = new Project();
+        int listenerCountBefore = project.getBuildListeners().size();
+
+        DatabaseType type = new DatabaseType(project);
+        type.setPassword("supersecret-pw-12345");
+        type.registerCredentialCleanup();
+
+        // Sanity: the listener was registered.
+        assertEquals("registerCredentialCleanup must add exactly one BuildListener",
+                listenerCountBefore + 1, project.getBuildListeners().size());
+
+        // Fire buildFinished — listener should run clearCredentials AND remove itself.
+        project.fireBuildFinished(null);
+
+        assertNull("password must be nulled when buildFinished fires", type.getPassword());
+        assertEquals("listener must deregister itself from the Project after firing",
+                listenerCountBefore, project.getBuildListeners().size());
+    }
+
+    @Test
+    public void multiple_databaseTypes_all_deregister_their_listeners_in_embedded_scenario() {
+        // CWE-316 regression for accumulation (per @wwillard7800): in a long-lived
+        // embedded Ant host that reuses one Project across N builds, N DatabaseType
+        // instances should result in zero residual listeners after all builds finish —
+        // not N listeners stuck holding references to empty DatabaseType shells.
+        Project project = new Project();
+        int listenerCountBefore = project.getBuildListeners().size();
+
+        DatabaseType firstBuild  = new DatabaseType(project);
+        DatabaseType secondBuild = new DatabaseType(project);
+        DatabaseType thirdBuild  = new DatabaseType(project);
+        firstBuild.registerCredentialCleanup();
+        secondBuild.registerCredentialCleanup();
+        thirdBuild.registerCredentialCleanup();
+
+        assertEquals("three DatabaseType instances must register three distinct listeners",
+                listenerCountBefore + 3, project.getBuildListeners().size());
+
+        // One buildFinished cycle drains all three at once.
+        project.fireBuildFinished(null);
+
+        assertEquals("all three listeners must deregister themselves — no accumulation",
+                listenerCountBefore, project.getBuildListeners().size());
+    }
 }

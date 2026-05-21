@@ -301,6 +301,17 @@ public class DatabaseType extends DataType {
      * so credentials are gone before the JVM idles but never while another task
      * still needs them.
      * <p>
+     * <b>Why the listener deregisters itself.</b> In a one-shot Ant CLI build the
+     * Project is GC'd after the build and the listener with it. But the audit
+     * threat model specifically covers long-running embedded hosts (Ant embedded
+     * in a build daemon, IDE plugin, MPS-style tool) that reuse one Project
+     * across many builds. Without explicit deregistration, every new DatabaseType
+     * would permanently add a listener; each listener holds a strong reference to
+     * its closed-over DatabaseType, accumulating empty (post-clear) shells for
+     * the host's lifetime — exactly the residency-window problem the rest of this
+     * audit slice is narrowing. {@code event.getProject().removeBuildListener(this)}
+     * inside {@code buildFinished} makes the listener truly one-shot.
+     * <p>
      * Called automatically from {@link #createDatabase(ResourceAccessor)} so any
      * Ant task that consumes this type opts in implicitly; package-private
      * accessibility allows direct testing.
@@ -317,7 +328,14 @@ public class DatabaseType extends DataType {
         project.addBuildListener(new BuildListener() {
             @Override public void buildStarted(BuildEvent event) {}
             @Override public void buildFinished(BuildEvent event) {
-                clearCredentials();
+                try {
+                    clearCredentials();
+                } finally {
+                    // One-shot: detach the listener so it (and the DatabaseType
+                    // it closes over) can be GC'd in long-lived embedded Ant
+                    // scenarios where the Project survives across many builds.
+                    event.getProject().removeBuildListener(this);
+                }
             }
             @Override public void targetStarted(BuildEvent event) {}
             @Override public void targetFinished(BuildEvent event) {}
