@@ -44,6 +44,24 @@ A clear and concise description of the change being made.
 - Make sure tests all pass
 -->
 
+## Release note
+
+<!--
+RECOMMENDED — one paragraph for customers. Audience-facing copy; what changed and why
+it matters to users (not implementation details).
+
+Why this matters: when this PR is merged, an automation creates a Jira ticket in SECURE
+for the docs team (per TECHOPS-497). That ticket's release-note section is filled from
+this section. If you skip this, the auto-created ticket gets a "[Release note needed]"
+placeholder and the docs team has to chase you to fill it in.
+
+If the change is genuinely not customer-facing (CI tweak, internal refactor, dep update),
+leave this empty AND apply the `skipReleaseNotes` label — no Jira ticket gets created.
+
+Convention: https://github.com/liquibase/liquibase-infrastructure/blob/main/jira/docs/description-conventions.md
+-->
+
+
 ## Things to be aware of
 
 <!--
