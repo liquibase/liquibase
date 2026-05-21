@@ -320,7 +320,7 @@ public class DatabaseType extends DataType {
         if (credentialCleanupRegistered) {
             return;
         }
-        Project project = getProject();
+        final Project project = getProject();
         if (project == null) {
             return;
         }
@@ -334,7 +334,18 @@ public class DatabaseType extends DataType {
                     // One-shot: detach the listener so it (and the DatabaseType
                     // it closes over) can be GC'd in long-lived embedded Ant
                     // scenarios where the Project survives across many builds.
-                    event.getProject().removeBuildListener(this);
+                    // Use the captured `project` instead of event.getProject()
+                    // so the deregister target is the same Project we attached
+                    // to, regardless of which Project fired the event.
+                    project.removeBuildListener(this);
+                    // Reset the idempotency flag so a SUBSEQUENT build on the
+                    // same DatabaseType instance — possible in long-lived
+                    // embedded hosts that reuse DataType instances across
+                    // builds — can register a fresh listener. Without this
+                    // reset, build 1's credentials would be cleared but build
+                    // 2 and onward would silently skip re-registration (per
+                    // @coderabbitai's review on #7743).
+                    credentialCleanupRegistered = false;
                 }
             }
             @Override public void targetStarted(BuildEvent event) {}

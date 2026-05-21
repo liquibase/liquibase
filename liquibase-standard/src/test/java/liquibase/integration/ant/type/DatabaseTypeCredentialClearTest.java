@@ -324,4 +324,48 @@ public class DatabaseTypeCredentialClearTest {
         p.setValue(value);
         return p;
     }
+
+    @Test
+    public void registerCredentialCleanup_resets_idempotency_flag_so_subsequent_builds_re_register() {
+        // CWE-316 regression for @coderabbitai's review on #7743: the one-shot
+        // BuildListener calls removeBuildListener(this) at buildFinished but
+        // (pre-fix) never reset credentialCleanupRegistered. In long-lived
+        // embedded hosts that reuse one DatabaseType across multiple builds,
+        // build 1's credentials would be cleared but build 2's registerCredentialCleanup
+        // would early-return on the stale flag — no listener registered — and
+        // build 2's credentials would silently survive.
+        Project project = new Project();
+        int listenerCountBefore = project.getBuildListeners().size();
+
+        DatabaseType type = new DatabaseType(project);
+
+        // ----- Build 1 cycle -----
+        type.setPassword("build-1-pw");
+        type.registerCredentialCleanup();
+        assertEquals("build 1: listener attached", listenerCountBefore + 1, project.getBuildListeners().size());
+
+        project.fireBuildFinished(null);
+        assertNull("build 1: password cleared at buildFinished", type.getPassword());
+        assertEquals("build 1: listener detached at buildFinished", listenerCountBefore, project.getBuildListeners().size());
+
+        // ----- Build 2 cycle on the SAME DatabaseType instance -----
+        // This is the case CodeRabbit flagged. Without the idempotency-flag
+        // reset, registerCredentialCleanup() would early-return on the stale
+        // flag and the new password would survive past buildFinished.
+        type.setPassword("build-2-pw");
+        type.registerCredentialCleanup();
+        assertEquals("build 2: listener re-attached (idempotency flag was reset)",
+                listenerCountBefore + 1, project.getBuildListeners().size());
+
+        project.fireBuildFinished(null);
+        assertNull("build 2: password cleared at buildFinished", type.getPassword());
+        assertEquals("build 2: listener detached at buildFinished", listenerCountBefore, project.getBuildListeners().size());
+
+        // ----- Build 3 cycle (one more, to lock the contract for N builds) -----
+        type.setPassword("build-3-pw");
+        type.registerCredentialCleanup();
+        project.fireBuildFinished(null);
+        assertNull("build 3: password cleared", type.getPassword());
+        assertEquals("build 3: listener detached", listenerCountBefore, project.getBuildListeners().size());
+    }
 }
