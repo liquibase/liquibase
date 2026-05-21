@@ -469,6 +469,34 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        try {
+            runExecute();
+        } finally {
+            // CWE-316: null the credential-bearing fields so the immutable String
+            // values become GC-eligible after the Mojo finishes. Most operationally
+            // relevant under Maven Daemon (mvnd) which keeps the JVM warm across
+            // builds; without this the credential Strings would persist for the
+            // entire daemon lifetime. Subclasses that hold additional credential
+            // fields (e.g. LiquibaseDatabaseDiff.referencePassword) override
+            // clearCredentialFields() and call super to extend the cleanup.
+            clearCredentialFields();
+        }
+    }
+
+    /**
+     * Null the credential-bearing fields so their (immutable) String values become
+     * GC-eligible after the Mojo finishes. Called from {@link #execute()}'s finally
+     * so it runs on success and on failure paths, including the early skip /
+     * skipOnFileExists returns. Subclasses with additional credential fields should
+     * override and call {@code super.clearCredentialFields()}.
+     * <p>
+     * CWE-316: Cleartext Storage of Sensitive Information in Memory.
+     */
+    protected void clearCredentialFields() {
+        this.password = null;
+    }
+
+    private void runExecute() throws MojoExecutionException, MojoFailureException {
         if (StringUtil.trimToNull(logging) != null) {
             getLog().error("The liquibase-maven-plugin now manages logging via the standard maven logging config, not the 'logging' configuration. Use the -e, -X or -q flags or see https://maven.apache.org/maven-logging.html");
         }
