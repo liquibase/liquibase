@@ -4,7 +4,9 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.resource.ResourceAccessor;
+import org.apache.tools.ant.BuildEvent;
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.BuildListener;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.DataType;
 import org.apache.tools.ant.types.Reference;
@@ -35,11 +37,14 @@ public class DatabaseType extends DataType {
     private String databaseChangeLogLockTableName;
     private String liquibaseTablespaceName;
 
+    private boolean credentialCleanupRegistered = false;
+
     public DatabaseType(Project project) {
         setProject(project);
     }
 
     public Database createDatabase(ResourceAccessor resourceAccessor) {
+        registerCredentialCleanup();
         logParameters();
         validateParameters();
         try {
@@ -278,5 +283,117 @@ public class DatabaseType extends DataType {
 
     public void setLiquibaseTablespaceName(String liquibaseTablespaceName) {
         this.liquibaseTablespaceName = liquibaseTablespaceName;
+    }
+
+    /**
+     * Register a one-shot Project BuildListener that nulls this DatabaseType's
+     * credential fields when the Ant build finishes (CWE-316: Cleartext Storage
+     * of Sensitive Information in Memory). Idempotent — only the first call per
+     * instance registers the listener.
+     * <p>
+     * <b>Why <code>buildFinished</code> and not at task end?</b> Ant's
+     * <code>&lt;typedef&gt;</code> + <code>databaseRef</code> pattern is
+     * specifically designed to let multiple tasks share a single
+     * <code>&lt;database id="…"&gt;</code> definition (e.g. an update followed
+     * by a rollback followed by a status check, all pointing at the same DB).
+     * Clearing credentials at task end would break the second and third tasks.
+     * <code>buildFinished</code> fires after the very last task on the project,
+     * so credentials are gone before the JVM idles but never while another task
+     * still needs them.
+     * <p>
+     * <b>Why the listener deregisters itself.</b> In a one-shot Ant CLI build the
+     * Project is GC'd after the build and the listener with it. But the audit
+     * threat model specifically covers long-running embedded hosts (Ant embedded
+     * in a build daemon, IDE plugin, MPS-style tool) that reuse one Project
+     * across many builds. Without explicit deregistration, every new DatabaseType
+     * would permanently add a listener; each listener holds a strong reference to
+     * its closed-over DatabaseType, accumulating empty (post-clear) shells for
+     * the host's lifetime — exactly the residency-window problem the rest of this
+     * audit slice is narrowing. {@code event.getProject().removeBuildListener(this)}
+     * inside {@code buildFinished} makes the listener truly one-shot.
+     * <p>
+     * Called automatically from {@link #createDatabase(ResourceAccessor)} so any
+     * Ant task that consumes this type opts in implicitly; package-private
+     * accessibility allows direct testing.
+     */
+    void registerCredentialCleanup() {
+        if (credentialCleanupRegistered) {
+            return;
+        }
+        final Project project = getProject();
+        if (project == null) {
+            return;
+        }
+        credentialCleanupRegistered = true;
+        project.addBuildListener(new BuildListener() {
+            @Override public void buildStarted(BuildEvent event) {}
+            @Override public void buildFinished(BuildEvent event) {
+                try {
+                    clearCredentials();
+                } finally {
+                    // One-shot: detach the listener so it (and the DatabaseType
+                    // it closes over) can be GC'd in long-lived embedded Ant
+                    // scenarios where the Project survives across many builds.
+                    // Use the captured `project` instead of event.getProject()
+                    // so the deregister target is the same Project we attached
+                    // to, regardless of which Project fired the event.
+                    project.removeBuildListener(this);
+                    // Reset the idempotency flag so a SUBSEQUENT build on the
+                    // same DatabaseType instance — possible in long-lived
+                    // embedded hosts that reuse DataType instances across
+                    // builds — can register a fresh listener. Without this
+                    // reset, build 1's credentials would be cleared but build
+                    // 2 and onward would silently skip re-registration (per
+                    // @coderabbitai's review on #7743).
+                    credentialCleanupRegistered = false;
+                }
+            }
+            @Override public void targetStarted(BuildEvent event) {}
+            @Override public void targetFinished(BuildEvent event) {}
+            @Override public void taskStarted(BuildEvent event) {}
+            @Override public void taskFinished(BuildEvent event) {}
+            @Override public void messageLogged(BuildEvent event) {}
+        });
+    }
+
+    /**
+     * Null the credential-bearing fields. Strings are immutable in Java and
+     * cannot be wiped in place; nulling the field is the closest equivalent and
+     * makes the String GC-eligible if no other references hold it.
+     * <p>
+     * For refid-based shells whose getters delegate to a referenced
+     * <code>DatabaseType</code> (the typedef+databaseRef pattern), also clear
+     * the referenced instance's credentials so the actual shared field is
+     * wiped. Safe to call multiple times on the same referenced instance —
+     * subsequent calls are no-ops because the field is already null.
+     */
+    void clearCredentials() {
+        this.password = null;
+        // Also wipe credential-bearing <connectionProperty> values — per
+        // @filipelautert's review on #7743, a build that uses
+        //   <connectionProperty name="password" value="hunter2"/>
+        // instead of (or in addition to) <password> would otherwise leave the
+        // raw value sitting in the Property list past buildFinished. Walk only
+        // the local connectionProperties — for refid shells, setRefid() rejects
+        // any locally-set attribute, so connectionProperties is always null on
+        // the shell; the referenced DatabaseType's connectionProperties get
+        // cleared via the refid traversal below.
+        if (this.connectionProperties != null) {
+            this.connectionProperties.clearCredentialValues();
+        }
+        if (isReference()) {
+            try {
+                // Type-safe Ant API (since 1.8) — the zero-arg getCheckedRef() form is
+                // deprecated. getCheckedRef(Class, String) returns the dereferenced
+                // value already cast, or throws BuildException if the refid does not
+                // resolve to a DatabaseType (which is the only valid use here).
+                DatabaseType ref = getCheckedRef(DatabaseType.class, "database");
+                ref.clearCredentials();
+            } catch (BuildException ignored) {
+                // The referenced object may no longer be resolvable at buildFinished
+                // time (project tear-down), or the refid may point to a non-DatabaseType.
+                // The local shell's field is already null.
+            }
+        }
     }
 }
