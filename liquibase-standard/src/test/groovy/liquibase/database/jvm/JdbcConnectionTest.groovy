@@ -38,6 +38,10 @@ class JdbcConnectionTest extends Specification {
         "jdbc:oracle:thin:user/password@host:1521/db"                                        | "jdbc:oracle:thin:user@host:1521/db"
         "jdbc:oracle:thin:@host:1521/db"                                                     | "jdbc:oracle:thin:@host:1521/db"
         "jdbc:databricks://databricks.azuredatabricks.net:443/default;transportMode=http;ssl=1;AuthMech=11;Auth_Flow=1;httpPath=/sql/1.0/warehouses/warehouseId;ConnCatalog=myCatalog;ConnSchema=mySchema;OAuth2ClientId=MyClientID;OAuth2Secret=MySecret;" | "jdbc:databricks://databricks.azuredatabricks.net:443/default;transportMode=http;ssl=1;AuthMech=11;Auth_Flow=1;httpPath=/sql/1.0/warehouses/warehouseId;ConnCatalog=myCatalog;ConnSchema=mySchema;OAuth2ClientId=MyClientID;"
+        // Generic jdbc: userinfo fallback (CWE-693) — postgresql + third-party drivers
+        "jdbc:postgresql://liquibaseuser:secret@host:5432/db"                                | "jdbc:postgresql:@host:5432/db"
+        "jdbc:sqlserver://user:secret@host:1433/db"                                          | "jdbc:sqlserver:@host:1433/db"
+        "jdbc:vendor-x://liquibaseuser:secret@host:9999/db"                                  | "jdbc:vendor-x:@host:9999/db"
         null                                                                                 | null
     }
 
@@ -75,6 +79,11 @@ class JdbcConnectionTest extends Specification {
         "jdbc:oracle:thin:@host:1521/db"                                                     | "jdbc:oracle:thin:@host:1521/db"
         "cosmosdb://maincosmosliquibase.documents.azure.com:t27yJICDSFdR1HN==@maincosmosliquibase.documents.azure.com:443/testdb1" | "cosmosdb://maincosmosliquibase.documents.azure.com:*****@maincosmosliquibase.documents.azure.com:443/testdb1"
         "jdbc:databricks://databricks.azuredatabricks.net:443/default;transportMode=http;ssl=1;AuthMech=11;Auth_Flow=1;httpPath=/sql/1.0/warehouses/warehouseId;ConnCatalog=myCatalog;ConnSchema=mySchema;OAuth2ClientId=MyClientID;OAuth2Secret=MySecret;" | "jdbc:databricks://databricks.azuredatabricks.net:443/default;transportMode=http;ssl=1;AuthMech=11;Auth_Flow=1;httpPath=/sql/1.0/warehouses/warehouseId;ConnCatalog=myCatalog;ConnSchema=mySchema;OAuth2ClientId=MyClientID;OAuth2Secret=*****;"
+        // Generic jdbc: userinfo fallback (CWE-693): postgresql + sqlserver + third-party drivers
+        // previously bypassed sanitizeUrl because their dialects had no matcher registered.
+        "jdbc:postgresql://liquibaseuser:secret@host:5432/db"                                | "jdbc:postgresql://*****:*****@host:5432/db"
+        "jdbc:sqlserver://user:secret@host:1433/db"                                          | "jdbc:sqlserver://*****:*****@host:1433/db"
+        "jdbc:vendor-x://liquibaseuser:secret@host:9999/db"                                  | "jdbc:vendor-x://*****:*****@host:9999/db"
         null                                                                                 | null
     }
 
@@ -112,6 +121,10 @@ class JdbcConnectionTest extends Specification {
         "jdbc:oracle:thin:@host:1521/db"                                                     | "jdbc:oracle:thin:@host:1521/db"
         "cosmosdb://maincosmosliquibase.documents.azure.com:t27yJICDSFdR1HN==@maincosmosliquibase.documents.azure.com:443/testdb1" | "cosmosdb://maincosmosliquibase.documents.azure.com:*****@maincosmosliquibase.documents.azure.com:443/testdb1"
         "jdbc:databricks://databricks.azuredatabricks.net:443/default;transportMode=http;ssl=1;AuthMech=11;Auth_Flow=1;httpPath=/sql/1.0/warehouses/warehouseId;ConnCatalog=myCatalog;ConnSchema=mySchema;OAuth2ClientId=MyClientID;OAuth2Secret=MySecret;" | "jdbc:databricks://databricks.azuredatabricks.net:443/default;transportMode=http;ssl=1;AuthMech=11;Auth_Flow=1;httpPath=/sql/1.0/warehouses/warehouseId;ConnCatalog=myCatalog;ConnSchema=mySchema;OAuth2ClientId=MyClientID;OAuth2Secret=*****;"
+        // Generic jdbc: userinfo fallback (CWE-693): replaceWithEmpty path
+        "jdbc:postgresql://liquibaseuser:secret@host:5432/db"                                | "jdbc:postgresql://host:5432/db"
+        "jdbc:sqlserver://user:secret@host:1433/db"                                          | "jdbc:sqlserver://host:1433/db"
+        "jdbc:vendor-x://liquibaseuser:secret@host:9999/db"                                  | "jdbc:vendor-x://host:9999/db"
         null                                                                                 | null
     }
 }

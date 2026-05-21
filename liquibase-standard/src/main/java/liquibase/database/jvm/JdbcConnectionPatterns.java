@@ -65,5 +65,13 @@ public class JdbcConnectionPatterns extends ConnectionPatterns {
         addJdbcBlankToObfuscatePatternsReplaceWithEmpty(PatternPair.of(Pattern.compile(oracleThinMatcherRegex), Pattern.compile(FILTER_CREDS_ORACLE_TO_OBFUSCATE_EMPTY)));
         addJdbcBlankToObfuscatePatternsReplaceWithEmpty(PatternPair.of(Pattern.compile(mysqlMatcherRegex), Pattern.compile(FILTER_CREDS_MYSQL_TO_OBFUSCATE_EMPTY)));
         addJdbcBlankToObfuscatePatternsReplaceWithEmpty(PatternPair.of(Pattern.compile(mariadbMatcherRegex), Pattern.compile(FILTER_CREDS_MARIADB_TO_OBFUSCATE_EMPTY)));
+
+        // Generic JDBC userinfo fallback for any jdbc: URL not covered by the dialect
+        // patterns above (postgresql, sqlserver, third-party drivers; CWE-693).
+        // See git blame / PR for design rationale and the dialect-vs-generic tradeoff.
+        final Pattern anyJdbcUrl = Pattern.compile("(?i)jdbc:.*");
+        addJdbcBlankPatterns(PatternPair.of(anyJdbcUrl, Pattern.compile(FILTER_CREDS)));
+        addJdbcBlankToObfuscatePatterns(PatternPair.of(anyJdbcUrl, Pattern.compile(FILTER_CREDS_MYSQL_TO_OBFUSCATE)));
+        addJdbcBlankToObfuscatePatternsReplaceWithEmpty(PatternPair.of(anyJdbcUrl, Pattern.compile(FILTER_CREDS_MYSQL_TO_OBFUSCATE_EMPTY)));
     }
 }
