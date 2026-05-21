@@ -54,10 +54,15 @@ public class CommandScope {
      * Substring tokens (lowercase) that mark an argument key as credential-bearing.
      * Values for matching keys are overwritten with {@code "*****"} at the end of
      * {@link #execute()} so the original credential Strings become GC-eligible and
-     * do not linger in heap for the rest of the JVM lifetime (CWE-316). Mirrors
-     * the denylist used by {@code IntegrationDetails.setParameter}, plus
-     * {@code "licensekey"} to also catch {@code liquibaseProLicenseKey} which is
-     * placed in this map via {@code Main.createLiquibaseCommand()}.
+     * do not linger in heap for the rest of the JVM lifetime (CWE-316).
+     * <p>
+     * Matching is intentionally substring-based on the lowercased key: keys like
+     * {@code "argument__bearerToken"} are caught by {@code "token"};
+     * {@code "liquibaseProLicenseKey"} (placed in this map via
+     * {@code Main.createLiquibaseCommand()}) is caught by {@code "licensekey"};
+     * AWS-style {@code accessKeyId} by {@code "accesskey"}. Over-masking is
+     * intentionally preferred to under-masking — downstream sinks treat redacted
+     * values as opaque, so false positives are harmless.
      */
     private static final String[] CREDENTIAL_KEY_TOKENS = {
             "password", "passwd", "secret", "token", "apikey", "accesskey", "licensekey"

@@ -1282,7 +1282,7 @@ public class Main {
                 try {
                     value = new String(pwdChars);
                 } finally {
-                    java.util.Arrays.fill(pwdChars, '\0');
+                    Arrays.fill(pwdChars, '\0');
                 }
             } else {
                 value = c.readLine(attributeName + ": ");
