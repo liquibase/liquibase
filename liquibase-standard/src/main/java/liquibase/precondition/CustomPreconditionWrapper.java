@@ -1,5 +1,6 @@
 package liquibase.precondition;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.visitor.ChangeExecListener;
@@ -54,12 +55,47 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
 
     @Override
     public ValidationErrors validate(Database database) {
+        // CWE-470 hard gate, paired with the defense-in-depth gate inside check().
+        // Hard error so the operator sees a clean pre-execution failure when the
+        // embedder has disabled custom-Java elements via
+        // liquibase.allowCustomChange=false. Naming-note: the flag is shared with
+        // customChange (see GlobalConfiguration.ALLOW_CUSTOM_CHANGE) because both
+        // elements expose identical Class.forName(initialize=true) load surfaces.
+        if (Boolean.FALSE.equals(GlobalConfiguration.ALLOW_CUSTOM_CHANGE.getCurrentValue())) {
+            return new ValidationErrors().addError(
+                    "customPrecondition is disabled by configuration " +
+                            "(liquibase.allowCustomChange=false). To run customPrecondition (and " +
+                            "customChange) elements, set liquibase.allowCustomChange=true (the default). " +
+                            "This flag is provided for environments that execute changelogs from " +
+                            "less-trusted sources, where loading an arbitrary JVM class by name via " +
+                            "changelog is not an acceptable risk.");
+        }
         return new ValidationErrors();
     }
 
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
             throws PreconditionFailedException, PreconditionErrorException {
+        // CWE-470 defense-in-depth gate: fire BEFORE any of the two Class.forName
+        // call sites below. The audit notes that preconditions are evaluated
+        // before changes execute, providing a separate class-load trigger point
+        // that fires even if the change body is never reached — e.g. an
+        // onFail=MARK_RAN precondition that "always passes" but whose load-time
+        // static <clinit> already ran. Throwing PreconditionErrorException
+        // (not PreconditionFailedException) bypasses onFail handling — we do NOT
+        // want MARK_RAN to silently swallow the embedder's configured-off intent.
+        if (Boolean.FALSE.equals(GlobalConfiguration.ALLOW_CUSTOM_CHANGE.getCurrentValue())) {
+            throw new PreconditionErrorException(new ErrorPrecondition(
+                    new CustomPreconditionErrorException(
+                            "customPrecondition is disabled by configuration " +
+                                    "(liquibase.allowCustomChange=false). To run customPrecondition (and " +
+                                    "customChange) elements, set liquibase.allowCustomChange=true (the " +
+                                    "default). This flag is provided for environments that execute " +
+                                    "changelogs from less-trusted sources, where loading an arbitrary " +
+                                    "JVM class by name via changelog is not an acceptable risk."),
+                    changeLog, this));
+        }
+
         CustomPrecondition customPrecondition;
         try {
 //            System.out.println(classLoader.toString());
