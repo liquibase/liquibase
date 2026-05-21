@@ -109,6 +109,144 @@ class CommandScopeTest extends Specification {
         e.message == "Invalid argument 'requiredArg': missing required argument"
     }
 
+    def "clearCredentialArguments redacts credential-bearing keys but leaves others"() {
+        // CWE-316 regression: credential-bearing argument values must be overwritten
+        // with "*****" so the original Strings become GC-eligible and don't linger
+        // in heap for the rest of the JVM lifetime. Non-credential keys (username,
+        // url, driver) must pass through unchanged so post-execution diagnostics
+        // still have context. Matching is case-insensitive and substring-based on
+        // the lowercased key.
+        given:
+        def scope = new CommandScope("mock")
+        scope.addArgumentValue("password",                "supersecret-pw-12345")
+        scope.addArgumentValue("apiSecret",               "secret-svc-token")
+        scope.addArgumentValue("authToken",               "bearer-xyz")
+        scope.addArgumentValue("AccessKey",               "AKIA-EXAMPLE")
+        scope.addArgumentValue("PASSWORD",                "case-insensitive-match")
+        scope.addArgumentValue("ldap.passwd",             "embedded-token-match")
+        // CommandScope receives liquibaseProLicenseKey via Main.createLiquibaseCommand()
+        // putting it into argsMap. Lowercase form "liquibaseprolicensekey" contains
+        // the "licensekey" token, so it must be redacted alongside passwords / secrets.
+        scope.addArgumentValue("liquibaseProLicenseKey",  "PRO-LICENSE-KEY-VALUE-12345")
+        scope.addArgumentValue("username",                "regular-user")
+        scope.addArgumentValue("url",                     "jdbc:postgresql://host:5432/db")
+        scope.addArgumentValue("driver",                  "org.postgresql.Driver")
+
+        when:
+        scope.clearCredentialArguments()
+        def values = scope.@argumentValues
+
+        then:
+        values["password"]               == "*****"
+        values["apiSecret"]              == "*****"
+        values["authToken"]              == "*****"
+        values["AccessKey"]              == "*****"
+        values["PASSWORD"]               == "*****"
+        values["ldap.passwd"]            == "*****"
+        values["liquibaseProLicenseKey"] == "*****"
+        values["username"]               == "regular-user"
+        values["url"]                    == "jdbc:postgresql://host:5432/db"
+        values["driver"]                 == "org.postgresql.Driver"
+    }
+
+    def "clearCredentialArguments is a no-op when there are no arguments"() {
+        given:
+        def scope = new CommandScope("mock")
+
+        when:
+        scope.clearCredentialArguments()
+
+        then:
+        noExceptionThrown()
+        scope.@argumentValues.isEmpty()
+    }
+
+    def "clearCredentialArguments uses Locale.ROOT so Turkish-locale 'I' does not break the ASCII substring match"() {
+        // CWE-316 regression for the Turkish-locale "dotless i" bug (per @coderabbitai
+        // on PR #7741): under tr-TR, bare String.toLowerCase() converts ASCII 'I' to
+        // dotless 'ı' (U+0131), so "argument__APIKEY".toLowerCase() becomes
+        // "argument__apıkey" — which does NOT contain the ASCII token "apikey". On a
+        // JVM whose default locale is Turkish (or any other locale with non-ASCII
+        // lowercasing of ASCII letters), credentials with uppercase-I keys would
+        // silently survive execute() unredacted. clearCredentialArguments() must
+        // therefore use toLowerCase(Locale.ROOT) explicitly. This test exercises the
+        // bug condition directly so the contract is locked in by CI, not just by a
+        // comment.
+        given:
+        Locale savedDefault = Locale.getDefault()
+        Locale.setDefault(Locale.forLanguageTag("tr-TR"))
+
+        def scope = new CommandScope("mock")
+        scope.addArgumentValue("argument__APIKEY",     "secret-api-key-12345")
+        scope.addArgumentValue("argument__PASSWORD",   "secret-pw-67890")
+        scope.addArgumentValue("argument__LICENSEKEY", "license-XYZ-ABC")
+        scope.addArgumentValue("argument__username",   "regular-user")
+
+        when:
+        scope.clearCredentialArguments()
+        def values = scope.@argumentValues
+
+        then:
+        values["argument__APIKEY"]     == "*****"
+        values["argument__PASSWORD"]   == "*****"
+        values["argument__LICENSEKEY"] == "*****"
+        values["argument__username"]   == "regular-user"
+
+        cleanup:
+        Locale.setDefault(savedDefault)
+    }
+
+    def "execute invokes credential clearing in its outer finally on the success path"() {
+        // CWE-316 wiring check: confirms the outer finally added to execute()
+        // actually calls clearCredentialArguments(). Pre-supplies the 'requiredArg'
+        // value so this test is order-independent w.r.t. the 'execute with failing
+        // argument validation' spec that registers requiredArg as required on
+        // 'mock' (Spock test order in a single Specification is declaration-order,
+        // but the side effect of CommandBuilder is global to the JVM).
+        given:
+        def scope = new CommandScope("mock")
+        scope.addArgumentValue("requiredArg", "anything")
+        scope.addArgumentValue("password",    "supersecret-pw-12345")
+        scope.addArgumentValue("username",    "regular-user")
+
+        MockCommandStep.logic = new MockCommandStep() {
+            @Override
+            void run(CommandResultsBuilder resultsBuilder) throws Exception {
+                // no-op pipeline body — we are testing the finally-block wiring, not the step.
+            }
+        }
+
+        when:
+        scope.execute()
+
+        then:
+        scope.@argumentValues["password"]    == "*****"
+        scope.@argumentValues["requiredArg"] == "anything"
+        scope.@argumentValues["username"]    == "regular-user"
+    }
+
+    def "execute invokes credential clearing in its outer finally even when the pipeline throws"() {
+        // CWE-316 wiring check: the outer finally must run on the failure path too.
+        given:
+        def scope = new CommandScope("mock")
+        scope.addArgumentValue("requiredArg", "anything")
+        scope.addArgumentValue("password",    "supersecret-pw-12345")
+
+        MockCommandStep.logic = new MockCommandStep() {
+            @Override
+            void run(CommandResultsBuilder resultsBuilder) throws Exception {
+                throw new RuntimeException("simulated command failure")
+            }
+        }
+
+        when:
+        scope.execute()
+
+        then:
+        thrown(liquibase.exception.CommandExecutionException)
+        scope.@argumentValues["password"] == "*****"
+    }
+
     def "ValueModifiers are used in getArgumentValue"() {
         when:
         def valueModifier = new ConfiguredValueModifier<String>() {
