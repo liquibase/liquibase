@@ -14,6 +14,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -61,6 +62,33 @@ public class DatabaseFactoryTest {
         DatabaseException expectedException = assertThrows(DatabaseException.class, () -> databaseFactory.openConnection("not:a:driver", "", "", null, resourceAccessor));
         assertThat(expectedException.getCause(), instanceOf(RuntimeException.class));
         assertThat(expectedException.getMessage(), containsString("Driver class was not specified and could not be determined from the url"));
+    }
+
+    @Test
+    public void openConnectionExceptionMessageDoesNotLeakPasswordWhenDriverCannotBeFoundByUrl() throws Exception {
+        // CWE-209 regression: when the URL prefix is not recognized, the resulting
+        // RuntimeException message must not surface credentials embedded in the URL.
+        // findDriverClass() now routes the URL through JdbcConnection.sanitizeUrl()
+        // before concatenating it into the message. The "cosmosdb://" URL is matched
+        // by sanitizeUrl's registered ConnectionPatterns (see JdbcConnectionTest) but
+        // is NOT recognised by findDefaultDriver (which only matches jdbc:-prefixed
+        // schemes), so this URL exercises both branches: sanitisation kicks in and
+        // the unrecognised-driver exception is the one that fires.
+        String url = "cosmosdb://liquibaseuser:SuperSecretPwd123@host:443/db";
+        DatabaseException expectedException = assertThrows(DatabaseException.class,
+                () -> databaseFactory.openConnection(url, "", "", null, resourceAccessor));
+        assertThat(expectedException.getCause(), instanceOf(RuntimeException.class));
+        assertThat(expectedException.getMessage(), containsString("Driver class was not specified and could not be determined from the url"));
+        // The credential value must not appear anywhere in the exception chain.
+        assertThat(expectedException.getMessage(), not(containsString("SuperSecretPwd123")));
+        Throwable cause = expectedException.getCause();
+        while (cause != null) {
+            String msg = cause.getMessage();
+            if (msg != null) {
+                assertThat(msg, not(containsString("SuperSecretPwd123")));
+            }
+            cause = cause.getCause();
+        }
     }
 
     @Test
