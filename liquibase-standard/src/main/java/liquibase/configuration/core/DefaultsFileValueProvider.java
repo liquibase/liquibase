@@ -70,6 +70,13 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
     private static Properties propertiesFromStream(InputStream stream) throws IOException {
 
         Properties properties = new Properties();
+        // CWE-94 guard: keep this bare java.util.Properties.load(). Do NOT add
+        // ${...} interpolation, environment-variable expansion, or include-file
+        // directives here. A defaults file may contain user-controlled values;
+        // expansion engines have a documented history of CVE-grade injection /
+        // info-disclosure issues (e.g. CVE-2022-33980 in Apache Commons Configuration).
+        // Pro extensions that need safe substitution can register a
+        // ConfiguredValueModifier instead of changing this loader.
         properties.load(stream);
         trimAllProperties(properties);
         return properties;

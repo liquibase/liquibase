@@ -447,11 +447,33 @@ public class Main {
                         } else {
                             throw new LiquibaseException(String.format(coreBundle.getString("unexpected.error"), message), e);
                         }
+                    } finally {
+                        // CWE-316: null the credential-bearing fields so the immutable
+                        // String values become GC-eligible promptly after the command
+                        // run finishes, rather than living for the rest of the JVM in
+                        // embedded scenarios. The String contents themselves cannot be
+                        // wiped in-place (Strings are immutable in Java); nulling the
+                        // field is the closest equivalent. The char[] returned by
+                        // Console.readPassword is already zeroed at its read site.
+                        main.clearCredentialFields();
                     }
 
                     return 0;
                 }
             });
+    }
+
+    /**
+     * Null the credential-bearing fields so their (immutable) String values become
+     * GC-eligible after a command run finishes. Called from {@link #run(String[])}'s
+     * finally block. Package-private to allow direct testing.
+     * <p>
+     * CWE-316: Cleartext Storage of Sensitive Information in Memory.
+     */
+    void clearCredentialFields() {
+        this.password = null;
+        this.referencePassword = null;
+        this.liquibaseProLicenseKey = null;
     }
 
     private static boolean setupNeeded(Main main) throws CommandLineParsingException {
@@ -1241,7 +1263,27 @@ public class Main {
             }
             //Prompt for value
             if (attributeName.toLowerCase().contains("password")) {
-                value = new String(c.readPassword(attributeName + ": "));
+                // Console.readPassword returns char[] precisely so callers can zero
+                // the buffer after use. Wrapping in `new String(...)` copies the
+                // chars into the (immutable) String constant; we explicitly clear
+                // the original char[] in `finally` so it does not linger in heap
+                // (CWE-316). The String copy that ends up in the destination field
+                // is cleared separately by clearCredentialFields() in run()'s
+                // finally block.
+                char[] pwdChars = c.readPassword(attributeName + ": ");
+                // Console.readPassword returns null on EOF (Ctrl+D on Unix, Ctrl+Z on
+                // Windows). Without this guard, the subsequent new String(pwdChars)
+                // and Arrays.fill(pwdChars, '\0') would NPE rather than producing a
+                // clear parsing error.
+                if (pwdChars == null) {
+                    throw new CommandLineParsingException(
+                            "No value provided for '" + attributeName + "' (end-of-input reached)");
+                }
+                try {
+                    value = new String(pwdChars);
+                } finally {
+                    Arrays.fill(pwdChars, '\0');
+                }
             } else {
                 value = c.readLine(attributeName + ": ");
             }

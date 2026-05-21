@@ -231,6 +231,18 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         super.execute();
     }
 
+    /**
+     * CWE-316: extend the base {@link AbstractLiquibaseMojo#clearCredentialFields()} to
+     * also null this Mojo's reference-database credential. Invoked from the base class's
+     * execute() finally block via dynamic dispatch, so it runs after super.execute()
+     * (and therefore after performLiquibaseTask has consumed referencePassword).
+     */
+    @Override
+    protected void clearCredentialFields() {
+        super.clearCredentialFields();
+        this.referencePassword = null;
+    }
+
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
         ClassLoader cl = null;
