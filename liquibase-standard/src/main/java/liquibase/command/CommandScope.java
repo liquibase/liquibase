@@ -50,6 +50,24 @@ public class CommandScope {
 
     private final SortedMap<String, Object> argumentValues = new TreeMap<>();
 
+    /**
+     * Substring tokens (lowercase) that mark an argument key as credential-bearing.
+     * Values for matching keys are overwritten with {@code "*****"} at the end of
+     * {@link #execute()} so the original credential Strings become GC-eligible and
+     * do not linger in heap for the rest of the JVM lifetime (CWE-316).
+     * <p>
+     * Matching is intentionally substring-based on the lowercased key: keys like
+     * {@code "argument__bearerToken"} are caught by {@code "token"};
+     * {@code "liquibaseProLicenseKey"} (placed in this map via
+     * {@code Main.createLiquibaseCommand()}) is caught by {@code "licensekey"};
+     * AWS-style {@code accessKeyId} by {@code "accesskey"}. Over-masking is
+     * intentionally preferred to under-masking — downstream sinks treat redacted
+     * values as opaque, so false positives are harmless.
+     */
+    private static final String[] CREDENTIAL_KEY_TOKENS = {
+            "password", "passwd", "secret", "token", "apikey", "accesskey", "licensekey"
+    };
+
     private final Map<Class<?>, Object> dependencies = new HashMap<>();
 
     /**
@@ -361,6 +379,41 @@ public class CommandScope {
             throw e;
         } catch (Exception e) {
             throw new CommandExecutionException(e);
+        } finally {
+            clearCredentialArguments();
+        }
+    }
+
+    /**
+     * Overwrite the values of any credential-bearing argument keys with
+     * {@code "*****"} so the original credential Strings stop being referenced by
+     * this scope. Strings are immutable and cannot be wiped in-place, but dropping
+     * the reference here makes them GC-eligible (assuming no other references hold
+     * the same String) instead of letting them live for the rest of the JVM in
+     * long-running embedded scenarios (CWE-316: Cleartext Storage of Sensitive
+     * Information in Memory). Called from {@link #execute()}'s outer finally so
+     * it runs regardless of command outcome; package-private for direct testing.
+     */
+    void clearCredentialArguments() {
+        if (argumentValues.isEmpty()) {
+            return;
+        }
+        for (Map.Entry<String, Object> entry : argumentValues.entrySet()) {
+            String key = entry.getKey();
+            if (key == null) {
+                continue;
+            }
+            // Locale.ROOT explicitly: bare String.toLowerCase() is locale-sensitive
+            // and would mis-lowercase ASCII letters under e.g. Turkish locale
+            // ("APIKEY" -> "apıkey" with dotless ı, which would then fail the
+            // contains("apikey") substring check and silently skip redaction).
+            String lowerKey = key.toLowerCase(Locale.ROOT);
+            for (String token : CREDENTIAL_KEY_TOKENS) {
+                if (lowerKey.contains(token)) {
+                    entry.setValue("*****");
+                    break;
+                }
+            }
         }
     }
 
