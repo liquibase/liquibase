@@ -67,12 +67,18 @@ class CustomPreconditionWrapperTest extends Specification {
     def "validate returns no errors by default — customPrecondition is intentional under the standard trust model (CWE-470 opt-out gate)"() {
         // CWE-470 regression: the default is liquibase.allowCustomChange=true so
         // existing users see no behaviour change.
+        //
+        // Explicitly scope the flag to "true" instead of reading the ambient default
+        // (per @coderabbitai's hermetic-test nit on #7749): another test, the runner,
+        // or a stale system property could leave the flag at "false" and turn the
+        // intended default-true path into a spurious failure.
         given:
         def precondition = new CustomPreconditionWrapper()
         precondition.setClassName("liquibase.precondition.ExampleCustomPrecondition")
 
         when:
-        def errors = precondition.validate(new MockDatabase())
+        def errors = Scope.child([(GlobalConfiguration.ALLOW_CUSTOM_CHANGE.getKey()): "true"],
+                { return precondition.validate(new MockDatabase()) } as Scope.ScopedRunnerWithReturn)
 
         then:
         !errors.hasErrors()
@@ -135,12 +141,18 @@ class CustomPreconditionWrapperTest extends Specification {
         // fixture used in the load-correctness specs above; it's known to load
         // cleanly and its check() body doesn't have side effects against
         // MockDatabase.
+        //
+        // Explicitly scope the flag to "true" (per @coderabbitai's hermetic-test
+        // nit on #7749) — see the same note on the "validate returns no errors
+        // by default" spec above.
         given:
         def precondition = new CustomPreconditionWrapper()
         precondition.setClassName("liquibase.precondition.ExampleCustomPrecondition")
 
-        when: "the flag is at its default (true)"
-        precondition.check(new MockDatabase(), null, null, null)
+        when: "the flag is enabled"
+        Scope.child([(GlobalConfiguration.ALLOW_CUSTOM_CHANGE.getKey()): "true"], {
+            precondition.check(new MockDatabase(), null, null, null)
+        } as Scope.ScopedRunner)
 
         then: "no exception thrown by the gate; ExampleCustomPrecondition.check ran normally"
         noExceptionThrown()
