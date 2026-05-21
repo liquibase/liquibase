@@ -1,5 +1,6 @@
 package liquibase.change.custom;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.database.Database;
@@ -83,6 +84,31 @@ public class CustomChangeWrapper extends AbstractChange {
     }
 
     private CustomChange loadCustomChange(String className) throws CustomChangeException {
+        // CWE-470 defense-in-depth gate. Every Class.forName(className, true, ...) below
+        // fires the named class's static <clinit> initializer at load time — BEFORE the
+        // cast to CustomChange or any other safety check could reject the load. Under
+        // the harder threat model (untrusted changelogs) that is a direct RCE primitive:
+        // any class on the JVM classpath can have its static init + constructor run
+        // merely by being named in the change tag. This gate fires BEFORE any of the
+        // three class-loading paths (OSGi / Scope classloader / thread context CL /
+        // bare Class.forName) so the static initializer never runs when the embedder
+        // has disabled customChange via liquibase.allowCustomChange=false.
+        //
+        // Mirrored in validate(Database) below for the standard hard-error operator
+        // surface; this method-level gate ALSO covers callers that don't go through
+        // validate(), notably customLoadLogic() which calls loadCustomChange during
+        // changelog PARSE-time (i.e. before validate() ever runs).
+        if (Boolean.FALSE.equals(GlobalConfiguration.ALLOW_CUSTOM_CHANGE.getCurrentValue())) {
+            throw new CustomChangeException(
+                    "customChange is disabled by configuration " +
+                            "(liquibase.allowCustomChange=false). To run customChange changes, set " +
+                            "liquibase.allowCustomChange=true (the default). This flag is provided for " +
+                            "environments that execute changelogs from less-trusted sources, where " +
+                            "loading an arbitrary JVM class by name via changelog is not an acceptable " +
+                            "risk (the load itself fires the class's static initializer before any " +
+                            "safety check could run).");
+        }
+
         try {
             Boolean osgiPlatform = Scope.getCurrentScope().get(Scope.Attr.osgiPlatform, Boolean.class);
             if (Boolean.TRUE.equals(osgiPlatform)) {
@@ -140,6 +166,20 @@ public class CustomChangeWrapper extends AbstractChange {
      */
     @Override
     public ValidationErrors validate(Database database) {
+        // CWE-470 hard gate, paired with the defense-in-depth gate inside
+        // loadCustomChange(). Hard error (not warning) so the operator sees a
+        // pre-execution failure when liquibase.allowCustomChange=false. Runs FIRST
+        // so the existing class-load / configureCustomChange / customChange.validate
+        // pipeline below is short-circuited entirely.
+        if (Boolean.FALSE.equals(GlobalConfiguration.ALLOW_CUSTOM_CHANGE.getCurrentValue())) {
+            return new ValidationErrors().addError(
+                    "customChange is disabled by configuration " +
+                            "(liquibase.allowCustomChange=false). To run customChange changes, set " +
+                            "liquibase.allowCustomChange=true (the default). This flag is provided for " +
+                            "environments that execute changelogs from less-trusted sources, where " +
+                            "loading an arbitrary JVM class by name via changelog is not an acceptable risk.");
+        }
+
         if (!configured) {
             if (this.customChange == null) {
                 try {
