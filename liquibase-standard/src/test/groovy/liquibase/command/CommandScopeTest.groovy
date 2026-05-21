@@ -161,6 +161,41 @@ class CommandScopeTest extends Specification {
         scope.@argumentValues.isEmpty()
     }
 
+    def "clearCredentialArguments uses Locale.ROOT so Turkish-locale 'I' does not break the ASCII substring match"() {
+        // CWE-316 regression for the Turkish-locale "dotless i" bug (per @coderabbitai
+        // on PR #7741): under tr-TR, bare String.toLowerCase() converts ASCII 'I' to
+        // dotless 'ı' (U+0131), so "argument__APIKEY".toLowerCase() becomes
+        // "argument__apıkey" — which does NOT contain the ASCII token "apikey". On a
+        // JVM whose default locale is Turkish (or any other locale with non-ASCII
+        // lowercasing of ASCII letters), credentials with uppercase-I keys would
+        // silently survive execute() unredacted. clearCredentialArguments() must
+        // therefore use toLowerCase(Locale.ROOT) explicitly. This test exercises the
+        // bug condition directly so the contract is locked in by CI, not just by a
+        // comment.
+        given:
+        Locale savedDefault = Locale.getDefault()
+        Locale.setDefault(Locale.forLanguageTag("tr-TR"))
+
+        def scope = new CommandScope("mock")
+        scope.addArgumentValue("argument__APIKEY",     "secret-api-key-12345")
+        scope.addArgumentValue("argument__PASSWORD",   "secret-pw-67890")
+        scope.addArgumentValue("argument__LICENSEKEY", "license-XYZ-ABC")
+        scope.addArgumentValue("argument__username",   "regular-user")
+
+        when:
+        scope.clearCredentialArguments()
+        def values = scope.@argumentValues
+
+        then:
+        values["argument__APIKEY"]     == "*****"
+        values["argument__PASSWORD"]   == "*****"
+        values["argument__LICENSEKEY"] == "*****"
+        values["argument__username"]   == "regular-user"
+
+        cleanup:
+        Locale.setDefault(savedDefault)
+    }
+
     def "execute invokes credential clearing in its outer finally on the success path"() {
         // CWE-316 wiring check: confirms the outer finally added to execute()
         // actually calls clearCredentialArguments(). Pre-supplies the 'requiredArg'

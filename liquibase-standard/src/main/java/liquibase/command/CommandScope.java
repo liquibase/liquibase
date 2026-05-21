@@ -403,7 +403,11 @@ public class CommandScope {
             if (key == null) {
                 continue;
             }
-            String lowerKey = key.toLowerCase();
+            // Locale.ROOT explicitly: bare String.toLowerCase() is locale-sensitive
+            // and would mis-lowercase ASCII letters under e.g. Turkish locale
+            // ("APIKEY" -> "apıkey" with dotless ı, which would then fail the
+            // contains("apikey") substring check and silently skip redaction).
+            String lowerKey = key.toLowerCase(Locale.ROOT);
             for (String token : CREDENTIAL_KEY_TOKENS) {
                 if (lowerKey.contains(token)) {
                     entry.setValue("*****");
