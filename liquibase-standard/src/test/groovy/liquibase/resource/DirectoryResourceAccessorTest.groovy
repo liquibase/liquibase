@@ -1,5 +1,6 @@
 package liquibase.resource
 
+import liquibase.Scope
 import liquibase.util.StreamUtil
 import spock.lang.IgnoreIf
 import spock.lang.Specification
@@ -154,14 +155,26 @@ class DirectoryResourceAccessorTest extends Specification {
                                      "com/example/users.csv"]
     }
 
-    @Unroll("getAll rejects path traversal: #payload")
-    def "getAll rejects path traversal payloads that escape the accessor root"() {
+    @Unroll("getAll rejects path traversal under strict mode: #payload")
+    def "getAll rejects path traversal payloads that escape the accessor root when allowParentDirectoryReferences=false"() {
+        // PR #7729 introduced the CWE-22 syntactic containment check. With the deprecation flag
+        // liquibase.allowParentDirectoryReferences defaulting to true, the check is opt-in; this
+        // spec exercises the opt-in (strict) path explicitly via Scope.child.
+        given:
+        IOException caught = null
+
         when:
-        simpleTestAccessor.getAll(payload)
+        Scope.child(["liquibase.allowParentDirectoryReferences": "false"] as Map, {
+            try {
+                simpleTestAccessor.getAll(payload)
+            } catch (IOException e) {
+                caught = e
+            }
+        } as Scope.ScopedRunner)
 
         then:
-        IOException e = thrown()
-        e.message.contains("resolves outside accessor root")
+        caught != null
+        caught.message.contains("resolves outside accessor root")
 
         where:
         payload << [
@@ -175,24 +188,100 @@ class DirectoryResourceAccessorTest extends Specification {
 
     def "getAll allows paths that traverse via .. but stay inside the root"() {
         // subdir/.. collapses pre-resolve and the resulting path stays under root.
+        // Behaviour is identical under both flag values — included in the default suite
+        // (flag=true) since that's the deprecation-window default.
         expect:
         simpleTestAccessor.getAll("liquibase/resource/foo/../DirectoryResourceAccessorTest.class")*.getPath() ==
                 ["liquibase/resource/DirectoryResourceAccessorTest.class"]
     }
 
-    def "search rejects path traversal in startPath"() {
+    def "getAll allows ../ payloads that resolve outside the root when allowParentDirectoryReferences=true (deprecation default)"() {
+        // Wesley/Filipe regression scenario: a customer with a 'shared dbarepo at the project
+        // root, per-environment changelogs underneath' layout references '../shared/foo' from
+        // within the accessor root. With the deprecation-default flag=true, the resolution
+        // succeeds (matching pre-CWE-22-fix behaviour); with flag=false (the future default),
+        // the same payload would be rejected.
+        given:
+        Path rootDir = Files.createTempDirectory("accessor-root-")
+        Path outsideDir = Files.createTempDirectory("outside-sibling-")
+        Path outsideFile = outsideDir.resolve("legit.txt")
+        Files.writeString(outsideFile, "legitimate sibling content")
+        def accessor = new DirectoryResourceAccessor(rootDir)
+        String payload = "../" + outsideDir.fileName.toString() + "/legit.txt"
+        List<Resource> result = null
+
         when:
-        simpleTestAccessor.search("../../etc", true)
+        Scope.child(["liquibase.allowParentDirectoryReferences": "true"] as Map, {
+            result = accessor.getAll(payload)
+        } as Scope.ScopedRunner)
 
         then:
-        IOException e = thrown()
-        e.message.contains("resolves outside accessor root")
+        result != null
+        result.size() == 1
+        result[0].getPath() == payload
+
+        cleanup:
+        Files.deleteIfExists(outsideFile)
+        Files.deleteIfExists(outsideDir)
+        Files.deleteIfExists(rootDir)
+    }
+
+    def "search rejects ../ startPath when allowParentDirectoryReferences=false"() {
+        // Strict-mode counterpart to the search() default-mode spec below. With the deprecation
+        // flag defaulting to true, this strict-rejection assertion runs inside Scope.child.
+        given:
+        IOException caught = null
+
+        when:
+        Scope.child(["liquibase.allowParentDirectoryReferences": "false"] as Map, {
+            try {
+                simpleTestAccessor.search("../../etc", true)
+            } catch (IOException e) {
+                caught = e
+            }
+        } as Scope.ScopedRunner)
+
+        then:
+        caught != null
+        caught.message.contains("resolves outside accessor root")
+    }
+
+    def "search allows ../ startPath that resolves outside the root when allowParentDirectoryReferences=true (deprecation default)"() {
+        // Mirrors the getAll() deprecation-default spec: a sibling directory referenced via
+        // '..' from the accessor root is reachable under flag=true. Wesley flagged Flow
+        // <conditions> and policy-check SCRIPT_PATH as call sites that depend on this.
+        given:
+        Path rootDir = Files.createTempDirectory("accessor-root-")
+        Path outsideDir = Files.createTempDirectory("outside-sibling-")
+        Path outsideFile = outsideDir.resolve("foo.txt")
+        Files.writeString(outsideFile, "content")
+        def accessor = new DirectoryResourceAccessor(rootDir)
+        String startPath = "../" + outsideDir.fileName.toString()
+        List<Resource> result = null
+
+        when:
+        Scope.child(["liquibase.allowParentDirectoryReferences": "true"] as Map, {
+            result = accessor.search(startPath, true)
+        } as Scope.ScopedRunner)
+
+        then:
+        result != null
+        result.size() == 1
+        result[0].getPath().endsWith("foo.txt")
+
+        cleanup:
+        Files.deleteIfExists(outsideFile)
+        Files.deleteIfExists(outsideDir)
+        Files.deleteIfExists(rootDir)
     }
 
     // Skipped on Windows because Files.createSymbolicLink requires the
     // SeCreateSymbolicLinkPrivilege (developer mode or admin).
     @IgnoreIf({ os.windows })
-    def "getAll rejects a symlink that escapes the accessor root"() {
+    def "getAll rejects a symlink that escapes the accessor root when allowParentDirectoryReferences=false"() {
+        // Strict-mode behaviour: a symlink whose canonical real path escapes the canonical
+        // root is rejected. With the deprecation flag defaulting to true, this assertion runs
+        // inside Scope.child.
         given:
         Path rootDir = Files.createTempDirectory("accessor-root-")
         Path outsideDir = Files.createTempDirectory("outside-secret-")
@@ -201,13 +290,51 @@ class DirectoryResourceAccessorTest extends Specification {
         Path symlinkInside = rootDir.resolve("escape-link")
         Files.createSymbolicLink(symlinkInside, outsideFile)
         def accessor = new DirectoryResourceAccessor(rootDir)
+        IOException caught = null
 
         when:
-        accessor.getAll("escape-link")
+        Scope.child(["liquibase.allowParentDirectoryReferences": "false"] as Map, {
+            try {
+                accessor.getAll("escape-link")
+            } catch (IOException e) {
+                caught = e
+            }
+        } as Scope.ScopedRunner)
 
         then:
-        IOException e = thrown()
-        e.message.contains("symlink") || e.message.contains("outside")
+        caught != null
+        caught.message.contains("symlink") || caught.message.contains("outside")
+
+        cleanup:
+        Files.deleteIfExists(symlinkInside)
+        Files.deleteIfExists(outsideFile)
+        Files.deleteIfExists(outsideDir)
+        Files.deleteIfExists(rootDir)
+    }
+
+    @IgnoreIf({ os.windows })
+    def "getAll follows a symlink that escapes the accessor root when allowParentDirectoryReferences=true (deprecation default)"() {
+        // Default-mode counterpart: legitimate symlink (e.g. customers using filesystem
+        // symlinks to share resources across projects) is followed without rejection.
+        given:
+        Path rootDir = Files.createTempDirectory("accessor-root-")
+        Path outsideDir = Files.createTempDirectory("outside-content-")
+        Path outsideFile = outsideDir.resolve("legit.txt")
+        Files.writeString(outsideFile, "legitimate symlinked content")
+        Path symlinkInside = rootDir.resolve("legit-link")
+        Files.createSymbolicLink(symlinkInside, outsideFile)
+        def accessor = new DirectoryResourceAccessor(rootDir)
+        List<Resource> result = null
+
+        when:
+        Scope.child(["liquibase.allowParentDirectoryReferences": "true"] as Map, {
+            result = accessor.getAll("legit-link")
+        } as Scope.ScopedRunner)
+
+        then:
+        result != null
+        result.size() == 1
+        result[0].getPath() == "legit-link"
 
         cleanup:
         Files.deleteIfExists(symlinkInside)

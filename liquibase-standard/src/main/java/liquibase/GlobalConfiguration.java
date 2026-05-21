@@ -55,6 +55,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> SECURE_PARSING;
     public static final ConfigurationDefinition<Boolean> ALLOW_CUSTOM_CHANGE;
     public static final ConfigurationDefinition<Boolean> ALLOW_EXECUTE_COMMAND;
+    public static final ConfigurationDefinition<Boolean> ALLOW_PARENT_DIRECTORY_REFERENCES;
     public static final ConfigurationDefinition<String> SEARCH_PATH;
 
     public static final ConfigurationDefinition<UIServiceEnum> UI_SERVICE;
@@ -248,6 +249,23 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                         "that execute changelogs from less-trusted sources (multi-tenant SaaS running customer " +
                         "changelogs, downloaded change-packs, contributor PRs prior to review) where arbitrary " +
                         "OS-shell execution via changelog is not an acceptable risk (CWE-78).")
+                .setDefaultValue(true)
+                .build();
+
+        ALLOW_PARENT_DIRECTORY_REFERENCES = builder.define("allowParentDirectoryReferences", Boolean.class)
+                .setDescription("If true (the default), AbstractPathResourceAccessor allows path payloads " +
+                        "containing '..' segments and symbolic links that resolve outside the configured " +
+                        "root directory. This preserves the behaviour that existed before the CWE-22 " +
+                        "path-containment fix landed, for legitimate multi-changelog layouts that depend on " +
+                        "parent-directory traversal — for example a shared 'dbarepo' at the project root " +
+                        "referenced as '../shared/foo.xml' from per-environment changelogs underneath it, " +
+                        "or a custom-check SCRIPT_PATH like '../checks/policy.py'. Set to false to enforce " +
+                        "strict containment: any '..' that resolves outside the accessor root, or any " +
+                        "symbolic link whose canonical real path escapes the canonical root, is rejected " +
+                        "with IOException. The default is true for one major release as a deprecation " +
+                        "window; a future major release will flip the default to false, at which point " +
+                        "callers depending on parent-directory traversal must either restructure their " +
+                        "layout or explicitly opt in via this flag (CWE-22).")
                 .setDefaultValue(true)
                 .build();
 
