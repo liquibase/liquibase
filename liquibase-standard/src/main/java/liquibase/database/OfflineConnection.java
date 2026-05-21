@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.OfflineChangeLogHistoryService;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -58,7 +59,12 @@ public class OfflineConnection implements DatabaseConnection {
         this.url = url;
         Matcher matcher = OFFLINE_COMMAND_PATTERN.matcher(url);
         if (!matcher.matches()) {
-            throw new UnexpectedLiquibaseException("Could not parse offline url " + url);
+            // A common operator mistake is to paste a JDBC URL where an offline: URL
+            // was expected; route the raw input through sanitizeUrl so any embedded
+            // credentials (jdbc:mysql://user:pw@…, ?password=…) do not surface in
+            // the exception message, which flows into MDC, log appenders, and the
+            // CLI error UI.
+            throw new UnexpectedLiquibaseException("Could not parse offline url " + JdbcConnection.sanitizeUrl(url));
         }
         this.databaseShortName = matcher.group(1).toLowerCase();
         String params = StringUtil.trimToNull(matcher.group(2));
@@ -112,7 +118,14 @@ public class OfflineConnection implements DatabaseConnection {
                             }
                         }
                     } catch (LiquibaseException e) {
-                        throw new UnexpectedLiquibaseException("Cannot parse snapshot " + url, e);
+                        // Reference the snapshot file path (already parsed) and the
+                        // database short name instead of the full URL: offline URLs
+                        // accept arbitrary key=value params (including credentials)
+                        // and the registered sanitizeUrl patterns do not cover the
+                        // "offline:" prefix, so embedding the raw url here would
+                        // potentially leak co-located params into logs/MDC.
+                        throw new UnexpectedLiquibaseException("Cannot parse snapshot '" + snapshotFile
+                                + "' for offline database '" + databaseShortName + "'", e);
                     }
                 } else if ("sendsStringParametersAsUnicode".equals(paramEntry.getKey())) {
                     this.sendsStringParametersAsUnicode = Boolean.parseBoolean(paramEntry.getValue());
