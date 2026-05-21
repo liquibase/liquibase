@@ -1,5 +1,6 @@
 package liquibase.database
 
+import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.resource.ResourceAccessor
 import liquibase.database.core.MockDatabase
 import liquibase.test.JUnitResourceAccessor
@@ -116,5 +117,38 @@ class OfflineConnectionTest extends Specification {
 
         then:
         "superuser" == username
+    }
+
+    def "parse-error exception does not leak credentials from a mistyped JDBC URL"() {
+        // CWE-209 regression: a user pasting a real JDBC URL where an offline: URL
+        // was expected must not see the embedded password echoed back into the
+        // exception message (which flows into MDC, log appenders, and the CLI
+        // error UI). The constructor routes the input through
+        // JdbcConnection.sanitizeUrl before embedding it.
+        when:
+        new OfflineConnection("jdbc:mysql://liquibaseuser:SuperSecretPwd123@host:3306/db", new JUnitResourceAccessor())
+
+        then:
+        UnexpectedLiquibaseException e = thrown()
+        e.message.contains("Could not parse offline url")
+        !e.message.contains("SuperSecretPwd123")
+    }
+
+    def "snapshot-parse exception references the snapshot file, not the full URL"() {
+        // CWE-209 regression: offline URLs accept arbitrary key=value params. The
+        // snapshot-parse failure path now reports the snapshot file path and the
+        // database short name (both already parsed and operationally useful) rather
+        // than the raw URL, which can have credentials co-located with snapshot=.
+        // ".qqq" guarantees SnapshotParserFactory.getParser throws
+        // UnknownFormatException -> LiquibaseException -> line 115's catch clause.
+        when:
+        new OfflineConnection("offline:postgresql?snapshot=secret-snapshot.qqq&password=SuperSecretPwd123", new JUnitResourceAccessor())
+
+        then:
+        UnexpectedLiquibaseException e = thrown()
+        e.message.contains("Cannot parse snapshot")
+        e.message.contains("secret-snapshot.qqq")
+        e.message.contains("postgresql")
+        !e.message.contains("SuperSecretPwd123")
     }
 }
