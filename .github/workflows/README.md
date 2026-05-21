@@ -21,7 +21,6 @@ The following actions are identical to those in a regular Liquibase release, wit
 - Build `ansible` package
 - Executes the test for the `brew` PR creation
 - Deploy artifacts to Maven, to our internal Maven repository: `https://repo.liquibase.net/repository/dry-run-sonatype-nexus-staging`
-- Push `docker` images to our internal `ecr` repository: `812559712860.dkr.ecr.us-east-1.amazonaws.com/liquibase-dry-run`
 - Delete the dryRun draft release. i.e `dry-run-10522556642`
 - Delete the dryRun repository tag. i.e `vdry-run-10522556642`
 

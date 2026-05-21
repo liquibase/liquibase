@@ -44,3 +44,59 @@ jobs:
       upload_sarif: true
       dispatch_new_cves: false
     secrets: inherit
+
+  # Publishes the community-image scan of main HEAD to the scan-results branch
+  # under liquibase/liquibase/latest/. The Liquibase internal security portal
+  # picks this up and renders it as a "main (dev)" entry alongside released
+  # versions. Skipped on PRs and on non-main pushes so PR builds and forks
+  # cannot write to scan-results. Shares the scan-results-writer concurrency
+  # group with trivy-scan-published-images.yml so the two workflows never
+  # race on the same branch. [TECHOPS-408]
+  persist-main-latest:
+    name: Persist main HEAD scan to scan-results
+    needs: scan-community
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      actions: read
+    concurrency:
+      group: scan-results-writer
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Download community scan artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: scan-artifacts
+          # Pull only the community-image artifact (suffix=""), not the alpine
+          # variant. persist-scan-results.sh parses the artifact name to derive
+          # image+tag; vulnerability-report-liquibase-liquibase-latest maps to
+          # liquibase/liquibase:latest in scan-results.
+          pattern: vulnerability-report-liquibase-liquibase-latest
+
+      # download-artifact@v8 flattens a single-match download directly into
+      # `path`. persist-scan-results.sh, by contrast, derives the image+tag
+      # from a per-artifact subdirectory (scan-artifacts/<artifact-name>/).
+      # Re-wrap the files into that subdir. Idempotent — skips if the subdir
+      # already exists (multi-match downloads create it themselves).
+      - name: Wrap artifact files in expected subdir
+        run: |
+          set -euo pipefail
+          ART_NAME="vulnerability-report-liquibase-liquibase-latest"
+          ART_DIR="scan-artifacts/${ART_NAME}"
+          if [ ! -d "$ART_DIR" ]; then
+            mkdir -p "$ART_DIR"
+            find scan-artifacts -maxdepth 1 -type f -exec mv -t "$ART_DIR/" {} +
+          fi
+          ls -la "$ART_DIR"
+
+      - name: Persist to scan-results branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          scripts/persist-scan-results.sh scan-artifacts
