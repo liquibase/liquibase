@@ -205,4 +205,123 @@ public class DatabaseTypeCredentialClearTest {
         assertEquals("all three listeners must deregister themselves — no accumulation",
                 listenerCountBefore, project.getBuildListeners().size());
     }
+
+    @Test
+    public void clearCredentials_wipes_credential_bearing_connectionProperty_values() {
+        // CWE-316 regression for @filipelautert's review gap on #7743: a build that
+        // uses <connectionProperty name="password" value="hunter2"/> instead of (or in
+        // addition to) <password> would otherwise leave the raw value in the Property
+        // list past buildFinished. clearCredentials() must walk connectionProperties
+        // and overwrite credential-bearing values.
+        Project project = new Project();
+        DatabaseType type = new DatabaseType(project);
+        type.setUrl("jdbc:h2:mem:test");
+        type.setUser("regular-user");
+
+        ConnectionProperties props = new ConnectionProperties();
+        org.apache.tools.ant.taskdefs.Property credentialProp = new org.apache.tools.ant.taskdefs.Property();
+        credentialProp.setProject(project);
+        credentialProp.setName("password");
+        credentialProp.setValue("hunter2");
+        props.addConnectionProperty(credentialProp);
+
+        org.apache.tools.ant.taskdefs.Property nonCredentialProp = new org.apache.tools.ant.taskdefs.Property();
+        nonCredentialProp.setProject(project);
+        nonCredentialProp.setName("connectTimeout");
+        nonCredentialProp.setValue("30000");
+        props.addConnectionProperty(nonCredentialProp);
+
+        type.addConnectionProperties(props);
+
+        type.clearCredentials();
+
+        assertEquals("credential-bearing <connectionProperty> value must be wiped",
+                "*****", credentialProp.getValue());
+        assertEquals("non-credential <connectionProperty> value must pass through unchanged",
+                "30000", nonCredentialProp.getValue());
+    }
+
+    @Test
+    public void clearCredentials_matches_credential_property_names_case_insensitively_locale_safe() {
+        // CWE-316 regression: case-insensitive substring matching must use
+        // Locale.ROOT — the Turkish "I" → "ı" quirk would otherwise let
+        // <connectionProperty name="APIKEY" .../> escape the sweep on a JVM
+        // whose default locale is Turkish. Also exercises a few common
+        // credential-naming variants to lock the denylist coverage in.
+        Project project = new Project();
+        DatabaseType type = new DatabaseType(project);
+        type.setUrl("jdbc:h2:mem:test");
+
+        ConnectionProperties props = new ConnectionProperties();
+        org.apache.tools.ant.taskdefs.Property[] credentialProps = new org.apache.tools.ant.taskdefs.Property[]{
+                makeProp(project, "PASSWORD",            "uppercase-pw"),
+                makeProp(project, "Passwd",              "mixed-pw"),
+                makeProp(project, "APIKEY",              "uppercase-i-key"),
+                makeProp(project, "client_secret",       "embedded-secret"),
+                makeProp(project, "accessKey",           "aws-key"),
+                makeProp(project, "awsCredentials",      "creds-blob"),
+                makeProp(project, "ldap.bearerToken",    "embedded-token-name"),
+        };
+        for (org.apache.tools.ant.taskdefs.Property p : credentialProps) {
+            props.addConnectionProperty(p);
+        }
+        // A non-credential property among them to verify no over-masking.
+        org.apache.tools.ant.taskdefs.Property nonCred = makeProp(project, "fetchSize", "1000");
+        props.addConnectionProperty(nonCred);
+
+        // Set Turkish locale for the duration of the call so the Locale.ROOT
+        // guarantee is actually exercised (a bare String.toLowerCase() would
+        // turn "APIKEY" into "apıkey" with dotless ı under tr-TR and miss
+        // the "apikey" token).
+        java.util.Locale savedDefault = java.util.Locale.getDefault();
+        try {
+            java.util.Locale.setDefault(java.util.Locale.forLanguageTag("tr-TR"));
+            type.addConnectionProperties(props);
+            type.clearCredentials();
+        } finally {
+            java.util.Locale.setDefault(savedDefault);
+        }
+
+        for (org.apache.tools.ant.taskdefs.Property p : credentialProps) {
+            assertEquals("credential-named property '" + p.getName() + "' must be wiped",
+                    "*****", p.getValue());
+        }
+        assertEquals("non-credential property must pass through",
+                "1000", nonCred.getValue());
+    }
+
+    @Test
+    public void clearCredentials_traverses_refid_and_wipes_referenced_connectionProperty_values() {
+        // CWE-316 regression: the typedef+databaseRef pattern shares one
+        // DatabaseType (with its connectionProperties) across many tasks. The
+        // refid traversal in clearCredentials must reach the referenced
+        // ConnectionProperties so the actual shared Property list is wiped.
+        Project project = new Project();
+        DatabaseType referenced = new DatabaseType(project);
+        referenced.setUrl("jdbc:h2:mem:shared");
+
+        ConnectionProperties props = new ConnectionProperties();
+        org.apache.tools.ant.taskdefs.Property pw = makeProp(project, "password", "shared-pw");
+        props.addConnectionProperty(pw);
+        referenced.addConnectionProperties(props);
+
+        project.addReference("mydb", referenced);
+
+        DatabaseType shell = new DatabaseType(project);
+        org.apache.tools.ant.types.Reference ref = new org.apache.tools.ant.types.Reference(project, "mydb");
+        shell.setRefid(ref);
+
+        shell.clearCredentials();
+
+        assertEquals("referenced <connectionProperty name=\"password\"> must be wiped via refid traversal",
+                "*****", pw.getValue());
+    }
+
+    private static org.apache.tools.ant.taskdefs.Property makeProp(Project project, String name, String value) {
+        org.apache.tools.ant.taskdefs.Property p = new org.apache.tools.ant.taskdefs.Property();
+        p.setProject(project);
+        p.setName(name);
+        p.setValue(value);
+        return p;
+    }
 }

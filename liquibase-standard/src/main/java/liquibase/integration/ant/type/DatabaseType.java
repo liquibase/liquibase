@@ -358,6 +358,18 @@ public class DatabaseType extends DataType {
      */
     void clearCredentials() {
         this.password = null;
+        // Also wipe credential-bearing <connectionProperty> values — per
+        // @filipelautert's review on #7743, a build that uses
+        //   <connectionProperty name="password" value="hunter2"/>
+        // instead of (or in addition to) <password> would otherwise leave the
+        // raw value sitting in the Property list past buildFinished. Walk only
+        // the local connectionProperties — for refid shells, setRefid() rejects
+        // any locally-set attribute, so connectionProperties is always null on
+        // the shell; the referenced DatabaseType's connectionProperties get
+        // cleared via the refid traversal below.
+        if (this.connectionProperties != null) {
+            this.connectionProperties.clearCredentialValues();
+        }
         if (isReference()) {
             try {
                 // Type-safe Ant API (since 1.8) — the zero-arg getCheckedRef() form is
