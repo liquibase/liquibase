@@ -1,8 +1,12 @@
 package liquibase.resource
 
 import liquibase.util.StreamUtil
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.Unroll
+
+import java.nio.file.Files
+import java.nio.file.Path
 
 class DirectoryResourceAccessorTest extends Specification {
 
@@ -148,6 +152,68 @@ class DirectoryResourceAccessorTest extends Specification {
                                      "com/example/liquibase/change/UniqueConstraintConfig.class",
                                      "com/example/my-logic.sql",
                                      "com/example/users.csv"]
+    }
+
+    @Unroll("getAll rejects path traversal: #payload")
+    def "getAll rejects path traversal payloads that escape the accessor root"() {
+        when:
+        simpleTestAccessor.getAll(payload)
+
+        then:
+        IOException e = thrown()
+        e.message.contains("resolves outside accessor root")
+
+        where:
+        payload << [
+                "../../etc/passwd",
+                "../../../etc/passwd",
+                "./../../etc/passwd",
+                "subdir/../../escape.txt",
+                "..\\..\\..\\etc\\passwd",
+        ]
+    }
+
+    def "getAll allows paths that traverse via .. but stay inside the root"() {
+        // subdir/.. collapses pre-resolve and the resulting path stays under root.
+        expect:
+        simpleTestAccessor.getAll("liquibase/resource/foo/../DirectoryResourceAccessorTest.class")*.getPath() ==
+                ["liquibase/resource/DirectoryResourceAccessorTest.class"]
+    }
+
+    def "search rejects path traversal in startPath"() {
+        when:
+        simpleTestAccessor.search("../../etc", true)
+
+        then:
+        IOException e = thrown()
+        e.message.contains("resolves outside accessor root")
+    }
+
+    // Skipped on Windows because Files.createSymbolicLink requires the
+    // SeCreateSymbolicLinkPrivilege (developer mode or admin).
+    @IgnoreIf({ os.windows })
+    def "getAll rejects a symlink that escapes the accessor root"() {
+        given:
+        Path rootDir = Files.createTempDirectory("accessor-root-")
+        Path outsideDir = Files.createTempDirectory("outside-secret-")
+        Path outsideFile = outsideDir.resolve("secret.txt")
+        Files.writeString(outsideFile, "SECRET")
+        Path symlinkInside = rootDir.resolve("escape-link")
+        Files.createSymbolicLink(symlinkInside, outsideFile)
+        def accessor = new DirectoryResourceAccessor(rootDir)
+
+        when:
+        accessor.getAll("escape-link")
+
+        then:
+        IOException e = thrown()
+        e.message.contains("symlink") || e.message.contains("outside")
+
+        cleanup:
+        Files.deleteIfExists(symlinkInside)
+        Files.deleteIfExists(outsideFile)
+        Files.deleteIfExists(outsideDir)
+        Files.deleteIfExists(rootDir)
     }
 
 }

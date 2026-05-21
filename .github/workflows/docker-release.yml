@@ -60,9 +60,10 @@ on:
 permissions:
   contents: read
   id-token: write
+  packages: write
 
 jobs:
-  # ── Step 1: Bump LIQUIBASE_VERSION ARG in Dockerfiles, commit to master ──────
+  # ── Step 1: Bump LIQUIBASE_VERSION ARG in Dockerfiles, commit to main ────────
   update-dockerfiles:
     name: Update Dockerfile versions
     runs-on: ubuntu-latest
@@ -92,11 +93,11 @@ jobs:
           owner: ${{ github.repository_owner }}
           permission-contents: write
 
-      - name: Checkout master
+      - name: Checkout main
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           token: ${{ steps.get-token.outputs.token }}
-          ref: master
+          ref: main
 
       - name: Resolve SHA256 checksums for ${{ inputs.liquibaseVersion }}
         id: checksums

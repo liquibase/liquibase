@@ -292,7 +292,12 @@ public class DatabaseFactory implements SingletonObject {
         }
 
         if (selectedDriverClass == null) {
-            throw new RuntimeException("Driver class was not specified and could not be determined from the url (" + url + ")");
+            // Route the URL through sanitizeUrl so embedded credentials (e.g.
+            // jdbc:mysql://user:pw@host/db or ?password=…) are not surfaced in the
+            // exception message — which otherwise flows into MDC, log appenders,
+            // and the CLI error UI via CommandScope.logPrimaryExceptionToMdc.
+            throw new RuntimeException("Driver class was not specified and could not be determined from the url ("
+                    + JdbcConnection.sanitizeUrl(url) + ")");
         }
         return selectedDriverClass;
     }

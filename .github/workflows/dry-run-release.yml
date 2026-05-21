@@ -72,13 +72,13 @@ jobs:
 
       - name: Invoke Create Release
         id: trigger-step
-        uses: the-actions-org/workflow-dispatch@3133c5d135c7dbe4be4f9793872b6ef331b53bc7 # v4.0.0
+        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@main
         with:
           workflow: create-release.yml
-          token: ${{ steps.get-token.outputs.token }}
-          inputs: '{"version": "dry-run-${{ github.run_id }}", "runId": "${{ needs.setup.outputs.dry_run_id }}", "standalone_zip": "false", "dry_run": "true", "branch": "main"}'
           ref: main
-          wait-for-completion: true
+          inputs: '{"version": "dry-run-${{ github.run_id }}", "runId": "${{ needs.setup.outputs.dry_run_id }}", "standalone_zip": "false", "dry_run": "true", "branch": "main"}'
+          wait: 'true'
+          gh-token: ${{ steps.get-token.outputs.token }}
 
       - name: Get Release Outputs
         id: wait_and_get_outputs
@@ -202,13 +202,13 @@ jobs:
           permission-actions: write
 
       - name: Trigger release-published-orchestrator workflow
-        uses: the-actions-org/workflow-dispatch@3133c5d135c7dbe4be4f9793872b6ef331b53bc7 # v4.0.0
+        uses: liquibase/build-logic/.github/actions/dispatch-and-wait@main
         with:
           workflow: release-published-orchestrator.yml
-          token: ${{ steps.get-token.outputs.token }}
-          inputs: '{"tag": "vdry-run-${{ github.run_id }}", "dry_run_release_id": "${{ needs.dry-run-create-release.outputs.dry_run_release_id }}", "dry_run_zip_url": "${{ needs.dry-run-create-release.outputs.dry_run_zip_url }}", "dry_run_tar_gz_url": "${{ needs.dry-run-create-release.outputs.dry_run_tar_gz_url }}", "dry_run": true, "dry_run_branch_name": "${{ needs.setup.outputs.dry_run_branch_name }}"}'
           ref: main
-          wait-for-completion: true
+          inputs: '{"tag": "vdry-run-${{ github.run_id }}", "dry_run_release_id": "${{ needs.dry-run-create-release.outputs.dry_run_release_id }}", "dry_run_zip_url": "${{ needs.dry-run-create-release.outputs.dry_run_zip_url }}", "dry_run_tar_gz_url": "${{ needs.dry-run-create-release.outputs.dry_run_tar_gz_url }}", "dry_run": true, "dry_run_branch_name": "${{ needs.setup.outputs.dry_run_branch_name }}"}'
+          wait: 'true'
+          gh-token: ${{ steps.get-token.outputs.token }}
 
   cleanup:
     runs-on: ubuntu-latest
