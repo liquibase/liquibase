@@ -53,6 +53,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> STRICT;
     public static final ConfigurationDefinition<Integer> DDL_LOCK_TIMEOUT;
     public static final ConfigurationDefinition<Boolean> SECURE_PARSING;
+    public static final ConfigurationDefinition<Boolean> ALLOW_EXECUTE_COMMAND;
     public static final ConfigurationDefinition<String> SEARCH_PATH;
 
     public static final ConfigurationDefinition<UIServiceEnum> UI_SERVICE;
@@ -221,6 +222,17 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
         SECURE_PARSING = builder.define("secureParsing", Boolean.class)
                 .setDescription("If true, remove functionality from file parsers which could be used insecurely. Examples include (but not limited to) disabling remote XML entity support.")
+                .setDefaultValue(true)
+                .build();
+
+        ALLOW_EXECUTE_COMMAND = builder.define("allowExecuteCommand", Boolean.class)
+                .setDescription("If false, the executeCommand changelog change is rejected at validation time " +
+                        "with a clear error instead of being allowed to invoke an OS shell command. " +
+                        "Defaults to true to preserve the documented executeCommand feature for the standard " +
+                        "trust model (team-authored, team-reviewed changelogs). Set to false in environments " +
+                        "that execute changelogs from less-trusted sources (multi-tenant SaaS running customer " +
+                        "changelogs, downloaded change-packs, contributor PRs prior to review) where arbitrary " +
+                        "OS-shell execution via changelog is not an acceptable risk (CWE-78).")
                 .setDefaultValue(true)
                 .build();
 
