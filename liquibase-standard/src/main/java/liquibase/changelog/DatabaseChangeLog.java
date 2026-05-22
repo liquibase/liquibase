@@ -637,6 +637,18 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
         IncludeAllFilter resourceFilter = null;
         if (resourceFilterDef != null) {
+            // CWE-470 gate: reject changelog-controlled FQCN loading when the embedder has
+            // explicitly opted out. The Class.forName(initialize=true) below would fire the
+            // named class's static <clinit> at load time, before the cast to IncludeAllFilter
+            // could reject it — same unsafe-reflection surface as <customChange> and
+            // <customPrecondition>, gated by liquibase.allowCustomChange.
+            if (!Boolean.TRUE.equals(GlobalConfiguration.ALLOW_INCLUDE_ALL_CLASSES.getCurrentValue())) {
+                throw new SetupException("includeAll with a resourceFilter class is disabled " +
+                        "because liquibase.allowIncludeAllClasses=false. The named class was " +
+                        "NOT loaded. Either remove the resourceFilter / filter attribute from " +
+                        "the includeAll directive, or set liquibase.allowIncludeAllClasses=true " +
+                        "to enable changelog-controlled class loading by includeAll.");
+            }
             try {
                 resourceFilter = (IncludeAllFilter) Class.forName(resourceFilterDef, true, Thread.currentThread().getContextClassLoader()).getConstructor().newInstance();
             } catch (ReflectiveOperationException e) {
@@ -727,6 +739,19 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         if (resourceComparatorDef == null) {
             resourceComparator = getStandardChangeLogComparator();
         } else {
+            // CWE-470 gate: must throw BEFORE the try/catch below so the existing
+            // ReflectiveOperationException-catches-and-falls-back-to-standard logic
+            // cannot silently degrade the configured-off intent into the default
+            // comparator (which would mask the rejection from the operator and look
+            // identical to the success path in logs).
+            if (!Boolean.TRUE.equals(GlobalConfiguration.ALLOW_INCLUDE_ALL_CLASSES.getCurrentValue())) {
+                throw new UnexpectedLiquibaseException("includeAll with a resourceComparator " +
+                        "class is disabled because liquibase.allowIncludeAllClasses=false. " +
+                        "The named class was NOT loaded. Either remove the resourceComparator " +
+                        "attribute from the includeAll directive, or set " +
+                        "liquibase.allowIncludeAllClasses=true to enable changelog-controlled " +
+                        "class loading by includeAll.");
+            }
             try {
                 resourceComparator = (Comparator<String>) Class.forName(resourceComparatorDef, true, Thread.currentThread().getContextClassLoader()).getConstructor().newInstance();
             } catch (ReflectiveOperationException e) {
