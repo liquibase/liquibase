@@ -53,6 +53,9 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> STRICT;
     public static final ConfigurationDefinition<Integer> DDL_LOCK_TIMEOUT;
     public static final ConfigurationDefinition<Boolean> SECURE_PARSING;
+    public static final ConfigurationDefinition<Boolean> ALLOW_CUSTOM_CHANGE;
+    public static final ConfigurationDefinition<Boolean> ALLOW_EXECUTE_COMMAND;
+    public static final ConfigurationDefinition<Boolean> ALLOW_PARENT_DIRECTORY_REFERENCES;
     public static final ConfigurationDefinition<String> SEARCH_PATH;
 
     public static final ConfigurationDefinition<UIServiceEnum> UI_SERVICE;
@@ -221,6 +224,47 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
 
         SECURE_PARSING = builder.define("secureParsing", Boolean.class)
                 .setDescription("If true, remove functionality from file parsers which could be used insecurely. Examples include (but not limited to) disabling remote XML entity support.")
+                .setDefaultValue(true)
+                .build();
+
+        ALLOW_CUSTOM_CHANGE = builder.define("allowCustomChange", Boolean.class)
+                .setDescription("If false, the customChange changelog change is rejected before its named " +
+                        "class is loaded. Defaults to true to preserve the documented customChange feature " +
+                        "for the standard trust model (team-authored, team-reviewed changelogs). Set to " +
+                        "false in environments that execute changelogs from less-trusted sources " +
+                        "(multi-tenant SaaS running customer changelogs, downloaded change-packs, " +
+                        "contributor PRs prior to review): customChange loads an arbitrary JVM class by " +
+                        "FQCN via Class.forName(initialize=true), which fires the class's static <clinit> " +
+                        "initializer at load time — before any cast or marker-interface check could " +
+                        "reject the load. Any class on the JVM classpath is reachable this way (CWE-470).")
+                .setDefaultValue(true)
+                .build();
+
+        ALLOW_EXECUTE_COMMAND = builder.define("allowExecuteCommand", Boolean.class)
+                .setDescription("If false, the executeCommand changelog change is rejected at validation time " +
+                        "with a clear error instead of being allowed to invoke an OS shell command. " +
+                        "Defaults to true to preserve the documented executeCommand feature for the standard " +
+                        "trust model (team-authored, team-reviewed changelogs). Set to false in environments " +
+                        "that execute changelogs from less-trusted sources (multi-tenant SaaS running customer " +
+                        "changelogs, downloaded change-packs, contributor PRs prior to review) where arbitrary " +
+                        "OS-shell execution via changelog is not an acceptable risk (CWE-78).")
+                .setDefaultValue(true)
+                .build();
+
+        ALLOW_PARENT_DIRECTORY_REFERENCES = builder.define("allowParentDirectoryReferences", Boolean.class)
+                .setDescription("If true (the default), AbstractPathResourceAccessor allows path payloads " +
+                        "containing '..' segments and symbolic links that resolve outside the configured " +
+                        "root directory. This preserves the behaviour that existed before the CWE-22 " +
+                        "path-containment fix landed, for legitimate multi-changelog layouts that depend on " +
+                        "parent-directory traversal — for example a shared 'dbarepo' at the project root " +
+                        "referenced as '../shared/foo.xml' from per-environment changelogs underneath it, " +
+                        "or a custom-check SCRIPT_PATH like '../checks/policy.py'. Set to false to enforce " +
+                        "strict containment: any '..' that resolves outside the accessor root, or any " +
+                        "symbolic link whose canonical real path escapes the canonical root, is rejected " +
+                        "with IOException. The default is true for one major release as a deprecation " +
+                        "window; a future major release will flip the default to false, at which point " +
+                        "callers depending on parent-directory traversal must either restructure their " +
+                        "layout or explicitly opt in via this flag (CWE-22).")
                 .setDefaultValue(true)
                 .build();
 

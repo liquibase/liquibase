@@ -31,6 +31,13 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
     public DefaultsFileValueProvider(InputStream stream, String sourceDescription) throws IOException {
         this.sourceDescription = sourceDescription;
         this.properties = new Properties();
+        // CWE-94 guard: keep this bare java.util.Properties.load(). Do NOT add
+        // ${...} interpolation, environment-variable expansion, or include-file
+        // directives here. A defaults file may contain user-controlled values;
+        // expansion engines have a documented history of CVE-grade injection /
+        // info-disclosure issues (e.g. CVE-2022-33980 in Apache Commons Configuration).
+        // Pro extensions that need safe substitution can register a
+        // ConfiguredValueModifier instead of changing this loader.
         this.properties.load(stream);
         trimAllProperties();
     }
@@ -40,6 +47,8 @@ public class DefaultsFileValueProvider extends AbstractMapConfigurationValueProv
 
         try (InputStream stream = Files.newInputStream(path.toPath())) {
             this.properties = new Properties();
+            // CWE-94 guard: see the InputStream-arg ctor above. Bare Properties.load —
+            // adding ${...} / env-var / include expansion requires a security review.
             this.properties.load(stream);
             trimAllProperties();
         }
