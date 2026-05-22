@@ -1,0 +1,319 @@
+name: "Auto-create Jira ticket on Community PR merge"
+
+# Per TECHOPS-497. When a qualifying Community PR is merged in this repo,
+# auto-creates a SECURE Story in Jira so the docs team gets a guaranteed
+# queue of every shipping change without scraping merged PRs at release
+# time. Full process: https://github.com/liquibase/liquibase-infrastructure/blob/main/jira/docs/community-release-process.md
+#
+# Three triggers cover real-world merge patterns:
+#   1. PR closed (merged) WITH milestone → create ticket immediately
+#   2. PR milestoned AFTER merge (forgot-to-set case) → create ticket
+#   3. Milestone renamed (e.g. 1NEXT → 5.0.4) → backfill Fix Version on
+#      every auto-created ticket in that milestone
+#
+# Decoupled from TECHOPS-273 (release-tag Fix Version automation): this
+# workflow owns the full Community-PR → Jira lifecycle on its own.
+#
+# Filter rules (a PR is SKIPPED when):
+#   - skipReleaseNotes label applied (per TECHOPS-478)
+#   - dependencies label applied
+#   - Author is dependabot[bot] or renovate[bot]
+#   - All changed files match the internal-only allowlist
+#     (.github/**, **/README.md, pom.xml — extend per Filipe's input)
+#
+# Required org-level setup (shared with the FixVersion workflow):
+#   /vault/liquibase must contain JIRA_USER + JIRA_API_TOKEN with
+#   Browse + Create + Edit + Resolve Issues on SECURE.
+
+# Serialize runs to prevent duplicate SECURE tickets from concurrent merges.
+# The idempotency check uses Jira's `text ~` JQL, which hits an async-indexed
+# store — two parallel runs can both read "no ticket yet" before either
+# commits and both create duplicates. Queueing closes that window.
+# `cancel-in-progress: false` is LOAD-BEARING — flipping it to true makes
+# runs drop instead of queue, which is worse than the original race.
+# Per Filipe's review on PR #7745 (CodeRabbit finding).
+concurrency:
+  group: auto-create-jira-${{ github.repository }}
+  cancel-in-progress: false
+
+on:
+  pull_request:
+    types: [closed, milestoned]
+  milestone:
+    types: [edited]
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: read
+
+jobs:
+  auto-create:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'milestone' ||
+      (github.event_name == 'pull_request' &&
+        ((github.event.action == 'closed' && github.event.pull_request.merged == true) ||
+         (github.event.action == 'milestoned' && github.event.pull_request.merged == true)))
+    steps:
+      - name: Configure AWS credentials for vault access
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Get Jira service-account credentials from vault
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            ,/vault/liquibase
+          parse-json-secrets: true
+
+      - name: Auto-create / update tickets
+        uses: actions/github-script@v8
+        env:
+          JIRA_BASE_URL: https://datical.atlassian.net
+          JIRA_EMAIL: ${{ env.JIRA_USER }}
+          JIRA_TOKEN: ${{ env.JIRA_API_TOKEN }}
+        with:
+          script: |
+            // ---- Config -----------------------------------------------------
+            const SECURE_PROJECT_KEY = 'SECURE';
+            const STORY_ISSUE_TYPE = 'Story';
+            const SKIP_LABELS = ['skipReleaseNotes', 'dependencies'];
+            const BOT_AUTHORS = ['dependabot[bot]', 'renovate[bot]'];
+            const INTERNAL_ONLY_PATTERNS = [
+              /^\.github\//,
+              /^README\.md$/i,
+              /\/README\.md$/i,
+              /^pom\.xml$/,
+            ];
+            const VERSION_PATTERN = /^v?(\d+\.\d+\.\d+)$/;
+
+            // ---- Jira helpers ----------------------------------------------
+            const baseUrl = process.env.JIRA_BASE_URL.replace(/\/$/, '');
+            const email = process.env.JIRA_EMAIL;
+            const token = process.env.JIRA_TOKEN;
+            if (!email || !token) {
+              core.setFailed('JIRA_USER or JIRA_API_TOKEN not set in /vault/liquibase');
+              return;
+            }
+            const auth = Buffer.from(`${email}:${token}`).toString('base64');
+            const jiraHeaders = {
+              'Authorization': `Basic ${auth}`,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            };
+
+            async function jiraFetch(method, path, body) {
+              const response = await fetch(`${baseUrl}${path}`, {
+                method,
+                headers: jiraHeaders,
+                body: body ? JSON.stringify(body) : undefined,
+              });
+              if (!response.ok) {
+                const text = await response.text();
+                throw new Error(`${method} ${path} -> ${response.status}: ${text.slice(0, 500)}`);
+              }
+              if (response.status === 204) return null;
+              return await response.json();
+            }
+
+            async function findExistingTicket(prUrl) {
+              const escaped = prUrl.replace(/"/g, '\\"');
+              const jql = `project = ${SECURE_PROJECT_KEY} AND labels = "auto-created" AND text ~ "\\"${escaped}\\""`;
+              const result = await jiraFetch('POST', '/rest/api/3/search/jql', {
+                jql,
+                fields: ['summary'],
+                maxResults: 1,
+              });
+              return result.issues && result.issues[0] ? result.issues[0].key : null;
+            }
+
+            // ---- ADF helpers ------------------------------------------------
+            const text = (s, marks) => ({ type: 'text', text: s, ...(marks ? { marks } : {}) });
+            const link = (s, href) => text(s, [{ type: 'link', attrs: { href } }]);
+            const para = (...content) => ({ type: 'paragraph', content });
+            const heading = (level, ...content) => ({ type: 'heading', attrs: { level }, content });
+
+            function extractReleaseNote(prBody) {
+              if (!prBody) return null;
+              const re = /##\s+(?:Release note|User benefit \(release note\))\s*\r?\n([\s\S]*?)(?=\r?\n##\s|$)/i;
+              const m = prBody.match(re);
+              if (!m) return null;
+              const cleaned = m[1].replace(/<!--[\s\S]*?-->/g, '').trim();
+              return cleaned || null;
+            }
+
+            function buildDescription(releaseNote, pr) {
+              const noteParas = releaseNote
+                ? releaseNote.split(/\n\n+/).map(p => para(text(p.trim())))
+                : [para(text('[Release note needed — fill in here or apply skipReleaseNotes label]'))];
+              const mergedBy = pr.merged_by ? pr.merged_by.login : pr.user.login;
+              return {
+                type: 'doc',
+                version: 1,
+                content: [
+                  heading(2, text('Release note')),
+                  ...noteParas,
+                  heading(2, text('Source')),
+                  para(
+                    text('Auto-created from '),
+                    link(`PR #${pr.number}`, pr.html_url),
+                    text(` (merged by @${mergedBy} at ${pr.merged_at}).`),
+                  ),
+                ],
+              };
+            }
+
+            // ---- PR-level filter --------------------------------------------
+            async function shouldSkipPR(pr) {
+              const labelNames = pr.labels.map(l => l.name);
+              for (const skip of SKIP_LABELS) {
+                if (labelNames.includes(skip)) return `label '${skip}' applied`;
+              }
+              if (BOT_AUTHORS.includes(pr.user.login)) return `bot author '${pr.user.login}'`;
+
+              const files = await github.paginate(github.rest.pulls.listFiles, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+              });
+              if (files.length === 0) return 'no files changed';
+              const allInternal = files.every(f =>
+                INTERNAL_ONLY_PATTERNS.some(p => p.test(f.filename))
+              );
+              if (allInternal) return 'all files match internal-only allowlist';
+              return null;
+            }
+
+            // ---- Trigger 1 + 2: PR merged ----------------------------------
+            async function handlePullRequest() {
+              const pr = context.payload.pull_request;
+              if (!pr.merged) {
+                core.info('PR not merged, skipping');
+                return;
+              }
+              if (!pr.milestone) {
+                core.info('PR has no milestone, skipping');
+                return;
+              }
+
+              const existing = await findExistingTicket(pr.html_url);
+              if (existing) {
+                core.info(`Ticket ${existing} already exists for PR #${pr.number}, skipping (idempotent)`);
+                return;
+              }
+
+              const skipReason = await shouldSkipPR(pr);
+              if (skipReason) {
+                core.info(`Skipping PR #${pr.number}: ${skipReason}`);
+                return;
+              }
+
+              const releaseNote = extractReleaseNote(pr.body);
+              const milestoneName = pr.milestone.title;
+              const versionMatch = milestoneName.match(VERSION_PATTERN);
+              const fixVersion = versionMatch ? versionMatch[1] : null;
+
+              const issuePayload = {
+                fields: {
+                  project: { key: SECURE_PROJECT_KEY },
+                  summary: pr.title,
+                  description: buildDescription(releaseNote, pr),
+                  issuetype: { name: STORY_ISSUE_TYPE },
+                  labels: ['community-source', 'auto-created'],
+                  ...(fixVersion ? { fixVersions: [{ name: fixVersion }] } : {}),
+                },
+              };
+
+              const issue = await jiraFetch('POST', '/rest/api/3/issue', issuePayload);
+              core.info(`Created ${issue.key} for PR #${pr.number}`);
+
+              // Remote link back to the PR. `globalId` makes the POST
+              // idempotent — re-posting with the same globalId updates the
+              // existing link instead of creating a duplicate. Belt-and-
+              // suspenders against the same race the `concurrency:` block
+              // above closes (issue-create side); this side covers re-runs
+              // and milestone-rename fan-out re-touching the same ticket.
+              await jiraFetch('POST', `/rest/api/3/issue/${issue.key}/remotelink`, {
+                globalId: `github-pr-${pr.html_url}`,
+                object: {
+                  url: pr.html_url,
+                  title: `PR #${pr.number}: ${pr.title}`,
+                  icon: { url16x16: 'https://github.githubassets.com/favicon.ico' },
+                },
+              });
+
+              const fvLine = fixVersion
+                ? `Fix Version set to **${fixVersion}** (from milestone "${milestoneName}").`
+                : `Fix Version pending — milestone "${milestoneName}" isn't a version pattern; will be set when milestone is renamed.`;
+              await core.summary
+                .addHeading('Auto-created Jira ticket')
+                .addRaw(`[${issue.key}](${baseUrl}/browse/${issue.key}) created for PR #${pr.number}\n\n${fvLine}`)
+                .write();
+            }
+
+            // ---- Trigger 3: milestone renamed -------------------------------
+            async function handleMilestoneEdit() {
+              const milestone = context.payload.milestone;
+              const before = (context.payload.changes && context.payload.changes.title && context.payload.changes.title.from) || null;
+              if (!before || before === milestone.title) {
+                core.info('Milestone edit was not a rename, skipping');
+                return;
+              }
+              const versionMatch = milestone.title.match(VERSION_PATTERN);
+              if (!versionMatch) {
+                core.info(`Milestone renamed to "${milestone.title}" but not a version pattern, skipping`);
+                return;
+              }
+              const fixVersion = versionMatch[1];
+              core.info(`Milestone renamed "${before}" → "${milestone.title}"; updating Fix Version on linked tickets`);
+
+              const issues = await github.paginate(github.rest.issues.listForRepo, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                milestone: milestone.number,
+                state: 'closed',
+                per_page: 100,
+              });
+              const prs = issues.filter(i => i.pull_request);
+
+              let updated = 0;
+              const errors = [];
+              for (const pr of prs) {
+                const prUrl = pr.html_url;
+                const issueKey = await findExistingTicket(prUrl);
+                if (!issueKey) continue;
+                try {
+                  await jiraFetch('PUT', `/rest/api/3/issue/${issueKey}`, {
+                    fields: { fixVersions: [{ name: fixVersion }] },
+                  });
+                  core.info(`Updated ${issueKey} Fix Version -> ${fixVersion}`);
+                  updated++;
+                } catch (e) {
+                  core.warning(`Failed to update ${issueKey}: ${e.message}`);
+                  errors.push({ issueKey, prNumber: pr.number, error: e.message });
+                }
+              }
+
+              await core.summary
+                .addHeading('Milestone rename → Fix Version updates')
+                .addRaw(`Milestone "${milestone.title}" picked up; updated **${updated}** auto-created tickets`)
+                .write();
+              if (errors.length) {
+                await core.summary
+                  .addHeading('Errors')
+                  .addRaw(errors.map(e => `- ${e.issueKey} (PR #${e.prNumber}): ${e.error}`).join('\n'))
+                  .write();
+              }
+            }
+
+            // ---- Dispatch ---------------------------------------------------
+            if (context.eventName === 'pull_request') {
+              await handlePullRequest();
+            } else if (context.eventName === 'milestone' && context.payload.action === 'edited') {
+              await handleMilestoneEdit();
+            } else {
+              core.info(`Event ${context.eventName}/${context.payload.action} not handled; no-op`);
+            }
