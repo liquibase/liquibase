@@ -25,6 +25,17 @@ name: "Auto-create Jira ticket on Community PR merge"
 #   /vault/liquibase must contain JIRA_USER + JIRA_API_TOKEN with
 #   Browse + Create + Edit + Resolve Issues on SECURE.
 
+# Serialize runs to prevent duplicate SECURE tickets from concurrent merges.
+# The idempotency check uses Jira's `text ~` JQL, which hits an async-indexed
+# store — two parallel runs can both read "no ticket yet" before either
+# commits and both create duplicates. Queueing closes that window.
+# `cancel-in-progress: false` is LOAD-BEARING — flipping it to true makes
+# runs drop instead of queue, which is worse than the original race.
+# Per Filipe's review on PR #7745 (CodeRabbit finding).
+concurrency:
+  group: auto-create-jira-${{ github.repository }}
+  cancel-in-progress: false
+
 on:
   pull_request:
     types: [closed, milestoned]
@@ -219,8 +230,14 @@ jobs:
               const issue = await jiraFetch('POST', '/rest/api/3/issue', issuePayload);
               core.info(`Created ${issue.key} for PR #${pr.number}`);
 
-              // Remote link back to the PR
+              // Remote link back to the PR. `globalId` makes the POST
+              // idempotent — re-posting with the same globalId updates the
+              // existing link instead of creating a duplicate. Belt-and-
+              // suspenders against the same race the `concurrency:` block
+              // above closes (issue-create side); this side covers re-runs
+              // and milestone-rename fan-out re-touching the same ticket.
               await jiraFetch('POST', `/rest/api/3/issue/${issue.key}/remotelink`, {
+                globalId: `github-pr-${pr.html_url}`,
                 object: {
                   url: pr.html_url,
                   title: `PR #${pr.number}: ${pr.title}`,
