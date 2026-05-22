@@ -68,10 +68,33 @@ public class JdbcConnectionPatterns extends ConnectionPatterns {
 
         // Generic JDBC userinfo fallback for any jdbc: URL not covered by the dialect
         // patterns above (postgresql, sqlserver, third-party drivers; CWE-693).
-        // See git blame / PR for design rationale and the dialect-vs-generic tradeoff.
-        final Pattern anyJdbcUrl = Pattern.compile("(?i)jdbc:.*");
-        addJdbcBlankPatterns(PatternPair.of(anyJdbcUrl, Pattern.compile(FILTER_CREDS)));
-        addJdbcBlankToObfuscatePatterns(PatternPair.of(anyJdbcUrl, Pattern.compile(FILTER_CREDS_MYSQL_TO_OBFUSCATE)));
-        addJdbcBlankToObfuscatePatternsReplaceWithEmpty(PatternPair.of(anyJdbcUrl, Pattern.compile(FILTER_CREDS_MYSQL_TO_OBFUSCATE_EMPTY)));
+        //
+        // The matcher is anchored to "@ follows :// with only authority-shaped characters
+        // between them" — specifically, no '/', ';', or '?'. This prevents the userinfo
+        // filter from firing on URLs where the '@' is NOT in the authority position:
+        //
+        //   * jdbc:sqlserver://host:1433;databaseName=mydb;...;user=admin@tenant.com;password=pass
+        //     — Azure-AD UPN inside a ';property=value' string. The '@' is in a property
+        //       value, not in userinfo. With the original "(?i)jdbc:.*" matcher this URL
+        //       false-matched, and the greedy FILTER_CREDS_MYSQL_TO_OBFUSCATE_EMPTY then
+        //       stripped 'jdbc:sqlserver://host:1433;...;user=admin@' from the front,
+        //       leaving 'tenant.com;password=pass' (later stripped further to 'tenant.com'
+        //       by the dialect's sanitizeAndStripParams) — a real LLT regression
+        //       discovered via MSSQLDatabaseTest.getTargetUniquenessAttributes_allAuthMethods_
+        //       produceSameUrl on the liquibase-pro subtree-sync.
+        //
+        //   * jdbc:postgresql://host:5432/db?user=admin@tenant.com&password=p
+        //     — '@' inside a query-string value. The dedicated FILTER_CREDS_USER /
+        //       FILTER_CREDS_PASSWORD obfuscation filters handle this correctly; the
+        //       userinfo filter has no business here.
+        //
+        // URLs WITH genuine userinfo (jdbc:postgresql://user:pass@host/db,
+        // jdbc:sqlserver://user:pass@host/db, third-party drivers in the same shape)
+        // are unchanged by this scoping — the userinfo characters never include '/',
+        // ';', or '?', so the new matcher still matches them.
+        final Pattern anyJdbcUrlWithAuthorityUserinfo = Pattern.compile("(?i)jdbc:[^/]+://[^/;?]+@.*");
+        addJdbcBlankPatterns(PatternPair.of(anyJdbcUrlWithAuthorityUserinfo, Pattern.compile(FILTER_CREDS)));
+        addJdbcBlankToObfuscatePatterns(PatternPair.of(anyJdbcUrlWithAuthorityUserinfo, Pattern.compile(FILTER_CREDS_MYSQL_TO_OBFUSCATE)));
+        addJdbcBlankToObfuscatePatternsReplaceWithEmpty(PatternPair.of(anyJdbcUrlWithAuthorityUserinfo, Pattern.compile(FILTER_CREDS_MYSQL_TO_OBFUSCATE_EMPTY)));
     }
 }
