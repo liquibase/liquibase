@@ -127,3 +127,5 @@ For example, the h2 configuration defines a "1.x" and a "2.x" profile:
 ```
 
 The advantage of profiles is to allow users to specify the exact version of h2 relevant for their testing.
+
+<!-- TECHOPS-497 smoke test marker — safe to revert -->
