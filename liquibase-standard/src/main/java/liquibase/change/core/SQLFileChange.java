@@ -15,7 +15,6 @@ import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.resource.Resource;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.FileUtil;
-import liquibase.util.ObjectUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
@@ -109,7 +108,7 @@ public class SQLFileChange extends AbstractSQLChange {
     }
 
     private Resource getResource() throws IOException {
-        boolean relative = ObjectUtil.defaultIfNull(isRelativeToChangelogFile(), false);
+        boolean relative = Boolean.TRUE.equals(isRelativeToChangelogFile());
         // CWE-22 defence-in-depth: even if validate() did not run (or its error was somehow
         // bypassed), reject classpath: / absolute paths here at the actual load site when
         // the embedder has opted out via liquibase.allowExternalChangelogPaths=false.
@@ -140,7 +139,7 @@ public class SQLFileChange extends AbstractSQLChange {
             // operator sees the security-relevant message directly rather than a generic
             // "sqlFile not found" warning produced by the IOException catch below. Runtime
             // defence-in-depth lives in getResource() itself.
-            boolean relative = ObjectUtil.defaultIfNull(isRelativeToChangelogFile(), false);
+            boolean relative = Boolean.TRUE.equals(isRelativeToChangelogFile());
             String externalForm = DatabaseChangeLog.detectExternalChangelogPathForm(path);
             if (externalForm != null && !relative
                     && !Boolean.TRUE.equals(GlobalConfiguration.ALLOW_EXTERNAL_CHANGELOG_PATHS.getCurrentValue())) {
