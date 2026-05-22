@@ -1219,4 +1219,161 @@ http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbch
         ]
     }
 
+    // CWE-22 opt-in restricted mode for absolute and classpath: paths in changelog
+    // include / includeAll directives. See GlobalConfiguration.ALLOW_EXTERNAL_CHANGELOG_PATHS.
+
+    @Unroll
+    def "detectExternalChangelogPathForm classifies #path as #expected"() {
+        expect:
+        DatabaseChangeLog.detectExternalChangelogPathForm(path) == expected
+
+        where:
+        path                                | expected
+        null                                | null
+        ""                                  | null
+        "relative/path.xml"                 | null
+        "subdir/file.xml"                   | null
+        // classpath: prefix (Spring Boot's common pattern when external paths are allowed)
+        "classpath:db/changelog/master.xml" | "the 'classpath:' URI prefix"
+        "classpath:/db/changelog/master.xml"| "the 'classpath:' URI prefix"
+        // Unix absolute
+        "/etc/passwd.xml"                   | "an absolute filesystem path"
+        "/"                                 | "an absolute filesystem path"
+        // UNC
+        "\\\\server\\share\\file.xml"       | "an absolute filesystem path"
+        // Windows drive letter (any case)
+        "C:/Users/Attacker/file.xml"        | "a Windows-style absolute path (drive letter)"
+        "d:\\evil.xml"                      | "a Windows-style absolute path (drive letter)"
+        "Z:/anywhere/file.xml"              | "a Windows-style absolute path (drive letter)"
+        // Lookalikes that should NOT be flagged
+        "1:notADriveLetter"                 | null
+        ":noLetterPrefix"                   | null
+    }
+
+    def "requireRelativeChangelogPathOrThrow is a no-op at default flag (true) even for external-looking paths"() {
+        when:
+        Scope.child(["liquibase.allowExternalChangelogPaths": "true"] as Map, {
+            DatabaseChangeLog.requireRelativeChangelogPathOrThrow("classpath:/foo.xml", false, "include")
+            DatabaseChangeLog.requireRelativeChangelogPathOrThrow("/etc/passwd.xml", false, "include")
+            DatabaseChangeLog.requireRelativeChangelogPathOrThrow("C:/file.xml", false, "include")
+        } as Scope.ScopedRunner)
+
+        then:
+        // No exception. Default behaviour preserves all path forms — Spring Boot users using
+        // classpath:db/changelog/... continue to work without changes.
+        noExceptionThrown()
+    }
+
+    def "requireRelativeChangelogPathOrThrow is a no-op when relativeToChangelogFile=true even at flag=false"() {
+        // The escape valve: anchoring to the parent changelog cannot escape its directory,
+        // so the gate does not fire even with the strictest flag setting.
+        when:
+        Scope.child(["liquibase.allowExternalChangelogPaths": "false"] as Map, {
+            DatabaseChangeLog.requireRelativeChangelogPathOrThrow("classpath:/foo.xml", true, "include")
+            DatabaseChangeLog.requireRelativeChangelogPathOrThrow("/etc/passwd.xml", true, "include")
+            DatabaseChangeLog.requireRelativeChangelogPathOrThrow("C:/file.xml", true, "include")
+        } as Scope.ScopedRunner)
+
+        then:
+        noExceptionThrown()
+    }
+
+    @Unroll
+    def "requireRelativeChangelogPathOrThrow throws SetupException with the configured-off message at flag=false for #path"() {
+        given:
+        SetupException caught = null
+
+        when:
+        Scope.child(["liquibase.allowExternalChangelogPaths": "false"] as Map, {
+            try {
+                DatabaseChangeLog.requireRelativeChangelogPathOrThrow(path, false, "include")
+            } catch (SetupException e) {
+                caught = e
+            }
+        } as Scope.ScopedRunner)
+
+        then:
+        caught != null
+        def message = caught.getMessage()
+        message.contains("liquibase.allowExternalChangelogPaths=false")
+        message.contains("liquibase.allowExternalChangelogPaths=true")
+        message.contains("include")
+        message.contains(path)
+        message.contains("NOT resolved")
+
+        where:
+        path << ["classpath:/foo.xml", "/etc/passwd.xml", "C:/file.xml", "\\\\server\\share\\file.xml"]
+    }
+
+    def "handleInclude parser-path: changelog with include[file=classpath:/foo.xml] is rejected when allowExternalChangelogPaths=false"() {
+        given:
+        def resourceAccessor = new MockResourceAccessor([:])
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        Throwable caught = null
+
+        when:
+        Scope.child(["liquibase.allowExternalChangelogPaths": "false"] as Map, {
+            try {
+                rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                        .addChildren([include: [file: "classpath:/db/changelog/master.xml"]]),
+                        resourceAccessor)
+            } catch (Throwable t) {
+                caught = t
+            }
+        } as Scope.ScopedRunner)
+
+        then:
+        caught != null
+        def message = (caught.getCause() != null ? caught.getCause().getMessage() : caught.getMessage()) ?: caught.toString()
+        message.contains("liquibase.allowExternalChangelogPaths=false")
+        message.contains("classpath:")
+    }
+
+    def "handleIncludeAll parser-path: changelog with includeAll[path=/etc/...] is rejected when allowExternalChangelogPaths=false"() {
+        given:
+        def resourceAccessor = new MockResourceAccessor([:])
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        Throwable caught = null
+
+        when:
+        Scope.child(["liquibase.allowExternalChangelogPaths": "false"] as Map, {
+            try {
+                rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                        .addChildren([includeAll: [path: "/etc/changelogs"]]),
+                        resourceAccessor)
+            } catch (Throwable t) {
+                caught = t
+            }
+        } as Scope.ScopedRunner)
+
+        then:
+        caught != null
+        def message = (caught.getCause() != null ? caught.getCause().getMessage() : caught.getMessage()) ?: caught.toString()
+        message.contains("liquibase.allowExternalChangelogPaths=false")
+        message.contains("absolute filesystem path")
+        message.contains("includeAll")
+    }
+
+    def "handleInclude parser-path: relative path is accepted even when allowExternalChangelogPaths=false (gate does not over-reach)"() {
+        // Sanity that the gate doesn't over-reach: normal relative paths pass through
+        // regardless of the flag value, so existing changelogs continue to work.
+        given:
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml])
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
+        rootChangeLog.getChangeLogParameters().set("loginUser", "testUser")
+
+        when:
+        Scope.child(["liquibase.allowExternalChangelogPaths": "false"] as Map, {
+            rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                    .addChildren([include: [file: "com/example/test1.xml"]]),
+                    resourceAccessor)
+        } as Scope.ScopedRunner)
+
+        then:
+        // No throw. The relative path resolves normally and the included changelog loads.
+        noExceptionThrown()
+        rootChangeLog.changeSets.size() > 0
+    }
+
 }

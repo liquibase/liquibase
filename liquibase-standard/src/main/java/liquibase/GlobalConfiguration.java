@@ -55,6 +55,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> SECURE_PARSING;
     public static final ConfigurationDefinition<Boolean> ALLOW_CUSTOM_CHANGE;
     public static final ConfigurationDefinition<Boolean> ALLOW_EXECUTE_COMMAND;
+    public static final ConfigurationDefinition<Boolean> ALLOW_EXTERNAL_CHANGELOG_PATHS;
     public static final ConfigurationDefinition<Boolean> ALLOW_PARENT_DIRECTORY_REFERENCES;
     public static final ConfigurationDefinition<String> SEARCH_PATH;
 
@@ -248,6 +249,28 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                         "that execute changelogs from less-trusted sources (multi-tenant SaaS running customer " +
                         "changelogs, downloaded change-packs, contributor PRs prior to review) where arbitrary " +
                         "OS-shell execution via changelog is not an acceptable risk (CWE-78).")
+                .setDefaultValue(true)
+                .build();
+
+        ALLOW_EXTERNAL_CHANGELOG_PATHS = builder.define("allowExternalChangelogPaths", Boolean.class)
+                .setDescription("If false, the include / includeAll / sqlFile changelog directives reject " +
+                        "paths that point outside the configured ResourceAccessor search-path scope — " +
+                        "specifically: the 'classpath:' URI prefix, and absolute filesystem paths (leading " +
+                        "'/', leading '\\\\' UNC, or Windows drive-letter '<L>:'). Defaults to true to " +
+                        "preserve the documented behaviour for the standard trust model, including " +
+                        "common deployments like Spring Boot apps that load 'classpath:db/changelog/...' " +
+                        "from JAR resources. Set to false in environments that execute changelogs from " +
+                        "less-trusted sources (multi-tenant SaaS, downloaded change-packs, contributor " +
+                        "PRs prior to review): the audit observed that an attacker who can write a file " +
+                        "anywhere on the ResourceAccessor search path (which by default in the CLI " +
+                        "includes the current working directory) can then name it in a changelog " +
+                        "include / sqlFile and get it parsed and executed. Restricting changelog paths " +
+                        "to relative-only-within-search-path (this flag set to false) is a defence-" +
+                        "in-depth mitigation; tightly-controlled search-path configuration alone also " +
+                        "mitigates the issue. The flag's enforcement is bypassed for any include / " +
+                        "includeAll / sqlFile that uses relativeToChangelogFile=true (the path is " +
+                        "resolved relative to the parent changelog and cannot escape its directory) " +
+                        "(CWE-22).")
                 .setDefaultValue(true)
                 .build();
 
