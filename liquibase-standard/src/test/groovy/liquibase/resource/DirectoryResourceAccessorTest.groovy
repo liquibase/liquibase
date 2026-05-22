@@ -31,7 +31,7 @@ class DirectoryResourceAccessorTest extends Specification {
 
         then:
         streams.size() == 1
-        StreamUtil.readStreamAsString(streams.getFirst().getValue()).contains(expected)
+        StreamUtil.readStreamAsString(streams.getFirst()).contains(expected)
         StreamUtil.readStreamAsString(stream).contains(expected)
 
         where:
