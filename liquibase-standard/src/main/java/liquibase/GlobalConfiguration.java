@@ -56,6 +56,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
     public static final ConfigurationDefinition<Boolean> ALLOW_CUSTOM_CHANGE;
     public static final ConfigurationDefinition<Boolean> ALLOW_EXECUTE_COMMAND;
     public static final ConfigurationDefinition<Boolean> ALLOW_PARENT_DIRECTORY_REFERENCES;
+    public static final ConfigurationDefinition<Boolean> ALLOW_SQL_PRECONDITION;
     public static final ConfigurationDefinition<String> SEARCH_PATH;
 
     public static final ConfigurationDefinition<UIServiceEnum> UI_SERVICE;
@@ -265,6 +266,24 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                         "window; a future major release will flip the default to false, at which point " +
                         "callers depending on parent-directory traversal must either restructure their " +
                         "layout or explicitly opt in via this flag (CWE-22).")
+                .setDefaultValue(true)
+                .build();
+
+        ALLOW_SQL_PRECONDITION = builder.define("allowSqlPrecondition", Boolean.class)
+                .setDescription("If false, the sqlCheck changelog precondition is rejected at validation " +
+                        "and check time without executing its SQL body. Defaults to true to preserve the " +
+                        "documented sqlCheck feature for the standard trust model (team-authored, team-" +
+                        "reviewed changelogs). Set to false in environments that execute changelogs from " +
+                        "less-trusted sources (multi-tenant SaaS running customer changelogs, downloaded " +
+                        "change-packs, contributor PRs prior to review): sqlCheck runs the literal SQL body " +
+                        "from the changelog against the live JDBC connection during precondition " +
+                        "evaluation, before the change body is reached. On drivers permitting multi-" +
+                        "statement execution (e.g. MySQL/MariaDB with allowMultiQueries=true), additional " +
+                        "DDL or DML can be batched into the sqlCheck body and run regardless of the " +
+                        "expectedResult comparison; the SQL also executes through a less-reviewed code " +
+                        "path that bypasses the change-execution audit trail, and an onFail=MARK_RAN " +
+                        "precondition can hide the change body from being applied while the precondition " +
+                        "SQL has already run (CWE-89).")
                 .setDefaultValue(true)
                 .build();
 
