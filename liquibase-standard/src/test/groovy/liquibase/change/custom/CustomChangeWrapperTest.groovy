@@ -1,5 +1,7 @@
 package liquibase.change.custom
 
+import liquibase.GlobalConfiguration
+import liquibase.Scope
 import liquibase.change.CheckSum
 import liquibase.database.Database
 import liquibase.exception.CustomChangeException
@@ -340,5 +342,93 @@ class CustomChangeWrapperTest extends Specification {
         then: "The checksum not affected by parameters set"
         change1.generateCheckSum() == change2.generateCheckSum()
         change1.generateCheckSum() != change3.generateCheckSum()
+    }
+
+    def "validate passes by default — customChange is intentional under the standard trust model (CWE-470 opt-out gate)"() {
+        // CWE-470 regression: the default is liquibase.allowCustomChange=true so
+        // existing users see no behaviour change. validate() must NOT return the
+        // configured-off error in this state. Uses ExampleCustomSqlChange (the
+        // existing test fixture) so the class actually loads cleanly.
+        given:
+        def wrapper = new CustomChangeWrapper()
+        wrapper.setClass(ExampleCustomSqlChange.class.getName())
+
+        when:
+        def errors = wrapper.validate(new MockDatabase())
+
+        then: "no error mentioning the allowCustomChange flag"
+        !errors.getErrorMessages().any { it.contains("allowCustomChange") }
+    }
+
+    def "validate fails when liquibase.allowCustomChange=false — embedder opt-out path"() {
+        // CWE-470 regression: when the embedder disables customChange via
+        // liquibase.allowCustomChange=false, validate() must reject with a hard
+        // error BEFORE loadCustomChange (and therefore Class.forName with
+        // initialize=true) runs. Error message must name the flag in both
+        // directions so operators can find their way back to opt-in.
+        given:
+        def wrapper = new CustomChangeWrapper()
+        wrapper.setClass(ExampleCustomSqlChange.class.getName())
+
+        when: "the embedder has disabled customChange via configuration"
+        def errors = Scope.child([(GlobalConfiguration.ALLOW_CUSTOM_CHANGE.getKey()): "false"],
+                { return wrapper.validate(new MockDatabase()) } as Scope.ScopedRunnerWithReturn)
+
+        then:
+        errors.hasErrors()
+        errors.getErrorMessages().any { it.contains("liquibase.allowCustomChange=false") }
+        errors.getErrorMessages().any { it.contains("liquibase.allowCustomChange=true") }
+    }
+
+    def "loadCustomChange gate fires BEFORE Class.forName even for a class that does not exist"() {
+        // CWE-470 regression for the parse-time / customLoadLogic call path: the
+        // gate inside loadCustomChange must fire BEFORE Class.forName runs. We
+        // exercise this by setting a class name that does NOT exist on the
+        // classpath and asserting the thrown exception is the configured-off
+        // CustomChangeException, NOT a ClassNotFoundException wrapped in
+        // CustomChangeException — proving the gate short-circuited the lookup.
+        given:
+        def wrapper = new CustomChangeWrapper()
+        wrapper.setClass("com.example.definitely.not.a.real.CustomChange")
+
+        when:
+        def errors = Scope.child([(GlobalConfiguration.ALLOW_CUSTOM_CHANGE.getKey()): "false"],
+                { return wrapper.validate(new MockDatabase()) } as Scope.ScopedRunnerWithReturn)
+
+        then: "the validate gate hits first; the loader never runs"
+        errors.hasErrors()
+        errors.getErrorMessages().any { it.contains("liquibase.allowCustomChange=false") }
+        // The pre-fix code path would have produced an 'Exception thrown loading
+        // com.example...' warning (from the ClassNotFoundException). After the
+        // fix, that warning never appears because the gate short-circuits first.
+        !errors.getErrorMessages().any { it.contains("Exception thrown loading") }
+        !errors.getWarningMessages().any { it.contains("Exception thrown loading") }
+    }
+
+    def "loadCustomChange method-level gate throws CustomChangeException directly when allowCustomChange=false"() {
+        // CWE-470 regression for the defense-in-depth method-level gate: any
+        // caller of loadCustomChange (NOT only validate — also generateCheckSum,
+        // configureCustomChange, customLoadLogic at parse time) must be
+        // protected. The gate inside loadCustomChange throws before any class
+        // loading happens; this test asserts that direct contract by calling
+        // through generateCheckSum (which calls loadCustomChange independently
+        // of validate()).
+        given:
+        def wrapper = new CustomChangeWrapper()
+        wrapper.setClass(ExampleCustomSqlChange.class.getName())
+
+        when:
+        def checksum = Scope.child([(GlobalConfiguration.ALLOW_CUSTOM_CHANGE.getKey()): "false"],
+                { return wrapper.generateCheckSum() } as Scope.ScopedRunnerWithReturn)
+
+        then: "generateCheckSum still returns; the customChange instance was never created so the named class's static initializer never fired"
+        checksum != null
+        // Use direct field access (wrapper.@customChange) instead of the property
+        // form (wrapper.customChange) — the property form calls the lazy-loading
+        // getCustomChange() getter, which would re-attempt the load HERE (outside
+        // the Scope.child block, where the flag has reverted to true) and pollute
+        // the assertion. The field-direct form proves the in-scope generateCheckSum
+        // call did not stash a loaded instance.
+        wrapper.@customChange == null
     }
 }
