@@ -103,6 +103,26 @@ public class ExecuteShellCommandChange extends AbstractChange {
     @Override
     public ValidationErrors validate(Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
+
+        // CWE-78 defense-in-depth gate: if the embedder has disabled executeCommand
+        // via liquibase.allowExecuteCommand=false, reject the change at validation
+        // time so the bad change is caught BEFORE ProcessBuilder.start() runs. The
+        // default is true, which preserves the documented feature for the standard
+        // Liquibase trust model (team-authored, team-reviewed changelogs). The
+        // opt-out exists for hosts that execute changelogs from less-trusted
+        // sources (multi-tenant SaaS running customer changelogs, downloaded
+        // change-packs, contributor PRs prior to review) — see the description on
+        // GlobalConfiguration.ALLOW_EXECUTE_COMMAND for the full threat model.
+        if (Boolean.FALSE.equals(GlobalConfiguration.ALLOW_EXECUTE_COMMAND.getCurrentValue())) {
+            validationErrors.addError(
+                    "executeCommand change is disabled by configuration " +
+                            "(liquibase.allowExecuteCommand=false). To run shell commands via changelog, " +
+                            "set liquibase.allowExecuteCommand=true (the default). This flag is provided " +
+                            "for environments that execute changelogs from less-trusted sources, where " +
+                            "arbitrary OS-shell execution via changelog is not an acceptable risk.");
+            return validationErrors;
+        }
+
         if (!StringUtils.isEmpty(timeout)) {
             // check for the timeout values, accept only positive value with one letter unit (s/m/h)
             Matcher matcher = TIMEOUT_PATTERN.matcher(timeout);
