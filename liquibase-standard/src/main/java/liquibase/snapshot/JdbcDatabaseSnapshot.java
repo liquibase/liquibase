@@ -1348,12 +1348,60 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return executeAndExtract(database, sql, parameters.toArray());
                 }
 
-                private List<CachedRow> queryPostgres(CatalogAndSchema catalogAndSchema, String tableName) throws SQLException {
+                private List<CachedRow> queryPostgres(CatalogAndSchema catalogAndSchema, String tableName) throws SQLException, DatabaseException {
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, escapeForLike(schema, database), ((tableName == null) ?
+                    List<CachedRow> rows = extract(databaseMetaData.getTables(catalog, escapeForLike(schema, database), ((tableName == null) ?
                             SQL_FILTER_MATCH_ALL : escapeForLike(tableName, database)), new String[]{"TABLE", "PARTITIONED TABLE"}));
+                    enrichPostgresqlTablesResult(catalogAndSchema, tableName, rows);
+                    return rows;
+                }
 
+                /**
+                 * Postgres-side enrichment that backfills a {@code PARTITION_BY} column onto each
+                 * row in {@code rows} whose parent table is declaratively partitioned
+                 * ({@code pg_class.relkind = 'p'}). The string stored is whatever
+                 * {@link } returns — verbatim, valid PostgreSQL syntax for the right-hand
+                 * side of a {@code PARTITION BY} clause. JDBC's {@code DatabaseMetaData.getTables}
+                 * already lists partitioned-table rows (via {@code TABLE_TYPE = 'PARTITIONED TABLE'})
+                 * but does not expose the partition strategy or key columns, so this enrichment is
+                 * the only path by which {@link liquibase.snapshot.jvm.TableSnapshotGenerator}
+                 * can recover that information.
+                 *
+                 * <p>Mirrors the index-USING enrichment added in PR #6901 (which lives in the
+                 * {@code getIndexInfo} extractor in this same file).
+                 */
+                private void enrichPostgresqlTablesResult(CatalogAndSchema catalogAndSchema, String tableName, List<CachedRow> rows) throws DatabaseException, SQLException {
+                    if (!(database instanceof PostgresDatabase) || rows.isEmpty()) {
+                        return;
+                    }
+                    String schemaName = database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class);
+                    StringBuilder sql = new StringBuilder(
+                            "SELECT ns.nspname AS TABLE_SCHEM, " +
+                            "       c.relname AS TABLE_NAME, " +
+                            "       pg_get_partkeydef(c.oid) AS PARTITION_BY " +
+                            "FROM pg_class c " +
+                            "JOIN pg_namespace ns ON ns.oid = c.relnamespace " +
+                            "JOIN pg_partitioned_table pt ON pt.partrelid = c.oid " +
+                            "WHERE c.relkind = 'p'");
+                    if (schemaName != null) {
+                        sql.append(" AND ns.nspname = '").append(database.escapeStringForDatabase(schemaName)).append("'");
+                    }
+                    if (tableName != null) {
+                        sql.append(" AND c.relname = '").append(database.escapeStringForDatabase(tableName)).append("'");
+                    }
+                    List<CachedRow> partitionRows = executeAndExtract(sql.toString(), database);
+                    for (CachedRow source : partitionRows) {
+                        for (CachedRow target : rows) {
+                            String tName = target.getString("TABLE_NAME");
+                            String tSchem = target.getString("TABLE_SCHEM");
+                            if (tName != null && tName.equalsIgnoreCase(source.getString("TABLE_NAME"))
+                                    && tSchem != null && tSchem.equalsIgnoreCase(source.getString("TABLE_SCHEM"))) {
+                                target.set("PARTITION_BY", source.getString("PARTITION_BY"));
+                                break;
+                            }
+                        }
+                    }
                 }
             });
         }
