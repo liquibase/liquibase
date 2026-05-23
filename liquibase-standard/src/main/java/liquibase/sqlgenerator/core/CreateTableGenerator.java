@@ -6,6 +6,7 @@ import liquibase.database.core.*;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -37,6 +38,15 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             }
         }
         return validationErrors;
+    }
+
+    @Override
+    public Warnings warn(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        Warnings warnings = super.warn(statement, database, sqlGeneratorChain);
+        if (!(database instanceof PostgresDatabase) && statement.getPartitionBy() != null) {
+            warnings.addWarning("partitionBy clause is only supported on PostgreSQL; " + database + " will silently ignore it");
+        }
+        return warnings;
     }
 
     @Override
@@ -353,6 +363,10 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             } else {
                 sql += " TABLESPACE " + statement.getTablespace();
             }
+        }
+
+        if (database instanceof PostgresDatabase && statement.getPartitionBy() != null) {
+            sql += " PARTITION BY " + statement.getPartitionBy();
         }
 
         if ((database instanceof MySQLDatabase) && (statement.getRemarks() != null)) {
