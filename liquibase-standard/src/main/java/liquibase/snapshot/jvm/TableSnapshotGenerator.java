@@ -3,6 +3,7 @@ package liquibase.snapshot.jvm;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -90,6 +91,15 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
         table.setRemarks(remarks);
         table.setTablespace(tablespace);
         table.setDefaultTablespace(BooleanUtil.isTrue(Boolean.parseBoolean(defaultTablespaceString)));
+
+        if (database instanceof PostgresDatabase) {
+            // PARTITION_BY is stamped onto the row by JdbcDatabaseSnapshot.enrichPostgresqlTablesResult
+            // (pg_get_partkeydef on pg_partitioned_table) for relkind='p' parent tables.
+            String partitionBy = StringUtil.trimToNull(tableMetadataResultSet.getString("PARTITION_BY"));
+            if (partitionBy != null) {
+                table.setPartitionBy(partitionBy);
+            }
+        }
 
         CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
         table.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
