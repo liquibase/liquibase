@@ -1361,8 +1361,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                  * Postgres-side enrichment that backfills a {@code PARTITION_BY} column onto each
                  * row in {@code rows} whose parent table is declaratively partitioned
                  * ({@code pg_class.relkind = 'p'}). The string stored is whatever
-                 * {@link } returns — verbatim, valid PostgreSQL syntax for the right-hand
-                 * side of a {@code PARTITION BY} clause. JDBC's {@code DatabaseMetaData.getTables}
+                 * {@code pg_get_partkeydef(oid)} returns — verbatim, valid PostgreSQL syntax for
+                 * the right-hand side of a {@code PARTITION BY} clause. JDBC's {@code DatabaseMetaData.getTables}
                  * already lists partitioned-table rows (via {@code TABLE_TYPE = 'PARTITIONED TABLE'})
                  * but does not expose the partition strategy or key columns, so this enrichment is
                  * the only path by which {@link liquibase.snapshot.jvm.TableSnapshotGenerator}
