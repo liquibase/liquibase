@@ -1372,7 +1372,16 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                  * {@code getIndexInfo} extractor in this same file).
                  */
                 private void enrichPostgresqlTablesResult(CatalogAndSchema catalogAndSchema, String tableName, List<CachedRow> rows) throws DatabaseException, SQLException {
-                    if (!(database instanceof PostgresDatabase) || rows.isEmpty()) {
+                    // CockroachDatabase extends PostgresDatabase but does not expose pg_partitioned_table /
+                    // pg_get_partkeydef as standard PG-compatible catalogs (Cockroach has its own partitioning
+                    // model). Exclude it explicitly so the enrichment query doesn't fail the entire snapshot
+                    // on a Cockroach target. Reported by CodeRabbit on PR #7759.
+                    // (Note: the index-USING enrichment a few methods up in this file has the identical guard
+                    // gap — same root cause, same fix-shape. Out of scope for #6885; should land as a separate
+                    // follow-up PR against the getIndexInfo extractor.)
+                    if (!(database instanceof PostgresDatabase)
+                            || (database instanceof CockroachDatabase)
+                            || rows.isEmpty()) {
                         return;
                     }
                     String schemaName = database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class);

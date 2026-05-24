@@ -497,6 +497,9 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
     @Test
     public void testSnapshotPartitionedTableCapturesPartitionBy() throws Exception {
         assumeNotNull(this.getDatabase());
+        // Declarative partitioning syntax (PARTITION BY) requires PostgreSQL 10+.
+        // Matches the version-guard pattern used elsewhere in this file. Suggested by CodeRabbit on PR #7759.
+        assumeTrue(getDatabase().getDatabaseMajorVersion() >= 10);
         Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                 .execute(new RawParameterizedSqlStatement(
                         "CREATE TABLE part_test (id BIGINT, sold_at DATE NOT NULL) PARTITION BY RANGE (sold_at)"));

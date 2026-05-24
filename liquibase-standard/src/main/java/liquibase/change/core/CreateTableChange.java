@@ -37,6 +37,7 @@ import liquibase.structure.core.Table;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Creates a new table.
@@ -193,8 +194,11 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     protected CreateTableStatement generateCreateTableStatement() {
+        // Trim-to-null on partitionBy mirrors how tablespace is normalized below in generateStatements;
+        // prevents a whitespace-only attribute from being forwarded into the SQL generator and emitting
+        // an invalid trailing "PARTITION BY ". Reported by CodeRabbit on PR #7759.
         return new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(), getRemarks(), getTableType(), Boolean.TRUE.equals(getIfNotExists()), Boolean.TRUE.equals(getRowDependencies()))
-                .setPartitionBy(getPartitionBy());
+                .setPartitionBy(StringUtils.trimToNull(getPartitionBy()));
     }
 
     @Override
