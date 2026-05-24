@@ -365,8 +365,12 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             }
         }
 
-        if (database instanceof PostgresDatabase && statement.getPartitionBy() != null) {
-            sql += " PARTITION BY " + statement.getPartitionBy();
+        // Defense-in-depth even though CreateTableChange.generateCreateTableStatement already
+        // trims-to-null: a CreateTableStatement constructed programmatically (or by a future change-
+        // type) could still arrive with whitespace-only partitionBy. Reported by CodeRabbit on PR #7759.
+        String partitionBy = StringUtils.trimToNull(statement.getPartitionBy());
+        if (database instanceof PostgresDatabase && partitionBy != null) {
+            sql += " PARTITION BY " + partitionBy;
         }
 
         if ((database instanceof MySQLDatabase) && (statement.getRemarks() != null)) {

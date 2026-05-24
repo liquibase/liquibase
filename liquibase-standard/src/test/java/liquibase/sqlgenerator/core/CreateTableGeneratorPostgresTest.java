@@ -32,6 +32,23 @@ public class CreateTableGeneratorPostgresTest {
     }
 
     @Test
+    public void testGenerateSqlNormalizesBlankPartitionByToNull() {
+        // Whitespace-only partitionBy must not emit a stray "PARTITION BY " — confirmed by
+        // the trim-to-null guard added in response to CodeRabbit on PR #7759.
+        for (String blank : new String[]{"", " ", "   ", "\t", "\n", " \n\t "}) {
+            CreateTableStatement statement = new CreateTableStatement(null, "public", "blank_tbl")
+                    .setPartitionBy(blank);
+            statement.addColumn("id", new IntType());
+
+            Sql[] result = new CreateTableGenerator().generateSql(statement, new PostgresDatabase(), null);
+
+            Assert.assertFalse("blank partitionBy (\"" + blank.replace("\n", "\\n").replace("\t", "\\t")
+                            + "\") must not emit PARTITION BY: " + result[0].toSql(),
+                    result[0].toSql().contains("PARTITION BY"));
+        }
+    }
+
+    @Test
     public void testGenerateSqlWithoutPartitionByOnPostgresProducesPlainCreateTable() {
         // Given a statement with NO partitionBy
         CreateTableStatement statement = new CreateTableStatement(null, "public", "plain_tbl");
