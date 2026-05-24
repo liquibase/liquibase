@@ -47,6 +47,64 @@ public class CreateTableGeneratorPostgresTest {
     }
 
     @Test
+    public void testGenerateSqlEmitsVerbatimForMultiColumnRangeKey() {
+        // pg_get_partkeydef returns multi-column keys as "RANGE (a, b)"; must round-trip verbatim.
+        CreateTableStatement statement = new CreateTableStatement(null, "public", "multi_col_part")
+                .setPartitionBy("RANGE (a, b)");
+        statement.addColumn("a", new IntType());
+        statement.addColumn("b", new IntType());
+
+        Sql[] result = new CreateTableGenerator().generateSql(statement, new PostgresDatabase(), null);
+
+        Assert.assertEquals(
+                "CREATE TABLE public.multi_col_part (a INTEGER, b INTEGER) PARTITION BY RANGE (a, b)",
+                result[0].toSql()
+        );
+    }
+
+    @Test
+    public void testGenerateSqlEmitsVerbatimForFunctionalKey() {
+        // Functional partition keys (RANGE (lower(email))) must pass through unchanged — we trust
+        // pg_get_partkeydef output rather than parsing/reformatting it.
+        CreateTableStatement statement = new CreateTableStatement(null, "public", "func_part")
+                .setPartitionBy("RANGE (lower(email))");
+        statement.addColumn("email", new IntType()); // type doesn't matter for this assertion
+
+        Sql[] result = new CreateTableGenerator().generateSql(statement, new PostgresDatabase(), null);
+
+        Assert.assertTrue("expected PARTITION BY RANGE (lower(email)); got: " + result[0].toSql(),
+                result[0].toSql().endsWith("PARTITION BY RANGE (lower(email))"));
+    }
+
+    @Test
+    public void testGenerateSqlEmitsVerbatimForQuotedIdentifier() {
+        // Case-sensitive identifiers are emitted by pg_get_partkeydef with double quotes preserved.
+        CreateTableStatement statement = new CreateTableStatement(null, "public", "quoted_part")
+                .setPartitionBy("RANGE (\"MixedCaseCol\")");
+        statement.addColumn("MixedCaseCol", new IntType());
+
+        Sql[] result = new CreateTableGenerator().generateSql(statement, new PostgresDatabase(), null);
+
+        Assert.assertTrue("quoted identifier must survive verbatim; got: " + result[0].toSql(),
+                result[0].toSql().endsWith("PARTITION BY RANGE (\"MixedCaseCol\")"));
+    }
+
+    @Test
+    public void testGenerateSqlEmitsListAndHashStrategiesVerbatim() {
+        // LIST and HASH strategies (alongside RANGE) all round-trip identically.
+        for (String spec : new String[]{"LIST (region)", "HASH (user_id)"}) {
+            CreateTableStatement statement = new CreateTableStatement(null, "public", "tbl")
+                    .setPartitionBy(spec);
+            statement.addColumn("c", new IntType());
+
+            Sql[] result = new CreateTableGenerator().generateSql(statement, new PostgresDatabase(), null);
+
+            Assert.assertTrue("expected ... PARTITION BY " + spec + "; got: " + result[0].toSql(),
+                    result[0].toSql().endsWith("PARTITION BY " + spec));
+        }
+    }
+
+    @Test
     public void testWarnEmittedForPartitionByOnNonPostgresDatabase() {
         // Given a statement with partitionBy targeting a non-Postgres database
         CreateTableStatement statement = new CreateTableStatement(null, "public", "tbl")

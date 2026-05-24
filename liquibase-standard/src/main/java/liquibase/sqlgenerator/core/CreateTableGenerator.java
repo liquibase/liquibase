@@ -44,7 +44,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
     public Warnings warn(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         Warnings warnings = super.warn(statement, database, sqlGeneratorChain);
         if (!(database instanceof PostgresDatabase) && statement.getPartitionBy() != null) {
-            warnings.addWarning("partitionBy clause is only supported on PostgreSQL; " + database + " will silently ignore it");
+            warnings.addWarning("partitionBy is only supported on PostgreSQL; the clause will be dropped from the generated SQL for " + database);
         }
         return warnings;
     }
