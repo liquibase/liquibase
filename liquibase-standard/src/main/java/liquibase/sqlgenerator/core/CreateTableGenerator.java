@@ -355,6 +355,19 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             sql += " " + ((MySQLDatabase) database).getTableOptionAutoIncrementStartWithClause(mysqlTableOptionStartWith);
         }
 
+        // PARTITION BY must come BEFORE TABLESPACE per PostgreSQL grammar:
+        //   (columns) [PARTITION BY ...] [USING ...] [WITH ...] [ON COMMIT ...] [TABLESPACE ...]
+        // Emitting them in the reverse order causes a syntax error when both are set on the same
+        // statement. Flagged by @filipelautert on PR #7759.
+        //
+        // Defense-in-depth even though CreateTableChange.generateCreateTableStatement already
+        // trims-to-null: a CreateTableStatement constructed programmatically (or by a future change-
+        // type) could still arrive with whitespace-only partitionBy. Reported by CodeRabbit on PR #7759.
+        String partitionBy = StringUtils.trimToNull(statement.getPartitionBy());
+        if (database instanceof PostgresDatabase && partitionBy != null) {
+            sql += " PARTITION BY " + partitionBy;
+        }
+
         if ((statement.getTablespace() != null) && database.supportsTablespaces()) {
             if ((database instanceof MSSQLDatabase) || (database instanceof SybaseASADatabase)) {
                 sql += " ON " + database.escapeTablespaceName(statement.getTablespace());
@@ -363,14 +376,6 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             } else {
                 sql += " TABLESPACE " + statement.getTablespace();
             }
-        }
-
-        // Defense-in-depth even though CreateTableChange.generateCreateTableStatement already
-        // trims-to-null: a CreateTableStatement constructed programmatically (or by a future change-
-        // type) could still arrive with whitespace-only partitionBy. Reported by CodeRabbit on PR #7759.
-        String partitionBy = StringUtils.trimToNull(statement.getPartitionBy());
-        if (database instanceof PostgresDatabase && partitionBy != null) {
-            sql += " PARTITION BY " + partitionBy;
         }
 
         if ((database instanceof MySQLDatabase) && (statement.getRemarks() != null)) {
