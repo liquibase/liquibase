@@ -122,6 +122,33 @@ public class CreateTableGeneratorPostgresTest {
     }
 
     @Test
+    public void testGenerateSqlEmitsPartitionByBeforeTablespace() {
+        // Per Postgres grammar:
+        //   (columns) [PARTITION BY ...] [USING ...] [WITH ...] [ON COMMIT ...] [TABLESPACE ...]
+        // The PARTITION BY clause must precede the TABLESPACE clause when both are present.
+        // Regression guard for @filipelautert's review on PR #7759.
+        CreateTableStatement statement = new CreateTableStatement(null, "public", "part_with_ts")
+                .setPartitionBy("RANGE (created_at)")
+                .setTablespace("my_ts");
+        statement.addColumn("id", new IntType());
+        statement.addColumn("created_at", new IntType());
+
+        Sql[] result = new CreateTableGenerator().generateSql(statement, new PostgresDatabase(), null);
+
+        String sql = result[0].toSql();
+        Assert.assertEquals(
+                "CREATE TABLE public.part_with_ts (id INTEGER, created_at INTEGER) PARTITION BY RANGE (created_at) TABLESPACE my_ts",
+                sql
+        );
+        // Defensive: verify both clauses present in the right order, in case the exact-string
+        // assertion drifts on whitespace in the future.
+        int partIdx = sql.indexOf("PARTITION BY");
+        int tsIdx = sql.indexOf("TABLESPACE");
+        Assert.assertTrue("PARTITION BY must appear before TABLESPACE; got: " + sql,
+                partIdx > 0 && tsIdx > 0 && partIdx < tsIdx);
+    }
+
+    @Test
     public void testWarnEmittedForPartitionByOnNonPostgresDatabase() {
         // Given a statement with partitionBy targeting a non-Postgres database
         CreateTableStatement statement = new CreateTableStatement(null, "public", "tbl")
