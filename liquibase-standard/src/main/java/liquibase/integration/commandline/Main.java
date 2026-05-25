@@ -1809,6 +1809,8 @@ public class Main {
 
         this.setDatabaseArgumentsToCommand(generateChangelogCommand);
         this.setPreCompareArgumentsToCommand(generateChangelogCommand);
+
+        generateChangelogCommandq.execute();
     }
 
     private void runDiffChangelogCommandStep() throws CommandExecutionException, CommandLineParsingException, IOException {
