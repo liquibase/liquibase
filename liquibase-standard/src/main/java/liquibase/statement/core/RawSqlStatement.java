@@ -1,13 +1,12 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.ReturningSqlStatement;
 
 /**
  * @deprecated use {@link RawParameterizedSqlStatement}
  */
 @Deprecated
-public class RawSqlStatement extends AbstractSqlStatement {
-
+public class RawSqlStatement extends ReturningSqlStatement {
     private final String sql;
     private String endDelimiter  = ";";
 
