@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="issue-4677-bit-numeric-default" author="test">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="bit_test_table"/>
+            </not>
+        </preConditions>
+        <createTable tableName="bit_test_table">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="bit_col" type="BIT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bit_col_1" type="BIT" defaultValueNumeric="1"/>
+        </createTable>
+        <rollback>
+            <dropTable tableName="bit_test_table"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
