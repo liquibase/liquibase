@@ -21,6 +21,28 @@ Usage: liquibase [GLOBAL OPTIONS] [COMMAND] [COMMAND OPTIONS]
 Command-specific help: "liquibase <command-name> --help"
 
 Global Options
+      --allow-custom-change=PARAM
+                             If false, the customChange changelog change is
+                               rejected before its named class is loaded.
+                               Defaults to true to preserve the documented
+                               customChange feature for the standard trust
+                               model (team-authored, team-reviewed changelogs).
+                               Set to false in environments that execute
+                               changelogs from less-trusted sources
+                               (multi-tenant SaaS running customer changelogs,
+                               downloaded change-packs, contributor PRs prior
+                               to review): customChange loads an arbitrary JVM
+                               class by FQCN via Class.forName
+                               (initialize=true), which fires the class's
+                               static <clinit> initializer at load time —
+                               before any cast or marker-interface check could
+                               reject the load. Any class on the JVM classpath
+                               is reachable this way (CWE-470).
+                             DEFAULT: true
+                             (defaults file: 'liquibase.allowCustomChange',
+                               environment variable:
+                               'LIQUIBASE_ALLOW_CUSTOM_CHANGE')
+
       --allow-duplicated-changeset-identifiers=PARAM
                              Allows duplicated changeset identifiers without
                                failing Liquibase execution.
@@ -30,6 +52,25 @@ Global Options
                                environment variable:
                                'LIQUIBASE_ALLOW_DUPLICATED_CHANGESET_IDENTIFIERS
                                ')
+
+      --allow-execute-command=PARAM
+                             If false, the executeCommand changelog change is
+                               rejected at validation time with a clear error
+                               instead of being allowed to invoke an OS shell
+                               command. Defaults to true to preserve the
+                               documented executeCommand feature for the
+                               standard trust model (team-authored,
+                               team-reviewed changelogs). Set to false in
+                               environments that execute changelogs from
+                               less-trusted sources (multi-tenant SaaS running
+                               customer changelogs, downloaded change-packs,
+                               contributor PRs prior to review) where arbitrary
+                               OS-shell execution via changelog is not an
+                               acceptable risk (CWE-78).
+                             DEFAULT: true
+                             (defaults file: 'liquibase.allowExecuteCommand',
+                               environment variable:
+                               'LIQUIBASE_ALLOW_EXECUTE_COMMAND')
 
       --allow-inherit-logical-file-path=PARAM
                              If true, included changelogs without an explicit
@@ -48,6 +89,36 @@ Global Options
                                allowInheritLogicalFilePath', environment
                                variable:
                                'LIQUIBASE_ALLOW_INHERIT_LOGICAL_FILE_PATH')
+
+      --allow-parent-directory-references=PARAM
+                             If true (the default),
+                               AbstractPathResourceAccessor allows path
+                               payloads containing '..' segments and symbolic
+                               links that resolve outside the configured root
+                               directory. This preserves the behaviour that
+                               existed before the CWE-22 path-containment fix
+                               landed, for legitimate multi-changelog layouts
+                               that depend on parent-directory traversal — for
+                               example a shared 'dbarepo' at the project root
+                               referenced as '../shared/foo.xml' from
+                               per-environment changelogs underneath it, or a
+                               custom-check SCRIPT_PATH like '../checks/policy.
+                               py'. Set to false to enforce strict containment:
+                               any '..' that resolves outside the accessor
+                               root, or any symbolic link whose canonical real
+                               path escapes the canonical root, is rejected
+                               with IOException. The default is true for one
+                               major release as a deprecation window; a future
+                               major release will flip the default to false, at
+                               which point callers depending on
+                               parent-directory traversal must either
+                               restructure their layout or explicitly opt in
+                               via this flag (CWE-22).
+                             DEFAULT: true
+                             (defaults file: 'liquibase.
+                               allowParentDirectoryReferences', environment
+                               variable:
+                               'LIQUIBASE_ALLOW_PARENT_DIRECTORY_REFERENCES')
 
       --always-drop-instead-of-replace=PARAM
                              If true, drop and recreate a view instead of
