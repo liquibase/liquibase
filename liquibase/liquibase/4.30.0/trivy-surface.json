@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019e5ee0-6004-7914-b82a-2bd1f5879f6c",
-  "CreatedAt": "2026-05-25T11:23:43.492597334Z",
+  "ReportID": "019e6923-052b-767a-b3e6-e31d27ce2b54",
+  "CreatedAt": "2026-05-27T11:12:43.307425544Z",
   "ArtifactID": "sha256:fadf7e34e3a45ff62c9582f9e5173fdb93e0e2440cf246babed77a5b50372e0c",
   "ArtifactName": "liquibase/liquibase:4.30.0",
   "ArtifactType": "container_image",
@@ -11469,7 +11469,7 @@
             "URL": "https://git.launchpad.net/ubuntu-cve-tracker"
           },
           "Fingerprint": "sha256:4a8ee1493bfed042a5985565171e10557b6f8e7cf2d8077b1eee0bb56a8eaece",
-          "Title": "GnuPG: GnuPG: Information disclosure and potential arbitrary code execution via out-of-bounds write",
+          "Title": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments  ...",
           "Description": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments of an index variable where one is intended, leading to an out-of-bounds write for crafted input. (For ExtendedLTS, 2.2.51 and later are fixed versions.)",
           "Severity": "HIGH",
           "CweIDs": [
@@ -11484,7 +11484,6 @@
             "nvd": 3,
             "oracle-oval": 3,
             "photon": 3,
-            "redhat": 3,
             "rocky": 3,
             "ubuntu": 3
           },
@@ -11492,23 +11491,18 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H",
               "V3Score": 7
-            },
-            "redhat": {
-              "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:N",
-              "V3Score": 7.8
             }
           },
           "References": [
             "http://www.openwall.com/lists/oss-security/2025/12/29/11",
             "https://access.redhat.com/errata/RHSA-2026:0719",
-            "https://access.redhat.com/security/cve/CVE-2025-68973",
             "https://bugzilla.redhat.com/2425966",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2425966",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68973",
             "https://dev.gnupg.org/T7906",
             "https://dev.gnupg.org/T8001",
             "https://errata.almalinux.org/9/ALSA-2026-0719.html",
-            "https://errata.rockylinux.org/RLSA-2026:0719",
+            "https://errata.rockylinux.org/RLSA-2026:0697",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
@@ -11553,7 +11547,7 @@
             "URL": "https://git.launchpad.net/ubuntu-cve-tracker"
           },
           "Fingerprint": "sha256:93ec5a8a2a00178161f5263d7cba5dfb95c94d2cf0a9f733056d9937738da3d5",
-          "Title": "GnuPG: GnuPG: Information disclosure and potential arbitrary code execution via out-of-bounds write",
+          "Title": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments  ...",
           "Description": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments of an index variable where one is intended, leading to an out-of-bounds write for crafted input. (For ExtendedLTS, 2.2.51 and later are fixed versions.)",
           "Severity": "HIGH",
           "CweIDs": [
@@ -11568,7 +11562,6 @@
             "nvd": 3,
             "oracle-oval": 3,
             "photon": 3,
-            "redhat": 3,
             "rocky": 3,
             "ubuntu": 3
           },
@@ -11576,23 +11569,18 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H",
               "V3Score": 7
-            },
-            "redhat": {
-              "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:N",
-              "V3Score": 7.8
             }
           },
           "References": [
             "http://www.openwall.com/lists/oss-security/2025/12/29/11",
             "https://access.redhat.com/errata/RHSA-2026:0719",
-            "https://access.redhat.com/security/cve/CVE-2025-68973",
             "https://bugzilla.redhat.com/2425966",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2425966",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68973",
             "https://dev.gnupg.org/T7906",
             "https://dev.gnupg.org/T8001",
             "https://errata.almalinux.org/9/ALSA-2026-0719.html",
-            "https://errata.rockylinux.org/RLSA-2026:0719",
+            "https://errata.rockylinux.org/RLSA-2026:0697",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
@@ -11637,7 +11625,7 @@
             "URL": "https://git.launchpad.net/ubuntu-cve-tracker"
           },
           "Fingerprint": "sha256:9b737a27c4df826146cc80687dbc385c4ab018292640b846b981948b38291604",
-          "Title": "GnuPG: GnuPG: Information disclosure and potential arbitrary code execution via out-of-bounds write",
+          "Title": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments  ...",
           "Description": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments of an index variable where one is intended, leading to an out-of-bounds write for crafted input. (For ExtendedLTS, 2.2.51 and later are fixed versions.)",
           "Severity": "HIGH",
           "CweIDs": [
@@ -11652,7 +11640,6 @@
             "nvd": 3,
             "oracle-oval": 3,
             "photon": 3,
-            "redhat": 3,
             "rocky": 3,
             "ubuntu": 3
           },
@@ -11660,23 +11647,18 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H",
               "V3Score": 7
-            },
-            "redhat": {
-              "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:N",
-              "V3Score": 7.8
             }
           },
           "References": [
             "http://www.openwall.com/lists/oss-security/2025/12/29/11",
             "https://access.redhat.com/errata/RHSA-2026:0719",
-            "https://access.redhat.com/security/cve/CVE-2025-68973",
             "https://bugzilla.redhat.com/2425966",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2425966",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68973",
             "https://dev.gnupg.org/T7906",
             "https://dev.gnupg.org/T8001",
             "https://errata.almalinux.org/9/ALSA-2026-0719.html",
-            "https://errata.rockylinux.org/RLSA-2026:0719",
+            "https://errata.rockylinux.org/RLSA-2026:0697",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
@@ -11721,7 +11703,7 @@
             "URL": "https://git.launchpad.net/ubuntu-cve-tracker"
           },
           "Fingerprint": "sha256:9354f6feaa9ba2d21cd8216ba06d0d672f570d575569242d80dc85e10b92cbae",
-          "Title": "GnuPG: GnuPG: Information disclosure and potential arbitrary code execution via out-of-bounds write",
+          "Title": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments  ...",
           "Description": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments of an index variable where one is intended, leading to an out-of-bounds write for crafted input. (For ExtendedLTS, 2.2.51 and later are fixed versions.)",
           "Severity": "HIGH",
           "CweIDs": [
@@ -11736,7 +11718,6 @@
             "nvd": 3,
             "oracle-oval": 3,
             "photon": 3,
-            "redhat": 3,
             "rocky": 3,
             "ubuntu": 3
           },
@@ -11744,23 +11725,18 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H",
               "V3Score": 7
-            },
-            "redhat": {
-              "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:N",
-              "V3Score": 7.8
             }
           },
           "References": [
             "http://www.openwall.com/lists/oss-security/2025/12/29/11",
             "https://access.redhat.com/errata/RHSA-2026:0719",
-            "https://access.redhat.com/security/cve/CVE-2025-68973",
             "https://bugzilla.redhat.com/2425966",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2425966",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68973",
             "https://dev.gnupg.org/T7906",
             "https://dev.gnupg.org/T8001",
             "https://errata.almalinux.org/9/ALSA-2026-0719.html",
-            "https://errata.rockylinux.org/RLSA-2026:0719",
+            "https://errata.rockylinux.org/RLSA-2026:0697",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
@@ -11805,7 +11781,7 @@
             "URL": "https://git.launchpad.net/ubuntu-cve-tracker"
           },
           "Fingerprint": "sha256:6cdb1b1842db2069beca27dda49179b03b95c26fbee6638436e98cadfd866c5c",
-          "Title": "GnuPG: GnuPG: Information disclosure and potential arbitrary code execution via out-of-bounds write",
+          "Title": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments  ...",
           "Description": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments of an index variable where one is intended, leading to an out-of-bounds write for crafted input. (For ExtendedLTS, 2.2.51 and later are fixed versions.)",
           "Severity": "HIGH",
           "CweIDs": [
@@ -11820,7 +11796,6 @@
             "nvd": 3,
             "oracle-oval": 3,
             "photon": 3,
-            "redhat": 3,
             "rocky": 3,
             "ubuntu": 3
           },
@@ -11828,23 +11803,18 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H",
               "V3Score": 7
-            },
-            "redhat": {
-              "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:N",
-              "V3Score": 7.8
             }
           },
           "References": [
             "http://www.openwall.com/lists/oss-security/2025/12/29/11",
             "https://access.redhat.com/errata/RHSA-2026:0719",
-            "https://access.redhat.com/security/cve/CVE-2025-68973",
             "https://bugzilla.redhat.com/2425966",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2425966",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68973",
             "https://dev.gnupg.org/T7906",
             "https://dev.gnupg.org/T8001",
             "https://errata.almalinux.org/9/ALSA-2026-0719.html",
-            "https://errata.rockylinux.org/RLSA-2026:0719",
+            "https://errata.rockylinux.org/RLSA-2026:0697",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
@@ -11889,7 +11859,7 @@
             "URL": "https://git.launchpad.net/ubuntu-cve-tracker"
           },
           "Fingerprint": "sha256:cbe4ac898d12f1a686a69222ec6361ca8c8303cf8ea927ca7e838278a07e879a",
-          "Title": "GnuPG: GnuPG: Information disclosure and potential arbitrary code execution via out-of-bounds write",
+          "Title": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments  ...",
           "Description": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments of an index variable where one is intended, leading to an out-of-bounds write for crafted input. (For ExtendedLTS, 2.2.51 and later are fixed versions.)",
           "Severity": "HIGH",
           "CweIDs": [
@@ -11904,7 +11874,6 @@
             "nvd": 3,
             "oracle-oval": 3,
             "photon": 3,
-            "redhat": 3,
             "rocky": 3,
             "ubuntu": 3
           },
@@ -11912,23 +11881,18 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H",
               "V3Score": 7
-            },
-            "redhat": {
-              "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:N",
-              "V3Score": 7.8
             }
           },
           "References": [
             "http://www.openwall.com/lists/oss-security/2025/12/29/11",
             "https://access.redhat.com/errata/RHSA-2026:0719",
-            "https://access.redhat.com/security/cve/CVE-2025-68973",
             "https://bugzilla.redhat.com/2425966",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2425966",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68973",
             "https://dev.gnupg.org/T7906",
             "https://dev.gnupg.org/T8001",
             "https://errata.almalinux.org/9/ALSA-2026-0719.html",
-            "https://errata.rockylinux.org/RLSA-2026:0719",
+            "https://errata.rockylinux.org/RLSA-2026:0697",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
@@ -11973,7 +11937,7 @@
             "URL": "https://git.launchpad.net/ubuntu-cve-tracker"
           },
           "Fingerprint": "sha256:c3256bff867fc4e348599d9aa4e1cc95c397539173cc2ff292f441ef00a0f987",
-          "Title": "GnuPG: GnuPG: Information disclosure and potential arbitrary code execution via out-of-bounds write",
+          "Title": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments  ...",
           "Description": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments of an index variable where one is intended, leading to an out-of-bounds write for crafted input. (For ExtendedLTS, 2.2.51 and later are fixed versions.)",
           "Severity": "HIGH",
           "CweIDs": [
@@ -11988,7 +11952,6 @@
             "nvd": 3,
             "oracle-oval": 3,
             "photon": 3,
-            "redhat": 3,
             "rocky": 3,
             "ubuntu": 3
           },
@@ -11996,23 +11959,18 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H",
               "V3Score": 7
-            },
-            "redhat": {
-              "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:N",
-              "V3Score": 7.8
             }
           },
           "References": [
             "http://www.openwall.com/lists/oss-security/2025/12/29/11",
             "https://access.redhat.com/errata/RHSA-2026:0719",
-            "https://access.redhat.com/security/cve/CVE-2025-68973",
             "https://bugzilla.redhat.com/2425966",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2425966",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68973",
             "https://dev.gnupg.org/T7906",
             "https://dev.gnupg.org/T8001",
             "https://errata.almalinux.org/9/ALSA-2026-0719.html",
-            "https://errata.rockylinux.org/RLSA-2026:0719",
+            "https://errata.rockylinux.org/RLSA-2026:0697",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
@@ -12057,7 +12015,7 @@
             "URL": "https://git.launchpad.net/ubuntu-cve-tracker"
           },
           "Fingerprint": "sha256:5b9e1c3dabf13490c33c37b3bc73ae255004e9df63460e19c7784ae6e281a5f7",
-          "Title": "GnuPG: GnuPG: Information disclosure and potential arbitrary code execution via out-of-bounds write",
+          "Title": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments  ...",
           "Description": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments of an index variable where one is intended, leading to an out-of-bounds write for crafted input. (For ExtendedLTS, 2.2.51 and later are fixed versions.)",
           "Severity": "HIGH",
           "CweIDs": [
@@ -12072,7 +12030,6 @@
             "nvd": 3,
             "oracle-oval": 3,
             "photon": 3,
-            "redhat": 3,
             "rocky": 3,
             "ubuntu": 3
           },
@@ -12080,23 +12037,18 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H",
               "V3Score": 7
-            },
-            "redhat": {
-              "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:N",
-              "V3Score": 7.8
             }
           },
           "References": [
             "http://www.openwall.com/lists/oss-security/2025/12/29/11",
             "https://access.redhat.com/errata/RHSA-2026:0719",
-            "https://access.redhat.com/security/cve/CVE-2025-68973",
             "https://bugzilla.redhat.com/2425966",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2425966",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68973",
             "https://dev.gnupg.org/T7906",
             "https://dev.gnupg.org/T8001",
             "https://errata.almalinux.org/9/ALSA-2026-0719.html",
-            "https://errata.rockylinux.org/RLSA-2026:0719",
+            "https://errata.rockylinux.org/RLSA-2026:0697",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
@@ -12141,7 +12093,7 @@
             "URL": "https://git.launchpad.net/ubuntu-cve-tracker"
           },
           "Fingerprint": "sha256:34e949225764ace904e2aa3b9ee0c0fe8f02b48006d7b46937b5965e7aeb5b7a",
-          "Title": "GnuPG: GnuPG: Information disclosure and potential arbitrary code execution via out-of-bounds write",
+          "Title": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments  ...",
           "Description": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments of an index variable where one is intended, leading to an out-of-bounds write for crafted input. (For ExtendedLTS, 2.2.51 and later are fixed versions.)",
           "Severity": "HIGH",
           "CweIDs": [
@@ -12156,7 +12108,6 @@
             "nvd": 3,
             "oracle-oval": 3,
             "photon": 3,
-            "redhat": 3,
             "rocky": 3,
             "ubuntu": 3
           },
@@ -12164,23 +12115,18 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H",
               "V3Score": 7
-            },
-            "redhat": {
-              "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:N",
-              "V3Score": 7.8
             }
           },
           "References": [
             "http://www.openwall.com/lists/oss-security/2025/12/29/11",
             "https://access.redhat.com/errata/RHSA-2026:0719",
-            "https://access.redhat.com/security/cve/CVE-2025-68973",
             "https://bugzilla.redhat.com/2425966",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2425966",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68973",
             "https://dev.gnupg.org/T7906",
             "https://dev.gnupg.org/T8001",
             "https://errata.almalinux.org/9/ALSA-2026-0719.html",
-            "https://errata.rockylinux.org/RLSA-2026:0719",
+            "https://errata.rockylinux.org/RLSA-2026:0697",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
@@ -12225,7 +12171,7 @@
             "URL": "https://git.launchpad.net/ubuntu-cve-tracker"
           },
           "Fingerprint": "sha256:a5515ef0052a7d772be9e4ce03cadc14329830750eb95db17f0ab079a9fa5279",
-          "Title": "GnuPG: GnuPG: Information disclosure and potential arbitrary code execution via out-of-bounds write",
+          "Title": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments  ...",
           "Description": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments of an index variable where one is intended, leading to an out-of-bounds write for crafted input. (For ExtendedLTS, 2.2.51 and later are fixed versions.)",
           "Severity": "HIGH",
           "CweIDs": [
@@ -12240,7 +12186,6 @@
             "nvd": 3,
             "oracle-oval": 3,
             "photon": 3,
-            "redhat": 3,
             "rocky": 3,
             "ubuntu": 3
           },
@@ -12248,23 +12193,18 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H",
               "V3Score": 7
-            },
-            "redhat": {
-              "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:N",
-              "V3Score": 7.8
             }
           },
           "References": [
             "http://www.openwall.com/lists/oss-security/2025/12/29/11",
             "https://access.redhat.com/errata/RHSA-2026:0719",
-            "https://access.redhat.com/security/cve/CVE-2025-68973",
             "https://bugzilla.redhat.com/2425966",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2425966",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68973",
             "https://dev.gnupg.org/T7906",
             "https://dev.gnupg.org/T8001",
             "https://errata.almalinux.org/9/ALSA-2026-0719.html",
-            "https://errata.rockylinux.org/RLSA-2026:0719",
+            "https://errata.rockylinux.org/RLSA-2026:0697",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
@@ -12309,7 +12249,7 @@
             "URL": "https://git.launchpad.net/ubuntu-cve-tracker"
           },
           "Fingerprint": "sha256:cd60843847f1e620e485c75fe535b81f518108e385e34fc75181e77da54dde75",
-          "Title": "GnuPG: GnuPG: Information disclosure and potential arbitrary code execution via out-of-bounds write",
+          "Title": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments  ...",
           "Description": "In GnuPG before 2.4.9, armor_filter in g10/armor.c has two increments of an index variable where one is intended, leading to an out-of-bounds write for crafted input. (For ExtendedLTS, 2.2.51 and later are fixed versions.)",
           "Severity": "HIGH",
           "CweIDs": [
@@ -12324,7 +12264,6 @@
             "nvd": 3,
             "oracle-oval": 3,
             "photon": 3,
-            "redhat": 3,
             "rocky": 3,
             "ubuntu": 3
           },
@@ -12332,23 +12271,18 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H",
               "V3Score": 7
-            },
-            "redhat": {
-              "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:N",
-              "V3Score": 7.8
             }
           },
           "References": [
             "http://www.openwall.com/lists/oss-security/2025/12/29/11",
             "https://access.redhat.com/errata/RHSA-2026:0719",
-            "https://access.redhat.com/security/cve/CVE-2025-68973",
             "https://bugzilla.redhat.com/2425966",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2425966",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68973",
             "https://dev.gnupg.org/T7906",
             "https://dev.gnupg.org/T8001",
             "https://errata.almalinux.org/9/ALSA-2026-0719.html",
-            "https://errata.rockylinux.org/RLSA-2026:0719",
+            "https://errata.rockylinux.org/RLSA-2026:0697",
             "https://github.com/gpg/gnupg/blob/ff30683418695f5d2cc9e6cf8c9418e09378ebe4/g10/armor.c#L1305-L1306",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9",
             "https://github.com/gpg/gnupg/commit/115d138ba599328005c5321c0ef9f00355838ca9 (gnupg-2.5.14)",
@@ -13029,7 +12963,7 @@
             "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
           },
           "Fingerprint": "sha256:64e771bfe3214bf8dd9b40e51d8b33e3519eedd46b2c1899780406cbed2a9e52",
-          "Title": "pgjdbc: pgjdbc insecure authentication in channel binding",
+          "Title": "pgjdbc is an open source postgresql JDBC Driver. From 42.7.4 and until ...",
           "Description": "pgjdbc is an open source postgresql JDBC Driver. From 42.7.4 and until 42.7.7, when the PostgreSQL JDBC driver is configured with channel binding set to required (default value is prefer), the driver would incorrectly allow connections to proceed with authentication methods that do not support channel binding (such as password, MD5, GSS, or SSPI authentication). This could allow a man-in-the-middle attacker to intercept connections that users believed were protected by channel binding requirements. This vulnerability is fixed in 42.7.7.",
           "Severity": "HIGH",
           "CweIDs": [
@@ -13038,8 +12972,7 @@
           "VendorSeverity": {
             "bitnami": 2,
             "ghsa": 3,
-            "nvd": 2,
-            "redhat": 3
+            "nvd": 2
           },
           "CVSS": {
             "bitnami": {
@@ -13053,21 +12986,15 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
               "V3Score": 5.9
-            },
-            "redhat": {
-              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N",
-              "V3Score": 8.2
             }
           },
           "References": [
-            "https://access.redhat.com/security/cve/CVE-2025-49146",
             "https://datatracker.ietf.org/doc/html/rfc5802",
             "https://datatracker.ietf.org/doc/html/rfc7677",
             "https://github.com/pgjdbc/pgjdbc",
             "https://github.com/pgjdbc/pgjdbc/commit/9217ed16cb2918ab1b6b9258ae97e6ede244d8a0",
             "https://github.com/pgjdbc/pgjdbc/security/advisories/GHSA-hq9p-pm7w-8p54",
             "https://nvd.nist.gov/vuln/detail/CVE-2025-49146",
-            "https://www.cve.org/CVERecord?id=CVE-2025-49146",
             "https://www.postgresql.org/docs/current/sasl-authentication.html#SASL-SCRAM-SHA-256"
           ],
           "PublishedDate": "2025-06-11T15:15:42.85Z",
@@ -13278,12 +13205,14 @@
             "https://access.redhat.com/security/cve/CVE-2025-68121",
             "https://bugzilla.redhat.com/2434432",
             "https://bugzilla.redhat.com/2437111",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2418462",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2434432",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2437111",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-61726",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-61729",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68121",
             "https://errata.almalinux.org/9/ALSA-2026-4177.html",
-            "https://errata.rockylinux.org/RLSA-2026:4177",
+            "https://errata.rockylinux.org/RLSA-2026:5146",
             "https://github.com/golang/go/issues/77113",
             "https://go.dev/cl/737700",
             "https://go.dev/issue/77217",
@@ -13297,6 +13226,735 @@
           ],
           "PublishedDate": "2026-02-05T18:16:10.857Z",
           "LastModifiedDate": "2026-04-29T14:16:16.17Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-22871",
+          "VendorIDs": [
+            "GO-2025-3563"
+          ],
+          "PkgID": "stdlib@v1.22.7",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.22.7",
+            "UID": "cf173b2c10d5ac82"
+          },
+          "InstalledVersion": "v1.22.7",
+          "FixedVersion": "1.23.8, 1.24.2",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:d4e09011ac9ce2e4747f1117b10602e84683855f35e35422060b49632c19c1f6",
+            "DiffID": "sha256:daf89b137c7fd76f7d94a2d3ed715fe2645d62766d5d6de3523e11ed36761e7b"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-22871",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Fingerprint": "sha256:dfbf375ae996bfbf7fd7dbba21f8a113bbae46a155b2c03d3e85d4281822fb74",
+          "Title": "The net/http package improperly accepts a bare LF as a line terminator ...",
+          "Description": "The net/http package improperly accepts a bare LF as a line terminator in chunked data chunk-size lines. This can permit request smuggling if a net/http server is used in conjunction with a server that incorrectly accepts a bare LF as part of a chunk-ext.",
+          "Severity": "HIGH",
+          "VendorSeverity": {
+            "alma": 2,
+            "amazon": 3,
+            "bitnami": 4,
+            "cbl-mariner": 3,
+            "ghsa": 4,
+            "oracle-oval": 2,
+            "photon": 4,
+            "rocky": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "V3Score": 9.1
+            },
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "V3Score": 9.1
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2025/04/04/4",
+            "https://access.redhat.com/errata/RHSA-2025:9635",
+            "https://bugzilla.redhat.com/2358493",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2358493",
+            "https://cert-portal.siemens.com/productcert/html/ssa-783943.html",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-22871",
+            "https://errata.almalinux.org/9/ALSA-2025-9635.html",
+            "https://errata.rockylinux.org/RLSA-2025:9317",
+            "https://github.com/roadrunner-server/roadrunner",
+            "https://github.com/roadrunner-server/roadrunner/commit/f269279ee87d0b88127741cad1042389af7605fa",
+            "https://github.com/roadrunner-server/roadrunner/issues/2166",
+            "https://github.com/roadrunner-server/roadrunner/releases/tag/v2025.1.0",
+            "https://go.dev/cl/652998",
+            "https://go.dev/issue/71988",
+            "https://groups.google.com/g/golang-announce/c/Y2uBTVKjBQk",
+            "https://linux.oracle.com/cve/CVE-2025-22871.html",
+            "https://linux.oracle.com/errata/ELSA-2025-9845.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-22871",
+            "https://pkg.go.dev/vuln/GO-2025-3563"
+          ],
+          "PublishedDate": "2025-04-08T20:15:20.183Z",
+          "LastModifiedDate": "2026-05-12T13:16:39.897Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-47906",
+          "VendorIDs": [
+            "GO-2025-3956"
+          ],
+          "PkgID": "stdlib@v1.22.7",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.22.7",
+            "UID": "cf173b2c10d5ac82"
+          },
+          "InstalledVersion": "v1.22.7",
+          "FixedVersion": "1.23.12, 1.24.6",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:d4e09011ac9ce2e4747f1117b10602e84683855f35e35422060b49632c19c1f6",
+            "DiffID": "sha256:daf89b137c7fd76f7d94a2d3ed715fe2645d62766d5d6de3523e11ed36761e7b"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-47906",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Fingerprint": "sha256:0da8f292a164235034713b5106f1174baacec5cd0d5b162c0f9a3e7536e26f0b",
+          "Title": "If the PATH environment variable contains paths which are executables  ...",
+          "Description": "If the PATH environment variable contains paths which are executables (rather than just directories), passing certain strings to LookPath (\"\", \".\", and \"..\"), can result in the binaries listed in the PATH being unexpectedly returned.",
+          "Severity": "HIGH",
+          "VendorSeverity": {
+            "alma": 2,
+            "amazon": 3,
+            "azure": 3,
+            "bitnami": 2,
+            "cbl-mariner": 2,
+            "oracle-oval": 2,
+            "photon": 2,
+            "rocky": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:L",
+              "V3Score": 6.5
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2025/08/06/1",
+            "https://access.redhat.com/errata/RHSA-2025:22005",
+            "https://bugzilla.redhat.com/2396546",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2396546",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-47906",
+            "https://errata.almalinux.org/9/ALSA-2025-22005.html",
+            "https://errata.rockylinux.org/RLSA-2025:22005",
+            "https://go.dev/cl/691775",
+            "https://go.dev/issue/74466",
+            "https://groups.google.com/g/golang-announce/c/x5MKroML2yM",
+            "https://linux.oracle.com/cve/CVE-2025-47906.html",
+            "https://linux.oracle.com/errata/ELSA-2025-22668.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-47906",
+            "https://pkg.go.dev/vuln/GO-2025-3956"
+          ],
+          "PublishedDate": "2025-09-18T19:15:37.66Z",
+          "LastModifiedDate": "2026-01-27T19:56:17.707Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-47907",
+          "VendorIDs": [
+            "GO-2025-3849"
+          ],
+          "PkgID": "stdlib@v1.22.7",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.22.7",
+            "UID": "cf173b2c10d5ac82"
+          },
+          "InstalledVersion": "v1.22.7",
+          "FixedVersion": "1.23.12, 1.24.6",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:d4e09011ac9ce2e4747f1117b10602e84683855f35e35422060b49632c19c1f6",
+            "DiffID": "sha256:daf89b137c7fd76f7d94a2d3ed715fe2645d62766d5d6de3523e11ed36761e7b"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-47907",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Fingerprint": "sha256:d9ab798a12a46a4eae7245c4ca1a2469ccc8c859352b23416a4a030030a3c2b6",
+          "Title": "Cancelling a query (e.g. by cancelling the context passed to one of th ...",
+          "Description": "Cancelling a query (e.g. by cancelling the context passed to one of the query methods) during a call to the Scan method of the returned Rows can result in unexpected results if other queries are being made in parallel. This can result in a race condition that may overwrite the expected results with those of another query, causing the call to Scan to return either unexpected results from the other query or an error.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-362"
+          ],
+          "VendorSeverity": {
+            "alma": 3,
+            "amazon": 3,
+            "azure": 3,
+            "bitnami": 3,
+            "cbl-mariner": 3,
+            "oracle-oval": 3,
+            "photon": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:L/A:L",
+              "V3Score": 7
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2025/08/06/1",
+            "https://access.redhat.com/errata/RHSA-2025:20909",
+            "https://bugzilla.redhat.com/2387083",
+            "https://bugzilla.redhat.com/2393152",
+            "https://errata.almalinux.org/9/ALSA-2025-20909.html",
+            "https://go.dev/cl/693735",
+            "https://go.dev/issue/74831",
+            "https://groups.google.com/g/golang-announce/c/x5MKroML2yM",
+            "https://linux.oracle.com/cve/CVE-2025-47907.html",
+            "https://linux.oracle.com/errata/ELSA-2025-20983.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-47907",
+            "https://pkg.go.dev/vuln/GO-2025-3849"
+          ],
+          "PublishedDate": "2025-08-07T16:15:30.357Z",
+          "LastModifiedDate": "2026-01-29T19:11:50.67Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-47912",
+          "VendorIDs": [
+            "GO-2025-4010"
+          ],
+          "PkgID": "stdlib@v1.22.7",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.22.7",
+            "UID": "cf173b2c10d5ac82"
+          },
+          "InstalledVersion": "v1.22.7",
+          "FixedVersion": "1.24.8, 1.25.2",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:d4e09011ac9ce2e4747f1117b10602e84683855f35e35422060b49632c19c1f6",
+            "DiffID": "sha256:daf89b137c7fd76f7d94a2d3ed715fe2645d62766d5d6de3523e11ed36761e7b"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-47912",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Fingerprint": "sha256:c270fdd9555b3c73b19d9fdafd6e3af47dff9cc8503f488ba04152538fddcab8",
+          "Title": "The Parse function permits values other than IPv6 addresses to be incl ...",
+          "Description": "The Parse function permits values other than IPv6 addresses to be included in square brackets within the host component of a URL. RFC 3986 permits IPv6 addresses to be included within the host component, enclosed within square brackets. For example: \"http://[::1]/\". IPv4 addresses and hostnames must not appear within square brackets. Parse did not enforce this requirement.",
+          "Severity": "HIGH",
+          "VendorSeverity": {
+            "amazon": 3,
+            "bitnami": 2,
+            "photon": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+              "V3Score": 5.3
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2025/10/08/1",
+            "https://go.dev/cl/709857",
+            "https://go.dev/issue/75678",
+            "https://groups.google.com/g/golang-announce/c/4Emdl2iQ_bI",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-47912",
+            "https://pkg.go.dev/vuln/GO-2025-4010"
+          ],
+          "PublishedDate": "2025-10-29T23:16:18.187Z",
+          "LastModifiedDate": "2026-01-29T13:57:18.69Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-58183",
+          "VendorIDs": [
+            "GO-2025-4014"
+          ],
+          "PkgID": "stdlib@v1.22.7",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.22.7",
+            "UID": "cf173b2c10d5ac82"
+          },
+          "InstalledVersion": "v1.22.7",
+          "FixedVersion": "1.24.8, 1.25.2",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:d4e09011ac9ce2e4747f1117b10602e84683855f35e35422060b49632c19c1f6",
+            "DiffID": "sha256:daf89b137c7fd76f7d94a2d3ed715fe2645d62766d5d6de3523e11ed36761e7b"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-58183",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Fingerprint": "sha256:f531cdf48b306da6683dd6285c35dd5bbe5e9d62bc485a54041a749d3034d8f2",
+          "Title": "tar.Reader does not set a maximum size on the number of sparse region  ...",
+          "Description": "tar.Reader does not set a maximum size on the number of sparse region data blocks in GNU tar pax 1.0 sparse files. A maliciously-crafted archive containing a large number of sparse regions can cause a Reader to read an unbounded amount of data from the archive into memory. When reading from a compressed source, a small compressed input can result in large allocations.",
+          "Severity": "HIGH",
+          "VendorSeverity": {
+            "alma": 2,
+            "amazon": 3,
+            "azure": 2,
+            "bitnami": 2,
+            "cbl-mariner": 2,
+            "oracle-oval": 2,
+            "photon": 2,
+            "rocky": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:L",
+              "V3Score": 4.3
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2025/10/08/1",
+            "https://access.redhat.com/errata/RHSA-2026:1381",
+            "https://bugzilla.redhat.com/2407258",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2407258",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-58183",
+            "https://errata.almalinux.org/9/ALSA-2026-1381.html",
+            "https://errata.rockylinux.org/RLSA-2025:23295",
+            "https://go.dev/cl/709861",
+            "https://go.dev/issue/75677",
+            "https://groups.google.com/g/golang-announce/c/4Emdl2iQ_bI",
+            "https://linux.oracle.com/cve/CVE-2025-58183.html",
+            "https://linux.oracle.com/errata/ELSA-2026-50076.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-58183",
+            "https://pkg.go.dev/vuln/GO-2025-4014"
+          ],
+          "PublishedDate": "2025-10-29T23:16:19.357Z",
+          "LastModifiedDate": "2026-04-15T00:35:42.02Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-58185",
+          "VendorIDs": [
+            "GO-2025-4011"
+          ],
+          "PkgID": "stdlib@v1.22.7",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.22.7",
+            "UID": "cf173b2c10d5ac82"
+          },
+          "InstalledVersion": "v1.22.7",
+          "FixedVersion": "1.24.8, 1.25.2",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:d4e09011ac9ce2e4747f1117b10602e84683855f35e35422060b49632c19c1f6",
+            "DiffID": "sha256:daf89b137c7fd76f7d94a2d3ed715fe2645d62766d5d6de3523e11ed36761e7b"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-58185",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Fingerprint": "sha256:b08facf74ebe96ee8fe479414a6bea4201ceb7efff74af493920b982693df2c4",
+          "Title": "Parsing a maliciously crafted DER payload could allocate large amounts ...",
+          "Description": "Parsing a maliciously crafted DER payload could allocate large amounts of memory, causing memory exhaustion.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-770"
+          ],
+          "VendorSeverity": {
+            "amazon": 3,
+            "bitnami": 2,
+            "photon": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+              "V3Score": 5.3
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2025/10/08/1",
+            "https://go.dev/cl/709856",
+            "https://go.dev/issue/75671",
+            "https://groups.google.com/g/golang-announce/c/4Emdl2iQ_bI",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-58185",
+            "https://pkg.go.dev/vuln/GO-2025-4011"
+          ],
+          "PublishedDate": "2025-10-29T23:16:19.45Z",
+          "LastModifiedDate": "2026-02-06T20:26:41.997Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-58186",
+          "VendorIDs": [
+            "GO-2025-4012"
+          ],
+          "PkgID": "stdlib@v1.22.7",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.22.7",
+            "UID": "cf173b2c10d5ac82"
+          },
+          "InstalledVersion": "v1.22.7",
+          "FixedVersion": "1.24.8, 1.25.2",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:d4e09011ac9ce2e4747f1117b10602e84683855f35e35422060b49632c19c1f6",
+            "DiffID": "sha256:daf89b137c7fd76f7d94a2d3ed715fe2645d62766d5d6de3523e11ed36761e7b"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-58186",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Fingerprint": "sha256:60f72a440881308d5f27020652e96d33d2fe6926bb6cee7e5575551cb93692d0",
+          "Title": "Despite HTTP headers having a default limit of 1MB, the number of cook ...",
+          "Description": "Despite HTTP headers having a default limit of 1MB, the number of cookies that can be parsed does not have a limit. By sending a lot of very small cookies such as \"a=;\", an attacker can make an HTTP server allocate a large amount of structs, causing large memory consumption.",
+          "Severity": "HIGH",
+          "VendorSeverity": {
+            "amazon": 3,
+            "bitnami": 2,
+            "photon": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+              "V3Score": 5.3
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2025/10/08/1",
+            "https://go.dev/cl/709855",
+            "https://go.dev/issue/75672",
+            "https://groups.google.com/g/golang-announce/c/4Emdl2iQ_bI",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-58186",
+            "https://pkg.go.dev/vuln/GO-2025-4012"
+          ],
+          "PublishedDate": "2025-10-29T23:16:19.547Z",
+          "LastModifiedDate": "2026-04-15T00:35:42.02Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-58187",
+          "VendorIDs": [
+            "GO-2025-4007"
+          ],
+          "PkgID": "stdlib@v1.22.7",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.22.7",
+            "UID": "cf173b2c10d5ac82"
+          },
+          "InstalledVersion": "v1.22.7",
+          "FixedVersion": "1.24.9, 1.25.3",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:d4e09011ac9ce2e4747f1117b10602e84683855f35e35422060b49632c19c1f6",
+            "DiffID": "sha256:daf89b137c7fd76f7d94a2d3ed715fe2645d62766d5d6de3523e11ed36761e7b"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-58187",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Fingerprint": "sha256:cf797d218a651b61869e8a683183398b795c41ff0c0508f5f8219635be863e59",
+          "Title": "Due to the design of the name constraint checking algorithm, the proce ...",
+          "Description": "Due to the design of the name constraint checking algorithm, the processing time of some inputs scale non-linearly with respect to the size of the certificate. This affects programs which validate arbitrary certificate chains.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-407"
+          ],
+          "VendorSeverity": {
+            "amazon": 3,
+            "bitnami": 3,
+            "photon": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2025/10/08/1",
+            "https://go.dev/cl/709854",
+            "https://go.dev/issue/75681",
+            "https://groups.google.com/g/golang-announce/c/4Emdl2iQ_bI",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-58187",
+            "https://pkg.go.dev/vuln/GO-2025-4007"
+          ],
+          "PublishedDate": "2025-10-29T23:16:19.643Z",
+          "LastModifiedDate": "2026-01-29T16:02:27.08Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-58188",
+          "VendorIDs": [
+            "GO-2025-4013"
+          ],
+          "PkgID": "stdlib@v1.22.7",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.22.7",
+            "UID": "cf173b2c10d5ac82"
+          },
+          "InstalledVersion": "v1.22.7",
+          "FixedVersion": "1.24.8, 1.25.2",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:d4e09011ac9ce2e4747f1117b10602e84683855f35e35422060b49632c19c1f6",
+            "DiffID": "sha256:daf89b137c7fd76f7d94a2d3ed715fe2645d62766d5d6de3523e11ed36761e7b"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-58188",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Fingerprint": "sha256:9eb330b5af35ea0fd0d32f4c2a0269204a70ac220b6ed2b8e61fc2c12084f3a7",
+          "Title": "Validating certificate chains which contain DSA public keys can cause  ...",
+          "Description": "Validating certificate chains which contain DSA public keys can cause programs to panic, due to a interface cast that assumes they implement the Equal method. This affects programs which validate arbitrary certificate chains.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-295"
+          ],
+          "VendorSeverity": {
+            "amazon": 3,
+            "bitnami": 3,
+            "photon": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2025/10/08/1",
+            "https://go.dev/cl/709853",
+            "https://go.dev/issue/75675",
+            "https://groups.google.com/g/golang-announce/c/4Emdl2iQ_bI",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-58188",
+            "https://pkg.go.dev/vuln/GO-2025-4013"
+          ],
+          "PublishedDate": "2025-10-29T23:16:19.74Z",
+          "LastModifiedDate": "2026-01-29T15:55:11.97Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-58189",
+          "VendorIDs": [
+            "GO-2025-4008"
+          ],
+          "PkgID": "stdlib@v1.22.7",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.22.7",
+            "UID": "cf173b2c10d5ac82"
+          },
+          "InstalledVersion": "v1.22.7",
+          "FixedVersion": "1.24.8, 1.25.2",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:d4e09011ac9ce2e4747f1117b10602e84683855f35e35422060b49632c19c1f6",
+            "DiffID": "sha256:daf89b137c7fd76f7d94a2d3ed715fe2645d62766d5d6de3523e11ed36761e7b"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-58189",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Fingerprint": "sha256:645739a19f26e65cfa3347d1ae88e9bc06995cb856501ea9e87733bc82e2d5d9",
+          "Title": "When Conn.Handshake fails during ALPN negotiation the error contains a ...",
+          "Description": "When Conn.Handshake fails during ALPN negotiation the error contains attacker controlled information (the ALPN protocols sent by the client) which is not escaped.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-532"
+          ],
+          "VendorSeverity": {
+            "amazon": 3,
+            "bitnami": 2,
+            "photon": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+              "V3Score": 5.3
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2025/10/08/1",
+            "https://go.dev/cl/707776",
+            "https://go.dev/issue/75652",
+            "https://groups.google.com/g/golang-announce/c/4Emdl2iQ_bI",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-58189",
+            "https://pkg.go.dev/vuln/GO-2025-4008"
+          ],
+          "PublishedDate": "2025-10-29T23:16:19.833Z",
+          "LastModifiedDate": "2026-01-29T15:49:24.543Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-61723",
+          "VendorIDs": [
+            "GO-2025-4009"
+          ],
+          "PkgID": "stdlib@v1.22.7",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.22.7",
+            "UID": "cf173b2c10d5ac82"
+          },
+          "InstalledVersion": "v1.22.7",
+          "FixedVersion": "1.24.8, 1.25.2",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:d4e09011ac9ce2e4747f1117b10602e84683855f35e35422060b49632c19c1f6",
+            "DiffID": "sha256:daf89b137c7fd76f7d94a2d3ed715fe2645d62766d5d6de3523e11ed36761e7b"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-61723",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Fingerprint": "sha256:af9ed8000749d66f98e2e9fa2447fa1d898143121164bfc8214ec9c54a21d506",
+          "Title": "The processing time for parsing some invalid inputs scales non-linearl ...",
+          "Description": "The processing time for parsing some invalid inputs scales non-linearly with respect to the size of the input. This affects programs which parse untrusted PEM inputs.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-770"
+          ],
+          "VendorSeverity": {
+            "amazon": 3,
+            "bitnami": 3,
+            "photon": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2025/10/08/1",
+            "https://go.dev/cl/709858",
+            "https://go.dev/issue/75676",
+            "https://groups.google.com/g/golang-announce/c/4Emdl2iQ_bI",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-61723",
+            "https://pkg.go.dev/vuln/GO-2025-4009"
+          ],
+          "PublishedDate": "2025-10-29T23:16:19.927Z",
+          "LastModifiedDate": "2026-01-29T15:49:05.343Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-61724",
+          "VendorIDs": [
+            "GO-2025-4015"
+          ],
+          "PkgID": "stdlib@v1.22.7",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.22.7",
+            "UID": "cf173b2c10d5ac82"
+          },
+          "InstalledVersion": "v1.22.7",
+          "FixedVersion": "1.24.8, 1.25.2",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:d4e09011ac9ce2e4747f1117b10602e84683855f35e35422060b49632c19c1f6",
+            "DiffID": "sha256:daf89b137c7fd76f7d94a2d3ed715fe2645d62766d5d6de3523e11ed36761e7b"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-61724",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Fingerprint": "sha256:514bad7a4c24cde568cc46d162007d7216ca011274923bc66c4d76644fea62c0",
+          "Title": "The Reader.ReadResponse function constructs a response string through  ...",
+          "Description": "The Reader.ReadResponse function constructs a response string through repeated string concatenation of lines. When the number of lines in a response is large, this can cause excessive CPU consumption.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-770"
+          ],
+          "VendorSeverity": {
+            "amazon": 3,
+            "bitnami": 2,
+            "photon": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+              "V3Score": 5.3
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2025/10/08/1",
+            "https://go.dev/cl/709859",
+            "https://go.dev/issue/75716",
+            "https://groups.google.com/g/golang-announce/c/4Emdl2iQ_bI",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-61724",
+            "https://pkg.go.dev/vuln/GO-2025-4015"
+          ],
+          "PublishedDate": "2025-10-29T23:16:20.02Z",
+          "LastModifiedDate": "2026-01-29T15:30:53.69Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-61725",
+          "VendorIDs": [
+            "GO-2025-4006"
+          ],
+          "PkgID": "stdlib@v1.22.7",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.22.7",
+            "UID": "cf173b2c10d5ac82"
+          },
+          "InstalledVersion": "v1.22.7",
+          "FixedVersion": "1.24.8, 1.25.2",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:d4e09011ac9ce2e4747f1117b10602e84683855f35e35422060b49632c19c1f6",
+            "DiffID": "sha256:daf89b137c7fd76f7d94a2d3ed715fe2645d62766d5d6de3523e11ed36761e7b"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-61725",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Fingerprint": "sha256:9715f135a626c9ddc750f4d2bc7824246b3ad5aa15cd93a032c14f5711f8b986",
+          "Title": "The ParseAddress function constructs domain-literal address components ...",
+          "Description": "The ParseAddress function constructs domain-literal address components through repeated string concatenation. When parsing large domain-literal components, this can cause excessive CPU consumption.",
+          "Severity": "HIGH",
+          "VendorSeverity": {
+            "amazon": 3,
+            "bitnami": 3,
+            "photon": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2025/10/08/1",
+            "https://go.dev/cl/709860",
+            "https://go.dev/issue/75680",
+            "https://groups.google.com/g/golang-announce/c/4Emdl2iQ_bI",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-61725",
+            "https://pkg.go.dev/vuln/GO-2025-4006"
+          ],
+          "PublishedDate": "2025-10-29T23:16:20.113Z",
+          "LastModifiedDate": "2026-04-15T00:35:42.02Z"
         },
         {
           "VulnerabilityID": "CVE-2025-61726",
@@ -13355,12 +14013,14 @@
             "https://access.redhat.com/security/cve/CVE-2025-61726",
             "https://bugzilla.redhat.com/2434432",
             "https://bugzilla.redhat.com/2437111",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2418462",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2434432",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2437111",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-61726",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-61729",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68121",
             "https://errata.almalinux.org/9/ALSA-2026-4177.html",
-            "https://errata.rockylinux.org/RLSA-2026:4177",
+            "https://errata.rockylinux.org/RLSA-2026:5146",
             "https://go.dev/cl/736712",
             "https://go.dev/issue/77101",
             "https://groups.google.com/g/golang-announce/c/Vd2tYVM8eUc",
@@ -13372,6 +14032,58 @@
           ],
           "PublishedDate": "2026-01-28T20:16:09.713Z",
           "LastModifiedDate": "2026-02-06T18:47:34.52Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-61727",
+          "VendorIDs": [
+            "GO-2025-4175"
+          ],
+          "PkgID": "stdlib@v1.22.7",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.22.7",
+            "UID": "cf173b2c10d5ac82"
+          },
+          "InstalledVersion": "v1.22.7",
+          "FixedVersion": "1.24.11, 1.25.5",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:d4e09011ac9ce2e4747f1117b10602e84683855f35e35422060b49632c19c1f6",
+            "DiffID": "sha256:daf89b137c7fd76f7d94a2d3ed715fe2645d62766d5d6de3523e11ed36761e7b"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-61727",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Fingerprint": "sha256:2f4b95c5f76cb4f0ee81b2a3a6f854f9d6068ca6616c5e3eee5f7cb720f61fb0",
+          "Title": "An excluded subdomain constraint in a certificate chain does not restr ...",
+          "Description": "An excluded subdomain constraint in a certificate chain does not restrict the usage of wildcard SANs in the leaf certificate. For example a constraint that excludes the subdomain test.example.com does not prevent a leaf certificate from claiming the SAN *.example.com.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-295"
+          ],
+          "VendorSeverity": {
+            "amazon": 3,
+            "bitnami": 2,
+            "photon": 2
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N",
+              "V3Score": 6.5
+            }
+          },
+          "References": [
+            "https://go.dev/cl/723900",
+            "https://go.dev/issue/76442",
+            "https://groups.google.com/g/golang-announce/c/8FJoBkPddm4",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-61727",
+            "https://pkg.go.dev/vuln/GO-2025-4175"
+          ],
+          "PublishedDate": "2025-12-03T20:16:25.607Z",
+          "LastModifiedDate": "2025-12-18T20:15:10.957Z"
         },
         {
           "VulnerabilityID": "CVE-2025-61729",
@@ -13398,7 +14110,7 @@
             "URL": "https://pkg.go.dev/vuln/"
           },
           "Fingerprint": "sha256:65e250e4a00357efbce4bd55385d9282269795814cd63d6f5c8923d5feb7c94d",
-          "Title": "crypto/x509: golang: Denial of Service due to excessive resource consumption via crafted certificate",
+          "Title": "Within HostnameError.Error(), when constructing an error string, there ...",
           "Description": "Within HostnameError.Error(), when constructing an error string, there is no limit to the number of hosts that will be printed out. Furthermore, the error string is constructed by repeated string concatenation, leading to quadratic runtime. Therefore, a certificate provided by a malicious actor can result in excessive resource consumption.",
           "Severity": "HIGH",
           "CweIDs": [
@@ -13412,22 +14124,16 @@
             "cbl-mariner": 1,
             "oracle-oval": 3,
             "photon": 3,
-            "redhat": 3,
             "rocky": 3
           },
           "CVSS": {
             "bitnami": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
               "V3Score": 7.5
-            },
-            "redhat": {
-              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
-              "V3Score": 7.5
             }
           },
           "References": [
             "https://access.redhat.com/errata/RHSA-2026:3928",
-            "https://access.redhat.com/security/cve/CVE-2025-61729",
             "https://bugzilla.redhat.com/2418462",
             "https://bugzilla.redhat.com/2434432",
             "https://bugzilla.redhat.com/2437111",
@@ -13438,15 +14144,14 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-61729",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68121",
             "https://errata.almalinux.org/9/ALSA-2026-3928.html",
-            "https://errata.rockylinux.org/RLSA-2026:3928",
+            "https://errata.rockylinux.org/RLSA-2026:5146",
             "https://go.dev/cl/725920",
             "https://go.dev/issue/76445",
             "https://groups.google.com/g/golang-announce/c/8FJoBkPddm4",
             "https://linux.oracle.com/cve/CVE-2025-61729.html",
             "https://linux.oracle.com/errata/ELSA-2026-5146.html",
             "https://nvd.nist.gov/vuln/detail/CVE-2025-61729",
-            "https://pkg.go.dev/vuln/GO-2025-4155",
-            "https://www.cve.org/CVERecord?id=CVE-2025-61729"
+            "https://pkg.go.dev/vuln/GO-2025-4155"
           ],
           "PublishedDate": "2025-12-02T19:15:51.447Z",
           "LastModifiedDate": "2025-12-19T18:25:28.283Z"
@@ -13505,10 +14210,12 @@
             "https://access.redhat.com/errata/RHSA-2026:9044",
             "https://access.redhat.com/security/cve/CVE-2026-25679",
             "https://bugzilla.redhat.com/2445356",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2445345",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2445356",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-25679",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-27137",
             "https://errata.almalinux.org/9/ALSA-2026-9044.html",
-            "https://errata.rockylinux.org/RLSA-2026:8841",
+            "https://errata.rockylinux.org/RLSA-2026:8842",
             "https://go.dev/cl/752180",
             "https://go.dev/issue/77578",
             "https://groups.google.com/g/golang-announce/c/EdhZqrQ98hk",
@@ -13571,19 +14278,30 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:14200",
+            "https://access.redhat.com/errata/RHSA-2026:19353",
             "https://access.redhat.com/security/cve/CVE-2026-32280",
+            "https://bugzilla.redhat.com/2445356",
+            "https://bugzilla.redhat.com/2449833",
+            "https://bugzilla.redhat.com/2455470",
+            "https://bugzilla.redhat.com/2456333",
+            "https://bugzilla.redhat.com/2456335",
             "https://bugzilla.redhat.com/2456336",
             "https://bugzilla.redhat.com/2456338",
             "https://bugzilla.redhat.com/2456339",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456336",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456338",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456339",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2456340",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2456341",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2456342",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-27140",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-27143",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-27144",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32280",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32282",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32283",
-            "https://errata.almalinux.org/9/ALSA-2026-14200.html",
-            "https://errata.rockylinux.org/RLSA-2026:14200",
+            "https://errata.almalinux.org/9/ALSA-2026-19353.html",
+            "https://errata.rockylinux.org/RLSA-2026:10217",
             "https://go.dev/cl/758320",
             "https://go.dev/issue/78282",
             "https://groups.google.com/g/golang-announce/c/0uYbvbPZRWU",
@@ -13629,6 +14347,7 @@
             "CWE-295"
           ],
           "VendorSeverity": {
+            "alma": 3,
             "amazon": 3,
             "bitnami": 3,
             "nvd": 3,
@@ -13649,7 +14368,17 @@
             }
           },
           "References": [
+            "https://access.redhat.com/errata/RHSA-2026:19353",
             "https://access.redhat.com/security/cve/CVE-2026-32281",
+            "https://bugzilla.redhat.com/2445356",
+            "https://bugzilla.redhat.com/2449833",
+            "https://bugzilla.redhat.com/2455470",
+            "https://bugzilla.redhat.com/2456333",
+            "https://bugzilla.redhat.com/2456335",
+            "https://bugzilla.redhat.com/2456336",
+            "https://bugzilla.redhat.com/2456338",
+            "https://bugzilla.redhat.com/2456339",
+            "https://errata.almalinux.org/9/ALSA-2026-19353.html",
             "https://go.dev/cl/758061",
             "https://go.dev/issue/78281",
             "https://groups.google.com/g/golang-announce/c/0uYbvbPZRWU",
@@ -13716,19 +14445,22 @@
             }
           },
           "References": [
-            "https://access.redhat.com/errata/RHSA-2026:14200",
+            "https://access.redhat.com/errata/RHSA-2026:19353",
             "https://access.redhat.com/security/cve/CVE-2026-32283",
+            "https://bugzilla.redhat.com/2445356",
+            "https://bugzilla.redhat.com/2449833",
+            "https://bugzilla.redhat.com/2455470",
+            "https://bugzilla.redhat.com/2456333",
+            "https://bugzilla.redhat.com/2456335",
             "https://bugzilla.redhat.com/2456336",
             "https://bugzilla.redhat.com/2456338",
             "https://bugzilla.redhat.com/2456339",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456336",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2456338",
-            "https://bugzilla.redhat.com/show_bug.cgi?id=2456339",
-            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32280",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32282",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-32283",
-            "https://errata.almalinux.org/9/ALSA-2026-14200.html",
-            "https://errata.rockylinux.org/RLSA-2026:14200",
+            "https://errata.almalinux.org/9/ALSA-2026-19353.html",
+            "https://errata.rockylinux.org/RLSA-2026:17075",
             "https://go.dev/cl/763767",
             "https://go.dev/issue/78334",
             "https://groups.google.com/g/golang-announce/c/0uYbvbPZRWU",
