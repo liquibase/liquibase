@@ -72,6 +72,35 @@ Global Options
                                environment variable:
                                'LIQUIBASE_ALLOW_EXECUTE_COMMAND')
 
+      --allow-include-all-classes=PARAM
+                             If false, the includeAll changelog directive's
+                               resourceFilter and resourceComparator attributes
+                               are rejected when they reference a class name.
+                               Defaults to true to preserve the documented
+                               includeAll feature for the standard trust model
+                               (team-authored, team-reviewed changelogs). Set
+                               to false in environments that execute changelogs
+                               from less-trusted sources (multi-tenant SaaS
+                               running customer changelogs, downloaded
+                               change-packs, contributor PRs prior to review):
+                               both attributes load an arbitrary JVM class by
+                               FQCN via Class.forName(initialize=true), which
+                               fires the class's static <clinit> initializer at
+                               load time — before any cast or marker-interface
+                               check could reject the load. Any class on the
+                               JVM classpath is reachable this way (CWE-470).
+                               This flag governs the same unsafe-reflection
+                               surface as liquibase.allowCustomChange (which
+                               gates the <customChange> and
+                               <customPrecondition> changelog elements);
+                               operators wanting to fully lock down
+                               changelog-controlled class loading must set both
+                               flags to false.
+                             DEFAULT: true
+                             (defaults file: 'liquibase.
+                               allowIncludeAllClasses', environment variable:
+                               'LIQUIBASE_ALLOW_INCLUDE_ALL_CLASSES')
+
       --allow-inherit-logical-file-path=PARAM
                              If true, included changelogs without an explicit
                                logicalFilePath will inherit their parent
