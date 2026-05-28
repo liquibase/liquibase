@@ -45,8 +45,25 @@ permissions:
   id-token: write
   contents: write
 
+# Serialize runs against the same release so concurrent triggers
+# (auto-fire from `release: [published]` + manual `workflow_dispatch`
+# on the same tag, two reruns racing, etc.) don't clobber each other
+# through the `gh release edit` step. cancel-in-progress: false lets
+# both runs complete in order rather than killing the first.
+concurrency:
+  group: release-notes-${{ github.event.release.tag_name || inputs.release_tag || inputs.version }}
+  cancel-in-progress: false
+
 jobs:
   derive:
+    # Skip prereleases on the auto-publish path. `release: [published]`
+    # fires for ANY release type (GA, prerelease, draft-being-published),
+    # but only GA releases should have their body auto-augmented with
+    # Jira release notes — an `v5.2.0-RC8` tag shouldn't pollute the RC
+    # release body with an empty completeness report.
+    # workflow_dispatch runs are unaffected (`github.event.release` is
+    # absent on dispatch, so the expression evaluates true).
+    if: ${{ github.event_name != 'release' || !github.event.release.prerelease }}
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.compute.outputs.version }}
