@@ -72,6 +72,43 @@ Global Options
                                environment variable:
                                'LIQUIBASE_ALLOW_EXECUTE_COMMAND')
 
+      --allow-external-changelog-paths=PARAM
+                             If false, the include / includeAll / sqlFile
+                               changelog directives reject paths that point
+                               outside the configured ResourceAccessor
+                               search-path scope — specifically: the
+                               'classpath:' URI prefix, and absolute filesystem
+                               paths (leading '/', leading '\\\\' UNC, or Windows
+                               drive-letter '<L>:'). Defaults to true to
+                               preserve the documented behaviour for the
+                               standard trust model, including common
+                               deployments like Spring Boot apps that load
+                               'classpath:db/changelog/...' from JAR resources.
+                               Set to false in environments that execute
+                               changelogs from less-trusted sources
+                               (multi-tenant SaaS, downloaded change-packs,
+                               contributor PRs prior to review): the audit
+                               observed that an attacker who can write a file
+                               anywhere on the ResourceAccessor search path
+                               (which by default in the CLI includes the
+                               current working directory) can then name it in a
+                               changelog include / sqlFile and get it parsed
+                               and executed. Restricting changelog paths to
+                               relative-only-within-search-path (this flag set
+                               to false) is a defence-in-depth mitigation;
+                               tightly-controlled search-path configuration
+                               alone also mitigates the issue. The flag's
+                               enforcement is bypassed for any include /
+                               includeAll / sqlFile that uses
+                               relativeToChangelogFile=true (the path is
+                               resolved relative to the parent changelog and
+                               cannot escape its directory) (CWE-22).
+                             DEFAULT: true
+                             (defaults file: 'liquibase.
+                               allowExternalChangelogPaths', environment
+                               variable:
+                               'LIQUIBASE_ALLOW_EXTERNAL_CHANGELOG_PATHS')
+
       --allow-inherit-logical-file-path=PARAM
                              If true, included changelogs without an explicit
                                logicalFilePath will inherit their parent
