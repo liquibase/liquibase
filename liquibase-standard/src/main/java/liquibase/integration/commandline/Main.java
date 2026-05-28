@@ -1478,7 +1478,7 @@ public class Main {
                 // otherwise, we will print the output
                 //
                 Writer outputWriter = getOutputWriter();
-                CommandResults commandResults = snapshotCommand.execute();
+                CommandResults commandResults = executeAndClearCredentials(snapshotCommand);
                 String result = InternalSnapshotCommandStep.printSnapshot(snapshotCommand, commandResults);
                 outputWriter.write(result);
                 outputWriter.flush();
@@ -1521,7 +1521,7 @@ public class Main {
                         .addArgumentValue(DropAllCommandStep.CATALOG_AND_SCHEMAS_ARG, InternalSnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
                         .addArgumentValue(GenerateChangelogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
 
-                dropAllCommand.execute();
+                executeAndClearCredentials(dropAllCommand);
                 return;
             } else if (COMMANDS.STATUS.equalsIgnoreCase(command)) {
                 boolean runVerbose = false;
@@ -1558,7 +1558,7 @@ public class Main {
                         .addArgumentValue(CalculateChecksumCommandStep.CHANGESET_IDENTIFIER_ARG, getCommandParam(OPTIONS.CHANGE_SET_IDENTIFIER, null))
                         .addArgumentValue(CalculateChecksumCommandStep.CHANGELOG_FILE_ARG, this.changeLogFile);
 
-                calculateChecksumCommand.execute();
+                executeAndClearCredentials(calculateChecksumCommand);
                 return;
             } else if (COMMANDS.DB_DOC.equalsIgnoreCase(command)) {
                 if (commandParams.isEmpty()) {
@@ -1704,7 +1704,7 @@ public class Main {
                     historyCommand.addArgumentValue(HistoryCommandStep.FORMAT_ARG, HistoryFormat.valueOf(format));
                     historyCommand.setOutput(getOutputStream());
 
-                    historyCommand.execute();
+                    executeAndClearCredentials(historyCommand);
                 } else {
                     throw new CommandLineParsingException(
                             String.format(coreBundle.getString("command.unknown"), command));
@@ -1782,13 +1782,13 @@ public class Main {
         if (outputWriter != null) {
             commandScope.setOutput(new WriterOutputStream(outputWriter, GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
         }
-        commandScope.execute();
+        executeAndClearCredentials(commandScope);
     }
 
     private void runReleaseLocksCommand() throws CommandExecutionException {
         CommandScope commandScope = new CommandScope(ReleaseLocksCommandStep.COMMAND_NAME[0]);
         this.setDatabaseArgumentsToCommand(commandScope);
-        commandScope.execute();
+        executeAndClearCredentials(commandScope);
     }
 
     private void runGenerateChangelogCommandStep() throws LiquibaseException, IOException, CommandLineParsingException {
@@ -1809,6 +1809,7 @@ public class Main {
 
         this.setDatabaseArgumentsToCommand(generateChangelogCommand);
         this.setPreCompareArgumentsToCommand(generateChangelogCommand);
+        executeAndClearCredentials(generateChangelogCommand);
     }
 
     private void runDiffChangelogCommandStep() throws CommandExecutionException, CommandLineParsingException, IOException {
@@ -1827,7 +1828,7 @@ public class Main {
         this.setDatabaseArgumentsToCommand(diffChangelogCommand);
         this.setReferenceDatabaseArgumentsToCommand(diffChangelogCommand);
 
-        diffChangelogCommand.execute();
+        executeAndClearCredentials(diffChangelogCommand);
     }
 
     private void runDiffCommandStep() throws CommandLineParsingException, CommandExecutionException, IOException {
@@ -1839,7 +1840,7 @@ public class Main {
         this.setDatabaseArgumentsToCommand(diffCommand);
         this.setReferenceDatabaseArgumentsToCommand(diffCommand);
 
-        diffCommand.execute();
+        executeAndClearCredentials(diffCommand);
     }
 
     private void runUpdateCommandStep() throws CommandLineParsingException, CommandExecutionException, IOException {
@@ -1850,7 +1851,7 @@ public class Main {
         updateCommand.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_CLASS_ARG, changeExecListenerClass);
         updateCommand.addArgumentValue(ChangeExecListenerCommandStep.CHANGE_EXEC_LISTENER_PROPERTIES_FILE_ARG, changeExecListenerPropertiesFile);
         setDatabaseArgumentsToCommand(updateCommand);
-        updateCommand.execute();
+        executeAndClearCredentials(updateCommand);
     }
 
     private void runRollbackOneChangeSetCommandStep() throws CommandExecutionException, CommandLineParsingException {
@@ -1865,7 +1866,7 @@ public class Main {
                 .addArgumentValue("force", getCommandParam(OPTIONS.FORCE, null));
         String internalCommand = "rollbackOneChangeset";
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
-        rollbackOneChangeSet.execute();
+        executeAndClearCredentials(rollbackOneChangeSet);
     }
 
     private void runRollbackOneChangeSetSqlCommandStep() throws CommandExecutionException, CommandLineParsingException, IOException {
@@ -1881,7 +1882,7 @@ public class Main {
         String internalCommand = "rollbackOneChangeset";
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
         rollbackOneChangeSet.setOutput(new WriterOutputStream(getOutputWriter(), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
-        rollbackOneChangeSet.execute();
+        executeAndClearCredentials(rollbackOneChangeSet);
     }
 
     private void runRollbackOneUpdateCommandStep() throws CommandExecutionException, CommandLineParsingException {
@@ -1894,7 +1895,7 @@ public class Main {
                 .addArgumentValue("force", getCommandParam(OPTIONS.FORCE, null));
         String internalCommand = "rollbackOneUpdate";
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
-        rollbackOneUpdate.execute();
+        executeAndClearCredentials(rollbackOneUpdate);
     }
 
     private void runRollbackOneUpdateSqlCommandStep() throws CommandExecutionException, CommandLineParsingException, IOException {
@@ -1908,7 +1909,7 @@ public class Main {
         String internalCommand = "rollbackOneUpdate";
         Scope.getCurrentScope().addMdcValue(MdcKey.LIQUIBASE_INTERNAL_COMMAND, internalCommand);
         rollbackOneUpdate.setOutput(new WriterOutputStream(getOutputWriter(), GlobalConfiguration.OUTPUT_FILE_ENCODING.getCurrentValue()));
-        rollbackOneUpdate.execute();
+        executeAndClearCredentials(rollbackOneUpdate);
     }
 
     /**
@@ -1989,7 +1990,7 @@ public class Main {
         executeSql.addArgumentValue(ExecuteSqlCommandStep.SQLFILE_ARG, getCommandParam("sqlFile", null));
         executeSql.addArgumentValue(ExecuteSqlCommandStep.DELIMITER_ARG, getCommandParam("delimiter", ";"));
         setDatabaseArgumentsToCommand(executeSql);
-        executeSql.execute();
+        executeAndClearCredentials(executeSql);
     }
 
     /**
@@ -2067,6 +2068,29 @@ public class Main {
     }
 
     /**
+     * Execute the given {@link CommandScope} and unconditionally call
+     * {@link CommandScope#clearCredentialArguments()} on it afterwards (CWE-316:
+     * Cleartext Storage of Sensitive Information in Memory). Used in place of a
+     * bare {@code commandScope.execute()} at every CLI command-runner site so
+     * that single-use scopes drop their credential references before this method
+     * returns, regardless of command outcome.
+     * <p>
+     * The clearing was originally inlined into {@link CommandScope#execute()}'s
+     * outer {@code finally}, but that broke any caller that calls {@code execute()}
+     * more than once on the same scope (the second call sees {@code "*****"} and
+     * the JDBC driver rejects). Moving the clearing to the CLI entry points
+     * preserves the CWE-316 intent here without imposing single-use semantics on
+     * programmatic / library callers.
+     */
+    private static CommandResults executeAndClearCredentials(CommandScope commandScope) throws CommandExecutionException {
+        try {
+            return commandScope.execute();
+        } finally {
+            commandScope.clearCredentialArguments();
+        }
+    }
+
+    /**
      * Return the first "parameter" from the command line that does NOT have the form of parameter=value. A parameter
      * is a command line argument that follows the main action (e.g. update/rollback/...). Example:
      * For the main action "updateToTagSQL &lt;tag&gt;", &lt;tag&gt; would be the command argument.
@@ -2137,7 +2161,7 @@ public class Main {
             commandScope.addArgumentValue("exception", exception);
             commandScope.addArgumentValue("listener", defaultChangeExecListener);
             commandScope.addArgumentValue("rollbackOnError", rollbackOnError);
-            commandScope.execute();
+            executeAndClearCredentials(commandScope);
         } catch (IllegalArgumentException ignoredCommandNotFound) {
             throw exception;
         }

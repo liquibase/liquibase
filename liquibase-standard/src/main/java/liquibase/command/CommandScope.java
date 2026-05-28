@@ -52,9 +52,23 @@ public class CommandScope {
 
     /**
      * Substring tokens (lowercase) that mark an argument key as credential-bearing.
-     * Values for matching keys are overwritten with {@code "*****"} at the end of
-     * {@link #execute()} so the original credential Strings become GC-eligible and
-     * do not linger in heap for the rest of the JVM lifetime (CWE-316).
+     * Values for matching keys are overwritten with {@code "*****"} when the
+     * (public) {@link #clearCredentialArguments()} method is invoked by a caller.
+     * That makes the original credential Strings GC-eligible so they do not linger
+     * in heap for the rest of the JVM lifetime in long-running embedded scenarios
+     * (CWE-316).
+     * <p>
+     * <b>Caller-invoked, not auto-invoked from {@link #execute()}</b>. Calling it
+     * from an outer {@code finally} block in {@code execute()} (as the original
+     * CWE-316 fix did) breaks any caller that calls {@code execute()} more than
+     * once on the same {@code CommandScope} — the second call reads {@code "*****"}
+     * instead of the real credential and the JDBC driver rejects the connection.
+     * The CLI in {@code Main} wraps its single-use scopes in try-finally to call
+     * this method after each {@code execute()}; programmatic / library callers
+     * who reuse a {@code CommandScope} (e.g. status-before / update / status-after
+     * patterns) should call it once after the final {@code execute()}, never
+     * between executions. Discovered via
+     * {@code PostgreSQLIntegrationTest.testStatusRunDuringUpdate}.
      * <p>
      * Matching is intentionally substring-based on the lowercased key: keys like
      * {@code "argument__bearerToken"} are caught by {@code "token"};
@@ -379,22 +393,30 @@ public class CommandScope {
             throw e;
         } catch (Exception e) {
             throw new CommandExecutionException(e);
-        } finally {
-            clearCredentialArguments();
         }
     }
 
     /**
-     * Overwrite the values of any credential-bearing argument keys with
-     * {@code "*****"} so the original credential Strings stop being referenced by
-     * this scope. Strings are immutable and cannot be wiped in-place, but dropping
-     * the reference here makes them GC-eligible (assuming no other references hold
-     * the same String) instead of letting them live for the rest of the JVM in
-     * long-running embedded scenarios (CWE-316: Cleartext Storage of Sensitive
-     * Information in Memory). Called from {@link #execute()}'s outer finally so
-     * it runs regardless of command outcome; package-private for direct testing.
+     * Overwrite the values of any credential-bearing argument keys (per
+     * {@link #CREDENTIAL_KEY_TOKENS}) with {@code "*****"} so the original
+     * credential Strings stop being referenced by this scope. Strings are
+     * immutable and cannot be wiped in-place, but dropping the reference here
+     * makes them GC-eligible (assuming no other references hold the same String)
+     * instead of letting them live for the rest of the JVM in long-running
+     * embedded scenarios (CWE-316: Cleartext Storage of Sensitive Information
+     * in Memory).
+     * <p>
+     * <b>Caller-invoked.</b> This method must NOT be auto-invoked from
+     * {@link #execute()} — doing so (as the original CWE-316 fix did) breaks any
+     * caller that calls {@code execute()} more than once on the same scope, since
+     * the second call reads {@code "*****"} instead of the real credential.
+     * Callers that reuse a scope (e.g. status-before / update / status-after
+     * patterns) must call this method <b>after the final</b> {@code execute()},
+     * never between executions. Callers that use a scope only once (such as the
+     * CLI in {@code Main}) typically wrap the {@code execute()} call in a
+     * try-finally and call this in the {@code finally}.
      */
-    void clearCredentialArguments() {
+    public void clearCredentialArguments() {
         if (argumentValues.isEmpty()) {
             return;
         }
