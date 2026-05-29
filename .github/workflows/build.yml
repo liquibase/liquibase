@@ -168,7 +168,7 @@ jobs:
           ## save install4j code signing keys
           mkdir -p liquibase-dist/target/keys
         
-          ./mvnw -B -pl liquibase-dist source:jar clean package failsafe:integration-test failsafe:verify \
+          ./mvnw -B -pl liquibase-dist -am source:jar clean package failsafe:integration-test failsafe:verify \
           "-Dbuild.repository.owner=liquibase" \
           "-Dbuild.repository.name=liquibase" \
           "-Dbuild.branch=${{ needs.setup.outputs.thisBranchName }}" \
