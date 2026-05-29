@@ -1,0 +1,103 @@
+name: "Release notes: aggregate from Jira"
+
+# Thin caller for the reusable workflow in liquibase/build-logic.
+# Aggregates `## Release note` H2 blocks from every Done Jira ticket
+# in a Community Fix Version, renders a markdown report, and either
+# previews it in the run summary (dry run) or appends it to the
+# GitHub Release body (publish).
+#
+# Two triggers:
+#   release: [published]     Auto-fires when a Community release is
+#                            published. Derives Jira Fix Version from
+#                            the release tag (strip leading 'v',
+#                            prepend 'Community '). dry_run is false,
+#                            release body gets the notes appended.
+#   workflow_dispatch        Manual. User enters the Fix Version name
+#                            directly. dry_run defaults to true,
+#                            preview-only.
+#
+# Per TECHOPS-498. Logic lives in liquibase/build-logic.
+#
+# Security: every workflow input and event payload field is consumed
+# via env vars in run: blocks. Never interpolated directly into shell.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Jira Fix Version name (e.g. 'Community 5.0.4')"
+        required: true
+        type: string
+      dry_run:
+        description: "Preview only — do not post to the GitHub Release body"
+        required: false
+        type: boolean
+        default: true
+      release_tag:
+        description: "GitHub Release tag to update when dry_run=false (e.g. 'v5.0.4')"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  id-token: write
+  contents: write
+
+# Serialize runs against the same release so concurrent triggers
+# (auto-fire from `release: [published]` + manual `workflow_dispatch`
+# on the same tag, two reruns racing, etc.) don't clobber each other
+# through the `gh release edit` step. cancel-in-progress: false lets
+# both runs complete in order rather than killing the first.
+concurrency:
+  group: release-notes-${{ github.event.release.tag_name || inputs.release_tag || inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  derive:
+    # Skip prereleases on the auto-publish path. `release: [published]`
+    # fires for ANY release type (GA, prerelease, draft-being-published),
+    # but only GA releases should have their body auto-augmented with
+    # Jira release notes — an `v5.2.0-RC8` tag shouldn't pollute the RC
+    # release body with an empty completeness report.
+    # workflow_dispatch runs are unaffected (`github.event.release` is
+    # absent on dispatch, so the expression evaluates true).
+    if: ${{ github.event_name != 'release' || !github.event.release.prerelease }}
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.compute.outputs.version }}
+      dry_run: ${{ steps.compute.outputs.dry_run }}
+      release_tag: ${{ steps.compute.outputs.release_tag }}
+    steps:
+      - id: compute
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          MANUAL_VERSION: ${{ inputs.version }}
+          MANUAL_DRY_RUN: ${{ inputs.dry_run }}
+          MANUAL_RELEASE_TAG: ${{ inputs.release_tag }}
+          EVENT_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          if [[ "$EVENT_NAME" == "release" ]]; then
+            stripped="${EVENT_TAG#v}"
+            {
+              echo "version=Community ${stripped}"
+              echo "dry_run=false"
+              echo "release_tag=${EVENT_TAG}"
+            } >> "$GITHUB_OUTPUT"
+          else
+            {
+              echo "version=${MANUAL_VERSION}"
+              echo "dry_run=${MANUAL_DRY_RUN}"
+              echo "release_tag=${MANUAL_RELEASE_TAG}"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+  aggregate:
+    needs: derive
+    uses: liquibase/build-logic/.github/workflows/release-notes-aggregate.yml@main
+    with:
+      version: ${{ needs.derive.outputs.version }}
+      dry_run: ${{ needs.derive.outputs.dry_run == 'true' }}
+      release_tag: ${{ needs.derive.outputs.release_tag }}
+    secrets: inherit
