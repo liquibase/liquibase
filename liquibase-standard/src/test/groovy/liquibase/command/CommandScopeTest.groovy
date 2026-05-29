@@ -196,13 +196,19 @@ class CommandScopeTest extends Specification {
         Locale.setDefault(savedDefault)
     }
 
-    def "execute invokes credential clearing in its outer finally on the success path"() {
-        // CWE-316 wiring check: confirms the outer finally added to execute()
-        // actually calls clearCredentialArguments(). Pre-supplies the 'requiredArg'
-        // value so this test is order-independent w.r.t. the 'execute with failing
-        // argument validation' spec that registers requiredArg as required on
-        // 'mock' (Spock test order in a single Specification is declaration-order,
-        // but the side effect of CommandBuilder is global to the JVM).
+    def "execute does NOT clear credential arguments automatically — opt-in semantics"() {
+        // Regression: PR #7741 originally clamped clearCredentialArguments() into
+        // execute()'s outer finally to satisfy CWE-316. That broke any caller that
+        // re-uses a CommandScope (see PostgreSQLIntegrationTest.testStatusRunDuringUpdate
+        // which executes 3× on the same scope: first call succeeded; second/third saw
+        // "*****" in argumentValues["password"] and got "FATAL: password authentication
+        // failed for user 'lbuser'" from the JDBC driver). The fix moved the clearing
+        // out of execute() and made it caller-invoked via the (now public)
+        // clearCredentialArguments() method. This spec pins that execute() alone does
+        // NOT touch credential argument values, so re-use cases continue to work.
+        // Pre-supplies 'requiredArg' so the test is order-independent w.r.t. the
+        // 'execute with failing argument validation' spec above which registers
+        // requiredArg as required on 'mock'.
         given:
         def scope = new CommandScope("mock")
         scope.addArgumentValue("requiredArg", "anything")
@@ -212,7 +218,7 @@ class CommandScopeTest extends Specification {
         MockCommandStep.logic = new MockCommandStep() {
             @Override
             void run(CommandResultsBuilder resultsBuilder) throws Exception {
-                // no-op pipeline body — we are testing the finally-block wiring, not the step.
+                // no-op pipeline body — we are pinning the absence of auto-clearing, not the step.
             }
         }
 
@@ -220,13 +226,51 @@ class CommandScopeTest extends Specification {
         scope.execute()
 
         then:
-        scope.@argumentValues["password"]    == "*****"
+        scope.@argumentValues["password"]    == "supersecret-pw-12345"
         scope.@argumentValues["requiredArg"] == "anything"
         scope.@argumentValues["username"]    == "regular-user"
     }
 
-    def "execute invokes credential clearing in its outer finally even when the pipeline throws"() {
-        // CWE-316 wiring check: the outer finally must run on the failure path too.
+    def "execute called twice on the same scope reads original credentials both times — regression for PostgreSQLIntegrationTest.testStatusRunDuringUpdate"() {
+        // The canary scenario that surfaced the auto-clear regression. A caller
+        // creates a CommandScope, executes it (e.g., 'status'), then re-executes
+        // the SAME scope (e.g., 'update', or 'status' again after a concurrent
+        // update). With the old auto-clear in execute()'s finally, the second
+        // execute() would see argumentValues["password"] == "*****" and the JDBC
+        // driver would reject the connection with "password authentication failed".
+        // Post-fix: both executions see the original credential.
+        given:
+        def scope = new CommandScope("mock")
+        scope.addArgumentValue("requiredArg", "anything")
+        scope.addArgumentValue("password",    "supersecret-pw-12345")
+
+        def passwordsObservedByPipeline = []
+        MockCommandStep.logic = new MockCommandStep() {
+            @Override
+            void run(CommandResultsBuilder resultsBuilder) throws Exception {
+                // Capture what the pipeline would have read at execute() time.
+                passwordsObservedByPipeline << resultsBuilder.getCommandScope().@argumentValues["password"]
+            }
+        }
+
+        when:
+        scope.execute()
+        scope.execute()
+        scope.execute()
+
+        then:
+        // All three executions saw the same original credential — none was redacted
+        // between calls. This is the contract that re-use callers depend on.
+        passwordsObservedByPipeline == ["supersecret-pw-12345", "supersecret-pw-12345", "supersecret-pw-12345"]
+        scope.@argumentValues["password"] == "supersecret-pw-12345"
+    }
+
+    def "execute does NOT clear credentials even when the pipeline throws — opt-in semantics also apply on the failure path"() {
+        // Counterpart to the success-path spec above: under the new opt-in semantics,
+        // execute() must NOT auto-clear on exception either. If a caller needs the
+        // CWE-316 protection on the failure path, they wrap the execute() call in
+        // try-finally and call clearCredentialArguments() themselves (see
+        // Main.executeAndClearCredentials()).
         given:
         def scope = new CommandScope("mock")
         scope.addArgumentValue("requiredArg", "anything")
@@ -244,6 +288,37 @@ class CommandScopeTest extends Specification {
 
         then:
         thrown(liquibase.exception.CommandExecutionException)
+        scope.@argumentValues["password"] == "supersecret-pw-12345"
+    }
+
+    def "caller-invoked try-finally pattern around execute clears credentials post-execution (CWE-316 wiring documented for CLI integrators)"() {
+        // The pattern recommended for CLI / single-use callers: wrap execute() in
+        // try-finally and call clearCredentialArguments() in the finally. This spec
+        // documents the contract: the pipeline sees the original credential during
+        // execute(), and the credential is wiped immediately after the call returns.
+        // Main.executeAndClearCredentials() is the canonical implementation.
+        given:
+        def scope = new CommandScope("mock")
+        scope.addArgumentValue("requiredArg", "anything")
+        scope.addArgumentValue("password",    "supersecret-pw-12345")
+
+        def passwordSeenByPipeline = null
+        MockCommandStep.logic = new MockCommandStep() {
+            @Override
+            void run(CommandResultsBuilder resultsBuilder) throws Exception {
+                passwordSeenByPipeline = resultsBuilder.getCommandScope().@argumentValues["password"]
+            }
+        }
+
+        when:
+        try {
+            scope.execute()
+        } finally {
+            scope.clearCredentialArguments()
+        }
+
+        then:
+        passwordSeenByPipeline == "supersecret-pw-12345"
         scope.@argumentValues["password"] == "*****"
     }
 
