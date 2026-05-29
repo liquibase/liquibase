@@ -192,11 +192,11 @@ jobs:
 
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.zip artifacts
-          cp liquibase-core/target/liquibase-core-0-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
+          cp liquibase-core/target/liquibase-core-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.jar artifacts/liquibase-core-0-SNAPSHOT.jar
           #cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT/internal/lib/liquibase-core.jar artifacts/liquibase-core-0-SNAPSHOT.jar
 
-          cp liquibase-core/target/liquibase-core-0-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
-          cp target/liquibase-0-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
+          cp liquibase-core/target/liquibase-core-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-sources.jar artifacts/liquibase-core-0-SNAPSHOT-sources.jar
+          cp target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-javadoc.jar artifacts/liquibase-core-0-SNAPSHOT-javadoc.jar
 
           ##create installer - disabled here but run as nightly job and as part of release workflow
           #cp liquibase-dist/target/liquibase-*-installer-* artifacts
