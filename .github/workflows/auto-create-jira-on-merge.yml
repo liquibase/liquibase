@@ -57,20 +57,20 @@ jobs:
          (github.event.action == 'milestoned' && github.event.pull_request.merged == true)))
     steps:
       - name: Configure AWS credentials for vault access
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.LIQUIBASE_VAULT_OIDC_ROLE_ARN }}
           aws-region: us-east-1
 
       - name: Get Jira service-account credentials from vault
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        uses: aws-actions/aws-secretsmanager-get-secrets@v3
         with:
           secret-ids: |
             ,/vault/liquibase
           parse-json-secrets: true
 
       - name: Auto-create / update tickets
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           JIRA_BASE_URL: https://datical.atlassian.net
           JIRA_EMAIL: ${{ env.JIRA_USER }}
