@@ -202,9 +202,9 @@ jobs:
           #cp liquibase-dist/target/liquibase-*-installer-* artifacts
 
           for i in 'liquibase-maven-plugin' 'liquibase-cli'; do
-            cp $i/target/$i-0-SNAPSHOT.jar artifacts
-            cp $i/target/$i-0-SNAPSHOT-sources.jar artifacts
-            cp $i/target/$i-0-SNAPSHOT-javadoc.jar artifacts
+            cp $i/target/$i-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.jar artifacts/$i-0-SNAPSHOT.jar
+            cp $i/target/$i-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-sources.jar artifacts/$i-0-SNAPSHOT-sources.jar
+            cp $i/target/$i-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-javadoc.jar artifacts/$i-0-SNAPSHOT-javadoc.jar
           done
 
           .github/util/sign-artifacts.sh artifacts
@@ -213,10 +213,10 @@ jobs:
           mkdir artifacts-named
 
           cp liquibase-dist/target/liquibase-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.tar.gz artifacts-named/liquibase-${{ needs.setup.outputs.thisBranchName }}.tar.gz
-          cp liquibase-extension-testing/target/liquibase-extension-testing-0-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}-deps.jar
+          cp liquibase-extension-testing/target/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT-deps.jar artifacts-named/liquibase-extension-testing-${{ needs.setup.outputs.thisBranchName }}-deps.jar
 
           for i in 'liquibase-core' 'liquibase-maven-plugin' 'liquibase-cli' 'liquibase-extension-testing'; do
-            cp $i/target/$i-0-SNAPSHOT.jar artifacts-named/$i-${{ needs.setup.outputs.thisBranchName }}.jar
+            cp $i/target/$i-${{ needs.setup.outputs.thisBranchName }}-SNAPSHOT.jar artifacts-named/$i-${{ needs.setup.outputs.thisBranchName }}.jar
           done
 
       - name: Archive Packages
