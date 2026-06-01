@@ -230,13 +230,14 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
                 .build();
 
         ALLOW_CUSTOM_CHANGE = builder.define("allowCustomChange", Boolean.class)
-                .setDescription("If false, the customChange changelog change is rejected before its named " +
-                        "class is loaded. Defaults to true to preserve the documented customChange feature " +
-                        "for the standard trust model (team-authored, team-reviewed changelogs). Set to " +
-                        "false in environments that execute changelogs from less-trusted sources " +
-                        "(multi-tenant SaaS running customer changelogs, downloaded change-packs, " +
-                        "contributor PRs prior to review): customChange loads an arbitrary JVM class by " +
-                        "FQCN via Class.forName(initialize=true), which fires the class's static <clinit> " +
+                .setDescription("If false, the customChange and customPrecondition changelog elements are " +
+                        "rejected before the named class is loaded. Defaults to true to preserve the " +
+                        "documented custom-Java features for the standard trust model (team-authored, " +
+                        "team-reviewed changelogs). Set to false in environments that execute changelogs " +
+                        "from less-trusted sources (multi-tenant SaaS running customer changelogs, " +
+                        "downloaded change-packs, contributor PRs prior to review): both customChange " +
+                        "and customPrecondition load an arbitrary JVM class by FQCN via " +
+                        "Class.forName(initialize=true), which fires the class's static <clinit> " +
                         "initializer at load time — before any cast or marker-interface check could " +
                         "reject the load. Any class on the JVM classpath is reachable this way (CWE-470).")
                 .setDefaultValue(true)
