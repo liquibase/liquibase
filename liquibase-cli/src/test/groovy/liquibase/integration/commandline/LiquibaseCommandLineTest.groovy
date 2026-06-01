@@ -157,6 +157,35 @@ Global Options
                                variable:
                                'LIQUIBASE_ALLOW_PARENT_DIRECTORY_REFERENCES')
 
+      --allow-sql-precondition=PARAM
+                             If false, the sqlCheck changelog precondition is
+                               rejected at validation and check time without
+                               executing its SQL body. Defaults to true to
+                               preserve the documented sqlCheck feature for the
+                               standard trust model (team-authored,
+                               team-reviewed changelogs). Set to false in
+                               environments that execute changelogs from
+                               less-trusted sources (multi-tenant SaaS running
+                               customer changelogs, downloaded change-packs,
+                               contributor PRs prior to review): sqlCheck runs
+                               the literal SQL body from the changelog against
+                               the live JDBC connection during precondition
+                               evaluation, before the change body is reached.
+                               On drivers permitting multi-statement execution
+                               (e.g. MySQL/MariaDB with
+                               allowMultiQueries=true), additional DDL or DML
+                               can be batched into the sqlCheck body and run
+                               regardless of the expectedResult comparison; the
+                               SQL also executes through a less-reviewed code
+                               path that bypasses the change-execution audit
+                               trail, and an onFail=MARK_RAN precondition can
+                               hide the change body from being applied while
+                               the precondition SQL has already run (CWE-89).
+                             DEFAULT: true
+                             (defaults file: 'liquibase.allowSqlPrecondition',
+                               environment variable:
+                               'LIQUIBASE_ALLOW_SQL_PRECONDITION')
+
       --always-drop-instead-of-replace=PARAM
                              If true, drop and recreate a view instead of
                                replacing it.
