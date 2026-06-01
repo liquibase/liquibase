@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019e736a-144f-7213-a898-758e7abb9c9d",
-  "CreatedAt": "2026-05-29T11:06:32.39913728Z",
+  "ReportID": "019e830d-b371-7615-86e9-bbeeea1b3be5",
+  "CreatedAt": "2026-06-01T11:59:33.745399913Z",
   "ArtifactName": "/tmp/extracted-deps",
   "ArtifactType": "filesystem",
   "Results": [
@@ -521,7 +521,7 @@
             "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
           },
           "Fingerprint": "sha256:9064d8c9810ed449e3e689ceba2ee10402d7090c4c545e3222f9812f1cc72007",
-          "Title": "pgjdbc is an open source postgresql JDBC Driver. From 42.7.4 and until ...",
+          "Title": "pgjdbc: pgjdbc insecure authentication in channel binding",
           "Description": "pgjdbc is an open source postgresql JDBC Driver. From 42.7.4 and until 42.7.7, when the PostgreSQL JDBC driver is configured with channel binding set to required (default value is prefer), the driver would incorrectly allow connections to proceed with authentication methods that do not support channel binding (such as password, MD5, GSS, or SSPI authentication). This could allow a man-in-the-middle attacker to intercept connections that users believed were protected by channel binding requirements. This vulnerability is fixed in 42.7.7.",
           "Severity": "HIGH",
           "CweIDs": [
@@ -530,7 +530,8 @@
           "VendorSeverity": {
             "bitnami": 2,
             "ghsa": 3,
-            "nvd": 2
+            "nvd": 2,
+            "redhat": 3
           },
           "CVSS": {
             "bitnami": {
@@ -544,15 +545,21 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
               "V3Score": 5.9
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N",
+              "V3Score": 8.2
             }
           },
           "References": [
+            "https://access.redhat.com/security/cve/CVE-2025-49146",
             "https://datatracker.ietf.org/doc/html/rfc5802",
             "https://datatracker.ietf.org/doc/html/rfc7677",
             "https://github.com/pgjdbc/pgjdbc",
             "https://github.com/pgjdbc/pgjdbc/commit/9217ed16cb2918ab1b6b9258ae97e6ede244d8a0",
             "https://github.com/pgjdbc/pgjdbc/security/advisories/GHSA-hq9p-pm7w-8p54",
             "https://nvd.nist.gov/vuln/detail/CVE-2025-49146",
+            "https://www.cve.org/CVERecord?id=CVE-2025-49146",
             "https://www.postgresql.org/docs/current/sasl-authentication.html#SASL-SCRAM-SHA-256"
           ],
           "PublishedDate": "2025-06-11T15:15:42.85Z",

@@ -3,8 +3,8 @@
   "Trivy": {
     "Version": "0.69.3"
   },
-  "ReportID": "019e736a-ef12-7054-ac68-bd6826440786",
-  "CreatedAt": "2026-05-29T11:07:28.402024269Z",
+  "ReportID": "019e830e-5052-7806-90d0-252ece83b92f",
+  "CreatedAt": "2026-06-01T12:00:13.906527176Z",
   "ArtifactName": "/tmp/extracted-deps",
   "ArtifactType": "filesystem",
   "Results": [
@@ -1143,7 +1143,7 @@
             "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
           },
           "Fingerprint": "sha256:ad6411eae3cf1dec667f1029d3d9f8f5b62fd7345959f8937deddc690b1f47e3",
-          "Title": "A vulnerability in the package_index module of pypa/setuptools version ...",
+          "Title": "pypa/setuptools: Remote code execution via download functions in the package_index module in pypa/setuptools",
           "Description": "A vulnerability in the package_index module of pypa/setuptools versions up to 69.1.1 allows for remote code execution via its download functions. These functions, which are used to download packages from URLs provided by users or retrieved from package index servers, are susceptible to code injection. If these functions are exposed to user-controlled inputs, such as package URLs, they can execute arbitrary commands on the system. The issue is fixed in version 70.0.",
           "Severity": "HIGH",
           "CweIDs": [
@@ -1158,6 +1158,7 @@
             "ghsa": 3,
             "oracle-oval": 3,
             "photon": 3,
+            "redhat": 3,
             "rocky": 3,
             "ubuntu": 2
           },
@@ -1171,10 +1172,15 @@
               "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:A/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
               "V3Score": 8.8,
               "V40Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+              "V3Score": 8.8
             }
           },
           "References": [
             "https://access.redhat.com/errata/RHSA-2024:6726",
+            "https://access.redhat.com/security/cve/CVE-2024-6345",
             "https://bugzilla.redhat.com/2297771",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2297771",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-6345",
@@ -1217,7 +1223,7 @@
             "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
           },
           "Fingerprint": "sha256:ad6411eae3cf1dec667f1029d3d9f8f5b62fd7345959f8937deddc690b1f47e3",
-          "Title": "A vulnerability in the package_index module of pypa/setuptools version ...",
+          "Title": "pypa/setuptools: Remote code execution via download functions in the package_index module in pypa/setuptools",
           "Description": "A vulnerability in the package_index module of pypa/setuptools versions up to 69.1.1 allows for remote code execution via its download functions. These functions, which are used to download packages from URLs provided by users or retrieved from package index servers, are susceptible to code injection. If these functions are exposed to user-controlled inputs, such as package URLs, they can execute arbitrary commands on the system. The issue is fixed in version 70.0.",
           "Severity": "HIGH",
           "CweIDs": [
@@ -1232,6 +1238,7 @@
             "ghsa": 3,
             "oracle-oval": 3,
             "photon": 3,
+            "redhat": 3,
             "rocky": 3,
             "ubuntu": 2
           },
@@ -1245,10 +1252,15 @@
               "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:A/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
               "V3Score": 8.8,
               "V40Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+              "V3Score": 8.8
             }
           },
           "References": [
             "https://access.redhat.com/errata/RHSA-2024:6726",
+            "https://access.redhat.com/security/cve/CVE-2024-6345",
             "https://bugzilla.redhat.com/2297771",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2297771",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-6345",
@@ -1291,7 +1303,7 @@
             "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
           },
           "Fingerprint": "sha256:ad6411eae3cf1dec667f1029d3d9f8f5b62fd7345959f8937deddc690b1f47e3",
-          "Title": "A vulnerability in the package_index module of pypa/setuptools version ...",
+          "Title": "pypa/setuptools: Remote code execution via download functions in the package_index module in pypa/setuptools",
           "Description": "A vulnerability in the package_index module of pypa/setuptools versions up to 69.1.1 allows for remote code execution via its download functions. These functions, which are used to download packages from URLs provided by users or retrieved from package index servers, are susceptible to code injection. If these functions are exposed to user-controlled inputs, such as package URLs, they can execute arbitrary commands on the system. The issue is fixed in version 70.0.",
           "Severity": "HIGH",
           "CweIDs": [
@@ -1306,6 +1318,7 @@
             "ghsa": 3,
             "oracle-oval": 3,
             "photon": 3,
+            "redhat": 3,
             "rocky": 3,
             "ubuntu": 2
           },
@@ -1319,10 +1332,15 @@
               "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:A/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
               "V3Score": 8.8,
               "V40Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+              "V3Score": 8.8
             }
           },
           "References": [
             "https://access.redhat.com/errata/RHSA-2024:6726",
+            "https://access.redhat.com/security/cve/CVE-2024-6345",
             "https://bugzilla.redhat.com/2297771",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2297771",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-6345",
@@ -1365,7 +1383,7 @@
             "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
           },
           "Fingerprint": "sha256:b5d6b054b091eb32e4fccf66007472f24187743e751b08e772f7137e0914ac38",
-          "Title": "setuptools is a package that allows users to download, build, install, ...",
+          "Title": "setuptools: Path Traversal Vulnerability in setuptools PackageIndex",
           "Description": "setuptools is a package that allows users to download, build, install, upgrade, and uninstall Python packages. A path traversal vulnerability in `PackageIndex` is present in setuptools prior to version 78.1.1. An attacker would be allowed to write files to arbitrary locations on the filesystem with the permissions of the process running the Python code, which could escalate to remote code execution depending on the context. Version 78.1.1 fixes the issue.",
           "Severity": "HIGH",
           "CweIDs": [
@@ -1380,6 +1398,7 @@
             "nvd": 3,
             "oracle-oval": 2,
             "photon": 3,
+            "redhat": 2,
             "rocky": 2,
             "ubuntu": 2
           },
@@ -1395,15 +1414,20 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
               "V3Score": 8.8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:L",
+              "V3Score": 7.1
             }
           },
           "References": [
             "https://access.redhat.com/errata/RHSA-2025:13578",
+            "https://access.redhat.com/security/cve/CVE-2025-47273",
             "https://bugzilla.redhat.com/2366982",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2366982",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-47273",
             "https://errata.almalinux.org/9/ALSA-2025-13578.html",
-            "https://errata.rockylinux.org/RLSA-2025:9940",
+            "https://errata.rockylinux.org/RLSA-2025:10407",
             "https://github.com/pypa/advisory-database/tree/main/vulns/setuptools/PYSEC-2025-49.yaml",
             "https://github.com/pypa/setuptools",
             "https://github.com/pypa/setuptools/blob/6ead555c5fb29bc57fe6105b1bffc163f56fd558/setuptools/package_index.py#L810C1-L825C88",
@@ -1443,7 +1467,7 @@
             "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
           },
           "Fingerprint": "sha256:b5d6b054b091eb32e4fccf66007472f24187743e751b08e772f7137e0914ac38",
-          "Title": "setuptools is a package that allows users to download, build, install, ...",
+          "Title": "setuptools: Path Traversal Vulnerability in setuptools PackageIndex",
           "Description": "setuptools is a package that allows users to download, build, install, upgrade, and uninstall Python packages. A path traversal vulnerability in `PackageIndex` is present in setuptools prior to version 78.1.1. An attacker would be allowed to write files to arbitrary locations on the filesystem with the permissions of the process running the Python code, which could escalate to remote code execution depending on the context. Version 78.1.1 fixes the issue.",
           "Severity": "HIGH",
           "CweIDs": [
@@ -1458,6 +1482,7 @@
             "nvd": 3,
             "oracle-oval": 2,
             "photon": 3,
+            "redhat": 2,
             "rocky": 2,
             "ubuntu": 2
           },
@@ -1473,15 +1498,20 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
               "V3Score": 8.8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:L",
+              "V3Score": 7.1
             }
           },
           "References": [
             "https://access.redhat.com/errata/RHSA-2025:13578",
+            "https://access.redhat.com/security/cve/CVE-2025-47273",
             "https://bugzilla.redhat.com/2366982",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2366982",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-47273",
             "https://errata.almalinux.org/9/ALSA-2025-13578.html",
-            "https://errata.rockylinux.org/RLSA-2025:9940",
+            "https://errata.rockylinux.org/RLSA-2025:10407",
             "https://github.com/pypa/advisory-database/tree/main/vulns/setuptools/PYSEC-2025-49.yaml",
             "https://github.com/pypa/setuptools",
             "https://github.com/pypa/setuptools/blob/6ead555c5fb29bc57fe6105b1bffc163f56fd558/setuptools/package_index.py#L810C1-L825C88",
@@ -1521,7 +1551,7 @@
             "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
           },
           "Fingerprint": "sha256:b5d6b054b091eb32e4fccf66007472f24187743e751b08e772f7137e0914ac38",
-          "Title": "setuptools is a package that allows users to download, build, install, ...",
+          "Title": "setuptools: Path Traversal Vulnerability in setuptools PackageIndex",
           "Description": "setuptools is a package that allows users to download, build, install, upgrade, and uninstall Python packages. A path traversal vulnerability in `PackageIndex` is present in setuptools prior to version 78.1.1. An attacker would be allowed to write files to arbitrary locations on the filesystem with the permissions of the process running the Python code, which could escalate to remote code execution depending on the context. Version 78.1.1 fixes the issue.",
           "Severity": "HIGH",
           "CweIDs": [
@@ -1536,6 +1566,7 @@
             "nvd": 3,
             "oracle-oval": 2,
             "photon": 3,
+            "redhat": 2,
             "rocky": 2,
             "ubuntu": 2
           },
@@ -1551,15 +1582,20 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
               "V3Score": 8.8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:L",
+              "V3Score": 7.1
             }
           },
           "References": [
             "https://access.redhat.com/errata/RHSA-2025:13578",
+            "https://access.redhat.com/security/cve/CVE-2025-47273",
             "https://bugzilla.redhat.com/2366982",
             "https://bugzilla.redhat.com/show_bug.cgi?id=2366982",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-47273",
             "https://errata.almalinux.org/9/ALSA-2025-13578.html",
-            "https://errata.rockylinux.org/RLSA-2025:9940",
+            "https://errata.rockylinux.org/RLSA-2025:10407",
             "https://github.com/pypa/advisory-database/tree/main/vulns/setuptools/PYSEC-2025-49.yaml",
             "https://github.com/pypa/setuptools",
             "https://github.com/pypa/setuptools/blob/6ead555c5fb29bc57fe6105b1bffc163f56fd558/setuptools/package_index.py#L810C1-L825C88",
@@ -1599,7 +1635,7 @@
             "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
           },
           "Fingerprint": "sha256:e19980d7bfdfcdeed1f1cc923340f225166dddf81b4fde899fac97237bd92711",
-          "Title": "Passing a heavily nested list to sqlparse.parse() leads to a Denial of ...",
+          "Title": "sqlparse: parsing heavily nested list leads to denial of service",
           "Description": "Passing a heavily nested list to sqlparse.parse() leads to a Denial of Service due to RecursionError.\n\n",
           "Severity": "HIGH",
           "CweIDs": [
@@ -1607,15 +1643,21 @@
           ],
           "VendorSeverity": {
             "ghsa": 3,
+            "redhat": 2,
             "ubuntu": 2
           },
           "CVSS": {
             "ghsa": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
               "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
             }
           },
           "References": [
+            "https://access.redhat.com/security/cve/CVE-2024-4340",
             "https://github.com/advisories/GHSA-2m57-hf25-phgg",
             "https://github.com/andialbrecht/sqlparse",
             "https://github.com/andialbrecht/sqlparse/commit/b4a39d9850969b4e1d6940d32094ee0b42a2cf03",
@@ -1652,7 +1694,7 @@
             "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
           },
           "Fingerprint": "sha256:e19980d7bfdfcdeed1f1cc923340f225166dddf81b4fde899fac97237bd92711",
-          "Title": "Passing a heavily nested list to sqlparse.parse() leads to a Denial of ...",
+          "Title": "sqlparse: parsing heavily nested list leads to denial of service",
           "Description": "Passing a heavily nested list to sqlparse.parse() leads to a Denial of Service due to RecursionError.\n\n",
           "Severity": "HIGH",
           "CweIDs": [
@@ -1660,15 +1702,21 @@
           ],
           "VendorSeverity": {
             "ghsa": 3,
+            "redhat": 2,
             "ubuntu": 2
           },
           "CVSS": {
             "ghsa": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
               "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
             }
           },
           "References": [
+            "https://access.redhat.com/security/cve/CVE-2024-4340",
             "https://github.com/advisories/GHSA-2m57-hf25-phgg",
             "https://github.com/andialbrecht/sqlparse",
             "https://github.com/andialbrecht/sqlparse/commit/b4a39d9850969b4e1d6940d32094ee0b42a2cf03",
@@ -1705,7 +1753,7 @@
             "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
           },
           "Fingerprint": "sha256:e19980d7bfdfcdeed1f1cc923340f225166dddf81b4fde899fac97237bd92711",
-          "Title": "Passing a heavily nested list to sqlparse.parse() leads to a Denial of ...",
+          "Title": "sqlparse: parsing heavily nested list leads to denial of service",
           "Description": "Passing a heavily nested list to sqlparse.parse() leads to a Denial of Service due to RecursionError.\n\n",
           "Severity": "HIGH",
           "CweIDs": [
@@ -1713,15 +1761,21 @@
           ],
           "VendorSeverity": {
             "ghsa": 3,
+            "redhat": 2,
             "ubuntu": 2
           },
           "CVSS": {
             "ghsa": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
               "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
             }
           },
           "References": [
+            "https://access.redhat.com/security/cve/CVE-2024-4340",
             "https://github.com/advisories/GHSA-2m57-hf25-phgg",
             "https://github.com/andialbrecht/sqlparse",
             "https://github.com/andialbrecht/sqlparse/commit/b4a39d9850969b4e1d6940d32094ee0b42a2cf03",
@@ -2055,7 +2109,7 @@
             "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
           },
           "Fingerprint": "sha256:b4c88ebf4b966bb7b3a123640dcd66b65ca41fabe067c31f153ffc831bcf7401",
-          "Title": "urllib3 is a user-friendly HTTP client library for Python. Starting in ...",
+          "Title": "urllib3: urllib3: Unbounded decompression chain leads to resource exhaustion",
           "Description": "urllib3 is a user-friendly HTTP client library for Python. Starting in version 1.24 and prior to 2.6.0, the number of links in the decompression chain was unbounded allowing a malicious server to insert a virtually unlimited number of compression steps leading to high CPU usage and massive memory allocation for the decompressed data. This vulnerability is fixed in 2.6.0.",
           "Severity": "HIGH",
           "CweIDs": [
@@ -2063,13 +2117,14 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
             "nvd": 3,
             "oracle-oval": 3,
             "photon": 3,
+            "redhat": 3,
             "rocky": 3,
             "ubuntu": 2
           },
@@ -2081,10 +2136,15 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
               "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
             }
           },
           "References": [
             "https://access.redhat.com/errata/RHSA-2026:1239",
+            "https://access.redhat.com/security/cve/CVE-2025-66418",
             "https://bugzilla.redhat.com/2419455",
             "https://bugzilla.redhat.com/2419467",
             "https://bugzilla.redhat.com/2427726",
@@ -2095,7 +2155,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66471",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-21441",
             "https://errata.almalinux.org/9/ALSA-2026-1239.html",
-            "https://errata.rockylinux.org/RLSA-2026:1086",
+            "https://errata.rockylinux.org/RLSA-2026:1087",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/commit/24d7b67eac89f94e11003424bcf0d8f7b72222a8",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-gm62-xv2j-4w53",
@@ -2133,7 +2193,7 @@
             "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
           },
           "Fingerprint": "sha256:b4c88ebf4b966bb7b3a123640dcd66b65ca41fabe067c31f153ffc831bcf7401",
-          "Title": "urllib3 is a user-friendly HTTP client library for Python. Starting in ...",
+          "Title": "urllib3: urllib3: Unbounded decompression chain leads to resource exhaustion",
           "Description": "urllib3 is a user-friendly HTTP client library for Python. Starting in version 1.24 and prior to 2.6.0, the number of links in the decompression chain was unbounded allowing a malicious server to insert a virtually unlimited number of compression steps leading to high CPU usage and massive memory allocation for the decompressed data. This vulnerability is fixed in 2.6.0.",
           "Severity": "HIGH",
           "CweIDs": [
@@ -2141,13 +2201,14 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
             "nvd": 3,
             "oracle-oval": 3,
             "photon": 3,
+            "redhat": 3,
             "rocky": 3,
             "ubuntu": 2
           },
@@ -2159,10 +2220,15 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
               "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
             }
           },
           "References": [
             "https://access.redhat.com/errata/RHSA-2026:1239",
+            "https://access.redhat.com/security/cve/CVE-2025-66418",
             "https://bugzilla.redhat.com/2419455",
             "https://bugzilla.redhat.com/2419467",
             "https://bugzilla.redhat.com/2427726",
@@ -2173,7 +2239,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66471",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-21441",
             "https://errata.almalinux.org/9/ALSA-2026-1239.html",
-            "https://errata.rockylinux.org/RLSA-2026:1086",
+            "https://errata.rockylinux.org/RLSA-2026:1087",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/commit/24d7b67eac89f94e11003424bcf0d8f7b72222a8",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-gm62-xv2j-4w53",
@@ -2211,7 +2277,7 @@
             "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
           },
           "Fingerprint": "sha256:b4c88ebf4b966bb7b3a123640dcd66b65ca41fabe067c31f153ffc831bcf7401",
-          "Title": "urllib3 is a user-friendly HTTP client library for Python. Starting in ...",
+          "Title": "urllib3: urllib3: Unbounded decompression chain leads to resource exhaustion",
           "Description": "urllib3 is a user-friendly HTTP client library for Python. Starting in version 1.24 and prior to 2.6.0, the number of links in the decompression chain was unbounded allowing a malicious server to insert a virtually unlimited number of compression steps leading to high CPU usage and massive memory allocation for the decompressed data. This vulnerability is fixed in 2.6.0.",
           "Severity": "HIGH",
           "CweIDs": [
@@ -2219,13 +2285,14 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
             "nvd": 3,
             "oracle-oval": 3,
             "photon": 3,
+            "redhat": 3,
             "rocky": 3,
             "ubuntu": 2
           },
@@ -2237,10 +2304,15 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
               "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
             }
           },
           "References": [
             "https://access.redhat.com/errata/RHSA-2026:1239",
+            "https://access.redhat.com/security/cve/CVE-2025-66418",
             "https://bugzilla.redhat.com/2419455",
             "https://bugzilla.redhat.com/2419467",
             "https://bugzilla.redhat.com/2427726",
@@ -2251,7 +2323,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66471",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-21441",
             "https://errata.almalinux.org/9/ALSA-2026-1239.html",
-            "https://errata.rockylinux.org/RLSA-2026:1086",
+            "https://errata.rockylinux.org/RLSA-2026:1087",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/commit/24d7b67eac89f94e11003424bcf0d8f7b72222a8",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-gm62-xv2j-4w53",
@@ -2289,7 +2361,7 @@
             "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
           },
           "Fingerprint": "sha256:06578667dda1b8ed5f48d2f08f16af906f89fbf0c511a0b32f48b54aac7036fe",
-          "Title": "urllib3 is a user-friendly HTTP client library for Python. Starting in ...",
+          "Title": "urllib3: urllib3 Streaming API improperly handles highly compressed data",
           "Description": "urllib3 is a user-friendly HTTP client library for Python. Starting in version 1.0 and prior to 2.6.0, the Streaming API improperly handles highly compressed data. urllib3's streaming API is designed for the efficient handling of large HTTP responses by reading the content in chunks, rather than loading the entire response body into memory at once. When streaming a compressed response, urllib3 can perform decoding or decompression based on the HTTP Content-Encoding header (e.g., gzip, deflate, br, or zstd). The library must read compressed data from the network and decompress it until the requested chunk size is met. Any resulting decompressed data that exceeds the requested amount is held in an internal buffer for the next read operation. The decompression logic could cause urllib3 to fully decode a small amount of highly compressed data in a single operation. This can result in excessive resource consumption (high CPU usage and massive memory allocation for the decompressed data.",
           "Severity": "HIGH",
           "CweIDs": [
@@ -2297,13 +2369,14 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
             "nvd": 3,
             "oracle-oval": 3,
             "photon": 3,
+            "redhat": 3,
             "rocky": 3,
             "ubuntu": 2
           },
@@ -2315,10 +2388,15 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
               "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
             }
           },
           "References": [
             "https://access.redhat.com/errata/RHSA-2026:1239",
+            "https://access.redhat.com/security/cve/CVE-2025-66471",
             "https://bugzilla.redhat.com/2419455",
             "https://bugzilla.redhat.com/2419467",
             "https://bugzilla.redhat.com/2427726",
@@ -2329,7 +2407,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66471",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-21441",
             "https://errata.almalinux.org/9/ALSA-2026-1239.html",
-            "https://errata.rockylinux.org/RLSA-2026:1086",
+            "https://errata.rockylinux.org/RLSA-2026:1087",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/commit/c19571de34c47de3a766541b041637ba5f716ed7",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-2xpw-w6gg-jr37",
@@ -2340,6 +2418,7 @@
             "https://ubuntu.com/security/notices/USN-7927-2",
             "https://ubuntu.com/security/notices/USN-7927-3",
             "https://ubuntu.com/security/notices/USN-8344-1",
+            "https://ubuntu.com/security/notices/USN-8344-2",
             "https://www.cve.org/CVERecord?id=CVE-2025-66471",
             "https://www.openwall.com/lists/oss-security/2025/12/05/4"
           ],
@@ -2368,7 +2447,7 @@
             "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
           },
           "Fingerprint": "sha256:06578667dda1b8ed5f48d2f08f16af906f89fbf0c511a0b32f48b54aac7036fe",
-          "Title": "urllib3 is a user-friendly HTTP client library for Python. Starting in ...",
+          "Title": "urllib3: urllib3 Streaming API improperly handles highly compressed data",
           "Description": "urllib3 is a user-friendly HTTP client library for Python. Starting in version 1.0 and prior to 2.6.0, the Streaming API improperly handles highly compressed data. urllib3's streaming API is designed for the efficient handling of large HTTP responses by reading the content in chunks, rather than loading the entire response body into memory at once. When streaming a compressed response, urllib3 can perform decoding or decompression based on the HTTP Content-Encoding header (e.g., gzip, deflate, br, or zstd). The library must read compressed data from the network and decompress it until the requested chunk size is met. Any resulting decompressed data that exceeds the requested amount is held in an internal buffer for the next read operation. The decompression logic could cause urllib3 to fully decode a small amount of highly compressed data in a single operation. This can result in excessive resource consumption (high CPU usage and massive memory allocation for the decompressed data.",
           "Severity": "HIGH",
           "CweIDs": [
@@ -2376,13 +2455,14 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
             "nvd": 3,
             "oracle-oval": 3,
             "photon": 3,
+            "redhat": 3,
             "rocky": 3,
             "ubuntu": 2
           },
@@ -2394,10 +2474,15 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
               "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
             }
           },
           "References": [
             "https://access.redhat.com/errata/RHSA-2026:1239",
+            "https://access.redhat.com/security/cve/CVE-2025-66471",
             "https://bugzilla.redhat.com/2419455",
             "https://bugzilla.redhat.com/2419467",
             "https://bugzilla.redhat.com/2427726",
@@ -2408,7 +2493,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66471",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-21441",
             "https://errata.almalinux.org/9/ALSA-2026-1239.html",
-            "https://errata.rockylinux.org/RLSA-2026:1086",
+            "https://errata.rockylinux.org/RLSA-2026:1087",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/commit/c19571de34c47de3a766541b041637ba5f716ed7",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-2xpw-w6gg-jr37",
@@ -2419,6 +2504,7 @@
             "https://ubuntu.com/security/notices/USN-7927-2",
             "https://ubuntu.com/security/notices/USN-7927-3",
             "https://ubuntu.com/security/notices/USN-8344-1",
+            "https://ubuntu.com/security/notices/USN-8344-2",
             "https://www.cve.org/CVERecord?id=CVE-2025-66471",
             "https://www.openwall.com/lists/oss-security/2025/12/05/4"
           ],
@@ -2447,7 +2533,7 @@
             "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
           },
           "Fingerprint": "sha256:06578667dda1b8ed5f48d2f08f16af906f89fbf0c511a0b32f48b54aac7036fe",
-          "Title": "urllib3 is a user-friendly HTTP client library for Python. Starting in ...",
+          "Title": "urllib3: urllib3 Streaming API improperly handles highly compressed data",
           "Description": "urllib3 is a user-friendly HTTP client library for Python. Starting in version 1.0 and prior to 2.6.0, the Streaming API improperly handles highly compressed data. urllib3's streaming API is designed for the efficient handling of large HTTP responses by reading the content in chunks, rather than loading the entire response body into memory at once. When streaming a compressed response, urllib3 can perform decoding or decompression based on the HTTP Content-Encoding header (e.g., gzip, deflate, br, or zstd). The library must read compressed data from the network and decompress it until the requested chunk size is met. Any resulting decompressed data that exceeds the requested amount is held in an internal buffer for the next read operation. The decompression logic could cause urllib3 to fully decode a small amount of highly compressed data in a single operation. This can result in excessive resource consumption (high CPU usage and massive memory allocation for the decompressed data.",
           "Severity": "HIGH",
           "CweIDs": [
@@ -2455,13 +2541,14 @@
           ],
           "VendorSeverity": {
             "alma": 3,
-            "amazon": 3,
+            "amazon": 2,
             "azure": 3,
             "cbl-mariner": 3,
             "ghsa": 3,
             "nvd": 3,
             "oracle-oval": 3,
             "photon": 3,
+            "redhat": 3,
             "rocky": 3,
             "ubuntu": 2
           },
@@ -2473,10 +2560,15 @@
             "nvd": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
               "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
             }
           },
           "References": [
             "https://access.redhat.com/errata/RHSA-2026:1239",
+            "https://access.redhat.com/security/cve/CVE-2025-66471",
             "https://bugzilla.redhat.com/2419455",
             "https://bugzilla.redhat.com/2419467",
             "https://bugzilla.redhat.com/2427726",
@@ -2487,7 +2579,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66471",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-21441",
             "https://errata.almalinux.org/9/ALSA-2026-1239.html",
-            "https://errata.rockylinux.org/RLSA-2026:1086",
+            "https://errata.rockylinux.org/RLSA-2026:1087",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/commit/c19571de34c47de3a766541b041637ba5f716ed7",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-2xpw-w6gg-jr37",
@@ -2498,6 +2590,7 @@
             "https://ubuntu.com/security/notices/USN-7927-2",
             "https://ubuntu.com/security/notices/USN-7927-3",
             "https://ubuntu.com/security/notices/USN-8344-1",
+            "https://ubuntu.com/security/notices/USN-8344-2",
             "https://www.cve.org/CVERecord?id=CVE-2025-66471",
             "https://www.openwall.com/lists/oss-security/2025/12/05/4"
           ],
@@ -2574,7 +2667,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66471",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-21441",
             "https://errata.almalinux.org/9/ALSA-2026-1239.html",
-            "https://errata.rockylinux.org/RLSA-2026:1086",
+            "https://errata.rockylinux.org/RLSA-2026:1087",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/commit/8864ac407bba8607950025e0979c4c69bc7abc7b",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-38jv-5279-wg99",
@@ -2660,7 +2753,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66471",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-21441",
             "https://errata.almalinux.org/9/ALSA-2026-1239.html",
-            "https://errata.rockylinux.org/RLSA-2026:1086",
+            "https://errata.rockylinux.org/RLSA-2026:1087",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/commit/8864ac407bba8607950025e0979c4c69bc7abc7b",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-38jv-5279-wg99",
@@ -2746,7 +2839,7 @@
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-66471",
             "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-21441",
             "https://errata.almalinux.org/9/ALSA-2026-1239.html",
-            "https://errata.rockylinux.org/RLSA-2026:1086",
+            "https://errata.rockylinux.org/RLSA-2026:1087",
             "https://github.com/urllib3/urllib3",
             "https://github.com/urllib3/urllib3/commit/8864ac407bba8607950025e0979c4c69bc7abc7b",
             "https://github.com/urllib3/urllib3/security/advisories/GHSA-38jv-5279-wg99",
